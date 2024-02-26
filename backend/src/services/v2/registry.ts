@@ -1,5 +1,5 @@
 import { listImageTags, listModelRepos } from '../../clients/registry.js'
-import { ImageAction } from '../../connectors/v2/authorisation/base.js'
+import { ImageAction } from '../../connectors/v2/authorisation/actions.js'
 import authorisation from '../../connectors/v2/authorisation/index.js'
 import { UserDoc } from '../../models/v2/User.js'
 import { Action, getAccessToken } from '../../routes/v1/registryAuth.js'

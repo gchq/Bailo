@@ -7,12 +7,12 @@ import bailoImageRelease from 'public/docs/bailo_add_image_to_release.png'
 
 # Uploading docker images
 
-Bailo uses a docker registry to store images of models. Unlike files docker images are model specific meaning you upload
-them to a model and then add them to a release.
+Bailo uses a docker registry to store images of models. Unlike files, docker images are model specific; meaning that you
+upload them to a model and then add them to a release.
 
 ## Pushing a model to Bailo
 
-You can push a model to Bailo by following the instructions in registry tab of your model.
+You can push a model to Bailo by following the instructions in the registry tab of your model.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image src={bailoPushImage} />
@@ -28,7 +28,7 @@ Once your image has been pushed to Bailo's registry you can now add it to one of
 
 ## What is a docker container?
 
-In the context of bailo a docker container is an isolated application or service that can be used to run your models
+In the context of bailo, a docker container is an isolated application or service that can be used to run your models
 from. This makes models easier to work with as models can just be 'spun-up' and inferenced from.
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

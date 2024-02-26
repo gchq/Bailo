@@ -1,4 +1,4 @@
-import { nanoid } from 'nanoid'
+import { customAlphabet } from 'nanoid'
 
 import { TokenActionsKeys, TokenDoc, TokenScopeKeys } from '../../models/v2/Token.js'
 import Token from '../../models/v2/Token.js'
@@ -13,9 +13,11 @@ interface CreateTokenProps {
   modelIds: Array<string>
   actions: Array<TokenActionsKeys>
 }
+
+const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQSRTUVWXYZ')
 export async function createToken(user: UserDoc, { description, scope, modelIds, actions }: CreateTokenProps) {
-  const accessKey = nanoid(10)
-  const secretKey = nanoid()
+  const accessKey = `BAC_${nanoid(8)}`
+  const secretKey = `BSK_${nanoid(12)}`
 
   if (scope === 'models') {
     // Checks to make sure the models are valid

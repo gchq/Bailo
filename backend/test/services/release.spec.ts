@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ReleaseAction } from '../../src/connectors/v2/authorisation/base.js'
+import { ReleaseAction } from '../../src/connectors/v2/authorisation/actions.js'
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import {
   createRelease,

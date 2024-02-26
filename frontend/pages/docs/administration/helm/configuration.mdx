@@ -1,0 +1,41 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Helm Configuration
+
+The default Helm configuration is stored within `values.yaml`. You should not alter this configuration directly, instead
+overriding individual values via the command line `--set` flag, or by providing a custom `--values` file.
+
+To override a single value, add `--set <option>=<value>` to either the `helm install` and `helm upgrade` commands you
+run. To overide multiple values, create a `local.yaml` (or a deployment specific name like `ops.yaml`) file and add
+`--values local.yaml` to your `helm install` and `helm upgrade` commands. For example:
+
+```yaml
+# reference.yaml
+
+image:
+  frontendRepository: 'internal.docker.registry'
+  frontendTag: 'v2.0.3-rc.0'
+```
+
+Would be installed and upgraded using:
+
+```bash
+$ helm install --values reference.yaml bailo .
+$ helm upgrade --values reference.yaml bailo .
+```
+
+We do not host built images of Bailo, thus at the very minimum the custom configuration should include the following:
+
+```yaml
+# local.yaml
+
+image:
+  frontendRepository: '<docker registry>'
+  frontendTag: 'v2.1.2'
+  backendRepository: '<docker registry>'
+  backendTag: 'v2.1.2'
+```
+
+To create these images, follow the instructions in [Building Bailo Images](../building-the-bailo-image).
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

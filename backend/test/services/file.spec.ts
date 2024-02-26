@@ -1,7 +1,7 @@
 import { Readable } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
-import { FileAction } from '../../src/connectors/v2/authorisation/base.js'
+import { FileAction } from '../../src/connectors/v2/authorisation/actions.js'
 import authorisation from '../../src/connectors/v2/authorisation/index.js'
 import { UserDoc } from '../../src/models/v2/User.js'
 import { downloadFile, getFilesByIds, getFilesByModel, removeFile, uploadFile } from '../../src/services/v2/file.js'
