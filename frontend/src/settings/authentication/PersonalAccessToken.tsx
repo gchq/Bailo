@@ -73,7 +73,13 @@ export default function PersonalAccessToken({ token }: TokenTabProps) {
 
   return (
     <>
-      <DialogContent>
+      <DialogContent
+        sx={{
+          width: '600px',
+          height: '400px',
+          overflow: 'auto',
+        }}
+      >
         <MessageAlert
           message='You will never be able to access this token again. Make sure to copy it to a safe place.'
           severity='warning'

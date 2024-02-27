@@ -1,13 +1,19 @@
 import { Box, Container, Dialog, DialogTitle, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useEffect, useState } from 'react'
-import DockerToken from 'src/settings/authentication/DockerToken'
+import DockerLogin from 'src/settings/authentication/DockerLogin'
 import KubernetesToken from 'src/settings/authentication/KubernetesToken'
 import PersonalAccessToken from 'src/settings/authentication/PersonalAccessToken'
 import { TokenInterface } from 'types/v2/types'
 
-type TokenCategory = 'personal access' | 'docker' | 'kubernetes'
+import DockerIcon from '../../../public/docker-icon.svg'
+import KubernetesIcon from '../../../public/kubernetes-icon.svg'
+import PodmanIcon from '../../../public/podman-icon.svg'
+import UserIcon from '../../../public/user-icon.svg'
+
+type TokenCategory = 'personal access' | 'kubernetes' | 'rocket' | 'podman' | 'docker-log' | 'docker-config'
 
 function isTokenCategory(tokenCategory: string | string[] | undefined): tokenCategory is TokenCategory {
   return (tokenCategory as TokenCategory) !== undefined
@@ -22,7 +28,7 @@ export default function TokenTabs({ token }: TokenTabProps) {
   const router = useRouter()
   const { tab } = router.query
   const [tokenCategory, setTokenCategory] = useState<TokenCategory>('personal access')
-  const [kubernetesToken, setKubernetesToken] = useState('')
+  // const [kubernetesToken, setKubernetesToken] = useState('')
 
   useEffect(() => {
     if (token) setOpen(true)
@@ -40,9 +46,9 @@ export default function TokenTabs({ token }: TokenTabProps) {
       query: { ...router.query, section: category },
     })
   }
-  function handleKubernetesTokenOnChange(value: string): void {
-    setKubernetesToken(value)
-  }
+  // function handleKubernetesTokenOnChange(value: string): void {
+  //   setKubernetesToken(value)
+  // }
 
   // const handleClose = () => {
   //   setIsLoading(true)
@@ -71,12 +77,10 @@ export default function TokenTabs({ token }: TokenTabProps) {
                 selected={tokenCategory === 'personal access'}
                 onClick={() => handleListItemClick('personal access')}
               >
-                Personal Access
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton selected={tokenCategory === 'docker'} onClick={() => handleListItemClick('docker')}>
-                Docker
+                <Stack sx={{ marginRight: 1 }}>
+                  <Image src={UserIcon} alt='user-icon' width={19} height={19} />
+                </Stack>
+                Personal Access Token
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -84,16 +88,58 @@ export default function TokenTabs({ token }: TokenTabProps) {
                 selected={tokenCategory === 'kubernetes'}
                 onClick={() => handleListItemClick('kubernetes')}
               >
-                Kubernetes
+                <Stack sx={{ marginRight: 1 }}>
+                  <Image src={KubernetesIcon} alt='kubernetes-icon' width={19} height={19} />
+                </Stack>
+                Kubernetes Secret
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton selected={tokenCategory === 'rocket'} onClick={() => handleListItemClick('rocket')}>
+                <Stack sx={{ marginRight: 1 }}>
+                  {/* <Image src={RocketIcon} alt='rocket-icon' width={19} height={19} /> */}
+                </Stack>
+                Rocket Configuration
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton selected={tokenCategory === 'podman'} onClick={() => handleListItemClick('podman')}>
+                <Stack sx={{ marginRight: 1 }}>
+                  <Image src={PodmanIcon} alt='podman-icon' width={19} height={19} />
+                </Stack>
+                Podman Login
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={tokenCategory === 'docker-log'}
+                onClick={() => handleListItemClick('docker-log')}
+              >
+                <Stack sx={{ marginRight: 1 }}>
+                  <Image src={DockerIcon} alt='docker icon' width={19} height={19} />
+                </Stack>
+                Docker Login
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={tokenCategory === 'docker-config'}
+                onClick={() => handleListItemClick('docker-config')}
+              >
+                <Stack sx={{ marginRight: 1 }}>
+                  <Image src={DockerIcon} alt='docker-icon' width={19} height={19} />
+                </Stack>
+                Docker Configuration
               </ListItemButton>
             </ListItem>
           </List>
           <Container sx={{ my: 2 }}>
             {tokenCategory === 'personal access' && <PersonalAccessToken token={token} />}
-            {tokenCategory === 'docker' && <DockerToken />}
-            {tokenCategory === 'kubernetes' && (
-              <KubernetesToken onChange={handleKubernetesTokenOnChange} value={kubernetesToken} />
-            )}
+            {tokenCategory === 'kubernetes' && <KubernetesToken />}
+            {/* {tokenCategory === 'rocket' && <RocketConfig />} */}
+            {/* {tokenCategory === 'podman' && <PodmanLogin/>} */}
+            {tokenCategory === 'docker-log' && <DockerLogin />}
+            {/* {tokenCategory === 'docker-config' && <DockerConfig />} */}
           </Container>
         </Stack>
       </Box>
