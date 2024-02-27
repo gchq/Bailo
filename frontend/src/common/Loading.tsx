@@ -1,38 +1,85 @@
 import { Box } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import Image from 'next/image'
-import BailoLogo from 'public/favicon-colour-transparent.png'
 import { ReactElement } from 'react'
 
-type LoadingProps = {
-  size?: number
-}
+export default function Loading(): ReactElement {
+  const StyledBox = styled(Box)({
+    position: 'relative',
+    left: '-9999px',
+    width: '10px',
+    height: '10px',
+    borderRadius: '5px',
+    backgroundColor: '#9880ff',
+    color: ' #d62560',
+    boxShadow: '9999px 0 0 -5px',
+    animation: 'dot-pulse 1.5s infinite linear',
+    animationDelay: '0.25s',
+    borderColor: 'red',
 
-export default function Loading({ size = 80 }: LoadingProps): ReactElement {
-  const StyledImage = styled(Image)({
-    animation: `nfLoaderSpin infinite 1.5s linear`,
-    animationTimingFunction: ' cubic-bezier(.17,.67,.83,.67)',
-    transformBox: 'fill-box',
+    '&:before, &:after': {
+      content: '""',
+      display: 'inline-block',
+      position: 'absolute',
+      top: 0,
+      width: '10px',
+      height: '10px',
+      borderRadius: '5px',
+      backgroundColor: '#9880ff',
+      color: ' #54278e',
+    },
 
-    '@keyframes nfLoaderSpin': {
-      from: {
-        transform: 'rotate(0deg)',
+    '&:before': {
+      boxShadow: '9984px 0 0 -5px',
+      animation: 'dot-pulse-before 1.5s infinite linear',
+      animationDelay: '0s',
+    },
+
+    '&:after': {
+      boxShadow: '10014px 0 0 -5px',
+      animation: 'dot-pulse-after 1.5s infinite linear',
+      animationDelay: '0.5s',
+    },
+
+    '@keyframes dot-pulse': {
+      '0%': {
+        boxShadow: '9999px 0 0 -5px',
       },
-      to: {
-        transform: 'rotate(360deg)',
+      '30%': {
+        boxShadow: '9999px 0 0 2px',
+      },
+      '60%, 100%': {
+        boxShadow: '9999px 0 0 -5px',
+      },
+    },
+
+    '@keyframes dot-pulse-before': {
+      '0%': {
+        boxShadow: '9984px 0 0 -5px',
+      },
+      '30%': {
+        boxShadow: '9984px 0 0 2px',
+      },
+      '60%, 100%': {
+        boxShadow: '9984px 0 0 -5px',
+      },
+    },
+
+    '@keyframes dot-pulse-after': {
+      '0%': {
+        boxShadow: '10014px 0 0 -5px',
+      },
+      '30%': {
+        boxShadow: '10014px 0 0 2px',
+      },
+      '60%, 100%': {
+        boxShadow: '10014px 0 0 -5px',
       },
     },
   })
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-      <StyledImage
-        src={BailoLogo}
-        alt='loading spinner'
-        width={size}
-        height={size}
-        className={'rotate linear infinite'}
-      />
+      <StyledBox />
     </Box>
   )
 }
