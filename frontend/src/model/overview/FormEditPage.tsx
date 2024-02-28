@@ -118,26 +118,52 @@ export default function FormEditPage({ model }: FormEditPageProps) {
             </Stack>
           )}
           {isEdit && (
-            <Stack
-              direction='row'
-              spacing={1}
-              justifyContent='flex-end'
-              divider={<Divider orientation='vertical' flexItem />}
-              sx={{ mb: { xs: 2 } }}
-            >
-              <Button variant='outlined' onClick={onCancel} data-test='cancelEditModelCardButton'>
-                Cancel
-              </Button>
-              <LoadingButton variant='contained' onClick={onSubmit} loading={loading} data-test='saveModelCardButton'>
-                Save
-              </LoadingButton>
-            </Stack>
+            <SaveAndCancelButtons
+              onCancel={onCancel}
+              onSubmit={onSubmit}
+              loading={loading}
+              cancelDataTestId='cancelEditModelCardButton'
+              saveDataTestId='saveModelCardButton'
+            />
           )}
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        {isEdit && <SaveAndCancelButtons onCancel={onCancel} onSubmit={onSubmit} loading={loading} />}
       </Box>
       <ModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />
     </>
+  )
+}
+
+interface SaveAndCancelButtonsProps {
+  onCancel: () => void
+  onSubmit: () => void
+  loading: boolean
+  cancelDataTestId?: string
+  saveDataTestId?: string
+}
+export function SaveAndCancelButtons({
+  onCancel,
+  onSubmit,
+  loading,
+  cancelDataTestId = '',
+  saveDataTestId = '',
+}: SaveAndCancelButtonsProps) {
+  return (
+    <Stack
+      direction='row'
+      spacing={1}
+      justifyContent='flex-end'
+      divider={<Divider orientation='vertical' flexItem />}
+      sx={{ mb: { xs: 2 } }}
+    >
+      <Button variant='outlined' onClick={onCancel} data-test={cancelDataTestId}>
+        Cancel
+      </Button>
+      <LoadingButton variant='contained' onClick={onSubmit} loading={loading} data-test={saveDataTestId}>
+        Save
+      </LoadingButton>
+    </Stack>
   )
 }
