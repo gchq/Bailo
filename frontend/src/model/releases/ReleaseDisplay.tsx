@@ -156,7 +156,7 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {(reviewsWithLatestResponses.length > 0 || release.comments.length > 0) && <Divider sx={{ my: 2 }} />}
+              {(reviewsWithLatestResponses.length > 0 || release.comments.length > 0) && <Divider />}
               <Stack direction='row' justifyContent='space-between' spacing={2}>
                 <div>
                   <ReviewDisplay reviews={reviewsWithLatestResponses} />

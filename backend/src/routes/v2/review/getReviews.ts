@@ -2,14 +2,14 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
-import audit from '../../../connectors/v2/audit/index.js'
-import { ModelInterface } from '../../../models/v2/Model.js'
-import { ReviewInterface } from '../../../models/v2/Review.js'
-import { findReviews } from '../../../services/v2/review.js'
-import { registerPath, reviewInterfaceSchema } from '../../../services/v2/specification.js'
-import { ReviewKind } from '../../../types/v2/enums.js'
-import { parse } from '../../../utils/v2/validate.js'
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
+import { ModelInterface } from '../../../models/Model.js'
+import { ReviewInterface } from '../../../models/Review.js'
+import { findReviews } from '../../../services/review.js'
+import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
+import { ReviewKind } from '../../../types/enums.js'
+import { parse, strictCoerceBoolean } from '../../../utils/validate.js'
 
 export const getReviewsSchema = z.object({
   query: z.object({
@@ -17,6 +17,7 @@ export const getReviewsSchema = z.object({
     semver: z.string().optional(),
     accessRequestId: z.string().optional(),
     kind: z.nativeEnum(ReviewKind).optional(),
+    mine: strictCoerceBoolean(z.boolean().optional().default(true)),
   }),
 })
 
@@ -49,10 +50,10 @@ export const getReviews = [
   async (req: Request, res: Response<GetReviewResponse>) => {
     req.audit = AuditInfo.SearchReviews
     const {
-      query: { modelId, semver, accessRequestId, kind },
+      query: { mine, modelId, semver, accessRequestId, kind },
     } = parse(req, getReviewsSchema)
 
-    const reviews = await findReviews(req.user, modelId, semver, accessRequestId, kind)
+    const reviews = await findReviews(req.user, mine, modelId, semver, accessRequestId, kind)
     await audit.onSearchReviews(req, reviews)
 
     res.setHeader('x-count', reviews.length)

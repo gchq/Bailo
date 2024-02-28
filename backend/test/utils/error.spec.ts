@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { BadReq, Forbidden, GenericError, NotFound, Unauthorized } from '../../src/utils/v2/error.js'
+import { BadReq, Forbidden, GenericError, NotFound, Unauthorized } from '../../src/utils/error.js'
 
 describe('utils > error', () => {
   test('GenericError', () => {

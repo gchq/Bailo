@@ -1,25 +1,25 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import authorisation from '../../src/connectors/v2/authorisation/index.js'
+import authorisation from '../../src/connectors/authorisation/index.js'
 import {
   createInference,
   getInferenceByImage,
   getInferencesByModel,
   updateInference,
-} from '../../src/services/v2/inference.js'
+} from '../../src/services/inference.js'
 
-vi.mock('../../src/connectors/v2/authorisation/index.js')
+vi.mock('../../src/connectors/authorisation/index.js')
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
   getModelCardRevision: vi.fn(),
 }))
-vi.mock('../../src/services/v2/model.js', () => modelMocks)
+vi.mock('../../src/services/model.js', () => modelMocks)
 
 const registryMocks = vi.hoisted(() => ({
   listModelImages: vi.fn(() => [{ repository: 'test', name: 'nginx', tags: ['latest'] }]),
 }))
-vi.mock('../../src/services/v2/registry.js', () => registryMocks)
+vi.mock('../../src/services/registry.js', () => registryMocks)
 
 const inference = {
   image: 'nginx',
@@ -54,7 +54,7 @@ const inferenceModelMocks = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/v2/Inference.js', () => ({ default: inferenceModelMocks }))
+vi.mock('../../src/models/Inference.js', () => ({ default: inferenceModelMocks }))
 
 describe('services > inference', () => {
   test('createInference > simple', async () => {

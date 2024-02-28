@@ -2,11 +2,11 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { UserInformation } from '../../../connectors/v2/authentication/Base.js'
-import authentication from '../../../connectors/v2/authentication/index.js'
-import { registerPath, UserInformationSchema } from '../../../services/v2/specification.js'
-import { toEntity } from '../../../utils/v2/entity.js'
-import { parse } from '../../../utils/v2/validate.js'
+import { UserInformation } from '../../../connectors/authentication/Base.js'
+import authentication from '../../../connectors/authentication/index.js'
+import { registerPath, UserInformationSchema } from '../../../services/specification.js'
+import { toEntity } from '../../../utils/entity.js'
+import { parse } from '../../../utils/validate.js'
 
 export const getEntityLookupSchema = z.object({
   params: z.object({

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../../utils/v2/validate.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const postStartMultipartUploadSchema = z.object({
   params: z.object({
