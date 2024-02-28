@@ -24,7 +24,7 @@ export async function listModelImages(user: UserDoc, modelId: string) {
   const repos = await listModelRepos(registryToken, modelId)
   const versions = await Promise.all(
     repos.map(async (repo) => {
-      const [namespace, image] = repo.split('/')
+      const [namespace, image] = repo.split(/\/(.*)/s)
       const repositoryToken = await getAccessToken({ id: user.dn, _id: user.dn }, [
         { type: 'repository', class: '', name: repo, actions: ['pull'] },
       ])
