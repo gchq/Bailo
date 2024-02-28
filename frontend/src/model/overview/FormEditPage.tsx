@@ -1,7 +1,7 @@
-import { LoadingButton } from '@mui/lab'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
+import SaveAndCancelButtons from 'src/model/overview/SaveAndCancelFormButtons'
 
 import { useGetModel } from '../../../actions/model'
 import { putModelCard, useGetModelCardRevisions } from '../../../actions/modelCard'
@@ -133,37 +133,5 @@ export default function FormEditPage({ model }: FormEditPageProps) {
       </Box>
       <ModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />
     </>
-  )
-}
-
-interface SaveAndCancelButtonsProps {
-  onCancel: () => void
-  onSubmit: () => void
-  loading: boolean
-  cancelDataTestId?: string
-  saveDataTestId?: string
-}
-export function SaveAndCancelButtons({
-  onCancel,
-  onSubmit,
-  loading,
-  cancelDataTestId = '',
-  saveDataTestId = '',
-}: SaveAndCancelButtonsProps) {
-  return (
-    <Stack
-      direction='row'
-      spacing={1}
-      justifyContent='flex-end'
-      divider={<Divider orientation='vertical' flexItem />}
-      sx={{ mb: { xs: 2 } }}
-    >
-      <Button variant='outlined' onClick={onCancel} data-test={cancelDataTestId}>
-        Cancel
-      </Button>
-      <LoadingButton variant='contained' onClick={onSubmit} loading={loading} data-test={saveDataTestId}>
-        Save
-      </LoadingButton>
-    </Stack>
   )
 }
