@@ -1,19 +1,8 @@
-import { LoadingButton } from '@mui/lab'
-import { DialogActions, DialogContent, Stack, Typography } from '@mui/material'
-import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { DialogContent, Stack, Typography } from '@mui/material'
 import CodeSnippetBox from 'src/settings/authentication/CodeSnippetBox'
 import CopyInputTextField from 'src/settings/authentication/CopyInputTextField'
 
-export default function KubernetesToken() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleClose = () => {
-    setIsLoading(true)
-    router.push('/settings?tab=authentication&category=docker')
-  }
-
+export default function KubernetesSecret() {
   return (
     <DialogContent
       sx={{
@@ -25,9 +14,11 @@ export default function KubernetesToken() {
       <Stack spacing={2} direction={{ xs: 'column' }}>
         <Typography fontWeight='bold'>Step 1: Download Secret</Typography>
         <Typography>First, download the Kubernetes pull secret for your personal access token.</Typography>
-        <CopyInputTextField text={`Download <key-name>-auth.yml / View <key-name>-auth.yml `} />
+        {/* TODO */}
+        <Typography>{`Download <key-name>-auth.yml / View <key-name>-auth.yml `}</Typography>
         <Typography fontWeight='bold'>Step 2: Submit</Typography>
         <Typography>Second, submit the secret to the cluster usign this command:</Typography>
+        {/* TODO */}
         <CopyInputTextField text={`kubectl create -f <key-name>-secret.yml --namespace=NAMESPACEHERE`} />
         <Typography fontWeight='bold'>Step 3: Update Kubernetes configuration</Typography>
         <Typography>
@@ -50,11 +41,6 @@ spec:
 `}
         </CodeSnippetBox>
       </Stack>
-      <DialogActions>
-        <LoadingButton variant='contained' loading={isLoading} onClick={handleClose}>
-          Continue
-        </LoadingButton>
-      </DialogActions>
     </DialogContent>
   )
 }

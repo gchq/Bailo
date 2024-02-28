@@ -3,14 +3,18 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useEffect, useState } from 'react'
+import DockerConfig from 'src/settings/authentication/DockerConfig'
 import DockerLogin from 'src/settings/authentication/DockerLogin'
-import KubernetesToken from 'src/settings/authentication/KubernetesToken'
+import KubernetesSecret from 'src/settings/authentication/KubernetesSecret'
 import PersonalAccessToken from 'src/settings/authentication/PersonalAccessToken'
+import PodmanLogin from 'src/settings/authentication/PodmanLogin'
+import RocketConfig from 'src/settings/authentication/RocketConfig'
 import { TokenInterface } from 'types/v2/types'
 
 import DockerIcon from '../../../public/docker-icon.svg'
 import KubernetesIcon from '../../../public/kubernetes-icon.svg'
-import PodmanIcon from '../../../public/podman-icon.svg'
+import PodmanIcon from '../../../public/podman-logo.svg'
+import RktLogo from '../../../public/rkt-logo.svg'
 import UserIcon from '../../../public/user-icon.svg'
 
 type TokenCategory = 'personal access' | 'kubernetes' | 'rocket' | 'podman' | 'docker-log' | 'docker-config'
@@ -97,9 +101,9 @@ export default function TokenTabs({ token }: TokenTabProps) {
             <ListItem disablePadding>
               <ListItemButton selected={tokenCategory === 'rocket'} onClick={() => handleListItemClick('rocket')}>
                 <Stack sx={{ marginRight: 1 }}>
-                  {/* <Image src={RocketIcon} alt='rocket-icon' width={19} height={19} /> */}
+                  <Image src={RktLogo} alt='rocket-icon' width={19} height={19} />
                 </Stack>
-                Rocket Configuration
+                Rkt Configuration
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
@@ -135,11 +139,11 @@ export default function TokenTabs({ token }: TokenTabProps) {
           </List>
           <Container sx={{ my: 2 }}>
             {tokenCategory === 'personal access' && <PersonalAccessToken token={token} />}
-            {tokenCategory === 'kubernetes' && <KubernetesToken />}
-            {/* {tokenCategory === 'rocket' && <RocketConfig />} */}
-            {/* {tokenCategory === 'podman' && <PodmanLogin/>} */}
-            {tokenCategory === 'docker-log' && <DockerLogin />}
-            {/* {tokenCategory === 'docker-config' && <DockerConfig />} */}
+            {tokenCategory === 'kubernetes' && <KubernetesSecret />}
+            {tokenCategory === 'rocket' && <RocketConfig />}
+            {tokenCategory === 'podman' && <PodmanLogin token={token} />}
+            {tokenCategory === 'docker-log' && <DockerLogin token={token} />}
+            {tokenCategory === 'docker-config' && <DockerConfig />}
           </Container>
         </Stack>
       </Box>

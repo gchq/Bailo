@@ -24,6 +24,7 @@ export default function CopyInputTextField({ text }: CopyInputTextProp) {
   return (
     <TextField
       value={text}
+      sx={{ width: '500px' }}
       InputProps={{
         endAdornment: (
           <InputAdornment position='end'>

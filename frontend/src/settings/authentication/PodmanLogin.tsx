@@ -5,16 +5,15 @@ import { useState } from 'react'
 import CopyInputTextField from 'src/settings/authentication/CopyInputTextField'
 import { TokenInterface } from 'types/v2/types'
 
-type DockerLoginProps = {
+type PodmanLoginProps = {
   token: TokenInterface
 }
-export default function DockerLogin({ token }: DockerLoginProps) {
+export default function PodmanLogin({ token }: PodmanLoginProps) {
   const theme = useTheme()
   const [showKeys, setShowKeys] = useState(false)
   const handleToggleKeyVisibility = () => {
     setShowKeys(!showKeys)
   }
-
   return (
     <DialogContent
       sx={{
@@ -23,16 +22,16 @@ export default function DockerLogin({ token }: DockerLoginProps) {
         overflow: 'auto',
       }}
     >
-      <Stack spacing={2}>
-        <Typography fontWeight='bold'>1. Run Docker login:</Typography>
-        <Typography>Enter the following command on the command line: </Typography>
+      <Stack spacing={2} direction={{ xs: 'column' }}>
+        <Typography fontWeight='bold'>1. Run Podman login:</Typography>
+        <Typography>Enter the following command on the command line:</Typography>
         <Grid container spacing={0} alignItems='center'>
           {!token.secretKey && <Typography color={theme.palette.error.main}>Could not find Secret Key</Typography>}
           {token.secretKey && (
             <CopyInputTextField
-              text={`docker login -u="${showKeys ? token.accessKey : 'xxxxxxxxxx'}" -p="${
+              text={`podman login -u="${showKeys ? token.accessKey : 'xxxxxxxxxx'}" -p="${
                 showKeys ? token.secretKey : 'xxxxxxxxxxxxxxxxxxxxx'
-              }" <registry-url>`}
+              }" <registry-url> `}
             />
           )}
           <Tooltip title={`${showKeys ? 'Hide' : 'Show'} keys`}>
