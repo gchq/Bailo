@@ -82,9 +82,8 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   function handleJsonFormOnSubmit(formData: string) {
     setJsonUploadDialogOpen(false)
     try {
-      const jsonInput = JSON.parse(formData)
       if (schema) {
-        const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], JSON.parse(jsonInput))
+        const steps = getStepsFromSchema(schema, {}, [], JSON.parse(formData))
         for (const step of steps) {
           step.steps = steps
         }
