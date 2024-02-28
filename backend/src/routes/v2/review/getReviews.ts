@@ -9,7 +9,7 @@ import { ReviewInterface } from '../../../models/Review.js'
 import { findReviews } from '../../../services/review.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
 import { ReviewKind } from '../../../types/enums.js'
-import { parse } from '../../../utils/validate.js'
+import { parse, strictCoerceBoolean } from '../../../utils/validate.js'
 
 export const getReviewsSchema = z.object({
   query: z.object({
@@ -17,6 +17,7 @@ export const getReviewsSchema = z.object({
     semver: z.string().optional(),
     accessRequestId: z.string().optional(),
     kind: z.nativeEnum(ReviewKind).optional(),
+    mine: strictCoerceBoolean(z.boolean().optional().default(true)),
   }),
 })
 
@@ -49,10 +50,10 @@ export const getReviews = [
   async (req: Request, res: Response<GetReviewResponse>) => {
     req.audit = AuditInfo.SearchReviews
     const {
-      query: { modelId, semver, accessRequestId, kind },
+      query: { mine, modelId, semver, accessRequestId, kind },
     } = parse(req, getReviewsSchema)
 
-    const reviews = await findReviews(req.user, modelId, semver, accessRequestId, kind)
+    const reviews = await findReviews(req.user, mine, modelId, semver, accessRequestId, kind)
     await audit.onSearchReviews(req, reviews)
 
     res.setHeader('x-count', reviews.length)

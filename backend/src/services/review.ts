@@ -30,6 +30,7 @@ const requiredRoles = {
 
 export async function findReviews(
   user: UserInterface,
+  mine: boolean,
   modelId?: string,
   semver?: string,
   accessRequestId?: string,
@@ -47,7 +48,7 @@ export async function findReviews(
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     // Populate model as value instead of array
     .unwind({ path: '$model' })
-    .match(await findUserInCollaborators(user))
+    .match({ ...(mine && (await findUserInCollaborators(user))) })
 
   const auths = await authorisation.models(
     user,

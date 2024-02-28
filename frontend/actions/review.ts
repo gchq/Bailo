@@ -44,6 +44,7 @@ export function useGetReviewRequestsForModel({ modelId, semver, accessRequestId 
   >(
     (modelId && semver) || (modelId && accessRequestId)
       ? `/api/v2/reviews?${qs.stringify({
+          mine: false,
           modelId,
           ...(semver && { semver }),
           ...(accessRequestId && { accessRequestId }),

@@ -94,15 +94,15 @@ vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 describe('services > review', () => {
   const user: any = { dn: 'test' }
 
-  test('findReviews > active', async () => {
-    await findReviews(user)
+  test('findReviews > all reviews for user', async () => {
+    await findReviews(user, true)
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
   test('findReviews > active reviews for a specific model', async () => {
-    await findReviews(user, 'modelId')
+    await findReviews(user, false, 'modelId')
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
