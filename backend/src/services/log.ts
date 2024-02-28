@@ -1,5 +1,6 @@
 import { WritableStream } from 'node:stream/web'
 
+import { OpenTelemetryBunyanStream } from '@opentelemetry/instrumentation-bunyan'
 import bunyan from 'bunyan'
 import chalk from 'chalk'
 import { omit } from 'lodash-es'
@@ -147,6 +148,12 @@ if (process.env.NODE_ENV !== 'production') {
   streams.push({
     level: config.log.level,
     stream: process.stdout,
+  })
+}
+if (config.instrumentation.enabled) {
+  streams.push({
+    type: 'raw',
+    stream: new OpenTelemetryBunyanStream(),
   })
 }
 

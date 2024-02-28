@@ -93,7 +93,6 @@ module.exports = {
   },
 
   oauth: {
-    enabled: false,
     provider: 'cognito',
 
     grant: {
@@ -171,5 +170,9 @@ module.exports = {
       uploads: 'uploads',
       registry: 'registry',
     },
+  },
+
+  instrumentation: {
+    enabled: false,
   },
 }
