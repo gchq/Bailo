@@ -1,10 +1,9 @@
-import { Code } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import useNotification from 'src/hooks/useNotification'
+import SaveAndCancelButtons from 'src/model/overview/SaveAndCancelFormButtons'
 
 import { useGetModel } from '../../../actions/model'
 import { putModelCard, useGetModelCardRevisions } from '../../../actions/modelCard'
@@ -142,33 +141,26 @@ export default function FormEditPage({ model }: FormEditPageProps) {
             </Stack>
           )}
           {isEdit && (
-            <Stack
-              direction='row'
-              spacing={1}
-              justifyContent='flex-end'
-              divider={<Divider orientation='vertical' flexItem />}
-              sx={{ mb: { xs: 2 } }}
-            >
-              <Button
-                variant='contained'
-                startIcon={<Code />}
-                color='secondary'
-                onClick={() => setJsonUploadDialogOpen(true)}
-                data-test='addJsonToFormButton'
-              >
-                Add JSON to form
-              </Button>
-              <Button variant='outlined' onClick={onCancel} data-test='cancelEditModelCardButton'>
-                Cancel
-              </Button>
-              <LoadingButton variant='contained' onClick={onSubmit} loading={loading} data-test='saveModelCardButton'>
-                Save
-              </LoadingButton>
-            </Stack>
+            <SaveAndCancelButtons
+              onCancel={onCancel}
+              onSubmit={onSubmit}
+              openTextInputDialog={() => setJsonUploadDialogOpen(true)}
+              loading={loading}
+              cancelDataTestId='cancelEditModelCardButton'
+              saveDataTestId='saveModelCardButton'
+            />
           )}
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        {isEdit && (
+          <SaveAndCancelButtons
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+            loading={loading}
+            openTextInputDialog={() => setJsonUploadDialogOpen(true)}
+          />
+        )}
       </Box>
       <ModelCardHistoryDialog model={model} open={historyDialogOpen} setOpen={setHistoryDialogOpen} />
       <TextInputDialog

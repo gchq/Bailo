@@ -22,6 +22,7 @@ import Link from 'next/link'
 import React, { ChangeEvent, Fragment, useCallback, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
+import Loading from 'src/common/Loading'
 import useDebounce from 'src/hooks/useDebounce'
 import MessageAlert from 'src/MessageAlert'
 import Wrapper from 'src/Wrapper'
@@ -49,7 +50,12 @@ function Marketplace() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const debouncedFilter = useDebounce(filter, 250)
 
-  const { models, isModelsError } = useListModels(selectedTypes, selectedTask, selectedLibraries, debouncedFilter)
+  const { models, isModelsError, isModelsLoading } = useListModels(
+    selectedTypes,
+    selectedTask,
+    selectedLibraries,
+    debouncedFilter,
+  )
 
   const theme = useTheme()
 
@@ -159,75 +165,41 @@ function Marketplace() {
                 <Tab label={`Models ${models ? `(${models.length})` : ''}`} value='bailo' />
               </Tabs>
             </Box>
-            <div data-test='modelListBox'>
-              {models.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
-              {models.map((model, index) => {
-                return (
-                  <Fragment key={model.id}>
-                    <Link style={{ textDecoration: 'none' }} href={`model/${model.id}`} passHref>
-                      <MuiLink
-                        variant='h5'
-                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
-                      >
-                        {model.name}
-                      </MuiLink>
-                    </Link>
-                    <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                      {model.description}
-                    </Typography>
-                    <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                      {model.tags.slice(0, 10).map((tag) => (
-                        <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
-                      ))}
-                    </Stack>
-                    {index !== models.length - 1 && (
-                      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                    )}
-                  </Fragment>
-                )
-              })}
-            </div>
+            {isModelsLoading && <Loading />}
+            {!isModelsLoading && (
+              <div data-test='modelListBox'>
+                {isModelsError && <MessageAlert message={isModelsError.info.message} severity='error' />}
+                {models.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
+                {models.map((model, index) => {
+                  return (
+                    <Fragment key={model.id}>
+                      <Link style={{ textDecoration: 'none' }} href={`model/${model.id}`} passHref>
+                        <MuiLink
+                          variant='h5'
+                          sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
+                        >
+                          {model.name}
+                        </MuiLink>
+                      </Link>
+                      <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                        {model.description}
+                      </Typography>
+                      <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
+                        {model.tags.slice(0, 10).map((tag) => (
+                          <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                        ))}
+                      </Stack>
+                      {index !== models.length - 1 && (
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                      )}
+                    </Fragment>
+                  )
+                })}
+              </div>
+            )}
           </Paper>
         </Box>
       </Stack>
-      <Box sx={{ width: '100%' }}>
-        <Paper sx={{ py: 2, px: 4 }}>
-          <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
-            <Tabs value={'bailo'} indicatorColor='secondary'>
-              <Tab label={`Models ${models ? `(${models.length})` : ''}`} value='bailo' />
-            </Tabs>
-          </Box>
-          <div data-test='modelListBox'>
-            {isModelsError && <MessageAlert message={isModelsError.info.message} severity='error' />}
-            {models.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
-            {models.map((model, index) => {
-              return (
-                <Fragment key={model.id}>
-                  <Link style={{ textDecoration: 'none' }} href={`model/${model.id}`} passHref>
-                    <MuiLink
-                      variant='h5'
-                      sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
-                    >
-                      {model.name}
-                    </MuiLink>
-                  </Link>
-                  <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                    {model.description}
-                  </Typography>
-                  <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                    {model.tags.map((tag) => (
-                      <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
-                    ))}
-                  </Stack>
-                  {index !== models.length - 1 && (
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                  )}
-                </Fragment>
-              )
-            })}
-          </div>
-        </Paper>
-      </Box>
     </Container>
   )
 }
