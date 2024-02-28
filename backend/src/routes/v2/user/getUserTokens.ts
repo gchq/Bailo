@@ -2,12 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
-import audit from '../../../connectors/v2/audit/index.js'
-import { TokenInterface } from '../../../models/v2/Token.js'
-import { registerPath, userTokenSchema } from '../../../services/v2/specification.js'
-import { findUserTokens } from '../../../services/v2/token.js'
-import { parse } from '../../../utils/v2/validate.js'
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
+import { TokenInterface } from '../../../models/Token.js'
+import { registerPath, userTokenSchema } from '../../../services/specification.js'
+import { findUserTokens } from '../../../services/token.js'
+import { parse } from '../../../utils/validate.js'
 
 export const getUserTokensSchema = z.object({})
 

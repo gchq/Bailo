@@ -1,7 +1,7 @@
 import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi'
 import { Request, Response } from 'express'
 
-import { registry } from '../../services/v2/specification.js'
+import { registry } from '../../services/specification.js'
 
 export const getSpecification = [
   async (_req: Request, res: Response) => {

@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { testGet } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/utils/user.js')
-vi.mock('../../../src/utils/v2/config.js')
+vi.mock('../../../src/utils/config.js')
 
 const authenticationMocks = vi.hoisted(() => ({
   authenticationMiddleware: vi.fn(() => []),
@@ -18,13 +18,13 @@ const authenticationMocks = vi.hoisted(() => ({
     },
   ]),
 }))
-vi.mock('../../../src/connectors/v2/authentication/index.js', async () => ({
+vi.mock('../../../src/connectors/authentication/index.js', async () => ({
   default: authenticationMocks,
 }))
 
 describe('routes > entities > getEntities', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../src/services/v2/model.js', () => ({
+    vi.mock('../../../src/services/model.js', () => ({
       getModelById: vi.fn(() => ({ _id: 'test' })),
     }))
 

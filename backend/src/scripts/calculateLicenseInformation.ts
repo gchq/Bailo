@@ -2,7 +2,6 @@ import shelljs from 'shelljs'
 
 import packageInfo from '../../package.json'
 import packageLock from '../../package-lock.json'
-import { consoleLog } from '../utils/logger.js'
 
 const { exec } = shelljs
 
@@ -27,7 +26,8 @@ export default async function runScript() {
     const license = unknownLicense as any
     const { version } = (packageLock as any).packages[`node_modules/${name}`]
 
-    consoleLog(`${name} v${version} <${license.licenses}>: ${license.repository}`)
+    // eslint-disable-next-line no-console
+    console.log(`${name} v${version} <${license.licenses}>: ${license.repository}`)
   }
 }
 
