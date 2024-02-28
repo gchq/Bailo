@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, TextField } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
 import { useState } from 'react'
 
 interface TextUploadDialogProps {
@@ -7,6 +7,7 @@ interface TextUploadDialogProps {
   onSubmit: (formData: string) => void
   helperText?: string
   submitButtonText?: string
+  dialogTitle?: string
 }
 
 export default function TextInputDialog({
@@ -14,6 +15,7 @@ export default function TextInputDialog({
   setOpen,
   onSubmit,
   helperText = '',
+  dialogTitle = '',
   submitButtonText = 'Submit',
 }: TextUploadDialogProps) {
   const [formData, setFormData] = useState('')
@@ -24,15 +26,17 @@ export default function TextInputDialog({
   }
   return (
     <Dialog maxWidth='lg' open={open} onClose={() => setOpen(false)}>
+      <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent sx={{ p: 2 }}>
         <TextField
           size='small'
           helperText={helperText}
           multiline
-          rows={4}
-          maxRows={20}
+          rows={10}
+          maxRows={15}
           value={formData}
           onChange={(e) => setFormData(e.target.value)}
+          sx={{ minWidth: '500px' }}
         ></TextField>
       </DialogContent>
       <DialogActions sx={{ pr: 2, pt: 0 }}>

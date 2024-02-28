@@ -177,7 +177,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
         setOpen={setJsonUploadDialogOpen}
         onSubmit={handleJsonFormOnSubmit}
         helperText='Paste in raw JSON to fill in the model card form'
-        submitButtonText='Add JSON to form'
+        dialogTitle='Add raw JSON to form'
       />
     </>
   )
