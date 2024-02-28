@@ -17,11 +17,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
   // Main Docs
   { title: 'Overview', slug: '', header: true },
 
-  { title: 'Getting Started', slug: 'getting-started', header: true },
-
-  { title: 'FAQ', slug: 'getting-started/faq' },
-  { title: `What's new in V2?`, slug: 'getting-started/whats-new-in-v2' },
-
   // Users
   { title: 'Users', slug: 'users', header: true },
 
@@ -34,7 +29,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Uploading Images', slug: 'users/managing-models-and-releases/upload-to-bailo/images' },
 
   { title: 'Using a Model', slug: 'users/using-a-model', header: true },
+  { title: 'Requesting Access', slug: 'users/using-a-model/requesting-access' },
+  { title: 'Personal Access Tokens', slug: 'users/using-a-model/personal-access-tokens' },
   { title: 'Using a a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
+  { title: 'Downloading files', slug: 'users/using-a-model/downloading-files' },
 
   { title: 'Reviews', slug: 'users/reviews', header: true },
   { title: 'Reviewing Releases and Access Requests', slug: 'users/reviews/reviewing', header: true },
@@ -80,10 +78,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   // Markdown
   { title: 'Markdown Examples', slug: 'markdown-examples' },
-
-  // V2
-  { title: 'V2', slug: 'v2', header: true },
-  { title: 'Model Images', slug: 'v2/model-images' },
 ]
 
 export interface DirectoryTree {

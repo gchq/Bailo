@@ -27,7 +27,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
   const [userListQuery, setUserListQuery] = useState('')
   const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
 
-  const { users, isUsersError } = useListUsers(userListQuery)
+  const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
@@ -70,16 +70,22 @@ export default function EntitySelector(props: EntitySelectorProps) {
   }
 
   if (isUsersError) {
-    return <MessageAlert message={isUsersError.info.message} severity='error' />
+    if (isUsersError.status !== 413) {
+      return <MessageAlert message={isUsersError.info.message} severity='error' />
+    }
   }
 
   return (
     <>
       {isCurrentUserLoading && <Loading />}
+      {isUsersError && isUsersError.status === 413 && (
+        <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
+      )}
       {currentUser && formContext && formContext.editMode && (
         <Autocomplete<EntityObject, true, true>
           multiple
           data-test='entitySelector'
+          loading={userListQuery.length > 3 && isUsersLoading}
           open={open}
           size='small'
           onOpen={() => {
@@ -92,6 +98,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
           isOptionEqualToValue={(option, value) => option.id === value.id}
           getOptionLabel={(option) => option.id}
           value={selectedEntities || []}
+          filterOptions={(x) => x}
           onChange={handleUserChange}
           noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}

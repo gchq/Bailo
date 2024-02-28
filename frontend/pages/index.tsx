@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Chip,
+  Container,
   FilledInput,
   FormControl,
   IconButton,
@@ -76,78 +77,117 @@ function Marketplace() {
   }
 
   return (
-    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-      <Stack spacing={2} sx={{ maxWidth: '250px' }}>
-        <Button component={Link} href='/model/new' variant='contained'>
-          Add new model
-        </Button>
-        <FormControl
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            maxWidth: '400px',
-            marginBottom: 3,
-          }}
-          variant='filled'
-          onSubmit={onFilterSubmit}
-        >
-          <InputLabel htmlFor='model-filter-input'>Filter models</InputLabel>
-          <FilledInput
-            sx={{ flex: 1, backgroundColor: theme.palette.background.paper }}
-            id='model-filter-input'
-            value={filter}
-            disableUnderline
-            onChange={handleFilterChange}
-            endAdornment={
-              <InputAdornment position='end'>
-                <IconButton color='secondary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
-                  <SearchIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-          />
-        </FormControl>
-        <Box>
-          <ChipSelector
-            label='Tasks'
-            // TODO fetch all model tags
-            tags={[
-              'Translation',
-              'Image Classification',
-              'Summarization',
-              'Tokenisation',
-              'Text to Speech',
-              'Tabular Regression',
-            ]}
-            expandThreshold={10}
-            selectedTags={selectedTask}
-            onChange={setSelectedTask}
-            size='small'
-          />
-        </Box>
-        <Box>
-          <ChipSelector
-            label='Libraries'
-            // TODO fetch all model libraries
-            tags={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
-            expandThreshold={10}
-            multiple
-            selectedTags={selectedLibraries}
-            onChange={setSelectedLibraries}
-            size='small'
-          />
-        </Box>
-        <Box>
-          <ChipSelector
-            label='Other'
-            multiple
-            tags={[...searchFilterTypeLabels.map((type) => type.label)]}
-            onChange={handleSelectedTypesOnChange}
-            selectedTags={searchFilterTypeLabels
-              .filter((label) => selectedTypes.includes(label.key))
-              .map((type) => type.label)}
-            size='small'
-          />
+    <Container maxWidth='xl'>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+        <Stack spacing={2} sx={{ maxWidth: '250px' }}>
+          <Button component={Link} href='/model/new' variant='contained'>
+            Add new model
+          </Button>
+          <FormControl
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              maxWidth: '400px',
+              marginBottom: 3,
+            }}
+            variant='filled'
+            onSubmit={onFilterSubmit}
+          >
+            <InputLabel htmlFor='model-filter-input'>Filter models</InputLabel>
+            <FilledInput
+              sx={{ flex: 1, backgroundColor: theme.palette.background.paper }}
+              id='model-filter-input'
+              value={filter}
+              disableUnderline
+              onChange={handleFilterChange}
+              endAdornment={
+                <InputAdornment position='end'>
+                  <IconButton color='secondary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+                    <SearchIcon />
+                  </IconButton>
+                </InputAdornment>
+              }
+            />
+          </FormControl>
+          <Box>
+            <ChipSelector
+              label='Tasks'
+              // TODO fetch all model tags
+              tags={[
+                'Translation',
+                'Image Classification',
+                'Summarization',
+                'Tokenisation',
+                'Text to Speech',
+                'Tabular Regression',
+              ]}
+              expandThreshold={10}
+              selectedTags={selectedTask}
+              onChange={setSelectedTask}
+              size='small'
+            />
+          </Box>
+          <Box>
+            <ChipSelector
+              label='Libraries'
+              // TODO fetch all model libraries
+              tags={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
+              expandThreshold={10}
+              multiple
+              selectedTags={selectedLibraries}
+              onChange={setSelectedLibraries}
+              size='small'
+            />
+          </Box>
+          <Box>
+            <ChipSelector
+              label='Other'
+              multiple
+              tags={[...searchFilterTypeLabels.map((type) => type.label)]}
+              onChange={handleSelectedTypesOnChange}
+              selectedTags={searchFilterTypeLabels
+                .filter((label) => selectedTypes.includes(label.key))
+                .map((type) => type.label)}
+              size='small'
+            />
+          </Box>
+        </Stack>
+        <Box sx={{ overflow: 'hidden', width: '100%' }}>
+          <Paper sx={{ py: 2, px: 4 }}>
+            <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
+              <Tabs value={'bailo'} indicatorColor='secondary'>
+                <Tab label={`Models ${models ? `(${models.length})` : ''}`} value='bailo' />
+              </Tabs>
+            </Box>
+            <div data-test='modelListBox'>
+              {models.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
+              {models.map((model, index) => {
+                return (
+                  <Fragment key={model.id}>
+                    <Link style={{ textDecoration: 'none' }} href={`model/${model.id}`} passHref>
+                      <MuiLink
+                        variant='h5'
+                        sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
+                      >
+                        {model.name}
+                      </MuiLink>
+                    </Link>
+                    <Typography variant='body1' sx={{ marginBottom: 2 }}>
+                      {model.description}
+                    </Typography>
+                    <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
+                      {model.tags.slice(0, 10).map((tag) => (
+                        <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
+                      ))}
+                    </Stack>
+                    {index !== models.length - 1 && (
+                      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
+                    )}
+                  </Fragment>
+                )
+              })}
+            </div>
+          </Paper>
         </Box>
       </Stack>
       <Box sx={{ width: '100%' }}>
@@ -188,6 +228,6 @@ function Marketplace() {
           </div>
         </Paper>
       </Box>
-    </Stack>
+    </Container>
   )
 }

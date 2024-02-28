@@ -2,13 +2,13 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
-import audit from '../../../../connectors/v2/audit/index.js'
-import { ModelCardInterface } from '../../../../models/v2/Model.js'
-import { getModelCard as getModelCardService } from '../../../../services/v2/model.js'
-import { modelCardInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
-import { GetModelCardVersionOptions } from '../../../../types/v2/enums.js'
-import { parse } from '../../../../utils/v2/validate.js'
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
+import { ModelCardInterface } from '../../../../models/Model.js'
+import { getModelCard as getModelCardService } from '../../../../services/model.js'
+import { modelCardInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import { GetModelCardVersionOptions } from '../../../../types/enums.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const getModelCardSchema = z.object({
   params: z.object({
