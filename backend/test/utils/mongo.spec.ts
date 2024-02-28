@@ -1,7 +1,7 @@
 import { MongoServerError } from 'mongodb'
 import { describe, expect, test } from 'vitest'
 
-import { isMongoServerError } from '../../src/utils/v2/mongo.js'
+import { isMongoServerError } from '../../src/utils/mongo.js'
 
 describe('utils > mongo', () => {
   test('returns true for a mongo server error', async () => {
