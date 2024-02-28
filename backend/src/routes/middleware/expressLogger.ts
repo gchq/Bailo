@@ -4,7 +4,7 @@ import morgan from 'morgan'
 import { promisify } from 'util'
 import { v4 as uuidv4 } from 'uuid'
 
-import log from '../../services/v2/log.js'
+import log from '../../services/log.js'
 
 const morganLog = promisify(
   morgan<any, any>(

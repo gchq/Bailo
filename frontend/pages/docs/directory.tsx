@@ -17,23 +17,31 @@ export const flatDirectory: Array<DirectoryEntry> = [
   // Main Docs
   { title: 'Overview', slug: '', header: true },
 
-  { title: 'Getting Started', slug: 'getting-started', header: true },
-
-  { title: 'FAQ', slug: 'getting-started/faq' },
-  { title: `What's new in V2?`, slug: 'getting-started/whats-new-in-v2' },
-
   // Users
   { title: 'Users', slug: 'users', header: true },
 
   { title: 'Managing Models and Releases', slug: 'users/managing-models-and-releases', header: true },
   { title: 'Uploading Artifacts', slug: 'users/managing-models-and-releases/upload-to-bailo', header: true },
+  { title: 'Creating a Model', slug: 'users/managing-models-and-releases/upload-to-bailo/creating-a-model' },
+  { title: 'Completing the Model', slug: 'users/managing-models-and-releases/upload-to-bailo/completing-the-model' },
+  { title: 'Creating a Release', slug: 'users/managing-models-and-releases/upload-to-bailo/create-a-release' },
   { title: 'Uploading Files', slug: 'users/managing-models-and-releases/upload-to-bailo/files' },
   { title: 'Uploading Images', slug: 'users/managing-models-and-releases/upload-to-bailo/images' },
 
   { title: 'Using a Model', slug: 'users/using-a-model', header: true },
+  { title: 'Requesting Access', slug: 'users/using-a-model/requesting-access' },
+  { title: 'Personal Access Tokens', slug: 'users/using-a-model/personal-access-tokens' },
   { title: 'Using a a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
+  { title: 'Downloading files', slug: 'users/using-a-model/downloading-files' },
 
   { title: 'Reviews', slug: 'users/reviews', header: true },
+  { title: 'Reviewing Releases and Access Requests', slug: 'users/reviews/reviewing', header: true },
+  { title: 'Reviewing a Release', slug: 'users/reviews/reviewing/releases' },
+  { title: 'Reviewing an Access Request', slug: 'users/reviews/reviewing/access' },
+  { title: 'Reviewed Releases and Access Requests', slug: 'users/reviews/reviewed', header: true },
+  { title: 'Releases', slug: 'users/reviews/reviewed/releases' },
+  { title: 'Access Requests', slug: 'users/reviews/reviewed/access-request' },
+
   { title: 'Programmatically using Bailo', slug: 'users/programmatically-using-bailo', header: true },
   { title: 'Authentication', slug: 'users/programmatically-using-bailo/authentication' },
   { title: 'Open API', slug: 'users/programmatically-using-bailo/open-api' },
@@ -70,10 +78,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
 
   // Markdown
   { title: 'Markdown Examples', slug: 'markdown-examples' },
-
-  // V2
-  { title: 'V2', slug: 'v2', header: true },
-  { title: 'Model Images', slug: 'v2/model-images' },
 ]
 
 export interface DirectoryTree {

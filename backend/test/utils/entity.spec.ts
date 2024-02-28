@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { fromEntity, toEntity } from '../../src/utils/v2/entity.js'
+import { fromEntity, toEntity } from '../../src/utils/entity.js'
 
 describe('utils > entity', () => {
   test('toEntity', () => {
