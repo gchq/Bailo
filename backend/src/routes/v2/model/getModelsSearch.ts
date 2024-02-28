@@ -7,7 +7,6 @@ import audit from '../../../connectors/v2/audit/index.js'
 import { searchModels } from '../../../services/v2/model.js'
 import { registerPath } from '../../../services/v2/specification.js'
 import { GetModelFilters } from '../../../types/v2/enums.js'
-import { BadReq } from '../../../utils/v2/error.js'
 import { coerceArray, parse } from '../../../utils/v2/validate.js'
 
 export const getModelsSearchSchema = z.object({
@@ -63,7 +62,6 @@ export const getModelsSearch = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelsResponse>) => {
     req.audit = AuditInfo.SearchModels
-    throw BadReq('')
     const {
       query: { libraries, filters, search, task },
     } = parse(req, getModelsSearchSchema)

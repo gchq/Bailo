@@ -155,7 +155,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
             underline='none'
             style={{ color: 'inherit', textDecoration: 'inherit', cursor: 'pointer' }}
           >
-            <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
+            <Stack justifyContent='center' alignItems='left'>
+              <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
+            </Stack>
           </Link>
           {/* </Box> */}
           {isSmOrLarger && (
