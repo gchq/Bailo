@@ -1,7 +1,7 @@
-import { LoadingButton } from '@mui/lab'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
+import SaveAndCancelButtons from 'src/model/overview/SaveAndCancelFormButtons'
 
 import { useGetModel } from '../../../actions/model'
 import { putModelCard, useGetModelCardRevisions } from '../../../actions/modelCard'
@@ -118,24 +118,18 @@ export default function FormEditPage({ model }: FormEditPageProps) {
             </Stack>
           )}
           {isEdit && (
-            <Stack
-              direction='row'
-              spacing={1}
-              justifyContent='flex-end'
-              divider={<Divider orientation='vertical' flexItem />}
-              sx={{ mb: { xs: 2 } }}
-            >
-              <Button variant='outlined' onClick={onCancel} data-test='cancelEditModelCardButton'>
-                Cancel
-              </Button>
-              <LoadingButton variant='contained' onClick={onSubmit} loading={loading} data-test='saveModelCardButton'>
-                Save
-              </LoadingButton>
-            </Stack>
+            <SaveAndCancelButtons
+              onCancel={onCancel}
+              onSubmit={onSubmit}
+              loading={loading}
+              cancelDataTestId='cancelEditModelCardButton'
+              saveDataTestId='saveModelCardButton'
+            />
           )}
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        {isEdit && <SaveAndCancelButtons onCancel={onCancel} onSubmit={onSubmit} loading={loading} />}
       </Box>
       <ModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />
     </>

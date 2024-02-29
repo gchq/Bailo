@@ -2,12 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
-import audit from '../../../../connectors/v2/audit/index.js'
-import { InferenceInterface } from '../../../../models/v2/Inference.js'
-import { getInferenceByImage } from '../../../../services/v2/inference.js'
-import { inferenceInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
-import { parse } from '../../../../utils/v2/validate.js'
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
+import { InferenceInterface } from '../../../../models/Inference.js'
+import { getInferenceByImage } from '../../../../services/inference.js'
+import { inferenceInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const getInferenceSchema = z.object({
   params: z.object({

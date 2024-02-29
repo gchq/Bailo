@@ -1,22 +1,22 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import audit from '../../../src/connectors/v2/audit/__mocks__/index.js'
+import audit from '../../../src/connectors/audit/__mocks__/index.js'
 import { postAccessRequestReviewResponseSchema } from '../../../src/routes/v2/review/postAccessRequestReviewResponse.js'
 import { createFixture, testPost } from '../../testUtils/routes.js'
 import { testReleaseReviewWithResponses } from '../../testUtils/testModels.js'
 
-vi.mock('../../../src/utils/v2/config.js')
+vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
-vi.mock('../../../src/connectors/v2/audit/index.js')
-vi.mock('../../../src/connectors/v2/authorisation/index.js')
+vi.mock('../../../src/connectors/audit/index.js')
+vi.mock('../../../src/connectors/authorisation/index.js')
 
 const mockReviewService = vi.hoisted(() => {
   return {
     respondToReview: vi.fn(() => testReleaseReviewWithResponses),
   }
 })
-vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
+vi.mock('../../../src/services/review.js', () => mockReviewService)
 
 describe('routes > review > postAccessRequestReviewResponse', () => {
   const endpoint = `/api/v2/model`

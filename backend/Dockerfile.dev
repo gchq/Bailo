@@ -1,39 +1,14 @@
 FROM node:18-alpine as installer
 
-RUN apk add --no-cache libc6-compat docker img skopeo
+RUN apk add --no-cache libc6-compat ca-certificates
 RUN apk update
 
 WORKDIR /app
-
-RUN mkdir /s2i && \
-  wget -O s2i.tar.gz https://github.com/openshift/source-to-image/releases/download/v1.3.1/source-to-image-v1.3.1-a5a77147-linux-amd64.tar.gz && \
-  tar -xvf s2i.tar.gz -C /s2i && \
-  rm -rf s2i.tar.gz && \
-  chmod -R o+x /s2i
-
-ARG user_id=1001
-RUN if [[ $user_id -eq 1000 ]]; then groupmod -g 1001 node && usermod -u 1001 -g 1001 node ; fi \
-  && chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap \
-  && adduser -D -u $user_id user \
-  && mkdir -p /run/user/$user_id \
-  && chown -R user /run/user/$user_id /home/user \
-  && chmod -R o+x /s2i \
-  && addgroup -S certs \
-  && addgroup user certs \
-  && chgrp certs /etc/ssl/certs \
-  && chmod -R 775 /etc/ssl/certs \
-  && echo user:100000:65536 | tee /etc/subuid | tee /etc/subgid \
-  && chmod -R 775 /usr/share/ca-certificates
 
 COPY package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 
 COPY . .
-
-USER user
-ENV USER user
-ENV HOME /home/user
-ENV XDG_RUNTIME_DIR=/run/user/$user_id
 
 EXPOSE 3001
 EXPOSE 9229

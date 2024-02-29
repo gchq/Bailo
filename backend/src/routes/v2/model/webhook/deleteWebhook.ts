@@ -2,9 +2,9 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { registerPath } from '../../../../services/v2/specification.js'
-import { removeWebhook } from '../../../../services/v2/webhook.js'
-import { parse } from '../../../../utils/v2/validate.js'
+import { registerPath } from '../../../../services/specification.js'
+import { removeWebhook } from '../../../../services/webhook.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const deleteWebhookSchema = z.object({
   params: z.object({
