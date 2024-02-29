@@ -1,6 +1,8 @@
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
+import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
+import useNotification from 'src/hooks/useNotification'
 import SaveAndCancelButtons from 'src/model/overview/SaveAndCancelFormButtons'
 
 import { useGetModel } from '../../../actions/model'
@@ -25,9 +27,11 @@ export default function FormEditPage({ model }: FormEditPageProps) {
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model.card.schemaId)
   const { isModelError, mutateModel } = useGetModel(model.id)
   const { mutateModelCardRevisions } = useGetModelCardRevisions(model.id)
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  const sendNotification = useNotification()
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   async function onSubmit() {
@@ -74,6 +78,25 @@ export default function FormEditPage({ model }: FormEditPageProps) {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
+  function handleJsonFormOnSubmit(formData: string) {
+    setJsonUploadDialogOpen(false)
+    try {
+      if (schema) {
+        const steps = getStepsFromSchema(schema, {}, [], JSON.parse(formData))
+        for (const step of steps) {
+          step.steps = steps
+        }
+        setSplitSchema({ reference: schema.id, steps })
+      }
+    } catch (_e) {
+      sendNotification({
+        variant: 'error',
+        msg: 'Could not update form - please make sure to use valid JSON.',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    }
+  }
+
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
@@ -104,7 +127,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
               divider={<Divider orientation='vertical' flexItem />}
               sx={{ mb: { xs: 2 } }}
             >
-              <Button variant='outlined' onClick={() => setDialogOpen(true)}>
+              <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
                 View History
               </Button>
               <Button
@@ -121,6 +144,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
             <SaveAndCancelButtons
               onCancel={onCancel}
               onSubmit={onSubmit}
+              openTextInputDialog={() => setJsonUploadDialogOpen(true)}
               loading={loading}
               cancelDataTestId='cancelEditModelCardButton'
               saveDataTestId='saveModelCardButton'
@@ -129,9 +153,23 @@ export default function FormEditPage({ model }: FormEditPageProps) {
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
-        {isEdit && <SaveAndCancelButtons onCancel={onCancel} onSubmit={onSubmit} loading={loading} />}
+        {isEdit && (
+          <SaveAndCancelButtons
+            onCancel={onCancel}
+            onSubmit={onSubmit}
+            loading={loading}
+            openTextInputDialog={() => setJsonUploadDialogOpen(true)}
+          />
+        )}
       </Box>
-      <ModelCardHistoryDialog model={model} open={dialogOpen} setOpen={setDialogOpen} />
+      <ModelCardHistoryDialog model={model} open={historyDialogOpen} setOpen={setHistoryDialogOpen} />
+      <TextInputDialog
+        open={jsonUploadDialogOpen}
+        setOpen={setJsonUploadDialogOpen}
+        onSubmit={handleJsonFormOnSubmit}
+        helperText='Paste in raw JSON to fill in the model card form'
+        dialogTitle='Add raw JSON to form'
+      />
     </>
   )
 }
