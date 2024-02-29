@@ -1,5 +1,5 @@
 import ReviewIcon from '@mui/icons-material/Comment'
-import { Stack } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import { useTheme } from '@mui/material/styles'
@@ -110,7 +110,10 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
         spacing={2}
         sx={{ px: 2, width: '100%' }}
       >
-        <ReviewIcon />
+        <Stack direction='row' spacing={1}>
+          <ReviewIcon />
+          <Typography>Ready for review</Typography>
+        </Stack>
         <Button variant='outlined' color='inherit' size='small' onClick={handleReviewOpen} data-test='reviewButton'>
           Review
         </Button>
