@@ -3,20 +3,25 @@ import { createHash, X509Certificate } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
 import jwt from 'jsonwebtoken'
+import { isEqual } from 'lodash-es'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
-import audit from '../../connectors/audit/index.js'
-import authorisation from '../../connectors/authorisation/index.js'
-import { ModelDoc } from '../../models/Model.js'
-import { TokenActions, TokenDoc } from '../../models/Token.js'
-import { UserInterface } from '../../models/User.js'
-import log from '../../services/log.js'
-import { getModelById } from '../../services/model.js'
-import { validateTokenForModel } from '../../services/token.js'
+import audit from '../../connectors/v2/audit/index.js'
+import authorisation from '../../connectors/v2/authorisation/index.js'
+import { ModelDoc } from '../../models/v2/Model.js'
+import { TokenActions, TokenDoc } from '../../models/v2/Token.js'
+import { UserDoc as UserDocV2 } from '../../models/v2/User.js'
+import { findDeploymentByUuid } from '../../services/deployment.js'
+import log from '../../services/v2/log.js'
+import { getModelById } from '../../services/v2/model.js'
+import { validateTokenForModel } from '../../services/v2/token.js'
+import { ModelId, UserDoc } from '../../types/types.js'
 import config from '../../utils/config.js'
+import { isUserInEntityList } from '../../utils/entity.js'
+import logger from '../../utils/logger.js'
 import { Forbidden, Unauthorised } from '../../utils/result.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
-import { bailoErrorGuard } from './../middleware/expressErrorHandler.js'
+import { bailoErrorGuard } from '../middleware/expressErrorHandler.js'
 
 let adminToken: string | undefined
 
@@ -111,11 +116,11 @@ async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn
   )
 }
 
-export function getRefreshToken(user: UserInterface) {
+export function getRefreshToken(user: UserDoc) {
   return encodeToken(
     {
-      sub: user.dn,
-      user: String(user.dn),
+      sub: user.id,
+      user: String(user._id),
       usage: 'refresh_token',
     },
     {
@@ -134,11 +139,16 @@ export interface Access {
   actions: Array<Action>
 }
 
-export function getAccessToken(user: UserInterface, access: Array<Access>) {
+export interface User {
+  _id: ModelId
+  id: string
+}
+
+export function getAccessToken(user: User, access: Array<Access>) {
   return encodeToken(
     {
-      sub: user.dn,
-      user: String(user.dn),
+      sub: user.id,
+      user: String(user._id),
       access,
     },
     {
@@ -158,7 +168,7 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccess(access: Access, user: UserInterface, token: TokenDoc | undefined) {
+async function checkAccessV2(access: Access, user: UserDocV2, token: TokenDoc | undefined) {
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
@@ -181,13 +191,54 @@ async function checkAccess(access: Access, user: UserInterface, token: TokenDoc 
   return auth.success
 }
 
+async function checkAccess(access: Access, user: UserDoc, token: TokenDoc | undefined) {
+  const modelUuid = access.name.split('/')[0]
+  try {
+    const v2User: UserDocV2 = { createdAt: user.createdAt, updatedAt: user.updatedAt, dn: user.id } as any
+    await getModelById(v2User, modelUuid)
+    return checkAccessV2(access, v2User, token)
+  } catch (e) {
+    // do nothing, assume v1 authorisation
+    log.warn({ userId: user.id, access, e }, 'Falling back to V1 authorisation')
+  }
+
+  if (access.type !== 'repository') {
+    // not a repository request
+    log.warn({ userId: user.id, access }, 'Refusing non-repository request')
+    return false
+  }
+
+  const deploymentUuid = access.name.split('/')[0]
+  const deployment = await findDeploymentByUuid(user, deploymentUuid)
+
+  if (!deployment) {
+    // no deployment found
+    log.warn({ userId: user.id, access }, 'No deployment found')
+    return false
+  }
+
+  if (!(await isUserInEntityList(user, deployment.metadata.contacts.owner))) {
+    // user not in access list
+    log.warn({ userId: user.id, access }, 'User not in deployment list')
+    return false
+  }
+
+  if (!isEqual(access.actions, ['pull'])) {
+    // users should only be able to pull images
+    log.warn({ userId: user.id, access }, 'User tried to request permissions beyond pulling')
+    return false
+  }
+
+  return true
+}
+
 export const getDockerRegistryAuth = [
   bodyParser.urlencoded({ extended: true }),
   async (req: Request, res: Response) => {
     const { account, client_id: clientId, offline_token: offlineToken, service, scope } = req.query
     const isOfflineToken = offlineToken === 'true'
 
-    let rlog = log.child({ account, clientId, isOfflineToken, service, scope })
+    let rlog = logger.child({ account, clientId, isOfflineToken, service, scope })
     rlog.trace({ url: req.originalUrl }, 'Received docker registry authentication request')
 
     const authorization = req.get('authorization')

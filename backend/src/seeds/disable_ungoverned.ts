@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
 
-import ModelModel from '../models/Model.js'
+import ModelModel from '../models/v2/Model.js'
 import { model } from './data/models.js'
 import { seed } from './index.js'
 

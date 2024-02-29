@@ -1,7 +1,23 @@
+import { NextFunction, Request, Response } from 'express'
 import supertest from 'supertest'
 import { expect, vi } from 'vitest'
 
 import { server } from '../../routes.js'
+import { testUser } from './testModels.js'
+
+vi.mock('../../utils/user.js', () => {
+  return {
+    getUser: vi.fn((req: Request, _res: Response, next: NextFunction) => {
+      req.user = testUser
+      next()
+    }),
+    ensureUserRole: vi.fn(() => {
+      return vi.fn((req: Request, _res: Response, next: NextFunction) => {
+        next()
+      })
+    }),
+  }
+})
 
 vi.mock('../../utils/config.js', () => {
   return {

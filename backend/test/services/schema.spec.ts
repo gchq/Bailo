@@ -1,12 +1,12 @@
 import { MongoServerError } from 'mongodb'
 import { describe, expect, test, vi } from 'vitest'
 
-import authorisation from '../../src/connectors/authorisation/index.js'
-import { UserInterface } from '../../src/models/User.js'
-import { createSchema, findSchemaById, findSchemasByKind } from '../../src/services/schema.js'
+import authorisation from '../../src/connectors/v2/authorisation/index.js'
+import { UserDoc } from '../../src/models/v2/User.js'
+import { createSchema, findSchemaById, findSchemasByKind } from '../../src/services/v2/schema.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
-vi.mock('../../src/connectors/authorisation/index.js')
+vi.mock('../../src/connectors/v2/authorisation/index.js')
 
 const mockSchema = vi.hoisted(() => {
   const mockedMethods = {
@@ -28,7 +28,7 @@ const mockSchema = vi.hoisted(() => {
     Schema,
   }
 })
-vi.mock('../../src/models/Schema.js', () => ({
+vi.mock('../../src/models/v2/Schema.js', () => ({
   default: mockSchema.Schema,
 }))
 
@@ -37,10 +37,10 @@ const mockMongoUtils = vi.hoisted(() => {
     isMongoServerError: vi.fn(),
   }
 })
-vi.mock('../../utils/mongo.js', () => mockMongoUtils)
+vi.mock('../../utils/v2/mongo.js', () => mockMongoUtils)
 
 describe('services > schema', () => {
-  const testUser = { dn: 'user' } as UserInterface
+  const testUser = { dn: 'user' } as UserDoc
 
   test('that all schemas can be retrieved', async () => {
     const result = await findSchemasByKind('model')

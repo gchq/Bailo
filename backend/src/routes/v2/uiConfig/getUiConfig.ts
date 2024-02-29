@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { registerPath } from '../../../services/specification.js'
+import { registerPath } from '../../../services/v2/specification.js'
 import { UiConfig } from '../../../types/types.js'
-import config from '../../../utils/config.js'
 import { NotFound } from '../../../utils/result.js'
-import { parse } from '../../../utils/validate.js'
+import config from '../../../utils/v2/config.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const getUiConfigSchema = z.object({})
 

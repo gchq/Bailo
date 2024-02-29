@@ -2,14 +2,14 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../connectors/audit/Base.js'
-import audit from '../../../connectors/audit/index.js'
-import { FileInterface } from '../../../models/File.js'
-import { ReleaseInterface } from '../../../models/Release.js'
-import { getFilesByIds } from '../../../services/file.js'
-import { getReleaseBySemver } from '../../../services/release.js'
-import { registerPath, releaseInterfaceSchema } from '../../../services/specification.js'
-import { parse } from '../../../utils/validate.js'
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
+import { FileInterface } from '../../../models/v2/File.js'
+import { ReleaseInterface } from '../../../models/v2/Release.js'
+import { getFilesByIds } from '../../../services/v2/file.js'
+import { getReleaseBySemver } from '../../../services/v2/release.js'
+import { registerPath, releaseInterfaceSchema } from '../../../services/v2/specification.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const getReleaseSchema = z.object({
   params: z.object({

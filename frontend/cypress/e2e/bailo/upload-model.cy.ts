@@ -8,7 +8,7 @@ const schemaId = 'minimal-general-v10'
 describe('Beta create new model', () => {
   it('loads the Create a new model Page', () => {
     cy.visit(newModelUrl)
-    cy.contains('Create a new Model')
+    cy.contains('Upload a new Model')
   })
 
   it('creates a public new model', () => {

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { getTokenFromAuthHeader as getTokenFromAuthHeaderService } from '../../services/token.js'
-import { Forbidden, Unauthorized } from '../../utils/error.js'
+import { getTokenFromAuthHeader as getTokenFromAuthHeaderService } from '../../services/v2/token.js'
+import { Forbidden, Unauthorized } from '../../utils/v2/error.js'
 
 export async function getTokenFromAuthHeader(req: Request, _res: Response, next: NextFunction) {
   // Unlike 'getUser' this function is currently intended to be used on methods that ONLY authenticate

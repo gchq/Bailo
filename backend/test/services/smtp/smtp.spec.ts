@@ -1,17 +1,17 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import AccessRequest from '../../../src/models/AccessRequest.js'
-import Release from '../../../src/models/Release.js'
-import Review from '../../../src/models/Review.js'
+import AccessRequest from '../../../src/models/v2/AccessRequest.js'
+import Release from '../../../src/models/v2/Release.js'
+import Review from '../../../src/models/v2/Review.js'
 import {
   notifyReviewResponseForAccess,
   notifyReviewResponseForRelease,
   requestReviewForAccessRequest,
   requestReviewForRelease,
-} from '../../../src/services/smtp/smtp.js'
-import config from '../../../src/utils/config.js'
+} from '../../../src/services/v2/smtp/smtp.js'
+import config from '../../../src/utils/v2/config.js'
 
-vi.mock('../../../src/utils/config.js', () => {
+vi.mock('../../../src/utils/v2/config.js', () => {
   return {
     __esModule: true,
     default: {
@@ -44,7 +44,7 @@ const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),
 }))
-vi.mock('../../../src/services/log.js', async () => ({
+vi.mock('../../../src/services/v2/log.js', async () => ({
   default: logMock,
 }))
 
@@ -64,12 +64,12 @@ const authenticationMock = vi.hoisted(() => ({
   getUserInformationList: vi.fn(() => [Promise.resolve({ email: 'email@email.com' })]),
   getUserInformation: vi.fn(() => [Promise.resolve({ name: 'Joe Blogs' })]),
 }))
-vi.mock('../../../src/connectors/authentication/index.js', async () => ({ default: authenticationMock }))
+vi.mock('../../../src/connectors/v2/authentication/index.js', async () => ({ default: authenticationMock }))
 
 const emailBuilderMock = vi.hoisted(() => ({
   buildEmail: vi.fn(() => ({ subject: 'subject', text: 'text', html: 'html' })),
 }))
-vi.mock('../../../src/services/smtp/emailBuilder.js', async () => emailBuilderMock)
+vi.mock('../../../src/services/v2/smtp/emailBuilder.js', async () => emailBuilderMock)
 
 describe('services > smtp > smtp', () => {
   const review = new Review({ role: 'owner', responses: [{ decision: 'approve' }] })

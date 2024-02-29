@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { convertStringToId, longId, shortId } from '../../src/utils/id.js'
+import { convertStringToId, longId, shortId } from '../../src/utils/v2/id.js'
 
 describe('utils > id', () => {
   test('longId', () => {

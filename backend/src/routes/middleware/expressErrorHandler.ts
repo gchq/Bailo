@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 
-import audit from '../../connectors/audit/index.js'
-import log from '../../services/log.js'
-import { BailoError } from '../../types/error.js'
+import audit from '../../connectors/v2/audit/index.js'
+import log from '../../services/v2/log.js'
+import { BailoError } from '../../types/v2/error.js'
 
 export function bailoErrorGuard(err: unknown): err is BailoError {
   if (typeof err !== 'object' || err === null) {

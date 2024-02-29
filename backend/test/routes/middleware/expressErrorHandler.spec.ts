@@ -1,10 +1,10 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import audit from '../../../src/connectors/audit/__mocks__/index.js'
+import audit from '../../../src/connectors/v2/audit/__mocks__/index.js'
 import { bailoErrorGuard, expressErrorHandler } from '../../../src/routes/middleware/expressErrorHandler.js'
 
-vi.mock('../../../src/utils/config.js')
-vi.mock('../../../src/connectors/audit/index.js')
+vi.mock('../../../src/utils/v2/config.js')
+vi.mock('../../../src/connectors/v2/audit/index.js')
 
 describe('middleware > expressErrorHandler', () => {
   test('bailoErrorGuard', () => {

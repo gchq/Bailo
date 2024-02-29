@@ -2,12 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../../connectors/audit/Base.js'
-import audit from '../../../../connectors/audit/index.js'
-import { ModelCardRevisionInterface } from '../../../../models/ModelCardRevision.js'
-import { updateModelCard } from '../../../../services/model.js'
-import { modelCardRevisionInterfaceSchema, registerPath } from '../../../../services/specification.js'
-import { parse } from '../../../../utils/validate.js'
+import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
+import audit from '../../../../connectors/v2/audit/index.js'
+import { ModelCardRevisionInterface } from '../../../../models/v2/ModelCardRevision.js'
+import { updateModelCard } from '../../../../services/v2/model.js'
+import { modelCardRevisionInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
+import { parse } from '../../../../utils/v2/validate.js'
 
 const knownOverview = z.object({
   tags: z.array(z.string()).optional(),

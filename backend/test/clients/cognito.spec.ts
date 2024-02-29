@@ -13,7 +13,7 @@ const configMock = vi.hoisted(
       },
     }) as any,
 )
-vi.mock('../../src/utils/config.js', () => ({
+vi.mock('../../src/utils/v2/config.js', () => ({
   __esModule: true,
   default: configMock,
 }))

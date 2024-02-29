@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { SillyAuthenticationConnector } from '../../../src/connectors/authentication/silly.js'
+import { SillyAuthenticationConnector } from '../../../src/connectors/v2/authentication/silly.js'
 
 vi.mock('../../../src/routes/middleware/defaultAuthentication.js', () => ({
   getTokenFromAuthHeader: 'Token Middleware',

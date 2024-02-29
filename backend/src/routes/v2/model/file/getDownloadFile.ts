@@ -4,14 +4,14 @@ import { Request, Response } from 'express'
 import stream from 'stream'
 import { z } from 'zod'
 
-import { FileInterface, FileInterfaceDoc } from '../../../../models/File.js'
-import { TokenActions } from '../../../../models/Token.js'
-import { downloadFile, getFileById } from '../../../../services/file.js'
-import { getFileByReleaseFileName } from '../../../../services/release.js'
-import { registerPath } from '../../../../services/specification.js'
-import { validateTokenForModel } from '../../../../services/token.js'
-import { BadReq, InternalError } from '../../../../utils/error.js'
-import { parse } from '../../../../utils/validate.js'
+import { FileInterface, FileInterfaceDoc } from '../../../../models/v2/File.js'
+import { TokenActions } from '../../../../models/v2/Token.js'
+import { downloadFile, getFileById } from '../../../../services/v2/file.js'
+import { getFileByReleaseFileName } from '../../../../services/v2/release.js'
+import { registerPath } from '../../../../services/v2/specification.js'
+import { validateTokenForModel } from '../../../../services/v2/token.js'
+import { BadReq, InternalError } from '../../../../utils/v2/error.js'
+import { parse } from '../../../../utils/v2/validate.js'
 
 export const getDownloadFileSchema = z
   .object({

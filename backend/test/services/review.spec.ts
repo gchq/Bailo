@@ -1,9 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import AccessRequest from '../../src/models/AccessRequest.js'
-import Model from '../../src/models/Model.js'
-import Release from '../../src/models/Release.js'
-import { Decision, ReviewDoc, ReviewInterface } from '../../src/models/Review.js'
+import AccessRequest from '../../src/models/v2/AccessRequest.js'
+import Model from '../../src/models/v2/Model.js'
+import Release from '../../src/models/v2/Release.js'
+import { Decision, ReviewDoc, ReviewInterface } from '../../src/models/v2/Review.js'
 import {
   checkAccessRequestsApproved,
   createAccessRequestReviews,
@@ -11,11 +11,11 @@ import {
   findReviews,
   respondToReview,
   sendReviewResponseNotification,
-} from '../../src/services/review.js'
-import { ReviewKind } from '../../src/types/enums.js'
+} from '../../src/services/v2/review.js'
+import { ReviewKind } from '../../src/types/v2/enums.js'
 
-vi.mock('../../src/connectors/authorisation/index.js')
-vi.mock('../../src/connectors/authentication/index.js', async () => ({
+vi.mock('../../src/connectors/v2/authorisation/index.js')
+vi.mock('../../src/connectors/v2/authentication/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
 }))
 
@@ -43,8 +43,8 @@ const reviewModelMock = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/Review.js', async () => ({
-  ...((await vi.importActual('../../src/models/Review.js')) as object),
+vi.mock('../../src/models/v2/Review.js', async () => ({
+  ...((await vi.importActual('../../src/models/v2/Review.js')) as object),
   default: reviewModelMock,
 }))
 
@@ -54,55 +54,55 @@ const smtpMock = vi.hoisted(() => ({
   requestReviewForRelease: vi.fn(() => Promise.resolve()),
   requestReviewForAccessRequest: vi.fn(() => Promise.resolve()),
 }))
-vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
+vi.mock('../../src/services/v2/smtp/smtp.js', async () => smtpMock)
 
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
-vi.mock('../../src/services/model.js', async () => modelMock)
+vi.mock('../../src/services/v2/model.js', async () => modelMock)
 
 const accessRequestServiceMock = vi.hoisted(() => ({
   getAccessRequestById: vi.fn(),
 }))
-vi.mock('../../src/services/accessRequest.js', async () => accessRequestServiceMock)
+vi.mock('../../src/services/v2/accessRequest.js', async () => accessRequestServiceMock)
 
 const releaseRequestServiceMock = vi.hoisted(() => ({
   getReleaseBySemver: vi.fn(),
 }))
-vi.mock('../../src/services/release.js', async () => releaseRequestServiceMock)
+vi.mock('../../src/services/v2/release.js', async () => releaseRequestServiceMock)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
 }))
-vi.mock('../../src/services/log.js', async () => ({
+vi.mock('../../src/services/v2/log.js', async () => ({
   default: logMock,
 }))
 const arrayUtilMock = vi.hoisted(() => ({
   asyncFilter: vi.fn(),
 }))
-vi.mock('../../src/utils/array.js', async () => arrayUtilMock)
+vi.mock('../../src/utils/v2/array.js', async () => arrayUtilMock)
 
 const mockWebhookService = vi.hoisted(() => {
   return {
     sendWebhooks: vi.fn(),
   }
 })
-vi.mock('../../src/services/webhook.js', () => mockWebhookService)
+vi.mock('../../src/services/v2/webhook.js', () => mockWebhookService)
 
 describe('services > review', () => {
   const user: any = { dn: 'test' }
 
-  test('findReviews > all reviews for user', async () => {
-    await findReviews(user, true)
+  test('findReviews > active', async () => {
+    await findReviews(user)
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
   test('findReviews > active reviews for a specific model', async () => {
-    await findReviews(user, false, 'modelId')
+    await findReviews(user, 'modelId')
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()

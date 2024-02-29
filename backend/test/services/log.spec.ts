@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
-import { isBunyanLogGuard, Writer } from '../../src/services/log.js'
-import { longId } from '../../src/utils/id.js'
+import { isBunyanLogGuard, Writer } from '../../src/services/v2/log.js'
+import { longId } from '../../src/utils/v2/id.js'
 
 describe('services > log', () => {
   test('isBunyanLogGuard > good', () => {

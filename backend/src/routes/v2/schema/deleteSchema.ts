@@ -2,11 +2,11 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../connectors/audit/Base.js'
-import audit from '../../../connectors/audit/index.js'
-import { deleteSchemaById } from '../../../services/schema.js'
-import { registerPath } from '../../../services/specification.js'
-import { parse } from '../../../utils/validate.js'
+import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
+import audit from '../../../connectors/v2/audit/index.js'
+import { deleteSchemaById } from '../../../services/v2/schema.js'
+import { registerPath } from '../../../services/v2/specification.js'
+import { parse } from '../../../utils/v2/validate.js'
 
 export const deleteSchemaSchema = z.object({
   params: z.object({

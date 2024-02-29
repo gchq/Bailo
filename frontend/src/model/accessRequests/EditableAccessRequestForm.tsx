@@ -1,5 +1,4 @@
-import { LoadingButton } from '@mui/lab'
-import { Box, Button, Stack, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { patchAccessRequest, useGetAccessRequest } from 'actions/accessRequest'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -104,16 +103,6 @@ export default function EditableAccessRequestForm({
           errorMessage={errorMessage}
         />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
-        {isEdit && (
-          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
-            <Button variant='outlined' onClick={handleCancel}>
-              Cancel
-            </Button>
-            <LoadingButton variant='contained' loading={isLoading} onClick={handleSubmit}>
-              Save
-            </LoadingButton>
-          </Stack>
-        )}
       </Box>
     </>
   )

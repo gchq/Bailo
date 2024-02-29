@@ -1,125 +1,62 @@
-import { Schema as JsonSchema } from 'jsonschema'
-
-import { SchemaAction } from '../connectors/authorisation/actions.js'
-import authorisation from '../connectors/authorisation/index.js'
-import Schema, { SchemaInterface } from '../models/Schema.js'
-import { UserInterface } from '../models/User.js'
-import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
+import SchemaModel from '../models/Schema.js'
+import { Schema, SchemaType } from '../types/types.js'
+import { ModelMetadata } from '../types/types.js'
 import config from '../utils/config.js'
-import { Forbidden, NotFound } from '../utils/error.js'
-import { handleDuplicateKeys } from '../utils/mongo.js'
-import log from './log.js'
+import logger from '../utils/logger.js'
 
-export interface DefaultSchema {
-  name: string
-  id: string
-  description: string
-  jsonSchema: JsonSchema
+export async function findSchemaByRef(ref: string) {
+  const schema = await SchemaModel.findOne({
+    reference: ref,
+  })
+
+  return schema
 }
 
-export async function findSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaInterface[]> {
-  const baseSchemas = await Schema.find({ ...(kind && { kind }) }).sort({ createdAt: -1 })
+export async function findSchemaByName(name: string) {
+  const schema = await SchemaModel.findOne({
+    name,
+  })
+
+  return schema
+}
+
+export async function findSchemasByUse(use: string, limit?: number) {
+  const baseSchemas = SchemaModel.find({ use }).sort({ createdAt: -1 })
+  if (limit) baseSchemas.limit(limit)
+
   return baseSchemas
 }
 
-export async function findSchemaById(schemaId: string) {
-  const schema = await Schema.findOne({
-    id: schemaId,
-  })
-
-  if (!schema) {
-    throw NotFound(`The requested schema was not found.`, { schemaId })
-  }
-
-  return schema
-}
-
-export async function deleteSchemaById(user: UserInterface, schemaId: string): Promise<string> {
-  const schema = await Schema.findOne({
-    id: schemaId,
-  })
-
-  if (!schema) {
-    throw NotFound(`The requested schema was not found.`, { schemaId })
-  }
-
-  const auth = await authorisation.schema(user, schema, SchemaAction.Delete)
-  if (!auth.success) {
-    throw Forbidden(auth.info, {
-      userDn: user.dn,
-      schemaId: schema.id,
-    })
-  }
-
-  await schema.delete()
-
-  return schema.id
-}
-
-export async function createSchema(user: UserInterface, schema: Partial<SchemaInterface>, overwrite = false) {
-  const schemaDoc = new Schema(schema)
-
-  const auth = await authorisation.schema(user, schemaDoc, SchemaAction.Create)
-  if (!auth.success) {
-    throw Forbidden(auth.info, {
-      userDn: user.dn,
-      schemaId: schemaDoc.id,
-    })
-  }
-
+export async function createSchema(schema: Schema, overwrite = false) {
   if (overwrite) {
-    await Schema.deleteOne({ id: schema.id })
+    await SchemaModel.deleteOne({ reference: schema.reference })
   }
 
-  try {
-    return await schemaDoc.save()
-  } catch (error) {
-    handleDuplicateKeys(error)
-    throw error
-  }
-}
+  const schemaDoc = new SchemaModel(schema)
 
-export type UpdateSchemaParams = Pick<SchemaInterface, 'active'>
-
-export async function updateSchema(user: UserInterface, schemaId: string, diff: Partial<UpdateSchemaParams>) {
-  const schema = await findSchemaById(schemaId)
-
-  const auth = await authorisation.schema(user, schema, SchemaAction.Update)
-  if (!auth.success) {
-    throw Forbidden(auth.info, {
-      userDn: user.dn,
-      schemaId: schema.id,
-    })
-  }
-
-  Object.assign(schema, diff)
-  await schema.save()
-
-  return schema
+  return schemaDoc.save()
 }
 
 export async function addDefaultSchemas() {
-  for (const schema of config.defaultSchemas.modelCards) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new Schema({
-      ...schema,
-      kind: SchemaKind.Model,
-      active: true,
-      hidden: false,
-    })
-    await Schema.deleteOne({ id: schema.id })
-    await modelSchema.save()
+  for (const schema of config.defaultSchemas.upload) {
+    logger.info({ name: schema.name, reference: schema.reference }, `Ensuring schema ${schema.reference} exists`)
+    await createSchema({ ...schema, use: SchemaType.UPLOAD }, true)
   }
 
-  for (const schema of config.defaultSchemas.accessRequests) {
-    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const modelSchema = new Schema({
-      ...schema,
-      kind: SchemaKind.AccessRequest,
-      active: true,
-      hidden: false,
-    })
-    await Schema.deleteOne({ id: schema.id })
-    await modelSchema.save()
+  for (const schema of config.defaultSchemas.deployment) {
+    logger.info({ name: schema.name, reference: schema.reference }, `Ensuring schema ${schema.reference} exists`)
+    await createSchema({ ...schema, use: SchemaType.DEPLOYMENT }, true)
   }
+}
+
+export async function getManagerAndReviewer(metadata: ModelMetadata) {
+  const schema = await findSchemaByRef(metadata.schemaRef)
+
+  if (!schema) {
+    return { managerTitle: 'Managers', reviewerTitle: 'Technical Reviewer' }
+  }
+
+  const managerTitle = schema.schema.properties.contacts.properties.manager.title
+  const reviewerTitle = schema.schema.properties.contacts.properties.reviewer.title
+  return { managerTitle, reviewerTitle }
 }

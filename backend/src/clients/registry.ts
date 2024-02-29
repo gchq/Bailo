@@ -1,9 +1,9 @@
 import fetch from 'node-fetch'
 
-import { getHttpsAgent } from '../services/http.js'
-import { isRegistryError } from '../types/RegistryError.js'
-import config from '../utils/config.js'
-import { InternalError, RegistryError } from '../utils/error.js'
+import { getHttpsAgent } from '../services/v2/http.js'
+import { isRegistryError } from '../types/v2/RegistryError.js'
+import config from '../utils/v2/config.js'
+import { InternalError, RegistryError } from '../utils/v2/error.js'
 
 interface RepoRef {
   namespace: string

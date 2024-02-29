@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { asyncFilter, findDuplicates } from '../../src/utils/array.js'
+import { asyncFilter, findDuplicates } from '../../src/utils/v2/array.js'
 
 describe('utils > array', () => {
   test('asyncFilter', async () => {

@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "useType": {
+      "type": "string",
+      "enum": ["RESEARCH", "TESTING", "CAPABILITY DEVELOPMENT", "OPERATIONAL"],
+      "enumNames": [
+        "Model will be used in researching e.g.testing new use cases.",
+        "Model will be used in testing - how the model will be integrated into a wider system.",
+        "Model will be used as part of capability development.",
+        "Model will be part of an operational system."
+      ]
+    },
+    "entity": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "description": "Type of entity (user, group)."
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for entity."
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "timeStamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "schemaRef": {
+      "title": "Schema reference",
+      "type": "string"
+    },
+    "highLevelDetails": {
+      "title": "Details",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "What is the name of the deployment?",
+          "description": "This will be used to distinguish your deployment from other deployments of this model",
+          "type": "string",
+          "maxLength": 100
+        },
+        "modelID": {
+          "title": "The id of the model you wish to deploy",
+          "type": "string"
+        },
+        "endDate": {
+          "title": "End Date",
+          "type": "object",
+          "properties": {
+            "hasEndDate": {
+              "title": "Is there a known end date for this deployment?",
+              "description": "Choose YES if this deployment will only be used for a short period choose an end date. Choose NO if the deployment will be ongoing and/or using new versions of the model when released.",
+              "type": "boolean"
+            }
+          },
+          "required": ["hasEndDate"],
+          "dependencies": {
+            "hasEndDate": {
+              "oneOf": [
+                {
+                  "properties": {
+                    "hasEndDate": {
+                      "enum": [false]
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "properties": {
+                    "hasEndDate": {
+                      "enum": [true]
+                    },
+                    "date": {
+                      "title": "What is the end date for this deployment?",
+                      "type": "string",
+                      "format": "date"
+                    }
+                  },
+                  "required": ["date"],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "patternProperties": {
+            "^date$": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["name", "endDate"],
+      "additionalProperties": false
+    },
+
+    "contacts": {
+      "title": "Deployment Contacts",
+      "type": "object",
+      "properties": {
+        "owner": {
+          "title": "Deployment Owners",
+          "description": "At least two users must own a deployment, in case the model owner needs to contact them.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/entity" },
+          "widget": "entitySelector"
+        }
+      },
+      "required": ["owner"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["timeStamp", "user", "highLevelDetails", "contacts"],
+  "additionalProperties": false
+}

@@ -4,9 +4,9 @@ import {
   ListUsersCommandOutput,
 } from '@aws-sdk/client-cognito-identity-provider'
 
-import { UserInformation } from '../connectors/authentication/Base.js'
-import config from '../utils/config.js'
-import { ConfigurationError, InternalError } from '../utils/error.js'
+import { UserInformation } from '../connectors/v2/authentication/Base.js'
+import config from '../utils/v2/config.js'
+import { ConfigurationError, InternalError } from '../utils/v2/error.js'
 
 export async function listUsers(query: string, exactMatch = false) {
   let dnName: string

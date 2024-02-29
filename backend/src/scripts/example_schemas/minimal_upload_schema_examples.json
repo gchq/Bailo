@@ -1,0 +1,55 @@
+[
+  {
+    "highLevelDetails": {
+      "tags": ["facebook", "fasttext", "NLP", "language", "language_identification", "multilingual"],
+      "name": "FastText Language Identification",
+      "modelInASentence": "Performs language identification of words",
+      "modelOverview": "Performs language identification of words in utf-8, capable of recognizing up to 176 languages.",
+      "modelCardVersion": "v1.0"
+    },
+    "contacts": {
+      "uploader": [{ "kind": "user", "id": "user" }],
+      "reviewer": [{ "kind": "user", "id": "user" }],
+      "manager": [{ "kind": "user", "id": "user" }]
+    },
+    "buildOptions": {
+      "uploadType": "Model card only"
+    }
+  },
+  {
+    "highLevelDetails": {
+      "tags": ["Computer_vision", "Object_detection", "COCO", "YOLO", "YOLO_v4_tiny", "v4", "tiny"],
+      "name": "YOLO v4 (tiny)",
+      "modelInASentence": "Performs object detection on an image.",
+      "modelOverview": "Locate common objects within an image, from a list of 80 known 80 pre-trained classes e.g. person, bicycle, car.",
+      "modelCardVersion": "v1.0"
+    },
+    "contacts": {
+      "uploader": [{ "kind": "user", "id": "user" }],
+      "reviewer": [{ "kind": "user", "id": "user" }],
+      "manager": [{ "kind": "user", "id": "user" }]
+    },
+    "buildOptions": {
+      "uploadType": "Code and binaries",
+      "seldonVersion": "seldonio/seldon-core-s2i-python37:1.10.0"
+    }
+  },
+  {
+    "highLevelDetails": {
+      "tags": ["NLP", "Natural Language Processing", "BERT", "Google", "context"],
+      "name": "BERT Language",
+      "modelInASentence": "Performs language modelling and next sentence prediction.",
+      "modelOverview": "Performs language modelling and next sentence prediction.",
+      "modelCardVersion": "v1.0"
+    },
+    "contacts": {
+      "uploader": [{ "kind": "user", "id": "user" }],
+      "reviewer": [{ "kind": "user", "id": "user" }],
+      "manager": [{ "kind": "user", "id": "user" }]
+    },
+    "buildOptions": {
+      "uploadType": "Code and binaries",
+      "seldonVersion": "seldonio/seldon-core-s2i-python37:1.10.0"
+    }
+  }
+]

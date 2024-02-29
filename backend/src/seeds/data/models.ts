@@ -1,6 +1,6 @@
-import { AccessRequestInterface } from '../../models/AccessRequest.js'
-import { ModelInterface } from '../../models/Model.js'
-import { ReleaseInterface } from '../../models/Release.js'
+import { AccessRequestInterface } from '../../models/v2/AccessRequest.js'
+import { ModelInterface } from '../../models/v2/Model.js'
+import { ReleaseInterface } from '../../models/v2/Release.js'
 
 export const model: ModelInterface = {
   // Basic model example

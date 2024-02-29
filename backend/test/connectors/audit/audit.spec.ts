@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { getAuditConnector } from '../../../src/connectors/audit/index.js'
+import { getAuditConnector } from '../../../src/connectors/v2/audit/index.js'
 
 const configMock = vi.hoisted(() => ({
   connectors: {
@@ -9,7 +9,7 @@ const configMock = vi.hoisted(() => ({
     },
   },
 }))
-vi.mock('../../../src/utils/config.js', () => ({
+vi.mock('../../../src/utils/v2/config.js', () => ({
   __esModule: true,
   default: configMock,
 }))

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import z from 'zod'
 
-import { coerceArray, parse } from '../../src/utils/validate.js'
+import { coerceArray, parse } from '../../src/utils/v2/validate.js'
 
 describe('utils > validate', () => {
   test('parse', () => {

@@ -1,20 +1,9 @@
-import {
-  CreateBucketCommand,
-  CreateBucketRequest,
-  GetObjectCommand,
-  GetObjectRequest,
-  HeadBucketCommand,
-  HeadBucketRequest,
-  HeadObjectRequest,
-  NoSuchKey,
-  S3Client,
-} from '@aws-sdk/client-s3'
+import { GetObjectCommand, GetObjectRequest, HeadObjectRequest, NoSuchKey, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
 
-import { getHttpsAgent } from '../services/http.js'
-import log from '../services/log.js'
-import config from '../utils/config.js'
+import { getHttpsAgent } from '../services/v2/http.js'
+import config from '../utils/v2/config.js'
 
 export async function getS3Client() {
   return new S3Client({
@@ -81,46 +70,6 @@ export async function headObject(bucket: string, key: string) {
   const response = await client.send(command)
 
   return response
-}
-
-export async function headBucket(bucket: string) {
-  const client = await getS3Client()
-
-  const input: HeadBucketRequest = {
-    Bucket: bucket,
-  }
-
-  const command = new HeadBucketCommand(input)
-  const response = await client.send(command)
-
-  return response
-}
-
-export async function createBucket(bucket: string) {
-  const client = await getS3Client()
-
-  const input: CreateBucketRequest = {
-    Bucket: bucket,
-  }
-
-  const command = new CreateBucketCommand(input)
-  const response = await client.send(command)
-
-  return response
-}
-
-export async function ensureBucketExists(bucket: string) {
-  try {
-    log.info({ bucket }, `Ensuring ${bucket} exists`)
-    await headBucket(bucket)
-    log.info({ bucket }, `Bucket ${bucket} already exists`)
-  } catch (error) {
-    if ((error as any)['$metadata'].httpStatusCode === 404) {
-      log.info({ bucket }, `Bucket does not exist, creating ${bucket}`)
-      return createBucket(bucket)
-    }
-    throw error
-  }
 }
 
 export function isNoSuchKeyException(err: any): err is NoSuchKey {

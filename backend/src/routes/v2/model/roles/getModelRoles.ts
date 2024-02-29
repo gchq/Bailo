@@ -2,8 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { Role } from '../../../../types/types.js'
-import { parse } from '../../../../utils/validate.js'
+import { Role } from '../../../../types/v2/types.js'
+import { parse } from '../../../../utils/v2/validate.js'
 
 export const getModelRolesSchema = z.object({
   params: z.object({

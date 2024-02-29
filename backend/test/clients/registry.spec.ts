@@ -7,7 +7,7 @@ const mockHttpService = vi.hoisted(() => {
     getHttpsAgent: vi.fn(() => 'mock agent'),
   }
 })
-vi.mock('../../src/services/http.js', () => mockHttpService)
+vi.mock('../../src/services/v2/http.js', () => mockHttpService)
 
 const fetchMock = vi.hoisted(() => ({
   default: vi.fn(() => ({ ok: true, text: vi.fn(), json: vi.fn() })),

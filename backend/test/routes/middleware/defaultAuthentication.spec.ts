@@ -6,7 +6,7 @@ import { checkAuthentication, getTokenFromAuthHeader } from '../../../src/routes
 const mockTokenService = vi.hoisted(() => ({
   getTokenFromAuthHeader: vi.fn(),
 }))
-vi.mock('../../../src/services/token.js', () => mockTokenService)
+vi.mock('../../../src/services/v2/token.js', () => mockTokenService)
 
 describe('middleware > defaultAuthentication', () => {
   test('getTokenFromAuthHeader > missing header', async () => {

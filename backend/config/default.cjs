@@ -1,4 +1,4 @@
-/** @type {import('../src/utils/config.js').Config} */
+/** @type {import('../src/utils/v2/config.js').Config} */
 module.exports = {
   api: {
     // Publicly accessible host
@@ -19,10 +19,51 @@ module.exports = {
     publicKey: './certs/cert.pem',
   },
 
+  s2i: {
+    // Path to the s2i binary
+    path: '/s2i/s2i',
+  },
+
+  build: {
+    // Environment to build in, can be 'img' or 'openshift'
+    environment: 'img',
+
+    // These settings only matter in OpenShift
+    openshift: {
+      // Build configs, secrets and builds will be triggered in this namespace
+      namespace: '',
+      // The name of the secret for the application to create to securely allow OpenShift to communicate with the Bailo registry
+      dockerPushSecret: '',
+    },
+  },
+
   mongo: {
     // A mongo connection URI, can contain usernames, passwords, replica set information, etc.
     // See: https://www.mongodb.com/docs/manual/reference/connection-string/
     uri: 'mongodb://localhost:27017/bailo?directConnection=true',
+  },
+
+  minio: {
+    // Connection information for an s3-compliant file store.  Settings are passed directly to 'minio', see reference for options:
+    // https://min.io/docs/minio/linux/developers/javascript/API.html#constructor
+    connection: {
+      endPoint: 'minio',
+      port: 9000,
+      useSSL: false,
+      accessKey: 'minioadmin',
+      secretKey: 'minioadmin',
+      region: 'minio',
+      partSize: 64 * 1024 * 1024,
+    },
+
+    // Automatically create the upload / registry bucket if they're not found?
+    automaticallyCreateBuckets: true,
+
+    // Names of buckets that Bailo uses
+    buckets: {
+      uploads: 'uploads',
+      registry: 'registry',
+    },
   },
 
   registry: {
@@ -63,29 +104,61 @@ module.exports = {
     from: '"Bailo 📝" <bailo@example.org>',
   },
 
-  log: {
-    level: 'debug',
+  logging: {
+    // Log out to a file
+    file: {
+      enabled: false,
+      level: 'info',
+      path: './logs/out.log',
+    },
+
+    // Log out to a stroom instance
+    stroom: {
+      enabled: false,
+      folder: './logs/stroom',
+      url: 'http://localhost:8090/stroom/datafeed',
+      environment: 'insecure',
+      feed: 'bailo',
+      system: 'bailo',
+      interval: 1000 * 60 * 5,
+    },
   },
 
   defaultSchemas: {
-    modelCards: [
+    upload: [
       {
         name: 'Minimal Schema v10',
-        id: 'minimal-general-v10',
-        description:
-          "This is the latest version of the default model card for users from West. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which model card to pick, you'll likely want this one!",
-        jsonSchema: require('../src/scripts/example_schemas/minimal_model_schema.json'),
+        reference: '/Minimal/General/v10',
+        schema: require('../src/scripts/example_schemas/minimal_upload_schema.json'),
       },
     ],
-    accessRequests: [
+    deployment: [
       {
-        name: 'Minimal Access Request Schema v10',
-        id: 'minimal-access-request-general-v10',
-        description:
-          'This access request should be used for models that are being deployed by the same organisation that created it and MAY be being used for operational use cases.\n\n ✔ Development Work  \n ✔ Operational Deployments  \n ✖ Second Party Sharing',
-        jsonSchema: require('../src/scripts/example_schemas/minimal_access_request_schema.json'),
+        name: 'Minimal Deployment Schema v6',
+        reference: '/Minimal/Deployment/v6',
+        schema: require('../src/scripts/example_schemas/minimal_deployment_schema.json'),
       },
     ],
+    v2: {
+      modelCards: [
+        {
+          name: 'Minimal Schema v10',
+          id: 'minimal-general-v10',
+          description:
+            "This is the latest version of the default model card for users from West. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which model card to pick, you'll likely want this one!",
+          jsonSchema: require('../src/scripts/example_schemas/minimal_model_schema.json'),
+        },
+      ],
+      accessRequests: [
+        {
+          name: 'Minimal Access Request Schema v10',
+          id: 'minimal-access-request-general-v10',
+          description:
+            'This access request should be used for models that are being deployed by the same organisation that created it and MAY be being used for operational use cases.\n\n ✔ Development Work  \n ✔ Operational Deployments  \n ✖ Second Party Sharing',
+          jsonSchema: require('../src/scripts/example_schemas/minimal_access_request_schema.json'),
+        },
+      ],
+    },
   },
 
   session: {
@@ -121,7 +194,7 @@ module.exports = {
     // Show a banner at the top of the screen on all pages
     banner: {
       enabled: true,
-      text: 'DEVELOPMENT DEPLOYMENT',
+      text: 'DEPLOYMENT: INSECURE',
       colour: 'orange',
       textColor: 'black',
     },
@@ -138,6 +211,11 @@ module.exports = {
       host: 'localhost:8080',
     },
 
+    // Used by some admin pages (e.g. the logs) to directly open the correct page in your IDE
+    // Not needed in production
+    development: {
+      logUrl: 'vscode://file/home/ec2-user/git/Bailo/',
+    },
     inference: {
       enabled: true,
       connection: {
@@ -162,6 +240,10 @@ module.exports = {
     },
   },
 
+  log: {
+    level: 'trace',
+  },
+
   s3: {
     credentials: {
       accessKeyId: 'minioadmin',
@@ -172,8 +254,6 @@ module.exports = {
     region: 'ignored',
     forcePathStyle: true,
     rejectUnauthorized: true,
-
-    automaticallyCreateBuckets: true,
 
     // Names of buckets that Bailo uses
     buckets: {

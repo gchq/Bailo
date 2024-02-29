@@ -1,49 +1,13 @@
-import { Schema as JsonSchema } from 'jsonschema'
-import { Document, model, Schema } from 'mongoose'
+import { model, Schema as MongooseSchema } from 'mongoose'
 
-import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
+import { SchemaType } from '../types/types.js'
 
-// This interface stores information about the properties on the base object.
-// It should be used for plain object representations, e.g. for sending to the
-// client.
-export interface SchemaInterface {
-  id: string
+export interface Schema {
   name: string
-  description: string
-
-  active: boolean
-  hidden: boolean
-
-  kind: SchemaKindKeys
-  jsonSchema: JsonSchema
-
-  createdAt: Date
-  updatedAt: Date
+  reference: string
+  schema: any
+  use: SchemaType
 }
-
-// The doc type includes all values in the plain interface, as well as all the
-// properties and functions that Mongoose provides.  If a function takes in an
-// object from Mongoose it should use this interface
-export type SchemaDoc = SchemaInterface & Document<any, any, SchemaInterface>
-
-const SchemaSchema = new Schema<SchemaInterface>(
-  {
-    id: { type: String, required: true, unique: true, index: true },
-    name: { type: String, required: true },
-    description: { type: String, required: false, default: '' },
-
-    active: { type: Boolean, default: true },
-    hidden: { type: Boolean, default: false },
-
-    kind: { type: String, enum: Object.values(SchemaKind), required: true },
-    jsonSchema: { type: String, required: true, get: getSchema, set: setSchema },
-  },
-  {
-    timestamps: true,
-    collection: 'v2_schemas',
-    toJSON: { getters: true },
-  },
-)
 
 function getSchema(schema: string) {
   return JSON.parse(schema)
@@ -53,6 +17,28 @@ function setSchema(schema: unknown) {
   return JSON.stringify(schema)
 }
 
-const SchemaModel = model<SchemaInterface>('v2_Schema', SchemaSchema)
+const SchemaSchema = new MongooseSchema<Schema>(
+  {
+    name: { type: String, required: true, unique: true, index: true },
+    reference: { type: String, required: true, unique: true },
+    schema: {
+      type: MongooseSchema.Types.Mixed,
+      required: true,
+      get: getSchema,
+      set: setSchema,
+    },
+    use: { type: String, required: true, enum: [SchemaType.UPLOAD, SchemaType.DEPLOYMENT] },
+  },
+  {
+    timestamps: true,
+    toJSON: { getters: true },
+  },
+)
+
+const SchemaModel = model<Schema>('Schema', SchemaSchema)
+
+export async function createSchemaIndexes() {
+  await SchemaModel.createIndexes()
+}
 
 export default SchemaModel
