@@ -56,7 +56,7 @@ describe('Draft and review a model release', () => {
     cy.log('Clicking the review button')
     cy.get('[data-test=reviewButton]').click({ force: true })
     // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000)
+    cy.wait(5000)
     cy.log('Creating a "requesting changes" review')
     cy.contains('Release Review')
     cy.get('[data-test=reviewWithCommentTextField').type('This is a comment')
