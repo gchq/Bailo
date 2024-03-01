@@ -1,0 +1,10 @@
+{
+  "auths": {
+    "<registry-url>": {
+      "auth": BASE64_ENCODE("<access_key>" + ":" + "<secret_key>")
+    }
+  }
+}
+
+
+

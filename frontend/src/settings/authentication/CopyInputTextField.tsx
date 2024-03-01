@@ -1,5 +1,5 @@
 import { ContentCopy } from '@mui/icons-material'
-import { IconButton, InputAdornment, TextField } from '@mui/material'
+import { IconButton, InputAdornment, TextField, Tooltip } from '@mui/material'
 import { useState } from 'react'
 import useNotification from 'utils/hooks/useNotification'
 
@@ -24,13 +24,17 @@ export default function CopyInputTextField({ text }: CopyInputTextProp) {
   return (
     <TextField
       value={text}
-      sx={{ width: '500px' }}
+      sx={{
+        width: '500px',
+      }}
       InputProps={{
         endAdornment: (
           <InputAdornment position='end'>
-            <IconButton onClick={handleCopyInput} aria-label='copy access key to clipboard'>
-              <ContentCopy />
-            </IconButton>
+            <Tooltip title='Copy to clipboard' placement='top'>
+              <IconButton onClick={handleCopyInput} aria-label='copy access key to clipboard'>
+                <ContentCopy />
+              </IconButton>
+            </Tooltip>
           </InputAdornment>
         ),
         readOnly: true,

@@ -20,6 +20,7 @@ export default function KubernetesSecret() {
         <Typography>Second, submit the secret to the cluster usign this command:</Typography>
         {/* TODO */}
         <CopyInputTextField text={`kubectl create -f <key-name>-secret.yml --namespace=NAMESPACEHERE`} />
+        {/* TODO: need to find out the cause of the keys not being revealed when pasted */}
         <Typography fontWeight='bold'>Step 3: Update Kubernetes configuration</Typography>
         <Typography>
           Finally, add a reference to the secret to your Kubernetes pod config via an `imagePullSecrets` field, For
