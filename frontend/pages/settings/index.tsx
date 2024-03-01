@@ -4,7 +4,7 @@ import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import AuthenticationTab from 'src/settings/authentication/AuthenticationTab'
-import DisplayTab from 'src/settings/DisplayTab'
+import DisplayTab from 'src/settings/display/DisplayTab'
 import ProfileTab from 'src/settings/ProfileTab'
 import Wrapper from 'src/Wrapper'
 
