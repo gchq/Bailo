@@ -8,6 +8,7 @@ import Head from 'next/head'
 import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
+import { lightTheme, themeList } from 'src/theme'
 
 import { useGetCurrentUser } from '../actions/user'
 import Banner from './Banner'
@@ -68,7 +69,12 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider
+      theme={
+        themeList.find((e) => typeof window !== 'undefined' && e.key === localStorage.getItem('user_theme'))?.theme ||
+        lightTheme
+      }
+    >
       <Head>
         <title>{`${title} :: Bailo`}</title>
       </Head>

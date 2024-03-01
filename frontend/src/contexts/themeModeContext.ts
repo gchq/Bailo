@@ -5,7 +5,7 @@ import { lightTheme } from '../theme'
 
 const ThemeModeContext = createContext<ThemeModeHook>({
   theme: lightTheme,
-  toggleDarkMode: () => null,
+  setTheme: () => null,
 })
 
 export default ThemeModeContext

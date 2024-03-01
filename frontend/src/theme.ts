@@ -1,5 +1,5 @@
 import { green, red, yellow } from '@mui/material/colors'
-import { createTheme, ThemeOptions } from '@mui/material/styles'
+import { createTheme, Theme, ThemeOptions } from '@mui/material/styles'
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -36,6 +36,11 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
       disableElevation: true,
     },
   },
+}
+
+export interface ThemeKey {
+  key: string
+  theme: Theme
 }
 
 export const lightTheme = createTheme({
@@ -234,3 +239,21 @@ export const darkTheme = createTheme({
     },
   },
 })
+
+export const ThemeNames = {
+  Light: 'light',
+  Dark: 'dark',
+} as const
+
+const lightThemeKey = {
+  key: ThemeNames.Light,
+  theme: lightTheme,
+  title: 'Light',
+}
+const darkThemeKey = {
+  key: ThemeNames.Dark,
+  theme: darkTheme,
+  title: 'Dark',
+}
+
+export const themeList = [lightThemeKey, darkThemeKey]
