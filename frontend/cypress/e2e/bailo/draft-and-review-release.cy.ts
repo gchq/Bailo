@@ -52,7 +52,7 @@ describe('Draft and review a model release', () => {
     cy.log('Navigating to the release page')
     cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
-    cy.contains('Ready for review')
+    cy.get('[data-test=releaseReviewDialog]').should('be.visible')
     cy.log('Clicking the review button')
     cy.get('[data-test=reviewButton]').click({ force: true })
     // eslint-disable-next-line cypress/no-unnecessary-waiting
