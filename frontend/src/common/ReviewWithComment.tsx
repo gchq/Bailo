@@ -112,7 +112,7 @@ export default function ReviewWithComment({
       {(isReviewsLoading || isModelRolesLoading) && <Loading />}
       <Dialog fullWidth open={open} onClose={onClose} data-test='releaseReviewDialog'>
         <DialogTitle>{title}</DialogTitle>
-        <DialogContent>
+        <DialogContent data-test='releaseReviewDialogContent'>
           {modelRoles.length === 0 && (
             <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>
           )}
