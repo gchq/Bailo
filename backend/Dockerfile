@@ -21,6 +21,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm install --omit=dev --cache=/cache/npm
 
+COPY python-docs .
 COPY --from=installer /app/config config
 COPY --from=installer /app/dist .
 

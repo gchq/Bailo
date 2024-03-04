@@ -204,6 +204,23 @@ export const schemaInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+export const inferenceInterfaceSchema = z.object({
+  modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
+  image: z.string().openapi({ example: 'yolov4' }),
+  tag: z.string().openapi({ example: 'latest' }),
+
+  description: z.string().openapi({ example: 'A deployment for running Yolo V4 in Bailo' }),
+
+  settings: z.object({
+    processorType: z.string().openapi({ example: 'cpu' }),
+    memory: z.number().optional().openapi({ example: 4 }),
+    port: z.number().openapi({ example: 8080 }),
+  }),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
 export const userTokenSchema = z.object({
   description: z.string().openapi({ example: 'user token' }),
 
