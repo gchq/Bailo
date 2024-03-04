@@ -1,0 +1,16 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > inferencing > getInference > 200 > ok 1`] = `
+{
+  "inference": {
+    "_id": "test",
+  },
+}
+`;
+
+exports[`routes > inferencing > getInference > audit > expected call 1`] = `
+{
+  "_id": "test",
+  "toObject": [MockFunction spy],
+}
+`;

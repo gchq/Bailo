@@ -113,6 +113,15 @@ export interface Config {
     registry: {
       host: string
     }
+
+    inference: {
+      enabled: boolean
+      connection: {
+        host: string
+      }
+
+      gpus: { [key: string]: string }
+    }
   }
 
   session: {

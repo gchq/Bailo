@@ -24,6 +24,10 @@ import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultip
 import { getModel } from './routes/v2/model/getModel.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
+import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
+import { getInferences } from './routes/v2/model/inferencing/getInferenceServices.js'
+import { postInference } from './routes/v2/model/inferencing/postInferenceService.js'
+import { putInference } from './routes/v2/model/inferencing/putInferenceService.js'
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
 import { getModelCardRevisions } from './routes/v2/model/modelcard/getModelCardRevisions.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
@@ -139,6 +143,11 @@ server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
+
+server.get('/api/v2/model/:modelId/inferences', ...getInferences)
+server.get('/api/v2/model/:modelId/inference/:image/:tag', ...getInference)
+server.post('/api/v2/model/:modelId/inference', ...postInference)
+server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
 
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
