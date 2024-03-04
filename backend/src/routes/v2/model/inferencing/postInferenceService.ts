@@ -11,9 +11,7 @@ import { parse } from '../../../../utils/validate.js'
 
 export const postInferenceSchema = z.object({
   params: z.object({
-    modelId: z.string({
-      required_error: 'Must specify model id as param',
-    }),
+    modelId: z.string(),
   }),
   body: z.object({
     image: z.string(),

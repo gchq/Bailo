@@ -13,6 +13,58 @@ exports[`services > inference > getInferenceByModel > good 1`] = `
 ]
 `;
 
+exports[`services > inference > getInferenceByModel > good 2`] = `
+[
+  {
+    "image": "nginx",
+    "tag": "latest",
+  },
+  {
+    "image": "yolov4",
+    "tag": "latest",
+  },
+]
+`;
+
+exports[`services > inference > getInferenceByModel > no 1`] = `
+[
+  {
+    "image": "nginx",
+    "tag": "latest",
+  },
+  {
+    "image": "yolov4",
+    "tag": "latest",
+  },
+]
+`;
+
+exports[`services > inference > getInferenceByModel > no model 1`] = `
+[
+  {
+    "image": "nginx",
+    "tag": "latest",
+  },
+  {
+    "image": "yolov4",
+    "tag": "latest",
+  },
+]
+`;
+
+exports[`services > inference > getInferenceByModel > noModel 1`] = `
+[
+  {
+    "image": "nginx",
+    "tag": "latest",
+  },
+  {
+    "image": "yolov4",
+    "tag": "latest",
+  },
+]
+`;
+
 exports[`services > release > getModelReleases > good 1`] = `
 [
   {

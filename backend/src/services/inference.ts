@@ -10,6 +10,11 @@ import { listModelImages } from './registry.js'
 
 export async function getInferenceByImage(user: UserInterface, modelId: string, image: string, tag: string) {
   const model = await getModelById(user, modelId)
+  const auth = await authorisation.model(user, model, ModelAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
+
   const inference = await Inference.findOne({
     modelId,
     image,
@@ -20,18 +25,14 @@ export async function getInferenceByImage(user: UserInterface, modelId: string, 
     throw NotFound(`The requested inferencing service was not found.`, { modelId, image, tag })
   }
 
-  const auth = await authorisation.model(user, model, ModelAction.View)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId })
-  }
   return inference
 }
 
 export async function getInferencesByModel(user: UserInterface, modelId: string) {
   const model = await getModelById(user, modelId)
-
-  if (!model) {
-    throw NotFound(`The requested model was not found.`, { modelId })
+  const auth = await authorisation.model(user, model, ModelAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
   const inferences = await InferenceModel.find({ modelId })

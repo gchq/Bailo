@@ -1,3 +1,4 @@
+import { MongoServerError } from 'mongodb'
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
@@ -71,6 +72,25 @@ describe('services > inference', () => {
       createInference(mockUser, 'test', { image: 'non-existent', tag: 'image' } as any),
     ).rejects.toThrowError(/^Image non-existent:image was not found on this model./)
   })
+
+  test('createInference > bad authorisation', async () => {
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+
+    expect(() => createInference({} as any, 'modelId', inference)).rejects.toThrowError(/^You do not have permission/)
+  })
+
+  test('createInference > existing service', async () => {
+    const mongoError = new MongoServerError({})
+    mongoError.code = 11000
+    mongoError.keyValue = {
+      mockKey: 'mockValue',
+    }
+    inferenceModelMocks.save.mockRejectedValueOnce(mongoError)
+    expect(() => createInference({} as any, 'test', inference)).rejects.toThrowError(
+      /^A service with this image already exists./,
+    )
+  })
+
   test('updateInference > success', async () => {
     await updateInference({} as any, 'test', 'nginx', 'latest', {
       description: 'New description',
@@ -82,6 +102,36 @@ describe('services > inference', () => {
     })
     expect(inferenceModelMocks.findOneAndUpdate).toBeCalled()
   })
+
+  test('updateInference > inference not found', async () => {
+    vi.mocked(inferenceModelMocks.findOneAndUpdate).mockResolvedValueOnce()
+    expect(() =>
+      updateInference({} as any, 'test', 'non-existent', 'image', {
+        description: 'New description',
+        settings: {
+          port: 8000,
+          memory: 4,
+          processorType: 'cpu',
+        },
+      }),
+    ).rejects.toThrowError(/^The requested inference service was not found./)
+  })
+
+  test('updateInference > bad authorisation', async () => {
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+
+    expect(() =>
+      updateInference({} as any, 'test', 'nginx', 'latest', {
+        description: 'New description',
+        settings: {
+          port: 8000,
+          memory: 4,
+          processorType: 'cpu',
+        },
+      }),
+    ).rejects.toThrowError(/^You do not have permission/)
+  })
+
   test('getInferenceByImage > good', async () => {
     await getInferenceByImage({} as any, 'test', 'nginx', 'latest')
     expect(inferenceModelMocks.findOne).toBeCalled()
@@ -95,19 +145,18 @@ describe('services > inference', () => {
       success: false,
       id: '',
     })
-    expect(() => getInferenceByImage({} as any, 'test', 'non-existant', 'image')).rejects.toThrowError(
+    expect(() => getInferenceByImage({} as any, 'test', 'nginx', 'latest')).rejects.toThrowError(
       /^You do not have permission to view this inference./,
     )
   })
   test('getInferenceByImage > no inference', async () => {
     inferenceModelMocks.findOne.mockResolvedValueOnce(undefined)
-    expect(() => getInferenceByImage({} as any, 'test', 'non-existent', 'image')).rejects.toThrowError(
+    expect(() => getInferenceByImage({} as any, 'test', 'nginx', 'latest')).rejects.toThrowError(
       /^The requested inferencing service was not found./,
     )
   })
 
   test('getInferenceByModel > good', async () => {
-    modelMocks.getModelById.mockResolvedValue('modelId')
     inferenceModelMocks.find.mockResolvedValue([
       { image: 'nginx', tag: 'latest' },
       { image: 'yolov4', tag: 'latest' },
@@ -115,5 +164,11 @@ describe('services > inference', () => {
 
     const inference = await getInferencesByModel({} as any, 'modelId')
     expect(inference).toMatchSnapshot()
+  })
+
+  test('getInferenceByModel > bad authorisation', async () => {
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+
+    expect(() => getInferencesByModel({} as any, 'modelId')).rejects.toThrowError(/^You do not have permission/)
   })
 })
