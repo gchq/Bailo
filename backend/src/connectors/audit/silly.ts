@@ -8,6 +8,7 @@ import { ReleaseDoc } from '../../models/Release.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
+import { UserSettingsInterface } from '../../models/UserSettings.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../types/error.js'
 import { BaseAuditConnector } from './Base.js'
@@ -36,6 +37,8 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateUserToken(_req: Request, _token: TokenDoc) {}
   onViewUserTokens(_req: Request, _tokens: TokenDoc[]) {}
   onDeleteUserToken(_req: Request, _accessKey: string) {}
+  onViewUserSettings(_req: Request) {}
+  onUpdateUserSettings(_req: Request, _userSettings: UserSettingsInterface) {}
   onCreateAccessRequest(_req: Request, _accessRequest: AccessRequestDoc) {}
   onViewAccessRequest(_req: Request, _accessRequest: AccessRequestDoc) {}
   onUpdateAccessRequest(_req: Request, _accessRequest: AccessRequestDoc) {}

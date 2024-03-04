@@ -1,14 +1,13 @@
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import CssBaseline from '@mui/material/CssBaseline'
-import { ThemeProvider, useTheme } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Head from 'next/head'
 import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import { lightTheme, themeList } from 'src/theme'
 
 import { useGetCurrentUser } from '../actions/user'
 import Banner from './Banner'
@@ -69,12 +68,7 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
   }
 
   return (
-    <ThemeProvider
-      theme={
-        themeList.find((e) => typeof window !== 'undefined' && e.key === localStorage.getItem('user_theme'))?.theme ||
-        lightTheme
-      }
-    >
+    <>
       <Head>
         <title>{`${title} :: Bailo`}</title>
       </Head>
@@ -130,6 +124,6 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
           </Box>
         </Box>
       </Box>
-    </ThemeProvider>
+    </>
   )
 }

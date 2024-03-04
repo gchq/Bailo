@@ -373,3 +373,8 @@ export type ReviewRequestInterface = {
   createdAt: string
   updatedAt: string
 } & PartialReviewRequestInterface
+
+export interface UserSettings {
+  dn: string
+  theme: string
+}

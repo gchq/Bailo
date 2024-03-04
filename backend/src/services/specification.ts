@@ -225,6 +225,14 @@ export const userInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+export const userSettingsSchema = z.object({
+  dn: z.string().openapi({ example: 'user' }),
+  theme: z.string().openapi('light'),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
 export const webhookInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'webhook-zyxwvu' }),
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),

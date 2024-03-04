@@ -1,20 +1,17 @@
 import { Container, Grid, Stack } from '@mui/material'
 import Typography from '@mui/material/Typography'
-import { useContext, useMemo } from 'react'
-import ThemeModeContext from 'src/contexts/themeModeContext'
+import { useMemo } from 'react'
 import ExampleDisplay from 'src/settings/display/ExampleDisplay'
 import { themeList } from 'src/theme'
 
 export default function DisplayTab() {
-  const { setTheme } = useContext(ThemeModeContext)
-
   const themes = useMemo(() => {
     return themeList.map((theme) => (
       <Grid item key={theme.key}>
-        <ExampleDisplay theme={theme} setTheme={setTheme} />
+        <ExampleDisplay theme={theme} />
       </Grid>
     ))
-  }, [setTheme])
+  }, [])
 
   return (
     <Container maxWidth='md'>

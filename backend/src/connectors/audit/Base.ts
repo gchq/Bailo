@@ -7,6 +7,7 @@ import { ReleaseDoc } from '../../models/Release.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
+import { UserSettingsInterface } from '../../models/UserSettings.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../types/error.js'
 
@@ -47,6 +48,13 @@ export const AuditInfo = {
   CreateUserToken: { typeId: 'CreateUserToken', description: 'Token Created', auditKind: AuditKind.Create },
   ViewUserTokens: { typeId: 'ViewUserToken', description: 'Token Viewed', auditKind: AuditKind.View },
   DeleteUserToken: { typeId: 'DeleteUserToken', description: 'Token Deleted', auditKind: AuditKind.Delete },
+
+  ViewUserSettings: { typeId: 'ViewUserSettings', description: 'View Settings Updated', auditKind: AuditKind.View },
+  UpdateUserSettings: {
+    typeId: 'UpdateUserSettings',
+    description: 'User Settings Updated',
+    auditKind: AuditKind.Update,
+  },
 
   CreateAccessRequest: {
     typeId: 'CreateAccessRequest',
@@ -115,6 +123,9 @@ export abstract class BaseAuditConnector {
   abstract onCreateUserToken(req: Request, token: TokenDoc)
   abstract onViewUserTokens(req: Request, tokens: TokenDoc[])
   abstract onDeleteUserToken(req: Request, accessKey: string)
+
+  abstract onViewUserSettings(req: Request, userSettings: UserSettingsInterface)
+  abstract onUpdateUserSettings(req: Request, userSettings: UserSettingsInterface)
 
   abstract onCreateAccessRequest(req: Request, accessRequest: AccessRequestDoc)
   abstract onViewAccessRequest(req: Request, accessRequest: AccessRequestDoc)

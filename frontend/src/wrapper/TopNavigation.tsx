@@ -96,8 +96,8 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
         top: 'unset',
         background:
           theme.palette.mode === 'light'
-            ? 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)'
-            : '#242424',
+            ? `linear-gradient(276deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`
+            : `${theme.palette.background}`,
       }}
     >
       <Toolbar
