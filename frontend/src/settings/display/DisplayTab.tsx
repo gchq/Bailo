@@ -7,7 +7,7 @@ import { themeList } from 'src/theme'
 export default function DisplayTab() {
   const themes = useMemo(() => {
     return themeList.map((theme) => (
-      <Grid item key={theme.key}>
+      <Grid item xs={12} sm={6} key={theme.key}>
         <ExampleDisplay theme={theme} />
       </Grid>
     ))
@@ -17,7 +17,9 @@ export default function DisplayTab() {
     <Container maxWidth='md'>
       <Stack spacing={2}>
         <Typography fontWeight='bold'>Theme</Typography>
-        <Stack spacing={1}>{themes}</Stack>
+        <Grid container spacing={1}>
+          {themes}
+        </Grid>
       </Stack>
     </Container>
   )

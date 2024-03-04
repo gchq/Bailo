@@ -7,6 +7,7 @@ import { ReleaseDoc } from '../../models/Release.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
+import { UserSettingsInterface } from '../../models/UserSettings.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { BailoError } from '../../types/error.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
@@ -271,6 +272,22 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     const event = this.generateEvent(req, {
       modelId,
       images: images.map((image) => ({ repository: image.repository, name: image.name })),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  onViewUserSettings(req: Request, userSettings: UserSettingsInterface) {
+    this.checkEventType(AuditInfo.ViewUserSettings, req)
+    const event = this.generateEvent(req, {
+      userSettings,
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  onUpdateUserSettings(req: Request, userSettings: UserSettingsInterface) {
+    this.checkEventType(AuditInfo.ViewUserSettings, req)
+    const event = this.generateEvent(req, {
+      userSettings,
     })
     req.log.info(event, req.audit.description)
   }

@@ -18,7 +18,14 @@ export default function ExampleDisplay({ theme }: ExampleDisplayProps) {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ border: 'solid 1px', backgroundColor: theme.theme.palette.container.main }}>
+      <Box
+        sx={{
+          borderStyle: 'solid',
+          borderWidth: '1px',
+          borderColor: theme.theme.palette.primary.main,
+          backgroundColor: theme.theme.palette.background.default,
+        }}
+      >
         <Button sx={{ color: theme.theme.palette.primary.main, width: '100%' }} onClick={setTheme}>
           {theme.key}
         </Button>
