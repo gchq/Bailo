@@ -137,8 +137,8 @@ export interface Config {
   instrumentation: {
     enabled: boolean
     serviceName: string
-    tracesEndpoint: string
-    tracesAuthenticationToken: string
+    endpoint: string
+    authenticationToken: string
   }
 }
 

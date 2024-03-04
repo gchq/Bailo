@@ -10,13 +10,13 @@ import config from './src/utils/config.js'
 if (config.instrumentation.enabled) {
   const sdk = new NodeSDK({
     traceExporter: new OTLPTraceExporter({
-      url: `${config.instrumentation.tracesEndpoint}/v1/traces`,
-      headers: { Authorization: `Bearer ${config.instrumentation.tracesAuthenticationToken}` },
+      url: `${config.instrumentation.endpoint}/v1/traces`,
+      headers: { Authorization: `Bearer ${config.instrumentation.authenticationToken}` },
     }),
     logRecordProcessor: new logs.SimpleLogRecordProcessor(
       new OTLPLogExporter({
-        url: `${config.instrumentation.tracesEndpoint}/v1/logs`,
-        headers: { Authorization: `Bearer ${config.instrumentation.tracesAuthenticationToken}` },
+        url: `${config.instrumentation.endpoint}/v1/logs`,
+        headers: { Authorization: `Bearer ${config.instrumentation.authenticationToken}` },
       }),
     ),
     instrumentations: [

@@ -256,3 +256,6 @@ connectors:
 
   authorisation:
     kind: 'basic'
+
+instrumentation:
+  enabled: false
