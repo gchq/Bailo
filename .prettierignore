@@ -8,8 +8,8 @@ frontend/.next
 frontend/dist
 frontend/node_modules
 infrastructure
-lib/python-beta/docs/pylint.md
+lib/python/docs/pylint.md
 node_modules
 .dockerignore
-lib/python-beta/docs/_build
+lib/python/docs/_build
 backend/coverage
