@@ -2,9 +2,9 @@
 
 exports[`utils > error > GenericError 1`] = `
 "{
-    \\"code\\": 999,
-    \\"context\\": {
-        \\"example\\": \\"context\\"
+    "code": 999,
+    "context": {
+        "example": "context"
     }
 }"
 `;
