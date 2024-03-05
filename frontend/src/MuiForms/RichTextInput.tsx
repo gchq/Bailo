@@ -12,6 +12,7 @@ interface RichTextInputProps {
   disabled?: boolean
   readOnly?: boolean
   id: string
+  rawErrors?: string[]
 }
 
 export default function RichTextInput({
@@ -22,6 +23,7 @@ export default function RichTextInput({
   required,
   disabled,
   id,
+  rawErrors,
 }: RichTextInputProps) {
   const theme = useTheme()
 
@@ -46,17 +48,20 @@ export default function RichTextInput({
   }
 
   return (
-    <RichTextEditor
-      value={value}
-      onChange={onChange}
-      textareaProps={{ disabled: disabled, id: id }}
-      label={
-        <Typography fontWeight='bold'>
-          {label}
-          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-        </Typography>
-      }
-      key={label}
-    />
+    <>
+      <RichTextEditor
+        value={value}
+        onChange={onChange}
+        textareaProps={{ disabled: disabled, id: id }}
+        errors={rawErrors}
+        label={
+          <Typography fontWeight='bold'>
+            {label}
+            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+          </Typography>
+        }
+        key={label}
+      />
+    </>
   )
 }

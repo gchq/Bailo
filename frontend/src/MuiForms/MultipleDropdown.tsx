@@ -12,6 +12,7 @@ interface MultipleDropdownProps {
   onChange: (newValue: string[]) => void
   InputProps?: any
   options: { enumOptions?: { label: string; value: string }[] }
+  rawErrors?: string[]
 }
 
 export default function MultipleDropdown({
@@ -21,6 +22,7 @@ export default function MultipleDropdown({
   onChange,
   options,
   required,
+  rawErrors,
 }: MultipleDropdownProps) {
   const theme = useTheme()
 
@@ -72,6 +74,7 @@ export default function MultipleDropdown({
               label='Select an option below'
               size='small'
               placeholder={value.length ? undefined : 'Unanswered'}
+              error={rawErrors && rawErrors.length > 0}
             />
           )}
         />
