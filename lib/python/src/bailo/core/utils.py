@@ -11,3 +11,29 @@ def filter_none(json: dict[str, Any]) -> dict[str, Any]:
     """
     res = {k: v for k, v in json.items() if v is not None}
     return res
+
+
+class NestedDict(dict):
+    def __getitem__(self,keytuple):
+        # if key is not a tuple then access as normal
+        if not isinstance(keytuple, tuple):
+            return super(NestedDict,self).__getitem__(keytuple)
+        d = self
+        for key in keytuple:
+            d = d[key]
+        return d
+    def __setitem__(self, keytuple, item):
+        # if key is not a tuple then access as normal
+        if not isinstance(keytuple, tuple):
+            return super(NestedDict,self).__setitem__(keytuple, item)
+        d = self
+        for index, key in enumerate(keytuple):
+            if index != len(keytuple) - 1:
+                try:
+                    d = d[key]
+                except:
+                    d[key] = {}
+                    d = d[key]
+
+            else:
+                d[key] = item
