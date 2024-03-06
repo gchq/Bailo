@@ -33,6 +33,7 @@
     "@uiw/react-md-editor": "^3.23.5",
     "axios": "^1.6.0",
     "clsx": "^2.1.0",
+    "cypress-pipe": "^2.0.0",
     "dayjs": "^1.11.10",
     "is-docker": "^3.0.0",
     "jsonschema": "^1.4.1",

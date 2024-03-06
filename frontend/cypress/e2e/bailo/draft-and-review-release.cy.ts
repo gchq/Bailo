@@ -1,6 +1,12 @@
+import 'cypress-pipe'
+
 let modelUuidForRelease = ''
 const modelNameForRelease = 'Test Model'
 const releaseVersion = '1.0.0'
+
+const click = ($el) => {
+  return $el.click()
+}
 
 describe('Draft and review a model release', () => {
   before(() => {
@@ -53,13 +59,13 @@ describe('Draft and review a model release', () => {
     cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
     cy.log('Clicking the review button')
-    cy.get('[data-test=reviewButton]').should('be.visible').click({ force: true })
+    cy.get('[data-test=reviewButton]').should('be.visible').pipe(click)
     cy.log('Creating a "requesting changes" review')
     cy.get('[data-test=reviewWithCommentDialogContent]').should('be.visible')
     cy.get('[data-test=reviewWithCommentTextField]').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton]').click()
     cy.log('Approving a release')
-    cy.get('[data-test=reviewButton]').should('be.visible').click({ force: true })
+    cy.get('[data-test=reviewButton]').should('be.visible').pipe(click)
     cy.get('[data-test=reviewWithCommentDialogContent]').should('be.visible')
     cy.get('[data-test=approveReviewButton]').click()
 
