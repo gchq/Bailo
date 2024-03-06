@@ -114,7 +114,14 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
           <ReviewIcon />
           <Typography>Ready for review</Typography>
         </Stack>
-        <Button variant='outlined' color='inherit' size='small' onClick={handleReviewOpen} data-test='reviewButton'>
+        <Button
+          variant='outlined'
+          color='inherit'
+          size='small'
+          onClick={handleReviewOpen}
+          data-test='reviewButton'
+          disabled={isReviewOpen}
+        >
           Review
         </Button>
       </Stack>
