@@ -139,11 +139,11 @@ export default function TokenTabs({ token }: TokenTabProps) {
           </List>
           <Container sx={{ my: 2 }}>
             {tokenCategory === 'personal access' && <PersonalAccessToken token={token} />}
-            {tokenCategory === 'kubernetes' && <KubernetesSecret />}
+            {tokenCategory === 'kubernetes' && <KubernetesSecret token={token} />}
             {tokenCategory === 'rocket' && <RocketConfig token={token} />}
             {tokenCategory === 'podman' && <PodmanLogin token={token} />}
             {tokenCategory === 'docker-log' && <DockerLogin token={token} />}
-            {tokenCategory === 'docker-config' && <DockerConfig />}
+            {tokenCategory === 'docker-config' && <DockerConfig token={token} />}
           </Container>
         </Stack>
       </Box>
