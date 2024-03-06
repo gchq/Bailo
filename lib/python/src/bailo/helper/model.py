@@ -6,8 +6,15 @@ from bailo.core.client import Client
 from bailo.core.enums import ModelVisibility
 from bailo.helper.release import Release
 from bailo.core.exceptions import BailoException
+from bailo.core.utils import NestedDict
+
 from semantic_version import Version
 
+try:
+    import mlflow
+    ml_flow = 1
+except:
+    ml_flow = 0
 
 class Model:
     """Represent a model within Bailo.
@@ -150,6 +157,11 @@ class Model:
         res = self.client.get_model_card(model_id=self.model_id, version=version)
         self.__unpack_mc(res["modelCard"])
 
+    def create_experiment(
+        self,
+    ) -> Experiment:
+        return Experiment.create(model=self)
+
     def create_release(
         self,
         version: Version | str,
@@ -263,3 +275,126 @@ class Model:
             self.model_card = res["metadata"]
         except KeyError:
             self.model_card = None
+
+
+
+class Experiment:
+    """Represent an experiment locally.
+
+    :param model: A Bailo model object which the experiment is being run on
+    :param raw: Raw information about the experiment runs
+    """    
+    def __init__(
+        self,
+        model: Model,
+    ):
+        self.model = model
+        self.raw = []
+
+    @classmethod
+    def create(
+        cls,
+        model: Model,
+    ) -> Experiment:
+        """Create an experiment locally.
+
+        :param model: A Bailo model object which the experiment is being run on
+        :return: Experiment object
+        """        
+        
+        return cls(model=model)
+
+    def start_run(self):
+        """Starts a new experiment run.
+        """        
+        try:
+            self.run = self.run + 1
+        except:
+            self.run = 0
+
+        self.run_data = {
+            "run": self.run,
+            "params": [],
+            "metrics": [],
+            "artifacts": [],
+            "dataset": ""
+        }
+
+        self.raw.append(self.run_data)
+
+        print(f"Bailo tracking run {self.run}.")
+
+    def log_params(self, params: dict[str, Any]):
+        """Logs parameters to the current run.
+
+        :param params: Dictionary of parameters to be logged
+        """        
+        self.run_data["params"].append(params)
+
+    def log_metrics(self, metrics: dict[str, Any]):
+        """Logs metrics to the current run.
+
+        :param metrics: Dictionary of metrics to be logged
+        """        
+        self.run_data["metrics"].append(metrics)
+
+    def log_artifacts(self, artifacts: dict[str, Any]):
+        """Logs artifacts to the current run.
+
+        :param artifacts: A dictionary of artifacts to be logged
+        """        
+        self.run_data["artifiacts"].append(artifacts)
+
+    def log_dataset(self, dataset: str):
+        """Logs a dataset to the current run.
+
+        :param dataset: Arbitrary title of dataset
+        """        
+        self.run_data["dataset"] = dataset
+
+    def from_mlflow(self, tracking_uri: str, experiment_id: str):
+        """Imports information from an MLFlow Tracking experiment.
+
+        :param tracking_uri: MLFlow Tracking server URI
+        :param experiment_id: MLFlow Tracking experiment ID
+        :raises ImportError: Import error if MLFlow not installed
+        """        
+        if ml_flow == 1:
+            client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
+            runs = client.search_runs(experiment_id)
+
+            for run in runs:
+                self.start_run()
+                data = run.data
+                self.log_params(data.params)
+                self.log_metrics(data.metrics)
+        else:
+            raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
+
+
+    def publish(self, mc_loc: str, run_id: str):
+        """Publishes a given experiments results to the model card.
+
+        :param mc_loc: Location of metrics in the model card (e.g. performance.performanceMetrics)
+        :param run_id: Local experiment run ID to be selected
+
+        ..note:: mc_loc is dependent on the model card schema being used
+        """        
+        mc = self.model.model_card
+        mc = NestedDict(mc)
+
+        for run in self.raw:
+            if run["run"] == run_id:
+                sel_run = run
+            else:
+                continue
+
+        values = []
+
+        for metric in sel_run['metrics']:
+            for k, v in metric.items():
+                values.append({"name": k, "value": v})
+
+        parsed_values = [{'dataset': sel_run['dataset'], 'datasetMetrics': values}]
+        mc[tuple(mc_loc.split('.'))] = parsed_values
+        self.model.update_model_card(model_card=mc)
