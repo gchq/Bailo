@@ -59,9 +59,9 @@ describe('Draft and review a model release', () => {
     cy.get('[data-test=reviewWithCommentTextField]').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton]').click()
     cy.log('Approving a release')
-    cy.get('[data-test=reviewButton]').click()
+    cy.get('[data-test=reviewButton]').parent().click()
     cy.get('[data-test=releaseReviewDialogContent]').should('be.visible')
-    cy.get('[data-test=approveReviewButton]').parent().click()
+    cy.get('[data-test=approveReviewButton]').click()
 
     cy.log('Checking that we can see both review states')
     cy.contains('requested changes')
