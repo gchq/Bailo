@@ -60,8 +60,8 @@ describe('Draft and review a model release', () => {
     cy.get('[data-test=requestChangesReviewButton]').click()
     cy.log('Approving a release')
     cy.get('[data-test=reviewButton]').click({ force: true })
-    //cy.contains('Release Review')
-    cy.get('[data-test=approveReviewButton').click()
+    cy.get('[data-test=releaseReviewDialogContent]').should('be.visible')
+    cy.get('[data-test=approveReviewButton]').click()
 
     cy.log('Checking that we can see both review states')
     cy.contains('requested changes')
