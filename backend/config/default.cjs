@@ -93,7 +93,6 @@ module.exports = {
   },
 
   oauth: {
-    enabled: false,
     provider: 'cognito',
 
     grant: {

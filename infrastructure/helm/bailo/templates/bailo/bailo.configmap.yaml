@@ -150,7 +150,6 @@ data:
       },
 
       oauth: {
-        enabled: {{ .Values.oauth.enabled }},
         provider: 'cognito',
 
         grant: {
@@ -169,6 +168,8 @@ data:
             subdomain: '{{ .Values.oauth.cognito.subdomain }}',
           },
         },
+        userPoolId: '{{ .Values.oauth.cognito.userPoolId }}',
+        userIdAttribute: '{{ .Values.oauth.cognito.userIdAttribute }}'
       },
 
       // These settings are PUBLIC and shared with the UI
