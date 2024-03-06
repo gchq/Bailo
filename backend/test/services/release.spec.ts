@@ -170,6 +170,19 @@ describe('services > release', () => {
     expect(releaseModelMocks.save).not.toBeCalled()
   })
 
+  test('createRelease > release with bad semver', async () => {
+    const result = createRelease(
+      {} as any,
+      {
+        semver: 'bad semver',
+        modelCardVersion: 999,
+      } as any,
+    )
+    expect(result).rejects.toThrowError(/is not a valid semver value./)
+
+    expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
   test('createRelease > bad authorisation', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
     modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
