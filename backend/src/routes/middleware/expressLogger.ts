@@ -15,10 +15,13 @@ const morganLog = promisify(
         'response-time': tokens['response-time'](req, res),
         status: tokens.status(req, res),
         'content-length': tokens.res(req, res, 'content-length'),
+        user: req.user,
       }
       req.log.trace(
         info,
-        `${info.method} ${info.url} ${info.status} ${info['response-time']}ms - ${info['content-length']}`,
+        `${info.method} ${info.url} ${info.status} ${info['response-time']}ms${
+          info['content-length'] ? ` - ${info['content-length']}` : ''
+        }`,
       )
 
       return ''

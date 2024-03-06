@@ -168,8 +168,17 @@ data:
             subdomain: '{{ .Values.oauth.cognito.subdomain }}',
           },
         },
-        userPoolId: '{{ .Values.oauth.cognito.userPoolId }}',
-        userIdAttribute: '{{ .Values.oauth.cognito.userIdAttribute }}'
+        cognito: {
+          identityProviderClient: {
+            region: 'eu-west-2',
+            credentials: {
+              accessKeyId: '{{ .Values.oauth.identityProviderClient.accessKeyId }}',
+              secretAccessKey: '{{ .Values.oauth.identityProviderClient.secretAccessKey }}',
+            },
+          },
+          userPoolId: '{{ .Values.oauth.identityProviderClient.userPoolId }}',
+          userIdAttribute: '{{ .Values.oauth.identityProviderClient.userIdAttribute }}',
+        },
       },
 
       // These settings are PUBLIC and shared with the UI
