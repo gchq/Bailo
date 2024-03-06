@@ -2,12 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
-import audit from '../../../connectors/v2/audit/index.js'
-import { searchModels } from '../../../services/v2/model.js'
-import { registerPath } from '../../../services/v2/specification.js'
-import { GetModelFilters } from '../../../types/v2/enums.js'
-import { coerceArray, parse } from '../../../utils/v2/validate.js'
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
+import { searchModels } from '../../../services/model.js'
+import { registerPath } from '../../../services/specification.js'
+import { GetModelFilters } from '../../../types/enums.js'
+import { coerceArray, parse } from '../../../utils/validate.js'
 
 export const getModelsSearchSchema = z.object({
   query: z.object({

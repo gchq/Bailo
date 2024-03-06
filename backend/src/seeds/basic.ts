@@ -1,8 +1,8 @@
 import { ObjectId } from 'mongodb'
 
-import AccessRequestModel from '../models/v2/AccessRequest.js'
-import ModelModel from '../models/v2/Model.js'
-import ReleaseModel from '../models/v2/Release.js'
+import AccessRequestModel from '../models/AccessRequest.js'
+import ModelModel from '../models/Model.js'
+import ReleaseModel from '../models/Release.js'
 import { accessRequest as baseAccessRequest, model as baseModel, release as baseRelease } from './data/models.js'
 import { seed } from './index.js'
 

@@ -88,19 +88,30 @@ export default function PageWithTabs({
         variant='scrollable'
       >
         {tabs.map((tab: PageTab) => {
-          return (
-            <Tab
-              key={tab.title}
-              disabled={tab.disabled}
-              value={tab.path}
-              data-test={`${tab.path}Tab`}
-              label={
-                <Tooltip title={tab.disabledText}>
-                  <span>{tab.title}</span>
-                </Tooltip>
-              }
-            />
-          )
+          if (tab.disabled) {
+            return (
+              <Tooltip key={tab.title} title={tab.disabledText}>
+                <span>
+                  <Tab
+                    disabled={tab.disabled}
+                    value={tab.path}
+                    data-test={`${tab.path}Tab`}
+                    label={<span>{tab.title}</span>}
+                  />
+                </span>
+              </Tooltip>
+            )
+          } else {
+            return (
+              <Tab
+                key={tab.title}
+                disabled={tab.disabled}
+                value={tab.path}
+                data-test={`${tab.path}Tab`}
+                label={<span>{tab.title}</span>}
+              />
+            )
+          }
         })}
       </Tabs>
       {tabs.map((tab: PageTab) => {

@@ -1,32 +1,32 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { BasicAuthorisationConnector } from '../../../src/connectors/v2/authorisation/base.js'
-import { ModelDoc } from '../../../src/models/v2/Model.js'
-import { ReleaseDoc } from '../../../src/models/v2/Release.js'
-import { SchemaDoc } from '../../../src/models/v2/Schema.js'
-import { UserDoc } from '../../../src/models/v2/User.js'
+import { BasicAuthorisationConnector } from '../../../src/connectors/authorisation/base.js'
+import { ModelDoc } from '../../../src/models/Model.js'
+import { ReleaseDoc } from '../../../src/models/Release.js'
+import { SchemaDoc } from '../../../src/models/Schema.js'
+import { UserInterface } from '../../../src/models/User.js'
 
 const mockAccessRequestService = vi.hoisted(() => ({
   getModelAccessRequestsForUser: vi.fn(),
 }))
-vi.mock('../../../src/services/v2/accessRequest.js', () => mockAccessRequestService)
+vi.mock('../../../src/services/accessRequest.js', () => mockAccessRequestService)
 
 const mockModelService = vi.hoisted(() => ({}))
-vi.mock('../../../src/services/v2/model.js', () => mockModelService)
+vi.mock('../../../src/services/model.js', () => mockModelService)
 
 const mockReviewService = vi.hoisted(() => ({
   checkAccessRequestsApproved: vi.fn(),
 }))
-vi.mock('../../../src/services/v2/review.js', () => mockReviewService)
+vi.mock('../../../src/services/review.js', () => mockReviewService)
 
 const mockAuthentication = vi.hoisted(() => ({
   getUserModelRoles: vi.fn(() => [] as Array<string>),
   hasRole: vi.fn(),
 }))
-vi.mock('../../../src/connectors/v2/authentication/index.js', async () => ({ default: mockAuthentication }))
+vi.mock('../../../src/connectors/authentication/index.js', async () => ({ default: mockAuthentication }))
 
 describe('connectors > authorisation > base', () => {
-  const user = { dn: 'testUser' } as UserDoc
+  const user = { dn: 'testUser' } as UserInterface
   const model = { id: 'testModel' } as ModelDoc
 
   test('hasApprovedAccessRequest > no access requests for model', async () => {

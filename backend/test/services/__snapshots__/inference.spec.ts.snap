@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > inference > getInferenceByModel > good 1`] = `
+[
+  {
+    "image": "nginx",
+    "tag": "latest",
+  },
+  {
+    "image": "yolov4",
+    "tag": "latest",
+  },
+]
+`;

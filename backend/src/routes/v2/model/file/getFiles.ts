@@ -2,12 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../../connectors/v2/audit/Base.js'
-import audit from '../../../../connectors/v2/audit/index.js'
-import { FileInterface } from '../../../../models/v2/File.js'
-import { getFilesByModel } from '../../../../services/v2/file.js'
-import { fileInterfaceSchema, registerPath } from '../../../../services/v2/specification.js'
-import { parse } from '../../../../utils/v2/validate.js'
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
+import { FileInterface } from '../../../../models/File.js'
+import { getFilesByModel } from '../../../../services/file.js'
+import { fileInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const getFilesSchema = z.object({
   params: z.object({
