@@ -424,6 +424,7 @@ class Client:
         :param json_schema: JSON schema
         :return: JSON response object
         """
+
         return self.agent.post(
             f"{self.url}/v2/schemas",
             json={
@@ -432,7 +433,7 @@ class Client:
                 "description": description,
                 "kind": str(kind),
                 "jsonSchema": json_schema,
-            },
+            }
         ).json()
 
     def get_reviews(
