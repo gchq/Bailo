@@ -18,7 +18,7 @@ const morganLog = promisify(
       }
       req.log.trace(
         info,
-        `${info.method} ${info.url} ${info.status} ${info['response-time']} ms - ${info['content-length']}`,
+        `${info.method} ${info.url} ${info.status} ${info['response-time']}ms - ${info['content-length']}`,
       )
 
       return ''
