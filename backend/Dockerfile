@@ -27,4 +27,4 @@ COPY --from=installer /app/dist .
 ENV NODE_ENV production
 EXPOSE 3001
 
-CMD ["node", "src/index.js"]
+CMD ["node", "--import=./src/instrumentation.js", "src/index.js"]

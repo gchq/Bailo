@@ -5,7 +5,7 @@ import { Resource } from '@opentelemetry/resources'
 import { logs, NodeSDK } from '@opentelemetry/sdk-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
-import config from './src/utils/config.js'
+import config from './utils/config.js'
 
 if (config.instrumentation.enabled) {
   const sdk = new NodeSDK({
