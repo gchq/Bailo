@@ -53,7 +53,7 @@ describe('Draft and review a model release', () => {
     cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
     cy.log('Clicking the review button')
-    cy.get('[data-test=reviewButton]').click()
+    cy.get('[data-test=reviewButton]').parent().click()
     cy.log('Creating a "requesting changes" review')
     cy.get('[data-test=releaseReviewDialogContent]').should('be.visible')
     cy.get('[data-test=reviewWithCommentTextField]').type('This is a comment')
@@ -61,7 +61,7 @@ describe('Draft and review a model release', () => {
     cy.log('Approving a release')
     cy.get('[data-test=reviewButton]').click()
     cy.get('[data-test=releaseReviewDialogContent]').should('be.visible')
-    cy.get('[data-test=approveReviewButton]').click()
+    cy.get('[data-test=approveReviewButton]').parent().click()
 
     cy.log('Checking that we can see both review states')
     cy.contains('requested changes')
