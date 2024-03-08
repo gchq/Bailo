@@ -136,6 +136,15 @@ module.exports = {
     registry: {
       host: 'localhost:8080',
     },
+
+    inference: {
+      enabled: true,
+      connection: {
+        host: 'example.com',
+      },
+
+      gpus: {},
+    },
   },
 
   connectors: {
