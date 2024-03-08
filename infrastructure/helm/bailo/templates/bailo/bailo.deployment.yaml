@@ -58,11 +58,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "bailo.fullname" . }}-apm
                   key: endpoint
-            - name: OTEL_EXPORTER_OTLP_HEADERS
+            - name: OTEL_EXPORTER_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: {{ include "bailo.fullname" . }}-apm
-                  key: auth
+                  key: auth-token
             {{- end }}
           ports:
             - name: http
@@ -181,7 +181,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "bailo.fullname" . }}-apm
-                  key: auth
+                  key: headers
           {{- end }}
           ports:
             - name: http
