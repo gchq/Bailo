@@ -239,6 +239,11 @@ data:
         level: 'trace',
       },
 
+      instrumentation: {
+        enabled: {{ .Values.instrumentation.enabled }},
+        endpoint: '{{ .Values.instrumentation.endpoint }}',
+      },
+
       s3: {
         credentials: {
           accessKeyId: 'OVERWRITTEN_BY_ENVIRONMENT_VARIABLE',
