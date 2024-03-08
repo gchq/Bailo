@@ -1,6 +1,9 @@
-//import CloseIcon from '@mui/icons-material/Close'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 import DownloadIcon from '@mui/icons-material/Download'
-import { Box, Button, DialogContent, Grid, Stack, Typography } from '@mui/material'
+import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { DialogContent, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -18,8 +21,9 @@ type rktConfigProps = {
 export default function RocketConfig({ token }: rktConfigProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [open, setOpen] = useState(false)
+  const [showKeys, setShowKeys] = useState(false)
 
-  function downloadTextFile(text, name) {
+  function downloadOrSaveTextFile(text, name) {
     const a = document.createElement('a')
     const type = name.toLowerCase().split('.').pop()
     a.href = URL.createObjectURL(new Blob([text], { type: `text/${type === 'txt' ? 'plain' : type}` }))
@@ -32,6 +36,15 @@ export default function RocketConfig({ token }: rktConfigProps) {
     if (key === 'password') return `${token.secretKey}`
     return value
   }
+
+  function handleOnChange() {
+    const currentState = open
+    setOpen(!currentState)
+  }
+  const handleToggleKeyVisibility = () => {
+    setShowKeys(!showKeys)
+  }
+
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
@@ -51,34 +64,64 @@ export default function RocketConfig({ token }: rktConfigProps) {
           <Typography>First, download the rkt credentials file for the personal access token:</Typography>
           {/* TODO */}
           <Grid container spacing={0} alignItems='center'>
-            <DownloadIcon color='primary' sx={{ mr: 0.5 }} />
             <Typography
-              onClick={() => downloadTextFile(JSON.stringify([rktConfig], replacer, 2), 'test.yaml')}
-              sx={{ cursor: 'pointer', textDecoration: 'underline' }}
-            >{`<key-name>-auth.yml `}</Typography>
+              onClick={() => downloadOrSaveTextFile(JSON.stringify([rktConfig], replacer, 2), 'test-auth.yaml')}
+              sx={{ cursor: 'pointer' }}
+            >
+              <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
+                <DownloadIcon color='primary' sx={{ mr: 0.5 }} />
+                {`Download <key-name>-auth.yml `}
+              </Stack>
+            </Typography>
           </Grid>
-          <Typography
-            onClick={() => setOpen(true)}
-            sx={{
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              '&:hover': { color: '#000', backgroundColor: '#f1f1f1' },
-            }}
-          >
-            {'View <key-name>-auth.yml'}
-          </Typography>
-          {open && (
-            <CodeSnippetBox>
-              {rktConfigTemplate(`${uiConfig?.registry.host}`, `${token.accessKey}`, `${token.secretKey}`)}
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button onClick={() => setOpen(false)}>Close</Button>
-              </Box>
-            </CodeSnippetBox>
-          )}
+          <Grid container spacing={0} alignItems='center'>
+            <Typography onClick={handleOnChange} sx={{ cursor: 'pointer' }}>
+              <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
+                {open ? (
+                  <Tooltip title='Show less' placement='bottom'>
+                    <ExpandLessIcon color='primary' sx={{ mr: 0.5 }} />
+                  </Tooltip>
+                ) : (
+                  <Tooltip title='Show more' placement='bottom'>
+                    <ExpandMoreIcon color='primary' sx={{ mr: 0.5 }} />
+                  </Tooltip>
+                )}
+                {'View <key-name>-auth.yml'}
+              </Stack>
+            </Typography>
+            {open && (
+              <CodeSnippetBox>
+                {rktConfigTemplate(
+                  `${uiConfig?.registry.host}`,
+                  `${showKeys ? token.accessKey : 'xxxxxxxxxx'}`,
+                  `${showKeys ? token.secretKey : 'xxxxxxxxxxxxxxxxxxxxx'}`,
+                )}
+                <Tooltip title={`${showKeys ? 'Hide' : 'Show'} keys`} placement='top'>
+                  <IconButton
+                    onClick={handleToggleKeyVisibility}
+                    aria-label={`${showKeys ? 'Hide' : 'Show'} keys`}
+                    data-test='toggleKeyVisibilityButton'
+                  >
+                    {showKeys ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </Tooltip>
+              </CodeSnippetBox>
+            )}
+          </Grid>
           <Typography fontWeight='bold'>Step 2: Write to disk</Typography>
           <Typography>Second, place the file in the rkt configuration directory:</Typography>
           {/* TODO */}
-          <Typography>{`mv <key-name>-auth.json /etc/rkt/auth.d/`}</Typography>
+          <Grid container spacing={0} alignItems='center'>
+            <Typography
+              onClick={() => downloadOrSaveTextFile(JSON.stringify([rktConfig], replacer, 2), 'test-auth.json')}
+              sx={{ cursor: 'pointer' }}
+            >
+              <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
+                <DriveFileMoveIcon color='primary' sx={{ mr: 0.5 }} />
+                {`mv <key-name>-auth.json /etc/rkt/auth.d/`}
+              </Stack>
+            </Typography>
+          </Grid>
         </Stack>
       </DialogContent>
     </>

@@ -32,7 +32,6 @@ export default function TokenTabs({ token }: TokenTabProps) {
   const router = useRouter()
   const { tab } = router.query
   const [tokenCategory, setTokenCategory] = useState<TokenCategory>('personal access')
-  // const [kubernetesToken, setKubernetesToken] = useState('')
 
   useEffect(() => {
     if (token) setOpen(true)
@@ -50,14 +49,6 @@ export default function TokenTabs({ token }: TokenTabProps) {
       query: { ...router.query, section: category },
     })
   }
-  // function handleKubernetesTokenOnChange(value: string): void {
-  //   setKubernetesToken(value)
-  // }
-
-  // const handleClose = () => {
-  //   setIsLoading(true)
-  //   router.push('/settings?tab=authentication&category=personal')
-  // }
 
   return (
     <Dialog
