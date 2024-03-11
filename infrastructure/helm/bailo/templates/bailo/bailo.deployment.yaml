@@ -53,21 +53,11 @@ spec:
             - name: MONGO_CONNECTION_URI
               value: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ include "bailo.mongo.host" . }}'
             {{- if .Values.instrumentation.enabled }}
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bailo.fullname" . }}-apm
-                  key: endpoint
             - name: OTEL_EXPORTER_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: {{ include "bailo.fullname" . }}-apm
                   key: auth-token
-            - name: OTEL_LOG_LEVEL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "bailo.fullname" . }}-apm
-                  key: debug
             {{- end }}
           ports:
             - name: http
@@ -187,6 +177,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "bailo.fullname" . }}-apm
                   key: headers
+            - name: OTEL_LOG_LEVEL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-apm
+                  key: debug
           {{- end }}
           ports:
             - name: http
