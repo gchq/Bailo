@@ -2,7 +2,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material'
 import DownloadIcon from '@mui/icons-material/Download'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { DialogContent, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Button, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -55,75 +55,74 @@ export default function KubernetesSecret({ token }: kubeSecretProps) {
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
+
   return (
     <>
       {isUiConfigLoading && <Loading />}
-      <DialogContent sx={{ overflow: 'auto' }}>
-        <Stack spacing={2} direction='column'>
-          <Typography fontWeight='bold'>Step 1: Download Secret</Typography>
-          <Typography>First, download the Kubernetes pull secret for your personal access token.</Typography>
-          <Typography
-            onClick={() => downloadOrSaveTextFile(JSON.stringify([kubeConfig], replacer, 2), 'test-auth.yaml')}
-            sx={{ cursor: 'pointer' }}
-          >
-            <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
-              <DownloadIcon color='primary' sx={{ mr: 0.5 }} />
-              {`Download ${toKebabCase(token.description)}-auth.yml `}
-            </Stack>
-          </Typography>
-          <Typography onClick={handleOnChange} sx={{ cursor: 'pointer' }}>
-            <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
-              {open ? (
-                <Tooltip title='Show less' placement='bottom'>
-                  <ExpandLessIcon color='primary' sx={{ mr: 0.5 }} />
-                </Tooltip>
-              ) : (
-                <Tooltip title='Show more' placement='bottom'>
-                  <ExpandMoreIcon color='primary' sx={{ mr: 0.5 }} />
-                </Tooltip>
-              )}
-              {` View ${toKebabCase(token.description)}-auth.yml `}
-            </Stack>
-          </Typography>
-          {open && (
-            <CodeSnippetBox>
-              {KubernetesSecretsConfigTemplate(
-                `${uiConfig?.registry.host}`,
-                `${showKeys ? token.accessKey : 'xxxxxxxxxx'}`,
-                `${showKeys ? token.secretKey : 'xxxxxxxxxxxxxxxxxxxxx'}`,
-              )}
-              <Tooltip title={`${showKeys ? 'Hide' : 'Show'} keys`} placement='left'>
-                <IconButton
-                  sx={{ position: 'absolute', top: 0, right: 0 }}
-                  onClick={handleToggleKeyVisibility}
-                  aria-label={`${showKeys ? 'Hide' : 'Show'} keys`}
-                  data-test='toggleKeyVisibilityButton'
-                >
-                  {showKeys ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </Tooltip>
-            </CodeSnippetBox>
+      <Stack spacing={2} direction='column' alignItems='flex-start'>
+        <Typography fontWeight='bold'>Step 1: Download Secret</Typography>
+        <Typography>First, download the Kubernetes pull secret for your personal access token.</Typography>
+        <Button
+          onClick={() =>
+            downloadOrSaveTextFile(
+              JSON.stringify([kubeConfig], replacer, 2),
+              `${toKebabCase(token.description)}-auth.yml`,
+            )
+          }
+        >
+          <DownloadIcon color='primary' sx={{ mr: 1 }} />
+          {`Download ${toKebabCase(token.description)}-auth.yml`}
+        </Button>
+        <Button onClick={handleOnChange}>
+          {open ? (
+            <Tooltip title='Show less' placement='bottom'>
+              <ExpandLessIcon color='primary' sx={{ mr: 1 }} />
+            </Tooltip>
+          ) : (
+            <Tooltip title='Show more' placement='bottom'>
+              <ExpandMoreIcon color='primary' sx={{ mr: 1 }} />
+            </Tooltip>
           )}
-          <Typography fontWeight='bold'>Step 2: Submit</Typography>
-          <Typography>Second, submit the secret to the cluster usign this command:</Typography>
-          <TokenCommand
-            disableVisibilityToggle
-            token={token}
-            command={`kubectl create -f ${toKebabCase(token.description)}-secret.yml --namespace=NAMESPACEHERE`}
-          />
-          <Typography fontWeight='bold'>Step 3: Update Kubernetes configuration</Typography>
-          <Typography>
-            Finally, add a reference to the secret to your Kubernetes pod config via an
-            <Grid container spacing={0} alignItems='center'>
-              <Typography sx={{ fontWeight: 'bold' }} mr={0.2} color={'primary'}>
-                imagePullSecrets
-              </Typography>{' '}
-              field. For example:
-            </Grid>
-          </Typography>
-          <CodeSnippetBox>{kubeImagePullSecretsConfigExample(`${toKebabCase(token.description)}`)}</CodeSnippetBox>
-        </Stack>
-      </DialogContent>
+          {`View ${toKebabCase(token.description)}-auth.yml`}
+        </Button>
+        {open && (
+          <CodeSnippetBox>
+            {KubernetesSecretsConfigTemplate(
+              `${uiConfig?.registry.host}`,
+              `${showKeys ? token.accessKey : 'xxxxxxxxxx'}`,
+              `${showKeys ? token.secretKey : 'xxxxxxxxxxxxxxxxxxxxx'}`,
+            )}
+            <Tooltip title={`${showKeys ? 'Hide' : 'Show'} keys`} placement='left'>
+              <IconButton
+                sx={{ position: 'absolute', top: 0, right: 0 }}
+                onClick={handleToggleKeyVisibility}
+                aria-label={`${showKeys ? 'Hide' : 'Show'} keys`}
+                data-test='toggleKeyVisibilityButton'
+              >
+                {showKeys ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </Tooltip>
+          </CodeSnippetBox>
+        )}
+        <Typography fontWeight='bold'>Step 2: Submit</Typography>
+        <Typography>Second, submit the secret to the cluster using this command:</Typography>
+        <TokenCommand
+          disableVisibilityToggle
+          token={token}
+          command={`kubectl create -f ${toKebabCase(token.description)}-secret.yml --namespace=<namespace>`}
+        />
+        <Typography fontWeight='bold'>Step 3: Update Kubernetes configuration</Typography>
+        <Typography>
+          Finally, add a reference to the secret to your Kubernetes pod config via an
+          <Grid container spacing={0} alignItems='center'>
+            <Typography sx={{ fontWeight: 'bold' }} mr={0.2} color={'primary'}>
+              imagePullSecrets
+            </Typography>{' '}
+            field. For example:
+          </Grid>
+        </Typography>
+        <CodeSnippetBox>{kubeImagePullSecretsConfigExample(`${toKebabCase(token.description)}`)}</CodeSnippetBox>
+      </Stack>
     </>
   )
 }

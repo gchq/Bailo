@@ -1,4 +1,4 @@
-import { DialogContent, Grid, Stack, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Loading from 'src/common/Loading'
@@ -20,21 +20,17 @@ export default function DockerLogin({ token }: DockerLoginProps) {
   return (
     <>
       {isUiConfigLoading && <Loading />}
-      <DialogContent sx={{ overflow: 'auto' }}>
-        <Stack spacing={2}>
-          <Typography fontWeight='bold'>1. Run Docker login:</Typography>
-          <Typography>Enter the following command on the command line: </Typography>
-          <Grid container spacing={0} alignItems='center'>
-            {!token.secretKey && <Typography color={theme.palette.error.main}>Could not find Secret Key</Typography>}
-            {token.secretKey && (
-              <TokenCommand
-                token={token}
-                command={`docker login -u="<access-key>" -p="<secret-key>" ${uiConfig?.registry.host}`}
-              />
-            )}
-          </Grid>
-        </Stack>
-      </DialogContent>
+      <Stack spacing={2} direction='column' alignItems='flex-start'>
+        <Typography fontWeight='bold'>1. Run Docker login:</Typography>
+        <Typography>Enter the following command on the command line: </Typography>
+        {!token.secretKey && <Typography color={theme.palette.error.main}>Could not find Secret Key</Typography>}
+        {token.secretKey && (
+          <TokenCommand
+            token={token}
+            command={`docker login -u="<access-key>" -p="<secret-key>" ${uiConfig?.registry.host}`}
+          />
+        )}
+      </Stack>
     </>
   )
 }

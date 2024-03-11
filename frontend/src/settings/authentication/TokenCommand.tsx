@@ -1,5 +1,5 @@
 import { ContentCopy, Visibility, VisibilityOff } from '@mui/icons-material'
-import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import { TokenInterface } from 'types/v2/types'
@@ -50,39 +50,35 @@ export default function TokenCommand({ token, command, disableVisibilityToggle =
   }
 
   return (
-    <Grid container spacing={1} alignItems='center'>
-      <Grid item xs={disableVisibilityToggle ? 11 : 10}>
-        <Box
-          sx={{
-            backgroundColor: theme.palette.container.main,
-            px: 2,
-            py: 1,
-            display: 'flex',
-          }}
-        >
-          <Typography sx={{ mx: 'auto' }} data-test='commandText'>
-            {text}
-          </Typography>
-        </Box>
-      </Grid>
-      <Grid item xs={disableVisibilityToggle ? 1 : 2}>
-        <Tooltip title='Copy to clipboard'>
-          <IconButton onClick={handleCopyCommand} aria-label='copy command key to clipboard'>
-            <ContentCopy />
+    <Stack direction='row' spacing={1}>
+      <Box
+        sx={{
+          backgroundColor: theme.palette.container.main,
+          px: 2,
+          py: 1,
+          display: 'flex',
+        }}
+      >
+        <Typography sx={{ mx: 'auto' }} data-test='commandText'>
+          {text}
+        </Typography>
+      </Box>
+      <Tooltip title='Copy to clipboard'>
+        <IconButton onClick={handleCopyCommand} aria-label='copy command key to clipboard'>
+          <ContentCopy />
+        </IconButton>
+      </Tooltip>
+      {!disableVisibilityToggle && (
+        <Tooltip title={`${isObfuscated ? 'Show' : 'Hide'} keys`}>
+          <IconButton
+            onClick={handleToggleKeyVisibility}
+            aria-label={`${isObfuscated ? 'Show' : 'Hide'} keys`}
+            data-test='toggleKeysButton'
+          >
+            {isObfuscated ? <Visibility /> : <VisibilityOff />}
           </IconButton>
         </Tooltip>
-        {!disableVisibilityToggle && (
-          <Tooltip title={`${isObfuscated ? 'Show' : 'Hide'} keys`}>
-            <IconButton
-              onClick={handleToggleKeyVisibility}
-              aria-label={`${isObfuscated ? 'Show' : 'Hide'} keys`}
-              data-test='toggleKeysButton'
-            >
-              {isObfuscated ? <Visibility /> : <VisibilityOff />}
-            </IconButton>
-          </Tooltip>
-        )}
-      </Grid>
-    </Grid>
+      )}
+    </Stack>
   )
 }

@@ -10,8 +10,8 @@ import ModelDetails from './settings/ModelDetails'
 
 type SettingsCategory = 'details' | 'danger' | 'access' | 'permissions'
 
-function isSettingsCategory(settingsCategory: string | string[] | undefined): settingsCategory is SettingsCategory {
-  return (settingsCategory as SettingsCategory) !== undefined
+function isSettingsCategory(value: string | string[] | undefined): value is SettingsCategory {
+  return value === 'details' || value === 'danger' || value === 'access' || value === 'permissions'
 }
 
 type SettingsProps = {
