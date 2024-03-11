@@ -14,12 +14,12 @@ type TokenTabProps = {
 export default function PersonalAccessToken({ token }: TokenTabProps) {
   const theme = useTheme()
   const router = useRouter()
-  const [_open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [showAccessKey, setShowAccessKey] = useState(false)
   const [showSecretKey, setShowSecretKey] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [_copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState(false)
   const sendNotification = useNotification()
 
   useEffect(() => {
@@ -73,13 +73,7 @@ export default function PersonalAccessToken({ token }: TokenTabProps) {
 
   return (
     <>
-      <DialogContent
-        sx={{
-          width: '600px',
-          height: '400px',
-          overflow: 'auto',
-        }}
-      >
+      <DialogContent sx={{ overflow: 'auto' }}>
         <MessageAlert
           message='You will never be able to access this token again. Make sure to copy it to a safe place.'
           severity='warning'

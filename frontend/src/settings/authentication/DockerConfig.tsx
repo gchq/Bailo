@@ -11,6 +11,7 @@ import MessageAlert from 'src/MessageAlert'
 import CodeSnippetBox from 'src/settings/authentication/CodeSnippetBox'
 import { dockerConfigTemplate } from 'src/settings/authentication/configTemplates'
 import { TokenInterface } from 'types/v2/types'
+import { toKebabCase } from 'utils/stringUtils'
 
 import dockerConfig from './dockerConfig.json'
 
@@ -56,17 +57,10 @@ export default function DockerConfig({ token }: dockerConfigProps) {
   return (
     <>
       {isUiConfigLoading && <Loading />}
-      <DialogContent
-        sx={{
-          width: '600px',
-          height: '400px',
-          overflow: 'auto',
-        }}
-      >
+      <DialogContent sx={{ overflow: 'auto' }}>
         <Stack spacing={2} direction={{ xs: 'column' }}>
           <Typography fontWeight='bold'>Step 1: Download credentials config</Typography>
           <Typography>First, download the Docker credentials for the application token: </Typography>
-          {/* TODO */}
           <Grid container spacing={0} alignItems='center'>
             <Typography
               onClick={() => downloadOrSaveTextFile(JSON.stringify([dockerConfig], replacer, 2), 'test-auth.yaml')}
@@ -74,7 +68,7 @@ export default function DockerConfig({ token }: dockerConfigProps) {
             >
               <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
                 <DownloadIcon color='primary' sx={{ mr: 0.5 }} />
-                {`Download <key-name>-auth.yml `}
+                {`Download ${toKebabCase(token.description)}-auth.yml `}
               </Stack>
             </Typography>
           </Grid>
@@ -90,7 +84,7 @@ export default function DockerConfig({ token }: dockerConfigProps) {
                     <ExpandMoreIcon color='primary' sx={{ mr: 0.5 }} />
                   </Tooltip>
                 )}
-                {`View <key-name>-auth.yml`}
+                {`View ${toKebabCase(token.description)}-auth.yml`}
               </Stack>
             </Typography>
             {open && (
@@ -100,8 +94,9 @@ export default function DockerConfig({ token }: dockerConfigProps) {
                   `${showKeys ? token.accessKey : 'xxxxxxxxxx'}`,
                   `${showKeys ? token.secretKey : 'xxxxxxxxxxxxxxxxxxxxx'}`,
                 )}
-                <Tooltip title={`${showKeys ? 'Hide' : 'Show'} keys`} placement='top'>
+                <Tooltip title={`${showKeys ? 'Hide' : 'Show'} keys`} placement='left'>
                   <IconButton
+                    sx={{ position: 'absolute', top: 0, right: 0 }}
                     onClick={handleToggleKeyVisibility}
                     aria-label={`${showKeys ? 'Hide' : 'Show'} keys`}
                     data-test='toggleKeyVisibilityButton'
@@ -120,7 +115,6 @@ export default function DockerConfig({ token }: dockerConfigProps) {
             </Typography>{' '}
             This will overwrite existing credentials:
           </Grid>
-          {/* TODO */}
           <Grid container spacing={0} alignItems='center'>
             <Typography
               onClick={() => downloadOrSaveTextFile(JSON.stringify([dockerConfig], replacer, 2), 'test-auth.json')}
@@ -128,7 +122,7 @@ export default function DockerConfig({ token }: dockerConfigProps) {
             >
               <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
                 <DriveFileMoveIcon color='primary' sx={{ mr: 0.5 }} />
-                {`mv <key-name>-auth.json ~/.docker/config.json`}
+                {`mv ${toKebabCase(token.description)}-auth.json ~/.docker/config.json`}
               </Stack>
             </Typography>
           </Grid>

@@ -11,6 +11,7 @@ import MessageAlert from 'src/MessageAlert'
 import CodeSnippetBox from 'src/settings/authentication/CodeSnippetBox'
 import { rktConfigTemplate } from 'src/settings/authentication/configTemplates'
 import { TokenInterface } from 'types/v2/types'
+import { toKebabCase } from 'utils/stringUtils'
 
 import rktConfig from './rktConfig.json'
 
@@ -52,17 +53,10 @@ export default function RocketConfig({ token }: rktConfigProps) {
   return (
     <>
       {isUiConfigLoading && <Loading />}
-      <DialogContent
-        sx={{
-          width: '600px',
-          height: '400px',
-          overflow: 'auto',
-        }}
-      >
+      <DialogContent sx={{ overflow: 'auto' }}>
         <Stack spacing={2} direction={{ xs: 'column' }}>
           <Typography fontWeight='bold'>Step 1: Download credentials config</Typography>
           <Typography>First, download the rkt credentials file for the personal access token:</Typography>
-          {/* TODO */}
           <Grid container spacing={0} alignItems='center'>
             <Typography
               onClick={() => downloadOrSaveTextFile(JSON.stringify([rktConfig], replacer, 2), 'test-auth.yaml')}
@@ -70,7 +64,7 @@ export default function RocketConfig({ token }: rktConfigProps) {
             >
               <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
                 <DownloadIcon color='primary' sx={{ mr: 0.5 }} />
-                {`Download <key-name>-auth.yml `}
+                {`Download ${toKebabCase(token.description)}-auth.yml `}
               </Stack>
             </Typography>
           </Grid>
@@ -86,7 +80,7 @@ export default function RocketConfig({ token }: rktConfigProps) {
                     <ExpandMoreIcon color='primary' sx={{ mr: 0.5 }} />
                   </Tooltip>
                 )}
-                {'View <key-name>-auth.yml'}
+                {`View ${toKebabCase(token.description)}-auth.yml`}
               </Stack>
             </Typography>
             {open && (
@@ -96,8 +90,9 @@ export default function RocketConfig({ token }: rktConfigProps) {
                   `${showKeys ? token.accessKey : 'xxxxxxxxxx'}`,
                   `${showKeys ? token.secretKey : 'xxxxxxxxxxxxxxxxxxxxx'}`,
                 )}
-                <Tooltip title={`${showKeys ? 'Hide' : 'Show'} keys`} placement='top'>
+                <Tooltip title={`${showKeys ? 'Hide' : 'Show'} keys`} placement='left'>
                   <IconButton
+                    sx={{ position: 'absolute', top: 0, right: 0 }}
                     onClick={handleToggleKeyVisibility}
                     aria-label={`${showKeys ? 'Hide' : 'Show'} keys`}
                     data-test='toggleKeyVisibilityButton'
@@ -110,7 +105,6 @@ export default function RocketConfig({ token }: rktConfigProps) {
           </Grid>
           <Typography fontWeight='bold'>Step 2: Write to disk</Typography>
           <Typography>Second, place the file in the rkt configuration directory:</Typography>
-          {/* TODO */}
           <Grid container spacing={0} alignItems='center'>
             <Typography
               onClick={() => downloadOrSaveTextFile(JSON.stringify([rktConfig], replacer, 2), 'test-auth.json')}
@@ -118,7 +112,7 @@ export default function RocketConfig({ token }: rktConfigProps) {
             >
               <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
                 <DriveFileMoveIcon color='primary' sx={{ mr: 0.5 }} />
-                {`mv <key-name>-auth.json /etc/rkt/auth.d/`}
+                {`mv ${toKebabCase(token.description)}-auth.json /etc/rkt/auth.d/`}
               </Stack>
             </Typography>
           </Grid>

@@ -119,7 +119,7 @@ export interface TokenInterface {
   modelIds: Array<string>
   actions: Array<TokenActionsKeys>
   accessKey: string
-  secretKey?: string
+  secretKey: string
   deleted: boolean
   createdAt: string
   updatedAt: string

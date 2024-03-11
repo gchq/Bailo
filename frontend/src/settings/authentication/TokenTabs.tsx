@@ -1,4 +1,4 @@
-import { Box, Container, Dialog, DialogTitle, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
+import { Box, Dialog, DialogTitle, Divider, List, ListItem, ListItemButton, Stack } from '@mui/material'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React from 'react'
@@ -17,7 +17,7 @@ import PodmanIcon from '../../../public/podman-logo.svg'
 import RktLogo from '../../../public/rkt-logo.svg'
 import UserIcon from '../../../public/user-icon.svg'
 
-type TokenCategory = 'personal access' | 'kubernetes' | 'rocket' | 'podman' | 'docker-log' | 'docker-config'
+type TokenCategory = 'personal-access' | 'kubernetes' | 'rocket' | 'podman' | 'docker-log' | 'docker-config'
 
 function isTokenCategory(tokenCategory: string | string[] | undefined): tokenCategory is TokenCategory {
   return (tokenCategory as TokenCategory) !== undefined
@@ -31,7 +31,7 @@ export default function TokenTabs({ token }: TokenTabProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
   const { tab } = router.query
-  const [tokenCategory, setTokenCategory] = useState<TokenCategory>('personal access')
+  const [tokenCategory, setTokenCategory] = useState<TokenCategory>('personal-access')
 
   useEffect(() => {
     if (token) setOpen(true)
@@ -57,20 +57,20 @@ export default function TokenTabs({ token }: TokenTabProps) {
         setOpen(false)
       }}
       fullWidth
-      maxWidth='md'
+      maxWidth='xl'
     >
       <DialogTitle>Token Created</DialogTitle>
       <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex' }}>
         <Stack
-          direction={{ xs: 'column', sm: 'row' }}
+          direction={{ xs: 'column', md: 'row' }}
           spacing={{ sm: 2 }}
           divider={<Divider orientation='vertical' flexItem />}
         >
           <List sx={{ width: '225px', minWidth: 'max-content' }}>
             <ListItem disablePadding>
               <ListItemButton
-                selected={tokenCategory === 'personal access'}
-                onClick={() => handleListItemClick('personal access')}
+                selected={tokenCategory === 'personal-access'}
+                onClick={() => handleListItemClick('personal-access')}
               >
                 <Stack sx={{ marginRight: 1 }}>
                   <Image src={UserIcon} alt='user-icon' width={19} height={19} />
@@ -128,14 +128,14 @@ export default function TokenTabs({ token }: TokenTabProps) {
               </ListItemButton>
             </ListItem>
           </List>
-          <Container sx={{ my: 2 }}>
-            {tokenCategory === 'personal access' && <PersonalAccessToken token={token} />}
+          <Box sx={{ my: 2 }}>
+            {tokenCategory === 'personal-access' && <PersonalAccessToken token={token} />}
             {tokenCategory === 'kubernetes' && <KubernetesSecret token={token} />}
             {tokenCategory === 'rocket' && <RocketConfig token={token} />}
             {tokenCategory === 'podman' && <PodmanLogin token={token} />}
             {tokenCategory === 'docker-log' && <DockerLogin token={token} />}
             {tokenCategory === 'docker-config' && <DockerConfig token={token} />}
-          </Container>
+          </Box>
         </Stack>
       </Box>
       {/* <DialogActions>

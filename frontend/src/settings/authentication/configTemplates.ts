@@ -9,7 +9,7 @@ credentials:
   password: '${secret_key}'`
 }
 
-export function kubeImagePullSecretsConfigExample() {
+export function kubeImagePullSecretsConfigExample(description) {
   return `apiVersion: v1
 kind: Pod
 metadata:
@@ -21,7 +21,7 @@ spec:
       image: bailo.xxx.yyy.zzz/some-model-id/some-repo-id
 
   imagePullSecrets:
-    - name: <key-name>-secret.yml`
+    - name: ${description}-secret.yml`
 }
 
 export function KubernetesSecretsConfigTemplate(registry_url, access_key, secret_key) {

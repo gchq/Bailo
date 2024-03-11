@@ -15,6 +15,7 @@ export default function CodeSnippetBox({ children }: CodeSnippetProps) {
         overflowX: 'auto',
         width: '100%',
         maxWidth: 'md',
+        position: 'relative',
       }}
     >
       {children}

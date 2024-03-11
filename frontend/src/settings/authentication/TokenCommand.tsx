@@ -1,0 +1,88 @@
+import { ContentCopy, Visibility, VisibilityOff } from '@mui/icons-material'
+import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import { useState } from 'react'
+import { TokenInterface } from 'types/v2/types'
+import useNotification from 'utils/hooks/useNotification'
+
+type TokenCommandProps = {
+  token: TokenInterface
+  command: string
+  disableVisibilityToggle?: boolean
+}
+
+export const TokenValueKind = {
+  ACCESS_KEY: '<access-key>',
+  SECRET_KEY: '<secret-key>',
+} as const
+
+export type TokenValueKindKeys = (typeof TokenValueKind)[keyof typeof TokenValueKind]
+
+export default function TokenCommand({ token, command, disableVisibilityToggle = false }: TokenCommandProps) {
+  const theme = useTheme()
+  const sendNotification = useNotification()
+  const [isObfuscated, setIsObfuscated] = useState(true)
+  const [text, setText] = useState(command)
+
+  const getFullCommand = () => {
+    let updatedText = text.replaceAll(TokenValueKind.ACCESS_KEY, token.accessKey)
+    updatedText = updatedText.replaceAll(TokenValueKind.SECRET_KEY, token.secretKey)
+
+    return updatedText
+  }
+
+  const handleCopyCommand = () => {
+    navigator.clipboard.writeText(getFullCommand())
+    sendNotification({
+      variant: 'success',
+      msg: 'Copied command to clipboard',
+      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+    })
+  }
+
+  const handleToggleKeyVisibility = () => {
+    if (isObfuscated) {
+      setText(getFullCommand())
+    } else {
+      setText(command)
+    }
+    setIsObfuscated(!isObfuscated)
+  }
+
+  return (
+    <Grid container spacing={1} alignItems='center'>
+      <Grid item xs={disableVisibilityToggle ? 11 : 10}>
+        <Box
+          sx={{
+            backgroundColor: theme.palette.container.main,
+            px: 2,
+            py: 1,
+            display: 'flex',
+          }}
+        >
+          <Typography sx={{ mx: 'auto' }} data-test='commandText'>
+            {text}
+          </Typography>
+        </Box>
+      </Grid>
+      <Grid item xs={disableVisibilityToggle ? 1 : 2}>
+        <Tooltip title='Copy to clipboard'>
+          <IconButton onClick={handleCopyCommand} aria-label='copy command key to clipboard'>
+            <ContentCopy />
+          </IconButton>
+        </Tooltip>
+        {!disableVisibilityToggle && (
+          <Tooltip title={`${isObfuscated ? 'Show' : 'Hide'} keys`}>
+            <IconButton
+              onClick={handleToggleKeyVisibility}
+              aria-label={`${isObfuscated ? 'Show' : 'Hide'} keys`}
+              data-test='toggleKeysButton'
+            >
+              {isObfuscated ? <Visibility /> : <VisibilityOff />}
+            </IconButton>
+          </Tooltip>
+        )}
+      </Grid>
+    </Grid>
+  )
+}
