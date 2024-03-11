@@ -242,6 +242,7 @@ data:
       instrumentation: {
         enabled: {{ .Values.instrumentation.enabled }},
         endpoint: '{{ .Values.instrumentation.endpoint }}',
+        debug: {{ .Values.instrumentation.debug }}
       },
 
       s3: {

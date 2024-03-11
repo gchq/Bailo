@@ -186,5 +186,6 @@ module.exports = {
     serviceName: 'backend',
     endpoint: '',
     authenticationToken: '',
+    debug: false,
   },
 }

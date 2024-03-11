@@ -148,6 +148,7 @@ export interface Config {
     serviceName: string
     endpoint: string
     authenticationToken: string
+    debug: boolean
   }
 }
 

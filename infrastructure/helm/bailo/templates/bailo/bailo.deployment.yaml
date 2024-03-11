@@ -63,6 +63,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "bailo.fullname" . }}-apm
                   key: auth-token
+            - name: OTEL_LOG_LEVEL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-apm
+                  key: debug
             {{- end }}
           ports:
             - name: http

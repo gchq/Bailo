@@ -264,3 +264,4 @@ connectors:
 
 instrumentation:
   enabled: false
+  debug: false
