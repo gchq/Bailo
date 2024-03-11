@@ -184,5 +184,7 @@ module.exports = {
   instrumentation: {
     enabled: false,
     serviceName: 'backend',
+    endpoint: '',
+    authenticationToken: '',
   },
 }
