@@ -109,7 +109,7 @@ export function useGetCurrentUserSettings() {
 
   return {
     mutateUserSettings: mutate,
-    userSettings: data?.settings || undefined,
+    userSettings: data?.settings,
     isUserSettingsLoading: !error && !data,
     isUserSettingsError: error,
   }

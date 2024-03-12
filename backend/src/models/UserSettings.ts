@@ -6,7 +6,7 @@ import MongooseDelete from 'mongoose-delete'
 // client.
 export interface UserSettingsInterface {
   dn: string
-  theme: string
+  themeKey: string
 
   createdAt: Date
   updatedAt: Date
@@ -20,7 +20,7 @@ export type UserSettingsDoc = UserSettingsInterface & Document<any, any, UserSet
 const UserSettingsSchema = new Schema<UserSettingsInterface>(
   {
     dn: { type: String, required: true },
-    theme: { type: String, required: true },
+    themeKey: { type: String, required: true },
   },
   {
     timestamps: true,

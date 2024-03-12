@@ -1,18 +1,32 @@
 import { Box, Button } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { patchCurrentUserSettings, useGetCurrentUserSettings } from 'actions/user'
-import { ThemeKey } from 'src/theme'
+import { useContext } from 'react'
+import ThemeModeContext from 'src/contexts/themeModeContext'
+import useNotification from 'src/hooks/useNotification'
+import { ThemeMapping } from 'src/theme'
 
 interface ExampleDisplayProps {
-  theme: ThemeKey
+  theme: ThemeMapping
 }
 export default function ExampleDisplay({ theme }: ExampleDisplayProps) {
   const { mutateUserSettings } = useGetCurrentUserSettings()
 
-  async function setTheme() {
-    const updatedSettings = await patchCurrentUserSettings({ theme: theme.key })
+  const sendNotification = useNotification()
+  const { setThemeKey } = useContext(ThemeModeContext)
+
+  async function updateTheme() {
+    const updatedSettings = await patchCurrentUserSettings({ themeKey: theme.key })
     if (updatedSettings.status === 200) {
       mutateUserSettings()
+      const data = await updatedSettings.json()
+      setThemeKey(data.settings.themeKey)
+    } else {
+      sendNotification({
+        variant: 'error',
+        msg: 'Could not update appliction them',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
     }
   }
 
@@ -26,7 +40,7 @@ export default function ExampleDisplay({ theme }: ExampleDisplayProps) {
           backgroundColor: theme.theme.palette.background.default,
         }}
       >
-        <Button sx={{ color: theme.theme.palette.primary.main, width: '100%' }} onClick={setTheme}>
+        <Button sx={{ color: theme.theme.palette.primary.main, width: '100%' }} onClick={updateTheme}>
           {theme.key}
         </Button>
       </Box>

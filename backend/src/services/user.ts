@@ -11,7 +11,7 @@ export async function findUserSettings(user: UserInterface) {
   if (!userSettings) {
     const newUserSettings = new UserSettingsModel({
       dn: user.dn,
-      theme: 'light',
+      themeKey: 'light',
     })
     newUserSettings.save()
     return newUserSettings

@@ -38,7 +38,7 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
   },
 }
 
-export interface ThemeKey {
+export interface ThemeMapping {
   key: string
   theme: Theme
 }
@@ -240,20 +240,20 @@ export const darkTheme = createTheme({
   },
 })
 
-export const ThemeNames = {
+export const ThemeName = {
   Light: 'light',
   Dark: 'dark',
 } as const
 
-const lightThemeKey = {
-  key: ThemeNames.Light,
+const lightThemeMapping = {
+  key: ThemeName.Light,
   theme: lightTheme,
   title: 'Light',
 }
-const darkThemeKey = {
-  key: ThemeNames.Dark,
+const darkThemeMapping = {
+  key: ThemeName.Dark,
   theme: darkTheme,
   title: 'Dark',
 }
 
-export const themeList = [lightThemeKey, darkThemeKey]
+export const themeList = [lightThemeMapping, darkThemeMapping]

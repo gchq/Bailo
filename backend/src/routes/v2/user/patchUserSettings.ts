@@ -11,7 +11,7 @@ import { parse } from '../../../utils/validate.js'
 
 export const patchUserSettingsSchema = z.object({
   body: z.object({
-    theme: z.string(),
+    themeKey: z.string(),
   }),
 })
 

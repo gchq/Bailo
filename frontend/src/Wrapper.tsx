@@ -25,7 +25,7 @@ export type WrapperProps = {
 export default function Wrapper({ title, page, children, fullWidth = false }: WrapperProps): ReactElement {
   const isDocsPage = useMemo(() => page.startsWith('docs'), [page])
 
-  const theme = useTheme()
+  const muiTheme = useTheme()
   const [open, setOpen] = useState(false)
   const [pageTopStyling, setPageTopStyling] = useState({})
   const [contentTopStyling, setContentTopStyling] = useState({})
@@ -93,7 +93,8 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
         <Box
           component='main'
           sx={{
-            backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
+            backgroundColor:
+              muiTheme.palette.mode === 'light' ? muiTheme.palette.grey[100] : muiTheme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',

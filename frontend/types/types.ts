@@ -376,5 +376,5 @@ export type ReviewRequestInterface = {
 
 export interface UserSettings {
   dn: string
-  theme: string
+  themeKey: string
 }
