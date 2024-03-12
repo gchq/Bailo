@@ -2,7 +2,7 @@ import { TableBody, TableCell, TableRow } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 
-import { ModelCardRevisionInterface } from '../../../types/v2/types'
+import { ModelCardRevisionInterface } from '../../../types/types'
 import { formatDateString } from '../../../utils/dateUtils'
 
 type revisionProp = {

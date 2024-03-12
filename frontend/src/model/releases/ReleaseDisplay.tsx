@@ -6,12 +6,10 @@ import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import { useEffect, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import { ReviewRequestInterface, ReviewResponse } from 'types/interfaces'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../actions/review'
-import { ReleaseInterface } from '../../../types/types'
-import { ModelInterface } from '../../../types/v2/types'
+import { ModelInterface, ReleaseInterface, ReviewRequestInterface, ReviewResponse } from '../../../types/types'
 import Loading from '../../common/Loading'
 import Markdown from '../../common/MarkdownDisplay'
 import Link from '../../Link'
@@ -158,7 +156,7 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {(reviewsWithLatestResponses.length > 0 || release.comments.length > 0) && <Divider sx={{ my: 2 }} />}
+              {(reviewsWithLatestResponses.length > 0 || release.comments.length > 0) && <Divider />}
               <Stack direction='row' justifyContent='space-between' spacing={2}>
                 <div>
                   <ReviewDisplay reviews={reviewsWithLatestResponses} />

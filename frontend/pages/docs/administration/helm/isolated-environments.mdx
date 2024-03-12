@@ -1,0 +1,42 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Isolated Environments
+
+Bailo is built to be deployed on isolated environments, where access to the internet is strictly regulated. To install
+Bailo on a segregated environment you will need the following dependencies.
+
+## Helm Charts
+
+We rely on the following Bitnami charts:
+
+- MinIO https://charts.bitnami.com/bitnami
+- MongoDB https://charts.bitnami.com/bitnami
+
+## Docker Images
+
+We rely on the following images:
+
+- mongo:6.0.4
+- minio/minio:RELEASE.2023-01-31T02-24-19Z
+- marlonb/mailcrab:v0.10.0
+- nginx:1.21.6-alpine
+- registry:2.8.1
+- node:18-alpine
+
+These will occassionally be updated. To retrieve the latest versions used, check `./docker-compose.yml` and
+`./backend/Dockerfile`. These versions can be configured using the `tag` attribute for each image in `values.yaml` to
+override the defaults. In general, keeping to the same major version will maintain compatability with Bailo.
+
+## NPM
+
+We rely on many NPM packages. The full list is available in `package-lock.json`, `frontend/package-lock.json` and
+`backend/package-lock.json`. Most are standard packages with the exception of:
+
+- `sharp`, which is an optimised image transformer and requires some compilation tools.
+- `cypress`, which is a user interface testing tool and requires a Chromium download.
+
+`sharp` includes instructions on installing / building without internet [here](https://sharp.pixelplumbing.com/install).
+Instructions on installing `cypress` without internet are available
+[here](https://docs.cypress.io/guides/references/advanced-installation).
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

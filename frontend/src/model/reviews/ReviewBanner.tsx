@@ -7,16 +7,15 @@ import { useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useMemo, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import { mutate } from 'swr'
-import { AccessRequestInterface } from 'types/interfaces'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { useGetReleasesForModelId } from '../../../actions/release'
 import { useGetReviewRequestsForModel } from '../../../actions/review'
 import { postReviewResponse } from '../../../actions/review'
-import { ReleaseInterface } from '../../../types/types'
+import { AccessRequestInterface, ReleaseInterface } from '../../../types/types'
 import ReviewWithComment, { ResponseTypeKeys } from '../../common/ReviewWithComment'
 
-type ReviewBannerProps =
+export type ReviewBannerProps =
   | {
       release: ReleaseInterface
       accessRequest?: never

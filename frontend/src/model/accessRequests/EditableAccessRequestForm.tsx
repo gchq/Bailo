@@ -1,4 +1,5 @@
-import { Box, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import { patchAccessRequest, useGetAccessRequest } from 'actions/accessRequest'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
@@ -6,7 +7,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import { getErrorMessage } from 'utils/fetcher'
 
 import { useGetSchema } from '../../../actions/schema'
-import { AccessRequestInterface, SplitSchemaNoRender } from '../../../types/interfaces'
+import { AccessRequestInterface, SplitSchemaNoRender } from '../../../types/types'
 import { getStepsData, getStepsFromSchema } from '../../../utils/formUtils'
 import Loading from '../../common/Loading'
 import JsonSchemaForm from '../../Form/JsonSchemaForm'
@@ -103,6 +104,16 @@ export default function EditableAccessRequestForm({
           errorMessage={errorMessage}
         />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        {isEdit && (
+          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
+            <Button variant='outlined' onClick={handleCancel}>
+              Cancel
+            </Button>
+            <LoadingButton variant='contained' loading={isLoading} onClick={handleSubmit}>
+              Save
+            </LoadingButton>
+          </Stack>
+        )}
       </Box>
     </>
   )

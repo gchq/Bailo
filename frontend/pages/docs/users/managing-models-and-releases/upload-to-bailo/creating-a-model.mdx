@@ -1,0 +1,58 @@
+import Image from 'next/legacy/image'
+import Box from '@mui/material/Box'
+import bailoMarketIcon from 'public/docs/bailo_market_icon.png'
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+## **Bailo Marketplace**
+
+The models added to Bailo are displayed in the Bailo Marketplace.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image src={bailoMarketIcon} />
+</Box>
+
+This enables the models to be discoverable to other users. There is an exception to this, where the models are marked as
+private. In these instances the model will not be displayed.
+
+## **Finding models**
+
+Models are discoverable by the search functionality or via filtering on the tags.
+
+## **Adding a model to the Marketplace**
+
+New models can be added to Bailo using the the **_Add a new model_** button on the Marketplace, or alternatively, the
+**_Add Model_** button at the top of the application.
+
+Adding models to the Marketplace is quick and easy and requires three fields to be completed.
+
+The fields are:
+
+- **_*The Model Name and the Model Description.*_**
+
+These represent what is displayed for the model in the Marketplace.
+
+- The 3rd field that requires completion is the **_*Public*_** or **_*Private*_** option.
+
+Public models are available for everyone, whereas private models will only be visible if you have been given the right
+permissions in the model settings.
+
+The model is now added to the Marketplace.
+
+## **Adding the Model Card detail**
+
+Once the initial three fields have been completed and the model is added to the Marketplace, the user is provided with
+the option to select which **_*schema*_** they wish to use.
+
+- The selection of the schema defines the model card structure that will be required for the model.
+
+- The model card provides various details about a model, including what it is intended for, what training and testing
+  has been undertaken and potential biases.
+
+- The model card detail can evolve as and when the information is known / available.
+
+## Changing the Model Name or Description
+
+To change model name or description, select the model and go to **_*Settings'*_** and amend the **_*Name*_** and / or
+**_*Description*_**.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

@@ -19,7 +19,7 @@ import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema } from '@
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useState } from 'react'
 
-import { SplitSchemaNoRender } from '../../types/interfaces'
+import { SplitSchemaNoRender } from '../../types/types'
 import { setStepState } from '../../utils/formUtils'
 import { widgets } from '../../utils/formUtils'
 import ValidationErrorIcon from '../model/common/ValidationErrorIcon'
@@ -111,6 +111,14 @@ export default function JsonSchemaForm({
     setActiveStep(index)
   }
 
+  function ErrorListTemplate() {
+    return (
+      <Typography color={theme.palette.error.main} sx={{ mb: 2 }}>
+        Please make sure that all errors listed below have been resolved.
+      </Typography>
+    )
+  }
+
   return (
     <Grid container spacing={2} sx={{ mt: theme.spacing(1) }}>
       <Grid item xs={12} sm={3} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
@@ -137,7 +145,7 @@ export default function JsonSchemaForm({
           validator={validator}
           widgets={widgets}
           uiSchema={currentStep.uiSchema}
-          liveValidate={currentStep.shouldValidate}
+          liveValidate
           omitExtraData
           disabled={!canEdit}
           liveOmit
@@ -153,7 +161,11 @@ export default function JsonSchemaForm({
                   ArrayFieldTemplate,
                   ObjectFieldTemplate,
                 }
-              : { ArrayFieldTemplate, ObjectFieldTemplate }
+              : {
+                  ArrayFieldTemplate,
+                  ObjectFieldTemplate,
+                  ErrorListTemplate,
+                }
           }
         >
           {/* eslint-disable-next-line react/jsx-no-useless-fragment */}

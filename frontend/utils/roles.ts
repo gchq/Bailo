@@ -1,4 +1,4 @@
-import { Role } from '../types/v2/types'
+import { Role } from '../types/types'
 
 export function getRoleDisplay(roleId: string, modelRoles: Role[]) {
   const role = modelRoles.find((role) => role.id === roleId)

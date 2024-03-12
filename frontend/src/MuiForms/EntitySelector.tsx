@@ -5,7 +5,8 @@ import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { EntityObject } from 'types/v2/types'
+import UserDisplay from 'src/common/UserDisplay'
+import { EntityObject } from 'types/types'
 
 import { useGetCurrentUser, useListUsers } from '../../actions/user'
 import Loading from '../common/Loading'
@@ -17,16 +18,17 @@ interface EntitySelectorProps {
   value: string[]
   onChange: (newValue: string[]) => void
   formContext?: FormContextType
+  rawErrors?: string[]
 }
 
 export default function EntitySelector(props: EntitySelectorProps) {
-  const { onChange, value: currentValue, required, label, formContext } = props
+  const { onChange, value: currentValue, required, label, formContext, rawErrors } = props
 
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
   const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
 
-  const { users, isUsersError } = useListUsers(userListQuery)
+  const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
@@ -69,16 +71,22 @@ export default function EntitySelector(props: EntitySelectorProps) {
   }
 
   if (isUsersError) {
-    return <MessageAlert message={isUsersError.info.message} severity='error' />
+    if (isUsersError.status !== 413) {
+      return <MessageAlert message={isUsersError.info.message} severity='error' />
+    }
   }
 
   return (
     <>
       {isCurrentUserLoading && <Loading />}
+      {isUsersError && isUsersError.status === 413 && (
+        <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
+      )}
       {currentUser && formContext && formContext.editMode && (
         <Autocomplete<EntityObject, true, true>
           multiple
           data-test='entitySelector'
+          loading={userListQuery.length > 3 && isUsersLoading}
           open={open}
           size='small'
           onOpen={() => {
@@ -91,6 +99,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
           isOptionEqualToValue={(option, value) => option.id === value.id}
           getOptionLabel={(option) => option.id}
           value={selectedEntities || []}
+          filterOptions={(x) => x}
           onChange={handleUserChange}
           noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}
@@ -98,7 +107,11 @@ export default function EntitySelector(props: EntitySelectorProps) {
           renderTags={(value, getTagProps) =>
             value.map((option, index) => (
               <Box key={option.id} sx={{ maxWidth: '200px' }}>
-                <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.id} />
+                <Chip
+                  {...getTagProps({ index })}
+                  sx={{ textOverflow: 'ellipsis' }}
+                  label={<UserDisplay dn={option.id} />}
+                />
               </Box>
             ))
           }
@@ -106,6 +119,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
             <TextField
               {...params}
               placeholder='Username or group name'
+              error={rawErrors && rawErrors.length > 0}
               label={label + (required ? ' *' : '')}
               onKeyDown={(event: KeyboardEvent) => {
                 if (event.key === 'Backspace') {
@@ -135,7 +149,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {currentValue.map((entity) => (
-                <Chip label={entity.split(':')[1] || entity} key={entity} sx={{ width: 'fit-content' }} />
+                <Chip label={<UserDisplay dn={entity} />} key={entity} sx={{ width: 'fit-content' }} />
               ))}
             </Stack>
           </Box>

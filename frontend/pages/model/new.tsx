@@ -20,8 +20,7 @@ import ModelDescriptionInput from 'src/model/ModelDescriptionInput'
 import ModelNameInput from 'src/model/ModelNameInput'
 import TeamSelect from 'src/TeamSelect'
 import Wrapper from 'src/Wrapper'
-import { TeamInterface } from 'types/interfaces'
-import { ModelForm, ModelVisibility } from 'types/v2/types'
+import { ModelForm, ModelVisibility, TeamInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function NewModel() {
@@ -87,7 +86,7 @@ export default function NewModel() {
         <Card sx={{ p: 4, m: 'auto' }}>
           <Stack spacing={2} alignItems='center' justifyContent='center'>
             <Typography data-test='createModelPageTitle' variant='h6' component='h1' color='primary'>
-              Upload a new Model
+              Create a new Model
             </Typography>
             <FileUpload color='primary' fontSize='large' />
             <Typography>A model repository contains all files, history and information related to a model.</Typography>

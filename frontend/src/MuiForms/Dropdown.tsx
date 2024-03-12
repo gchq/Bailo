@@ -12,9 +12,10 @@ interface DropdownProps {
   onChange: (newValue: string) => void
   InputProps?: any
   options: { enumOptions?: { label: string; value: string }[] }
+  rawErrors?: string[]
 }
 
-export default function Dropdown({ label, formContext, value, onChange, options, required }: DropdownProps) {
+export default function Dropdown({ label, formContext, value, onChange, options, required, rawErrors }: DropdownProps) {
   const theme = useTheme()
 
   const handleChange = (_event: SyntheticEvent<Element, Event>, newValue: string | null) => {
@@ -59,7 +60,13 @@ export default function Dropdown({ label, formContext, value, onChange, options,
           value={value || ''}
           disabled={!formContext.editMode}
           renderInput={(params) => (
-            <TextField {...params} label='Select an option below' size='small' placeholder='Unanswered' />
+            <TextField
+              {...params}
+              label='Select an option below'
+              size='small'
+              placeholder='Unanswered'
+              error={rawErrors && rawErrors.length > 0}
+            />
           )}
         />
       )}

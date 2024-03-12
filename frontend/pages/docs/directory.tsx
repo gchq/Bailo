@@ -17,23 +17,31 @@ export const flatDirectory: Array<DirectoryEntry> = [
   // Main Docs
   { title: 'Overview', slug: '', header: true },
 
-  { title: 'Getting Started', slug: 'getting-started', header: true },
-
-  { title: 'FAQ', slug: 'getting-started/faq' },
-  { title: `What's new in V2?`, slug: 'getting-started/whats-new-in-v2' },
-
   // Users
   { title: 'Users', slug: 'users', header: true },
 
   { title: 'Managing Models and Releases', slug: 'users/managing-models-and-releases', header: true },
   { title: 'Uploading Artifacts', slug: 'users/managing-models-and-releases/upload-to-bailo', header: true },
+  { title: 'Creating a Model', slug: 'users/managing-models-and-releases/upload-to-bailo/creating-a-model' },
+  { title: 'Completing the Model', slug: 'users/managing-models-and-releases/upload-to-bailo/completing-the-model' },
+  { title: 'Creating a Release', slug: 'users/managing-models-and-releases/upload-to-bailo/create-a-release' },
   { title: 'Uploading Files', slug: 'users/managing-models-and-releases/upload-to-bailo/files' },
   { title: 'Uploading Images', slug: 'users/managing-models-and-releases/upload-to-bailo/images' },
 
   { title: 'Using a Model', slug: 'users/using-a-model', header: true },
+  { title: 'Requesting Access', slug: 'users/using-a-model/requesting-access' },
+  { title: 'Personal Access Tokens', slug: 'users/using-a-model/personal-access-tokens' },
   { title: 'Using a a Pushed Docker Image', slug: 'users/using-a-model/using-a-pushed-docker-image' },
+  { title: 'Downloading files', slug: 'users/using-a-model/downloading-files' },
 
   { title: 'Reviews', slug: 'users/reviews', header: true },
+  { title: 'Reviewing Releases and Access Requests', slug: 'users/reviews/reviewing', header: true },
+  { title: 'Reviewing a Release', slug: 'users/reviews/reviewing/releases' },
+  { title: 'Reviewing an Access Request', slug: 'users/reviews/reviewing/access' },
+  { title: 'Reviewed Releases and Access Requests', slug: 'users/reviews/reviewed', header: true },
+  { title: 'Releases', slug: 'users/reviews/reviewed/releases' },
+  { title: 'Access Requests', slug: 'users/reviews/reviewed/access-request' },
+
   { title: 'Programmatically using Bailo', slug: 'users/programmatically-using-bailo', header: true },
   { title: 'Authentication', slug: 'users/programmatically-using-bailo/authentication' },
   { title: 'Open API', slug: 'users/programmatically-using-bailo/open-api' },
@@ -41,23 +49,27 @@ export const flatDirectory: Array<DirectoryEntry> = [
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
 
-  { title: 'Managing Bailo', slug: 'administration/managing-bailo', header: true },
+  { title: 'Getting Started', slug: 'administration/getting-started', header: true },
+  { title: 'Building The Bailo Image', slug: 'administration/getting-started/building-the-bailo-image' },
+
+  /// Helm
+  { title: 'Helm', slug: 'administration/helm', header: true },
+  { title: 'Basic Usage', slug: 'administration/helm/basic-usage' },
+  { title: 'Configuration', slug: 'administration/helm/configuration' },
+  { title: 'Isolated Environments', slug: 'administration/helm/isolated-environments' },
+
+  /// Schema Management
+  { title: 'Schema', slug: 'administration/schemas', header: true },
+  { title: 'Create a Schema', slug: 'administration/schemas/create-a-schema' },
+  { title: 'Upload a Schema', slug: 'administration/schemas/upload-a-schema' },
+
+  { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
 
   { title: 'Migrations', slug: 'administration/migrations', header: true },
-  { title: 'Bailo 0.4', slug: 'administration/migrations/bailo-0.4' },
-  { title: 'Bailo 2.0', slug: 'administration/migrations/bailo-2.0' },
+  { title: 'Bailo v0.4', slug: 'administration/migrations/bailo-0.4' },
+  { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
 
-  // Developers
-  { title: 'Developers', slug: 'developers', header: true },
-
-  { title: 'Bailo Development', slug: 'developers/bailo-development', header: true },
-
-  // Markdown
-  { title: 'Markdown Examples', slug: 'markdown-examples' },
-
-  // V2
-  { title: 'V2', slug: 'v2', header: true },
-  { title: 'Model Images', slug: 'v2/model-images' },
+  { title: 'Managing Bailo', slug: 'administration/managing-bailo', header: true },
 ]
 
 export interface DirectoryTree {

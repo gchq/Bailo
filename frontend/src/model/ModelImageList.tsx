@@ -4,10 +4,9 @@ import TextField from '@mui/material/TextField'
 import { useGetModelImages } from 'actions/model'
 import { SyntheticEvent, useMemo } from 'react'
 import Loading from 'src/common/Loading'
-import { ModelInterface } from 'types/v2/types'
 import { sortByNameAscending } from 'utils/arrayUtils'
 
-import { FlattenedModelImage } from '../../types/interfaces'
+import { FlattenedModelImage, ModelInterface } from '../../types/types'
 import MessageAlert from '../MessageAlert'
 
 interface ModelImageListProps {

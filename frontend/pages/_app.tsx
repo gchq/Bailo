@@ -16,8 +16,8 @@ import createEmotionCache from 'utils/createEmotionCache'
 
 import ThemeModeContext from '../src/contexts/themeModeContext'
 import UnsavedChangesContext from '../src/contexts/unsavedChangesContext'
-import useThemeMode from '../utils/hooks/useThemeMode'
-import useUnsavedChanges from '../utils/hooks/useUnsavedChanges'
+import useThemeMode from '../src/hooks/useThemeMode'
+import useUnsavedChanges from '../src/hooks/useUnsavedChanges'
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()

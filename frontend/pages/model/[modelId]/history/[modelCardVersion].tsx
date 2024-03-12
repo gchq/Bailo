@@ -8,7 +8,7 @@ import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Wrapper from 'src/Wrapper'
-import { SplitSchemaNoRender } from 'types/interfaces'
+import { SplitSchemaNoRender } from 'types/types'
 import { getStepsFromSchema } from 'utils/formUtils'
 
 export default function ViewModelCardVersion() {

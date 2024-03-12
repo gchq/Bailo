@@ -6,7 +6,7 @@ import Alert, { AlertProps } from '@mui/material/Alert'
 import Stack from '@mui/material/Stack'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import useNotification from 'utils/hooks/useNotification'
+import useNotification from 'src/hooks/useNotification'
 
 type PartialMessageAlertProps =
   | {
@@ -21,9 +21,18 @@ type PartialMessageAlertProps =
 type MessageAlertProps = {
   message?: string
   severity?: AlertProps['severity']
+  'data-test'?: string
+  slimView?: boolean
 } & PartialMessageAlertProps
 
-export default function MessageAlert({ message = '', severity, linkText, href }: MessageAlertProps) {
+export default function MessageAlert({
+  message = '',
+  severity,
+  linkText,
+  href,
+  'data-test': dataTest,
+  slimView = false,
+}: MessageAlertProps) {
   const alertRef = useRef<HTMLDivElement>(null)
   const [showContactMessage, setShowContactMessage] = useState(false)
   const sendNotification = useNotification()
@@ -48,7 +57,12 @@ export default function MessageAlert({ message = '', severity, linkText, href }:
   if (!message) return null
 
   return (
-    <Alert severity={severity} sx={{ mb: 2, mt: 2 }} ref={alertRef}>
+    <Alert
+      severity={severity}
+      sx={{ mb: 2, mt: 2, maxHeight: slimView ? '70px' : 'none', maxWidth: slimView ? '250px' : 'none' }}
+      ref={alertRef}
+      data-test={dataTest}
+    >
       <Stack spacing={1}>
         <Stack direction='row' spacing={1} alignItems='center'>
           <Typography>{message}</Typography>
@@ -66,7 +80,7 @@ export default function MessageAlert({ message = '', severity, linkText, href }:
           )}
         </Stack>
         <Typography>{!!(href && linkText) && <Link href={href}>{linkText}</Link>}</Typography>
-        {severity === 'error' && (
+        {severity === 'error' && !slimView && (
           <>
             <div>
               <Button

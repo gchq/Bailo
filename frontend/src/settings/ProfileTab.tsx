@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import { User } from 'types/v2/types'
+import { User } from 'types/types'
 
 type ProfileTabProps = {
   user: User

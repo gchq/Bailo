@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { AccessRequestInterface } from 'types/interfaces'
+import { AccessRequestInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export function useGetAccessRequestsForModelId(modelId?: string) {

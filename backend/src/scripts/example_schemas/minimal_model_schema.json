@@ -41,7 +41,7 @@
         "questionTwo": {
           "title": "Question two",
           "description": "This is another question",
-          "type": "string"
+          "type": "number"
         }
       },
       "required": [],

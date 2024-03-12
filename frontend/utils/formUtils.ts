@@ -10,7 +10,7 @@ import Nothing from 'src/MuiForms/Nothing'
 import RichTextInput from 'src/MuiForms/RichTextInput'
 import TagSelector from 'src/MuiForms/TagSelector'
 
-import { SplitSchemaNoRender, StepNoRender, StepType } from '../types/interfaces'
+import { SplitSchemaNoRender, StepNoRender, StepType } from '../types/types'
 import { createUiSchema } from './uiSchemaUtils'
 
 export const widgets = {

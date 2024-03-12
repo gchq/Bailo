@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { TeamInterface } from 'types/interfaces'
+import { TeamInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 export const useGetTeams = () => {

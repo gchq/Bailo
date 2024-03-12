@@ -78,6 +78,11 @@ oauth:
     response: [] #example 'tokens', 'raw', 'jwt'
     callback: "" # exmaple /
     subdomain: "cognito domain"
+  identityProviderClient:
+    accessKeyId: "access"
+    secretAccessKey: "secret"
+    userPoolId: "region_id"
+    userIdAttribute: "name"
 
 # Used for aws storage
 aws:
