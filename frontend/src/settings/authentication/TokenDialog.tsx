@@ -1,140 +1,134 @@
-import { ContentCopy, Visibility, VisibilityOff } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
+import Person from '@mui/icons-material/Person'
 import {
-  Box,
+  Button,
+  Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
-  IconButton,
-  Tooltip,
+  Divider,
+  List,
+  Stack,
   Typography,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
+import DockerIcon from 'public/docker-icon.svg'
+import KubernetesIcon from 'public/kubernetes-icon.svg'
+import PodmanIcon from 'public/podman-logo.svg'
+import RktLogo from 'public/rkt-logo.svg'
 import { useEffect, useState } from 'react'
-import MessageAlert from 'src/MessageAlert'
-import { TokenInterface } from 'types/types'
+import DockerConfiguration from 'src/settings/authentication/DockerConfiguration'
+import DockerLogin from 'src/settings/authentication/DockerLogin'
+import KubernetesSecret from 'src/settings/authentication/KubernetesSecret'
+import PersonalAccessToken from 'src/settings/authentication/PersonalAccessToken'
+import PodmanLogin from 'src/settings/authentication/PodmanLogin'
+import RocketConfiguration from 'src/settings/authentication/RocketConfiguration'
+import TabButton from 'src/settings/authentication/TabButton'
+import { isTokenCategory, TokenCategory, TokenCategoryKeys, TokenInterface } from 'types/types'
 
-type TokenDialogProps = {
-  token?: TokenInterface
+type TokenTabProps = {
+  token: TokenInterface
 }
 
-export default function TokenDialog({ token }: TokenDialogProps) {
-  const theme = useTheme()
-  const router = useRouter()
+export default function TokenDialog({ token }: TokenTabProps) {
   const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [showAccessKey, setShowAccessKey] = useState(false)
-  const [showSecretKey, setShowSecretKey] = useState(false)
+  const router = useRouter()
+  const { tab } = router.query
+  const [tokenCategory, setTokenCategory] = useState<TokenCategoryKeys>(TokenCategory.PERSONAL_ACCESS)
 
   useEffect(() => {
     if (token) setOpen(true)
   }, [token])
 
+  useEffect(() => {
+    if (isTokenCategory(tab)) {
+      setTokenCategory(tab ?? TokenCategory.PERSONAL_ACCESS)
+    }
+  }, [tab, setTokenCategory])
+
   const handleClose = () => {
-    setIsLoading(true)
-    router.push('/settings?tab=authentication&category=personal')
+    setOpen(false)
   }
 
-  const handleCopyAccessKey = () => {
-    if (token) navigator.clipboard.writeText(token.accessKey)
-  }
-
-  const handleCopySecretKey = () => {
-    if (token?.secretKey) navigator.clipboard.writeText(token.secretKey)
-  }
-
-  const handleToggleAccessKeyVisibility = () => {
-    setShowAccessKey(!showAccessKey)
-  }
-
-  const handleToggleSecretKeyVisibility = () => {
-    setShowSecretKey(!showSecretKey)
+  const handleListItemClick = (category: TokenCategoryKeys) => {
+    setTokenCategory(category)
   }
 
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog
+      fullWidth
+      maxWidth='xl'
+      open={open}
+      onClose={() => {
+        setOpen(false)
+      }}
+    >
       <DialogTitle>Token Created</DialogTitle>
       <DialogContent>
-        <MessageAlert
-          message='You will never be able to access this token again. Make sure to copy it to a safe place.'
-          severity='warning'
-        />
-        <Grid container spacing={1} alignItems='center'>
-          <Grid item xs={2}>
-            <Typography>Access Key</Typography>
-          </Grid>
-          <Grid item xs={8}>
-            <Box
-              sx={{
-                backgroundColor: theme.palette.container.main,
-                px: 2,
-                py: 1,
-                display: 'flex',
-              }}
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
+          divider={<Divider orientation='vertical' flexItem />}
+        >
+          <List sx={{ width: '325px' }}>
+            <TabButton
+              selected={tokenCategory === TokenCategory.PERSONAL_ACCESS}
+              onClick={() => handleListItemClick(TokenCategory.PERSONAL_ACCESS)}
             >
-              <Typography sx={{ mx: 'auto' }} data-test='accessKeyText'>
-                {showAccessKey ? token?.accessKey || '' : 'xxxxxxxxxx'}
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={2}>
-            <Tooltip title='Copy to clipboard' placement='top'>
-              <IconButton onClick={handleCopyAccessKey} aria-label='copy access key to clipboard'>
-                <ContentCopy />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title={`${showAccessKey ? 'Hide' : 'Show'} access key`} placement='top'>
-              <IconButton
-                onClick={handleToggleAccessKeyVisibility}
-                aria-label={`${showAccessKey ? 'Hide' : 'Show'} access key`}
-                data-test='toggleAccessKeyButton'
-              >
-                {showAccessKey ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </Tooltip>
-          </Grid>
-          <Grid item xs={2}>
-            <Typography>Secret Key</Typography>
-          </Grid>
-          <Grid item xs={8}>
-            <Box
-              sx={{
-                backgroundColor: theme.palette.container.main,
-                px: 2,
-                py: 1,
-                display: 'flex',
-              }}
+              <Person fontSize='small' />
+              <Typography ml={1}>Personal Access Token</Typography>
+            </TabButton>
+            <TabButton
+              selected={tokenCategory === TokenCategory.KUBERNETES}
+              onClick={() => handleListItemClick(TokenCategory.KUBERNETES)}
             >
-              <Typography sx={{ mx: 'auto' }} data-test='secretKeyText'>
-                {showSecretKey ? token?.secretKey || '' : 'xxxxxxxxxxxxxxxxxxxxx'}
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={2}>
-            <Tooltip title='Copy to clipboard'>
-              <IconButton onClick={handleCopySecretKey} aria-label='copy secret key to clipboard'>
-                <ContentCopy />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title={`${showSecretKey ? 'Hide' : 'Show'} secret key`}>
-              <IconButton
-                onClick={handleToggleSecretKeyVisibility}
-                aria-label={`${showSecretKey ? 'Hide' : 'Show'} secret key`}
-                data-test='toggleSecretKeyButton'
-              >
-                {showSecretKey ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </Tooltip>
-          </Grid>
-        </Grid>
+              <Image src={KubernetesIcon} alt='kubernetes-icon' width={20} height={20} />
+              <Typography ml={1}>Kubernetes Secret</Typography>
+            </TabButton>
+            <TabButton
+              selected={tokenCategory === TokenCategory.ROCKET}
+              onClick={() => handleListItemClick(TokenCategory.ROCKET)}
+            >
+              <Image src={RktLogo} alt='rocket-icon' width={20} height={20} />
+              <Typography ml={1}>Rkt Configuration</Typography>
+            </TabButton>
+            <TabButton
+              selected={tokenCategory === TokenCategory.PODMAN}
+              onClick={() => handleListItemClick(TokenCategory.PODMAN)}
+            >
+              <Image src={PodmanIcon} alt='podman-icon' width={20} height={20} />
+              <Typography ml={1}>Podman Login</Typography>
+            </TabButton>
+            <TabButton
+              selected={tokenCategory === TokenCategory.DOCKER_LOGIN}
+              onClick={() => handleListItemClick(TokenCategory.DOCKER_LOGIN)}
+            >
+              <Image src={DockerIcon} alt='docker icon' width={20} height={20} />
+              <Typography ml={1}>Docker Login</Typography>
+            </TabButton>
+            <TabButton
+              selected={tokenCategory === TokenCategory.DOCKER_CONFIGURATION}
+              onClick={() => handleListItemClick(TokenCategory.DOCKER_CONFIGURATION)}
+            >
+              <Image src={DockerIcon} alt='docker-icon' width={20} height={20} />
+              <Typography ml={1}>Docker Configuration</Typography>
+            </TabButton>
+          </List>
+          <Container sx={{ my: 2 }}>
+            {tokenCategory === TokenCategory.PERSONAL_ACCESS && <PersonalAccessToken token={token} />}
+            {tokenCategory === TokenCategory.KUBERNETES && <KubernetesSecret token={token} />}
+            {tokenCategory === TokenCategory.ROCKET && <RocketConfiguration token={token} />}
+            {tokenCategory === TokenCategory.PODMAN && <PodmanLogin token={token} />}
+            {tokenCategory === TokenCategory.DOCKER_LOGIN && <DockerLogin token={token} />}
+            {tokenCategory === TokenCategory.DOCKER_CONFIGURATION && <DockerConfiguration token={token} />}
+          </Container>
+        </Stack>
       </DialogContent>
       <DialogActions>
-        <LoadingButton variant='contained' loading={isLoading} onClick={handleClose}>
-          Continue
-        </LoadingButton>
+        <Button variant='contained' onClick={handleClose}>
+          Close
+        </Button>
       </DialogActions>
     </Dialog>
   )

@@ -19,8 +19,7 @@ import { postUserToken } from 'actions/user'
 import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-//import TokenDialog from 'src/settings/authentication/TokenDialog'
-import TokenTabs from 'src/settings/authentication/TokenTabs'
+import TokenDialog from 'src/settings/authentication/TokenDialog'
 import Wrapper from 'src/Wrapper'
 import { TokenActions, TokenActionsKeys, TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
@@ -201,8 +200,7 @@ export default function NewToken() {
           </Stack>
         </Card>
       </Container>
-      {/* <TokenDialog token={token} /> */}
-      <TokenTabs token={token} />
+      {token && <TokenDialog token={token} />}
     </Wrapper>
   )
 }

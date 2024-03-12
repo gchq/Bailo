@@ -6,10 +6,11 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { TokenInterface } from 'types/types'
 
-type TokenTabProps = {
+type PersonalAccessTokenProps = {
   token: TokenInterface
 }
-export default function PersonalAccessToken({ token }: TokenTabProps) {
+
+export default function PersonalAccessToken({ token }: PersonalAccessTokenProps) {
   const theme = useTheme()
   const [errorMessage, setErrorMessage] = useState('')
   const [showAccessKey, setShowAccessKey] = useState(false)

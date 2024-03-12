@@ -9,6 +9,7 @@ import { TokenInterface } from 'types/types'
 type DockerLoginProps = {
   token: TokenInterface
 }
+
 export default function DockerLogin({ token }: DockerLoginProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const theme = useTheme()
@@ -20,7 +21,7 @@ export default function DockerLogin({ token }: DockerLoginProps) {
   return (
     <>
       {isUiConfigLoading && <Loading />}
-      <Stack spacing={2} direction='column' alignItems='flex-start'>
+      <Stack spacing={2} direction='column'>
         <Typography fontWeight='bold'>1. Run Docker login:</Typography>
         <Typography>Enter the following command on the command line: </Typography>
         {!token.secretKey && <Typography color={theme.palette.error.main}>Could not find Secret Key</Typography>}

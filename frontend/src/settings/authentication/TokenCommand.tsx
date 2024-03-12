@@ -64,13 +64,14 @@ export default function TokenCommand({ token, command, disableVisibilityToggle =
         </Typography>
       </Box>
       <Tooltip title='Copy to clipboard'>
-        <IconButton onClick={handleCopyCommand} aria-label='copy command key to clipboard'>
+        <IconButton color='primary' onClick={handleCopyCommand} aria-label='copy command key to clipboard'>
           <ContentCopy />
         </IconButton>
       </Tooltip>
       {!disableVisibilityToggle && (
         <Tooltip title={`${isObfuscated ? 'Show' : 'Hide'} keys`}>
           <IconButton
+            color='primary'
             onClick={handleToggleKeyVisibility}
             aria-label={`${isObfuscated ? 'Show' : 'Hide'} keys`}
             data-test='toggleKeysButton'

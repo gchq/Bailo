@@ -1,4 +1,4 @@
-export function rktConfigTemplate(registry_url: string, access_key: string, secret_key: string) {
+export function rocketConfigTemplate(registry_url: string, access_key: string, secret_key: string) {
   return `rktKind: auth
 rktVersion: v1
 domains:
@@ -24,13 +24,13 @@ spec:
     - name: ${description}-secret.yml`
 }
 
-export function KubernetesSecretsConfigTemplate(
+export function kubernetesSecretsConfigTemplate(
   description: string,
   registry_url: string,
   access_key: string,
   secret_key: string,
 ) {
-  return `apiVersion: v1 frfgtwrghb jpwersoiutygb 9puqwuerutier eu[qwiyhjiq bho[hyhqerreqwghkk gfoyoi[j[iou]]]]
+  return `apiVersion: v1
 kind: Secret
 metadata:
   name:  ${description}-secret

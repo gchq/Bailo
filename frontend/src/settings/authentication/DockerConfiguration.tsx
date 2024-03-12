@@ -5,30 +5,27 @@ import Loading from 'src/common/Loading'
 import SplitButton from 'src/common/SplitButton'
 import MessageAlert from 'src/MessageAlert'
 import CodeSnippetBox from 'src/settings/authentication/CodeSnippetBox'
-import {
-  kubeImagePullSecretsConfigExample,
-  kubernetesSecretsConfigTemplate,
-} from 'src/settings/authentication/configTemplates'
+import { dockerConfigTemplate } from 'src/settings/authentication/configTemplates'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
 import { TokenInterface } from 'types/types'
 import { downloadFile } from 'utils/fileUtils'
 import { toKebabCase } from 'utils/stringUtils'
 
-import kubeConfig from './kubernetesConfig.json'
+import dockerConfig from './dockerConfig.json'
 
-type KubernetesSecretProps = {
+type DockerConfigurationProps = {
   token: TokenInterface
 }
 
-export default function KubernetesSecret({ token }: KubernetesSecretProps) {
+export default function DockerConfiguration({ token }: DockerConfigurationProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [showFilePreview, setShowFilePreview] = useState(false)
   const [showKeys, setShowKeys] = useState(false)
 
   function replacer(key: string | string[], value: string) {
-    if (key === '.dockerconfigjson') {
+    if (key === 'auths') {
       return JSON.parse(
-        `{"auths": {"${uiConfig?.registry.host}": {"username": "${token.accessKey}","password": "${token.secretKey}","auth": "BASE64(${token.accessKey}:${token.secretKey})"}}}`,
+        `{"${uiConfig?.registry.host}": {"username": "${token.accessKey}","password": "${token.secretKey}","auth": "BASE64(${token.accessKey}:${token.secretKey})"}}`,
       )
     }
     return value
@@ -43,12 +40,12 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
       {isUiConfigLoading && <Loading />}
       <Stack spacing={4} direction='column'>
         <Stack spacing={2} direction='column' alignItems='flex-start'>
-          <Typography fontWeight='bold'>Step 1: Download Secret</Typography>
-          <Typography>First, download the Kubernetes pull secret for your personal access token.</Typography>
+          <Typography fontWeight='bold'>Step 1: Download credentials config</Typography>
+          <Typography>First, download the Docker credentials for the application token: </Typography>
           <SplitButton
             options={['Preview file']}
             onPrimaryButtonClick={() =>
-              downloadFile(JSON.stringify([kubeConfig], replacer, 2), `${toKebabCase(token.description)}-auth.yml`)
+              downloadFile(JSON.stringify([dockerConfig], replacer, 2), `${toKebabCase(token.description)}-auth.yml`)
             }
             onMenuItemClick={() => setShowFilePreview(true)}
           >
@@ -60,8 +57,7 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
               onShowKeysChange={(value) => setShowKeys(value)}
               onClose={() => setShowFilePreview(false)}
             >
-              {kubernetesSecretsConfigTemplate(
-                `${token.description}`,
+              {dockerConfigTemplate(
                 `${uiConfig?.registry.host}`,
                 `${showKeys ? token.accessKey : 'xxxxxxxxxx'}`,
                 `${showKeys ? token.secretKey : 'xxxxxxxxxxxxxxxxxxxxx'}`,
@@ -70,26 +66,14 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           )}
         </Stack>
         <Stack spacing={2} direction='column' alignItems='flex-start'>
-          <Typography fontWeight='bold'>Step 2: Submit</Typography>
-          <Typography>Second, submit the secret to the cluster using this command:</Typography>
+          <Typography fontWeight='bold'>Step 2: Write to disk:</Typography>
+          <Typography>Second, place the file in the Docker configuration Directory.</Typography>
+          <MessageAlert message='Note: This will overwrite existing credentials.' severity='warning' />
           <TokenCommand
             disableVisibilityToggle
             token={token}
-            command={`kubectl create -f ${toKebabCase(token.description)}-secret.yml --namespace=<namespace>`}
+            command={`mv ${toKebabCase(token.description)}-auth.json ~/.docker/config.json`}
           />
-        </Stack>
-        <Stack spacing={2} direction='column' alignItems='flex-start'>
-          <Typography fontWeight='bold'>Step 3: Update Kubernetes configuration</Typography>
-          <Typography>
-            Finally, add a reference to the secret to your Kubernetes pod config via an
-            <Typography component='span' fontWeight='bold'>
-              {' imagePullSecrets '}
-            </Typography>
-            field. For example:
-          </Typography>
-          <CodeSnippetBox disableVisibilityButton disableCloseButton>
-            {kubeImagePullSecretsConfigExample(`${toKebabCase(token.description)}`)}
-          </CodeSnippetBox>
         </Stack>
       </Stack>
     </>
