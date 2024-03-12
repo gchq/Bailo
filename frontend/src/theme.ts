@@ -6,11 +6,13 @@ declare module '@mui/material/styles/createPalette' {
     container: PaletteColor
     customTextInput: PaletteColor
     topNavigation: PaletteColor
+    navbarGradient: boolean
   }
   interface PaletteOptions {
     container: PaletteColorOptions
     customTextInput: PaletteColorOptions
     topNavigation: PaletteColorOptions
+    navbarGradient: boolean
   }
 }
 
@@ -93,6 +95,7 @@ export const lightTheme = createTheme({
   },
   palette: {
     mode: 'light',
+    navbarGradient: true,
     primary: {
       main: '#54278e',
     },
@@ -117,6 +120,7 @@ export const lightTheme = createTheme({
 export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
+    navbarGradient: false,
     primary: {
       main: '#f37f58',
       contrastText: '#fff',

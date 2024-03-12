@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material'
+import { Button } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { patchCurrentUserSettings, useGetCurrentUserSettings } from 'actions/user'
 import { useContext } from 'react'
@@ -9,7 +9,7 @@ import { ThemeMapping } from 'src/theme'
 interface ExampleDisplayProps {
   theme: ThemeMapping
 }
-export default function ExampleDisplay({ theme }: ExampleDisplayProps) {
+export default function ThemeSelectButton({ theme }: ExampleDisplayProps) {
   const { mutateUserSettings } = useGetCurrentUserSettings()
 
   const sendNotification = useNotification()
@@ -32,18 +32,9 @@ export default function ExampleDisplay({ theme }: ExampleDisplayProps) {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box
-        sx={{
-          borderStyle: 'solid',
-          borderWidth: '1px',
-          borderColor: theme.theme.palette.primary.main,
-          backgroundColor: theme.theme.palette.background.default,
-        }}
-      >
-        <Button sx={{ color: theme.theme.palette.primary.main, width: '100%' }} onClick={updateTheme}>
-          {theme.key}
-        </Button>
-      </Box>
+      <Button variant='outlined' sx={{ width: '200px' }} onClick={updateTheme}>
+        {theme.key}
+      </Button>
     </ThemeProvider>
   )
 }

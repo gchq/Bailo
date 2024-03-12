@@ -94,10 +94,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
       sx={{
         ...pageTopStyling,
         top: 'unset',
-        background:
-          theme.palette.mode === 'light'
-            ? `linear-gradient(276deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`
-            : `${theme.palette.background}`,
+        background: theme.palette.navbarGradient
+          ? `linear-gradient(276deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`
+          : `${theme.palette.background}`,
       }}
     >
       <Toolbar
