@@ -3,6 +3,7 @@ import { WritableStream } from 'node:stream/web'
 import { OpenTelemetryBunyanStream } from '@opentelemetry/instrumentation-bunyan'
 import bunyan from 'bunyan'
 import chalk from 'chalk'
+import { getNamespace } from 'cls-hooked'
 import { omit } from 'lodash-es'
 import path, { join } from 'path'
 import util from 'util'
@@ -130,6 +131,15 @@ export class Writer extends WritableStream {
   }
 }
 
+function ProductionStream() {
+  return {
+    write: (log) => {
+      const namespace = getNamespace('my session')
+      process.stdout.write(`${JSON.stringify({ ...log, requestId: namespace?.get('reqId') })}\n`)
+    },
+  }
+}
+
 const streams: Array<bunyan.Stream> = []
 
 if (process.env.NODE_ENV !== 'production') {
@@ -147,7 +157,8 @@ if (process.env.NODE_ENV !== 'production') {
   // In production environments output plain JSON logs
   streams.push({
     level: config.log.level,
-    stream: process.stdout,
+    type: 'raw',
+    stream: ProductionStream(),
   })
 }
 if (config.instrumentation.enabled) {
