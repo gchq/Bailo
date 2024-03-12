@@ -8,8 +8,6 @@ import {
   DialogTitle,
   Divider,
   List,
-  ListItem,
-  ListItemButton,
   Stack,
   Typography,
 } from '@mui/material'
@@ -26,7 +24,8 @@ import KubernetesSecret from 'src/settings/authentication/KubernetesSecret'
 import PersonalAccessToken from 'src/settings/authentication/PersonalAccessToken'
 import PodmanLogin from 'src/settings/authentication/PodmanLogin'
 import RocketConfig from 'src/settings/authentication/RocketConfig'
-import { TokenInterface } from 'types/v2/types'
+import TabButton from 'src/settings/authentication/TabButton'
+import { TokenInterface } from 'types/types'
 
 export const TokenCategory = {
   PERSONAL_ACCESS: 'personal access',
@@ -95,60 +94,48 @@ export default function TokenTabs({ token }: TokenTabProps) {
           divider={<Divider orientation='vertical' flexItem />}
         >
           <List sx={{ width: '325px' }}>
-            <ListItem disablePadding>
-              <ListItemButton
-                selected={tokenCategory === TokenCategory.PERSONAL_ACCESS}
-                onClick={() => handleListItemClick(TokenCategory.PERSONAL_ACCESS)}
-              >
-                <Person fontSize='small' />
-                <Typography ml={1}>Personal Access Token</Typography>
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton
-                selected={tokenCategory === TokenCategory.KUBERNETES}
-                onClick={() => handleListItemClick(TokenCategory.KUBERNETES)}
-              >
-                <Image src={KubernetesIcon} alt='kubernetes-icon' width={20} height={20} />
-                <Typography ml={1}>Kubernetes Secret</Typography>
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton
-                selected={tokenCategory === TokenCategory.ROCKET}
-                onClick={() => handleListItemClick(TokenCategory.ROCKET)}
-              >
-                <Image src={RktLogo} alt='rocket-icon' width={20} height={20} />
-                <Typography ml={1}>Rkt Configuration</Typography>
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton
-                selected={tokenCategory === TokenCategory.PODMAN}
-                onClick={() => handleListItemClick(TokenCategory.PODMAN)}
-              >
-                <Image src={PodmanIcon} alt='podman-icon' width={20} height={20} />
-                <Typography ml={1}>Podman Login</Typography>
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton
-                selected={tokenCategory === TokenCategory.DOCKER_LOGIN}
-                onClick={() => handleListItemClick(TokenCategory.DOCKER_LOGIN)}
-              >
-                <Image src={DockerIcon} alt='docker icon' width={20} height={20} />
-                <Typography ml={1}>Docker Login</Typography>
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton
-                selected={tokenCategory === TokenCategory.DOCKER_CONFIGURATION}
-                onClick={() => handleListItemClick(TokenCategory.DOCKER_CONFIGURATION)}
-              >
-                <Image src={DockerIcon} alt='docker-icon' width={20} height={20} />
-                <Typography ml={1}>Docker Configuration</Typography>
-              </ListItemButton>
-            </ListItem>
+            <TabButton
+              selected={tokenCategory === TokenCategory.PERSONAL_ACCESS}
+              onClick={() => handleListItemClick(TokenCategory.PERSONAL_ACCESS)}
+            >
+              <Person fontSize='small' />
+              <Typography ml={1}>Personal Access Token</Typography>
+            </TabButton>
+            <TabButton
+              selected={tokenCategory === TokenCategory.KUBERNETES}
+              onClick={() => handleListItemClick(TokenCategory.KUBERNETES)}
+            >
+              <Image src={KubernetesIcon} alt='kubernetes-icon' width={20} height={20} />
+              <Typography ml={1}>Kubernetes Secret</Typography>
+            </TabButton>
+            <TabButton
+              selected={tokenCategory === TokenCategory.ROCKET}
+              onClick={() => handleListItemClick(TokenCategory.ROCKET)}
+            >
+              <Image src={RktLogo} alt='rocket-icon' width={20} height={20} />
+              <Typography ml={1}>Rkt Configuration</Typography>
+            </TabButton>
+            <TabButton
+              selected={tokenCategory === TokenCategory.PODMAN}
+              onClick={() => handleListItemClick(TokenCategory.PODMAN)}
+            >
+              <Image src={PodmanIcon} alt='podman-icon' width={20} height={20} />
+              <Typography ml={1}>Podman Login</Typography>
+            </TabButton>
+            <TabButton
+              selected={tokenCategory === TokenCategory.DOCKER_LOGIN}
+              onClick={() => handleListItemClick(TokenCategory.DOCKER_LOGIN)}
+            >
+              <Image src={DockerIcon} alt='docker icon' width={20} height={20} />
+              <Typography ml={1}>Docker Login</Typography>
+            </TabButton>
+            <TabButton
+              selected={tokenCategory === TokenCategory.DOCKER_CONFIGURATION}
+              onClick={() => handleListItemClick(TokenCategory.DOCKER_CONFIGURATION)}
+            >
+              <Image src={DockerIcon} alt='docker-icon' width={20} height={20} />
+              <Typography ml={1}>Docker Configuration</Typography>
+            </TabButton>
           </List>
           <Container sx={{ my: 2 }}>
             {tokenCategory === TokenCategory.PERSONAL_ACCESS && <PersonalAccessToken token={token} />}

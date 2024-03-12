@@ -10,7 +10,7 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import CodeSnippetBox from 'src/settings/authentication/CodeSnippetBox'
 import { rktConfigTemplate } from 'src/settings/authentication/configTemplates'
-import { TokenInterface } from 'types/v2/types'
+import { TokenInterface } from 'types/types'
 import { toKebabCase } from 'utils/stringUtils'
 
 import rktConfig from './rktConfig.json'

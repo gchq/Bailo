@@ -2,9 +2,9 @@ import { ContentCopy, Visibility, VisibilityOff } from '@mui/icons-material'
 import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
+import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { TokenInterface } from 'types/v2/types'
-import useNotification from 'utils/hooks/useNotification'
+import { TokenInterface } from 'types/types'
 
 type TokenTabProps = {
   token: TokenInterface

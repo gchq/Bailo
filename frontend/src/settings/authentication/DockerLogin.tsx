@@ -4,7 +4,7 @@ import { useGetUiConfig } from 'actions/uiConfig'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
-import { TokenInterface } from 'types/v2/types'
+import { TokenInterface } from 'types/types'
 
 type DockerLoginProps = {
   token: TokenInterface

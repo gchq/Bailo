@@ -2,8 +2,8 @@ import { ContentCopy, Visibility, VisibilityOff } from '@mui/icons-material'
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
-import { TokenInterface } from 'types/v2/types'
-import useNotification from 'utils/hooks/useNotification'
+import useNotification from 'src/hooks/useNotification'
+import { TokenInterface } from 'types/types'
 
 type TokenCommandProps = {
   token: TokenInterface

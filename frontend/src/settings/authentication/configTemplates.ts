@@ -1,4 +1,4 @@
-export function rktConfigTemplate(registry_url, access_key, secret_key) {
+export function rktConfigTemplate(registry_url: string, access_key: string, secret_key: string) {
   return `rktKind: auth
 rktVersion: v1
 domains:
@@ -9,7 +9,7 @@ credentials:
   password: '${secret_key}'`
 }
 
-export function kubeImagePullSecretsConfigExample(description) {
+export function kubeImagePullSecretsConfigExample(description: string) {
   return `apiVersion: v1
 kind: Pod
 metadata:
@@ -24,11 +24,16 @@ spec:
     - name: ${description}-secret.yml`
 }
 
-export function KubernetesSecretsConfigTemplate(registry_url, access_key, secret_key) {
-  return `apiVersion: v1
+export function KubernetesSecretsConfigTemplate(
+  description: string,
+  registry_url: string,
+  access_key: string,
+  secret_key: string,
+) {
+  return `apiVersion: v1 frfgtwrghb jpwersoiutygb 9puqwuerutier eu[qwiyhjiq bho[hyhqerreqwghkk gfoyoi[j[iou]]]]
 kind: Secret
 metadata:
-  name: <key-name>-secret
+  name:  ${description}-secret
 data:
   .dockerconfigjson:
     auths:
@@ -39,7 +44,7 @@ data:
 type: kubernetes.io/dockerconfigjson`
 }
 
-export function dockerConfigTemplate(registry_url, access_key, secret_key) {
+export function dockerConfigTemplate(registry_url: string, access_key: string, secret_key: string) {
   return `auths:
   '${registry_url}':
     username: '${access_key}'
