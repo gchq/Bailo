@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import SplitButton from 'src/common/SplitButton'
 import MessageAlert from 'src/MessageAlert'
@@ -25,6 +25,8 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
   const [showFilePreview, setShowFilePreview] = useState(false)
   const [showKeys, setShowKeys] = useState(false)
 
+  const secretFileName = useMemo(() => `${toKebabCase(token.description)}-k8s-secret.yml`, [token.description])
+
   function replacer(key: string | string[], value: string) {
     if (key === '.dockerconfigjson') {
       return JSON.parse(
@@ -47,17 +49,16 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           <Typography>First, download the Kubernetes pull secret for your personal access token.</Typography>
           <SplitButton
             options={[`${showFilePreview ? 'Close preview' : 'Preview file'}`]}
-            onPrimaryButtonClick={() =>
-              downloadFile(JSON.stringify([kubeConfig], replacer, 2), `${toKebabCase(token.description)}-auth.yml`)
-            }
+            onPrimaryButtonClick={() => downloadFile(JSON.stringify([kubeConfig], replacer, 2), secretFileName)}
             onMenuItemClick={() => setShowFilePreview(!showFilePreview)}
           >
-            {`Download ${toKebabCase(token.description)}-auth.yml`}
+            Download
           </SplitButton>
           {showFilePreview && (
             <CodeSnippet
+              fileName={secretFileName}
               showKeys={showKeys}
-              onShowKeysChange={(value) => setShowKeys(value)}
+              onVisibilityChange={(value) => setShowKeys(value)}
               onClose={() => setShowFilePreview(false)}
             >
               {kubernetesSecretsConfigTemplate(
@@ -75,7 +76,7 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           <TokenCommand
             disableVisibilityToggle
             token={token}
-            command={`kubectl create -f ${toKebabCase(token.description)}-secret.yml --namespace=<namespace>`}
+            command={`kubectl create -f ${secretFileName} --namespace=<namespace>`}
           />
         </Stack>
         <Stack spacing={2} direction='column' alignItems='flex-start'>

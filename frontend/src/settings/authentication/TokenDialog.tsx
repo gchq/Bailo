@@ -58,11 +58,13 @@ export default function TokenDialog({ token }: TokenDialogProps) {
   return (
     <Dialog
       fullWidth
+      disableEscapeKeyDown
       maxWidth='xl'
       open={open}
-      onClose={() => {
-        setOpen(false)
+      onClose={(_event, reason) => {
+        if (reason !== 'backdropClick') setOpen(false)
       }}
+      PaperProps={{ sx: { height: '90vh' } }}
     >
       <DialogTitle>Token Created</DialogTitle>
       <DialogContent>
@@ -70,6 +72,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
           direction={{ xs: 'column', sm: 'row' }}
           spacing={2}
           divider={<Divider orientation='vertical' flexItem />}
+          sx={{ height: '100%' }}
         >
           <List sx={{ width: '325px' }}>
             <SimpleListItemButton
@@ -115,7 +118,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
               <Typography ml={1}>Docker Configuration</Typography>
             </SimpleListItemButton>
           </List>
-          <Container sx={{ my: 2 }}>
+          <Container sx={{ my: 2, overflowY: 'auto' }}>
             {tokenCategory === TokenCategory.PERSONAL_ACCESS && <PersonalAccessToken token={token} />}
             {tokenCategory === TokenCategory.KUBERNETES && <KubernetesSecret token={token} />}
             {tokenCategory === TokenCategory.ROCKET && <RocketConfiguration token={token} />}

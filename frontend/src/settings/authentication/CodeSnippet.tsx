@@ -1,20 +1,21 @@
-import { Close, Visibility, VisibilityOff } from '@mui/icons-material'
-import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { ReactNode } from 'react'
+import CodeSnippetActions from 'src/settings/authentication/CodeSnippetActions'
 
 type CodeSnippetProps = {
   children: ReactNode
+  fileName?: string
 } & (
   | {
       disableVisibilityButton?: false
       showKeys: boolean
-      onShowKeysChange: (value: boolean) => void
+      onVisibilityChange: (showKeys: boolean) => void
     }
   | {
       disableVisibilityButton: true
       showKeys?: never
-      onShowKeysChange?: never
+      onVisibilityChange?: never
     }
 ) &
   (
@@ -30,62 +31,72 @@ type CodeSnippetProps = {
 
 export default function CodeSnippet({
   children,
+  fileName = '',
   disableVisibilityButton = false,
   disableCloseButton = false,
   showKeys = false,
-  onShowKeysChange = () => undefined,
+  onVisibilityChange = () => undefined,
   onClose = () => undefined,
 }: CodeSnippetProps) {
   const theme = useTheme()
 
-  const handleToggleKeyVisibility = () => {
-    onShowKeysChange(!showKeys)
-  }
-
-  const handleClose = () => {
-    onClose()
-  }
-
   return (
     <Stack
-      direction='row'
-      spacing={1}
-      alignItems='flex-start'
-      justifyContent='space-between'
+      direction='column'
+      divider={<Divider />}
       sx={{
-        p: theme.spacing(1),
         backgroundColor: theme.palette.container.main,
         width: '100%',
       }}
     >
-      <Typography
+      {fileName && (
+        <Stack
+          direction='row'
+          spacing={1}
+          alignItems='center'
+          justifyContent='space-between'
+          sx={{
+            pl: theme.spacing(2),
+            pr: theme.spacing(1),
+            py: theme.spacing(1),
+          }}
+        >
+          <Typography variant='caption'>{fileName}</Typography>
+          <CodeSnippetActions
+            disableVisibilityButton={disableVisibilityButton}
+            disableCloseButton={disableCloseButton}
+            showKeys={showKeys}
+            onVisibilityChange={() => onVisibilityChange(!showKeys)}
+            onClose={onClose}
+          />
+        </Stack>
+      )}
+      <Stack
+        direction='row'
+        spacing={1}
+        alignItems='flex-start'
+        justifyContent='space-between'
         sx={{
-          px: theme.spacing(1),
-          whiteSpace: 'pre-wrap',
-          overflowX: 'auto',
+          px: theme.spacing(2),
+          py: theme.spacing(1),
         }}
       >
-        {children}
-      </Typography>
-      <Stack direction='row'>
-        {!disableVisibilityButton && (
-          <Tooltip title={`${showKeys ? 'Hide' : 'Show'} keys`}>
-            <IconButton
-              color='primary'
-              onClick={handleToggleKeyVisibility}
-              aria-label={`${showKeys ? 'Hide' : 'Show'} keys`}
-              data-test='toggleKeyVisibilityButton'
-            >
-              {showKeys ? <VisibilityOff /> : <Visibility />}
-            </IconButton>
-          </Tooltip>
-        )}
-        {!disableCloseButton && (
-          <Tooltip title='Close'>
-            <IconButton color='primary' onClick={handleClose} aria-label='Close' data-test='closeCodeSnippetButton'>
-              <Close />
-            </IconButton>
-          </Tooltip>
+        <Typography
+          sx={{
+            whiteSpace: 'pre-wrap',
+            overflowX: 'auto',
+          }}
+        >
+          {children}
+        </Typography>
+        {!fileName && (
+          <CodeSnippetActions
+            disableVisibilityButton={disableVisibilityButton}
+            disableCloseButton={disableCloseButton}
+            showKeys={showKeys}
+            onVisibilityChange={() => onVisibilityChange(!showKeys)}
+            onClose={onClose}
+          />
         )}
       </Stack>
     </Stack>

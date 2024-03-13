@@ -79,12 +79,13 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
         </Grid>
         <Grid item xs={2}>
           <Tooltip title='Copy to clipboard' placement='top'>
-            <IconButton onClick={handleCopyAccessKey} aria-label='copy access key to clipboard'>
+            <IconButton color='primary' onClick={handleCopyAccessKey} aria-label='copy access key to clipboard'>
               <ContentCopy />
             </IconButton>
           </Tooltip>
           <Tooltip title={`${showAccessKey ? 'Hide' : 'Show'} access key`} placement='top'>
             <IconButton
+              color='primary'
               onClick={handleToggleAccessKeyVisibility}
               aria-label={`${showAccessKey ? 'Hide' : 'Show'} access key`}
               data-test='toggleAccessKeyButton'
@@ -112,12 +113,13 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
         </Grid>
         <Grid item xs={2}>
           <Tooltip title='Copy to clipboard'>
-            <IconButton onClick={handleCopySecretKey} aria-label='copy secret key to clipboard'>
+            <IconButton color='primary' onClick={handleCopySecretKey} aria-label='copy secret key to clipboard'>
               <ContentCopy />
             </IconButton>
           </Tooltip>
           <Tooltip title={`${showSecretKey ? 'Hide' : 'Show'} secret key`}>
             <IconButton
+              color='primary'
               onClick={handleToggleSecretKeyVisibility}
               aria-label={`${showSecretKey ? 'Hide' : 'Show'} secret key`}
               data-test='toggleSecretKeyButton'

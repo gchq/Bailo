@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import SplitButton from 'src/common/SplitButton'
 import MessageAlert from 'src/MessageAlert'
@@ -21,6 +21,8 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [showFilePreview, setShowFilePreview] = useState(false)
   const [showKeys, setShowKeys] = useState(false)
+
+  const configFileName = useMemo(() => `${toKebabCase(token.description)}-docker-auth.yml`, [token.description])
 
   function replacer(key: string | string[], value: string) {
     if (key === 'auths') {
@@ -44,17 +46,16 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
           <Typography>First, download the Docker credentials for the application token: </Typography>
           <SplitButton
             options={[`${showFilePreview ? 'Close preview' : 'Preview file'}`]}
-            onPrimaryButtonClick={() =>
-              downloadFile(JSON.stringify([dockerConfig], replacer, 2), `${toKebabCase(token.description)}-auth.yml`)
-            }
+            onPrimaryButtonClick={() => downloadFile(JSON.stringify([dockerConfig], replacer, 2), configFileName)}
             onMenuItemClick={() => setShowFilePreview(!showFilePreview)}
           >
-            {`Download ${toKebabCase(token.description)}-auth.yml`}
+            Download
           </SplitButton>
           {showFilePreview && (
             <CodeSnippet
+              fileName={configFileName}
               showKeys={showKeys}
-              onShowKeysChange={(value) => setShowKeys(value)}
+              onVisibilityChange={(value) => setShowKeys(value)}
               onClose={() => setShowFilePreview(false)}
             >
               {dockerConfigTemplate(
@@ -69,11 +70,7 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
           <Typography fontWeight='bold'>Step 2: Write to disk:</Typography>
           <Typography>Second, place the file in the Docker configuration Directory.</Typography>
           <MessageAlert message='Note: This will overwrite existing credentials.' severity='warning' />
-          <TokenCommand
-            disableVisibilityToggle
-            token={token}
-            command={`mv ${toKebabCase(token.description)}-auth.json ~/.docker/config.json`}
-          />
+          <TokenCommand disableVisibilityToggle token={token} command={`mv ${configFileName} ~/.docker/config.yml`} />
         </Stack>
       </Stack>
     </>
