@@ -114,6 +114,9 @@ export const lightTheme = createTheme({
     topNavigation: {
       main: '#fff',
     },
+    text: {
+      primary: '#3c3c3c',
+    },
   },
 })
 
@@ -244,9 +247,85 @@ export const darkTheme = createTheme({
   },
 })
 
+export const classicTheme = createTheme({
+  components: {
+    ...defaultComponentOverrides,
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#f5f5f5',
+          },
+        },
+      },
+    },
+    MuiListItem: {
+      styleOverrides: {
+        button: {
+          '&:hover': {
+            backgroundColor: '#f5f5f5',
+          },
+        },
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#f5f5f5',
+            borderRight: 'solid',
+            borderWidth: '2px',
+            borderColor: '#b3cde0',
+          },
+          '&.Mui-selected': {
+            borderRight: 'solid',
+            borderWidth: '2px',
+            borderColor: '#6497b1',
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#f5f5f5',
+          },
+        },
+      },
+    },
+  },
+  palette: {
+    mode: 'light',
+    navbarGradient: false,
+    primary: {
+      main: '#193a6f',
+    },
+    secondary: {
+      main: '#f37f58',
+    },
+    error: {
+      main: red.A400,
+    },
+    container: {
+      main: '#f3f1f1',
+    },
+    customTextInput: {
+      main: '#535353',
+    },
+    topNavigation: {
+      main: '#fff',
+    },
+    text: {
+      primary: '#3c3c3c',
+    },
+  },
+})
+
 export const ThemeName = {
   Light: 'light',
   Dark: 'dark',
+  Classic: 'classic',
 } as const
 
 const lightThemeMapping = {
@@ -259,5 +338,10 @@ const darkThemeMapping = {
   theme: darkTheme,
   title: 'Dark',
 }
+const classicThemeMapping = {
+  key: ThemeName.Classic,
+  theme: classicTheme,
+  title: 'Classic',
+}
 
-export const themeList = [lightThemeMapping, darkThemeMapping]
+export const themeList = [lightThemeMapping, darkThemeMapping, classicThemeMapping]
