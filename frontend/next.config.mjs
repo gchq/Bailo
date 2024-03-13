@@ -25,6 +25,9 @@ const backend = process.env.BACKEND_SERVICE ?? defaultBackend
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    instrumentationHook: true,
+  },
   reactStrictMode: true,
   output: 'standalone',
   transpilePackages: ['nanoid', 'lodash-es'],
