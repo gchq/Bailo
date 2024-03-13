@@ -9,15 +9,19 @@ import log from '../../services/log.js'
 const morganLog = promisify(
   morgan<any, any>(
     (tokens, req, res) => {
+      const info = {
+        url: tokens.url(req, res),
+        method: tokens.method(req, res),
+        'response-time': tokens['response-time'](req, res),
+        status: tokens.status(req, res),
+        'content-length': tokens.res(req, res, 'content-length'),
+        user: req.user,
+      }
       req.log.trace(
-        {
-          url: tokens.url(req, res),
-          method: tokens.method(req, res),
-          'response-time': tokens['response-time'](req, res),
-          status: tokens.status(req, res),
-          code: 'approval',
-        },
-        tokens.dev(morgan, req, res),
+        info,
+        `${info.method} ${info.url} ${info.status} ${info['response-time']}ms${
+          info['content-length'] ? ` - ${info['content-length']}` : ''
+        }`,
       )
 
       return ''
