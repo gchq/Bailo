@@ -1,7 +1,8 @@
 import { LoadingButton } from '@mui/lab'
-import { Container, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { Container, Divider, List, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import TabButton from 'src/common/TabButton'
 
 import { ModelInterface } from '../../types/types'
 import AccessRequestSettings from './settings/AccessRequestSettings'
@@ -51,29 +52,18 @@ export default function Settings({ model }: SettingsProps) {
       divider={<Divider orientation='vertical' flexItem />}
     >
       <List sx={{ width: '200px' }}>
-        <ListItem disablePadding>
-          <ListItemButton selected={selectedCategory === 'details'} onClick={() => handleListItemClick('details')}>
-            Details
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton
-            selected={selectedCategory === 'permissions'}
-            onClick={() => handleListItemClick('permissions')}
-          >
-            Model Access
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton selected={selectedCategory === 'access'} onClick={() => handleListItemClick('access')}>
-            Access Requests
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton selected={selectedCategory === 'danger'} onClick={() => handleListItemClick('danger')}>
-            Danger Zone
-          </ListItemButton>
-        </ListItem>
+        <TabButton selected={selectedCategory === 'details'} onClick={() => handleListItemClick('details')}>
+          Details
+        </TabButton>
+        <TabButton selected={selectedCategory === 'permissions'} onClick={() => handleListItemClick('permissions')}>
+          Model Access
+        </TabButton>
+        <TabButton selected={selectedCategory === 'access'} onClick={() => handleListItemClick('access')}>
+          Access Requests
+        </TabButton>
+        <TabButton selected={selectedCategory === 'danger'} onClick={() => handleListItemClick('danger')}>
+          Danger Zone
+        </TabButton>
       </List>
       <Container sx={{ my: 2 }}>
         {selectedCategory === 'details' && <ModelDetails model={model} />}
