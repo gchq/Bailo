@@ -11,6 +11,7 @@ import {
 } from 'src/settings/authentication/configTemplates'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
 import { TokenInterface } from 'types/types'
+import { HIDDEN_TOKEN_ACCESS_KEY, HIDDEN_TOKEN_SECRET_KEY } from 'utils/constants'
 import { downloadFile } from 'utils/fileUtils'
 import { toKebabCase } from 'utils/stringUtils'
 
@@ -64,8 +65,8 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
               {kubernetesSecretsConfigTemplate(
                 `${token.description}`,
                 `${uiConfig?.registry.host}`,
-                `${showKeys ? token.accessKey : 'xxxxxxxxxx'}`,
-                `${showKeys ? token.secretKey : 'xxxxxxxxxxxxxxxxxxxxx'}`,
+                `${showKeys ? token.accessKey : HIDDEN_TOKEN_ACCESS_KEY}`,
+                `${showKeys ? token.secretKey : HIDDEN_TOKEN_SECRET_KEY}`,
               )}
             </CodeSnippet>
           )}

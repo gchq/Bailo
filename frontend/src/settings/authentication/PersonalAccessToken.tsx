@@ -5,6 +5,7 @@ import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { TokenInterface } from 'types/types'
+import { HIDDEN_TOKEN_ACCESS_KEY, HIDDEN_TOKEN_SECRET_KEY } from 'utils/constants'
 
 type PersonalAccessTokenProps = {
   token: TokenInterface
@@ -73,7 +74,7 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
             }}
           >
             <Typography sx={{ mx: 'auto' }} data-test='accessKeyText'>
-              {showAccessKey ? token?.accessKey || '' : 'xxxxxxxxxx'}
+              {showAccessKey ? token?.accessKey || '' : HIDDEN_TOKEN_ACCESS_KEY}
             </Typography>
           </Box>
         </Grid>
@@ -107,7 +108,7 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
             }}
           >
             <Typography sx={{ mx: 'auto' }} data-test='secretKeyText'>
-              {showSecretKey ? token?.secretKey || '' : 'xxxxxxxxxxxxxxxxxxxxx'}
+              {showSecretKey ? token?.secretKey || '' : HIDDEN_TOKEN_SECRET_KEY}
             </Typography>
           </Box>
         </Grid>

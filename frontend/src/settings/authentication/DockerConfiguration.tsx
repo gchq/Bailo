@@ -8,6 +8,7 @@ import CodeSnippet from 'src/settings/authentication/CodeSnippet'
 import { dockerConfigTemplate } from 'src/settings/authentication/configTemplates'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
 import { TokenInterface } from 'types/types'
+import { HIDDEN_TOKEN_ACCESS_KEY, HIDDEN_TOKEN_SECRET_KEY } from 'utils/constants'
 import { downloadFile } from 'utils/fileUtils'
 import { toKebabCase } from 'utils/stringUtils'
 
@@ -60,8 +61,8 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
             >
               {dockerConfigTemplate(
                 `${uiConfig?.registry.host}`,
-                `${showKeys ? token.accessKey : 'xxxxxxxxxx'}`,
-                `${showKeys ? token.secretKey : 'xxxxxxxxxxxxxxxxxxxxx'}`,
+                `${showKeys ? token.accessKey : HIDDEN_TOKEN_ACCESS_KEY}`,
+                `${showKeys ? token.secretKey : HIDDEN_TOKEN_SECRET_KEY}`,
               )}
             </CodeSnippet>
           )}
@@ -70,6 +71,7 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
           <Typography fontWeight='bold'>Step 2: Write to disk:</Typography>
           <Typography>Second, place the file in the Docker configuration Directory.</Typography>
           <MessageAlert message='Note: This will overwrite existing credentials.' severity='warning' />
+          {/* TODO me - check in with Alex. Should this be a json or yaml file? */}
           <TokenCommand disableVisibilityToggle token={token} command={`mv ${configFileName} ~/.docker/config.yml`} />
         </Stack>
       </Stack>
