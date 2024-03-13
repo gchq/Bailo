@@ -116,12 +116,12 @@ export default function NewToken() {
   }
 
   return (
-    <Wrapper title='Access Token' page='Token'>
+    <Wrapper title='Personal Access Token' page='Token'>
       <Container maxWidth='md'>
         <Card sx={{ my: 4, p: 4 }}>
           <Stack spacing={2}>
             <div>
-              <Link href={'/settings?tab=authentication&category=personal'}>
+              <Link href={'/settings?tab=authentication'}>
                 <Button startIcon={<ArrowBack />}>Back to settings</Button>
               </Link>
             </div>

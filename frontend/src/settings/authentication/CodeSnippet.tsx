@@ -28,7 +28,7 @@ type CodeSnippetProps = {
       }
   )
 
-export default function CodeSnippetBox({
+export default function CodeSnippet({
   children,
   disableVisibilityButton = false,
   disableCloseButton = false,
@@ -67,7 +67,7 @@ export default function CodeSnippetBox({
       >
         {children}
       </Typography>
-      <Stack direction='row' spacing={1}>
+      <Stack direction='row'>
         {!disableVisibilityButton && (
           <Tooltip title={`${showKeys ? 'Hide' : 'Show'} keys`}>
             <IconButton
@@ -82,7 +82,7 @@ export default function CodeSnippetBox({
         )}
         {!disableCloseButton && (
           <Tooltip title='Close'>
-            <IconButton color='primary' onClick={handleClose} aria-label='Close' data-test='closeCodeSnippetBoxButton'>
+            <IconButton color='primary' onClick={handleClose} aria-label='Close' data-test='closeCodeSnippetButton'>
               <Close />
             </IconButton>
           </Tooltip>

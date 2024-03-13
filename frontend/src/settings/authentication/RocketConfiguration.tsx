@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import SplitButton from 'src/common/SplitButton'
 import MessageAlert from 'src/MessageAlert'
-import CodeSnippetBox from 'src/settings/authentication/CodeSnippetBox'
+import CodeSnippet from 'src/settings/authentication/CodeSnippet'
 import { rocketConfigTemplate } from 'src/settings/authentication/configTemplates'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
 import { TokenInterface } from 'types/types'
@@ -41,16 +41,16 @@ export default function RocketConfiguration({ token }: RocketConfigurationProps)
           <Typography fontWeight='bold'>Step 1: Download credentials config</Typography>
           <Typography>First, download the rkt credentials file for the personal access token:</Typography>
           <SplitButton
-            options={['Preview file']}
+            options={[`${showFilePreview ? 'Close preview' : 'Preview file'}`]}
             onPrimaryButtonClick={() =>
               downloadFile(JSON.stringify([rocketConfig], replacer, 2), `${toKebabCase(token.description)}-auth.yml`)
             }
-            onMenuItemClick={() => setShowFilePreview(true)}
+            onMenuItemClick={() => setShowFilePreview(!showFilePreview)}
           >
             {`Download ${toKebabCase(token.description)}-auth.yml`}
           </SplitButton>
           {showFilePreview && (
-            <CodeSnippetBox
+            <CodeSnippet
               showKeys={showKeys}
               onShowKeysChange={(value) => setShowKeys(value)}
               onClose={() => setShowFilePreview(false)}
@@ -60,7 +60,7 @@ export default function RocketConfiguration({ token }: RocketConfigurationProps)
                 `${showKeys ? token.accessKey : 'xxxxxxxxxx'}`,
                 `${showKeys ? token.secretKey : 'xxxxxxxxxxxxxxxxxxxxx'}`,
               )}
-            </CodeSnippetBox>
+            </CodeSnippet>
           )}
         </Stack>
         <Stack spacing={2} direction='column' alignItems='flex-start'>

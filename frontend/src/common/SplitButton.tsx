@@ -14,8 +14,8 @@ export default function SplitButton({ options, onPrimaryButtonClick, onMenuItemC
   const anchorRef = useRef<HTMLButtonElement>(null)
 
   const handleMenuItemClick = (_event: MouseEvent, index: number) => {
-    onMenuItemClick(options[index])
     setOpen(false)
+    onMenuItemClick(options[index])
   }
 
   const handleToggleMenu = () => {

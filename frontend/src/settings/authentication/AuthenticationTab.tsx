@@ -91,7 +91,7 @@ export default function AuthenticationTab() {
         sx={{ pb: 2 }}
       >
         <Typography fontWeight='bold' mb={1}>
-          Access Tokens
+          Personal Access Tokens
         </Typography>
         <LoadingButton variant='outlined' loading={isLoading} onClick={handleAddToken}>
           Add token
