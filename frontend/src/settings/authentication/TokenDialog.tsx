@@ -74,7 +74,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
           divider={<Divider orientation='vertical' flexItem />}
           sx={{ height: '100%' }}
         >
-          <List sx={{ width: '325px' }}>
+          <List sx={{ minWidth: '230px' }}>
             <SimpleListItemButton
               selected={tokenCategory === TokenCategory.PERSONAL_ACCESS}
               onClick={() => handleListItemClick(TokenCategory.PERSONAL_ACCESS)}
