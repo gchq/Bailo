@@ -1,4 +1,4 @@
-import OrganisationIcon from '@mui/icons-material/Business'
+import { Label } from '@mui/icons-material'
 import ContentCopy from '@mui/icons-material/ContentCopy'
 import EmailIcon from '@mui/icons-material/Email'
 import UserIcon from '@mui/icons-material/Person'
@@ -93,15 +93,6 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
               </Typography>
             </Stack>
             <Divider />
-            <Stack direction='row' spacing={1}>
-              <OrganisationIcon color='primary' />
-              <Typography>
-                <Box component='span' fontWeight='bold'>
-                  Organisation
-                </Box>
-                : {userInformation.organisation}
-              </Typography>
-            </Stack>
             <Stack direction='row' spacing={1} alignItems='center'>
               <EmailIcon color='primary' />
               <Typography>
@@ -114,6 +105,21 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
                 <ContentCopy color='primary' />
               </IconButton>
             </Stack>
+            {Object.keys(userInformation).map((key) => {
+              if (key !== 'name' && key !== 'email') {
+                return (
+                  <Stack direction='row' spacing={1} key={key}>
+                    <Label color='primary' />
+                    <Typography>
+                      <Box component='span' fontWeight='bold'>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </Box>
+                      : {userInformation[key]}
+                    </Typography>
+                  </Stack>
+                )
+              }
+            })}
           </Stack>
         </Popover>
       )}
