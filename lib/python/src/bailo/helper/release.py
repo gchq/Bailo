@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import os
+import shutil
 from io import BytesIO
-from typing import Any
+from typing import Any, Union
 
 from bailo.core.client import Client
 from semantic_version import Version
@@ -132,23 +134,52 @@ class Release:
             draft,
         )
 
-    def download(self, filename: str) -> Any:
+    def download(self, filename: str, write: bool | None = True, path: str | None = None) -> Any:
         """Give returns a Reading object given the file id.
 
         :param filename: The name of the file to retrieve
+        :param write: Bool to determine if writing file to disk, defaults to True
+        :param path: Local path to write file to (if write set to True)
+
         :return: A JSON response object
         """
-        return self.client.get_download_by_filename(self.model_id, str(self.version), filename)
+        res = self.client.get_download_by_filename(self.model_id, str(self.version), filename)
 
-    def upload(self, name: str, file: BytesIO) -> str:
-        """Upload files in a given directory to the release.
+        if write:
+            if path is None:
+                path = filename
+            with open(path, "wb") as f:
+                f.write(res.content)
 
-        :param name: The name of the file to upload to bailo
-        :param f: A BytesIO object
+        return res
+
+    def upload(self, path: str, data: BytesIO | None = None) -> str:
+        """Upload a file to the release.
+
+        :param path: The path, or name of file or directory to be uploaded
+        :param data: A BytesIO object if not loading from disk
 
         :return: The unique file ID of the file uploaded
+        ..note:: If path provided is a directory, it will be uploaded as a zip
         """
-        res = self.client.simple_upload(self.model_id, name, file).json()
+        name = path.split('/')[-1]
+        is_zip = False
+
+        if data is None:
+            if os.path.isdir(path):
+                shutil.make_archive(name, "zip", path)
+                path = f"{name}.zip"
+                name = path
+                is_zip = True
+
+            with open(path, "rb") as f:
+                res = self.client.simple_upload(self.model_id, name, f).json()
+            
+            if is_zip:
+                os.remove(path)
+        else:
+            res = self.client.simple_upload(self.model_id, name, data).json()
+        
         self.files.append(res["file"]["id"])
         self.update()
         return res["file"]["id"]
