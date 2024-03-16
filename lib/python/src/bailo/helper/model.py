@@ -8,6 +8,8 @@ from bailo.helper.release import Release
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 
+import os
+import shutil
 from semantic_version import Version
 
 try:
@@ -221,7 +223,10 @@ class Model:
 
         :return: Release object
         """
-        return max(self.get_releases())
+        releases = self.get_releases()
+        if releases == []:
+            raise BailoException("This model has no releases.")
+        return max(releases)
 
     def get_images(self):
         """Get all model image references for the model.
@@ -290,6 +295,7 @@ class Experiment:
     ):
         self.model = model
         self.raw = []
+        self.temp_dirs = []
 
     @classmethod
     def create(
@@ -304,8 +310,10 @@ class Experiment:
         
         return cls(model=model)
 
-    def start_run(self):
+    def start_run(self, is_mlflow: bool | None = False):
         """Starts a new experiment run.
+
+        :param is_mlflow: Marks a run as MLFlow
         """        
         try:
             self.run = self.run + 1
@@ -322,7 +330,8 @@ class Experiment:
 
         self.raw.append(self.run_data)
 
-        print(f"Bailo tracking run {self.run}.")
+        if not is_mlflow:
+            print(f"Bailo tracking run {self.run}.")
 
     def log_params(self, params: dict[str, Any]):
         """Logs parameters to the current run.
@@ -338,12 +347,12 @@ class Experiment:
         """        
         self.run_data["metrics"].append(metrics)
 
-    def log_artifacts(self, artifacts: dict[str, Any]):
+    def log_artifacts(self, artifacts: list):
         """Logs artifacts to the current run.
 
-        :param artifacts: A dictionary of artifacts to be logged
+        :param artifacts: A list of artifact paths to be logged
         """        
-        self.run_data["artifiacts"].append(artifacts)
+        self.run_data["artifacts"] = self.run_data["artifacts"] + artifacts
 
     def log_dataset(self, dataset: str):
         """Logs a dataset to the current run.
@@ -364,19 +373,40 @@ class Experiment:
             runs = client.search_runs(experiment_id)
 
             for run in runs:
-                self.start_run()
                 data = run.data
+                info = run.info
+
+                artifact_uri = info.artifact_uri
+                run_id = info.run_id
+                status = info.status
+
+                artifacts = []
+
+                # MLFlow run must be status FINISHED
+                if status != "FINISHED":
+                    continue
+
+                temp_dir = f"bailo_runs/mlflow_{run_id}"
+                if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)) > 0:
+                    mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=temp_dir)
+                    artifacts.append(temp_dir)
+
+                self.start_run(is_mlflow=True)
                 self.log_params(data.params)
                 self.log_metrics(data.metrics)
+                self.log_artifacts(artifacts)
+                self.run_data["run"] = info.run_id
         else:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
 
-    def publish(self, mc_loc: str, run_id: str):
+    def publish(self, mc_loc: str, run_id: str, semver: str | None = "0.1.0", notes: str | None = ""):
         """Publishes a given experiments results to the model card.
 
         :param mc_loc: Location of metrics in the model card (e.g. performance.performanceMetrics)
         :param run_id: Local experiment run ID to be selected
+        :param semver: Semantic version of release to create (if artifacts present)
+        :param notes: Notes for release, defaults to ""
 
         ..note:: mc_loc is dependent on the model card schema being used
         """        
@@ -395,6 +425,27 @@ class Experiment:
             for k, v in metric.items():
                 values.append({"name": k, "value": v})
 
+        # Updating the model card
         parsed_values = [{'dataset': sel_run['dataset'], 'datasetMetrics': values}]
         mc[tuple(mc_loc.split('.'))] = parsed_values
         self.model.update_model_card(model_card=mc)
+
+        # Creating a release and uploading artifacts (if artifacts present)
+        artifacts = sel_run['artifacts']
+        if len(artifacts) > 0:
+            # Create new release
+            try:
+                release_latest = self.model.get_latest_release().version
+                release_new = release_latest.next_minor()
+            except:
+                release_new = semver
+
+            run_id = sel_run["run"]
+            notes = f"{notes} (Run ID: {run_id})"
+            release_new = self.model.create_release(version = release_new, minor=True, notes=notes)
+
+            for artifact in artifacts:
+                release_new.upload(path=artifact)
+
+            if os.path.exists("bailo_runs") and os.path.isdir("bailo_runs"):
+                shutil.rmtree("bailo_runs")
