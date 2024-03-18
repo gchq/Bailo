@@ -51,6 +51,7 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.8",
     "qs": "^6.11.2",
+    "semver": "^7.6.0",
     "shelljs": "^0.8.5",
     "utility-types": "^3.10.0",
     "uuid": "^9.0.1",
