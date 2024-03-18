@@ -13,10 +13,11 @@ interface CustomTextInputProps {
   onChange: (newValue: string) => void
   InputProps?: any
   id: string
+  rawErrors?: string[]
 }
 
 export default function CustomTextInput(props: CustomTextInputProps) {
-  const { onChange, value, label, formContext, id, required } = props
+  const { onChange, value, label, formContext, id, required, rawErrors } = props
 
   const theme = useTheme()
 
@@ -41,6 +42,7 @@ export default function CustomTextInput(props: CustomTextInputProps) {
       <TextField
         size='small'
         id={id}
+        error={rawErrors && rawErrors.length > 0}
         sx={{
           input: {
             color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,

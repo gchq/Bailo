@@ -2,12 +2,12 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
-import audit from '../../../connectors/v2/audit/index.js'
-import { SchemaInterface } from '../../../models/v2/Schema.js'
-import { findSchemaById } from '../../../services/v2/schema.js'
-import { registerPath, schemaInterfaceSchema } from '../../../services/v2/specification.js'
-import { parse } from '../../../utils/v2/validate.js'
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
+import { SchemaInterface } from '../../../models/Schema.js'
+import { findSchemaById } from '../../../services/schema.js'
+import { registerPath, schemaInterfaceSchema } from '../../../services/specification.js'
+import { parse } from '../../../utils/validate.js'
 
 export const getSchemaSchema = z.object({
   params: z.object({

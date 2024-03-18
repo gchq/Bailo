@@ -491,13 +491,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
 
-          cd lib/python-beta
+          cd lib/python
           python -m pip install -e .[test]
 
       # Run tests
       - name: Test with pytest
         run: |
-          cd lib/python-beta
+          cd lib/python
           python -m pytest -m integration
 
       - name: Dump docker-compose logs

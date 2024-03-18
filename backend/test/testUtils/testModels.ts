@@ -1,5 +1,5 @@
-import { Decision } from '../../src/models/v2/Review.js'
-import { ReviewKind, SchemaKind } from '../../src/types/v2/enums.js'
+import { Decision } from '../../src/models/Review.js'
+import { ReviewKind, SchemaKind } from '../../src/types/enums.js'
 
 export const testModelSchema = {
   id: 'example-model-schema-1',

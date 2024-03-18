@@ -24,15 +24,15 @@ Client("http://127.0.0.1:8080", cert="path/to/cert.pem", key="path/to/key.pem",
 
 ## Token Agents
 
-If not using PKI Bailo allows the usage of access tokens to allow for fine-grained access Tokens are used to grant
-access to models within bailo to specific models and specific actions. These can be found in
+If you are not using PKI then Bailo allows the usage of access tokens to allow for fine-grained access. Tokens are used
+to grant access to models within Bailo to specific models and specific actions. These can be found in
 `Settings > Authentication`.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
   <Image src={bailoSettingsAuth} />
 </Box>
 
-To create a new access token, press `Add token` and select the options from bellow.
+To create a new access token, press `Add token` and select the options from below.
 
 - `image:read` Allows you to download images from Bailo
 - `file:read` Allows you to download files from Bailo

@@ -150,7 +150,6 @@ data:
       },
 
       oauth: {
-        enabled: {{ .Values.oauth.enabled }},
         provider: 'cognito',
 
         grant: {
@@ -168,6 +167,17 @@ data:
             callback: '{{ .Values.oauth.cognito.callback }}',
             subdomain: '{{ .Values.oauth.cognito.subdomain }}',
           },
+        },
+        cognito: {
+          identityProviderClient: {
+            region: 'eu-west-2',
+            credentials: {
+              accessKeyId: '{{ .Values.oauth.identityProviderClient.accessKeyId }}',
+              secretAccessKey: '{{ .Values.oauth.identityProviderClient.secretAccessKey }}',
+            },
+          },
+          userPoolId: '{{ .Values.oauth.identityProviderClient.userPoolId }}',
+          userIdAttribute: '{{ .Values.oauth.identityProviderClient.userIdAttribute }}',
         },
       },
 
@@ -229,6 +239,12 @@ data:
         level: 'trace',
       },
 
+      instrumentation: {
+        enabled: {{ .Values.instrumentation.enabled }},
+        endpoint: '{{ .Values.instrumentation.endpoint }}',
+        debug: {{ .Values.instrumentation.debug }}
+      },
+
       s3: {
         credentials: {
           accessKeyId: 'OVERWRITTEN_BY_ENVIRONMENT_VARIABLE',
@@ -263,5 +279,8 @@ data:
           accessKeyId: 'MINIO_ACCESS_KEY',
           secretAccessKey: 'MINIO_SECRET_KEY',
         },
+      },
+      instrumentation: {
+        authenticationToken: 'OTEL_EXPORTER_TOKEN',
       },
     }

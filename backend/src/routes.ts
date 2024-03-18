@@ -1,55 +1,11 @@
-import parser from 'body-parser'
-import MongoStore from 'connect-mongo'
 import express from 'express'
-import session from 'express-session'
-import grant from 'grant'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import authentication from './connectors/v2/authentication/index.js'
-import { expressErrorHandler as expressErrorHandlerV2 } from './routes/middleware/expressErrorHandler.js'
-import { expressLogger as expressLoggerV2 } from './routes/middleware/expressLogger.js'
-import { getApplicationLogs, getItemLogs } from './routes/v1/admin.js'
-import { getApprovals, getNumApprovals, postApprovalResponse } from './routes/v1/approvals.js'
-import {
-  fetchRawModelFiles,
-  getDeployment,
-  getDeploymentAccess,
-  getDeploymentApprovals,
-  getExportModelVersion,
-  getUserDeployments,
-  postDeployment,
-  postUngovernedDeployment,
-  resetDeploymentApprovals,
-} from './routes/v1/deployment.js'
-import {
-  getModelAccess,
-  getModelById,
-  getModelByUuid,
-  getModelDeployments,
-  getModels,
-  getModelSchema,
-  getModelVersion,
-  getModelVersions,
-} from './routes/v1/model.js'
+import authentication from './connectors/authentication/index.js'
+import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
+import { expressLogger } from './routes/middleware/expressLogger.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
-import { getDefaultSchema, getSchema, getSchemas, postSchema } from './routes/v1/schema.js'
-import { getSpecification } from './routes/v1/specification.js'
-import { getUiConfig } from './routes/v1/uiConfig.js'
-import { postUpload } from './routes/v1/upload.js'
-import { favouriteModel, getLoggedInUser, getUsers, postRegenerateToken, unfavouriteModel } from './routes/v1/users.js'
-import {
-  deleteVersion,
-  getVersion,
-  getVersionAccess,
-  getVersionApprovals,
-  getVersionFile,
-  getVersionFileList,
-  postRebuildModel,
-  postResetVersionApprovals,
-  putUpdateLastViewed,
-  putVersion,
-} from './routes/v1/version.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
@@ -68,6 +24,10 @@ import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultip
 import { getModel } from './routes/v2/model/getModel.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
+import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
+import { getInferences } from './routes/v2/model/inferencing/getInferenceServices.js'
+import { postInference } from './routes/v2/model/inferencing/postInferenceService.js'
+import { putInference } from './routes/v2/model/inferencing/putInferenceService.js'
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
 import { getModelCardRevisions } from './routes/v2/model/modelcard/getModelCardRevisions.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
@@ -90,130 +50,30 @@ import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
 import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
-import { getSchema as getSchemaV2 } from './routes/v2/schema/getSchema.js'
-import { getSchemas as getSchemasV2 } from './routes/v2/schema/getSchemas.js'
-import { patchSchema as patchSchemaV2 } from './routes/v2/schema/patchSchema.js'
-import { postSchema as postSchemaV2 } from './routes/v2/schema/postSchema.js'
-import { getSpecification as getSpecificationV2 } from './routes/v2/specification.js'
+import { getSchema } from './routes/v2/schema/getSchema.js'
+import { getSchemas } from './routes/v2/schema/getSchemas.js'
+import { patchSchema } from './routes/v2/schema/patchSchema.js'
+import { postSchema } from './routes/v2/schema/postSchema.js'
+import { getSpecification } from './routes/v2/specification.js'
 import { patchTeam } from './routes/v2/team/getMyTeams.js'
 import { getTeam } from './routes/v2/team/getTeam.js'
 import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
-import { getUiConfig as getUiConfigV2 } from './routes/v2/uiConfig/getUiConfig.js'
+import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
-import { expressErrorHandler, expressLogger } from './utils/logger.js'
-import { getUser } from './utils/user.js'
-import config from './utils/v2/config.js'
 
 export const server = express()
 
-/**
- * This is only required for V1 OAuth.
- * V2 OAuth is handled separately.
- * Having both V1 and V1 results in duplication but this does not affect functionality.
- */
-if (config.oauth.enabled) {
-  server.use(
-    session({
-      secret: config.session.secret,
-      resave: true,
-      saveUninitialized: true,
-      cookie: { maxAge: 30 * 24 * 60 * 60000 }, // store for 30 days
-      store: MongoStore.create({
-        mongoUrl: config.mongo.uri,
-      }),
-    }),
-  )
-}
-
-if (config.oauth.enabled) {
-  server.use(parser.urlencoded({ extended: true }))
-  server.use(grant.default.express(config.oauth.grant))
-
-  server.get('/api/login', (req, res) => {
-    res.redirect(`/api/connect/${config.oauth.provider}/login`)
-  })
-
-  server.get('/api/logout', (req, res) => {
-    req.session.destroy(function (err: unknown) {
-      if (err) throw err
-      res.redirect('/')
-    })
-  })
-}
-
-server.use('/api/v1', getUser)
-server.use('/api/v1', expressLogger)
-server.use('/api/v2', expressLoggerV2)
+server.use('/api/v2', expressLogger)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
 
-// V1 APIs
-
-server.post('/api/v1/model', ...postUpload)
-
-server.get('/api/v1/models', ...getModels)
-server.get('/api/v1/model/uuid/:uuid', ...getModelByUuid)
-server.get('/api/v1/model/id/:id', ...getModelById)
-server.get('/api/v1/model/:uuid/schema', ...getModelSchema)
-server.get('/api/v1/model/:uuid/versions', ...getModelVersions)
-server.get('/api/v1/model/:uuid/version/:version', ...getModelVersion)
-server.get('/api/v1/model/:uuid/deployments', ...getModelDeployments)
-server.get('/api/v1/model/:uuid/access', ...getModelAccess)
-
-server.post('/api/v1/deployment', ...postDeployment)
-server.post('/api/v1/deployment/ungoverned', ...postUngovernedDeployment)
-server.get('/api/v1/deployment/:uuid', ...getDeployment)
-server.get('/api/v1/deployment/:id/approvals', ...getDeploymentApprovals)
-server.get('/api/v1/deployment/user/:id', ...getUserDeployments)
-server.post('/api/v1/deployment/:uuid/reset-approvals', ...resetDeploymentApprovals)
-server.get('/api/v1/deployment/:uuid/access', ...getDeploymentAccess)
-server.get('/api/v1/deployment/:uuid/version/:version/raw/:fileType', ...fetchRawModelFiles)
-server.get('/api/v1/deployment/:uuid/version/:version/export', ...getExportModelVersion)
-
-server.get('/api/v1/version/:id', ...getVersion)
-server.get('/api/v1/version/:id/contents/:file/list', ...getVersionFileList)
-server.get('/api/v1/version/:id/contents/:file', ...getVersionFile)
-server.get('/api/v1/version/:id/access', ...getVersionAccess)
-server.get('/api/v1/version/:id/approvals', ...getVersionApprovals)
-server.put('/api/v1/version/:id', ...putVersion)
-server.delete('/api/v1/version/:id', ...deleteVersion)
-server.post('/api/v1/version/:id/reset-approvals', ...postResetVersionApprovals)
-server.post('/api/v1/version/:id/rebuild', ...postRebuildModel)
-server.put('/api/v1/version/:id/lastViewed/:role', ...putUpdateLastViewed)
-
-server.get('/api/v1/schemas', ...getSchemas)
-server.get('/api/v1/schema/default', ...getDefaultSchema)
-server.get('/api/v1/schema/:ref', ...getSchema)
-server.post('/api/v1/schema', ...postSchema)
-
-server.get('/api/v1/config/ui', ...getUiConfig)
-
-server.get('/api/v1/users', ...getUsers)
-server.get('/api/v1/user', ...getLoggedInUser)
-server.post('/api/v1/user/token', ...postRegenerateToken)
-server.post('/api/v1/user/favourite/:id', ...favouriteModel)
-server.post('/api/v1/user/unfavourite/:id', ...unfavouriteModel)
-
-server.get('/api/v1/approvals', ...getApprovals)
-server.get('/api/v1/approvals/count', ...getNumApprovals)
-server.post('/api/v1/approval/:id/respond', ...postApprovalResponse)
-
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
-server.get('/api/v1/specification', ...getSpecification)
-
-server.get('/api/v1/admin/logs', ...getApplicationLogs)
-server.get('/api/v1/admin/logs/build/:buildId', ...getItemLogs)
-server.get('/api/v1/admin/logs/approval/:approvalId', ...getItemLogs)
-
-/**
- ** V2 API **
- */
 server.post('/api/v2/models', ...postModel)
 server.get('/api/v2/models/search', ...getModelsSearch)
 // server.post('/api/v2/models/import', ...postModelImport)
@@ -284,13 +144,18 @@ server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartM
 server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
+server.get('/api/v2/model/:modelId/inferences', ...getInferences)
+server.get('/api/v2/model/:modelId/inference/:image/:tag', ...getInference)
+server.post('/api/v2/model/:modelId/inference', ...postInference)
+server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
+
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
-server.get('/api/v2/schemas', ...getSchemasV2)
-server.get('/api/v2/schema/:schemaId', ...getSchemaV2)
-server.post('/api/v2/schemas', ...postSchemaV2)
-server.patch('/api/v2/schema/:schemaId', ...patchSchemaV2)
+server.get('/api/v2/schemas', ...getSchemas)
+server.get('/api/v2/schema/:schemaId', ...getSchema)
+server.post('/api/v2/schemas', ...postSchema)
+server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/reviews', ...getReviews)
@@ -316,19 +181,18 @@ server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
 server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
 
-server.get('/api/v2/config/ui', ...getUiConfigV2)
+server.get('/api/v2/config/ui', ...getUiConfig)
 
 server.post('/api/v2/user/tokens', ...postUserToken)
 server.get('/api/v2/user/tokens', ...getUserTokens)
 // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
 server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
-server.get('/api/v2/specification', ...getSpecificationV2)
+server.get('/api/v2/specification', ...getSpecification)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/_build/dirhtml')))
 
-server.use('/api/v1', expressErrorHandler)
-server.use('/api/v2', expressErrorHandlerV2)
+server.use('/api/v2', expressErrorHandler)

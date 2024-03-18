@@ -3,9 +3,15 @@ import '@uiw/react-markdown-preview/markdown.css'
 
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import { useTheme } from '@mui/material/styles'
 import { MDEditorProps } from '@uiw/react-md-editor'
 import dynamic from 'next/dynamic'
 import { ReactNode, useState } from 'react'
+
+// The MD Editor library uses custom CSS property names which do not correspond to standard CSS naming
+interface MDEdtiorStyling {
+  [Key: string]: string
+}
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 
@@ -15,6 +21,7 @@ export type RichTextEditorProps = {
   label?: ReactNode
   textareaProps?: MDEditorProps['textareaProps']
   dataTest?: string
+  errors?: string[]
 }
 
 export default function RichTextEditor({
@@ -23,8 +30,10 @@ export default function RichTextEditor({
   textareaProps,
   label = <></>,
   dataTest = 'richTextEditor',
+  errors,
 }: RichTextEditorProps) {
   const [hideToolbar, setHideToolbar] = useState(true)
+  const theme = useTheme()
 
   const toggleToolbar = () => {
     setHideToolbar(!hideToolbar)
@@ -39,6 +48,10 @@ export default function RichTextEditor({
     ...textareaProps,
   }
 
+  const styling: MDEdtiorStyling = {
+    '--color-border-default': errors && errors.length > 0 ? theme.palette.error.main : '',
+  }
+
   return (
     <>
       <Box display='flex' overflow='auto'>
@@ -50,6 +63,7 @@ export default function RichTextEditor({
       <MDEditor
         defaultTabEnable
         value={value}
+        style={styling}
         preview='edit'
         hideToolbar={hideToolbar}
         height={150}
