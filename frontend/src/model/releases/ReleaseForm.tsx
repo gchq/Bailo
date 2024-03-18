@@ -1,4 +1,14 @@
-import { Checkbox, FormControl, FormControlLabel, Grid, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import {
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  LinearProgress,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
 import prettyBytes from 'pretty-bytes'
@@ -11,7 +21,14 @@ import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import ModelImageList from 'src/model/ModelImageList'
-import { FileInterface, FileWithMetadata, FlattenedModelImage, isFileInterface, ModelInterface } from 'types/types'
+import {
+  FileInterface,
+  FileUploadProgress,
+  FileWithMetadata,
+  FlattenedModelImage,
+  isFileInterface,
+  ModelInterface,
+} from 'types/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -42,6 +59,8 @@ type ReleaseFormProps = {
   filesMetadata: FileWithMetadata[]
   onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
+  currentFileUploadProgress?: FileUploadProgress
+  uploadedFiles?: string[]
 } & EditableReleaseFormProps
 
 export default function ReleaseForm({
@@ -56,6 +75,8 @@ export default function ReleaseForm({
   onImageListChange,
   editable = false,
   isEdit = false,
+  currentFileUploadProgress,
+  uploadedFiles,
 }: ReleaseFormProps) {
   const theme = useTheme()
 
@@ -156,15 +177,45 @@ export default function ReleaseForm({
       <Stack>
         <Typography fontWeight='bold'>Files</Typography>
         {!isReadOnly && (
-          <MultiFileInput
-            fullWidth
-            label='Attach files'
-            files={formData.files}
-            filesMetadata={filesMetadata}
-            readOnly={isReadOnly}
-            onFilesChange={onFilesChange}
-            onFilesMetadataChange={onFilesMetadataChange}
-          />
+          <Stack spacing={2}>
+            <MultiFileInput
+              fullWidth
+              label='Attach files'
+              files={formData.files}
+              filesMetadata={filesMetadata}
+              readOnly={isReadOnly}
+              onFilesChange={onFilesChange}
+              onFilesMetadataChange={onFilesMetadataChange}
+            />
+            {uploadedFiles &&
+              uploadedFiles.map((file) => (
+                <Stack key={file} spacing={1}>
+                  <Typography>{file} successfully uploaded</Typography>
+                </Stack>
+              ))}
+            {currentFileUploadProgress && (
+              <>
+                {currentFileUploadProgress.uploadProgress < 100 && (
+                  <>
+                    <LinearProgress variant='determinate' value={currentFileUploadProgress.uploadProgress} />
+                    <Stack direction='row' spacing={1}>
+                      <Typography>Uploading {currentFileUploadProgress.fileName}</Typography>
+                      <Typography>{currentFileUploadProgress.uploadProgress}%</Typography>
+                    </Stack>
+                  </>
+                )}
+                {currentFileUploadProgress.uploadProgress === 100 && (
+                  <>
+                    <LinearProgress />
+                    <Stack direction='row' spacing={1}>
+                      <Typography>Uploading {currentFileUploadProgress.fileName}</Typography>
+                      <Typography>File recieved - waiting for response from server...</Typography>
+                    </Stack>
+                  </>
+                )}
+              </>
+            )}
+          </Stack>
         )}
         {isReadOnly &&
           formData.files.map((file) => (

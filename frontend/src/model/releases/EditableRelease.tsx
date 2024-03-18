@@ -1,13 +1,22 @@
 import { Box, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
-import { postFile, putRelease, UpdateReleaseParams, useGetRelease, useGetReleasesForModelId } from 'actions/release'
+import { putRelease, UpdateReleaseParams, useGetRelease, useGetReleasesForModelId } from 'actions/release'
+import axios from 'axios'
+import qs from 'querystring'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/releases/ReleaseForm'
-import { FileInterface, FileWithMetadata, FlattenedModelImage, isFileInterface, ReleaseInterface } from 'types/types'
+import {
+  FileInterface,
+  FileUploadProgress,
+  FileWithMetadata,
+  FlattenedModelImage,
+  isFileInterface,
+  ReleaseInterface,
+} from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type EditableReleaseProps = {
@@ -25,6 +34,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
 
   const { model, isModelLoading, isModelError } = useGetModel(release.modelId)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
@@ -77,15 +88,30 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
       }
 
       const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
-      const postFileResponse = await postFile(file, model.id, file.name, file.type, metadata)
 
-      if (!postFileResponse.ok) {
-        setErrorMessage(await getErrorMessage(postFileResponse))
+      const response = await axios.post(
+        metadata
+          ? `/api/v2/model/${release.modelId}/files/upload/simple?name=${file.name}&mime=${file.type}?${qs.stringify({
+              metadata,
+            })}`
+          : `/api/v2/model/${release.modelId}/files/upload/simple?name=${file.name}&mime=${file.type}`,
+        file,
+        {
+          onUploadProgress: function (progressEvent) {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+              setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+            }
+          },
+        },
+      )
+      if (response.status !== 200) {
+        // TODO handle file upload error
         return setIsLoading(false)
       }
 
-      const res = await postFileResponse.json()
-      fileIds.push(res.file._id)
+      setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
+      fileIds.push(response.data.file._id)
     }
 
     const updatedRelease: UpdateReleaseParams = {
@@ -107,6 +133,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
     } else {
       mutateReleases()
       mutateRelease()
+      setUploadedFiles([])
+      setCurrentFileUploadProgress(undefined)
       onIsEditChange(false)
     }
     setIsLoading(false)
@@ -147,6 +175,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onFilesChange={(value) => setFiles(value)}
         onFilesMetadataChange={(value) => setFilesMetadata(value)}
         onImageListChange={(value) => setImageList(value)}
+        currentFileUploadProgress={currentFileUploadProgress}
+        uploadedFiles={uploadedFiles}
       />
     </Box>
   )
