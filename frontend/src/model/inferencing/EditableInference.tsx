@@ -113,7 +113,7 @@ export default function EditableInference({ inference }: EditableInferenceProps)
         onProcessorTypeChange={(value) => setProcessorType(value)}
         onMemoryChange={(value) => setMemory(value)}
         onPortChange={(value) => setPort(value)}
-      ></InferenceForm>
+      />
     </>
   )
 }
