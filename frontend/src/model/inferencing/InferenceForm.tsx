@@ -1,6 +1,6 @@
-import { Slider, Stack, TextField, Typography } from '@mui/material'
+import { Slider, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useMemo } from 'react'
+import { ChangeEvent, useMemo, useState } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import ProcessorTypeList from 'src/model/inferencing/ProcessorTypeList'
@@ -8,7 +8,7 @@ import ModelImageList from 'src/model/ModelImageList'
 import { FlattenedModelImage, ModelInterface } from 'types/types'
 
 type InferenceFormData = {
-  image: FlattenedModelImage
+  image?: FlattenedModelImage
   description: string
   port: number
   processorType: string
@@ -48,23 +48,25 @@ export default function InferenceForm({
 }: InferenceFormProps) {
   const theme = useTheme()
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
+  const [cpuType, setCpuType] = useState(formData.processorType === 'cpu')
 
-  const handleMemoryChange = (_event, newValue) => {
-    onMemoryChange(newValue)
+  const handleMemoryChange = (_event: Event, newValue: number | number[]) => {
+    onMemoryChange(newValue as number)
   }
 
   const handleImageChange = (image: FlattenedModelImage) => {
     onImageChange(image)
   }
 
-  const handlePortChange = (event) => {
-    onPortChange(event.target.value)
+  const handlePortChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onPortChange(parseInt(event.target.value))
   }
-  const handleProcessorTypeChange = (_event, newValue) => {
+  const handleProcessorTypeChange = (_event: ChangeEvent<HTMLInputElement>, newValue: string) => {
     onProcessorTypeChange(newValue)
+    setCpuType(formData.processorType !== 'cpu')
   }
 
-  const handleDescriptionChange = (event) => {
+  const handleDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
     onDescriptionChange(event.target.value)
   }
   return (
@@ -96,7 +98,7 @@ export default function InferenceForm({
       {isReadOnly ? (
         <ReadOnlyAnswer value={formData.port.toString()} />
       ) : (
-        <TextField required size='small' value={formData.port} onChange={handlePortChange} />
+        <TextField required size='small' value={formData.port} onChange={handlePortChange} type='number' />
       )}
       <Typography fontWeight='bold'>
         Processor Type {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
@@ -111,14 +113,25 @@ export default function InferenceForm({
         {!isReadOnly && formData.processorType === 'cpu' && <span style={{ color: theme.palette.error.main }}>*</span>}
       </Typography>
       {!isReadOnly && (
-        <Slider
-          disabled={formData.processorType !== 'cpu'}
-          size='small'
-          min={0.1}
-          max={8}
-          value={formData.memory}
-          onChange={handleMemoryChange}
-        />
+        <Tooltip
+          title='Specify a cpu processor type to allocate memory to this service'
+          disableHoverListener={cpuType}
+          disableFocusListener={cpuType}
+        >
+          <span>
+            <Slider
+              disabled={!cpuType}
+              size='small'
+              min={1}
+              max={8}
+              value={formData.memory}
+              aria-label='Memory'
+              getAriaValueText={(value: number) => `${value} GB`}
+              onChange={handleMemoryChange}
+              valueLabelDisplay='auto'
+            />
+          </span>
+        </Tooltip>
       )}
     </Stack>
   )

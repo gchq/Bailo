@@ -15,7 +15,6 @@ import { FlattenedModelImage } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function NewInference() {
-  const [image, setImage] = useState<FlattenedModelImage>({} as any)
   const [description, setDescription] = useState('')
   const [port, setPort] = useState(8000)
   const [processorType, setProcessorType] = useState('cpu')
@@ -27,6 +26,8 @@ export default function NewInference() {
 
   const { modelId }: { modelId?: string } = router.query
 
+  const [image, setImage] = useState<FlattenedModelImage | undefined>()
+
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
 
   if (isModelError) {
@@ -34,10 +35,19 @@ export default function NewInference() {
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    setLoading(true)
     event.preventDefault()
+
     if (!model) {
-      return setErrorMessage('Please wait for the model to finish loading before trying to make a release.')
+      return setErrorMessage('Please wait for the model to finish loading before trying to make a inferencing service.')
     }
+    if (!image) {
+      return setErrorMessage('Please select an image to spin up a service.')
+    }
+    if (!port) {
+      return setErrorMessage('Please specify a port to access this service with.')
+    }
+
     const inference: CreateInferenceParams = {
       modelId: model.id,
       image: image.name,
@@ -45,8 +55,8 @@ export default function NewInference() {
       tag: image.tag,
       settings: {
         processorType: processorType,
-        memory: processorType === 'cpu' ? memory : undefined,
         port: port,
+        ...(processorType === 'cpu' && { memory }),
       },
     }
 
@@ -56,8 +66,7 @@ export default function NewInference() {
       setErrorMessage(await getErrorMessage(res))
       setLoading(false)
     } else {
-      const body = await res.json()
-      router.push(`/model/${modelId}/inference/${body.image}/${body.tag}`)
+      router.push(`/model/${modelId}/inference/${image.name}/${image.tag}`)
     }
   }
   return (
@@ -79,7 +88,7 @@ export default function NewInference() {
                   </Typography>
                   <RocketLaunchIcon color='primary' fontSize='large' />
                   <Typography>
-                    Model Inferencing allows usage of models within Bailo! This allows users of this model to experiment
+                    Model Inferencing allows usage of models within Bailo. This allows users of this model to experiment
                     with them without creating any local deployment.
                   </Typography>
                 </Stack>
@@ -91,7 +100,7 @@ export default function NewInference() {
                   onProcessorTypeChange={(value) => setProcessorType(value)}
                   onMemoryChange={(value) => setMemory(value)}
                   onPortChange={(value) => setPort(value)}
-                ></InferenceForm>
+                />
               </Stack>
               <Stack alignItems='flex-end' padding={2}>
                 <LoadingButton

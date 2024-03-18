@@ -3,6 +3,7 @@ import { Button, Card, Container, Link, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
+import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import Wrapper from 'src/Wrapper'
@@ -13,6 +14,11 @@ export default function InferenceApp() {
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
+  const serviceEndpoint = useMemo(
+    () => `${uiConfig?.inference.connection.host}/inference/${modelId}/${image}/${tag}`,
+    [uiConfig, modelId, image, tag],
+  )
+
   if (isModelError) {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
@@ -21,8 +27,6 @@ export default function InferenceApp() {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
-  const serviceEndpoint = `${uiConfig?.inference.connection.host}/inference/${modelId}/${image}/${tag}`
-
   return (
     <Wrapper title='Inferencing Service' page='Inferencing'>
       {(isModelLoading || isUiConfigLoading) && <Loading />}
@@ -30,7 +34,7 @@ export default function InferenceApp() {
         <Card sx={{ my: 4, p: 4 }}>
           {model && (
             <Stack spacing={2}>
-              <Typography variant='h4' color='primary' fontWeight='bold'>
+              <Typography component='h1' variant='h4' color='primary' fontWeight='bold'>
                 {model.name}
               </Typography>
               {image}:{tag}
@@ -44,7 +48,7 @@ export default function InferenceApp() {
                   <Button sx={{ width: 'fit-content' }}>View Settings</Button>
                 </Link>
               </Stack>
-              <iframe src={serviceEndpoint} width='100%' height='600'></iframe>
+              <iframe src={serviceEndpoint} width='100%' height='600' />
             </Stack>
           )}
         </Card>

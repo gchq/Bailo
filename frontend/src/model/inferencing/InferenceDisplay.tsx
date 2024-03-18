@@ -5,13 +5,12 @@ import { formatDateString } from 'utils/dateUtils'
 
 import { InferenceInterface, ModelInterface } from '../../../types/types'
 
-export default function InferenceDisplay({
-  model,
-  inference,
-}: {
+type InferenceDisplayProps = {
   model: ModelInterface
   inference: InferenceInterface
-}) {
+}
+
+export default function InferenceDisplay({ model, inference }: InferenceDisplayProps) {
   const router = useRouter()
   return (
     <Card sx={{ width: '100%' }}>
@@ -40,9 +39,7 @@ export default function InferenceDisplay({
             {` ${formatDateString(inference.createdAt)}`}
           </Typography>
         </Typography>
-        <Stack direction={{ sm: 'row', xs: 'column' }} justifyContent='space-between' alignItems='center' spacing={2}>
-          <Typography>{inference.description}</Typography>
-        </Stack>
+        <Typography>{inference.description}</Typography>
       </Stack>
     </Card>
   )

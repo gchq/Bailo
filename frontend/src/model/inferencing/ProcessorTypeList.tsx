@@ -7,8 +7,10 @@ import MessageAlert from 'src/MessageAlert'
 export default function ProcessorTypeList({ value, onChange, readOnly = false }) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const processorTypes = { CPU: 'cpu', ...uiConfig?.inference.gpus }
-  const processorTypesList = Object.values(processorTypes)
+  const processorTypesList = useMemo(
+    () => (uiConfig ? ['cpu', ...Object.values(uiConfig.inference.gpus)] : []),
+    [uiConfig],
+  )
   const readOnlyProcessorTypeList = useMemo(() => {
     return isUiConfigLoading ? (
       <Loading />
@@ -28,7 +30,7 @@ export default function ProcessorTypeList({ value, onChange, readOnly = false })
       ) : (
         <Autocomplete
           loading={isUiConfigLoading}
-          data-test='imageListAutocomplete'
+          data-test='processorTypesAutocomplete'
           options={processorTypesList}
           value={value}
           onChange={onChange}

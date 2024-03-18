@@ -3,13 +3,13 @@ import { InferenceInterface } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-export function useGetInferencesForModelId(modelId?: string) {
+export function useGetInferencesForModelId(modelId: string) {
   const { data, error, mutate } = useSWR<
     {
       inferences: InferenceInterface[]
     },
     ErrorInfo
-  >(modelId ? `/api/v2/model/${modelId}/inferences` : null, fetcher)
+  >(`/api/v2/model/${modelId}/inferences`, fetcher)
 
   return {
     mutateInferences: mutate,
@@ -29,7 +29,7 @@ export function useGetInference(modelId?: string, image?: string, tag?: string) 
 
   return {
     mutateInference: mutate,
-    inference: data ? data.inference : undefined,
+    inference: data?.inference,
     isInferenceLoading: !error && !data,
     isInferenceError: error,
   }

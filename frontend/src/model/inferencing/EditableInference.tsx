@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { putInference, UpdateInferenceParams, useGetInference } from 'actions/inferencing'
 import { useGetModel } from 'actions/model'
 import { useCallback, useContext, useEffect, useState } from 'react'
@@ -12,22 +12,21 @@ import { FlattenedModelImage } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 type EditableInferenceProps = {
   inference: InferenceInterface
-  isEdit: boolean
-  onIsEditChange: (value: boolean) => void
 }
 
-export default function EditableInference({ inference, isEdit, onIsEditChange }: EditableInferenceProps) {
+export default function EditableInference({ inference }: EditableInferenceProps) {
   const [image, setImage] = useState<FlattenedModelImage>({
     name: inference.image,
     tag: inference.tag,
-    modelId: inference.modelId,
-  } as any)
+    repository: inference.modelId,
+  })
   const [description, setDescription] = useState(inference.description)
   const [port, setPort] = useState(inference.settings.port)
   const [processorType, setProcessorType] = useState(inference.settings.processorType)
   const [memory, setMemory] = useState(inference.settings.memory)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isEdit, onIsEditChange] = useState(false)
 
   const { model, isModelLoading, isModelError } = useGetModel(inference.modelId)
   const { mutateInference } = useGetInference(inference.modelId, inference.image, inference.tag)
@@ -88,7 +87,7 @@ export default function EditableInference({ inference, isEdit, onIsEditChange }:
   }
 
   return (
-    <Box>
+    <>
       <EditableFormHeading
         heading={
           <div>
@@ -115,6 +114,6 @@ export default function EditableInference({ inference, isEdit, onIsEditChange }:
         onMemoryChange={(value) => setMemory(value)}
         onPortChange={(value) => setPort(value)}
       ></InferenceForm>
-    </Box>
+    </>
   )
 }
