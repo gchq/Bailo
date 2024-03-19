@@ -10,6 +10,7 @@ import InferenceForm from 'src/model/inferencing/InferenceForm'
 import { InferenceInterface } from 'types/types'
 import { FlattenedModelImage } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { isPortNumber } from 'utils/stringUtils'
 type EditableInferenceProps = {
   inference: InferenceInterface
 }
@@ -21,7 +22,7 @@ export default function EditableInference({ inference }: EditableInferenceProps)
     repository: inference.modelId,
   })
   const [description, setDescription] = useState(inference.description)
-  const [port, setPort] = useState(inference.settings.port)
+  const [port, setPort] = useState(inference.settings.port.toString())
   const [processorType, setProcessorType] = useState(inference.settings.processorType)
   const [memory, setMemory] = useState(inference.settings.memory)
   const [errorMessage, setErrorMessage] = useState('')
@@ -34,7 +35,7 @@ export default function EditableInference({ inference }: EditableInferenceProps)
 
   const resetForm = useCallback(() => {
     setDescription(inference.description)
-    setPort(inference.settings.port)
+    setPort(inference.settings.port.toString())
     setProcessorType(inference.settings.processorType)
     setMemory(inference.settings.memory)
   }, [setDescription, setPort, setProcessorType, setMemory, inference])
@@ -65,12 +66,17 @@ export default function EditableInference({ inference }: EditableInferenceProps)
   }
 
   const handleSubmit = async () => {
+    if (!isPortNumber(port)) {
+      return setErrorMessage('Please use a valid port number.')
+    }
+
+    setErrorMessage('')
     setIsLoading(true)
 
     const updatedInference: UpdateInferenceParams = {
       description: description,
       settings: {
-        port: port,
+        port: Number(port),
         memory: memory,
         processorType: processorType,
       },

@@ -13,10 +13,11 @@ import InferenceForm from 'src/model/inferencing/InferenceForm'
 import Wrapper from 'src/Wrapper'
 import { FlattenedModelImage } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { isPortNumber } from 'utils/stringUtils'
 
 export default function NewInference() {
   const [description, setDescription] = useState('')
-  const [port, setPort] = useState(8000)
+  const [port, setPort] = useState('')
   const [processorType, setProcessorType] = useState('cpu')
   const [memory, setMemory] = useState(2)
   const [errorMessage, setErrorMessage] = useState('')
@@ -35,18 +36,20 @@ export default function NewInference() {
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    setLoading(true)
     event.preventDefault()
 
     if (!model) {
-      return setErrorMessage('Please wait for the model to finish loading before trying to make a inferencing service.')
+      return setErrorMessage('Please wait for the model to finish loading.')
     }
     if (!image) {
       return setErrorMessage('Please select an image to spin up a service.')
     }
-    if (!port) {
-      return setErrorMessage('Please specify a port to access this service with.')
+    if (!isPortNumber(port)) {
+      return setErrorMessage('Please use a valid port number.')
     }
+
+    setErrorMessage('')
+    setLoading(true)
 
     const inference: CreateInferenceParams = {
       modelId: model.id,
@@ -55,7 +58,7 @@ export default function NewInference() {
       tag: image.tag,
       settings: {
         processorType: processorType,
-        port: port,
+        port: Number(port),
         ...(processorType === 'cpu' && { memory }),
       },
     }

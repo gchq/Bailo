@@ -6,11 +6,12 @@ import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import ProcessorTypeList from 'src/model/inferencing/ProcessorTypeList'
 import ModelImageList from 'src/model/ModelImageList'
 import { FlattenedModelImage, ModelInterface } from 'types/types'
+import { isPortNumber } from 'utils/stringUtils'
 
 type InferenceFormData = {
   image?: FlattenedModelImage
   description: string
-  port: number
+  port: string
   processorType: string
   memory?: number
 }
@@ -30,7 +31,7 @@ type InferenceFormProps = {
   formData: InferenceFormData
   onImageChange: (value: FlattenedModelImage) => void
   onDescriptionChange: (value: string) => void
-  onPortChange: (value: number) => void
+  onPortChange: (value: string) => void
   onProcessorTypeChange: (value: string) => void
   onMemoryChange: (value: number) => void
 } & EditableInferenceFormProps
@@ -59,7 +60,7 @@ export default function InferenceForm({
   }
 
   const handlePortChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onPortChange(parseInt(event.target.value))
+    onPortChange(event.target.value)
   }
   const handleProcessorTypeChange = (_event: ChangeEvent<HTMLInputElement>, newValue: string) => {
     onProcessorTypeChange(newValue)
@@ -98,7 +99,14 @@ export default function InferenceForm({
       {isReadOnly ? (
         <ReadOnlyAnswer value={formData.port.toString()} />
       ) : (
-        <TextField required size='small' value={formData.port} onChange={handlePortChange} type='number' />
+        <TextField
+          required
+          size='small'
+          value={formData.port}
+          onChange={handlePortChange}
+          error={formData.port !== '' && !isPortNumber(formData.port)}
+          helperText={formData.port !== '' && !isPortNumber(formData.port) ? 'Must be a valid port number' : ''}
+        />
       )}
       <Typography fontWeight='bold'>
         Processor Type {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}

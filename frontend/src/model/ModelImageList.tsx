@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material'
-import Autocomplete from '@mui/material/Autocomplete'
+import Autocomplete, { AutocompleteRenderInputParams } from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import { useGetModelImages } from 'actions/model'
 import { SyntheticEvent, useMemo } from 'react'
@@ -74,33 +74,23 @@ export default function ModelImageList({ model, value, onChange, readOnly = fals
     return <MessageAlert message={isModelImagesError.info.message} severity='error' />
   }
 
-  return (
-    <>
-      {readOnly ? (
-        readOnlyImageList
-      ) : multiple ? (
-        <Autocomplete
-          multiple
-          loading={isModelImagesLoading}
-          onChange={handleChange}
-          data-test='imageListAutocomplete'
-          getOptionLabel={(option) => `${option.name}:${option.tag}`}
-          groupBy={(option) => option.name}
-          options={sortedImageList}
-          value={value}
-          renderInput={(params) => <TextField {...params} size='small' />}
-        />
-      ) : (
-        <Autocomplete
-          loading={isModelImagesLoading}
-          onChange={handleChange}
-          data-test='imageAutocomplete'
-          getOptionLabel={(option) => `${option.name}:${option.tag}`}
-          options={sortedImageList}
-          value={value}
-          renderInput={(params) => <TextField {...params} size='small' />}
-        />
-      )}
-    </>
+  if (readOnly) {
+    return <>{readOnlyImageList}</>
+  }
+
+  const partialAutocompleteProps = {
+    loading: isModelImagesLoading,
+    onChange: handleChange,
+    getOptionLabel: (option: FlattenedModelImage) => `${option.name}:${option.tag}`,
+    groupBy: (option: FlattenedModelImage) => option.name,
+    options: sortedImageList,
+    renderInput: (params: AutocompleteRenderInputParams) => <TextField {...params} size='small' />,
+    'data-test': 'imageListAutocomplete',
+  }
+
+  return multiple ? (
+    <Autocomplete multiple value={value} {...partialAutocompleteProps} />
+  ) : (
+    <Autocomplete value={value} {...partialAutocompleteProps} />
   )
 }
