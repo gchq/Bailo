@@ -131,10 +131,10 @@ export class Writer extends WritableStream {
   }
 }
 
-function ProductionStream() {
+function productionStream() {
   return {
     write: (log) => {
-      const namespace = getNamespace('my session')
+      const namespace = getNamespace('bailo')
       process.stdout.write(`${JSON.stringify({ ...log, requestId: namespace?.get('reqId') })}\n`)
     },
   }
@@ -158,7 +158,7 @@ if (process.env.NODE_ENV !== 'production') {
   streams.push({
     level: config.log.level,
     type: 'raw',
-    stream: ProductionStream(),
+    stream: productionStream(),
   })
 }
 if (config.instrumentation.enabled) {
