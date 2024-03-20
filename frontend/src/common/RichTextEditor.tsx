@@ -22,6 +22,7 @@ export type RichTextEditorProps = {
   textareaProps?: MDEditorProps['textareaProps']
   dataTest?: string
   errors?: string[]
+  autoFocus?: boolean
 }
 
 export default function RichTextEditor({
@@ -31,6 +32,7 @@ export default function RichTextEditor({
   label = <></>,
   dataTest = 'richTextEditor',
   errors,
+  autoFocus,
 }: RichTextEditorProps) {
   const [hideToolbar, setHideToolbar] = useState(true)
   const theme = useTheme()
@@ -61,6 +63,7 @@ export default function RichTextEditor({
         </Button>
       </Box>
       <MDEditor
+        autoFocus={autoFocus}
         defaultTabEnable
         value={value}
         style={styling}
