@@ -36,9 +36,9 @@ def example_model(integration_client, metrics_schema):
     model.card_from_schema(metrics_schema.schema_id)
 
     new_card = {
-        'overview': {
-        'tags': [],
-        'modelSummary': 'YOLOv5 model for object detection.',
+        "overview": {
+            "tags": [],
+            "modelSummary": "YOLOv5 model for object detection.",
         }
     }
     model.update_model_card(model_card=new_card)
@@ -58,13 +58,15 @@ def local_model():
     )
     return model
 
+
 @pytest.fixture(scope="session")
 def weights_path(tmpdir_factory):
     weights = "Test Weights"
     fn = tmpdir_factory.mktemp("data").join("weights.pth")
     with open(str(fn), "w") as weights_file:
         weights_file.write(weights)
-    return fn    
+    return fn
+
 
 @pytest.fixture
 def standard_experiment(example_model, weights_path):
@@ -117,90 +119,82 @@ def mlflow_id(weights_path):
 
     return mlflow_id
 
+
 @pytest.fixture
 def metrics_schema(integration_client):
     schema_id = str(random.randint(1, 1000000))
 
     json_schema = {
-        "$schema":"http://json-schema.org/draft-07/schema#",
-        "type":"object",
-        "properties":{
-            "overview":{
-                "title":"Overview",
-                "description":"Summary of the model functionality.",
-                "type":"object",
-                "properties":{
-                    "modelSummary":{
-                    "title":"What does the model do?",
-                    "description":"A description of what the model does.",
-                    "type":"string",
-                    "minLength":1,
-                    "maxLength":5000
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+            "overview": {
+                "title": "Overview",
+                "description": "Summary of the model functionality.",
+                "type": "object",
+                "properties": {
+                    "modelSummary": {
+                        "title": "What does the model do?",
+                        "description": "A description of what the model does.",
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 5000,
                     },
-                    "tags":{
-                    "title":"Descriptive tags for the model.",
-                    "description":"These tags will be searchable and will help others find this model.",
-                    "type":"array",
-                    "widget":"tagSelector",
-                    "items":{
-                        "type":"string"
+                    "tags": {
+                        "title": "Descriptive tags for the model.",
+                        "description": "These tags will be searchable and will help others find this model.",
+                        "type": "array",
+                        "widget": "tagSelector",
+                        "items": {"type": "string"},
+                        "uniqueItems": True,
                     },
-                    "uniqueItems":True
+                },
+                "required": [],
+                "additionalProperties": False,
+            },
+            "performance": {
+                "title": "Performance",
+                "type": "object",
+                "properties": {
+                    "performanceMetrics": {
+                        "title": "Performance Metrics",
+                        "description": "List of metrics, values, and the dataset they were evaluated on",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "title": "",
+                            "properties": {
+                                "dataset": {"title": "Dataset used", "type": "string"},
+                                "datasetMetrics": {
+                                    "type": "array",
+                                    "title": "Dataset Metrics",
+                                    "items": {
+                                        "type": "object",
+                                        "title": "",
+                                        "properties": {
+                                            "name": {
+                                                "title": "Metric name",
+                                                "description": "For example: ACCURACY",
+                                                "type": "string",
+                                            },
+                                            "value": {
+                                                "title": "Model performance metric value",
+                                                "description": "For example: 82",
+                                                "type": "number",
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     }
                 },
-                "required":[
-                
-                ],
-                "additionalProperties":False
             },
-            "performance":{
-                "title":"Performance",
-                "type":"object",
-                "properties":{
-                    "performanceMetrics":{
-                    "title":"Performance Metrics",
-                    "description":"List of metrics, values, and the dataset they were evaluated on",
-                    "type":"array",
-                    "items":{
-                        "type":"object",
-                        "title":"",
-                        "properties":{
-                            "dataset":{
-                                "title":"Dataset used",
-                                "type":"string"
-                            },
-                            "datasetMetrics":{
-                                "type":"array",
-                                "title":"Dataset Metrics",
-                                "items":{
-                                "type":"object",
-                                "title":"",
-                                "properties":{
-                                    "name":{
-                                        "title":"Metric name",
-                                        "description":"For example: ACCURACY",
-                                        "type":"string"
-                                    },
-                                    "value":{
-                                        "title":"Model performance metric value",
-                                        "description":"For example: 82",
-                                        "type":"number"
-                                    }
-                                }
-                                }
-                            }
-                        }
-                    }
-                    }
-                }
-            }
         },
-        "required":[
-        
-        ],
-        "additionalProperties":False
-        }
-    
+        "required": [],
+        "additionalProperties": False,
+    }
+
     schema = Schema.create(
         client=integration_client,
         schema_id=schema_id,
