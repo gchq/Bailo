@@ -1,23 +1,25 @@
 from __future__ import annotations
 
 import pytest
-from bailo import Client, Model, ModelVisibility
+from bailo import Client, Model, ModelVisibility, Experiment
 from bailo.core.exceptions import BailoException
+from bailo.core.utils import NestedDict
 
 
-def test_model():
-    client = Client("https://example.com")
-    visibility = ModelVisibility.PUBLIC
+def test_model(local_model):
+    assert isinstance(local_model, Model)
 
-    model = Model(
-        client=client,
-        model_id="test-id",
-        name="test",
-        description="test",
-        visibility=visibility,
-    )
 
-    assert isinstance(model, Model)
+def test_experiment(local_model):
+    experiment = Experiment(model=local_model)
+
+    assert isinstance(experiment, Experiment)
+
+
+def test_create_experiment_from_model(local_model):
+    experiment = local_model.create_experiment()
+
+    assert isinstance(experiment, Experiment)
 
 
 @pytest.mark.integration
@@ -121,3 +123,55 @@ def test_create_release_without_model_card(integration_client):
 
     with pytest.raises(BailoException):
         model.create_release("1.0.0", "test")
+
+
+@pytest.mark.integration
+def test_publish_experiment_standard(standard_experiment):
+    run_id = standard_experiment.raw[0]["run"]
+    standard_experiment.publish(mc_loc="performance.performanceMetrics", run_id=run_id)
+    
+    model_card = standard_experiment.model.model_card
+    model_card = NestedDict(model_card)
+    metrics_array = model_card[("performance","performanceMetrics")][0]["datasetMetrics"]
+    
+    expected_accuracy = 0.98
+    actual_accuracy = metrics_array[0]["value"]
+
+    assert expected_accuracy == actual_accuracy
+
+
+@pytest.mark.integration
+def test_import_experiment_from_mlflow_and_publish(mlflow_id, example_model):
+    experiment_mlflow = example_model.create_experiment()
+    experiment_mlflow.from_mlflow(tracking_uri="http://127.0.0.1:5000", experiment_id=mlflow_id)
+
+    run_id = experiment_mlflow.raw[0]["run"]
+    experiment_mlflow.publish(mc_loc="performance.performanceMetrics", run_id=run_id)
+
+    model_card = experiment_mlflow.model.model_card
+    model_card = NestedDict(model_card)
+    metrics_array = model_card[("performance","performanceMetrics")][0]["datasetMetrics"]
+    
+    expected_accuracy = 0.86
+    actual_accuracy = metrics_array[0]["value"]
+
+    assert expected_accuracy == actual_accuracy
+
+
+@pytest.mark.integration
+def test_publish_experiment_without_valid_id(standard_experiment):
+    run_id = "random_incorrect_id"
+
+    with pytest.raises(NameError):
+        standard_experiment.publish(mc_loc="performance.performanceMetrics", run_id=run_id)
+
+
+@pytest.mark.integration
+def test_publish_experiment_without_valid_model_card(standard_experiment):
+    standard_experiment.model.model_card = None
+    run_id = standard_experiment.raw[0]["run"]
+
+    with pytest.raises(UnboundLocalError):
+        standard_experiment.publish(mc_loc="performance.performanceMetrics", run_id=run_id)
+
+
