@@ -162,7 +162,7 @@ class Release:
         :return: The unique file ID of the file uploaded
         ..note:: If path provided is a directory, it will be uploaded as a zip
         """
-        name = path.split('/')[-1]
+        name = path.split("/")[-1]
         is_zip = False
 
         if data is None:
@@ -174,12 +174,12 @@ class Release:
 
             with open(path, "rb") as f:
                 res = self.client.simple_upload(self.model_id, name, f).json()
-            
+
             if is_zip:
                 os.remove(path)
         else:
             res = self.client.simple_upload(self.model_id, name, data).json()
-        
+
         self.files.append(res["file"]["id"])
         self.update()
         return res["file"]["id"]

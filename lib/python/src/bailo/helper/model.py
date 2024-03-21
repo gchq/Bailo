@@ -14,9 +14,11 @@ from semantic_version import Version
 
 try:
     import mlflow
+
     ml_flow = 1
 except:
     ml_flow = 0
+
 
 class Model:
     """Represent a model within Bailo.
@@ -282,13 +284,13 @@ class Model:
             self.model_card = None
 
 
-
 class Experiment:
     """Represent an experiment locally.
 
     :param model: A Bailo model object which the experiment is being run on
     :param raw: Raw information about the experiment runs
-    """    
+    """
+
     def __init__(
         self,
         model: Model,
@@ -306,27 +308,21 @@ class Experiment:
 
         :param model: A Bailo model object which the experiment is being run on
         :return: Experiment object
-        """        
-        
+        """
+
         return cls(model=model)
 
     def start_run(self, is_mlflow: bool | None = False):
         """Starts a new experiment run.
 
         :param is_mlflow: Marks a run as MLFlow
-        """        
+        """
         try:
             self.run = self.run + 1
         except:
             self.run = 0
 
-        self.run_data = {
-            "run": self.run,
-            "params": [],
-            "metrics": [],
-            "artifacts": [],
-            "dataset": ""
-        }
+        self.run_data = {"run": self.run, "params": [], "metrics": [], "artifacts": [], "dataset": ""}
 
         self.raw.append(self.run_data)
 
@@ -337,28 +333,28 @@ class Experiment:
         """Logs parameters to the current run.
 
         :param params: Dictionary of parameters to be logged
-        """        
+        """
         self.run_data["params"].append(params)
 
     def log_metrics(self, metrics: dict[str, Any]):
         """Logs metrics to the current run.
 
         :param metrics: Dictionary of metrics to be logged
-        """        
+        """
         self.run_data["metrics"].append(metrics)
 
     def log_artifacts(self, artifacts: list):
         """Logs artifacts to the current run.
 
         :param artifacts: A list of artifact paths to be logged
-        """        
+        """
         self.run_data["artifacts"] = self.run_data["artifacts"] + artifacts
 
     def log_dataset(self, dataset: str):
         """Logs a dataset to the current run.
 
         :param dataset: Arbitrary title of dataset
-        """        
+        """
         self.run_data["dataset"] = dataset
 
     def from_mlflow(self, tracking_uri: str, experiment_id: str):
@@ -367,7 +363,7 @@ class Experiment:
         :param tracking_uri: MLFlow Tracking server URI
         :param experiment_id: MLFlow Tracking experiment ID
         :raises ImportError: Import error if MLFlow not installed
-        """        
+        """
         if ml_flow == 1:
             client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
             runs = client.search_runs(experiment_id)
@@ -403,7 +399,6 @@ class Experiment:
         else:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
-
     def publish(self, mc_loc: str, run_id: str, semver: str | None = "0.1.0", notes: str | None = ""):
         """Publishes a given experiments results to the model card.
 
@@ -413,7 +408,7 @@ class Experiment:
         :param notes: Notes for release, defaults to ""
 
         ..note:: mc_loc is dependent on the model card schema being used
-        """        
+        """
         mc = self.model.model_card
         if mc is None:
             raise UnboundLocalError("Model card needs to be populated before publishing an experiment.")
@@ -431,17 +426,17 @@ class Experiment:
 
         values = []
 
-        for metric in sel_run['metrics']:
+        for metric in sel_run["metrics"]:
             for k, v in metric.items():
                 values.append({"name": k, "value": v})
 
         # Updating the model card
-        parsed_values = [{'dataset': sel_run['dataset'], 'datasetMetrics': values}]
-        mc[tuple(mc_loc.split('.'))] = parsed_values
+        parsed_values = [{"dataset": sel_run["dataset"], "datasetMetrics": values}]
+        mc[tuple(mc_loc.split("."))] = parsed_values
         self.model.update_model_card(model_card=mc)
 
         # Creating a release and uploading artifacts (if artifacts present)
-        artifacts = sel_run['artifacts']
+        artifacts = sel_run["artifacts"]
         if len(artifacts) > 0:
             # Create new release
             try:
@@ -452,7 +447,7 @@ class Experiment:
 
             run_id = sel_run["run"]
             notes = f"{notes} (Run ID: {run_id})"
-            release_new = self.model.create_release(version = release_new_version, minor=True, notes=notes)
+            release_new = self.model.create_release(version=release_new_version, minor=True, notes=notes)
 
             for artifact in artifacts:
                 release_new.upload(path=artifact)
