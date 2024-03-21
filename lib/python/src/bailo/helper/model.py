@@ -375,10 +375,13 @@ class Experiment:
             for run in runs:
                 data = run.data
                 info = run.info
+                inputs = run.inputs
 
                 artifact_uri = info.artifact_uri
                 run_id = info.run_id
                 status = info.status
+                datasets = inputs.dataset_inputs
+                datasets_str = [x.name for x in datasets]
 
                 artifacts = []
 
@@ -395,6 +398,7 @@ class Experiment:
                 self.log_params(data.params)
                 self.log_metrics(data.metrics)
                 self.log_artifacts(artifacts)
+                self.log_dataset("".join(datasets_str))
                 self.run_data["run"] = info.run_id
         else:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
@@ -411,13 +415,19 @@ class Experiment:
         ..note:: mc_loc is dependent on the model card schema being used
         """        
         mc = self.model.model_card
+        if mc is None:
+            raise UnboundLocalError("Model card needs to be populated before publishing an experiment.")
+
         mc = NestedDict(mc)
 
         for run in self.raw:
             if run["run"] == run_id:
                 sel_run = run
+                break
             else:
                 continue
+        else:
+            raise NameError(f"Run {run_id} does not exist.")
 
         values = []
 
@@ -435,14 +445,14 @@ class Experiment:
         if len(artifacts) > 0:
             # Create new release
             try:
-                release_latest = self.model.get_latest_release().version
-                release_new = release_latest.next_minor()
+                release_latest_version = self.model.get_latest_release().version
+                release_new_version = release_latest_version.next_minor()
             except:
-                release_new = semver
+                release_new_version = semver
 
             run_id = sel_run["run"]
             notes = f"{notes} (Run ID: {run_id})"
-            release_new = self.model.create_release(version = release_new, minor=True, notes=notes)
+            release_new = self.model.create_release(version = release_new_version, minor=True, notes=notes)
 
             for artifact in artifacts:
                 release_new.upload(path=artifact)
