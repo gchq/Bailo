@@ -100,6 +100,7 @@ server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
 server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
 server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
 server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
+//server.patch('/api/v2/model:modelId/release/:semver/review', ...patchReleaseReviewResponse)
 
 server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
 server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
@@ -108,6 +109,7 @@ server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...delet
 server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
+//server.patch('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...patchAccessRequestReviewResponse)
 
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)

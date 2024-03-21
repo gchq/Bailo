@@ -207,6 +207,23 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
   return reviews.some((review) => requiredRoles.accessRequest.includes(review.role))
 }
 
+export type UpdateReviewResponseParams = Pick<ReviewResponse, 'comment' | 'decision'>
+export async function updateReviewResponse(
+  user: UserInterface,
+  modelId: string,
+  role: string,
+  response: ReviewResponseParams,
+  kind: ReviewKindKeys,
+  reviewId: string,
+  delta: UpdateReviewResponseParams,
+) {
+  const reviewResponse = await respondToReview(user, modelId, role, response, kind, reviewId)
+
+  //const auth = await authorisation.
+
+  Object.assign(reviewResponse, delta)
+}
+
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
   return roles.map((role) => {
     const entities = collaborators
