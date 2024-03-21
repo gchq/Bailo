@@ -140,7 +140,7 @@ def test_publish_experiment_standard(standard_experiment):
     assert expected_accuracy == actual_accuracy
 
 
-@pytest.mark.integration
+@pytest.mark.mlflow
 def test_import_experiment_from_mlflow_and_publish(mlflow_id, example_model):
     experiment_mlflow = example_model.create_experiment()
     experiment_mlflow.from_mlflow(tracking_uri="http://127.0.0.1:5000", experiment_id=mlflow_id)
