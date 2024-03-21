@@ -129,11 +129,11 @@ def test_create_release_without_model_card(integration_client):
 def test_publish_experiment_standard(standard_experiment):
     run_id = standard_experiment.raw[0]["run"]
     standard_experiment.publish(mc_loc="performance.performanceMetrics", run_id=run_id)
-    
+
     model_card = standard_experiment.model.model_card
     model_card = NestedDict(model_card)
-    metrics_array = model_card[("performance","performanceMetrics")][0]["datasetMetrics"]
-    
+    metrics_array = model_card[("performance", "performanceMetrics")][0]["datasetMetrics"]
+
     expected_accuracy = 0.98
     actual_accuracy = metrics_array[0]["value"]
 
@@ -150,8 +150,8 @@ def test_import_experiment_from_mlflow_and_publish(mlflow_id, example_model):
 
     model_card = experiment_mlflow.model.model_card
     model_card = NestedDict(model_card)
-    metrics_array = model_card[("performance","performanceMetrics")][0]["datasetMetrics"]
-    
+    metrics_array = model_card[("performance", "performanceMetrics")][0]["datasetMetrics"]
+
     expected_accuracy = 0.86
     actual_accuracy = metrics_array[0]["value"]
 
@@ -173,5 +173,3 @@ def test_publish_experiment_without_valid_model_card(standard_experiment):
 
     with pytest.raises(UnboundLocalError):
         standard_experiment.publish(mc_loc="performance.performanceMetrics", run_id=run_id)
-
-
