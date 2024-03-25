@@ -180,4 +180,12 @@ module.exports = {
       registry: 'registry',
     },
   },
+
+  instrumentation: {
+    enabled: false,
+    serviceName: 'backend',
+    endpoint: '',
+    authenticationToken: '',
+    debug: false,
+  },
 }

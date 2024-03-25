@@ -52,6 +52,13 @@ spec:
                   key: mongodb-passwords
             - name: MONGO_CONNECTION_URI
               value: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ include "bailo.mongo.host" . }}'
+            {{- if .Values.instrumentation.enabled }}
+            - name: OTEL_EXPORTER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-apm
+                  key: auth-token
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.backendPort }}
@@ -84,7 +91,7 @@ spec:
               mountPath: /app/certs/key.pem
               subPath: key.pem
             - name: certs
-              mountPath: /usr/local/share/ca-certificates/cert.pem 
+              mountPath: /usr/local/share/ca-certificates/cert.pem
               subPath: cert.pem
             - name: stroom
               mountPath: /app/logs
@@ -158,6 +165,24 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.frontendRepository }}:{{ .Values.image.frontendTag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.instrumentation.enabled }}
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-apm
+                  key: endpoint
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-apm
+                  key: headers
+            - name: OTEL_LOG_LEVEL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-apm
+                  key: debug
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.frontendPort }}

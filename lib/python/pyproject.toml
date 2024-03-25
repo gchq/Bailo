@@ -18,7 +18,8 @@ classifiers = [
 requires-python = ">=3.8.1"
 dynamic = ["version"]
 dependencies = [
-    "semantic-version==2.10.0"
+    "semantic-version==2.10.0",
+    "requests>=2.22"
 ]
 
 [project.optional-dependencies]
