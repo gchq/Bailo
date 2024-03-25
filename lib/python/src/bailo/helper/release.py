@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import shutil
 from io import BytesIO
-from typing import Any, Union
+from typing import Any
 
 from bailo.core.client import Client
 from semantic_version import Version
@@ -134,7 +134,7 @@ class Release:
             draft,
         )
 
-    def download(self, filename: str, write: bool | None = True, path: str | None = None) -> Any:
+    def download(self, filename: str, write: bool = True, path: str = None) -> Any:
         """Give returns a Reading object given the file id.
 
         :param filename: The name of the file to retrieve
@@ -153,7 +153,7 @@ class Release:
 
         return res
 
-    def upload(self, path: str, data: BytesIO | None = None) -> str:
+    def upload(self, path: str, data: BytesIO = None) -> str:
         """Upload a file to the release.
 
         :param path: The path, or name of file or directory to be uploaded
@@ -162,15 +162,13 @@ class Release:
         :return: The unique file ID of the file uploaded
         ..note:: If path provided is a directory, it will be uploaded as a zip
         """
-        name = path.split("/")[-1]
-        is_zip = False
+        name = os.path.split(path)[1]
 
         if data is None:
-            if os.path.isdir(path):
+            if is_zip := os.path.isdir(path):
                 shutil.make_archive(name, "zip", path)
                 path = f"{name}.zip"
                 name = path
-                is_zip = True
 
             with open(path, "rb") as f:
                 res = self.client.simple_upload(self.model_id, name, f).json()

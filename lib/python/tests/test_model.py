@@ -10,12 +10,6 @@ def test_model(local_model):
     assert isinstance(local_model, Model)
 
 
-def test_experiment(local_model):
-    experiment = Experiment(model=local_model)
-
-    assert isinstance(experiment, Experiment)
-
-
 def test_create_experiment_from_model(local_model):
     experiment = local_model.create_experiment()
 
@@ -171,5 +165,14 @@ def test_publish_experiment_without_valid_model_card(standard_experiment):
     standard_experiment.model.model_card = None
     run_id = standard_experiment.raw[0]["run"]
 
-    with pytest.raises(UnboundLocalError):
+    with pytest.raises(BailoException):
+        standard_experiment.publish(mc_loc="performance.performanceMetrics", run_id=run_id)
+
+
+@pytest.mark.integration
+def test_publish_experiment_without_runs(standard_experiment):
+    standard_experiment.raw = []
+    run_id = 0
+
+    with pytest.raises(BailoException):
         standard_experiment.publish(mc_loc="performance.performanceMetrics", run_id=run_id)

@@ -30,11 +30,6 @@ class NestedDict(dict):
         d = self
         for index, key in enumerate(keytuple):
             if index != len(keytuple) - 1:
-                try:
-                    d = d[key]
-                except:
-                    d[key] = {}
-                    d = d[key]
-
+                d = d.setdefault(key, {})
             else:
                 d[key] = item

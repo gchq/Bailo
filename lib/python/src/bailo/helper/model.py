@@ -10,14 +10,15 @@ from bailo.core.utils import NestedDict
 
 import os
 import shutil
+import tempfile
 from semantic_version import Version
 
 try:
     import mlflow
 
-    ml_flow = 1
-except:
-    ml_flow = 0
+    ml_flow = True
+except ImportError:
+    ml_flow = False
 
 
 class Model:
@@ -289,6 +290,19 @@ class Experiment:
 
     :param model: A Bailo model object which the experiment is being run on
     :param raw: Raw information about the experiment runs
+
+    .. code-block:: python
+
+       experiment = model.create_experiment()
+       for x in range(5):
+           experiment.start_run()
+           experiment.log_params({"lr": 0.01})
+           ### INSERT MODEL TRAINING HERE ###
+           experiment.log_metrics("accuracy": 0.86)
+           experiment.log_artifacts(["weights.pth"])
+
+       experiment.publish(mc_loc="performance.performanceMetrics", run_id=1)
+
     """
 
     def __init__(
@@ -297,7 +311,8 @@ class Experiment:
     ):
         self.model = model
         self.raw = []
-        self.temp_dirs = []
+        self.run = None
+        self.temp_dir = os.path.join(tempfile.gettempdir(), "bailo_runs")
 
     @classmethod
     def create(
@@ -312,14 +327,14 @@ class Experiment:
 
         return cls(model=model)
 
-    def start_run(self, is_mlflow: bool | None = False):
+    def start_run(self, is_mlflow: bool = False):
         """Starts a new experiment run.
 
         :param is_mlflow: Marks a run as MLFlow
         """
         try:
-            self.run = self.run + 1
-        except:
+            self.run += 1
+        except TypeError:
             self.run = 0
 
         self.run_data = {"run": self.run, "params": [], "metrics": [], "artifacts": [], "dataset": ""}
@@ -348,7 +363,7 @@ class Experiment:
 
         :param artifacts: A list of artifact paths to be logged
         """
-        self.run_data["artifacts"] = self.run_data["artifacts"] + artifacts
+        self.run_data["artifacts"].extend(artifacts)
 
     def log_dataset(self, dataset: str):
         """Logs a dataset to the current run.
@@ -364,7 +379,7 @@ class Experiment:
         :param experiment_id: MLFlow Tracking experiment ID
         :raises ImportError: Import error if MLFlow not installed
         """
-        if ml_flow == 1:
+        if ml_flow:
             client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
             runs = client.search_runs(experiment_id)
 
@@ -377,7 +392,7 @@ class Experiment:
                 run_id = info.run_id
                 status = info.status
                 datasets = inputs.dataset_inputs
-                datasets_str = [x.name for x in datasets]
+                datasets_str = [dataset.name for dataset in datasets]
 
                 artifacts = []
 
@@ -385,10 +400,10 @@ class Experiment:
                 if status != "FINISHED":
                     continue
 
-                temp_dir = f"bailo_runs/mlflow_{run_id}"
                 if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)) > 0:
-                    mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=temp_dir)
-                    artifacts.append(temp_dir)
+                    mlflow_dir = os.path.join(self.temp_dir, f"mlflow_{run_id}")
+                    mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
+                    artifacts.append(mlflow_dir)
 
                 self.start_run(is_mlflow=True)
                 self.log_params(data.params)
@@ -399,30 +414,31 @@ class Experiment:
         else:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
-    def publish(self, mc_loc: str, run_id: str, semver: str | None = "0.1.0", notes: str | None = ""):
+    def publish(self, mc_loc: str, run_id: str, semver: str = "0.1.0", notes: str = ""):
         """Publishes a given experiments results to the model card.
 
         :param mc_loc: Location of metrics in the model card (e.g. performance.performanceMetrics)
         :param run_id: Local experiment run ID to be selected
-        :param semver: Semantic version of release to create (if artifacts present)
+        :param semver: Semantic version of release to create (if artifacts present), defaults to 0.1.0 or next
         :param notes: Notes for release, defaults to ""
 
         ..note:: mc_loc is dependent on the model card schema being used
         """
         mc = self.model.model_card
         if mc is None:
-            raise UnboundLocalError("Model card needs to be populated before publishing an experiment.")
+            raise BailoException("Model card needs to be populated before publishing an experiment.")
 
         mc = NestedDict(mc)
 
-        for run in self.raw:
-            if run["run"] == run_id:
-                sel_run = run
-                break
+        if len(self.raw) > 0:
+            for run in self.raw:
+                if run["run"] == run_id:
+                    sel_run = run
+                    break
             else:
-                continue
+                raise NameError(f"Run {run_id} does not exist.")
         else:
-            raise NameError(f"Run {run_id} does not exist.")
+            raise BailoException(f"This experiment has no runs to publish.")
 
         values = []
 
@@ -452,5 +468,5 @@ class Experiment:
             for artifact in artifacts:
                 release_new.upload(path=artifact)
 
-            if os.path.exists("bailo_runs") and os.path.isdir("bailo_runs"):
-                shutil.rmtree("bailo_runs")
+            if os.path.exists(self.temp_dir) and os.path.isdir(self.temp_dir):
+                shutil.rmtree(self.temp_dir)
