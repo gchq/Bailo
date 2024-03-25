@@ -13,6 +13,7 @@ from __future__ import annotations
 import pytest
 import random
 import mlflow
+from example_schemas import METRICS_JSON_SCHEMA
 from bailo.core.client import Client
 from bailo.core.enums import ModelVisibility, SchemaKind
 from bailo.helper.model import Model
@@ -96,7 +97,7 @@ def standard_experiment(example_model, weights_path):
 
 @pytest.fixture
 def mlflow_id(weights_path):
-    mlflow_client = client = mlflow.tracking.MlflowClient(tracking_uri="http://127.0.0.1:5000")
+    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri="http://127.0.0.1:5000")
     experiment_name = f"Test_{str(random.randint(1, 1000000))}"
     mlflow_id = mlflow_client.create_experiment(name=experiment_name)
 
@@ -124,84 +125,13 @@ def mlflow_id(weights_path):
 def metrics_schema(integration_client):
     schema_id = str(random.randint(1, 1000000))
 
-    json_schema = {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "type": "object",
-        "properties": {
-            "overview": {
-                "title": "Overview",
-                "description": "Summary of the model functionality.",
-                "type": "object",
-                "properties": {
-                    "modelSummary": {
-                        "title": "What does the model do?",
-                        "description": "A description of what the model does.",
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 5000,
-                    },
-                    "tags": {
-                        "title": "Descriptive tags for the model.",
-                        "description": "These tags will be searchable and will help others find this model.",
-                        "type": "array",
-                        "widget": "tagSelector",
-                        "items": {"type": "string"},
-                        "uniqueItems": True,
-                    },
-                },
-                "required": [],
-                "additionalProperties": False,
-            },
-            "performance": {
-                "title": "Performance",
-                "type": "object",
-                "properties": {
-                    "performanceMetrics": {
-                        "title": "Performance Metrics",
-                        "description": "List of metrics, values, and the dataset they were evaluated on",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "title": "",
-                            "properties": {
-                                "dataset": {"title": "Dataset used", "type": "string"},
-                                "datasetMetrics": {
-                                    "type": "array",
-                                    "title": "Dataset Metrics",
-                                    "items": {
-                                        "type": "object",
-                                        "title": "",
-                                        "properties": {
-                                            "name": {
-                                                "title": "Metric name",
-                                                "description": "For example: ACCURACY",
-                                                "type": "string",
-                                            },
-                                            "value": {
-                                                "title": "Model performance metric value",
-                                                "description": "For example: 82",
-                                                "type": "number",
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    }
-                },
-            },
-        },
-        "required": [],
-        "additionalProperties": False,
-    }
-
     schema = Schema.create(
         client=integration_client,
         schema_id=schema_id,
         name="metrics-schema-test",
         description="Metrics schema test.",
         kind=SchemaKind.MODEL,
-        json_schema=json_schema,
+        json_schema=METRICS_JSON_SCHEMA,
     )
 
     return schema
