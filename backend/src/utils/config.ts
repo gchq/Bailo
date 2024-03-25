@@ -129,9 +129,6 @@ export interface Config {
   }
 
   oauth: {
-    // Enabled only included for backward support with V1.
-    // After V1, authentication connector config should be used.
-    enabled: boolean
     provider: string
     grant: grant.GrantConfig | grant.GrantOptions
     cognito: {
@@ -144,6 +141,14 @@ export interface Config {
   defaultSchemas: {
     modelCards: Array<DefaultSchema>
     accessRequests: Array<DefaultSchema>
+  }
+
+  instrumentation: {
+    enabled: boolean
+    serviceName: string
+    endpoint: string
+    authenticationToken: string
+    debug: boolean
   }
 }
 
