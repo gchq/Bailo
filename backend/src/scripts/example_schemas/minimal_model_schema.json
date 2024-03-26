@@ -34,12 +34,16 @@
       "type": "object",
       "properties": {
         "questionOne": {
-          "title": "Question one",
-          "description": "This is a question",
-          "type": "string"
+          "title": "Section one",
+          "description": "This is a section",
+          "type": "object",
+          "properties": {
+            "q1": { "title": "Question one", "description": "This is a question", "type": "string" },
+            "q2": { "title": "Question two", "description": "This is a question", "type": "string" }
+          }
         },
         "questionTwo": {
-          "title": "Question two",
+          "title": "Question three",
           "description": "This is another question",
           "type": "number"
         }

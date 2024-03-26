@@ -22,6 +22,8 @@ export type RichTextEditorProps = {
   textareaProps?: MDEditorProps['textareaProps']
   dataTest?: string
   errors?: string[]
+  autoFocus?: boolean
+  ref?: any
 }
 
 export default function RichTextEditor({
@@ -31,6 +33,8 @@ export default function RichTextEditor({
   label = <></>,
   dataTest = 'richTextEditor',
   errors,
+  autoFocus = false,
+  ref,
 }: RichTextEditorProps) {
   const [hideToolbar, setHideToolbar] = useState(true)
   const theme = useTheme()
@@ -52,6 +56,10 @@ export default function RichTextEditor({
     '--color-border-default': errors && errors.length > 0 ? theme.palette.error.main : '',
   }
 
+  const handleOnFocus = (element: any) => {
+    element.target.setSelectionRange(element.target.value.length, element.target.value.length)
+  }
+
   return (
     <>
       <Box display='flex' overflow='auto'>
@@ -64,10 +72,12 @@ export default function RichTextEditor({
         defaultTabEnable
         value={value}
         style={styling}
+        autoFocus={autoFocus}
+        ref={ref}
         preview='edit'
         hideToolbar={hideToolbar}
         height={150}
-        textareaProps={richTextareaProps}
+        textareaProps={{ onFocus: handleOnFocus, ...richTextareaProps }}
         onChange={handleChange}
       />
     </>
