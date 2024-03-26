@@ -21,7 +21,6 @@ spec:
       labels:
         name: backend
     spec:
-      serviceAccountName: {{ include "bailo.fullname" .  }}-builder
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -50,8 +49,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "bailo.fullname" . }}-mongodb
                   key: mongodb-passwords
-            - name: MONGO_CONNECTION_URI
-              value: 'mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:{{ index .Values.mongodb.auth.passwords 0 }}@{{ include "bailo.mongo.host" . }}'
             {{- if .Values.instrumentation.enabled }}
             - name: OTEL_EXPORTER_TOKEN
               valueFrom:

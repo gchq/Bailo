@@ -222,6 +222,7 @@ config:
       enabled: false
       text: "BAILO"
       colour: "#047a06"
+      textColor: "black"
 
   smtp:
     #host: 'mail' #service name
@@ -239,17 +240,6 @@ config:
     protocol: "https"
     port: 443
 
-# logging https://github.com/gchq/stroom
-stroom:
-  enabled: false
-  url: "http://localhost:8090/stroom/datafeed"
-  folder: "./logs/stroom"
-  system: "bailo"
-  feed: "bailo"
-  environment: "Development"
-  insecure: true
-  interval: 300000
-
 # nginx.deployment registry.deployment
 nginxcert:
   cert: cert.pem #use san.cnf to create certs
@@ -261,6 +251,9 @@ connectors:
 
   authorisation:
     kind: 'basic'
+
+  audit:
+    kind: 'silly'
 
 instrumentation:
   enabled: false
