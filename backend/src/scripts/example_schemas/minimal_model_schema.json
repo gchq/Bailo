@@ -22,7 +22,8 @@
           "items": {
             "type": "string"
           },
-          "uniqueItems": true
+          "uniqueItems": true,
+          "autofocus": true
         }
       },
       "required": [],

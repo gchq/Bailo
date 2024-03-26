@@ -69,10 +69,10 @@ export default function RichTextEditor({
         </Button>
       </Box>
       <MDEditor
+        autoFocus={autoFocus}
         defaultTabEnable
         value={value}
         style={styling}
-        autoFocus={autoFocus}
         ref={ref}
         preview='edit'
         hideToolbar={hideToolbar}
