@@ -1,5 +1,6 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { forwardRef } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 
@@ -47,12 +48,14 @@ export default function RichTextInput({
     )
   }
 
-  return (
+  const RichTextInput = forwardRef((_props: any, ref: any) => (
     <RichTextEditor
       value={value}
       onChange={onChange}
       textareaProps={{ disabled: disabled, id: id }}
       errors={rawErrors}
+      autoFocus={formContext.firstQuestionKey === id}
+      ref={ref}
       label={
         <Typography fontWeight='bold'>
           {label}
@@ -61,5 +64,8 @@ export default function RichTextInput({
       }
       key={label}
     />
-  )
+  ))
+  RichTextInput.displayName = 'RichTextInput'
+
+  return <RichTextInput />
 }

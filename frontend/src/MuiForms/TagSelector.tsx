@@ -1,22 +1,75 @@
 import { Autocomplete, Box, Chip, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FormContextType } from '@rjsf/utils'
+import { forwardRef } from 'react'
 
 interface TagSelectorProps {
   onChange: (newValue: string[]) => void
   value: string[]
   label: string
+  id: string
   formContext?: FormContextType
   required?: boolean
   rawErrors?: string[]
 }
 
-export default function TagSelector({ onChange, value, label, formContext, required, rawErrors }: TagSelectorProps) {
+export default function TagSelector({
+  onChange,
+  value,
+  label,
+  id,
+  formContext,
+  required,
+  rawErrors,
+}: TagSelectorProps) {
   const handleChange = (_event: React.SyntheticEvent<Element, Event>, newValues: string[]) => {
     onChange([...newValues])
   }
 
   const theme = useTheme()
+
+  const TagSelectorInput = forwardRef((_props: any, ref: any) => (
+    <Autocomplete
+      multiple
+      isOptionEqualToValue={(option: string, optionValue: string) => option === optionValue}
+      value={value || ''}
+      onChange={handleChange}
+      options={[]}
+      freeSolo
+      ref={ref}
+      autoFocus={formContext && formContext.firstQuestionKey === id}
+      renderTags={(tagValue: string[], getTagProps) =>
+        tagValue.map((option: string, index: number) => (
+          <Chip variant='outlined' label={option} {...getTagProps({ index })} key={option} />
+        ))
+      }
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          size='small'
+          error={rawErrors && rawErrors.length > 0}
+          sx={{
+            input: {
+              color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+            },
+            label: {
+              WebkitTextFillColor:
+                theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+            },
+            '& .MuiInputBase-input.Mui-disabled': {
+              WebkitTextFillColor:
+                theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+            },
+            fontStyle: value ? 'unset' : 'italic',
+          }}
+          variant='outlined'
+          required
+          onFocus={(e) => e.currentTarget.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)}
+        />
+      )}
+    />
+  ))
+  TagSelectorInput.displayName = 'TagSelectorInput'
 
   return (
     <>
@@ -26,42 +79,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
-          <Autocomplete
-            multiple
-            isOptionEqualToValue={(option: string, optionValue: string) => option === optionValue}
-            value={value || ''}
-            onChange={handleChange}
-            options={[]}
-            freeSolo
-            renderTags={(tagValue: string[], getTagProps) =>
-              tagValue.map((option: string, index: number) => (
-                <Chip variant='outlined' label={option} {...getTagProps({ index })} key={option} />
-              ))
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                size='small'
-                error={rawErrors && rawErrors.length > 0}
-                sx={{
-                  input: {
-                    color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
-                  },
-                  label: {
-                    WebkitTextFillColor:
-                      theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
-                  },
-                  '& .MuiInputBase-input.Mui-disabled': {
-                    WebkitTextFillColor:
-                      theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
-                  },
-                  fontStyle: value ? 'unset' : 'italic',
-                }}
-                variant='outlined'
-                required
-              />
-            )}
-          />
+          <TagSelectorInput />
         </>
       )}
       {formContext && !formContext.editMode && (

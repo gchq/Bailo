@@ -10,6 +10,10 @@ export function createUiSchema(schema: any, customSchema: any) {
 function createBaseSchema(schema: any) {
   const uiSchema = {}
 
+  if (schema.autofocus) {
+    uiSchema['ui:autofocus'] = true
+  }
+
   if (schema.maxLength > 140) {
     uiSchema['ui:widget'] = 'textarea'
   }

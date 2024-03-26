@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { Fragment, useMemo } from 'react'
+import { forwardRef, Fragment, useMemo } from 'react'
 
 interface CustomTextInputProps {
   label?: string
@@ -33,40 +33,47 @@ export default function CustomTextInput(props: CustomTextInputProps) {
     }
   }, [theme, value])
 
+  const TextInput = forwardRef((props: any, ref: any) => (
+    <TextField
+      size='small'
+      id={id}
+      error={rawErrors && rawErrors.length > 0}
+      sx={{
+        input: {
+          color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+        },
+        label: {
+          WebkitTextFillColor: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+        },
+        '& .MuiInputBase-input.Mui-disabled': {
+          WebkitTextFillColor: disabledWebkitTextFillColor,
+        },
+        fontStyle: value ? 'unset' : 'italic',
+      }}
+      onChange={handleChange}
+      variant={!formContext.editMode ? 'standard' : 'outlined'}
+      required={formContext.editMode}
+      value={value || (!formContext.editMode ? 'Unanswered' : '')}
+      disabled={!formContext.editMode}
+      ref={ref}
+      InputProps={{
+        ...props.inputProps,
+        ...(!formContext.editMode && { disableUnderline: true }),
+        'data-test': id,
+        autoFocus: formContext.firstQuestionKey === id,
+      }}
+      onFocus={(e) => e.currentTarget.setSelectionRange(e.currentTarget.value.length, e.currentTarget.value.length)}
+    />
+  ))
+  TextInput.displayName = 'TextInput'
+
   return (
     <Fragment key={label}>
       <Typography id={`${id}-label`} fontWeight='bold'>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
-      <TextField
-        size='small'
-        id={id}
-        error={rawErrors && rawErrors.length > 0}
-        sx={{
-          input: {
-            color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
-          },
-          label: {
-            WebkitTextFillColor:
-              theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
-          },
-          '& .MuiInputBase-input.Mui-disabled': {
-            WebkitTextFillColor: disabledWebkitTextFillColor,
-          },
-          fontStyle: value ? 'unset' : 'italic',
-        }}
-        onChange={handleChange}
-        variant={!formContext.editMode ? 'standard' : 'outlined'}
-        required={formContext.editMode}
-        value={value || (!formContext.editMode ? 'Unanswered' : '')}
-        disabled={!formContext.editMode}
-        InputProps={{
-          ...props.InputProps,
-          ...(!formContext.editMode && { disableUnderline: true }),
-          'data-test': id,
-        }}
-      />
+      <TextInput />
     </Fragment>
   )
 }
