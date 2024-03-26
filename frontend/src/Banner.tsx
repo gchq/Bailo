@@ -13,7 +13,7 @@ function Banner() {
     borderRadius: 0,
     position: 'fixed',
     width: 1,
-    zIndex: 1500,
+    zIndex: 1299,
   }
 
   if (isUiConfigError) {

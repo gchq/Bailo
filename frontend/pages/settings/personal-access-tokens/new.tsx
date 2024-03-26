@@ -121,7 +121,7 @@ export default function NewToken() {
         <Card sx={{ my: 4, p: 4 }}>
           <Stack spacing={2}>
             <div>
-              <Link href={'/settings?tab=authentication&category=personal'}>
+              <Link href={'/settings?tab=authentication'}>
                 <Button startIcon={<ArrowBack />}>Back to settings</Button>
               </Link>
             </div>
@@ -200,7 +200,7 @@ export default function NewToken() {
           </Stack>
         </Card>
       </Container>
-      <TokenDialog token={token} />
+      {token && <TokenDialog token={token} />}
     </Wrapper>
   )
 }
