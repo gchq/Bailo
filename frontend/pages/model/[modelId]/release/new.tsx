@@ -9,6 +9,7 @@ import qs from 'querystring'
 import { FormEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/releases/ReleaseForm'
@@ -29,6 +30,7 @@ export default function NewRelease() {
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const router = useRouter()
+  const sendNotification = useNotification()
 
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
@@ -60,29 +62,46 @@ export default function NewRelease() {
 
       const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
 
-      const response = await axios.post(
-        metadata
-          ? `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${file.type}?${qs.stringify({
-              metadata,
-            })}`
-          : `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${file.type}`,
-        file,
-        {
-          onUploadProgress: function (progressEvent) {
-            if (progressEvent.total) {
-              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-              setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
-            }
+      const fileResponse = await axios
+        .post(
+          metadata
+            ? `/api/v2/model/${model.id}/files/upload/simple?name=${file.name}&mime=${file.type}?${qs.stringify({
+                metadata,
+              })}`
+            : `/api/v2/model/${model.id}/files/upload/simple?name=${file.name}&mime=${file.type}`,
+          file,
+          {
+            onUploadProgress: function (progressEvent) {
+              if (progressEvent.total) {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+              }
+            },
           },
-        },
-      )
-      if (response.status !== 200) {
-        // TODO handle file upload error
+        )
+        .catch(function (error) {
+          if (error.response) {
+            sendNotification({
+              variant: 'error',
+              msg: `Error code ${error.response.status} recieved from server whilst attemping to upload file ${file.name}`,
+            })
+          } else if (error.request) {
+            sendNotification({
+              variant: 'error',
+              msg: `There was a problem with the request whilst attemping to upload file ${file.name}`,
+            })
+          } else {
+            sendNotification({ variant: 'error', msg: `Unknown error whilst attemping to upload file ${file.name}` })
+          }
+        })
+
+      if (fileResponse) {
+        setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
+        fileIds.push(fileResponse.data.file._id)
+      } else {
+        setCurrentFileUploadProgress(undefined)
         return setLoading(false)
       }
-
-      setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
-      fileIds.push(response.data.file._id)
     }
 
     const release: CreateReleaseParams = {

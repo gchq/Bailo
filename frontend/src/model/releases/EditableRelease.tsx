@@ -7,6 +7,7 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
+import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/releases/ReleaseForm'
 import {
@@ -40,6 +41,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   const { model, isModelLoading, isModelError } = useGetModel(release.modelId)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
   const { mutateRelease } = useGetRelease(release.modelId, release.semver)
+  const sendNotification = useNotification()
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
@@ -89,29 +91,46 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
 
       const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
 
-      const response = await axios.post(
-        metadata
-          ? `/api/v2/model/${release.modelId}/files/upload/simple?name=${file.name}&mime=${file.type}?${qs.stringify({
-              metadata,
-            })}`
-          : `/api/v2/model/${release.modelId}/files/upload/simple?name=${file.name}&mime=${file.type}`,
-        file,
-        {
-          onUploadProgress: function (progressEvent) {
-            if (progressEvent.total) {
-              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-              setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
-            }
+      const fileResponse = await axios
+        .post(
+          metadata
+            ? `/api/v2/model/${release.modelId}/files/upload/simple?name=${file.name}&mime=${file.type}?${qs.stringify({
+                metadata,
+              })}`
+            : `/api/v2/model/${release.modelId}/files/upload/simple?name=${file.name}&mime=${file.type}`,
+          file,
+          {
+            onUploadProgress: function (progressEvent) {
+              if (progressEvent.total) {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+              }
+            },
           },
-        },
-      )
-      if (response.status !== 200) {
-        // TODO handle file upload error
+        )
+        .catch(function (error) {
+          if (error.response) {
+            sendNotification({
+              variant: 'error',
+              msg: `Error code ${error.response.status} recieved from server whilst attemping to upload file ${file.name}`,
+            })
+          } else if (error.request) {
+            sendNotification({
+              variant: 'error',
+              msg: `There was a problem with the request whilst attemping to upload file ${file.name}`,
+            })
+          } else {
+            sendNotification({ variant: 'error', msg: `Unknown error whilst attemping to upload file ${file.name}` })
+          }
+        })
+
+      if (fileResponse) {
+        setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
+        fileIds.push(fileResponse.data.file._id)
+      } else {
+        setCurrentFileUploadProgress(undefined)
         return setIsLoading(false)
       }
-
-      setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
-      fileIds.push(response.data.file._id)
     }
 
     const updatedRelease: UpdateReleaseParams = {
