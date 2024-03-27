@@ -13,7 +13,7 @@ import InferenceForm from 'src/model/inferencing/InferenceForm'
 import Wrapper from 'src/Wrapper'
 import { FlattenedModelImage } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { isPortNumber } from 'utils/stringUtils'
+import { isValidPortNumber } from 'utils/stringUtils'
 
 export default function NewInference() {
   const [description, setDescription] = useState('')
@@ -44,7 +44,7 @@ export default function NewInference() {
     if (!image) {
       return setErrorMessage('Please select an image to spin up a service.')
     }
-    if (!isPortNumber(port)) {
+    if (!isValidPortNumber(port)) {
       return setErrorMessage('Please use a valid port number.')
     }
 

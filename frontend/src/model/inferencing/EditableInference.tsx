@@ -10,7 +10,7 @@ import InferenceForm from 'src/model/inferencing/InferenceForm'
 import { InferenceInterface } from 'types/types'
 import { FlattenedModelImage } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { isPortNumber } from 'utils/stringUtils'
+import { isValidPortNumber } from 'utils/stringUtils'
 type EditableInferenceProps = {
   inference: InferenceInterface
 }
@@ -66,8 +66,8 @@ export default function EditableInference({ inference }: EditableInferenceProps)
   }
 
   const handleSubmit = async () => {
-    if (!isPortNumber(port)) {
-      return setErrorMessage('Please use a valid port number.')
+    if (!isValidPortNumber(port)) {
+      return setErrorMessage('Port number must be in the range 1-65535.')
     }
 
     setErrorMessage('')

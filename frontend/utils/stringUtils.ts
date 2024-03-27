@@ -14,7 +14,7 @@ export const isValidSemver = (semverInput: string) => {
   return !!semver.valid(semverInput)
 }
 
-export const isPortNumber = (portNumber: string) => {
+export const isValidPortNumber = (portNumber: string) => {
   const numericPortNumber = Number(portNumber)
   return (
     !isNaN(numericPortNumber) &&

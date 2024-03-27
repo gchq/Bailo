@@ -6,7 +6,7 @@ import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import ProcessorTypeList from 'src/model/inferencing/ProcessorTypeList'
 import ModelImageList from 'src/model/ModelImageList'
 import { FlattenedModelImage, ModelInterface } from 'types/types'
-import { isPortNumber } from 'utils/stringUtils'
+import { isValidPortNumber } from 'utils/stringUtils'
 
 type InferenceFormData = {
   image?: FlattenedModelImage
@@ -104,8 +104,10 @@ export default function InferenceForm({
           size='small'
           value={formData.port}
           onChange={handlePortChange}
-          error={formData.port !== '' && !isPortNumber(formData.port)}
-          helperText={formData.port !== '' && !isPortNumber(formData.port) ? 'Must be a valid port number' : ''}
+          error={formData.port !== '' && !isValidPortNumber(formData.port)}
+          helperText={
+            formData.port !== '' && !isValidPortNumber(formData.port) ? 'Port number must be in the range 1-65535' : ''
+          }
         />
       )}
       <Typography fontWeight='bold'>
