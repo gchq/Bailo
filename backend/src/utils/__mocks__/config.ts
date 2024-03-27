@@ -29,11 +29,8 @@ const config = {
       internal: 'https://localhost:5000',
     },
   },
-  oauth: {
+  instrumentation: {
     enabled: false,
-  },
-  experimental: {
-    v2: true,
   },
 }
 

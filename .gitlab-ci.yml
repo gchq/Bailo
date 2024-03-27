@@ -4,7 +4,7 @@ stages:
 
 variables:
   AWS_TAG: latest
-  OS_TAG: $CI_PIPELINE_ID
+  OS_TAG: $CI_COMMIT_BRANCH-$CI_COMMIT_SHORT_SHA
 
 os-backend-build:
   stage: os_build

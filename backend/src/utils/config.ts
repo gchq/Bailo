@@ -82,6 +82,9 @@ export interface Config {
 
   mongo: {
     uri: string
+
+    user: string
+    pass: string
   }
 
   registry: {
@@ -113,6 +116,15 @@ export interface Config {
     registry: {
       host: string
     }
+
+    inference: {
+      enabled: boolean
+      connection: {
+        host: string
+      }
+
+      gpus: { [key: string]: string }
+    }
   }
 
   session: {
@@ -120,9 +132,6 @@ export interface Config {
   }
 
   oauth: {
-    // Enabled only included for backward support with V1.
-    // After V1, authentication connector config should be used.
-    enabled: boolean
     provider: string
     grant: grant.GrantConfig | grant.GrantOptions
     cognito: {
@@ -135,6 +144,14 @@ export interface Config {
   defaultSchemas: {
     modelCards: Array<DefaultSchema>
     accessRequests: Array<DefaultSchema>
+  }
+
+  instrumentation: {
+    enabled: boolean
+    serviceName: string
+    endpoint: string
+    authenticationToken: string
+    debug: boolean
   }
 }
 

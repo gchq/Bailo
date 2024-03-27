@@ -70,14 +70,6 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
 
   { title: 'Managing Bailo', slug: 'administration/managing-bailo', header: true },
-
-  // Developers
-  { title: 'Developers', slug: 'developers', header: true },
-
-  { title: 'Bailo Development', slug: 'developers/bailo-development', header: true },
-
-  // Markdown
-  { title: 'Markdown Examples', slug: 'markdown-examples' },
 ]
 
 export interface DirectoryTree {
