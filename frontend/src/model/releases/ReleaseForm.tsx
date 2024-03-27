@@ -196,7 +196,13 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>Images</Typography>
-        <ModelImageList model={model} value={formData.imageList} readOnly={isReadOnly} onChange={onImageListChange} />
+        <ModelImageList
+          multiple
+          model={model}
+          value={formData.imageList}
+          readOnly={isReadOnly}
+          onChange={onImageListChange}
+        />
         {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
       </Stack>
     </Stack>

@@ -5,6 +5,7 @@ import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import AccessRequests from 'src/model/AccessRequests'
+import InferenceServices from 'src/model/InferenceServices'
 import ModelImages from 'src/model/ModelImages'
 import Overview from 'src/model/Overview'
 import Releases from 'src/model/Releases'
@@ -40,6 +41,11 @@ export default function Model() {
               title: 'Registry',
               path: 'registry',
               view: <ModelImages model={model} />,
+            },
+            {
+              title: 'Inferencing',
+              path: 'inferencing',
+              view: <InferenceServices model={model} />,
             },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]
