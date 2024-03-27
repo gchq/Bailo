@@ -21,7 +21,6 @@ Welcome to Bailo's Python Client documentation!
 .. toctree::
    :maxdepth: 1
    :caption: Notebooks:
+   :glob:
 
-   notebooks/access_requests_demo
-   notebooks/models_and_releases_demo
-   notebooks/schemas_demo
+   notebooks/*

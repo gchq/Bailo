@@ -55,7 +55,8 @@
 <p class="caption" role="heading"><span class="caption-text">Notebooks:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/access_requests_demo.html">Managing Access Requests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks/models_and_releases_demo.html">Managing Models &amp; Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/experiment_tracking_demo.html">Experiment Tracking with Bailo &amp; MLFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks/models_and_releases_demo_pytorch.html">Managing Models &amp; Releases (ResNet-50 Example with PyTorch)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks/schemas_demo.html">Managing Schemas</a></li>
 </ul>
 
@@ -91,8 +92,10 @@
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
@@ -214,11 +217,11 @@
 </li>
       <li><a href="bailo.core.html#bailo.core.client.Client">Client (class in bailo.core.client)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bailo.helper.html#bailo.helper.access_request.AccessRequest.create">create() (bailo.helper.access_request.AccessRequest class method)</a>
 
       <ul>
+        <li><a href="bailo.helper.html#bailo.helper.model.Experiment.create">(bailo.helper.model.Experiment class method)</a>
+</li>
         <li><a href="bailo.helper.html#bailo.helper.model.Model.create">(bailo.helper.model.Model class method)</a>
 </li>
         <li><a href="bailo.helper.html#bailo.helper.release.Release.create">(bailo.helper.release.Release class method)</a>
@@ -226,6 +229,10 @@
         <li><a href="bailo.helper.html#bailo.helper.schema.Schema.create">(bailo.helper.schema.Schema class method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bailo.helper.html#bailo.helper.model.Model.create_experiment">create_experiment() (bailo.helper.model.Model method)</a>
+</li>
       <li><a href="bailo.helper.html#bailo.helper.model.Model.create_release">create_release() (bailo.helper.model.Model method)</a>
 </li>
   </ul></td>
@@ -259,6 +266,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bailo.helper.html#bailo.helper.model.Experiment">Experiment (class in bailo.helper.model)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -272,6 +287,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bailo.helper.html#bailo.helper.model.Experiment.from_mlflow">from_mlflow() (bailo.helper.model.Experiment method)</a>
+</li>
       <li><a href="bailo.helper.html#bailo.helper.release.Release.from_version">from_version() (bailo.helper.release.Release class method)</a>
 </li>
   </ul></td>
@@ -351,6 +368,22 @@
   </ul></td>
 </tr></table>
 
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bailo.helper.html#bailo.helper.model.Experiment.log_artifacts">log_artifacts() (bailo.helper.model.Experiment method)</a>
+</li>
+      <li><a href="bailo.helper.html#bailo.helper.model.Experiment.log_dataset">log_dataset() (bailo.helper.model.Experiment method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="bailo.helper.html#bailo.helper.model.Experiment.log_metrics">log_metrics() (bailo.helper.model.Experiment method)</a>
+</li>
+      <li><a href="bailo.helper.html#bailo.helper.model.Experiment.log_params">log_params() (bailo.helper.model.Experiment method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -360,9 +393,9 @@
 </li>
       <li><a href="bailo.core.html#bailo.core.client.Client.model_card_from_schema">model_card_from_schema() (bailo.core.client.Client method)</a>
 </li>
-      <li><a href="bailo.core.html#bailo.core.enums.Role.MODEL_SENIOR_RESPONSABILITY_OFFICER">MODEL_SENIOR_RESPONSABILITY_OFFICER (bailo.core.enums.Role attribute)</a>
+      <li><a href="bailo.core.html#bailo.core.enums.Role.MODEL_SENIOR_RESPONSIBLE_OFFICER">MODEL_SENIOR_RESPONSIBLE_OFFICER (bailo.core.enums.Role attribute)</a>
 </li>
-      <li><a href="bailo.core.html#bailo.core.enums.Role.MODEL_TECNICAL_REVIEWER">MODEL_TECNICAL_REVIEWER (bailo.core.enums.Role attribute)</a>
+      <li><a href="bailo.core.html#bailo.core.enums.Role.MODEL_TECHNICAL_REVIEWER">MODEL_TECHNICAL_REVIEWER (bailo.core.enums.Role attribute)</a>
 </li>
       <li><a href="bailo.core.html#bailo.core.enums.ModelVisibility">ModelVisibility (class in bailo.core.enums)</a>
 </li>
@@ -445,6 +478,8 @@
 </li>
       <li><a href="bailo.core.html#bailo.core.enums.ModelVisibility.PUBLIC">PUBLIC (bailo.core.enums.ModelVisibility attribute)</a>
 </li>
+      <li><a href="bailo.helper.html#bailo.helper.model.Experiment.publish">publish() (bailo.helper.model.Experiment method)</a>
+</li>
       <li><a href="bailo.core.html#bailo.core.agent.Agent.push">push() (bailo.core.agent.Agent method)</a>
 </li>
       <li><a href="bailo.core.html#bailo.core.agent.Agent.put">put() (bailo.core.agent.Agent method)</a>
@@ -481,11 +516,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bailo.helper.html#bailo.helper.schema.Schema">Schema (class in bailo.helper.schema)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bailo.core.html#bailo.core.enums.SchemaKind">SchemaKind (class in bailo.core.enums)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="bailo.core.html#bailo.core.client.Client.simple_upload">simple_upload() (bailo.core.client.Client method)</a>
+</li>
+      <li><a href="bailo.helper.html#bailo.helper.model.Experiment.start_run">start_run() (bailo.helper.model.Experiment method)</a>
 </li>
   </ul></td>
 </tr></table>
