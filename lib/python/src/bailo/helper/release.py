@@ -134,7 +134,7 @@ class Release:
             draft,
         )
 
-    def download(self, filename: str, write: bool = True, path: str = None) -> Any:
+    def download(self, filename: str, write: bool = True, path: str | None = None) -> Any:
         """Give returns a Reading object given the file id.
 
         :param filename: The name of the file to retrieve
@@ -153,7 +153,7 @@ class Release:
 
         return res
 
-    def upload(self, path: str, data: BytesIO = None) -> str:
+    def upload(self, path: str, data: BytesIO | None = None) -> str:
         """Upload a file to the release.
 
         :param path: The path, or name of file or directory to be uploaded

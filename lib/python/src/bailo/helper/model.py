@@ -311,7 +311,7 @@ class Experiment:
     ):
         self.model = model
         self.raw = []
-        self.run = None
+        self.run = -1
         self.temp_dir = os.path.join(tempfile.gettempdir(), "bailo_runs")
 
     @classmethod
@@ -332,10 +332,7 @@ class Experiment:
 
         :param is_mlflow: Marks a run as MLFlow
         """
-        try:
-            self.run += 1
-        except TypeError:
-            self.run = 0
+        self.run += 1
 
         self.run_data = {"run": self.run, "params": [], "metrics": [], "artifacts": [], "dataset": ""}
 
