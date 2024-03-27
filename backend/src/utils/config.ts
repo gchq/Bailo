@@ -1,16 +1,18 @@
+import { CognitoIdentityProviderClientConfig } from '@aws-sdk/client-cognito-identity-provider'
+import bunyan from 'bunyan'
 import _config from 'config'
-import { GrantConfig, GrantOptions } from 'grant'
+import grant from 'grant'
 
-interface DefaultSchema {
-  name: string
-  reference: string
-  schema: unknown
-}
+import { AuditKindKeys } from '../connectors/audit/index.js'
+import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
+import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
+import { DefaultSchema } from '../services/schema.js'
+import { deepFreeze } from './object.js'
 
 export interface Config {
   api: {
-    port: number
     host: string
+    port: number
   }
 
   app: {
@@ -22,45 +24,18 @@ export interface Config {
     publicKey: string
   }
 
-  s2i: {
-    path: string
-  }
-
-  build: {
-    environment: 'img' | 'openshift'
-
-    openshift: {
-      namespace: string
-      dockerPushSecret: string
-    }
-  }
-
-  mongo: {
-    uri: string
-  }
-
-  minio: {
-    connection: any
-
-    automaticallyCreateBuckets: boolean
-
-    buckets: {
-      uploads: string
-      registry: string
-    }
-  }
-
-  registry: {
-    connection: {
-      host: string
-      port: string
-      protocol: string
+  connectors: {
+    authentication: {
+      kind: AuthenticationKindKeys
     }
 
-    service: string
-    issuer: string
+    authorisation: {
+      kind: AuthorisationKindKeys
+    }
 
-    insecure: boolean
+    audit: {
+      kind: AuditKindKeys
+    }
   }
 
   smtp: {
@@ -82,40 +57,46 @@ export interface Config {
     from: string
   }
 
-  logging: {
-    file: {
-      enabled: boolean
+  log: {
+    level: bunyan.LogLevel
+  }
 
-      level: string
-      path: string
+  s3: {
+    credentials: {
+      accessKeyId: string
+      secretAccessKey: string
     }
 
-    stroom: {
-      enabled: boolean
+    endpoint: string
+    region: string
+    forcePathStyle: boolean
+    rejectUnauthorized: boolean
 
-      folder: string
-      url: string
-      environment: string
-      feed: string
-      system: string
+    automaticallyCreateBuckets: boolean
 
-      interval: number
+    buckets: {
+      uploads: string
+      registry: string
     }
   }
 
-  defaultSchemas: {
-    upload: Array<DefaultSchema>
-    deployment: Array<DefaultSchema>
+  mongo: {
+    uri: string
+
+    user: string
+    pass: string
   }
 
-  oauth: {
-    enabled: boolean
-    provider: string
-    grant: GrantOptions | GrantConfig
-  }
+  registry: {
+    connection: {
+      internal: string
+      insecure: boolean
+    }
 
-  session: {
-    secret: string
+    service: string
+    issuer: string
+
+    insecure: boolean
   }
 
   ui: {
@@ -123,110 +104,56 @@ export interface Config {
       enabled: boolean
       text: string
       colour: string
+      textColor: string
     }
+
     issues: {
       label: string
       supportHref: string
       contactHref: string
     }
+
     registry: {
       host: string
     }
-    uploadWarning: {
-      showWarning: boolean
-      checkboxText: string
+
+    inference: {
+      enabled: boolean
+      connection: {
+        host: string
+      }
+
+      gpus: { [key: string]: string }
     }
-    deploymentWarning: {
-      showWarning: boolean
-      checkboxText: string
+  }
+
+  session: {
+    secret: string
+  }
+
+  oauth: {
+    provider: string
+    grant: grant.GrantConfig | grant.GrantOptions
+    cognito: {
+      identityProviderClient: CognitoIdentityProviderClientConfig
+      userPoolId: string
+      userIdAttribute: string
     }
-    development: {
-      logUrl: string
-    }
-    seldonVersions: Array<{
-      name: string
-      image: string
-    }>
-    //max model size is calculated in gigabytes
-    maxModelSizeGB: number
+  }
+
+  defaultSchemas: {
+    modelCards: Array<DefaultSchema>
+    accessRequests: Array<DefaultSchema>
+  }
+
+  instrumentation: {
+    enabled: boolean
+    serviceName: string
+    endpoint: string
+    authenticationToken: string
+    debug: boolean
   }
 }
 
-const config: Config = {
-  api: {
-    port: _config.get('api.port'),
-    host: _config.get('api.host'),
-  },
-
-  app: {
-    protocol: _config.get('app.protocol'),
-    host: _config.get('app.host'),
-    port: _config.get('app.port'),
-
-    publicKey: _config.get('app.publicKey'),
-    privateKey: _config.get('app.privateKey'),
-  },
-
-  s2i: {
-    path: _config.get('s2i.path'),
-  },
-
-  build: {
-    environment: _config.get('build.environment'),
-
-    openshift: {
-      namespace: _config.get('build.openshift.namespace'),
-      dockerPushSecret: _config.get('build.openshift.dockerPushSecret'),
-    },
-  },
-
-  mongo: {
-    uri: _config.get('mongo.uri'),
-  },
-
-  minio: {
-    connection: _config.get('minio.connection'),
-
-    automaticallyCreateBuckets: _config.get('minio.automaticallyCreateBuckets'),
-
-    buckets: {
-      uploads: _config.get('minio.buckets.uploads'),
-      registry: _config.get('minio.buckets.registry'),
-    },
-  },
-
-  registry: {
-    connection: {
-      host: _config.get('registry.connection.host'),
-      port: _config.get('registry.connection.port'),
-      protocol: _config.get('registry.connection.protocol'),
-    },
-
-    service: _config.get('registry.service'),
-    issuer: _config.get('registry.issuer'),
-
-    insecure: _config.get('registry.insecure'),
-  },
-
-  smtp: {
-    enabled: _config.get('smtp.enabled'),
-
-    connection: _config.get('smtp.connection'),
-
-    from: _config.get('smtp.from'),
-  },
-
-  logging: {
-    file: _config.get('logging.file'),
-    stroom: _config.get('logging.stroom'),
-  },
-
-  defaultSchemas: _config.get('defaultSchemas'),
-
-  oauth: _config.get('oauth'),
-  session: _config.get('session'),
-
-  ui: _config.get('ui'),
-}
-
-export default config
+const config: Config = _config.util.toObject()
+export default deepFreeze(config) as Config

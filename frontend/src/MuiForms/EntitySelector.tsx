@@ -18,10 +18,11 @@ interface EntitySelectorProps {
   value: string[]
   onChange: (newValue: string[]) => void
   formContext?: FormContextType
+  rawErrors?: string[]
 }
 
 export default function EntitySelector(props: EntitySelectorProps) {
-  const { onChange, value: currentValue, required, label, formContext } = props
+  const { onChange, value: currentValue, required, label, formContext, rawErrors } = props
 
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
@@ -70,12 +71,17 @@ export default function EntitySelector(props: EntitySelectorProps) {
   }
 
   if (isUsersError) {
-    return <MessageAlert message={isUsersError.info.message} severity='error' />
+    if (isUsersError.status !== 413) {
+      return <MessageAlert message={isUsersError.info.message} severity='error' />
+    }
   }
 
   return (
     <>
       {isCurrentUserLoading && <Loading />}
+      {isUsersError && isUsersError.status === 413 && (
+        <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
+      )}
       {currentUser && formContext && formContext.editMode && (
         <Autocomplete<EntityObject, true, true>
           multiple
@@ -93,6 +99,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
           isOptionEqualToValue={(option, value) => option.id === value.id}
           getOptionLabel={(option) => option.id}
           value={selectedEntities || []}
+          filterOptions={(x) => x}
           onChange={handleUserChange}
           noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}
@@ -112,6 +119,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
             <TextField
               {...params}
               placeholder='Username or group name'
+              error={rawErrors && rawErrors.length > 0}
               label={label + (required ? ' *' : '')}
               onKeyDown={(event: KeyboardEvent) => {
                 if (event.key === 'Backspace') {

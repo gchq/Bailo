@@ -9,7 +9,7 @@ export default defineConfig({
     include: ['test/**/*.spec.ts'],
     coverage: {
       enabled: true,
-      include: ['**/v2/**/*.ts', '**/middleware/**/*.ts', 'src/clients/*.ts'],
+      include: ['**/**/*.ts', '**/middleware/**/*.ts'],
     },
   },
 })

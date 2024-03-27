@@ -1,4 +1,5 @@
-import { Box, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import {
   deleteAccessRequest,
   patchAccessRequest,
@@ -137,6 +138,16 @@ export default function EditableAccessRequestForm({
           errorMessage={deleteErrorMessage}
           dialogMessage={'Are you sure you want to delete this access request?'}
         />
+        {isEdit && (
+          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
+            <Button variant='outlined' onClick={handleCancel}>
+              Cancel
+            </Button>
+            <LoadingButton variant='contained' loading={isLoading} onClick={handleSubmit}>
+              Save
+            </LoadingButton>
+          </Stack>
+        )}
       </Box>
     </>
   )

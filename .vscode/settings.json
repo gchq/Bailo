@@ -17,15 +17,15 @@
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "pylint.args": [
-    "--rcfile=lib/python-beta/pyproject.toml"
+    "--rcfile=lib/python/pyproject.toml"
   ],
   "black-formatter.args": [
-    "--config=lib/python-beta/pyproject.toml"
+    "--config=lib/python/pyproject.toml"
   ],
   "flake8.args": [
-    "--toml-config=lib/python-beta/pyproject.toml"
+    "--toml-config=lib/python/pyproject.toml"
   ],
   "isort.args": [
-    "--settings-path=lib/python-beta/pyproject.toml"
+    "--settings-path=lib/python/pyproject.toml"
   ],
 }

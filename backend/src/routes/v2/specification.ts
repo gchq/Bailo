@@ -1,7 +1,7 @@
 import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi'
 import { Request, Response } from 'express'
 
-import { registry } from '../../services/v2/specification.js'
+import { registry } from '../../services/specification.js'
 
 export const getSpecification = [
   async (_req: Request, res: Response) => {
@@ -63,6 +63,11 @@ export const getSpecification = [
           {
             name: 'user',
             description: 'A user represents an individual who has accessed this service.',
+          },
+          {
+            name: 'inference',
+            description:
+              'An inference service is used to run models within Bailo. Each contains settings for a specific configuration',
           },
         ],
       }),

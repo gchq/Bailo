@@ -2,11 +2,11 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../connectors/v2/audit/Base.js'
-import audit from '../../../connectors/v2/audit/index.js'
-import { registerPath } from '../../../services/v2/specification.js'
-import { removeToken } from '../../../services/v2/token.js'
-import { parse } from '../../../utils/v2/validate.js'
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
+import { registerPath } from '../../../services/specification.js'
+import { removeToken } from '../../../services/token.js'
+import { parse } from '../../../utils/validate.js'
 
 export const deleteUserTokenSchema = z.object({
   params: z.object({
@@ -41,7 +41,7 @@ interface DeleteUserTokenResponse {
 export const deleteUserToken = [
   bodyParser.json(),
   async (req: Request, res: Response<DeleteUserTokenResponse>) => {
-    req.audit = AuditInfo.DeleteAccessRequest
+    req.audit = AuditInfo.DeleteUserToken
     const {
       params: { accessKey },
     } = parse(req, deleteUserTokenSchema)

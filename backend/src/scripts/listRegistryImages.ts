@@ -1,10 +1,10 @@
 import fetch from 'node-fetch'
 
 import { getAccessToken } from '../routes/v1/registryAuth.js'
-import { getHttpsAgent } from '../services/v2/http.js'
+import { getHttpsAgent } from '../services/http.js'
+import log from '../services/log.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
-import logger from '../utils/logger.js'
 
 const httpsAgent = getHttpsAgent({
   rejectUnauthorized: !config.registry.insecure,
@@ -15,9 +15,7 @@ async function script() {
 
   const registry = `https://localhost:5000/v2`
 
-  const token = await getAccessToken({ id: 'user', _id: 'user' }, [
-    { type: 'registry', class: '', name: 'catalog', actions: ['*'] },
-  ])
+  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', class: '', name: 'catalog', actions: ['*'] }])
 
   const authorisation = `Bearer ${token}`
 
@@ -28,7 +26,7 @@ async function script() {
     agent: httpsAgent,
   }).then((res) => res.json())
 
-  logger.info(catalog, 'Current catalog')
+  log.info(catalog, 'Current catalog')
 
   setTimeout(disconnectFromMongoose, 50)
 }

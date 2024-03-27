@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { describe, expect, test, vi } from 'vitest'
 
-import { OauthAuthenticationConnector } from '../../../src/connectors/v2/authentication/oauth.js'
+import { OauthAuthenticationConnector } from '../../../src/connectors/authentication/oauth.js'
 
 const mockCognitoClient = vi.hoisted(() => ({
   listUsers: vi.fn(),

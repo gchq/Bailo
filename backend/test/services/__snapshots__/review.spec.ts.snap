@@ -36,50 +36,6 @@ exports[`services > review > checkAccessRequestsApproved > no approved access re
 ]
 `;
 
-exports[`services > review > findReviews > active 1`] = `
-[
-  {},
-]
-`;
-
-exports[`services > review > findReviews > active 2`] = `
-[
-  {
-    "$expr": {
-      "$gt": [
-        {
-          "$size": {
-            "$filter": {
-              "as": "item",
-              "cond": {
-                "$and": [
-                  {
-                    "$in": [
-                      "$$item.entity",
-                      [
-                        "user:test",
-                      ],
-                    ],
-                  },
-                  {
-                    "$in": [
-                      "$role",
-                      "$$item.roles",
-                    ],
-                  },
-                ],
-              },
-              "input": "$model.collaborators",
-            },
-          },
-        },
-        0,
-      ],
-    },
-  },
-]
-`;
-
 exports[`services > review > findReviews > active reviews for a specific model 1`] = `
 [
   {
@@ -89,6 +45,18 @@ exports[`services > review > findReviews > active reviews for a specific model 1
 `;
 
 exports[`services > review > findReviews > active reviews for a specific model 2`] = `
+[
+  {},
+]
+`;
+
+exports[`services > review > findReviews > all reviews for user 1`] = `
+[
+  {},
+]
+`;
+
+exports[`services > review > findReviews > all reviews for user 2`] = `
 [
   {
     "$expr": {
@@ -185,54 +153,6 @@ exports[`services > review > respondToReview > release successful 1`] = `
 `;
 
 exports[`services > review > respondToReview > release successful 2`] = `
-[
-  {
-    "$expr": {
-      "$gt": [
-        {
-          "$size": {
-            "$filter": {
-              "as": "item",
-              "cond": {
-                "$and": [
-                  {
-                    "$in": [
-                      "$$item.entity",
-                      [
-                        "user:test",
-                      ],
-                    ],
-                  },
-                  {
-                    "$in": [
-                      "$role",
-                      "$$item.roles",
-                    ],
-                  },
-                ],
-              },
-              "input": "$model.collaborators",
-            },
-          },
-        },
-        0,
-      ],
-    },
-  },
-]
-`;
-
-exports[`services > review > respondToReview > successful 1`] = `
-[
-  {
-    "modelId": "modelId",
-    "role": "msro",
-    "semver": "semver",
-  },
-]
-`;
-
-exports[`services > review > respondToReview > successful 2`] = `
 [
   {
     "$expr": {

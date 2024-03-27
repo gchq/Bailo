@@ -149,7 +149,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         }
         editButtonText='Edit Release'
         deleteButtonText='Delete Release'
-        showDeleteButton
+        // TODO 1257 - Re-add the delete button once the backend is resolve the issue of duplicate semvers
+        // showDeleteButton
         isEdit={isEdit}
         isLoading={isLoading}
         onEdit={handleEdit}
