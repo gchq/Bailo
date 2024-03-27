@@ -2,16 +2,19 @@ import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Box, Button, Card, Container, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
-import { CreateReleaseParams, postFile, postRelease } from 'actions/release'
+import { CreateReleaseParams, postRelease } from 'actions/release'
+import axios from 'axios'
 import { useRouter } from 'next/router'
+import qs from 'querystring'
 import { FormEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/releases/ReleaseForm'
 import Wrapper from 'src/Wrapper'
-import { FileInterface, FileWithMetadata, FlattenedModelImage, isFileInterface } from 'types/types'
+import { FileInterface, FileUploadProgress, FileWithMetadata, FlattenedModelImage, isFileInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver } from 'utils/stringUtils'
 
@@ -24,7 +27,10 @@ export default function NewRelease() {
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const router = useRouter()
+  const sendNotification = useNotification()
 
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
@@ -55,15 +61,47 @@ export default function NewRelease() {
       }
 
       const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
-      const postFileResponse = await postFile(file, model.id, file.name, file.type, metadata)
 
-      if (!postFileResponse.ok) {
-        setErrorMessage(await getErrorMessage(postFileResponse))
+      const fileResponse = await axios
+        .post(
+          metadata
+            ? `/api/v2/model/${model.id}/files/upload/simple?name=${file.name}&mime=${file.type}?${qs.stringify({
+                metadata,
+              })}`
+            : `/api/v2/model/${model.id}/files/upload/simple?name=${file.name}&mime=${file.type}`,
+          file,
+          {
+            onUploadProgress: function (progressEvent) {
+              if (progressEvent.total) {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+              }
+            },
+          },
+        )
+        .catch(function (error) {
+          if (error.response) {
+            sendNotification({
+              variant: 'error',
+              msg: `Error code ${error.response.status} recieved from server whilst attemping to upload file ${file.name}`,
+            })
+          } else if (error.request) {
+            sendNotification({
+              variant: 'error',
+              msg: `There was a problem with the request whilst attemping to upload file ${file.name}`,
+            })
+          } else {
+            sendNotification({ variant: 'error', msg: `Unknown error whilst attemping to upload file ${file.name}` })
+          }
+        })
+
+      if (fileResponse) {
+        setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
+        fileIds.push(fileResponse.data.file._id)
+      } else {
+        setCurrentFileUploadProgress(undefined)
         return setLoading(false)
       }
-
-      const res = await postFileResponse.json()
-      fileIds.push(res.file._id)
     }
 
     const release: CreateReleaseParams = {
@@ -83,6 +121,8 @@ export default function NewRelease() {
       setLoading(false)
     } else {
       const body = await response.json()
+      setUploadedFiles([])
+      setCurrentFileUploadProgress(undefined)
       router.push(`/model/${modelId}/release/${body.release.semver}`)
     }
   }
@@ -131,6 +171,8 @@ export default function NewRelease() {
                   filesMetadata={filesMetadata}
                   onFilesMetadataChange={(value) => setFilesMetadata(value)}
                   onImageListChange={(value) => setImageList(value)}
+                  currentFileUploadProgress={currentFileUploadProgress}
+                  uploadedFiles={uploadedFiles}
                 />
                 <Stack alignItems='flex-end'>
                   <LoadingButton

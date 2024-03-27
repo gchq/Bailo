@@ -1,13 +1,23 @@
 import { Box, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
-import { postFile, putRelease, UpdateReleaseParams, useGetRelease, useGetReleasesForModelId } from 'actions/release'
+import { putRelease, UpdateReleaseParams, useGetRelease, useGetReleasesForModelId } from 'actions/release'
+import axios from 'axios'
+import qs from 'querystring'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
+import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/releases/ReleaseForm'
-import { FileInterface, FileWithMetadata, FlattenedModelImage, isFileInterface, ReleaseInterface } from 'types/types'
+import {
+  FileInterface,
+  FileUploadProgress,
+  FileWithMetadata,
+  FlattenedModelImage,
+  isFileInterface,
+  ReleaseInterface,
+} from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type EditableReleaseProps = {
@@ -25,10 +35,13 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
 
   const { model, isModelLoading, isModelError } = useGetModel(release.modelId)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
   const { mutateRelease } = useGetRelease(release.modelId, release.semver)
+  const sendNotification = useNotification()
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
@@ -77,15 +90,47 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
       }
 
       const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
-      const postFileResponse = await postFile(file, model.id, file.name, file.type, metadata)
 
-      if (!postFileResponse.ok) {
-        setErrorMessage(await getErrorMessage(postFileResponse))
+      const fileResponse = await axios
+        .post(
+          metadata
+            ? `/api/v2/model/${release.modelId}/files/upload/simple?name=${file.name}&mime=${file.type}?${qs.stringify({
+                metadata,
+              })}`
+            : `/api/v2/model/${release.modelId}/files/upload/simple?name=${file.name}&mime=${file.type}`,
+          file,
+          {
+            onUploadProgress: function (progressEvent) {
+              if (progressEvent.total) {
+                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+              }
+            },
+          },
+        )
+        .catch(function (error) {
+          if (error.response) {
+            sendNotification({
+              variant: 'error',
+              msg: `Error code ${error.response.status} recieved from server whilst attemping to upload file ${file.name}`,
+            })
+          } else if (error.request) {
+            sendNotification({
+              variant: 'error',
+              msg: `There was a problem with the request whilst attemping to upload file ${file.name}`,
+            })
+          } else {
+            sendNotification({ variant: 'error', msg: `Unknown error whilst attemping to upload file ${file.name}` })
+          }
+        })
+
+      if (fileResponse) {
+        setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
+        fileIds.push(fileResponse.data.file._id)
+      } else {
+        setCurrentFileUploadProgress(undefined)
         return setIsLoading(false)
       }
-
-      const res = await postFileResponse.json()
-      fileIds.push(res.file._id)
     }
 
     const updatedRelease: UpdateReleaseParams = {
@@ -107,6 +152,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
     } else {
       mutateReleases()
       mutateRelease()
+      setUploadedFiles([])
+      setCurrentFileUploadProgress(undefined)
       onIsEditChange(false)
     }
     setIsLoading(false)
@@ -147,6 +194,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onFilesChange={(value) => setFiles(value)}
         onFilesMetadataChange={(value) => setFilesMetadata(value)}
         onImageListChange={(value) => setImageList(value)}
+        currentFileUploadProgress={currentFileUploadProgress}
+        uploadedFiles={uploadedFiles}
       />
     </Box>
   )
