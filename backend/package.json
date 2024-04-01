@@ -89,7 +89,7 @@
     "supertest": "^6.3.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.1.3",
-    "vite-tsconfig-paths": "^4.2.1",
+    "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.3.1"
   }
 }
