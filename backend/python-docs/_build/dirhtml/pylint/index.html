@@ -56,7 +56,8 @@
 <p class="caption" role="heading"><span class="caption-text">Notebooks:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/access_requests_demo/">Managing Access Requests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks/models_and_releases_demo/">Managing Models &amp; Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/experiment_tracking_demo/">Experiment Tracking with Bailo &amp; MLFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/models_and_releases_demo_pytorch/">Managing Models &amp; Releases (ResNet-50 Example with PyTorch)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/schemas_demo/">Managing Schemas</a></li>
 </ul>
 
@@ -225,7 +226,7 @@
 </section>
 <section id="global-evaluation-report-rp0004">
 <h1>global evaluation report (RP0004).<a class="headerlink" href="#global-evaluation-report-rp0004" title="Link to this heading"></a></h1>
-<p>evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)</p>
+<p>evaluation=10.0 - ((float(5 _ error + warning + refactor + convention) / statement) _ 10)</p>
 </section>
 <section id="template-used-to-display-messages-this-is-a-python-new-style-format-string">
 <h1>Template used to display messages. This is a python new-style format string<a class="headerlink" href="#template-used-to-display-messages-this-is-a-python-new-style-format-string" title="Link to this heading"></a></h1>
@@ -295,12 +296,7 @@
 </section>
 <section id="bad-variable-names-which-should-always-be-refused-separated-by-a-comma">
 <h1>Bad variable names which should always be refused, separated by a comma.<a class="headerlink" href="#bad-variable-names-which-should-always-be-refused-separated-by-a-comma" title="Link to this heading"></a></h1>
-<p>bad-names=foo,
-bar,
-baz,
-toto,
-tutu,
-tata</p>
+<p>bad-names=foo, bar, baz, toto, tutu, tata</p>
 </section>
 <section id="naming-style-matching-correct-class-attribute-names">
 <h1>Naming style matching correct class attribute names.<a class="headerlink" href="#naming-style-matching-correct-class-attribute-names" title="Link to this heading"></a></h1>
@@ -355,18 +351,7 @@ tata</p>
 </section>
 <section id="good-variable-names-which-should-always-be-accepted-separated-by-a-comma">
 <h1>Good variable names which should always be accepted, separated by a comma.<a class="headerlink" href="#good-variable-names-which-should-always-be-accepted-separated-by-a-comma" title="Link to this heading"></a></h1>
-<p>good-names=i,
-j,
-k,
-ex,
-Run,
-_,
-df,
-n,
-N,
-t,
-T,
-ax</p>
+<p>good-names=i, j, k, ex, Run, _, df, n, N, t, T, ax</p>
 </section>
 <section id="include-a-hint-for-the-correct-naming-format-with-invalid-name">
 <h1>Include a hint for the correct naming format with invalid-name.<a class="headerlink" href="#include-a-hint-for-the-correct-naming-format-with-invalid-name" title="Link to this heading"></a></h1>
@@ -454,11 +439,11 @@ ax</p>
 <p>indent-after-paren=4</p>
 </section>
 <section id="string-used-as-indentation-unit-this-is-usually-4-spaces-or-t-1">
-<h1>String used as indentation unit. This is usually “    “ (4 spaces) or “\t” (1<a class="headerlink" href="#string-used-as-indentation-unit-this-is-usually-4-spaces-or-t-1" title="Link to this heading"></a></h1>
+<h1>String used as indentation unit. This is usually “ “ (4 spaces) or “\t” (1<a class="headerlink" href="#string-used-as-indentation-unit-this-is-usually-4-spaces-or-t-1" title="Link to this heading"></a></h1>
 </section>
 <section id="tab">
 <h1>tab).<a class="headerlink" href="#tab" title="Link to this heading"></a></h1>
-<p>indent-string=’    ‘</p>
+<p>indent-string=’ ‘</p>
 </section>
 <section id="maximum-number-of-characters-on-a-single-line">
 <h1>Maximum number of characters on a single line.<a class="headerlink" href="#maximum-number-of-characters-on-a-single-line" title="Link to this heading"></a></h1>
@@ -472,15 +457,14 @@ ax</p>
 <h1>List of optional constructs for which whitespace checking is disabled. `dict-<a class="headerlink" href="#list-of-optional-constructs-for-which-whitespace-checking-is-disabled-dict" title="Link to this heading"></a></h1>
 </section>
 <section id="separator-is-used-to-allow-tabulation-in-dicts-etc-1-1-n222-2">
-<h1>separator` is used to allow tabulation in dicts, etc.: {1  : 1,\n222: 2}.<a class="headerlink" href="#separator-is-used-to-allow-tabulation-in-dicts-etc-1-1-n222-2" title="Link to this heading"></a></h1>
+<h1>separator` is used to allow tabulation in dicts, etc.: {1 : 1,\n222: 2}.<a class="headerlink" href="#separator-is-used-to-allow-tabulation-in-dicts-etc-1-1-n222-2" title="Link to this heading"></a></h1>
 </section>
 <section id="trailing-comma-allows-a-space-between-comma-and-closing-bracket-a">
 <h1><code class="docutils literal notranslate"><span class="pre">trailing-comma</span></code> allows a space between comma and closing bracket: (a, ).<a class="headerlink" href="#trailing-comma-allows-a-space-between-comma-and-closing-bracket-a" title="Link to this heading"></a></h1>
 </section>
 <section id="empty-line-allows-space-only-lines">
 <h1><code class="docutils literal notranslate"><span class="pre">empty-line</span></code> allows space-only lines.<a class="headerlink" href="#empty-line-allows-space-only-lines" title="Link to this heading"></a></h1>
-<p>no-space-check=trailing-comma,
-dict-separator</p>
+<p>no-space-check=trailing-comma, dict-separator</p>
 </section>
 <section id="allow-the-body-of-a-class-to-be-on-the-same-line-as-the-declaration-if-body">
 <h1>Allow the body of a class to be on the same line as the declaration if body<a class="headerlink" href="#allow-the-body-of-a-class-to-be-on-the-same-line-as-the-declaration-if-body" title="Link to this heading"></a></h1>
@@ -514,9 +498,7 @@ dict-separator</p>
 </section>
 <section id="list-of-note-tags-to-take-in-consideration-separated-by-a-comma">
 <h1>List of note tags to take in consideration, separated by a comma.<a class="headerlink" href="#list-of-note-tags-to-take-in-consideration-separated-by-a-comma" title="Link to this heading"></a></h1>
-<p>notes=FIXME,
-XXX,
-TODO</p>
+<p>notes=FIXME, XXX, TODO</p>
 <p>[SIMILARITIES]</p>
 </section>
 <section id="ignore-comments-when-computing-similarities">
@@ -692,15 +674,14 @@ TODO</p>
 </section>
 <section id="name-must-start-or-end-with-one-of-those-strings">
 <h1>name must start or end with one of those strings.<a class="headerlink" href="#name-must-start-or-end-with-one-of-those-strings" title="Link to this heading"></a></h1>
-<p>callbacks=cb_,
-_cb</p>
+<p>callbacks=cb_, _cb</p>
 </section>
 <section id="a-regular-expression-matching-the-name-of-dummy-variables-i-e-expected-to">
 <h1>A regular expression matching the name of dummy variables (i.e. expected to<a class="headerlink" href="#a-regular-expression-matching-the-name-of-dummy-variables-i-e-expected-to" title="Link to this heading"></a></h1>
 </section>
 <section id="not-be-used">
 <h1>not be used).<a class="headerlink" href="#not-be-used" title="Link to this heading"></a></h1>
-<p>dummy-variables-rgx=<em>+$|(</em>[a-zA-Z0-9_]*[a-zA-Z0-9]+?$)|dummy|^ignored_|^unused_</p>
+<p>dummy-variables-rgx=<em>+$|(</em>[a-zA-Z0-9_]*[a-zA-Z0-9]+?$)|dummy|^ignored*|^unused*</p>
 </section>
 <section id="argument-names-that-match-this-expression-will-be-ignored-default-to-name">
 <h1>Argument names that match this expression will be ignored. Default to name<a class="headerlink" href="#argument-names-that-match-this-expression-will-be-ignored-default-to-name" title="Link to this heading"></a></h1>
@@ -723,21 +704,14 @@ _cb</p>
 </section>
 <section id="list-of-method-names-used-to-declare-i-e-assign-instance-attributes">
 <h1>List of method names used to declare (i.e. assign) instance attributes.<a class="headerlink" href="#list-of-method-names-used-to-declare-i-e-assign-instance-attributes" title="Link to this heading"></a></h1>
-<p>defining-attr-methods=<strong>init</strong>,
-<strong>new</strong>,
-setUp,
-<strong>post_init</strong></p>
+<p>defining-attr-methods=<strong>init</strong>, <strong>new</strong>, setUp, <strong>post_init</strong></p>
 </section>
 <section id="list-of-member-names-which-should-be-excluded-from-the-protected-access">
 <h1>List of member names, which should be excluded from the protected access<a class="headerlink" href="#list-of-member-names-which-should-be-excluded-from-the-protected-access" title="Link to this heading"></a></h1>
 </section>
 <section id="warning">
 <h1>warning.<a class="headerlink" href="#warning" title="Link to this heading"></a></h1>
-<p>exclude-protected=_asdict,
-_fields,
-_replace,
-_source,
-_make</p>
+<p>exclude-protected=_asdict, _fields, _replace, _source, _make</p>
 </section>
 <section id="list-of-valid-names-for-the-first-argument-in-a-class-method">
 <h1>List of valid names for the first argument in a class method.<a class="headerlink" href="#list-of-valid-names-for-the-first-argument-in-a-class-method" title="Link to this heading"></a></h1>
@@ -856,8 +830,7 @@ _make</p>
 </section>
 <section id="baseexception-exception">
 <h1>“BaseException, Exception”.<a class="headerlink" href="#baseexception-exception" title="Link to this heading"></a></h1>
-<p>overgeneral-exceptions=BaseException,
-Exception</p>
+<p>overgeneral-exceptions=BaseException, Exception</p>
 </section>
 
 

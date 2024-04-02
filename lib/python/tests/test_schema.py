@@ -4,40 +4,8 @@ import random
 import string
 
 import pytest
+from example_schemas import MINIMAL_JSON_SCHEMA
 from bailo import Client, Schema, SchemaKind
-
-MINIMAL_JSON_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "properties": {
-        "overview": {
-            "title": "Overview",
-            "description": "Summary of the model functionality.",
-            "type": "object",
-            "properties": {
-                "modelOverview": {
-                    "title": "What does the model do?",
-                    "description": "A description of what the model does.",
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 5000,
-                },
-                "tags": {
-                    "title": "Descriptive tags for the model.",
-                    "description": "These tags will be searchable and will help others find this model.",
-                    "type": "array",
-                    "widget": "tagSelectorBeta",
-                    "items": {"type": "string"},
-                    "uniqueItems": True,
-                },
-            },
-            "required": [],
-            "additionalProperties": False,
-        },
-    },
-    "required": [],
-    "additionalProperties": False,
-}
 
 
 def random_generator(N=10):
