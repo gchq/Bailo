@@ -84,4 +84,6 @@ ReleaseSchema.index({ modelId: 1, semver: 1 }, { unique: true })
 
 const ReleaseModel = model<ReleaseInterface>('v2_Release', ReleaseSchema)
 
-export default ReleaseModel
+// There is a typing error whereby mongoose-delete plugin functions are not
+// found by the TS compiler.
+export default ReleaseModel as any

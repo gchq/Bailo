@@ -103,6 +103,16 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     releaseParams.modelCardVersion = model.card?.version
   }
 
+  const deletedRelease = await Release.findOneWithDeleted({
+    modelId: releaseParams.modelId,
+    semver: releaseParams.semver,
+  })
+  if (deletedRelease) {
+    throw BadReq(
+      'A release using this semver has been deleted. Please use a different semver or contact an admin to restore the deleted release.',
+    )
+  }
+
   const release = new Release({
     createdBy: user.dn,
     ...releaseParams,
