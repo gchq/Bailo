@@ -183,7 +183,9 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onConfirm={handleDeleteConfirm}
         onCancel={() => setOpen(false)}
         errorMessage={deleteErrorMessage}
-        dialogMessage={'Are you sure you want to delete this release?'}
+        dialogMessage={
+          'Are you sure you want to delete this release? You will be unable to create a new release using this semver unless an admin restores it for you.'
+        }
       />
     </Box>
   )
