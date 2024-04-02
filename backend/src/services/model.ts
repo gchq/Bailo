@@ -115,11 +115,16 @@ export async function searchModels(
     }
   }
 
-  const results = await ModelModel
+  let cursor = ModelModel
     // Find only matching documents
     .find(query)
+
+  if (!search)
     // Sort by last updated
-    .sort({ updatedAt: -1 })
+    cursor = cursor.sort({ updatedAt: -1 })
+  }
+
+  const results = await cursor
 
   const auths = await authorisation.models(user, results, ModelAction.View)
   return results.filter((_, i) => auths[i].success)
