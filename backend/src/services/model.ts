@@ -119,13 +119,15 @@ export async function searchModels(
     // Find only matching documents
     .find(query)
 
-  if (!search)
+  if (!search) {
     // Sort by last updated
     cursor = cursor.sort({ updatedAt: -1 })
+  } else {
+    // Sort by text search
+    cursor = cursor.sort({ score: { $meta: 'textScore' } })
   }
 
   const results = await cursor
-
   const auths = await authorisation.models(user, results, ModelAction.View)
   return results.filter((_, i) => auths[i].success)
 }
