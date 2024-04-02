@@ -22,10 +22,12 @@ export default function ReleaseDisplay({
   model,
   release,
   latestRelease,
+  displayReviewBanner = true,
 }: {
   model: ModelInterface
   release: ReleaseInterface
-  latestRelease: string
+  latestRelease?: string
+  displayReviewBanner?: boolean
 }) {
   const router = useRouter()
 
@@ -78,7 +80,7 @@ export default function ReleaseDisplay({
       {(isReviewsLoading || isUiConfigLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
-          {reviews.length > 0 && <ReviewBanner release={release} />}
+          {reviews.length > 0 && displayReviewBanner && <ReviewBanner release={release} />}
           <Stack spacing={1} p={2}>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}

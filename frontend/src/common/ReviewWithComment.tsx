@@ -1,15 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import {
-  Autocomplete,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Autocomplete, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { SyntheticEvent, useMemo, useState } from 'react'
 
@@ -38,29 +28,19 @@ type PartialReviewWithCommentProps =
     }
 
 type ReviewWithCommentProps = {
-  open: boolean
-  title: string
-  onClose: () => void
   onSubmit: (kind: ResponseTypeKeys, reviewComment: string, reviewRole: string) => void
   loading?: boolean
-  description?: string
-  errorMessage?: string
 } & PartialReviewWithCommentProps
 
 export default function ReviewWithComment({
-  open,
-  title,
-  onClose,
   onSubmit,
   loading = false,
-  description = '',
-  errorMessage = '',
   release,
   accessRequest,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
   const [reviewComment, setReviewComment] = useState('')
-  const [showError, setShowError] = useState(false)
+  const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
 
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
@@ -83,10 +63,12 @@ export default function ReviewWithComment({
   }
 
   function submitForm(decision: ResponseTypeKeys) {
-    setShowError(false)
+    setErrorText('')
 
     if (invalidComment() && decision === ResponseTypes.RequestChanges) {
-      setShowError(true)
+      setErrorText('You must submit a comment when requesting changes.')
+    } else if (!reviewRequest.role) {
+      setErrorText('Please select a role before submitting your review.')
     } else {
       setReviewComment('')
       onSubmit(decision, reviewComment, reviewRequest.role)
@@ -110,77 +92,71 @@ export default function ReviewWithComment({
   return (
     <>
       {(isReviewsLoading || isModelRolesLoading) && <Loading />}
-      <Dialog fullWidth open={open} onClose={onClose} data-test='releaseReviewDialog'>
-        <DialogTitle>{title}</DialogTitle>
-        <DialogContent data-test='reviewWithCommentDialogContent'>
-          {modelRoles.length === 0 && (
-            <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>
-          )}
-          {modelRoles.length > 0 && (
-            <Stack spacing={2}>
-              <Autocomplete
-                sx={{ pt: 1 }}
-                open={selectOpen}
-                onOpen={() => {
-                  setSelectOpen(true)
-                }}
-                onClose={() => {
-                  setSelectOpen(false)
-                }}
-                // we might get a string or an object back
-                isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
-                  option.role === value.role
-                }
-                onChange={onChange}
-                value={reviewRequest}
-                getOptionLabel={(option) => getRoleDisplay(option.role, modelRoles)}
-                options={reviews}
-                renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
-              />
-              {description && <DialogContentText>{description}</DialogContentText>}
-              <TextField
-                size='small'
-                minRows={4}
-                maxRows={8}
-                multiline
-                placeholder='Leave a comment'
-                data-test='reviewWithCommentTextField'
-                value={reviewComment}
-                onChange={(e) => setReviewComment(e.target.value)}
-                error={showError}
-                helperText={showError ? 'You must submit a comment when requesting changes.' : ''}
-              />
-              <Stack
-                spacing={2}
-                direction={{ sm: 'row', xs: 'column' }}
-                justifyContent='space-between'
-                alignItems='center'
-              >
-                <Button onClick={onClose}>Cancel</Button>
-                <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
-                  <LoadingButton
-                    variant='outlined'
-                    onClick={() => submitForm(ResponseTypes.RequestChanges)}
-                    loading={loading}
-                    data-test='requestChangesReviewButton'
-                  >
-                    Request Changes
-                  </LoadingButton>
-                  <LoadingButton
-                    variant='contained'
-                    onClick={() => submitForm(ResponseTypes.Approve)}
-                    loading={loading}
-                    data-test='approveReviewButton'
-                  >
-                    Approve
-                  </LoadingButton>
-                </Stack>
+      <div data-test='reviewWithCommentContent'>
+        {modelRoles.length === 0 && (
+          <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>
+        )}
+        {modelRoles.length > 0 && (
+          <Stack spacing={2}>
+            <Autocomplete
+              sx={{ pt: 1 }}
+              open={selectOpen}
+              onOpen={() => {
+                setSelectOpen(true)
+              }}
+              onClose={() => {
+                setSelectOpen(false)
+              }}
+              // we might get a string or an object back
+              isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
+                option.role === value.role
+              }
+              onChange={onChange}
+              value={reviewRequest}
+              getOptionLabel={(option) => getRoleDisplay(option.role, modelRoles)}
+              options={reviews}
+              renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
+            />
+            <TextField
+              size='small'
+              minRows={4}
+              maxRows={8}
+              multiline
+              placeholder='Leave a comment'
+              data-test='reviewWithCommentTextField'
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              error={errorText.length > 0}
+              helperText={errorText}
+            />
+            <Stack
+              spacing={2}
+              direction={{ sm: 'row', xs: 'column' }}
+              justifyContent='space-between'
+              alignItems='center'
+            >
+              <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
+                <LoadingButton
+                  variant='outlined'
+                  onClick={() => submitForm(ResponseTypes.RequestChanges)}
+                  loading={loading}
+                  data-test='requestChangesReviewButton'
+                >
+                  Request Changes
+                </LoadingButton>
+                <LoadingButton
+                  variant='contained'
+                  onClick={() => submitForm(ResponseTypes.Approve)}
+                  loading={loading}
+                  data-test='approveReviewButton'
+                >
+                  Approve
+                </LoadingButton>
               </Stack>
-              <MessageAlert message={errorMessage} severity='error' />
             </Stack>
-          )}
-        </DialogContent>
-      </Dialog>
+          </Stack>
+        )}
+      </div>
     </>
   )
 }
