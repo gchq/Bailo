@@ -67,7 +67,7 @@ export default function ReviewWithComment({
 
     if (invalidComment() && decision === ResponseTypes.RequestChanges) {
       setErrorText('You must submit a comment when requesting changes.')
-    } else if (!reviewRequest.role) {
+    } else if (!reviewRequest || !reviewRequest.role) {
       setErrorText('Please select a role before submitting your review.')
     } else {
       setReviewComment('')
