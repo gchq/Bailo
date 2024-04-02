@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import authentication from './connectors/authentication/index.js'
 import { expressErrorHandler } from './routes/middleware/expressErrorHandler.js'
 import { expressLogger } from './routes/middleware/expressLogger.js'
+import { requestId } from './routes/middleware/requestId.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
@@ -66,6 +67,7 @@ import { postUserToken } from './routes/v2/user/postUserToken.js'
 
 export const server = express()
 
+server.use('/api/v2', requestId)
 server.use('/api/v2', expressLogger)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
