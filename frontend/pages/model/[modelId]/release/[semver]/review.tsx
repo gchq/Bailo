@@ -1,18 +1,23 @@
 import { ArrowBack } from '@mui/icons-material'
-import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Divider, Grid, Paper, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { useGetRelease, useGetReleasesForModelId } from 'actions/release'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
+import { useGetUiConfig } from 'actions/uiConfig'
+import Markdown from 'markdown-to-jsx'
 import { useRouter } from 'next/router'
+import prettyBytes from 'pretty-bytes'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
+import UserDisplay from 'src/common/UserDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import ReleaseDisplay from 'src/model/releases/ReleaseDisplay'
+import CodeLine from 'src/model/registry/CodeLine'
 import Wrapper from 'src/Wrapper'
 import { mutate } from 'swr'
+import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function ReleaseReview() {
@@ -23,6 +28,7 @@ export default function ReleaseReview() {
 
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { mutateReleases } = useGetReleasesForModelId(modelId)
   const { mutateReviews } = useGetReviewRequestsForModel({
     modelId,
@@ -59,13 +65,14 @@ export default function ReleaseReview() {
     }
   }
 
-  if (!release || !model || isReleaseLoading || isModelLoading) {
+  if (!release || !model || !uiConfig || isReleaseLoading || isModelLoading || isUiConfigLoading) {
     return <Loading />
   }
 
   const error = MultipleErrorWrapper(`Unable to load release review page`, {
     isReleaseError,
     isModelError,
+    isUiConfigError,
   })
   if (error) return error
 
@@ -88,11 +95,63 @@ export default function ReleaseReview() {
                 {model ? `Reviewing release ${semver} for model ${model.name}` : 'Loading...'}
               </Typography>
             </Stack>
-            <Typography></Typography>
             <ReviewWithComment onSubmit={handleSubmit} release={release} />
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />
-            <ReleaseDisplay release={release} model={model} displayReviewBanner={false} />
+            <Typography variant='caption' sx={{ mb: 2 }}>
+              Created by {<UserDisplay dn={release.createdBy} />} on
+              <Typography variant='caption' fontWeight='bold'>
+                {` ${formatDateString(release.createdAt)}`}
+              </Typography>
+            </Typography>
+            <Markdown>{release.notes}</Markdown>
+            <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
+            <Stack spacing={1}>
+              {release.files.length > 0 && (
+                <>
+                  <Typography fontWeight='bold'>Files</Typography>
+                  {release.files.map((file) => (
+                    <div key={file._id}>
+                      <Grid container spacing={1} alignItems='center'>
+                        <Grid item xs>
+                          <Tooltip title={file.name}>
+                            <Link
+                              href={`/api/v2/model/${model.id}/file/${file._id}/download`}
+                              data-test={`fileLink-${file.name}`}
+                            >
+                              <Typography noWrap textOverflow='ellipsis' display='inline'>
+                                {file.name}
+                              </Typography>
+                            </Link>
+                          </Tooltip>
+                        </Grid>
+                        <Grid item xs={1} textAlign='right'>
+                          <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+                        </Grid>
+                      </Grid>
+                    </div>
+                  ))}
+                </>
+              )}
+              {release.images.length > 0 && (
+                <>
+                  <Typography fontWeight='bold'>Docker images</Typography>
+                  {release.images.map((image) => (
+                    <Stack
+                      key={`${image.repository}-${image.name}-${image.tag}`}
+                      direction={{ sm: 'row', xs: 'column' }}
+                      justifyContent='space-between'
+                      alignItems='center'
+                      spacing={1}
+                    >
+                      {uiConfig && (
+                        <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />
+                      )}
+                    </Stack>
+                  ))}
+                </>
+              )}
+            </Stack>
           </Stack>
         </Paper>
       </Container>

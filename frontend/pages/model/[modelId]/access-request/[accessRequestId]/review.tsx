@@ -1,5 +1,5 @@
 import { ArrowBack } from '@mui/icons-material'
-import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
+import { Button, Card, Container, Divider, Grid, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest, useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useGetModel } from 'actions/model'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
@@ -7,12 +7,13 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
+import UserDisplay from 'src/common/UserDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import AccessRequestDisplay from 'src/model/accessRequests/AccessRequestDisplay'
 import Wrapper from 'src/Wrapper'
 import { mutate } from 'swr'
+import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function AccessRequestReview() {
@@ -88,11 +89,51 @@ export default function AccessRequestReview() {
                 {model ? `Reviewing access request ${accessRequestId} for model ${model.name}` : 'Loading...'}
               </Typography>
             </Stack>
-            <Typography></Typography>
             <ReviewWithComment onSubmit={handleSubmit} accessRequest={accessRequest} />
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />
-            <AccessRequestDisplay accessRequest={accessRequest} displayReviewBanner={false} />
+            <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
+              <Typography variant='caption'>
+                Created by {<UserDisplay dn={accessRequest.createdBy} />} on
+                <Typography variant='caption' fontWeight='bold'>
+                  {` ${formatDateString(accessRequest.createdAt)} `}
+                </Typography>
+              </Typography>
+              {accessRequest.metadata.overview.endDate && (
+                <Typography variant='caption'>
+                  End Date:
+                  <Typography variant='caption' fontWeight='bold' data-test='accessRequestEndDate'>
+                    {` ${formatDateString(accessRequest.metadata.overview.endDate)}`}
+                  </Typography>
+                </Typography>
+              )}
+            </Stack>
+            <Stack
+              direction={{ sm: 'row', xs: 'column' }}
+              alignItems='flex-end'
+              justifyContent='space-between'
+              spacing={4}
+            >
+              <Card
+                sx={{
+                  px: 2,
+                  pt: 1,
+                  pb: 2,
+                  width: '100%',
+                }}
+              >
+                <Typography variant='subtitle2' component='h3' mb={1}>
+                  Users
+                </Typography>
+                <Grid container>
+                  {accessRequest.metadata.overview.entities.map((entity) => (
+                    <Grid item xs={3} key={entity}>
+                      <UserDisplay dn={entity} />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Card>
+            </Stack>
           </Stack>
         </Paper>
       </Container>
