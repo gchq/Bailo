@@ -69,7 +69,6 @@ export default function RichTextEditor({
         </Button>
       </Box>
       <MDEditor
-        autoFocus={autoFocus}
         defaultTabEnable
         value={value}
         style={styling}
@@ -77,7 +76,7 @@ export default function RichTextEditor({
         preview='edit'
         hideToolbar={hideToolbar}
         height={150}
-        textareaProps={{ onFocus: handleOnFocus, ...richTextareaProps }}
+        textareaProps={{ onFocus: handleOnFocus, ...richTextareaProps, autoFocus }}
         onChange={handleChange}
       />
     </>

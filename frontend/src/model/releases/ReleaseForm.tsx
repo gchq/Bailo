@@ -117,7 +117,7 @@ export default function ReleaseForm({
             error={formData.semver !== '' && !isValidSemver(formData.semver)}
             helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
             value={formData.semver}
-            inputProps={{ autoFocus: true, 'data-test': 'releaseSemanticVersionTextField' }}
+            inputProps={{ autoFocus: !isEdit, 'data-test': 'releaseSemanticVersionTextField' }}
             onChange={handleSemverChange}
           />
         )}
@@ -130,6 +130,7 @@ export default function ReleaseForm({
           </>
         ) : (
           <RichTextEditor
+            autoFocus={isEdit}
             value={formData.releaseNotes}
             onChange={onReleaseNotesChange}
             aria-label='Release notes'

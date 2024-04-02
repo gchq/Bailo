@@ -129,7 +129,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
           )
         }
         loading={isUsersLoading && userListQuery.length >= 3}
-        renderInput={(params) => <TextField {...params} label='Add a user or group to the model access list' />}
+        renderInput={(params) => (
+          <TextField {...params} autoFocus={true} label='Add a user or group to the model access list' />
+        )}
       />
       <Table>
         <TableHead>
