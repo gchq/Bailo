@@ -19,7 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.3.0",
-    "@aws-sdk/client-cognito-identity-provider": "^3.525.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.540.0",
     "@aws-sdk/client-s3": "^3.421.0",
     "@aws-sdk/lib-storage": "^3.540.0",
     "@opentelemetry/auto-instrumentations-node": "^0.41.1",
