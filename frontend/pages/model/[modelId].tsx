@@ -1,4 +1,5 @@
 import { useGetModel } from 'actions/model'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
@@ -16,10 +17,11 @@ export default function Model() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const tabs = useMemo(
     () =>
-      model
+      model && uiConfig
         ? [
             { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
             {
@@ -46,11 +48,13 @@ export default function Model() {
               title: 'Inferencing',
               path: 'inferencing',
               view: <InferenceServices model={model} />,
+              disabled: !uiConfig?.inference.enabled,
+              disabledText: 'Model inferencing is not setup on Bailo.',
             },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]
         : [],
-    [model],
+    [model, uiConfig],
   )
 
   function requestAccess() {
@@ -59,12 +63,13 @@ export default function Model() {
 
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isModelError,
+    isUiConfigError,
   })
   if (error) return error
 
   return (
     <Wrapper title={model ? model.name : 'Loading...'} page='marketplace' fullWidth>
-      {isModelLoading && <Loading />}
+      {(isModelLoading || isUiConfigLoading) && <Loading />}
       {model && (
         <PageWithTabs
           title={model.name}
