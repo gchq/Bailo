@@ -90,8 +90,6 @@ spec:
             - name: certs
               mountPath: /usr/local/share/ca-certificates/cert.pem
               subPath: cert.pem
-            - name: stroom
-              mountPath: /app/logs
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -122,8 +120,6 @@ spec:
               - key: key.pem
                 path: key.pem
         - name: temp
-          emptyDir: {}
-        - name: stroom
           emptyDir: {}
 
 ---
