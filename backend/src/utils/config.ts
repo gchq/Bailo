@@ -82,6 +82,9 @@ export interface Config {
 
   mongo: {
     uri: string
+
+    user: string
+    pass: string
   }
 
   registry: {
