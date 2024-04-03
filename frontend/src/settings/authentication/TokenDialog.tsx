@@ -19,6 +19,7 @@ import PodmanIcon from 'public/podman-logo.svg'
 import RktLogo from 'public/rkt-logo.svg'
 import { useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
+import MessageAlert from 'src/MessageAlert'
 import DockerConfiguration from 'src/settings/authentication/DockerConfiguration'
 import DockerLogin from 'src/settings/authentication/DockerLogin'
 import KubernetesSecret from 'src/settings/authentication/KubernetesSecret'
@@ -119,6 +120,10 @@ export default function TokenDialog({ token }: TokenDialogProps) {
             </SimpleListItemButton>
           </List>
           <Container sx={{ my: 2, overflowY: 'auto' }}>
+            <MessageAlert
+              message='You will never be able to access this token again. Make sure to copy it to a safe place.'
+              severity='warning'
+            />
             {tokenCategory === TokenCategory.PERSONAL_ACCESS && <PersonalAccessToken token={token} />}
             {tokenCategory === TokenCategory.KUBERNETES && <KubernetesSecret token={token} />}
             {tokenCategory === TokenCategory.ROCKET && <RocketConfiguration token={token} />}

@@ -56,10 +56,6 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
 
   return (
     <>
-      <MessageAlert
-        message='You will never be able to access this token again. Make sure to copy it to a safe place.'
-        severity='warning'
-      />
       <Grid container spacing={1} alignItems='center'>
         <Grid item xs={2}>
           <Typography>Access Key</Typography>
