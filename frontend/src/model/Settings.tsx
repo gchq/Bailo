@@ -9,10 +9,22 @@ import AccessRequestSettings from './settings/AccessRequestSettings'
 import ModelAccess from './settings/ModelAccess'
 import ModelDetails from './settings/ModelDetails'
 
-type SettingsCategory = 'details' | 'danger' | 'access' | 'permissions'
+export const SettingsCategory = {
+  DETAILS: 'details',
+  DANGER: 'danger',
+  ACCESS: 'access',
+  PERMISSIONS: 'permissions',
+} as const
 
-function isSettingsCategory(value: string | string[] | undefined): value is SettingsCategory {
-  return value === 'details' || value === 'danger' || value === 'access' || value === 'permissions'
+export type SettingsCategoryKeys = (typeof SettingsCategory)[keyof typeof SettingsCategory]
+
+function isSettingsCategory(value: string | string[] | undefined): value is SettingsCategoryKeys {
+  return (
+    value === SettingsCategory.DETAILS ||
+    value === SettingsCategory.DANGER ||
+    value === SettingsCategory.ACCESS ||
+    value === SettingsCategory.PERMISSIONS
+  )
 }
 
 type SettingsProps = {
@@ -25,15 +37,15 @@ export default function Settings({ model }: SettingsProps) {
 
   const { section } = router.query
 
-  const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>('details')
+  const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
 
   useEffect(() => {
     if (isSettingsCategory(section)) {
-      setSelectedCategory(section ?? 'details')
+      setSelectedCategory(section ?? SettingsCategory.DETAILS)
     }
   }, [section, setSelectedCategory])
 
-  const handleListItemClick = (category: SettingsCategory) => {
+  const handleListItemClick = (category: SettingsCategoryKeys) => {
     setSelectedCategory(category)
     router.replace({
       query: { ...router.query, section: category },
@@ -53,27 +65,36 @@ export default function Settings({ model }: SettingsProps) {
       divider={<Divider orientation='vertical' flexItem />}
     >
       <List sx={{ width: '200px' }}>
-        <SimpleListItemButton selected={selectedCategory === 'details'} onClick={() => handleListItemClick('details')}>
+        <SimpleListItemButton
+          selected={selectedCategory === SettingsCategory.DETAILS}
+          onClick={() => handleListItemClick(SettingsCategory.DETAILS)}
+        >
           Details
         </SimpleListItemButton>
         <SimpleListItemButton
-          selected={selectedCategory === 'permissions'}
-          onClick={() => handleListItemClick('permissions')}
+          selected={selectedCategory === SettingsCategory.PERMISSIONS}
+          onClick={() => handleListItemClick(SettingsCategory.PERMISSIONS)}
         >
           Model Access
         </SimpleListItemButton>
-        <SimpleListItemButton selected={selectedCategory === 'access'} onClick={() => handleListItemClick('access')}>
+        <SimpleListItemButton
+          selected={selectedCategory === SettingsCategory.ACCESS}
+          onClick={() => handleListItemClick(SettingsCategory.ACCESS)}
+        >
           Access Requests
         </SimpleListItemButton>
-        <SimpleListItemButton selected={selectedCategory === 'danger'} onClick={() => handleListItemClick('danger')}>
+        <SimpleListItemButton
+          selected={selectedCategory === SettingsCategory.DANGER}
+          onClick={() => handleListItemClick(SettingsCategory.DANGER)}
+        >
           Danger Zone
         </SimpleListItemButton>
       </List>
       <Container sx={{ my: 2 }}>
-        {selectedCategory === 'details' && <ModelDetails model={model} />}
-        {selectedCategory === 'permissions' && <ModelAccess model={model} />}
-        {selectedCategory === 'access' && <AccessRequestSettings model={model} />}
-        {selectedCategory === 'danger' && (
+        {selectedCategory === SettingsCategory.DETAILS && <ModelDetails model={model} />}
+        {selectedCategory === SettingsCategory.PERMISSIONS && <ModelAccess model={model} />}
+        {selectedCategory === SettingsCategory.ACCESS && <AccessRequestSettings model={model} />}
+        {selectedCategory === SettingsCategory.DANGER && (
           <Stack spacing={2}>
             <Typography variant='h6' component='h2'>
               Danger Zone!
