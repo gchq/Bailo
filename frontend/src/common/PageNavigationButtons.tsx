@@ -6,8 +6,8 @@ interface PageNavigationButtonsProps {
   maxPages: number
   navigateForward: () => void
   navigateBackward: () => void
-  nextPageLabel?: string
-  previousPageLabel?: string
+  nextPageAriaLabel?: string
+  previousPageAriaLabel?: string
 }
 
 export default function PageNavigationButtons({
@@ -15,8 +15,8 @@ export default function PageNavigationButtons({
   maxPages,
   navigateForward,
   navigateBackward,
-  nextPageLabel = '',
-  previousPageLabel = '',
+  nextPageAriaLabel = '',
+  previousPageAriaLabel = '',
 }: PageNavigationButtonsProps) {
   return (
     <Stack
@@ -32,7 +32,7 @@ export default function PageNavigationButtons({
         size='small'
         onClick={navigateBackward}
         disabled={currentIndex === 1}
-        aria-label={previousPageLabel}
+        aria-label={previousPageAriaLabel}
       >
         Previous page
       </Button>
@@ -42,7 +42,7 @@ export default function PageNavigationButtons({
         size='small'
         onClick={navigateForward}
         disabled={currentIndex >= maxPages}
-        aria-label={nextPageLabel}
+        aria-label={nextPageAriaLabel}
       >
         Next page
       </Button>

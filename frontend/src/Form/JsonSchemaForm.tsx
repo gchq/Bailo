@@ -139,10 +139,10 @@ export default function JsonSchemaForm({
         maxPages={splitSchema.steps.length}
         navigateForward={navigateStepForward}
         navigateBackward={navigateStepBackward}
-        nextPageLabel={
+        nextPageAriaLabel={
           splitSchema.steps[activeStep + 1] ? `Go forward to ${splitSchema.steps[activeStep + 1].schema.title}` : ''
         }
-        previousPageLabel={
+        previousPageAriaLabel={
           splitSchema.steps[activeStep - 1] ? `Go back to ${splitSchema.steps[activeStep - 1].schema.title}` : ''
         }
       />
@@ -204,10 +204,10 @@ export default function JsonSchemaForm({
         maxPages={splitSchema.steps.length}
         navigateForward={navigateStepForward}
         navigateBackward={navigateStepBackward}
-        nextPageLabel={
+        nextPageAriaLabel={
           splitSchema.steps[activeStep + 1] ? `Go forward to ${splitSchema.steps[activeStep + 1].schema.title}` : ''
         }
-        previousPageLabel={
+        previousPageAriaLabel={
           splitSchema.steps[activeStep - 1] ? `Go back to ${splitSchema.steps[activeStep - 1].schema.title}` : ''
         }
       />
