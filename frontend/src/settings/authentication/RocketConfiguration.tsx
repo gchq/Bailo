@@ -25,7 +25,7 @@ export default function RocketConfiguration({ token }: RocketConfigurationProps)
 
   const configFileName = useMemo(() => `${toKebabCase(token.description)}-rkt-auth.yml`, [token.description])
 
-  function replacer(key: string | string[], value: string) {
+  function replacer(key: string, value: string) {
     if (key === 'domains') return [`${uiConfig?.registry.host}`]
     if (key === 'user') return `${token.accessKey}`
     if (key === 'password') return `${token.secretKey}`

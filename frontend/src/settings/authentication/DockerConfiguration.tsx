@@ -25,7 +25,7 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
 
   const configFileName = useMemo(() => `${toKebabCase(token.description)}-docker-auth.yml`, [token.description])
 
-  function replacer(key: string | string[], value: string) {
+  function replacer(key: string, value: string) {
     if (key === 'auths') {
       return JSON.parse(
         `{"${uiConfig?.registry.host}": {"username": "${token.accessKey}","password": "${token.secretKey}","auth": "BASE64(${token.accessKey}:${token.secretKey})"}}`,
