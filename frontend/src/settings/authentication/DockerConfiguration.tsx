@@ -6,13 +6,12 @@ import SplitButton from 'src/common/SplitButton'
 import MessageAlert from 'src/MessageAlert'
 import CodeSnippet from 'src/settings/authentication/CodeSnippet'
 import { dockerConfigTemplate } from 'src/settings/authentication/configTemplates'
+import { viewDockerConfigTemplate } from 'src/settings/authentication/configTemplates'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
 import { TokenInterface } from 'types/types'
 import { HIDDEN_TOKEN_ACCESS_KEY, HIDDEN_TOKEN_SECRET_KEY } from 'utils/constants'
 import { downloadFile } from 'utils/fileUtils'
 import { toKebabCase } from 'utils/stringUtils'
-
-import dockerConfig from './dockerConfig.json'
 
 type DockerConfigurationProps = {
   token: TokenInterface
@@ -24,15 +23,7 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
   const [showKeys, setShowKeys] = useState(false)
 
   const configFileName = useMemo(() => `${toKebabCase(token.description)}-docker-auth.yml`, [token.description])
-
-  function replacer(key: string, value: string) {
-    if (key === 'auths') {
-      return JSON.parse(
-        `{"${uiConfig?.registry.host}": {"username": "${token.accessKey}","password": "${token.secretKey}","auth": "BASE64(${token.accessKey}:${token.secretKey})"}}`,
-      )
-    }
-    return value
-  }
+  const auth = `${Buffer.from(`${token.accessKey}:${token.secretKey}`).toString('base64')}`
 
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
@@ -41,13 +32,23 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
   return (
     <>
       {isUiConfigLoading && <Loading />}
-      <Stack spacing={4} direction='column'>
-        <Stack spacing={2} direction='column' alignItems='flex-start'>
+      <Stack spacing={4}>
+        <Stack spacing={2} alignItems='flex-start'>
           <Typography fontWeight='bold'>Step 1: Download credentials config</Typography>
           <Typography>First, download the Docker credentials for the application token: </Typography>
           <SplitButton
             options={[`${showFilePreview ? 'Close preview' : 'Preview file'}`]}
-            onPrimaryButtonClick={() => downloadFile(JSON.stringify([dockerConfig], replacer, 2), configFileName)}
+            onPrimaryButtonClick={() =>
+              downloadFile(
+                dockerConfigTemplate({
+                  accessKey: token.accessKey,
+                  secretKey: token.secretKey,
+                  registryUrl: uiConfig?.registry.host,
+                  auth: auth,
+                }),
+                configFileName,
+              )
+            }
             onMenuItemClick={() => setShowFilePreview(!showFilePreview)}
           >
             Download
@@ -59,10 +60,11 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
               onVisibilityChange={(value) => setShowKeys(value)}
               onClose={() => setShowFilePreview(false)}
             >
-              {dockerConfigTemplate(
+              {viewDockerConfigTemplate(
                 `${uiConfig?.registry.host}`,
                 `${showKeys ? token.accessKey : HIDDEN_TOKEN_ACCESS_KEY}`,
                 `${showKeys ? token.secretKey : HIDDEN_TOKEN_SECRET_KEY}`,
+                `${showKeys ? auth : `${HIDDEN_TOKEN_ACCESS_KEY}:${HIDDEN_TOKEN_SECRET_KEY}`}`,
               )}
             </CodeSnippet>
           )}

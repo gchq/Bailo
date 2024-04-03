@@ -21,7 +21,7 @@ export default function PodmanLogin({ token }: PodmanLoginProps) {
   return (
     <>
       {isUiConfigLoading && <Loading />}
-      <Stack spacing={2} direction='column'>
+      <Stack spacing={2}>
         <Typography fontWeight='bold'>1. Run Podman login:</Typography>
         <Typography>Enter the following command on the command line:</Typography>
         {!token.secretKey && <Typography color={theme.palette.error.main}>Could not find Secret Key</Typography>}

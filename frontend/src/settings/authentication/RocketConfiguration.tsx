@@ -5,14 +5,12 @@ import Loading from 'src/common/Loading'
 import SplitButton from 'src/common/SplitButton'
 import MessageAlert from 'src/MessageAlert'
 import CodeSnippet from 'src/settings/authentication/CodeSnippet'
-import { rocketConfigTemplate } from 'src/settings/authentication/configTemplates'
+import { rocketConfigTemplate, viewRocketConfigTemplate } from 'src/settings/authentication/configTemplates'
 import TokenCommand from 'src/settings/authentication/TokenCommand'
 import { TokenInterface } from 'types/types'
 import { HIDDEN_TOKEN_ACCESS_KEY, HIDDEN_TOKEN_SECRET_KEY } from 'utils/constants'
 import { downloadFile } from 'utils/fileUtils'
 import { toKebabCase } from 'utils/stringUtils'
-
-import rocketConfig from './rocketConfig.json'
 
 type RocketConfigurationProps = {
   token: TokenInterface
@@ -25,13 +23,6 @@ export default function RocketConfiguration({ token }: RocketConfigurationProps)
 
   const configFileName = useMemo(() => `${toKebabCase(token.description)}-rkt-auth.yml`, [token.description])
 
-  function replacer(key: string, value: string) {
-    if (key === 'domains') return [`${uiConfig?.registry.host}`]
-    if (key === 'user') return `${token.accessKey}`
-    if (key === 'password') return `${token.secretKey}`
-    return value
-  }
-
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
@@ -39,13 +30,22 @@ export default function RocketConfiguration({ token }: RocketConfigurationProps)
   return (
     <>
       {isUiConfigLoading && <Loading />}
-      <Stack spacing={4} direction='column'>
-        <Stack spacing={2} direction='column' alignItems='flex-start'>
+      <Stack spacing={4}>
+        <Stack spacing={2} alignItems='flex-start'>
           <Typography fontWeight='bold'>Step 1: Download credentials config</Typography>
           <Typography>First, download the rkt credentials file for the personal access token:</Typography>
           <SplitButton
             options={[`${showFilePreview ? 'Close preview' : 'Preview file'}`]}
-            onPrimaryButtonClick={() => downloadFile(JSON.stringify([rocketConfig], replacer, 2), configFileName)}
+            onPrimaryButtonClick={() =>
+              downloadFile(
+                rocketConfigTemplate({
+                  accessKey: token.accessKey,
+                  secretKey: token.secretKey,
+                  registryUrl: uiConfig?.registry.host,
+                }),
+                configFileName,
+              )
+            }
             onMenuItemClick={() => setShowFilePreview(!showFilePreview)}
           >
             Download
@@ -57,7 +57,7 @@ export default function RocketConfiguration({ token }: RocketConfigurationProps)
               onVisibilityChange={(value) => setShowKeys(value)}
               onClose={() => setShowFilePreview(false)}
             >
-              {rocketConfigTemplate(
+              {viewRocketConfigTemplate(
                 `${uiConfig?.registry.host}`,
                 `${showKeys ? token.accessKey : HIDDEN_TOKEN_ACCESS_KEY}`,
                 `${showKeys ? token.secretKey : HIDDEN_TOKEN_SECRET_KEY}`,
@@ -65,7 +65,7 @@ export default function RocketConfiguration({ token }: RocketConfigurationProps)
             </CodeSnippet>
           )}
         </Stack>
-        <Stack spacing={2} direction='column' alignItems='flex-start'>
+        <Stack spacing={2} alignItems='flex-start'>
           <Typography fontWeight='bold'>Step 2: Write to disk</Typography>
           <Typography>Second, place the file in the rkt configuration directory:</Typography>
           <TokenCommand disableVisibilityToggle token={token} command={`mv ${configFileName} /etc/rkt/auth.d/`} />

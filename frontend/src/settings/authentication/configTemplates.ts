@@ -1,4 +1,6 @@
-export function rocketConfigTemplate(registry_url: string, access_key: string, secret_key: string) {
+import Handlebars from 'handlebars'
+
+export function viewRocketConfigTemplate(registry_url: string, access_key: string, secret_key: string) {
   return `rktKind: auth
 rktVersion: v1
 domains:
@@ -24,11 +26,12 @@ spec:
     - name: ${description}-secret.yml`
 }
 
-export function kubernetesSecretsConfigTemplate(
+export function viewKubernetesSecretsConfigTemplate(
   description: string,
   registry_url: string,
   access_key: string,
   secret_key: string,
+  auth: string,
 ) {
   return `apiVersion: v1
 kind: Secret
@@ -40,15 +43,56 @@ data:
       '${registry_url}':
         username: '${access_key}'
         password: '${secret_key}'
-        auth: 'BASE64(${access_key}:${secret_key})'
+        auth:  '${auth}''
 type: kubernetes.io/dockerconfigjson`
 }
 
-export function dockerConfigTemplate(registry_url: string, access_key: string, secret_key: string) {
+export function viewDockerConfigTemplate(registry_url: string, access_key: string, secret_key: string, auth: string) {
   return `auths:
   '${registry_url}':
     username: '${access_key}'
     password: '${secret_key}'
-    auth: 'BASE64(${access_key}:${secret_key})'
-`
+    auth: '${auth}'`
 }
+
+export const dockerConfigTemplate = Handlebars.compile(`{
+  "auths": {
+    "{{registryUrl}}": {
+      "username": "{{accessKey}}",
+      "password": "{{secretKey}}",
+      "auth": "{{auth}}"
+    }
+  }
+}`)
+
+export const kubernetesConfigTemplate = Handlebars.compile(`{
+  "apiVersion": "v1",
+  "kind": "Secret",
+  "metadata": {
+    "name": "<key-name>-secret"
+  },
+  "data": {
+    ".dockerconfigjson": {
+      "auths": {
+        "{{registryUrl}}": {
+          "username": "{{accessKey}}",
+          "password": "{{secretKey}}",
+          "auth": "{{auth}}"
+        }
+      }
+    }
+  },
+  "type": "kubernetes.io/dockerconfigjson"
+}
+`)
+
+export const rocketConfigTemplate = Handlebars.compile(`{
+  "rktKind": "auth",
+  "rktVersion": "v1",
+  "domains": "{{registryUrl}}",
+  "type": "basic",
+  "credentials": {
+    "user": "{{accessKey}}",
+    "password": "{{secretKey}}"
+  }
+}`)
