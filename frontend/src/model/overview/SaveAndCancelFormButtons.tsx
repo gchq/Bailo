@@ -30,15 +30,16 @@ export default function SaveAndCancelButtons({
         variant='contained'
         startIcon={<Code />}
         color='secondary'
+        size='small'
         onClick={openTextInputDialog}
         data-test='addJsonToFormButton'
       >
         Add JSON to form
       </Button>
-      <Button variant='outlined' onClick={onCancel} data-test={cancelDataTestId}>
+      <Button variant='outlined' size='small' onClick={onCancel} data-test={cancelDataTestId}>
         Cancel
       </Button>
-      <LoadingButton variant='contained' onClick={onSubmit} loading={loading} data-test={saveDataTestId}>
+      <LoadingButton variant='contained' size='small' onClick={onSubmit} loading={loading} data-test={saveDataTestId}>
         Save
       </LoadingButton>
     </Stack>

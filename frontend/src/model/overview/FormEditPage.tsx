@@ -127,13 +127,14 @@ export default function FormEditPage({ model }: FormEditPageProps) {
               divider={<Divider orientation='vertical' flexItem />}
               sx={{ mb: { xs: 2 } }}
             >
-              <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
+              <Button variant='outlined' size='small' onClick={() => setHistoryDialogOpen(true)}>
                 View History
               </Button>
               <Button
                 variant='outlined'
                 onClick={() => setIsEdit(!isEdit)}
                 sx={{ mb: { xs: 2 } }}
+                size='small'
                 data-test='editModelCardButton'
               >
                 Edit Model card

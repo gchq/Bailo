@@ -18,6 +18,7 @@ import Form from '@rjsf/mui'
 import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useState } from 'react'
+import PageNavigationButtons from 'src/common/PageNavigationButtons'
 
 import { SplitSchemaNoRender } from '../../types/types'
 import { setStepState } from '../../utils/formUtils'
@@ -111,6 +112,18 @@ export default function JsonSchemaForm({
     setActiveStep(index)
   }
 
+  function navigateStepForward() {
+    if (activeStep + 1 < splitSchema.steps.length) {
+      setActiveStep(activeStep + 1)
+    }
+  }
+
+  function navigateStepBackward() {
+    if (activeStep > 0) {
+      setActiveStep(activeStep - 1)
+    }
+  }
+
   function ErrorListTemplate() {
     return (
       <Typography color={theme.palette.error.main} sx={{ mb: 2 }}>
@@ -120,58 +133,72 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Grid container spacing={2} sx={{ mt: theme.spacing(1) }}>
-      <Grid item xs={12} sm={3} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
-        <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
-          <List sx={{ width: { xs: '100%' } }}>
-            {splitSchema.steps.map((step, index) => (
-              <ListItem key={step.schema.title} disablePadding>
-                <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
-                  <Stack direction='row' spacing={2}>
-                    <Typography>{step.schema.title}</Typography>
-                    {displayLabelValidation && <ValidationErrorIcon step={step} />}
-                  </Stack>
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Stepper>
+    <Stack>
+      <PageNavigationButtons
+        currentIndex={activeStep + 1}
+        maxPages={splitSchema.steps.length}
+        navigateForward={navigateStepForward}
+        navigateBackward={navigateStepBackward}
+      />
+      <Grid container spacing={2} sx={{ mt: theme.spacing(1) }}>
+        <Grid item xs={12} sm={3} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
+          <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
+            <List sx={{ width: { xs: '100%' } }}>
+              {splitSchema.steps.map((step, index) => (
+                <ListItem key={step.schema.title} disablePadding>
+                  <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
+                    <Stack direction='row' spacing={2}>
+                      <Typography>{step.schema.title}</Typography>
+                      {displayLabelValidation && <ValidationErrorIcon step={step} />}
+                    </Stack>
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Stepper>
+        </Grid>
+        <Grid item xs={12} sm={9} md={10}>
+          <Form
+            schema={currentStep.schema}
+            formData={currentStep.state}
+            onChange={onFormChange}
+            validator={validator}
+            widgets={widgets}
+            uiSchema={currentStep.uiSchema}
+            liveValidate
+            omitExtraData
+            disabled={!canEdit}
+            liveOmit
+            formContext={{
+              editMode: canEdit,
+              formSchema: currentStep.schema,
+              defaultCurrentUser: defaultCurrentUserInEntityList,
+            }}
+            templates={
+              !canEdit
+                ? {
+                    DescriptionFieldTemplate,
+                    ArrayFieldTemplate,
+                    ObjectFieldTemplate,
+                  }
+                : {
+                    ArrayFieldTemplate,
+                    ObjectFieldTemplate,
+                    ErrorListTemplate,
+                  }
+            }
+          >
+            {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
+            <></>
+          </Form>
+        </Grid>
       </Grid>
-      <Grid item xs={12} sm={9} md={10}>
-        <Form
-          schema={currentStep.schema}
-          formData={currentStep.state}
-          onChange={onFormChange}
-          validator={validator}
-          widgets={widgets}
-          uiSchema={currentStep.uiSchema}
-          liveValidate
-          omitExtraData
-          disabled={!canEdit}
-          liveOmit
-          formContext={{
-            editMode: canEdit,
-            formSchema: currentStep.schema,
-            defaultCurrentUser: defaultCurrentUserInEntityList,
-          }}
-          templates={
-            !canEdit
-              ? {
-                  DescriptionFieldTemplate,
-                  ArrayFieldTemplate,
-                  ObjectFieldTemplate,
-                }
-              : {
-                  ArrayFieldTemplate,
-                  ObjectFieldTemplate,
-                  ErrorListTemplate,
-                }
-          }
-        >
-          {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
-          <></>
-        </Form>
-      </Grid>
-    </Grid>
+      <PageNavigationButtons
+        currentIndex={activeStep + 1}
+        maxPages={splitSchema.steps.length}
+        navigateForward={navigateStepForward}
+        navigateBackward={navigateStepBackward}
+      />
+    </Stack>
   )
 }
