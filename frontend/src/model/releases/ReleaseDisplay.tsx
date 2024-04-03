@@ -5,6 +5,7 @@ import { cloneDeep, groupBy } from 'lodash-es'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import { useEffect, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 
@@ -97,6 +98,11 @@ export default function ReleaseDisplay({
                     {model.name} - {release.semver}
                   </Typography>
                 </Link>
+                <CopyToClipboardButton
+                  textToCopy={`${model.name} - ${release.semver}`}
+                  notificationText='Copied release semver to clipboard'
+                  ariaLabel='copy release semver to clipboard'
+                />
                 {latestVersionAdornment()}
               </Stack>
               <Button onClick={() => router.push(`/model/${model.id}/history/${release.modelCardVersion}`)}>

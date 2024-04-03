@@ -118,7 +118,7 @@ export default function FormEditPage({ model }: FormEditPageProps) {
         >
           <div>
             <Typography fontWeight='bold'>Schema</Typography>
-            <Stack direction='row'>
+            <Stack direction='row' alignItems='center'>
               <Typography>{schema?.name}</Typography>
               <CopyToClipboardButton
                 textToCopy={schema ? schema.name : ''}

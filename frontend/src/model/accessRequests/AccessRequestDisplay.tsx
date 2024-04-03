@@ -2,6 +2,7 @@ import CommentIcon from '@mui/icons-material/ChatBubble'
 import { Card, Grid, Stack, Typography } from '@mui/material'
 import { groupBy } from 'lodash-es'
 import { useEffect, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
 import Link from 'src/Link'
 import { AccessRequestInterface, ReviewRequestInterface, ReviewResponse } from 'types/types'
@@ -54,11 +55,18 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
         <Card sx={{ width: '100%' }}>
           {reviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
-            <Link href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
-              <Typography component='h2' variant='h6' color='primary'>
-                {accessRequest.metadata.overview.name}
-              </Typography>
-            </Link>
+            <Stack direction={{ sm: 'row', xs: 'column' }} alignItems='center' spacing={1}>
+              <Link href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
+                <Typography component='h2' variant='h6' color='primary'>
+                  {accessRequest.metadata.overview.name}
+                </Typography>
+              </Link>
+              <CopyToClipboardButton
+                textToCopy={accessRequest.metadata.overview.name}
+                notificationText='Copied access request name to clipboard'
+                ariaLabel='copy access request name to clipboard'
+              />
+            </Stack>
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
               <Typography variant='caption'>
                 Created by {<UserDisplay dn={accessRequest.createdBy} />} on
