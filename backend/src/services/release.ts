@@ -103,7 +103,10 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     releaseParams.modelCardVersion = model.card?.version
   }
 
-  const deletedRelease = await Release.findOneWithDeleted({
+  // There is a typing error whereby mongoose-delete plugin functions are not
+  // found by the TS compiler.
+  const ReleaseModelWithDelete = Release as any
+  const deletedRelease = await ReleaseModelWithDelete.findOneWithDeleted({
     modelId: releaseParams.modelId,
     semver: releaseParams.semver,
   })
