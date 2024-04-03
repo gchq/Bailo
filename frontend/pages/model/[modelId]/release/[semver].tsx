@@ -53,7 +53,7 @@ export default function Release() {
                     Back to model
                   </Button>
                 </Link>
-                <Stack direction='row'>
+                <Stack direction='row' alignItems='center'>
                   <Typography variant='h6' component='h1' color='primary'>
                     {release ? release.semver : 'Loading...'}
                   </Typography>

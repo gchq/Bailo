@@ -54,7 +54,7 @@ export default function AccessRequest() {
                       Back to model
                     </Button>
                   </Link>
-                  <Stack direction='row'>
+                  <Stack direction='row' alignItems='center'>
                     <Typography variant='h6' color='primary' component='h1'>
                       {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
                     </Typography>
