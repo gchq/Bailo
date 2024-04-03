@@ -48,14 +48,12 @@ export default function RichTextInput({
     )
   }
 
-  const RichTextInput = forwardRef((_props: any, ref: any) => (
+  const WrappedRichTextEditor = forwardRef(() => (
     <RichTextEditor
       value={value}
       onChange={onChange}
-      textareaProps={{ disabled: disabled, id: id }}
+      textareaProps={{ disabled, id, autoFocus: formContext.firstQuestionKey === id }}
       errors={rawErrors}
-      autoFocus={formContext.firstQuestionKey === id}
-      ref={ref}
       label={
         <Typography fontWeight='bold'>
           {label}
@@ -65,7 +63,7 @@ export default function RichTextInput({
       key={label}
     />
   ))
-  RichTextInput.displayName = 'RichTextInput'
+  WrappedRichTextEditor.displayName = 'WrappedRichTextEditor'
 
-  return <RichTextInput />
+  return <WrappedRichTextEditor />
 }

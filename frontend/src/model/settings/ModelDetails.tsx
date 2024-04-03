@@ -96,11 +96,7 @@ export default function ModelDetails({ model }: ModelAccessProps) {
           </Typography>
           <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
             <TeamSelect value={team} loading={isTeamLoading} onChange={(value) => setTeam(value)} />
-            <ModelNameInput
-              inputProps={{ autoFocus: true }}
-              value={modelName}
-              onChange={(value) => setModelName(value)}
-            />
+            <ModelNameInput autoFocus value={modelName} onChange={(value) => setModelName(value)} />
           </Stack>
           <ModelDescriptionInput value={description} onChange={(value) => setDescription(value)} />
         </>

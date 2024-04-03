@@ -114,10 +114,11 @@ export default function ReleaseForm({
           <TextField
             required
             size='small'
+            autoFocus={!isEdit}
             error={formData.semver !== '' && !isValidSemver(formData.semver)}
             helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
             value={formData.semver}
-            inputProps={{ autoFocus: !isEdit, 'data-test': 'releaseSemanticVersionTextField' }}
+            inputProps={{ 'data-test': 'releaseSemanticVersionTextField' }}
             onChange={handleSemverChange}
           />
         )}
