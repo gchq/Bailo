@@ -10,10 +10,10 @@ import { registerPath, reviewInterfaceSchema } from '../../../services/specifica
 import { ReviewKind } from '../../../types/enums.js'
 import { parse } from '../../../utils/validate.js'
 
-export const patchReleaseReviewResponseSchema = z.object({
+export const patchAccessRequestReviewResponseSchema = z.object({
   params: z.object({
     modelId: z.string(),
-    semver: z.string(),
+    accessRequestId: z.string(),
   }),
   body: z.object({
     role: z.string(),
@@ -24,10 +24,10 @@ export const patchReleaseReviewResponseSchema = z.object({
 
 registerPath({
   method: 'patch',
-  path: '/api/v2/model/{modelId}/release/{semver}/review',
-  tags: ['release', 'review'],
-  description: 'Update a review for a release.',
-  schema: patchReleaseReviewResponseSchema,
+  path: '/api/v2/model/{modelId}/access-request/{AccessRequestId}/review',
+  tags: ['access-request', 'review'],
+  description: 'Update a review for a access request.',
+  schema: patchAccessRequestReviewResponseSchema,
   responses: {
     200: {
       description: 'A review instance.',
@@ -42,20 +42,20 @@ registerPath({
   },
 })
 
-interface PatchReleaseReviewResponse {
+interface PatchAccessRequestReviewResponse {
   review: ReviewInterface
 }
 
-export const patchReleaseReviewResponse = [
+export const patchAccessRequestReviewResponse = [
   bodyParser.json(),
-  async (req: Request, res: Response<PatchReleaseReviewResponse>) => {
+  async (req: Request, res: Response<PatchAccessRequestReviewResponse>) => {
     req.audit = AuditInfo.UpdateReviewResponse
     const {
-      params: { modelId, semver },
+      params: { modelId, accessRequestId },
       body: { role, ...body },
-    } = parse(req, patchReleaseReviewResponseSchema)
+    } = parse(req, patchAccessRequestReviewResponseSchema)
     // need to change function below to the update function
-    const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Release, semver)
+    const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Access, accessRequestId)
 
     await audit.onUpdateReviewResponse(req, review)
 
