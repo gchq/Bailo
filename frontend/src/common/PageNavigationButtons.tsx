@@ -20,7 +20,7 @@ export default function PageNavigationButtons({
 }: PageNavigationButtonsProps) {
   return (
     <Stack
-      direction='row'
+      direction={{ xs: 'column', sm: 'row' }}
       spacing={2}
       divider={<Divider flexItem orientation='vertical' />}
       justifyContent='center'
