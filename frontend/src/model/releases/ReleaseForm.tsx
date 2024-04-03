@@ -131,11 +131,11 @@ export default function ReleaseForm({
           </>
         ) : (
           <RichTextEditor
-            autoFocus={isEdit}
             value={formData.releaseNotes}
             onChange={onReleaseNotesChange}
             aria-label='Release notes'
             label={releaseNotesLabel}
+            textareaProps={{ autoFocus: isEdit }}
             dataTest='releaseNotesInput'
           />
         )}
