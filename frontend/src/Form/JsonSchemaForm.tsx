@@ -139,6 +139,12 @@ export default function JsonSchemaForm({
         maxPages={splitSchema.steps.length}
         navigateForward={navigateStepForward}
         navigateBackward={navigateStepBackward}
+        nextPageLabel={
+          splitSchema.steps[activeStep + 1] ? `Go forward to ${splitSchema.steps[activeStep + 1].schema.title}` : ''
+        }
+        previousPageLabel={
+          splitSchema.steps[activeStep - 1] ? `Go back to ${splitSchema.steps[activeStep - 1].schema.title}` : ''
+        }
       />
       <Grid container spacing={2} sx={{ mt: theme.spacing(1) }}>
         <Grid item xs={12} sm={3} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
@@ -198,6 +204,12 @@ export default function JsonSchemaForm({
         maxPages={splitSchema.steps.length}
         navigateForward={navigateStepForward}
         navigateBackward={navigateStepBackward}
+        nextPageLabel={
+          splitSchema.steps[activeStep + 1] ? `Go forward to ${splitSchema.steps[activeStep + 1].schema.title}` : ''
+        }
+        previousPageLabel={
+          splitSchema.steps[activeStep - 1] ? `Go back to ${splitSchema.steps[activeStep - 1].schema.title}` : ''
+        }
       />
     </Stack>
   )
