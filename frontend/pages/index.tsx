@@ -19,7 +19,8 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import Link from 'next/link'
-import React, { ChangeEvent, Fragment, useCallback, useState } from 'react'
+import { useRouter } from 'next/router'
+import React, { ChangeEvent, Fragment, useCallback, useEffect, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -58,6 +59,23 @@ function Marketplace() {
   )
 
   const theme = useTheme()
+  const router = useRouter()
+
+  const { filter: filterFromQuery, task: taskFromQuery, libraries: librariesFromQuery } = router.query
+
+  useEffect(() => {
+    if (filterFromQuery) setFilter(filterFromQuery as string)
+    if (taskFromQuery) setSelectedTask(taskFromQuery as string)
+    if (librariesFromQuery) {
+      let librariesAsArray: string[] = []
+      if (typeof librariesFromQuery === 'string') {
+        librariesAsArray.push(librariesFromQuery)
+      } else {
+        librariesAsArray = [...librariesFromQuery]
+      }
+      setSelectedLibraries([...librariesAsArray])
+    }
+  }, [filterFromQuery, taskFromQuery, librariesFromQuery])
 
   const handleSelectedTypesOnChange = useCallback((selected: string[]) => {
     if (selected.length > 0) {
@@ -74,9 +92,38 @@ function Marketplace() {
     }
   }, [])
 
-  const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value)
-  }
+  const updateQueryParams = useCallback(
+    (key: string, value: string | string[]) => {
+      router.replace({
+        query: { ...router.query, [key]: value },
+      })
+    },
+    [router],
+  )
+
+  const handleFilterChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setFilter(e.target.value)
+      updateQueryParams('filter', e.target.value)
+    },
+    [updateQueryParams],
+  )
+
+  const handleTaskOnChange = useCallback(
+    (task: string) => {
+      setSelectedTask(task)
+      updateQueryParams('task', task)
+    },
+    [updateQueryParams],
+  )
+
+  const handleLibrariesOnChange = useCallback(
+    (libraries: string[]) => {
+      setSelectedLibraries(libraries as string[])
+      updateQueryParams('libraries', libraries)
+    },
+    [updateQueryParams],
+  )
 
   const onFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -129,7 +176,7 @@ function Marketplace() {
               ]}
               expandThreshold={10}
               selectedTags={selectedTask}
-              onChange={setSelectedTask}
+              onChange={handleTaskOnChange}
               size='small'
             />
           </Box>
@@ -141,7 +188,7 @@ function Marketplace() {
               expandThreshold={10}
               multiple
               selectedTags={selectedLibraries}
-              onChange={setSelectedLibraries}
+              onChange={handleLibrariesOnChange}
               size='small'
             />
           </Box>
