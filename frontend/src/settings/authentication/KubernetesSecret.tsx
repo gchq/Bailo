@@ -28,7 +28,7 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
 
   const secretFileName = useMemo(() => `${toKebabCase(token.description)}-k8s-secret.yml`, [token.description])
 
-  function replacer(key: string | string[], value: string) {
+  function replacer(key: string, value: string) {
     if (key === '.dockerconfigjson') {
       return JSON.parse(
         `{"auths": {"${uiConfig?.registry.host}": {"username": "${token.accessKey}","password": "${token.secretKey}","auth": "BASE64(${token.accessKey}:${token.secretKey})"}}}`,
