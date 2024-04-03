@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
 import { ReactElement, SyntheticEvent, useContext, useEffect, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 export interface PageTab {
@@ -70,9 +71,16 @@ export default function PageWithTabs({
         spacing={{ sm: 2 }}
         sx={{ p: 2 }}
       >
-        <Typography component='h1' color='primary' variant='h6'>
-          {title}
-        </Typography>
+        <Stack direction='row'>
+          <Typography component='h1' color='primary' variant='h6'>
+            {title}
+          </Typography>
+          <CopyToClipboardButton
+            textToCopy={title}
+            notificationText='Copied to clipboard'
+            ariaLabel='copy to clipboard'
+          />
+        </Stack>
         {displayActionButton && (
           <Button variant='contained' onClick={actionButtonOnClick}>
             {actionButtonTitle}

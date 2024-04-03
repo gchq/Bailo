@@ -2,6 +2,7 @@ import { LoadingButton } from '@mui/lab'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { patchAccessRequest, useGetAccessRequest } from 'actions/accessRequest'
 import { useCallback, useContext, useEffect, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import { getErrorMessage } from 'utils/fetcher'
@@ -92,7 +93,14 @@ export default function EditableAccessRequestForm({
           heading={
             <div>
               <Typography fontWeight='bold'>Schema</Typography>
-              <Typography>{schema?.name}</Typography>
+              <Stack direction='row'>
+                <Typography>{schema?.name}</Typography>
+                <CopyToClipboardButton
+                  textToCopy={schema ? schema.name : ''}
+                  notificationText='Copied schema name to clipboard'
+                  ariaLabel='copy schema name to clipboard'
+                />
+              </Stack>
             </div>
           }
           editButtonText='Edit Access Request'
