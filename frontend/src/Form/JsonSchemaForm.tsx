@@ -93,32 +93,26 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
-  const [firstQuestionKey, setFirstQuestionKey] = useState<string | undefined>(undefined)
+  const [firstQuestionKey, setFirstQuestionKey] = useState<string | undefined>()
   const theme = useTheme()
 
   const currentStep = splitSchema.steps[activeStep]
 
-  const getKeyFromSection = useCallback((schema: RJSFSchema, key = '') => {
+  const getKeyFromSection = useCallback((schema: RJSFSchema, key: string) => {
     const [firstQuestionKey] = Object.keys(schema)
     let updatedKey = `${key}_${firstQuestionKey}`
     if (schema[firstQuestionKey].type === 'object') {
-      return (updatedKey = getKeyFromSection(schema[firstQuestionKey].properties, updatedKey))
+      updatedKey = getKeyFromSection(schema[firstQuestionKey].properties, updatedKey)
     }
     return updatedKey
   }, [])
 
-  const handleFirstQuestionFocus = useCallback(() => {
+  useEffect(() => {
+    // Set focus to first question in current step
     if (currentStep) {
-      setFirstQuestionKey(undefined)
-      let questionKey = 'root'
-      questionKey += getKeyFromSection(currentStep.schema.properties)
-      setFirstQuestionKey(questionKey)
+      setFirstQuestionKey(getKeyFromSection(currentStep.schema.properties, 'root'))
     }
   }, [currentStep, getKeyFromSection])
-
-  useEffect(() => {
-    if (currentStep) handleFirstQuestionFocus()
-  }, [currentStep, handleFirstQuestionFocus])
 
   if (!currentStep) {
     return null
@@ -132,7 +126,6 @@ export default function JsonSchemaForm({
 
   function handleListItemClick(index: number) {
     setActiveStep(index)
-    handleFirstQuestionFocus()
   }
 
   function ErrorListTemplate() {
