@@ -331,7 +331,7 @@ jobs:
           }
           EOT
 
-      - run: docker-compose -f docker-compose-prod.yml up -d
+      - run: docker compose -f docker-compose-prod.yml up -d
 
       # Install dependencies
       - run: npm ci
@@ -364,9 +364,9 @@ jobs:
       #     name: cypress-videos
       #     path: cypress/videos
 
-      - name: Dump docker-compose logs
+      - name: Dump docker compose logs
         if: always()
-        run: docker-compose logs > logs/stack.log
+        run: docker compose logs > logs/stack.log
 
       - name: Docker Compose Logs
         if: always()
@@ -448,7 +448,7 @@ jobs:
           }
           EOT
 
-      - run: docker-compose -f docker-compose-prod.yml up -d
+      - run: docker compose -f docker-compose-prod.yml up -d
 
       # Install dependencies
       - run: npm ci
@@ -483,9 +483,9 @@ jobs:
           cd lib/python
           python -m pytest -m integration
 
-      - name: Dump docker-compose logs
+      - name: Dump docker compose logs
         if: always()
-        run: docker-compose logs > logs/stack.log
+        run: docker compose logs > logs/stack.log
 
       - name: Docker Compose Logs
         if: always()
