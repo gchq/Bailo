@@ -1,5 +1,5 @@
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction } from '../connectors/authorisation/actions.js'
+import { AccessRequestAction, ModelAction, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
@@ -210,16 +210,37 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
 export type UpdateReviewResponseParams = Pick<ReviewResponse, 'comment' | 'decision'>
 export async function updateReviewResponse(
   user: UserInterface,
+  mine: boolean,
   modelId: string,
-  role: string,
-  response: ReviewResponseParams,
-  kind: ReviewKindKeys,
-  reviewId: string,
+  semver: string,
+  accessRequestId: string,
+  kind: string,
   delta: UpdateReviewResponseParams,
 ) {
-  const reviewResponse = await respondToReview(user, modelId, role, response, kind, reviewId)
+  const reviewResponse = await findReviews(user, mine, modelId, semver, accessRequestId, kind)
+  const model = await getModelById(user, modelId)
+  const release = await getReleaseBySemver(user, modelId, semver)
+  const access = await getAccessRequestById(user, accessRequestId)
+  let reviewIdQuery
+  switch (kind) {
+    case ReviewKind.Access: {
+      const accessAuth = await authorisation.accessRequest(user, model, access, AccessRequestAction.Update)
+      if (!accessAuth.success) {
+        log.error('Unable to update review response. Cannot find access request ID.', { accessRequestId })
+      }
+      break
+    }
+    case ReviewKind.Release: {
+      const releaseAuth = await authorisation.release(user, model, release, ReleaseAction.Update)
+      if (!releaseAuth.success) {
+        log.error('Unable to update review response. Cannot find semver.', { semver })
+      }
+      break
+    }
 
-  //const auth = await authorisation.
+    default:
+      throw GenericError(500, 'Review Kind not recognised', reviewIdQuery)
+  }
 
   Object.assign(reviewResponse, delta)
 }
