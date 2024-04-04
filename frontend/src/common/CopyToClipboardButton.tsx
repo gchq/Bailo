@@ -22,7 +22,13 @@ export default function CopyToClipboardButton({
 
   return (
     <Tooltip title='Copy to clipboard'>
-      <IconButton size='small' color='primary' onClick={copyTextToClipboard} aria-label={ariaLabel}>
+      <IconButton
+        size='small'
+        color='primary'
+        onClick={copyTextToClipboard}
+        aria-label={ariaLabel}
+        data-test='copyToClipboardButton'
+      >
         <ContentCopy fontSize='inherit' />
       </IconButton>
     </Tooltip>
