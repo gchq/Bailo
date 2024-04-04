@@ -23,6 +23,7 @@ export default function PageWithTabs({
   displayActionButton = false,
   actionButtonOnClick,
   requiredUrlParams = {},
+  showCopyButton = false,
 }: {
   title: string
   tabs: PageTab[]
@@ -30,6 +31,7 @@ export default function PageWithTabs({
   displayActionButton?: boolean
   actionButtonOnClick?: () => void
   requiredUrlParams?: ParsedUrlQuery
+  showCopyButton?: boolean
 }) {
   const router = useRouter()
   const { tab } = router.query
@@ -75,11 +77,13 @@ export default function PageWithTabs({
           <Typography component='h1' color='primary' variant='h6'>
             {title}
           </Typography>
-          <CopyToClipboardButton
-            textToCopy={title}
-            notificationText='Copied to clipboard'
-            ariaLabel='copy to clipboard'
-          />
+          {showCopyButton && (
+            <CopyToClipboardButton
+              textToCopy={title}
+              notificationText='Copied to clipboard'
+              ariaLabel='copy to clipboard'
+            />
+          )}
         </Stack>
         {displayActionButton && (
           <Button variant='contained' onClick={actionButtonOnClick}>
