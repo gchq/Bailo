@@ -11,6 +11,7 @@ export interface PageTab {
   path: string
   view: ReactElement
   disabled?: boolean
+  hidden?: boolean
   datatest?: string
   disabledText?: string
 }
@@ -87,32 +88,34 @@ export default function PageWithTabs({
         scrollButtons='auto'
         variant='scrollable'
       >
-        {tabs.map((tab: PageTab) => {
-          if (tab.disabled) {
-            return (
-              <Tooltip key={tab.title} title={tab.disabledText}>
-                <span>
-                  <Tab
-                    disabled={tab.disabled}
-                    value={tab.path}
-                    data-test={`${tab.path}Tab`}
-                    label={<span>{tab.title}</span>}
-                  />
-                </span>
-              </Tooltip>
-            )
-          } else {
-            return (
-              <Tab
-                key={tab.title}
-                disabled={tab.disabled}
-                value={tab.path}
-                data-test={`${tab.path}Tab`}
-                label={<span>{tab.title}</span>}
-              />
-            )
-          }
-        })}
+        {tabs
+          .filter((tab) => !tab.hidden)
+          .map((tab: PageTab) => {
+            if (tab.disabled) {
+              return (
+                <Tooltip key={tab.title} title={tab.disabledText}>
+                  <span>
+                    <Tab
+                      disabled={tab.disabled}
+                      value={tab.path}
+                      data-test={`${tab.path}Tab`}
+                      label={<span>{tab.title}</span>}
+                    />
+                  </span>
+                </Tooltip>
+              )
+            } else {
+              return (
+                <Tab
+                  key={tab.title}
+                  disabled={tab.disabled}
+                  value={tab.path}
+                  data-test={`${tab.path}Tab`}
+                  label={<span>{tab.title}</span>}
+                />
+              )
+            }
+          })}
       </Tabs>
       {tabs.map((tab: PageTab) => {
         return (

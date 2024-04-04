@@ -48,8 +48,7 @@ export default function Model() {
               title: 'Inferencing',
               path: 'inferencing',
               view: <InferenceServices model={model} />,
-              disabled: !uiConfig?.inference.enabled,
-              disabledText: 'Model inferencing is not setup on Bailo.',
+              hidden: !uiConfig.inference.enabled,
             },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]

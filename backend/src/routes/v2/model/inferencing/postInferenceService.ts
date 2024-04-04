@@ -7,6 +7,7 @@ import audit from '../../../../connectors/audit/index.js'
 import { InferenceInterface } from '../../../../models/Inference.js'
 import { createInference } from '../../../../services/inference.js'
 import { inferenceInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import config from '../../../../utils/config.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const postInferenceSchema = z.object({
@@ -24,24 +25,25 @@ export const postInferenceSchema = z.object({
     }),
   }),
 })
-
-registerPath({
-  method: 'post',
-  path: '/api/v2/model/{modelId}/inference',
-  tags: ['inference'],
-  description: 'Create a inferencing service within Bailo',
-  schema: postInferenceSchema,
-  responses: {
-    200: {
-      description: 'The created inferencing service.',
-      content: {
-        'application/json': {
-          schema: inferenceInterfaceSchema,
+if (config.ui.inference.enabled) {
+  registerPath({
+    method: 'post',
+    path: '/api/v2/model/{modelId}/inference',
+    tags: ['inference'],
+    description: 'Create a inferencing service within Bailo',
+    schema: postInferenceSchema,
+    responses: {
+      200: {
+        description: 'The created inferencing service.',
+        content: {
+          'application/json': {
+            schema: inferenceInterfaceSchema,
+          },
         },
       },
     },
-  },
-})
+  })
+}
 
 interface PostInferenceService {
   inference: InferenceInterface

@@ -7,6 +7,7 @@ import audit from '../../../../connectors/audit/index.js'
 import { InferenceInterface } from '../../../../models/Inference.js'
 import { updateInference } from '../../../../services/inference.js'
 import { inferenceInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import config from '../../../../utils/config.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const putInferenceSchema = z.object({
@@ -24,24 +25,25 @@ export const putInferenceSchema = z.object({
     }),
   }),
 })
-
-registerPath({
-  method: 'put',
-  path: '/api/v2/model/{modelId}/inference/{image}/{tag}',
-  tags: ['inference'],
-  description: 'Update a inferencing service within Bailo',
-  schema: putInferenceSchema,
-  responses: {
-    200: {
-      description: 'The created inferencing service.',
-      content: {
-        'application/json': {
-          schema: inferenceInterfaceSchema,
+if (config.ui.inference.enabled) {
+  registerPath({
+    method: 'put',
+    path: '/api/v2/model/{modelId}/inference/{image}/{tag}',
+    tags: ['inference'],
+    description: 'Update a inferencing service within Bailo',
+    schema: putInferenceSchema,
+    responses: {
+      200: {
+        description: 'The created inferencing service.',
+        content: {
+          'application/json': {
+            schema: inferenceInterfaceSchema,
+          },
         },
       },
     },
-  },
-})
+  })
+}
 
 interface PutInferenceService {
   inference: InferenceInterface
