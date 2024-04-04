@@ -1,12 +1,11 @@
-import ContentCopy from '@mui/icons-material/ContentCopy'
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
-import { Button, Collapse, IconButton, Tooltip, Typography } from '@mui/material'
+import { Button, Collapse, Typography } from '@mui/material'
 import Alert, { AlertProps } from '@mui/material/Alert'
 import Stack from '@mui/material/Stack'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import useNotification from 'src/hooks/useNotification'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 
 type PartialMessageAlertProps =
   | {
@@ -35,7 +34,6 @@ export default function MessageAlert({
 }: MessageAlertProps) {
   const alertRef = useRef<HTMLDivElement>(null)
   const [showContactMessage, setShowContactMessage] = useState(false)
-  const sendNotification = useNotification()
 
   useEffect(() => {
     if (message && alertRef.current && alertRef.current.scrollIntoView) {
@@ -47,11 +45,6 @@ export default function MessageAlert({
 
   const handleContact = () => {
     setShowContactMessage(!showContactMessage)
-  }
-
-  const copyErrorMsgToClipboard = () => {
-    navigator.clipboard.writeText(message)
-    sendNotification({ variant: 'success', msg: 'Copied error message to clipboard' })
   }
 
   if (!message) return null
@@ -67,16 +60,11 @@ export default function MessageAlert({
         <Stack direction='row' spacing={1} alignItems='center'>
           <Typography>{message}</Typography>
           {severity === 'error' && (
-            <Tooltip title='Copy to clipboard'>
-              <IconButton
-                size='small'
-                color='primary'
-                onClick={copyErrorMsgToClipboard}
-                aria-label='copy error message to clipboard'
-              >
-                <ContentCopy fontSize='inherit' />
-              </IconButton>
-            </Tooltip>
+            <CopyToClipboardButton
+              textToCopy={message}
+              notificationText='Copied error message to clipboard'
+              ariaLabel='copy error message to clipboard'
+            />
           )}
         </Stack>
         <Typography>{!!(href && linkText) && <Link href={href}>{linkText}</Link>}</Typography>
