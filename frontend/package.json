@@ -13,7 +13,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@emotion/cache": "^11.10.7",
+    "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.0",
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.0",
@@ -23,6 +23,7 @@
     "@mui/icons-material": "^5.11.16",
     "@mui/lab": "^5.0.0-alpha.135",
     "@mui/material": "^5.13.2",
+    "@mui/material-nextjs": "^5.15.11",
     "@mui/x-date-pickers": "^6.18.2",
     "@next/mdx": "^14.0.1",
     "@rjsf/core": "^5.10.0",
