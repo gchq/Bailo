@@ -43,7 +43,7 @@ data:
       '${registry_url}':
         username: '${access_key}'
         password: '${secret_key}'
-        auth:  '${auth}''
+        auth:  '${auth}'
 type: kubernetes.io/dockerconfigjson`
 }
 
@@ -89,7 +89,7 @@ export const kubernetesConfigTemplate = Handlebars.compile(`{
 export const rocketConfigTemplate = Handlebars.compile(`{
   "rktKind": "auth",
   "rktVersion": "v1",
-  "domains": "{{registryUrl}}",
+  "domains": ["{{registryUrl}}"],
   "type": "basic",
   "credentials": {
     "user": "{{accessKey}}",
