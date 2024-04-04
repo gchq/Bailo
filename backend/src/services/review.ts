@@ -9,7 +9,7 @@ import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import { toEntity } from '../utils/entity.js'
-import { BadReq, GenericError, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, GenericError, NotFound } from '../utils/error.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -210,30 +210,34 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
 export type UpdateReviewResponseParams = Pick<ReviewResponse, 'comment' | 'decision'>
 export async function updateReviewResponse(
   user: UserInterface,
-  mine: boolean,
   modelId: string,
   semver: string,
   accessRequestId: string,
   kind: string,
   delta: UpdateReviewResponseParams,
 ) {
-  const reviewResponse = await findReviews(user, mine, modelId, semver, accessRequestId, kind)
+  const reviewResponse = await findReviews(user, true, modelId, semver, accessRequestId, kind)
   const model = await getModelById(user, modelId)
-  const release = await getReleaseBySemver(user, modelId, semver)
-  const access = await getAccessRequestById(user, accessRequestId)
+
   let reviewIdQuery
   switch (kind) {
     case ReviewKind.Access: {
+      const access = await getAccessRequestById(user, accessRequestId)
       const accessAuth = await authorisation.accessRequest(user, model, access, AccessRequestAction.Update)
       if (!accessAuth.success) {
-        log.error('Unable to update review response. Cannot find access request ID.', { accessRequestId })
+        throw Forbidden(accessAuth.info, { userDn: user.dn, accessRequestId })
       }
+
       break
     }
     case ReviewKind.Release: {
+      const release = await getReleaseBySemver(user, modelId, semver)
       const releaseAuth = await authorisation.release(user, model, release, ReleaseAction.Update)
       if (!releaseAuth.success) {
-        log.error('Unable to update review response. Cannot find semver.', { semver })
+        throw Forbidden(releaseAuth.info, {
+          userDn: user.dn,
+          modelId: modelId,
+        })
       }
       break
     }

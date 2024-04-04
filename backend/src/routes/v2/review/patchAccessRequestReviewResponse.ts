@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { Decision, ReviewInterface } from '../../../models/Review.js'
-import { respondToReview } from '../../../services/review.js'
+import { updateReviewResponse } from '../../../services/review.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
 import { ReviewKind } from '../../../types/enums.js'
 import { parse } from '../../../utils/validate.js'
@@ -54,8 +54,7 @@ export const patchAccessRequestReviewResponse = [
       params: { modelId, accessRequestId },
       body: { role, ...body },
     } = parse(req, patchAccessRequestReviewResponseSchema)
-    // need to change function below to the update function
-    const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Access, accessRequestId)
+    const review = await updateReviewResponse(req.user, modelId, role, ReviewKind.Release, accessRequestId, body)
 
     await audit.onUpdateReviewResponse(req, review)
 
