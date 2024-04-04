@@ -32,7 +32,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     transition: theme.transitions.create('width'),
     [theme.breakpoints.up('sm')]: {
       width: '16ch',
-      '&:focus': {
+      '&:hover': {
         width: '25ch',
       },
     },
