@@ -1,6 +1,6 @@
 import { Slider, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ChangeEvent, useMemo, useState } from 'react'
+import { ChangeEvent, useEffect, useMemo, useState } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import ProcessorTypeList from 'src/model/inferencing/ProcessorTypeList'
@@ -51,6 +51,10 @@ export default function InferenceForm({
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
   const [cpuType, setCpuType] = useState(formData.processorType === 'cpu')
 
+  useEffect(() => {
+    setCpuType(formData.processorType === 'cpu')
+  }, [formData.processorType])
+
   const handleMemoryChange = (_event: Event, newValue: number | number[]) => {
     onMemoryChange(newValue as number)
   }
@@ -64,7 +68,6 @@ export default function InferenceForm({
   }
   const handleProcessorTypeChange = (_event: ChangeEvent<HTMLInputElement>, newValue: string) => {
     onProcessorTypeChange(newValue)
-    setCpuType(formData.processorType !== 'cpu')
   }
 
   const handleDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -72,19 +75,23 @@ export default function InferenceForm({
   }
   return (
     <Stack spacing={2}>
-      <Typography fontWeight='bold'>
-        Description {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
-      </Typography>
-      {isReadOnly ? (
-        <ReadOnlyAnswer value={formData.description} />
-      ) : (
-        <TextField required size='small' value={formData.description} onChange={handleDescriptionChange} />
+      <Stack>
+        <Typography fontWeight='bold'>
+          Description {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
+        </Typography>
+        {isReadOnly ? (
+          <ReadOnlyAnswer value={formData.description} />
+        ) : (
+          <TextField required size='small' value={formData.description} onChange={handleDescriptionChange} />
+        )}
+      </Stack>
+      {!(isReadOnly || editable) && (
+        <Typography fontWeight='bold' color='primary' fontSize='medium'>
+          Deployment Settings
+          <HelpPopover>These help you configure how your image is deployed within Bailo</HelpPopover>
+        </Typography>
       )}
-      <Typography fontWeight='bold' color='primary' fontSize='medium'>
-        Deployment Settings
-        {!isReadOnly && <HelpPopover>These help you configure how your image is deployed within Bailo</HelpPopover>}
-      </Typography>
-      {!isReadOnly && !editable && (
+      {!(isReadOnly || editable) && (
         <>
           <Typography fontWeight='bold'>
             Image
@@ -93,56 +100,64 @@ export default function InferenceForm({
           <ModelImageList model={model} value={formData.image} onChange={handleImageChange} />
         </>
       )}
-      <Typography fontWeight='bold'>
-        Port {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
-      </Typography>
-      {isReadOnly ? (
-        <ReadOnlyAnswer value={formData.port.toString()} />
-      ) : (
-        <TextField
-          required
-          size='small'
-          value={formData.port}
-          onChange={handlePortChange}
-          error={formData.port !== '' && !isValidPortNumber(formData.port)}
-          helperText={
-            formData.port !== '' && !isValidPortNumber(formData.port) ? 'Port number must be in the range 1-65535' : ''
-          }
-        />
-      )}
-      <Typography fontWeight='bold'>
-        Processor Type {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
-      </Typography>
-      {isReadOnly ? (
-        <ReadOnlyAnswer value={formData.processorType} />
-      ) : (
-        <ProcessorTypeList value={formData.processorType} onChange={handleProcessorTypeChange} readOnly={false} />
-      )}
-      <Typography fontWeight='bold'>
-        {`Memory : ${formData.memory} GB `}
-        {!isReadOnly && formData.processorType === 'cpu' && <span style={{ color: theme.palette.error.main }}>*</span>}
-      </Typography>
-      {!isReadOnly && (
-        <Tooltip
-          title='Specify a cpu processor type to allocate memory to this service'
-          disableHoverListener={cpuType}
-          disableFocusListener={cpuType}
-        >
-          <span>
-            <Slider
-              disabled={!cpuType}
-              size='small'
-              min={1}
-              max={8}
-              value={formData.memory}
-              aria-label='Memory'
-              getAriaValueText={(value: number) => `${value} GB`}
-              onChange={handleMemoryChange}
-              valueLabelDisplay='auto'
-            />
-          </span>
-        </Tooltip>
-      )}
+      <Stack>
+        <Typography fontWeight='bold'>
+          Port {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
+        </Typography>
+        {isReadOnly ? (
+          <ReadOnlyAnswer value={formData.port.toString()} />
+        ) : (
+          <TextField
+            required
+            size='small'
+            value={formData.port}
+            onChange={handlePortChange}
+            error={formData.port !== '' && !isValidPortNumber(formData.port)}
+            helperText={
+              formData.port !== '' && !isValidPortNumber(formData.port)
+                ? 'Port number must be in the range 1-65535'
+                : ''
+            }
+          />
+        )}
+      </Stack>
+      <Stack>
+        <Typography fontWeight='bold'>
+          Processor Type {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
+        </Typography>
+        {isReadOnly ? (
+          <ReadOnlyAnswer value={formData.processorType} />
+        ) : (
+          <ProcessorTypeList value={formData.processorType} onChange={handleProcessorTypeChange} readOnly={false} />
+        )}
+      </Stack>
+      <Stack>
+        <Stack>
+          <Typography fontWeight='bold'>{'Memory'}</Typography>
+          <Typography>{formData.memory} GB</Typography>
+        </Stack>
+        {!isReadOnly && (
+          <Tooltip
+            title='Specify a cpu processor type to allocate memory to this service'
+            disableHoverListener={cpuType}
+            disableFocusListener={cpuType}
+          >
+            <span>
+              <Slider
+                disabled={!cpuType}
+                size='small'
+                min={1}
+                max={8}
+                value={formData.memory}
+                aria-label='Memory'
+                getAriaValueText={(value: number) => `${value} GB`}
+                onChange={handleMemoryChange}
+                valueLabelDisplay='auto'
+              />
+            </span>
+          </Tooltip>
+        )}
+      </Stack>
     </Stack>
   )
 }

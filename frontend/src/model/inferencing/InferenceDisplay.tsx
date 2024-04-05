@@ -17,13 +17,16 @@ export default function InferenceDisplay({ model, inference }: InferenceDisplayP
       <Stack spacing={1} padding={2}>
         <Stack direction='row' justifyContent={'space-between'}>
           <Stack direction='row' spacing={2}>
-            <Link href={`/model/${model.id}/inference/${inference.image}/${inference.tag}`}>
+            <Link
+              href={`/model/${model.id}/inference/${inference.image}/${inference.tag}`}
+              sx={{ alignSelf: 'center' }}
+            >
               <Typography component='h2' variant='h6' color='primary'>
                 {inference.image}:{inference.tag}
               </Typography>
             </Link>
-            <Divider orientation='vertical' flexItem />
-            <Typography fontWeight='bold' color='primary'>
+            <Divider orientation='vertical' flexItem variant='middle' />
+            <Typography fontWeight='bold' color='primary' sx={{ alignSelf: 'center' }}>
               {inference.settings.processorType}
             </Typography>
           </Stack>

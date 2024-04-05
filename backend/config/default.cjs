@@ -139,7 +139,7 @@ module.exports = {
     },
 
     inference: {
-      enabled: true,
+      enabled: false,
       connection: {
         host: 'http://example.com',
       },

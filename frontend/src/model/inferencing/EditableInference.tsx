@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { putInference, UpdateInferenceParams, useGetInference } from 'actions/inferencing'
 import { useGetModel } from 'actions/model'
 import { useCallback, useContext, useEffect, useState } from 'react'
@@ -96,10 +96,10 @@ export default function EditableInference({ inference }: EditableInferenceProps)
     <>
       <EditableFormHeading
         heading={
-          <div>
+          <Stack>
             <Typography fontWeight='bold'>Deployed Image </Typography>
             <Typography>{`${model.name} - ${inference.image}:${inference.tag}`}</Typography>
-          </div>
+          </Stack>
         }
         isEdit={isEdit}
         isLoading={isLoading}
