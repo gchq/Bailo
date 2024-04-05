@@ -4,6 +4,7 @@ import { useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
@@ -52,9 +53,16 @@ export default function Release() {
                     Back to model
                   </Button>
                 </Link>
-                <Typography variant='h6' component='h1' color='primary'>
-                  {release ? release.semver : 'Loading...'}
-                </Typography>
+                <Stack direction='row' alignItems='center'>
+                  <Typography variant='h6' component='h1' color='primary'>
+                    {release ? release.semver : 'Loading...'}
+                  </Typography>
+                  <CopyToClipboardButton
+                    textToCopy={release.semver}
+                    notificationText='Copied release semver to clipboard'
+                    ariaLabel='copy release semver to clipboard'
+                  />
+                </Stack>
               </Stack>
               {release && <EditableRelease release={release} isEdit={isEdit} onIsEditChange={setIsEdit} />}
               <ReviewComments release={release} isEdit={isEdit} />
