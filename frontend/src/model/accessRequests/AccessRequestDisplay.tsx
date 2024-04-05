@@ -17,9 +17,10 @@ import ReviewDisplay from '../reviews/ReviewDisplay'
 
 type AccessRequestDisplayProps = {
   accessRequest: AccessRequestInterface
+  hideReviewBanner?: boolean
 }
 
-export default function AccessRequestDisplay({ accessRequest }: AccessRequestDisplayProps) {
+export default function AccessRequestDisplay({ accessRequest, hideReviewBanner = false }: AccessRequestDisplayProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: accessRequest.modelId,
     accessRequestId: accessRequest.id,
@@ -53,7 +54,7 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
       {isReviewsLoading && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
-          {reviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
+          {reviews.length > 0 && !hideReviewBanner && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
             <Stack direction={{ sm: 'row', xs: 'column' }} alignItems='center' spacing={1}>
               <Link href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
@@ -62,9 +63,9 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 </Typography>
               </Link>
               <CopyToClipboardButton
-                textToCopy={accessRequest.metadata.overview.name}
-                notificationText='Copied access request name to clipboard'
-                ariaLabel='copy access request name to clipboard'
+                textToCopy={accessRequest.id}
+                notificationText='Copied access request ID to clipboard'
+                ariaLabel='copy access request ID to clipboard'
               />
             </Stack>
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
