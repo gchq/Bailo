@@ -11,8 +11,8 @@ module.exports = {
   inference: {
     enabled: false,
     connection: {
-      host: "http://example.com"
-    }
+      host: 'http://example.com',
+    },
   },
 
   app: {
