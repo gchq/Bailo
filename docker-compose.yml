@@ -89,7 +89,7 @@ services:
     depends_on:
       - mongo
       - minio
-      - clamav
+      - clamd
     security_opt:
       - seccomp:unconfined
       - apparmor:unconfined
