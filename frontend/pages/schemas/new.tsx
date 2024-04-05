@@ -111,6 +111,7 @@ export default function NewSchema() {
                   Id <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <TextField
+                  inputProps={{ autoFocus: true }}
                   fullWidth
                   required
                   size='small'
