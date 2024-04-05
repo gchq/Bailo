@@ -12,7 +12,7 @@ import MessageAlert from 'src/MessageAlert'
 const Search = styled('div')(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
+  '&:hover, &:focus': {
     backgroundColor: alpha(theme.palette.common.white, 0.25),
   },
   width: '100%',
@@ -32,7 +32,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     transition: theme.transitions.create('width'),
     [theme.breakpoints.up('sm')]: {
       width: '16ch',
-      '&:hover': {
+      '&:hover, &:focus': {
         width: '25ch',
       },
     },
