@@ -4,7 +4,7 @@ import { useGetAccessRequest, useGetAccessRequestsForModelId } from 'actions/acc
 import { useGetModel } from 'actions/model'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
 import UserDisplay from 'src/common/UserDisplay'
@@ -12,7 +12,6 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import Wrapper from 'src/Wrapper'
-import { mutate } from 'swr'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -27,13 +26,16 @@ export default function AccessRequestReview() {
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
   const { mutateReviews } = useGetReviewRequestsForModel({
     modelId,
-    accessRequestId: accessRequestId as string,
+    accessRequestId: `${accessRequestId}`,
   })
 
   async function handleSubmit(decision: ResponseTypeKeys, comment: string, role: string) {
     setErrorMessage('')
-    if (!modelId || !accessRequestId) {
+    if (!modelId) {
       return setErrorMessage('Could not find model ID')
+    }
+    if (!accessRequestId) {
+      return setErrorMessage('Could not find access request ID')
     }
 
     const res = await postReviewResponse({
@@ -47,18 +49,21 @@ export default function AccessRequestReview() {
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
     } else {
-      mutate(
-        (key) => {
-          return typeof key === 'string' && key.startsWith('/api/v2/reviews')
-        },
-        undefined,
-        { revalidate: true },
-      )
       mutateReviews()
       mutateAccessRequests()
       router.push(`/model/${modelId}?tabs=access`)
     }
   }
+
+  const accessRequestEntities = useMemo(() => {
+    if (accessRequest) {
+      return accessRequest.metadata.overview.entities.map((entity) => (
+        <Grid item xs={3} key={entity}>
+          <UserDisplay dn={entity} />
+        </Grid>
+      ))
+    }
+  }, [accessRequest])
 
   if (!accessRequest || !model || isAccessRequestLoading || isModelLoading) {
     return <Loading />
@@ -72,7 +77,7 @@ export default function AccessRequestReview() {
 
   return (
     <Wrapper fullWidth title={accessRequestId ? accessRequestId : 'Loading...'} page='access request review'>
-      <Container maxWidth='md' sx={{ my: 4 }} data-test='releaseContainer'>
+      <Container maxWidth='md' sx={{ my: 4 }}>
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
             <Stack
@@ -125,13 +130,7 @@ export default function AccessRequestReview() {
                 <Typography variant='subtitle2' component='h3' mb={1}>
                   Users
                 </Typography>
-                <Grid container>
-                  {accessRequest.metadata.overview.entities.map((entity) => (
-                    <Grid item xs={3} key={entity}>
-                      <UserDisplay dn={entity} />
-                    </Grid>
-                  ))}
-                </Grid>
+                <Grid container>{accessRequestEntities}</Grid>
               </Card>
             </Stack>
           </Stack>

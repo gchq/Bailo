@@ -107,7 +107,6 @@ export default function ReviewWithComment({
               onClose={() => {
                 setSelectOpen(false)
               }}
-              // we might get a string or an object back
               isOptionEqualToValue={(option: ReviewRequestInterface, value: ReviewRequestInterface) =>
                 option.role === value.role
               }

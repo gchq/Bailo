@@ -16,10 +16,10 @@ import ReviewDisplay from '../reviews/ReviewDisplay'
 
 type AccessRequestDisplayProps = {
   accessRequest: AccessRequestInterface
-  displayReviewBanner?: boolean
+  hideReviewBanner?: boolean
 }
 
-export default function AccessRequestDisplay({ accessRequest, displayReviewBanner = true }: AccessRequestDisplayProps) {
+export default function AccessRequestDisplay({ accessRequest, hideReviewBanner = false }: AccessRequestDisplayProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId: accessRequest.modelId,
     accessRequestId: accessRequest.id,
@@ -53,7 +53,7 @@ export default function AccessRequestDisplay({ accessRequest, displayReviewBanne
       {isReviewsLoading && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
-          {reviews.length > 0 && displayReviewBanner && <ReviewBanner accessRequest={accessRequest} />}
+          {reviews.length > 0 && !hideReviewBanner && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
             <Link href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
               <Typography component='h2' variant='h6' color='primary'>

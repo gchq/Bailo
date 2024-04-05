@@ -7,7 +7,7 @@ import { useGetUiConfig } from 'actions/uiConfig'
 import Markdown from 'markdown-to-jsx'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
 import UserDisplay from 'src/common/UserDisplay'
@@ -16,7 +16,6 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import CodeLine from 'src/model/registry/CodeLine'
 import Wrapper from 'src/Wrapper'
-import { mutate } from 'swr'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -32,13 +31,16 @@ export default function ReleaseReview() {
   const { mutateReleases } = useGetReleasesForModelId(modelId)
   const { mutateReviews } = useGetReviewRequestsForModel({
     modelId,
-    semver: semver as string,
+    semver: `${semver}`,
   })
 
   async function handleSubmit(decision: ResponseTypeKeys, comment: string, role: string) {
     setErrorMessage('')
-    if (!modelId || !semver) {
+    if (!modelId) {
       return setErrorMessage('Could not find model ID')
+    }
+    if (!semver) {
+      return setErrorMessage('Could not find release semver')
     }
 
     const res = await postReviewResponse({
@@ -52,18 +54,48 @@ export default function ReleaseReview() {
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
     } else {
-      mutate(
-        (key) => {
-          return typeof key === 'string' && key.startsWith('/api/v2/reviews')
-        },
-        undefined,
-        { revalidate: true },
-      )
       mutateReviews()
       mutateReleases()
       router.push(`/model/${modelId}?tabs=releases`)
     }
   }
+
+  const releaseFiles = useMemo(() => {
+    if (release && model) {
+      return release.files.map((file) => (
+        <Grid container spacing={1} alignItems='center' key={file._id}>
+          <Grid item xs>
+            <Tooltip title={file.name}>
+              <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
+                <Typography noWrap textOverflow='ellipsis' display='inline'>
+                  {file.name}
+                </Typography>
+              </Link>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={1} textAlign='right'>
+            <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+          </Grid>
+        </Grid>
+      ))
+    }
+  }, [model, release])
+
+  const releaseImages = useMemo(() => {
+    if (release && model) {
+      return release.images.map((image) => (
+        <Stack
+          key={`${image.repository}-${image.name}-${image.tag}`}
+          direction={{ sm: 'row', xs: 'column' }}
+          justifyContent='space-between'
+          alignItems='center'
+          spacing={1}
+        >
+          {uiConfig && <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />}
+        </Stack>
+      ))
+    }
+  }, [release, model, uiConfig])
 
   if (!release || !model || !uiConfig || isReleaseLoading || isModelLoading || isUiConfigLoading) {
     return <Loading />
@@ -78,7 +110,7 @@ export default function ReleaseReview() {
 
   return (
     <Wrapper fullWidth title={semver ? semver : 'Loading...'} page='release review'>
-      <Container maxWidth='md' sx={{ my: 4 }} data-test='releaseContainer'>
+      <Container maxWidth='md' sx={{ my: 4 }}>
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
             <Stack
@@ -110,45 +142,13 @@ export default function ReleaseReview() {
               {release.files.length > 0 && (
                 <>
                   <Typography fontWeight='bold'>Files</Typography>
-                  {release.files.map((file) => (
-                    <div key={file._id}>
-                      <Grid container spacing={1} alignItems='center'>
-                        <Grid item xs>
-                          <Tooltip title={file.name}>
-                            <Link
-                              href={`/api/v2/model/${model.id}/file/${file._id}/download`}
-                              data-test={`fileLink-${file.name}`}
-                            >
-                              <Typography noWrap textOverflow='ellipsis' display='inline'>
-                                {file.name}
-                              </Typography>
-                            </Link>
-                          </Tooltip>
-                        </Grid>
-                        <Grid item xs={1} textAlign='right'>
-                          <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-                        </Grid>
-                      </Grid>
-                    </div>
-                  ))}
+                  {releaseFiles}
                 </>
               )}
               {release.images.length > 0 && (
                 <>
                   <Typography fontWeight='bold'>Docker images</Typography>
-                  {release.images.map((image) => (
-                    <Stack
-                      key={`${image.repository}-${image.name}-${image.tag}`}
-                      direction={{ sm: 'row', xs: 'column' }}
-                      justifyContent='space-between'
-                      alignItems='center'
-                      spacing={1}
-                    >
-                      {uiConfig && (
-                        <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />
-                      )}
-                    </Stack>
-                  ))}
+                  {releaseImages}
                 </>
               )}
             </Stack>
