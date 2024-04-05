@@ -44,7 +44,12 @@ export async function uploadFile(
 
   if (config.avScanning.enabled) {
     if (!av) {
-      av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
+      try {
+        av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
+      } catch (error) {
+        log.error('Unable to connect to ClamAV.', error)
+        return file
+      }
     }
     const avStream = av.passthrough()
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable

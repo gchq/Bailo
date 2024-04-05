@@ -23,6 +23,9 @@ services:
       - minioVolume:/data
     command: server /data --console-address ":9001"
 
+  clamd:
+    image: clamav/clamav:1.3
+
   mailcrab:
     image: marlonb/mailcrab:v0.10.0
     ports:
@@ -86,6 +89,7 @@ services:
     depends_on:
       - mongo
       - minio
+      - clamav
     security_opt:
       - seccomp:unconfined
       - apparmor:unconfined
@@ -95,8 +99,6 @@ services:
     image: tarampampam/webhook-tester
     command: serve --port 8082 --create-session 00000000-0000-0000-0000-000000000000
     ports: ['8082:8082/tcp'] # Open <http://127.0.0.1:8080/#/00000000-0000-0000-0000-000000000000>
-  clamd:
-    image: clamav/clamav:1.3
 
 volumes:
   minioVolume:
