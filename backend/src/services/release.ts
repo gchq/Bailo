@@ -8,6 +8,7 @@ import { ModelDoc, ModelInterface } from '../models/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
+import { isBailoError } from '../types/error.js'
 import { findDuplicates } from '../utils/array.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
@@ -52,7 +53,15 @@ async function validateRelease(user: UserInterface, model: ModelDoc, release: Re
     const fileNames: Array<string> = []
 
     for (const fileId of release.fileIds) {
-      const file = await getFileById(user, fileId)
+      let file
+      try {
+        file = await getFileById(user, fileId)
+      } catch (e) {
+        if (isBailoError(e) && e.code === 404) {
+          throw BadReq('Unable to create release as the file cannot be found.', { fileId })
+        }
+        throw e
+      }
       fileNames.push(file.name)
 
       if (file.modelId !== model.id) {

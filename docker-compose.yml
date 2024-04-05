@@ -95,6 +95,8 @@ services:
     image: tarampampam/webhook-tester
     command: serve --port 8082 --create-session 00000000-0000-0000-0000-000000000000
     ports: ['8082:8082/tcp'] # Open <http://127.0.0.1:8080/#/00000000-0000-0000-0000-000000000000>
+  clamd:
+    image: clamav/clamav:1.3
 
 volumes:
   minioVolume:
