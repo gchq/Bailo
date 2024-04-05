@@ -33,7 +33,7 @@
       "description": "This is a second page",
       "type": "object",
       "properties": {
-        "questionOne": {
+        "sectionOne": {
           "title": "Section one",
           "description": "This is a section",
           "type": "object",
@@ -42,10 +42,17 @@
             "q2": { "title": "Question two", "description": "This is a question", "type": "string" }
           }
         },
-        "questionTwo": {
-          "title": "Question three",
-          "description": "This is another question",
-          "type": "number"
+        "sectionTwo": {
+          "title": "Section two",
+          "description": "This is another section",
+          "type": "object",
+          "properties": {
+            "questionThree": {
+              "title": "Question three",
+              "description": "This is another question",
+              "type": "number"
+            }
+          }
         }
       },
       "required": [],
