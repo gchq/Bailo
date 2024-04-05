@@ -1,10 +1,10 @@
-import OrganisationIcon from '@mui/icons-material/Business'
-import ContentCopy from '@mui/icons-material/ContentCopy'
+import { Label } from '@mui/icons-material'
 import EmailIcon from '@mui/icons-material/Email'
 import UserIcon from '@mui/icons-material/Person'
-import { Box, Divider, IconButton, Popover, Stack, Typography } from '@mui/material'
+import { Box, Divider, Popover, Stack, Typography } from '@mui/material'
 import { useGetUserInformation } from 'actions/user'
 import { MouseEvent, useMemo, useRef, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 
@@ -27,12 +27,6 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     dn.includes(':') ? dn.split(':')[1] : dn,
   )
-
-  function handleCopyButtonClick() {
-    if (userInformation && userInformation.email) {
-      navigator.clipboard.writeText(userInformation.email)
-    }
-  }
 
   const popoverEnter = () => {
     if (ref.current) {
@@ -93,15 +87,6 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
               </Typography>
             </Stack>
             <Divider />
-            <Stack direction='row' spacing={1}>
-              <OrganisationIcon color='primary' />
-              <Typography>
-                <Box component='span' fontWeight='bold'>
-                  Organisation
-                </Box>
-                : {userInformation.organisation}
-              </Typography>
-            </Stack>
             <Stack direction='row' spacing={1} alignItems='center'>
               <EmailIcon color='primary' />
               <Typography>
@@ -110,10 +95,27 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
                 </Box>
                 : {userInformation.email}
               </Typography>
-              <IconButton onClick={() => handleCopyButtonClick()} aria-label='Copy text to clipboard' size='small'>
-                <ContentCopy color='primary' />
-              </IconButton>
+              <CopyToClipboardButton
+                textToCopy={userInformation.email ? userInformation.email : ''}
+                notificationText='Copied email address to clipboard'
+                ariaLabel='copy email address to clipboard'
+              />
             </Stack>
+            {Object.keys(userInformation).map((key) => {
+              if (key !== 'name' && key !== 'email') {
+                return (
+                  <Stack direction='row' spacing={1} key={key}>
+                    <Label color='primary' />
+                    <Typography>
+                      <Box component='span' fontWeight='bold'>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </Box>
+                      : {userInformation[key]}
+                    </Typography>
+                  </Stack>
+                )
+              }
+            })}
           </Stack>
         </Popover>
       )}

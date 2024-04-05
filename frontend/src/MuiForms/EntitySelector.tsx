@@ -18,10 +18,11 @@ interface EntitySelectorProps {
   value: string[]
   onChange: (newValue: string[]) => void
   formContext?: FormContextType
+  rawErrors?: string[]
 }
 
 export default function EntitySelector(props: EntitySelectorProps) {
-  const { onChange, value: currentValue, required, label, formContext } = props
+  const { onChange, value: currentValue, required, label, formContext, rawErrors } = props
 
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
@@ -118,6 +119,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
             <TextField
               {...params}
               placeholder='Username or group name'
+              error={rawErrors && rawErrors.length > 0}
               label={label + (required ? ' *' : '')}
               onKeyDown={(event: KeyboardEvent) => {
                 if (event.key === 'Backspace') {
