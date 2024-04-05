@@ -1,5 +1,5 @@
 import { Stack, Typography } from '@mui/material'
-import { alpha, styled } from '@mui/material/styles'
+import { alpha, styled, useTheme } from '@mui/material/styles'
 import { CSSProperties, ReactElement } from 'react'
 
 interface ExpandableButtonProps {
@@ -18,10 +18,12 @@ export default function ExpandableButton({
   onClick,
   ariaLabel,
   height = 'unset',
-  initialMaxWidth = '50px',
+  initialMaxWidth = '55px',
   onHoverMaxWidth = '350px',
 }: ExpandableButtonProps) {
-  const StyledButton = styled('button')(({ theme }) => ({
+  const theme = useTheme()
+
+  const StyledButton = styled('button')({
     maxWidth: initialMaxWidth,
     webkitTransition: 'max-width 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
     transition: 'max-width 0.5s',
@@ -33,19 +35,19 @@ export default function ExpandableButton({
     cursor: 'pointer',
     height: height,
     backgroundColor: alpha(theme.palette.common.white, 0.15),
-    '&:hover': {
+    '&:hover, &:focus': {
       backgroundColor: alpha(theme.palette.common.white, 0.25),
     },
-    '&&:hover': {
+    '&&:hover, &:focus': {
       maxWidth: onHoverMaxWidth,
     },
-  }))
+  })
 
   return (
     <StyledButton data-test='expandableButton' onClick={() => onClick()} aria-label={ariaLabel}>
       <Stack direction='row' alignItems='center' spacing={2}>
-        <div style={{ paddingLeft: 10, paddingTop: 2 }}>{icon}</div>
-        <Typography sx={{ whiteSpace: 'nowrap', pr: 1 }}>{label}</Typography>
+        <div style={{ paddingLeft: theme.spacing(1.5), paddingTop: theme.spacing(0.5) }}>{icon}</div>
+        <Typography sx={{ whiteSpace: 'nowrap', pr: theme.spacing(0.5) }}>{label}</Typography>
       </Stack>
     </StyledButton>
   )
