@@ -266,23 +266,6 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v3
 
-      - name: Free up disk space
-        run: |
-          # https://github.com/actions/runner-images/issues/2840#issuecomment-790492173
-          echo "Check free disk space before cleanup."
-          df -h
-          echo "Removing non-essential tools and libraries."
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/share/boost
-          # Delete libraries for Android (12G), PowerShell (1.3G), Swift (1.7G)
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /usr/local/share/powershell
-          sudo rm -rf /usr/share/swift
-          echo "Check free disk space after cleanup."
-          df -h
-
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
@@ -348,7 +331,7 @@ jobs:
           }
           EOT
 
-      - run: docker-compose -f docker-compose-prod.yml up -d
+      - run: docker compose -f docker-compose-prod.yml up -d
 
       # Install dependencies
       - run: npm ci
@@ -381,9 +364,9 @@ jobs:
       #     name: cypress-videos
       #     path: cypress/videos
 
-      - name: Dump docker-compose logs
+      - name: Dump docker compose logs
         if: always()
-        run: docker-compose logs > logs/stack.log
+        run: docker compose logs > logs/stack.log
 
       - name: Docker Compose Logs
         if: always()
@@ -465,7 +448,7 @@ jobs:
           }
           EOT
 
-      - run: docker-compose -f docker-compose-prod.yml up -d
+      - run: docker compose -f docker-compose-prod.yml up -d
 
       # Install dependencies
       - run: npm ci
@@ -491,18 +474,18 @@ jobs:
         run: |
           python -m pip install --upgrade pip
 
-          cd lib/python-beta
+          cd lib/python
           python -m pip install -e .[test]
 
       # Run tests
       - name: Test with pytest
         run: |
-          cd lib/python-beta
+          cd lib/python
           python -m pytest -m integration
 
-      - name: Dump docker-compose logs
+      - name: Dump docker compose logs
         if: always()
-        run: docker-compose logs > logs/stack.log
+        run: docker compose logs > logs/stack.log
 
       - name: Docker Compose Logs
         if: always()

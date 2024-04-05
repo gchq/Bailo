@@ -24,7 +24,7 @@ jobs:
         uses: tj-actions/changed-files@v40
         with:
           files: |
-            lib/python-beta/src/bailo/__init__.py
+            lib/python/src/bailo/__init__.py
 
       # Setup Python
       - name: Set up Python
@@ -39,7 +39,7 @@ jobs:
       # Build Bailo distribution
       - name: Build a binary wheel and a source tarball
         run: |
-          cd lib/python-beta
+          cd lib/python
           python3 -m build
 
       # Upload Bailo artifact
@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: python-package-distributions
-          path: lib/python-beta/dist/
+          path: lib/python/dist/
 
   publish-to-testpypi:
     name: Publish Bailo distribution to TestPyPI
@@ -69,12 +69,12 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: python-package-distributions
-          path: lib/python-beta/dist/
+          path: lib/python/dist/
 
       # Publish artifact to TestPyPI
       - name: Publish distribution to TestPyPI
         if: needs.build.outputs.files-changed-output == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: lib/python-beta/dist/
+          packages-dir: lib/python/dist/
           repository-url: https://test.pypi.org/legacy/

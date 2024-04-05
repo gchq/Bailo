@@ -8,9 +8,10 @@ interface TagSelectorProps {
   label: string
   formContext?: FormContextType
   required?: boolean
+  rawErrors?: string[]
 }
 
-export default function TagSelector({ onChange, value, label, formContext, required }: TagSelectorProps) {
+export default function TagSelector({ onChange, value, label, formContext, required, rawErrors }: TagSelectorProps) {
   const handleChange = (_event: React.SyntheticEvent<Element, Event>, newValues: string[]) => {
     onChange([...newValues])
   }
@@ -41,6 +42,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
               <TextField
                 {...params}
                 size='small'
+                error={rawErrors && rawErrors.length > 0}
                 sx={{
                   input: {
                     color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
