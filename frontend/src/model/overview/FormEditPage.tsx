@@ -1,5 +1,6 @@
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import useNotification from 'src/hooks/useNotification'
@@ -117,7 +118,14 @@ export default function FormEditPage({ model }: FormEditPageProps) {
         >
           <div>
             <Typography fontWeight='bold'>Schema</Typography>
-            <Typography>{schema?.name}</Typography>
+            <Stack direction='row' alignItems='center'>
+              <Typography>{schema?.name}</Typography>
+              <CopyToClipboardButton
+                textToCopy={schema ? schema.name : ''}
+                notificationText='Copied schema name to clipboard'
+                ariaLabel='copy schema name to clipboard'
+              />
+            </Stack>
           </div>
           {!isEdit && (
             <Stack

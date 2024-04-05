@@ -1,8 +1,8 @@
-import { ContentCopy, Visibility, VisibilityOff } from '@mui/icons-material'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
-import useNotification from 'src/hooks/useNotification'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import { TokenInterface } from 'types/types'
 
 type TokenCommandProps = {
@@ -20,7 +20,6 @@ export type TokenValueKindKeys = (typeof TokenValueKind)[keyof typeof TokenValue
 
 export default function TokenCommand({ token, command, disableVisibilityToggle = false }: TokenCommandProps) {
   const theme = useTheme()
-  const sendNotification = useNotification()
   const [isObfuscated, setIsObfuscated] = useState(true)
   const [text, setText] = useState(command)
 
@@ -29,15 +28,6 @@ export default function TokenCommand({ token, command, disableVisibilityToggle =
     updatedText = updatedText.replaceAll(TokenValueKind.SECRET_KEY, token.secretKey)
 
     return updatedText
-  }
-
-  const handleCopyCommand = () => {
-    navigator.clipboard.writeText(getFullCommand())
-    sendNotification({
-      variant: 'success',
-      msg: 'Copied command to clipboard',
-      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-    })
   }
 
   const handleToggleKeyVisibility = () => {
@@ -63,11 +53,11 @@ export default function TokenCommand({ token, command, disableVisibilityToggle =
           {text}
         </Typography>
       </Box>
-      <Tooltip title='Copy to clipboard'>
-        <IconButton color='primary' onClick={handleCopyCommand} aria-label='copy command key to clipboard'>
-          <ContentCopy />
-        </IconButton>
-      </Tooltip>
+      <CopyToClipboardButton
+        textToCopy={getFullCommand()}
+        notificationText='Copied command to clipboard'
+        ariaLabel='copy command to clipboard'
+      />
       {!disableVisibilityToggle && (
         <Tooltip title={`${isObfuscated ? 'Show' : 'Hide'} keys`}>
           <IconButton

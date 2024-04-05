@@ -1,9 +1,8 @@
-import { ContentCopy, Visibility, VisibilityOff } from '@mui/icons-material'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
-import useNotification from 'src/hooks/useNotification'
-import MessageAlert from 'src/MessageAlert'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import { TokenInterface } from 'types/types'
 import { HIDDEN_TOKEN_ACCESS_KEY, HIDDEN_TOKEN_SECRET_KEY } from 'utils/constants'
 
@@ -13,38 +12,8 @@ type PersonalAccessTokenProps = {
 
 export default function PersonalAccessToken({ token }: PersonalAccessTokenProps) {
   const theme = useTheme()
-  const [errorMessage, setErrorMessage] = useState('')
   const [showAccessKey, setShowAccessKey] = useState(false)
   const [showSecretKey, setShowSecretKey] = useState(false)
-  const sendNotification = useNotification()
-
-  const handleCopyAccessKey = async () => {
-    if (token) {
-      setErrorMessage('')
-      await navigator.clipboard.writeText(token.accessKey)
-      sendNotification({
-        variant: 'success',
-        msg: 'Access key copied to clipboard',
-        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-      })
-    } else {
-      setErrorMessage('Failed to copy Access Key to clipboard')
-    }
-  }
-
-  const handleCopySecretKey = async () => {
-    if (token.secretKey) {
-      setErrorMessage('')
-      await navigator.clipboard.writeText(token.secretKey)
-      sendNotification({
-        variant: 'success',
-        msg: 'Secret key copied to clipboard',
-        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-      })
-    } else {
-      setErrorMessage('Failed to copy Secret Key to clipboard')
-    }
-  }
 
   const handleToggleAccessKeyVisibility = () => {
     setShowAccessKey(!showAccessKey)
@@ -70,16 +39,16 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
             }}
           >
             <Typography sx={{ mx: 'auto' }} data-test='accessKeyText'>
-              {showAccessKey ? token?.accessKey || '' : HIDDEN_TOKEN_ACCESS_KEY}
+              {showAccessKey ? token.accessKey || '' : HIDDEN_TOKEN_ACCESS_KEY}
             </Typography>
           </Box>
         </Grid>
         <Grid item xs={2}>
-          <Tooltip title='Copy to clipboard' placement='top'>
-            <IconButton color='primary' onClick={handleCopyAccessKey} aria-label='copy access key to clipboard'>
-              <ContentCopy />
-            </IconButton>
-          </Tooltip>
+          <CopyToClipboardButton
+            textToCopy={token.accessKey}
+            notificationText='Copied access key to clipboard'
+            ariaLabel='copy access key to clipboard'
+          />
           <Tooltip title={`${showAccessKey ? 'Hide' : 'Show'} access key`} placement='top'>
             <IconButton
               color='primary'
@@ -104,16 +73,16 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
             }}
           >
             <Typography sx={{ mx: 'auto' }} data-test='secretKeyText'>
-              {showSecretKey ? token?.secretKey || '' : HIDDEN_TOKEN_SECRET_KEY}
+              {showSecretKey ? token.secretKey : HIDDEN_TOKEN_SECRET_KEY}
             </Typography>
           </Box>
         </Grid>
         <Grid item xs={2}>
-          <Tooltip title='Copy to clipboard'>
-            <IconButton color='primary' onClick={handleCopySecretKey} aria-label='copy secret key to clipboard'>
-              <ContentCopy />
-            </IconButton>
-          </Tooltip>
+          <CopyToClipboardButton
+            textToCopy={token.secretKey}
+            notificationText='Copied secret key to clipboard'
+            ariaLabel='copy secret key to clipboard'
+          />
           <Tooltip title={`${showSecretKey ? 'Hide' : 'Show'} secret key`}>
             <IconButton
               color='primary'
@@ -126,7 +95,6 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
           </Tooltip>
         </Grid>
       </Grid>
-      <MessageAlert message={errorMessage} severity='error' />
     </>
   )
 }

@@ -73,7 +73,6 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
           <Typography fontWeight='bold'>Step 2: Write to disk:</Typography>
           <Typography>Second, place the file in the Docker configuration Directory.</Typography>
           <MessageAlert message='Note: This will overwrite existing credentials.' severity='warning' />
-          {/* TODO me - check in with Alex. Should this be a json or yaml file? */}
           <TokenCommand disableVisibilityToggle token={token} command={`mv ${configFileName} ~/.docker/config.yml`} />
         </Stack>
       </Stack>
