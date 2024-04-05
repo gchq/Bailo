@@ -25,7 +25,7 @@ export const putInferenceSchema = z.object({
     }),
   }),
 })
-if (config.ui.inference.enabled) {
+if (config.inference?.enabled) {
   registerPath({
     method: 'put',
     path: '/api/v2/model/{modelId}/inference/{image}/{tag}',

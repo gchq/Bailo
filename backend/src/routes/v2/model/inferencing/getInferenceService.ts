@@ -17,7 +17,8 @@ export const getInferenceSchema = z.object({
     tag: z.string(),
   }),
 })
-if (config.ui.inference.enabled) {
+
+if (config.inference?.enabled) {
   registerPath({
     method: 'get',
     path: '/api/v2/model/{modelId}/inference/{image}/{tag}',

@@ -1,6 +1,6 @@
 import { Slider, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import ProcessorTypeList from 'src/model/inferencing/ProcessorTypeList'
@@ -49,11 +49,7 @@ export default function InferenceForm({
 }: InferenceFormProps) {
   const theme = useTheme()
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
-  const [cpuType, setCpuType] = useState(formData.processorType === 'cpu')
-
-  useEffect(() => {
-    setCpuType(formData.processorType === 'cpu')
-  }, [formData.processorType])
+  const isCpuProcessor = useMemo(() => formData.processorType === 'cpu', [formData.processorType])
 
   const handleMemoryChange = (_event: Event, newValue: number | number[]) => {
     onMemoryChange(newValue as number)
@@ -86,13 +82,11 @@ export default function InferenceForm({
         )}
       </Stack>
       {!(isReadOnly || editable) && (
-        <Typography fontWeight='bold' color='primary' fontSize='medium'>
-          Deployment Settings
-          <HelpPopover>These help you configure how your image is deployed within Bailo</HelpPopover>
-        </Typography>
-      )}
-      {!(isReadOnly || editable) && (
         <>
+          <Typography fontWeight='bold' color='primary' fontSize='medium'>
+            Deployment Settings
+            <HelpPopover>These help you configure how your image is deployed within Bailo</HelpPopover>
+          </Typography>
           <Typography fontWeight='bold'>
             Image
             {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
@@ -139,12 +133,12 @@ export default function InferenceForm({
         {!isReadOnly && (
           <Tooltip
             title='Specify a cpu processor type to allocate memory to this service'
-            disableHoverListener={cpuType}
-            disableFocusListener={cpuType}
+            disableHoverListener={isCpuProcessor}
+            disableFocusListener={isCpuProcessor}
           >
             <span>
               <Slider
-                disabled={!cpuType}
+                disabled={!isCpuProcessor}
                 size='small'
                 min={1}
                 max={8}

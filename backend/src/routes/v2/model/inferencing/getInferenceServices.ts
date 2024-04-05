@@ -15,7 +15,7 @@ export const getInferencesSchema = z.object({
     modelId: z.string(),
   }),
 })
-if (config.ui.inference.enabled) {
+if (config.inference?.enabled) {
   registerPath({
     method: 'get',
     path: '/api/v2/model/{modelId}/inferences',

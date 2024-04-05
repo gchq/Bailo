@@ -3,7 +3,7 @@ import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
-import { ReactElement, SyntheticEvent, useContext, useEffect, useState } from 'react'
+import { ReactElement, SyntheticEvent, useContext, useEffect, useMemo, useState } from 'react'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 export interface PageTab {
@@ -40,6 +40,8 @@ export default function PageWithTabs({
     if (!tabs.length) return
     setCurrentTab(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
   }, [tab, tabs])
+
+  const visibleTabs = useMemo(() => tabs.filter((tab) => !tab.hidden), [tabs])
 
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
@@ -88,34 +90,32 @@ export default function PageWithTabs({
         scrollButtons='auto'
         variant='scrollable'
       >
-        {tabs
-          .filter((tab) => !tab.hidden)
-          .map((tab: PageTab) => {
-            if (tab.disabled) {
-              return (
-                <Tooltip key={tab.title} title={tab.disabledText}>
-                  <span>
-                    <Tab
-                      disabled={tab.disabled}
-                      value={tab.path}
-                      data-test={`${tab.path}Tab`}
-                      label={<span>{tab.title}</span>}
-                    />
-                  </span>
-                </Tooltip>
-              )
-            } else {
-              return (
-                <Tab
-                  key={tab.title}
-                  disabled={tab.disabled}
-                  value={tab.path}
-                  data-test={`${tab.path}Tab`}
-                  label={<span>{tab.title}</span>}
-                />
-              )
-            }
-          })}
+        {visibleTabs.map((tab: PageTab) => {
+          if (tab.disabled) {
+            return (
+              <Tooltip key={tab.title} title={tab.disabledText}>
+                <span>
+                  <Tab
+                    disabled={tab.disabled}
+                    value={tab.path}
+                    data-test={`${tab.path}Tab`}
+                    label={<span>{tab.title}</span>}
+                  />
+                </span>
+              </Tooltip>
+            )
+          } else {
+            return (
+              <Tab
+                key={tab.title}
+                disabled={tab.disabled}
+                value={tab.path}
+                data-test={`${tab.path}Tab`}
+                label={<span>{tab.title}</span>}
+              />
+            )
+          }
+        })}
       </Tabs>
       {tabs.map((tab: PageTab) => {
         return (
