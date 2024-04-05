@@ -59,13 +59,13 @@ export async function uploadFile(
       })
     })
     avStream.on('error', async (error) => {
-      log.info('Scan errored.', { error, modelId, fileId: file._id, name })
+      log.error('Scan errored.', { error, modelId, fileId: file._id, name })
       await file.update({
         avScan: { state: ScanState.Error },
       })
     })
     avStream.on('timeout', async (error) => {
-      log.info('Scan timed out.', { error, modelId, fileId: file._id, name })
+      log.error('Scan timed out.', { error, modelId, fileId: file._id, name })
       await file.update({
         avScan: { state: ScanState.Error },
       })
