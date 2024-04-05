@@ -62,9 +62,9 @@ export default function AccessRequestDisplay({ accessRequest }: AccessRequestDis
                 </Typography>
               </Link>
               <CopyToClipboardButton
-                textToCopy={accessRequest.metadata.overview.name}
-                notificationText='Copied access request name to clipboard'
-                ariaLabel='copy access request name to clipboard'
+                textToCopy={accessRequest.id}
+                notificationText='Copied access request ID to clipboard'
+                ariaLabel='copy access request ID to clipboard'
               />
             </Stack>
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
