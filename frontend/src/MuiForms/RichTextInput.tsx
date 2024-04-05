@@ -48,6 +48,7 @@ export default function RichTextInput({
     )
   }
 
+  // Hacky way to allow control of focus in MDEditor
   const WrappedRichTextEditor = forwardRef(() => (
     <RichTextEditor
       value={value}
