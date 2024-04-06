@@ -4,6 +4,7 @@ import os
 import shutil
 from io import BytesIO
 from typing import Any
+from tqdm import tqdm
 
 from bailo.core.client import Client
 from semantic_version import Version
@@ -148,8 +149,13 @@ class Release:
         if write:
             if path is None:
                 path = filename
-            with open(path, "wb") as f:
-                f.write(res.content)
+            total_size = int(res.headers.get("content-length", 0))
+            block_size = 1024
+            with tqdm(total=total_size, unit="B", unit_scale=True, unit_divisor=block_size, postfix=f"downloading {filename} as {path}", colour="green") as t:
+                with open(path, "wb") as f:
+                    for data in res.iter_content(block_size):
+                        t.update(len(data))
+                        f.write(data)
 
         return res
 

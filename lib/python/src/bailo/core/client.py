@@ -3,6 +3,9 @@ from __future__ import annotations
 import shutil
 from io import BytesIO
 from typing import Any
+import os
+from tqdm import tqdm
+from tqdm.utils import CallbackIOWrapper
 
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import ModelVisibility, SchemaKind
@@ -342,13 +345,21 @@ class Client:
         :param name: File name
         :return: JSON response object
         """
-        return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/files/upload/simple",
-            params={"name": name},
-            data=buffer,
-            stream=True,
-            timeout=10_000,
-        )
+        old_file_position = buffer.tell()
+        buffer.seek(0, os.SEEK_END)
+        size = buffer.tell()
+        buffer.seek(old_file_position, os.SEEK_SET)
+
+        with tqdm(total=size, unit="B", unit_scale=True, unit_divisor=1024, postfix=f"uploading {name}", colour="blue") as t:
+            wrapped_buffer = CallbackIOWrapper(t.update, buffer, "read")
+            res = self.agent.post(
+                f"{self.url}/v2/model/{model_id}/files/upload/simple",
+                params={"name": name},
+                data=wrapped_buffer,
+                stream=True,
+                timeout=10_000,
+            )
+        return res
 
     # def start_multi_upload(): TBC
 
