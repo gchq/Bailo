@@ -85,6 +85,7 @@ function Tag({ tag, handleChange, size, activeChip }: TagProps) {
       key={tag}
       sx={{ mr: 1, mb: 1 }}
       label={tag}
+      data-test={`chipOption-${tag}`}
       onClick={() => handleChange(tag)}
     />
   )
