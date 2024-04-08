@@ -8,10 +8,13 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 
-export interface UserInformation {
+export type UserInformation = {
   name?: string
-  organisation?: string
   email?: string
+} & AdditionalProperties
+
+interface AdditionalProperties {
+  [x: string]: string
 }
 
 export type UserDisplayProps = {
@@ -51,6 +54,7 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
       <Box
         component='span'
         ref={ref}
+        data-test='userDisplayName'
         aria-owns={open ? 'user-popover' : undefined}
         aria-haspopup='true'
         sx={{ fontWeight: 'bold' }}
@@ -82,14 +86,14 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
           <Stack spacing={1} sx={{ p: 2 }}>
             <Stack direction='row' alignItems='center' spacing={1}>
               <UserIcon color='primary' />
-              <Typography color='primary' fontWeight='bold'>
+              <Typography color='primary' fontWeight='bold' data-test='userDisplayNameProperty'>
                 {userInformation.name}
               </Typography>
             </Stack>
             <Divider />
             <Stack direction='row' spacing={1} alignItems='center'>
               <EmailIcon color='primary' />
-              <Typography>
+              <Typography data-test='userDisplayEmailProperty'>
                 <Box component='span' fontWeight='bold'>
                   Email
                 </Box>
@@ -106,7 +110,7 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
                 return (
                   <Stack direction='row' spacing={1} key={key}>
                     <Label color='primary' />
-                    <Typography>
+                    <Typography data-test={`userDisplayDynamicProperty-${key}`}>
                       <Box component='span' fontWeight='bold'>
                         {key.charAt(0).toUpperCase() + key.slice(1)}
                       </Box>

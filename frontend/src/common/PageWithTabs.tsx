@@ -24,6 +24,7 @@ export default function PageWithTabs({
   actionButtonOnClick,
   requiredUrlParams = {},
   showCopyButton = false,
+  textToCopy,
 }: {
   title: string
   tabs: PageTab[]
@@ -32,6 +33,7 @@ export default function PageWithTabs({
   actionButtonOnClick?: () => void
   requiredUrlParams?: ParsedUrlQuery
   showCopyButton?: boolean
+  textToCopy?: string
 }) {
   const router = useRouter()
   const { tab } = router.query
@@ -79,7 +81,7 @@ export default function PageWithTabs({
           </Typography>
           {showCopyButton && (
             <CopyToClipboardButton
-              textToCopy={title}
+              textToCopy={textToCopy ? textToCopy : title}
               notificationText='Copied to clipboard'
               ariaLabel='copy to clipboard'
             />

@@ -59,9 +59,9 @@ export default function AccessRequest() {
                       {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
                     </Typography>
                     <CopyToClipboardButton
-                      textToCopy={accessRequest.metadata.overview.name}
-                      notificationText='Copied access request name to clipboard'
-                      ariaLabel='copy semver to clipboard'
+                      textToCopy={accessRequest.id}
+                      notificationText='Copied access request ID to clipboard'
+                      ariaLabel='copy access request ID to clipboard'
                     />
                   </Stack>
                 </Stack>

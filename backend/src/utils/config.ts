@@ -153,6 +153,14 @@ export interface Config {
     authenticationToken: string
     debug: boolean
   }
+
+  avScanning: {
+    enabled: boolean
+    clamdscan: {
+      host: string
+      port: number
+    }
+  }
 }
 
 const config: Config = _config.util.toObject()
