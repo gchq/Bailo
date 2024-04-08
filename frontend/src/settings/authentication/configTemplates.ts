@@ -1,17 +1,25 @@
-import Handlebars from 'handlebars'
+import { toKebabCase } from 'utils/stringUtils'
 
-export function viewRocketConfigTemplate(registry_url: string, access_key: string, secret_key: string) {
-  return `rktKind: auth
-rktVersion: v1
-domains:
-  - '${registry_url}'
-type: basic
-credentials:
-  user: '${access_key}'
-  password: '${secret_key}'`
+export function getKubernetesSecretConfig(
+  description: string,
+  registryUrl: string,
+  accessKey: string,
+  secretKey: string,
+) {
+  return `apiVersion: v1
+kind: Secret
+metadata:
+  name:  ${toKebabCase(description)}-secret
+data:
+  .dockerconfigjson: ${btoa(
+    `{"auths":{"${registryUrl}":{"username":"${accessKey}","password":"${secretKey}","auth":${btoa(
+      `${accessKey}:${secretKey}`,
+    )}}}}`,
+  )}
+type: kubernetes.io/dockerconfigjson`
 }
 
-export function kubeImagePullSecretsConfigExample(description: string) {
+export function getKubernetesImagePullSecretsExampleConfig(registryUrl: string, secretFileName: string) {
   return `apiVersion: v1
 kind: Pod
 metadata:
@@ -20,79 +28,39 @@ metadata:
 spec:
   containers:
     - name: web
-      image: bailo.xxx.yyy.zzz/some-model-id/some-repo-id
+      image: ${registryUrl}/some-model-id/some-repo-id
 
   imagePullSecrets:
-    - name: ${description}-secret.yml`
+    - name: ${secretFileName}`
 }
 
-export function viewKubernetesSecretsConfigTemplate(
-  description: string,
-  registry_url: string,
-  access_key: string,
-  secret_key: string,
-  auth: string,
-) {
-  return `apiVersion: v1
-kind: Secret
-metadata:
-  name:  ${description}-secret
-data:
-  .dockerconfigjson:
-    auths:
-      '${registry_url}':
-        username: '${access_key}'
-        password: '${secret_key}'
-        auth:  '${auth}'
-type: kubernetes.io/dockerconfigjson`
+export function getRktCredentialsConfig(registryUrl: string, accessKey: string, secretKey: string) {
+  return JSON.stringify(
+    {
+      rktKind: 'auth',
+      rktVersion: 'v1',
+      domains: [`${registryUrl}`],
+      type: 'basic',
+      credentials: {
+        user: `${accessKey}`,
+        password: `${secretKey}`,
+      },
+    },
+    null,
+    2,
+  )
 }
 
-export function viewDockerConfigTemplate(registry_url: string, access_key: string, secret_key: string, auth: string) {
-  return `auths:
-  '${registry_url}':
-    username: '${access_key}'
-    password: '${secret_key}'
-    auth: '${auth}'`
+export function getDockerCredentialsConfig(registryUrl: string, accessKey: string, secretKey: string) {
+  return JSON.stringify(
+    {
+      auths: {
+        [`${registryUrl}`]: {
+          auth: btoa(`${accessKey}:${secretKey}`),
+        },
+      },
+    },
+    null,
+    2,
+  )
 }
-
-export const dockerConfigTemplate = Handlebars.compile(`{
-  "auths": {
-    "{{registryUrl}}": {
-      "username": "{{accessKey}}",
-      "password": "{{secretKey}}",
-      "auth": "{{auth}}"
-    }
-  }
-}`)
-
-export const kubernetesConfigTemplate = Handlebars.compile(`{
-  "apiVersion": "v1",
-  "kind": "Secret",
-  "metadata": {
-    "name": "<key-name>-secret"
-  },
-  "data": {
-    ".dockerconfigjson": {
-      "auths": {
-        "{{registryUrl}}": {
-          "username": "{{accessKey}}",
-          "password": "{{secretKey}}",
-          "auth": "{{auth}}"
-        }
-      }
-    }
-  },
-  "type": "kubernetes.io/dockerconfigjson"
-}
-`)
-
-export const rocketConfigTemplate = Handlebars.compile(`{
-  "rktKind": "auth",
-  "rktVersion": "v1",
-  "domains": ["{{registryUrl}}"],
-  "type": "basic",
-  "credentials": {
-    "user": "{{accessKey}}",
-    "password": "{{secretKey}}"
-  }
-}`)
