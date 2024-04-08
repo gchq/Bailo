@@ -36,7 +36,6 @@ export async function uploadFile(
     throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id })
   }
 
-  // Change this to an upsert operation
   const { fileSize } = await putObjectStream(bucket, path, stream)
   file.size = fileSize
 
@@ -56,7 +55,6 @@ export async function uploadFile(
     s3Stream.pipe(avStream)
     log.info('Scan started.', { modelId, fileId: file._id, name })
 
-    // What happens when scan is completed
     avStream.on('scan-complete', async (result) => {
       log.info('Scan complete.', { result, modelId, fileId: file._id, name })
       await file.update({
