@@ -16,9 +16,23 @@ export interface FileInterface {
 
   complete: boolean
 
+  avScan: {
+    state: ScanStateKeys
+    isInfected?: boolean
+    viruses?: Array<unknown>
+  }
+
   createdAt: Date
   updatedAt: Date
 }
+
+export const ScanState = {
+  NotScanned: 'notScanned',
+  InProgress: 'inProgress',
+  Complete: 'complete',
+  Error: 'error',
+} as const
+export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
 
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
@@ -30,13 +44,19 @@ const FileSchema = new Schema<FileInterface>(
     modelId: { type: String, required: true },
 
     name: { type: String, required: true },
-    size: { type: Number, required: true },
+    size: { type: Number },
     mime: { type: String, required: true },
 
     bucket: { type: String, required: true },
     path: { type: String, required: true },
 
-    complete: { type: Boolean, default: true, required: true },
+    avScan: {
+      state: { type: String, enum: Object.values(ScanState), default: 'notScanned' },
+      isInfected: { type: Boolean },
+      viruses: [{ type: String }],
+    },
+
+    complete: { type: Boolean, default: false },
   },
   {
     timestamps: true,
