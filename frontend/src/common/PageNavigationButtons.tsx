@@ -24,6 +24,7 @@ export default function PageNavigationButtons({
       spacing={2}
       divider={<Divider flexItem orientation='vertical' />}
       justifyContent='center'
+      // This hides from the page but should allow screen-reader usage
       sx={{ width: '1px', position: 'absolute', overflow: 'hidden' }}
     >
       <Button
