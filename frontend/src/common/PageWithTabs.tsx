@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
 import { ReactElement, SyntheticEvent, useContext, useEffect, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 export interface PageTab {
@@ -22,6 +23,8 @@ export default function PageWithTabs({
   displayActionButton = false,
   actionButtonOnClick,
   requiredUrlParams = {},
+  showCopyButton = false,
+  textToCopy,
 }: {
   title: string
   tabs: PageTab[]
@@ -29,6 +32,8 @@ export default function PageWithTabs({
   displayActionButton?: boolean
   actionButtonOnClick?: () => void
   requiredUrlParams?: ParsedUrlQuery
+  showCopyButton?: boolean
+  textToCopy?: string
 }) {
   const router = useRouter()
   const { tab } = router.query
@@ -70,9 +75,18 @@ export default function PageWithTabs({
         spacing={{ sm: 2 }}
         sx={{ p: 2 }}
       >
-        <Typography component='h1' color='primary' variant='h6'>
-          {title}
-        </Typography>
+        <Stack direction='row'>
+          <Typography component='h1' color='primary' variant='h6'>
+            {title}
+          </Typography>
+          {showCopyButton && (
+            <CopyToClipboardButton
+              textToCopy={textToCopy ? textToCopy : title}
+              notificationText='Copied to clipboard'
+              ariaLabel='copy to clipboard'
+            />
+          )}
+        </Stack>
         {displayActionButton && (
           <Button variant='contained' onClick={actionButtonOnClick}>
             {actionButtonTitle}

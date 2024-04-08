@@ -1,4 +1,4 @@
-import { ContentCopy, Visibility, VisibilityOff } from '@mui/icons-material'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import {
   Box,
@@ -14,6 +14,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import MessageAlert from 'src/MessageAlert'
 import { TokenInterface } from 'types/types'
 
@@ -36,14 +37,6 @@ export default function TokenDialog({ token }: TokenDialogProps) {
   const handleClose = () => {
     setIsLoading(true)
     router.push('/settings?tab=authentication&category=personal')
-  }
-
-  const handleCopyAccessKey = () => {
-    if (token) navigator.clipboard.writeText(token.accessKey)
-  }
-
-  const handleCopySecretKey = () => {
-    if (token?.secretKey) navigator.clipboard.writeText(token.secretKey)
   }
 
   const handleToggleAccessKeyVisibility = () => {
@@ -81,11 +74,11 @@ export default function TokenDialog({ token }: TokenDialogProps) {
             </Box>
           </Grid>
           <Grid item xs={2}>
-            <Tooltip title='Copy to clipboard' placement='top'>
-              <IconButton onClick={handleCopyAccessKey} aria-label='copy access key to clipboard'>
-                <ContentCopy />
-              </IconButton>
-            </Tooltip>
+            <CopyToClipboardButton
+              textToCopy={token ? token.accessKey : ''}
+              notificationText='Copied access key to clipboard'
+              ariaLabel='copy access key to clipboard'
+            />
             <Tooltip title={`${showAccessKey ? 'Hide' : 'Show'} access key`} placement='top'>
               <IconButton
                 onClick={handleToggleAccessKeyVisibility}
@@ -114,11 +107,11 @@ export default function TokenDialog({ token }: TokenDialogProps) {
             </Box>
           </Grid>
           <Grid item xs={2}>
-            <Tooltip title='Copy to clipboard'>
-              <IconButton onClick={handleCopySecretKey} aria-label='copy secret key to clipboard'>
-                <ContentCopy />
-              </IconButton>
-            </Tooltip>
+            <CopyToClipboardButton
+              textToCopy={token && token.secretKey ? token.secretKey : ''}
+              notificationText='Copied secret key to clipboard'
+              ariaLabel='copy secret key to clipboard'
+            />
             <Tooltip title={`${showSecretKey ? 'Hide' : 'Show'} secret key`}>
               <IconButton
                 onClick={handleToggleSecretKeyVisibility}
