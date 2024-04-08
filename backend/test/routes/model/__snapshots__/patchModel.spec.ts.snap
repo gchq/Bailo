@@ -29,7 +29,7 @@ exports[`routes > model > patchModel > 400 > bad visibility 1`] = `
       ],
     },
     "message": "Path: body.visibility - Message: Invalid enum value. Expected 'private' | 'public', received 'not_valid'",
-    "name": "Error",
+    "name": "Bailo Error",
   },
 }
 `;

@@ -9,6 +9,7 @@ import {
 import { useRouter } from 'next/router'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import { getErrorMessage } from 'utils/fetcher'
@@ -115,7 +116,14 @@ export default function EditableAccessRequestForm({
           heading={
             <div>
               <Typography fontWeight='bold'>Schema</Typography>
-              <Typography>{schema?.name}</Typography>
+              <Stack direction='row' alignItems='center'>
+                <Typography>{schema?.name}</Typography>
+                <CopyToClipboardButton
+                  textToCopy={schema ? schema.name : ''}
+                  notificationText='Copied schema name to clipboard'
+                  ariaLabel='copy schema name to clipboard'
+                />
+              </Stack>
             </div>
           }
           editButtonText='Edit Access Request'

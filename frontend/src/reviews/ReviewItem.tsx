@@ -13,8 +13,11 @@ export default function ReviewItem({ review }: ReviewItemProps) {
   const router = useRouter()
 
   function handleListItemClick() {
-    const tab = review.kind === 'release' ? 'releases' : 'access'
-    router.push(`/model/${review.model.id}?tab=${tab}`)
+    router.push(
+      `/model/${review.model.id}/${
+        review.kind === 'release' ? `release/${review.semver}` : `access-request/${review.accessRequestId}`
+      }/review`,
+    )
   }
 
   function editedAdornment() {
