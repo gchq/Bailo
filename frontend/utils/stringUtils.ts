@@ -15,5 +15,8 @@ export const isValidSemver = (semverInput: string) => {
 }
 
 export const toKebabCase = (value: string): string => {
-  return value.toLowerCase().replaceAll(' ', '-')
+  return value
+    .replace(/[^\w -]/g, '')
+    .replaceAll(' ', '-')
+    .toLowerCase()
 }

@@ -28,10 +28,9 @@ export default function SplitButton({ options, onPrimaryButtonClick, onMenuItemC
 
   return (
     <>
-      <ButtonGroup variant='contained'>
+      <ButtonGroup size='small' variant='contained'>
         <Button onClick={onPrimaryButtonClick}>{children}</Button>
         <Button
-          size='small'
           aria-controls={open ? 'split-button-menu' : undefined}
           aria-expanded={open ? 'true' : undefined}
           aria-haspopup='menu'
