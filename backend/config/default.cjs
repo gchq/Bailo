@@ -203,4 +203,11 @@ module.exports = {
     authenticationToken: '',
     debug: false,
   },
+
+  modelMirror: {
+    enabled: false,
+    export: {
+      bucket: 'exports',
+    },
+  },
 }

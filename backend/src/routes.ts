@@ -32,6 +32,7 @@ import { putInference } from './routes/v2/model/inferencing/putInferenceService.
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
 import { getModelCardRevisions } from './routes/v2/model/modelcard/getModelCardRevisions.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
+import { postRequestExport } from './routes/v2/model/modelcard/postRequestExport.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
@@ -85,6 +86,7 @@ server.patch('/api/v2/model/:modelId', ...patchModel)
 
 server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
 server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)
+server.post('/api/v2/model/:modelId/model-card-revisions/export', ...postRequestExport)
 server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
 
 // *server.get('/api/v2/template/models', ...getModelTemplates)

@@ -161,6 +161,13 @@ export interface Config {
       port: number
     }
   }
+
+  modelMirror: {
+    enabled: boolean
+    export: {
+      bucket: string
+    }
+  }
 }
 
 const config: Config = _config.util.toObject()
