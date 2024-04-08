@@ -11,6 +11,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
+import { PassThrough } from 'stream'
 
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -28,10 +29,15 @@ export async function getS3Client() {
   })
 }
 
-export async function putObjectStream(bucket: string, key: string, body: ReadableStream) {
+export async function putObjectStream(
+  bucket: string,
+  key: string,
+  body: ReadableStream | PassThrough,
+  metadata?: Record<string, string>,
+) {
   const upload = new Upload({
     client: await getS3Client(),
-    params: { Bucket: bucket, Key: key, Body: body },
+    params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
     queueSize: 4,
     partSize: 1024 * 1024 * 64,
     leavePartsOnError: false,
