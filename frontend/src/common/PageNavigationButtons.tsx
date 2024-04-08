@@ -24,7 +24,7 @@ export default function PageNavigationButtons({
       spacing={2}
       divider={<Divider flexItem orientation='vertical' />}
       justifyContent='center'
-      sx={{ width: '100%' }}
+      sx={{ width: '100%', display: 'none' }}
     >
       <Button
         data-test='previousPageButton'

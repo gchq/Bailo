@@ -199,18 +199,6 @@ export default function JsonSchemaForm({
           </Form>
         </Grid>
       </Grid>
-      <PageNavigationButtons
-        currentIndex={activeStep + 1}
-        maxPages={splitSchema.steps.length}
-        navigateForward={navigateStepForward}
-        navigateBackward={navigateStepBackward}
-        nextPageAriaLabel={
-          splitSchema.steps[activeStep + 1] ? `Go forward to ${splitSchema.steps[activeStep + 1].schema.title}` : ''
-        }
-        previousPageAriaLabel={
-          splitSchema.steps[activeStep - 1] ? `Go back to ${splitSchema.steps[activeStep - 1].schema.title}` : ''
-        }
-      />
     </Stack>
   )
 }
