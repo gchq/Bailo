@@ -112,6 +112,19 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     releaseParams.modelCardVersion = model.card?.version
   }
 
+  // There is a typing error whereby mongoose-delete plugin functions are not
+  // found by the TS compiler.
+  const ReleaseModelWithDelete = Release as any
+  const deletedRelease = await ReleaseModelWithDelete.findOneWithDeleted({
+    modelId: releaseParams.modelId,
+    semver: releaseParams.semver,
+  })
+  if (deletedRelease) {
+    throw BadReq(
+      'A release using this semver has been deleted. Please use a different semver or contact an admin to restore the deleted release.',
+    )
+  }
+
   const release = new Release({
     createdBy: user.dn,
     ...releaseParams,
