@@ -1,5 +1,13 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`services > file > downloadFile > success 1`] = `
+{
+  "Body": {
+    "pipe": [MockFunction spy],
+  },
+}
+`;
+
 exports[`services > file > getFilesByIds > success 1`] = `
 [
   {
@@ -48,4 +56,38 @@ exports[`services > file > removeFile > success 1`] = `
   "save": [MockFunction spy],
   "size": 100,
 }
+`;
+
+exports[`services > file > uploadFile > virus scan 1`] = `
+[
+  [
+    "scan-complete",
+    [Function],
+  ],
+  [
+    "error",
+    [Function],
+  ],
+  [
+    "timeout",
+    [Function],
+  ],
+]
+`;
+
+exports[`services > file > uploadFile > virus scan initialised 1`] = `
+[
+  [
+    "scan-complete",
+    [Function],
+  ],
+  [
+    "error",
+    [Function],
+  ],
+  [
+    "timeout",
+    [Function],
+  ],
+]
 `;
