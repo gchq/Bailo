@@ -2,7 +2,7 @@ import { Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import { useGetModelImages } from 'actions/model'
-import { SyntheticEvent, useMemo } from 'react'
+import { SyntheticEvent, useEffect, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import { sortByNameAscending } from 'utils/arrayUtils'
 
@@ -13,11 +13,22 @@ interface ModelImageListProps {
   model: ModelInterface
   value: FlattenedModelImage[]
   onChange: (value: FlattenedModelImage[]) => void
+  setRegistryError: (value: boolean) => void
   readOnly?: boolean
 }
 
-export default function ModelImageList({ model, value, onChange, readOnly = false }: ModelImageListProps) {
+export default function ModelImageList({
+  model,
+  value,
+  onChange,
+  setRegistryError,
+  readOnly = false,
+}: ModelImageListProps) {
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
+
+  useEffect(() => {
+    setRegistryError(!!isModelImagesError)
+  }, [isModelImagesError, setRegistryError])
 
   const sortedImageList = useMemo(() => {
     const flattenedImageList: FlattenedModelImage[] = []

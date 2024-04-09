@@ -16,13 +16,13 @@ type EntityItemProps = {
   accessList: CollaboratorEntry[]
   onAccessListChange: (value: CollaboratorEntry[]) => void
   model: ModelInterface
+  setRoleError: (value: boolean) => void
 }
 
-export default function EntityItem({ entity, accessList, onAccessListChange, model }: EntityItemProps) {
+export default function EntityItem({ entity, accessList, onAccessListChange, model, setRoleError }: EntityItemProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(model.id)
 
   const modelRoleOptions = useMemo(() => modelRoles.map((role) => role.id), [modelRoles])
-
   function onRoleChange(_event: React.SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(accessList)
     const index = updatedAccessList.findIndex((access) => access.entity === entity.entity)
@@ -42,6 +42,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
   }
 
   if (isModelRolesError) {
+    setRoleError(true)
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
@@ -50,7 +51,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
       <TableCell>
         <Stack direction='row' alignItems='center' spacing={0.5}>
           <EntityIcon entity={entity} />
-          <EntityNameDisplay entity={entity} />
+          <EntityNameDisplay entity={entity} setRoleError={setRoleError} />
         </Stack>
       </TableCell>
       <TableCell>
@@ -100,9 +101,10 @@ function EntityIcon({ entity }: EntityIconProps) {
 
 type EntityNameDisplayProps = {
   entity: CollaboratorEntry
+  setRoleError: (value: boolean) => void
 }
 
-function EntityNameDisplay({ entity }: EntityNameDisplayProps) {
+function EntityNameDisplay({ entity, setRoleError }: EntityNameDisplayProps) {
   const entityName = useMemo(() => entity.entity.replace('user:', '').replace('group:', ''), [entity])
-  return <UserDisplay dn={entityName} />
+  return <UserDisplay dn={entityName} setRoleError={setRoleError} />
 }

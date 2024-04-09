@@ -11,6 +11,7 @@ type EditableFormHeadingProps = {
   onEdit: () => void
   onCancel: () => void
   onSubmit: () => void
+  registryError?: boolean
   errorMessage?: string
 }
 
@@ -22,6 +23,7 @@ export default function EditableFormHeading({
   onEdit,
   onCancel,
   onSubmit,
+  registryError,
   errorMessage = '',
 }: EditableFormHeadingProps) {
   return (
@@ -34,7 +36,13 @@ export default function EditableFormHeading({
       >
         {heading}
         {!isEdit && (
-          <Button variant='outlined' onClick={onEdit} sx={{ mb: { xs: 2 } }} data-test='editFormButton'>
+          <Button
+            variant='outlined'
+            onClick={onEdit}
+            sx={{ mb: { xs: 2 } }}
+            data-test='editFormButton'
+            disabled={registryError}
+          >
             {editButtonText}
           </Button>
         )}
@@ -43,7 +51,13 @@ export default function EditableFormHeading({
             <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton'>
               Cancel
             </Button>
-            <LoadingButton variant='contained' loading={isLoading} onClick={onSubmit} data-test='saveEditFormButton'>
+            <LoadingButton
+              variant='contained'
+              loading={isLoading}
+              onClick={onSubmit}
+              data-test='saveEditFormButton'
+              disabled={registryError}
+            >
               Save
             </LoadingButton>
           </Stack>

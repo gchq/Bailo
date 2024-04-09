@@ -25,6 +25,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [registryError, setRegistryError] = useState(false)
 
   const { model, isModelLoading, isModelError } = useGetModel(release.modelId)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
@@ -128,6 +129,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onCancel={handleCancel}
         onSubmit={handleSubmit}
         errorMessage={errorMessage}
+        registryError={registryError}
       />
       <ReleaseForm
         editable
@@ -147,6 +149,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onFilesChange={(value) => setFiles(value)}
         onFilesMetadataChange={(value) => setFilesMetadata(value)}
         onImageListChange={(value) => setImageList(value)}
+        setRegistryError={(value) => setRegistryError(value)}
       />
     </Box>
   )
