@@ -41,12 +41,14 @@ def test_file_download_all(example_model, downloads_path):
     with open(str(downloads_path.join("test2.txt")), "rb") as f:
         assert f.read() == byte_obj
 
+
 @pytest.mark.integration
 def test_file_download_all_no_files(example_model):
     example_release = example_model.create_release("0.1.0", "test")
 
     with pytest.raises(BailoException):
         example_release.download_all()
+
 
 @pytest.mark.integration
 def test_source_target_doesnt_exist(example_model):
