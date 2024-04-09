@@ -69,6 +69,12 @@ def weights_path(tmpdir_factory):
     return fn
 
 
+@pytest.fixture(scope="session")
+def downloads_path(tmpdir_factory):
+    fn = tmpdir_factory.mktemp("downloads")
+    return fn
+
+
 @pytest.fixture
 def standard_experiment(example_model, weights_path):
     experiment = example_model.create_experiment()
