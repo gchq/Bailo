@@ -341,14 +341,13 @@ class Client:
         :param name: File name
         :return: JSON response object
         """
-        res = self.agent.post(
+        return self.agent.post(
             f"{self.url}/v2/model/{model_id}/files/upload/simple",
             params={"name": name},
             data=buffer,
             stream=True,
             timeout=10_000,
         )
-        return res
 
     # def start_multi_upload(): TBC
 
