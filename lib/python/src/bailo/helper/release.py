@@ -1,13 +1,21 @@
 from __future__ import annotations
 
 import os
+import fnmatch
 import shutil
 from io import BytesIO
-from typing import Any
+from typing import Any, Union
 from tqdm import tqdm
+from tqdm.utils import CallbackIOWrapper
 
 from bailo.core.client import Client
+from bailo.core.exceptions import BailoException
 from semantic_version import Version
+
+try:
+    no_color = int(os.environ["NO_COLOR"])
+except KeyError:
+    no_color = 0
 
 
 class Release:
@@ -136,7 +144,7 @@ class Release:
         )
 
     def download(self, filename: str, write: bool = True, path: str | None = None) -> Any:
-        """Give returns a Reading object given the file id.
+        """Returns a response object given the file name and optionally writes file to disk.
 
         :param filename: The name of the file to retrieve
         :param write: Bool to determine if writing file to disk, defaults to True
@@ -151,13 +159,58 @@ class Release:
                 path = filename
             total_size = int(res.headers.get("content-length", 0))
             block_size = 1024
-            with tqdm(total=total_size, unit="B", unit_scale=True, unit_divisor=block_size, postfix=f"downloading {filename} as {path}", colour="green") as t:
+
+            if no_color == 1:
+                colour = "white"
+            else:
+                colour = "green"
+
+            with tqdm(
+                total=total_size,
+                unit="B",
+                unit_scale=True,
+                unit_divisor=block_size,
+                postfix=f"downloading {filename} as {path}",
+                colour=colour,
+            ) as t:
                 with open(path, "wb") as f:
                     for data in res.iter_content(block_size):
                         t.update(len(data))
                         f.write(data)
 
         return res
+
+    def download_all(self, path: str = os.getcwd(), include: Union[list, str] = None, exclude: Union[list, str] = None):
+        """Writes all files to disk given a local directory.
+
+        :param include: List of regex statements for file names to include, defaults to None
+        :param exclude: List of regex statements for file names to exclude, defaults to None
+        :param path: Local directory to write files to
+        :raises BailoException: If the release has no files assigned to it
+        ..note:: Regex statements must be complete to work as intended (uses re.match not re.search)
+        """
+        files_metadata = self.client.get_release(self.model_id, self.version)["release"]["files"]
+        if files_metadata == []:
+            raise BailoException("Release has no associated files.")
+        file_names = [file_metadata["name"] for file_metadata in files_metadata]
+
+        if isinstance(include, str):
+            include = [include]
+        if isinstance(exclude, str):
+            exclude = [exclude]
+
+        if include is not None:
+            file_names = [file for file in file_names if any([fnmatch.fnmatch(file, pattern) for pattern in include])]
+
+        if exclude is not None:
+            file_names = [
+                file for file in file_names if not any([fnmatch.fnmatch(file, pattern) for pattern in exclude])
+            ]
+
+        os.makedirs(path, exist_ok=True)
+        for file in file_names:
+            file_path = os.path.join(path, file)
+            self.download(filename=file, path=file_path)
 
     def upload(self, path: str, data: BytesIO | None = None) -> str:
         """Upload a file to the release.
@@ -168,7 +221,7 @@ class Release:
         :return: The unique file ID of the file uploaded
         ..note:: If path provided is a directory, it will be uploaded as a zip
         """
-        name = os.path.split(path)[1]
+        name = os.path.split(path)[-1]
 
         if data is None:
             if is_zip := os.path.isdir(path):
@@ -177,12 +230,26 @@ class Release:
                 name = path
 
             with open(path, "rb") as f:
-                res = self.client.simple_upload(self.model_id, name, f).json()
+                data = BytesIO(f.read())
 
             if is_zip:
                 os.remove(path)
+
+        old_file_position = data.tell()
+        data.seek(0, os.SEEK_END)
+        size = data.tell()
+        data.seek(old_file_position, os.SEEK_SET)
+
+        if no_color == 1:
+            colour = "white"
         else:
-            res = self.client.simple_upload(self.model_id, name, data).json()
+            colour = "blue"
+
+        with tqdm(
+            total=size, unit="B", unit_scale=True, unit_divisor=1024, postfix=f"uploading {name}", colour=colour
+        ) as t:
+            wrapped_buffer = CallbackIOWrapper(t.update, data, "read")
+            res = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()
 
         self.files.append(res["file"]["id"])
         self.update()
