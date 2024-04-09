@@ -78,6 +78,7 @@ export default function Model() {
           actionButtonOnClick={requestAccess}
           requiredUrlParams={{ modelId: model.id }}
           showCopyButton
+          textToCopy={model.id}
         />
       )}
     </Wrapper>

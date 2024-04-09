@@ -59,8 +59,8 @@ export default function Release() {
                   </Typography>
                   <CopyToClipboardButton
                     textToCopy={release.semver}
-                    notificationText='Copied release semantic version to clipboard'
-                    ariaLabel='copy semver to clipboard'
+                    notificationText='Copied release semver to clipboard'
+                    ariaLabel='copy release semver to clipboard'
                   />
                 </Stack>
               </Stack>

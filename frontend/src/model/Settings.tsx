@@ -1,17 +1,30 @@
 import { LoadingButton } from '@mui/lab'
-import { Container, Divider, List, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { Container, Divider, List, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import SimpleListItemButton from 'src/common/SimpleListItemButton'
 
 import { ModelInterface } from '../../types/types'
 import AccessRequestSettings from './settings/AccessRequestSettings'
 import ModelAccess from './settings/ModelAccess'
 import ModelDetails from './settings/ModelDetails'
 
-type SettingsCategory = 'details' | 'danger' | 'access' | 'permissions'
+export const SettingsCategory = {
+  DETAILS: 'details',
+  DANGER: 'danger',
+  ACCESS: 'access',
+  PERMISSIONS: 'permissions',
+} as const
 
-function isSettingsCategory(settingsCategory: string | string[] | undefined): settingsCategory is SettingsCategory {
-  return (settingsCategory as SettingsCategory) !== undefined
+export type SettingsCategoryKeys = (typeof SettingsCategory)[keyof typeof SettingsCategory]
+
+function isSettingsCategory(value: string | string[] | undefined): value is SettingsCategoryKeys {
+  return (
+    value === SettingsCategory.DETAILS ||
+    value === SettingsCategory.DANGER ||
+    value === SettingsCategory.ACCESS ||
+    value === SettingsCategory.PERMISSIONS
+  )
 }
 
 type SettingsProps = {
@@ -24,15 +37,15 @@ export default function Settings({ model }: SettingsProps) {
 
   const { section } = router.query
 
-  const [selectedCategory, setSelectedCategory] = useState<SettingsCategory>('details')
+  const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
 
   useEffect(() => {
     if (isSettingsCategory(section)) {
-      setSelectedCategory(section ?? 'details')
+      setSelectedCategory(section ?? SettingsCategory.DETAILS)
     }
   }, [section, setSelectedCategory])
 
-  const handleListItemClick = (category: SettingsCategory) => {
+  const handleListItemClick = (category: SettingsCategoryKeys) => {
     setSelectedCategory(category)
     router.replace({
       query: { ...router.query, section: category },
@@ -44,6 +57,7 @@ export default function Settings({ model }: SettingsProps) {
 
     // TODO - Delete model API request and setLoading(false) on error
   }
+
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
@@ -51,35 +65,36 @@ export default function Settings({ model }: SettingsProps) {
       divider={<Divider orientation='vertical' flexItem />}
     >
       <List sx={{ width: '200px' }}>
-        <ListItem disablePadding>
-          <ListItemButton selected={selectedCategory === 'details'} onClick={() => handleListItemClick('details')}>
-            Details
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton
-            selected={selectedCategory === 'permissions'}
-            onClick={() => handleListItemClick('permissions')}
-          >
-            Model Access
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton selected={selectedCategory === 'access'} onClick={() => handleListItemClick('access')}>
-            Access Requests
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton selected={selectedCategory === 'danger'} onClick={() => handleListItemClick('danger')}>
-            Danger Zone
-          </ListItemButton>
-        </ListItem>
+        <SimpleListItemButton
+          selected={selectedCategory === SettingsCategory.DETAILS}
+          onClick={() => handleListItemClick(SettingsCategory.DETAILS)}
+        >
+          Details
+        </SimpleListItemButton>
+        <SimpleListItemButton
+          selected={selectedCategory === SettingsCategory.PERMISSIONS}
+          onClick={() => handleListItemClick(SettingsCategory.PERMISSIONS)}
+        >
+          Model Access
+        </SimpleListItemButton>
+        <SimpleListItemButton
+          selected={selectedCategory === SettingsCategory.ACCESS}
+          onClick={() => handleListItemClick(SettingsCategory.ACCESS)}
+        >
+          Access Requests
+        </SimpleListItemButton>
+        <SimpleListItemButton
+          selected={selectedCategory === SettingsCategory.DANGER}
+          onClick={() => handleListItemClick(SettingsCategory.DANGER)}
+        >
+          Danger Zone
+        </SimpleListItemButton>
       </List>
       <Container sx={{ my: 2 }}>
-        {selectedCategory === 'details' && <ModelDetails model={model} />}
-        {selectedCategory === 'permissions' && <ModelAccess model={model} />}
-        {selectedCategory === 'access' && <AccessRequestSettings model={model} />}
-        {selectedCategory === 'danger' && (
+        {selectedCategory === SettingsCategory.DETAILS && <ModelDetails model={model} />}
+        {selectedCategory === SettingsCategory.PERMISSIONS && <ModelAccess model={model} />}
+        {selectedCategory === SettingsCategory.ACCESS && <AccessRequestSettings model={model} />}
+        {selectedCategory === SettingsCategory.DANGER && (
           <Stack spacing={2}>
             <Typography variant='h6' component='h2'>
               Danger Zone!

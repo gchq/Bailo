@@ -23,3 +23,10 @@ export const isValidPortNumber = (portNumber: string) => {
     numericPortNumber <= 65535
   )
 }
+
+export const toKebabCase = (value: string): string => {
+  return value
+    .replace(/[^\w -]/g, '')
+    .replaceAll(' ', '-')
+    .toLowerCase()
+}

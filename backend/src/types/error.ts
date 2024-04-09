@@ -21,3 +21,15 @@ export interface BailoError extends Error {
   // A custom logger may be provided, otherwise a default is used
   logger?: Logger
 }
+
+export function isBailoError(err: unknown): err is BailoError {
+  if (typeof err !== 'object' || err === null) {
+    return false
+  }
+
+  if (err instanceof Error && err.name === 'Bailo Error') {
+    return true
+  }
+
+  return false
+}
