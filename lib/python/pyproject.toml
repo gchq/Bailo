@@ -19,7 +19,8 @@ requires-python = ">=3.8.1"
 dynamic = ["version"]
 dependencies = [
     "semantic-version==2.10.0",
-    "requests>=2.22"
+    "requests>=2.22",
+    "tqdm>=4.66.2"
 ]
 
 [project.optional-dependencies]
