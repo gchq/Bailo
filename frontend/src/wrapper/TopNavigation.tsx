@@ -161,7 +161,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
           {/* </Box> */}
           {isSmOrLarger && (
             <Box>
-              <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
+              <Stack direction='row' spacing={1} justifyContent='center' alignItems='center'>
                 <ExpandableButton
                   label='Add Model'
                   icon={<Add />}
