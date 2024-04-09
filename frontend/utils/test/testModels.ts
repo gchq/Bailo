@@ -1,3 +1,4 @@
+import { UserInformation } from 'src/common/UserDisplay'
 import {
   AccessRequestInterface,
   ModelCardInterface,
@@ -182,4 +183,10 @@ export const testAccessRequestSchemaStepNoRender: StepNoRender = {
 export const testManagerRole: Role = {
   id: 'mngr',
   name: 'Manager',
+}
+
+export const testUserInformation: UserInformation = {
+  name: 'Joe Bloggs',
+  email: 'test@example.com',
+  birthday: '2/2/22',
 }

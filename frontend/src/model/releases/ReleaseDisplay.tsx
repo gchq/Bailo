@@ -19,15 +19,19 @@ import CodeLine from '../registry/CodeLine'
 import ReviewBanner from '../reviews/ReviewBanner'
 import ReviewDisplay from '../reviews/ReviewDisplay'
 
+export interface ReleaseDisplayProps {
+  model: ModelInterface
+  release: ReleaseInterface
+  latestRelease?: string
+  hideReviewBanner?: boolean
+}
+
 export default function ReleaseDisplay({
   model,
   release,
   latestRelease,
-}: {
-  model: ModelInterface
-  release: ReleaseInterface
-  latestRelease: string
-}) {
+  hideReviewBanner = false,
+}: ReleaseDisplayProps) {
   const router = useRouter()
 
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
@@ -79,7 +83,7 @@ export default function ReleaseDisplay({
       {(isReviewsLoading || isUiConfigLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
-          {reviews.length > 0 && <ReviewBanner release={release} />}
+          {reviews.length > 0 && !hideReviewBanner && <ReviewBanner release={release} />}
           <Stack spacing={1} p={2}>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
