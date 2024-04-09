@@ -42,6 +42,7 @@ type ReleaseFormProps = {
   filesMetadata: FileWithMetadata[]
   onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
+  setRegistryError: (value: boolean) => void
 } & EditableReleaseFormProps
 
 export default function ReleaseForm({
@@ -54,6 +55,7 @@ export default function ReleaseForm({
   filesMetadata,
   onFilesMetadataChange,
   onImageListChange,
+  setRegistryError,
   editable = false,
   isEdit = false,
 }: ReleaseFormProps) {
@@ -196,7 +198,13 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>Images</Typography>
-        <ModelImageList model={model} value={formData.imageList} readOnly={isReadOnly} onChange={onImageListChange} />
+        <ModelImageList
+          model={model}
+          value={formData.imageList}
+          readOnly={isReadOnly}
+          onChange={onImageListChange}
+          setRegistryError={setRegistryError}
+        />
         {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
       </Stack>
     </Stack>

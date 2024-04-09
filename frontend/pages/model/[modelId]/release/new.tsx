@@ -24,6 +24,7 @@ export default function NewRelease() {
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [registryError, setRegistryError] = useState(false)
   const router = useRouter()
 
   const { modelId }: { modelId?: string } = router.query
@@ -131,13 +132,14 @@ export default function NewRelease() {
                   filesMetadata={filesMetadata}
                   onFilesMetadataChange={(value) => setFilesMetadata(value)}
                   onImageListChange={(value) => setImageList(value)}
+                  setRegistryError={(value) => setRegistryError(value)}
                 />
                 <Stack alignItems='flex-end'>
                   <LoadingButton
                     variant='contained'
                     loading={loading}
                     type='submit'
-                    disabled={!semver || !releaseNotes || !isValidSemver(semver)}
+                    disabled={!(semver && releaseNotes && isValidSemver(semver) && !registryError)}
                     sx={{ width: 'fit-content' }}
                     data-test='createReleaseButton'
                   >

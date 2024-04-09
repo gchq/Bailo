@@ -31,6 +31,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const [userListQuery, setUserListQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [roleError, onRoleError] = useState(false)
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
   const { isModelError, mutateModel } = useGetModel(model.id)
@@ -45,6 +46,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
           accessList={accessList}
           onAccessListChange={setAccessList}
           model={model}
+          setRoleError={onRoleError}
         />
       )),
     [accessList, model],
@@ -141,7 +143,13 @@ export default function ModelAccess({ model }: ModelAccessProps) {
         </TableHead>
         <TableBody>{accessListEntities}</TableBody>
       </Table>
-      <LoadingButton variant='contained' aria-label='Save access list' onClick={updateAccessList} loading={loading}>
+      <LoadingButton
+        variant='contained'
+        aria-label='Save access list'
+        onClick={updateAccessList}
+        loading={loading}
+        disabled={roleError}
+      >
         Save
       </LoadingButton>
       <MessageAlert message={errorMessage} severity='error' />
