@@ -5,7 +5,6 @@ Bailo Python Client
 Bailo is a ecosystem for managing the lifecycle of managing machine learning models. This package provides support for interacting with models within Bailo.
 """
 from __future__ import annotations
-import os
 
 __version__ = "2.1.1"
 
@@ -16,8 +15,3 @@ from bailo.helper.access_request import AccessRequest
 from bailo.helper.model import Model, Experiment
 from bailo.helper.release import Release
 from bailo.helper.schema import Schema
-
-try:
-    NO_COLOR = int(os.environ["NO_COLOR"])
-except KeyError:
-    NO_COLOR = 0

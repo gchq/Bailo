@@ -8,9 +8,9 @@ from typing import Any, Union
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
-from bailo import NO_COLOR
 from bailo.core.client import Client
 from bailo.core.exceptions import BailoException
+from bailo.core.utils import NO_COLOR
 from semantic_version import Version
 
 
