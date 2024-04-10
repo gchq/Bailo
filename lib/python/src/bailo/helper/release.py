@@ -156,7 +156,7 @@ class Release:
             total_size = int(res.headers.get("content-length", 0))
             block_size = 1024
 
-            if no_color == 1:
+            if NO_COLOR == 1:
                 colour = "white"
             else:
                 colour = "green"
@@ -236,7 +236,7 @@ class Release:
         size = data.tell()
         data.seek(old_file_position, os.SEEK_SET)
 
-        if no_color == 1:
+        if NO_COLOR == 1:
             colour = "white"
         else:
             colour = "blue"
