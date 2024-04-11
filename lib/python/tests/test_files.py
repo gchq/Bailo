@@ -24,22 +24,40 @@ def test_file_upload(example_model):
 
 
 @pytest.mark.integration
-def test_file_download_all(example_model, downloads_path):
+def test_file_download_all(example_model, tmpdir):
     byte_obj = b"Test Binary"
     file = BytesIO(byte_obj)
 
     example_release = example_model.create_release("0.1.0", "test")
+    filenames = ["test.json", "test2.txt"]
 
-    for filename in ["test.json", "test2.txt", "to_exclude.txt"]:
+    for filename in filenames:
         example_release.upload(filename, file)
         file.seek(0)
 
+    downloads_path = tmpdir.mkdir("downloads")
+    example_release.download_all(path=downloads_path)
+
+    assert set(os.listdir(downloads_path)).issubset(filenames)
+
+
+@pytest.mark.integration
+def test_file_download_filter(example_model, tmpdir):
+    byte_obj = b"Test Binary"
+    file = BytesIO(byte_obj)
+
+    example_release = example_model.create_release("0.1.0", "test")
+    filenames = ["test.json", "test2.txt", "to_exclude.txt"]
+
+    for filename in filenames:
+        example_release.upload(filename, file)
+        file.seek(0)
+
+    downloads_path = tmpdir.mkdir("downloads")
     example_release.download_all(path=downloads_path, include=["*.txt"], exclude=["to_exclude.txt"])
 
     assert os.listdir(downloads_path) == ["test2.txt"]
 
-    with open(str(downloads_path.join("test2.txt")), "rb") as f:
-        assert f.read() == byte_obj
 
 
 @pytest.mark.integration

@@ -13,6 +13,8 @@ from bailo.core.exceptions import BailoException
 from bailo.core.utils import NO_COLOR
 from semantic_version import Version
 
+BLOCK_SIZE = 1024
+
 
 class Release:
     def __init__(
@@ -154,7 +156,6 @@ class Release:
             if path is None:
                 path = filename
             total_size = int(res.headers.get("content-length", 0))
-            block_size = 1024
 
             if NO_COLOR == 1:
                 colour = "white"
@@ -165,27 +166,27 @@ class Release:
                 total=total_size,
                 unit="B",
                 unit_scale=True,
-                unit_divisor=block_size,
+                unit_divisor=BLOCK_SIZE,
                 postfix=f"downloading {filename} as {path}",
                 colour=colour,
             ) as t:
                 with open(path, "wb") as f:
-                    for data in res.iter_content(block_size):
+                    for data in res.iter_content(BLOCK_SIZE):
                         t.update(len(data))
                         f.write(data)
 
         return res
 
-    def download_all(self, path: str = os.getcwd(), include: Union[list, str] = None, exclude: Union[list, str] = None):
+    def download_all(self, path: str = os.getcwd(), include: list | str = None, exclude: list | str = None):
         """Writes all files to disk given a local directory.
 
-        :param include: List of regex statements for file names to include, defaults to None
-        :param exclude: List of regex statements for file names to exclude, defaults to None
+        :param include: List or string of fnmatch statements for file names to include, defaults to None
+        :param exclude: List or string of fnmatch statements for file names to exclude, defaults to None
         :param path: Local directory to write files to
         :raises BailoException: If the release has no files assigned to it
-        ..note:: Regex statements must be complete to work as intended (uses re.match not re.search)
+        ..note:: Fnmatch statements support Unix shell-style wildcards.
         """
-        files_metadata = self.client.get_release(self.model_id, self.version)["release"]["files"]
+        files_metadata = self.client.get_release(self.model_id, str(self.version))["release"]["files"]
         if files_metadata == []:
             raise BailoException("Release has no associated files.")
         file_names = [file_metadata["name"] for file_metadata in files_metadata]
@@ -242,7 +243,7 @@ class Release:
             colour = "blue"
 
         with tqdm(
-            total=size, unit="B", unit_scale=True, unit_divisor=1024, postfix=f"uploading {name}", colour=colour
+            total=size, unit="B", unit_scale=True, unit_divisor=BLOCK_SIZE, postfix=f"uploading {name}", colour=colour
         ) as t:
             wrapped_buffer = CallbackIOWrapper(t.update, data, "read")
             res = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()
