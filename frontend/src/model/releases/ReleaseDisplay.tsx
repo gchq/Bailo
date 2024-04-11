@@ -5,6 +5,7 @@ import { cloneDeep, groupBy } from 'lodash-es'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import { useEffect, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 
@@ -18,15 +19,19 @@ import CodeLine from '../registry/CodeLine'
 import ReviewBanner from '../reviews/ReviewBanner'
 import ReviewDisplay from '../reviews/ReviewDisplay'
 
+export interface ReleaseDisplayProps {
+  model: ModelInterface
+  release: ReleaseInterface
+  latestRelease?: string
+  hideReviewBanner?: boolean
+}
+
 export default function ReleaseDisplay({
   model,
   release,
   latestRelease,
-}: {
-  model: ModelInterface
-  release: ReleaseInterface
-  latestRelease: string
-}) {
+  hideReviewBanner = false,
+}: ReleaseDisplayProps) {
   const router = useRouter()
 
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
@@ -78,7 +83,7 @@ export default function ReleaseDisplay({
       {(isReviewsLoading || isUiConfigLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
-          {reviews.length > 0 && <ReviewBanner release={release} />}
+          {reviews.length > 0 && !hideReviewBanner && <ReviewBanner release={release} />}
           <Stack spacing={1} p={2}>
             <Stack
               direction={{ sm: 'row', xs: 'column' }}
@@ -97,6 +102,11 @@ export default function ReleaseDisplay({
                     {model.name} - {release.semver}
                   </Typography>
                 </Link>
+                <CopyToClipboardButton
+                  textToCopy={`${model.name} - ${release.semver}`}
+                  notificationText='Copied release semver to clipboard'
+                  ariaLabel='copy release semver to clipboard'
+                />
                 {latestVersionAdornment()}
               </Stack>
               <Button onClick={() => router.push(`/model/${model.id}/history/${release.modelCardVersion}`)}>

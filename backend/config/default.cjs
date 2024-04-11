@@ -122,6 +122,14 @@ module.exports = {
     },
   },
 
+  avScanning: {
+    enabled: false,
+    clamdscan: {
+      host: '127.0.0.1',
+      port: 3310,
+    },
+  },
+
   // These settings are PUBLIC and shared with the UI
   ui: {
     // Show a banner at the top of the screen on all pages

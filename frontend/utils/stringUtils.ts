@@ -13,3 +13,10 @@ export const plural = (value: number, phrase: string) => {
 export const isValidSemver = (semverInput: string) => {
   return !!semver.valid(semverInput)
 }
+
+export const toKebabCase = (value: string): string => {
+  return value
+    .replace(/[^\w -]/g, '')
+    .replaceAll(' ', '-')
+    .toLowerCase()
+}
