@@ -8,6 +8,7 @@ export interface BailoError extends Error {
 
 export enum EntityKind {
   USER = 'user',
+  GROUP = 'group',
 }
 
 export interface Entity {
