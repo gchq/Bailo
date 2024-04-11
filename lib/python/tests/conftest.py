@@ -59,6 +59,7 @@ def local_model():
     )
     return model
 
+
 @pytest.fixture(scope="session")
 def weights_path(tmpdir_factory):
     weights = "Test Weights"
