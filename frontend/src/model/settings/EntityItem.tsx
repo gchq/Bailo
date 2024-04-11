@@ -58,7 +58,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
   return (
     <TableRow>
       <TableCell>
-        <Stack direction='row' alignItems='center' spacing={0.5}>
+        <Stack direction='row' alignItems='center' spacing={1}>
           <EntityIcon entity={entity} />
           <EntityNameDisplay entity={entity} />
         </Stack>
