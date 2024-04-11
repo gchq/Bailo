@@ -5,6 +5,7 @@ import os
 
 NO_COLOR = int(os.environ.get("NO_COLOR", 0))
 
+
 def filter_none(json: dict[str, Any]) -> dict[str, Any]:
     """Remove None attributes from a dictionary.
 

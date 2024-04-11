@@ -59,19 +59,12 @@ def local_model():
     )
     return model
 
-
 @pytest.fixture(scope="session")
 def weights_path(tmpdir_factory):
     weights = "Test Weights"
     fn = tmpdir_factory.mktemp("data").join("weights.pth")
     with open(str(fn), "w") as weights_file:
         weights_file.write(weights)
-    return fn
-
-
-@pytest.fixture(scope="session")
-def downloads_path(tmpdir_factory):
-    fn = tmpdir_factory.mktemp("downloads")
     return fn
 
 
