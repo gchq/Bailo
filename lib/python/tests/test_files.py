@@ -59,7 +59,6 @@ def test_file_download_filter(example_model, tmpdir):
     assert os.listdir(downloads_path) == ["test2.txt"]
 
 
-
 @pytest.mark.integration
 def test_file_download_all_no_files(example_model):
     example_release = example_model.create_release("0.1.0", "test")
