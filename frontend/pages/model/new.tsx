@@ -99,7 +99,7 @@ export default function NewModel() {
                 </Typography>
                 <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
                   <TeamSelect value={team} onChange={(value) => setTeam(value)} />
-                  <ModelNameInput value={modelName} onChange={(value) => setModelName(value)} />
+                  <ModelNameInput autoFocus value={modelName} onChange={(value) => setModelName(value)} />
                 </Stack>
                 <ModelDescriptionInput value={description} onChange={(value) => setDescription(value)} />
               </>

@@ -1,7 +1,15 @@
 import { LoadingButton } from '@mui/lab'
 import { Box, Button, Stack, Typography } from '@mui/material'
-import { patchAccessRequest, useGetAccessRequest } from 'actions/accessRequest'
+import {
+  deleteAccessRequest,
+  patchAccessRequest,
+  useGetAccessRequest,
+  useGetAccessRequestsForModelId,
+} from 'actions/accessRequest'
+import { useRouter } from 'next/router'
 import { useCallback, useContext, useEffect, useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import { getErrorMessage } from 'utils/fetcher'
@@ -27,11 +35,27 @@ export default function EditableAccessRequestForm({
   const [isLoading, setIsLoading] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
+  const [open, setOpen] = useState(false)
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(accessRequest.schemaId)
   const { isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
+  const { mutateAccessRequests } = useGetAccessRequestsForModelId(accessRequest.modelId)
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+  const router = useRouter()
+
+  const handleDeleteConfirm = useCallback(async () => {
+    setErrorMessage('')
+    const res = await deleteAccessRequest(accessRequest.modelId, accessRequest.id)
+    if (!res.ok) {
+      setDeleteErrorMessage(await getErrorMessage(res))
+    } else {
+      mutateAccessRequests()
+      setOpen(false)
+      router.push(`/model/${accessRequest.modelId}?tab=access`)
+    }
+  }, [mutateAccessRequests, accessRequest, router])
 
   async function handleSubmit() {
     if (schema) {
@@ -92,7 +116,14 @@ export default function EditableAccessRequestForm({
           heading={
             <div>
               <Typography fontWeight='bold'>Schema</Typography>
-              <Typography>{schema?.name}</Typography>
+              <Stack direction='row' alignItems='center'>
+                <Typography>{schema?.name}</Typography>
+                <CopyToClipboardButton
+                  textToCopy={schema ? schema.name : ''}
+                  notificationText='Copied schema name to clipboard'
+                  ariaLabel='copy schema name to clipboard'
+                />
+              </Stack>
             </div>
           }
           editButtonText='Edit Access Request'
@@ -101,9 +132,20 @@ export default function EditableAccessRequestForm({
           onEdit={handleEdit}
           onCancel={handleCancel}
           onSubmit={handleSubmit}
+          onDelete={() => setOpen(true)}
           errorMessage={errorMessage}
+          deleteButtonText='Delete Request'
+          showDeleteButton
         />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        <ConfirmationDialogue
+          open={open}
+          title='Delete Access Request'
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setOpen(false)}
+          errorMessage={deleteErrorMessage}
+          dialogMessage={'Are you sure you want to delete this access request?'}
+        />
         {isEdit && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
             <Button variant='outlined' onClick={handleCancel}>

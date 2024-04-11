@@ -12,7 +12,10 @@ type EditableFormHeadingProps = {
   onCancel: () => void
   onSubmit: () => void
   registryError?: boolean
+  onDelete?: () => void
   errorMessage?: string
+  deleteButtonText?: string
+  showDeleteButton?: boolean
 }
 
 export default function EditableFormHeading({
@@ -24,7 +27,10 @@ export default function EditableFormHeading({
   onCancel,
   onSubmit,
   registryError,
+  onDelete,
   errorMessage = '',
+  deleteButtonText = 'Delete',
+  showDeleteButton = false,
 }: EditableFormHeadingProps) {
   return (
     <Stack sx={{ pb: 2 }}>
@@ -36,15 +42,22 @@ export default function EditableFormHeading({
       >
         {heading}
         {!isEdit && (
-          <Button
-            variant='outlined'
-            onClick={onEdit}
-            sx={{ mb: { xs: 2 } }}
-            data-test='editFormButton'
-            disabled={registryError}
-          >
-            {editButtonText}
-          </Button>
+          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
+            <Button variant='outlined' onClick={onEdit} data-test='editFormButton' disabled={registryError}>
+              {editButtonText}
+            </Button>
+            {showDeleteButton && (
+              <Button
+                variant='contained'
+                color='secondary'
+                onClick={onDelete}
+                data-test='deleteFormButton'
+                disabled={registryError}
+              >
+                {deleteButtonText}
+              </Button>
+            )}
+          </Stack>
         )}
         {isEdit && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>

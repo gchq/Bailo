@@ -116,6 +116,7 @@ export default function ReleaseForm({
           <TextField
             required
             size='small'
+            autoFocus={!isEdit}
             error={formData.semver !== '' && !isValidSemver(formData.semver)}
             helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
             value={formData.semver}
@@ -136,6 +137,7 @@ export default function ReleaseForm({
             onChange={onReleaseNotesChange}
             aria-label='Release notes'
             label={releaseNotesLabel}
+            textareaProps={{ autoFocus: isEdit }}
             dataTest='releaseNotesInput'
           />
         )}
