@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 import os
 
-NO_COLOR = int(os.environ.get("NO_COLOR", 0))
+NO_COLOR = bool(int(os.environ.get("NO_COLOR", 0)))
 
 
 def filter_none(json: dict[str, Any]) -> dict[str, Any]:
