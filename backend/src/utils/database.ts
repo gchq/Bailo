@@ -18,7 +18,7 @@ export async function connectToMongoose() {
     mongoose.set('strictPopulate', false)
 
     const connectionURI = config.mongo.pass
-      ? `${config.mongo.uri.replace('://', `://${config.mongo.user}:${config.mongo.pass}`)}`
+      ? `${config.mongo.uri.replace('://', `://${config.mongo.user}:${config.mongo.pass}@`)}`
       : config.mongo.uri
 
     await mongoose.connect(connectionURI)

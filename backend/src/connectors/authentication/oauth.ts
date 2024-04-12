@@ -22,7 +22,7 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
 
   authenticationMiddleware() {
     const connectionURI = config.mongo.pass
-      ? `${config.mongo.uri.replace('://', `://${config.mongo.user}:${config.mongo.pass}`)}`
+      ? `${config.mongo.uri.replace('://', `://${config.mongo.user}:${config.mongo.pass}@`)}`
       : config.mongo.uri
 
     return [
