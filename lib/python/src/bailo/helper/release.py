@@ -157,7 +157,7 @@ class Release:
                 path = filename
             total_size = int(res.headers.get("content-length", 0))
 
-            if NO_COLOR == 1:
+            if NO_COLOR:
                 colour = "white"
             else:
                 colour = "green"
@@ -237,7 +237,7 @@ class Release:
         size = data.tell()
         data.seek(old_file_position, os.SEEK_SET)
 
-        if NO_COLOR == 1:
+        if NO_COLOR:
             colour = "white"
         else:
             colour = "blue"
