@@ -21,6 +21,10 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
   }
 
   authenticationMiddleware() {
+    const connectionURI = config.mongo.pass
+      ? `${config.mongo.uri.replace('://', `://${config.mongo.user}:${config.mongo.pass}`)}`
+      : config.mongo.uri
+
     return [
       {
         middleware: [
@@ -30,7 +34,7 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
             saveUninitialized: true,
             cookie: { maxAge: 30 * 24 * 60 * 60000 }, // store for 30 days
             store: MongoStore.create({
-              mongoUrl: config.mongo.uri,
+              mongoUrl: connectionURI,
             }),
           }),
           parser.urlencoded({ extended: true }),

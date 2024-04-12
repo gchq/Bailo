@@ -16,10 +16,12 @@ export async function connectToMongoose() {
   try {
     mongoose.set('strictQuery', false)
     mongoose.set('strictPopulate', false)
-    await mongoose.connect(config.mongo.uri, {
-      user: config.mongo.user,
-      pass: config.mongo.pass,
-    })
+
+    const connectionURI = config.mongo.pass
+      ? `${config.mongo.uri.replace('://', `://${config.mongo.user}:${config.mongo.pass}`)}`
+      : config.mongo.uri
+
+    await mongoose.connect(connectionURI)
     log.info('Connected to Mongoose')
   } catch (error) {
     log.error({ error }, 'Error')
