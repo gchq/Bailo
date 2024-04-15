@@ -16,7 +16,7 @@ type EntityItemProps = {
   accessList: CollaboratorEntry[]
   onAccessListChange: (value: CollaboratorEntry[]) => void
   model: ModelInterface
-  setRoleError: (value: boolean) => void
+  setRoleError: (value: string) => void
 }
 
 export default function EntityItem({ entity, accessList, onAccessListChange, model, setRoleError }: EntityItemProps) {
@@ -42,7 +42,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
   }
 
   if (isModelRolesError) {
-    setRoleError(true)
+    setRoleError(isModelRolesError.info.message)
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
@@ -101,7 +101,7 @@ function EntityIcon({ entity }: EntityIconProps) {
 
 type EntityNameDisplayProps = {
   entity: CollaboratorEntry
-  setRoleError: (value: boolean) => void
+  setRoleError: (value: string) => void
 }
 
 function EntityNameDisplay({ entity, setRoleError }: EntityNameDisplayProps) {
