@@ -1,4 +1,5 @@
 import { CognitoIdentityProviderClientConfig } from '@aws-sdk/client-cognito-identity-provider'
+import { KMSClientConfig } from '@aws-sdk/client-kms'
 import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
@@ -166,6 +167,10 @@ export interface Config {
     enabled: boolean
     export: {
       bucket: string
+      kmsSignature: {
+        enabled: boolean
+        KMSClient: KMSClientConfig
+      }
     }
   }
 }
