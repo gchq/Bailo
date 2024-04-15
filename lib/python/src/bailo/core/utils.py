@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
 import os
+from typing import Any
 
-NO_COLOR = bool(int(os.environ.get("NO_COLOR", 0)))
+NO_COLOR = "NO_COLOR" in os.environ
 
 
 def filter_none(json: dict[str, Any]) -> dict[str, Any]:
@@ -20,7 +20,7 @@ class NestedDict(dict):
     def __getitem__(self, keytuple):
         # if key is not a tuple then access as normal
         if not isinstance(keytuple, tuple):
-            return super(NestedDict, self).__getitem__(keytuple)
+            return super().__getitem__(keytuple)
         d = self
         for key in keytuple:
             d = d[key]
@@ -29,7 +29,7 @@ class NestedDict(dict):
     def __setitem__(self, keytuple, item):
         # if key is not a tuple then access as normal
         if not isinstance(keytuple, tuple):
-            return super(NestedDict, self).__setitem__(keytuple, item)
+            return super().__setitem__(keytuple, item)
         d = self
         for index, key in enumerate(keytuple):
             if index != len(keytuple) - 1:
