@@ -64,7 +64,6 @@ export interface SideNavigationProps {
   pageTopStyling?: CSSProperties
 }
 
-// This is currently only being used by the beta wrapper
 export default function SideNavigation({
   page,
   currentUser,

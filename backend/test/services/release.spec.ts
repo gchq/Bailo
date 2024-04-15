@@ -47,6 +47,7 @@ const releaseModelMocks = vi.hoisted(() => {
   obj.save = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.findOneWithDeleted = vi.fn(() => obj)
   obj.filter = vi.fn(() => obj)
 
   const model: any = vi.fn((params) => ({ ...obj, ...params }))
@@ -73,8 +74,9 @@ vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 describe('services > release', () => {
   test('createRelease > simple', async () => {
     modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
-    await createRelease({} as any, { minor: false } as any)
+    await createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)
 
     expect(releaseModelMocks.save).toBeCalled()
     expect(releaseModelMocks).toBeCalled()
@@ -84,8 +86,9 @@ describe('services > release', () => {
 
   test('createRelease > minor release', async () => {
     modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
-    await createRelease({} as any, { minor: true } as any)
+    await createRelease({} as any, { semver: 'v1.0.0', minor: true } as any)
 
     expect(releaseModelMocks.save).toBeCalled()
     expect(releaseModelMocks).toBeCalled()
@@ -96,10 +99,12 @@ describe('services > release', () => {
     const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
     registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
     modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     await createRelease(
       {} as any,
       {
+        semver: 'v1.0.0',
         images: existingImages.flatMap(({ tags, ...rest }) => tags.map((tag) => ({ tag, ...rest }))),
       } as any,
     )
@@ -113,11 +118,13 @@ describe('services > release', () => {
     const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
     registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
     modelMocks.getModelById.mockResolvedValue(undefined)
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     expect(() =>
       createRelease(
         {} as any,
         {
+          semver: 'v1.0.0',
           modelCardVersion: 999,
           images: [
             { repository: 'fake', name: 'fake', tag: 'fake1' },
@@ -134,11 +141,13 @@ describe('services > release', () => {
   test('createRelease > release with bad files', async () => {
     fileMocks.getFileById.mockResolvedValueOnce({ modelId: 'random_model' })
     modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     expect(() =>
       createRelease(
         {} as any,
         {
+          semver: 'v1.0.0',
           modelCardVersion: 999,
           fileIds: ['test'],
         } as any,
@@ -151,12 +160,14 @@ describe('services > release', () => {
   test('createRelease > release with duplicate file names', async () => {
     fileMocks.getFileById.mockResolvedValue({ modelId: 'test_model_id', name: 'test_file.png' })
     modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     expect(
       async () =>
         await createRelease(
           {} as any,
           {
+            semver: 'v1.0.0',
             modelCardVersion: 999,
             fileIds: ['test', 'test2'],
           } as any,
@@ -166,16 +177,34 @@ describe('services > release', () => {
     expect(releaseModelMocks.save).not.toBeCalled()
   })
 
+  test('createRelease > release with bad semver', async () => {
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    const result = createRelease(
+      {} as any,
+      {
+        semver: 'bad semver',
+        modelCardVersion: 999,
+      } as any,
+    )
+    expect(result).rejects.toThrowError(/is not a valid semver value./)
+
+    expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
   test('createRelease > bad authorisation', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
     modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
-    expect(() => createRelease({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
+      /^You do not have permission/,
+    )
   })
 
   test('createRelease > automatic model card version', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 999 } })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
-    await createRelease({} as any, {} as any)
+    await createRelease({} as any, { semver: 'v1.0.0' } as any)
 
     expect(releaseModelMocks.save).toBeCalled()
     expect(releaseModelMocks.mock.calls.at(0)[0].modelCardVersion).toBe(999)
@@ -184,7 +213,7 @@ describe('services > release', () => {
   test('createRelease > no model card', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({ card: undefined })
 
-    expect(() => createRelease({} as any, {} as any)).rejects.toThrowError(
+    expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
       /^This model does not have a model card associated with it/,
     )
 
@@ -204,6 +233,7 @@ describe('services > release', () => {
 
     expect(() =>
       updateRelease({} as any, 'model-id', 'v1.0.0', {
+        semver: 'v1.0.0',
         fileIds: ['test'],
       } as any),
     ).rejects.toThrowError(/^The file 'test' comes from the model/)
@@ -211,7 +241,7 @@ describe('services > release', () => {
 
   test('updateRelease > success', async () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
-    releaseModelMocks.findOne.mockResolvedValue({})
+    releaseModelMocks.findOne.mockResolvedValue({ semver: 'v1.0.0' })
 
     await updateRelease({} as any, 'model-id', 'v1.0.0', { notes: 'New notes' } as any)
 

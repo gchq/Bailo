@@ -95,11 +95,11 @@ export default function NewRelease() {
           }
         })
 
+      setCurrentFileUploadProgress(undefined)
       if (fileResponse) {
         setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
         fileIds.push(fileResponse.data.file._id)
       } else {
-        setCurrentFileUploadProgress(undefined)
         return setLoading(false)
       }
     }
