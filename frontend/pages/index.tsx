@@ -2,7 +2,6 @@ import SearchIcon from '@mui/icons-material/Search'
 import {
   Box,
   Button,
-  Chip,
   Container,
   FilledInput,
   FormControl,
@@ -129,6 +128,13 @@ function Marketplace() {
     e.preventDefault()
   }
 
+  const handleResetFilters = () => {
+    setSelectedTask('')
+    setSelectedLibraries([])
+    setFilter('')
+    router.replace('/', undefined, { shallow: true })
+  }
+
   return (
     <Container maxWidth='xl'>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
@@ -165,8 +171,9 @@ function Marketplace() {
           <Box>
             <ChipSelector
               label='Tasks'
+              chipTooltipTitle={'Filter by task'}
               // TODO fetch all model tags
-              tags={[
+              options={[
                 'Translation',
                 'Image Classification',
                 'Summarization',
@@ -175,35 +182,39 @@ function Marketplace() {
                 'Tabular Regression',
               ]}
               expandThreshold={10}
-              selectedTags={selectedTask}
+              selectedChips={selectedTask}
               onChange={handleTaskOnChange}
               size='small'
+              ariaLabel='add task to search filter'
             />
           </Box>
           <Box>
             <ChipSelector
               label='Libraries'
+              chipTooltipTitle={'Filter by library'}
               // TODO fetch all model libraries
-              tags={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
+              options={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
               expandThreshold={10}
               multiple
-              selectedTags={selectedLibraries}
+              selectedChips={selectedLibraries}
               onChange={handleLibrariesOnChange}
               size='small'
+              ariaLabel='add library to search filter'
             />
           </Box>
           <Box>
             <ChipSelector
               label='Other'
               multiple
-              tags={[...searchFilterTypeLabels.map((type) => type.label)]}
+              options={[...searchFilterTypeLabels.map((type) => type.label)]}
               onChange={handleSelectedTypesOnChange}
-              selectedTags={searchFilterTypeLabels
+              selectedChips={searchFilterTypeLabels
                 .filter((label) => selectedTypes.includes(label.key))
                 .map((type) => type.label)}
               size='small'
             />
           </Box>
+          <Button onClick={handleResetFilters}>Reset filters</Button>
         </Stack>
         <Box sx={{ overflow: 'hidden', width: '100%' }}>
           <Paper sx={{ py: 2, px: 4 }}>
@@ -231,11 +242,16 @@ function Marketplace() {
                       <Typography variant='body1' sx={{ marginBottom: 2 }}>
                         {model.description}
                       </Typography>
-                      <Stack direction='row' spacing={1} sx={{ marginBottom: 2 }}>
-                        {model.tags.slice(0, 10).map((tag) => (
-                          <Chip color='secondary' key={`chip-${tag}`} label={tag} size='small' variant='outlined' />
-                        ))}
-                      </Stack>
+                      <ChipSelector
+                        chipTooltipTitle={'Filter by tag'}
+                        options={model.tags.slice(0, 10)}
+                        expandThreshold={10}
+                        multiple
+                        selectedChips={selectedLibraries}
+                        onChange={handleLibrariesOnChange}
+                        size='small'
+                        ariaLabel='add model tag to search filter'
+                      />
                       {index !== models.length - 1 && (
                         <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
                       )}
