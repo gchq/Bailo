@@ -82,6 +82,9 @@ export interface Config {
 
   mongo: {
     uri: string
+
+    user: string
+    pass: string
   }
 
   registry: {
@@ -149,6 +152,14 @@ export interface Config {
     endpoint: string
     authenticationToken: string
     debug: boolean
+  }
+
+  avScanning: {
+    enabled: boolean
+    clamdscan: {
+      host: string
+      port: number
+    }
   }
 }
 

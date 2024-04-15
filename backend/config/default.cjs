@@ -20,9 +20,16 @@ module.exports = {
   },
 
   mongo: {
-    // A mongo connection URI, can contain usernames, passwords, replica set information, etc.
+    // A mongo connection URI, can contain replica set information, etc.
     // See: https://www.mongodb.com/docs/manual/reference/connection-string/
+
+    // This is usually embedded in a config map, so do not put usernames and
+    // passwords in the connection string.
     uri: 'mongodb://localhost:27017/bailo?directConnection=true',
+
+    // Authentication details
+    user: undefined,
+    pass: undefined,
   },
 
   registry: {
@@ -112,6 +119,14 @@ module.exports = {
         callback: '/',
         subdomain: '',
       },
+    },
+  },
+
+  avScanning: {
+    enabled: false,
+    clamdscan: {
+      host: '127.0.0.1',
+      port: 3310,
     },
   },
 

@@ -27,27 +27,11 @@ data:
         publicKey: '/app/certs/cert.pem',
       },
 
-      s2i: {
-        path: '/s2i/s2i',
-      },
-
-      build: {
-        // Environment to build in, can be 'img' or 'openshift'
-        environment: '{{ .Values.config.build.environment }}',
-
-        // These settings only matter in OpenShift
-        openshift: {
-          // Build configs, secrets and builds will be triggered in this namespace
-          namespace: '{{ .Values.openshift.namespace }}',
-          // The name of the secret for the application to create to securely allow OpenShift to communicate with the Bailo registry
-          dockerPushSecret: '{{ .Values.openshift.dockerPushSecretName }}',
-        },
-      },
-
       mongo: {
         // A mongo connection URI, can contain usernames, passwords, replica set information, etc.
         // See: https://www.mongodb.com/docs/manual/reference/connection-string/
-        uri: 'OVERWRITTEN_BY_ENVIRONMENT_VARIABLE',
+        uri: '{{ include "bailo.mongoConnectionURI" . }}',
+        user: '{{ index .Values.mongodb.auth.usernames 0 }}',
 
         connectionOptions: {
           useFindAndModify: false,
@@ -56,29 +40,6 @@ data:
           useCreateIndex: true,
           ssl: {{ .Values.mongodb.ssl }},
           sslValidate: {{ .Values.mongodb.sslValidate }},
-        },
-      },
-
-      minio: {
-        // Connection information for an s3-compliant file store.  Settings are passed directly to 'minio', see reference for options:
-        // https://min.io/docs/minio/linux/developers/javascript/API.html#constructor
-        connection: {
-          endPoint: '{{ include "bailo.minio.host" . }}',
-          port: {{ .Values.minio.service.ports.api }},
-          useSSL: {{ .Values.minio.useSSL }},
-          accessKey: 'OVERWRITTEN_BY_ENVIRONMENT_VARIABLE',
-          secretKey: 'OVERWRITTEN_BY_ENVIRONMENT_VARIABLE',
-          region: '{{ .Values.minio.region }}',
-          partSize: {{ .Values.minio.partSizeMB }} * 1024 * 1024,
-        },
-
-        // Automatically create the upload / registry bucket if they're not found?
-        automaticallyCreateBuckets: {{ .Values.minio.createBuckets }},
-
-        // Names of buckets that Bailo uses
-        buckets: {
-          uploads: '{{ .Values.minio.uploadBucket }}',
-          registry: '{{ .Values.minio.registryBucket }}',
         },
       },
 
@@ -124,25 +85,8 @@ data:
         from: '{{ .Values.config.smtp.from }}',
       },
 
-      logging: {
-        // Log out to a file
-        file: {
-          enabled: false,
-          level: 'info',
-          path: './logs/out.log',
-        },
-
-        // Log out to a stroom instance
-        stroom: {
-          enabled: {{ .Values.stroom.enabled }},
-          folder: '{{ .Values.stroom.folder }}',
-          url: '{{ .Values.stroom.url }}',
-          feed: '{{ .Values.stroom.feed }}',
-          environment: '{{ .Values.stroom.environment }}',
-          system: '{{ .Values.stroom.system }}',
-          insecure: {{ .Values.stroom.insecure }},
-          interval: {{ .Values.stroom.interval }},
-        },
+      log: {
+        level: 'info',
       },
 
       session: {
@@ -188,6 +132,7 @@ data:
           enabled: {{ .Values.config.ui.banner.enabled }},
           text: '{{ .Values.config.ui.banner.text }}',
           colour: '{{ .Values.config.ui.banner.colour }}',
+          textColor: '{{ .Values.config.ui.banner.textColor}}'         
         },
 
         // Contact details for the support team
@@ -201,28 +146,6 @@ data:
         registry: {
           host: '{{ .Values.route.appPublicRoute }}',
         },
-
-        // A configurable checkbox on the last page when uploading a model
-        uploadWarning: {
-          showWarning: true,
-          checkboxText: 'By checking here you confirm that the information is correct',
-        },
-
-        // A configurable checkbox on the last page when requesting a deployment
-        deploymentWarning: {
-          showWarning: true,
-          checkboxText: 'By checking here you confirm that the information is correct',
-        },
-
-        // The available seldon versions that can be used to build images
-        seldonVersions: [
-          {
-            name: '{{ .Values.config.s2i.name }}',
-            image: '{{ .Values.config.s2i.image }}',
-          },
-        ],
-
-        maxModelSizeGB: 50,
       },
 
       connectors: {
@@ -232,6 +155,10 @@ data:
 
         authorisation: {
           kind: '{{ .Values.connectors.authorisation.kind }}',
+        },
+
+        audit: {
+          kind: '{{ .Values.connectors.audit.kind }}',
         },
       },
 
@@ -265,14 +192,8 @@ data:
 
   custom-environment-variables.cjs: |
     module.exports = {
-      minio: {
-        connection: {
-          accessKey: 'MINIO_ACCESS_KEY',
-          secretKey: 'MINIO_SECRET_KEY',
-        },
-      },
       mongo: {
-        uri: 'MONGO_CONNECTION_URI',
+        pass: 'MONGO_PASSWORD',
       },
       s3: {
         credentials: {

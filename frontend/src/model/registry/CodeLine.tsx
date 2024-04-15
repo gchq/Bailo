@@ -1,9 +1,8 @@
-import { ContentCopy } from '@mui/icons-material'
 import CodeIcon from '@mui/icons-material/Code'
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { ReactElement } from 'react'
-import useNotification from 'src/hooks/useNotification'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 
 interface CodeLineProps {
   line: string
@@ -12,12 +11,6 @@ interface CodeLineProps {
 
 export default function CodeLine({ line, icon = <CodeIcon /> }: CodeLineProps) {
   const theme = useTheme()
-  const sendNotification = useNotification()
-
-  function handleButtonClick() {
-    navigator.clipboard.writeText(line)
-    sendNotification({ variant: 'success', msg: 'Copied to clipboard' })
-  }
 
   return (
     <Stack direction='row' spacing={1}>
@@ -32,11 +25,11 @@ export default function CodeLine({ line, icon = <CodeIcon /> }: CodeLineProps) {
           <Typography>{line}</Typography>
         </Stack>
       </Box>
-      <Tooltip title='Copy to clipboard' arrow>
-        <IconButton onClick={() => handleButtonClick()} aria-label='Copy text to clipboard'>
-          <ContentCopy />
-        </IconButton>
-      </Tooltip>
+      <CopyToClipboardButton
+        textToCopy={line}
+        notificationText='Copied to clipboard'
+        ariaLabel='Copy text to clipboard'
+      />
     </Stack>
   )
 }
