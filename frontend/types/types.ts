@@ -37,6 +37,14 @@ export interface UiConfig {
   development: {
     logUrl: string
   }
+  inference: {
+    enabled: boolean
+    connection: {
+      host: string
+    }
+
+    gpus: { [key: string]: string }
+  }
 }
 
 export interface FileInterface {
@@ -395,3 +403,18 @@ export type ReviewRequestInterface = {
   createdAt: string
   updatedAt: string
 } & PartialReviewRequestInterface
+
+export interface InferenceInterface {
+  modelId: string
+  image: string
+  tag: string
+  settings: {
+    processorType: string
+    memory?: number
+    port: number
+  }
+  description: string
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
