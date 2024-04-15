@@ -19,7 +19,7 @@ interface AdditionalProperties {
 
 export type UserDisplayProps = {
   dn: string
-  setRoleError?: (value: boolean) => void
+  setRoleError?: (value: string) => void
   hidePopover?: boolean
 }
 
@@ -44,7 +44,7 @@ export default function UserDisplay({ dn, setRoleError, hidePopover = false }: U
 
   if (isUserInformationError) {
     if (setRoleError) {
-      setRoleError(true)
+      setRoleError(isUserInformationError.info.message)
     }
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
   }
