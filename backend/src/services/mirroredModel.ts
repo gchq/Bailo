@@ -86,11 +86,12 @@ async function generateReleaseZip(user: UserInterface, modelId: string, semvers:
   const releases = await getReleasesBySemvers(user, modelId, semvers)
 
   const zip = archiver('zip')
-  try {
-    await Promise.all(releases.map((release) => addReleaseToZip(user, model, release, zip)))
-    await zip.finalize()
-  } catch (error: any) {
-    throw InternalError('Error when generating the release zip file.', { error })
+  const errors: any[] = []
+  // Using a .catch here to ensure all errors are returned, rather than just the first error.
+  await Promise.all(releases.map((release) => addReleaseToZip(user, model, release, zip).catch((e) => errors.push(e))))
+  await zip.finalize()
+  if (errors.length > 0) {
+    throw InternalError('Error when generating the release zip file.', { errors })
   }
   return zip
 }
