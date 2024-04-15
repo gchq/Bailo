@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { exportModelCardRevisions } from '../../../../services/mirroredModel.js'
+import { exportModelCardRevisions, exportRelease } from '../../../../services/mirroredModel.js'
 import { registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -48,6 +48,7 @@ export const postRequestExport = [
     } = parse(req, postRequestExportSchema)
 
     await exportModelCardRevisions(req.user, modelId, disclaimerAgreement)
+    await exportRelease(req.user, modelId, '1.2.3', disclaimerAgreement)
 
     return res.json({
       message: 'Successfully exported model cards',

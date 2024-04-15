@@ -208,6 +208,16 @@ module.exports = {
     enabled: false,
     export: {
       bucket: 'exports',
+      kmsSignature: {
+        enabled: false,
+        KMSClient: {
+          region: 'eu-west-2',
+          credentials: {
+            accessKeyId: 'access',
+            secretAccessKey: 'secret',
+          },
+        },
+      },
     },
   },
 }
