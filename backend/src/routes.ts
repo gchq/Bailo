@@ -84,9 +84,10 @@ server.get('/api/v2/models/search', ...getModelsSearch)
 server.get('/api/v2/model/:modelId', ...getModel)
 server.patch('/api/v2/model/:modelId', ...patchModel)
 
+server.post('/api/v2/model/:modelId/export', ...postRequestExport)
+
 server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
 server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)
-server.post('/api/v2/model/:modelId/model-card-revisions/export', ...postRequestExport)
 server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
 
 // *server.get('/api/v2/template/models', ...getModelTemplates)

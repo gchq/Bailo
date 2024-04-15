@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { exportModelCardRevisions, exportRelease } from '../../../../services/mirroredModel.js'
+import { exportModel } from '../../../../services/mirroredModel.js'
 import { registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -11,15 +11,17 @@ export const postRequestExportSchema = z.object({
     modelId: z.string(),
   }),
   body: z.object({
+    releases: z.array(z.string()).optional(),
     disclaimerAgreement: z.boolean(),
   }),
 })
 
 registerPath({
   method: 'post',
-  path: '/api/v2/model/{modelId}/model-card-revisions/export',
-  tags: ['modelcard'],
-  description: 'Request for all current model card reviews to be exported to S3 as a Zip file.',
+  path: '/api/v2/model/:modelId/export',
+  tags: ['model', 'mirror'],
+  description:
+    'Request for all current model card revisions to be exported to S3 as a Zip file. Can also include releases specified by semver in the body.',
   schema: postRequestExportSchema,
   responses: {
     200: {
@@ -44,11 +46,10 @@ export const postRequestExport = [
   async (req: Request, res: Response<PostRequestExportResponse>) => {
     const {
       params: { modelId },
-      body: { disclaimerAgreement },
+      body: { disclaimerAgreement, releases },
     } = parse(req, postRequestExportSchema)
 
-    await exportModelCardRevisions(req.user, modelId, disclaimerAgreement)
-    await exportRelease(req.user, modelId, '1.2.3', disclaimerAgreement)
+    await exportModel(req.user, modelId, disclaimerAgreement, releases)
 
     return res.json({
       message: 'Successfully exported model cards',
