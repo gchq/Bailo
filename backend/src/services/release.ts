@@ -230,6 +230,30 @@ export async function getModelReleases(
   return results.filter((_, i) => auths[i].success)
 }
 
+export async function getReleasesBySemvers(user: UserInterface, modelId: string, semvers: string[]) {
+  const model = await getModelById(user, modelId)
+  const releases = await Release.find({
+    modelId,
+    semver: semvers,
+  })
+
+  const auths = await authorisation.releases(user, model, releases, ReleaseAction.View)
+  const filtered: ReleaseDoc[] = []
+  for (let i = 0; i < releases.length; i++) {
+    if (auths[i].success) {
+      filtered.push(releases[i])
+    }
+    log.warn('Release not included in response due to authorisation failure', {
+      authorisationResponse: auths[i],
+      modelId,
+      semver: releases[i].semver,
+      requestedReleases: semvers,
+    })
+  }
+
+  return filtered
+}
+
 export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
   const release = await Release.findOne({
