@@ -50,7 +50,7 @@ export default function PageWithTabs({
   const tabsList = useMemo(
     () =>
       tabs.reduce<ReactElement[]>((visibleTabs, tab: PageTab) => {
-        if (!tab.hidden)
+        if (!tab.hidden) {
           visibleTabs.push(
             tab.disabled ? (
               <Tooltip key={tab.title} title={tab.disabledText}>
@@ -73,6 +73,7 @@ export default function PageWithTabs({
               />
             ),
           )
+        }
         return visibleTabs
       }, []),
     [tabs],
