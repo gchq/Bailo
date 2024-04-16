@@ -49,7 +49,7 @@ export default function PageWithTabs({
 
   const tabsList = useMemo(
     () =>
-      tabs.reduce<ReactElement[]>((visibleTabs, tab: PageTab) => {
+      tabs.reduce<ReactElement[]>((visibleTabs, tab) => {
         if (!tab.hidden) {
           visibleTabs.push(
             tab.disabled ? (
@@ -81,7 +81,7 @@ export default function PageWithTabs({
 
   const tabPanels = useMemo(
     () =>
-      tabs.map((tab: PageTab) => (
+      tabs.map((tab) => (
         <CustomTabPanel key={tab.title} currentTab={currentTab} tabKey={tab.path}>
           {tab.view}
         </CustomTabPanel>
