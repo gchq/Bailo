@@ -84,7 +84,9 @@ async function generateModelCardRevisionsZip(user: UserInterface, model: ModelDo
 }
 
 async function generateReleaseZip(user: UserInterface, model: ModelDoc, semvers: string[]) {
-  await checkTotalFileSize(model.id, semvers)
+  if (semvers.length > 1) {
+    await checkTotalFileSize(model.id, semvers)
+  }
   const releases = await getReleasesBySemvers(user, model.id, semvers)
 
   const zip = archiver('zip')
