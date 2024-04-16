@@ -117,7 +117,7 @@ export default function SideNavigation({
               selectedPage={page}
               primaryText='Marketplace'
               drawerOpen={drawerOpen}
-              menuPage='marketplace'
+              menuPage='model'
               title='Marketplace'
               icon={<DashboardIcon />}
             />

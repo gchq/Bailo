@@ -15,11 +15,11 @@ import {
 import { postModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { FormEvent, useState } from 'react'
+import Title from 'src/common/Title'
 import MessageAlert from 'src/MessageAlert'
 import ModelDescriptionInput from 'src/model/ModelDescriptionInput'
 import ModelNameInput from 'src/model/ModelNameInput'
 import TeamSelect from 'src/TeamSelect'
-import Wrapper from 'src/Wrapper'
 import { ModelForm, ModelVisibility, TeamInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -81,7 +81,8 @@ export default function NewModel() {
   }
 
   return (
-    <Wrapper title='Create a new Model' page='upload'>
+    <>
+      <Title title='Create a new Model' />
       <Container maxWidth='sm'>
         <Card sx={{ p: 4, m: 'auto' }}>
           <Stack spacing={2} alignItems='center' justifyContent='center'>
@@ -148,6 +149,6 @@ export default function NewModel() {
           </Box>
         </Card>
       </Container>
-    </Wrapper>
+    </>
   )
 }
