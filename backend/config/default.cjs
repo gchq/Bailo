@@ -207,7 +207,7 @@ module.exports = {
   modelMirror: {
     enabled: false,
     export: {
-      maxSize: 1024 * 1024,
+      maxSize: 100 * 1024 * 1024 * 1024,
       bucket: 'exports',
       kmsSignature: {
         enabled: false,
