@@ -13,9 +13,9 @@ import { ReleaseDoc } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
-import { downloadFile, getFilesByIds } from './file.js'
+import { downloadFile, getFilesByIds, getTotalFileSize } from './file.js'
 import { getModelById, getModelCardRevisions } from './model.js'
-import { getReleasesBySemvers } from './release.js'
+import { getAllFileIds, getReleasesBySemvers } from './release.js'
 
 export async function exportModel(
   user: UserInterface,
@@ -84,6 +84,7 @@ async function generateModelCardRevisionsZip(user: UserInterface, model: ModelDo
 }
 
 async function generateReleaseZip(user: UserInterface, model: ModelDoc, semvers: string[]) {
+  await checkTotalFileSize(model.id, semvers)
   const releases = await getReleasesBySemvers(user, model.id, semvers)
 
   const zip = archiver('zip')
@@ -127,6 +128,14 @@ async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: Re
     throw InternalError('Error when generating the zip file.', { error })
   }
   return zip
+}
+
+async function checkTotalFileSize(modelId: string, semvers: string[]) {
+  const fileIds = await getAllFileIds(modelId, semvers)
+  const totalFileSize = await getTotalFileSize(fileIds)
+  if (totalFileSize > config.modelMirror.export.maxSize) {
+    throw BadReq('Requested export is too large.', { size: totalFileSize, maxSize: config.modelMirror.export.maxSize })
+  }
 }
 
 async function checkReleaseFiles(
