@@ -1,4 +1,13 @@
-import { Checkbox, FormControl, FormControlLabel, LinearProgress, Stack, TextField, Typography } from '@mui/material'
+import {
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  LinearProgress,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useMemo } from 'react'
@@ -90,21 +99,31 @@ export default function ReleaseForm({
       return <Typography>All files uploaded successfully.</Typography>
     }
     return currentFileUploadProgress.uploadProgress < 100 ? (
-      <Typography>
-        <span style={{ fontWeight: 'bold' }}>
-          File {uploadedFiles ? uploadedFiles.length + 1 : '1'} / {formData.files.length} -{' '}
-          {currentFileUploadProgress.fileName}
-        </span>
-        uploading {currentFileUploadProgress.uploadProgress}%
-      </Typography>
+      <Grid container direction='row' spacing={1}>
+        <Grid item>
+          <Typography fontWeight='bold'>
+            [File {uploadedFiles ? uploadedFiles.length + 1 : '1'} / {formData.files.length}] -
+          </Typography>
+        </Grid>
+        <Grid item>
+          <Typography fontWeight='bold'>{currentFileUploadProgress.fileName}</Typography>
+        </Grid>
+        <Grid item>
+          <Typography>uploading {currentFileUploadProgress.uploadProgress}%</Typography>
+        </Grid>
+      </Grid>
     ) : (
-      <Typography>
-        <span style={{ fontWeight: 'bold' }}>
-          File {uploadedFiles && uploadedFiles.length + 1} / {formData.files.length}
-          {currentFileUploadProgress.fileName}
-        </span>
-        recieved - waiting for response from server...
-      </Typography>
+      <Grid container direction='row' spacing={1}>
+        <Grid item>
+          <Typography fontWeight='bold'>
+            File {uploadedFiles && uploadedFiles.length + 1} / {formData.files.length} -
+            {currentFileUploadProgress.fileName}
+          </Typography>
+        </Grid>
+        <Grid item>
+          <Typography>recieved - waiting for response from server...</Typography>
+        </Grid>
+      </Grid>
     )
   }
 
@@ -215,7 +234,13 @@ export default function ReleaseForm({
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>Images</Typography>
-        <ModelImageList model={model} value={formData.imageList} readOnly={isReadOnly} onChange={onImageListChange} />
+        <ModelImageList
+          multiple
+          model={model}
+          value={formData.imageList}
+          readOnly={isReadOnly}
+          onChange={onImageListChange}
+        />
         {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
       </Stack>
     </Stack>
