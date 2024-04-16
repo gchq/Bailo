@@ -12,6 +12,7 @@ import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { SnackbarProvider } from 'notistack'
 import { useEffect } from 'react'
+import Wrapper from 'src/Wrapper'
 
 import ThemeModeContext from '../src/contexts/themeModeContext'
 import UnsavedChangesContext from '../src/contexts/unsavedChangesContext'
@@ -41,7 +42,9 @@ export default function MyApp(props: AppProps) {
             <SnackbarProvider>
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
                 <CssBaseline />
-                <Component {...pageProps} />
+                <Wrapper {...pageProps}>
+                  <Component {...pageProps} />
+                </Wrapper>
               </LocalizationProvider>
             </SnackbarProvider>
           </ThemeModeContext.Provider>

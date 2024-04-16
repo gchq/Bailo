@@ -1,6 +1,6 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { LoadingButton } from '@mui/lab'
-import { Button, Card, Stack, Typography } from '@mui/material'
+import { Button, Card, Container, Stack, Typography } from '@mui/material'
 import { postAccessRequest } from 'actions/accessRequest'
 import { useGetModel } from 'actions/model'
 import { useGetSchema } from 'actions/schema'
@@ -9,11 +9,11 @@ import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import Wrapper from 'src/Wrapper'
 import { SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, setStepValidate, validateForm } from 'utils/formUtils'
@@ -106,43 +106,46 @@ export default function NewAccessRequest() {
   if (error) return error
 
   return (
-    <Wrapper title='Access Request' page='Model'>
+    <>
+      <Title title='Access Request' />
       {isLoading && <Loading />}
       {!isLoading && (
-        <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-          {(!model || !model.card) && (
-            <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>
-          )}
-          {model && model.card && (
-            <Stack spacing={4}>
-              <Link href={`/model/${modelId}/access-request/schema`}>
-                <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                  Select a different schema
-                </Button>
-              </Link>
-              <JsonSchemaForm
-                splitSchema={splitSchema}
-                setSplitSchema={setSplitSchema}
-                canEdit
-                displayLabelValidation
-                defaultCurrentUserInEntityList
-              />
-              <Stack alignItems='flex-end'>
-                <LoadingButton
-                  sx={{ width: 'fit-content' }}
-                  variant='contained'
-                  onClick={onSubmit}
-                  loading={submitButtonLoading}
-                  data-test='createAccessRequestButton'
-                >
-                  Submit
-                </LoadingButton>
-                <MessageAlert message={submissionErrorText} severity='error' />
+        <Container maxWidth='md'>
+          <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
+            {(!model || !model.card) && (
+              <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>
+            )}
+            {model && model.card && (
+              <Stack spacing={4}>
+                <Link href={`/model/${modelId}/access-request/schema`}>
+                  <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
+                    Select a different schema
+                  </Button>
+                </Link>
+                <JsonSchemaForm
+                  splitSchema={splitSchema}
+                  setSplitSchema={setSplitSchema}
+                  canEdit
+                  displayLabelValidation
+                  defaultCurrentUserInEntityList
+                />
+                <Stack alignItems='flex-end'>
+                  <LoadingButton
+                    sx={{ width: 'fit-content' }}
+                    variant='contained'
+                    onClick={onSubmit}
+                    loading={submitButtonLoading}
+                    data-test='createAccessRequestButton'
+                  >
+                    Submit
+                  </LoadingButton>
+                  <MessageAlert message={submissionErrorText} severity='error' />
+                </Stack>
               </Stack>
-            </Stack>
-          )}
-        </Card>
+            )}
+          </Card>
+        </Container>
       )}
-    </Wrapper>
+    </>
   )
 }

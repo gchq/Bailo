@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import PageWithTabs from 'src/common/PageWithTabs'
+import Title from 'src/common/Title'
 import ReviewsList from 'src/reviews/ReviewsList'
-import Wrapper from 'src/Wrapper'
 
 export default function Review() {
   const tabs = useMemo(
@@ -14,8 +14,9 @@ export default function Review() {
   )
 
   return (
-    <Wrapper title='Review' page='review' fullWidth>
+    <>
+      <Title title='Review' />
       <PageWithTabs title='Your Reviews' tabs={tabs} />
-    </Wrapper>
+    </>
   )
 }

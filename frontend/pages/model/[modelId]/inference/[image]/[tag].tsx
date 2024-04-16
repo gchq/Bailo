@@ -5,8 +5,8 @@ import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import MessageAlert from 'src/MessageAlert'
-import Wrapper from 'src/Wrapper'
 
 export default function InferenceApp() {
   const router = useRouter()
@@ -28,7 +28,8 @@ export default function InferenceApp() {
   }
 
   return (
-    <Wrapper title='Inferencing Service' page='Inferencing'>
+    <>
+      <Title title='Inferencing Service' />
       {(isModelLoading || isUiConfigLoading) && <Loading />}
       <Container maxWidth='lg'>
         <Card sx={{ my: 4, p: 4 }}>
@@ -53,6 +54,6 @@ export default function InferenceApp() {
           )}
         </Card>
       </Container>
-    </Wrapper>
+    </>
   )
 }

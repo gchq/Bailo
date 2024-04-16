@@ -3,9 +3,9 @@ import { Button, Card, Container, Divider, Link, Stack, Typography } from '@mui/
 import { useGetInference } from 'actions/inferencing'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import MessageAlert from 'src/MessageAlert'
 import EditableInference from 'src/model/inferencing/EditableInference'
-import Wrapper from 'src/Wrapper'
 
 export default function InferenceSettings() {
   const router = useRouter()
@@ -17,7 +17,8 @@ export default function InferenceSettings() {
   }
 
   return (
-    <Wrapper title={inference ? `${inference.image}:${inference.tag}` : 'Loading...'} page='inferencing' fullWidth>
+    <>
+      <Title title={inference ? `${inference.image}:${inference.tag}` : 'Loading...'} />
       {!inference || isInferenceLoading ? (
         <Loading />
       ) : (
@@ -39,6 +40,6 @@ export default function InferenceSettings() {
           </Card>
         </Container>
       )}
-    </Wrapper>
+    </>
   )
 }

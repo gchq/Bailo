@@ -1,14 +1,15 @@
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import PageWithTabs from 'src/common/PageWithTabs'
+import Title from 'src/common/Title'
 import SchemaTab from 'src/schemas/SchemaTab'
-import Wrapper from 'src/Wrapper'
 
 export default function SchemasPage() {
   return (
-    <Wrapper title='Schemas' page='beta/schemas' fullWidth>
+    <>
+      <Title title='Schemas' />
       <Schemas />
-    </Wrapper>
+    </>
   )
 }
 
