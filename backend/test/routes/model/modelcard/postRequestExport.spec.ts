@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { postRequestExportSchema } from '../../../../src/routes/v2/model/modelcard/postRequestExport.js'
+import { postRequestExportSchema } from '../../../../src/routes/v2/model/postRequestExport.js'
 import { createFixture, testPost } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/connectors/authorisation/index.js')
