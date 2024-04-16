@@ -45,6 +45,7 @@ export interface ModelInterface {
   collaborators: Array<CollaboratorEntry>
   settings: {
     ungovernedAccess: boolean
+    mirroredModelId?: string
   }
 
   visibility: ModelVisibilityKeys
@@ -82,6 +83,7 @@ const ModelSchema = new Schema<ModelInterface>(
     ],
     settings: {
       ungovernedAccess: { type: Boolean, required: true, default: false },
+      mirroredModelId: { type: String },
     },
 
     visibility: { type: String, enum: Object.values(ModelVisibility), default: ModelVisibility.Public },

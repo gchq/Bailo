@@ -29,14 +29,17 @@ export async function exportModel(
   if (!disclaimerAgreement) {
     throw BadReq('You must agree to the disclaimer agreement before being able to export a model.')
   }
-  // Add a check to verify an export model ID has been set
+  const model = await getModelById(user, modelId)
+  if (!model.settings.mirroredModelId || model.settings.mirroredModelId === '') {
+    throw BadReq('The ID of the mirrored model has not been set on this model.')
+  }
 
   const zipFiles: { filename: string; file: archiver.Archiver }[] = []
-  zipFiles.push({ filename: `${modelId}/modelCards.zip`, file: await generateModelCardRevisionsZip(user, modelId) })
+  zipFiles.push({ filename: `${modelId}/modelCards.zip`, file: await generateModelCardRevisionsZip(user, model) })
   if (releaseSemvers && releaseSemvers.length > 0) {
     zipFiles.push({
       filename: `${modelId}/releases.zip`,
-      file: await generateReleaseZip(user, modelId, releaseSemvers),
+      file: await generateReleaseZip(user, model, releaseSemvers),
     })
   }
 
@@ -60,12 +63,11 @@ async function uploadZipFileToS3(zip: archiver.Archiver, filename: string) {
   await putObjectStream(config.modelMirror.export.bucket, filename, s3Stream, signatures)
 }
 
-async function generateModelCardRevisionsZip(user: UserInterface, modelId: string) {
-  const model = await getModelById(user, modelId)
-  const cards = await getModelCardRevisions(user, modelId)
+async function generateModelCardRevisionsZip(user: UserInterface, model: ModelDoc) {
+  const cards = await getModelCardRevisions(user, model.id)
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+    throw Forbidden(auth.info, { userDn: user.dn, model: model.id })
   }
 
   let zip: archiver.Archiver
@@ -81,9 +83,8 @@ async function generateModelCardRevisionsZip(user: UserInterface, modelId: strin
   return zip
 }
 
-async function generateReleaseZip(user: UserInterface, modelId: string, semvers: string[]) {
-  const model = await getModelById(user, modelId)
-  const releases = await getReleasesBySemvers(user, modelId, semvers)
+async function generateReleaseZip(user: UserInterface, model: ModelDoc, semvers: string[]) {
+  const releases = await getReleasesBySemvers(user, model.id, semvers)
 
   const zip = archiver('zip')
   const errors: any[] = []

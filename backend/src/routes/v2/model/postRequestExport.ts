@@ -2,16 +2,19 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { exportModel } from '../../../../services/mirroredModel.js'
-import { registerPath } from '../../../../services/specification.js'
-import { parse } from '../../../../utils/validate.js'
+import { exportModel } from '../../../services/mirroredModel.js'
+import { registerPath } from '../../../services/specification.js'
+import { parse } from '../../../utils/validate.js'
 
 export const postRequestExportSchema = z.object({
   params: z.object({
     modelId: z.string(),
   }),
   body: z.object({
-    releases: z.array(z.string()).optional(),
+    releases: z
+      .array(z.string())
+      .optional()
+      .openapi({ example: ['0.0.1', '0.0.2'] }),
     disclaimerAgreement: z.boolean(),
   }),
 })
@@ -29,7 +32,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            message: z.string().openapi({ example: 'Successfully exported model cards' }),
+            message: z.string().openapi({ example: 'Successfully exported model.' }),
           }),
         },
       },
@@ -52,7 +55,7 @@ export const postRequestExport = [
     await exportModel(req.user, modelId, disclaimerAgreement, releases)
 
     return res.json({
-      message: 'Successfully exported model cards',
+      message: 'Successfully exported model.',
     })
   },
 ]
