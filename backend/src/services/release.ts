@@ -242,13 +242,14 @@ export async function getReleasesBySemvers(user: UserInterface, modelId: string,
   for (let i = 0; i < releases.length; i++) {
     if (auths[i].success) {
       filtered.push(releases[i])
+    } else {
+      log.warn('Release not included in response due to authorisation failure', {
+        authorisationResponse: auths[i],
+        modelId,
+        semver: releases[i].semver,
+        requestedReleases: semvers,
+      })
     }
-    log.warn('Release not included in response due to authorisation failure', {
-      authorisationResponse: auths[i],
-      modelId,
-      semver: releases[i].semver,
-      requestedReleases: semvers,
-    })
   }
 
   return filtered
@@ -326,4 +327,17 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
   }
 
   return file
+}
+
+export async function getAllFileIds(modelId: string, semvers: string[]) {
+  const result = await Release.aggregate()
+    .match({ modelId, semver: { $in: semvers } })
+    .unwind({ path: '$fileIds' })
+    .group({
+      _id: null,
+      fileIds: {
+        $addToSet: '$fileIds',
+      },
+    })
+  return result.at(0).fileIds
 }
