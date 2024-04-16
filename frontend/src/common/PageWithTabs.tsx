@@ -40,15 +40,53 @@ export default function PageWithTabs({
   const { tab } = router.query
 
   const [currentTab, setCurrentTab] = useState('')
+  const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
   useEffect(() => {
     if (!tabs.length) return
     setCurrentTab(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
   }, [tab, tabs])
 
-  const visibleTabs = useMemo(() => tabs.filter((tab) => !tab.hidden), [tabs])
+  const tabsList = useMemo(
+    () =>
+      tabs.reduce<ReactElement[]>((visibleTabs, tab: PageTab) => {
+        if (!tab.hidden)
+          visibleTabs.push(
+            tab.disabled ? (
+              <Tooltip key={tab.title} title={tab.disabledText}>
+                <span>
+                  <Tab
+                    disabled={tab.disabled}
+                    value={tab.path}
+                    data-test={`${tab.path}Tab`}
+                    label={<span>{tab.title}</span>}
+                  />
+                </span>
+              </Tooltip>
+            ) : (
+              <Tab
+                key={tab.title}
+                disabled={tab.disabled}
+                value={tab.path}
+                data-test={`${tab.path}Tab`}
+                label={<span>{tab.title}</span>}
+              />
+            ),
+          )
+        return visibleTabs
+      }, []),
+    [tabs],
+  )
 
-  const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
+  const tabPanels = useMemo(
+    () =>
+      tabs.map((tab: PageTab) => (
+        <CustomTabPanel key={tab.title} currentTab={currentTab} tabKey={tab.path}>
+          {tab.view}
+        </CustomTabPanel>
+      )),
+    [currentTab, tabs],
+  )
 
   function handleChange(_event: SyntheticEvent, newValue: string) {
     if (unsavedChanges) {
@@ -104,40 +142,9 @@ export default function PageWithTabs({
         scrollButtons='auto'
         variant='scrollable'
       >
-        {visibleTabs.map((tab: PageTab) => {
-          if (tab.disabled) {
-            return (
-              <Tooltip key={tab.title} title={tab.disabledText}>
-                <span>
-                  <Tab
-                    disabled={tab.disabled}
-                    value={tab.path}
-                    data-test={`${tab.path}Tab`}
-                    label={<span>{tab.title}</span>}
-                  />
-                </span>
-              </Tooltip>
-            )
-          } else {
-            return (
-              <Tab
-                key={tab.title}
-                disabled={tab.disabled}
-                value={tab.path}
-                data-test={`${tab.path}Tab`}
-                label={<span>{tab.title}</span>}
-              />
-            )
-          }
-        })}
+        {tabsList}
       </Tabs>
-      {tabs.map((tab: PageTab) => {
-        return (
-          <CustomTabPanel key={tab.title} currentTab={currentTab} tabKey={tab.path}>
-            {tab.view}
-          </CustomTabPanel>
-        )
-      })}
+      {tabPanels}
     </>
   )
 }
