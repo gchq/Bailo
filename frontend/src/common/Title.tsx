@@ -7,7 +7,7 @@ export interface TitleProps {
 export default function Title({ title }: TitleProps) {
   return (
     <Head>
-      <title>{`${title} | Bailo`}</title>
+      <title>{`${title} · Bailo`}</title>
     </Head>
   )
 }
