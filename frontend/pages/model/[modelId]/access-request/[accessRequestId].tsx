@@ -4,6 +4,7 @@ import { useGetAccessRequest } from 'actions/accessRequest'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
@@ -53,9 +54,16 @@ export default function AccessRequest() {
                       Back to model
                     </Button>
                   </Link>
-                  <Typography variant='h6' color='primary' component='h1'>
-                    {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
-                  </Typography>
+                  <Stack direction='row' alignItems='center'>
+                    <Typography variant='h6' color='primary' component='h1'>
+                      {accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
+                    </Typography>
+                    <CopyToClipboardButton
+                      textToCopy={accessRequest.id}
+                      notificationText='Copied access request ID to clipboard'
+                      ariaLabel='copy access request ID to clipboard'
+                    />
+                  </Stack>
                 </Stack>
                 {accessRequest && (
                   <EditableAccessRequestForm accessRequest={accessRequest} isEdit={isEdit} onIsEditChange={setIsEdit} />
