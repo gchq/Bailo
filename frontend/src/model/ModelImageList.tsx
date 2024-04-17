@@ -23,7 +23,7 @@ type PartialModelImageListProps =
 
 type ModelImageListProps = {
   model: ModelInterface
-  setRegistryError: (value: boolean) => void
+  setRegistryError?: (value: boolean) => void
   readOnly?: boolean
 } & PartialModelImageListProps
 
@@ -38,7 +38,9 @@ export default function ModelImageList({
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
   useEffect(() => {
-    setRegistryError(!!isModelImagesError)
+    if (setRegistryError) {
+      setRegistryError(!!isModelImagesError)
+    }
   }, [isModelImagesError, setRegistryError])
 
   const sortedImageList = useMemo(() => {
