@@ -1,4 +1,5 @@
 import { useGetModel } from 'actions/model'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
@@ -6,6 +7,7 @@ import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import AccessRequests from 'src/model/AccessRequests'
+import InferenceServices from 'src/model/InferenceServices'
 import ModelImages from 'src/model/ModelImages'
 import Overview from 'src/model/Overview'
 import Releases from 'src/model/Releases'
@@ -17,6 +19,7 @@ export default function Model() {
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const roles = useMemo(
     () => model?.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === currentUser?.dn)?.roles,
@@ -25,7 +28,7 @@ export default function Model() {
 
   const tabs = useMemo(
     () =>
-      model && roles
+      model && uiConfig && roles
         ? [
             { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
             {
@@ -48,10 +51,16 @@ export default function Model() {
               path: 'registry',
               view: <ModelImages model={model} />,
             },
+            {
+              title: 'Inferencing',
+              path: 'inferencing',
+              view: <InferenceServices model={model} />,
+              hidden: !uiConfig.inference.enabled,
+            },
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]
         : [],
-    [model, roles],
+    [model, uiConfig, roles],
   )
 
   function requestAccess() {
@@ -61,12 +70,13 @@ export default function Model() {
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isModelError,
     isCurrentUserError,
+    isUiConfigError,
   })
   if (error) return error
 
   return (
     <Wrapper title={model ? model.name : 'Loading...'} page='marketplace' fullWidth>
-      {isModelLoading && isCurrentUserLoading && <Loading />}
+      {isModelLoading && isCurrentUserLoading && isUiConfigLoading && <Loading />}
       {model && (
         <PageWithTabs
           title={model.name}

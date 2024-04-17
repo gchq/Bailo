@@ -1,12 +1,12 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
-import { Box, Button, Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Card, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { cloneDeep, groupBy } from 'lodash-es'
 import { useRouter } from 'next/router'
-import prettyBytes from 'pretty-bytes'
 import { useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UserDisplay from 'src/common/UserDisplay'
+import FileDownload from 'src/model/releases/FileDownload'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 
 import { useGetReviewRequestsForModel } from '../../../actions/review'
@@ -126,25 +126,7 @@ export default function ReleaseDisplay({
                 <>
                   <Typography fontWeight='bold'>Files</Typography>
                   {release.files.map((file) => (
-                    <div key={file._id}>
-                      <Grid container spacing={1} alignItems='center'>
-                        <Grid item xs>
-                          <Tooltip title={file.name}>
-                            <Link
-                              href={`/api/v2/model/${model.id}/file/${file._id}/download`}
-                              data-test={`fileLink-${file.name}`}
-                            >
-                              <Typography noWrap textOverflow='ellipsis' display='inline'>
-                                {file.name}
-                              </Typography>
-                            </Link>
-                          </Tooltip>
-                        </Grid>
-                        <Grid item xs={1} textAlign='right'>
-                          <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-                        </Grid>
-                      </Grid>
-                    </div>
+                    <FileDownload key={file.name} file={file} modelId={model.id} />
                   ))}
                 </>
               )}
