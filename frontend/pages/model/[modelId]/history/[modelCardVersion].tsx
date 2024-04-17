@@ -39,7 +39,7 @@ export default function ViewModelCardVersion() {
 
   return (
     <>
-      <Title title='Model Card Revision' />
+      <Title text='Model Card Revision' />
       {(isSchemaLoading || isModelLoading) && <Loading />}
       <Box sx={{ px: 4, py: 1 }}>
         {!isSchemaLoading && (

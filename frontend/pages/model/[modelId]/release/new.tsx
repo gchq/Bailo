@@ -94,7 +94,7 @@ export default function NewRelease() {
 
   return (
     <>
-      <Title title='Draft New Release' />
+      <Title text='Draft New Release' />
       {isModelLoading && <Loading />}
       {model && !isModelLoading && (
         <Container maxWidth='md'>

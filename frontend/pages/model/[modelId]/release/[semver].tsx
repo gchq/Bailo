@@ -38,7 +38,7 @@ export default function Release() {
 
   return (
     <>
-      <Title title={release ? release.semver : 'Loading...'} />
+      <Title text={release ? release.semver : 'Loading...'} />
       <Container maxWidth='md' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper>
           <>

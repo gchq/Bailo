@@ -42,7 +42,7 @@ export default function MyApp(props: AppProps) {
             <SnackbarProvider>
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
                 <CssBaseline />
-                <Wrapper {...pageProps}>
+                <Wrapper>
                   <Component {...pageProps} />
                 </Wrapper>
               </LocalizationProvider>

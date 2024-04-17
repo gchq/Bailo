@@ -129,7 +129,7 @@ export default function Marketplace() {
 
   return (
     <>
-      <Title title='Marketplace' />
+      <Title text='Marketplace' />
       <Container maxWidth='xl'>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <Stack spacing={2} sx={{ maxWidth: '250px' }}>

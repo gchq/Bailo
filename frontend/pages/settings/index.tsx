@@ -28,7 +28,7 @@ export default function Settings() {
 
   return (
     <>
-      <Title title='Settings' />
+      <Title text='Settings' />
       {isCurrentUserLoading && <Loading />}
       <PageWithTabs title='Settings' tabs={tabs} />
     </>

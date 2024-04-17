@@ -107,7 +107,7 @@ export default function NewAccessRequest() {
 
   return (
     <>
-      <Title title='Access Request' />
+      <Title text='Access Request' />
       {isLoading && <Loading />}
       {!isLoading && (
         <Container maxWidth='md'>

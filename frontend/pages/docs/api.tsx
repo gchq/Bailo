@@ -10,7 +10,7 @@ const SwaggerUI = dynamic(import('swagger-ui-react'), { ssr: false })
 export default function API() {
   return (
     <>
-      <Title title='API' />
+      <Title text='API' />
       <Box sx={{ backgroundColor: '#f5f5f5', pt: '5px', pb: '5px', borderRadius: 4 }}>
         <SwaggerUI url='/api/v2/specification' />
       </Box>

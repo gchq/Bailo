@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box'
-import CssBaseline from '@mui/material/CssBaseline'
-import { ThemeProvider, useTheme } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
@@ -30,6 +29,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const isDocsPage = useMemo(() => router.route.startsWith('/docs'), [router])
+  const page = useMemo(() => router.route.split('/')[1].replace('/', ''), [router])
 
   useEffect(() => {
     if (!isUiConfigLoading) {
@@ -65,16 +65,15 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <>
       <Banner />
       <Box sx={{ display: 'flex' }}>
-        <CssBaseline />
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
         {currentUser && (
           <>
             <TopNavigation drawerOpen={open} pageTopStyling={pageTopStyling} currentUser={currentUser} />
             <SideNavigation
-              page={router.route.split('/')[1].replace('/', '')}
+              page={page}
               currentUser={currentUser}
               drawerOpen={open}
               pageTopStyling={pageTopStyling}
@@ -108,6 +107,6 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
           </Box>
         </Box>
       </Box>
-    </ThemeProvider>
+    </>
   )
 }
