@@ -1,18 +1,15 @@
-import React, { MouseEvent, ReactElement, ReactNode, useContext, useEffect, useMemo } from 'react'
+import React, { ReactElement, ReactNode, useMemo } from 'react'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
-import Container from '@mui/material/Container'
+import GitHubIcon from '@mui/icons-material/GitHub'
 import CssBaseline from '@mui/material/CssBaseline'
-import MuiDrawer from '@mui/material/Drawer'
-import List from '@mui/material/List'
 import { styled, ThemeProvider, useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
-import Typography from '@mui/material/Typography'
 import Head from 'next/head'
 import Image from 'next/legacy/image'
 import Link from './Link'
-import Copyright from './Copyright'
 import imageLoader from './imageLoader'
+import { Button, IconButton, Tooltip } from '@mui/material'
 
 const drawerWidth = 240
 
@@ -56,7 +53,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
       </Head>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <AppBar position='absolute' data-test='appBar' sx={{ top: 'unset' }}>
+        <AppBar position='absolute' data-test='appBar' sx={{ top: 'unset', boxShadow: 'none' }}>
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed
@@ -74,7 +71,12 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 />
               </Link>
             </Box>
-            Documentation
+            <Button href='/docs/' sx={{ color: 'white' }}>
+              Documentation
+            </Button>
+            <Button href='https://github.com/gchq/bailo' sx={{ color: 'white' }}>
+              Github
+            </Button>
           </Toolbar>
         </AppBar>
         <Box

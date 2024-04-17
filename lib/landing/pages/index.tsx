@@ -9,7 +9,6 @@ import localFont from '@next/font/local'
 import Link from '../src/Link'
 import { createRef } from 'react'
 import Tooltip from '@mui/material/Tooltip'
-import GitHubIcon from '@mui/icons-material/GitHub'
 import IconButton from '@mui/material/IconButton'
 import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
@@ -42,15 +41,6 @@ export default function Home() {
           minHeight: '100vh',
         }}
       >
-        <Container sx={{ p: 4, position: 'absolute' }}>
-          <Link href='https://github.com/gchq/bailo'>
-            <Tooltip title='Open GitHub'>
-              <IconButton sx={{ p: 0 }}>
-                <GitHubIcon color='secondary' sx={{ fontSize: 40 }} />
-              </IconButton>
-            </Tooltip>
-          </Link>
-        </Container>
         <Stack
           sx={{
             display: 'flex',
