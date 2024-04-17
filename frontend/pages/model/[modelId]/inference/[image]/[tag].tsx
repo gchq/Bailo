@@ -29,7 +29,7 @@ export default function InferenceApp() {
 
   return (
     <>
-      <Title title='Inferencing Service' />
+      <Title text='Inferencing Service' />
       {(isModelLoading || isUiConfigLoading) && <Loading />}
       <Container maxWidth='lg'>
         <Card sx={{ my: 4, p: 4 }}>

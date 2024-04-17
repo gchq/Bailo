@@ -117,7 +117,7 @@ export default function NewToken() {
 
   return (
     <>
-      <Title title='Personal Access Token' />
+      <Title text='Personal Access Token' />
       <Container maxWidth='md'>
         <Card sx={{ my: 4, p: 4 }}>
           <Stack spacing={2}>

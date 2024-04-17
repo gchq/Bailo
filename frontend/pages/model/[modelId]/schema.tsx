@@ -59,7 +59,7 @@ export default function NewSchemaSelection() {
 
   return (
     <>
-      <Title title='Select a schema' />
+      <Title text='Select a schema' />
       {isLoadingData && <Loading />}
       {!isLoadingData && (
         <Container maxWidth='md'>

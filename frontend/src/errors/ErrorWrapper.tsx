@@ -8,7 +8,7 @@ type ErrorWrapperProps = {
 export default function ErrorWrapper({ message }: ErrorWrapperProps) {
   return (
     <>
-      <Title title='Error' />
+      <Title text='Error' />
       <MessageAlert
         message={message || 'Unable to communicate with server.'}
         severity='error'

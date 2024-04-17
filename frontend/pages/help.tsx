@@ -1,7 +1,7 @@
 import ArticleIcon from '@mui/icons-material/Article'
 import BugReportIcon from '@mui/icons-material/BugReport'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
-import { Paper } from '@mui/material'
+import { Container, Paper } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -24,8 +24,8 @@ export default function Help() {
   if (error) return error
 
   return (
-    <>
-      <Title title='Help' />
+    <Container maxWidth='xl' sx={{ pb: 2 }}>
+      <Title text='Help' />
       {isUiConfigLoading && <Loading />}
       {uiConfig && (
         <Paper sx={{ py: 5, px: 5 }}>
@@ -103,6 +103,6 @@ export default function Help() {
           </Grid>
         </Paper>
       )}
-    </>
+    </Container>
   )
 }

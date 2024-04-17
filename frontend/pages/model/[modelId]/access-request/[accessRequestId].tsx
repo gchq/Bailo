@@ -33,7 +33,7 @@ export default function AccessRequest() {
 
   return (
     <>
-      <Title title={accessRequest ? accessRequest.metadata.overview.name : 'Loading...'} />
+      <Title text={accessRequest ? accessRequest.metadata.overview.name : 'Loading...'} />
       <Container maxWidth='md' sx={{ my: 4 }} data-test='accessRequestContainer'>
         <Paper>
           {isAccessRequestLoading && isReviewsLoading && <Loading />}

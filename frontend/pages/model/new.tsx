@@ -82,7 +82,7 @@ export default function NewModel() {
 
   return (
     <>
-      <Title title='Create a new Model' />
+      <Title text='Create a new Model' />
       <Container maxWidth='sm'>
         <Card sx={{ p: 4, m: 'auto' }}>
           <Stack spacing={2} alignItems='center' justifyContent='center'>

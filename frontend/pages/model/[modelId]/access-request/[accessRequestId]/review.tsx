@@ -77,7 +77,7 @@ export default function AccessRequestReview() {
 
   return (
     <>
-      <Title title={accessRequestId ? accessRequestId : 'Loading...'} />
+      <Title text={accessRequestId ? accessRequestId : 'Loading...'} />
       <Container maxWidth='md' sx={{ my: 4 }}>
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>

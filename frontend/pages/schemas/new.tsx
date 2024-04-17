@@ -90,7 +90,7 @@ export default function NewSchema() {
 
   return (
     <>
-      <Title title='Upload a new Schema' />
+      <Title text='Upload a new Schema' />
       <Container maxWidth='sm' sx={{ my: 4 }}>
         <Paper sx={{ p: 4, m: 'auto' }}>
           <Link href={`/schemas/list`}>

@@ -74,7 +74,7 @@ export default function NewInference() {
   }
   return (
     <>
-      <Title title='Create a new Inferencing Service' />
+      <Title text='Create a new Inferencing Service' />
       {isModelLoading && <Loading />}
       {model && !isModelLoading && (
         <Container maxWidth='md'>

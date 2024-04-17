@@ -18,7 +18,7 @@ export default function InferenceSettings() {
 
   return (
     <>
-      <Title title={inference ? `${inference.image}:${inference.tag}` : 'Loading...'} />
+      <Title text={inference ? `${inference.image}:${inference.tag}` : 'Loading...'} />
       {!inference || isInferenceLoading ? (
         <Loading />
       ) : (

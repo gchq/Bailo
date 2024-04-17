@@ -1,13 +1,13 @@
 import Head from 'next/head'
 
 export interface TitleProps {
-  title: string
+  text: string
 }
 
-export default function Title({ title }: TitleProps) {
+export default function Title({ text }: TitleProps) {
   return (
     <Head>
-      <title>{`${title} · Bailo`}</title>
+      <title>{`${text} · Bailo`}</title>
     </Head>
   )
 }

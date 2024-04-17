@@ -7,7 +7,7 @@ import SchemaTab from 'src/schemas/SchemaTab'
 export default function SchemasPage() {
   return (
     <>
-      <Title title='Schemas' />
+      <Title text='Schemas' />
       <Schemas />
     </>
   )

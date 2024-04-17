@@ -110,7 +110,7 @@ export default function ReleaseReview() {
 
   return (
     <>
-      <Title title={semver ? semver : 'Loading...'} />
+      <Title text={semver ? semver : 'Loading...'} />
       <Container maxWidth='md' sx={{ my: 4 }}>
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
