@@ -8,12 +8,12 @@ import { useRouter } from 'next/router'
 import qs from 'querystring'
 import { FormEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import ReleaseForm from 'src/model/releases/ReleaseForm'
-import Wrapper from 'src/Wrapper'
 import { FileInterface, FileUploadProgress, FileWithMetadata, FlattenedModelImage, isFileInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver } from 'utils/stringUtils'
@@ -133,7 +133,8 @@ export default function NewRelease() {
   if (error) return error
 
   return (
-    <Wrapper fullWidth title='Draft New Release' page='Model'>
+    <>
+      <Title text='Draft New Release' />
       {isModelLoading && <Loading />}
       {model && !isModelLoading && (
         <Container maxWidth='md'>
@@ -173,6 +174,7 @@ export default function NewRelease() {
                   onImageListChange={(value) => setImageList(value)}
                   currentFileUploadProgress={currentFileUploadProgress}
                   uploadedFiles={uploadedFiles}
+                  filesToUploadCount={files.length}
                 />
                 <Stack alignItems='flex-end'>
                   <LoadingButton
@@ -192,6 +194,6 @@ export default function NewRelease() {
           </Card>
         </Container>
       )}
-    </Wrapper>
+    </>
   )
 }

@@ -52,6 +52,7 @@ type ReleaseFormProps = {
   onImageListChange: (value: FlattenedModelImage[]) => void
   currentFileUploadProgress?: FileUploadProgress
   uploadedFiles?: string[]
+  filesToUploadCount: number
 } & EditableReleaseFormProps
 
 export default function ReleaseForm({
@@ -68,6 +69,7 @@ export default function ReleaseForm({
   isEdit = false,
   currentFileUploadProgress,
   uploadedFiles,
+  filesToUploadCount,
 }: ReleaseFormProps) {
   const theme = useTheme()
 
@@ -95,14 +97,14 @@ export default function ReleaseForm({
     if (!currentFileUploadProgress) {
       return <Typography>Could not determine file progress</Typography>
     }
-    if (uploadedFiles && uploadedFiles.length === formData.files.length) {
+    if (uploadedFiles && uploadedFiles.length === filesToUploadCount) {
       return <Typography>All files uploaded successfully.</Typography>
     }
     return currentFileUploadProgress.uploadProgress < 100 ? (
       <Grid container direction='row' spacing={1}>
         <Grid item>
           <Typography fontWeight='bold'>
-            [File {uploadedFiles ? uploadedFiles.length + 1 : '1'} / {formData.files.length}] -
+            [File {uploadedFiles ? uploadedFiles.length + 1 : '1'} / {filesToUploadCount}] -
           </Typography>
         </Grid>
         <Grid item>
@@ -116,7 +118,7 @@ export default function ReleaseForm({
       <Grid container direction='row' spacing={1}>
         <Grid item>
           <Typography fontWeight='bold'>
-            File {uploadedFiles && uploadedFiles.length + 1} / {formData.files.length} -
+            File {uploadedFiles && uploadedFiles.length + 1} / {filesToUploadCount} -
             {currentFileUploadProgress.fileName}
           </Typography>
         </Grid>

@@ -47,6 +47,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const [open, setOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
+  const [filesToUploadCount, setFilesToUploadCount] = useState(0)
 
   const { model, isModelLoading, isModelError } = useGetModel(release.modelId)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
@@ -106,9 +107,15 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
 
   const handleSubmit = async () => {
     setIsLoading(true)
-
     const fileIds: string[] = []
+    const newFilesToUpload: File[] = []
     for (const file of files) {
+      isFileInterface(file) ? fileIds.push(file._id) : newFilesToUpload.push(file)
+    }
+
+    setFilesToUploadCount(newFilesToUpload.length)
+
+    for (const file of newFilesToUpload) {
       if (isFileInterface(file)) {
         fileIds.push(file._id)
         continue
@@ -225,6 +232,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onImageListChange={(value) => setImageList(value)}
         currentFileUploadProgress={currentFileUploadProgress}
         uploadedFiles={uploadedFiles}
+        filesToUploadCount={filesToUploadCount}
       />
       <ConfirmationDialogue
         open={open}
