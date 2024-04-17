@@ -14,10 +14,11 @@ import { styled, useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
-import Title from 'src/common/Title'
-import Copyright from 'src/Copyright'
+import React from 'react'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
+import Title from '../common/Title'
+import Copyright from '../Copyright'
 
 type DocsWrapperProps = {
   children?: ReactNode
