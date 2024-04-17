@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material'
-import Autocomplete from '@mui/material/Autocomplete'
+import Autocomplete, { AutocompleteRenderInputParams } from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import { useGetModelImages } from 'actions/model'
 import { SyntheticEvent, useEffect, useMemo } from 'react'
@@ -9,13 +9,23 @@ import { sortByNameAscending } from 'utils/arrayUtils'
 import { FlattenedModelImage, ModelInterface } from '../../types/types'
 import MessageAlert from '../MessageAlert'
 
-interface ModelImageListProps {
+type PartialModelImageListProps =
+  | {
+      multiple: true
+      value: FlattenedModelImage[]
+      onChange: (val: FlattenedModelImage[]) => void
+    }
+  | {
+      multiple?: false
+      value?: FlattenedModelImage | undefined
+      onChange: (val: FlattenedModelImage) => void
+    }
+
+type ModelImageListProps = {
   model: ModelInterface
-  value: FlattenedModelImage[]
-  onChange: (value: FlattenedModelImage[]) => void
   setRegistryError: (value: boolean) => void
   readOnly?: boolean
-}
+} & PartialModelImageListProps
 
 export default function ModelImageList({
   model,
@@ -23,6 +33,7 @@ export default function ModelImageList({
   onChange,
   setRegistryError,
   readOnly = false,
+  multiple,
 }: ModelImageListProps) {
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
@@ -49,40 +60,49 @@ export default function ModelImageList({
   const readOnlyImageList = useMemo(() => {
     return isModelImagesLoading ? (
       <Loading />
-    ) : (
-      sortedImageList.map((modelImage) => (
+    ) : multiple ? (
+      value.map((modelImage) => (
         <Typography key={`${modelImage.repository}-${modelImage.name}`}>
           {`${modelImage.name}:${modelImage.tag}`}
         </Typography>
       ))
+    ) : (
+      <Typography>{value ? `${value.name}:${value.tag}` : ''}</Typography>
     )
-  }, [isModelImagesLoading, sortedImageList])
+  }, [isModelImagesLoading, value, multiple])
 
-  function handleChange(_event: SyntheticEvent<Element, Event>, flattenedImageList: FlattenedModelImage[]) {
-    onChange(flattenedImageList)
+  function handleChange(
+    _event: SyntheticEvent<Element, Event>,
+    flattenedImages: FlattenedModelImage[] | FlattenedModelImage | null,
+  ) {
+    if (multiple) {
+      onChange([...(flattenedImages as FlattenedModelImage[])])
+    } else {
+      onChange(flattenedImages as FlattenedModelImage)
+    }
   }
 
   if (isModelImagesError) {
     return <MessageAlert message={isModelImagesError.info.message} severity='error' />
   }
 
-  return (
-    <>
-      {readOnly ? (
-        readOnlyImageList
-      ) : (
-        <Autocomplete
-          multiple
-          loading={isModelImagesLoading}
-          onChange={handleChange}
-          data-test='imageListAutocomplete'
-          getOptionLabel={(option) => `${option.name}:${option.tag}`}
-          groupBy={(option) => option.name}
-          options={sortedImageList}
-          value={value}
-          renderInput={(params) => <TextField {...params} size='small' />}
-        />
-      )}
-    </>
+  if (readOnly) {
+    return <>{readOnlyImageList}</>
+  }
+
+  const partialAutocompleteProps = {
+    loading: isModelImagesLoading,
+    onChange: handleChange,
+    getOptionLabel: (option: FlattenedModelImage) => `${option.name}:${option.tag}`,
+    groupBy: (option: FlattenedModelImage) => option.name,
+    options: sortedImageList,
+    renderInput: (params: AutocompleteRenderInputParams) => <TextField {...params} size='small' />,
+    'data-test': 'imageListAutocomplete',
+  }
+
+  return multiple ? (
+    <Autocomplete multiple value={value} {...partialAutocompleteProps} />
+  ) : (
+    <Autocomplete value={value} {...partialAutocompleteProps} />
   )
 }
