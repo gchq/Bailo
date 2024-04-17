@@ -3,7 +3,8 @@ import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
-import { ReactElement, SyntheticEvent, useContext, useEffect, useState } from 'react'
+import { ReactElement, SyntheticEvent, useContext, useEffect, useMemo, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
 export interface PageTab {
@@ -11,6 +12,7 @@ export interface PageTab {
   path: string
   view: ReactElement
   disabled?: boolean
+  hidden?: boolean
   datatest?: string
   disabledText?: string
 }
@@ -22,6 +24,8 @@ export default function PageWithTabs({
   displayActionButton = false,
   actionButtonOnClick,
   requiredUrlParams = {},
+  showCopyButton = false,
+  textToCopy,
 }: {
   title: string
   tabs: PageTab[]
@@ -29,18 +33,61 @@ export default function PageWithTabs({
   displayActionButton?: boolean
   actionButtonOnClick?: () => void
   requiredUrlParams?: ParsedUrlQuery
+  showCopyButton?: boolean
+  textToCopy?: string
 }) {
   const router = useRouter()
   const { tab } = router.query
 
   const [currentTab, setCurrentTab] = useState('')
+  const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
 
   useEffect(() => {
     if (!tabs.length) return
     setCurrentTab(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
   }, [tab, tabs])
 
-  const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
+  const tabsList = useMemo(
+    () =>
+      tabs.reduce<ReactElement[]>((visibleTabs, tab) => {
+        if (!tab.hidden) {
+          visibleTabs.push(
+            tab.disabled ? (
+              <Tooltip key={tab.title} title={tab.disabledText}>
+                <span>
+                  <Tab
+                    disabled={tab.disabled}
+                    value={tab.path}
+                    data-test={`${tab.path}Tab`}
+                    label={<span>{tab.title}</span>}
+                  />
+                </span>
+              </Tooltip>
+            ) : (
+              <Tab
+                key={tab.title}
+                disabled={tab.disabled}
+                value={tab.path}
+                data-test={`${tab.path}Tab`}
+                label={<span>{tab.title}</span>}
+              />
+            ),
+          )
+        }
+        return visibleTabs
+      }, []),
+    [tabs],
+  )
+
+  const tabPanels = useMemo(
+    () =>
+      tabs.map((tab) => (
+        <CustomTabPanel key={tab.title} currentTab={currentTab} tabKey={tab.path}>
+          {tab.view}
+        </CustomTabPanel>
+      )),
+    [currentTab, tabs],
+  )
 
   function handleChange(_event: SyntheticEvent, newValue: string) {
     if (unsavedChanges) {
@@ -70,9 +117,18 @@ export default function PageWithTabs({
         spacing={{ sm: 2 }}
         sx={{ p: 2 }}
       >
-        <Typography component='h1' color='primary' variant='h6'>
-          {title}
-        </Typography>
+        <Stack direction='row'>
+          <Typography component='h1' color='primary' variant='h6'>
+            {title}
+          </Typography>
+          {showCopyButton && (
+            <CopyToClipboardButton
+              textToCopy={textToCopy ? textToCopy : title}
+              notificationText='Copied to clipboard'
+              ariaLabel='copy to clipboard'
+            />
+          )}
+        </Stack>
         {displayActionButton && (
           <Button variant='contained' onClick={actionButtonOnClick}>
             {actionButtonTitle}
@@ -87,40 +143,9 @@ export default function PageWithTabs({
         scrollButtons='auto'
         variant='scrollable'
       >
-        {tabs.map((tab: PageTab) => {
-          if (tab.disabled) {
-            return (
-              <Tooltip key={tab.title} title={tab.disabledText}>
-                <span>
-                  <Tab
-                    disabled={tab.disabled}
-                    value={tab.path}
-                    data-test={`${tab.path}Tab`}
-                    label={<span>{tab.title}</span>}
-                  />
-                </span>
-              </Tooltip>
-            )
-          } else {
-            return (
-              <Tab
-                key={tab.title}
-                disabled={tab.disabled}
-                value={tab.path}
-                data-test={`${tab.path}Tab`}
-                label={<span>{tab.title}</span>}
-              />
-            )
-          }
-        })}
+        {tabsList}
       </Tabs>
-      {tabs.map((tab: PageTab) => {
-        return (
-          <CustomTabPanel key={tab.title} currentTab={currentTab} tabKey={tab.path}>
-            {tab.view}
-          </CustomTabPanel>
-        )
-      })}
+      {tabPanels}
     </>
   )
 }

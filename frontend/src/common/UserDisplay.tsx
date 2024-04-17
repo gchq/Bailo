@@ -1,17 +1,20 @@
 import { Label } from '@mui/icons-material'
-import ContentCopy from '@mui/icons-material/ContentCopy'
 import EmailIcon from '@mui/icons-material/Email'
 import UserIcon from '@mui/icons-material/Person'
-import { Box, Divider, IconButton, Popover, Stack, Typography } from '@mui/material'
+import { Box, Divider, Popover, Stack, Typography } from '@mui/material'
 import { useGetUserInformation } from 'actions/user'
 import { MouseEvent, useMemo, useRef, useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 
-export interface UserInformation {
+export type UserInformation = {
   name?: string
-  organisation?: string
   email?: string
+} & AdditionalProperties
+
+interface AdditionalProperties {
+  [x: string]: string
 }
 
 export type UserDisplayProps = {
@@ -27,12 +30,6 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     dn.includes(':') ? dn.split(':')[1] : dn,
   )
-
-  function handleCopyButtonClick() {
-    if (userInformation && userInformation.email) {
-      navigator.clipboard.writeText(userInformation.email)
-    }
-  }
 
   const popoverEnter = () => {
     if (ref.current) {
@@ -57,6 +54,7 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
       <Box
         component='span'
         ref={ref}
+        data-test='userDisplayName'
         aria-owns={open ? 'user-popover' : undefined}
         aria-haspopup='true'
         sx={{ fontWeight: 'bold' }}
@@ -88,29 +86,31 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
           <Stack spacing={1} sx={{ p: 2 }}>
             <Stack direction='row' alignItems='center' spacing={1}>
               <UserIcon color='primary' />
-              <Typography color='primary' fontWeight='bold'>
+              <Typography color='primary' fontWeight='bold' data-test='userDisplayNameProperty'>
                 {userInformation.name}
               </Typography>
             </Stack>
             <Divider />
             <Stack direction='row' spacing={1} alignItems='center'>
               <EmailIcon color='primary' />
-              <Typography>
+              <Typography data-test='userDisplayEmailProperty'>
                 <Box component='span' fontWeight='bold'>
                   Email
                 </Box>
                 : {userInformation.email}
               </Typography>
-              <IconButton onClick={() => handleCopyButtonClick()} aria-label='Copy text to clipboard' size='small'>
-                <ContentCopy color='primary' />
-              </IconButton>
+              <CopyToClipboardButton
+                textToCopy={userInformation.email ? userInformation.email : ''}
+                notificationText='Copied email address to clipboard'
+                ariaLabel='copy email address to clipboard'
+              />
             </Stack>
             {Object.keys(userInformation).map((key) => {
               if (key !== 'name' && key !== 'email') {
                 return (
                   <Stack direction='row' spacing={1} key={key}>
                     <Label color='primary' />
-                    <Typography>
+                    <Typography data-test={`userDisplayDynamicProperty-${key}`}>
                       <Box component='span' fontWeight='bold'>
                         {key.charAt(0).toUpperCase() + key.slice(1)}
                       </Box>

@@ -7,6 +7,12 @@ import log from '../services/log.js'
 import { doesMigrationExist, markMigrationComplete } from '../services/migration.js'
 import config from './config.js'
 
+export function getConnectionURI() {
+  return config.mongo.pass
+    ? `${config.mongo.uri.replace('://', `://${config.mongo.user}:${config.mongo.pass}@`)}`
+    : config.mongo.uri
+}
+
 export async function connectToMongoose() {
   // is it already connected
   if (Number(mongoose.connection.readyState) === 1) {
@@ -16,10 +22,8 @@ export async function connectToMongoose() {
   try {
     mongoose.set('strictQuery', false)
     mongoose.set('strictPopulate', false)
-    await mongoose.connect(config.mongo.uri, {
-      user: config.mongo.user,
-      pass: config.mongo.pass,
-    })
+
+    await mongoose.connect(getConnectionURI())
     log.info('Connected to Mongoose')
   } catch (error) {
     log.error({ error }, 'Error')
