@@ -17,7 +17,6 @@ import { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
 import React from 'react'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
-import Title from '../common/Title'
 import Copyright from '../Copyright'
 import Wrapper from '../Wrapper'
 
