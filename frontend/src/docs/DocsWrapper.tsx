@@ -110,8 +110,8 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
 
   return (
     <>
-      {/* Banner height + Toolbar height = 96px */}
       <Title text='Documentation' />
+      {/* Banner height + Toolbar height = 96px */}
       <Box display='flex' width='100%' height='calc(100vh - 96px)'>
         <Box
           sx={{
