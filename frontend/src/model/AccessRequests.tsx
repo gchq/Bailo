@@ -12,9 +12,10 @@ import Loading from '../common/Loading'
 
 type AccessRequestsProps = {
   model: ModelInterface
+  roles: string[]
 }
 
-export default function AccessRequests({ model }: AccessRequestsProps) {
+export default function AccessRequests({ model, roles }: AccessRequestsProps) {
   const { accessRequests, isAccessRequestsLoading, isAccessRequestsError } = useGetAccessRequestsForModelId(model.id)
 
   const accessRequestsList = useMemo(
@@ -23,12 +24,16 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
         accessRequests
           .sort(sortByCreatedAtDescending)
           .map((accessRequest) => (
-            <AccessRequestDisplay accessRequest={accessRequest} key={accessRequest.metadata.overview.name} />
+            <AccessRequestDisplay
+              accessRequest={accessRequest}
+              key={accessRequest.metadata.overview.name}
+              hideReviewBanner={!roles?.some((role) => ['msro', 'mtr'].includes(role))}
+            />
           ))
       ) : (
         <EmptyBlob text={`No access requests found for model ${model.name}`} />
       ),
-    [accessRequests, model.name],
+    [accessRequests, model.name, roles],
   )
 
   if (isAccessRequestsError) {
