@@ -21,27 +21,28 @@ export default function Model() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const roles = useMemo(
-    () => model?.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === currentUser?.dn)?.roles,
+  const currentUserRoles = useMemo(
+    () =>
+      model?.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === currentUser?.dn)?.roles || [],
     [model, currentUser],
   )
 
   const tabs = useMemo(
     () =>
-      model && uiConfig && roles
+      model && uiConfig
         ? [
             { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
             {
               title: 'Releases',
               path: 'releases',
-              view: <Releases model={model} roles={roles} />,
+              view: <Releases model={model} currentUserRoles={currentUserRoles} />,
               disabled: !model.card,
               disabledText: 'Select a schema to view this tab',
             },
             {
               title: 'Access Requests',
               path: 'access',
-              view: <AccessRequests model={model} roles={roles} />,
+              view: <AccessRequests model={model} currentUserRoles={currentUserRoles} />,
               datatest: 'accessRequestTab',
               disabled: !model.card,
               disabledText: 'Select a schema to view this tab',
@@ -60,7 +61,7 @@ export default function Model() {
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]
         : [],
-    [model, uiConfig, roles],
+    [model, uiConfig, currentUserRoles],
   )
 
   function requestAccess() {
@@ -76,7 +77,7 @@ export default function Model() {
 
   return (
     <Wrapper title={model ? model.name : 'Loading...'} page='marketplace' fullWidth>
-      {isModelLoading && isCurrentUserLoading && isUiConfigLoading && <Loading />}
+      {(isModelLoading || isCurrentUserLoading || isUiConfigLoading) && <Loading />}
       {model && (
         <PageWithTabs
           title={model.name}
