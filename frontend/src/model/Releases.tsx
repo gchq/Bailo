@@ -9,7 +9,12 @@ import EmptyBlob from '../common/EmptyBlob'
 import Loading from '../common/Loading'
 import ReleaseDisplay from './releases/ReleaseDisplay'
 
-export default function Releases({ model }: { model: ModelInterface }) {
+type ReleasesProps = {
+  model: ModelInterface
+  roles: string[]
+}
+
+export default function Releases({ model, roles }: ReleasesProps) {
   const router = useRouter()
   const [latestRelease, setLatestRelease] = useState('')
 
@@ -18,9 +23,15 @@ export default function Releases({ model }: { model: ModelInterface }) {
   const releaseDisplays = useMemo(
     () =>
       releases.map((release) => (
-        <ReleaseDisplay key={release.semver} model={model} release={release} latestRelease={latestRelease} />
+        <ReleaseDisplay
+          key={release.semver}
+          model={model}
+          release={release}
+          latestRelease={latestRelease}
+          hideReviewBanner={!roles?.some((role) => ['msro', 'mtr'].includes(role))}
+        />
       )),
-    [latestRelease, model, releases],
+    [latestRelease, model, releases, roles],
   )
 
   useEffect(() => {

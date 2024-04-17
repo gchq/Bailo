@@ -1,4 +1,5 @@
 import { useGetModel } from 'actions/model'
+import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
@@ -15,23 +16,29 @@ export default function Model() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+
+  const roles = useMemo(
+    () => model?.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === currentUser?.dn)?.roles,
+    [model, currentUser],
+  )
 
   const tabs = useMemo(
     () =>
-      model
+      model && roles
         ? [
             { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
             {
               title: 'Releases',
               path: 'releases',
-              view: <Releases model={model} />,
+              view: <Releases model={model} roles={roles} />,
               disabled: !model.card,
               disabledText: 'Select a schema to view this tab',
             },
             {
               title: 'Access Requests',
               path: 'access',
-              view: <AccessRequests model={model} />,
+              view: <AccessRequests model={model} roles={roles} />,
               datatest: 'accessRequestTab',
               disabled: !model.card,
               disabledText: 'Select a schema to view this tab',
@@ -44,7 +51,7 @@ export default function Model() {
             { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
           ]
         : [],
-    [model],
+    [model, roles],
   )
 
   function requestAccess() {
@@ -53,12 +60,13 @@ export default function Model() {
 
   const error = MultipleErrorWrapper(`Unable to load model page`, {
     isModelError,
+    isCurrentUserError,
   })
   if (error) return error
 
   return (
     <Wrapper title={model ? model.name : 'Loading...'} page='marketplace' fullWidth>
-      {isModelLoading && <Loading />}
+      {isModelLoading && isCurrentUserLoading && <Loading />}
       {model && (
         <PageWithTabs
           title={model.name}
