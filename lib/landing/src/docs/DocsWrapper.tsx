@@ -17,8 +17,8 @@ import { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
 import React from 'react'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
+import Title from '../common/Title'
 import Copyright from '../Copyright'
-import Wrapper from '../Wrapper'
 
 type DocsWrapperProps = {
   children?: ReactNode
@@ -109,8 +109,9 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   }
 
   return (
-    <Wrapper title='Documentation' page='Documentation'>
+    <>
       {/* Banner height + Toolbar height = 96px */}
+      <Title text='Documentation' />
       <Box display='flex' width='100%' height='calc(100vh - 96px)'>
         <Box
           sx={{
@@ -179,6 +180,6 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
           </Box>
         </Box>
       </Box>
-    </Wrapper>
+    </>
   )
 }
