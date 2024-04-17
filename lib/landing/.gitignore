@@ -38,7 +38,7 @@ yarn-error.log*
 
 src/Copyright.tsx
 src/Link.tsx
-src/docs
+src/docs/IntroCard.tsx
 
 pages/docs
 public
