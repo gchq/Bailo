@@ -2,6 +2,7 @@ import { Box, Button, Container, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
+import { hasRole } from 'utils/roles'
 
 import { useGetReleasesForModelId } from '../../actions/release'
 import { ModelInterface } from '../../types/types'
@@ -11,10 +12,10 @@ import ReleaseDisplay from './releases/ReleaseDisplay'
 
 type ReleasesProps = {
   model: ModelInterface
-  roles: string[]
+  currentUserRoles: string[]
 }
 
-export default function Releases({ model, roles }: ReleasesProps) {
+export default function Releases({ model, currentUserRoles }: ReleasesProps) {
   const router = useRouter()
   const [latestRelease, setLatestRelease] = useState('')
 
@@ -28,10 +29,10 @@ export default function Releases({ model, roles }: ReleasesProps) {
           model={model}
           release={release}
           latestRelease={latestRelease}
-          hideReviewBanner={!roles?.some((role) => ['msro', 'mtr'].includes(role))}
+          hideReviewBanner={!hasRole(currentUserRoles, ['msro', 'mtr'])}
         />
       )),
-    [latestRelease, model, releases, roles],
+    [latestRelease, model, releases, currentUserRoles],
   )
 
   useEffect(() => {
