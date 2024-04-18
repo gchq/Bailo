@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
+import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import AccessRequests from 'src/model/AccessRequests'
 import InferenceServices from 'src/model/InferenceServices'
@@ -12,7 +13,6 @@ import ModelImages from 'src/model/ModelImages'
 import Overview from 'src/model/Overview'
 import Releases from 'src/model/Releases'
 import Settings from 'src/model/Settings'
-import Wrapper from 'src/Wrapper'
 
 export default function Model() {
   const router = useRouter()
@@ -76,7 +76,8 @@ export default function Model() {
   if (error) return error
 
   return (
-    <Wrapper title={model ? model.name : 'Loading...'} page='marketplace' fullWidth>
+    <>
+      <Title text={model ? model.name : 'Loading...'} />
       {(isModelLoading || isCurrentUserLoading || isUiConfigLoading) && <Loading />}
       {model && (
         <PageWithTabs
@@ -90,6 +91,6 @@ export default function Model() {
           textToCopy={model.id}
         />
       )}
-    </Wrapper>
+    </>
   )
 }

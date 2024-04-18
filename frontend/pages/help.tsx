@@ -1,7 +1,7 @@
 import ArticleIcon from '@mui/icons-material/Article'
 import BugReportIcon from '@mui/icons-material/BugReport'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
-import { Paper } from '@mui/material'
+import { Container, Paper } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -12,8 +12,8 @@ import Typography from '@mui/material/Typography'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import Wrapper from 'src/Wrapper'
 
 export default function Help() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -24,7 +24,8 @@ export default function Help() {
   if (error) return error
 
   return (
-    <Wrapper title='Help' page='help'>
+    <Container maxWidth='xl' sx={{ pb: 2 }}>
+      <Title text='Help' />
       {isUiConfigLoading && <Loading />}
       {uiConfig && (
         <Paper sx={{ py: 5, px: 5 }}>
@@ -102,6 +103,6 @@ export default function Help() {
           </Grid>
         </Paper>
       )}
-    </Wrapper>
+    </Container>
   )
 }
