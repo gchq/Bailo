@@ -1,10 +1,11 @@
 version: '3.9'
 services:
   mongo:
-    image: mongo:6.0.4
-    command: [--replSet, repl-set, --bind_ip_all, --port, '27017', --quiet]
+    image: bitnami/mongodb:7.0.8
+    environment:
+      - MONGODB_REPLICA_SET_NAME=repl-set
     volumes:
-      - mongoVolume:/data/db
+      - mongoVolume:/bitnami/mongodb
     ports:
       - 27017:27017
     healthcheck:
