@@ -51,7 +51,7 @@ export default function AccessRequestReview() {
     } else {
       mutateReviews()
       mutateAccessRequests()
-      router.push(`/model/${modelId}?tabs=access`)
+      router.push(`/model/${modelId}/access-request/${accessRequestId}`)
     }
   }
 
