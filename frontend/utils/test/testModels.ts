@@ -1,9 +1,9 @@
 import { UserInformation } from 'src/common/UserDisplay'
 import {
   AccessRequestInterface,
+  EntryCardInterface,
+  EntryInterface,
   EntryVisibility,
-  ModelCardInterface,
-  ModelInterface,
   ReviewComment,
   ReviewRequestInterface,
   ReviewResponse,
@@ -60,14 +60,14 @@ export const testAccessRequestWithComments: AccessRequestInterface = {
   updatedAt: new Date().toDateString(),
 }
 
-export const testModelCard: ModelCardInterface = {
+export const testModelCard: EntryCardInterface = {
   schemaId: modelcardSchemaId,
   metadata: {},
   version: 1,
   createdBy: testEntity,
 }
 
-export const testV2Model: ModelInterface = {
+export const testV2Model: EntryInterface = {
   id: modelId,
   name: 'My Model',
   description: 'This is a test model',
