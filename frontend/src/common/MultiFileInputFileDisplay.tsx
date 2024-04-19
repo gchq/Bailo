@@ -29,7 +29,7 @@ export default function MultiFileInputFileDisplay({
 
   return (
     <Grid container spacing={1} alignItems='center'>
-      <Grid item>
+      <Grid item xs>
         <Tooltip title={file.name}>
           <Chip color='primary' label={file.name} onDelete={readOnly ? undefined : handleDelete} />
         </Tooltip>

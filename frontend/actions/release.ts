@@ -68,23 +68,6 @@ export function postReleaseComment(modelId: string, semver: string, comment: str
   })
 }
 
-export async function postFile(file: File, modelId: string, name: string, mime: string, metadata?: string | undefined) {
-  const mimeParam = mime || 'application/octet-stream'
-
-  return fetch(
-    metadata
-      ? `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mime=${mimeParam}?${qs.stringify({
-          metadata,
-        })}`
-      : `/api/v2/model/${modelId}/files/upload/simple?name=${name}&mime=${mimeParam}`,
-    {
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: file,
-    },
-  )
-}
-
 export function deleteRelease(modelId: string, semver: string) {
   return fetch(`/api/v2/model/${modelId}/release/${semver}`, {
     method: 'delete',
@@ -98,13 +81,14 @@ export async function postSimpleFileForRelease(
   onUploadProgress: (progress: AxiosProgressEvent) => void,
   metadata?: string,
 ) {
+  const mime = file.type || 'application/octet-stream'
   const fileResponse = await axios
     .post(
       metadata
-        ? `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${file.type}?${qs.stringify({
+        ? `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}?${qs.stringify({
             metadata,
           })}`
-        : `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${file.type}`,
+        : `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}`,
       file,
       {
         onUploadProgress,
