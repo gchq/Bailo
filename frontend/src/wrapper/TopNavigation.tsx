@@ -1,10 +1,11 @@
 import '@fontsource/pacifico'
 
-import { Add, Menu as MenuIcon, Settings } from '@mui/icons-material'
+import { Add, KeyboardArrowDown, KeyboardArrowUp, Menu as MenuIcon, Person, Settings } from '@mui/icons-material'
 import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LogoutIcon from '@mui/icons-material/Logout'
 import {
   Box,
+  Button,
   Divider,
   IconButton,
   ListItemIcon,
@@ -20,17 +21,17 @@ import {
   useMediaQuery,
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
-import { styled, useTheme } from '@mui/material/styles'
+import { alpha, styled, useTheme } from '@mui/material/styles'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
+import UserDisplay from 'src/common/UserDisplay'
 import ModelSearchField from 'src/wrapper/ModelSearchField'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
-import { EntityKind, User } from '../../types/types'
+import { User } from '../../types/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import ExpandableButton from '../common/ExpandableButton'
-import UserAvatar from '../common/UserAvatar'
 import ThemeModeContext from '../contexts/themeModeContext'
 import Link from '../Link'
 
@@ -172,9 +173,22 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 <ModelSearchField />
                 {currentUser ? (
                   <>
-                    <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                      <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.dn }} size='chip' />
-                    </IconButton>
+                    <Button
+                      startIcon={<Person />}
+                      endIcon={actionOpen ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                      sx={{
+                        color: 'white',
+                        backgroundColor: alpha(theme.palette.common.white, 0.15),
+                        '&:hover, &:focus': {
+                          backgroundColor: alpha(theme.palette.common.white, 0.25),
+                        },
+                        textTransform: 'capitalize',
+                      }}
+                      onClick={handleUserMenuClicked}
+                      data-test='userMenuButton'
+                    >
+                      <UserDisplay dn={currentUser.dn} hidePopover />
+                    </Button>
                     <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose}>
                       <MenuList>
                         {/* TODO - currently breaks v1. Re-add when v2 is fully adopted */}
