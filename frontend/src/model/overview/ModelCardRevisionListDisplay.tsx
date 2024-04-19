@@ -1,6 +1,7 @@
 import { TableBody, TableCell, TableRow } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
+import UserDisplay from 'src/common/UserDisplay'
 
 import { ModelCardRevisionInterface } from '../../../types/types'
 import { formatDateString } from '../../../utils/dateUtils'
@@ -22,7 +23,9 @@ export default function ModelCardRevisionListDisplay({ modelCard }: revisionProp
         hover
       >
         <TableCell style={{ color: theme.palette.secondary.main }}>{modelCard.version}</TableCell>
-        <TableCell style={{ color: theme.palette.primary.main }}>{modelCard.createdBy}</TableCell>
+        <TableCell style={{ color: theme.palette.primary.main }}>
+          <UserDisplay dn={modelCard.createdBy} />
+        </TableCell>
         <TableCell style={{ color: theme.palette.primary.main }}>{formatDateString(modelCard.createdAt)}</TableCell>
       </TableRow>
     </TableBody>
