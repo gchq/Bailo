@@ -24,7 +24,7 @@ services:
     command: server /data --console-address ":9001"
 
   mailcrab:
-    image: marlonb/mailcrab:v0.10.0
+    image: marlonb/mailcrab:v1.2.0
     ports:
       - 1080:1080
       - 1025:1025
