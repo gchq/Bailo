@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
+import { useGetReviewRequestsForModel } from 'actions/review'
 import { UserDisplayProps } from 'src/common/UserDisplay'
 import AccessRequestDisplay from 'src/entry/model/accessRequests/AccessRequestDisplay'
 import { ReviewBannerProps } from 'src/entry/model/reviews/ReviewBanner'
@@ -9,14 +10,12 @@ import { formatDateString } from 'utils/dateUtils'
 import { testAccessRequest, testAccessRequestReview, testAccessRequestWithComments } from 'utils/test/testModels'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useGetReviewRequestsForModel } from '../../../actions/review'
-
-vi.mock('../../../actions/review', () => ({
+vi.mock('actions/review', () => ({
   useGetReviewRequestsForModel: vi.fn(),
 }))
-vi.mock('src/model/reviews/ReviewBanner.tsx', () => ({ default: (_props: ReviewBannerProps) => <></> }))
+vi.mock('src/entry/model/reviews/ReviewBanner.tsx', () => ({ default: (_props: ReviewBannerProps) => <></> }))
 vi.mock('src/common/UserDisplay.tsx', () => ({ default: (_props: UserDisplayProps) => <></> }))
-vi.mock('src/model/reviews/ReviewDisplay.tsx', () => ({ default: (_props: ReviewDisplayProps) => <></> }))
+vi.mock('src/entry/model/reviews/ReviewDisplay.tsx', () => ({ default: (_props: ReviewDisplayProps) => <></> }))
 
 describe('AccessRequestDisplay', () => {
   it('displays access request metadata when not loading and no errors', async () => {

@@ -1,18 +1,18 @@
 import getUuidFromUrl from '../../utils/getUuidFromUrl'
 
-const newModelUrl = '/entry/new?kind=model'
+const newModelUrl = '/entry/new'
 
 let modelUuid = ''
 const schemaId = 'minimal-general-v10'
 
 describe('Beta create new model', () => {
   it('loads the Create a new model Page', () => {
-    cy.visit(newModelUrl)
+    cy.visit(newModelUrl, { qs: { kind: 'model' } })
     cy.contains('Create a new Model')
   })
 
   it('creates a public new model', () => {
-    cy.visit(newModelUrl)
+    cy.visit(newModelUrl, { qs: { kind: 'model' } })
 
     cy.get('[data-test=entryNameInput]').type('test model')
     cy.get('[data-test=entryDescriptionInput]').type('test description')
@@ -32,7 +32,7 @@ describe('Beta create new model', () => {
 
   it('creates a private new model', () => {
     cy.log('Navigating to the new model page')
-    cy.visit(newModelUrl)
+    cy.visit(newModelUrl, { qs: { kind: 'model' } })
 
     cy.log('Filling out the form to make a private model and submitting')
     cy.get('[data-test=entryNameInput]').type('test model')
