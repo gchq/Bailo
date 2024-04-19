@@ -41,7 +41,7 @@ services:
 
   registry:
     restart: always
-    image: registry:2.8.1
+    image: registry:2.8.3
     ports:
       - 5000:5000
     environment:
