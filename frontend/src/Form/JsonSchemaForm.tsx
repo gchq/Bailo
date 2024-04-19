@@ -135,7 +135,7 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Grid container spacing={2} sx={{ mt: theme.spacing(1) }}>
+    <Grid container spacing={2} sx={{ mt: 1 }}>
       <Grid item xs={12} sm={3} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
