@@ -40,6 +40,7 @@ export async function exportModel(
 
   const zipFiles: { filename: string; file: archiver.Archiver }[] = []
   zipFiles.push({ filename: `${modelId}/modelCards.zip`, file: await generateModelCardRevisionsZip(user, model) })
+  // unknown release semver
   if (releaseSemvers && releaseSemvers.length > 0) {
     zipFiles.push({
       filename: `${modelId}/releases.zip`,
@@ -57,10 +58,9 @@ async function uploadZipFileToS3(zip: archiver.Archiver, filename: string) {
   zip.pipe(hashStream)
   zip.pipe(s3Stream)
 
-  const messageDigest = await generateDigest(hashStream)
-
   let signatures = {}
   if (config.modelMirror.export.kmsSignature.enabled) {
+    const messageDigest = await generateDigest(hashStream)
     // If keys are wrong this returns a horrible error to the user.
     signatures = await sign(messageDigest)
   }
