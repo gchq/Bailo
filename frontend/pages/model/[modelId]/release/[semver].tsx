@@ -6,12 +6,12 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import EditableRelease from 'src/entry/model/releases/EditableRelease'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
-import Wrapper from 'src/Wrapper'
 
 export default function Release() {
   const router = useRouter()
@@ -37,7 +37,8 @@ export default function Release() {
   }
 
   return (
-    <Wrapper fullWidth title={release ? release.semver : 'Loading...'} page='release'>
+    <>
+      <Title text={release ? release.semver : 'Loading...'} />
       <Container maxWidth='md' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper>
           <>
@@ -70,6 +71,6 @@ export default function Release() {
           </>
         </Paper>
       </Container>
-    </Wrapper>
+    </>
   )
 }

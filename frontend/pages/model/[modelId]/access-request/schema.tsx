@@ -7,10 +7,10 @@ import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import SchemaButton from 'src/entry/model/common/SchemaButton'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
-import Wrapper from 'src/Wrapper'
 import { SchemaInterface, SchemaKind } from 'types/types'
 
 export default function NewSchemaSelection() {
@@ -31,7 +31,8 @@ export default function NewSchemaSelection() {
   if (error) return error
 
   return (
-    <Wrapper title='Select a schema' page='upload'>
+    <>
+      <Title text='Select a schema' />
       {isSchemasLoading && <Loading />}
       {schemas && !isSchemasLoading && (
         <Container maxWidth='md'>
@@ -86,6 +87,6 @@ export default function NewSchemaSelection() {
           </Card>
         </Container>
       )}
-    </Wrapper>
+    </>
   )
 }

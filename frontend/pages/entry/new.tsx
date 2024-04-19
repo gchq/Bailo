@@ -1,8 +1,8 @@
 import { FileUpload } from '@mui/icons-material'
 import { Button, Card, Container, Divider, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
+import Title from 'src/common/Title'
 import CreateEntry from 'src/entry/CreateEntry'
-import Wrapper from 'src/Wrapper'
 import { EntryKind, EntryKindKeys, isEntryKind } from 'types/types'
 
 export default function NewEntry() {
@@ -16,7 +16,8 @@ export default function NewEntry() {
   }
 
   return (
-    <Wrapper title='Create data card or model' page='upload'>
+    <>
+      <Title text='Create data card or model' />
       <Container maxWidth='md'>
         {isEntryKind(kind) ? (
           <CreateEntry kind={kind} />
@@ -89,6 +90,6 @@ export default function NewEntry() {
           </Card>
         )}
       </Container>
-    </Wrapper>
+    </>
   )
 }

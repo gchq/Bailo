@@ -1,16 +1,16 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
-import { Box, Button, Card, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Card, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { cloneDeep, groupBy } from 'lodash-es'
 import { useRouter } from 'next/router'
-import prettyBytes from 'pretty-bytes'
 import { useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserDisplay from 'src/common/UserDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
+import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import Link from 'src/Link'
@@ -125,25 +125,7 @@ export default function ReleaseDisplay({
                 <>
                   <Typography fontWeight='bold'>Files</Typography>
                   {release.files.map((file) => (
-                    <div key={file._id}>
-                      <Grid container spacing={1} alignItems='center'>
-                        <Grid item xs>
-                          <Tooltip title={file.name}>
-                            <Link
-                              href={`/api/v2/model/${model.id}/file/${file._id}/download`}
-                              data-test={`fileLink-${file.name}`}
-                            >
-                              <Typography noWrap textOverflow='ellipsis' display='inline'>
-                                {file.name}
-                              </Typography>
-                            </Link>
-                          </Tooltip>
-                        </Grid>
-                        <Grid item xs={1} textAlign='right'>
-                          <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-                        </Grid>
-                      </Grid>
-                    </div>
+                    <FileDownload key={file.name} file={file} modelId={model.id} />
                   ))}
                 </>
               )}
