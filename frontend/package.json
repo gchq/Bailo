@@ -60,6 +60,7 @@
     "@next/bundle-analyzer": "^14.1.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
+    "@types/axios": "^0.14.0",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "20.4.5",
     "@types/react": "18.2.7",

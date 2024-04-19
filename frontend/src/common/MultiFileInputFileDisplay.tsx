@@ -29,12 +29,12 @@ export default function MultiFileInputFileDisplay({
 
   return (
     <Grid container spacing={1} alignItems='center'>
-      <Grid item xs={4}>
+      <Grid item>
         <Tooltip title={file.name}>
           <Chip color='primary' label={file.name} onDelete={readOnly ? undefined : handleDelete} />
         </Tooltip>
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={7}>
         <TextField
           size='small'
           placeholder='Optional metadata'
@@ -43,7 +43,7 @@ export default function MultiFileInputFileDisplay({
           onChange={handleMetadataChange}
         />
       </Grid>
-      <Grid item xs={2} textAlign='right'>
+      <Grid item xs={1} textAlign='right'>
         <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
       </Grid>
     </Grid>

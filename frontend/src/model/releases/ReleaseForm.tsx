@@ -1,13 +1,4 @@
-import {
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  LinearProgress,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Checkbox, FormControl, FormControlLabel, LinearProgress, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useMemo } from 'react'
@@ -51,7 +42,7 @@ type ReleaseFormProps = {
   onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
   currentFileUploadProgress?: FileUploadProgress
-  uploadedFiles?: string[]
+  uploadedFiles: string[]
   filesToUploadCount: number
 } & EditableReleaseFormProps
 
@@ -101,31 +92,20 @@ export default function ReleaseForm({
       return <Typography>All files uploaded successfully.</Typography>
     }
     return currentFileUploadProgress.uploadProgress < 100 ? (
-      <Grid container direction='row' spacing={1}>
-        <Grid item>
-          <Typography fontWeight='bold'>
-            [File {uploadedFiles ? uploadedFiles.length + 1 : '1'} / {filesToUploadCount}] -
-          </Typography>
-        </Grid>
-        <Grid item>
-          <Typography fontWeight='bold'>{currentFileUploadProgress.fileName}</Typography>
-        </Grid>
-        <Grid item>
-          <Typography>uploading {currentFileUploadProgress.uploadProgress}%</Typography>
-        </Grid>
-      </Grid>
+      <Stack direction='row' spacing={1}>
+        <Typography fontWeight='bold'>
+          [File {uploadedFiles ? uploadedFiles.length + 1 : '1'} / {filesToUploadCount}] -
+        </Typography>
+        <Typography fontWeight='bold'>{currentFileUploadProgress.fileName}</Typography>
+        <Typography>uploading {currentFileUploadProgress.uploadProgress}%</Typography>
+      </Stack>
     ) : (
-      <Grid container direction='row' spacing={1}>
-        <Grid item>
-          <Typography fontWeight='bold'>
-            File {uploadedFiles && uploadedFiles.length + 1} / {filesToUploadCount} -
-            {currentFileUploadProgress.fileName}
-          </Typography>
-        </Grid>
-        <Grid item>
-          <Typography>received - waiting for response from server...</Typography>
-        </Grid>
-      </Grid>
+      <Stack direction='row' spacing={1}>
+        <Typography fontWeight='bold'>
+          File {uploadedFiles && uploadedFiles.length + 1} / {filesToUploadCount} -{currentFileUploadProgress.fileName}
+        </Typography>
+        <Typography>received - waiting for response from server...</Typography>
+      </Stack>
     )
   }
 
