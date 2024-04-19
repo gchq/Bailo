@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MarkdownDisplayProps } from 'src/common/MarkdownDisplay'
-import ValidationErrorIcon from 'src/model/common/ValidationErrorIcon'
+import ValidationErrorIcon from 'src/entry/model/common/ValidationErrorIcon'
 import { lightTheme } from 'src/theme'
 import { testAccessRequestSchemaStepNoRender } from 'utils/test/testModels'
 import { describe, expect, it, vi } from 'vitest'

@@ -1,9 +1,9 @@
 import { UserInformation } from 'src/common/UserDisplay'
 import {
   AccessRequestInterface,
+  EntryVisibility,
   ModelCardInterface,
   ModelInterface,
-  ModelVisibility,
   ReviewComment,
   ReviewRequestInterface,
   ReviewResponse,
@@ -71,7 +71,7 @@ export const testV2Model: ModelInterface = {
   id: modelId,
   name: 'My Model',
   description: 'This is a test model',
-  visibility: ModelVisibility.Public,
+  visibility: EntryVisibility.Public,
   collaborators: [
     {
       entity: testEntity,
