@@ -2,14 +2,14 @@ import { Box, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import {
   deleteRelease,
+  postSimpleFileForRelease,
   putRelease,
   UpdateReleaseParams,
   useGetRelease,
   useGetReleasesForModelId,
 } from 'actions/release'
-import axios from 'axios'
+import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import qs from 'querystring'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
@@ -123,46 +123,30 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
 
       const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
 
-      const fileResponse = await axios
-        .post(
-          metadata
-            ? `/api/v2/model/${release.modelId}/files/upload/simple?name=${file.name}&mime=${file.type}?${qs.stringify({
-                metadata,
-              })}`
-            : `/api/v2/model/${release.modelId}/files/upload/simple?name=${file.name}&mime=${file.type}`,
-          file,
-          {
-            onUploadProgress: function (progressEvent) {
-              if (progressEvent.total) {
-                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-                setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
-              }
-            },
-          },
-        )
-        .catch(function (error) {
-          if (error.response) {
-            sendNotification({
-              variant: 'error',
-              msg: `Error code ${error.response.status} received from server whilst attempting to upload file ${file.name}`,
-            })
-          } else if (error.request) {
-            sendNotification({
-              variant: 'error',
-              msg: `There was a problem with the request whilst attempting to upload file ${file.name}`,
-            })
-          } else {
-            sendNotification({ variant: 'error', msg: `Unknown error whilst attempting to upload file ${file.name}` })
-          }
-        })
+      const fileProgress = (progressEvent: AxiosProgressEvent) => {
+        if (progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+        }
+      }
 
-      setCurrentFileUploadProgress(undefined)
-      if (fileResponse) {
-        setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
-        fileIds.push(fileResponse.data.file._id)
-      } else {
+      try {
+        const fileUploadResponse = await postSimpleFileForRelease(model.id, file, fileProgress, metadata)
         setCurrentFileUploadProgress(undefined)
-        return setIsLoading(false)
+        if (fileUploadResponse) {
+          setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
+          fileIds.push(fileUploadResponse.data.file._id)
+        } else {
+          setCurrentFileUploadProgress(undefined)
+          return setIsLoading(false)
+        }
+      } catch (e) {
+        if (e instanceof Error) {
+          sendNotification({
+            variant: 'error',
+            msg: e.message,
+          })
+        }
       }
     }
 

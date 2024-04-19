@@ -1,3 +1,4 @@
+import axios, { AxiosProgressEvent } from 'axios'
 import qs from 'querystring'
 import useSWR from 'swr'
 import { ReleaseInterface } from 'types/types'
@@ -89,4 +90,36 @@ export function deleteRelease(modelId: string, semver: string) {
     method: 'delete',
     headers: { 'Content-Type': 'application/json' },
   })
+}
+
+export async function postSimpleFileForRelease(
+  modelId: string,
+  file: File,
+  onUploadProgress: (progress: AxiosProgressEvent) => void,
+  metadata?: string,
+) {
+  const fileResponse = await axios
+    .post(
+      metadata
+        ? `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${file.type}?${qs.stringify({
+            metadata,
+          })}`
+        : `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${file.type}`,
+      file,
+      {
+        onUploadProgress,
+      },
+    )
+    .catch(function (error) {
+      if (error.response) {
+        throw new Error(
+          `Error code ${error.response.status} received from server whilst attempting to upload file ${file.name}`,
+        )
+      } else if (error.request) {
+        throw new Error(`There was a problem with the request whilst attempting to upload file ${file.name}`)
+      } else {
+        throw new Error(`Unknown error whilst attempting to upload file ${file.name}`)
+      }
+    })
+  return fileResponse
 }
