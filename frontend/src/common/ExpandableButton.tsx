@@ -45,7 +45,7 @@ export default function ExpandableButton({
 
   return (
     <StyledButton data-test='expandableButton' onClick={() => onClick()} aria-label={ariaLabel}>
-      <Box sx={{ px: theme.spacing(1) }}>
+      <Box sx={{ px: 1 }}>
         <Stack direction='row' alignItems='center' spacing={2}>
           {icon}
           <Typography sx={{ whiteSpace: 'nowrap' }}>{label}</Typography>
