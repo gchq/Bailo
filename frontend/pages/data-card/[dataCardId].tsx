@@ -3,9 +3,9 @@ import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
+import Title from 'src/common/Title'
 import Overview from 'src/entry/overview/Overview'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import Wrapper from 'src/Wrapper'
 
 export default function DataCard() {
   const router = useRouter()
@@ -23,7 +23,8 @@ export default function DataCard() {
   if (error) return error
 
   return (
-    <Wrapper title={dataCard ? dataCard.name : 'Loading...'} page='data-card' fullWidth>
+    <>
+      <Title text={dataCard ? dataCard.name : 'Loading...'} />
       {isDataCardLoading && <Loading />}
       {dataCard && (
         <PageWithTabs
@@ -34,6 +35,6 @@ export default function DataCard() {
           textToCopy={dataCard.id}
         />
       )}
-    </Wrapper>
+    </>
   )
 }

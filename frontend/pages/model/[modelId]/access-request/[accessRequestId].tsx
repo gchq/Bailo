@@ -6,12 +6,12 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
-import Wrapper from 'src/Wrapper'
 
 export default function AccessRequest() {
   const router = useRouter()
@@ -32,11 +32,8 @@ export default function AccessRequest() {
   if (error) return error
 
   return (
-    <Wrapper
-      title={accessRequest ? accessRequest.metadata.overview.name : 'Loading...'}
-      page='access-request'
-      fullWidth
-    >
+    <>
+      <Title text={accessRequest ? accessRequest.metadata.overview.name : 'Loading...'} />
       <Container maxWidth='md' sx={{ my: 4 }} data-test='accessRequestContainer'>
         <Paper>
           {isAccessRequestLoading && isReviewsLoading && <Loading />}
@@ -74,6 +71,6 @@ export default function AccessRequest() {
           )}
         </Paper>
       </Container>
-    </Wrapper>
+    </>
   )
 }

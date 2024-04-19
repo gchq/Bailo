@@ -91,7 +91,6 @@ export const getDownloadFile = [
   bodyParser.json(),
   async (req: Request, res: Response<GetDownloadFileResponse>) => {
     const { params } = parse(req, getDownloadFileSchema)
-
     let file: FileInterfaceDoc
     if ('semver' in params) {
       file = await getFileByReleaseFileName(req.user, params.modelId, params.semver, params.fileName)
@@ -104,11 +103,6 @@ export const getDownloadFile = [
       await validateTokenForModel(req.token, file.modelId, TokenActions.FileRead)
     }
 
-    // required to support utf-8 file names
-    res.set('Content-Disposition', contentDisposition(file.name, { type: 'attachment' }))
-    res.set('Content-Type', file.mime)
-    res.set('Cache-Control', 'public, max-age=604800, immutable')
-
     if (req.headers.range) {
       // TODO: support ranges
       throw BadReq('Ranges are not supported', { fileId: file._id })
@@ -117,12 +111,16 @@ export const getDownloadFile = [
     res.set('Content-Length', String(file.size))
     // TODO: support ranges
     // res.set('Accept-Ranges', 'bytes')
-
     const stream = await downloadFile(req.user, file._id)
 
     if (!stream.Body) {
       throw InternalError('We were not able to retrieve the body of this file', { fileId: file._id })
     }
+
+    // required to support utf-8 file names
+    res.set('Content-Disposition', contentDisposition(file.name, { type: 'attachment' }))
+    res.set('Content-Type', file.mime)
+    res.set('Cache-Control', 'public, max-age=604800, immutable')
 
     res.writeHead(200)
 

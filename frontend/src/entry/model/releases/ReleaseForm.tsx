@@ -1,17 +1,16 @@
-import { Checkbox, FormControl, FormControlLabel, Grid, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { Checkbox, FormControl, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
-import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ModelImageList from 'src/entry/model/ModelImageList'
+import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
-import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FileInterface, FileWithMetadata, FlattenedModelImage, isFileInterface } from 'types/types'
+import { EntryInterface, FileInterface, FileWithMetadata, FlattenedModelImage } from 'types/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -168,37 +167,20 @@ export default function ReleaseForm({
             onFilesMetadataChange={onFilesMetadataChange}
           />
         )}
-        {isReadOnly &&
-          formData.files.map((file) => (
-            <>
-              {isFileInterface(file) && (
-                <Grid container spacing={1} alignItems='center' key={file.name}>
-                  <Grid item xs={11}>
-                    {isFileInterface(file) && (
-                      <Tooltip title={file.name}>
-                        <Link
-                          href={`/api/v2/model/${model.id}/file/${file._id}/download`}
-                          data-test={`fileLink-${file.name}`}
-                        >
-                          <Typography noWrap textOverflow='ellipsis'>
-                            {file.name}
-                          </Typography>
-                        </Link>
-                      </Tooltip>
-                    )}
-                  </Grid>
-                  <Grid item xs={1} textAlign='right'>
-                    <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-                  </Grid>
-                </Grid>
-              )}
-            </>
-          ))}
+        <Stack spacing={1}>
+          {isReadOnly && formData.files.map((file) => <FileDownload key={file.name} file={file} modelId={model.id} />)}
+        </Stack>
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>
       <Stack>
         <Typography fontWeight='bold'>Images</Typography>
-        <ModelImageList model={model} value={formData.imageList} readOnly={isReadOnly} onChange={onImageListChange} />
+        <ModelImageList
+          multiple
+          model={model}
+          value={formData.imageList}
+          readOnly={isReadOnly}
+          onChange={onImageListChange}
+        />
         {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
       </Stack>
     </Stack>
