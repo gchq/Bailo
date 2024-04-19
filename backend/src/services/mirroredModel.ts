@@ -33,6 +33,10 @@ export async function exportModel(
   if (!model.settings.mirroredModelId || model.settings.mirroredModelId === '') {
     throw BadReq('The ID of the mirrored model has not been set on this model.')
   }
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, model: model.id })
+  }
 
   const zipFiles: { filename: string; file: archiver.Archiver }[] = []
   zipFiles.push({ filename: `${modelId}/modelCards.zip`, file: await generateModelCardRevisionsZip(user, model) })
@@ -65,10 +69,6 @@ async function uploadZipFileToS3(zip: archiver.Archiver, filename: string) {
 
 async function generateModelCardRevisionsZip(user: UserInterface, model: ModelDoc) {
   const cards = await getModelCardRevisions(user, model.id)
-  const auth = await authorisation.model(user, model, ModelAction.Update)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, model: model.id })
-  }
 
   let zip: archiver.Archiver
   try {
