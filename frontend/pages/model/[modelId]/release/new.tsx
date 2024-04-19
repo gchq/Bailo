@@ -61,7 +61,7 @@ export default function NewRelease() {
 
       const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
 
-      const fileProgress = (progressEvent: AxiosProgressEvent) => {
+      const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
         if (progressEvent.total) {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
@@ -69,7 +69,7 @@ export default function NewRelease() {
       }
 
       try {
-        const fileUploadResponse = await postSimpleFileForRelease(model.id, file, fileProgress, metadata)
+        const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
         setCurrentFileUploadProgress(undefined)
         if (fileUploadResponse) {
           setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
