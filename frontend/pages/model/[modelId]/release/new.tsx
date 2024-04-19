@@ -83,15 +83,15 @@ export default function NewRelease() {
           if (error.response) {
             sendNotification({
               variant: 'error',
-              msg: `Error code ${error.response.status} recieved from server whilst attemping to upload file ${file.name}`,
+              msg: `Error code ${error.response.status} received from server whilst attempting to upload file ${file.name}`,
             })
           } else if (error.request) {
             sendNotification({
               variant: 'error',
-              msg: `There was a problem with the request whilst attemping to upload file ${file.name}`,
+              msg: `There was a problem with the request whilst attempting to upload file ${file.name}`,
             })
           } else {
-            sendNotification({ variant: 'error', msg: `Unknown error whilst attemping to upload file ${file.name}` })
+            sendNotification({ variant: 'error', msg: `Unknown error whilst attempting to upload file ${file.name}` })
           }
         })
 
