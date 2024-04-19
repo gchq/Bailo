@@ -18,12 +18,10 @@ import Form from '@rjsf/mui'
 import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react'
-
-import { SplitSchemaNoRender } from '../../types/types'
-import { setStepState } from '../../utils/formUtils'
-import { widgets } from '../../utils/formUtils'
-import ValidationErrorIcon from '../model/common/ValidationErrorIcon'
-import Nothing from '../MuiForms/Nothing'
+import ValidationErrorIcon from 'src/entry/model/common/ValidationErrorIcon'
+import Nothing from 'src/MuiForms/Nothing'
+import { SplitSchemaNoRender } from 'types/types'
+import { setStepState, widgets } from 'utils/formUtils'
 
 function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   return (

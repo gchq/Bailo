@@ -83,8 +83,8 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
     setNavbarAnchorEl(event.currentTarget)
   }
 
-  const handleNewModelClicked = () => {
-    router.push('/model/new')
+  const handleCreateEntryClick = () => {
+    router.push('/entry/new')
   }
 
   const handleMenuClose = () => {
@@ -117,12 +117,12 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 <MenuIcon sx={{ color: theme.palette.topNavigation.main }} />
               </IconButton>
               <Menu anchorEl={navbarAnchorEl} open={navbarMenuOpen} onClose={() => setNavbarAnchorEl(null)}>
-                <Link href='/model/new'>
+                <Link href='/entry/new'>
                   <MenuItem>
                     <ListItemIcon>
                       <Add fontSize='small' />
                     </ListItemIcon>
-                    <ListItemText>Add new model</ListItemText>
+                    <ListItemText>Create data card/model</ListItemText>
                   </MenuItem>
                 </Link>
                 <Divider />
@@ -147,7 +147,6 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               </Menu>
             </Box>
           )}
-          {/* <Box sx={{ flexGrow: 1, ml: 2, width: 'fit-content' }}> */}
           <Link
             href='/'
             color='inherit'
@@ -158,15 +157,14 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
             </Stack>
           </Link>
-          {/* </Box> */}
           {isSmOrLarger && (
             <Box>
               <Stack direction='row' spacing={1} justifyContent='center' alignItems='center'>
                 <ExpandableButton
-                  label='Add Model'
+                  label='Create Data Card/Model'
                   icon={<Add />}
-                  onClick={() => handleNewModelClicked()}
-                  ariaLabel='Add a new model'
+                  onClick={handleCreateEntryClick}
+                  ariaLabel='Create a new data card or model'
                   height='40px'
                 />
                 <ModelSearchField />
