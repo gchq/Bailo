@@ -123,7 +123,7 @@ export default function ReleaseForm({
           </Typography>
         </Grid>
         <Grid item>
-          <Typography>recieved - waiting for response from server...</Typography>
+          <Typography>received - waiting for response from server...</Typography>
         </Grid>
       </Grid>
     )
