@@ -215,9 +215,11 @@ export async function updateReviewResponse(
   accessRequestId: string,
   kind: string,
   delta: UpdateReviewResponseParams,
-) {
-  const reviewResponse = await findReviews(user, true, modelId, semver, accessRequestId, kind)
+): Promise<ReviewInterface> {
   const model = await getModelById(user, modelId)
+  //const update = await findReviews(user, true, modelId, semver, accessRequestId, kind)
+  const updatedAccess = await Review.findOneAndUpdate({ modelId, accessRequestId, kind }, delta, { new: true })
+  const updatedRelease = await Review.findOneAndUpdate({ modelId, semver, kind }, delta, { new: true })
 
   let reviewIdQuery
   switch (kind) {
@@ -226,6 +228,10 @@ export async function updateReviewResponse(
       const accessAuth = await authorisation.accessRequest(user, model, access, AccessRequestAction.Update)
       if (!accessAuth.success) {
         throw Forbidden(accessAuth.info, { userDn: user.dn, accessRequestId })
+      }
+
+      if (!updatedAccess) {
+        throw NotFound(`The requested access was not found.`, { updatedAccess })
       }
 
       break
@@ -239,6 +245,11 @@ export async function updateReviewResponse(
           modelId: modelId,
         })
       }
+
+      if (!updatedRelease) {
+        throw NotFound(`The requested release was not found.`, { updatedRelease })
+      }
+
       break
     }
 
@@ -246,7 +257,7 @@ export async function updateReviewResponse(
       throw GenericError(500, 'Review Kind not recognised', reviewIdQuery)
   }
 
-  Object.assign(reviewResponse, delta)
+  return [updatedAccess, updatedRelease]
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {

@@ -54,6 +54,7 @@ export const patchAccessRequestReviewResponse = [
       params: { modelId, accessRequestId },
       body: { role, ...body },
     } = parse(req, patchAccessRequestReviewResponseSchema)
+
     const review = await updateReviewResponse(req.user, modelId, role, ReviewKind.Release, accessRequestId, body)
 
     await audit.onUpdateReviewResponse(req, review)
