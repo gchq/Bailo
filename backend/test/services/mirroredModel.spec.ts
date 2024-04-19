@@ -11,6 +11,11 @@ const configMock = vi.hoisted(
     ({
       modelMirror: {
         enabled: true,
+        export: {
+          kmsSignature: {
+            enabled: false,
+          },
+        },
       },
     }) as any,
 )
@@ -34,16 +39,14 @@ const modelMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(),
-  getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(), version: 123 }]),
+  getReleasesBySemvers: vi.fn(() => [{}]),
 }))
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
 const fileMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(),
-  getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(), version: 123 }]),
+  getFilesByIds: vi.fn(),
 }))
-vi.mock('../../src/services/release.js', () => fileMocks)
+vi.mock('../../src/services/file.js', () => fileMocks)
 
 const archiverMocks = vi.hoisted(() => ({
   append: vi.fn(),
@@ -51,6 +54,23 @@ const archiverMocks = vi.hoisted(() => ({
   pipe: vi.fn(),
 }))
 vi.mock('archiver', () => ({ default: vi.fn(() => archiverMocks) }))
+
+const s3Mocks = vi.hoisted(() => ({
+  putObjectStream: vi.fn(() => ({ fileSize: 100 })),
+  getObjectStream: vi.fn(() => ({ Body: { pipe: vi.fn() } })),
+}))
+vi.mock('../../src/clients/s3.js', () => s3Mocks)
+
+const kmsMocks = vi.hoisted(() => ({
+  putObjectStream: vi.fn(() => ({ fileSize: 100 })),
+  getObjectStream: vi.fn(() => ({ Body: { pipe: vi.fn() } })),
+}))
+vi.mock('../../src/clients/kms`.js', () => kmsMocks)
+
+const hashMocks = vi.hoisted(() => ({
+  putObjectStream: vi.fn(() => ({ fileSize: 100 })),
+}))
+vi.mock('node:crypto', () => hashMocks)
 
 describe('services > mirroredModel', () => {
   test('exportModel > not enabled', async () => {
@@ -60,26 +80,42 @@ describe('services > mirroredModel', () => {
     expect(response).rejects.toThrowError('Model mirroring has not been enabled.')
   })
 
-  test('exportModelCardRevisions > bad authorisation', async () => {
+  test('exportModel > bad authorisation', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
     const response = exportModel({} as UserInterface, 'modelId', true)
     expect(response).rejects.toThrowError(/^You do not have permission/)
   })
 
-  test('exportModelCardRevisions > missing disclaimer agreement', async () => {
+  test('exportModel > missing disclaimer agreement', async () => {
     const response = exportModel({} as UserInterface, 'modelId', false)
     expect(response).rejects.toThrowError(
       /^You must agree to the disclaimer agreement before being able to export a model./,
     )
   })
 
-  test('exportModelCardRevisions > unable to create model card zip file', async () => {
+  test('exportModel > unable to create model card zip file', async () => {
     archiverMocks.append.mockImplementationOnce(() => {
       throw Error('Error making zip file')
     })
     const response = exportModel({} as UserInterface, 'modelId', true)
     expect(response).rejects.toThrowError(/^Error when generating the model card revisions zip file./)
+  })
+
+  test('exportModel > unable to create release zip file', async () => {
+    archiverMocks.append.mockReturnValueOnce({})
+    archiverMocks.append.mockImplementationOnce(() => {
+      throw Error('Error making zip file')
+    })
+    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
+  })
+
+  test('exportModel > signature is added when enabled in config', async () => {
+    // need to mock stuff in checkFilesForRealeses
+    configMock.modelMirror.export.kmsSignature.enabled = true
+    const response = await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
   })
 
   /*
