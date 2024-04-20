@@ -113,7 +113,7 @@ function recursiveRender(obj: any, schema: Fragment, output = '', depth = 1) {
       break
     default:
       throw new Error(
-        `One of the types within this schema has not been implemented in the export method.  Received type ${schema.type}`,
+        `One of the types within this schema has not been implemented in the export method.  Received type ${(schema as any).type}`,
       )
   }
 
