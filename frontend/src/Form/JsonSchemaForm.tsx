@@ -17,7 +17,7 @@ import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 
 import { SplitSchemaNoRender } from '../../types/types'
 import { setStepState } from '../../utils/formUtils'
@@ -93,26 +93,9 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
-  const [firstQuestionKey, setFirstQuestionKey] = useState<string | undefined>()
   const theme = useTheme()
 
   const currentStep = splitSchema.steps[activeStep]
-
-  const getKeyFromSection = useCallback((schema: RJSFSchema, key: string) => {
-    const [firstQuestionKey] = Object.keys(schema)
-    let updatedKey = `${key}_${firstQuestionKey}`
-    if (schema[firstQuestionKey].type === 'object') {
-      updatedKey = getKeyFromSection(schema[firstQuestionKey].properties, updatedKey)
-    }
-    return updatedKey
-  }, [])
-
-  useEffect(() => {
-    // Set focus to first question in current step
-    if (currentStep) {
-      setFirstQuestionKey(getKeyFromSection(currentStep.schema.properties, 'root'))
-    }
-  }, [currentStep, getKeyFromSection])
 
   if (!currentStep) {
     return null
@@ -155,42 +138,39 @@ export default function JsonSchemaForm({
         </Stepper>
       </Grid>
       <Grid item xs={12} sm={9} md={10}>
-        {firstQuestionKey && (
-          <Form
-            schema={currentStep.schema}
-            formData={currentStep.state}
-            onChange={onFormChange}
-            validator={validator}
-            widgets={widgets}
-            uiSchema={currentStep.uiSchema}
-            liveValidate
-            omitExtraData
-            disabled={!canEdit}
-            liveOmit
-            formContext={{
-              editMode: canEdit,
-              formSchema: currentStep.schema,
-              defaultCurrentUser: defaultCurrentUserInEntityList,
-              firstQuestionKey: firstQuestionKey,
-            }}
-            templates={
-              !canEdit
-                ? {
-                    DescriptionFieldTemplate,
-                    ArrayFieldTemplate,
-                    ObjectFieldTemplate,
-                  }
-                : {
-                    ArrayFieldTemplate,
-                    ObjectFieldTemplate,
-                    ErrorListTemplate,
-                  }
-            }
-          >
-            {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
-            <></>
-          </Form>
-        )}
+        <Form
+          schema={currentStep.schema}
+          formData={currentStep.state}
+          onChange={onFormChange}
+          validator={validator}
+          widgets={widgets}
+          uiSchema={currentStep.uiSchema}
+          liveValidate
+          omitExtraData
+          disabled={!canEdit}
+          liveOmit
+          formContext={{
+            editMode: canEdit,
+            formSchema: currentStep.schema,
+            defaultCurrentUser: defaultCurrentUserInEntityList,
+          }}
+          templates={
+            !canEdit
+              ? {
+                  DescriptionFieldTemplate,
+                  ArrayFieldTemplate,
+                  ObjectFieldTemplate,
+                }
+              : {
+                  ArrayFieldTemplate,
+                  ObjectFieldTemplate,
+                  ErrorListTemplate,
+                }
+          }
+        >
+          {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
+          <></>
+        </Form>
       </Grid>
     </Grid>
   )
