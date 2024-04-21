@@ -1,3 +1,4 @@
+import { Fetcher } from 'swr'
 import { redirectToLoginPage } from 'utils/loginUtils'
 
 export type ErrorInfo = Error & {
@@ -13,18 +14,8 @@ type ErrorResponse = {
   error: Error
 }
 
-export const textFetcher = async (input: RequestInfo, init: RequestInit) => {
-  const res = await fetch(input, init)
-
-  if (!res.ok) {
-    await handleSWRError(res)
-  }
-
-  return res.text()
-}
-
-export const fetcher = async (input: RequestInfo, init: RequestInit) => {
-  const res = await fetch(input, init)
+export const fetcher: Fetcher<any, string> = async (input) => {
+  const res = await fetch(input)
 
   if (!res.ok) {
     await handleSWRError(res)
