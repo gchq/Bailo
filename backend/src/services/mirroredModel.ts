@@ -14,8 +14,21 @@ import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import { downloadFile, getFilesByIds, getTotalFileSize } from './file.js'
+import log from './log.js'
 import { getModelById, getModelCardRevisions } from './model.js'
 import { getAllFileIds, getReleasesBySemvers } from './release.js'
+
+const ExportKind = {
+  ModelCards: 'modelCards',
+  Releases: 'releases',
+} as const
+type ExportKindKeys = (typeof ExportKind)[keyof typeof ExportKind]
+
+type ZipFile = {
+  filename: string
+  file: archiver.Archiver
+  metadata: { modelId: string; exportKind: ExportKindKeys }
+}
 
 export async function exportModel(
   user: UserInterface,
@@ -38,25 +51,30 @@ export async function exportModel(
     throw Forbidden(auth.info, { userDn: user.dn, model: model.id })
   }
 
-  const zipFiles: { filename: string; file: archiver.Archiver }[] = []
-  zipFiles.push({ filename: `${modelId}/modelCards.zip`, file: await generateModelCardRevisionsZip(user, model) })
+  const zipFiles: ZipFile[] = []
+  zipFiles.push({
+    filename: `${modelId}/modelCards.zip`,
+    file: await generateModelCardRevisionsZip(user, model),
+    metadata: { modelId, exportKind: ExportKind.ModelCards },
+  })
   // unknown release semver
   if (releaseSemvers && releaseSemvers.length > 0) {
     zipFiles.push({
       filename: `${modelId}/releases.zip`,
       file: await generateReleaseZip(user, model, releaseSemvers),
+      metadata: { modelId, exportKind: ExportKind.Releases },
     })
   }
 
-  return Promise.all(zipFiles.map(async (zipFile) => await uploadZipFileToS3(zipFile.file, zipFile.filename)))
+  return Promise.all(zipFiles.map((zipFile) => uploadZipFileToS3(zipFile)))
 }
 
-async function uploadZipFileToS3(zip: archiver.Archiver, filename: string) {
+async function uploadZipFileToS3(zip: ZipFile) {
   const s3Stream = new PassThrough()
   const hashStream = new PassThrough()
 
-  zip.pipe(hashStream)
-  zip.pipe(s3Stream)
+  zip.file.pipe(hashStream)
+  zip.file.pipe(s3Stream)
 
   let signatures = {}
   if (config.modelMirror.export.kmsSignature.enabled) {
@@ -64,7 +82,31 @@ async function uploadZipFileToS3(zip: archiver.Archiver, filename: string) {
     // If keys are wrong this returns a horrible error to the user.
     signatures = await sign(messageDigest)
   }
-  await putObjectStream(config.modelMirror.export.bucket, filename, s3Stream, signatures)
+
+  log.debug('Starting export of zip file to S3.', {
+    bucket: config.modelMirror.export.bucket,
+    name: zip.filename,
+    modelId: zip.metadata.modelId,
+    exportKind: zip.metadata.exportKind,
+  })
+  putObjectStream(config.modelMirror.export.bucket, zip.filename, s3Stream, signatures)
+    .then(() =>
+      log.debug('Successfully exported zip file to S3.', {
+        bucket: config.modelMirror.export.bucket,
+        name: zip.filename,
+        modelId: zip.metadata.modelId,
+        exportKind: zip.metadata.exportKind,
+      }),
+    )
+    .catch((error) =>
+      log.error('Failed to export zip file to S3.', {
+        error,
+        bucket: config.modelMirror.export.bucket,
+        name: zip.filename,
+        modelId: zip.metadata.modelId,
+        exportKind: zip.metadata.exportKind,
+      }),
+    )
 }
 
 async function generateModelCardRevisionsZip(user: UserInterface, model: ModelDoc) {
