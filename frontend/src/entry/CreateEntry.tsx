@@ -10,7 +10,7 @@ import MessageAlert from 'src/MessageAlert'
 import TeamSelect from 'src/TeamSelect'
 import { EntryForm, EntryKind, EntryKindKeys, EntryVisibility, TeamInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { toKebabCase, toTitleCase } from 'utils/stringUtils'
+import { toTitleCase } from 'utils/stringUtils'
 
 type CreateEntryProps = {
   kind: EntryKindKeys
@@ -45,7 +45,7 @@ export default function CreateEntry({ kind }: CreateEntryProps) {
       setLoading(false)
     } else {
       const data = await response.json()
-      router.push(`/${toKebabCase(kind)}/${data.model.id}`)
+      router.push(`/${kind}/${data.model.id}`)
     }
   }
 
