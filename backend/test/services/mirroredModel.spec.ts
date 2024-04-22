@@ -20,8 +20,9 @@ const configMock = vi.hoisted(
       modelMirror: {
         enabled: true,
         export: {
+          maxSize: 100,
           kmsSignature: {
-            enabled: false,
+            enabled: true,
           },
         },
       },
@@ -34,7 +35,9 @@ vi.mock('../../src/utils/config.js', () => ({
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
+  debug: vi.fn(),
   warn: vi.fn(),
+  error: vi.fn(),
 }))
 vi.mock('../../src/services/log.js', async () => ({
   default: logMock,
@@ -55,6 +58,7 @@ vi.mock('../../src/services/release.js', () => releaseMocks)
 const fileMocks = vi.hoisted(() => ({
   getFilesByIds: vi.fn(() => [{ _id: '123', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() }]),
   getTotalFileSize: vi.fn(),
+  downloadFile: vi.fn(() => ({ Body: 'test' })),
 }))
 vi.mock('../../src/services/file.js', () => fileMocks)
 
@@ -66,25 +70,37 @@ const archiverMocks = vi.hoisted(() => ({
 vi.mock('archiver', () => ({ default: vi.fn(() => archiverMocks) }))
 
 const s3Mocks = vi.hoisted(() => ({
-  putObjectStream: vi.fn(() => ({ fileSize: 100 })),
-  getObjectStream: vi.fn(() => ({ Body: { pipe: vi.fn() } })),
+  putObjectStream: vi.fn(() => Promise.resolve({ fileSize: 100 })),
 }))
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
 
 const kmsMocks = vi.hoisted(() => ({
-  putObjectStream: vi.fn(() => ({ fileSize: 100 })),
-  getObjectStream: vi.fn(() => ({ Body: { pipe: vi.fn() } })),
+  sign: vi.fn(),
 }))
-vi.mock('../../src/clients/kms`.js', () => kmsMocks)
+vi.mock('../../src/clients/kms.js', () => kmsMocks)
 
 const hashMocks = vi.hoisted(() => ({
-  putObjectStream: vi.fn(() => ({ fileSize: 100 })),
+  createHash: vi.fn(() => ({
+    setEncoding: vi.fn(),
+    end: vi.fn(),
+    read: vi.fn(() => 'test digest'),
+  })),
 }))
 vi.mock('node:crypto', () => hashMocks)
 
+const streamMocks = vi.hoisted(() => ({
+  PassThrough: vi.fn(() => ({
+    pipe: vi.fn(),
+    on: vi.fn((a, b) => {
+      b()
+    }),
+  })),
+}))
+vi.mock('stream', () => streamMocks)
+
 describe('services > mirroredModel', () => {
   test('exportModel > not enabled', async () => {
-    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({ enabled: false })
+    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValueOnce({ enabled: false })
     const response = exportModel({} as UserInterface, 'modelId', true)
 
     expect(response).rejects.toThrowError('Model mirroring has not been enabled.')
@@ -119,6 +135,14 @@ describe('services > mirroredModel', () => {
     })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
+  })
+
+  test('exportModel > unable to create digest for zip file', async () => {
+    hashMocks.createHash.mockImplementationOnce(() => {
+      throw Error()
+    })
+    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    expect(response).rejects.toThrowError(/^Error when generating the digest for the zip file./)
   })
 
   test('exportModel > release export size too large', async () => {
@@ -167,10 +191,41 @@ describe('services > mirroredModel', () => {
     expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
   })
 
-  /*
-  test('exportModelCardRevisions > unable to create the signature for the zip file', async () => {
-    const response = exportModelCardRevisions({} as UserInterface, 'modelId', true)
-    expect(response).rejects.toThrowError(/^Error when generating the zip hash./)
+  test('exportModel > signatures not added if disabled', async () => {
+    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
+      enabled: true,
+      export: {
+        kmsSignature: {
+          enabled: false,
+        },
+      },
+    })
+
+    await exportModel({} as UserInterface, 'modelId', true)
+    expect(kmsMocks.sign).not.toBeCalled()
+    expect(hashMocks.createHash).not.toBeCalled()
   })
-  */
+
+  test('exportModel > export uploaded to S3 with signatures', async () => {
+    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
+      enabled: true,
+      export: {
+        kmsSignature: {
+          enabled: true,
+        },
+      },
+    })
+    await exportModel({} as UserInterface, 'modelId', true)
+    expect(kmsMocks.sign).toBeCalled()
+    expect(hashMocks.createHash).toBeCalled()
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+  })
+
+  test('exportModel > export uploaded to S3 for model cards and releases', async () => {
+    await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '3.2.1'])
+
+    expect(kmsMocks.sign).toBeCalled()
+    expect(hashMocks.createHash).toBeCalled()
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
+  })
 })
