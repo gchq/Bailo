@@ -6,26 +6,17 @@ interface TagSelectorProps {
   onChange: (newValue: string[]) => void
   value: string[]
   label: string
-  id: string
   formContext?: FormContextType
   required?: boolean
   rawErrors?: string[]
 }
 
-export default function TagSelector({
-  onChange,
-  value,
-  label,
-  id,
-  formContext,
-  required,
-  rawErrors,
-}: TagSelectorProps) {
-  const theme = useTheme()
-
+export default function TagSelector({ onChange, value, label, formContext, required, rawErrors }: TagSelectorProps) {
   const handleChange = (_event: React.SyntheticEvent<Element, Event>, newValues: string[]) => {
     onChange([...newValues])
   }
+
+  const theme = useTheme()
 
   return (
     <>
@@ -37,11 +28,11 @@ export default function TagSelector({
           </Typography>
           <Autocomplete
             multiple
-            freeSolo
             isOptionEqualToValue={(option: string, optionValue: string) => option === optionValue}
             value={value || ''}
             onChange={handleChange}
             options={[]}
+            freeSolo
             renderTags={(tagValue: string[], getTagProps) =>
               tagValue.map((option: string, index: number) => (
                 <Chip variant='outlined' label={option} {...getTagProps({ index })} key={option} />
@@ -50,9 +41,7 @@ export default function TagSelector({
             renderInput={(params) => (
               <TextField
                 {...params}
-                required
                 size='small'
-                variant='outlined'
                 error={rawErrors && rawErrors.length > 0}
                 sx={{
                   input: {
@@ -68,10 +57,8 @@ export default function TagSelector({
                   },
                   fontStyle: value ? 'unset' : 'italic',
                 }}
-                inputRef={(inputRef) => {
-                  // Set focus if this is the first question
-                  if (inputRef && formContext.firstQuestionKey === id) inputRef.focus()
-                }}
+                variant='outlined'
+                required
               />
             )}
           />
