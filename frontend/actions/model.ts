@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { EntryForm, EntryInterface, ModelImage, Role } from '../types/types'
+import { EntryForm, EntryInterface, EntryKindKeys, ModelImage, Role } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export interface ModelSearchResult {
@@ -97,8 +97,8 @@ export function useGetModelRolesCurrentUser(id?: string) {
   }
 }
 
-export async function postModel(form: EntryForm) {
-  return fetch(`/api/v2/models`, {
+export async function postModel(form: EntryForm, kind: EntryKindKeys) {
+  return fetch(`/api/v2/models?kind=${kind}`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(form),
