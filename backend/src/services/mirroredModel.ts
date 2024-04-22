@@ -213,6 +213,6 @@ async function generateDigest(file: stream.PassThrough) {
     )
     return messageDigest
   } catch (error: any) {
-    throw InternalError('Error when generating the signature for the zip file.', { error })
+    throw InternalError('Error when generating the digest for the zip file.', { error })
   }
 }
