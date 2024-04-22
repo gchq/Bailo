@@ -6,6 +6,14 @@ import { exportModel } from '../../src/services/mirroredModel.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
+const authMock = vi.hoisted(() => ({
+  model: vi.fn(() => ({ success: true })),
+  release: vi.fn(() => ({ success: true })),
+}))
+vi.mock('../../src/connectors/authorisation/index.js', async () => ({
+  default: authMock,
+}))
+
 const configMock = vi.hoisted(
   () =>
     ({
@@ -39,13 +47,13 @@ const modelMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
-  getReleasesBySemvers: vi.fn(() => [{}]),
+  getReleasesBySemvers: vi.fn(() => [{ toJSON: vi.fn() }]),
   getAllFileIds: vi.fn(() => [{}]),
 }))
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
 const fileMocks = vi.hoisted(() => ({
-  getFilesByIds: vi.fn(),
+  getFilesByIds: vi.fn(() => [{ _id: '123', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() }]),
   getTotalFileSize: vi.fn(),
 }))
 vi.mock('../../src/services/file.js', () => fileMocks)
@@ -118,6 +126,45 @@ describe('services > mirroredModel', () => {
     fileMocks.getTotalFileSize.mockReturnValueOnce(100)
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '1.2.4'])
     expect(response).rejects.toThrowError(/^Requested export is too large./)
+  })
+
+  test('exportModel > missing mirrored model ID', async () => {
+    modelMocks.getModelById.mockReturnValueOnce({ settings: { mirroredModelId: '' } })
+    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    expect(response).rejects.toThrowError(/^The ID of the mirrored model has not been set on this model./)
+  })
+
+  test('exportModel > incorrect authorisation on release', async () => {
+    authMock.release.mockReturnValueOnce({ success: false })
+    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
+  })
+
+  test('exportModel > export contains infected file', async () => {
+    fileMocks.getFilesByIds.mockReturnValueOnce([
+      { _id: '123', avScan: { state: 'complete', isInfected: true }, toJSON: vi.fn() },
+      { _id: '321', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() },
+    ])
+    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
+  })
+
+  test('exportModel > export contains incomplete file scan', async () => {
+    fileMocks.getFilesByIds.mockReturnValueOnce([
+      { _id: '123', avScan: { state: 'inProgress' } as any, toJSON: vi.fn() },
+      { _id: '321', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() },
+    ])
+    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
+  })
+
+  test('exportModel > export missing file scan', async () => {
+    fileMocks.getFilesByIds.mockReturnValueOnce([
+      { _id: '123', toJSON: vi.fn() } as any,
+      { _id: '321', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() },
+    ])
+    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
   })
 
   /*
