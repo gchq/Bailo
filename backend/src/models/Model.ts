@@ -8,6 +8,13 @@ export const EntryVisibility = {
 
 export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVisibility]
 
+export const EntryKind = {
+  Model: 'model',
+  DataCard: 'dataCard',
+} as const
+
+export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
+
 export interface CollaboratorEntry {
   entity: string
   roles: Array<'owner' | 'contributor' | 'consumer' | string>
@@ -38,6 +45,7 @@ export interface ModelInterface {
   id: string
 
   name: string
+  kind: EntryKindKeys
   teamId?: string
   description: string
   card?: ModelCardInterface
