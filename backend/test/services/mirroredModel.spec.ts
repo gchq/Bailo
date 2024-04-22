@@ -40,11 +40,13 @@ vi.mock('../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
   getReleasesBySemvers: vi.fn(() => [{}]),
+  getAllFileIds: vi.fn(() => [{}]),
 }))
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
 const fileMocks = vi.hoisted(() => ({
   getFilesByIds: vi.fn(),
+  getTotalFileSize: vi.fn(),
 }))
 vi.mock('../../src/services/file.js', () => fileMocks)
 
@@ -111,11 +113,11 @@ describe('services > mirroredModel', () => {
     expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
   })
 
-  test('exportModel > signature is added when enabled in config', async () => {
-    // need to mock stuff in checkFilesForRealeses
-    configMock.modelMirror.export.kmsSignature.enabled = true
-    const response = await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
-    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
+  test('exportModel > release export size too large', async () => {
+    configMock.modelMirror.export.maxSize = 10
+    fileMocks.getTotalFileSize.mockReturnValueOnce(100)
+    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '1.2.4'])
+    expect(response).rejects.toThrowError(/^Requested export is too large./)
   })
 
   /*
