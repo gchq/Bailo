@@ -8,12 +8,14 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/dateUtils'
+import { hasRole } from 'utils/roles'
 
 type AccessRequestsProps = {
   model: EntryInterface
+  currentUserRoles: string[]
 }
 
-export default function AccessRequests({ model }: AccessRequestsProps) {
+export default function AccessRequests({ model, currentUserRoles }: AccessRequestsProps) {
   const { accessRequests, isAccessRequestsLoading, isAccessRequestsError } = useGetAccessRequestsForModelId(model.id)
 
   const accessRequestsList = useMemo(
@@ -22,12 +24,16 @@ export default function AccessRequests({ model }: AccessRequestsProps) {
         accessRequests
           .sort(sortByCreatedAtDescending)
           .map((accessRequest) => (
-            <AccessRequestDisplay accessRequest={accessRequest} key={accessRequest.metadata.overview.name} />
+            <AccessRequestDisplay
+              accessRequest={accessRequest}
+              key={accessRequest.metadata.overview.name}
+              hideReviewBanner={!hasRole(currentUserRoles, ['msro', 'mtr'])}
+            />
           ))
       ) : (
         <EmptyBlob text={`No access requests found for model ${model.name}`} />
       ),
-    [accessRequests, model.name],
+    [accessRequests, model.name, currentUserRoles],
   )
 
   if (isAccessRequestsError) {
