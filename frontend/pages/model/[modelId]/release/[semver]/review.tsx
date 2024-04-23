@@ -10,12 +10,12 @@ import prettyBytes from 'pretty-bytes'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
+import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import CodeLine from 'src/model/registry/CodeLine'
-import Wrapper from 'src/Wrapper'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -56,7 +56,7 @@ export default function ReleaseReview() {
     } else {
       mutateReviews()
       mutateReleases()
-      router.push(`/model/${modelId}?tabs=releases`)
+      router.push(`/model/${modelId}/release/${semver}`)
     }
   }
 
@@ -109,7 +109,8 @@ export default function ReleaseReview() {
   if (error) return error
 
   return (
-    <Wrapper fullWidth title={semver ? semver : 'Loading...'} page='release review'>
+    <>
+      <Title text={semver ? semver : 'Loading...'} />
       <Container maxWidth='md' sx={{ my: 4 }}>
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
@@ -155,6 +156,6 @@ export default function ReleaseReview() {
           </Stack>
         </Paper>
       </Container>
-    </Wrapper>
+    </>
   )
 }
