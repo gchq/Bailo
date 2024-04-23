@@ -333,6 +333,7 @@ export interface EntryInterface {
 
 export interface EntryForm {
   name: string
+  kind: EntryKindKeys
   teamId: string
   description: string
   visibility: EntryVisibilityKeys
