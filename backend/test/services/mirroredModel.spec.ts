@@ -142,7 +142,13 @@ describe('services > mirroredModel', () => {
       throw Error()
     })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
-    expect(response).rejects.toThrowError(/^Error when generating the digest for the zip file./)
+    expect(response).rejects.toThrowError(/^Failed to create signature for zip file./)
+  })
+
+  test('exportModel > unable to create kms signature for zip file', async () => {
+    kmsMocks.sign.mockRejectedValueOnce('Error')
+    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    expect(response).rejects.toThrowError(/^Failed to create signature for zip file./)
   })
 
   test('exportModel > release export size too large', async () => {
