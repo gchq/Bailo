@@ -32,7 +32,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            message: z.string().openapi({ example: 'Successfully exported model.' }),
+            message: z.string().openapi({ example: 'Successfully started export upload.' }),
           }),
         },
       },
@@ -55,7 +55,7 @@ export const postRequestExport = [
     await exportModel(req.user, modelId, disclaimerAgreement, releases)
 
     return res.json({
-      message: 'Successfully exported model.',
+      message: 'Successfully started export upload.',
     })
   },
 ]

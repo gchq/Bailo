@@ -157,6 +157,14 @@ describe('services > mirroredModel', () => {
     expect(response).rejects.toThrowError(/^Requested export is too large./)
   })
 
+  test('exportModel > successful export if no files exist', async () => {
+    releaseMocks.getAllFileIds.mockResolvedValueOnce([])
+    await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '1.2.4'])
+    expect(kmsMocks.sign).toBeCalled()
+    expect(hashMocks.createHash).toBeCalled()
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
+  })
+
   test('exportModel > missing mirrored model ID', async () => {
     modelMocks.getModelById.mockReturnValueOnce({ settings: { mirroredModelId: '' } })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
