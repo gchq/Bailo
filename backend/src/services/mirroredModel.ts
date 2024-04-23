@@ -179,6 +179,9 @@ async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: Re
 
 async function checkTotalFileSize(modelId: string, semvers: string[]) {
   const fileIds = await getAllFileIds(modelId, semvers)
+  if (fileIds.length === 0) {
+    return
+  }
   const totalFileSize = await getTotalFileSize(fileIds)
   if (totalFileSize > config.modelMirror.export.maxSize) {
     throw BadReq('Requested export is too large.', { size: totalFileSize, maxSize: config.modelMirror.export.maxSize })

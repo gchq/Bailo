@@ -242,7 +242,7 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
     throw NotFound('The following releases were not found.', { modelId, releases: missing })
   }
 
-  const auths = await authorisation.releases({ dn: 'user2' }, model, releases, ReleaseAction.Update)
+  const auths = await authorisation.releases(user, model, releases, ReleaseAction.Update)
   const noAuth = releases.filter((_, i) => !auths[i].success)
   if (noAuth.length > 0) {
     throw Forbidden('You do not have the necessary permissions to export these releases', {
@@ -339,5 +339,8 @@ export async function getAllFileIds(modelId: string, semvers: string[]) {
         $addToSet: '$fileIds',
       },
     })
-  return result.at(0).fileIds
+  if (result.at(0)) {
+    return result.at(0).fileIds
+  }
+  return []
 }
