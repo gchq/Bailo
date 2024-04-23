@@ -6,13 +6,13 @@ import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
+import AccessRequests from 'src/entry/model/AccessRequests'
+import InferenceServices from 'src/entry/model/InferenceServices'
+import ModelImages from 'src/entry/model/ModelImages'
+import Releases from 'src/entry/model/Releases'
+import Settings from 'src/entry/model/Settings'
+import Overview from 'src/entry/overview/Overview'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import AccessRequests from 'src/model/AccessRequests'
-import InferenceServices from 'src/model/InferenceServices'
-import ModelImages from 'src/model/ModelImages'
-import Overview from 'src/model/Overview'
-import Releases from 'src/model/Releases'
-import Settings from 'src/model/Settings'
 
 export default function Model() {
   const router = useRouter()
@@ -31,7 +31,7 @@ export default function Model() {
     () =>
       model && uiConfig
         ? [
-            { title: 'Overview', path: 'overview', view: <Overview model={model} /> },
+            { title: 'Overview', path: 'overview', view: <Overview entry={model} /> },
             {
               title: 'Releases',
               path: 'releases',

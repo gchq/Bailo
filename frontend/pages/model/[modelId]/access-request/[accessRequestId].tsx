@@ -7,10 +7,10 @@ import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
+import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
-import EditableAccessRequestForm from 'src/model/accessRequests/EditableAccessRequestForm'
-import ReviewBanner from 'src/model/reviews/ReviewBanner'
 import ReviewComments from 'src/reviews/ReviewComments'
 
 export default function AccessRequest() {

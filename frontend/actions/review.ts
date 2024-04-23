@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import { ResponseTypeKeys } from 'src/common/ReviewWithComment'
 import useSWR from 'swr'
-import { AccessRequestInterface, ModelInterface, ReleaseInterface, ReviewRequestInterface } from 'types/types'
+import { AccessRequestInterface, EntryInterface, ReleaseInterface, ReviewRequestInterface } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -32,7 +32,7 @@ type SemverOrAccessRequestId =
     }
 
 type GetReviewRequestsForModelQuery = {
-  modelId?: ModelInterface['id']
+  modelId?: EntryInterface['id']
 } & SemverOrAccessRequestId
 
 export function useGetReviewRequestsForModel({ modelId, semver, accessRequestId }: GetReviewRequestsForModelQuery) {
