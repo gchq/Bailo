@@ -8,7 +8,6 @@ vi.mock('../../src/connectors/authorisation/index.js')
 
 const authMock = vi.hoisted(() => ({
   model: vi.fn(() => ({ success: true })),
-  release: vi.fn(() => ({ success: true })),
 }))
 vi.mock('../../src/connectors/authorisation/index.js', async () => ({
   default: authMock,
@@ -50,7 +49,7 @@ const modelMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
-  getReleasesBySemvers: vi.fn(() => [{ toJSON: vi.fn() }]),
+  getReleasesForExport: vi.fn(() => [{ toJSON: vi.fn() }]),
   getAllFileIds: vi.fn(() => [{}]),
 }))
 vi.mock('../../src/services/release.js', () => releaseMocks)
@@ -162,12 +161,6 @@ describe('services > mirroredModel', () => {
     modelMocks.getModelById.mockReturnValueOnce({ settings: { mirroredModelId: '' } })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     expect(response).rejects.toThrowError(/^The ID of the mirrored model has not been set on this model./)
-  })
-
-  test('exportModel > incorrect authorisation on release', async () => {
-    authMock.release.mockReturnValueOnce({ success: false })
-    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
-    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
   })
 
   test('exportModel > export contains infected file', async () => {
