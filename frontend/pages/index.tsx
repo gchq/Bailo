@@ -133,8 +133,8 @@ export default function Marketplace() {
       <Container maxWidth='xl'>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <Stack spacing={2} sx={{ maxWidth: '250px' }}>
-            <Button component={Link} href='/model/new' variant='contained'>
-              Add new model
+            <Button component={Link} href='/entry/new' variant='contained'>
+              Create data card/model
             </Button>
             <FormControl
               sx={{
