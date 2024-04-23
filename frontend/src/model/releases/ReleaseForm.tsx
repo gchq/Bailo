@@ -1,4 +1,4 @@
-import { Checkbox, FormControl, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
+import { Checkbox, FormControl, FormControlLabel, LinearProgress, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useMemo } from 'react'
@@ -10,7 +10,7 @@ import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import MessageAlert from 'src/MessageAlert'
 import ModelImageList from 'src/model/ModelImageList'
 import FileDownload from 'src/model/releases/FileDownload'
-import { FileInterface, FileWithMetadata, FlattenedModelImage, ModelInterface } from 'types/types'
+import { FileInterface, FileUploadProgress, FileWithMetadata, FlattenedModelImage, ModelInterface } from 'types/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -42,6 +42,9 @@ type ReleaseFormProps = {
   onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
   setRegistryError: (value: boolean) => void
+  currentFileUploadProgress?: FileUploadProgress
+  uploadedFiles: string[]
+  filesToUploadCount: number
 } & EditableReleaseFormProps
 
 export default function ReleaseForm({
@@ -57,6 +60,9 @@ export default function ReleaseForm({
   setRegistryError,
   editable = false,
   isEdit = false,
+  currentFileUploadProgress,
+  uploadedFiles,
+  filesToUploadCount,
 }: ReleaseFormProps) {
   const theme = useTheme()
 
@@ -79,6 +85,31 @@ export default function ReleaseForm({
       Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
+
+  const fileProgressText = () => {
+    if (!currentFileUploadProgress) {
+      return <Typography>Could not determine file progress</Typography>
+    }
+    if (uploadedFiles && uploadedFiles.length === filesToUploadCount) {
+      return <Typography>All files uploaded successfully.</Typography>
+    }
+    return currentFileUploadProgress.uploadProgress < 100 ? (
+      <Stack direction='row' spacing={1}>
+        <Typography fontWeight='bold'>
+          [File {uploadedFiles ? uploadedFiles.length + 1 : '1'} / {filesToUploadCount}] -
+        </Typography>
+        <Typography fontWeight='bold'>{currentFileUploadProgress.fileName}</Typography>
+        <Typography>uploading {currentFileUploadProgress.uploadProgress}%</Typography>
+      </Stack>
+    ) : (
+      <Stack direction='row' spacing={1}>
+        <Typography fontWeight='bold'>
+          File {uploadedFiles && uploadedFiles.length + 1} / {filesToUploadCount} -{currentFileUploadProgress.fileName}
+        </Typography>
+        <Typography>received - waiting for response from server...</Typography>
+      </Stack>
+    )
+  }
 
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
@@ -159,15 +190,26 @@ export default function ReleaseForm({
       <Stack>
         <Typography fontWeight='bold'>Files</Typography>
         {!isReadOnly && (
-          <MultiFileInput
-            fullWidth
-            label='Attach files'
-            files={formData.files}
-            filesMetadata={filesMetadata}
-            readOnly={isReadOnly}
-            onFilesChange={onFilesChange}
-            onFilesMetadataChange={onFilesMetadataChange}
-          />
+          <Stack spacing={2}>
+            <MultiFileInput
+              fullWidth
+              label='Attach files'
+              files={formData.files}
+              filesMetadata={filesMetadata}
+              readOnly={isReadOnly}
+              onFilesChange={onFilesChange}
+              onFilesMetadataChange={onFilesMetadataChange}
+            />
+            {currentFileUploadProgress && (
+              <>
+                <LinearProgress
+                  variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
+                  value={currentFileUploadProgress.uploadProgress}
+                />
+                {fileProgressText()}
+              </>
+            )}
+          </Stack>
         )}
         <Stack spacing={1}>
           {isReadOnly && formData.files.map((file) => <FileDownload key={file.name} file={file} modelId={model.id} />)}
