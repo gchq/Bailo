@@ -56,9 +56,9 @@ export default function CodeSnippet({
           alignItems='center'
           justifyContent='space-between'
           sx={{
-            pl: theme.spacing(2),
-            pr: theme.spacing(1),
-            py: theme.spacing(1),
+            pl: 2,
+            pr: 1,
+            py: 1,
           }}
         >
           <Typography variant='caption'>{fileName}</Typography>
@@ -77,8 +77,8 @@ export default function CodeSnippet({
         alignItems='flex-start'
         justifyContent='space-between'
         sx={{
-          px: theme.spacing(2),
-          py: theme.spacing(1),
+          px: 2,
+          py: 1,
         }}
       >
         <Typography
