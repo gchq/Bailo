@@ -56,7 +56,7 @@ export default function ReleaseReview() {
     } else {
       mutateReviews()
       mutateReleases()
-      router.push(`/model/${modelId}?tabs=releases`)
+      router.push(`/model/${modelId}/release/${semver}`)
     }
   }
 
