@@ -8,13 +8,13 @@ const uint8ArrayFromHexString = (hexstring) =>
   Uint8Array.from(hexstring.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)))
 
 export async function sign(hash: string) {
-  const keyId = '6e8432ae-73a3-48f0-8b9a-065554cc2b20'
+  const keyId = config.modelMirror.export.kmsSignature.keyId
   const client = new KMSClient(config.modelMirror.export.kmsSignature.KMSClient)
 
   const describeKeyCommand = new DescribeKeyCommand({ KeyId: keyId })
   const keyResponse = await client.send(describeKeyCommand)
   if (!keyResponse.KeyMetadata || !keyResponse.KeyMetadata.SigningAlgorithms) {
-    throw InternalError('Missing key information.')
+    throw InternalError('Cannot get key information.', { response: keyResponse })
   }
   const signingAlgorithm = keyResponse.KeyMetadata.SigningAlgorithms[0]
 
@@ -31,7 +31,7 @@ export async function sign(hash: string) {
 
 async function getSignatureValues(signResponse: SignCommandOutput) {
   if (!signResponse.Signature) {
-    throw InternalError('Missing key information.')
+    throw InternalError('Cannot get signature.', { response: signResponse })
   }
   const hex = Buffer.from(signResponse.Signature).toString('hex')
   const intIdx = ASN1HEX.getChildIdx(hex, 0)

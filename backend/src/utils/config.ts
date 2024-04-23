@@ -170,6 +170,7 @@ export interface Config {
       bucket: string
       kmsSignature: {
         enabled: boolean
+        keyId: string
         KMSClient: KMSClientConfig
       }
     }
