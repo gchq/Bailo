@@ -237,9 +237,9 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
     semver: semvers,
   })
 
-  const difference = semvers.filter((x) => !releases.some((release) => release.semver === x))
-  if (difference.length > 0) {
-    throw NotFound('The following releases were not found.', { modelId, releases: difference })
+  const missing = semvers.filter((x) => !releases.some((release) => release.semver === x))
+  if (missing.length > 0) {
+    throw NotFound('The following releases were not found.', { modelId, releases: missing })
   }
 
   const auths = await authorisation.releases({ dn: 'user2' }, model, releases, ReleaseAction.Update)
