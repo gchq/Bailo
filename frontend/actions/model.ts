@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { ModelForm, ModelImage, ModelInterface, Role } from '../types/types'
+import { EntryForm, EntryInterface, ModelImage, Role } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export interface ModelSearchResult {
@@ -36,7 +36,7 @@ export function useListModels(filters: string[] = [], task = '', libraries: stri
 export function useGetModel(id?: string) {
   const { data, error, mutate } = useSWR<
     {
-      model: ModelInterface
+      model: EntryInterface
     },
     ErrorInfo
   >(id ? `/api/v2/model/${id}` : null, fetcher)
@@ -97,7 +97,7 @@ export function useGetModelRolesCurrentUser(id?: string) {
   }
 }
 
-export async function postModel(form: ModelForm) {
+export async function postModel(form: EntryForm) {
   return fetch(`/api/v2/models`, {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
@@ -107,7 +107,7 @@ export async function postModel(form: ModelForm) {
 
 export async function patchModel(
   id: string,
-  delta: Partial<Pick<ModelInterface, 'name' | 'description' | 'collaborators' | 'visibility' | 'settings'>>,
+  delta: Partial<Pick<EntryInterface, 'name' | 'description' | 'collaborators' | 'visibility' | 'settings'>>,
 ) {
   return fetch(`/api/v2/model/${id}`, {
     method: 'PATCH',
