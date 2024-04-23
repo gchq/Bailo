@@ -230,29 +230,29 @@ export async function getModelReleases(
   return results.filter((_, i) => auths[i].success)
 }
 
-export async function getReleasesBySemvers(user: UserInterface, modelId: string, semvers: string[]) {
+export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
   const model = await getModelById(user, modelId)
   const releases = await Release.find({
     modelId,
     semver: semvers,
   })
 
-  const auths = await authorisation.releases(user, model, releases, ReleaseAction.View)
-  const filtered: ReleaseDoc[] = []
-  for (let i = 0; i < releases.length; i++) {
-    if (auths[i].success) {
-      filtered.push(releases[i])
-    } else {
-      log.warn('Release not included in response due to authorisation failure', {
-        authorisationResponse: auths[i],
-        modelId,
-        semver: releases[i].semver,
-        requestedReleases: semvers,
-      })
-    }
+  const difference = semvers.filter((x) => !releases.some((release) => release.semver === x))
+  if (difference.length > 0) {
+    throw NotFound('The following releases were not found.', { modelId, releases: difference })
   }
 
-  return filtered
+  const auths = await authorisation.releases({ dn: 'user2' }, model, releases, ReleaseAction.Update)
+  const noAuth = releases.filter((_, i) => !auths[i].success)
+  if (noAuth.length > 0) {
+    throw Forbidden('You do not have the necessary permissions to export these releases', {
+      modelId,
+      releases: noAuth.map((release) => release.semver),
+      user,
+    })
+  }
+
+  return releases
 }
 
 export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {

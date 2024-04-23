@@ -5,7 +5,7 @@ import stream, { PassThrough } from 'stream'
 
 import { sign } from '../clients/kms.js'
 import { putObjectStream } from '../clients/s3.js'
-import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.js'
+import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileInterfaceDoc, ScanState } from '../models/File.js'
 import { ModelDoc } from '../models/Model.js'
@@ -16,7 +16,7 @@ import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import { downloadFile, getFilesByIds, getTotalFileSize } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevisions } from './model.js'
-import { getAllFileIds, getReleasesBySemvers } from './release.js'
+import { getAllFileIds, getReleasesForExport } from './release.js'
 
 const ExportKind = {
   ModelCards: 'modelCards',
@@ -133,10 +133,10 @@ async function generateModelCardRevisionsZip(user: UserInterface, model: ModelDo
 }
 
 async function generateReleaseZip(user: UserInterface, model: ModelDoc, semvers: string[]) {
+  const releases = await getReleasesForExport(user, model.id, semvers)
   if (semvers.length > 1) {
     await checkTotalFileSize(model.id, semvers)
   }
-  const releases = await getReleasesBySemvers(user, model.id, semvers)
 
   const zip = archiver('zip')
   const errors: any[] = []
@@ -150,10 +150,6 @@ async function generateReleaseZip(user: UserInterface, model: ModelDoc, semvers:
 }
 
 async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: ReleaseDoc, zip: archiver.Archiver) {
-  const auth = await authorisation.release(user, model, release, ReleaseAction.Update)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId: release.modelId, semver: release.semver })
-  }
   const files: FileInterfaceDoc[] = await getFilesByIds(user, release.modelId, release.fileIds)
   const errors: Array<{ message: string; context?: { [key: string]: unknown } }> = []
   const failedFileScans = await checkReleaseFiles(files)
