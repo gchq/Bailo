@@ -415,6 +415,11 @@ export type ReviewRequestInterface = {
   updatedAt: string
 } & PartialReviewRequestInterface
 
+export interface FileUploadProgress {
+  fileName: string
+  uploadProgress: number
+}
+
 export interface InferenceInterface {
   modelId: string
   image: string
