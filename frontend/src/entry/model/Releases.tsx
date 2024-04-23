@@ -7,8 +7,14 @@ import Loading from 'src/common/Loading'
 import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
+import { hasRole } from 'utils/roles'
 
-export default function Releases({ model }: { model: EntryInterface }) {
+type ReleasesProps = {
+  model: EntryInterface
+  currentUserRoles: string[]
+}
+
+export default function Releases({ model, currentUserRoles }: ReleasesProps) {
   const router = useRouter()
   const [latestRelease, setLatestRelease] = useState('')
 
@@ -17,9 +23,15 @@ export default function Releases({ model }: { model: EntryInterface }) {
   const releaseDisplays = useMemo(
     () =>
       releases.map((release) => (
-        <ReleaseDisplay key={release.semver} model={model} release={release} latestRelease={latestRelease} />
+        <ReleaseDisplay
+          key={release.semver}
+          model={model}
+          release={release}
+          latestRelease={latestRelease}
+          hideReviewBanner={!hasRole(currentUserRoles, ['msro', 'mtr'])}
+        />
       )),
-    [latestRelease, model, releases],
+    [latestRelease, model, releases, currentUserRoles],
   )
 
   useEffect(() => {
