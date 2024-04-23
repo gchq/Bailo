@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { EntryForm, EntryInterface, ModelImage, Role } from '../types/types'
+import { EntryForm, EntryInterface, EntryKindKeys, ModelImage, Role } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export interface ModelSearchResult {
@@ -11,8 +11,15 @@ export interface ModelSearchResult {
   tags: Array<string>
 }
 
-export function useListModels(filters: string[] = [], task = '', libraries: string[] = [], search = '') {
+export function useListModels(
+  kind?: EntryKindKeys,
+  filters: string[] = [],
+  task = '',
+  libraries: string[] = [],
+  search = '',
+) {
   const queryParams = {
+    ...(kind && { kind }),
     ...(filters.length > 0 && { filters }),
     ...(task && { task }),
     ...(libraries.length > 0 && { libraries }),

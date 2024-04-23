@@ -3,7 +3,7 @@ import { Validator } from 'jsonschema'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel from '../models/Model.js'
+import ModelModel, { EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
@@ -73,12 +73,17 @@ export async function canUserActionModelById(user: UserInterface, modelId: strin
 
 export async function searchModels(
   user: UserInterface,
+  kind: EntryKindKeys,
   libraries: Array<string>,
   filters: Array<GetModelFiltersKeys>,
   search: string,
   task?: string,
 ): Promise<Array<ModelInterface>> {
   const query: any = {}
+
+  if (kind) {
+    query['kind'] = { $all: kind }
+  }
 
   if (libraries.length) {
     query['card.metadata.overview.tags'] = { $all: libraries }
