@@ -211,6 +211,7 @@ module.exports = {
       bucket: 'exports',
       kmsSignature: {
         enabled: false,
+        keyId: '123-456',
         KMSClient: {
           region: 'eu-west-2',
           credentials: {
