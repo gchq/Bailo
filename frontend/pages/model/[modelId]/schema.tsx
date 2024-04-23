@@ -11,10 +11,10 @@ import { useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import SchemaButton from 'src/entry/model/common/SchemaButton'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import SchemaButton from 'src/model/common/SchemaButton'
 import { SchemaInterface, SchemaKind } from 'types/types'
 
 export default function NewSchemaSelection() {

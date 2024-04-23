@@ -4,8 +4,8 @@ import { useGetInference } from 'actions/inferencing'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import EditableInference from 'src/entry/model/inferencing/EditableInference'
 import MessageAlert from 'src/MessageAlert'
-import EditableInference from 'src/model/inferencing/EditableInference'
 
 export default function InferenceSettings() {
   const router = useRouter()
