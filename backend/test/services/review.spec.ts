@@ -11,6 +11,7 @@ import {
   findReviews,
   respondToReview,
   sendReviewResponseNotification,
+  updateReviewResponse,
 } from '../../src/services/review.js'
 import { ReviewKind } from '../../src/types/enums.js'
 
@@ -29,6 +30,7 @@ const reviewModelMock = vi.hoisted(() => {
   obj.append = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
   obj.findByIdAndUpdate = vi.fn(() => obj)
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
@@ -265,5 +267,72 @@ describe('services > review', () => {
 
     expect(result).toBe(false)
     expect(reviewModelMock.find.mock.calls).toMatchSnapshot()
+  })
+
+  test('updateReviewResponse > update for release review response sucessful', async () => {
+    await updateReviewResponse(
+      user,
+      'modelId',
+      'msro',
+      {
+        id: 'demo1d0vka6-fwfqdm',
+        comment: 'Do better!',
+      },
+      ReviewKind.Release,
+      'semver',
+    )
+    expect(reviewModelMock.findOneAndUpdate).toBeCalled()
+  })
+
+  test('updateRevieResponse > update for access request review response sucessful', async () => {
+    await updateReviewResponse(
+      user,
+      'modelId',
+      'msro',
+      {
+        id: 'demo1d0vka6-fwfqdm',
+        comment: 'Do better!',
+      },
+      ReviewKind.Access,
+      'accessRequestId',
+    )
+    expect(reviewModelMock.findOneAndUpdate).toBeCalled()
+  })
+
+  test('updateReviewResponse > review not found ', async () => {
+    reviewModelMock.limit.mockReturnValueOnce()
+
+    const result: Promise<ReviewInterface> = updateReviewResponse(
+      user,
+      'modelId',
+      'msro',
+      {
+        id: 'demo1d0vka6-fwfqdm',
+        comment: 'Do better!',
+      },
+      ReviewKind.Release,
+      'semver',
+    )
+
+    expect(result).rejects.toThrowError(`Review not found`)
+    expect(reviewModelMock.findOneAndUpdate).not.toBeCalled()
+  })
+
+  test('update a review response > mongo update fails', async () => {
+    reviewModelMock.findOneAndUpdate.mockReturnValueOnce()
+
+    const result: Promise<ReviewInterface> = updateReviewResponse(
+      user,
+      'modelId',
+      'msro',
+      {
+        id: 'demo1d0vka6-fwfqdm',
+        comment: 'Do better!',
+      },
+      ReviewKind.Release,
+      'semver',
+    )
+
+    expect(result).rejects.toThrowError(`Updating response to Review, was not successful`)
   })
 })

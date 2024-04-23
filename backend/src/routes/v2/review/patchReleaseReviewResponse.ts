@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { Decision, ReviewInterface } from '../../../models/Review.js'
+import { ReviewInterface } from '../../../models/Review.js'
 import { updateReviewResponse } from '../../../services/review.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
 import { ReviewKind } from '../../../types/enums.js'
@@ -16,9 +16,9 @@ export const patchReleaseReviewResponseSchema = z.object({
     semver: z.string(),
   }),
   body: z.object({
+    id: z.string(),
     role: z.string(),
     comment: z.string().optional(),
-    decision: z.nativeEnum(Decision),
   }),
 })
 
@@ -54,7 +54,7 @@ export const patchReleaseReviewResponse = [
       params: { modelId, semver },
       body: { role, ...body },
     } = parse(req, patchReleaseReviewResponseSchema)
-    const review = await updateReviewResponse(req.user, modelId, role, ReviewKind.Release, semver, body)
+    const review = await updateReviewResponse(req.user, modelId, role, body, ReviewKind.Release, semver)
 
     await audit.onUpdateReviewResponse(req, review)
 

@@ -10,6 +10,7 @@ import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, GenericError, NotFound } from '../utils/error.js'
+import { convertStringToId } from '../utils/id.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -144,7 +145,7 @@ export async function respondToReview(
   const update = await Review.findByIdAndUpdate(
     review._id,
     {
-      $push: { responses: { user: toEntity('user', user.dn), ...response } },
+      $push: { responses: { id: convertStringToId(reviewId), user: toEntity('user', user.dn), ...response } },
     },
     { new: true },
   )
@@ -207,37 +208,30 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
   return reviews.some((review) => requiredRoles.accessRequest.includes(review.role))
 }
 
-export type UpdateReviewResponseParams = Pick<ReviewResponse, 'comment' | 'decision'>
+export type UpdateReviewResponseParams = Pick<ReviewResponse, 'comment' | 'id'>
 export async function updateReviewResponse(
   user: UserInterface,
   modelId: string,
-  semver: string,
-  accessRequestId: string,
-  kind: string,
-  delta: UpdateReviewResponseParams,
-): Promise<ReviewInterface> {
+  role: string,
+  response: UpdateReviewResponseParams,
+  kind: ReviewKindKeys,
+  reviewId: string,
+) {
   const model = await getModelById(user, modelId)
-  //const update = await findReviews(user, true, modelId, semver, accessRequestId, kind)
-  const updatedAccess = await Review.findOneAndUpdate({ modelId, accessRequestId, kind }, delta, { new: true })
-  const updatedRelease = await Review.findOneAndUpdate({ modelId, semver, kind }, delta, { new: true })
 
   let reviewIdQuery
   switch (kind) {
     case ReviewKind.Access: {
-      const access = await getAccessRequestById(user, accessRequestId)
+      const access = await getAccessRequestById(user, reviewId)
       const accessAuth = await authorisation.accessRequest(user, model, access, AccessRequestAction.Update)
       if (!accessAuth.success) {
-        throw Forbidden(accessAuth.info, { userDn: user.dn, accessRequestId })
+        throw Forbidden(accessAuth.info, { userDn: user.dn, accessRequestId: reviewId })
       }
-
-      if (!updatedAccess) {
-        throw NotFound(`The requested access was not found.`, { updatedAccess })
-      }
-
+      reviewIdQuery = { modelId, accessRequestId: reviewId, kind, role }
       break
     }
     case ReviewKind.Release: {
-      const release = await getReleaseBySemver(user, modelId, semver)
+      const release = await getReleaseBySemver(user, modelId, reviewId)
       const releaseAuth = await authorisation.release(user, model, release, ReleaseAction.Update)
       if (!releaseAuth.success) {
         throw Forbidden(releaseAuth.info, {
@@ -245,19 +239,32 @@ export async function updateReviewResponse(
           modelId: modelId,
         })
       }
-
-      if (!updatedRelease) {
-        throw NotFound(`The requested release was not found.`, { updatedRelease })
-      }
-
+      reviewIdQuery = { modelId, semver: reviewId, kind, role }
       break
     }
 
     default:
-      throw GenericError(500, 'Review Kind not recognised', reviewIdQuery)
+      throw GenericError(500, 'Review not found', reviewIdQuery)
   }
 
-  return [updatedAccess, updatedRelease]
+  const update = await Review.findOneAndUpdate(
+    reviewIdQuery,
+    { 'responses.$[i].comment': response.comment, 'user:user': toEntity('user', user.dn) },
+    {
+      arrayFilters: [
+        {
+          'i.id': `${response.id}`,
+          'i.user': `${toEntity('user', user.dn)}`,
+        },
+      ],
+    },
+  )
+  if (!update) {
+    throw GenericError(500, `Updating response to Review, was not successful`, {
+      reviewIdQuery,
+    })
+  }
+  return update
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
