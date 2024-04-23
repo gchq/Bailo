@@ -78,9 +78,16 @@ async function uploadZipFileToS3(zip: ZipFile) {
 
   let signatures = {}
   if (config.modelMirror.export.kmsSignature.enabled) {
-    const messageDigest = await generateDigest(hashStream)
-    // If keys are wrong this returns a horrible error to the user.
-    signatures = await sign(messageDigest)
+    try {
+      const messageDigest = await generateDigest(hashStream)
+      signatures = await sign(messageDigest)
+    } catch (error) {
+      throw InternalError('Failed to create signature for zip file.', {
+        error,
+        modelId: zip.metadata.modelId,
+        exportKind: zip.metadata.exportKind,
+      })
+    }
   }
 
   log.debug('Starting export of zip file to S3.', {
