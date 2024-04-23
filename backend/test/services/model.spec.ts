@@ -2,7 +2,6 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { EntryKind } from '../../src/models/Model.js'
 import {
   _setModelCard,
   canUserActionModelById,
@@ -123,28 +122,28 @@ describe('services > model', () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, EntryKind.Model, [], [], '', undefined)
+    await searchModels(user, 'model', [], [], '', undefined)
   })
 
   test('searchModels > all filters', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, EntryKind.Model, ['library'], ['mine'], 'search', 'task')
+    await searchModels(user, 'model', ['library'], ['mine'], 'search', 'task')
   })
 
   test('searchModels > task no library', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, EntryKind.Model, [], [], '', 'task')
+    await searchModels(user, 'model', [], [], '', 'task')
   })
 
   test('searchModels > bad filter', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    expect(() => searchModels(user, EntryKind.Model, [], ['asdf' as any], '')).rejects.toThrowError()
+    expect(() => searchModels(user, 'model', [], ['asdf' as any], '')).rejects.toThrowError()
   })
 
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {
