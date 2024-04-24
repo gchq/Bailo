@@ -8,12 +8,10 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
-  Link as MuiLink,
   Paper,
   Stack,
   Tab,
   Tabs,
-  Typography,
 } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
@@ -21,11 +19,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { ChangeEvent, Fragment, useCallback, useEffect, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
-import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import useDebounce from 'src/hooks/useDebounce'
+import EntryList from 'src/marketplace/EntryList'
 import MessageAlert from 'src/MessageAlert'
+import { EntryKind, EntryKindKeys } from 'types/types'
 
 interface KeyAndLabel {
   key: string
@@ -40,14 +39,22 @@ export default function Marketplace() {
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
+  const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, isModelsError, isModelsLoading } = useListModels(
+    EntryKind.MODEL,
     selectedTypes,
     selectedTask,
     selectedLibraries,
     debouncedFilter,
   )
+
+  const {
+    models: dataCards,
+    isModelsError: isDataCardsError,
+    isModelsLoading: isDataCardsLoading,
+  } = useListModels(EntryKind.DATA_CARD, selectedTypes, selectedTask, selectedLibraries, debouncedFilter)
 
   const theme = useTheme()
   const router = useRouter()
@@ -213,45 +220,38 @@ export default function Marketplace() {
           <Box sx={{ overflow: 'hidden', width: '100%' }}>
             <Paper sx={{ py: 2, px: 4 }}>
               <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
-                <Tabs value={'bailo'} indicatorColor='secondary'>
-                  <Tab label={`Models ${models ? `(${models.length})` : ''}`} value='bailo' />
+                <Tabs value={selectedTab} indicatorColor='secondary'>
+                  <Tab
+                    label={`Models ${models ? `(${models.length})` : ''}`}
+                    value={EntryKind.MODEL}
+                    onClick={() => setSelectedTab(EntryKind.MODEL)}
+                  />
+                  <Tab
+                    label={`Data Cards ${dataCards ? `(${dataCards.length})` : ''}`}
+                    value={EntryKind.DATA_CARD}
+                    onClick={() => setSelectedTab(EntryKind.DATA_CARD)}
+                  />
                 </Tabs>
               </Box>
               {isModelsLoading && <Loading />}
-              {!isModelsLoading && (
+              {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   {isModelsError && <MessageAlert message={isModelsError.info.message} severity='error' />}
-                  {models.length === 0 && <EmptyBlob data-test='emptyModelListBlob' text='No models here' />}
-                  {models.map((model, index) => {
-                    return (
-                      <Fragment key={model.id}>
-                        <Link style={{ textDecoration: 'none' }} href={`model/${model.id}`} passHref>
-                          <MuiLink
-                            variant='h5'
-                            sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
-                          >
-                            {model.name}
-                          </MuiLink>
-                        </Link>
-                        <Typography variant='body1' sx={{ marginBottom: 2 }}>
-                          {model.description}
-                        </Typography>
-                        <ChipSelector
-                          chipTooltipTitle={'Filter by tag'}
-                          options={model.tags.slice(0, 10)}
-                          expandThreshold={10}
-                          multiple
-                          selectedChips={selectedLibraries}
-                          onChange={handleLibrariesOnChange}
-                          size='small'
-                          ariaLabel='add model tag to search filter'
-                        />
-                        {index !== models.length - 1 && (
-                          <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />
-                        )}
-                      </Fragment>
-                    )
-                  })}
+                  <EntryList
+                    entries={models}
+                    selectedChips={selectedLibraries}
+                    onSelectedChipsChange={handleLibrariesOnChange}
+                  />
+                </div>
+              )}
+              {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
+                <div data-test='dataCardListBox'>
+                  {isDataCardsError && <MessageAlert message={isDataCardsError.info.message} severity='error' />}
+                  <EntryList
+                    entries={dataCards}
+                    selectedChips={selectedLibraries}
+                    onSelectedChipsChange={handleLibrariesOnChange}
+                  />
                 </div>
               )}
             </Paper>

@@ -34,6 +34,7 @@ export default function CreateEntry({ kind }: CreateEntryProps) {
 
     const formData: EntryForm = {
       name: name,
+      kind: kind,
       teamId: team?.id ?? 'Uncategorised',
       description,
       visibility,

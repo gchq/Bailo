@@ -1,10 +1,11 @@
 import { AccessRequestInterface } from '../../models/AccessRequest.js'
-import { ModelInterface } from '../../models/Model.js'
+import { EntryKind, ModelInterface } from '../../models/Model.js'
 import { ReleaseInterface } from '../../models/Release.js'
 
 export const model: ModelInterface = {
   // Basic model example
   id: 'basic-model-abcdef',
+  kind: EntryKind.Model,
   teamId: undefined,
 
   name: 'Basic Model',
