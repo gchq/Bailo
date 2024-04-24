@@ -6,7 +6,6 @@ import { useGetUserInformation } from 'actions/user'
 import { MouseEvent, useMemo, useRef, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
 
 export type UserInformation = {
   name?: string
@@ -41,12 +40,6 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
     setAnchorEl(null)
   }
 
-  if (isUserInformationError) {
-    if (isUserInformationError.status !== 404) {
-      return <MessageAlert message={isUserInformationError.info.message} severity='error' slimView />
-    }
-  }
-
   if (isUserInformationLoading) {
     return <Loading />
   }
@@ -63,7 +56,7 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
         onMouseEnter={(e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
         onMouseLeave={() => setAnchorEl(null)}
       >
-        {userInformation ? userInformation.name : dn}
+        {userInformation ? userInformation.name : dn.charAt(0).toUpperCase() + dn.slice(1)}
       </Box>
       {!hidePopover && (
         <Popover
@@ -89,7 +82,7 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
             <Stack direction='row' alignItems='center' spacing={1}>
               <UserIcon color='primary' />
               <Typography color='primary' fontWeight='bold' data-test='userDisplayNameProperty'>
-                {userInformation ? userInformation.name : dn}
+                {userInformation ? userInformation.name : dn.charAt(0).toUpperCase() + dn.slice(1)}
               </Typography>
             </Stack>
             <Divider />
