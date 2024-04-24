@@ -5,7 +5,7 @@ export async function up() {
   for (const model of models) {
     if (model.kind === undefined) {
       model.kind = 'model'
-      model.save()
+      await model.save()
     }
   }
 }
