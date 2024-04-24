@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
 import { exportModel } from '../../../services/mirroredModel.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -47,12 +49,14 @@ interface PostRequestExportResponse {
 export const postRequestExport = [
   bodyParser.json(),
   async (req: Request, res: Response<PostRequestExportResponse>) => {
+    req.audit = AuditInfo.CreateExport
     const {
       params: { modelId },
       body: { disclaimerAgreement, releases },
     } = parse(req, postRequestExportSchema)
 
     await exportModel(req.user, modelId, disclaimerAgreement, releases)
+    await audit.onCreateExport(req, modelId, releases)
 
     return res.json({
       message: 'Successfully started export upload.',

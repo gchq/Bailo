@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-//import audit from '../../../src/connectors/audit/__mocks__/index.js'
+import audit from '../../../src/connectors/audit/__mocks__/index.js'
 import { postRequestExportSchema } from '../../../src/routes/v2/model/postRequestExport.js'
 import { createFixture, testPost } from '../../testUtils/routes.js'
 
@@ -22,16 +22,16 @@ describe('routes > model > postModel', () => {
     expect(res.body).matchSnapshot()
   })
 
-  //test('audit > expected call', async () => {
-  //  vi.mock('../../../src/services/model.js', () => ({
-  //    createModel: vi.fn(() => ({ _id: 'test' })),
-  //  }))
+  test('audit > expected call', async () => {
+    vi.mock('../../../src/services/model.js', () => ({
+      createModel: vi.fn(() => ({ _id: 'test' })),
+    }))
 
-  //  const fixture = createFixture(postModelSchema)
-  //  const res = await testPost('/api/v2/models', fixture)
+    const fixture = createFixture(postRequestExportSchema)
+    const res = await testPost(`/api/v2/model/${fixture.params.modelId}/export`, fixture)
 
-  //  expect(res.statusCode).toBe(200)
-  //  expect(audit.onCreateModel).toBeCalled()
-  //  expect(audit.onCreateModel.mock.calls.at(0).at(1)).toMatchSnapshot()
-  //})
+    expect(res.statusCode).toBe(200)
+    expect(audit.onCreateExport).toBeCalled()
+    expect(audit.onCreateExport.mock.calls.at(0).at(1)).toMatchSnapshot()
+  })
 })
