@@ -12,7 +12,7 @@ import { parse } from '../../../utils/validate.js'
 export const postModelSchema = z.object({
   body: z.object({
     name: z.string(),
-    kind: z.nativeEnum(EntryKind).optional().default(EntryKind.Model),
+    kind: z.nativeEnum(EntryKind),
     teamId: z.string(),
     description: z.string(),
     visibility: z.nativeEnum(EntryVisibility).optional().default(EntryVisibility.Public),
