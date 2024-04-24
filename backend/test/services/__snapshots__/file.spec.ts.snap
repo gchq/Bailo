@@ -24,8 +24,6 @@ exports[`services > file > getFilesByModel > success 1`] = `
 ]
 `;
 
-exports[`services > file > getTotalFileSize > uses expected query 1`] = `undefined`;
-
 exports[`services > file > removeFile > success 1`] = `
 {
   "aggregate": [MockFunction spy],
