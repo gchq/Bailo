@@ -3,7 +3,7 @@ import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
-import MessageAlert from 'src/MessageAlert'
+import ErrorWrapper from 'src/errors/ErrorWrapper'
 import SchemaSelect from 'src/schemas/SchemaSelect'
 
 export default function ModelSchema() {
@@ -13,12 +13,7 @@ export default function ModelSchema() {
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
 
   if (isModelError) {
-    return (
-      <>
-        <Title text='Error' />
-        <MessageAlert message={isModelError.info.message} severity='error' />
-      </>
-    )
+    return <ErrorWrapper message={isModelError.info.message} />
   }
 
   return (

@@ -38,7 +38,7 @@ export default function EntryCardHistoryDialog({ entry, open, setOpen }: EntryCa
       entryCardRevisions
         .sort(sortByCreatedAtDescending)
         .map((entryCardRevision) => (
-          <EntryCardRevision key={entryCardRevision.version} entryCard={entryCardRevision} kind={entry.kind} />
+          <EntryCardRevision key={entryCardRevision.version} entryCard={entryCardRevision} entryKind={entry.kind} />
         )),
     [entry.kind, entryCardRevisions],
   )
