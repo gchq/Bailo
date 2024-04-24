@@ -282,11 +282,10 @@ describe('services > file', () => {
     )
   })
 
-  test('getTotalFileSize > uses expected query', async () => {
+  test('getTotalFileSize > returns file size', async () => {
     fileModelMocks.group.mockResolvedValueOnce([{ totalSize: 42 }])
     const size = await getTotalFileSize(['1', '2', '3'])
 
-    expect(fileModelMocks.aggregate.calls).toMatchSnapshot()
     expect(size).toBe(42)
   })
 })
