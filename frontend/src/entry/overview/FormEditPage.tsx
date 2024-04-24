@@ -172,7 +172,7 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
       <EntryCardHistoryDialog entry={entry} open={historyDialogOpen} setOpen={setHistoryDialogOpen} />
       <TextInputDialog
         open={jsonUploadDialogOpen}
-        setOpen={setJsonUploadDialogOpen}
+        onClose={() => setJsonUploadDialogOpen(false)}
         onSubmit={handleJsonFormOnSubmit}
         helperText={`Paste in raw JSON to fill in the ${EntryCardKindLabel[entry.kind]} form`}
         dialogTitle='Add Raw JSON to Form'
