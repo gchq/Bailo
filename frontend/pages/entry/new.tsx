@@ -43,10 +43,12 @@ export default function NewEntry() {
                 >
                   <Stack spacing={2}>
                     <Typography component='h2' variant='h6' color='primary'>
-                      Create data card
+                      Create Data Card
                     </Typography>
                     <Typography>
-                      {`Data cards allow you to track and reference the training data used to generate your models. Adding data cards to Bailo allows you to link it to any model, keep track of it's storage location and other accreditation requirements.`}
+                      Data cards allow you to track and reference the training data used to generate your models. Adding
+                      data cards to Bailo allows you to link it to any model, keep track of its storage location and
+                      other accreditation requirements.
                     </Typography>
                     <Button
                       disabled // Disabled until data cards are fully supported
@@ -68,7 +70,7 @@ export default function NewEntry() {
                 >
                   <Stack spacing={2}>
                     <Typography component='h2' variant='h6' color='primary'>
-                      Create model
+                      Create Model
                     </Typography>
                     <Typography>
                       Creating a model allows you to create artefacts and images, write a model card and control who has

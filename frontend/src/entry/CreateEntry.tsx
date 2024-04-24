@@ -8,7 +8,7 @@ import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
 import MessageAlert from 'src/MessageAlert'
 import TeamSelect from 'src/TeamSelect'
-import { EntryForm, EntryKind, EntryKindKeys, EntryVisibility, TeamInterface } from 'types/types'
+import { EntryForm, EntryKind, EntryKindKeys, EntryKindLabel, EntryVisibility, TeamInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
 
@@ -56,7 +56,9 @@ export default function CreateEntry({ kind }: CreateEntryProps) {
         <Lock />
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Private</Typography>
-          <Typography variant='caption'>{`Only named individuals will be able to view this ${kind}`}</Typography>
+          <Typography variant='caption'>
+            {`Only named individuals will be able to view this ${EntryKindLabel[kind]}`}
+          </Typography>
         </Stack>
       </Stack>
     )
@@ -68,7 +70,9 @@ export default function CreateEntry({ kind }: CreateEntryProps) {
         <LockOpen />
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Public</Typography>
-          <Typography variant='caption'>{`Any authorised user will be able to see this ${kind}`}</Typography>
+          <Typography variant='caption'>
+            {`Any authorised user will be able to see this ${EntryKindLabel[kind]}`}
+          </Typography>
         </Stack>
       </Stack>
     )
@@ -132,7 +136,7 @@ export default function CreateEntry({ kind }: CreateEntryProps) {
                   data-test='createEntryButton'
                   loading={loading}
                 >
-                  {`Create ${kind}`}
+                  {`Create ${EntryKindLabel[kind]}`}
                 </LoadingButton>
               </span>
             </Tooltip>

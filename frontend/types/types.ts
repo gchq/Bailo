@@ -126,8 +126,9 @@ export interface Role {
 }
 
 export const SchemaKind = {
-  Model: 'model',
-  AccessRequest: 'accessRequest',
+  MODEL: 'model',
+  ACCESS_REQUEST: 'accessRequest',
+  DATA_CARD: 'dataCard',
 } as const
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
@@ -293,6 +294,18 @@ export const EntryVisibility = {
 
 export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVisibility]
 
+export const EntryCardKindLabel = {
+  model: 'model card',
+  'data-card': 'data card',
+} as const
+export type EntryCardKindLabelKeys = (typeof EntryCardKindLabel)[keyof typeof EntryCardKindLabel]
+
+export const EntryCardKind = {
+  model: 'model-card',
+  'data-card': 'data-card',
+} as const
+export type EntryCardKindKeys = (typeof EntryCardKind)[keyof typeof EntryCardKind]
+
 export interface EntryCardInterface {
   schemaId: string
   version: number
@@ -304,6 +317,12 @@ export interface CollaboratorEntry {
   entity: string
   roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
+
+export const EntryKindLabel = {
+  model: 'model',
+  'data-card': 'data card',
+} as const
+export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindLabel]
 
 export const EntryKind = {
   MODEL: 'model',

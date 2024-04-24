@@ -19,7 +19,7 @@ describe('Beta create new model', () => {
 
     cy.get('[data-test=publicButtonSelector]').click()
     cy.get('[data-test=createEntryButton]').click()
-    cy.get('[data-test=createModelCardOverview]')
+    cy.get('[data-test=createEntryCardOverview]')
 
     cy.log('Checking URL has been updated')
     cy.url()
@@ -40,7 +40,7 @@ describe('Beta create new model', () => {
 
     cy.get('[data-test=privateButtonSelector]').click()
     cy.get('[data-test=createEntryButton]').click()
-    cy.get('[data-test=createModelCardOverview]')
+    cy.get('[data-test=createEntryCardOverview]')
   })
 
   it('can set a schema for a newly created model', () => {
@@ -62,13 +62,13 @@ describe('Beta create new model', () => {
     cy.visit(`/model/${modelUuid}`)
     cy.contains('Edit Model card')
     cy.log('Test that we can edit the model card')
-    cy.get('[data-test=editModelCardButton]').click()
+    cy.get('[data-test=editEntryCardButton]').click()
     cy.get('#root_modelSummary').type('This is a test summary')
-    cy.get('[data-test=cancelEditModelCardButton]').click({ force: true })
+    cy.get('[data-test=cancelEditEntryCardButton]').click({ force: true })
     cy.contains('This is a test summary').should('not.exist')
-    cy.get('[data-test=editModelCardButton]').click({ force: true })
+    cy.get('[data-test=editEntryCardButton]').click({ force: true })
     cy.get('#root_modelSummary').type('This is a test summary')
-    cy.get('[data-test=saveModelCardButton]').click({ force: true })
+    cy.get('[data-test=saveEntryCardButton]').click({ force: true })
     cy.contains('This is a test summary')
   })
 })

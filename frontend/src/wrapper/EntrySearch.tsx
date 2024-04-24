@@ -39,7 +39,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }))
 
-export default function ModelSearchField() {
+export default function EntrySearch() {
   const [modelFilter, setModelFilter] = useState('')
   const debouncedFilter = useDebounce(modelFilter, 250)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
