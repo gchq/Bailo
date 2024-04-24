@@ -24,8 +24,11 @@ exports[`services > file > getFilesByModel > success 1`] = `
 ]
 `;
 
+exports[`services > file > getTotalFileSize > uses expected query 1`] = `undefined`;
+
 exports[`services > file > removeFile > success 1`] = `
 {
+  "aggregate": [MockFunction spy],
   "delete": [MockFunction spy] {
     "calls": [
       [],
@@ -53,26 +56,11 @@ exports[`services > file > removeFile > success 1`] = `
       },
     ],
   },
+  "group": [MockFunction spy],
+  "match": [MockFunction spy],
   "save": [MockFunction spy],
   "size": 100,
 }
-`;
-
-exports[`services > file > uploadFile > virus scan 1`] = `
-[
-  [
-    "scan-complete",
-    [Function],
-  ],
-  [
-    "error",
-    [Function],
-  ],
-  [
-    "timeout",
-    [Function],
-  ],
-]
 `;
 
 exports[`services > file > uploadFile > virus scan initialised 1`] = `
