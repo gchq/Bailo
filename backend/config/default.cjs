@@ -91,6 +91,15 @@ module.exports = {
         jsonSchema: require('../src/scripts/example_schemas/minimal_model_schema.json'),
       },
     ],
+    dataCards: [
+      {
+        name: 'Minimal Data Card Schema v10',
+        id: 'minimal-data-card-v10',
+        description:
+          "This is the latest version of the default data card for users from West. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which data card to pick, you'll likely want this one!",
+        jsonSchema: require('../src/scripts/example_schemas/minimal_data_card_schema.json'),
+      },
+    ],
     accessRequests: [
       {
         name: 'Minimal Access Request Schema v10',
