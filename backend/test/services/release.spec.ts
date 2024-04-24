@@ -51,6 +51,7 @@ const releaseModelMocks = vi.hoisted(() => {
   obj.save = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.findOneWithDeleted = vi.fn(() => obj)
   obj.filter = vi.fn(() => obj)
 
   const model: any = vi.fn((params) => ({ ...obj, ...params }))
@@ -77,6 +78,7 @@ vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 describe('services > release', () => {
   test('createRelease > simple', async () => {
     modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     await createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)
 
@@ -88,6 +90,7 @@ describe('services > release', () => {
 
   test('createRelease > minor release', async () => {
     modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     await createRelease({} as any, { semver: 'v1.0.0', minor: true } as any)
 
@@ -100,6 +103,7 @@ describe('services > release', () => {
     const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
     registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
     modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     await createRelease(
       {} as any,
@@ -118,6 +122,7 @@ describe('services > release', () => {
     const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
     registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
     modelMocks.getModelById.mockResolvedValue(undefined)
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     expect(() =>
       createRelease(
@@ -140,6 +145,7 @@ describe('services > release', () => {
   test('createRelease > release with bad files', async () => {
     fileMocks.getFileById.mockResolvedValueOnce({ modelId: 'random_model' })
     modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     expect(() =>
       createRelease(
@@ -158,6 +164,7 @@ describe('services > release', () => {
   test('createRelease > release with duplicate file names', async () => {
     fileMocks.getFileById.mockResolvedValue({ modelId: 'test_model_id', name: 'test_file.png' })
     modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     expect(
       async () =>
@@ -175,6 +182,7 @@ describe('services > release', () => {
   })
 
   test('createRelease > release with bad semver', async () => {
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
     const result = createRelease(
       {} as any,
       {
@@ -190,6 +198,7 @@ describe('services > release', () => {
   test('createRelease > bad authorisation', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
     modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
     expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
       /^You do not have permission/,
     )
@@ -197,6 +206,7 @@ describe('services > release', () => {
 
   test('createRelease > automatic model card version', async () => {
     modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 999 } })
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     await createRelease({} as any, { semver: 'v1.0.0' } as any)
 

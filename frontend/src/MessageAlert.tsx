@@ -3,9 +3,9 @@ import ExpandMore from '@mui/icons-material/ExpandMore'
 import { Button, Collapse, Typography } from '@mui/material'
 import Alert, { AlertProps } from '@mui/material/Alert'
 import Stack from '@mui/material/Stack'
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
+import Link from 'src/Link'
 
 type PartialMessageAlertProps =
   | {
@@ -67,7 +67,11 @@ export default function MessageAlert({
             />
           )}
         </Stack>
-        <Typography>{!!(href && linkText) && <Link href={href}>{linkText}</Link>}</Typography>
+        {!!(href && linkText) && (
+          <Typography>
+            <Link href={href}>{linkText}</Link>
+          </Typography>
+        )}
         {severity === 'error' && !slimView && (
           <>
             <div>

@@ -7,11 +7,11 @@ import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
+import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import Wrapper from 'src/Wrapper'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -51,7 +51,7 @@ export default function AccessRequestReview() {
     } else {
       mutateReviews()
       mutateAccessRequests()
-      router.push(`/model/${modelId}?tabs=access`)
+      router.push(`/model/${modelId}/access-request/${accessRequestId}`)
     }
   }
 
@@ -76,7 +76,8 @@ export default function AccessRequestReview() {
   if (error) return error
 
   return (
-    <Wrapper fullWidth title={accessRequestId ? accessRequestId : 'Loading...'} page='access request review'>
+    <>
+      <Title text={accessRequestId ? accessRequestId : 'Loading...'} />
       <Container maxWidth='md' sx={{ my: 4 }}>
         <Paper sx={{ p: 2 }}>
           <Stack spacing={2}>
@@ -136,6 +137,6 @@ export default function AccessRequestReview() {
           </Stack>
         </Paper>
       </Container>
-    </Wrapper>
+    </>
   )
 }

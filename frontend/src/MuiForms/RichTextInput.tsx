@@ -1,6 +1,5 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { forwardRef } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 
@@ -48,12 +47,11 @@ export default function RichTextInput({
     )
   }
 
-  // Hacky way to allow control of focus in MDEditor
-  const WrappedRichTextEditor = forwardRef(() => (
+  return (
     <RichTextEditor
       value={value}
       onChange={onChange}
-      textareaProps={{ disabled, id, autoFocus: formContext.firstQuestionKey === id }}
+      textareaProps={{ disabled, id }}
       errors={rawErrors}
       label={
         <Typography fontWeight='bold'>
@@ -63,8 +61,5 @@ export default function RichTextInput({
       }
       key={label}
     />
-  ))
-  WrappedRichTextEditor.displayName = 'WrappedRichTextEditor'
-
-  return <WrappedRichTextEditor />
+  )
 }

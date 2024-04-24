@@ -13,3 +13,20 @@ export const plural = (value: number, phrase: string) => {
 export const isValidSemver = (semverInput: string) => {
   return !!semver.valid(semverInput)
 }
+
+export const isValidPortNumber = (portNumber: string) => {
+  const numericPortNumber = Number(portNumber)
+  return (
+    !isNaN(numericPortNumber) &&
+    Number.isInteger(numericPortNumber) &&
+    numericPortNumber > 0 &&
+    numericPortNumber <= 65535
+  )
+}
+
+export const toKebabCase = (value: string): string => {
+  return value
+    .replace(/[^\w -]/g, '')
+    .replaceAll(' ', '-')
+    .toLowerCase()
+}
