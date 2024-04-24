@@ -7,10 +7,10 @@ import { formatDateString } from 'utils/dateUtils'
 
 type EntryCardRevisionProps = {
   entryCard: EntryCardRevisionInterface
-  kind: EntryKindKeys
+  entryKind: EntryKindKeys
 }
 
-export default function EntryCardRevision({ entryCard, kind }: EntryCardRevisionProps) {
+export default function EntryCardRevision({ entryCard, entryKind }: EntryCardRevisionProps) {
   const router = useRouter()
   const theme = useTheme()
 
@@ -18,7 +18,7 @@ export default function EntryCardRevision({ entryCard, kind }: EntryCardRevision
     <TableBody>
       <TableRow
         hover
-        onClick={() => router.push(`/${kind}/${entryCard.modelId}/history/${entryCard.version}`)}
+        onClick={() => router.push(`/${entryKind}/${entryCard.modelId}/history/${entryCard.version}`)}
         sx={{ '&:hover': { cursor: 'pointer' } }}
       >
         <TableCell sx={{ color: theme.palette.secondary.main }}>{entryCard.version}</TableCell>

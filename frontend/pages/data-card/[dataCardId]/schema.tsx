@@ -3,7 +3,7 @@ import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
-import MessageAlert from 'src/MessageAlert'
+import ErrorWrapper from 'src/errors/ErrorWrapper'
 import SchemaSelect from 'src/schemas/SchemaSelect'
 
 export default function DataCardSchema() {
@@ -13,12 +13,7 @@ export default function DataCardSchema() {
   const { model: dataCard, isModelLoading: isDataCardLoading, isModelError: isDataCardError } = useGetModel(dataCardId)
 
   if (isDataCardError) {
-    return (
-      <>
-        <Title text='Error' />
-        <MessageAlert message={isDataCardError.info.message} severity='error' />
-      </>
-    )
+    return <ErrorWrapper message={isDataCardError.info.message} />
   }
 
   return (

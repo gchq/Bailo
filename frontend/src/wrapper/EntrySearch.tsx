@@ -44,17 +44,21 @@ export default function EntrySearch() {
   const debouncedFilter = useDebounce(modelFilter, 250)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const theme = useTheme()
-  const { models, isModelsLoading, isModelsError } = useListModels(undefined, [], '', [], debouncedFilter)
+  const {
+    models: entries,
+    isModelsLoading: isEntriesLoading,
+    isModelsError: isEntriesError,
+  } = useListModels(undefined, [], '', [], debouncedFilter)
 
   const modelList = useMemo(
     () =>
-      models.map((model) => (
-        <Box key={model.id} sx={{ maxWidth: '300px' }}>
-          <Link href={`/model/${model.id}`} noLinkStyle>
+      entries.map((entry) => (
+        <Box key={entry.id} sx={{ maxWidth: '300px' }}>
+          <Link href={`/${entry.kind}/${entry.id}`} noLinkStyle>
             <ListItemButton>
               <ListItemText
-                primary={model.name}
-                secondary={model.description}
+                primary={entry.name}
+                secondary={entry.description}
                 primaryTypographyProps={{
                   style: {
                     whiteSpace: 'nowrap',
@@ -71,7 +75,7 @@ export default function EntrySearch() {
           </Link>
         </Box>
       )),
-    [models, theme.palette.primary.main],
+    [entries, theme.palette.primary.main],
   )
   const searchMenuOpen = useMemo(() => !!anchorEl, [anchorEl])
 
@@ -82,8 +86,8 @@ export default function EntrySearch() {
     }
   }
 
-  if (isModelsError) {
-    return <MessageAlert message={isModelsError.info.message} severity='error' slimView />
+  if (isEntriesError) {
+    return <MessageAlert message={isEntriesError.info.message} severity='error' slimView />
   }
 
   return (
@@ -92,8 +96,8 @@ export default function EntrySearch() {
         <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
           <SearchIcon sx={{ ml: 1 }} />
           <StyledInputBase
-            placeholder='Search for a model'
-            inputProps={{ 'aria-label': 'search for a model' }}
+            placeholder='Search for a data card/model'
+            inputProps={{ 'aria-label': 'search for a data card or model' }}
             value={modelFilter}
             onChange={handleChange}
           />
@@ -116,15 +120,15 @@ export default function EntrySearch() {
             horizontal: 152,
           }}
         >
-          {isModelsLoading && <Loading />}
-          {!isModelsLoading && (
+          {isEntriesLoading && <Loading />}
+          {!isEntriesLoading && (
             <List dense disablePadding>
               {modelList}
             </List>
           )}
-          {!isModelsLoading && modelList.length === 0 && (
+          {!isEntriesLoading && modelList.length === 0 && (
             <Box sx={{ p: 4, minWidth: '272px' }}>
-              <EmptyBlob text='No models found' />
+              <EmptyBlob text='No data cards/models found' />
             </Box>
           )}
         </Popover>
