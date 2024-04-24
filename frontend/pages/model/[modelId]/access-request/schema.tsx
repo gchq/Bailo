@@ -8,15 +8,15 @@ import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
-import SchemaButton from 'src/entry/model/common/SchemaButton'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
+import SchemaButton from 'src/schemas/SchemaButton'
 import { SchemaInterface, SchemaKind } from 'types/types'
 
-export default function NewSchemaSelection() {
+export default function AccessRequestSchema() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.AccessRequest)
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.ACCESS_REQUEST)
 
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])

@@ -2,6 +2,7 @@ import semver from 'semver'
 
 export const toTitleCase = (value: string): string =>
   value
+    .replace(/[-_]/g, ' ')
     .split(' ')
     .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`)
     .join(' ')
