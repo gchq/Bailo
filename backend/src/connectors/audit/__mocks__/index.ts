@@ -43,6 +43,8 @@ const audit = {
 
   onViewModelImages: vi.fn(),
 
+  onCreateExport: vi.fn(),
+
   onError: vi.fn(),
 }
 export default audit
