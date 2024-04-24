@@ -56,6 +56,7 @@ def local_model():
         client=client,
         model_id="test-id",
         name="test",
+        kind=EntryKind.MODEL,
         description="test",
         visibility=visibility,
     )
