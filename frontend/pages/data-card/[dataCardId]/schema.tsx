@@ -6,17 +6,17 @@ import Title from 'src/common/Title'
 import MessageAlert from 'src/MessageAlert'
 import SchemaSelect from 'src/schemas/SchemaSelect'
 
-export default function ModelSchema() {
+export default function DataCardSchema() {
   const router = useRouter()
-  const { modelId }: { modelId?: string } = router.query
+  const { dataCardId }: { dataCardId?: string } = router.query
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { model: dataCard, isModelLoading: isDataCardLoading, isModelError: isDataCardError } = useGetModel(dataCardId)
 
-  if (isModelError) {
+  if (isDataCardError) {
     return (
       <>
         <Title text='Error' />
-        <MessageAlert message={isModelError.info.message} severity='error' />
+        <MessageAlert message={isDataCardError.info.message} severity='error' />
       </>
     )
   }
@@ -24,8 +24,8 @@ export default function ModelSchema() {
   return (
     <>
       <Title text='Select a schema' />
-      {isModelLoading && <Loading />}
-      {model && <SchemaSelect entry={model} />}
+      {isDataCardLoading && <Loading />}
+      {dataCard && <SchemaSelect entry={dataCard} />}
     </>
   )
 }
