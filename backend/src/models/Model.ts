@@ -1,12 +1,12 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
-export const ModelVisibility = {
+export const EntryVisibility = {
   Private: 'private',
   Public: 'public',
 } as const
 
-export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
+export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVisibility]
 
 export interface CollaboratorEntry {
   entity: string
@@ -48,7 +48,7 @@ export interface ModelInterface {
     mirroredModelId?: string
   }
 
-  visibility: ModelVisibilityKeys
+  visibility: EntryVisibilityKeys
   deleted: boolean
 
   createdAt: Date
@@ -86,7 +86,7 @@ const ModelSchema = new Schema<ModelInterface>(
       mirroredModelId: { type: String },
     },
 
-    visibility: { type: String, enum: Object.values(ModelVisibility), default: ModelVisibility.Public },
+    visibility: { type: String, enum: Object.values(EntryVisibility), default: EntryVisibility.Public },
   },
   {
     timestamps: true,
