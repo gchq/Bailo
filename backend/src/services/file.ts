@@ -100,7 +100,6 @@ export async function getFileById(user: UserInterface, fileId: string) {
   }
 
   const model = await getModelById(user, file.modelId)
-
   const auth = await authorisation.file(user, model, file, FileAction.View)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, fileId })
