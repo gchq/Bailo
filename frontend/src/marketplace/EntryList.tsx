@@ -9,10 +9,10 @@ import EmptyBlob from 'src/common/EmptyBlob'
 interface EntryListProps {
   entries: ModelSearchResult[]
   selectedChips: string[]
-  handleChipsOnChange: (chips: string[]) => void
+  onSelectedChipsChange: (chips: string[]) => void
 }
 
-export default function EntryList({ entries, selectedChips, handleChipsOnChange }: EntryListProps) {
+export default function EntryList({ entries, selectedChips, onSelectedChipsChange }: EntryListProps) {
   const theme = useTheme()
 
   return (
@@ -38,7 +38,7 @@ export default function EntryList({ entries, selectedChips, handleChipsOnChange 
               expandThreshold={10}
               multiple
               selectedChips={selectedChips}
-              onChange={handleChipsOnChange}
+              onChange={onSelectedChipsChange}
               size='small'
               ariaLabel='add tag to search filter'
             />

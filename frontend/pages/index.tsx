@@ -240,7 +240,7 @@ export default function Marketplace() {
                   <EntryList
                     entries={models}
                     selectedChips={selectedLibraries}
-                    handleChipsOnChange={handleLibrariesOnChange}
+                    onSelectedChipsChange={handleLibrariesOnChange}
                   />
                 </div>
               )}
@@ -250,7 +250,7 @@ export default function Marketplace() {
                   <EntryList
                     entries={dataCards}
                     selectedChips={selectedLibraries}
-                    handleChipsOnChange={handleLibrariesOnChange}
+                    onSelectedChipsChange={handleLibrariesOnChange}
                   />
                 </div>
               )}
