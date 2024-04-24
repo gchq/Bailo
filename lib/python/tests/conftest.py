@@ -10,14 +10,15 @@ In VSCode, Code Coverage is recorded in config.xml. Delete this file to reset re
 
 from __future__ import annotations
 
-import pytest
 import random
+
 import mlflow
-from example_schemas import METRICS_JSON_SCHEMA
+import pytest
 from bailo.core.client import Client
-from bailo.core.enums import ModelVisibility, SchemaKind
+from bailo.core.enums import EntryKind, ModelVisibility, SchemaKind
 from bailo.helper.model import Model
 from bailo.helper.schema import Schema
+from example_schemas import METRICS_JSON_SCHEMA
 
 
 @pytest.fixture
@@ -30,7 +31,7 @@ def example_model(integration_client, metrics_schema):
     model = Model.create(
         client=integration_client,
         name="Yolo-v4",
-        kind="model",
+        kind=EntryKind.MODEL,
         description="You only look once!",
         team_id="team_id",
         visibility=ModelVisibility.PUBLIC,
