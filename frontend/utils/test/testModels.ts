@@ -3,6 +3,7 @@ import {
   AccessRequestInterface,
   EntryCardInterface,
   EntryInterface,
+  EntryKind,
   EntryVisibility,
   ReviewComment,
   ReviewRequestInterface,
@@ -69,6 +70,7 @@ export const testModelCard: EntryCardInterface = {
 
 export const testV2Model: EntryInterface = {
   id: modelId,
+  kind: EntryKind.MODEL,
   name: 'My Model',
   description: 'This is a test model',
   visibility: EntryVisibility.Public,
