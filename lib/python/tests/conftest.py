@@ -30,6 +30,7 @@ def example_model(integration_client, metrics_schema):
     model = Model.create(
         client=integration_client,
         name="Yolo-v4",
+        kind="model",
         description="You only look once!",
         team_id="team_id",
         visibility=ModelVisibility.PUBLIC,
