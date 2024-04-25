@@ -40,6 +40,7 @@ export default function ModelDetails({ model }: ModelAccessProps) {
 
     const formData: EntryForm = {
       name: modelName,
+      kind: model.kind,
       teamId: team?.id ?? 'Uncategorised',
       description,
       visibility,

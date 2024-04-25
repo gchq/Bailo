@@ -318,6 +318,7 @@ export const isEntryKind = (value: unknown): value is EntryKindKeys => {
 export interface EntryInterface {
   id: string
   name: string
+  kind: EntryKindKeys
   teamId: string
   description: string
   settings: {
@@ -332,6 +333,7 @@ export interface EntryInterface {
 
 export interface EntryForm {
   name: string
+  kind: EntryKindKeys
   teamId: string
   description: string
   visibility: EntryVisibilityKeys
