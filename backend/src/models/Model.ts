@@ -8,6 +8,13 @@ export const EntryVisibility = {
 
 export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVisibility]
 
+export const EntryKind = {
+  Model: 'model',
+  DataCard: 'data-card',
+} as const
+
+export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
+
 export interface CollaboratorEntry {
   entity: string
   roles: Array<'owner' | 'contributor' | 'consumer' | string>
@@ -38,6 +45,7 @@ export interface ModelInterface {
   id: string
 
   name: string
+  kind: EntryKindKeys
   teamId?: string
   description: string
   card?: ModelCardInterface
@@ -65,6 +73,7 @@ const ModelSchema = new Schema<ModelInterface>(
     teamId: { type: String, required: true, index: true, default: 'Uncategorised' },
 
     name: { type: String, required: true },
+    kind: { type: String, enum: Object.values(EntryKind) },
     description: { type: String, required: true },
     card: {
       schemaId: { type: String },

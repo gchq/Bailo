@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from typing import Any
-
-from bailo.core.client import Client
-from bailo.core.enums import ModelVisibility
-from bailo.helper.release import Release
-from bailo.core.exceptions import BailoException
-from bailo.core.utils import NestedDict
-
 import os
 import shutil
 import tempfile
+from typing import Any
+
+from bailo.core.client import Client
+from bailo.core.enums import EntryKind, ModelVisibility
+from bailo.core.exceptions import BailoException
+from bailo.core.utils import NestedDict
+from bailo.helper.release import Release
 from semantic_version import Version
 
 try:
@@ -27,6 +26,7 @@ class Model:
     :param client: A client object used to interact with Bailo
     :param model_id: A unique ID for the model
     :param name: Name of model
+    :param kind: Either a Model or a Datacard
     :param description: Description of model
     :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
@@ -36,6 +36,7 @@ class Model:
         client: Client,
         model_id: str,
         name: str,
+        kind: EntryKind,
         description: str,
         visibility: ModelVisibility | None = None,
     ) -> None:
@@ -43,6 +44,7 @@ class Model:
 
         self.model_id = model_id
         self.name = name
+        self.kind = kind
         self.description = description
         self.visibility = visibility
 
@@ -55,6 +57,7 @@ class Model:
         cls,
         client: Client,
         name: str,
+        kind: EntryKind,
         description: str,
         team_id: str,
         visibility: ModelVisibility | None = None,
@@ -63,16 +66,18 @@ class Model:
 
         :param client: A client object used to interact with Bailo
         :param name: Name of model
+        :param kind: Either a Model or a Datacard
         :param description: Description of model
         :param team_id: A unique team ID
         :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
-        res = client.post_model(name=name, description=description, team_id=team_id, visibility=visibility)
+        res = client.post_model(name=name, kind=kind, description=description, team_id=team_id, visibility=visibility)
         model = cls(
             client=client,
             model_id=res["model"]["id"],
             name=name,
+            kind=kind,
             description=description,
             visibility=visibility,
         )
@@ -93,6 +98,7 @@ class Model:
         model = cls(
             client=client,
             model_id=model_id,
+            kind=res["kind"],
             name=res["name"],
             description=res["description"],
         )
@@ -107,6 +113,7 @@ class Model:
         res = self.client.patch_model(
             model_id=self.model_id,
             name=self.name,
+            kind=self.kind,
             description=self.description,
             visibility=self.visibility,
         )
