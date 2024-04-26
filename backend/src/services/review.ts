@@ -244,7 +244,7 @@ export async function updateReviewResponse(
     }
 
     default:
-      throw GenericError(500, 'Review not found', reviewIdQuery)
+      throw GenericError(500, 'Review kind not recognised', reviewIdQuery)
   }
 
   const update = await Review.findOneAndUpdate(
