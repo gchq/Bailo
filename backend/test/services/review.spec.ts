@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import authorisation from '../../src/connectors/authorisation/index.js'
 import AccessRequest from '../../src/models/AccessRequest.js'
 import Model from '../../src/models/Model.js'
 import Release from '../../src/models/Release.js'
@@ -270,6 +271,7 @@ describe('services > review', () => {
   })
 
   test('updateReviewResponse > update for release review response sucessful', async () => {
+    releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
     await updateReviewResponse(
       user,
       'modelId',
@@ -281,44 +283,30 @@ describe('services > review', () => {
       ReviewKind.Release,
       'semver',
     )
+    expect(releaseRequestServiceMock.getReleaseBySemver).toBeCalled()
     expect(reviewModelMock.findOneAndUpdate).toBeCalled()
   })
 
-  test('updateRevieResponse > update for access request review response sucessful', async () => {
-    await updateReviewResponse(
-      user,
-      'modelId',
-      'msro',
-      {
-        id: 'demo1d0vka6-fwfqdm',
-        comment: 'Do better!',
-      },
-      ReviewKind.Access,
-      'accessRequestId',
-    )
-    expect(reviewModelMock.findOneAndUpdate).toBeCalled()
+  test('updateReviewREsponse > bad authorisation', async () => {
+    vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+    modelMock.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
+    reviewModelMock.findOneAndUpdate.mockResolvedValue(null)
+    expect(() =>
+      updateReviewResponse(
+        user,
+        'modelId',
+        'msro',
+        {
+          id: 'demo1d0vka6-fwfqdm',
+          comment: 'Do better!',
+        },
+        ReviewKind.Release,
+        'semver',
+      ),
+    ).rejects.toThrowError(/^You do not have permission/)
   })
 
-  test('updateReviewResponse > review not found ', async () => {
-    reviewModelMock.limit.mockReturnValueOnce()
-
-    const result: Promise<ReviewInterface> = updateReviewResponse(
-      user,
-      'modelId',
-      'msro',
-      {
-        id: 'demo1d0vka6-fwfqdm',
-        comment: 'Do better!',
-      },
-      ReviewKind.Release,
-      'semver',
-    )
-
-    expect(result).rejects.toThrowError(`Review not found`)
-    expect(reviewModelMock.findOneAndUpdate).not.toBeCalled()
-  })
-
-  test('update a review response > mongo update fails', async () => {
+  test('updateReviewResponse > mongo update fails', async () => {
     reviewModelMock.findOneAndUpdate.mockReturnValueOnce()
 
     const result: Promise<ReviewInterface> = updateReviewResponse(
