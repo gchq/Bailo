@@ -1,6 +1,6 @@
 import { ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
-import ReviewDisplay from 'src/model/reviews/ReviewDisplay'
+import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import { ReviewRequestInterface } from 'types/types'
 import { timeDifference } from 'utils/dateUtils'
