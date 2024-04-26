@@ -8,9 +8,9 @@ import { useGetModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { FormEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
+import InferenceForm from 'src/entry/model/inferencing/InferenceForm'
 import MessageAlert from 'src/MessageAlert'
-import InferenceForm from 'src/model/inferencing/InferenceForm'
-import Wrapper from 'src/Wrapper'
 import { FlattenedModelImage } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidPortNumber } from 'utils/stringUtils'
@@ -73,7 +73,8 @@ export default function NewInference() {
     }
   }
   return (
-    <Wrapper title='Create a new Inferencing Service' page='Inferencing'>
+    <>
+      <Title text='Create a new Inferencing Service' />
       {isModelLoading && <Loading />}
       {model && !isModelLoading && (
         <Container maxWidth='md'>
@@ -120,6 +121,6 @@ export default function NewInference() {
           </Card>
         </Container>
       )}
-    </Wrapper>
+    </>
   )
 }

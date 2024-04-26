@@ -44,7 +44,7 @@ export default function ModelSearchField() {
   const debouncedFilter = useDebounce(modelFilter, 250)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const theme = useTheme()
-  const { models, isModelsLoading, isModelsError } = useListModels([], '', [], debouncedFilter)
+  const { models, isModelsLoading, isModelsError } = useListModels(undefined, [], '', [], debouncedFilter)
 
   const modelList = useMemo(
     () =>

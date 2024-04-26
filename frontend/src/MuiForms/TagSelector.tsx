@@ -6,21 +6,12 @@ interface TagSelectorProps {
   onChange: (newValue: string[]) => void
   value: string[]
   label: string
-  id: string
   formContext?: FormContextType
   required?: boolean
   rawErrors?: string[]
 }
 
-export default function TagSelector({
-  onChange,
-  value,
-  label,
-  id,
-  formContext,
-  required,
-  rawErrors,
-}: TagSelectorProps) {
+export default function TagSelector({ onChange, value, label, formContext, required, rawErrors }: TagSelectorProps) {
   const theme = useTheme()
 
   const handleChange = (_event: React.SyntheticEvent<Element, Event>, newValues: string[]) => {
@@ -67,10 +58,6 @@ export default function TagSelector({
                       theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
                   },
                   fontStyle: value ? 'unset' : 'italic',
-                }}
-                inputRef={(inputRef) => {
-                  // Set focus if this is the first question
-                  if (inputRef && formContext.firstQuestionKey === id) inputRef.focus()
                 }}
               />
             )}
