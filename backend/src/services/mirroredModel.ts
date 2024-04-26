@@ -4,7 +4,7 @@ import archiver from 'archiver'
 import stream, { PassThrough, Readable } from 'stream'
 
 import { sign } from '../clients/kms.js'
-import { copyObject, getObjectStream, putObjectStream } from '../clients/s3.js'
+import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileInterfaceDoc, ScanState } from '../models/File.js'
@@ -54,7 +54,7 @@ export async function exportModel(
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug('Using signatures. Uploading to temporary S3 location first.')
     putObjectStream(config.s3.buckets.uploads, `exportQueue/${model.id}.zip`, s3Stream)
-    s3Stream.on('end', async () => await uploadToExportBucket(s3UploadLocations))
+    s3Stream.on('close', async () => await uploadToExportBucket(s3UploadLocations))
   } else {
     log.debug('Signatures not enabled. Uploading to export S3 location.')
     putObjectStream(config.modelMirror.export.bucket, `${model.id}.zip`, s3Stream)
@@ -79,17 +79,16 @@ async function uploadToExportBucket(s3Locations: {
   export: { bucket: string; object: string }
 }) {
   let signatures = {}
-  const sourceStream = (await getObjectStream(s3Locations.temporary.bucket, s3Locations.temporary.object))
+  log.debug('Getting stream from S3')
+  const streamForDigest = (await getObjectStream(s3Locations.temporary.bucket, s3Locations.temporary.object))
     .Body as Readable
-  const messageDigest = await generateDigest(sourceStream)
+  const messageDigest = await generateDigest(streamForDigest)
+  log.debug('Generating signatures')
   signatures = await sign(messageDigest)
-  await copyObject(
-    s3Locations.temporary.bucket,
-    s3Locations.temporary.object,
-    s3Locations.export.bucket,
-    s3Locations.export.object,
-    signatures,
-  )
+  log.debug(messageDigest)
+  const streamToCopy = (await getObjectStream(s3Locations.temporary.bucket, s3Locations.temporary.object))
+    .Body as Readable
+  await putObjectStream(s3Locations.export.bucket, s3Locations.export.object, streamToCopy, signatures)
 }
 
 async function addModelCardRevisionsToZip(user: UserInterface, model: ModelDoc, zip: archiver.Archiver) {
@@ -186,6 +185,7 @@ async function generateDigest(file: Readable) {
         resolve(hash.read())
       }),
     )
+    file.on('data', () => log.debug('Generating digest'))
     return messageDigest
   } catch (error: any) {
     throw InternalError('Error when generating the digest for the zip file.', { error })
