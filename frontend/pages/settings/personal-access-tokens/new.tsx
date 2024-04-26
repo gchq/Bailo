@@ -35,7 +35,7 @@ export default function NewToken() {
   const [errorMessage, setErrorMessage] = useState('')
   const [token, setToken] = useState<TokenInterface | undefined>()
 
-  const { models, isModelsLoading, isModelsError } = useListModels()
+  const { models, isModelsLoading, isModelsError } = useListModels('model')
 
   const modelsAutocompletePlaceholder = useMemo(() => {
     if (isAllModels) return 'All models selected'
