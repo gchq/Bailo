@@ -1,4 +1,6 @@
 import {
+  CopyObjectCommand,
+  CopyObjectRequest,
   CreateBucketCommand,
   CreateBucketRequest,
   GetObjectCommand,
@@ -114,6 +116,21 @@ export async function createBucket(bucket: string) {
   const command = new CreateBucketCommand(input)
   const response = await client.send(command)
 
+  return response
+}
+
+export async function copyObject(sourceBucket, sourceKey, destinationBucket, destinationKey, metadata?) {
+  const client = await getS3Client()
+
+  const input: CopyObjectRequest = {
+    Bucket: destinationBucket,
+    Key: destinationKey,
+    CopySource: `${sourceBucket}/${sourceKey}`,
+    Metadata: metadata,
+    MetadataDirective: 'REPLACE',
+  }
+
+  const response = await client.send(new CopyObjectCommand(input))
   return response
 }
 
