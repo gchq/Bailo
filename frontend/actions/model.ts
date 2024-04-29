@@ -30,7 +30,7 @@ export function useListModels(
       models: ModelSearchResult[]
     },
     ErrorInfo
-  >(queryParams ? `/api/v2/models/search?${qs.stringify(queryParams)}` : `/api/v2/models/search`, fetcher)
+  >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
     mutateModels: mutate,
