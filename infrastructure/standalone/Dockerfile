@@ -21,22 +21,23 @@ RUN wget https://dl.min.io/server/minio/release/linux-amd64/minio &&\
 RUN wget -qO - https://pgp.mongodb.com/server-6.0.asc |  gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-6.0.gpg &&\
     echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" |  tee /etc/apt/sources.list.d/mongodb-org-6.0.list &&\
     apt update &&\
-    apt install mongodb-org -y
+    apt install mongodb-org -y &&\
+    mkdir -m 777 -p /data/db
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
 RUN wget https://github.com/distribution/distribution/releases/download/v2.8.3/registry_2.8.3_linux_amd64.tar.gz &&\
     tar -xvf registry_2.8.3_linux_amd64.tar.gz &&\
     mv registry /usr/local/bin/
-ENV REGISTRY_HTTP_TLS_CERTIFICATE: /Bailo/backend/certs/cert.pem
-ENV REGISTRY_HTTP_TLS_KEY: /Bailo/backend/certs/key.pem
-ENV REGISTRY_STORAGE_S3_ACCESSKEY: minioaccesskey
-ENV REGISTRY_STORAGE_S3_SECRETKEY: miniosecretkey
-ENV REGISTRY_AUTH: token
-ENV REGISTRY_AUTH_TOKEN_REALM: http://localhost:3001/api/v1/registry_auth
-ENV REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
-ENV REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
-ENV REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /Bailo/backend/certs/cert.pem
+ENV REGISTRY_HTTP_TLS_CERTIFICATE=/Bailo/backend/certs/cert.pem
+ENV REGISTRY_HTTP_TLS_KEY=/Bailo/backend/certs/key.pem
+ENV REGISTRY_STORAGE_S3_ACCESSKEY=minioaccesskey
+ENV REGISTRY_STORAGE_S3_SECRETKEY=miniosecretkey
+ENV REGISTRY_AUTH=token
+ENV REGISTRY_AUTH_TOKEN_REALM=http://localhost:3001/api/v1/registry_auth
+ENV REGISTRY_AUTH_TOKEN_SERVICE=RegistryAuth
+ENV REGISTRY_AUTH_TOKEN_ISSUER=RegistryIssuer
+ENV REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/Bailo/backend/certs/cert.pem
 COPY registry.conf /registry.conf
 
 RUN wget https://github.com/tweedegolf/mailcrab/releases/download/v1.2.0/mailcrab-linux-x86-64-gnu-v1.2.0 &&\
@@ -53,6 +54,8 @@ WORKDIR /Bailo/frontend
 RUN npm run build
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+WORKDIR /
 
 EXPOSE 8080
 
