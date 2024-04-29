@@ -1,10 +1,10 @@
 FROM ubuntu:jammy
 
-RUN apt update 
+RUN apt update
 
-ENV DEBIAN_FRONTEND=noninteractive 
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt install git curl wget gnupg ca-certificates iproute2 nginx supervisor -y
+RUN apt install git curl wget gnupg ca-certificates iproute2 nginx vim -y
 
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - &&\
     apt install nodejs -y
@@ -24,6 +24,8 @@ RUN wget -qO - https://pgp.mongodb.com/server-6.0.asc |  gpg --dearmor -o /etc/a
     apt install mongodb-org -y
 
 COPY <<EOF /etc/nginx/nginx.conf
+# An example Nginx configuration
+
 pid /tmp/nginx.pid;
 worker_processes 1;
 events { worker_connections 1024; }
@@ -102,6 +104,7 @@ http {
             proxy_pass http://backend_service;
         }
 
+
         location /v2 {
             proxy_hide_header WWW-Authenticate;
             add_header WWW-Authenticate $new_www_authenticate always;
@@ -117,7 +120,7 @@ http {
             client_max_body_size 0;
             chunked_transfer_encoding on;
 
-            proxy_pass https://registry_service;
+            proxy_pass         https://registry_service;
         }
     }
 }
@@ -129,7 +132,7 @@ RUN wget https://github.com/distribution/distribution/releases/download/v2.8.3/r
 ENV REGISTRY_HTTP_TLS_CERTIFICATE: /Bailo/backend/certs/cert.pem
 ENV REGISTRY_HTTP_TLS_KEY: /Bailo/backend/certs/key.pem
 ENV REGISTRY_STORAGE_S3_ACCESSKEY: minioaccesskey
-ENV REGISTRY_STORAGE_S3_SECRETKEY: miniosecretkey  
+ENV REGISTRY_STORAGE_S3_SECRETKEY: miniosecretkey
 ENV REGISTRY_AUTH: token
 ENV REGISTRY_AUTH_TOKEN_REALM: http://localhost:3001/api/v1/registry_auth
 ENV REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
@@ -180,57 +183,13 @@ RUN git clone https://github.com/gchq/Bailo.git
 WORKDIR /Bailo
 RUN npm run certs &&\
     npm install
+WORKDIR /Bailo/backend
+RUN npm run build
+WORKDIR /Bailo/frontend
+RUN npm run build
 
-COPY <<EOF /etc/supervisor/conf.d/supervisord.conf
-[program:minio]
-command=minio server /minio-data
-stdout_logfile=/dev/fd/1
-stdout_logfile_maxbytes=0
-redirect_stderr=true
-
-[program:mongo]
-command=mongod
-stdout_logfile=/dev/fd/1
-stdout_logfile_maxbytes=0
-redirect_stderr=true
-
-[program:nginx]
-command=nginx
-stdout_logfile=/dev/fd/1
-stdout_logfile_maxbytes=0
-redirect_stderr=true
-
-[program:registry]
-command=registry serve /registry.conf
-stdout_logfile=/dev/fd/1
-stdout_logfile_maxbytes=0
-redirect_stderr=true
-
-[program:mail]
-command=mailcrab
-stdout_logfile=/dev/fd/1
-stdout_logfile_maxbytes=0
-redirect_stderr=true
-
-[program:backend]
-command=node /Bailo/backend/src/index.js
-stdout_logfile=/dev/fd/1
-stdout_logfile_maxbytes=0
-redirect_stderr=true
-
-[program:frontend]
-command=node /Bailo/fronend/server.js
-stdout_logfile=/dev/fd/1
-stdout_logfile_maxbytes=0
-redirect_stderr=true
-
-[supervisord]
-nodaemon=true
-logfile=/dev/null
-logfile_maxbytes=0
-EOF
+WORKDIR /
 
 EXPOSE 8080
 
-ENTRYPOINT ["/bin/sh"]
-CMD ["/usr/bin/supervisord"]
+CMD minio server /minio-data; mongod; nginx; registry serve registry.conf; mailcrab; node /Bailo/backend/src/index.js; node /Bailo/fronend/server.js
