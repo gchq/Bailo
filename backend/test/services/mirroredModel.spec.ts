@@ -1,3 +1,4 @@
+import { PassThrough } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
@@ -16,6 +17,7 @@ vi.mock('../../src/connectors/authorisation/index.js', async () => ({
 const configMock = vi.hoisted(
   () =>
     ({
+      s3: { buckets: { uploads: 'test' } },
       modelMirror: {
         enabled: true,
         export: {
@@ -70,6 +72,7 @@ vi.mock('archiver', () => ({ default: vi.fn(() => archiverMocks) }))
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => Promise.resolve({ fileSize: 100 })),
+  getObjectStream: vi.fn(() => Promise.resolve({ Body: new PassThrough() })),
 }))
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
 
@@ -124,7 +127,7 @@ describe('services > mirroredModel', () => {
       throw Error('Error making zip file')
     })
     const response = exportModel({} as UserInterface, 'modelId', true)
-    expect(response).rejects.toThrowError(/^Error when generating the model card revisions zip file./)
+    expect(response).rejects.toThrowError(/^Error when adding the model card revision\(s\) to the zip file./)
   })
 
   test('exportModel > unable to create release zip file', async () => {
@@ -133,21 +136,29 @@ describe('services > mirroredModel', () => {
       throw Error('Error making zip file')
     })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
-    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
+    expect(response).rejects.toThrowError(/^Error when adding the release\(s\) to the zip file./)
   })
 
   test('exportModel > unable to create digest for zip file', async () => {
     hashMocks.createHash.mockImplementationOnce(() => {
       throw Error()
     })
-    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
-    expect(response).rejects.toThrowError(/^Failed to create signature for zip file./)
+    await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    await new Promise((r) => setTimeout(r))
+    expect(logMock.error).toBeCalledWith(
+      'Failed to upload export to export location with signatures',
+      expect.any(Object),
+    )
   })
 
   test('exportModel > unable to create kms signature for zip file', async () => {
     kmsMocks.sign.mockRejectedValueOnce('Error')
-    const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
-    expect(response).rejects.toThrowError(/^Failed to create signature for zip file./)
+    await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    await new Promise((r) => setTimeout(r))
+    expect(logMock.error).toBeCalledWith(
+      'Failed to upload export to export location with signatures',
+      expect.any(Object),
+    )
   })
 
   test('exportModel > release export size too large', async () => {
@@ -160,8 +171,8 @@ describe('services > mirroredModel', () => {
   test('exportModel > successful export if no files exist', async () => {
     releaseMocks.getAllFileIds.mockResolvedValueOnce([])
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '1.2.4'])
-    expect(kmsMocks.sign).toBeCalled()
-    expect(hashMocks.createHash).toBeCalled()
+    // Allow for completion of asynchronous content
+    await new Promise((r) => setTimeout(r))
     expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
   })
 
@@ -169,6 +180,7 @@ describe('services > mirroredModel', () => {
     modelMocks.getModelById.mockReturnValueOnce({ settings: { mirroredModelId: '' } })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     expect(response).rejects.toThrowError(/^The ID of the mirrored model has not been set on this model./)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > export contains infected file', async () => {
@@ -177,7 +189,8 @@ describe('services > mirroredModel', () => {
       { _id: '321', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() },
     ])
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
-    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
+    expect(response).rejects.toThrowError(/^Error when adding the release\(s\) to the zip file./)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > export contains incomplete file scan', async () => {
@@ -186,7 +199,8 @@ describe('services > mirroredModel', () => {
       { _id: '321', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() },
     ])
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
-    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
+    expect(response).rejects.toThrowError(/^Error when adding the release\(s\) to the zip file./)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > export missing file scan', async () => {
@@ -195,10 +209,33 @@ describe('services > mirroredModel', () => {
       { _id: '321', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() },
     ])
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
-    expect(response).rejects.toThrowError(/^Error when generating the release zip file./)
+    expect(response).rejects.toThrowError(/^Error when adding the release\(s\) to the zip file./)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
-  test('exportModel > signatures not added if disabled', async () => {
+  test('exportModel > upload straight to the export bucket if signatures are disabled', async () => {
+    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
+      enabled: true,
+      export: {
+        bucket: 'exports',
+        kmsSignature: {
+          enabled: false,
+        },
+      },
+    })
+
+    await exportModel({} as UserInterface, 'modelId', true)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledWith(
+      'exports',
+      'modelId.zip',
+      expect.any(Object),
+      expect.any(Object),
+    )
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(1)
+  })
+
+  test('exportModel > log error if unable to upload to export s3 storage', async () => {
+    s3Mocks.putObjectStream.mockRejectedValueOnce('')
     vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
       enabled: true,
       export: {
@@ -209,8 +246,7 @@ describe('services > mirroredModel', () => {
     })
 
     await exportModel({} as UserInterface, 'modelId', true)
-    expect(kmsMocks.sign).not.toBeCalled()
-    expect(hashMocks.createHash).not.toBeCalled()
+    expect(logMock.error).toHaveBeenCalledWith('Failed to export to export S3 location.', expect.any(Object))
   })
 
   test('exportModel > export uploaded to S3 with signatures', async () => {
@@ -223,16 +259,26 @@ describe('services > mirroredModel', () => {
       },
     })
     await exportModel({} as UserInterface, 'modelId', true)
-    expect(kmsMocks.sign).toBeCalled()
-    expect(hashMocks.createHash).toBeCalled()
     expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
   })
 
   test('exportModel > export uploaded to S3 for model cards and releases', async () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '3.2.1'])
 
-    expect(kmsMocks.sign).toBeCalled()
-    expect(hashMocks.createHash).toBeCalled()
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+  })
+
+  test('exportModel > unable to upload to tmp S3 location', async () => {
+    s3Mocks.putObjectStream.mockRejectedValueOnce('')
+    await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    await new Promise((r) => setTimeout(r))
+    expect(logMock.error).toBeCalledWith('Failed to export to temporary S3 location.', expect.any(Object))
+  })
+
+  test('exportModel > unable to get object from tmp S3 location', async () => {
+    s3Mocks.getObjectStream.mockRejectedValueOnce('')
+    await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+    await new Promise((r) => setTimeout(r))
+    expect(logMock.error).toBeCalledWith('Failed to retrieve stream from temporary S3 location.', expect.any(Object))
   })
 })
