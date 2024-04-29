@@ -28,21 +28,25 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
   const [dataCardListQuery, setDataCardListQuery] = useState('')
   const [selectedDataCards, setSelectedDataCards] = useState<ModelSearchResult[]>([])
 
-  const { models, isModelsLoading, isModelsError } = useListModels(EntryKind.DATA_CARD)
+  const {
+    models: dataCards,
+    isModelsLoading: isDataCardsLoading,
+    isModelsError: isDataCardsError,
+  } = useListModels(EntryKind.DATA_CARD)
 
   const theme = useTheme()
   const router = useRouter()
 
   useEffect(() => {
     if (currentValue) {
-      const updatedDataCards: ModelSearchResult[] = models.filter((model) => {
-        if (currentValue.includes(model.id)) {
-          return model
+      const updatedDataCards: ModelSearchResult[] = dataCards.filter((dataCard) => {
+        if (currentValue.includes(dataCard.id)) {
+          return dataCard
         }
       })
       setSelectedDataCards(updatedDataCards)
     }
-  }, [currentValue, models])
+  }, [currentValue, dataCards])
 
   const handleModelChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: ModelSearchResult[]) => {
@@ -60,20 +64,20 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
     handleInputChange(event, value)
   }, 500)
 
-  if (isModelsError) {
-    if (isModelsError.status !== 413) {
-      return <MessageAlert message={isModelsError.info.message} severity='error' />
+  if (isDataCardsError) {
+    if (isDataCardsError.status !== 413) {
+      return <MessageAlert message={isDataCardsError.info.message} severity='error' />
     }
   }
 
   return (
     <>
-      {isModelsLoading && <Loading />}
+      {isDataCardsLoading && <Loading />}
       {formContext && formContext.editMode && (
         <Autocomplete<ModelSearchResult, true, true>
           multiple
           data-test='dataCardSelector'
-          loading={dataCardListQuery.length > 3 && isModelsLoading}
+          loading={dataCardListQuery.length > 3 && isDataCardsLoading}
           open={open}
           size='small'
           onOpen={() => {
@@ -90,7 +94,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
           onChange={handleModelChange}
           noOptionsText={dataCardListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}
-          options={models || []}
+          options={dataCards || []}
           renderTags={(value, getTagProps) =>
             value.map((option, index) => (
               <Box key={option.name} sx={{ maxWidth: '200px' }}>
@@ -131,11 +135,14 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
           )}
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
-              {currentValue.map((dataCard) => (
+              {currentValue.map((currentDataCard) => (
                 <Chip
-                  label={models.find((model) => model.id === dataCard)?.name || 'Unable to find model name'}
-                  key={dataCard}
-                  onClick={() => router.push(`/data-card/${dataCard}`)}
+                  label={
+                    dataCards.find((dataCard) => dataCard.id === currentDataCard)?.name ||
+                    'Unable to find data card name'
+                  }
+                  key={currentDataCard}
+                  onClick={() => router.push(`/data-card/${currentDataCard}`)}
                   sx={{ width: 'fit-content' }}
                 />
               ))}
