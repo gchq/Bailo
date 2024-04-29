@@ -50,8 +50,11 @@ export async function exportModel(
 
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug('Using signatures. Uploading to temporary S3 location first.', { modelId, semvers })
-    uploadToTemporaryS3Location(modelId, semvers, s3Stream)
-    s3Stream.on('end', async () => await copyToExportBucketWithSignatures(modelId, semvers, mirroredModelId))
+    uploadToTemporaryS3Location(modelId, semvers, s3Stream).then(() =>
+      copyToExportBucketWithSignatures(modelId, semvers, mirroredModelId).catch((error) =>
+        log.debug('Failed to upload export to export location with signatures', { modelId, semvers, error }),
+      ),
+    )
   } else {
     log.debug('Signatures not enabled. Uploading to export S3 location.', { modelId, semvers })
     uploadToExportS3Location(modelId, semvers, s3Stream, { modelId, mirroredModelId })
@@ -123,7 +126,7 @@ async function uploadToTemporaryS3Location(
 
 async function getObjectFromTemporaryS3Location(modelId: string, semvers: string[] | undefined) {
   const bucket = config.s3.buckets.uploads
-  const object = `exportQueue/${modelId}.zip`
+  const object = `exportQueue/${modelId}.zi`
   try {
     const stream = (await getObjectStream(bucket, object)).Body as Readable
     log.debug('Successfully retrieved stream from temporary S3 location.', {
