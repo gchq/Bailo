@@ -51,7 +51,7 @@ export async function exportModel(
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug('Using signatures. Uploading to temporary S3 location first.', { modelId, semvers })
     uploadToTemporaryS3Location(modelId, semvers, s3Stream)
-    s3Stream.on('close', async () => await copyToExportBucketWithSignatures(modelId, semvers, mirroredModelId))
+    s3Stream.on('end', async () => await copyToExportBucketWithSignatures(modelId, semvers, mirroredModelId))
   } else {
     log.debug('Signatures not enabled. Uploading to export S3 location.', { modelId, semvers })
     uploadToExportS3Location(modelId, semvers, s3Stream, { modelId, mirroredModelId })
@@ -70,6 +70,7 @@ export async function exportModel(
     throw InternalError('Error when adding the model card revisions to the zip file.', { error })
   }
   zip.finalize()
+  log.debug('Successfully finalized zip file.', { modelId, semvers })
 }
 
 async function copyToExportBucketWithSignatures(
@@ -78,12 +79,13 @@ async function copyToExportBucketWithSignatures(
   mirroredModelId: string,
 ) {
   let signatures = {}
-  log.debug('Getting stream from S3', { modelId, semvers })
+  log.debug('Getting stream from S3 to generate signatures.', { modelId, semvers })
   const streamForDigest = await getObjectFromTemporaryS3Location(modelId, semvers)
   const messageDigest = await generateDigest(streamForDigest)
-  log.debug('Generating signatures', { modelId, semvers })
+  log.debug('Generating signatures.', { modelId, semvers })
   signatures = await sign(messageDigest)
   log.debug('Successfully generated signatures', { modelId, semvers })
+  log.debug('Getting stream from S3 to upload to export location.', { modelId, semvers })
   const streamToCopy = await getObjectFromTemporaryS3Location(modelId, semvers)
   await uploadToExportS3Location(modelId, semvers, streamToCopy, {
     modelId,
@@ -230,6 +232,7 @@ async function checkTotalFileSize(modelId: string, semvers: string[]) {
     return
   }
   const totalFileSize = await getTotalFileSize(fileIds)
+  log.debug('Calculated estimated total file size included in export.', { modelId, semvers, size: totalFileSize })
   if (totalFileSize > config.modelMirror.export.maxSize) {
     throw BadReq('Requested export is too large.', { size: totalFileSize, maxSize: config.modelMirror.export.maxSize })
   }
