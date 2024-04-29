@@ -287,7 +287,24 @@ describe('services > review', () => {
     expect(reviewModelMock.findOneAndUpdate).toBeCalled()
   })
 
-  test('updateReviewREsponse > bad authorisation', async () => {
+  test('updateReviewResponse > update for access request review response sucessful', async () => {
+    accessRequestServiceMock.getAccessRequestById.mockReturnValueOnce({ createdBy: 'Yellow' })
+    await updateReviewResponse(
+      user,
+      'modelId',
+      'msro',
+      {
+        id: 'demo1d0vka6-fwfqdm',
+        comment: 'Do better!',
+      },
+      ReviewKind.Access,
+      'semver',
+    )
+    expect(accessRequestServiceMock.getAccessRequestById).toBeCalled()
+    expect(reviewModelMock.findOneAndUpdate).toBeCalled()
+  })
+
+  test('updateReviewREsponse > bad authorisation for release review response update', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
     modelMock.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
     reviewModelMock.findOneAndUpdate.mockResolvedValue(null)
@@ -301,6 +318,29 @@ describe('services > review', () => {
           comment: 'Do better!',
         },
         ReviewKind.Release,
+        'semver',
+      ),
+    ).rejects.toThrowError(/^You do not have permission/)
+  })
+
+  test('updateReviewResponse > bad authorisation for access request review response update', async () => {
+    vi.mocked(authorisation.accessRequest).mockResolvedValue({
+      info: 'You do not have permission',
+      success: false,
+      id: '',
+    })
+    modelMock.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
+    reviewModelMock.findOneAndUpdate.mockResolvedValue(null)
+    expect(() =>
+      updateReviewResponse(
+        user,
+        'modelId',
+        'msro',
+        {
+          id: 'demo1d0vka6-fwfqdm',
+          comment: 'Do better!',
+        },
+        ReviewKind.Access,
         'semver',
       ),
     ).rejects.toThrowError(/^You do not have permission/)
