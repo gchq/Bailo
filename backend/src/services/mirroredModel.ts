@@ -52,7 +52,7 @@ export async function exportModel(
     log.debug('Using signatures. Uploading to temporary S3 location first.', { modelId, semvers })
     uploadToTemporaryS3Location(modelId, semvers, s3Stream).then(() =>
       copyToExportBucketWithSignatures(modelId, semvers, mirroredModelId).catch((error) =>
-        log.debug('Failed to upload export to export location with signatures', { modelId, semvers, error }),
+        log.error('Failed to upload export to export location with signatures', { modelId, semvers, error }),
       ),
     )
   } else {
@@ -63,14 +63,14 @@ export async function exportModel(
   try {
     await addModelCardRevisionsToZip(user, model, zip)
   } catch (error) {
-    throw InternalError('Error when adding the model card revisions to the zip file.', { error })
+    throw InternalError('Error when adding the model card revision(s) to the zip file.', { error })
   }
   try {
     if (semvers && semvers.length > 0) {
       await addReleasesToZip(user, model, semvers, zip)
     }
   } catch (error) {
-    throw InternalError('Error when adding the model card revisions to the zip file.', { error })
+    throw InternalError('Error when adding the release(s) to the zip file.', { error })
   }
   zip.finalize()
   log.debug('Successfully finalized zip file.', { modelId, semvers })
@@ -270,7 +270,6 @@ async function generateDigest(file: Readable) {
         resolve(hash.read())
       }),
     )
-    file.on('data', () => log.debug('Generating digest'))
     return messageDigest
   } catch (error: any) {
     throw InternalError('Error when generating the digest for the zip file.', { error })
