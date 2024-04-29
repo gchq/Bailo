@@ -150,7 +150,7 @@ export abstract class BaseAuditConnector {
     images: { repository: string; name: string; tags: string[] }[],
   )
 
-  abstract onCreateExport(req: Request, modelId: string, semvers?: string[])
+  abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[])
 
   abstract onError(req: Request, error: BailoError)
 
