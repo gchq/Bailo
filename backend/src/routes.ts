@@ -35,7 +35,7 @@ import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
-import { postRequestExport } from './routes/v2/model/postRequestExport.js'
+import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
@@ -85,7 +85,7 @@ server.get('/api/v2/models/search', ...getModelsSearch)
 server.get('/api/v2/model/:modelId', ...getModel)
 server.patch('/api/v2/model/:modelId', ...patchModel)
 
-server.post('/api/v2/model/:modelId/export', ...postRequestExport)
+server.post('/api/v2/model/:modelId/export/s3', ...postRequestExportToS3)
 
 server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
 server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)

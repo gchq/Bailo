@@ -310,7 +310,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onCreateExport(req: Request, modelId: string, semvers?: string[]) {
+  onCreateS3Export(req: Request, modelId: string, semvers?: string[]) {
     this.checkEventType(AuditInfo.CreateExport, req)
     const event = this.generateEvent(req, { modelId: modelId, semvers })
     req.log.info(event, req.audit.description)
