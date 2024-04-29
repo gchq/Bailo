@@ -58,3 +58,5 @@ EXPOSE 8080
 
 ENTRYPOINT ["/bin/sh"]
 CMD ["/usr/bin/supervisord"]
+
+#CMD minio server /minio-data; mongod; nginx; registry serve registry.conf; mailcrab; node /Bailo/backend/src/index.js; node /Bailo/fronend/server.js
