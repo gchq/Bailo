@@ -37,7 +37,7 @@ ENV REGISTRY_AUTH_TOKEN_REALM: http://localhost:3001/api/v1/registry_auth
 ENV REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
 ENV REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
 ENV REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /Bailo/backend/certs/cert.pem
-COPY registry /registry.conf
+COPY registry.conf /registry.conf
 
 RUN wget https://github.com/tweedegolf/mailcrab/releases/download/v1.2.0/mailcrab-linux-x86-64-gnu-v1.2.0 &&\
     chmod +x mailcrab-linux-x86-64-gnu-v1.2.0 &&\
