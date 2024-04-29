@@ -22,7 +22,7 @@ export async function exportModel(
   user: UserInterface,
   modelId: string,
   disclaimerAgreement: boolean,
-  releaseSemvers?: Array<string>,
+  semvers?: Array<string>,
 ) {
   if (!config.modelMirror.enabled) {
     throw BadReq('Model mirroring has not been enabled.')
@@ -34,12 +34,13 @@ export async function exportModel(
   if (!model.settings.mirroredModelId || model.settings.mirroredModelId === '') {
     throw BadReq('The ID of the mirrored model has not been set on this model.')
   }
+  const mirroredModelId = model.settings.mirroredModelId
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, model: model.id })
   }
-  if (releaseSemvers && releaseSemvers.length > 1) {
-    await checkTotalFileSize(model.id, releaseSemvers)
+  if (semvers && semvers.length > 1) {
+    await checkTotalFileSize(model.id, semvers)
   }
   log.debug('Request checks complete')
 
@@ -47,26 +48,23 @@ export async function exportModel(
   const s3Stream = new PassThrough()
   zip.pipe(s3Stream)
 
-  const s3UploadLocations = {
-    temporary: { bucket: config.s3.buckets.uploads, object: `exportQueue/${model.id}.zip` },
-    export: { bucket: config.modelMirror.export.bucket, object: `${model.id}.zip` },
-  }
   if (config.modelMirror.export.kmsSignature.enabled) {
-    log.debug('Using signatures. Uploading to temporary S3 location first.')
-    putObjectStream(config.s3.buckets.uploads, `exportQueue/${model.id}.zip`, s3Stream)
-    s3Stream.on('close', async () => await uploadToExportBucket(s3UploadLocations))
+    log.debug('Using signatures. Uploading to temporary S3 location first.', { modelId, semvers })
+    uploadToTemporaryS3Location(modelId, semvers, s3Stream)
+    s3Stream.on('close', async () => await copyToExportBucketWithSignatures(modelId, semvers, mirroredModelId))
   } else {
-    log.debug('Signatures not enabled. Uploading to export S3 location.')
-    putObjectStream(config.modelMirror.export.bucket, `${model.id}.zip`, s3Stream)
+    log.debug('Signatures not enabled. Uploading to export S3 location.', { modelId, semvers })
+    uploadToExportS3Location(modelId, semvers, s3Stream, { modelId, mirroredModelId })
   }
+
   try {
     await addModelCardRevisionsToZip(user, model, zip)
   } catch (error) {
     throw InternalError('Error when adding the model card revisions to the zip file.', { error })
   }
   try {
-    if (releaseSemvers && releaseSemvers.length > 0) {
-      await addReleasesToZip(user, model, releaseSemvers, zip)
+    if (semvers && semvers.length > 0) {
+      await addReleasesToZip(user, model, semvers, zip)
     }
   } catch (error) {
     throw InternalError('Error when adding the model card revisions to the zip file.', { error })
@@ -74,21 +72,102 @@ export async function exportModel(
   zip.finalize()
 }
 
-async function uploadToExportBucket(s3Locations: {
-  temporary: { bucket: string; object: string }
-  export: { bucket: string; object: string }
-}) {
+async function copyToExportBucketWithSignatures(
+  modelId: string,
+  semvers: string[] | undefined,
+  mirroredModelId: string,
+) {
   let signatures = {}
-  log.debug('Getting stream from S3')
-  const streamForDigest = (await getObjectStream(s3Locations.temporary.bucket, s3Locations.temporary.object))
-    .Body as Readable
+  log.debug('Getting stream from S3', { modelId, semvers })
+  const streamForDigest = await getObjectFromTemporaryS3Location(modelId, semvers)
   const messageDigest = await generateDigest(streamForDigest)
-  log.debug('Generating signatures')
+  log.debug('Generating signatures', { modelId, semvers })
   signatures = await sign(messageDigest)
-  log.debug(messageDigest)
-  const streamToCopy = (await getObjectStream(s3Locations.temporary.bucket, s3Locations.temporary.object))
-    .Body as Readable
-  await putObjectStream(s3Locations.export.bucket, s3Locations.export.object, streamToCopy, signatures)
+  log.debug('Successfully generated signatures', { modelId, semvers })
+  const streamToCopy = await getObjectFromTemporaryS3Location(modelId, semvers)
+  await uploadToExportS3Location(modelId, semvers, streamToCopy, {
+    modelId,
+    mirroredModelId,
+    ...signatures,
+  })
+}
+
+async function uploadToTemporaryS3Location(
+  modelId: string,
+  semvers: string[] | undefined,
+  stream: Readable,
+  metadata?: Record<string, string>,
+) {
+  const bucket = config.s3.buckets.uploads
+  const object = `exportQueue/${modelId}.zip`
+  try {
+    await putObjectStream(bucket, object, stream, metadata)
+    log.debug('Successfully uploaded export to temporary S3 location.', {
+      bucket,
+      object,
+      modelId,
+      semvers,
+    })
+  } catch (error) {
+    log.error('Failed to export to temporary S3 location.', {
+      bucket,
+      object,
+      modelId,
+      semvers,
+      error,
+    })
+  }
+}
+
+async function getObjectFromTemporaryS3Location(modelId: string, semvers: string[] | undefined) {
+  const bucket = config.s3.buckets.uploads
+  const object = `exportQueue/${modelId}.zip`
+  try {
+    const stream = (await getObjectStream(bucket, object)).Body as Readable
+    log.debug('Successfully retrieved stream from temporary S3 location.', {
+      bucket,
+      object,
+      modelId,
+      semvers,
+    })
+    return stream
+  } catch (error) {
+    log.error('Failed to retrieve stream from temporary S3 location.', {
+      bucket,
+      object,
+      modelId,
+      semvers,
+      error,
+    })
+    throw error
+  }
+}
+
+async function uploadToExportS3Location(
+  modelId: string,
+  semvers: string[] | undefined,
+  stream: Readable,
+  metadata?: Record<string, string>,
+) {
+  const bucket = config.modelMirror.export.bucket
+  const object = `${modelId}.zip`
+  try {
+    await putObjectStream(bucket, object, stream, metadata)
+    log.debug('Successfully uploaded export to export S3 location.', {
+      bucket,
+      object,
+      modelId,
+      semvers,
+    })
+  } catch (error) {
+    log.error('Failed to export to export S3 location.', {
+      bucket,
+      object,
+      modelId,
+      semvers,
+      error,
+    })
+  }
 }
 
 async function addModelCardRevisionsToZip(user: UserInterface, model: ModelDoc, zip: archiver.Archiver) {
