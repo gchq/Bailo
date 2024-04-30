@@ -41,7 +41,7 @@ type ReleaseFormProps = {
   filesMetadata: FileWithMetadata[]
   onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
-  setRegistryError: (value: boolean) => void
+  onRegistryError: (value: boolean) => void
   currentFileUploadProgress?: FileUploadProgress
   uploadedFiles: string[]
   filesToUploadCount: number
@@ -57,7 +57,7 @@ export default function ReleaseForm({
   filesMetadata,
   onFilesMetadataChange,
   onImageListChange,
-  setRegistryError,
+  onRegistryError,
   editable = false,
   isEdit = false,
   currentFileUploadProgress,
@@ -224,7 +224,7 @@ export default function ReleaseForm({
           value={formData.imageList}
           readOnly={isReadOnly}
           onChange={onImageListChange}
-          setRegistryError={setRegistryError}
+          onRegistryError={onRegistryError}
         />
         {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
       </Stack>

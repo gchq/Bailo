@@ -132,7 +132,7 @@ export default function ReleaseReview() {
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />
             <Typography variant='caption' sx={{ mb: 2 }}>
-              Created by {<UserDisplay dn={release.createdBy} />} on
+              Created by {<UserDisplay onUserError={setErrorMessage} dn={release.createdBy} />} on
               <Typography variant='caption' fontWeight='bold'>
                 {` ${formatDateString(release.createdAt)}`}
               </Typography>

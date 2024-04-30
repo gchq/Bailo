@@ -15,10 +15,10 @@ type EntityItemProps = {
   accessList: CollaboratorEntry[]
   onAccessListChange: (value: CollaboratorEntry[]) => void
   model: EntryInterface
-  setRoleError: (value: string) => void
+  onError: (value: string) => void
 }
 
-export default function EntityItem({ entity, accessList, onAccessListChange, model, setRoleError }: EntityItemProps) {
+export default function EntityItem({ entity, accessList, onAccessListChange, model, onError }: EntityItemProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(model.id)
 
   const modelRoleOptions = useMemo(() => modelRoles.map((role) => role.id), [modelRoles])
@@ -41,7 +41,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
   }
 
   if (isModelRolesError) {
-    setRoleError(isModelRolesError.info.message)
+    onError(isModelRolesError.info.message)
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
@@ -50,7 +50,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
       <TableCell>
         <Stack direction='row' alignItems='center' spacing={0.5}>
           <EntityIcon entity={entity} />
-          <EntityNameDisplay entity={entity} setRoleError={setRoleError} />
+          <EntityNameDisplay entity={entity} onError={onError} />
         </Stack>
       </TableCell>
       <TableCell>
@@ -100,10 +100,10 @@ function EntityIcon({ entity }: EntityIconProps) {
 
 type EntityNameDisplayProps = {
   entity: CollaboratorEntry
-  setRoleError: (value: string) => void
+  onError: (value: string) => void
 }
 
-function EntityNameDisplay({ entity, setRoleError }: EntityNameDisplayProps) {
+function EntityNameDisplay({ entity, onError }: EntityNameDisplayProps) {
   const entityName = useMemo(() => entity.entity.replace('user:', '').replace('group:', ''), [entity])
-  return <UserDisplay dn={entityName} setRoleError={setRoleError} />
+  return <UserDisplay dn={entityName} onUserInformationError={onError} />
 }
