@@ -2,10 +2,10 @@ import { useGetCurrentUser } from 'actions/user'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
+import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import AuthenticationTab from 'src/settings/authentication/AuthenticationTab'
 import ProfileTab from 'src/settings/ProfileTab'
-import Wrapper from 'src/Wrapper'
 
 export default function Settings() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
@@ -27,9 +27,10 @@ export default function Settings() {
   if (error) return error
 
   return (
-    <Wrapper fullWidth title='Settings' page='settings'>
+    <>
+      <Title text='Settings' />
       {isCurrentUserLoading && <Loading />}
       <PageWithTabs title='Settings' tabs={tabs} />
-    </Wrapper>
+    </>
   )
 }

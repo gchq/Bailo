@@ -1,12 +1,9 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 import nextMDX from '@next/mdx'
 import isDocker from 'is-docker'
-import removeImports from 'next-remove-imports'
 import rehypeHighlight from 'rehype-highlight'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
-
-const withRemoveImports = removeImports()
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -54,13 +51,7 @@ const nextConfig = {
     ]
   },
 
-  compiler: {
-    emotion: true,
-    styledComponents: true,
-  },
-  swcMinify: true,
-
-  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+  pageExtensions: ['tsx', 'mdx'],
 }
 
-export default withRemoveImports(withBundleAnalyzer(withMDX(nextConfig)))
+export default withBundleAnalyzer(withMDX(nextConfig))
