@@ -2,7 +2,6 @@ import CommentIcon from '@mui/icons-material/ChatBubble'
 import { Box, Button, Card, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { cloneDeep, groupBy } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -15,8 +14,9 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, ReleaseInterface, ReviewRequestInterface, ReviewResponse } from 'types/types'
-import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
+import { EntryInterface, ReleaseInterface, ReviewRequestInterface } from 'types/types'
+import { formatDateString } from 'utils/dateUtils'
+import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 export interface ReleaseDisplayProps {
   model: EntryInterface
@@ -48,23 +48,9 @@ export default function ReleaseDisplay({
     }
   }
 
-  interface GroupedReviewResponse {
-    [user: string]: ReviewResponse[]
-  }
-
   useEffect(() => {
     if (!isReviewsLoading && reviews) {
-      const latestReviews: ReviewRequestInterface[] = []
-      reviews.forEach((review) => {
-        const reviewResult: ReviewRequestInterface = cloneDeep(review)
-        const groupedResponses: GroupedReviewResponse = groupBy(reviewResult.responses, (response) => response.user)
-        const latestResponses: ReviewResponse[] = []
-        Object.keys(groupedResponses).forEach((user) => {
-          latestResponses.push(groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1])
-        })
-        reviewResult.responses = latestResponses
-        latestReviews.push(reviewResult)
-      })
+      const latestReviews = latestReviewsForEachUser(reviews)
       setReviewsWithLatestResponses(latestReviews)
     }
   }, [reviews, isReviewsLoading])
