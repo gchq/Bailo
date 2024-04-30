@@ -59,7 +59,7 @@ export default function AccessRequestReview() {
     if (accessRequest) {
       return accessRequest.metadata.overview.entities.map((entity) => (
         <Grid item xs={3} key={entity}>
-          <UserDisplay onUserError={setErrorMessage} dn={entity} />
+          <UserDisplay dn={entity} />
         </Grid>
       ))
     }
@@ -100,7 +100,7 @@ export default function AccessRequestReview() {
             <Divider />
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
               <Typography variant='caption'>
-                Created by {<UserDisplay onUserError={setErrorMessage} dn={accessRequest.createdBy} />} on
+                Created by {<UserDisplay onUserInformationError={setErrorMessage} dn={accessRequest.createdBy} />} on
                 <Typography variant='caption' fontWeight='bold'>
                   {` ${formatDateString(accessRequest.createdAt)} `}
                 </Typography>
