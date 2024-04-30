@@ -216,4 +216,23 @@ module.exports = {
     authenticationToken: '',
     debug: false,
   },
+
+  modelMirror: {
+    enabled: false,
+    export: {
+      maxSize: 100 * 1024 * 1024 * 1024,
+      bucket: 'exports',
+      kmsSignature: {
+        enabled: false,
+        keyId: '123-456',
+        KMSClient: {
+          region: 'eu-west-2',
+          credentials: {
+            accessKeyId: 'access',
+            secretAccessKey: 'secret',
+          },
+        },
+      },
+    },
+  },
 }
