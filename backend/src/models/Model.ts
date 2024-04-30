@@ -1,12 +1,19 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
-export const ModelVisibility = {
+export const EntryVisibility = {
   Private: 'private',
   Public: 'public',
 } as const
 
-export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
+export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVisibility]
+
+export const EntryKind = {
+  Model: 'model',
+  DataCard: 'data-card',
+} as const
+
+export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
 export interface CollaboratorEntry {
   entity: string
@@ -38,6 +45,7 @@ export interface ModelInterface {
   id: string
 
   name: string
+  kind: EntryKindKeys
   teamId?: string
   description: string
   card?: ModelCardInterface
@@ -47,7 +55,7 @@ export interface ModelInterface {
     ungovernedAccess: boolean
   }
 
-  visibility: ModelVisibilityKeys
+  visibility: EntryVisibilityKeys
   deleted: boolean
 
   createdAt: Date
@@ -65,6 +73,7 @@ const ModelSchema = new Schema<ModelInterface>(
     teamId: { type: String, required: true, index: true, default: 'Uncategorised' },
 
     name: { type: String, required: true },
+    kind: { type: String, enum: Object.values(EntryKind) },
     description: { type: String, required: true },
     card: {
       schemaId: { type: String },
@@ -84,7 +93,7 @@ const ModelSchema = new Schema<ModelInterface>(
       ungovernedAccess: { type: Boolean, required: true, default: false },
     },
 
-    visibility: { type: String, enum: Object.values(ModelVisibility), default: ModelVisibility.Public },
+    visibility: { type: String, enum: Object.values(EntryVisibility), default: EntryVisibility.Public },
   },
   {
     timestamps: true,

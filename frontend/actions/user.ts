@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import { UserInformation } from 'src/common/UserDisplay'
 import useSWR from 'swr'
-import { EntityObject, ModelInterface, TokenActionsKeys, TokenInterface, TokenScopeKeys, User } from 'types/types'
+import { EntityObject, EntryInterface, TokenActionsKeys, TokenInterface, TokenScopeKeys, User } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -76,7 +76,7 @@ export function useGetUserTokens() {
 export function postUserToken(
   description: string,
   scope: TokenScopeKeys,
-  modelIds: ModelInterface['id'][],
+  modelIds: EntryInterface['id'][],
   actions: TokenActionsKeys[],
 ) {
   return fetch('/api/v2/user/tokens', {

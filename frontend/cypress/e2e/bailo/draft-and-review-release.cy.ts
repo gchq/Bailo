@@ -7,6 +7,7 @@ describe('Draft and review a model release', () => {
     cy.log('Upload new model and set schema via API')
     cy.request('POST', 'http://localhost:8080/api/v2/models', {
       name: modelNameForRelease,
+      kind: 'model',
       teamId: 'Uncategorised',
       description: 'This is a test',
       visibility: 'public',
