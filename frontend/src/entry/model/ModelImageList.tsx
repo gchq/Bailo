@@ -2,7 +2,7 @@ import { Typography } from '@mui/material'
 import Autocomplete, { AutocompleteRenderInputParams } from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import { useGetModelImages } from 'actions/model'
-import { SyntheticEvent, useEffect, useMemo } from 'react'
+import { SyntheticEvent, useCallback, useEffect, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, FlattenedModelImage } from 'types/types'
@@ -22,7 +22,7 @@ type PartialModelImageListProps =
 
 type ModelImageListProps = {
   model: EntryInterface
-  setRegistryError?: (value: boolean) => void
+  onRegistryError: (value: boolean) => void
   readOnly?: boolean
 } & PartialModelImageListProps
 
@@ -30,17 +30,17 @@ export default function ModelImageList({
   model,
   value,
   onChange,
-  setRegistryError,
+  onRegistryError,
   readOnly = false,
   multiple,
 }: ModelImageListProps) {
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
+  const handleRegistryError = useCallback((value: boolean) => onRegistryError(value), [onRegistryError])
+
   useEffect(() => {
-    if (setRegistryError) {
-      setRegistryError(!!isModelImagesError)
-    }
-  }, [isModelImagesError, setRegistryError])
+    handleRegistryError(!!isModelImagesError)
+  }, [isModelImagesError, handleRegistryError])
 
   const sortedImageList = useMemo(() => {
     const flattenedImageList: FlattenedModelImage[] = []
