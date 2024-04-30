@@ -19,6 +19,7 @@ import {
 } from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
+import { reviewResponsesForEachUser } from 'utils/reviewUtils'
 
 type ReviewCommentsProps = {
   isEdit: boolean
@@ -61,9 +62,8 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
 
   const reviewDetails = useMemo(() => {
     let decisionsAndComments: Array<ReviewResponseKind> = []
-    reviews.forEach((review) => {
-      review.responses.forEach((response) => decisionsAndComments.push(response))
-    })
+    const groupedResponses = reviewResponsesForEachUser(reviews)
+    decisionsAndComments.push(...groupedResponses)
     if (release) {
       decisionsAndComments = [...decisionsAndComments, ...release.comments]
     }
@@ -73,12 +73,14 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     decisionsAndComments.sort(sortByCreatedAtAscending)
     return decisionsAndComments.map((response) => {
       if (isReviewResponse(response)) {
-        return <ReviewDecisionDisplay key={response.createdAt} response={response as ReviewResponse} />
+        return (
+          <ReviewDecisionDisplay key={response.createdAt} response={response as ReviewResponse} modelId={modelId} />
+        )
       } else {
         return <ReviewCommentDisplay key={response.createdAt} response={response as ReviewComment} />
       }
     })
-  }, [reviews, release, accessRequest])
+  }, [reviews, release, accessRequest, modelId])
 
   async function submitReviewComment() {
     setCommentSubmissionError('')
