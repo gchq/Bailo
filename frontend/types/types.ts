@@ -38,6 +38,14 @@ export interface UiConfig {
   development: {
     logUrl: string
   }
+  inference: {
+    enabled: boolean
+    connection: {
+      host: string
+    }
+
+    gpus: { [key: string]: string }
+  }
 }
 
 export interface FileInterface {
@@ -102,7 +110,7 @@ export interface SchemaInterface {
   updatedAt: Date
 }
 
-export interface ModelCardRevisionInterface {
+export interface EntryCardRevisionInterface {
   modelId: string
   schemaId: string
   version: number
@@ -279,18 +287,17 @@ export interface TeamInterface {
   updatedAt: Date
 }
 
-export const ModelVisibility = {
+export const EntryVisibility = {
   Private: 'private',
   Public: 'public',
 } as const
 
-export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
+export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVisibility]
 
-export interface ModelCardInterface {
+export interface EntryCardInterface {
   schemaId: string
   version: number
   createdBy: string
-
   metadata: unknown
 }
 
@@ -299,26 +306,38 @@ export interface CollaboratorEntry {
   roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
 
-export interface ModelInterface {
+export const EntryKind = {
+  MODEL: 'model',
+  DATA_CARD: 'data-card',
+} as const
+export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
+
+export const isEntryKind = (value: unknown): value is EntryKindKeys => {
+  return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD)
+}
+
+export interface EntryInterface {
   id: string
   name: string
+  kind: EntryKindKeys
   teamId: string
   description: string
   settings: {
     ungovernedAccess: boolean
   }
-  card: ModelCardInterface
-  visibility: ModelVisibilityKeys
+  card: EntryCardInterface
+  visibility: EntryVisibilityKeys
   collaborators: CollaboratorEntry[]
   createdBy: string
   createdAt: Date
 }
 
-export interface ModelForm {
+export interface EntryForm {
   name: string
+  kind: EntryKindKeys
   teamId: string
   description: string
-  visibility: ModelVisibilityKeys
+  visibility: EntryVisibilityKeys
 }
 
 export interface AccessRequestMetadata {
@@ -389,10 +408,30 @@ type PartialReviewRequestInterface =
     }
 
 export type ReviewRequestInterface = {
-  model: ModelInterface
+  model: EntryInterface
   role: string
   kind: 'release' | 'access'
   responses: ReviewResponse[]
   createdAt: string
   updatedAt: string
 } & PartialReviewRequestInterface
+
+export interface FileUploadProgress {
+  fileName: string
+  uploadProgress: number
+}
+
+export interface InferenceInterface {
+  modelId: string
+  image: string
+  tag: string
+  settings: {
+    processorType: string
+    memory?: number
+    port: number
+  }
+  description: string
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
