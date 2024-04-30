@@ -8,7 +8,6 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import { patchModel, useGetModel } from 'actions/model'
@@ -31,7 +30,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const [userListQuery, setUserListQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [roleError, setRoleError] = useState('')
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
   const { isModelError, mutateModel } = useGetModel(model.id)
@@ -46,7 +44,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
           accessList={accessList}
           onAccessListChange={setAccessList}
           model={model}
-          setRoleError={setRoleError}
+          onError={setErrorMessage}
         />
       )),
     [accessList, model],
@@ -145,19 +143,9 @@ export default function ModelAccess({ model }: ModelAccessProps) {
         </TableHead>
         <TableBody>{accessListEntities}</TableBody>
       </Table>
-      <Tooltip title={roleError}>
-        <span>
-          <LoadingButton
-            variant='contained'
-            aria-label='Save access list'
-            onClick={updateAccessList}
-            loading={loading}
-            disabled={!!roleError}
-          >
-            Save
-          </LoadingButton>
-        </span>
-      </Tooltip>
+      <LoadingButton variant='contained' aria-label='Save access list' onClick={updateAccessList} loading={loading}>
+        Save
+      </LoadingButton>
       <MessageAlert message={errorMessage} severity='error' />
     </Stack>
   )

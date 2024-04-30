@@ -11,7 +11,7 @@ type EditableFormHeadingProps = {
   onEdit: () => void
   onCancel: () => void
   onSubmit: () => void
-  registryError?: boolean
+  isRegistryError?: boolean
   onDelete?: () => void
   errorMessage?: string
   deleteButtonText?: string
@@ -26,7 +26,7 @@ export default function EditableFormHeading({
   onEdit,
   onCancel,
   onSubmit,
-  registryError,
+  isRegistryError,
   onDelete,
   errorMessage = '',
   deleteButtonText = 'Delete',
@@ -43,7 +43,7 @@ export default function EditableFormHeading({
         {heading}
         {!isEdit && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
-            <Button variant='outlined' onClick={onEdit} data-test='editFormButton' disabled={registryError}>
+            <Button variant='outlined' onClick={onEdit} data-test='editFormButton' disabled={isRegistryError}>
               {editButtonText}
             </Button>
             {showDeleteButton && (
@@ -52,7 +52,7 @@ export default function EditableFormHeading({
                 color='secondary'
                 onClick={onDelete}
                 data-test='deleteFormButton'
-                disabled={registryError}
+                disabled={isRegistryError}
               >
                 {deleteButtonText}
               </Button>
@@ -69,7 +69,7 @@ export default function EditableFormHeading({
               loading={isLoading}
               onClick={onSubmit}
               data-test='saveEditFormButton'
-              disabled={registryError}
+              disabled={isRegistryError}
             >
               Save
             </LoadingButton>

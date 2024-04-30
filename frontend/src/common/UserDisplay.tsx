@@ -18,11 +18,11 @@ interface AdditionalProperties {
 
 export type UserDisplayProps = {
   dn: string
-  setRoleError?: (value: string) => void
+  onUserInformationError: (value: string) => void
   hidePopover?: boolean
 }
 
-export default function UserDisplay({ dn, setRoleError, hidePopover = false }: UserDisplayProps) {
+export default function UserDisplay({ dn, onUserInformationError, hidePopover = false }: UserDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = useMemo(() => !!anchorEl, [anchorEl])
   const ref = useRef<HTMLDivElement>(null)
@@ -42,9 +42,7 @@ export default function UserDisplay({ dn, setRoleError, hidePopover = false }: U
   }
 
   if (isUserInformationError) {
-    if (setRoleError) {
-      setRoleError(isUserInformationError.info.message)
-    }
+    onUserInformationError(isUserInformationError.info.message)
   }
 
   if (isUserInformationLoading) {
