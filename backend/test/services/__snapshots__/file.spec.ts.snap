@@ -26,6 +26,7 @@ exports[`services > file > getFilesByModel > success 1`] = `
 
 exports[`services > file > removeFile > success 1`] = `
 {
+  "aggregate": [MockFunction spy],
   "delete": [MockFunction spy] {
     "calls": [
       [],
@@ -53,6 +54,8 @@ exports[`services > file > removeFile > success 1`] = `
       },
     ],
   },
+  "group": [MockFunction spy],
+  "match": [MockFunction spy],
   "save": [MockFunction spy],
   "size": 100,
 }
