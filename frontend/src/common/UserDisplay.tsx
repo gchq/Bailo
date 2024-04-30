@@ -18,7 +18,7 @@ interface AdditionalProperties {
 
 export type UserDisplayProps = {
   dn: string
-  onUserInformationError: (value: string) => void
+  onUserInformationError?: (value: string) => void
   hidePopover?: boolean
 }
 
@@ -41,7 +41,7 @@ export default function UserDisplay({ dn, onUserInformationError, hidePopover = 
     setAnchorEl(null)
   }
 
-  if (isUserInformationError) {
+  if (isUserInformationError && onUserInformationError) {
     onUserInformationError(isUserInformationError.info.message)
   }
 

@@ -26,7 +26,6 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
   })
 
   const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ReviewRequestInterface[]>([])
-  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     if (!isReviewsLoading && reviews) {
@@ -70,7 +69,7 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
             </Stack>
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
               <Typography variant='caption'>
-                Created by {<UserDisplay onUserError={setErrorMessage} dn={accessRequest.createdBy} />} on
+                Created by {<UserDisplay dn={accessRequest.createdBy} />} on
                 <Typography variant='caption' fontWeight='bold'>
                   {` ${formatDateString(accessRequest.createdAt)} `}
                 </Typography>
@@ -104,7 +103,7 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
                 <Grid container>
                   {accessRequest.metadata.overview.entities.map((entity) => (
                     <Grid item xs={3} key={entity}>
-                      <UserDisplay onUserError={setErrorMessage} dn={entity} />
+                      <UserDisplay dn={entity} />
                     </Grid>
                   ))}
                 </Grid>
@@ -121,7 +120,6 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
                 </Stack>
               )}
             </Stack>
-            <MessageAlert message={errorMessage} severity='error' />
           </Stack>
         </Card>
       </Stack>
