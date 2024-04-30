@@ -148,6 +148,7 @@ export interface Config {
   defaultSchemas: {
     modelCards: Array<DefaultSchema>
     accessRequests: Array<DefaultSchema>
+    dataCards: Array<DefaultSchema>
   }
 
   instrumentation: {
