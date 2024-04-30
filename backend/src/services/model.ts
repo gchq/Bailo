@@ -1,5 +1,6 @@
 import { Validator } from 'jsonschema'
 import _ from 'lodash'
+import mongoose from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
@@ -18,6 +19,7 @@ import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
+import log from './log.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -271,9 +273,17 @@ export async function _setModelCard(
   }
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
-  await revision.save()
 
-  await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } })
+  const message = 'Unable to save model card revision'
+  await mongoose.connection
+    .transaction(async function executeUpdate(session) {
+      await revision.save({ session })
+      await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session: session })
+    })
+    .catch((error) => {
+      log.error('Error when updating model card/revision. Transaction rolled back.', error)
+      throw InternalError(message, { modelId })
+    })
 
   return revision
 }
