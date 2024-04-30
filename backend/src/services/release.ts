@@ -243,6 +243,31 @@ export async function getModelReleases(
   return results.filter((_, i) => auths[i].success)
 }
 
+export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
+  const model = await getModelById(user, modelId)
+  const releases = await Release.find({
+    modelId,
+    semver: semvers,
+  })
+
+  const missing = semvers.filter((x) => !releases.some((release) => release.semver === x))
+  if (missing.length > 0) {
+    throw NotFound('The following releases were not found.', { modelId, releases: missing })
+  }
+
+  const auths = await authorisation.releases(user, model, releases, ReleaseAction.Update)
+  const noAuth = releases.filter((_, i) => !auths[i].success)
+  if (noAuth.length > 0) {
+    throw Forbidden('You do not have the necessary permissions to export these releases.', {
+      modelId,
+      releases: noAuth.map((release) => release.semver),
+      user,
+    })
+  }
+
+  return releases
+}
+
 export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
   const release = await Release.findOne({
@@ -315,4 +340,20 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
   }
 
   return file
+}
+
+export async function getAllFileIds(modelId: string, semvers: string[]) {
+  const result = await Release.aggregate()
+    .match({ modelId, semver: { $in: semvers } })
+    .unwind({ path: '$fileIds' })
+    .group({
+      _id: null,
+      fileIds: {
+        $addToSet: '$fileIds',
+      },
+    })
+  if (result.at(0)) {
+    return result.at(0).fileIds
+  }
+  return []
 }
