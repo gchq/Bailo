@@ -127,7 +127,7 @@ npm run script -- addUploadSchema
 | ---------- | ----- | --------------------- |
 | Next UI    | 3000  | Stored in `frontend`  |
 | NodeJS App | 3001  | Stored in `backend`   |
-| Mongo      | 27017 | No credentials        |
+| Mongo      | 27017 | mongoadmin:mongoadmin |
 | Registry   | 5000  | HTTPS only, no UI     |
 | Minio UI   | 9001  | minioadmin:minioadmin |
 | Minio      | 9000  | minioadmin:minioadmin |
