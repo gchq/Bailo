@@ -118,7 +118,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
         size='small'
         noOptionsText={noOptionsText}
         onInputChange={debounceOnInputChange}
-        groupBy={(option) => option.kind}
+        groupBy={(option) => option.kind.toUpperCase()}
         getOptionLabel={(option) => option.id}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         onChange={onUserChange}
