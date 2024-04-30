@@ -47,22 +47,24 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
             sx={{ width: '100%' }}
             justifyContent='space-between'
           >
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
-              <Typography>
-                <UserDisplay dn={username} />
-                {` ${isApproved ? 'has approved' : 'has requested changes'}`}
-              </Typography>
-              {isApproved ? (
-                <Done color='success' fontSize='small' />
-              ) : (
-                <HourglassEmpty color='warning' fontSize='small' />
-              )}
-              <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
-              {response.outdated && (
-                <Typography sx={{ backgroundColor: theme.palette.warning.light, borderRadius: 1, px: 0.5 }}>
-                  Outdated
+            <Stack alignItems={{ xs: 'center', sm: 'flex-start' }} spacing={{ xs: 1, sm: 0 }}>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
+                <Typography>
+                  <UserDisplay dn={username} />
+                  {` ${isApproved ? 'has approved' : 'has requested changes'}`}
                 </Typography>
-              )}
+                {isApproved ? (
+                  <Done color='success' fontSize='small' />
+                ) : (
+                  <HourglassEmpty color='warning' fontSize='small' />
+                )}
+                {response.outdated && (
+                  <Typography sx={{ backgroundColor: theme.palette.warning.light, borderRadius: 1, px: 0.5 }}>
+                    Outdated
+                  </Typography>
+                )}
+              </Stack>
+              <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
             </Stack>
             <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
           </Stack>
