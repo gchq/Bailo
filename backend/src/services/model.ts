@@ -12,6 +12,7 @@ import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { EntityKind, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
+import { isReplicaSet } from '../utils/database.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
@@ -269,16 +270,21 @@ export async function _setModelCard(
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
 
-  const message = 'Unable to save model card revision'
-  await mongoose.connection
-    .transaction(async function executeUpdate(session) {
-      await revision.save({ session })
-      await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session: session })
-    })
-    .catch((error) => {
-      log.error('Error when updating model card/revision. Transaction rolled back.', error)
-      throw InternalError(message, { modelId })
-    })
+  if (await isReplicaSet()) {
+    await mongoose.connection
+      .transaction(async function executeUpdate(session) {
+        await revision.save({ session })
+        await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session: session })
+      })
+      .catch((error) => {
+        const message = 'Unable to save model card revision'
+        log.error('Error when updating model card/revision. Transaction rolled back.', error)
+        throw InternalError(message, { modelId })
+      })
+  } else {
+    await revision.save()
+    await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } })
+  }
 
   return revision
 }
