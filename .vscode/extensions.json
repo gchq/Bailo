@@ -10,6 +10,6 @@
     "ms-python.flake8",
     "ms-python.black-formatter",
     "ryanluker.vscode-coverage-gutters",
-    "bungcip.better-toml"
+    "tamasfe.even-better-toml"
   ]
 }
