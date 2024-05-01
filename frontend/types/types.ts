@@ -416,6 +416,11 @@ export type ReviewRequestInterface = {
   updatedAt: string
 } & PartialReviewRequestInterface
 
+export interface UserSettings {
+  dn: string
+  themeKey: string
+}
+
 export interface FileUploadProgress {
   fileName: string
   uploadProgress: number

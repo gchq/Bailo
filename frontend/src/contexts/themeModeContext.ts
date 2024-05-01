@@ -1,11 +1,12 @@
 import { createContext } from 'react'
 
 import { ThemeModeHook } from '../hooks/useThemeMode'
-import { lightTheme } from '../theme'
 
 const ThemeModeContext = createContext<ThemeModeHook>({
-  theme: lightTheme,
-  toggleDarkMode: () => null,
+  themeKey: '',
+  setThemeKey: (_value: string) => null,
+  isLoadingUserSettings: true,
+  setIsLoadingUserSettings: (_value: boolean) => null,
 })
 
 export default ThemeModeContext

@@ -1,6 +1,6 @@
 import { Delete } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Container, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { deleteUserToken, useGetUserTokens } from 'actions/user'
 import { useRouter } from 'next/router'
 import { Fragment, useCallback, useMemo, useState } from 'react'
@@ -83,7 +83,7 @@ export default function AuthenticationTab() {
   }
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Container maxWidth='md'>
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         justifyContent={{ xs: 'center', sm: 'space-between' }}
@@ -107,6 +107,6 @@ export default function AuthenticationTab() {
         onConfirm={handleDeleteToken}
         onCancel={handleCloseDialog}
       />
-    </Box>
+    </Container>
   )
 }
