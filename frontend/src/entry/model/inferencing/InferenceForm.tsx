@@ -33,6 +33,7 @@ type InferenceFormProps = {
   onDescriptionChange: (value: string) => void
   onPortChange: (value: string) => void
   onProcessorTypeChange: (value: string) => void
+  onRegistryError: (value: boolean) => void
   onMemoryChange: (value: number) => void
 } & EditableInferenceFormProps
 
@@ -44,6 +45,7 @@ export default function InferenceForm({
   onPortChange,
   onProcessorTypeChange,
   onMemoryChange,
+  onRegistryError,
   editable = false,
   isEdit = false,
 }: InferenceFormProps) {
@@ -91,7 +93,12 @@ export default function InferenceForm({
             Image
             {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
           </Typography>
-          <ModelImageList model={model} value={formData.image} onChange={handleImageChange} />
+          <ModelImageList
+            model={model}
+            value={formData.image}
+            onChange={handleImageChange}
+            onRegistryError={onRegistryError}
+          />
         </>
       )}
       <Stack>

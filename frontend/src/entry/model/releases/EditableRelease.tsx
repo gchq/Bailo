@@ -43,6 +43,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isRegistryError, setIsRegistryError] = useState(false)
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const [open, setOpen] = useState(false)
@@ -56,6 +57,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const router = useRouter()
+
+  const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
   const handleDeleteConfirm = useCallback(async () => {
     setErrorMessage('')
@@ -195,6 +198,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onSubmit={handleSubmit}
         onDelete={() => setOpen(true)}
         errorMessage={errorMessage}
+        isRegistryError={isRegistryError}
       />
       <ReleaseForm
         editable
@@ -214,6 +218,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onFilesChange={(value) => setFiles(value)}
         onFilesMetadataChange={(value) => setFilesMetadata(value)}
         onImageListChange={(value) => setImageList(value)}
+        onRegistryError={handleRegistryError}
         currentFileUploadProgress={currentFileUploadProgress}
         uploadedFiles={uploadedFiles}
         filesToUploadCount={filesToUploadCount}
