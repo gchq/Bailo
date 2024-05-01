@@ -3,7 +3,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
-import { ModelSearchResult, useListModels } from 'actions/model'
+import { EntrySearchResult, useListModels } from 'actions/model'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
@@ -26,7 +26,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
 
   const [open, setOpen] = useState(false)
   const [dataCardListQuery, setDataCardListQuery] = useState('')
-  const [selectedDataCards, setSelectedDataCards] = useState<ModelSearchResult[]>([])
+  const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
 
   const {
     models: dataCards,
@@ -39,7 +39,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
 
   useEffect(() => {
     if (currentValue) {
-      const updatedDataCards: ModelSearchResult[] = dataCards.filter((dataCard) => {
+      const updatedDataCards: EntrySearchResult[] = dataCards.filter((dataCard) => {
         if (currentValue.includes(dataCard.id)) {
           return dataCard
         }
@@ -49,7 +49,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
   }, [currentValue, dataCards])
 
   const handleSelectedDataCardsChange = useCallback(
-    (_event: SyntheticEvent<Element, Event>, newValues: ModelSearchResult[]) => {
+    (_event: SyntheticEvent<Element, Event>, newValues: EntrySearchResult[]) => {
       onChange(newValues.map((value) => value.id))
       setSelectedDataCards(newValues)
     },
@@ -72,7 +72,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
     <>
       {isDataCardsLoading && <Loading />}
       {formContext && formContext.editMode && (
-        <Autocomplete<ModelSearchResult, true, true>
+        <Autocomplete<EntrySearchResult, true, true>
           multiple
           data-test='dataCardSelector'
           loading={dataCardListQuery.length > 3 && isDataCardsLoading}
