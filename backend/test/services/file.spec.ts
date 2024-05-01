@@ -4,7 +4,14 @@ import { describe, expect, test, vi } from 'vitest'
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
-import { downloadFile, getFilesByIds, getFilesByModel, removeFile, uploadFile } from '../../src/services/file.js'
+import {
+  downloadFile,
+  getFilesByIds,
+  getFilesByModel,
+  getTotalFileSize,
+  removeFile,
+  uploadFile,
+} from '../../src/services/file.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -53,6 +60,10 @@ vi.mock('../../src/services/release.js', () => releaseServiceMocks)
 
 const fileModelMocks = vi.hoisted(() => {
   const obj: any = {}
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.group = vi.fn(() => obj)
 
   obj.save = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
@@ -269,5 +280,12 @@ describe('services > file', () => {
     await expect(downloadFile(user, fileId, range)).rejects.toThrowError(
       /^You do not have permission to download this model./,
     )
+  })
+
+  test('getTotalFileSize > returns file size', async () => {
+    fileModelMocks.group.mockResolvedValueOnce([{ totalSize: 42 }])
+    const size = await getTotalFileSize(['1', '2', '3'])
+
+    expect(size).toBe(42)
   })
 })

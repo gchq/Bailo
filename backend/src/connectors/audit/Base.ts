@@ -94,6 +94,8 @@ export const AuditInfo = {
   UpdateInference: { typeId: 'UpdateInference', description: 'Inference Service Updated', auditKind: AuditKind.Update },
   ViewInference: { typeId: 'ViewInference', description: 'Inference Service Viewed', auditKind: AuditKind.View },
   ViewInferences: { typeId: 'ViewInferences', description: 'Inferences Viewed', auditKind: AuditKind.View },
+
+  CreateExport: { typeId: 'CreateExport', description: 'Model Exported', auditKind: AuditKind.Create },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -147,6 +149,8 @@ export abstract class BaseAuditConnector {
     modelId: string,
     images: { repository: string; name: string; tags: string[] }[],
   )
+
+  abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[])
 
   abstract onError(req: Request, error: BailoError)
 
