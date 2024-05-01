@@ -53,6 +53,7 @@ export interface ModelSearchResult {
   name: string
   description: string
   tags: Array<string>
+  kind: EntryKindKeys
 }
 
 interface GetModelsResponse {
@@ -73,6 +74,7 @@ export const getModelsSearch = [
       name: model.name,
       description: model.description,
       tags: model.card?.metadata?.overview?.tags || [],
+      kind: model.kind,
     }))
 
     await audit.onSearchModel(req, models)

@@ -70,7 +70,6 @@ export default function NewEntry() {
                       other accreditation requirements.
                     </Typography>
                     <Button
-                      disabled // Disabled until data cards are fully supported
                       variant='contained'
                       onClick={() => setEntryKind(EntryKind.DATA_CARD)}
                       sx={{ width: '100%' }}
