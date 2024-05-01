@@ -2,6 +2,7 @@ import { Validator } from 'jsonschema'
 import { cloneDeep, dropRight, get, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
 import CustomTextInput from 'src/MuiForms/CustomTextInput'
+import DataCardSelector from 'src/MuiForms/DataCardSelector'
 import DateSelector from 'src/MuiForms/DateSelector'
 import Dropdown from 'src/MuiForms/Dropdown'
 import EntitySelector from 'src/MuiForms/EntitySelector'
@@ -21,6 +22,7 @@ export const widgets = {
   entitySelector: EntitySelector,
   SelectWidget: Dropdown,
   multiSelector: MultipleDropdown,
+  dataCardSelector: DataCardSelector,
   nothing: Nothing,
 }
 
