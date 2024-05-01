@@ -1,6 +1,17 @@
-import { FileUpload, Lock, LockOpen } from '@mui/icons-material'
+import { ArrowBack, FileUpload, Lock, LockOpen } from '@mui/icons-material'
 import LoadingButton from '@mui/lab/LoadingButton'
-import { Box, Card, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Card,
+  Divider,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { postModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { FormEvent, useMemo, useState } from 'react'
@@ -8,15 +19,16 @@ import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
 import MessageAlert from 'src/MessageAlert'
 import TeamSelect from 'src/TeamSelect'
-import { EntryForm, EntryKind, EntryKindKeys, EntryVisibility, TeamInterface } from 'types/types'
+import { EntryForm, EntryKind, EntryKindKeys, EntryKindLabel, EntryVisibility, TeamInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
 
 type CreateEntryProps = {
   kind: EntryKindKeys
+  onBackClick: () => void
 }
 
-export default function CreateEntry({ kind }: CreateEntryProps) {
+export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
   const router = useRouter()
   const [team, setTeam] = useState<TeamInterface | undefined>()
   const [name, setName] = useState('')
@@ -33,9 +45,9 @@ export default function CreateEntry({ kind }: CreateEntryProps) {
     setErrorMessage('')
 
     const formData: EntryForm = {
-      name: name,
-      kind: kind,
+      name,
       teamId: team?.id ?? 'Uncategorised',
+      kind,
       description,
       visibility,
     }
@@ -56,7 +68,9 @@ export default function CreateEntry({ kind }: CreateEntryProps) {
         <Lock />
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Private</Typography>
-          <Typography variant='caption'>{`Only named individuals will be able to view this ${kind}`}</Typography>
+          <Typography variant='caption'>
+            {`Only named individuals will be able to view this ${EntryKindLabel[kind]}`}
+          </Typography>
         </Stack>
       </Stack>
     )
@@ -68,22 +82,29 @@ export default function CreateEntry({ kind }: CreateEntryProps) {
         <LockOpen />
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Public</Typography>
-          <Typography variant='caption'>{`Any authorised user will be able to see this ${kind}`}</Typography>
+          <Typography variant='caption'>
+            {`Any authorised user will be able to see this ${EntryKindLabel[kind]}`}
+          </Typography>
         </Stack>
       </Stack>
     )
   }
 
   return (
-    <Card sx={{ p: 4, m: 'auto' }}>
-      <Stack spacing={2} alignItems='center' justifyContent='center'>
-        <Typography variant='h6' component='h1' color='primary'>
-          {`Create ${toTitleCase(kind)}`}
-        </Typography>
-        <FileUpload color='primary' fontSize='large' />
-        {kind === EntryKind.MODEL && (
-          <Typography>A model repository contains all files, history and information related to a model.</Typography>
-        )}
+    <Card sx={{ p: 4, mb: 4 }}>
+      <Stack spacing={1}>
+        <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />} onClick={() => onBackClick()}>
+          Back
+        </Button>
+        <Stack spacing={2} alignItems='center' justifyContent='center'>
+          <Typography variant='h6' component='h1' color='primary'>
+            {`Create ${toTitleCase(kind)}`}
+          </Typography>
+          <FileUpload color='primary' fontSize='large' />
+          {kind === EntryKind.MODEL && (
+            <Typography>A model repository contains all files, history and information related to a model.</Typography>
+          )}
+        </Stack>
       </Stack>
       <Box component='form' sx={{ mt: 4 }} onSubmit={handleSubmit}>
         <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
@@ -132,7 +153,7 @@ export default function CreateEntry({ kind }: CreateEntryProps) {
                   data-test='createEntryButton'
                   loading={loading}
                 >
-                  {`Create ${kind}`}
+                  {`Create ${EntryKindLabel[kind]}`}
                 </LoadingButton>
               </span>
             </Tooltip>
