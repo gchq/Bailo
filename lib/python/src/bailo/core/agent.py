@@ -11,12 +11,9 @@ class Agent:
     """Base API Agent for talking with Bailo.
 
     Wraps each request in an exception handler that maps API errors to Python Bailo errors, among status codes less than 400.
-    Defaults request timeout to 5 seconds.
     """
 
     def __request(self, method, *args, **kwargs):
-        if "timeout" not in kwargs:
-            kwargs["timeout"] = 5
         if "verify" not in kwargs:
             kwargs["verify"] = True
 

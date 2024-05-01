@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import shutil
 from io import BytesIO
 from typing import Any
 
 from bailo.core.agent import Agent, TokenAgent
-from bailo.core.enums import ModelVisibility, SchemaKind
+from bailo.core.enums import EntryKind, ModelVisibility, SchemaKind
 from bailo.core.utils import filter_none
 
 
@@ -23,6 +22,7 @@ class Client:
     def post_model(
         self,
         name: str,
+        kind: EntryKind,
         description: str,
         team_id: str,
         visibility: ModelVisibility | None = None,
@@ -30,6 +30,7 @@ class Client:
         """Create a model.
 
         :param name: Name of the model
+        :param kind: Either a Model or a Datacard
         :param description: Description of the model
         :param visibility: Enum to define model visibility (e.g public or private)
         :return: JSON response object
@@ -40,6 +41,7 @@ class Client:
         filtered_json = filter_none(
             {
                 "name": name,
+                "kind": kind,
                 "description": description,
                 "visibility": visibility,
                 "teamId": team_id,
@@ -99,6 +101,7 @@ class Client:
         self,
         model_id: str,
         name: str | None = None,
+        kind: str | None = None,
         description: str | None = None,
         visibility: str | None = None,
     ):
@@ -106,11 +109,12 @@ class Client:
 
         :param model_id: Unique model ID
         :param name: Name of the model, defaults to None
+        :param kind: Either a Model or a Datacard
         :param description: Description of the model, defaults to None
         :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
         :return: JSON response object
         """
-        filtered_json = filter_none({"name": name, "description": description, "visibility": visibility})
+        filtered_json = filter_none({"name": name, "kind": kind, "description": description, "visibility": visibility})
 
         return self.agent.patch(f"{self.url}/v2/model/{model_id}", json=filtered_json).json()
 

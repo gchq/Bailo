@@ -51,7 +51,7 @@ export default function RichTextInput({
     <RichTextEditor
       value={value}
       onChange={onChange}
-      textareaProps={{ disabled: disabled, id: id }}
+      textareaProps={{ disabled, id }}
       errors={rawErrors}
       label={
         <Typography fontWeight='bold'>

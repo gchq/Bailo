@@ -7,6 +7,8 @@ import { RegistryError } from '../types/RegistryError.js'
 export function GenericError(code: number, message: string, context?: BailoError['context'], logger?: Logger) {
   const err = Error(message) as BailoError
 
+  err.name = 'Bailo Error'
+
   if (err.stack) {
     // Remove this file from stack traces.
     err.stack = err.stack

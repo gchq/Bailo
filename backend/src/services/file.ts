@@ -1,13 +1,19 @@
+import NodeClam from 'clamscan'
+import { Readable } from 'stream'
+
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import FileModel from '../models/File.js'
+import FileModel, { ScanState } from '../models/File.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { Forbidden, NotFound } from '../utils/error.js'
 import { longId } from '../utils/id.js'
+import log from './log.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
+
+let av: NodeClam
 
 export async function uploadFile(
   user: UserInterface,
@@ -23,14 +29,7 @@ export async function uploadFile(
   const bucket = config.s3.buckets.uploads
   const path = `beta/model/${modelId}/files/${fileId}`
 
-  const file = new FileModel({
-    modelId,
-    name,
-    mime,
-    bucket,
-    path,
-    complete: true,
-  })
+  const file = new FileModel({ modelId, name, mime, bucket, path, complete: true })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
@@ -41,6 +40,40 @@ export async function uploadFile(
   file.size = fileSize
 
   await file.save()
+
+  if (config.avScanning.enabled) {
+    if (!av) {
+      try {
+        av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
+      } catch (error) {
+        log.error('Unable to connect to ClamAV.', error)
+        return file
+      }
+    }
+    const avStream = av.passthrough()
+    const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
+    s3Stream.pipe(avStream)
+    log.info('Scan started.', { modelId, fileId: file._id, name })
+
+    avStream.on('scan-complete', async (result) => {
+      log.info('Scan complete.', { result, modelId, fileId: file._id, name })
+      await file.update({
+        avScan: { state: ScanState.Complete, isInfected: result.isInfected, viruses: result.viruses },
+      })
+    })
+    avStream.on('error', async (error) => {
+      log.error('Scan errored.', { error, modelId, fileId: file._id, name })
+      await file.update({
+        avScan: { state: ScanState.Error },
+      })
+    })
+    avStream.on('timeout', async (error) => {
+      log.error('Scan timed out.', { error, modelId, fileId: file._id, name })
+      await file.update({
+        avScan: { state: ScanState.Error },
+      })
+    })
+  }
 
   return file
 }
@@ -67,7 +100,6 @@ export async function getFileById(user: UserInterface, fileId: string) {
   }
 
   const model = await getModelById(user, file.modelId)
-
   const auth = await authorisation.file(user, model, file, FileAction.View)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, fileId })
@@ -116,4 +148,14 @@ export async function removeFile(user: UserInterface, modelId: string, fileId: s
   await file.delete()
 
   return file
+}
+
+export async function getTotalFileSize(fileIds: string[]) {
+  const totalSize = await FileModel.aggregate()
+    .match({ _id: { $in: fileIds } })
+    .group({
+      _id: null,
+      totalSize: { $sum: '$size' },
+    })
+  return totalSize.at(0).totalSize
 }

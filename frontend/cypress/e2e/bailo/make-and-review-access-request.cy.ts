@@ -8,6 +8,7 @@ describe('Make and approve an access request', () => {
     cy.log('Upload new model and set schema via API')
     cy.request('POST', 'http://localhost:8080/api/v2/models', {
       name: modelName,
+      kind: 'model',
       teamId: 'Uncategorised',
       description: 'This is a test',
       visibility: 'public',
@@ -65,10 +66,11 @@ describe('Make and approve an access request', () => {
     cy.visit(`/model/${modelUuid}/access-request/${accessRequestUuid}`)
     cy.log('Reviewing the access request and leaving comments')
     cy.get('[data-test=reviewButton]').click({ force: true })
-    cy.get('[data-test=releaseReviewDialog]').contains('Access Request Review')
+    cy.contains(`Reviewing access request ${accessRequestUuid} for model ${modelName}`)
     cy.get('[data-test=reviewWithCommentTextField').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton').click()
 
+    cy.visit(`/model/${modelUuid}/access-request/${accessRequestUuid}`)
     cy.get('[data-test=accessRequestContainer').contains('requested changes')
     cy.get('[data-test=accessRequestContainer').contains('This is a comment')
   })

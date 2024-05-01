@@ -52,4 +52,11 @@ module.exports = {
 
     from: '"Bailo 📝" <bailo@example.org>',
   },
+
+  avScanning: {
+    enabled: true,
+    clamdscan: {
+      host: 'clamd',
+    },
+  },
 }

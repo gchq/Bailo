@@ -4,14 +4,47 @@ import { describe, expect, test, vi } from 'vitest'
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
-import { downloadFile, getFilesByIds, getFilesByModel, removeFile, uploadFile } from '../../src/services/file.js'
+import {
+  downloadFile,
+  getFilesByIds,
+  getFilesByModel,
+  getTotalFileSize,
+  removeFile,
+  uploadFile,
+} from '../../src/services/file.js'
 
-vi.mock('../../src/utils/config.js')
 vi.mock('../../src/connectors/authorisation/index.js')
+
+const logMock = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+}))
+vi.mock('../../src/services/log.js', async () => ({
+  default: logMock,
+}))
+
+const configMock = vi.hoisted(
+  () =>
+    ({
+      avScanning: {
+        enabled: false,
+      },
+      s3: {
+        buckets: {
+          uploads: 'uploads',
+          registry: 'registry',
+        },
+      },
+    }) as any,
+)
+vi.mock('../../src/utils/config.js', () => ({
+  __esModule: true,
+  default: configMock,
+}))
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
-  getObjectStream: vi.fn(() => 'fileStream'),
+  getObjectStream: vi.fn(() => ({ Body: { pipe: vi.fn() } })),
 }))
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
 
@@ -28,6 +61,10 @@ vi.mock('../../src/services/release.js', () => releaseServiceMocks)
 const fileModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.group = vi.fn(() => obj)
+
   obj.save = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
@@ -39,6 +76,12 @@ const fileModelMocks = vi.hoisted(() => {
   return model
 })
 vi.mock('../../src/models/File.js', () => ({ default: fileModelMocks }))
+
+const clamscan = vi.hoisted(() => ({ on: vi.fn() }))
+vi.mock('clamscan', () => ({
+  __esModule: true,
+  default: vi.fn(() => ({ init: vi.fn(() => ({ passthrough: vi.fn(() => clamscan) })) })),
+}))
 
 describe('services > file', () => {
   test('uploadFile > success', async () => {
@@ -54,6 +97,23 @@ describe('services > file', () => {
     expect(s3Mocks.putObjectStream).toBeCalled()
     expect(fileModelMocks.save).toBeCalled()
     expect(result.save).toBe(fileModelMocks.save)
+  })
+
+  test('uploadFile > virus scan initialised', async () => {
+    vi.spyOn(configMock, 'avScanning', 'get').mockReturnValue({ enabled: true, clamdscan: 'test' })
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+    const name = 'testFile'
+    const mime = 'text/plain'
+    const stream = new Readable() as any
+    fileModelMocks.save.mockResolvedValueOnce({ example: true })
+
+    const result = await uploadFile(user, modelId, name, mime, stream)
+
+    expect(s3Mocks.putObjectStream).toBeCalled()
+    expect(fileModelMocks.save).toBeCalled()
+    expect(result.save).toBe(fileModelMocks.save)
+    expect(clamscan.on.mock.calls).toMatchSnapshot()
   })
 
   test('uploadFile > no permission', async () => {
@@ -201,7 +261,7 @@ describe('services > file', () => {
 
     const result = await downloadFile(user, fileId, range)
 
-    expect(result).toBe('fileStream')
+    expect(result).toMatchSnapshot()
   })
 
   test('downloadFile > no permission', async () => {
@@ -220,5 +280,12 @@ describe('services > file', () => {
     await expect(downloadFile(user, fileId, range)).rejects.toThrowError(
       /^You do not have permission to download this model./,
     )
+  })
+
+  test('getTotalFileSize > returns file size', async () => {
+    fileModelMocks.group.mockResolvedValueOnce([{ totalSize: 42 }])
+    const size = await getTotalFileSize(['1', '2', '3'])
+
+    expect(size).toBe(42)
   })
 })

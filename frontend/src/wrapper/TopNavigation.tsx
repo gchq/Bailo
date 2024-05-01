@@ -1,9 +1,10 @@
 import '@fontsource/pacifico'
 
-import { Add, Menu as MenuIcon, Settings } from '@mui/icons-material'
+import { Add, KeyboardArrowDown, KeyboardArrowUp, Menu as MenuIcon, Person, Settings } from '@mui/icons-material'
 import LogoutIcon from '@mui/icons-material/Logout'
 import {
   Box,
+  Button,
   Divider,
   IconButton,
   ListItemIcon,
@@ -17,17 +18,17 @@ import {
   useMediaQuery,
 } from '@mui/material'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
-import { styled, useTheme } from '@mui/material/styles'
+import { alpha, styled, useTheme } from '@mui/material/styles'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useMemo, useState } from 'react'
+import UserDisplay from 'src/common/UserDisplay'
 import ModelSearchField from 'src/wrapper/ModelSearchField'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
-import { EntityKind, User } from '../../types/types'
+import { User } from '../../types/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import ExpandableButton from '../common/ExpandableButton'
-import UserAvatar from '../common/UserAvatar'
 import Link from '../Link'
 
 export type TopNavigationProps = {
@@ -58,7 +59,6 @@ const AppBar = styled(MuiAppBar, {
   }),
 }))
 
-// This is currently only being used by the beta wrapper
 export default function TopNavigation({ drawerOpen = false, pageTopStyling = {}, currentUser }: TopNavigationProps) {
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [navbarAnchorEl, setNavbarAnchorEl] = useState<HTMLButtonElement | null>(null)
@@ -78,8 +78,8 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
     setNavbarAnchorEl(event.currentTarget)
   }
 
-  const handleNewModelClicked = () => {
-    router.push('/model/new')
+  const handleCreateEntryClick = () => {
+    router.push('/entry/new')
   }
 
   const handleMenuClose = () => {
@@ -111,12 +111,12 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 <MenuIcon sx={{ color: theme.palette.topNavigation.main }} />
               </IconButton>
               <Menu anchorEl={navbarAnchorEl} open={navbarMenuOpen} onClose={() => setNavbarAnchorEl(null)}>
-                <Link href='/model/new'>
+                <Link href='/entry/new'>
                   <MenuItem>
                     <ListItemIcon>
                       <Add fontSize='small' />
                     </ListItemIcon>
-                    <ListItemText>Add new model</ListItemText>
+                    <ListItemText>Create data card/model</ListItemText>
                   </MenuItem>
                 </Link>
                 <Divider />
@@ -131,7 +131,6 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               </Menu>
             </Box>
           )}
-          {/* <Box sx={{ flexGrow: 1, ml: 2, width: 'fit-content' }}> */}
           <Link
             href='/'
             color='inherit'
@@ -142,23 +141,35 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
             </Stack>
           </Link>
-          {/* </Box> */}
           {isSmOrLarger && (
             <Box>
-              <Stack direction='row' spacing={2} justifyContent='center' alignItems='center'>
+              <Stack direction='row' spacing={1} justifyContent='center' alignItems='center'>
                 <ExpandableButton
-                  label='Add Model'
+                  label='Create Data Card/Model'
                   icon={<Add />}
-                  onClick={() => handleNewModelClicked()}
-                  ariaLabel='Add a new model'
+                  onClick={handleCreateEntryClick}
+                  ariaLabel='Create a new data card or model'
                   height='40px'
                 />
                 <ModelSearchField />
                 {currentUser ? (
                   <>
-                    <IconButton onClick={handleUserMenuClicked} data-test='userMenuButton'>
-                      <UserAvatar entity={{ kind: EntityKind.USER, id: currentUser.dn }} size='chip' />
-                    </IconButton>
+                    <Button
+                      startIcon={<Person />}
+                      endIcon={actionOpen ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                      sx={{
+                        color: 'white',
+                        backgroundColor: alpha(theme.palette.common.white, 0.15),
+                        '&:hover, &:focus': {
+                          backgroundColor: alpha(theme.palette.common.white, 0.25),
+                        },
+                        textTransform: 'capitalize',
+                      }}
+                      onClick={handleUserMenuClicked}
+                      data-test='userMenuButton'
+                    >
+                      <UserDisplay dn={currentUser.dn} hidePopover />
+                    </Button>
                     <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose}>
                       <MenuList>
                         <Link href='/settings' color='inherit' underline='none'>

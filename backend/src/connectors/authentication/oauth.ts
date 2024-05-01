@@ -7,6 +7,7 @@ import grant from 'grant'
 import { listUsers } from '../../clients/cognito.js'
 import { UserInterface } from '../../models/User.js'
 import config from '../../utils/config.js'
+import { getConnectionURI } from '../../utils/database.js'
 import { fromEntity, toEntity } from '../../utils/entity.js'
 import { InternalError, NotFound } from '../../utils/error.js'
 import { BaseAuthenticationConnector, RoleKeys, UserInformation } from './Base.js'
@@ -30,7 +31,7 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
             saveUninitialized: true,
             cookie: { maxAge: 30 * 24 * 60 * 60000 }, // store for 30 days
             store: MongoStore.create({
-              mongoUrl: config.mongo.uri,
+              mongoUrl: getConnectionURI(),
             }),
           }),
           parser.urlencoded({ extended: true }),

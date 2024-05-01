@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "overview": {
+      "title": "Overview",
+      "description": "Summary of the data card functionality.",
+      "type": "object",
+      "properties": {
+        "storageLocation": {
+          "title": "What is the storage location of this data card?",
+          "type": "string",
+          "minLength": 1
+        },
+        "tags": {
+          "title": "Descriptive tags for the data card.",
+          "description": "These tags will be searchable and will help others find this data card.  Type in a tag, then press the 'enter key' to add it.",
+          "type": "array",
+          "widget": "tagSelector",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

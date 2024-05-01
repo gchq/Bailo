@@ -7,7 +7,7 @@
   <title>Managing Access Requests &mdash; Bailo Python Client Docs 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.png"/>
@@ -26,7 +26,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Managing Models &amp; Releases" href="models_and_releases_demo.html" />
+    <link rel="next" title="Experiment Tracking with Bailo &amp; MLFlow" href="experiment_tracking_demo.html" />
     <link rel="prev" title="bailo.helper package" href="../bailo.helper.html" /> 
 </head>
 
@@ -71,7 +71,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#Deleting-an-access-request">Deleting an access request</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="models_and_releases_demo.html">Managing Models &amp; Releases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment_tracking_demo.html">Experiment Tracking with Bailo &amp; MLFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models_and_releases_demo_pytorch.html">Managing Models &amp; Releases (ResNet-50 Example with PyTorch)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schemas_demo.html">Managing Schemas</a></li>
 </ul>
 
@@ -150,7 +151,7 @@
 <span class="n">model_id</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_id</span>
 
 <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;overview&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;entities&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">],</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;endDate&quot;</span><span class="p">:</span> <span class="s2">&quot;1970-01-01&quot;</span><span class="p">}}</span>
-<span class="n">access_request</span> <span class="o">=</span> <span class="n">AccessRequest</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span> <span class="n">schema_id</span><span class="o">=</span><span class="s2">&quot;minimal-access-request-general-v10-beta&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
+<span class="n">access_request</span> <span class="o">=</span> <span class="n">AccessRequest</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">,</span> <span class="n">schema_id</span><span class="o">=</span><span class="s2">&quot;minimal-access-request-general-v10&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
 
 <span class="n">access_request_id</span> <span class="o">=</span> <span class="n">access_request</span><span class="o">.</span><span class="n">access_request_id</span>
 </pre></div>
@@ -211,7 +212,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../bailo.helper.html" class="btn btn-neutral float-left" title="bailo.helper package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="models_and_releases_demo.html" class="btn btn-neutral float-right" title="Managing Models &amp; Releases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="experiment_tracking_demo.html" class="btn btn-neutral float-right" title="Experiment Tracking with Bailo &amp; MLFlow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

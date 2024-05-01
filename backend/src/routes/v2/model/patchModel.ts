@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { ModelInterface, ModelVisibility } from '../../../models/Model.js'
+import { EntryKind, EntryVisibility, ModelInterface } from '../../../models/Model.js'
 import { updateModel } from '../../../services/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -12,11 +12,13 @@ import { parse } from '../../../utils/validate.js'
 export const patchModelSchema = z.object({
   body: z.object({
     name: z.string().optional().openapi({ example: 'Yolo v4' }),
+    kind: z.nativeEnum(EntryKind).optional().default(EntryKind.Model),
     description: z.string().optional().openapi({ example: 'You only look once' }),
-    visibility: z.nativeEnum(ModelVisibility).optional().openapi({ example: 'private' }),
+    visibility: z.nativeEnum(EntryVisibility).optional().openapi({ example: 'private' }),
     settings: z
       .object({
         ungovernedAccess: z.boolean().optional().default(false).openapi({ example: true }),
+        mirroredModelId: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),
       })
       .optional(),
     collaborators: z

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from bailo import Client, ModelVisibility, SchemaKind
+from bailo.core.enums import EntryKind
 
 mock_result = {"success": True}
 
@@ -13,6 +14,7 @@ def test_post_model(requests_mock):
     client = Client("https://example.com")
     result = client.post_model(
         name="test",
+        kind=EntryKind.MODEL,
         description="test",
         visibility=ModelVisibility.PUBLIC,
         team_id="uncategorised",

@@ -28,7 +28,7 @@ exports[`routes > accessRequest > patchAccessRequest > 400 > no name 1`] = `
       ],
     },
     "message": "Path: body.metadata.overview.name - Message: Required",
-    "name": "Error",
+    "name": "Bailo Error",
   },
 }
 `;

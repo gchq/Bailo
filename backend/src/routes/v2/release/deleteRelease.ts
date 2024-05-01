@@ -27,7 +27,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            message: z.string().openapi({ example: 'Succesfully removed release' }),
+            message: z.string().openapi({ example: 'Successfully removed release' }),
           }),
         },
       },

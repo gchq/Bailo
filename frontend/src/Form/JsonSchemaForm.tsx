@@ -18,12 +18,10 @@ import Form from '@rjsf/mui'
 import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useState } from 'react'
-
-import { SplitSchemaNoRender } from '../../types/types'
-import { setStepState } from '../../utils/formUtils'
-import { widgets } from '../../utils/formUtils'
-import ValidationErrorIcon from '../model/common/ValidationErrorIcon'
-import Nothing from '../MuiForms/Nothing'
+import ValidationErrorIcon from 'src/entry/model/common/ValidationErrorIcon'
+import Nothing from 'src/MuiForms/Nothing'
+import { SplitSchemaNoRender } from 'types/types'
+import { setStepState, widgets } from 'utils/formUtils'
 
 function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   return (
@@ -120,7 +118,7 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Grid container spacing={2} sx={{ mt: theme.spacing(1) }}>
+    <Grid container spacing={2} sx={{ mt: 1 }}>
       <Grid item xs={12} sm={3} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>

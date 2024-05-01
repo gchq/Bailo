@@ -142,7 +142,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnami/mongodb
-    tag: 6.0.5-debian-11-r9
+    tag: 7.0.8-debian-12-r2
 
 # MinIO Dependencies
 minio:
@@ -174,7 +174,7 @@ minio:
   image:
     registry: docker.io
     repository: bitnami/minio
-    tag: 2022.2.12-debian-10-r0
+    tag: 2024.4.18-debian-12-r0
     debug: true
 
 # Registry Dependencies
@@ -222,6 +222,7 @@ config:
       enabled: false
       text: "BAILO"
       colour: "#047a06"
+      textColor: "black"
 
   smtp:
     #host: 'mail' #service name
@@ -239,17 +240,6 @@ config:
     protocol: "https"
     port: 443
 
-# logging https://github.com/gchq/stroom
-stroom:
-  enabled: false
-  url: "http://localhost:8090/stroom/datafeed"
-  folder: "./logs/stroom"
-  system: "bailo"
-  feed: "bailo"
-  environment: "Development"
-  insecure: true
-  interval: 300000
-
 # nginx.deployment registry.deployment
 nginxcert:
   cert: cert.pem #use san.cnf to create certs
@@ -261,6 +251,9 @@ connectors:
 
   authorisation:
     kind: 'basic'
+
+  audit:
+    kind: 'silly'
 
 instrumentation:
   enabled: false

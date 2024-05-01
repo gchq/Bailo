@@ -26,7 +26,7 @@ exports[`routes > model > postModel > 400 > no description 1`] = `
       ],
     },
     "message": "Path: body.description - Message: Required",
-    "name": "Error",
+    "name": "Bailo Error",
   },
 }
 `;

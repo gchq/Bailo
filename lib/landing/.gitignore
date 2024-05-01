@@ -39,6 +39,7 @@ yarn-error.log*
 src/Copyright.tsx
 src/Link.tsx
 src/docs
+src/common/Title.tsx
 
 pages/docs
 public

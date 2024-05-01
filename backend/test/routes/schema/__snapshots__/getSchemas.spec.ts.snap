@@ -54,10 +54,11 @@ exports[`routes > schema > getSchemas > rejects unknown query parameter 1`] = `
       "errors": [
         {
           "code": "invalid_enum_value",
-          "message": "Invalid enum value. Expected 'model' | 'accessRequest', received 'notValid'",
+          "message": "Invalid enum value. Expected 'model' | 'accessRequest' | 'dataCard', received 'notValid'",
           "options": [
             "model",
             "accessRequest",
+            "dataCard",
           ],
           "path": [
             "query",
@@ -67,8 +68,8 @@ exports[`routes > schema > getSchemas > rejects unknown query parameter 1`] = `
         },
       ],
     },
-    "message": "Path: query.kind - Message: Invalid enum value. Expected 'model' | 'accessRequest', received 'notValid'",
-    "name": "Error",
+    "message": "Path: query.kind - Message: Invalid enum value. Expected 'model' | 'accessRequest' | 'dataCard', received 'notValid'",
+    "name": "Bailo Error",
   },
 }
 `;

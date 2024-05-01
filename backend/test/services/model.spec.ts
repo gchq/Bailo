@@ -122,28 +122,28 @@ describe('services > model', () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, [], [], '', undefined)
+    await searchModels(user, 'model', [], [], '', undefined)
   })
 
   test('searchModels > all filters', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, ['library'], ['mine'], 'search', 'task')
+    await searchModels(user, 'model', ['library'], ['mine'], 'search', 'task')
   })
 
   test('searchModels > task no library', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, [], [], '', 'task')
+    await searchModels(user, 'model', [], [], '', 'task')
   })
 
   test('searchModels > bad filter', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    expect(() => searchModels(user, [], ['asdf' as any], '')).rejects.toThrowError()
+    expect(() => searchModels(user, 'model', [], ['asdf' as any], '')).rejects.toThrowError()
   })
 
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {

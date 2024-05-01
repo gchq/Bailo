@@ -42,17 +42,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Create the name of the service account to use
-*/}}
-{{- define "bailo.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "bailo.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
 Mongo host defination
 */}}
 {{- define "bailo.mongo.host" -}}
@@ -69,7 +58,7 @@ Mongo host defination
 Create the mongo connection URI
 */}}
 {{- define "bailo.mongoConnectionURI" -}}
-mongodb://{{ index .Values.mongodb.auth.usernames 0 }}:${MONGO_PASSWORD}@{{ include "bailo.mongo.host" . }}
+mongodb://{{ include "bailo.mongo.host" . }}
 {{- end }}
 
 {{/*

@@ -3,7 +3,7 @@ import { UserInformation } from 'src/common/UserDisplay'
 import useSWR from 'swr'
 import {
   EntityObject,
-  ModelInterface,
+  EntryInterface,
   TokenActionsKeys,
   TokenInterface,
   TokenScopeKeys,
@@ -84,7 +84,7 @@ export function useGetUserTokens() {
 export function postUserToken(
   description: string,
   scope: TokenScopeKeys,
-  modelIds: ModelInterface['id'][],
+  modelIds: EntryInterface['id'][],
   actions: TokenActionsKeys[],
 ) {
   return fetch('/api/v2/user/tokens', {

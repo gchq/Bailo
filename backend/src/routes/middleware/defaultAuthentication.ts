@@ -27,5 +27,8 @@ export function checkAuthentication(req, res, next) {
   if (!req.user) {
     throw Unauthorized('No valid authentication provided.')
   }
+  req.log.debug('User successfully authorized.', {
+    user: req.user,
+  })
   return next()
 }

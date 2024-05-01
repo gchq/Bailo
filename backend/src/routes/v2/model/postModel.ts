@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { ModelInterface, ModelVisibility } from '../../../models/Model.js'
+import { EntryKind, EntryVisibility, ModelInterface } from '../../../models/Model.js'
 import { createModel } from '../../../services/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -12,9 +12,10 @@ import { parse } from '../../../utils/validate.js'
 export const postModelSchema = z.object({
   body: z.object({
     name: z.string(),
+    kind: z.nativeEnum(EntryKind),
     teamId: z.string(),
     description: z.string(),
-    visibility: z.nativeEnum(ModelVisibility).optional().default(ModelVisibility.Public),
+    visibility: z.nativeEnum(EntryVisibility).optional().default(EntryVisibility.Public),
     settings: z
       .object({
         ungovernedAccess: z.boolean().optional().default(false).openapi({ example: true }),

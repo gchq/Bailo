@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic'
 import { ReactNode, useState } from 'react'
 
 // The MD Editor library uses custom CSS property names which do not correspond to standard CSS naming
-interface MDEdtiorStyling {
+interface MDEditorStyling {
   [Key: string]: string
 }
 
@@ -48,7 +48,7 @@ export default function RichTextEditor({
     ...textareaProps,
   }
 
-  const styling: MDEdtiorStyling = {
+  const styling: MDEditorStyling = {
     '--color-border-default': errors && errors.length > 0 ? theme.palette.error.main : '',
   }
 

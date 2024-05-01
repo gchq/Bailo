@@ -14,10 +14,11 @@ import { styled, useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Fragment, ReactElement, ReactNode, useCallback, useMemo } from 'react'
-import Copyright from 'src/Copyright'
-import Wrapper from 'src/Wrapper'
+import React from 'react'
 
 import { directory, DirectoryTree, flatDirectory } from '../../pages/docs/directory'
+import Title from '../common/Title'
+import Copyright from '../Copyright'
 
 type DocsWrapperProps = {
   children?: ReactNode
@@ -108,7 +109,8 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   }
 
   return (
-    <Wrapper title='Documentation' page='docs'>
+    <>
+      <Title text='Documentation' />
       {/* Banner height + Toolbar height = 96px */}
       <Box display='flex' width='100%' height='calc(100vh - 96px)'>
         <Box
@@ -178,6 +180,6 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
           </Box>
         </Box>
       </Box>
-    </Wrapper>
+    </>
   )
 }

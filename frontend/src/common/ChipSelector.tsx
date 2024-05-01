@@ -1,48 +1,53 @@
+import { Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
 import { ReactElement, useState } from 'react'
 
-type PartialTagSelectorProps =
+type PartialChipSelectorProps =
   | {
       multiple: true
-      tags: string[]
-      selectedTags: string[]
+      options: string[]
+      selectedChips: string[]
       onChange: (value: string[]) => void
     }
   | {
       multiple?: false
-      tags: string[]
-      selectedTags: string
+      options: string[]
+      selectedChips: string
       onChange: (value: string) => void
     }
 
-type TagSelectorProps = {
-  label: string
+type ChipSelectorProps = {
+  label?: string
   size?: 'small' | 'medium'
   expandThreshold?: number
-} & PartialTagSelectorProps
+  chipTooltipTitle?: string
+  ariaLabel?: string
+} & PartialChipSelectorProps
 
 export default function ChipSelector({
   label,
-  tags,
+  options,
   onChange,
-  selectedTags,
+  selectedChips,
   multiple,
   size = 'medium',
   expandThreshold = 5,
-}: TagSelectorProps): ReactElement {
+  chipTooltipTitle = '',
+  ariaLabel = '',
+}: ChipSelectorProps): ReactElement {
   const [expanded, setExpanded] = useState(false)
 
-  const handleChange = (selectedTag: string): void => {
+  const handleChange = (selectedChip: string): void => {
     if (multiple) {
-      if (selectedTags.includes(selectedTag)) {
-        onChange(selectedTags.filter((tag) => tag !== selectedTag))
+      if (selectedChips.includes(selectedChip)) {
+        onChange(selectedChips.filter((chipFilter) => chipFilter !== selectedChip))
       } else {
-        onChange([...selectedTags, selectedTag])
+        onChange([...selectedChips, selectedChip])
       }
     } else {
-      onChange(selectedTags !== selectedTag ? selectedTag : '')
+      onChange(selectedChips !== selectedChip ? selectedChip : '')
     }
   }
 
@@ -50,42 +55,52 @@ export default function ChipSelector({
     setExpanded(!expanded)
   }
 
-  const allTags = tags.map((tag) => (
-    <Tag key={tag} tag={tag} size={size} activeChip={selectedTags.includes(tag)} handleChange={handleChange} />
+  const allOptions = options.map((option) => (
+    <ChipItem
+      key={option}
+      chip={option}
+      size={size}
+      activeChip={selectedChips.includes(option)}
+      handleChange={handleChange}
+      chipTooltipTitle={chipTooltipTitle}
+      ariaLabel={ariaLabel}
+    />
   ))
-
-  function displaySelectedTagCount(): string {
-    return multiple && selectedTags.length > 0 ? `(${selectedTags.length} selected)` : ''
-  }
 
   return (
     <>
-      <Typography component='h2' variant='h6'>{`${label} ${displaySelectedTagCount()}`}</Typography>
-      {!expanded && allTags.slice(0, expandThreshold)}
-      {expanded && allTags}
-      {tags.length > expandThreshold && (
+      {label && <Typography component='h2' variant='h6'>{`${label}`}</Typography>}
+      {!expanded && allOptions.slice(0, expandThreshold)}
+      {expanded && allOptions}
+      {options.length > expandThreshold && (
         <Button onClick={toggleExpansion}>{expanded ? 'Show less' : 'Show more...'}</Button>
       )}
     </>
   )
 }
 
-type TagProps = {
-  tag: string
+type ChipItemProps = {
+  chip: string
   handleChange: (value: string) => void
-  size?: TagSelectorProps['size']
+  size?: ChipSelectorProps['size']
   activeChip: boolean
+  chipTooltipTitle?: string
+  ariaLabel?: string
 }
 
-function Tag({ tag, handleChange, size, activeChip }: TagProps) {
+function ChipItem({ chip, handleChange, size, activeChip, chipTooltipTitle = '', ariaLabel = '' }: ChipItemProps) {
   return (
-    <Chip
-      color={activeChip ? 'primary' : 'default'}
-      size={size}
-      key={tag}
-      sx={{ mr: 1, mb: 1 }}
-      label={tag}
-      onClick={() => handleChange(tag)}
-    />
+    <Tooltip title={chipTooltipTitle}>
+      <Chip
+        color={activeChip ? 'secondary' : 'default'}
+        size={size}
+        key={chip}
+        sx={{ mr: 1, mb: 1 }}
+        label={chip}
+        data-test={`chipOption-${chip}`}
+        onClick={() => handleChange(chip)}
+        aria-label={ariaLabel}
+      />
+    </Tooltip>
   )
 }

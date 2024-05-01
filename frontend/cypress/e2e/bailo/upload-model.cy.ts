@@ -1,24 +1,24 @@
 import getUuidFromUrl from '../../utils/getUuidFromUrl'
 
-const newModelUrl = '/model/new'
+const newModelUrl = '/entry/new'
 
 let modelUuid = ''
 const schemaId = 'minimal-general-v10'
 
 describe('Beta create new model', () => {
   it('loads the Create a new model Page', () => {
-    cy.visit(newModelUrl)
-    cy.contains('Create a new Model')
+    cy.visit(newModelUrl, { qs: { kind: 'model' } })
+    cy.contains('Create Model')
   })
 
   it('creates a public new model', () => {
-    cy.visit(newModelUrl)
+    cy.visit(newModelUrl, { qs: { kind: 'model' } })
 
-    cy.get('[data-test=modelNameInput]').type('test model')
-    cy.get('[data-test=modelDescriptionInput]').type('test description')
+    cy.get('[data-test=entryNameInput]').type('test model')
+    cy.get('[data-test=entryDescriptionInput]').type('test description')
 
     cy.get('[data-test=publicButtonSelector]').click()
-    cy.get('[data-test=createModelButton]').click()
+    cy.get('[data-test=createEntryButton]').click()
     cy.get('[data-test=createModelCardOverview]')
 
     cy.log('Checking URL has been updated')
@@ -32,14 +32,14 @@ describe('Beta create new model', () => {
 
   it('creates a private new model', () => {
     cy.log('Navigating to the new model page')
-    cy.visit(newModelUrl)
+    cy.visit(newModelUrl, { qs: { kind: 'model' } })
 
     cy.log('Filling out the form to make a private model and submitting')
-    cy.get('[data-test=modelNameInput]').type('test model')
-    cy.get('[data-test=modelDescriptionInput]').type('test description')
+    cy.get('[data-test=entryNameInput]').type('test model')
+    cy.get('[data-test=entryDescriptionInput]').type('test description')
 
     cy.get('[data-test=privateButtonSelector]').click()
-    cy.get('[data-test=createModelButton]').click()
+    cy.get('[data-test=createEntryButton]').click()
     cy.get('[data-test=createModelCardOverview]')
   })
 

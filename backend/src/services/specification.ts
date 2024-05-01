@@ -75,6 +75,7 @@ export const modelInterfaceSchema = z.object({
   id: z.string().openapi({ example: 'yolo-v4-abcdef' }),
 
   name: z.string().openapi({ example: 'Yolo v4' }),
+  kind: z.string().openapi({ example: 'model' }),
   description: z.string().openapi({ example: 'You only look once' }),
   card: modelCardInterfaceSchema,
 

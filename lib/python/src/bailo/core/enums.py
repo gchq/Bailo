@@ -28,3 +28,10 @@ class Role(ValuedEnum):
     OWNER = "owner"
     MODEL_TECHNICAL_REVIEWER = "mtr"
     MODEL_SENIOR_RESPONSIBLE_OFFICER = "msro"
+
+
+class EntryKind(ValuedEnum):
+    """The type of model."""
+
+    MODEL = "model"
+    DATACARD = "data-card"

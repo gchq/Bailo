@@ -37,7 +37,12 @@ describe('middleware > defaultAuthentication', () => {
   })
 
   test('checkAuthentication > valid authentication', async () => {
-    const request = { user: 'test' } as Request
+    const request = {
+      user: 'test',
+      log: {
+        debug: vi.fn(),
+      },
+    } as Request
     const next = vi.fn()
 
     checkAuthentication(request, {} as Response, next)

@@ -42,6 +42,13 @@ export function postAccessRequest(modelId: string, schemaId: string, form: Recor
   })
 }
 
+export function deleteAccessRequest(modelId: string, accessRequestId: string) {
+  return fetch(`/api/v2/model/${modelId}/access-request/${accessRequestId}`, {
+    method: 'delete',
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
 export function patchAccessRequest(modelId: string, accessRequestId: string, form: Record<string, unknown>) {
   return fetch(`/api/v2/model/${modelId}/access-request/${accessRequestId}`, {
     method: 'PATCH',

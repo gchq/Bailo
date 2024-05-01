@@ -1,18 +1,15 @@
-import React, { MouseEvent, ReactElement, ReactNode, useContext, useEffect, useMemo } from 'react'
+import React, { ReactElement, ReactNode, useMemo } from 'react'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
-import Container from '@mui/material/Container'
+import GitHubIcon from '@mui/icons-material/GitHub'
 import CssBaseline from '@mui/material/CssBaseline'
-import MuiDrawer from '@mui/material/Drawer'
-import List from '@mui/material/List'
 import { styled, ThemeProvider, useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
-import Typography from '@mui/material/Typography'
 import Head from 'next/head'
 import Image from 'next/legacy/image'
 import Link from './Link'
-import Copyright from './Copyright'
 import imageLoader from './imageLoader'
+import { Button, IconButton, Tooltip } from '@mui/material'
 
 const drawerWidth = 240
 
@@ -38,32 +35,6 @@ const AppBar = styled(MuiAppBar, {
   }),
 }))
 
-const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
-  '& .MuiDrawer-paper': {
-    position: 'relative',
-    whiteSpace: 'nowrap',
-    width: drawerWidth,
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    boxSizing: 'border-box',
-    ...(!open && {
-      overflowX: 'hidden',
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9),
-      },
-    }),
-  },
-}))
-
 type WrapperProps = {
   title: string
   page: string
@@ -75,40 +46,14 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
 
   const theme = useTheme()
 
-  const headerTitle =
-    typeof title === 'string' ? (
-      <Typography
-        noWrap
-        component='h1'
-        variant='h6'
-        color='inherit'
-        data-test='headerTitle'
-        sx={{ mr: '55px', flexGrow: 1 }}
-      >
-        {title}
-      </Typography>
-    ) : (
-      title
-    )
-
-  const StyledList = styled(List)({
-    paddingTop: 0,
-    paddingBottom: 0,
-    '&& .Mui-selected, && .Mui-selected:hover': {
-      '&, & .MuiListItemIcon-root': {
-        color: theme.palette.secondary.main,
-      },
-    },
-  })
-
   return (
     <ThemeProvider theme={theme}>
       <Head>
-        <title>{`${title} :: Bailo`}</title>
+        <title>{`${title} · Bailo`}</title>
       </Head>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <AppBar position='absolute' data-test='appBar' sx={{ top: 'unset' }}>
+        <AppBar position='absolute' data-test='appBar' sx={{ top: 'unset', boxShadow: 'none' }}>
           <Toolbar
             sx={{
               pr: '24px', // keep right padding when drawer closed
@@ -126,7 +71,12 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
                 />
               </Link>
             </Box>
-            Documentation
+            <Button href='/docs/' sx={{ color: 'white' }}>
+              Documentation
+            </Button>
+            <Button href='https://github.com/gchq/bailo' sx={{ color: 'white' }}>
+              Github
+            </Button>
           </Toolbar>
         </AppBar>
         <Box
@@ -139,18 +89,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
           }}
         >
           <Toolbar />
-          <Box>
-            {isDocsPage ? (
-              children
-            ) : (
-              <>
-                <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
-                  {children}
-                </Container>
-                <Copyright sx={{ mb: 2 }} />
-              </>
-            )}
-          </Box>
+          <Box>{isDocsPage ? children : <>{children}</>}</Box>
         </Box>
       </Box>
     </ThemeProvider>

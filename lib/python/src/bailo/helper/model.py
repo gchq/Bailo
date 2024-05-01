@@ -1,12 +1,23 @@
 from __future__ import annotations
 
+import os
+import shutil
+import tempfile
 from typing import Any
 
 from bailo.core.client import Client
-from bailo.core.enums import ModelVisibility
-from bailo.helper.release import Release
+from bailo.core.enums import EntryKind, ModelVisibility
 from bailo.core.exceptions import BailoException
+from bailo.core.utils import NestedDict
+from bailo.helper.release import Release
 from semantic_version import Version
+
+try:
+    import mlflow
+
+    ml_flow = True
+except ImportError:
+    ml_flow = False
 
 
 class Model:
@@ -15,6 +26,7 @@ class Model:
     :param client: A client object used to interact with Bailo
     :param model_id: A unique ID for the model
     :param name: Name of model
+    :param kind: Either a Model or a Datacard
     :param description: Description of model
     :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
@@ -24,6 +36,7 @@ class Model:
         client: Client,
         model_id: str,
         name: str,
+        kind: EntryKind,
         description: str,
         visibility: ModelVisibility | None = None,
     ) -> None:
@@ -31,6 +44,7 @@ class Model:
 
         self.model_id = model_id
         self.name = name
+        self.kind = kind
         self.description = description
         self.visibility = visibility
 
@@ -43,6 +57,7 @@ class Model:
         cls,
         client: Client,
         name: str,
+        kind: EntryKind,
         description: str,
         team_id: str,
         visibility: ModelVisibility | None = None,
@@ -51,16 +66,18 @@ class Model:
 
         :param client: A client object used to interact with Bailo
         :param name: Name of model
+        :param kind: Either a Model or a Datacard
         :param description: Description of model
         :param team_id: A unique team ID
         :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
-        res = client.post_model(name=name, description=description, team_id=team_id, visibility=visibility)
+        res = client.post_model(name=name, kind=kind, description=description, team_id=team_id, visibility=visibility)
         model = cls(
             client=client,
             model_id=res["model"]["id"],
             name=name,
+            kind=kind,
             description=description,
             visibility=visibility,
         )
@@ -81,6 +98,7 @@ class Model:
         model = cls(
             client=client,
             model_id=model_id,
+            kind=res["kind"],
             name=res["name"],
             description=res["description"],
         )
@@ -95,6 +113,7 @@ class Model:
         res = self.client.patch_model(
             model_id=self.model_id,
             name=self.name,
+            kind=self.kind,
             description=self.description,
             visibility=self.visibility,
         )
@@ -149,6 +168,11 @@ class Model:
         """
         res = self.client.get_model_card(model_id=self.model_id, version=version)
         self.__unpack_mc(res["modelCard"])
+
+    def create_experiment(
+        self,
+    ) -> Experiment:
+        return Experiment.create(model=self)
 
     def create_release(
         self,
@@ -209,7 +233,10 @@ class Model:
 
         :return: Release object
         """
-        return max(self.get_releases())
+        releases = self.get_releases()
+        if releases == []:
+            raise BailoException("This model has no releases.")
+        return max(releases)
 
     def get_images(self):
         """Get all model image references for the model.
@@ -263,3 +290,187 @@ class Model:
             self.model_card = res["metadata"]
         except KeyError:
             self.model_card = None
+
+
+class Experiment:
+    """Represent an experiment locally.
+
+    :param model: A Bailo model object which the experiment is being run on
+    :param raw: Raw information about the experiment runs
+
+    .. code-block:: python
+
+       experiment = model.create_experiment()
+       for x in range(5):
+           experiment.start_run()
+           experiment.log_params({"lr": 0.01})
+           ### INSERT MODEL TRAINING HERE ###
+           experiment.log_metrics("accuracy": 0.86)
+           experiment.log_artifacts(["weights.pth"])
+
+       experiment.publish(mc_loc="performance.performanceMetrics", run_id=1)
+
+    """
+
+    def __init__(
+        self,
+        model: Model,
+    ):
+        self.model = model
+        self.raw = []
+        self.run = -1
+        self.temp_dir = os.path.join(tempfile.gettempdir(), "bailo_runs")
+
+    @classmethod
+    def create(
+        cls,
+        model: Model,
+    ) -> Experiment:
+        """Create an experiment locally.
+
+        :param model: A Bailo model object which the experiment is being run on
+        :return: Experiment object
+        """
+
+        return cls(model=model)
+
+    def start_run(self, is_mlflow: bool = False):
+        """Starts a new experiment run.
+
+        :param is_mlflow: Marks a run as MLFlow
+        """
+        self.run += 1
+
+        self.run_data = {"run": self.run, "params": [], "metrics": [], "artifacts": [], "dataset": ""}
+
+        self.raw.append(self.run_data)
+
+        if not is_mlflow:
+            print(f"Bailo tracking run {self.run}.")
+
+    def log_params(self, params: dict[str, Any]):
+        """Logs parameters to the current run.
+
+        :param params: Dictionary of parameters to be logged
+        """
+        self.run_data["params"].append(params)
+
+    def log_metrics(self, metrics: dict[str, Any]):
+        """Logs metrics to the current run.
+
+        :param metrics: Dictionary of metrics to be logged
+        """
+        self.run_data["metrics"].append(metrics)
+
+    def log_artifacts(self, artifacts: list):
+        """Logs artifacts to the current run.
+
+        :param artifacts: A list of artifact paths to be logged
+        """
+        self.run_data["artifacts"].extend(artifacts)
+
+    def log_dataset(self, dataset: str):
+        """Logs a dataset to the current run.
+
+        :param dataset: Arbitrary title of dataset
+        """
+        self.run_data["dataset"] = dataset
+
+    def from_mlflow(self, tracking_uri: str, experiment_id: str):
+        """Imports information from an MLFlow Tracking experiment.
+
+        :param tracking_uri: MLFlow Tracking server URI
+        :param experiment_id: MLFlow Tracking experiment ID
+        :raises ImportError: Import error if MLFlow not installed
+        """
+        if ml_flow:
+            client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
+            runs = client.search_runs(experiment_id)
+
+            for run in runs:
+                data = run.data
+                info = run.info
+                inputs = run.inputs
+
+                artifact_uri = info.artifact_uri
+                run_id = info.run_id
+                status = info.status
+                datasets = inputs.dataset_inputs
+                datasets_str = [dataset.name for dataset in datasets]
+
+                artifacts = []
+
+                # MLFlow run must be status FINISHED
+                if status != "FINISHED":
+                    continue
+
+                if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)) > 0:
+                    mlflow_dir = os.path.join(self.temp_dir, f"mlflow_{run_id}")
+                    mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
+                    artifacts.append(mlflow_dir)
+
+                self.start_run(is_mlflow=True)
+                self.log_params(data.params)
+                self.log_metrics(data.metrics)
+                self.log_artifacts(artifacts)
+                self.log_dataset("".join(datasets_str))
+                self.run_data["run"] = info.run_id
+        else:
+            raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
+
+    def publish(self, mc_loc: str, run_id: str, semver: str = "0.1.0", notes: str = ""):
+        """Publishes a given experiments results to the model card.
+
+        :param mc_loc: Location of metrics in the model card (e.g. performance.performanceMetrics)
+        :param run_id: Local experiment run ID to be selected
+        :param semver: Semantic version of release to create (if artifacts present), defaults to 0.1.0 or next
+        :param notes: Notes for release, defaults to ""
+
+        ..note:: mc_loc is dependent on the model card schema being used
+        """
+        mc = self.model.model_card
+        if mc is None:
+            raise BailoException("Model card needs to be populated before publishing an experiment.")
+
+        mc = NestedDict(mc)
+
+        if len(self.raw) > 0:
+            for run in self.raw:
+                if run["run"] == run_id:
+                    sel_run = run
+                    break
+            else:
+                raise NameError(f"Run {run_id} does not exist.")
+        else:
+            raise BailoException(f"This experiment has no runs to publish.")
+
+        values = []
+
+        for metric in sel_run["metrics"]:
+            for k, v in metric.items():
+                values.append({"name": k, "value": v})
+
+        # Updating the model card
+        parsed_values = [{"dataset": sel_run["dataset"], "datasetMetrics": values}]
+        mc[tuple(mc_loc.split("."))] = parsed_values
+        self.model.update_model_card(model_card=mc)
+
+        # Creating a release and uploading artifacts (if artifacts present)
+        artifacts = sel_run["artifacts"]
+        if len(artifacts) > 0:
+            # Create new release
+            try:
+                release_latest_version = self.model.get_latest_release().version
+                release_new_version = release_latest_version.next_minor()
+            except:
+                release_new_version = semver
+
+            run_id = sel_run["run"]
+            notes = f"{notes} (Run ID: {run_id})"
+            release_new = self.model.create_release(version=release_new_version, minor=True, notes=notes)
+
+            for artifact in artifacts:
+                release_new.upload(path=artifact)
+
+            if os.path.exists(self.temp_dir) and os.path.isdir(self.temp_dir):
+                shutil.rmtree(self.temp_dir)

@@ -5,9 +5,9 @@ import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
-import Wrapper from 'src/Wrapper'
 import { SplitSchemaNoRender } from 'types/types'
 import { getStepsFromSchema } from 'utils/formUtils'
 
@@ -38,7 +38,8 @@ export default function ViewModelCardVersion() {
   if (error) return error
 
   return (
-    <Wrapper title='Model Card Revision' page='Model'>
+    <>
+      <Title text='Model Card Revision' />
       {(isSchemaLoading || isModelLoading) && <Loading />}
       <Box sx={{ px: 4, py: 1 }}>
         {!isSchemaLoading && (
@@ -52,6 +53,6 @@ export default function ViewModelCardVersion() {
           </Container>
         )}
       </Box>
-    </Wrapper>
+    </>
   )
 }
