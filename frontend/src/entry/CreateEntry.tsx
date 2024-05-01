@@ -45,7 +45,7 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
     setErrorMessage('')
 
     const formData: EntryForm = {
-      name: name,
+      name,
       teamId: team?.id ?? 'Uncategorised',
       kind,
       description,
