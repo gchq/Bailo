@@ -26,7 +26,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import ModelSearchField from 'src/wrapper/ModelSearchField'
+import EntrySearch from 'src/wrapper/EntrySearch'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
 import { User } from '../../types/types'
@@ -123,7 +123,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                     <ListItemIcon>
                       <Add fontSize='small' />
                     </ListItemIcon>
-                    <ListItemText>Create data card/model</ListItemText>
+                    <ListItemText>Create</ListItemText>
                   </MenuItem>
                 </Link>
                 <Divider />
@@ -162,13 +162,13 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
             <Box>
               <Stack direction='row' spacing={1} justifyContent='center' alignItems='center'>
                 <ExpandableButton
-                  label='Create Data Card/Model'
+                  label='Create'
                   icon={<Add />}
                   onClick={handleCreateEntryClick}
                   ariaLabel='Create a new data card or model'
                   height='40px'
                 />
-                <ModelSearchField />
+                <EntrySearch />
                 {currentUser ? (
                   <>
                     <Button

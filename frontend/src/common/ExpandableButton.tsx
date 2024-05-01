@@ -31,6 +31,11 @@ export default function ExpandableButton({
     overflow: 'hidden',
     color: theme.palette.common.white,
     borderStyle: 'none',
+    // This is to align button padding with FireFox and Chrome
+    paddingLeft: '6px',
+    paddingRight: '6px',
+    paddingTop: '1px',
+    paddingBottom: '1px',
     borderRadius: 3,
     cursor: 'pointer',
     height: height,
