@@ -39,6 +39,7 @@ registerPath({
                 name: z.string().openapi({ example: 'Yolo v4' }),
                 description: z.string().openapi({ example: 'You only look once' }),
                 tags: z.array(z.string()).openapi({ example: ['tag', 'ml'] }),
+                kind: z.string().openapi({ example: EntryKind.Model }),
               }),
             ),
           }),
