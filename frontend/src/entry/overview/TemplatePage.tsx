@@ -55,7 +55,6 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
             </Card>
           )}
           <Card
-            variant='outlined'
             sx={{
               width: '300px',
               p: 2,

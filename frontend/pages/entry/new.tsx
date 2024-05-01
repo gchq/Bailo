@@ -29,7 +29,6 @@ export default function NewEntry() {
                 divider={<Divider orientation='vertical' flexItem />}
               >
                 <Card
-                  variant='outlined'
                   sx={{
                     width: '300px',
                     p: 2,
