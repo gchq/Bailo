@@ -226,8 +226,7 @@ class Release:
                 path = f"{name}.zip"
                 name = path
 
-            with open(path, "rb") as f:
-                data = BytesIO(f.read())
+            data = open(path, "rb")
 
             if is_zip:
                 os.remove(path)
