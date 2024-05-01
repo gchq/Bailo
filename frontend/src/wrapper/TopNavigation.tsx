@@ -123,7 +123,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                     <ListItemIcon>
                       <Add fontSize='small' />
                     </ListItemIcon>
-                    <ListItemText>Create data card/model</ListItemText>
+                    <ListItemText>Create</ListItemText>
                   </MenuItem>
                 </Link>
                 <Divider />
@@ -162,7 +162,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
             <Box>
               <Stack direction='row' spacing={1} justifyContent='center' alignItems='center'>
                 <ExpandableButton
-                  label='Create Data Card/Model'
+                  label='Create'
                   icon={<Add />}
                   onClick={handleCreateEntryClick}
                   ariaLabel='Create a new data card or model'
