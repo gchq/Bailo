@@ -1,6 +1,17 @@
-import { FileUpload, Lock, LockOpen } from '@mui/icons-material'
+import { ArrowBack, FileUpload, Lock, LockOpen } from '@mui/icons-material'
 import LoadingButton from '@mui/lab/LoadingButton'
-import { Box, Card, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Card,
+  Divider,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { postModel } from 'actions/model'
 import { useRouter } from 'next/router'
 import { FormEvent, useMemo, useState } from 'react'
@@ -14,9 +25,10 @@ import { toTitleCase } from 'utils/stringUtils'
 
 type CreateEntryProps = {
   kind: EntryKindKeys
+  onBackClick: () => void
 }
 
-export default function CreateEntry({ kind }: CreateEntryProps) {
+export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
   const router = useRouter()
   const [team, setTeam] = useState<TeamInterface | undefined>()
   const [name, setName] = useState('')
@@ -79,15 +91,20 @@ export default function CreateEntry({ kind }: CreateEntryProps) {
   }
 
   return (
-    <Card sx={{ p: 4, m: 'auto' }}>
-      <Stack spacing={2} alignItems='center' justifyContent='center'>
-        <Typography variant='h6' component='h1' color='primary'>
-          {`Create ${toTitleCase(kind)}`}
-        </Typography>
-        <FileUpload color='primary' fontSize='large' />
-        {kind === EntryKind.MODEL && (
-          <Typography>A model repository contains all files, history and information related to a model.</Typography>
-        )}
+    <Card sx={{ p: 4, mb: 4 }}>
+      <Stack spacing={1}>
+        <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />} onClick={() => onBackClick()}>
+          Back
+        </Button>
+        <Stack spacing={2} alignItems='center' justifyContent='center'>
+          <Typography variant='h6' component='h1' color='primary'>
+            {`Create ${toTitleCase(kind)}`}
+          </Typography>
+          <FileUpload color='primary' fontSize='large' />
+          {kind === EntryKind.MODEL && (
+            <Typography>A model repository contains all files, history and information related to a model.</Typography>
+          )}
+        </Stack>
       </Stack>
       <Box component='form' sx={{ mt: 4 }} onSubmit={handleSubmit}>
         <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
