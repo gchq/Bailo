@@ -6,7 +6,7 @@ Bailo is a ecosystem for managing the lifecycle of managing machine learning mod
 """
 from __future__ import annotations
 
-# Package version
+
 __version__ = "2.2.0"
 
 
