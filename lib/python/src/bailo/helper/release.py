@@ -249,6 +249,7 @@ class Release:
 
         self.files.append(res["file"]["id"])
         self.update()
+        data.close()
         return res["file"]["id"]
 
     def update(self) -> Any:
