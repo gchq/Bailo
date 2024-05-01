@@ -14,8 +14,8 @@
           "minLength": 1,
           "maxLength": 5000
         },
-        "dataCards": {
-          "title": "Are there any data cards related to this model?",
+        "datasets": {
+          "title": "Are there any datasets related to this model?",
           "type": "array",
           "widget": "dataCardSelector",
           "items": {
