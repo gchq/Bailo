@@ -100,7 +100,7 @@ export default function AccessRequestReview() {
             <Divider />
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>
               <Typography variant='caption'>
-                Created by {<UserDisplay onUserInformationError={setErrorMessage} dn={accessRequest.createdBy} />} on
+                Created by {<UserDisplay dn={accessRequest.createdBy} />} on
                 <Typography variant='caption' fontWeight='bold'>
                   {` ${formatDateString(accessRequest.createdAt)} `}
                 </Typography>

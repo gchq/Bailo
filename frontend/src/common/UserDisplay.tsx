@@ -1,28 +1,26 @@
 import { Label } from '@mui/icons-material'
+import ContentCopy from '@mui/icons-material/ContentCopy'
 import EmailIcon from '@mui/icons-material/Email'
 import UserIcon from '@mui/icons-material/Person'
-import { Box, Divider, Popover, Stack, Typography } from '@mui/material'
+import { Box, Divider, IconButton, Popover, Stack, Typography } from '@mui/material'
 import { useGetUserInformation } from 'actions/user'
 import { MouseEvent, useMemo, useRef, useState } from 'react'
-import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
+import MessageAlert from 'src/MessageAlert'
 
-export type UserInformation = {
+export interface UserInformation {
   name?: string
+  organisation?: string
   email?: string
-} & AdditionalProperties
-
-interface AdditionalProperties {
-  [x: string]: string
 }
 
 export type UserDisplayProps = {
   dn: string
-  onUserInformationError?: (value: string) => void
+  setRoleError?: (value: boolean) => void
   hidePopover?: boolean
 }
 
-export default function UserDisplay({ dn, onUserInformationError, hidePopover = false }: UserDisplayProps) {
+export default function UserDisplay({ dn, setRoleError, hidePopover = false }: UserDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = useMemo(() => !!anchorEl, [anchorEl])
   const ref = useRef<HTMLDivElement>(null)
@@ -30,6 +28,12 @@ export default function UserDisplay({ dn, onUserInformationError, hidePopover = 
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     dn.includes(':') ? dn.split(':')[1] : dn,
   )
+
+  function handleCopyButtonClick() {
+    if (userInformation && userInformation.email) {
+      navigator.clipboard.writeText(userInformation.email)
+    }
+  }
 
   const popoverEnter = () => {
     if (ref.current) {
@@ -41,11 +45,14 @@ export default function UserDisplay({ dn, onUserInformationError, hidePopover = 
     setAnchorEl(null)
   }
 
-  if (isUserInformationError && onUserInformationError) {
-    onUserInformationError(isUserInformationError.info.message)
+  if (isUserInformationError) {
+    if (setRoleError) {
+      setRoleError(true)
+    }
+    return <MessageAlert message={isUserInformationError.info.message} severity='error' />
   }
 
-  if (isUserInformationLoading) {
+  if (isUserInformationLoading || !userInformation) {
     return <Loading />
   }
 
@@ -54,14 +61,13 @@ export default function UserDisplay({ dn, onUserInformationError, hidePopover = 
       <Box
         component='span'
         ref={ref}
-        data-test='userDisplayName'
         aria-owns={open ? 'user-popover' : undefined}
         aria-haspopup='true'
         sx={{ fontWeight: 'bold' }}
         onMouseEnter={(e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
         onMouseLeave={() => setAnchorEl(null)}
       >
-        {userInformation ? userInformation.name : dn.charAt(0).toUpperCase() + dn.slice(1)}
+        {userInformation.name}
       </Box>
       {!hidePopover && (
         <Popover
@@ -86,47 +92,38 @@ export default function UserDisplay({ dn, onUserInformationError, hidePopover = 
           <Stack spacing={1} sx={{ p: 2 }}>
             <Stack direction='row' alignItems='center' spacing={1}>
               <UserIcon color='primary' />
-              <Typography color='primary' fontWeight='bold' data-test='userDisplayNameProperty'>
-                {userInformation ? userInformation.name : dn.charAt(0).toUpperCase() + dn.slice(1)}
+              <Typography color='primary' fontWeight='bold'>
+                {userInformation.name}
               </Typography>
             </Stack>
             <Divider />
-            {!userInformation && isUserInformationError && (
-              <Typography>{isUserInformationError.info.message}</Typography>
-            )}
-            {userInformation && (
-              <>
-                <Stack direction='row' spacing={1} alignItems='center'>
-                  <EmailIcon color='primary' />
-                  <Typography data-test='userDisplayEmailProperty'>
-                    <Box component='span' fontWeight='bold'>
-                      Email
-                    </Box>
-                    : {userInformation.email}
-                  </Typography>
-                  <CopyToClipboardButton
-                    textToCopy={userInformation.email ? userInformation.email : ''}
-                    notificationText='Copied email address to clipboard'
-                    ariaLabel='copy email address to clipboard'
-                  />
-                </Stack>
-                {Object.keys(userInformation).map((key) => {
-                  if (key !== 'name' && key !== 'email') {
-                    return (
-                      <Stack direction='row' spacing={1} key={key}>
-                        <Label color='primary' />
-                        <Typography data-test={`userDisplayDynamicProperty-${key}`}>
-                          <Box component='span' fontWeight='bold'>
-                            {key.charAt(0).toUpperCase() + key.slice(1)}
-                          </Box>
-                          : {userInformation[key]}
-                        </Typography>
-                      </Stack>
-                    )
-                  }
-                })}
-              </>
-            )}
+            <Stack direction='row' spacing={1} alignItems='center'>
+              <EmailIcon color='primary' />
+              <Typography>
+                <Box component='span' fontWeight='bold'>
+                  Email
+                </Box>
+                : {userInformation.email}
+              </Typography>
+              <IconButton onClick={() => handleCopyButtonClick()} aria-label='Copy text to clipboard' size='small'>
+                <ContentCopy color='primary' />
+              </IconButton>
+            </Stack>
+            {Object.keys(userInformation).map((key) => {
+              if (key !== 'name' && key !== 'email') {
+                return (
+                  <Stack direction='row' spacing={1} key={key}>
+                    <Label color='primary' />
+                    <Typography>
+                      <Box component='span' fontWeight='bold'>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </Box>
+                      : {userInformation[key]}
+                    </Typography>
+                  </Stack>
+                )
+              }
+            })}
           </Stack>
         </Popover>
       )}
