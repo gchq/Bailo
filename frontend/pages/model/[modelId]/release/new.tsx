@@ -2,16 +2,18 @@ import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Box, Button, Card, Container, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
-import { CreateReleaseParams, postFile, postRelease } from 'actions/release'
+import { CreateReleaseParams, postRelease, postSimpleFileForRelease } from 'actions/release'
+import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
+import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import ReleaseForm from 'src/model/releases/ReleaseForm'
-import Wrapper from 'src/Wrapper'
-import { FileInterface, FileWithMetadata, FlattenedModelImage, isFileInterface } from 'types/types'
+import { FileInterface, FileUploadProgress, FileWithMetadata, FlattenedModelImage, isFileInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver } from 'utils/stringUtils'
 
@@ -24,10 +26,16 @@ export default function NewRelease() {
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isRegistryError, setIsRegistryError] = useState(false)
+  const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const router = useRouter()
+  const sendNotification = useNotification()
 
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
+
+  const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -55,15 +63,32 @@ export default function NewRelease() {
       }
 
       const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
-      const postFileResponse = await postFile(file, model.id, file.name, file.type, metadata)
 
-      if (!postFileResponse.ok) {
-        setErrorMessage(await getErrorMessage(postFileResponse))
-        return setLoading(false)
+      const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
+        if (progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+        }
       }
 
-      const res = await postFileResponse.json()
-      fileIds.push(res.file._id)
+      try {
+        const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
+        setCurrentFileUploadProgress(undefined)
+        if (fileUploadResponse) {
+          setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
+          fileIds.push(fileUploadResponse.data.file._id)
+        } else {
+          setCurrentFileUploadProgress(undefined)
+          return setLoading(false)
+        }
+      } catch (e) {
+        if (e instanceof Error) {
+          sendNotification({
+            variant: 'error',
+            msg: e.message,
+          })
+        }
+      }
     }
 
     const release: CreateReleaseParams = {
@@ -83,6 +108,8 @@ export default function NewRelease() {
       setLoading(false)
     } else {
       const body = await response.json()
+      setUploadedFiles([])
+      setCurrentFileUploadProgress(undefined)
       router.push(`/model/${modelId}/release/${body.release.semver}`)
     }
   }
@@ -93,7 +120,8 @@ export default function NewRelease() {
   if (error) return error
 
   return (
-    <Wrapper fullWidth title='Draft New Release' page='Model'>
+    <>
+      <Title text='Draft New Release' />
       {isModelLoading && <Loading />}
       {model && !isModelLoading && (
         <Container maxWidth='md'>
@@ -131,13 +159,17 @@ export default function NewRelease() {
                   filesMetadata={filesMetadata}
                   onFilesMetadataChange={(value) => setFilesMetadata(value)}
                   onImageListChange={(value) => setImageList(value)}
+                  onRegistryError={handleRegistryError}
+                  currentFileUploadProgress={currentFileUploadProgress}
+                  uploadedFiles={uploadedFiles}
+                  filesToUploadCount={files.length}
                 />
                 <Stack alignItems='flex-end'>
                   <LoadingButton
                     variant='contained'
                     loading={loading}
                     type='submit'
-                    disabled={!semver || !releaseNotes || !isValidSemver(semver)}
+                    disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
                     sx={{ width: 'fit-content' }}
                     data-test='createReleaseButton'
                   >
@@ -150,6 +182,6 @@ export default function NewRelease() {
           </Card>
         </Container>
       )}
-    </Wrapper>
+    </>
   )
 }

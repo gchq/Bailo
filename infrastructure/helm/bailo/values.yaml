@@ -142,7 +142,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnami/mongodb
-    tag: 6.0.5-debian-11-r9
+    tag: 7.0.8-debian-12-r2
 
 # MinIO Dependencies
 minio:
@@ -174,7 +174,7 @@ minio:
   image:
     registry: docker.io
     repository: bitnami/minio
-    tag: 2022.2.12-debian-10-r0
+    tag: 2024.4.18-debian-12-r0
     debug: true
 
 # Registry Dependencies

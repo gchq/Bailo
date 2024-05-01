@@ -36,7 +36,7 @@ exports[`routes > review > postAccessRequestReviewResponse > missing review deci
       ],
     },
     "message": "Path: body.decision - Message: Required",
-    "name": "Error",
+    "name": "Bailo Error",
   },
 }
 `;

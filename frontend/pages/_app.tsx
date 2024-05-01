@@ -3,30 +3,24 @@ import '../public/css/layouting.css'
 import '../public/css/table.css'
 import '../public/css/highlight.css'
 
-import { CacheProvider, EmotionCache } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
+import { AppCacheProvider } from '@mui/material-nextjs/v13-pagesRouter'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { SnackbarProvider } from 'notistack'
 import { useEffect } from 'react'
-import createEmotionCache from 'utils/createEmotionCache'
+import Wrapper from 'src/Wrapper'
 
 import ThemeModeContext from '../src/contexts/themeModeContext'
 import UnsavedChangesContext from '../src/contexts/unsavedChangesContext'
 import useThemeMode from '../src/hooks/useThemeMode'
 import useUnsavedChanges from '../src/hooks/useUnsavedChanges'
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache()
-
-interface MyAppProps extends AppProps {
-  emotionCache?: EmotionCache
-}
-
-export default function MyApp({ Component, emotionCache = clientSideEmotionCache, pageProps }: MyAppProps) {
+export default function MyApp(props: AppProps) {
+  const { Component, pageProps } = props
   const themeModeValue = useThemeMode()
   const unsavedChangesValue = useUnsavedChanges()
 
@@ -38,7 +32,7 @@ export default function MyApp({ Component, emotionCache = clientSideEmotionCache
   }, [themeModeValue])
 
   return (
-    <CacheProvider value={emotionCache}>
+    <AppCacheProvider {...props}>
       <Head>
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>
@@ -48,12 +42,14 @@ export default function MyApp({ Component, emotionCache = clientSideEmotionCache
             <SnackbarProvider>
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
                 <CssBaseline />
-                <Component {...pageProps} />
+                <Wrapper>
+                  <Component {...pageProps} />
+                </Wrapper>
               </LocalizationProvider>
             </SnackbarProvider>
           </ThemeModeContext.Provider>
         </UnsavedChangesContext.Provider>
       </ThemeProvider>
-    </CacheProvider>
+    </AppCacheProvider>
   )
 }

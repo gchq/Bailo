@@ -35,6 +35,7 @@ import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
+import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
@@ -64,6 +65,7 @@ import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
+import config from './utils/config.js'
 
 export const server = express()
 
@@ -82,6 +84,8 @@ server.get('/api/v2/models/search', ...getModelsSearch)
 
 server.get('/api/v2/model/:modelId', ...getModel)
 server.patch('/api/v2/model/:modelId', ...patchModel)
+
+server.post('/api/v2/model/:modelId/export/s3', ...postRequestExportToS3)
 
 server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
 server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)
@@ -146,11 +150,14 @@ server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartM
 server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
-server.get('/api/v2/model/:modelId/inferences', ...getInferences)
-server.get('/api/v2/model/:modelId/inference/:image/:tag', ...getInference)
-server.post('/api/v2/model/:modelId/inference', ...postInference)
-server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
-
+// Inferencing routes are conditional to Bailo specific configuration
+// NOTE: Enabled if config not loaded for testing purposes
+if (!config.inference || config.inference?.enabled) {
+  server.get('/api/v2/model/:modelId/inferences', ...getInferences)
+  server.get('/api/v2/model/:modelId/inference/:image/:tag', ...getInference)
+  server.post('/api/v2/model/:modelId/inference', ...postInference)
+  server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
+}
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
 

@@ -4,13 +4,14 @@ import { useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
+import EditableRelease from 'src/entry/model/releases/EditableRelease'
+import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
-import EditableRelease from 'src/model/releases/EditableRelease'
-import ReviewBanner from 'src/model/reviews/ReviewBanner'
 import ReviewComments from 'src/reviews/ReviewComments'
-import Wrapper from 'src/Wrapper'
 
 export default function Release() {
   const router = useRouter()
@@ -36,7 +37,8 @@ export default function Release() {
   }
 
   return (
-    <Wrapper fullWidth title={release ? release.semver : 'Loading...'} page='release'>
+    <>
+      <Title text={release ? release.semver : 'Loading...'} />
       <Container maxWidth='md' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper>
           <>
@@ -52,9 +54,16 @@ export default function Release() {
                     Back to model
                   </Button>
                 </Link>
-                <Typography variant='h6' component='h1' color='primary'>
-                  {release ? release.semver : 'Loading...'}
-                </Typography>
+                <Stack direction='row' alignItems='center'>
+                  <Typography variant='h6' component='h1' color='primary'>
+                    {release ? release.semver : 'Loading...'}
+                  </Typography>
+                  <CopyToClipboardButton
+                    textToCopy={release.semver}
+                    notificationText='Copied release semver to clipboard'
+                    ariaLabel='copy release semver to clipboard'
+                  />
+                </Stack>
               </Stack>
               {release && <EditableRelease release={release} isEdit={isEdit} onIsEditChange={setIsEdit} />}
               <ReviewComments release={release} isEdit={isEdit} />
@@ -62,6 +71,6 @@ export default function Release() {
           </>
         </Paper>
       </Container>
-    </Wrapper>
+    </>
   )
 }

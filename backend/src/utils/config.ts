@@ -1,4 +1,5 @@
 import { CognitoIdentityProviderClientConfig } from '@aws-sdk/client-cognito-identity-provider'
+import { KMSClientConfig } from '@aws-sdk/client-kms'
 import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
@@ -99,6 +100,13 @@ export interface Config {
     insecure: boolean
   }
 
+  inference: {
+    enabled: boolean
+    connection: {
+      host: string
+    }
+  }
+
   ui: {
     banner: {
       enabled: boolean
@@ -119,9 +127,6 @@ export interface Config {
 
     inference: {
       enabled: boolean
-      connection: {
-        host: string
-      }
 
       gpus: { [key: string]: string }
     }
@@ -144,6 +149,7 @@ export interface Config {
   defaultSchemas: {
     modelCards: Array<DefaultSchema>
     accessRequests: Array<DefaultSchema>
+    dataCards: Array<DefaultSchema>
   }
 
   instrumentation: {
@@ -152,6 +158,27 @@ export interface Config {
     endpoint: string
     authenticationToken: string
     debug: boolean
+  }
+
+  avScanning: {
+    enabled: boolean
+    clamdscan: {
+      host: string
+      port: number
+    }
+  }
+
+  modelMirror: {
+    enabled: boolean
+    export: {
+      maxSize: number
+      bucket: string
+      kmsSignature: {
+        enabled: boolean
+        keyId: string
+        KMSClient: KMSClientConfig
+      }
+    }
   }
 }
 

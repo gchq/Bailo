@@ -8,6 +8,7 @@ import { ModelDoc, ModelInterface } from '../models/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
+import { isBailoError } from '../types/error.js'
 import { findDuplicates } from '../utils/array.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
@@ -52,7 +53,15 @@ async function validateRelease(user: UserInterface, model: ModelDoc, release: Re
     const fileNames: Array<string> = []
 
     for (const fileId of release.fileIds) {
-      const file = await getFileById(user, fileId)
+      let file
+      try {
+        file = await getFileById(user, fileId)
+      } catch (e) {
+        if (isBailoError(e) && e.code === 404) {
+          throw BadReq('Unable to create release as the file cannot be found.', { fileId })
+        }
+        throw e
+      }
       fileNames.push(file.name)
 
       if (file.modelId !== model.id) {
@@ -101,6 +110,19 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     }
 
     releaseParams.modelCardVersion = model.card?.version
+  }
+
+  // There is a typing error whereby mongoose-delete plugin functions are not
+  // found by the TS compiler.
+  const ReleaseModelWithDelete = Release as any
+  const deletedRelease = await ReleaseModelWithDelete.findOneWithDeleted({
+    modelId: releaseParams.modelId,
+    semver: releaseParams.semver,
+  })
+  if (deletedRelease) {
+    throw BadReq(
+      'A release using this semver has been deleted. Please use a different semver or contact an admin to restore the deleted release.',
+    )
   }
 
   const release = new Release({
@@ -221,6 +243,31 @@ export async function getModelReleases(
   return results.filter((_, i) => auths[i].success)
 }
 
+export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
+  const model = await getModelById(user, modelId)
+  const releases = await Release.find({
+    modelId,
+    semver: semvers,
+  })
+
+  const missing = semvers.filter((x) => !releases.some((release) => release.semver === x))
+  if (missing.length > 0) {
+    throw NotFound('The following releases were not found.', { modelId, releases: missing })
+  }
+
+  const auths = await authorisation.releases(user, model, releases, ReleaseAction.Update)
+  const noAuth = releases.filter((_, i) => !auths[i].success)
+  if (noAuth.length > 0) {
+    throw Forbidden('You do not have the necessary permissions to export these releases.', {
+      modelId,
+      releases: noAuth.map((release) => release.semver),
+      user,
+    })
+  }
+
+  return releases
+}
+
 export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
   const release = await Release.findOne({
@@ -293,4 +340,20 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
   }
 
   return file
+}
+
+export async function getAllFileIds(modelId: string, semvers: string[]) {
+  const result = await Release.aggregate()
+    .match({ modelId, semver: { $in: semvers } })
+    .unwind({ path: '$fileIds' })
+    .group({
+      _id: null,
+      fileIds: {
+        $addToSet: '$fileIds',
+      },
+    })
+  if (result.at(0)) {
+    return result.at(0).fileIds
+  }
+  return []
 }

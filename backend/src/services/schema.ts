@@ -111,6 +111,18 @@ export async function addDefaultSchemas() {
     await modelSchema.save()
   }
 
+  for (const schema of config.defaultSchemas.dataCards) {
+    log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
+    const dataCardSchema = new Schema({
+      ...schema,
+      kind: SchemaKind.DataCard,
+      active: true,
+      hidden: false,
+    })
+    await Schema.deleteOne({ id: schema.id })
+    await dataCardSchema.save()
+  }
+
   for (const schema of config.defaultSchemas.accessRequests) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
     const modelSchema = new Schema({

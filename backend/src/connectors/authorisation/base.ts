@@ -1,6 +1,6 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ModelDoc, ModelVisibility } from '../../models/Model.js'
+import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { SchemaDoc } from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
@@ -27,7 +27,7 @@ type Response = { id: string; success: true } | { id: string; success: false; in
 
 export class BasicAuthorisationConnector {
   async hasModelVisibilityAccess(user: UserInterface, model: ModelDoc) {
-    if (model.visibility === ModelVisibility.Public) {
+    if (model.visibility === EntryVisibility.Public) {
       return true
     }
 

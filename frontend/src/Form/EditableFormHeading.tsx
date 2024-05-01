@@ -11,7 +11,11 @@ type EditableFormHeadingProps = {
   onEdit: () => void
   onCancel: () => void
   onSubmit: () => void
+  isRegistryError?: boolean
+  onDelete?: () => void
   errorMessage?: string
+  deleteButtonText?: string
+  showDeleteButton?: boolean
 }
 
 export default function EditableFormHeading({
@@ -22,7 +26,11 @@ export default function EditableFormHeading({
   onEdit,
   onCancel,
   onSubmit,
+  onDelete,
   errorMessage = '',
+  deleteButtonText = 'Delete',
+  showDeleteButton = false,
+  isRegistryError = false,
 }: EditableFormHeadingProps) {
   return (
     <Stack sx={{ pb: 2 }}>
@@ -34,16 +42,35 @@ export default function EditableFormHeading({
       >
         {heading}
         {!isEdit && (
-          <Button variant='outlined' onClick={onEdit} sx={{ mb: { xs: 2 } }} data-test='editFormButton'>
-            {editButtonText}
-          </Button>
+          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
+            <Button variant='outlined' onClick={onEdit} data-test='editFormButton' disabled={isRegistryError}>
+              {editButtonText}
+            </Button>
+            {showDeleteButton && (
+              <Button
+                variant='contained'
+                color='secondary'
+                onClick={onDelete}
+                data-test='deleteFormButton'
+                disabled={isRegistryError}
+              >
+                {deleteButtonText}
+              </Button>
+            )}
+          </Stack>
         )}
         {isEdit && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
             <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton'>
               Cancel
             </Button>
-            <LoadingButton variant='contained' loading={isLoading} onClick={onSubmit} data-test='saveEditFormButton'>
+            <LoadingButton
+              variant='contained'
+              loading={isLoading}
+              onClick={onSubmit}
+              data-test='saveEditFormButton'
+              disabled={isRegistryError}
+            >
               Save
             </LoadingButton>
           </Stack>
