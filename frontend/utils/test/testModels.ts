@@ -92,6 +92,7 @@ export const testV2Model: EntryInterface = {
 export const testReviewResponse: ReviewResponse = {
   user: testEntity,
   decision: 'approve',
+  role: 'mtr',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 }
