@@ -26,11 +26,11 @@ export default function EditableFormHeading({
   onEdit,
   onCancel,
   onSubmit,
-  isRegistryError,
   onDelete,
   errorMessage = '',
   deleteButtonText = 'Delete',
   showDeleteButton = false,
+  isRegistryError = false,
 }: EditableFormHeadingProps) {
   return (
     <Stack sx={{ pb: 2 }}>

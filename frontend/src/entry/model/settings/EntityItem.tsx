@@ -1,37 +1,27 @@
 import ClearIcon from '@mui/icons-material/Clear'
 import GroupsIcon from '@mui/icons-material/Groups'
 import PersonIcon from '@mui/icons-material/Person'
-import {
-  Autocomplete,
-  Chip,
-  IconButton,
-  Stack,
-  TableCell,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
 import _ from 'lodash-es'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntityKind, EntryInterface } from 'types/types'
+import { CollaboratorEntry, EntryInterface } from 'types/types'
 
 type EntityItemProps = {
   entity: CollaboratorEntry
   accessList: CollaboratorEntry[]
   onAccessListChange: (value: CollaboratorEntry[]) => void
   model: EntryInterface
-  onError: (value: string) => void
 }
 
-export default function EntityItem({ entity, accessList, onAccessListChange, model, onError }: EntityItemProps) {
+export default function EntityItem({ entity, accessList, onAccessListChange, model }: EntityItemProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(model.id)
 
   const modelRoleOptions = useMemo(() => modelRoles.map((role) => role.id), [modelRoles])
+
   function onRoleChange(_event: React.SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(accessList)
     const index = updatedAccessList.findIndex((access) => access.entity === entity.entity)
@@ -51,16 +41,15 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
   }
 
   if (isModelRolesError) {
-    onError(isModelRolesError.info.message)
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
   return (
     <TableRow>
       <TableCell>
-        <Stack direction='row' alignItems='center' spacing={1}>
+        <Stack direction='row' alignItems='center' spacing={0.5}>
           <EntityIcon entity={entity} />
-          <EntityNameDisplay entity={entity} onError={onError} />
+          <EntityNameDisplay entity={entity} />
         </Stack>
       </TableCell>
       <TableCell>
@@ -110,14 +99,9 @@ function EntityIcon({ entity }: EntityIconProps) {
 
 type EntityNameDisplayProps = {
   entity: CollaboratorEntry
-  onError: (value: string) => void
 }
 
 function EntityNameDisplay({ entity }: EntityNameDisplayProps) {
-  const [entityKind, entityName] = useMemo(() => entity.entity.split(':'), [entity])
-  return entityKind === EntityKind.USER || entityKind === EntityKind.GROUP ? (
-    <UserDisplay dn={entityName} />
-  ) : (
-    <Typography fontWeight='bold'>{entityName}</Typography>
-  )
+  const entityName = useMemo(() => entity.entity.replace('user:', '').replace('group:', ''), [entity])
+  return <UserDisplay dn={entityName} />
 }

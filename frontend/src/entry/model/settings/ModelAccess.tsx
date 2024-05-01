@@ -44,7 +44,6 @@ export default function ModelAccess({ model }: ModelAccessProps) {
           accessList={accessList}
           onAccessListChange={setAccessList}
           model={model}
-          onError={setErrorMessage}
         />
       )),
     [accessList, model],
