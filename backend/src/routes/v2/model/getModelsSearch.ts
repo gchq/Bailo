@@ -39,6 +39,7 @@ registerPath({
                 name: z.string().openapi({ example: 'Yolo v4' }),
                 description: z.string().openapi({ example: 'You only look once' }),
                 tags: z.array(z.string()).openapi({ example: ['tag', 'ml'] }),
+                kind: z.string().openapi({ example: EntryKind.Model }),
               }),
             ),
           }),
@@ -53,6 +54,7 @@ export interface ModelSearchResult {
   name: string
   description: string
   tags: Array<string>
+  kind: EntryKindKeys
 }
 
 interface GetModelsResponse {
@@ -73,6 +75,7 @@ export const getModelsSearch = [
       name: model.name,
       description: model.description,
       tags: model.card?.metadata?.overview?.tags || [],
+      kind: model.kind,
     }))
 
     await audit.onSearchModel(req, models)

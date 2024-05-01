@@ -1,22 +1,17 @@
 import useSWR from 'swr'
 
-import { SchemaInterface } from '../types/types'
+import { SchemaInterface, SchemaKindKeys } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
-
-export enum SchemaKind {
-  MODEL = 'model',
-  ACCESS = 'accessRequest',
-}
 
 export interface PostSchemaParams {
   id: string
   name: string
   description: string
-  kind: SchemaKind
+  kind: SchemaKindKeys
   jsonSchema: any
 }
 
-export function useGetSchemas(kind?: string) {
+export function useGetSchemas(kind?: SchemaKindKeys) {
   const { data, error, mutate } = useSWR<
     {
       schemas: SchemaInterface[]
