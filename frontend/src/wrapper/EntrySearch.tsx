@@ -96,7 +96,7 @@ export default function EntrySearch() {
         <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
           <SearchIcon sx={{ ml: 1 }} />
           <StyledInputBase
-            placeholder='Search for a data card/model'
+            placeholder='Search'
             inputProps={{ 'aria-label': 'search for a data card or model' }}
             value={modelFilter}
             onChange={handleChange}
