@@ -51,7 +51,14 @@ export default function InferenceApp() {
                   <Button sx={{ width: 'fit-content' }}>View Settings</Button>
                 </Link>
               </Stack>
-              {isSpinningUp && <Loading />}
+              {isSpinningUp && (
+                <Stack direction={'row'} spacing={3} alignItems='center' justifyContent='center'>
+                  <Typography fontWeight={'bold'} color={'primary'}>
+                    Spinning up {image}
+                  </Typography>
+                  <Loading />
+                </Stack>
+              )}
               <iframe src={serviceEndpoint} width='100%' height='600' onLoad={() => setIsSpinningUp(false)} />
             </Stack>
           )}
