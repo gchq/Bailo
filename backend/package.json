@@ -50,7 +50,7 @@
     "mjml": "^4.15.3",
     "mongodb": "^6.4.0",
     "mongoose": "^6.11.3",
-    "mongoose-delete": "^0.5.4",
+    "mongoose-delete": "^1.0.2",
     "morgan": "^1.10.0",
     "nanoid": "^5.0.6",
     "node-fetch": "^3.3.2",
