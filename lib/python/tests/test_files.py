@@ -24,6 +24,16 @@ def test_file_upload(example_model):
 
 
 @pytest.mark.integration
+def test_file_upload_from_disk_large(example_model, test_path_large):
+    example_release = example_model.create_release("0.1.0", "test")
+
+    example_release.upload(test_path_large)
+    download_file = example_release.download("test.pth", write=False)
+
+    assert download_file.status_code == 200
+
+
+@pytest.mark.integration
 def test_file_download_all(example_model, tmpdir):
     byte_obj = b"Test Binary"
     file = BytesIO(byte_obj)
