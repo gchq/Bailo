@@ -8,6 +8,7 @@ export interface BailoError extends Error {
 
 export enum EntityKind {
   USER = 'user',
+  GROUP = 'group',
 }
 
 export interface Entity {
@@ -387,7 +388,9 @@ export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 export interface ReviewResponse {
   user: string
   decision: DecisionKeys
+  role: string
   comment?: string
+  outdated?: boolean
   createdAt: string
   updatedAt: string
 }
