@@ -19,7 +19,7 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/pacifico": "^5.0.8",
     "@mdx-js/loader": "^2.3.0",
-    "@mdx-js/react": "^2.3.0",
+    "@mdx-js/react": "^3.0.1",
     "@mui/icons-material": "^5.11.16",
     "@mui/lab": "^5.0.0-alpha.135",
     "@mui/material": "^5.13.2",
