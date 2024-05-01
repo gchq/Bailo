@@ -48,7 +48,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
     }
   }, [currentValue, dataCards])
 
-  const handleModelChange = useCallback(
+  const handleSelectedDataCardsChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: ModelSearchResult[]) => {
       onChange(newValues.map((value) => value.id))
       setSelectedDataCards(newValues)
@@ -65,9 +65,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
   }, 500)
 
   if (isDataCardsError) {
-    if (isDataCardsError.status !== 413) {
-      return <MessageAlert message={isDataCardsError.info.message} severity='error' />
-    }
+    return <MessageAlert message={isDataCardsError.info.message} severity='error' />
   }
 
   return (
@@ -90,8 +88,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
           isOptionEqualToValue={(option, value) => option.id === value.id}
           getOptionLabel={(option) => option.name}
           value={selectedDataCards || []}
-          filterOptions={(x) => x}
-          onChange={handleModelChange}
+          onChange={handleSelectedDataCardsChange}
           noOptionsText={dataCardListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
           onInputChange={debounceOnInputChange}
           options={dataCards || []}
@@ -135,14 +132,14 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
           )}
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
-              {currentValue.map((currentDataCard) => (
+              {currentValue.map((currentDataCardId) => (
                 <Chip
                   label={
-                    dataCards.find((dataCard) => dataCard.id === currentDataCard)?.name ||
+                    dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
                     'Unable to find data card name'
                   }
-                  key={currentDataCard}
-                  onClick={() => router.push(`/data-card/${currentDataCard}`)}
+                  key={currentDataCardId}
+                  onClick={() => router.push(`/data-card/${currentDataCardId}`)}
                   sx={{ width: 'fit-content' }}
                 />
               ))}
