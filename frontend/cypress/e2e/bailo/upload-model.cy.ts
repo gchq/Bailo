@@ -5,14 +5,16 @@ const newModelUrl = '/entry/new'
 let modelUuid = ''
 const schemaId = 'minimal-general-v10'
 
-describe('Beta create new model', () => {
+describe('Create new model', () => {
   it('loads the Create a new model Page', () => {
-    cy.visit(newModelUrl, { qs: { kind: 'model' } })
+    cy.visit(newModelUrl)
+    cy.get('[data-test=createModelButton]').click()
     cy.contains('Create Model')
   })
 
   it('creates a public new model', () => {
-    cy.visit(newModelUrl, { qs: { kind: 'model' } })
+    cy.visit(newModelUrl)
+    cy.get('[data-test=createModelButton]').click()
 
     cy.get('[data-test=entryNameInput]').type('test model')
     cy.get('[data-test=entryDescriptionInput]').type('test description')
@@ -32,7 +34,8 @@ describe('Beta create new model', () => {
 
   it('creates a private new model', () => {
     cy.log('Navigating to the new model page')
-    cy.visit(newModelUrl, { qs: { kind: 'model' } })
+    cy.visit(newModelUrl)
+    cy.get('[data-test=createModelButton]').click()
 
     cy.log('Filling out the form to make a private model and submitting')
     cy.get('[data-test=entryNameInput]').type('test model')
