@@ -1,10 +1,8 @@
 import Box from '@mui/material/Box'
-import Container from '@mui/material/Container'
-import CssBaseline from '@mui/material/CssBaseline'
 import { useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import { useGetUiConfig } from 'actions/uiConfig'
-import Head from 'next/head'
+import { useRouter } from 'next/router'
 import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -16,23 +14,22 @@ import SideNavigation from './wrapper/SideNavigation'
 import TopNavigation from './wrapper/TopNavigation'
 
 export type WrapperProps = {
-  title: string
-  page: string
   children?: ReactNode
-  fullWidth?: boolean
 }
 
-export default function Wrapper({ title, page, children, fullWidth = false }: WrapperProps): ReactElement {
-  const isDocsPage = useMemo(() => page.startsWith('docs'), [page])
-
-  const muiTheme = useTheme()
+export default function Wrapper({ children }: WrapperProps): ReactElement {
+  const theme = useTheme()
   const [open, setOpen] = useState(false)
   const [pageTopStyling, setPageTopStyling] = useState({})
   const [contentTopStyling, setContentTopStyling] = useState({})
   const [errorMessage, setErrorMessage] = useState('')
 
+  const router = useRouter()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+
+  const isDocsPage = useMemo(() => router.route.startsWith('/docs'), [router])
+  const page = useMemo(() => router.route.split('/')[1].replace('/', ''), [router])
 
   useEffect(() => {
     if (!isUiConfigLoading) {
@@ -69,12 +66,8 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
 
   return (
     <>
-      <Head>
-        <title>{`${title} :: Bailo`}</title>
-      </Head>
       <Banner />
       <Box sx={{ display: 'flex' }}>
-        <CssBaseline />
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
         {currentUser && (
           <>
@@ -93,8 +86,7 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
         <Box
           component='main'
           sx={{
-            backgroundColor:
-              muiTheme.palette.mode === 'light' ? muiTheme.palette.grey[100] : muiTheme.palette.grey[900],
+            backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',
@@ -107,18 +99,8 @@ export default function Wrapper({ title, page, children, fullWidth = false }: Wr
             ) : (
               <>
                 {isCurrentUserLoading && <Loading />}
-                {!fullWidth && (
-                  <Container maxWidth={fullWidth ? false : 'xl'} sx={{ mt: 4, mb: 4 }}>
-                    <MessageAlert message={errorMessage} severity='error' />
-                    {children}
-                  </Container>
-                )}
-                {fullWidth && (
-                  <>
-                    <MessageAlert message={errorMessage} severity='error' />
-                    {children}
-                  </>
-                )}
+                <MessageAlert message={errorMessage} severity='error' />
+                {children}
                 <Copyright sx={{ mb: 2 }} />
               </>
             )}

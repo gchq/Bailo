@@ -8,6 +8,13 @@ module.exports = {
     port: 3001,
   },
 
+  inference: {
+    enabled: false,
+    connection: {
+      host: 'http://example.com',
+    },
+  },
+
   app: {
     // Publicly accessible route to service
     protocol: '',
@@ -20,9 +27,16 @@ module.exports = {
   },
 
   mongo: {
-    // A mongo connection URI, can contain usernames, passwords, replica set information, etc.
+    // A mongo connection URI, can contain replica set information, etc.
     // See: https://www.mongodb.com/docs/manual/reference/connection-string/
+
+    // This is usually embedded in a config map, so do not put usernames and
+    // passwords in the connection string.
     uri: 'mongodb://localhost:27017/bailo?directConnection=true',
+
+    // Authentication details
+    user: undefined,
+    pass: undefined,
   },
 
   registry: {
@@ -73,8 +87,17 @@ module.exports = {
         name: 'Minimal Schema v10',
         id: 'minimal-general-v10',
         description:
-          "This is the latest version of the default model card for users from West. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which model card to pick, you'll likely want this one!",
+          "This is the latest version of the default model card. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which model card to pick, you'll likely want this one!",
         jsonSchema: require('../src/scripts/example_schemas/minimal_model_schema.json'),
+      },
+    ],
+    dataCards: [
+      {
+        name: 'Minimal Data Card Schema v10',
+        id: 'minimal-data-card-v10',
+        description:
+          "This is the latest version of the default data card. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which data card to pick, you'll likely want this one!",
+        jsonSchema: require('../src/scripts/example_schemas/minimal_data_card_schema.json'),
       },
     ],
     accessRequests: [
@@ -115,6 +138,14 @@ module.exports = {
     },
   },
 
+  avScanning: {
+    enabled: false,
+    clamdscan: {
+      host: '127.0.0.1',
+      port: 3310,
+    },
+  },
+
   // These settings are PUBLIC and shared with the UI
   ui: {
     // Show a banner at the top of the screen on all pages
@@ -138,10 +169,7 @@ module.exports = {
     },
 
     inference: {
-      enabled: true,
-      connection: {
-        host: 'example.com',
-      },
+      enabled: false,
 
       gpus: {},
     },
@@ -187,5 +215,24 @@ module.exports = {
     endpoint: '',
     authenticationToken: '',
     debug: false,
+  },
+
+  modelMirror: {
+    enabled: false,
+    export: {
+      maxSize: 100 * 1024 * 1024 * 1024,
+      bucket: 'exports',
+      kmsSignature: {
+        enabled: false,
+        keyId: '123-456',
+        KMSClient: {
+          region: 'eu-west-2',
+          credentials: {
+            accessKeyId: 'access',
+            secretAccessKey: 'secret',
+          },
+        },
+      },
+    },
   },
 }

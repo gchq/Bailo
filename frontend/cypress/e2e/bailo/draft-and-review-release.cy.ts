@@ -7,6 +7,7 @@ describe('Draft and review a model release', () => {
     cy.log('Upload new model and set schema via API')
     cy.request('POST', 'http://localhost:8080/api/v2/models', {
       name: modelNameForRelease,
+      kind: 'model',
       teamId: 'Uncategorised',
       description: 'This is a test',
       visibility: 'public',
@@ -54,16 +55,20 @@ describe('Draft and review a model release', () => {
     cy.contains(`${modelNameForRelease} - ${releaseVersion}`)
     cy.log('Clicking the review button')
     cy.get('[data-test=reviewButton]').click({ force: true })
+    cy.contains(`Reviewing release ${releaseVersion} for model ${modelNameForRelease}`)
     cy.log('Creating a "requesting changes" review')
-    cy.contains('Release Review')
-    cy.get('[data-test=reviewWithCommentTextField').type('This is a comment')
-    cy.get('[data-test=requestChangesReviewButton').click()
+    cy.get('[data-test=reviewWithCommentContent]').should('be.visible')
+    cy.get('[data-test=reviewWithCommentTextField]').type('This is a comment')
+    cy.get('[data-test=requestChangesReviewButton]').click()
     cy.log('Approving a release')
+    cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
     cy.get('[data-test=reviewButton]').click({ force: true })
-    cy.contains('Release Review')
-    cy.get('[data-test=approveReviewButton').click()
+    cy.contains(`Reviewing release ${releaseVersion} for model ${modelNameForRelease}`)
+    cy.get('[data-test=reviewWithCommentContent]').should('be.visible')
+    cy.get('[data-test=approveReviewButton]').click()
 
     cy.log('Checking that we can see both review states')
+    cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
     cy.contains('requested changes')
     cy.contains('approved')
     cy.contains('This is a comment')

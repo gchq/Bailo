@@ -1,6 +1,6 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { ModelDoc, ModelVisibility } from '../../models/Model.js'
+import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { SchemaDoc } from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
@@ -27,7 +27,7 @@ type Response = { id: string; success: true } | { id: string; success: false; in
 
 export class BasicAuthorisationConnector {
   async hasModelVisibilityAccess(user: UserInterface, model: ModelDoc) {
-    if (model.visibility === ModelVisibility.Public) {
+    if (model.visibility === EntryVisibility.Public) {
       return true
     }
 
@@ -77,8 +77,6 @@ export class BasicAuthorisationConnector {
   async models(user: UserInterface, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
     return Promise.all(
       models.map(async (model) => {
-        const roles = await authentication.getUserModelRoles(user, model)
-
         // Prohibit non-collaborators from seeing private models
         if (!(await this.hasModelVisibilityAccess(user, model))) {
           return {
@@ -89,8 +87,11 @@ export class BasicAuthorisationConnector {
         }
 
         // Check a user has a role before allowing write actions
-        if ([ModelAction.Write, ModelAction.Update].some((a) => a === action) && roles.length === 0) {
-          return { id: model.id, success: false, info: 'You cannot update a model you do not have permissions for.' }
+        if (
+          [ModelAction.Write, ModelAction.Update].some((a) => a === action) &&
+          (await missingRequiredRole(user, model, ['owner', 'collaborator']))
+        ) {
+          return { id: model.id, success: false, info: 'Only owners and collaborators can update a model.' }
         }
 
         return { id: model.id, success: true }
@@ -143,16 +144,22 @@ export class BasicAuthorisationConnector {
   ): Promise<Array<Response>> {
     const entities = await authentication.getEntities(user)
 
-    // Does the user hold a role on the model the parent is on?
-    const hasModelRole = (await authentication.getUserModelRoles(user, model)).length !== 0
-
     return Promise.all(
       accessRequests.map(async (request) => {
         // Does any individual in the access request share an entity with our user?
         const isNamed = request.metadata.overview.entities.some((value) => entities.includes(value))
 
-        // If they are not listed on the model
-        if (!isNamed && !hasModelRole && [AccessRequestAction.Delete, AccessRequestAction.Update].includes(action)) {
+        /**
+         * Reject if:
+         *  - user is not named on the access request
+         *  - user is not the owner of the model
+         *  - the user is trying to delete or update an existing AR
+         */
+        if (
+          !isNamed &&
+          (await missingRequiredRole(user, model, ['owner'])) &&
+          [AccessRequestAction.Delete, AccessRequestAction.Update].includes(action)
+        ) {
           return { success: false, info: 'You cannot change an access request you do not own', id: request.id }
         }
 
@@ -168,28 +175,32 @@ export class BasicAuthorisationConnector {
     files: Array<FileInterfaceDoc>,
     action: FileActionKeys,
   ): Promise<Array<Response>> {
-    // Does the user hold a role on the file's model?
-    const hasModelRole = (await authentication.getUserModelRoles(user, model)).length !== 0
-
     // Does the user have a valid access request for this model?
     const hasApprovedAccessRequest = await this.hasApprovedAccessRequest(user, model)
 
     return Promise.all(
       files.map(async (file) => {
         // If they are not listed on the model, don't let them upload or delete files.
-        if (!hasModelRole && [FileAction.Delete, FileAction.Upload].includes(action)) {
-          return { success: false, info: 'You need to hold a model role in order to upload a file', id: file.id }
-        }
-
         if (
-          !hasApprovedAccessRequest &&
-          !hasModelRole &&
-          [FileAction.Download].includes(action) &&
-          !model.settings.ungovernedAccess
+          [FileAction.Delete, FileAction.Upload].includes(action) &&
+          (await missingRequiredRole(user, model, ['owner', 'collaborator']))
         ) {
           return {
             success: false,
-            info: 'You need to have an approved access request to download a file.',
+            info: 'You need to be an owner or collaborator in order to upload a file',
+            id: file.id,
+          }
+        }
+
+        if (
+          [FileAction.Download].includes(action) &&
+          !model.settings.ungovernedAccess &&
+          !hasApprovedAccessRequest &&
+          (await missingRequiredRole(user, model, ['owner', 'collaborator', 'consumer']))
+        ) {
+          return {
+            success: false,
+            info: 'You need to have an approved access request or be an owner, collaborator or consumer to download a file.',
             id: file.id,
           }
         }
@@ -200,9 +211,6 @@ export class BasicAuthorisationConnector {
   }
 
   async images(user: UserInterface, model: ModelDoc, accesses: Array<Access>): Promise<Array<Response>> {
-    // Does the user hold a role on the image's model?
-    const hasModelRole = (await authentication.getUserModelRoles(user, model)).length !== 0
-
     // Does the user have a valid access request for this model?
     const hasAccessRequest = await this.hasApprovedAccessRequest(user, model)
 
@@ -220,19 +228,26 @@ export class BasicAuthorisationConnector {
         }
 
         // If they are not listed on the model, don't let them upload or delete images.
-        if (!hasModelRole && access.actions.includes(ImageAction.Push as Action)) {
-          return { success: false, info: 'You need to hold a model role in order to upload an image', id: access.name }
+        if (
+          (await missingRequiredRole(user, model, ['owner', 'collaborator'])) &&
+          access.actions.includes(ImageAction.Push as Action)
+        ) {
+          return {
+            success: false,
+            info: 'You need to be an owner or collaborator in order to upload an image',
+            id: access.name,
+          }
         }
 
         if (
           !hasAccessRequest &&
-          !hasModelRole &&
+          (await missingRequiredRole(user, model, ['owner', 'collaborator', 'consumer'])) &&
           access.actions.includes(ImageAction.Pull as Action) &&
           !model.settings.ungovernedAccess
         ) {
           return {
             success: false,
-            info: 'You need to have an approved access request to download an image.',
+            info: 'You need to have an approved access request or be an owner, collaborator or consumer to download an image.',
             id: access.name,
           }
         }
@@ -241,6 +256,11 @@ export class BasicAuthorisationConnector {
       }),
     )
   }
+}
+
+async function missingRequiredRole(user: UserInterface, model: ModelDoc, roles: Array<string>) {
+  const modelRoles = await authentication.getUserModelRoles(user, model)
+  return !modelRoles.some((value) => roles.includes(value))
 }
 
 export async function partials<T>(

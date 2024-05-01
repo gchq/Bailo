@@ -17,10 +17,10 @@ import { useTheme } from '@mui/material/styles'
 import { ModelSearchResult, useListModels } from 'actions/model'
 import { postUserToken } from 'actions/user'
 import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/authentication/TokenDialog'
-import Wrapper from 'src/Wrapper'
 import { TokenActions, TokenActionsKeys, TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
@@ -35,7 +35,7 @@ export default function NewToken() {
   const [errorMessage, setErrorMessage] = useState('')
   const [token, setToken] = useState<TokenInterface | undefined>()
 
-  const { models, isModelsLoading, isModelsError } = useListModels()
+  const { models, isModelsLoading, isModelsError } = useListModels('model')
 
   const modelsAutocompletePlaceholder = useMemo(() => {
     if (isAllModels) return 'All models selected'
@@ -116,12 +116,13 @@ export default function NewToken() {
   }
 
   return (
-    <Wrapper title='Personal Access Token' page='Token'>
+    <>
+      <Title text='Personal Access Token' />
       <Container maxWidth='md'>
         <Card sx={{ my: 4, p: 4 }}>
           <Stack spacing={2}>
             <div>
-              <Link href={'/settings?tab=authentication&category=personal'}>
+              <Link href={'/settings?tab=authentication'}>
                 <Button startIcon={<ArrowBack />}>Back to settings</Button>
               </Link>
             </div>
@@ -200,7 +201,7 @@ export default function NewToken() {
           </Stack>
         </Card>
       </Container>
-      <TokenDialog token={token} />
-    </Wrapper>
+      {token && <TokenDialog token={token} />}
+    </>
   )
 }

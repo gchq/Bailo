@@ -7,9 +7,9 @@ import { postSchema, SchemaKind } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import RichTextEditor from 'src/common/RichTextEditor'
+import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import Wrapper from 'src/Wrapper'
 import { getErrorMessage } from 'utils/fetcher'
 
 const VisuallyHiddenInput = styled('input')({
@@ -89,7 +89,8 @@ export default function NewSchema() {
   }
 
   return (
-    <Wrapper title='Upload a new Schema' page='upload'>
+    <>
+      <Title text='Upload a new Schema' />
       <Container maxWidth='sm' sx={{ my: 4 }}>
         <Paper sx={{ p: 4, m: 'auto' }}>
           <Link href={`/schemas/list`}>
@@ -111,6 +112,7 @@ export default function NewSchema() {
                   Id <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <TextField
+                  inputProps={{ autoFocus: true }}
                   fullWidth
                   required
                   size='small'
@@ -181,6 +183,6 @@ export default function NewSchema() {
           </Box>
         </Paper>
       </Container>
-    </Wrapper>
+    </>
   )
 }

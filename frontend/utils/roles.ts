@@ -6,3 +6,7 @@ export function getRoleDisplay(roleId: string, modelRoles: Role[]) {
 
   return role.name
 }
+
+export const hasRole = (userRoles: string[], validRoles: string[]) => {
+  return userRoles.some((role) => validRoles.includes(role))
+}
