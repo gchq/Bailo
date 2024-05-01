@@ -18,6 +18,7 @@ exports[`routes > model > getModelsSearch > audit > expected call 1`] = `
   {
     "description": "description",
     "id": "test",
+    "kind": undefined,
     "name": "name",
     "tags": [],
   },
