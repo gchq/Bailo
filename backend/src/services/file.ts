@@ -149,3 +149,13 @@ export async function removeFile(user: UserInterface, modelId: string, fileId: s
 
   return file
 }
+
+export async function getTotalFileSize(fileIds: string[]) {
+  const totalSize = await FileModel.aggregate()
+    .match({ _id: { $in: fileIds } })
+    .group({
+      _id: null,
+      totalSize: { $sum: '$size' },
+    })
+  return totalSize.at(0).totalSize
+}
