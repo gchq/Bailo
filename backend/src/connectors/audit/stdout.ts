@@ -81,9 +81,15 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  onViewFile(req: Request, file: FileInterfaceDoc) {
+    this.checkEventType(AuditInfo.ViewFile, req)
+    const event = this.generateEvent(req, { id: file._id.toString(), modelId: file.modelId })
+    req.log.info(event, req.audit.description)
+  }
+
   onViewFiles(req: Request, modelId: string, files: FileInterface[]) {
     this.checkEventType(AuditInfo.ViewFiles, req)
-    const event = this.generateEvent(req, { modelId, results: files.map((file) => file.name) })
+    const event = this.generateEvent(req, { modelId, results: files.map((file) => file._id) })
     req.log.info(event, req.audit.description)
   }
 
