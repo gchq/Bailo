@@ -249,7 +249,8 @@ class Release:
 
         self.files.append(res["file"]["id"])
         self.update()
-        data.close()
+        if not isinstance(data, BytesIO):
+            data.close()
         return res["file"]["id"]
 
     def update(self) -> Any:

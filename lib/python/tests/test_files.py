@@ -43,7 +43,6 @@ def test_file_download_all(example_model, tmpdir):
 
     for filename in filenames:
         example_release.upload(filename, file)
-        file.open()
         file.seek(0)
 
     downloads_path = tmpdir.mkdir("downloads")
@@ -62,7 +61,6 @@ def test_file_download_filter(example_model, tmpdir):
 
     for filename in filenames:
         example_release.upload(filename, file)
-        file.open()
         file.seek(0)
 
     downloads_path = tmpdir.mkdir("downloads")
