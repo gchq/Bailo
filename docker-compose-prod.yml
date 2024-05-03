@@ -2,15 +2,21 @@ services:
   mongo:
     image: bitnami/mongodb:7.0.8
     environment:
-      - MONGODB_REPLICA_SET_NAME=repl-set
+      - MONGODB_ADVERTISED_HOSTNAME=mongo
+      - MONGODB_ADVERTISED_PORT_NUMBER=27017
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_REPLICA_SET_KEY=developmentReplicaSetKey
+      - MONGODB_ROOT_USER=mongoadmin
+      - MONGODB_ROOT_PASSWORD=mongoadmin
+      - MONGODB_REPLICA_SET_NAME=rs0
     volumes:
       - mongoVolume:/bitnami/mongodb
     ports:
       - 27017:27017
     healthcheck:
       test:
-        test $$(mongosh --port 27017 --quiet --eval "try
-        {rs.initiate({_id:'repl-set',members:[{_id:0,host:\"mongo:27017\"}]})} catch(e) {rs.status().ok}") -eq 1
+        test $$(mongosh --authenticationDatabase admin --username ${MONGODB_ROOT_USER:-'mongoadmin'} --password
+        ${MONGODB_ROOT_PASSWORD:-'mongoadmin'} --quiet --eval "rs.status().ok") -eq 1
       interval: 10s
       start_period: 30s
 

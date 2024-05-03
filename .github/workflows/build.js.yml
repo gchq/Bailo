@@ -313,6 +313,13 @@ jobs:
               secretKey: 'minioadmin',
             },
 
+            mongo: {
+              uri: 'mongodb://mongo:27017/bailo?replicaSet=rs0&authSource=admin',
+
+              user: 'mongoadmin',
+              pass: 'mongoadmin',
+            },
+
             smtp: {
               auth: {
                 user: 'mailuser',
@@ -428,6 +435,13 @@ jobs:
             minio: {
               accessKey: 'minioadmin',
               secretKey: 'minioadmin',
+            },
+
+            mongo: {
+              uri: 'mongodb://mongo:27017/bailo?replicaSet=rs0&authSource=admin',
+
+              user: 'mongoadmin',
+              pass: 'mongoadmin',
             },
 
             smtp: {
