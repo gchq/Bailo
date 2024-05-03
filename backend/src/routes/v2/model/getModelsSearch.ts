@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
+import { EntryKind, EntryKindKeys } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
 import { GetModelFilters } from '../../../types/enums.js'
@@ -12,8 +13,8 @@ import { coerceArray, parse } from '../../../utils/validate.js'
 export const getModelsSearchSchema = z.object({
   query: z.object({
     // These are all optional with defaults.  If they are not provided, they do not filter settings.
+    kind: z.string(z.nativeEnum(EntryKind)).optional(),
     task: z.string().optional(),
-
     libraries: coerceArray(z.array(z.string()).optional().default([])),
     filters: coerceArray(z.array(z.nativeEnum(GetModelFilters)).optional().default([])),
     search: z.string().optional().default(''),
@@ -38,6 +39,7 @@ registerPath({
                 name: z.string().openapi({ example: 'Yolo v4' }),
                 description: z.string().openapi({ example: 'You only look once' }),
                 tags: z.array(z.string()).openapi({ example: ['tag', 'ml'] }),
+                kind: z.string().openapi({ example: EntryKind.Model }),
               }),
             ),
           }),
@@ -52,6 +54,7 @@ export interface ModelSearchResult {
   name: string
   description: string
   tags: Array<string>
+  kind: EntryKindKeys
 }
 
 interface GetModelsResponse {
@@ -63,15 +66,16 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>) => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { libraries, filters, search, task },
+      query: { kind, libraries, filters, search, task },
     } = parse(req, getModelsSearchSchema)
 
-    const foundModels = await searchModels(req.user, libraries, filters, search, task)
+    const foundModels = await searchModels(req.user, kind as EntryKindKeys, libraries, filters, search, task)
     const models = foundModels.map((model) => ({
       id: model.id,
       name: model.name,
       description: model.description,
       tags: model.card?.metadata?.overview?.tags || [],
+      kind: model.kind,
     }))
 
     await audit.onSearchModel(req, models)

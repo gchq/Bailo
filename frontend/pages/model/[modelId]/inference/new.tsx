@@ -6,11 +6,11 @@ import { Stack } from '@mui/system'
 import { CreateInferenceParams, postInference } from 'actions/inferencing'
 import { useGetModel } from 'actions/model'
 import { useRouter } from 'next/router'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import InferenceForm from 'src/entry/model/inferencing/InferenceForm'
 import MessageAlert from 'src/MessageAlert'
-import InferenceForm from 'src/model/inferencing/InferenceForm'
 import { FlattenedModelImage } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidPortNumber } from 'utils/stringUtils'
@@ -20,6 +20,7 @@ export default function NewInference() {
   const [port, setPort] = useState('')
   const [processorType, setProcessorType] = useState('cpu')
   const [memory, setMemory] = useState(2)
+  const [isRegistryError, setIsRegistryError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -30,6 +31,8 @@ export default function NewInference() {
   const [image, setImage] = useState<FlattenedModelImage | undefined>()
 
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
+
+  const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
   if (isModelError) {
     return <MessageAlert message={isModelError.info.message} severity='error' />
@@ -101,6 +104,7 @@ export default function NewInference() {
                   formData={{ image, description, memory, port, processorType }}
                   onImageChange={(value) => setImage(value)}
                   onDescriptionChange={(value) => setDescription(value)}
+                  onRegistryError={handleRegistryError}
                   onProcessorTypeChange={(value) => setProcessorType(value)}
                   onMemoryChange={(value) => setMemory(value)}
                   onPortChange={(value) => setPort(value)}
@@ -110,7 +114,7 @@ export default function NewInference() {
                 <LoadingButton
                   variant='contained'
                   type='submit'
-                  disabled={!(image && description && port)}
+                  disabled={!(image && description && port && !isRegistryError)}
                   loading={loading}
                 >
                   Create Inferencing Service

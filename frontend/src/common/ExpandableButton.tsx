@@ -1,4 +1,4 @@
-import { Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { alpha, styled, useTheme } from '@mui/material/styles'
 import { CSSProperties, ReactElement } from 'react'
 
@@ -18,7 +18,7 @@ export default function ExpandableButton({
   onClick,
   ariaLabel,
   height = 'unset',
-  initialMaxWidth = '55px',
+  initialMaxWidth = '52px',
   onHoverMaxWidth = '350px',
 }: ExpandableButtonProps) {
   const theme = useTheme()
@@ -31,6 +31,11 @@ export default function ExpandableButton({
     overflow: 'hidden',
     color: theme.palette.common.white,
     borderStyle: 'none',
+    // This is to align button padding with FireFox and Chrome
+    paddingLeft: '6px',
+    paddingRight: '6px',
+    paddingTop: '1px',
+    paddingBottom: '1px',
     borderRadius: 3,
     cursor: 'pointer',
     height: height,
@@ -45,10 +50,12 @@ export default function ExpandableButton({
 
   return (
     <StyledButton data-test='expandableButton' onClick={() => onClick()} aria-label={ariaLabel}>
-      <Stack direction='row' alignItems='center' spacing={2}>
-        <div style={{ paddingLeft: theme.spacing(1.5), paddingTop: theme.spacing(0.5) }}>{icon}</div>
-        <Typography sx={{ whiteSpace: 'nowrap', pr: theme.spacing(0.5) }}>{label}</Typography>
-      </Stack>
+      <Box sx={{ px: 1 }}>
+        <Stack direction='row' alignItems='center' spacing={2}>
+          {icon}
+          <Typography sx={{ whiteSpace: 'nowrap' }}>{label}</Typography>
+        </Stack>
+      </Box>
     </StyledButton>
   )
 }

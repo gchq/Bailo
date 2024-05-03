@@ -10,13 +10,13 @@ import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
-import SchemaButton from 'src/model/common/SchemaButton'
+import SchemaButton from 'src/schemas/SchemaButton'
 import { SchemaInterface, SchemaKind } from 'types/types'
 
-export default function NewSchemaSelection() {
+export default function AccessRequestSchema() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.AccessRequest)
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.ACCESS_REQUEST)
 
   const activeSchemas = useMemo(() => schemas.filter((schema) => schema.active), [schemas])
   const inactiveSchemas = useMemo(() => schemas.filter((schema) => !schema.active), [schemas])

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import useSWR from 'swr'
-import { ModelCardInterface, ModelCardRevisionInterface } from 'types/types'
+import { EntryCardInterface, EntryCardRevisionInterface } from 'types/types'
 import { handleAxiosError } from 'utils/axios'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
@@ -32,25 +32,25 @@ export async function putModelCard(modelId: string, metadata: unknown) {
   }
 }
 
-export function useModelCard(modelId?: string, modelCardVersion?: number) {
+export function useGetEntryCard(entryId?: string, entryCardVersion?: number) {
   const { data, error } = useSWR<
     {
-      modelCard: ModelCardInterface
+      modelCard: EntryCardInterface
     },
     ErrorInfo
-  >(modelId && modelCardVersion ? `/api/v2/model/${modelId}/model-card/${modelCardVersion}` : null, fetcher)
+  >(entryId && entryCardVersion ? `/api/v2/model/${entryId}/model-card/${entryCardVersion}` : null, fetcher)
 
   return {
-    model: data ? data.modelCard : undefined,
-    isModelLoading: !error && !data,
-    isModelError: error,
+    entryCard: data ? data.modelCard : undefined,
+    isEntryCardLoading: !error && !data,
+    isEntryCardError: error,
   }
 }
 
 export function useGetModelCardRevisions(modelId: string) {
   const { data, error, mutate } = useSWR<
     {
-      modelCardRevisions: ModelCardRevisionInterface[]
+      modelCardRevisions: EntryCardRevisionInterface[]
     },
     ErrorInfo
   >(`/api/v2/model/${modelId}/model-card-revisions`, fetcher)

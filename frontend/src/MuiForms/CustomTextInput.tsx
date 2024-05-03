@@ -66,10 +66,6 @@ export default function CustomTextInput(props: CustomTextInputProps) {
           ...(!formContext.editMode && { disableUnderline: true }),
           'data-test': id,
         }}
-        inputRef={(inputRef) => {
-          // Set focus if this is the first question
-          if (inputRef && formContext.firstQuestionKey === id) inputRef.focus()
-        }}
       />
     </Fragment>
   )

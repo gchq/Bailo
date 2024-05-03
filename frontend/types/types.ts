@@ -8,6 +8,7 @@ export interface BailoError extends Error {
 
 export enum EntityKind {
   USER = 'user',
+  GROUP = 'group',
 }
 
 export interface Entity {
@@ -109,7 +110,7 @@ export interface SchemaInterface {
   updatedAt: Date
 }
 
-export interface ModelCardRevisionInterface {
+export interface EntryCardRevisionInterface {
   modelId: string
   schemaId: string
   version: number
@@ -126,8 +127,9 @@ export interface Role {
 }
 
 export const SchemaKind = {
-  Model: 'model',
-  AccessRequest: 'accessRequest',
+  MODEL: 'model',
+  ACCESS_REQUEST: 'accessRequest',
+  DATA_CARD: 'dataCard',
 } as const
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
@@ -286,18 +288,29 @@ export interface TeamInterface {
   updatedAt: Date
 }
 
-export const ModelVisibility = {
+export const EntryVisibility = {
   Private: 'private',
   Public: 'public',
 } as const
 
-export type ModelVisibilityKeys = (typeof ModelVisibility)[keyof typeof ModelVisibility]
+export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVisibility]
 
-export interface ModelCardInterface {
+export const EntryCardKindLabel = {
+  model: 'model card',
+  'data-card': 'data card',
+} as const
+export type EntryCardKindLabelKeys = (typeof EntryCardKindLabel)[keyof typeof EntryCardKindLabel]
+
+export const EntryCardKind = {
+  model: 'model-card',
+  'data-card': 'data-card',
+} as const
+export type EntryCardKindKeys = (typeof EntryCardKind)[keyof typeof EntryCardKind]
+
+export interface EntryCardInterface {
   schemaId: string
   version: number
   createdBy: string
-
   metadata: unknown
 }
 
@@ -306,26 +319,44 @@ export interface CollaboratorEntry {
   roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
 
-export interface ModelInterface {
+export const EntryKindLabel = {
+  model: 'model',
+  'data-card': 'data card',
+} as const
+export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindLabel]
+
+export const EntryKind = {
+  MODEL: 'model',
+  DATA_CARD: 'data-card',
+} as const
+export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
+
+export const isEntryKind = (value: unknown): value is EntryKindKeys => {
+  return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD)
+}
+
+export interface EntryInterface {
   id: string
   name: string
+  kind: EntryKindKeys
   teamId: string
   description: string
   settings: {
     ungovernedAccess: boolean
   }
-  card: ModelCardInterface
-  visibility: ModelVisibilityKeys
+  card: EntryCardInterface
+  visibility: EntryVisibilityKeys
   collaborators: CollaboratorEntry[]
   createdBy: string
   createdAt: Date
 }
 
-export interface ModelForm {
+export interface EntryForm {
   name: string
+  kind: EntryKindKeys
   teamId: string
   description: string
-  visibility: ModelVisibilityKeys
+  visibility: EntryVisibilityKeys
 }
 
 export interface AccessRequestMetadata {
@@ -376,7 +407,9 @@ export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 export interface ReviewResponse {
   user: string
   decision: DecisionKeys
+  role: string
   comment?: string
+  outdated?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -396,7 +429,7 @@ type PartialReviewRequestInterface =
     }
 
 export type ReviewRequestInterface = {
-  model: ModelInterface
+  model: EntryInterface
   role: string
   kind: 'release' | 'access'
   responses: ReviewResponse[]

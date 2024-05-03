@@ -5,14 +5,14 @@ import { useGetModel } from 'actions/model'
 import { CreateReleaseParams, postRelease, postSimpleFileForRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import ReleaseForm from 'src/model/releases/ReleaseForm'
 import { FileInterface, FileUploadProgress, FileWithMetadata, FlattenedModelImage, isFileInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver } from 'utils/stringUtils'
@@ -26,6 +26,7 @@ export default function NewRelease() {
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isRegistryError, setIsRegistryError] = useState(false)
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const router = useRouter()
@@ -33,6 +34,8 @@ export default function NewRelease() {
 
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId)
+
+  const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -156,6 +159,7 @@ export default function NewRelease() {
                   filesMetadata={filesMetadata}
                   onFilesMetadataChange={(value) => setFilesMetadata(value)}
                   onImageListChange={(value) => setImageList(value)}
+                  onRegistryError={handleRegistryError}
                   currentFileUploadProgress={currentFileUploadProgress}
                   uploadedFiles={uploadedFiles}
                   filesToUploadCount={files.length}
@@ -165,7 +169,7 @@ export default function NewRelease() {
                     variant='contained'
                     loading={loading}
                     type='submit'
-                    disabled={!semver || !releaseNotes || !isValidSemver(semver)}
+                    disabled={!(semver && releaseNotes && isValidSemver(semver) && !isRegistryError)}
                     sx={{ width: 'fit-content' }}
                     data-test='createReleaseButton'
                   >

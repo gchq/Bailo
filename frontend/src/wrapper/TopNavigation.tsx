@@ -26,7 +26,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
-import ModelSearchField from 'src/wrapper/ModelSearchField'
+import EntrySearch from 'src/wrapper/EntrySearch'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
 import { User } from '../../types/types'
@@ -84,8 +84,8 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
     setNavbarAnchorEl(event.currentTarget)
   }
 
-  const handleNewModelClicked = () => {
-    router.push('/model/new')
+  const handleCreateEntryClick = () => {
+    router.push('/entry/new')
   }
 
   const handleMenuClose = () => {
@@ -118,12 +118,12 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                 <MenuIcon sx={{ color: theme.palette.topNavigation.main }} />
               </IconButton>
               <Menu anchorEl={navbarAnchorEl} open={navbarMenuOpen} onClose={() => setNavbarAnchorEl(null)}>
-                <Link href='/model/new'>
+                <Link href='/entry/new'>
                   <MenuItem>
                     <ListItemIcon>
                       <Add fontSize='small' />
                     </ListItemIcon>
-                    <ListItemText>Add new model</ListItemText>
+                    <ListItemText>Create</ListItemText>
                   </MenuItem>
                 </Link>
                 <Divider />
@@ -148,7 +148,6 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               </Menu>
             </Box>
           )}
-          {/* <Box sx={{ flexGrow: 1, ml: 2, width: 'fit-content' }}> */}
           <Link
             href='/'
             color='inherit'
@@ -159,18 +158,17 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               <Image src={bailoLogo} alt='bailo logo' width={142} height={60} />
             </Stack>
           </Link>
-          {/* </Box> */}
           {isSmOrLarger && (
             <Box>
               <Stack direction='row' spacing={1} justifyContent='center' alignItems='center'>
                 <ExpandableButton
-                  label='Add Model'
+                  label='Create'
                   icon={<Add />}
-                  onClick={() => handleNewModelClicked()}
-                  ariaLabel='Add a new model'
+                  onClick={handleCreateEntryClick}
+                  ariaLabel='Create a new data card or model'
                   height='40px'
                 />
-                <ModelSearchField />
+                <EntrySearch />
                 {currentUser ? (
                   <>
                     <Button
