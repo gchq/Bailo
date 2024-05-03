@@ -57,6 +57,10 @@ const modelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
 
+vi.mock('../../src/utils/database.ts', async () => ({
+  isReplicaSet: vi.fn(() => false),
+}))
+
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
 }))
