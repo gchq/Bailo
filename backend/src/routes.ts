@@ -16,6 +16,7 @@ import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModel
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
 import { postAccessRequestComment } from './routes/v2/model/accessRequest/postAccessRequestComment.js'
+import { getExportedModel } from './routes/v2/model/export/getExportedModel.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getDownloadFile } from './routes/v2/model/file/getDownloadFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
@@ -133,6 +134,7 @@ server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
 server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
 server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
 server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
+server.get('/api/v2/model/:modelId/export', getExportedModel)
 
 server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)

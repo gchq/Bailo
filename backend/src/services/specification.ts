@@ -55,6 +55,10 @@ export const modelCardInterfaceSchema = z.object({
   }),
 })
 
+export const modelExportSchema = z.object({
+  model: z.object({}).openapi({}),
+})
+
 export const modelCardRevisionInterfaceSchema = z.object({
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   schemaId: z.string().openapi({ example: 'minimal-general-v10-beta' }),

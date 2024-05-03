@@ -1,8 +1,8 @@
 import { outdent } from 'outdent'
 
-import { ModelInterface } from '../models/Model.js'
-import { SchemaInterface } from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
+import { getModelById } from './model.js'
+import { findSchemaById } from './schema.js'
 
 type Common = {
   title: string
@@ -31,8 +31,14 @@ type Fragment = (
 ) &
   Common
 
-export async function renderToMarkdown(user: UserInterface, model: ModelInterface, schema: SchemaInterface) {
-  if (!model.card) {
+export async function renderToMarkdown(user: UserInterface, modelId: string) {
+  const model = await getModelById(user, modelId)
+  if (!model || !model.card) {
+    throw new Error('Trying to export model with no corresponding card')
+  }
+
+  const schema = await findSchemaById(model.card.schemaId)
+  if (!schema) {
     throw new Error('Trying to export model with no corresponding card')
   }
 
