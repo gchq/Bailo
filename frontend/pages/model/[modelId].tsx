@@ -10,8 +10,8 @@ import AccessRequests from 'src/entry/model/AccessRequests'
 import InferenceServices from 'src/entry/model/InferenceServices'
 import ModelImages from 'src/entry/model/ModelImages'
 import Releases from 'src/entry/model/Releases'
-import Settings from 'src/entry/model/Settings'
 import Overview from 'src/entry/overview/Overview'
+import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 
 export default function Model() {
@@ -58,7 +58,7 @@ export default function Model() {
               view: <InferenceServices model={model} />,
               hidden: !uiConfig.inference.enabled,
             },
-            { title: 'Settings', path: 'settings', view: <Settings model={model} /> },
+            { title: 'Settings', path: 'settings', view: <Settings entry={model} /> },
           ]
         : [],
     [model, uiConfig, currentUserRoles],
