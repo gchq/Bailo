@@ -3,35 +3,36 @@ import { LoadingButton } from '@mui/lab'
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
 import { patchModel } from 'actions/model'
 import { useGetTeam } from 'actions/team'
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import TeamSelect from 'src/TeamSelect'
-import { EntryForm, EntryInterface, EntryKind, TeamInterface } from 'types/types'
+import { EntryForm, EntryInterface, EntryKindLabel, TeamInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
 
-type ModelAccessProps = {
-  model: EntryInterface
+type EntryDetailsProps = {
+  entry: EntryInterface
 }
 
-export default function ModelDetails({ model }: ModelAccessProps) {
+export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [team, setTeam] = useState<TeamInterface | undefined>()
-  const [modelName, setModelName] = useState(model.name)
-  const [description, setDescription] = useState(model.description)
-  const [visibility, setVisibility] = useState<EntryForm['visibility']>(model.visibility)
+  const [name, setName] = useState(entry.name)
+  const [description, setDescription] = useState(entry.description)
+  const [visibility, setVisibility] = useState<EntryForm['visibility']>(entry.visibility)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   const sendNotification = useNotification()
-  const { team: modelTeam, isTeamLoading, isTeamError } = useGetTeam(model.teamId)
+  const { team: entryTeam, isTeamLoading, isTeamError } = useGetTeam(entry.teamId)
 
   useEffect(() => {
-    setTeam(modelTeam)
-  }, [modelTeam])
+    setTeam(entryTeam)
+  }, [entryTeam])
 
-  const formValid = team && modelName && description
+  const isFormValid = useMemo(() => team && name && description, [team, name, description])
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -39,20 +40,20 @@ export default function ModelDetails({ model }: ModelAccessProps) {
     setIsLoading(true)
 
     const formData: EntryForm = {
-      name: modelName,
-      kind: model.kind,
+      name,
       teamId: team?.id ?? 'Uncategorised',
+      kind: entry.kind,
       description,
       visibility,
     }
-    const response = await patchModel(model.id, formData)
+    const response = await patchModel(entry.id, formData)
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
     } else {
       sendNotification({
         variant: 'success',
-        msg: 'Model updated',
+        msg: `${toSentenceCase(EntryKindLabel[entry.kind])} updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }
@@ -65,7 +66,9 @@ export default function ModelDetails({ model }: ModelAccessProps) {
         <Lock />
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Private</Typography>
-          <Typography variant='caption'>Only named individuals will be able to view this model</Typography>
+          <Typography variant='caption'>{`Only named individuals will be able to view this ${
+            EntryKindLabel[entry.kind]
+          }`}</Typography>
         </Stack>
       </Stack>
     )
@@ -77,7 +80,9 @@ export default function ModelDetails({ model }: ModelAccessProps) {
         <LockOpen />
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Public</Typography>
-          <Typography variant='caption'>Any authorised user will be able to see this model</Typography>
+          <Typography variant='caption'>{`Any authorised user will be able to see this ${
+            EntryKindLabel[entry.kind]
+          }`}</Typography>
         </Stack>
       </Stack>
     )
@@ -92,16 +97,11 @@ export default function ModelDetails({ model }: ModelAccessProps) {
       <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
         <>
           <Typography variant='h6' component='h2'>
-            Model Details
+            {`${toTitleCase(EntryKindLabel[entry.kind])} Details`}
           </Typography>
           <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
             <TeamSelect value={team} loading={isTeamLoading} onChange={(value) => setTeam(value)} />
-            <EntryNameInput
-              autoFocus
-              value={modelName}
-              kind={EntryKind.MODEL}
-              onChange={(value) => setModelName(value)}
-            />
+            <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
           </Stack>
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
         </>
@@ -130,9 +130,9 @@ export default function ModelDetails({ model }: ModelAccessProps) {
           </RadioGroup>
         </>
         <Divider />
-        <Tooltip title={!formValid ? 'Please make sure all required fields are filled out' : ''}>
+        <Tooltip title={!isFormValid ? 'Please make sure all required fields are filled out' : ''}>
           <span>
-            <LoadingButton variant='contained' loading={isLoading} disabled={!formValid} type='submit'>
+            <LoadingButton variant='contained' loading={isLoading} disabled={!isFormValid} type='submit'>
               Save
             </LoadingButton>
           </span>

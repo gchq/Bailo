@@ -5,6 +5,7 @@ import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import Overview from 'src/entry/overview/Overview'
+import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 
 export default function DataCard() {
@@ -13,7 +14,13 @@ export default function DataCard() {
   const { model: dataCard, isModelLoading: isDataCardLoading, isModelError: isDataCardError } = useGetModel(dataCardId)
 
   const tabs = useMemo(
-    () => (dataCard ? [{ title: 'Overview', path: 'overview', view: <Overview entry={dataCard} /> }] : []),
+    () =>
+      dataCard
+        ? [
+            { title: 'Overview', path: 'overview', view: <Overview entry={dataCard} /> },
+            { title: 'Settings', path: 'settings', view: <Settings entry={dataCard} /> },
+          ]
+        : [],
     [dataCard],
   )
 
