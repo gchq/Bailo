@@ -3,7 +3,6 @@ import { WritableStream } from 'node:stream/web'
 import { OpenTelemetryBunyanStream } from '@opentelemetry/instrumentation-bunyan'
 import bunyan from 'bunyan'
 import chalk from 'chalk'
-import { getNamespace } from 'cls-hooked'
 import { omit } from 'lodash-es'
 import path, { join } from 'path'
 import util from 'util'
@@ -134,8 +133,7 @@ export class Writer extends WritableStream {
 function productionStream() {
   return {
     write: (log) => {
-      const namespace = getNamespace('bailo')
-      process.stdout.write(`${JSON.stringify({ ...log, requestId: namespace?.get('reqId') })}\n`)
+      process.stdout.write(`${JSON.stringify(log)}\n`)
     },
   }
 }
