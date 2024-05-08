@@ -7,7 +7,7 @@ import { ReviewListStatus } from 'types/types'
 export default function Review() {
   const tabs = useMemo(
     () => [
-      { title: 'Your open reviews', path: 'releases', view: <ReviewsListContainer status={ReviewListStatus.OPEN} /> },
+      { title: 'Your open reviews', path: 'open', view: <ReviewsListContainer status={ReviewListStatus.OPEN} /> },
       {
         title: 'Your archived reviews',
         path: 'archived',

@@ -3,18 +3,10 @@ import router from 'next/router'
 import { useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import ReviewsList from 'src/reviews/ReviewsList'
-import { ReviewListStatusKeys } from 'types/types'
+import { ReviewKind, ReviewKindKeys, ReviewListStatusKeys } from 'types/types'
 
-export const ReviewListContainerCategory = {
-  RELEASE: 'release',
-  ACCESS: 'access',
-} as const
-
-export type ReviewListContainerCategoryKeys =
-  (typeof ReviewListContainerCategory)[keyof typeof ReviewListContainerCategory]
-
-function isReviewListContainerCategory(value: string | string[] | undefined): value is ReviewListContainerCategoryKeys {
-  return value === ReviewListContainerCategory.RELEASE || value === ReviewListContainerCategory.ACCESS
+function isReviewListContainerCategory(value: string | string[] | undefined): value is ReviewKindKeys {
+  return value === ReviewKind.RELEASE || value === ReviewKind.ACCESS
 }
 
 export interface ReviewsListContainerProps {
@@ -24,17 +16,15 @@ export interface ReviewsListContainerProps {
 export default function ReviewsListContainer({ status }: ReviewsListContainerProps) {
   const { category } = router.query
 
-  const [selectedCategory, setSelectedCategory] = useState<ReviewListContainerCategoryKeys>(
-    ReviewListContainerCategory.RELEASE,
-  )
+  const [selectedCategory, setSelectedCategory] = useState<ReviewKindKeys>(ReviewKind.RELEASE)
 
   useEffect(() => {
     if (isReviewListContainerCategory(category)) {
-      setSelectedCategory(category ?? ReviewListContainerCategory.RELEASE)
+      setSelectedCategory(category ?? ReviewKind.RELEASE)
     }
   }, [category])
 
-  const handleListItemClick = (category: ReviewListContainerCategoryKeys) => {
+  const handleListItemClick = (category: ReviewKindKeys) => {
     setSelectedCategory(category)
     router.replace({
       query: { ...router.query, category },
@@ -48,21 +38,21 @@ export default function ReviewsListContainer({ status }: ReviewsListContainerPro
     >
       <List sx={{ width: '200px' }}>
         <SimpleListItemButton
-          selected={selectedCategory === ReviewListContainerCategory.RELEASE}
-          onClick={() => handleListItemClick(ReviewListContainerCategory.RELEASE)}
+          selected={selectedCategory === ReviewKind.RELEASE}
+          onClick={() => handleListItemClick(ReviewKind.RELEASE)}
         >
           Releases
         </SimpleListItemButton>
         <SimpleListItemButton
-          selected={selectedCategory === ReviewListContainerCategory.ACCESS}
-          onClick={() => handleListItemClick(ReviewListContainerCategory.ACCESS)}
+          selected={selectedCategory === ReviewKind.ACCESS}
+          onClick={() => handleListItemClick(ReviewKind.ACCESS)}
         >
           Access requests
         </SimpleListItemButton>
       </List>
       <Container sx={{ my: 2 }}>
-        {selectedCategory === ReviewListContainerCategory.RELEASE && <ReviewsList kind='release' status={status} />}
-        {selectedCategory === ReviewListContainerCategory.ACCESS && <ReviewsList kind='access' status={status} />}
+        {selectedCategory === ReviewKind.RELEASE && <ReviewsList kind={ReviewKind.RELEASE} status={status} />}
+        {selectedCategory === ReviewKind.ACCESS && <ReviewsList kind={ReviewKind.ACCESS} status={status} />}
       </Container>
     </Stack>
   )
