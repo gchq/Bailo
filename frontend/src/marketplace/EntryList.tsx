@@ -11,7 +11,7 @@ interface EntryListProps {
   entries: EntrySearchResult[]
   selectedChips: string[]
   onSelectedChipsChange: (chips: string[]) => void
-  entriesErrorMessage: string
+  entriesErrorMessage?: string
 }
 
 export default function EntryList({
