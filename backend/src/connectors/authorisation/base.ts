@@ -81,12 +81,9 @@ export class BasicAuthorisationConnector {
     return Promise.all(
       models.map(async (model) => {
         // Is this a constrained user token.
-        if (user.token && (await validateTokenForModel(user.token, model.id, ActionLookup[action]))) {
-          return {
-            id: model.id,
-            success: false,
-            info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
-          }
+        const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+        if (!tokenAuth.success) {
+          return tokenAuth
         }
 
         // Prohibit non-collaborators from seeing private models
@@ -115,12 +112,9 @@ export class BasicAuthorisationConnector {
     return Promise.all(
       schemas.map(async (schema) => {
         // Is this a constrained user token.
-        if (user.token && (await validateTokenForUse(user.token, ActionLookup[action]))) {
-          return {
-            id: schema.id,
-            success: false,
-            info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
-          }
+        const tokenAuth = await validateTokenForUse(user.token, ActionLookup[action])
+        if (!tokenAuth.success) {
+          return tokenAuth
         }
 
         if (action === SchemaAction.Create || action === SchemaAction.Delete) {
@@ -159,12 +153,9 @@ export class BasicAuthorisationConnector {
     }
 
     // Is this a constrained user token.
-    if (user.token?.actions && !user.token.actions.includes(ActionLookup[action])) {
-      return releases.map((release) => ({
-        id: release.id,
-        success: false,
-        info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
-      }))
+    const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+    if (!tokenAuth.success) {
+      return releases.map(() => tokenAuth)
     }
 
     return new Array(releases.length).fill(await this.model(user, model, actionMap[action]))
@@ -181,12 +172,9 @@ export class BasicAuthorisationConnector {
     return Promise.all(
       accessRequests.map(async (request) => {
         // Is this a constrained user token.
-        if (user.token?.actions && !user.token.actions.includes(ActionLookup[action])) {
-          return {
-            id: request.id,
-            success: false,
-            info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
-          }
+        const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+        if (!tokenAuth.success) {
+          return tokenAuth
         }
 
         // Does any individual in the access request share an entity with our user?
@@ -224,12 +212,9 @@ export class BasicAuthorisationConnector {
     return Promise.all(
       files.map(async (file) => {
         // Is this a constrained user token.
-        if (user.token?.actions && !user.token.actions.includes(ActionLookup[action])) {
-          return {
-            id: file.id,
-            success: false,
-            info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
-          }
+        const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+        if (!tokenAuth.success) {
+          return tokenAuth
         }
 
         // If they are not listed on the model, don't let them upload or delete files.
@@ -298,12 +283,9 @@ export class BasicAuthorisationConnector {
 
         // Is this a constrained user token.
         for (const action of actions) {
-          if (user.token?.actions && !user.token.actions.includes(ActionLookup[action])) {
-            return {
-              id: model.id,
-              success: false,
-              info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
-            }
+          const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+          if (!tokenAuth.success) {
+            return tokenAuth
           }
         }
 
