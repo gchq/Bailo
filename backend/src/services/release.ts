@@ -158,7 +158,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
       await createReleaseReviews(model, release)
     } catch (error) {
       // Transactions here would solve this issue.
-      log.warn('Error when creating Release Review Requests. Approval cannot be given to this release', error)
+      log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this release')
     }
   }
 
