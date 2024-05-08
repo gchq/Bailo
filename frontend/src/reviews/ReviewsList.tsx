@@ -6,33 +6,41 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import ReviewItem from 'src/reviews/ReviewItem'
-import { ReviewRequestInterface } from 'types/types'
+import { ReviewListStatus, ReviewListStatusKeys, ReviewRequestInterface } from 'types/types'
 
 type ReviewsListProps = {
-  kind: 'release' | 'access' | 'archived'
+  kind: 'release' | 'access'
+  status: ReviewListStatusKeys
 }
 
-export default function ReviewsList({ kind }: ReviewsListProps) {
+export default function ReviewsList({ kind, status }: ReviewsListProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [filteredReviews, setFilteredReviews] = useState<ReviewRequestInterface[]>([])
 
-  const containsUserResponse = useCallback(
+  const approvedByUser = useCallback(
     (review: ReviewRequestInterface) => {
-      return currentUser && review.responses.find((response) => response.user === `user:${currentUser.dn}`)
+      return (
+        currentUser &&
+        review.responses.find(
+          (response) => response.user === `user:${currentUser.dn}` && response.decision === 'approve',
+        )
+      )
     },
     [currentUser],
   )
 
   useEffect(() => {
-    if (kind === 'archived') {
-      setFilteredReviews(reviews.filter((filteredReview) => containsUserResponse(filteredReview)))
+    if (status === ReviewListStatus.ARCHIVED) {
+      setFilteredReviews(
+        reviews.filter((filteredReview) => filteredReview.kind === kind && approvedByUser(filteredReview)),
+      )
     } else {
       setFilteredReviews(
-        reviews.filter((filteredReview) => filteredReview.kind === kind && !containsUserResponse(filteredReview)),
+        reviews.filter((filteredReview) => filteredReview.kind === kind && !approvedByUser(filteredReview)),
       )
     }
-  }, [reviews, kind, containsUserResponse])
+  }, [reviews, kind, approvedByUser, status])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
@@ -44,7 +52,7 @@ export default function ReviewsList({ kind }: ReviewsListProps) {
 
   return (
     <>
-      {isCurrentUserLoading && isReviewsLoading && <Loading />}
+      {isCurrentUserLoading || (isReviewsLoading && <Loading />)}
       {filteredReviews.length === 0 && <EmptyBlob text='No reviews found' />}
       <List>
         {filteredReviews.map((review) => (
