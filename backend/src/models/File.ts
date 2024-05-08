@@ -1,10 +1,11 @@
-import { Document, model, Schema } from 'mongoose'
+import { Document, model, ObjectId, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface FileInterface {
+  _id: ObjectId
   modelId: string
 
   name: string
