@@ -19,8 +19,10 @@ export const postModelSchema = z.object({
     settings: z
       .object({
         ungovernedAccess: z.boolean().optional().default(false).openapi({ example: true }),
+        mirroredModelId: z.string(),
       })
-      .optional(),
+      .optional()
+      .default({ ungovernedAccess: false, mirroredModelId: '' }),
   }),
 })
 

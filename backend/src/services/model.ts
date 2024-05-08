@@ -14,7 +14,7 @@ import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { findSchemaById } from './schema.js'
 
-export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'>
+export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility' | 'settings'>
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
@@ -29,6 +29,10 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
         roles: ['owner'],
       },
     ],
+    settings: {
+      ungovernedAccess: false,
+      mirroredModelId: 'demo1-7zwbdq',
+    },
   })
 
   const auth = await authorisation.model(user, model, ModelAction.Create)

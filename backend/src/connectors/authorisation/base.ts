@@ -77,6 +77,13 @@ export class BasicAuthorisationConnector {
   async models(user: UserInterface, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
     return Promise.all(
       models.map(async (model) => {
+        if (!this.modelType(model, action)) {
+          return {
+            id: model.id,
+            success: false,
+            info: 'You cannot edit a mirrored model. Only the system can edit the mirrored model.',
+          }
+        }
         // Prohibit non-collaborators from seeing private models
         if (!(await this.hasModelVisibilityAccess(user, model))) {
           return {
@@ -255,6 +262,16 @@ export class BasicAuthorisationConnector {
         return { success: true, id: access.name }
       }),
     )
+  }
+
+  modelType(model: ModelDoc, action: ModelActionKeys) {
+    if (!model.settings.mirroredModelId || model.settings.mirroredModelId === '') {
+      return true
+    }
+    if (action !== ModelAction.View && action !== ModelAction.Create) {
+      return false
+    }
+    return true
   }
 }
 
