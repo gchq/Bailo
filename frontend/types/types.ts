@@ -456,3 +456,9 @@ export interface InferenceInterface {
   createdAt: string
   updatedAt: string
 }
+
+export const ReviewListStatus = {
+  OPEN: 'open',
+  ARCHIVED: 'archived',
+} as const
+export type ReviewListStatusKeys = (typeof ReviewListStatus)[keyof typeof ReviewListStatus]
