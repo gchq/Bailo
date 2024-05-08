@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
+import { SchemaAction } from '../../../src/connectors/authorisation/actions.js'
 import { BasicAuthorisationConnector } from '../../../src/connectors/authorisation/base.js'
 import { ModelDoc } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
@@ -123,7 +124,7 @@ describe('connectors > authorisation > base', () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.hasRole.mockReturnValueOnce(true)
 
-    const result = await connector.schema(user, { id: 'testSchema' } as SchemaDoc, 'create')
+    const result = await connector.schema(user, { id: 'testSchema' } as SchemaDoc, SchemaAction.Create)
 
     expect(result).toStrictEqual({
       id: 'testSchema',
@@ -135,7 +136,7 @@ describe('connectors > authorisation > base', () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.hasRole.mockReturnValueOnce(false)
 
-    const result = await connector.schema(user, { id: 'testSchema' } as SchemaDoc, 'create')
+    const result = await connector.schema(user, { id: 'testSchema' } as SchemaDoc, SchemaAction.Create)
 
     expect(result).toStrictEqual({
       id: 'testSchema',

@@ -15,10 +15,10 @@ describe('middleware > defaultAuthentication', () => {
     } as any
     const next = vi.fn()
 
-    const response = getTokenFromAuthHeader(request, {} as Response, next)
+    getTokenFromAuthHeader(request, {} as Response, next)
 
-    expect(response).rejects.toThrowError('No authorisation header found')
-    expect(next).not.toBeCalled()
+    expect(request.user).toBe(undefined)
+    expect(next).toBeCalled()
   })
 
   test('getTokenFromAuthHeader > valid authentication', async () => {
@@ -31,8 +31,8 @@ describe('middleware > defaultAuthentication', () => {
 
     await getTokenFromAuthHeader(request, {} as Response, next)
 
-    expect(request.token).toEqual(token)
-    expect(request.user).toEqual({ dn: token.user })
+    expect(request.user.token).toEqual(token)
+    expect(request.user).toEqual({ dn: token.user, token })
     expect(next).toBeCalled()
   })
 
