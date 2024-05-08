@@ -8,11 +8,9 @@ import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 import audit from '../../connectors/audit/index.js'
 import authorisation from '../../connectors/authorisation/index.js'
 import { ModelDoc } from '../../models/Model.js'
-import { TokenActions, TokenDoc } from '../../models/Token.js'
 import { UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import { getModelById } from '../../services/model.js'
-import { validateTokenForModel } from '../../services/token.js'
 import config from '../../utils/config.js'
 import { Forbidden, Unauthorised } from '../../utils/result.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
@@ -158,7 +156,7 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccess(access: Access, user: UserInterface, token: TokenDoc | undefined) {
+async function checkAccess(access: Access, user: UserInterface) {
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
@@ -167,14 +165,6 @@ async function checkAccess(access: Access, user: UserInterface, token: TokenDoc 
     log.warn({ userDn: user.dn, access, e }, 'Bad modelId provided')
     // bad model id?
     return false
-  }
-
-  if (token) {
-    try {
-      await validateTokenForModel(token, model.id, TokenActions.ImageRead)
-    } catch (e) {
-      return false
-    }
   }
 
   const auth = await authorisation.image(user, model, access)
@@ -196,7 +186,7 @@ export const getDockerRegistryAuth = [
       throw Unauthorised({}, 'No authorisation header found', rlog)
     }
 
-    const { error, user, admin, token } = await getUserFromAuthHeader(authorization)
+    const { error, user, admin } = await getUserFromAuthHeader(authorization)
 
     if (error) {
       throw Unauthorised({ error }, error, rlog)
@@ -242,7 +232,7 @@ export const getDockerRegistryAuth = [
     const accesses = scopes.map(generateAccess)
 
     for (const access of accesses) {
-      if (!admin && !(await checkAccess(access, user, token))) {
+      if (!admin && !(await checkAccess(access, user))) {
         throw Forbidden({ access }, 'User does not have permission to carry out request', rlog)
       }
     }

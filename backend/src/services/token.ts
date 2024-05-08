@@ -1,5 +1,6 @@
 import { customAlphabet } from 'nanoid'
 
+import { Response } from '../connectors/authorisation/base.js'
 import { TokenActionsKeys, TokenDoc, TokenScopeKeys } from '../models/Token.js'
 import Token from '../models/Token.js'
 import { UserInterface } from '../models/User.js'
@@ -110,22 +111,68 @@ export async function getTokenFromAuthHeader(header: string) {
   return token
 }
 
-export async function validateTokenForModel(token: TokenDoc, modelId: string, action: TokenActionsKeys) {
+export async function validateTokenForUse(token: TokenDoc | undefined, action: TokenActionsKeys): Promise<Response> {
+  if (!token) {
+    // User session comes without restrictions
+    return {
+      id: action,
+      success: true,
+    }
+  }
+
+  if (token.scope === 'models') {
+    return {
+      id: token._id,
+      success: false,
+      info: 'This token must not have model restrictions for this endpoint',
+    }
+  }
+
+  if (token.actions && !token.actions.includes(action)) {
+    return {
+      id: token._id,
+      success: false,
+      info: 'This token may not be used for this action',
+    }
+  }
+
+  return {
+    id: token._id,
+    success: true,
+  }
+}
+
+export async function validateTokenForModel(
+  token: TokenDoc | undefined,
+  modelId: string,
+  action: TokenActionsKeys,
+): Promise<Response> {
+  if (!token) {
+    // User session comes without restrictions
+    return {
+      id: modelId,
+      success: true,
+    }
+  }
+
   if (token.scope === 'models' && !token.modelIds.includes(modelId)) {
-    throw Unauthorized('This token may not be used for this model', {
-      accessKey: token.accessKey,
-      modelIds: token.modelIds,
-      modelId,
-    })
+    return {
+      id: modelId,
+      success: false,
+      info: 'This token may not be used for this model',
+    }
   }
 
-  if (!token.actions.includes(action)) {
-    throw Unauthorized('This token may not be used for this action', {
-      accessKey: token.accessKey,
-      actions: token.actions,
-      action,
-    })
+  if (token.actions && !token.actions.includes(action)) {
+    return {
+      id: modelId,
+      success: false,
+      info: 'This token may not be used for this action',
+    }
   }
 
-  return
+  return {
+    id: modelId,
+    success: true,
+  }
 }

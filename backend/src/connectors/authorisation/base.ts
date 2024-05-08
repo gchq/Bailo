@@ -7,14 +7,17 @@ import { UserInterface } from '../../models/User.js'
 import { Access, Action } from '../../routes/v1/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../services/accessRequest.js'
 import { checkAccessRequestsApproved } from '../../services/review.js'
+import { validateTokenForModel, validateTokenForUse } from '../../services/token.js'
 import { Roles } from '../authentication/Base.js'
 import authentication from '../authentication/index.js'
 import {
   AccessRequestAction,
   AccessRequestActionKeys,
+  ActionLookup,
   FileAction,
   FileActionKeys,
   ImageAction,
+  ImageActionKeys,
   ModelAction,
   ModelActionKeys,
   ReleaseAction,
@@ -23,7 +26,7 @@ import {
   SchemaActionKeys,
 } from './actions.js'
 
-type Response = { id: string; success: true } | { id: string; success: false; info: string }
+export type Response = { id: string; success: true } | { id: string; success: false; info: string }
 
 export class BasicAuthorisationConnector {
   async hasModelVisibilityAccess(user: UserInterface, model: ModelDoc) {
@@ -77,6 +80,15 @@ export class BasicAuthorisationConnector {
   async models(user: UserInterface, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
     return Promise.all(
       models.map(async (model) => {
+        // Is this a constrained user token.
+        if (user.token && (await validateTokenForModel(user.token, model.id, ActionLookup[action]))) {
+          return {
+            id: model.id,
+            success: false,
+            info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
+          }
+        }
+
         // Prohibit non-collaborators from seeing private models
         if (!(await this.hasModelVisibilityAccess(user, model))) {
           return {
@@ -100,22 +112,35 @@ export class BasicAuthorisationConnector {
   }
 
   async schemas(user: UserInterface, schemas: Array<SchemaDoc>, action: SchemaActionKeys): Promise<Array<Response>> {
-    if (action === SchemaAction.Create || action === SchemaAction.Delete) {
-      const isAdmin = await authentication.hasRole(user, Roles.Admin)
+    return Promise.all(
+      schemas.map(async (schema) => {
+        // Is this a constrained user token.
+        if (user.token && (await validateTokenForUse(user.token, ActionLookup[action]))) {
+          return {
+            id: schema.id,
+            success: false,
+            info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
+          }
+        }
 
-      if (!isAdmin) {
-        return schemas.map((schema) => ({
+        if (action === SchemaAction.Create || action === SchemaAction.Delete) {
+          const isAdmin = await authentication.hasRole(user, Roles.Admin)
+
+          if (!isAdmin) {
+            return {
+              id: schema.id,
+              success: false,
+              info: 'You cannot upload or modify a schema if you are not an admin.',
+            }
+          }
+        }
+
+        return {
           id: schema.id,
-          success: false,
-          info: 'You cannot upload or modify a schema if you are not an admin.',
-        }))
-      }
-    }
-
-    return schemas.map((schema) => ({
-      id: schema.id,
-      success: true,
-    }))
+          success: true,
+        }
+      }),
+    )
   }
 
   async releases(
@@ -133,6 +158,15 @@ export class BasicAuthorisationConnector {
       [ReleaseAction.View]: ModelAction.View,
     }
 
+    // Is this a constrained user token.
+    if (user.token?.actions && !user.token.actions.includes(ActionLookup[action])) {
+      return releases.map((release) => ({
+        id: release.id,
+        success: false,
+        info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
+      }))
+    }
+
     return new Array(releases.length).fill(await this.model(user, model, actionMap[action]))
   }
 
@@ -146,6 +180,15 @@ export class BasicAuthorisationConnector {
 
     return Promise.all(
       accessRequests.map(async (request) => {
+        // Is this a constrained user token.
+        if (user.token?.actions && !user.token.actions.includes(ActionLookup[action])) {
+          return {
+            id: request.id,
+            success: false,
+            info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
+          }
+        }
+
         // Does any individual in the access request share an entity with our user?
         const isNamed = request.metadata.overview.entities.some((value) => entities.includes(value))
 
@@ -158,7 +201,7 @@ export class BasicAuthorisationConnector {
         if (
           !isNamed &&
           (await missingRequiredRole(user, model, ['owner'])) &&
-          [AccessRequestAction.Delete, AccessRequestAction.Update].includes(action)
+          ([AccessRequestAction.Delete, AccessRequestAction.Update] as AccessRequestActionKeys[]).includes(action)
         ) {
           return { success: false, info: 'You cannot change an access request you do not own', id: request.id }
         }
@@ -180,9 +223,18 @@ export class BasicAuthorisationConnector {
 
     return Promise.all(
       files.map(async (file) => {
+        // Is this a constrained user token.
+        if (user.token?.actions && !user.token.actions.includes(ActionLookup[action])) {
+          return {
+            id: file.id,
+            success: false,
+            info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
+          }
+        }
+
         // If they are not listed on the model, don't let them upload or delete files.
         if (
-          [FileAction.Delete, FileAction.Upload].includes(action) &&
+          ([FileAction.Delete, FileAction.Upload] as FileActionKeys[]).includes(action) &&
           (await missingRequiredRole(user, model, ['owner', 'collaborator']))
         ) {
           return {
@@ -193,7 +245,7 @@ export class BasicAuthorisationConnector {
         }
 
         if (
-          [FileAction.Download].includes(action) &&
+          ([FileAction.Download] as FileActionKeys[]).includes(action) &&
           !model.settings.ungovernedAccess &&
           !hasApprovedAccessRequest &&
           (await missingRequiredRole(user, model, ['owner', 'collaborator', 'consumer']))
@@ -216,14 +268,42 @@ export class BasicAuthorisationConnector {
 
     return Promise.all(
       accesses.map(async (access) => {
+        const actions = access.actions.map((action) => {
+          switch (action) {
+            case '*':
+              return ImageAction.Wildcard
+            case 'delete':
+              return ImageAction.Delete
+            case 'list':
+              return ImageAction.List
+            case 'pull':
+              return ImageAction.Pull
+            case 'push':
+              return ImageAction.Push
+          }
+        })
+
         // Don't allow anything beyond pushing and pulling actions.
         if (
-          !access.actions.every((action) => [ImageAction.Push, ImageAction.Pull, ImageAction.List].includes(action))
+          !actions.every((action) =>
+            ([ImageAction.Push, ImageAction.Pull, ImageAction.List] as ImageActionKeys[]).includes(action),
+          )
         ) {
           return {
             success: false,
             info: 'You are not allowed to complete any actions beyond `push` or `pull` on an image.',
             id: access.name,
+          }
+        }
+
+        // Is this a constrained user token.
+        for (const action of actions) {
+          if (user.token?.actions && !user.token.actions.includes(ActionLookup[action])) {
+            return {
+              id: model.id,
+              success: false,
+              info: `You are using a token that does not have the required permission to complete this action.  Required permission: ${ActionLookup[action]}`,
+            }
           }
         }
 

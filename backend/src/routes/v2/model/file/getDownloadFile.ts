@@ -5,11 +5,9 @@ import stream from 'stream'
 import { z } from 'zod'
 
 import { FileInterface, FileInterfaceDoc } from '../../../../models/File.js'
-import { TokenActions } from '../../../../models/Token.js'
 import { downloadFile, getFileById } from '../../../../services/file.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
 import { registerPath } from '../../../../services/specification.js'
-import { validateTokenForModel } from '../../../../services/token.js'
 import { BadReq, InternalError } from '../../../../utils/error.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -96,11 +94,6 @@ export const getDownloadFile = [
       file = await getFileByReleaseFileName(req.user, params.modelId, params.semver, params.fileName)
     } else {
       file = await getFileById(req.user, params.fileId)
-    }
-
-    if (req.token) {
-      // Check that the token can be used for the requested model.
-      await validateTokenForModel(req.token, file.modelId, TokenActions.FileRead)
     }
 
     if (req.headers.range) {
