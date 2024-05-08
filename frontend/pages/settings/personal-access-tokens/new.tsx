@@ -14,7 +14,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ModelSearchResult, useListModels } from 'actions/model'
+import { EntrySearchResult, useListModels } from 'actions/model'
 import { postUserToken } from 'actions/user'
 import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import Title from 'src/common/Title'
@@ -29,7 +29,7 @@ export default function NewToken() {
   const theme = useTheme()
   const [description, setDescription] = useState('')
   const [isAllModels, setIsAllModels] = useState(false)
-  const [selectedModels, setSelectedModels] = useState<ModelSearchResult[]>([])
+  const [selectedModels, setSelectedModels] = useState<EntrySearchResult[]>([])
   const [selectedActions, setSelectedActions] = useState<TokenActionsKeys[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -95,7 +95,7 @@ export default function NewToken() {
     setSelectedModels([])
   }
 
-  const handleSelectedModelsChange = (_: SyntheticEvent<Element, Event>, value: ModelSearchResult[]) => {
+  const handleSelectedModelsChange = (_: SyntheticEvent<Element, Event>, value: EntrySearchResult[]) => {
     setSelectedModels(value)
   }
 

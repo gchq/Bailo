@@ -16,8 +16,9 @@ import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import EntryCardRevision from 'src/entry/overview/EntryCardRevision'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { EntryCardKindLabel, EntryInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/dateUtils'
+import { toTitleCase } from 'utils/stringUtils'
 
 type EntryCardHistoryDialogProps = {
   entry: EntryInterface
@@ -27,24 +28,32 @@ type EntryCardHistoryDialogProps = {
 
 export default function EntryCardHistoryDialog({ entry, open, setOpen }: EntryCardHistoryDialogProps) {
   const theme = useTheme()
-  const { modelCardRevisions, isModelCardRevisionsLoading, isModelCardRevisionsError } = useGetModelCardRevisions(
-    entry.id,
-  )
-  const sortedModelCardRevisions = useMemo(
-    () => modelCardRevisions.sort(sortByCreatedAtDescending),
-    [modelCardRevisions],
+  const {
+    modelCardRevisions: entryCardRevisions,
+    isModelCardRevisionsLoading: isEntryCardRevisionsLoading,
+    isModelCardRevisionsError: isEntryCardRevisionsError,
+  } = useGetModelCardRevisions(entry.id)
+  const sortedEntryCardRevisions = useMemo(
+    () =>
+      entryCardRevisions
+        .sort(sortByCreatedAtDescending)
+        .map((entryCardRevision) => (
+          <EntryCardRevision key={entryCardRevision.version} entryCard={entryCardRevision} entryKind={entry.kind} />
+        )),
+    [entry.kind, entryCardRevisions],
   )
 
-  if (isModelCardRevisionsError) {
-    return <MessageAlert message={isModelCardRevisionsError.info.message} severity='error' />
+  if (isEntryCardRevisionsError) {
+    return <MessageAlert message={isEntryCardRevisionsError.info.message} severity='error' />
   }
 
   return (
     <>
-      {isModelCardRevisionsLoading && <Loading />}
+      {isEntryCardRevisionsLoading && <Loading />}
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
         <DialogTitle>
-          History details for <span style={{ color: theme.palette.primary.main }}>{entry.name}</span>
+          {`${toTitleCase(EntryCardKindLabel[entry.kind])} History - `}
+          <span style={{ color: theme.palette.primary.main }}>{entry.name}</span>
         </DialogTitle>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 550 }}>
@@ -55,9 +64,7 @@ export default function EntryCardHistoryDialog({ entry, open, setOpen }: EntryCa
                 <TableCell>Created At</TableCell>
               </TableRow>
             </TableHead>
-            {sortedModelCardRevisions.map((modelCardRevision) => (
-              <EntryCardRevision key={entry.id} modelCard={modelCardRevision} />
-            ))}
+            {sortedEntryCardRevisions}
           </Table>
         </TableContainer>
         <DialogActions>

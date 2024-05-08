@@ -12,7 +12,7 @@ import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, SplitSchemaNoRender } from 'types/types'
+import { EntryCardKindLabel, EntryInterface, SplitSchemaNoRender } from 'types/types'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 
 type FormEditPageProps = {
@@ -25,8 +25,8 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
   const [errorMessage, setErrorMessage] = useState('')
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
-  const { isModelError, mutateModel } = useGetModel(entry.id)
-  const { mutateModelCardRevisions } = useGetModelCardRevisions(entry.id)
+  const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id)
+  const { mutateModelCardRevisions: mutateEntryCardRevisions } = useGetModelCardRevisions(entry.id)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -42,7 +42,7 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
       const res = await putModelCard(entry.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
-        mutateModelCardRevisions()
+        mutateEntryCardRevisions()
       } else {
         setErrorMessage(res.data)
       }
@@ -52,7 +52,7 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
 
   function onCancel() {
     if (schema) {
-      mutateModel()
+      mutateEntry()
       const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], entry.card.metadata)
       for (const step of steps) {
         step.steps = steps
@@ -101,8 +101,8 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
 
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
+  if (isEntryError) {
+    return <MessageAlert message={isEntryError.info.message} severity='error' />
   }
 
   return (
@@ -141,9 +141,9 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
                 variant='outlined'
                 onClick={() => setIsEdit(!isEdit)}
                 sx={{ mb: { xs: 2 } }}
-                data-test='editModelCardButton'
+                data-test='editEntryCardButton'
               >
-                Edit Model card
+                {`Edit ${EntryCardKindLabel[entry.kind]}`}
               </Button>
             </Stack>
           )}
@@ -153,8 +153,8 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
               onSubmit={onSubmit}
               openTextInputDialog={() => setJsonUploadDialogOpen(true)}
               loading={loading}
-              cancelDataTestId='cancelEditModelCardButton'
-              saveDataTestId='saveModelCardButton'
+              cancelDataTestId='cancelEditEntryCardButton'
+              saveDataTestId='saveEntryCardButton'
             />
           )}
         </Stack>
@@ -172,10 +172,10 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
       <EntryCardHistoryDialog entry={entry} open={historyDialogOpen} setOpen={setHistoryDialogOpen} />
       <TextInputDialog
         open={jsonUploadDialogOpen}
-        setOpen={setJsonUploadDialogOpen}
+        onClose={() => setJsonUploadDialogOpen(false)}
         onSubmit={handleJsonFormOnSubmit}
-        helperText='Paste in raw JSON to fill in the model card form'
-        dialogTitle='Add raw JSON to form'
+        helperText={`Paste in raw JSON to fill in the ${EntryCardKindLabel[entry.kind]} form`}
+        dialogTitle='Add Raw JSON to Form'
       />
     </>
   )

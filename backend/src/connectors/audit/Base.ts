@@ -36,6 +36,7 @@ export const AuditInfo = {
   UpdateModelCard: { typeId: 'UpdateModelCard', description: 'Model Card Updated', auditKind: AuditKind.Update },
 
   CreateFile: { typeId: 'CreateFile', description: 'File Information Created', auditKind: AuditKind.Create },
+  ViewFile: { typeId: 'ViewFile', description: 'File Downloaded', auditKind: AuditKind.View },
   ViewFiles: { typeId: 'ViewFiles', description: 'File Information Viewed', auditKind: AuditKind.View },
   DeleteFile: { typeId: 'DeleteFile', description: 'File Information Deleted', auditKind: AuditKind.Delete },
 
@@ -111,6 +112,7 @@ export abstract class BaseAuditConnector {
   abstract onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[])
 
   abstract onCreateFile(req: Request, file: FileInterfaceDoc)
+  abstract onViewFile(req: Request, file: FileInterfaceDoc)
   abstract onViewFiles(req: Request, modelId: string, files: FileInterface[])
   abstract onDeleteFile(req: Request, modelId: string, fileId: string)
 

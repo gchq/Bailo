@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 interface TextUploadDialogProps {
   open: boolean
-  setOpen: (isOpen: boolean) => void
+  onClose: () => void
   onSubmit: (formData: string) => void
   helperText?: string
   submitButtonText?: string
@@ -12,7 +12,7 @@ interface TextUploadDialogProps {
 
 export default function TextInputDialog({
   open,
-  setOpen,
+  onClose,
   onSubmit,
   helperText = '',
   dialogTitle = '',
@@ -25,14 +25,14 @@ export default function TextInputDialog({
     setFormData('')
   }
   return (
-    <Dialog maxWidth='lg' open={open} onClose={() => setOpen(false)}>
+    <Dialog maxWidth='lg' open={open} onClose={onClose}>
       <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent sx={{ p: 2 }}>
         <TextField
           size='small'
           helperText={helperText}
           multiline
-          rows={10}
+          minRows={10}
           maxRows={15}
           value={formData}
           onChange={(e) => setFormData(e.target.value)}
@@ -40,6 +40,9 @@ export default function TextInputDialog({
         ></TextField>
       </DialogContent>
       <DialogActions sx={{ pr: 2, pt: 0 }}>
+        <Button variant='outlined' onClick={onClose}>
+          Cancel
+        </Button>
         <Button
           variant='contained'
           disabled={formData.length === 0}

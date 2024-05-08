@@ -7,11 +7,11 @@ import EntryCardVersion from 'src/entry/EntryCardVersion'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { EntryKind } from 'types/types'
 
-export default function ModelCardVersion() {
+export default function DataCardVersion() {
   const router = useRouter()
-  const { modelId, modelCardVersion }: { modelId?: string; modelCardVersion?: number } = router.query
+  const { dataCardId, dataCardVersion }: { dataCardId?: string; dataCardVersion?: number } = router.query
 
-  const { entryCard, isEntryCardLoading, isEntryCardError } = useGetEntryCard(modelId, modelCardVersion)
+  const { entryCard, isEntryCardLoading, isEntryCardError } = useGetEntryCard(dataCardId, dataCardVersion)
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entryCard?.schemaId || '')
 
   const error = MultipleErrorWrapper(`Unable to load history page`, {
@@ -22,10 +22,10 @@ export default function ModelCardVersion() {
 
   return (
     <>
-      <Title text='Model Card Revision' />
+      <Title text='Data Card Revision' />
       {(isEntryCardLoading || isSchemaLoading) && <Loading />}
-      {entryCard && schema && modelId && (
-        <EntryCardVersion entryCard={entryCard} schema={schema} entryId={modelId} entryKind={EntryKind.MODEL} />
+      {entryCard && schema && dataCardId && (
+        <EntryCardVersion entryCard={entryCard} schema={schema} entryId={dataCardId} entryKind={EntryKind.DATA_CARD} />
       )}
     </>
   )

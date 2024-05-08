@@ -1,10 +1,16 @@
 import semver from 'semver'
 
-export const toTitleCase = (value: string): string =>
-  value
+export const toTitleCase = (value: string): string => {
+  return value
+    .replace(/[-_]/g, ' ')
     .split(' ')
     .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`)
     .join(' ')
+}
+
+export const toSentenceCase = (value: string): string => {
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`.replace(/[-_]/g, ' ')
+}
 
 export const plural = (value: number, phrase: string) => {
   return `${value} ${phrase}${value === 1 ? '' : 's'}`

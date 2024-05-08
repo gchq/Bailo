@@ -107,9 +107,9 @@ export async function searchModels(
 
   for (const filter of filters) {
     // This switch statement is here to ensure we always handle all filters in the 'GetModelFilterKeys'
-    // enum.  Eslint will throw an error if we are not exhaustiviely matching all the enum options,
+    // enum.  Eslint will throw an error if we are not exhaustively matching all the enum options,
     // which makes it far harder to forget.
-    // The 'Unexpected filter' should never be reached, as we have guarenteed type consistency provided
+    // The 'Unexpected filter' should never be reached, as we have guaranteed type consistency provided
     // by TypeScript.
     switch (filter) {
       case 'mine':

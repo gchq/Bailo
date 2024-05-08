@@ -59,7 +59,7 @@ export async function createAccessRequest(
     await createAccessRequestReviews(model, accessRequest)
   } catch (error) {
     // Transactions here would solve this issue.
-    log.warn('Error when creating Release Review Requests. Approval cannot be given to this Access Request', error)
+    log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this Access Request')
   }
 
   sendWebhooks(

@@ -64,16 +64,29 @@ def local_model():
 
 
 @pytest.fixture(scope="session")
-def weights_path(tmpdir_factory):
-    weights = "Test Weights"
-    fn = tmpdir_factory.mktemp("data").join("weights.pth")
+def test_path(tmpdir_factory):
+    weights = "Test"
+    fn = tmpdir_factory.mktemp("data").join("test.pth")
     with open(str(fn), "w") as weights_file:
         weights_file.write(weights)
     return fn
 
 
+@pytest.fixture(scope="session")
+def test_path_large(tmpdir_factory):
+    weights = "Test"
+    fn = tmpdir_factory.mktemp("data").join("test.pth")
+
+    f = open(str(fn), "wb")
+    f.seek(8589934592 - 1)  # 8GB
+    f.write(b"\0")
+    f.close()
+
+    return fn
+
+
 @pytest.fixture
-def standard_experiment(example_model, weights_path):
+def standard_experiment(example_model, test_path):
     experiment = example_model.create_experiment()
 
     # Arbitrary params
@@ -92,14 +105,14 @@ def standard_experiment(example_model, weights_path):
         experiment.start_run()
         experiment.log_params(params)
         experiment.log_metrics(metrics)
-        experiment.log_artifacts([str(weights_path)])
+        experiment.log_artifacts([str(test_path)])
         experiment.log_dataset("test_dataset")
 
     return experiment
 
 
 @pytest.fixture
-def mlflow_id(weights_path):
+def mlflow_id(test_path):
     mlflow_client = mlflow.tracking.MlflowClient(tracking_uri="http://127.0.0.1:5000")
     experiment_name = f"Test_{str(random.randint(1, 1000000))}"
     mlflow_id = mlflow_client.create_experiment(name=experiment_name)
@@ -118,7 +131,7 @@ def mlflow_id(weights_path):
     with mlflow.start_run():
         mlflow.log_params(params)
         mlflow.log_metric("accuracy", 0.86)
-        mlflow.log_artifact(str(weights_path))
+        mlflow.log_artifact(str(test_path))
         mlflow.set_tag("Training Info", "YOLOv5 Demo Model")
 
     return mlflow_id
