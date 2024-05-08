@@ -5,15 +5,24 @@ import Link from 'next/link'
 import { Fragment } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
+import MessageAlert from 'src/MessageAlert'
 
 interface EntryListProps {
   entries: EntrySearchResult[]
   selectedChips: string[]
   onSelectedChipsChange: (chips: string[]) => void
+  entriesErrorMessage: string
 }
 
-export default function EntryList({ entries, selectedChips, onSelectedChipsChange }: EntryListProps) {
+export default function EntryList({
+  entries,
+  selectedChips,
+  onSelectedChipsChange,
+  entriesErrorMessage,
+}: EntryListProps) {
   const theme = useTheme()
+
+  if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
 
   return (
     <>
