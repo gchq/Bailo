@@ -1,7 +1,7 @@
 import { customAlphabet } from 'nanoid'
 
 import { Response } from '../connectors/authorisation/base.js'
-import { TokenActionsKeys, TokenDoc, TokenScopeKeys } from '../models/Token.js'
+import { TokenActionsKeys, TokenDoc, TokenScope, TokenScopeKeys } from '../models/Token.js'
 import Token from '../models/Token.js'
 import { UserInterface } from '../models/User.js'
 import { BadReq, Forbidden, NotFound, Unauthorized } from '../utils/error.js'
@@ -120,7 +120,7 @@ export async function validateTokenForUse(token: TokenDoc | undefined, action: T
     }
   }
 
-  if (token.scope === 'models') {
+  if (token.scope === TokenScope.Models) {
     return {
       id: token._id,
       success: false,
@@ -155,7 +155,7 @@ export async function validateTokenForModel(
     }
   }
 
-  if (token.scope === 'models' && !token.modelIds.includes(modelId)) {
+  if (token.scope === TokenScope.Models && !token.modelIds.includes(modelId)) {
     return {
       id: modelId,
       success: false,

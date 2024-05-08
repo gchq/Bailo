@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { SchemaAction } from '../../../src/connectors/authorisation/actions.js'
+import { ModelAction, ReleaseAction, SchemaAction } from '../../../src/connectors/authorisation/actions.js'
 import { BasicAuthorisationConnector } from '../../../src/connectors/authorisation/base.js'
 import { ModelDoc } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
@@ -90,7 +90,7 @@ describe('connectors > authorisation > base', () => {
         id: 'testModel',
         visibility: 'private',
       } as ModelDoc,
-      'create',
+      ModelAction.Create,
     )
 
     expect(result).toStrictEqual({
@@ -111,7 +111,7 @@ describe('connectors > authorisation > base', () => {
         id: 'testModel',
         visibility: 'private',
       } as ModelDoc,
-      'create',
+      ModelAction.Create,
     )
 
     expect(result).toStrictEqual({
@@ -157,7 +157,7 @@ describe('connectors > authorisation > base', () => {
         visibility: 'private',
       } as ModelDoc,
       {} as ReleaseDoc,
-      'create',
+      ReleaseAction.Create,
     )
 
     expect(result).toStrictEqual({
@@ -176,7 +176,7 @@ describe('connectors > authorisation > base', () => {
         visibility: 'private',
       } as ModelDoc,
       {} as ReleaseDoc,
-      'create',
+      ReleaseAction.Create,
     )
 
     expect(result).toStrictEqual({
