@@ -271,6 +271,7 @@ export class BasicAuthorisationConnector {
     if (action !== ModelAction.View && action !== ModelAction.Create) {
       return false
     }
+    return true
   }
 }
 
