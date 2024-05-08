@@ -428,6 +428,12 @@ type PartialReviewRequestInterface =
       semver: string
     }
 
+export const ReviewKind = {
+  ACCESS: 'access',
+  RELEASE: 'release',
+} as const
+export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
+
 export type ReviewRequestInterface = {
   model: EntryInterface
   role: string
