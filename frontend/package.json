@@ -40,7 +40,7 @@
     "jsonschema": "^1.4.1",
     "lodash-es": "^4.17.21",
     "markdown-to-jsx": "^7.3.2",
-    "next": "13.4.5",
+    "next": "14.1.1",
     "next-remove-imports": "^1.0.12",
     "notistack": "^3.0.1",
     "pretty-bytes": "^6.1.1",
