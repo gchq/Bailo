@@ -1,22 +1,39 @@
+FROM node:18-alpine as backend
+RUN apk add --no-cache libc6-compat
+RUN apk update
+WORKDIR /app
+COPY ../../backend/package*.json ./
+RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
+COPY . .
+RUN npm run build
+
+FROM node:18-alpine as frontend
+RUN apk add --no-cache libc6-compat
+RUN apk update
+WORKDIR /app
+COPY ../../frontend/package*.json ./
+RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm run build
+
 FROM ubuntu:jammy
-
 RUN apt update
-
 ENV DEBIAN_FRONTEND=noninteractive
-
 RUN apt install git curl wget gnupg ca-certificates iproute2 nginx supervisor -y
 
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - &&\
     apt install nodejs -y
 
-ENV MINIO_ROOT_USER=minioaccesskey
-ENV MINIO_ROOT_PASSWORD=minioaccesskey
-#ENV MINIO_ACCESS_KEY=minioaccesskey
-#ENV MINIO_SECRET_KEY=miniosecretkey
+ENV MINIO_ROOT_USER=minioadmin
+ENV MINIO_ROOT_PASSWORD=minioadmin
 VOLUME minio-data
 RUN wget https://dl.min.io/server/minio/release/linux-amd64/minio &&\
+    wget https://dl.min.io/client/mc/release/linux-amd64/mc &&\
     chmod +x minio &&\
-    mv minio /usr/local/bin/
+    chmod +x mc &&\
+    mv minio /usr/local/bin/ &&\
+    mv mc /usr/local/bin/
 
 RUN wget -qO - https://pgp.mongodb.com/server-6.0.asc |  gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-6.0.gpg &&\
     echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" |  tee /etc/apt/sources.list.d/mongodb-org-6.0.list &&\
@@ -31,8 +48,8 @@ RUN wget https://github.com/distribution/distribution/releases/download/v2.8.3/r
     mv registry /usr/local/bin/
 ENV REGISTRY_HTTP_TLS_CERTIFICATE=/Bailo/backend/certs/cert.pem
 ENV REGISTRY_HTTP_TLS_KEY=/Bailo/backend/certs/key.pem
-ENV REGISTRY_STORAGE_S3_ACCESSKEY=minioaccesskey
-ENV REGISTRY_STORAGE_S3_SECRETKEY=miniosecretkey
+ENV REGISTRY_STORAGE_S3_ACCESSKEY=minioadmin
+ENV REGISTRY_STORAGE_S3_SECRETKEY=minioadmin
 ENV REGISTRY_AUTH=token
 ENV REGISTRY_AUTH_TOKEN_REALM=http://localhost:3001/api/v1/registry_auth
 ENV REGISTRY_AUTH_TOKEN_SERVICE=RegistryAuth
@@ -44,14 +61,24 @@ RUN wget https://github.com/tweedegolf/mailcrab/releases/download/v1.2.0/mailcra
     chmod +x mailcrab-linux-x86-64-gnu-v1.2.0 &&\
     mv mailcrab-linux-x86-64-gnu-v1.2.0 /usr/local/bin/mailcrab
 
-RUN git clone https://github.com/gchq/Bailo.git
-WORKDIR /Bailo
-RUN npm run certs &&\
-    npm install
-WORKDIR /Bailo/backend
-RUN npm run build
-WORKDIR /Bailo/frontend
-RUN npm run build
+# Backend
+WORKDIR /app
+COPY package*.json ./
+#RUN --mount=type=cache,target=/cache/npm npm install --omit=dev --cache=/cache/npm
+COPY --from=backend python-docs python-docs
+COPY --from=backend /app/config config
+COPY --from=backend /app/dist .
+COPY local.cjs config/local.cjs
+ENV NODE_ENV production
+
+# Frontend
+WORKDIR /app
+COPY --from=frontend /app/next.config.mjs .
+COPY --from=frontend /app/package.json .
+COPY --from=frontend /app/.next/standalone ./
+COPY --from=frontend /app/.next/static ./.next/static
+COPY --from=frontend /app/public ./public
+ENV NEXT_TELEMETRY_DISABLED 1
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
@@ -59,7 +86,7 @@ WORKDIR /
 
 EXPOSE 8080
 
-ENTRYPOINT ["/bin/sh"]
+#ENTRYPOINT ["/bin/sh"]
 CMD ["/usr/bin/supervisord"]
-
-#CMD minio server /minio-data; mongod; nginx; registry serve registry.conf; mailcrab; node /Bailo/backend/src/index.js; node /Bailo/fronend/server.js
+#CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.c"]
+#ENTRYPOINT ["/usr/bin/supervisord"]
