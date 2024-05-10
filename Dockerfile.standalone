@@ -63,8 +63,10 @@ RUN wget https://github.com/tweedegolf/mailcrab/releases/download/v1.2.0/mailcra
 
 # Backend
 WORKDIR /app/backend
-COPY package*.json ./
+COPY backend/package*.json ./
+COPY backend/certs/san.cnf ./
 RUN --mount=type=cache,target=/cache/npm npm install --omit=dev --cache=/cache/npm
+RUN mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config ./san.cnf -extensions 'v3_req' -days 360
 COPY backend/python-docs python-docs
 COPY --from=backend /app/config config
 COPY --from=backend /app/dist .
@@ -86,7 +88,4 @@ WORKDIR /
 
 EXPOSE 8080
 
-#ENTRYPOINT ["/bin/sh"]
-CMD ["/usr/bin/supervisord"]
-#CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.c"]
-#ENTRYPOINT ["/usr/bin/supervisord"]
+ENTRYPOINT ["/usr/bin/supervisord"]
