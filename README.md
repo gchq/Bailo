@@ -86,6 +86,13 @@ sharing.
 
 ### Installation:
 
+To run in standalone mode (http://localhost:8080):
+
+```bash
+docker build -t "bailo:standalone" -f ./Dockerfile.standalone .
+docker run --name bailo -p 8080:8080 -d bailo:standalone
+```bash
+
 To run in development mode (modified files on your host machine will be reloaded into the running application):
 
 ```bash
