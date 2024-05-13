@@ -1,11 +1,12 @@
 import { LoadingButton } from '@mui/lab'
-import { Autocomplete, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { SyntheticEvent, useMemo, useState } from 'react'
+import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
+import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 import { useGetModelRoles } from '../../actions/model'
 import { useGetReviewRequestsForModel } from '../../actions/review'
-import { AccessRequestInterface, ReleaseInterface, ReviewRequestInterface } from '../../types/types'
+import { AccessRequestInterface, Decision, ReleaseInterface, ReviewRequestInterface } from '../../types/types'
 import { getRoleDisplay } from '../../utils/roles'
 import MessageAlert from '../MessageAlert'
 import Loading from './Loading'
@@ -13,6 +14,7 @@ import Loading from './Loading'
 export const ResponseTypes = {
   Approve: 'approve',
   RequestChanges: 'request_changes',
+  UndoReview: 'undo_review',
 } as const
 
 export type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
@@ -42,6 +44,7 @@ export default function ReviewWithComment({
   const [reviewComment, setReviewComment] = useState('')
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
+  const [showUndoButton, setShowUndoButton] = useState(false)
 
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
     () =>
@@ -61,6 +64,23 @@ export default function ReviewWithComment({
   function invalidComment() {
     return reviewComment.trim() === '' ? true : false
   }
+
+  useEffect(() => {
+    if (reviewRequest) {
+      const latestReviewForRole = latestReviewsForEachUser([reviewRequest]).find(
+        (latestReview) => latestReview.role === reviewRequest.role,
+      )
+      if (
+        latestReviewForRole &&
+        latestReviewForRole.responses[0] &&
+        latestReviewForRole.responses[0].decision !== Decision.UndoReview
+      ) {
+        setShowUndoButton(true)
+      } else {
+        setShowUndoButton(false)
+      }
+    }
+  }, [reviewRequest])
 
   function submitForm(decision: ResponseTypeKeys) {
     setErrorText('')
@@ -135,6 +155,20 @@ export default function ReviewWithComment({
               alignItems='center'
             >
               <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
+                {showUndoButton && (
+                  <>
+                    <LoadingButton
+                      onClick={() => submitForm(ResponseTypes.UndoReview)}
+                      loading={loading}
+                      variant='contained'
+                      color='warning'
+                      data-test='requestChangesReviewButton'
+                    >
+                      Undo Review
+                    </LoadingButton>
+                    <Divider flexItem orientation='vertical' />
+                  </>
+                )}
                 <LoadingButton
                   variant='outlined'
                   onClick={() => submitForm(ResponseTypes.RequestChanges)}

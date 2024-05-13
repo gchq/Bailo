@@ -1,15 +1,15 @@
+import { Undo } from '@mui/icons-material'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Card, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
-import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
-import { EntityKind, ReviewResponse } from 'types/types'
+import { Decision, EntityKind, ReviewResponse } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getRoleDisplay } from 'utils/roles'
 
@@ -22,7 +22,6 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
 
   const theme = useTheme()
-  const isApproved = useMemo(() => response.decision === 'approve', [response.decision])
   const username = response.user.split(':')[1]
 
   if (isModelRolesError) {
@@ -51,13 +50,13 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
                 <Typography>
                   <UserDisplay dn={username} />
-                  {` ${isApproved ? 'has approved' : 'has requested changes'}`}
+                  {response.decision === Decision.Approve && ' has approved'}
+                  {response.decision === Decision.RequestChanges && ' has requested changes'}
+                  {response.decision === Decision.UndoReview && ' has undone their review'}
                 </Typography>
-                {isApproved ? (
-                  <Done color='success' fontSize='small' />
-                ) : (
-                  <HourglassEmpty color='warning' fontSize='small' />
-                )}
+                {response.decision === Decision.Approve && <Done color='success' fontSize='small' />}
+                {response.decision === Decision.RequestChanges && <HourglassEmpty color='warning' fontSize='small' />}
+                {response.decision === Decision.UndoReview && <Undo fontSize='small' />}
                 {response.outdated && (
                   <Typography sx={{ backgroundColor: theme.palette.warning.light, borderRadius: 1, px: 0.5 }}>
                     Outdated
