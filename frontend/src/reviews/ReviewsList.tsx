@@ -52,7 +52,7 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
 
   return (
     <>
-      {isCurrentUserLoading || (isReviewsLoading && <Loading />)}
+      {(isCurrentUserLoading || isReviewsLoading) && <Loading />}
       {filteredReviews.length === 0 && <EmptyBlob text='No reviews found' />}
       <List>
         {filteredReviews.map((review) => (
