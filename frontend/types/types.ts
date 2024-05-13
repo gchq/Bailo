@@ -468,3 +468,7 @@ export const ReviewListStatus = {
   ARCHIVED: 'archived',
 } as const
 export type ReviewListStatusKeys = (typeof ReviewListStatus)[keyof typeof ReviewListStatus]
+
+export function isReviewKind(value: unknown): value is ReviewKindKeys {
+  return value === ReviewKind.RELEASE || value === ReviewKind.ACCESS
+}
