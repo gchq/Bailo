@@ -238,6 +238,7 @@ export const userTokenSchema = z.object({
 
 export const userInterfaceSchema = z.object({
   dn: z.string().openapi({ example: 'user' }),
+  isAdmin: z.boolean().openapi({ example: false }),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),

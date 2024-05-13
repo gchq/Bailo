@@ -152,7 +152,7 @@ export default function SideNavigation({
             />
             <Divider />
             {/* TODO Once currentUser api has been updated to use roles we should check if they're admin */}
-            {currentUser && (
+            {currentUser.isAdmin && (
               <>
                 <NavMenuItem
                   href='/schemas/list'

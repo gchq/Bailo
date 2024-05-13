@@ -161,6 +161,7 @@ export interface PostSimpleUpload {
 
 export interface User {
   dn: string
+  isAdmin?: boolean
 }
 
 export interface EntityObject {
