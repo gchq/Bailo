@@ -100,6 +100,9 @@ export type CreateReleaseParams = Optional<
 >
 export async function createRelease(user: UserInterface, releaseParams: CreateReleaseParams) {
   const model = await getModelById(user, releaseParams.modelId)
+  if (!(model.settings && model.settings.mirroredModelId)) {
+    throw BadReq(`Cannot create a release from a mirrored model`)
+  }
 
   if (releaseParams.modelCardVersion) {
     // Ensure that the requested model card version exists.
@@ -175,6 +178,9 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
 export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'fileIds' | 'images'>
 export async function updateRelease(user: UserInterface, modelId: string, semver: string, delta: UpdateReleaseParams) {
   const model = await getModelById(user, modelId)
+  if (!(model.settings && model.settings.mirroredModelId)) {
+    throw BadReq(`Cannot update a release on a mirrored model`)
+  }
   const release = await getReleaseBySemver(user, modelId, semver)
 
   Object.assign(release, delta)
@@ -289,6 +295,9 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
 
 export async function deleteRelease(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
+  if (!(model.settings && model.settings.mirroredModelId)) {
+    throw BadReq(`Cannot delete a release on a Smirrored model`)
+  }
   const release = await getReleaseBySemver(user, modelId, semver)
 
   const auth = await authorisation.release(user, model, release, ReleaseAction.Delete)

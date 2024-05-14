@@ -185,6 +185,20 @@ describe('services > model', () => {
     expect(result).toEqual(mockModelCard)
   })
 
+  test('getModelCardRevision > should throw Forbidden if the user tries to alter the model card', async () => {
+    const mockUser = { dn: 'testUser' } as any
+    const mockModelId = '123'
+    const mockVersion = 1
+    const mockModelCard = { modelId: mockModelId, version: mockVersion }
+
+    modelCardRevisionModel.findOne = vi.fn().mockResolvedValue(mockModelCard)
+    vi.mocked(authorisation.modelCard).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+
+    await expect(getModelCardRevision(mockUser, mockModelId, mockVersion)).rejects.toThrow(
+      /^You do not have permission/,
+    )
+  })
+
   test('_setModelCard > should throw Forbidden if user does not have write permission', async () => {
     const mockUser = { dn: 'testUser' } as any
     const mockModelId = '123'

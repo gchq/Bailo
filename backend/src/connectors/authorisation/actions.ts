@@ -43,4 +43,13 @@ export const ImageAction = {
   Push: 'push',
   List: 'list',
 }
+
 export type ImageActionKeys = (typeof ImageAction)[keyof typeof ImageAction]
+
+export const ModelCardAction = {
+  Create: 'create',
+  View: 'view',
+  Update: 'update',
+  Write: 'write',
+} as const
+export type ModelCardActionKeys = (typeof ModelCardAction)[keyof typeof ModelCardAction]

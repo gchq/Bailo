@@ -7,7 +7,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import FileModel, { ScanState } from '../models/File.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
-import { Forbidden, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { longId } from '../utils/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -23,6 +23,9 @@ export async function uploadFile(
   stream: ReadableStream,
 ) {
   const model = await getModelById(user, modelId)
+  if (!(model.settings && model.settings.mirroredModelId)) {
+    throw BadReq(`Cannot upload file to mirrored model`)
+  }
 
   const fileId = longId()
 
@@ -135,6 +138,9 @@ export async function getFilesByIds(user: UserInterface, modelId: string, fileId
 export async function removeFile(user: UserInterface, modelId: string, fileId: string) {
   const model = await getModelById(user, modelId)
   const file = await getFileById(user, fileId)
+  if (!(model.settings && model.settings.mirroredModelId)) {
+    throw BadReq(`Cannot remove a file from a mirrored model`)
+  }
 
   const auth = await authorisation.file(user, model, file, FileAction.Delete)
   if (!auth.success) {
