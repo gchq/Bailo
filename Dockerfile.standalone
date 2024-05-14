@@ -87,5 +87,7 @@ COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/superviso
 WORKDIR /
 
 EXPOSE 8080
+EXPOSE 9000
+EXPOSE 27017
 
 ENTRYPOINT ["/usr/bin/supervisord"]

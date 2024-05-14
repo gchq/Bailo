@@ -86,7 +86,7 @@ sharing.
 
 ### Installation:
 
-To run in standalone mode (http://localhost:8080):
+To run in standalone mode, not development mode (http://localhost:8080). Not for production use:
 
 ````bash
 docker build -t "bailo:standalone" -f ./Dockerfile.standalone .
