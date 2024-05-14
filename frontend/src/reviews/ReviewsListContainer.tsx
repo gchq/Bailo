@@ -17,7 +17,7 @@ export default function ReviewsListContainer({ status }: ReviewsListContainerPro
 
   useEffect(() => {
     if (isReviewKind(category)) {
-      setSelectedCategory(category ?? ReviewKind.ACCESS)
+      setSelectedCategory(category)
     }
   }, [category])
 
