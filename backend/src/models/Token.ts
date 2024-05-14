@@ -100,7 +100,7 @@ TokenSchema.pre('save', function userPreSave(next) {
   }
 
   if (this.hashMethod === HashType.Bcrypt) {
-    bcrypt.hash(this.secretKey, 8, (err: Error | undefined, hash: string) => {
+    bcrypt.hash(this.secretKey, 8, (err: Error | null, hash: string) => {
       if (err) {
         next(err)
         return
@@ -126,7 +126,7 @@ TokenSchema.methods.compareToken = function compareToken(candidateToken: string)
     }
 
     if (this.hashMethod === HashType.Bcrypt) {
-      bcrypt.compare(candidateToken, this.secretKey, (err: Error | undefined, isMatch: boolean) => {
+      bcrypt.compare(candidateToken, this.secretKey, (err: Error | null, isMatch: boolean) => {
         if (err) {
           reject(err)
           return
