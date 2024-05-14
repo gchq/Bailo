@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../../connectors/audit/index.js'
+import { Response as AuthResponse } from '../../connectors/authorisation/base.js'
 import authorisation from '../../connectors/authorisation/index.js'
 import { ModelDoc } from '../../models/Model.js'
 import { UserInterface } from '../../models/User.js'
@@ -156,7 +157,7 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccess(access: Access, user: UserInterface) {
+async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
@@ -164,11 +165,11 @@ async function checkAccess(access: Access, user: UserInterface) {
   } catch (e) {
     log.warn({ userDn: user.dn, access, e }, 'Bad modelId provided')
     // bad model id?
-    return false
+    return { id: modelId, success: false, info: 'Bad modelId provided' }
   }
 
   const auth = await authorisation.image(user, model, access)
-  return auth.success
+  return auth
 }
 
 export const getDockerRegistryAuth = [
@@ -232,8 +233,9 @@ export const getDockerRegistryAuth = [
     const accesses = scopes.map(generateAccess)
 
     for (const access of accesses) {
-      if (!admin && !(await checkAccess(access, user))) {
-        throw Forbidden({ access }, 'User does not have permission to carry out request', rlog)
+      const authResult = await checkAccess(access, user)
+      if (!admin && !authResult.success) {
+        throw Forbidden({ access }, authResult.info, rlog)
       }
     }
 

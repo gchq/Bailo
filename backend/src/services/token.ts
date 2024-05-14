@@ -167,7 +167,7 @@ export async function validateTokenForModel(
     return {
       id: modelId,
       success: false,
-      info: 'This token may not be used for this action',
+      info: `This token is missing the required action: ${action}`,
     }
   }
 
