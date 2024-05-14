@@ -25,7 +25,7 @@ exports[`routes > review > postAccessRequestReviewResponse > missing review deci
       "errors": [
         {
           "code": "invalid_type",
-          "expected": "'request_changes' | 'approve'",
+          "expected": "'request_changes' | 'approve' | 'undo_review'",
           "message": "Required",
           "path": [
             "body",
