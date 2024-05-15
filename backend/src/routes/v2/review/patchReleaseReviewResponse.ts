@@ -25,7 +25,7 @@ export const patchReleaseReviewResponseSchema = z.object({
 registerPath({
   method: 'patch',
   path: '/api/v2/model/{modelId}/release/{semver}/review',
-  tags: ['release', 'review'],
+  tags: ['review'],
   description: 'Update a review for a release.',
   schema: patchReleaseReviewResponseSchema,
   responses: {

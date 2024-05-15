@@ -25,7 +25,7 @@ export const patchAccessRequestReviewResponseSchema = z.object({
 registerPath({
   method: 'patch',
   path: '/api/v2/model/{modelId}/access-request/{AccessRequestId}/review',
-  tags: ['access-request', 'review'],
+  tags: ['review'],
   description: 'Update a review for a access request.',
   schema: patchAccessRequestReviewResponseSchema,
   responses: {
