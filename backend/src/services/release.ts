@@ -10,7 +10,7 @@ import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isBailoError } from '../types/error.js'
 import { findDuplicates } from '../utils/array.js'
-import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound, Unauthorized } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
@@ -237,6 +237,16 @@ export async function updateReleaseComment(
 
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  const originalComment = release.comments.find((comment) => comment._id.toString() === commentId)
+
+  if (!originalComment) {
+    throw NotFound(`The requested release comment was not found.`, { release, commentId })
+  }
+
+  if (user.dn !== originalComment.user) {
+    throw Unauthorized('You do not have permission to update this comment', { release, commentId })
   }
 
   const updatedRelease = await Release.findOneAndUpdate(
