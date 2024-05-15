@@ -68,6 +68,7 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
         message: { type: String },
         user: { type: String },
         createdAt: { type: String },
+        updatedAt: { type: String },
       },
     ],
 

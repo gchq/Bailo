@@ -70,6 +70,24 @@ export const testReleaseReviewWithResponses = {
   updatedAt: new Date('08/14/2023'),
 }
 
+export const testAccessRequestReviewWithResponses = {
+  modelId: 'abc',
+  accessRequestId: 'test-235',
+  kind: ReviewKind.Access,
+  responses: [
+    {
+      user: 'user',
+      decision: Decision.Approve,
+      comment: 'looks amazing!',
+    },
+  ],
+
+  role: 'msro',
+
+  createdAt: new Date('08/13/2023'),
+  updatedAt: new Date('08/14/2023'),
+}
+
 export const testReleaseReview = {
   modelId: 'abc',
   semver: '3.0.3',

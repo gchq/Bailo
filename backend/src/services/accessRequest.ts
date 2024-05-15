@@ -163,6 +163,35 @@ export async function newAccessRequestComment(user: UserInterface, accessRequest
   return updatedAccessRequest
 }
 
+export async function updateAccessRequestComment(
+  user: UserInterface,
+  accessRequestId: string,
+  commentId: string,
+  message: string,
+) {
+  const accessRequest = await getAccessRequestById(user, accessRequestId)
+
+  if (!accessRequest) {
+    throw NotFound(`The requested access request was not found.`, { accessRequestId })
+  }
+
+  const updatedAccessRequest = await AccessRequest.findOneAndUpdate(
+    { _id: accessRequest._id, 'comments._id': commentId },
+    {
+      $set: {
+        'comments.$.message': message,
+        'comments.$.updatedAt': new Date().toISOString(),
+      },
+    },
+  )
+
+  if (!updatedAccessRequest) {
+    throw InternalError(`Updated of access request failed.`, { accessRequestId })
+  }
+
+  return updatedAccessRequest
+}
+
 export async function getModelAccessRequestsForUser(user: UserInterface, modelId: string) {
   const accessRequests = await AccessRequest.find({
     modelId,

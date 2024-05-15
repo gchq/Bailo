@@ -226,6 +226,36 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
   return updatedRelease
 }
 
+export async function updateReleaseComment(
+  user: UserInterface,
+  modelId: string,
+  semver: string,
+  commentId: string,
+  message: string,
+) {
+  const release = await getReleaseBySemver(user, modelId, semver)
+
+  if (!release) {
+    throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  const updatedRelease = await Release.findOneAndUpdate(
+    { _id: release._id, 'comments._id': commentId },
+    {
+      $set: {
+        'comments.$.message': message,
+        'comments.$.updatedAt': new Date().toISOString(),
+      },
+    },
+  )
+
+  if (!updatedRelease) {
+    throw InternalError(`Update of release failed.`, { modelId, semver })
+  }
+
+  return updatedRelease
+}
+
 export async function getModelReleases(
   user: UserInterface,
   modelId: string,

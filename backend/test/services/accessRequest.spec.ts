@@ -8,7 +8,9 @@ import {
   getModelAccessRequestsForUser,
   newAccessRequestComment,
   removeAccessRequest,
+  updateAccessRequestComment,
 } from '../../src/services/accessRequest.js'
+import { testAccessRequestReviewWithResponses } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -93,6 +95,15 @@ describe('services > accessRequest', () => {
     accessRequestModelMocks.findOneAndUpdate.mockResolvedValue({})
 
     await newAccessRequestComment({} as any, '1.0.0', 'This is a new comment')
+
+    expect(accessRequestModelMocks.findOneAndUpdate).toBeCalled()
+  })
+
+  test('updateAccessRequestComment > success', async () => {
+    modelMocks.getModelById.mockResolvedValue(undefined)
+    accessRequestModelMocks.findOneAndUpdate.mockResolvedValue(testAccessRequestReviewWithResponses)
+
+    await updateAccessRequestComment({} as any, '1.0.0', 'comment-125', 'This is an updated comment')
 
     expect(accessRequestModelMocks.findOneAndUpdate).toBeCalled()
   })
