@@ -4,6 +4,8 @@ import { Request, Response } from 'express'
 import stream from 'stream'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
 import { FileInterface, FileInterfaceDoc } from '../../../../models/File.js'
 import { downloadFile, getFileById } from '../../../../services/file.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
@@ -88,6 +90,7 @@ interface GetDownloadFileResponse {
 export const getDownloadFile = [
   bodyParser.json(),
   async (req: Request, res: Response<GetDownloadFileResponse>) => {
+    req.audit = AuditInfo.ViewFile
     const { params } = parse(req, getDownloadFileSchema)
     let file: FileInterfaceDoc
     if ('semver' in params) {
@@ -109,6 +112,8 @@ export const getDownloadFile = [
     if (!stream.Body) {
       throw InternalError('We were not able to retrieve the body of this file', { fileId: file._id })
     }
+
+    await audit.onViewFile(req, file)
 
     // required to support utf-8 file names
     res.set('Content-Disposition', contentDisposition(file.name, { type: 'attachment' }))

@@ -37,5 +37,6 @@ const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {
   log.info('Listening on port', config.api.port)
 })
+httpServer.headersTimeout = 1200000
 
 registerSigTerminate(httpServer)

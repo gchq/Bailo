@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 
 import archiver from 'archiver'
+import prettyBytes from 'pretty-bytes'
 import stream, { PassThrough, Readable } from 'stream'
 
 import { sign } from '../clients/kms.js'
@@ -49,14 +50,14 @@ export async function exportModel(
   zip.pipe(s3Stream)
 
   if (config.modelMirror.export.kmsSignature.enabled) {
-    log.debug('Using signatures. Uploading to temporary S3 location first.', { modelId, semvers })
+    log.debug({ modelId, semvers }, 'Using signatures. Uploading to temporary S3 location first.')
     uploadToTemporaryS3Location(modelId, semvers, s3Stream).then(() =>
       copyToExportBucketWithSignatures(modelId, semvers, mirroredModelId).catch((error) =>
-        log.error('Failed to upload export to export location with signatures', { modelId, semvers, error }),
+        log.error({ modelId, semvers, error }, 'Failed to upload export to export location with signatures'),
       ),
     )
   } else {
-    log.debug('Signatures not enabled. Uploading to export S3 location.', { modelId, semvers })
+    log.debug({ modelId, semvers }, 'Signatures not enabled. Uploading to export S3 location.')
     uploadToExportS3Location(modelId, semvers, s3Stream, { modelId, mirroredModelId })
   }
 
@@ -73,7 +74,7 @@ export async function exportModel(
     throw InternalError('Error when adding the release(s) to the zip file.', { error })
   }
   zip.finalize()
-  log.debug('Successfully finalized zip file.', { modelId, semvers })
+  log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
 }
 
 async function copyToExportBucketWithSignatures(
@@ -82,13 +83,13 @@ async function copyToExportBucketWithSignatures(
   mirroredModelId: string,
 ) {
   let signatures = {}
-  log.debug('Getting stream from S3 to generate signatures.', { modelId, semvers })
+  log.debug({ modelId, semvers }, 'Getting stream from S3 to generate signatures.')
   const streamForDigest = await getObjectFromTemporaryS3Location(modelId, semvers)
   const messageDigest = await generateDigest(streamForDigest)
-  log.debug('Generating signatures.', { modelId, semvers })
+  log.debug({ modelId, semvers }, 'Generating signatures.')
   signatures = await sign(messageDigest)
-  log.debug('Successfully generated signatures', { modelId, semvers })
-  log.debug('Getting stream from S3 to upload to export location.', { modelId, semvers })
+  log.debug({ modelId, semvers }, 'Successfully generated signatures')
+  log.debug({ modelId, semvers }, 'Getting stream from S3 to upload to export location.')
   const streamToCopy = await getObjectFromTemporaryS3Location(modelId, semvers)
   await uploadToExportS3Location(modelId, semvers, streamToCopy, {
     modelId,
@@ -107,20 +108,26 @@ async function uploadToTemporaryS3Location(
   const object = `exportQueue/${modelId}.zip`
   try {
     await putObjectStream(bucket, object, stream, metadata)
-    log.debug('Successfully uploaded export to temporary S3 location.', {
-      bucket,
-      object,
-      modelId,
-      semvers,
-    })
+    log.debug(
+      {
+        bucket,
+        object,
+        modelId,
+        semvers,
+      },
+      'Successfully uploaded export to temporary S3 location.',
+    )
   } catch (error) {
-    log.error('Failed to export to temporary S3 location.', {
-      bucket,
-      object,
-      modelId,
-      semvers,
-      error,
-    })
+    log.error(
+      {
+        bucket,
+        object,
+        modelId,
+        semvers,
+        error,
+      },
+      'Failed to export to temporary S3 location.',
+    )
   }
 }
 
@@ -129,21 +136,27 @@ async function getObjectFromTemporaryS3Location(modelId: string, semvers: string
   const object = `exportQueue/${modelId}.zi`
   try {
     const stream = (await getObjectStream(bucket, object)).Body as Readable
-    log.debug('Successfully retrieved stream from temporary S3 location.', {
-      bucket,
-      object,
-      modelId,
-      semvers,
-    })
+    log.debug(
+      {
+        bucket,
+        object,
+        modelId,
+        semvers,
+      },
+      'Successfully retrieved stream from temporary S3 location.',
+    )
     return stream
   } catch (error) {
-    log.error('Failed to retrieve stream from temporary S3 location.', {
-      bucket,
-      object,
-      modelId,
-      semvers,
-      error,
-    })
+    log.error(
+      {
+        bucket,
+        object,
+        modelId,
+        semvers,
+        error,
+      },
+      'Failed to retrieve stream from temporary S3 location.',
+    )
     throw error
   }
 }
@@ -158,34 +171,40 @@ async function uploadToExportS3Location(
   const object = `${modelId}.zip`
   try {
     await putObjectStream(bucket, object, stream, metadata)
-    log.debug('Successfully uploaded export to export S3 location.', {
-      bucket,
-      object,
-      modelId,
-      semvers,
-    })
+    log.debug(
+      {
+        bucket,
+        object,
+        modelId,
+        semvers,
+      },
+      'Successfully uploaded export to export S3 location.',
+    )
   } catch (error) {
-    log.error('Failed to export to export S3 location.', {
-      bucket,
-      object,
-      modelId,
-      semvers,
-      error,
-    })
+    log.error(
+      {
+        bucket,
+        object,
+        modelId,
+        semvers,
+        error,
+      },
+      'Failed to export to export S3 location.',
+    )
   }
 }
 
 async function addModelCardRevisionsToZip(user: UserInterface, model: ModelDoc, zip: archiver.Archiver) {
-  log.debug('Generating zip file of model card revisions.', { user, modelId: model.id })
+  log.debug({ user, modelId: model.id }, 'Generating zip file of model card revisions.')
   const cards = await getModelCardRevisions(user, model.id)
   for (const card of cards) {
     zip.append(JSON.stringify(card.toJSON()), { name: `${card.version}.json` })
   }
-  log.debug('Finished generating zip file of model card revisions.', { user, modelId: model.id })
+  log.debug({ user, modelId: model.id }, 'Finished generating zip file of model card revisions.')
 }
 
 async function addReleasesToZip(user: UserInterface, model: ModelDoc, semvers: string[], zip: archiver.Archiver) {
-  log.debug('Adding releases to zip file', { user, modelId: model.id, semvers })
+  log.debug({ user, modelId: model.id, semvers }, 'Adding releases to zip file')
   const releases = await getReleasesForExport(user, model.id, semvers)
 
   const errors: any[] = []
@@ -194,7 +213,7 @@ async function addReleasesToZip(user: UserInterface, model: ModelDoc, semvers: s
   if (errors.length > 0) {
     throw InternalError('Error when generating the release zip file.', { errors })
   }
-  log.debug('Completed generating zip file of releases.', { user, modelId: model.id, semvers })
+  log.debug({ user, modelId: model.id, semvers }, 'Completed generating zip file of releases.')
   return zip
 }
 
@@ -225,7 +244,7 @@ async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: Re
   } catch (error: any) {
     throw InternalError('Error when generating the zip file.', { error })
   }
-  log.debug('Finished adding release to zip file of releases.', { user, modelId: model.id, semver: release.semver })
+  log.debug({ user, modelId: model.id, semver: release.semver }, 'Finished adding release to zip file of releases.')
   return zip
 }
 
@@ -235,7 +254,10 @@ async function checkTotalFileSize(modelId: string, semvers: string[]) {
     return
   }
   const totalFileSize = await getTotalFileSize(fileIds)
-  log.debug('Calculated estimated total file size included in export.', { modelId, semvers, size: totalFileSize })
+  log.debug(
+    { modelId, semvers, size: prettyBytes(totalFileSize) },
+    'Calculated estimated total file size included in export.',
+  )
   if (totalFileSize > config.modelMirror.export.maxSize) {
     throw BadReq('Requested export is too large.', { size: totalFileSize, maxSize: config.modelMirror.export.maxSize })
   }

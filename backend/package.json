@@ -55,6 +55,7 @@
     "nanoid": "^5.0.6",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.13",
+    "pretty-bytes": "^6.1.1",
     "qs": "^6.12.1",
     "semver": "^7.6.0",
     "shelljs": "^0.8.5",
