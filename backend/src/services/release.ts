@@ -315,6 +315,10 @@ export function getReleaseName(release: ReleaseDoc): string {
 }
 
 export async function removeFileFromReleases(user: UserInterface, model: ModelDoc, fileId: string) {
+  if (!(model.settings && model.settings.mirroredModelId)) {
+    throw BadReq(`Cannot update a release on a mirrored model`)
+  }
+
   const query = {
     modelId: model.id,
     // Match documents where the element exists in the array

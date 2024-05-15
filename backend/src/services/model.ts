@@ -1,7 +1,7 @@
 import { Validator } from 'jsonschema'
 
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction, ModelActionKeys, ModelCardAction } from '../connectors/authorisation/actions.js'
+import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
@@ -153,7 +153,7 @@ export async function getModelCard(
       throw NotFound('This model has no model card setup', { modelId, version })
     }
 
-    const auth = await authorisation.modelCard(user, model, card, ModelCardAction.View)
+    const auth = await authorisation.model(user, model, ModelAction.View)
     if (!auth.success) {
       throw Forbidden(auth.info, { userDn: user.dn, modelId })
     }
@@ -172,7 +172,7 @@ export async function getModelCardRevision(user: UserInterface, modelId: string,
     throw NotFound(`Version '${version}' does not exist on the requested model`, { modelId, version })
   }
 
-  const auth = await authorisation.modelCard(user, model, modelCard, ModelAction.View)
+  const auth = await authorisation.model(user, model, ModelAction.View)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
@@ -189,11 +189,9 @@ export async function getModelCardRevisions(user: UserInterface, modelId: string
 
   // We don't track the classification of individual model cards.  Instead, we should
   // ensure that the model is accessible to the user.
-  const model = await getModelById(user, modelId)
+  const _model = await getModelById(user, modelId)
 
-  const auths = await authorisation.modelCards(user, model, modelCardRevisions, ModelAction.View)
-
-  return modelCardRevisions.filter((_, i) => auths[i].success)
+  return modelCardRevisions
 }
 
 // This is an internal function.  Use an equivalent like 'updateModelCard' or 'createModelCardFromSchema'
@@ -227,7 +225,7 @@ export async function _setModelCard(
   }
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
-  const auth = await authorisation.modelCard(user, model, revision, ModelCardAction.Update)
+  const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }

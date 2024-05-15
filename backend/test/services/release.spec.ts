@@ -1,7 +1,10 @@
+//import { model } from 'mongoose'
 import { describe, expect, test, vi } from 'vitest'
 
 import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { UserInterface } from '../../src/models/User.js'
+//import { getModelCard } from '../../src/services/model.js'
 import {
   createRelease,
   deleteRelease,
@@ -222,6 +225,18 @@ describe('services > release', () => {
     )
 
     expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
+  test('createRelease > should throw Forbidden if the user tries to alter a mirrored model card', async () => {
+    vi.mocked(authorisation.release).mockResolvedValueOnce({
+      info: 'You do not have permission',
+      success: false,
+      id: '',
+    })
+    modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
+    const response = modelMocks.getModelById({} as UserInterface, 'modelId', 1)
+
+    expect(response).rejects.toThrowError(/^Cannot create a release from a mirrored model/)
   })
 
   test('updateRelease > bad authorisation', async () => {

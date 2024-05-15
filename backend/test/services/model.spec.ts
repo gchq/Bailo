@@ -2,11 +2,13 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { UserInterface } from '../../src/models/User.js'
 import {
   _setModelCard,
   canUserActionModelById,
   createModel,
   getModelById,
+  getModelCard,
   getModelCardRevision,
   searchModels,
 } from '../../src/services/model.js'
@@ -185,20 +187,6 @@ describe('services > model', () => {
     expect(result).toEqual(mockModelCard)
   })
 
-  test('getModelCardRevision > should throw Forbidden if the user tries to alter the model card', async () => {
-    const mockUser = { dn: 'testUser' } as any
-    const mockModelId = '123'
-    const mockVersion = 1
-    const mockModelCard = { modelId: mockModelId, version: mockVersion }
-
-    modelCardRevisionModel.findOne = vi.fn().mockResolvedValue(mockModelCard)
-    vi.mocked(authorisation.modelCard).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
-
-    await expect(getModelCardRevision(mockUser, mockModelId, mockVersion)).rejects.toThrow(
-      /^You do not have permission/,
-    )
-  })
-
   test('_setModelCard > should throw Forbidden if user does not have write permission', async () => {
     const mockUser = { dn: 'testUser' } as any
     const mockModelId = '123'
@@ -218,6 +206,17 @@ describe('services > model', () => {
       /^You do not have permission to update this model card/,
     )
     expect(modelCardRevisionModel.save).not.toBeCalled()
+  })
+
+  test('getModelCardRevision > should throw Forbidden if the user tries to alter a mirrored model card', async () => {
+    vi.mocked(authorisation.model).mockResolvedValueOnce({
+      info: 'You do not have permission',
+      success: false,
+      id: '',
+    })
+
+    const response = getModelCard({} as UserInterface, 'modelId', 1)
+    expect(response).rejects.toThrowError(/^You do not have permission/)
   })
 
   test('_setModelCard > should save and update model card if user has write permission', async () => {

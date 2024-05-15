@@ -1,6 +1,6 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterfaceDoc } from '../../models/File.js'
-import { EntryVisibility, ModelCardInterface, ModelDoc } from '../../models/Model.js'
+import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { SchemaDoc } from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
@@ -17,8 +17,6 @@ import {
   ImageAction,
   ModelAction,
   ModelActionKeys,
-  ModelCardAction,
-  ModelCardActionKeys,
   ReleaseAction,
   ReleaseActionKeys,
   SchemaAction,
@@ -49,10 +47,6 @@ export class BasicAuthorisationConnector {
 
   async model(user: UserInterface, model: ModelDoc, action: ModelActionKeys) {
     return (await this.models(user, [model], action))[0]
-  }
-
-  async modelCard(user: UserInterface, model: ModelDoc, modelCard: ModelCardInterface, action: ModelCardActionKeys) {
-    return (await this.modelCards(user, model, [modelCard], action))[0]
   }
 
   async schema(user: UserInterface, schema: SchemaDoc, action: SchemaActionKeys) {
@@ -105,32 +99,6 @@ export class BasicAuthorisationConnector {
     )
   }
 
-  async modelCards(
-    user: UserInterface,
-    model: ModelDoc,
-    modelCards: Array<ModelCardInterface>,
-    action: ModelCardActionKeys,
-  ): Promise<Array<Response>> {
-    const actionMap: Record<ModelCardActionKeys, ModelActionKeys> = {
-      [ModelCardAction.Create]: ModelAction.Write,
-      [ModelCardAction.Write]: ModelAction.Write,
-      [ModelCardAction.Update]: ModelAction.Update,
-      [ModelCardAction.View]: ModelAction.View,
-    }
-    return Promise.all(
-      modelCards.map(async () => {
-        if (!this.modelCardType(model, action)) {
-          return {
-            id: model.id,
-            success: false,
-            info: 'You cannot edit a mirrored model. Only the system can edit the mirrored model.',
-          }
-        }
-        return await this.model(user, model, actionMap[action])
-      }),
-    )
-  }
-
   async schemas(user: UserInterface, schemas: Array<SchemaDoc>, action: SchemaActionKeys): Promise<Array<Response>> {
     if (action === SchemaAction.Create || action === SchemaAction.Delete) {
       const isAdmin = await authentication.hasRole(user, Roles.Admin)
@@ -164,19 +132,8 @@ export class BasicAuthorisationConnector {
       [ReleaseAction.Update]: ModelAction.Update,
       [ReleaseAction.View]: ModelAction.View,
     }
-    return Promise.all(
-      releases.map(async () => {
-        if (!this.releaseType(model, action)) {
-          return {
-            id: model.id,
-            success: false,
-            info: 'You cannot edit a mirrored model. Only the system can edit the mirrored model.',
-          }
-        }
-        return await this.model(user, model, actionMap[action])
-        //return new Array(releases.length).fill(await this.model(user, model, actionMap[action]))
-      }),
-    )
+
+    return new Array(releases.length).fill(await this.model(user, model, actionMap[action]))
   }
 
   async accessRequests(
@@ -223,13 +180,6 @@ export class BasicAuthorisationConnector {
 
     return Promise.all(
       files.map(async (file) => {
-        if (!this.fileType(model, action)) {
-          return {
-            id: model.id,
-            success: false,
-            info: 'You cannot edit a mirrored model. Only the system can edit the mirrored model.',
-          }
-        }
         // If they are not listed on the model, don't let them upload or delete files.
         if (
           [FileAction.Delete, FileAction.Upload].includes(action) &&
@@ -267,13 +217,7 @@ export class BasicAuthorisationConnector {
     return Promise.all(
       accesses.map(async (access) => {
         //also blocks the registry
-        if (!this.imageType(model, access.actions)) {
-          return {
-            id: model.id,
-            success: false,
-            info: 'You cannot edit a mirrored model. Only the system can edit the mirrored model.',
-          }
-        }
+
         //Don't allow anything beyond pushing and pulling actions.
         if (
           !access.actions.every((action) => [ImageAction.Push, ImageAction.Pull, ImageAction.List].includes(action))
@@ -313,46 +257,6 @@ export class BasicAuthorisationConnector {
         return { success: true, id: access.name }
       }),
     )
-  }
-
-  releaseType(model: ModelDoc, action: ReleaseActionKeys) {
-    if (!(model.settings && model.settings.mirroredModelId)) {
-      return true
-    }
-    if (action !== ReleaseAction.View) {
-      return false
-    }
-    return true
-  }
-
-  fileType(model: ModelDoc, action: FileActionKeys) {
-    if (!(model.settings && model.settings.mirroredModelId)) {
-      return true
-    }
-    if (action !== FileAction.View) {
-      return false
-    }
-    return true
-  }
-
-  imageType(model: ModelDoc, actions: Array<Action>) {
-    if (!(model.settings && model.settings.mirroredModelId)) {
-      return true
-    }
-    if (!actions.every((action) => [ImageAction.List].includes(action))) {
-      return false
-    }
-    return true
-  }
-
-  modelCardType(model: ModelDoc, action: ModelCardActionKeys) {
-    if (!(model.settings && model.settings.mirroredModelId)) {
-      return true
-    }
-    if (action !== ModelCardAction.View) {
-      return false
-    }
-    return true
   }
 }
 
