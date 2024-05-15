@@ -211,6 +211,16 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  onUpdateReviewResponse(req: Request, review: ReviewInterface) {
+    this.checkEventType(AuditInfo.UpdateReviewResponse, req)
+    const event = this.generateEvent(req, {
+      modelId: review.modelId,
+      ...(review.semver && { semver: review.semver }),
+      ...(review.accessRequestId && { semver: review.accessRequestId }),
+    })
+    req.log.info(event, req.audit.description)
+  }
+
   onError(req: Request, error: BailoError) {
     if (!req.audit) {
       // No audit information has been attached to the request
