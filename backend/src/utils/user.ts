@@ -26,7 +26,7 @@ function safelyCompareTokens(expected: string, actual: string) {
 // - the password is not hashed, so comparisons _must_ be done in constant time
 export async function getUserFromAuthHeader(
   header: string,
-): Promise<{ error?: string; user?: UserInterface; admin?: boolean; token?: TokenDoc }> {
+): Promise<{ error?: string; user?: UserInterface; admin?: boolean }> {
   const [method, code] = header.split(' ')
 
   if (method.toLowerCase() !== 'basic') {
@@ -59,9 +59,9 @@ export async function getUserFromAuthHeader(
   }
 
   return {
-    token: tokenDoc,
     user: {
       dn: tokenDoc.user,
+      token: tokenDoc,
     },
   }
 }

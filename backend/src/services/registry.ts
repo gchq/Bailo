@@ -1,8 +1,7 @@
 import { listImageTags, listModelRepos } from '../clients/registry.js'
-import { ImageAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { UserInterface } from '../models/User.js'
-import { Action, getAccessToken } from '../routes/v1/registryAuth.js'
+import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { Forbidden } from '../utils/error.js'
 import { getModelById } from './model.js'
 
@@ -12,7 +11,7 @@ export async function listModelImages(user: UserInterface, modelId: string) {
   const auth = await authorisation.image(user, model, {
     type: 'repository',
     name: modelId,
-    actions: [ImageAction.List as Action],
+    actions: ['list'],
   })
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
