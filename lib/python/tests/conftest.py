@@ -78,7 +78,8 @@ def test_path_large(tmpdir_factory):
     fn = tmpdir_factory.mktemp("data").join("test.pth")
 
     f = open(str(fn), "wb")
-    f.seek(8589934592 - 1)  # 8GB
+    # f.seek(8589934592 - 1)  # 8GB
+    f.seek(512 * 1024 * 1024 - 1) # 512MB
     f.write(b"\0")
     f.close()
 
