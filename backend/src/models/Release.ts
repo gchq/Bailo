@@ -27,9 +27,11 @@ export interface ReleaseInterface {
 }
 
 export interface ReviewComment {
+  _id: string
   message: string
   user: string
   createdAt: string
+  updatedAt: string
 }
 
 export interface ImageRef {

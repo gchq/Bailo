@@ -8,7 +8,7 @@ import AccessRequest from '../models/AccessRequest.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
-import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound, Unauthorized } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -173,6 +173,16 @@ export async function updateAccessRequestComment(
 
   if (!accessRequest) {
     throw NotFound(`The requested access request was not found.`, { accessRequestId })
+  }
+
+  const originalComment = accessRequest.comments.find((comment) => comment._id.toString() === commentId)
+
+  if (!originalComment) {
+    throw NotFound(`The requested access request comment was not found.`, { accessRequestId, commentId })
+  }
+
+  if (user.dn !== originalComment.user) {
+    throw Unauthorized('You do not have permission to update this comment', { accessRequestId, commentId })
   }
 
   const updatedAccessRequest = await AccessRequest.findOneAndUpdate(
