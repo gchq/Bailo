@@ -83,52 +83,57 @@ export default function EntitySelector(props: EntitySelectorProps) {
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
       )}
       {currentUser && formContext && formContext.editMode && (
-        <Autocomplete<EntityObject, true, true>
-          multiple
-          data-test='entitySelector'
-          loading={userListQuery.length > 3 && isUsersLoading}
-          open={open}
-          size='small'
-          onOpen={() => {
-            setOpen(true)
-          }}
-          onClose={() => {
-            setOpen(false)
-          }}
-          disableClearable
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          getOptionLabel={(option) => option.id}
-          value={selectedEntities || []}
-          filterOptions={(x) => x}
-          onChange={handleUserChange}
-          noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
-          onInputChange={debounceOnInputChange}
-          options={users || []}
-          renderTags={(value, getTagProps) =>
-            value.map((option, index) => (
-              <Box key={option.id} sx={{ maxWidth: '200px' }}>
-                <Chip
-                  {...getTagProps({ index })}
-                  sx={{ textOverflow: 'ellipsis' }}
-                  label={<UserDisplay dn={option.id} />}
-                />
-              </Box>
-            ))
-          }
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              placeholder='Username or group name'
-              error={rawErrors && rawErrors.length > 0}
-              label={label + (required ? ' *' : '')}
-              onKeyDown={(event: KeyboardEvent) => {
-                if (event.key === 'Backspace') {
-                  event.stopPropagation()
-                }
-              }}
-            />
-          )}
-        />
+        <>
+          <Typography fontWeight='bold'>
+            {label}
+            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+          </Typography>
+          <Autocomplete<EntityObject, true, true>
+            multiple
+            data-test='entitySelector'
+            loading={userListQuery.length > 3 && isUsersLoading}
+            open={open}
+            size='small'
+            onOpen={() => {
+              setOpen(true)
+            }}
+            onClose={() => {
+              setOpen(false)
+            }}
+            disableClearable
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            getOptionLabel={(option) => option.id}
+            value={selectedEntities || []}
+            filterOptions={(x) => x}
+            onChange={handleUserChange}
+            noOptionsText={userListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+            onInputChange={debounceOnInputChange}
+            options={users || []}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Box key={option.id} sx={{ maxWidth: '200px' }}>
+                  <Chip
+                    {...getTagProps({ index })}
+                    sx={{ textOverflow: 'ellipsis' }}
+                    label={<UserDisplay dn={option.id} />}
+                  />
+                </Box>
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder='Username or group name'
+                error={rawErrors && rawErrors.length > 0}
+                onKeyDown={(event: KeyboardEvent) => {
+                  if (event.key === 'Backspace') {
+                    event.stopPropagation()
+                  }
+                }}
+              />
+            )}
+          />
+        </>
       )}
       {formContext && !formContext.editMode && (
         <>

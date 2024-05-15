@@ -14,7 +14,7 @@ import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { findSchemaById } from './schema.js'
 
-export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'>
+export type CreateModelParams = Pick<ModelInterface, 'name' | 'kind' | 'teamId' | 'description' | 'visibility'>
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
@@ -103,9 +103,9 @@ export async function searchModels(
 
   for (const filter of filters) {
     // This switch statement is here to ensure we always handle all filters in the 'GetModelFilterKeys'
-    // enum.  Eslint will throw an error if we are not exhaustiviely matching all the enum options,
+    // enum.  Eslint will throw an error if we are not exhaustively matching all the enum options,
     // which makes it far harder to forget.
-    // The 'Unexpected filter' should never be reached, as we have guarenteed type consistency provided
+    // The 'Unexpected filter' should never be reached, as we have guaranteed type consistency provided
     // by TypeScript.
     switch (filter) {
       case 'mine':

@@ -23,7 +23,6 @@ import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
-import MessageAlert from 'src/MessageAlert'
 import { EntryKind, EntryKindKeys } from 'types/types'
 
 interface KeyAndLabel {
@@ -141,7 +140,7 @@ export default function Marketplace() {
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <Stack spacing={2} sx={{ maxWidth: '250px' }}>
             <Button component={Link} href='/entry/new' variant='contained'>
-              Create data card/model
+              Create
             </Button>
             <FormControl
               sx={{
@@ -236,9 +235,9 @@ export default function Marketplace() {
               {isModelsLoading && <Loading />}
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
-                  {isModelsError && <MessageAlert message={isModelsError.info.message} severity='error' />}
                   <EntryList
                     entries={models}
+                    entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
                   />
@@ -246,9 +245,9 @@ export default function Marketplace() {
               )}
               {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
                 <div data-test='dataCardListBox'>
-                  {isDataCardsError && <MessageAlert message={isDataCardsError.info.message} severity='error' />}
                   <EntryList
                     entries={dataCards}
+                    entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
                   />

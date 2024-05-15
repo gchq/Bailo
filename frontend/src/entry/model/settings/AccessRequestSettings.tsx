@@ -7,11 +7,11 @@ import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
-type ModelAccessProps = {
+type AccessRequestSettingsProps = {
   model: EntryInterface
 }
 
-export default function AccessRequestSettings({ model }: ModelAccessProps) {
+export default function AccessRequestSettings({ model }: AccessRequestSettingsProps) {
   const [allowUngoverned, setAllowUngoverned] = useState(model.settings.ungovernedAccess)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')

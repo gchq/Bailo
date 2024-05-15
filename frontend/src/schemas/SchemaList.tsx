@@ -5,11 +5,11 @@ import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import { SchemaInterface } from 'types/types'
+import { SchemaInterface, SchemaKindKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 interface SchemaDisplayProps {
-  schemaKind: string
+  schemaKind: SchemaKindKeys
 }
 
 export default function SchemaList({ schemaKind }: SchemaDisplayProps) {

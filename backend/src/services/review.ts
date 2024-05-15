@@ -72,7 +72,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
     })
     roleInfo.entities.forEach((entity) =>
       requestReviewForRelease(entity, review, release).catch((error) =>
-        log.warn('Error when sending notifications requesting review for release.', { error }),
+        log.warn({ error }, 'Error when sending notifications requesting review for release.'),
       ),
     )
     return review.save()
@@ -92,7 +92,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
     })
     roleInfo.entities.forEach((entity) =>
       requestReviewForAccessRequest(entity, review, accessRequest).catch((error) =>
-        log.warn('Error when sending notifications requesting review for Access Request.', { error }),
+        log.warn({ error }, 'Error when sending notifications requesting review for Access Request.'),
       ),
     )
     return review.save()
@@ -169,25 +169,25 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
   switch (review.kind) {
     case ReviewKind.Access: {
       if (!review.accessRequestId) {
-        log.error('Unable to send notification for review response. Cannot find access request ID.', { review })
+        log.error({ review }, 'Unable to send notification for review response. Cannot find access request ID.')
         return
       }
 
       const access = await getAccessRequestById(user, review.accessRequestId)
       notifyReviewResponseForAccess(review, access).catch((error) =>
-        log.warn(log.warn('Error when notifying collaborators about review response.', { error })),
+        log.warn({ error }, 'Error when notifying collaborators about review response.'),
       )
       break
     }
     case ReviewKind.Release: {
       if (!review.semver) {
-        log.error('Unable to send notification for review response. Cannot find semver.', { review })
+        log.error({ review }, 'Unable to send notification for review response. Cannot find semver.')
         return
       }
 
       const release = await getReleaseBySemver(user, review.modelId, review.semver)
       notifyReviewResponseForRelease(review, release).catch((error) =>
-        log.warn(log.warn('Error when notifying collaborators about review response.', { error })),
+        log.warn({ error }, 'Error when notifying collaborators about review response.'),
       )
       break
     }

@@ -1,19 +1,28 @@
 import { Box, Link as MuiLink, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ModelSearchResult } from 'actions/model'
+import { EntrySearchResult } from 'actions/model'
 import Link from 'next/link'
 import { Fragment } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
+import MessageAlert from 'src/MessageAlert'
 
 interface EntryListProps {
-  entries: ModelSearchResult[]
+  entries: EntrySearchResult[]
   selectedChips: string[]
   onSelectedChipsChange: (chips: string[]) => void
+  entriesErrorMessage?: string
 }
 
-export default function EntryList({ entries, selectedChips, onSelectedChipsChange }: EntryListProps) {
+export default function EntryList({
+  entries,
+  selectedChips,
+  onSelectedChipsChange,
+  entriesErrorMessage,
+}: EntryListProps) {
   const theme = useTheme()
+
+  if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
 
   return (
     <>
@@ -21,7 +30,7 @@ export default function EntryList({ entries, selectedChips, onSelectedChipsChang
       {entries.map((entry, index) => {
         return (
           <Fragment key={entry.id}>
-            <Link style={{ textDecoration: 'none' }} href={`model/${entry.id}`} passHref>
+            <Link style={{ textDecoration: 'none' }} href={`${entry.kind}/${entry.id}`} passHref>
               <MuiLink
                 variant='h5'
                 sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}

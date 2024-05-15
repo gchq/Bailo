@@ -14,6 +14,15 @@
           "minLength": 1,
           "maxLength": 5000
         },
+        "datasets": {
+          "title": "Are there any datasets related to this model?",
+          "type": "array",
+          "widget": "dataCardSelector",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
         "tags": {
           "title": "Descriptive tags for the model.",
           "description": "These tags will be searchable and will help others find this model.  Type in a tag, then press the 'enter key' to add it.",

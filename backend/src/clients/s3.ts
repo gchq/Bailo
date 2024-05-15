@@ -11,6 +11,8 @@ import {
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
+import prettyBytes from 'pretty-bytes'
+import { PassThrough, Readable } from 'stream'
 
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -28,10 +30,15 @@ export async function getS3Client() {
   })
 }
 
-export async function putObjectStream(bucket: string, key: string, body: ReadableStream) {
+export async function putObjectStream(
+  bucket: string,
+  key: string,
+  body: ReadableStream | PassThrough | Readable,
+  metadata?: Record<string, string>,
+) {
   const upload = new Upload({
     client: await getS3Client(),
-    params: { Bucket: bucket, Key: key, Body: body },
+    params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
     queueSize: 4,
     partSize: 1024 * 1024 * 64,
     leavePartsOnError: false,
@@ -39,14 +46,21 @@ export async function putObjectStream(bucket: string, key: string, body: Readabl
 
   let fileSize = 0
   upload.on('httpUploadProgress', (progress) => {
-    log.debug('Object upload is in progress', progress)
+    log.debug(
+      {
+        ...progress,
+        ...(progress.loaded && { loaded: prettyBytes(progress.loaded) }),
+        ...(progress.total && { total: prettyBytes(progress.total) }),
+      },
+      'Object upload is in progress',
+    )
     if (progress.loaded) {
       fileSize = progress.loaded
     }
   })
 
   const s3Response = await upload.done()
-  log.debug('Object upload complete', s3Response)
+  log.debug(s3Response, 'Object upload complete')
 
   return {
     fileSize,

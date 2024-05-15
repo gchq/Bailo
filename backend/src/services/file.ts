@@ -46,29 +46,29 @@ export async function uploadFile(
       try {
         av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
       } catch (error) {
-        log.error('Unable to connect to ClamAV.', error)
+        log.error(error, 'Unable to connect to ClamAV.')
         return file
       }
     }
     const avStream = av.passthrough()
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     s3Stream.pipe(avStream)
-    log.info('Scan started.', { modelId, fileId: file._id, name })
+    log.info({ modelId, fileId: file._id, name }, 'Scan started.')
 
     avStream.on('scan-complete', async (result) => {
-      log.info('Scan complete.', { result, modelId, fileId: file._id, name })
+      log.info({ result, modelId, fileId: file._id, name }, 'Scan complete.')
       await file.update({
         avScan: { state: ScanState.Complete, isInfected: result.isInfected, viruses: result.viruses },
       })
     })
     avStream.on('error', async (error) => {
-      log.error('Scan errored.', { error, modelId, fileId: file._id, name })
+      log.error({ error, modelId, fileId: file._id, name }, 'Scan errored.')
       await file.update({
         avScan: { state: ScanState.Error },
       })
     })
     avStream.on('timeout', async (error) => {
-      log.error('Scan timed out.', { error, modelId, fileId: file._id, name })
+      log.error({ error, modelId, fileId: file._id, name }, 'Scan timed out.')
       await file.update({
         avScan: { state: ScanState.Error },
       })
@@ -148,4 +148,14 @@ export async function removeFile(user: UserInterface, modelId: string, fileId: s
   await file.delete()
 
   return file
+}
+
+export async function getTotalFileSize(fileIds: string[]) {
+  const totalSize = await FileModel.aggregate()
+    .match({ _id: { $in: fileIds } })
+    .group({
+      _id: null,
+      totalSize: { $sum: '$size' },
+    })
+  return totalSize.at(0).totalSize
 }

@@ -1,58 +1,32 @@
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import { Box, Button, Card, Container } from '@mui/material'
-import { useModelCard } from 'actions/modelCard'
+import { useGetEntryCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import EntryCardVersion from 'src/entry/EntryCardVersion'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import JsonSchemaForm from 'src/Form/JsonSchemaForm'
-import { SplitSchemaNoRender } from 'types/types'
-import { getStepsFromSchema } from 'utils/formUtils'
+import { EntryKind } from 'types/types'
 
-export default function ViewModelCardVersion() {
+export default function ModelCardVersion() {
   const router = useRouter()
   const { modelId, modelCardVersion }: { modelId?: string; modelCardVersion?: number } = router.query
 
-  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const { model, isModelLoading, isModelError } = useModelCard(modelId, modelCardVersion)
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(model?.schemaId || '')
-
-  useEffect(() => {
-    if (!model || !schema) return
-    const metadata = model.metadata
-    const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
-
-    for (const step of steps) {
-      step.steps = steps
-    }
-
-    setSplitSchema({ reference: schema.id, steps })
-  }, [schema, model])
+  const { entryCard, isEntryCardLoading, isEntryCardError } = useGetEntryCard(modelId, modelCardVersion)
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entryCard?.schemaId || '')
 
   const error = MultipleErrorWrapper(`Unable to load history page`, {
+    isEntryCardError,
     isSchemaError,
-    isModelError,
   })
   if (error) return error
 
   return (
     <>
       <Title text='Model Card Revision' />
-      {(isSchemaLoading || isModelLoading) && <Loading />}
-      <Box sx={{ px: 4, py: 1 }}>
-        {!isSchemaLoading && (
-          <Container>
-            <Card sx={{ p: 4 }}>
-              <Button startIcon={<ArrowBackIosIcon />} onClick={() => router.push(`/model/${modelId}`)}>
-                Back To Model
-              </Button>
-              <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
-            </Card>
-          </Container>
-        )}
-      </Box>
+      {(isEntryCardLoading || isSchemaLoading) && <Loading />}
+      {entryCard && schema && modelId && (
+        <EntryCardVersion entryCard={entryCard} schema={schema} entryId={modelId} entryKind={EntryKind.MODEL} />
+      )}
     </>
   )
 }

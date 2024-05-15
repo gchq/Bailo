@@ -193,8 +193,8 @@ describe('services > review', () => {
     await sendReviewResponseNotification({ kind: 'access' } as ReviewDoc, user)
 
     expect(logMock.error).toHaveBeenCalledWith(
-      'Unable to send notification for review response. Cannot find access request ID.',
       { review: { kind: 'access' } },
+      'Unable to send notification for review response. Cannot find access request ID.',
     )
   })
 
@@ -210,9 +210,12 @@ describe('services > review', () => {
     releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
     await sendReviewResponseNotification({ kind: 'release' } as ReviewDoc, user)
 
-    expect(logMock.error).toHaveBeenCalledWith('Unable to send notification for review response. Cannot find semver.', {
-      review: { kind: 'release' },
-    })
+    expect(logMock.error).toHaveBeenCalledWith(
+      {
+        review: { kind: 'release' },
+      },
+      'Unable to send notification for review response. Cannot find semver.',
+    )
   })
 
   test('respondToReview > mongo update fails', async () => {
