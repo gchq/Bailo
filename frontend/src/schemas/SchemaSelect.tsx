@@ -110,7 +110,7 @@ export default function SchemaSelect({ entry }: SchemaSelectProps) {
               </Button>
             </Link>
             <Stack spacing={2} justifyContent='center' alignItems='center'>
-              <Typography variant='h6' component='h1' color='primary'>
+              <Typography variant='h5' component='h1' color='primary'>
                 Choose a schema
               </Typography>
               <Schema fontSize='large' color='primary' />
@@ -119,17 +119,17 @@ export default function SchemaSelect({ entry }: SchemaSelectProps) {
                 {` ${EntryKindLabel[entry.kind]}`} you create. Select from the list below:
               </Typography>
             </Stack>
-            <Stack sx={{ mt: 2 }} spacing={2}>
+            <Stack sx={{ mt: 2 }} spacing={2} alignItems='center'>
               <Typography color='primary' variant='h6' component='h2'>
                 Active Schemas
               </Typography>
-              <Grid container spacing={2}>
+              <Grid container spacing={2} justifyContent='center'>
                 {activeSchemaButtons}
               </Grid>
               <Typography color='primary' variant='h6' component='h2'>
                 Inactive Schemas
               </Typography>
-              <Grid container spacing={2}>
+              <Grid container spacing={2} justifyContent='center'>
                 {inactiveSchemaButtons}
               </Grid>
               <MessageAlert message={errorMessage} severity='error' />

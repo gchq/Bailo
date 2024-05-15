@@ -5,8 +5,6 @@ import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
 import { exportModel } from '../../src/services/mirroredModel.js'
 
-vi.mock('../../src/connectors/authorisation/index.js')
-
 const authMock = vi.hoisted(() => ({
   model: vi.fn(() => ({ success: true })),
 }))
@@ -58,7 +56,7 @@ vi.mock('../../src/services/release.js', () => releaseMocks)
 
 const fileMocks = vi.hoisted(() => ({
   getFilesByIds: vi.fn(() => [{ _id: '123', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() }]),
-  getTotalFileSize: vi.fn(),
+  getTotalFileSize: vi.fn(() => 42),
   downloadFile: vi.fn(() => ({ Body: 'test' })),
 }))
 vi.mock('../../src/services/file.js', () => fileMocks)
@@ -146,8 +144,8 @@ describe('services > mirroredModel', () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
     expect(logMock.error).toBeCalledWith(
-      'Failed to upload export to export location with signatures',
       expect.any(Object),
+      'Failed to upload export to export location with signatures',
     )
   })
 
@@ -156,13 +154,21 @@ describe('services > mirroredModel', () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
     expect(logMock.error).toBeCalledWith(
-      'Failed to upload export to export location with signatures',
       expect.any(Object),
+      'Failed to upload export to export location with signatures',
     )
   })
 
   test('exportModel > release export size too large', async () => {
-    configMock.modelMirror.export.maxSize = 10
+    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
+      enabled: true,
+      export: {
+        maxSize: 10,
+        kmsSignature: {
+          enabled: true,
+        },
+      },
+    })
     fileMocks.getTotalFileSize.mockReturnValueOnce(100)
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '1.2.4'])
     expect(response).rejects.toThrowError(/^Requested export is too large./)
@@ -246,7 +252,7 @@ describe('services > mirroredModel', () => {
     })
 
     await exportModel({} as UserInterface, 'modelId', true)
-    expect(logMock.error).toHaveBeenCalledWith('Failed to export to export S3 location.', expect.any(Object))
+    expect(logMock.error).toHaveBeenCalledWith(expect.any(Object), 'Failed to export to export S3 location.')
   })
 
   test('exportModel > export uploaded to S3 with signatures', async () => {
@@ -272,13 +278,13 @@ describe('services > mirroredModel', () => {
     s3Mocks.putObjectStream.mockRejectedValueOnce('')
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
-    expect(logMock.error).toBeCalledWith('Failed to export to temporary S3 location.', expect.any(Object))
+    expect(logMock.error).toBeCalledWith(expect.any(Object), 'Failed to export to temporary S3 location.')
   })
 
   test('exportModel > unable to get object from tmp S3 location', async () => {
     s3Mocks.getObjectStream.mockRejectedValueOnce('')
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
-    expect(logMock.error).toBeCalledWith('Failed to retrieve stream from temporary S3 location.', expect.any(Object))
+    expect(logMock.error).toBeCalledWith(expect.any(Object), 'Failed to retrieve stream from temporary S3 location.')
   })
 })
