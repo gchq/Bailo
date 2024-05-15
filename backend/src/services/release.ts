@@ -295,8 +295,8 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
 
 export async function deleteRelease(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
-  if (!(model.settings && model.settings.mirroredModelId)) {
-    throw BadReq(`Cannot delete a release on a Smirrored model`)
+  if (!model.settings.mirroredModelId) {
+    throw BadReq(`Cannot delete a release on a mirrored model`)
   }
   const release = await getReleaseBySemver(user, modelId, semver)
 
