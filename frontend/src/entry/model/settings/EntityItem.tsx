@@ -1,14 +1,24 @@
 import ClearIcon from '@mui/icons-material/Clear'
 import GroupsIcon from '@mui/icons-material/Groups'
 import PersonIcon from '@mui/icons-material/Person'
-import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
+import {
+  Autocomplete,
+  Chip,
+  IconButton,
+  Stack,
+  TableCell,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
 import _ from 'lodash-es'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntryInterface } from 'types/types'
+import { CollaboratorEntry, EntityKind, EntryInterface } from 'types/types'
 
 type EntityItemProps = {
   entity: CollaboratorEntry
@@ -47,7 +57,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
   return (
     <TableRow>
       <TableCell>
-        <Stack direction='row' alignItems='center' spacing={0.5}>
+        <Stack direction='row' alignItems='center' spacing={1}>
           <EntityIcon entity={entity} />
           <EntityNameDisplay entity={entity} />
         </Stack>
@@ -102,6 +112,10 @@ type EntityNameDisplayProps = {
 }
 
 function EntityNameDisplay({ entity }: EntityNameDisplayProps) {
-  const entityName = useMemo(() => entity.entity.replace('user:', '').replace('group:', ''), [entity])
-  return <UserDisplay dn={entityName} />
+  const [entityKind, entityName] = useMemo(() => entity.entity.split(':'), [entity])
+  return entityKind === EntityKind.USER || entityKind === EntityKind.GROUP ? (
+    <UserDisplay dn={entityName} />
+  ) : (
+    <Typography fontWeight='bold'>{entityName}</Typography>
+  )
 }

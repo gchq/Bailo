@@ -8,6 +8,7 @@ export interface BailoError extends Error {
 
 export enum EntityKind {
   USER = 'user',
+  GROUP = 'group',
 }
 
 export interface Entity {
@@ -126,8 +127,9 @@ export interface Role {
 }
 
 export const SchemaKind = {
-  Model: 'model',
-  AccessRequest: 'accessRequest',
+  MODEL: 'model',
+  ACCESS_REQUEST: 'accessRequest',
+  DATA_CARD: 'dataCard',
 } as const
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
@@ -293,6 +295,18 @@ export const EntryVisibility = {
 
 export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVisibility]
 
+export const EntryCardKindLabel = {
+  model: 'model card',
+  'data-card': 'data card',
+} as const
+export type EntryCardKindLabelKeys = (typeof EntryCardKindLabel)[keyof typeof EntryCardKindLabel]
+
+export const EntryCardKind = {
+  model: 'model-card',
+  'data-card': 'data-card',
+} as const
+export type EntryCardKindKeys = (typeof EntryCardKind)[keyof typeof EntryCardKind]
+
 export interface EntryCardInterface {
   schemaId: string
   version: number
@@ -304,6 +318,12 @@ export interface CollaboratorEntry {
   entity: string
   roles: Array<'owner' | 'contributor' | 'consumer' | string>
 }
+
+export const EntryKindLabel = {
+  model: 'model',
+  'data-card': 'data card',
+} as const
+export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindLabel]
 
 export const EntryKind = {
   MODEL: 'model',
@@ -387,7 +407,9 @@ export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 export interface ReviewResponse {
   user: string
   decision: DecisionKeys
+  role: string
   comment?: string
+  outdated?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -405,6 +427,12 @@ type PartialReviewRequestInterface =
       accessRequestId?: never
       semver: string
     }
+
+export const ReviewKind = {
+  ACCESS: 'access',
+  RELEASE: 'release',
+} as const
+export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
 export type ReviewRequestInterface = {
   model: EntryInterface
@@ -433,4 +461,14 @@ export interface InferenceInterface {
   createdBy: string
   createdAt: string
   updatedAt: string
+}
+
+export const ReviewListStatus = {
+  OPEN: 'open',
+  ARCHIVED: 'archived',
+} as const
+export type ReviewListStatusKeys = (typeof ReviewListStatus)[keyof typeof ReviewListStatus]
+
+export function isReviewKind(value: unknown): value is ReviewKindKeys {
+  return value === ReviewKind.RELEASE || value === ReviewKind.ACCESS
 }

@@ -3,13 +3,14 @@ import { LoadingButton } from '@mui/lab'
 import { Box, Button, Container, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { useTheme } from '@mui/material/styles'
-import { postSchema, SchemaKind } from 'actions/schema'
+import { postSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import RichTextEditor from 'src/common/RichTextEditor'
 import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
+import { SchemaKind, SchemaKindKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 const VisuallyHiddenInput = styled('input')({
@@ -30,7 +31,7 @@ export default function NewSchema() {
   const [schemaDescription, setSchemaDescription] = useState('')
   const [schemaName, setSchemaName] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
-  const [schemaKind, setSchemaKind] = useState<SchemaKind>(SchemaKind.MODEL)
+  const [schemaKind, setSchemaKind] = useState<SchemaKindKeys>(SchemaKind.MODEL)
   const [filename, setFilename] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -155,10 +156,10 @@ export default function NewSchema() {
                   size='small'
                   required
                   value={schemaKind}
-                  onChange={(e) => setSchemaKind(e.target.value as SchemaKind)}
+                  onChange={(e) => setSchemaKind(e.target.value as SchemaKindKeys)}
                 >
                   <MenuItem value={SchemaKind.MODEL}>Model</MenuItem>
-                  <MenuItem value={SchemaKind.ACCESS}>Access Request</MenuItem>
+                  <MenuItem value={SchemaKind.ACCESS_REQUEST}>Access Request</MenuItem>
                 </Select>
                 <Typography variant='caption'>
                   Schemas are used for both model cards and access request forms

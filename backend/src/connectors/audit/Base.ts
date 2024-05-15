@@ -36,6 +36,7 @@ export const AuditInfo = {
   UpdateModelCard: { typeId: 'UpdateModelCard', description: 'Model Card Updated', auditKind: AuditKind.Update },
 
   CreateFile: { typeId: 'CreateFile', description: 'File Information Created', auditKind: AuditKind.Create },
+  ViewFile: { typeId: 'ViewFile', description: 'File Downloaded', auditKind: AuditKind.View },
   ViewFiles: { typeId: 'ViewFiles', description: 'File Information Viewed', auditKind: AuditKind.View },
   DeleteFile: { typeId: 'DeleteFile', description: 'File Information Deleted', auditKind: AuditKind.Delete },
 
@@ -99,6 +100,8 @@ export const AuditInfo = {
   UpdateInference: { typeId: 'UpdateInference', description: 'Inference Service Updated', auditKind: AuditKind.Update },
   ViewInference: { typeId: 'ViewInference', description: 'Inference Service Viewed', auditKind: AuditKind.View },
   ViewInferences: { typeId: 'ViewInferences', description: 'Inferences Viewed', auditKind: AuditKind.View },
+
+  CreateExport: { typeId: 'CreateExport', description: 'Model Exported', auditKind: AuditKind.Create },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -114,6 +117,7 @@ export abstract class BaseAuditConnector {
   abstract onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[])
 
   abstract onCreateFile(req: Request, file: FileInterfaceDoc)
+  abstract onViewFile(req: Request, file: FileInterfaceDoc)
   abstract onViewFiles(req: Request, modelId: string, files: FileInterface[])
   abstract onDeleteFile(req: Request, modelId: string, fileId: string)
 
@@ -153,6 +157,8 @@ export abstract class BaseAuditConnector {
     modelId: string,
     images: { repository: string; name: string; tags: string[] }[],
   )
+
+  abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[])
 
   abstract onError(req: Request, error: BailoError)
 

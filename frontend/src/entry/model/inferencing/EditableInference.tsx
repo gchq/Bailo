@@ -27,6 +27,7 @@ export default function EditableInference({ inference }: EditableInferenceProps)
   const [processorType, setProcessorType] = useState(inference.settings.processorType)
   const [memory, setMemory] = useState(inference.settings.memory)
   const [errorMessage, setErrorMessage] = useState('')
+  const [isRegistryError, setIsRegistryError] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isEdit, onIsEditChange] = useState(false)
 
@@ -40,6 +41,8 @@ export default function EditableInference({ inference }: EditableInferenceProps)
     setProcessorType(inference.settings.processorType)
     setMemory(inference.settings.memory)
   }, [setDescription, setPort, setProcessorType, setMemory, inference])
+
+  const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
   useEffect(() => {
     resetForm()
@@ -108,6 +111,7 @@ export default function EditableInference({ inference }: EditableInferenceProps)
         onCancel={handleCancel}
         onSubmit={handleSubmit}
         errorMessage={errorMessage}
+        isRegistryError={isRegistryError}
         editButtonText='Edit Settings'
       />
       <InferenceForm
@@ -117,6 +121,7 @@ export default function EditableInference({ inference }: EditableInferenceProps)
         formData={{ image, description, port, processorType, memory }}
         onImageChange={(value) => setImage(value)}
         onDescriptionChange={(value) => setDescription(value)}
+        onRegistryError={handleRegistryError}
         onProcessorTypeChange={(value) => setProcessorType(value)}
         onMemoryChange={(value) => setMemory(value)}
         onPortChange={(value) => setPort(value)}

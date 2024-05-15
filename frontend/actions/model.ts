@@ -4,11 +4,12 @@ import useSWR from 'swr'
 import { EntryForm, EntryInterface, EntryKindKeys, ModelImage, Role } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-export interface ModelSearchResult {
+export interface EntrySearchResult {
   id: string
   name: string
   description: string
   tags: Array<string>
+  kind: EntryKindKeys
 }
 
 export function useListModels(
@@ -27,7 +28,7 @@ export function useListModels(
   }
   const { data, error, mutate } = useSWR<
     {
-      models: ModelSearchResult[]
+      models: EntrySearchResult[]
     },
     ErrorInfo
   >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
