@@ -74,7 +74,7 @@ class Model(Entry):
             visibility=visibility,
         )
 
-        model._Entry__unpack(res["model"])
+        model._unpack(res["model"])
 
         return model
 
@@ -94,7 +94,7 @@ class Model(Entry):
             description=res["description"],
         )
 
-        model._Entry__unpack(res)
+        model._unpack(res)
         model.get_card_latest()
 
         return model
@@ -106,7 +106,7 @@ class Model(Entry):
 
         ..note:: If a model card is not provided, the current model card attribute value is used
         """
-        self._Entry__update_card(card=model_card)
+        self._update_card(card=model_card)
 
     def create_experiment(
         self,
@@ -199,27 +199,27 @@ class Model(Entry):
 
     @property
     def model_card(self):
-        return self.card
+        return self._card
 
     @model_card.setter
     def model_card(self, value):
-        self.card = value
+        self._card = value
 
     @property
     def model_card_version(self):
-        return self.card_version
+        return self._card_version
 
     @model_card_version.setter
     def model_card_version(self, value):
-        self.card_version = value
+        self._card_version = value
 
     @property
     def model_card_schema(self):
-        return self.card_schema
+        return self._card_schema
 
     @model_card_schema.setter
     def model_card_schema(self, value):
-        self.card_schema = value
+        self._card_schema = value
 
 
 class Experiment:

@@ -65,7 +65,7 @@ class Datacard(Entry):
             visibility=visibility,
         )
 
-        datacard._Entry__unpack(res["model"])
+        datacard._unpack(res["model"])
 
         return datacard
 
@@ -84,7 +84,7 @@ class Datacard(Entry):
             name=res["name"],
             description=res["description"],
         )
-        datacard._Entry__unpack(res)
+        datacard._unpack(res)
 
         datacard.get_card_latest()
 
@@ -97,28 +97,28 @@ class Datacard(Entry):
 
         ..note:: If a datacard is not provided, the current datacard attribute value is used
         """
-        self._Entry__update_card(card=data_card)
+        self._update_card(card=data_card)
 
     @property
     def data_card(self):
-        return self.card
+        return self._card
 
     @data_card.setter
     def data_card(self, value):
-        self.card = value
+        self._card = value
 
     @property
     def data_card_version(self):
-        return self.card_version
+        return self._card_version
 
     @data_card_version.setter
     def data_card_version(self, value):
-        self.card_version = value
+        self._card_version = value
 
     @property
     def data_card_schema(self):
-        return self.card_schema
+        return self._card_schema
 
     @data_card_schema.setter
     def data_card_schema(self, value):
-        self.card_schema = value
+        self._card_schema = value

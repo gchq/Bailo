@@ -25,9 +25,9 @@ class Entry:
         self.kind = kind
         self.visibility = visibility
 
-        self.card = None
-        self.card_version = None
-        self.card_schema = None
+        self._card = None
+        self._card_version = None
+        self._card_schema = None
 
     def update(self) -> None:
         """Upload and retrieve any changes to the entry summary on Bailo."""
@@ -38,7 +38,7 @@ class Entry:
             description=self.description,
             visibility=self.visibility,
         )
-        self.__unpack(res["model"])
+        self._unpack(res["model"])
 
     def card_from_schema(self, schema_id: str) -> None:
         """Create a card using a schema on Bailo.
@@ -89,14 +89,14 @@ class Entry:
 
         return res["roles"]
 
-    def __update_card(self, card: dict[str, Any] | None = None) -> None:
+    def _update_card(self, card: dict[str, Any] | None = None) -> None:
         if card is None:
-            card = self.card
+            card = self._card
 
         res = self.client.put_model_card(model_id=self.id, metadata=card)
         self.__unpack_card(res["card"])
 
-    def __unpack(self, res):
+    def _unpack(self, res):
         self.id = res["id"]
         self.name = res["name"]
         self.description = res["description"]
@@ -107,10 +107,10 @@ class Entry:
             self.visibility = ModelVisibility.PUBLIC
 
     def __unpack_card(self, res):
-        self.card_version = res["version"]
-        self.card_schema = res["schemaId"]
+        self._card_version = res["version"]
+        self._card_schema = res["schemaId"]
 
         try:
-            self.card = res["metadata"]
+            self._card = res["metadata"]
         except KeyError:
-            self.card = None
+            self._card = None
