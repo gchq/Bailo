@@ -1,10 +1,7 @@
-//import { model } from 'mongoose'
 import { describe, expect, test, vi } from 'vitest'
 
 import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-//import { UserInterface } from '../../src/models/User.js'
-//import { getModelCard } from '../../src/services/model.js'
 import {
   createRelease,
   deleteRelease,
@@ -21,7 +18,7 @@ import {
 vi.mock('../../src/connectors/authorisation/index.js')
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(),
+  getModelById: vi.fn(() => ({ id: 'test_model_id', card: { version: 1 }, settings: { mirroredModelId: 'abc' } })),
   getModelCardRevision: vi.fn(),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
@@ -80,7 +77,6 @@ vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
 describe('services > release', () => {
   test('createRelease > simple', async () => {
-    modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     await createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)
@@ -92,7 +88,6 @@ describe('services > release', () => {
   })
 
   test('createRelease > minor release', async () => {
-    modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     await createRelease({} as any, { semver: 'v1.0.0', minor: true } as any)
@@ -105,7 +100,7 @@ describe('services > release', () => {
   test('createRelease > release with image', async () => {
     const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
     registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
-    modelMocks.getModelById.mockResolvedValue({ card: { version: 1 } })
+
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     await createRelease(
@@ -124,7 +119,6 @@ describe('services > release', () => {
   test('createRelease > missing images in the registry', async () => {
     const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
     registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
-    modelMocks.getModelById.mockResolvedValue(undefined)
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     expect(() =>
@@ -147,7 +141,6 @@ describe('services > release', () => {
 
   test('createRelease > release with bad files', async () => {
     fileMocks.getFileById.mockResolvedValueOnce({ modelId: 'random_model' })
-    modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     expect(() =>
@@ -166,7 +159,11 @@ describe('services > release', () => {
 
   test('createRelease > release with duplicate file names', async () => {
     fileMocks.getFileById.mockResolvedValue({ modelId: 'test_model_id', name: 'test_file.png' })
-    modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
+    modelMocks.getModelById.mockResolvedValue({
+      id: 'test_model_id',
+      card: { version: 1 },
+      settings: { mirroredModelId: 'abc' },
+    })
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     expect(
@@ -200,7 +197,7 @@ describe('services > release', () => {
 
   test('createRelease > bad authorisation', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
-    modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
+
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
     expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
       /^You do not have permission/,
@@ -208,7 +205,11 @@ describe('services > release', () => {
   })
 
   test('createRelease > automatic model card version', async () => {
-    modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 999 } })
+    modelMocks.getModelById.mockResolvedValueOnce({
+      id: 'test_model_id',
+      card: { version: 999 },
+      settings: { mirroredModelId: 'abc' },
+    })
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
     await createRelease({} as any, { semver: 'v1.0.0' } as any)
@@ -218,7 +219,11 @@ describe('services > release', () => {
   })
 
   test('createRelease > no model card', async () => {
-    modelMocks.getModelById.mockResolvedValueOnce({ card: undefined })
+    modelMocks.getModelById.mockResolvedValueOnce({
+      id: 'test_model_id',
+      card: undefined as any,
+      settings: { mirroredModelId: 'abc' },
+    })
 
     expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
       /^This model does not have a model card associated with it/,
@@ -233,7 +238,6 @@ describe('services > release', () => {
       success: false,
       id: '',
     })
-    modelMocks.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
     expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
       /^Cannot create a release from a mirrored model/,
@@ -249,7 +253,6 @@ describe('services > release', () => {
 
   test('updateRelease > release with bad files', async () => {
     fileMocks.getFileById.mockResolvedValueOnce({ modelId: 'random_model' })
-    modelMocks.getModelById.mockResolvedValue({ id: 'test_model_id' })
 
     expect(() =>
       updateRelease({} as any, 'model-id', 'v1.0.0', {
@@ -260,7 +263,6 @@ describe('services > release', () => {
   })
 
   test('updateRelease > success', async () => {
-    modelMocks.getModelById.mockResolvedValue(undefined)
     releaseModelMocks.findOne.mockResolvedValue({ semver: 'v1.0.0' })
 
     await updateRelease({} as any, 'model-id', 'v1.0.0', { notes: 'New notes' } as any)
@@ -269,7 +271,6 @@ describe('services > release', () => {
   })
 
   test('newReleaseComment > success', async () => {
-    modelMocks.getModelById.mockResolvedValue(undefined)
     releaseModelMocks.findOneAndUpdate.mockResolvedValue({})
 
     await newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')
@@ -293,14 +294,12 @@ describe('services > release', () => {
   test('getReleaseBySemver > good', async () => {
     const mockRelease = { _id: 'release' }
 
-    modelMocks.getModelById.mockResolvedValue(undefined)
     releaseModelMocks.findOne.mockResolvedValue(mockRelease)
 
     expect(await getReleaseBySemver({} as any, 'test', 'test')).toBe(mockRelease)
   })
 
   test('getReleaseBySemver > no release', async () => {
-    modelMocks.getModelById.mockResolvedValue(undefined)
     releaseModelMocks.findOne.mockResolvedValue(undefined)
 
     expect(() => getReleaseBySemver({} as any, 'test', 'test')).rejects.toThrowError(
@@ -311,7 +310,6 @@ describe('services > release', () => {
   test('getReleaseBySemver > no permission', async () => {
     const mockRelease = { _id: 'release' }
 
-    modelMocks.getModelById.mockResolvedValue(undefined)
     releaseModelMocks.findOne.mockResolvedValue(mockRelease)
     vi.mocked(authorisation.release).mockResolvedValue({
       info: 'You do not have permission to view this release.',
@@ -325,15 +323,12 @@ describe('services > release', () => {
   })
 
   test('deleteRelease > success', async () => {
-    modelMocks.getModelById.mockResolvedValue(undefined)
-
     expect(await deleteRelease({} as any, 'test', 'test')).toStrictEqual({ modelId: 'test', semver: 'test' })
   })
 
   test('deleteRelease > no permission', async () => {
     const mockRelease = { _id: 'release' }
 
-    modelMocks.getModelById.mockResolvedValue(undefined)
     releaseModelMocks.findOne.mockResolvedValue(mockRelease)
 
     vi.mocked(authorisation.release).mockImplementation(async (_user, _model, _release, action) => {
@@ -352,7 +347,7 @@ describe('services > release', () => {
 
   test('removeFileFromReleases > no permission', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test' }
+    const mockModel: any = { id: 'test', settings: { mirroredModelId: 'abc' } }
     const mockRelease = { _id: 'release' }
 
     vi.mocked(authorisation.releases).mockResolvedValue([
@@ -373,7 +368,7 @@ describe('services > release', () => {
 
   test('removeFileFromReleases > success', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test' }
+    const mockModel: any = { id: 'test', settings: { mirroredModelId: 'abc' } }
     const mockRelease = { _id: 'release' }
     const resultObject = { modifiedCount: 2, matchedCount: 2 }
 

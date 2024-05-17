@@ -295,7 +295,7 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
 
 export async function deleteRelease(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
-  if (!model.settings.mirroredModelId) {
+  if (!(model.settings && model.settings.mirroredModelId)) {
     throw BadReq(`Cannot delete a release on a mirrored model`)
   }
   const release = await getReleaseBySemver(user, modelId, semver)
@@ -316,7 +316,7 @@ export function getReleaseName(release: ReleaseDoc): string {
 
 export async function removeFileFromReleases(user: UserInterface, model: ModelDoc, fileId: string) {
   if (!(model.settings && model.settings.mirroredModelId)) {
-    throw BadReq(`Cannot update a release on a mirrored model`)
+    throw BadReq(`Cannot remove a file from a mirrored model`)
   }
 
   const query = {

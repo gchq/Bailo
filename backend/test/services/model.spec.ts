@@ -36,7 +36,7 @@ vi.mock('../../src/utils/id.js', () => ({
 }))
 
 const modelMocks = vi.hoisted(() => {
-  const obj: any = {}
+  const obj: any = { settings: { mirroredModelId: 'abc' } }
 
   obj.aggregate = vi.fn(() => obj)
   obj.match = vi.fn(() => obj)
@@ -47,6 +47,7 @@ const modelMocks = vi.hoisted(() => {
   obj.findOne = vi.fn(() => obj)
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -208,7 +209,28 @@ describe('services > model', () => {
     expect(modelCardRevisionModel.save).not.toBeCalled()
   })
 
-  test('getModelCardRevision > should throw Forbidden if the user tries to alter a mirrored model card', async () => {
+  test('_setModelCard > should throw BadReq if the user tries to alter a mirrored model card', async () => {
+    const mockUser = { dn: 'testUser' } as any
+    const mockModelId = '123'
+    const mockSchemaId = 'abc'
+    const mockVersion = 1
+    const mockMetadata = { key: 'value' }
+
+    vi.mocked(authorisation.model).mockImplementation(async (_user, _model, action) => {
+      if (action === ModelAction.View) return { success: true, id: '' }
+      if (action === ModelAction.Write) return { success: false, info: 'Cannot alter a mirrored model', id: '' }
+      if (action === ModelAction.Update) return { success: false, info: 'Cannot alter a mirrored model', id: '' }
+
+      return { success: false, info: 'Unknown action.', id: '' }
+    })
+
+    await expect(_setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)).rejects.toThrow(
+      /^Cannot alter a mirrored model/,
+    )
+    expect(modelCardRevisionModel.save).not.toBeCalled()
+  })
+
+  test('getModelCardRevision > should throw BadReq if the user tries to alter a mirrored model card', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({
       info: 'You do not have permission',
       success: false,
