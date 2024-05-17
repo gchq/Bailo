@@ -189,13 +189,16 @@ export async function updateAccessRequestComment(
     throw Unauthorized('You do not have permission to update this comment', { accessRequestId, commentId })
   }
 
-  const updatedAccessRequest = await AccessRequest.findOneAndUpdate(
+  const updatedAccessRequest = AccessRequest.findOneAndUpdate(
     { _id: accessRequest._id, 'comments._id': commentId },
+    { 'comments.$[i].message': message },
     {
-      $set: {
-        'comments.$.message': message,
-        'comments.$.updatedAt': new Date().toISOString(),
-      },
+      arrayFilters: [
+        {
+          'i._id': `${commentId}`,
+          'i.user': `${user.dn}`,
+        },
+      ],
     },
   )
 

@@ -253,13 +253,16 @@ export async function updateReleaseComment(
     throw Unauthorized('You do not have permission to update this comment', { release, commentId })
   }
 
-  const updatedRelease = await Release.findOneAndUpdate(
+  const updatedRelease = Release.findOneAndUpdate(
     { _id: release._id, 'comments._id': commentId },
+    { 'comments.$[i].message': message },
     {
-      $set: {
-        'comments.$.message': message,
-        'comments.$.updatedAt': new Date().toISOString(),
-      },
+      arrayFilters: [
+        {
+          'i._id': `${commentId}`,
+          'i.user': `${user.dn}`,
+        },
+      ],
     },
   )
 
