@@ -13,9 +13,18 @@ class Agent:
     Wraps each request in an exception handler that maps API errors to Python Bailo errors, among status codes less than 400.
     """
 
+    def __init__(
+        self,
+        verify: str | bool = True,
+    ):
+        """Initiate a standard agent.
+
+        :param verify: Path to certificate authority file, or bool for SSL verification.
+        """
+        self.verify = verify
+
     def __request(self, method, *args, **kwargs):
-        if "verify" not in kwargs:
-            kwargs["verify"] = True
+        kwargs["verify"] = self.verify
 
         res = requests.request(method, *args, **kwargs)
 
@@ -62,24 +71,25 @@ class PkiAgent(Agent):
         :param key: Path to key file
         :param auth: Path to certificate authority file
         """
+        super().__init__(verify=auth)
+
         self.cert = cert
         self.key = key
-        self.auth = auth
 
     def get(self, *args, **kwargs):
-        return super().get(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return super().get(*args, cert=(self.cert, self.key), **kwargs)
 
     def post(self, *args, **kwargs):
-        return super().post(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return super().post(*args, cert=(self.cert, self.key), **kwargs)
 
     def put(self, *args, **kwargs):
-        return super().put(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return super().put(*args, cert=(self.cert, self.key), **kwargs)
 
     def patch(self, *args, **kwargs):
-        return super().patch(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return super().patch(*args, cert=(self.cert, self.key), **kwargs)
 
     def delete(self, *args, **kwargs):
-        return super().delete(*args, cert=(self.cert, self.key), verify=self.auth, **kwargs)
+        return super().delete(*args, cert=(self.cert, self.key), **kwargs)
 
 
 class TokenAgent(Agent):
