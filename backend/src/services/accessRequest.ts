@@ -135,7 +135,7 @@ export async function updateAccessRequest(
 }
 
 export async function newAccessRequestComment(user: UserInterface, accessRequestId: string, message: string) {
-  const accessRequest = await getAccessRequestById(user, accessRequestId)
+  const accessRequest = await AccessRequest.findOne({ id: accessRequestId })
 
   if (!accessRequest) {
     throw NotFound(`The requested access request was not found.`, { accessRequestId })
@@ -169,10 +169,14 @@ export async function updateAccessRequestComment(
   commentId: string,
   message: string,
 ) {
-  const accessRequest = await getAccessRequestById(user, accessRequestId)
+  const accessRequest = await AccessRequest.findOne({ id: accessRequestId })
 
   if (!accessRequest) {
     throw NotFound(`The requested access request was not found.`, { accessRequestId })
+  }
+
+  if (!accessRequest.comments) {
+    throw NotFound(`The requested access request does not contain any comments to edit.`, { accessRequestId })
   }
 
   const originalComment = accessRequest.comments.find((comment) => comment._id.toString() === commentId)
