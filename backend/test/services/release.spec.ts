@@ -15,7 +15,7 @@ import {
   updateRelease,
   updateReleaseComment,
 } from '../../src/services/release.js'
-import { testReleaseReviewWithResponses } from '../testUtils/testModels.js'
+import { testRelease } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -264,10 +264,16 @@ describe('services > release', () => {
   })
 
   test('updateReleaseComment > success', async () => {
-    modelMocks.getModelById.mockResolvedValue(undefined)
-    releaseModelMocks.findOneAndUpdate.mockResolvedValue(testReleaseReviewWithResponses)
+    releaseModelMocks.findOne.mockResolvedValue(testRelease)
+    releaseModelMocks.findOneAndUpdate.mockResolvedValue({})
 
-    await updateReleaseComment({} as any, 'model', '1.0.0', 'commentid', 'This is an updated comment')
+    await updateReleaseComment(
+      { dn: 'user' },
+      testRelease.modelId,
+      testRelease.semver,
+      testRelease.comments[0]._id,
+      'This is an updated comment',
+    )
 
     expect(releaseModelMocks.findOneAndUpdate).toBeCalled()
   })

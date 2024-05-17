@@ -198,7 +198,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
 }
 
 export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, message: string) {
-  const release = await getReleaseBySemver(user, modelId, semver)
+  const release = await Release.findOne({ modelId, semver })
 
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
@@ -233,10 +233,14 @@ export async function updateReleaseComment(
   commentId: string,
   message: string,
 ) {
-  const release = await getReleaseBySemver(user, modelId, semver)
+  const release = await Release.findOne({ modelId, semver })
 
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  if (!release.comments) {
+    throw NotFound(`The requested release does not have any comments to edit.`, { modelId, semver })
   }
 
   const originalComment = release.comments.find((comment) => comment._id.toString() === commentId)
