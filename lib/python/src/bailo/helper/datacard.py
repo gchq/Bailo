@@ -4,6 +4,7 @@ from typing import Any
 
 from bailo.core.client import Client
 from bailo.core.enums import EntryKind, ModelVisibility
+from bailo.core.exceptions import BailoException
 from bailo.helper.entry import Entry
 
 
@@ -78,6 +79,11 @@ class Datacard(Entry):
         :return: A datacard object
         """
         res = client.get_model(model_id=datacard_id)["model"]
+        if res["kind"] != "data-card":
+            raise BailoException(
+                f"ID {datacard_id} does not belong to a datacard. Did you mean to use Model.from_id()?"
+            )
+
         datacard = cls(
             client=client,
             datacard_id=datacard_id,

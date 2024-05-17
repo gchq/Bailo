@@ -87,6 +87,9 @@ class Model(Entry):
         :return: A model object
         """
         res = client.get_model(model_id=model_id)["model"]
+        if res["kind"] != "model":
+            raise BailoException(f"ID {model_id} does not belong to a model. Did you mean to use Datacard.from_id()?")
+
         model = cls(
             client=client,
             model_id=model_id,
