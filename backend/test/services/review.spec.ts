@@ -12,7 +12,7 @@ import {
   findReviews,
   respondToReview,
   sendReviewResponseNotification,
-  updateReviewResponse,
+  updateReviewResponseComment,
 } from '../../src/services/review.js'
 import { ReviewKind } from '../../src/types/enums.js'
 
@@ -275,16 +275,15 @@ describe('services > review', () => {
 
   test('updateReviewResponse > update for release review response sucessful', async () => {
     releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
-    await updateReviewResponse(
+    reviewModelMock.findOneAndUpdate.mockReturnValueOnce({})
+    await updateReviewResponseComment(
       user,
-      'modelId',
-      'msro',
-      {
-        id: 'demo1d0vka6-fwfqdm',
-        comment: 'Do better!',
-      },
+      'model-123',
+      'review-123',
+      'response-124123',
       ReviewKind.Release,
-      'semver',
+      'test comment!',
+      '1.0.0',
     )
     expect(releaseRequestServiceMock.getReleaseBySemver).toBeCalled()
     expect(reviewModelMock.findOneAndUpdate).toBeCalled()
@@ -292,16 +291,15 @@ describe('services > review', () => {
 
   test('updateReviewResponse > update for access request review response sucessful', async () => {
     accessRequestServiceMock.getAccessRequestById.mockReturnValueOnce({ createdBy: 'Yellow' })
-    await updateReviewResponse(
+    reviewModelMock.findOneAndUpdate.mockReturnValueOnce({})
+    await updateReviewResponseComment(
       user,
-      'modelId',
-      'msro',
-      {
-        id: 'demo1d0vka6-fwfqdm',
-        comment: 'Do better!',
-      },
+      'model-123',
+      'review-123',
+      'response-124123',
       ReviewKind.Access,
-      'semver',
+      'test comment!',
+      'access-request-123',
     )
     expect(accessRequestServiceMock.getAccessRequestById).toBeCalled()
     expect(reviewModelMock.findOneAndUpdate).toBeCalled()
@@ -311,22 +309,22 @@ describe('services > review', () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
     modelMock.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
     reviewModelMock.findOneAndUpdate.mockResolvedValue(null)
+    reviewModelMock.findOneAndUpdate.mockReturnValueOnce({})
     expect(() =>
-      updateReviewResponse(
+      updateReviewResponseComment(
         user,
-        'modelId',
-        'msro',
-        {
-          id: 'demo1d0vka6-fwfqdm',
-          comment: 'Do better!',
-        },
+        'model-123',
+        'review-123',
+        'response-124123',
         ReviewKind.Release,
-        'semver',
+        'test comment!',
+        '1.0.0',
       ),
     ).rejects.toThrowError(/^You do not have permission/)
   })
 
   test('updateReviewResponse > bad authorisation for access request review response update', async () => {
+    reviewModelMock.findOneAndUpdate.mockReturnValueOnce({})
     vi.mocked(authorisation.accessRequest).mockResolvedValue({
       info: 'You do not have permission',
       success: false,
@@ -335,33 +333,29 @@ describe('services > review', () => {
     modelMock.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
     reviewModelMock.findOneAndUpdate.mockResolvedValue(null)
     expect(() =>
-      updateReviewResponse(
+      updateReviewResponseComment(
         user,
-        'modelId',
-        'msro',
-        {
-          id: 'demo1d0vka6-fwfqdm',
-          comment: 'Do better!',
-        },
+        'model-123',
+        'review-123',
+        'response-124123',
         ReviewKind.Access,
-        'semver',
+        'test comment!',
+        'access-request-123',
       ),
     ).rejects.toThrowError(/^You do not have permission/)
   })
 
   test('updateReviewResponse > mongo update fails', async () => {
     reviewModelMock.findOneAndUpdate.mockReturnValueOnce()
-
-    const result: Promise<ReviewInterface> = updateReviewResponse(
+    reviewModelMock.findOneAndUpdate.mockReturnValueOnce({})
+    const result: Promise<ReviewInterface> = updateReviewResponseComment(
       user,
-      'modelId',
-      'msro',
-      {
-        id: 'demo1d0vka6-fwfqdm',
-        comment: 'Do better!',
-      },
+      'model-123',
+      'review-123',
+      'response-124123',
       ReviewKind.Release,
-      'semver',
+      'test comment!',
+      '1.0.0',
     )
 
     expect(result).rejects.toThrowError(`Updating response to Review, was not successful`)

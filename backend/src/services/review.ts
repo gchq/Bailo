@@ -215,18 +215,14 @@ export async function updateReviewResponseComment(
   responseId: string,
   kind: ReviewKindKeys,
   comment: string,
-  semver?: string,
-  accessRequestId?: string,
+  semverOrAccessId: string,
 ) {
   const model = await getModelById(user, modelId)
 
   let reviewIdQuery
   switch (kind) {
     case ReviewKind.Access: {
-      if (!accessRequestId) {
-        throw BadReq('Invalid access request ID')
-      }
-      const access = await getAccessRequestById(user, accessRequestId)
+      const access = await getAccessRequestById(user, semverOrAccessId)
       const accessAuth = await authorisation.accessRequest(user, model, access, AccessRequestAction.Update)
       if (!accessAuth.success) {
         throw Forbidden(accessAuth.info, { userDn: user.dn, accessRequestId: reviewId })
@@ -235,10 +231,7 @@ export async function updateReviewResponseComment(
       break
     }
     case ReviewKind.Release: {
-      if (!semver) {
-        throw BadReq('Invalid access request ID')
-      }
-      const release = await getReleaseBySemver(user, modelId, semver)
+      const release = await getReleaseBySemver(user, modelId, semverOrAccessId)
       const releaseAuth = await authorisation.release(user, model, release, ReleaseAction.Update)
       if (!releaseAuth.success) {
         throw Forbidden(releaseAuth.info, {
