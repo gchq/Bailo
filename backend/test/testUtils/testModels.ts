@@ -70,6 +70,24 @@ export const testReleaseReviewWithResponses = {
   updatedAt: new Date('08/14/2023'),
 }
 
+export const testAccessRequestReviewWithResponses = {
+  modelId: 'abc',
+  accessRequestId: 'test-235',
+  kind: ReviewKind.Access,
+  responses: [
+    {
+      user: 'user',
+      decision: Decision.Approve,
+      comment: 'looks amazing!',
+    },
+  ],
+
+  role: 'msro',
+
+  createdAt: new Date('08/13/2023'),
+  updatedAt: new Date('08/14/2023'),
+}
+
 export const testReleaseReview = {
   modelId: 'abc',
   semver: '3.0.3',
@@ -85,4 +103,30 @@ export const testModelCardRevision = {
   modelId: 'abc',
   CreatedBy: 'user',
   createdAt: '2023-11-17T14:25:39.004Z',
+}
+
+export const testAccessRequest = {
+  id: 'test-access-request-13623',
+  modelId: 'test-model-4342',
+  comments: [
+    {
+      message: 'test comment',
+      user: 'user',
+      createdAt: '2024-05-17T06:13:41.690Z',
+      _id: '6646f5953391b094ca4f55ee',
+    },
+  ],
+}
+
+export const testRelease = {
+  modelId: 'test-model-1124',
+  semver: '1.0.0',
+  comments: [
+    {
+      message: 'test comment',
+      user: 'user',
+      createdAt: '2024-05-17T06:13:41.690Z',
+      _id: '6646f5953391b094ca4f55ee',
+    },
+  ],
 }
