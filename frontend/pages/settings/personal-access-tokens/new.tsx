@@ -2,13 +2,16 @@ import { ArrowBack } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import {
   Autocomplete,
+  AutocompleteChangeDetails,
+  AutocompleteChangeReason,
+  AutocompleteRenderGetTagProps,
   Button,
   Card,
   Checkbox,
+  Chip,
   Container,
   FormControl,
   FormControlLabel,
-  Grid,
   Stack,
   TextField,
   Typography,
@@ -21,16 +24,48 @@ import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/authentication/TokenDialog'
-import { TokenActions, TokenActionsKeys, TokenInterface, TokenScope } from 'types/types'
+import { TokenAction, TokenActionKeys, TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
+
+const [TokenReadAction, TokenWriteAction] = Object.values(TokenAction).reduce<Record<string, TokenActionKeys>[]>(
+  ([readActions, writeActions], action) => {
+    let groupedActions = [readActions, writeActions]
+    const [name, kind] = action.split(':')
+
+    if (kind === 'read') {
+      groupedActions = [{ ...readActions, [name]: action }, writeActions]
+    }
+    if (kind === 'write') {
+      groupedActions = [readActions, { ...writeActions, [name]: action }]
+    }
+
+    return groupedActions
+  },
+  [{}, {}],
+)
+
+const isWriteAction = (action: TokenActionKeys) => {
+  return Object.values(TokenWriteAction).includes(action)
+}
+
+const isReadAction = (action: TokenActionKeys) => {
+  return Object.values(TokenReadAction).includes(action)
+}
+
+const getActionName = (action: TokenActionKeys) => {
+  return action.split(':')[0]
+}
+
+const actionOptions = Object.values(TokenAction)
 
 export default function NewToken() {
   const theme = useTheme()
   const [description, setDescription] = useState('')
-  const [isAllModels, setIsAllModels] = useState(false)
+  const [isAllModels, setIsAllModels] = useState(true)
   const [selectedModels, setSelectedModels] = useState<EntrySearchResult[]>([])
-  const [selectedActions, setSelectedActions] = useState<TokenActionsKeys[]>([])
+  const [isAllActions, setIsAllActions] = useState(true)
+  const [selectedActions, setSelectedActions] = useState<TokenActionKeys[]>(actionOptions)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [token, setToken] = useState<TokenInterface | undefined>()
@@ -48,42 +83,33 @@ export default function NewToken() {
     [description, isAllModels, selectedModels.length, selectedActions.length],
   )
 
-  const handleSelectedActionsChange = useCallback(
-    (action: TokenActionsKeys, checked: boolean) => {
-      if (checked) {
-        setSelectedActions([...selectedActions, action])
-      } else {
-        const foundIndex = selectedActions.findIndex((selectedRepository) => selectedRepository === action)
-        if (foundIndex >= 0) {
-          const updatedSelectedActions = [...selectedActions]
-          updatedSelectedActions.splice(foundIndex, 1)
-          setSelectedActions(updatedSelectedActions)
-        }
-      }
-    },
-    [selectedActions],
-  )
+  const renderActionTags = useCallback(
+    (value: TokenActionKeys[], getTagProps: AutocompleteRenderGetTagProps) =>
+      value.map((option, index) => {
+        const actionName = getActionName(option)
+        const isRequired =
+          option === TokenAction.MODEL_READ ||
+          (isReadAction(option) && selectedActions.includes(TokenWriteAction[actionName]))
 
-  const actionCheckboxes = useMemo(
-    () =>
-      Object.values(TokenActions).map((action) => (
-        <Grid item xs={6} key={action}>
-          <FormControl>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name={action}
-                  checked={selectedActions.includes(action)}
-                  onChange={(_event, checked) => handleSelectedActionsChange(action, checked)}
-                  data-test={`${action.replace(':', '')}ActionCheckbox`}
-                />
-              }
-              label={action}
-            />
-          </FormControl>
-        </Grid>
-      )),
-    [handleSelectedActionsChange, selectedActions],
+        // overrideProps is used to disable delete functionality for model:read and any selected
+        // read actions with a corresponding selected write action
+        const overrideProps = {
+          ...(isRequired && {
+            onDelete: undefined,
+          }),
+        }
+
+        return (
+          <Chip
+            label={isRequired ? `${option} (required)` : option}
+            size='small'
+            {...getTagProps({ index })}
+            {...overrideProps}
+            key={option}
+          />
+        )
+      }),
+    [selectedActions],
   )
 
   const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -95,8 +121,40 @@ export default function NewToken() {
     setSelectedModels([])
   }
 
-  const handleSelectedModelsChange = (_: SyntheticEvent<Element, Event>, value: EntrySearchResult[]) => {
+  const handleSelectedModelsChange = (_event: SyntheticEvent<Element, Event>, value: EntrySearchResult[]) => {
     setSelectedModels(value)
+  }
+
+  const handleAllActionsChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    setIsAllActions(checked)
+    setSelectedActions(checked ? actionOptions : [TokenAction.MODEL_READ])
+  }
+
+  const handleSelectedActionsChange = (
+    _event: SyntheticEvent<Element, Event>,
+    value: TokenActionKeys[],
+    reason: AutocompleteChangeReason,
+    details?: AutocompleteChangeDetails<TokenActionKeys>,
+  ) => {
+    if (reason === 'clear') {
+      setIsAllActions(false)
+      setSelectedActions([TokenAction.MODEL_READ])
+      return
+    }
+
+    const updatedValue = [...value]
+
+    // If the selected option is a write action, ensure the corresponding
+    // read action is also selected
+    if (reason === 'selectOption' && details && isWriteAction(details.option)) {
+      const actionName = getActionName(details.option)
+      if (!updatedValue.includes(TokenReadAction[actionName])) {
+        updatedValue.push(TokenReadAction[actionName])
+      }
+    }
+
+    setIsAllActions(updatedValue.length === actionOptions.length)
+    setSelectedActions(updatedValue)
   }
 
   const handleSubmit = async () => {
@@ -183,7 +241,33 @@ export default function NewToken() {
                 <Typography fontWeight='bold'>
                   Actions <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
-                <Grid container>{actionCheckboxes}</Grid>
+                <Stack direction='row' alignItems='start' justifyContent='center' spacing={2}>
+                  <FormControl>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name='All'
+                          checked={isAllActions}
+                          onChange={handleAllActionsChange}
+                          data-test='allActionsCheckbox'
+                        />
+                      }
+                      label='All'
+                    />
+                  </FormControl>
+                  <Autocomplete
+                    multiple
+                    fullWidth
+                    value={selectedActions}
+                    options={actionOptions}
+                    limitTags={3}
+                    disableClearable={selectedActions.length === 1}
+                    getLimitTagsText={(more) => `+${plural(more, 'action')}`}
+                    onChange={handleSelectedActionsChange}
+                    renderInput={(params) => <TextField {...params} required size='small' />}
+                    renderTags={renderActionTags}
+                  />
+                </Stack>
               </Stack>
               <Stack alignItems='flex-end'>
                 <LoadingButton
