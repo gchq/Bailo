@@ -11,6 +11,7 @@ export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
 export interface ReviewResponse {
   user: string
+  id: string
   decision: DecisionKeys
   comment?: string
 
@@ -75,6 +76,7 @@ const ReviewSchema = new Schema<ReviewInterface>(
       {
         type: new Schema<ReviewResponse>(
           {
+            id: { type: String, required: true },
             user: { type: String, required: true },
             decision: { type: String, enum: Object.values(Decision), required: true },
             comment: { type: String, required: false },
