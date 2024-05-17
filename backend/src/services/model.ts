@@ -41,13 +41,14 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   return model
 }
 
-export async function getModelById(user: UserInterface, modelId: string) {
+export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
   const model = await Model.findOne({
     id: modelId,
+    ...(kind && { kind }),
   })
 
   if (!model) {
-    throw NotFound(`The requested model was not found.`, { modelId })
+    throw NotFound(`The requested entry was not found.`, { modelId })
   }
 
   const auth = await authorisation.model(user, model, ModelAction.View)

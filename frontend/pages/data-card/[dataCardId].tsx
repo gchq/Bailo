@@ -7,11 +7,16 @@ import Title from 'src/common/Title'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import { EntryKind } from 'types/types'
 
 export default function DataCard() {
   const router = useRouter()
   const { dataCardId }: { dataCardId?: string } = router.query
-  const { model: dataCard, isModelLoading: isDataCardLoading, isModelError: isDataCardError } = useGetModel(dataCardId)
+  const {
+    model: dataCard,
+    isModelLoading: isDataCardLoading,
+    isModelError: isDataCardError,
+  } = useGetModel(dataCardId, EntryKind.DATA_CARD)
 
   const tabs = useMemo(
     () =>

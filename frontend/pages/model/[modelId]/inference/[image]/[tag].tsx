@@ -7,11 +7,12 @@ import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import MessageAlert from 'src/MessageAlert'
+import { EntryKind } from 'types/types'
 
 export default function InferenceApp() {
   const router = useRouter()
   const { modelId, image, tag }: { modelId?: string; image?: string; tag?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const serviceEndpoint = useMemo(
