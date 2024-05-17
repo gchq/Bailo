@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from bailo import Client, Experiment, Model, ModelVisibility
+from bailo import Client, Experiment, Model, Datacard, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 
@@ -120,6 +120,20 @@ def test_create_release_without_model_card(integration_client):
 
     with pytest.raises(BailoException):
         model.create_release("1.0.0", "test")
+
+
+@pytest.mark.integration
+def test_get_datacard_as_model(integration_client):
+    datacard = Datacard.create(
+        client=integration_client,
+        name="test-datacard",
+        description="test",
+        team_id="Uncategorised",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    with pytest.raises(BailoException):
+        model = Model.from_id(client=integration_client, model_id=datacard.datacard_id)
 
 
 @pytest.mark.integration

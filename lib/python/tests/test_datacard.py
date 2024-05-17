@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from bailo import Client, Datacard, ModelVisibility
+from bailo import Client, Datacard, ModelVisibility, Model
 from bailo.core.exceptions import BailoException
 
 
@@ -76,3 +76,17 @@ def get_data_card_without_creation(integration_client):
 
     with pytest.raises(BailoException):
         datacard.get_card_latest()
+
+
+@pytest.mark.integration
+def test_get_model_as_datacard(integration_client):
+    model = Model.create(
+        client=integration_client,
+        name="test-model",
+        description="test",
+        team_id="Uncategorised",
+        visibility=ModelVisibility.PUBLIC,
+    )
+
+    with pytest.raises(BailoException):
+        datacard = Datacard.from_id(client=integration_client, datacard_id=model.model_id)
