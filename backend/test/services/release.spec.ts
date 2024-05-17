@@ -13,7 +13,9 @@ import {
   newReleaseComment,
   removeFileFromReleases,
   updateRelease,
+  updateReleaseComment,
 } from '../../src/services/release.js'
+import { testRelease } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -257,6 +259,21 @@ describe('services > release', () => {
     releaseModelMocks.findOneAndUpdate.mockResolvedValue({})
 
     await newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')
+
+    expect(releaseModelMocks.findOneAndUpdate).toBeCalled()
+  })
+
+  test('updateReleaseComment > success', async () => {
+    releaseModelMocks.findOne.mockResolvedValue(testRelease)
+    releaseModelMocks.findOneAndUpdate.mockResolvedValue({})
+
+    await updateReleaseComment(
+      { dn: 'user' },
+      testRelease.modelId,
+      testRelease.semver,
+      testRelease.comments[0]._id,
+      'This is an updated comment',
+    )
 
     expect(releaseModelMocks.findOneAndUpdate).toBeCalled()
   })

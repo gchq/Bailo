@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > release > patchReleaseComment > 200 > ok 1`] = `
+{
+  "accessRequest": {
+    "message": "test",
+  },
+}
+`;
+
+exports[`routes > release > patchReleaseComment > audit > expected call 1`] = `
+{
+  "message": "test",
+}
+`;

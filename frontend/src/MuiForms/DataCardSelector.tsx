@@ -13,7 +13,8 @@ import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
 interface DataCardSelectorProps {
-  label?: string
+  id: string
+  label: string
   required?: boolean
   value: string[]
   onChange: (newValue: string[]) => void
@@ -22,7 +23,7 @@ interface DataCardSelectorProps {
 }
 
 export default function DataCardSelector(props: DataCardSelectorProps) {
-  const { onChange, value: currentValue, required, label, formContext, rawErrors } = props
+  const { onChange, value: currentValue, required, label, id, formContext, rawErrors } = props
 
   const [open, setOpen] = useState(false)
   const [dataCardListQuery, setDataCardListQuery] = useState('')
@@ -72,47 +73,52 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
     <>
       {isDataCardsLoading && <Loading />}
       {formContext && formContext.editMode && (
-        <Autocomplete<EntrySearchResult, true, true>
-          multiple
-          data-test='dataCardSelector'
-          loading={dataCardListQuery.length > 3 && isDataCardsLoading}
-          open={open}
-          size='small'
-          onOpen={() => {
-            setOpen(true)
-          }}
-          onClose={() => {
-            setOpen(false)
-          }}
-          disableClearable
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          getOptionLabel={(option) => option.name}
-          value={selectedDataCards || []}
-          onChange={handleSelectedDataCardsChange}
-          noOptionsText={dataCardListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
-          onInputChange={debounceOnInputChange}
-          options={dataCards || []}
-          renderTags={(value, getTagProps) =>
-            value.map((option, index) => (
-              <Box key={option.name} sx={{ maxWidth: '200px' }}>
-                <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.name} />
-              </Box>
-            ))
-          }
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              placeholder='Data card name'
-              error={rawErrors && rawErrors.length > 0}
-              label={label + (required ? ' *' : '')}
-              onKeyDown={(event: KeyboardEvent) => {
-                if (event.key === 'Backspace') {
-                  event.stopPropagation()
-                }
-              }}
-            />
-          )}
-        />
+        <>
+          <Typography id={`${id}-label`} fontWeight='bold'>
+            {label}
+            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+          </Typography>
+          <Autocomplete<EntrySearchResult, true, true>
+            multiple
+            data-test='dataCardSelector'
+            loading={dataCardListQuery.length > 3 && isDataCardsLoading}
+            open={open}
+            size='small'
+            onOpen={() => {
+              setOpen(true)
+            }}
+            onClose={() => {
+              setOpen(false)
+            }}
+            disableClearable
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            getOptionLabel={(option) => option.name}
+            value={selectedDataCards || []}
+            onChange={handleSelectedDataCardsChange}
+            noOptionsText={dataCardListQuery.length < 3 ? 'Please enter at least three characters' : 'No options'}
+            onInputChange={debounceOnInputChange}
+            options={dataCards || []}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Box key={option.name} sx={{ maxWidth: '200px' }}>
+                  <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.name} />
+                </Box>
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder='Data card name'
+                error={rawErrors && rawErrors.length > 0}
+                onKeyDown={(event: KeyboardEvent) => {
+                  if (event.key === 'Backspace') {
+                    event.stopPropagation()
+                  }
+                }}
+              />
+            )}
+          />
+        </>
       )}
       {formContext && !formContext.editMode && (
         <>
