@@ -6,13 +6,12 @@ import jwt from 'jsonwebtoken'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../../connectors/audit/index.js'
+import { Response as AuthResponse } from '../../connectors/authorisation/base.js'
 import authorisation from '../../connectors/authorisation/index.js'
 import { ModelDoc } from '../../models/Model.js'
-import { TokenActions, TokenDoc } from '../../models/Token.js'
 import { UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import { getModelById } from '../../services/model.js'
-import { validateTokenForModel } from '../../services/token.js'
 import config from '../../utils/config.js'
 import { Forbidden, Unauthorised } from '../../utils/result.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
@@ -158,7 +157,7 @@ function generateAccess(scope: any) {
   }
 }
 
-async function checkAccess(access: Access, user: UserInterface, token: TokenDoc | undefined) {
+async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
@@ -166,19 +165,11 @@ async function checkAccess(access: Access, user: UserInterface, token: TokenDoc 
   } catch (e) {
     log.warn({ userDn: user.dn, access, e }, 'Bad modelId provided')
     // bad model id?
-    return false
-  }
-
-  if (token) {
-    try {
-      await validateTokenForModel(token, model.id, TokenActions.ImageRead)
-    } catch (e) {
-      return false
-    }
+    return { id: modelId, success: false, info: 'Bad modelId provided' }
   }
 
   const auth = await authorisation.image(user, model, access)
-  return auth.success
+  return auth
 }
 
 export const getDockerRegistryAuth = [
@@ -196,7 +187,7 @@ export const getDockerRegistryAuth = [
       throw Unauthorised({}, 'No authorisation header found', rlog)
     }
 
-    const { error, user, admin, token } = await getUserFromAuthHeader(authorization)
+    const { error, user, admin } = await getUserFromAuthHeader(authorization)
 
     if (error) {
       throw Unauthorised({ error }, error, rlog)
@@ -242,8 +233,9 @@ export const getDockerRegistryAuth = [
     const accesses = scopes.map(generateAccess)
 
     for (const access of accesses) {
-      if (!admin && !(await checkAccess(access, user, token))) {
-        throw Forbidden({ access }, 'User does not have permission to carry out request', rlog)
+      const authResult = await checkAccess(access, user)
+      if (!admin && !authResult.success) {
+        throw Forbidden({ access }, authResult.info, rlog)
       }
     }
 
