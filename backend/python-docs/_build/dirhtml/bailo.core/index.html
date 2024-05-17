@@ -118,6 +118,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#bailo.core.client.Client.simple_upload"><code class="docutils literal notranslate"><span class="pre">Client.simple_upload()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#bailo.core.enums.EntryKind"><code class="docutils literal notranslate"><span class="pre">EntryKind</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.core.enums.EntryKind.DATACARD"><code class="docutils literal notranslate"><span class="pre">EntryKind.DATACARD</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bailo.core.enums.EntryKind.MODEL"><code class="docutils literal notranslate"><span class="pre">EntryKind.MODEL</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#bailo.core.enums.ModelVisibility"><code class="docutils literal notranslate"><span class="pre">ModelVisibility</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#bailo.core.enums.ModelVisibility.PRIVATE"><code class="docutils literal notranslate"><span class="pre">ModelVisibility.PRIVATE</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bailo.core.enums.ModelVisibility.PUBLIC"><code class="docutils literal notranslate"><span class="pre">ModelVisibility.PUBLIC</span></code></a></li>
@@ -143,6 +148,7 @@
 <p class="caption" role="heading"><span class="caption-text">Notebooks:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/access_requests_demo/">Managing Access Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/datacards_demo/">Managing Datacards</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/experiment_tracking_demo/">Experiment Tracking with Bailo &amp; MLFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/models_and_releases_demo_pytorch/">Managing Models &amp; Releases (ResNet-50 Example with PyTorch)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/schemas_demo/">Managing Schemas</a></li>
@@ -695,13 +701,14 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bailo.core.client.Client.patch_model">
-<span class="sig-name descname"><span class="pre">patch_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visibility</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bailo/core/client/#Client.patch_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.core.client.Client.patch_model" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">patch_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visibility</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bailo/core/client/#Client.patch_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.core.client.Client.patch_model" title="Link to this definition"></a></dt>
 <dd><p>Update a specific model using its unique ID.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model_id</strong> – Unique model ID</p></li>
 <li><p><strong>name</strong> – Name of the model, defaults to None</p></li>
+<li><p><strong>kind</strong> – Either a Model or a Datacard</p></li>
 <li><p><strong>description</strong> – Description of the model, defaults to None</p></li>
 <li><p><strong>visibility</strong> – Enum to define model visibility (e.g. public or private), defaults to None</p></li>
 </ul>
@@ -750,12 +757,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bailo.core.client.Client.post_model">
-<span class="sig-name descname"><span class="pre">post_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">team_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visibility</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#bailo.core.enums.ModelVisibility" title="bailo.core.enums.ModelVisibility"><span class="pre">ModelVisibility</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bailo/core/client/#Client.post_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.core.client.Client.post_model" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">post_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#bailo.core.enums.EntryKind" title="bailo.core.enums.EntryKind"><span class="pre">EntryKind</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">team_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visibility</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#bailo.core.enums.ModelVisibility" title="bailo.core.enums.ModelVisibility"><span class="pre">ModelVisibility</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bailo/core/client/#Client.post_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.core.client.Client.post_model" title="Link to this definition"></a></dt>
 <dd><p>Create a model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – Name of the model</p></li>
+<li><p><strong>kind</strong> – Either a Model or a Datacard</p></li>
 <li><p><strong>description</strong> – Description of the model</p></li>
 <li><p><strong>visibility</strong> – Enum to define model visibility (e.g public or private)</p></li>
 </ul>
@@ -904,6 +912,22 @@
 </dd></dl>
 
 <dl class="py class" id="module-bailo.core.enums">
+<dt class="sig sig-object py" id="bailo.core.enums.EntryKind">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bailo.core.enums.</span></span><span class="sig-name descname"><span class="pre">EntryKind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bailo/core/enums/#EntryKind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.core.enums.EntryKind" title="Link to this definition"></a></dt>
+<dd><p>The type of model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bailo.core.enums.EntryKind.DATACARD">
+<span class="sig-name descname"><span class="pre">DATACARD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'data-card'</span></em><a class="headerlink" href="#bailo.core.enums.EntryKind.DATACARD" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bailo.core.enums.EntryKind.MODEL">
+<span class="sig-name descname"><span class="pre">MODEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'model'</span></em><a class="headerlink" href="#bailo.core.enums.EntryKind.MODEL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="bailo.core.enums.ModelVisibility">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bailo.core.enums.</span></span><span class="sig-name descname"><span class="pre">ModelVisibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bailo/core/enums/#ModelVisibility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bailo.core.enums.ModelVisibility" title="Link to this definition"></a></dt>
 <dd><p>Whether a model is publicly visible or not.</p>

@@ -55,6 +55,7 @@
 <p class="caption" role="heading"><span class="caption-text">Notebooks:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks/access_requests_demo.html">Managing Access Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/datacards_demo.html">Managing Datacards</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks/experiment_tracking_demo.html">Experiment Tracking with Bailo &amp; MLFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks/models_and_releases_demo_pytorch.html">Managing Models &amp; Releases (ResNet-50 Example with PyTorch)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks/schemas_demo.html">Managing Schemas</a></li>
@@ -87,12 +88,11 @@
   <h1>Source code for bailo.core.client</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span> <span class="nn">bailo.core.agent</span> <span class="kn">import</span> <span class="n">Agent</span><span class="p">,</span> <span class="n">TokenAgent</span>
-<span class="kn">from</span> <span class="nn">bailo.core.enums</span> <span class="kn">import</span> <span class="n">ModelVisibility</span><span class="p">,</span> <span class="n">SchemaKind</span>
+<span class="kn">from</span> <span class="nn">bailo.core.enums</span> <span class="kn">import</span> <span class="n">EntryKind</span><span class="p">,</span> <span class="n">ModelVisibility</span><span class="p">,</span> <span class="n">SchemaKind</span>
 <span class="kn">from</span> <span class="nn">bailo.core.utils</span> <span class="kn">import</span> <span class="n">filter_none</span>
 
 
@@ -114,6 +114,7 @@
     <span class="k">def</span> <span class="nf">post_model</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">kind</span><span class="p">:</span> <span class="n">EntryKind</span><span class="p">,</span>
         <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">team_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">visibility</span><span class="p">:</span> <span class="n">ModelVisibility</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -121,6 +122,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a model.</span>
 
 <span class="sd">        :param name: Name of the model</span>
+<span class="sd">        :param kind: Either a Model or a Datacard</span>
 <span class="sd">        :param description: Description of the model</span>
 <span class="sd">        :param visibility: Enum to define model visibility (e.g public or private)</span>
 <span class="sd">        :return: JSON response object</span>
@@ -131,6 +133,7 @@
         <span class="n">filtered_json</span> <span class="o">=</span> <span class="n">filter_none</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
                 <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
                 <span class="s2">&quot;visibility&quot;</span><span class="p">:</span> <span class="n">visibility</span><span class="p">,</span>
                 <span class="s2">&quot;teamId&quot;</span><span class="p">:</span> <span class="n">team_id</span><span class="p">,</span>
@@ -199,6 +202,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">visibility</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
@@ -206,11 +210,12 @@
 
 <span class="sd">        :param model_id: Unique model ID</span>
 <span class="sd">        :param name: Name of the model, defaults to None</span>
+<span class="sd">        :param kind: Either a Model or a Datacard</span>
 <span class="sd">        :param description: Description of the model, defaults to None</span>
 <span class="sd">        :param visibility: Enum to define model visibility (e.g. public or private), defaults to None</span>
 <span class="sd">        :return: JSON response object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">filtered_json</span> <span class="o">=</span> <span class="n">filter_none</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span> <span class="s2">&quot;visibility&quot;</span><span class="p">:</span> <span class="n">visibility</span><span class="p">})</span>
+        <span class="n">filtered_json</span> <span class="o">=</span> <span class="n">filter_none</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span> <span class="s2">&quot;visibility&quot;</span><span class="p">:</span> <span class="n">visibility</span><span class="p">})</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">/v2/model/</span><span class="si">{</span><span class="n">model_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">filtered_json</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
