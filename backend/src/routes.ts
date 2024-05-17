@@ -111,7 +111,10 @@ server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComm
 server.patch('/api/v2/model/:modelId/release/:semver/comment/:commentId', ...patchReleaseComment)
 server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
 server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
-server.patch('/api/v2/model/:modelId/release/:semver/review', ...patchReleaseReviewResponse)
+server.patch(
+  '/api/v2/model/:modelId/release/:semver/review/:reviewId/response/:responseId',
+  ...patchReleaseReviewResponse,
+)
 
 server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
 server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
@@ -121,7 +124,10 @@ server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchA
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
 server.patch('/api/v2/model/:modelId/access-request/:accessRequestId/comment/:commentId', ...patchAccessRequestComment)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
-server.patch('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...patchAccessRequestReviewResponse)
+server.patch(
+  '/api/v2/model/:modelId/access-request/:accessRequestId/review/:reviewId/response/:responseId',
+  ...patchAccessRequestReviewResponse,
+)
 
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
