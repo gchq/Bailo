@@ -208,30 +208,37 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
   return reviews.some((review) => requiredRoles.accessRequest.includes(review.role))
 }
 
-export type UpdateReviewResponseParams = Pick<ReviewResponse, 'comment' | 'id'>
-export async function updateReviewResponse(
+export async function updateReviewResponseComment(
   user: UserInterface,
   modelId: string,
-  role: string,
-  response: UpdateReviewResponseParams,
-  kind: ReviewKindKeys,
   reviewId: string,
+  responseId: string,
+  kind: ReviewKindKeys,
+  comment: string,
+  semver?: string,
+  accessRequestId?: string,
 ) {
   const model = await getModelById(user, modelId)
 
   let reviewIdQuery
   switch (kind) {
     case ReviewKind.Access: {
-      const access = await getAccessRequestById(user, reviewId)
+      if (!accessRequestId) {
+        throw BadReq('Invalid access request ID')
+      }
+      const access = await getAccessRequestById(user, accessRequestId)
       const accessAuth = await authorisation.accessRequest(user, model, access, AccessRequestAction.Update)
       if (!accessAuth.success) {
         throw Forbidden(accessAuth.info, { userDn: user.dn, accessRequestId: reviewId })
       }
-      reviewIdQuery = { modelId, accessRequestId: reviewId, kind, role }
+      reviewIdQuery = { modelId, accessRequestId: reviewId, kind }
       break
     }
     case ReviewKind.Release: {
-      const release = await getReleaseBySemver(user, modelId, reviewId)
+      if (!semver) {
+        throw BadReq('Invalid access request ID')
+      }
+      const release = await getReleaseBySemver(user, modelId, semver)
       const releaseAuth = await authorisation.release(user, model, release, ReleaseAction.Update)
       if (!releaseAuth.success) {
         throw Forbidden(releaseAuth.info, {
@@ -239,7 +246,7 @@ export async function updateReviewResponse(
           modelId: modelId,
         })
       }
-      reviewIdQuery = { modelId, semver: reviewId, kind, role }
+      reviewIdQuery = { modelId, semver: reviewId, kind }
       break
     }
 
@@ -248,12 +255,12 @@ export async function updateReviewResponse(
   }
 
   const update = await Review.findOneAndUpdate(
-    reviewIdQuery,
-    { 'responses.$[i].comment': response.comment, 'user:user': toEntity('user', user.dn) },
+    { _id: reviewId },
+    { 'responses.$[i].comment': comment, 'user:user': toEntity('user', user.dn) },
     {
       arrayFilters: [
         {
-          'i.id': `${response.id}`,
+          'i.id': `${responseId}`,
           'i.user': `${toEntity('user', user.dn)}`,
         },
       ],
