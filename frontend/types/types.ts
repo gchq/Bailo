@@ -185,17 +185,11 @@ export const TokenAction = {
   ACCESS_REQUEST_READ: 'access_request:read',
   ACCESS_REQUEST_WRITE: 'access_request:write',
 
-  WEBHOOK_READ: 'webhook:read',
-  WEBHOOK_WRITE: 'webhook:write',
-
   FILE_READ: 'file:read',
   FILE_WRITE: 'file:write',
 
   IMAGE_READ: 'image:read',
   IMAGE_WRITE: 'image:write',
-
-  INFERENCE_READ: 'inference:read',
-  INFERENCE_WRITE: 'inference:write',
 
   SCHEMA_READ: 'schema:read',
   SCHEMA_WRITE: 'schema:write',
