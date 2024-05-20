@@ -6,18 +6,16 @@ import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 import { useGetModelRoles } from '../../actions/model'
 import { useGetReviewRequestsForModel } from '../../actions/review'
-import { AccessRequestInterface, Decision, ReleaseInterface, ReviewRequestInterface } from '../../types/types'
+import {
+  AccessRequestInterface,
+  Decision,
+  DecisionKeys,
+  ReleaseInterface,
+  ReviewRequestInterface,
+} from '../../types/types'
 import { getRoleDisplay } from '../../utils/roles'
 import MessageAlert from '../MessageAlert'
 import Loading from './Loading'
-
-export const ResponseTypes = {
-  Approve: 'approve',
-  RequestChanges: 'request_changes',
-  UndoReview: 'undo_review',
-} as const
-
-export type ResponseTypeKeys = (typeof ResponseTypes)[keyof typeof ResponseTypes]
 
 type PartialReviewWithCommentProps =
   | {
@@ -30,7 +28,7 @@ type PartialReviewWithCommentProps =
     }
 
 type ReviewWithCommentProps = {
-  onSubmit: (kind: ResponseTypeKeys, reviewComment: string, reviewRole: string) => void
+  onSubmit: (kind: DecisionKeys, reviewComment: string, reviewRole: string) => void
   loading?: boolean
 } & PartialReviewWithCommentProps
 
@@ -82,10 +80,10 @@ export default function ReviewWithComment({
     }
   }, [reviewRequest])
 
-  function submitForm(decision: ResponseTypeKeys) {
+  function submitForm(decision: DecisionKeys) {
     setErrorText('')
 
-    if (invalidComment() && decision === ResponseTypes.RequestChanges) {
+    if (invalidComment() && decision === Decision.RequestChanges) {
       setErrorText('You must submit a comment when requesting changes.')
     } else if (!reviewRequest || !reviewRequest.role) {
       setErrorText('Please select a role before submitting your review.')
@@ -158,11 +156,11 @@ export default function ReviewWithComment({
                 {showUndoButton && (
                   <>
                     <LoadingButton
-                      onClick={() => submitForm(ResponseTypes.UndoReview)}
+                      onClick={() => submitForm(Decision.UndoReview)}
                       loading={loading}
                       variant='contained'
                       color='warning'
-                      data-test='requestChangesReviewButton'
+                      data-test='undoReviewButton'
                     >
                       Undo Review
                     </LoadingButton>
@@ -171,7 +169,7 @@ export default function ReviewWithComment({
                 )}
                 <LoadingButton
                   variant='outlined'
-                  onClick={() => submitForm(ResponseTypes.RequestChanges)}
+                  onClick={() => submitForm(Decision.RequestChanges)}
                   loading={loading}
                   data-test='requestChangesReviewButton'
                 >
@@ -179,7 +177,7 @@ export default function ReviewWithComment({
                 </LoadingButton>
                 <LoadingButton
                   variant='contained'
-                  onClick={() => submitForm(ResponseTypes.Approve)}
+                  onClick={() => submitForm(Decision.Approve)}
                   loading={loading}
                   data-test='approveReviewButton'
                 >

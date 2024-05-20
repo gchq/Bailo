@@ -1,7 +1,12 @@
 import qs from 'querystring'
-import { ResponseTypeKeys } from 'src/common/ReviewWithComment'
 import useSWR from 'swr'
-import { AccessRequestInterface, EntryInterface, ReleaseInterface, ReviewRequestInterface } from 'types/types'
+import {
+  AccessRequestInterface,
+  DecisionKeys,
+  EntryInterface,
+  ReleaseInterface,
+  ReviewRequestInterface,
+} from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -63,7 +68,7 @@ export function useGetReviewRequestsForModel({ modelId, semver, accessRequestId 
 
 type PostReviewResponseParams = {
   modelId: string
-  decision: ResponseTypeKeys
+  decision: DecisionKeys
   comment: string
   role: string
 } & SemverOrAccessRequestId

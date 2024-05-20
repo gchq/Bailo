@@ -9,13 +9,14 @@ import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
-import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
+import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
+import { DecisionKeys } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -34,7 +35,7 @@ export default function ReleaseReview() {
     semver: `${semver}`,
   })
 
-  async function handleSubmit(decision: ResponseTypeKeys, comment: string, role: string) {
+  async function handleSubmit(decision: DecisionKeys, comment: string, role: string) {
     setErrorMessage('')
     if (!modelId) {
       return setErrorMessage('Could not find model ID')

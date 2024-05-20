@@ -6,7 +6,7 @@ import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 export const Decision = {
   RequestChanges: 'request_changes',
   Approve: 'approve',
-  UndoReview: 'undo_review',
+  UndoReview: 'undo',
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
