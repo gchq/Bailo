@@ -7,7 +7,6 @@ exports[`connectors > authentication > oauth > authenticationMiddleware > return
       {
         "session": "session middleware",
       },
-      "body parser middleware",
       "grant middleware",
       [Function],
     ],
