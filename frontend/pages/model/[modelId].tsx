@@ -13,11 +13,12 @@ import Releases from 'src/entry/model/Releases'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import { EntryKind } from 'types/types'
 
 export default function Model() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 

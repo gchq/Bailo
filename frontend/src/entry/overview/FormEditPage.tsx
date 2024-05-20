@@ -25,7 +25,7 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
   const [errorMessage, setErrorMessage] = useState('')
 
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
-  const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id)
+  const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
   const { mutateModelCardRevisions: mutateEntryCardRevisions } = useGetModelCardRevisions(entry.id)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
