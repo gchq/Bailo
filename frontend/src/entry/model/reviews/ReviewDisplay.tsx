@@ -2,7 +2,7 @@ import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Stack, Tooltip, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import ApprovalsDisplay from 'src/entry/model/reviews/ApprovalsDisplay'
-import { ReviewRequestInterface, ReviewResponseWithRole } from 'types/types'
+import { Decision, ReviewRequestInterface, ReviewResponseWithRole } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
 export interface ReviewDisplayProps {
@@ -18,9 +18,12 @@ export default function ReviewDisplay({ reviews }: ReviewDisplayProps) {
     const updatedRequests: ReviewResponseWithRole[] = []
     reviews.forEach((review) =>
       review.responses.forEach((reviewResponse) => {
-        reviewResponse.decision === 'approve'
-          ? updatedApprovals.push({ ...reviewResponse, role: review.role })
-          : updatedRequests.push({ ...reviewResponse, role: review.role })
+        if (reviewResponse.decision === Decision.Approve) {
+          updatedApprovals.push({ ...reviewResponse, role: review.role })
+        }
+        if (reviewResponse.decision === Decision.RequestChanges) {
+          updatedRequests.push({ ...reviewResponse, role: review.role })
+        }
       }),
     )
     setAcceptedReviewResponses(updatedApprovals)

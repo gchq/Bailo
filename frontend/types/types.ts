@@ -401,6 +401,7 @@ export interface FileWithMetadata {
 export const Decision = {
   RequestChanges: 'request_changes',
   Approve: 'approve',
+  Undo: 'undo',
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 

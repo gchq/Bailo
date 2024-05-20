@@ -25,7 +25,7 @@ exports[`routes > review > postReleaseReviewResponse > missing review decision 1
       "errors": [
         {
           "code": "invalid_type",
-          "expected": "'request_changes' | 'approve'",
+          "expected": "'request_changes' | 'approve' | 'undo'",
           "message": "Required",
           "path": [
             "body",
