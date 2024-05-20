@@ -151,7 +151,6 @@ export default function SideNavigation({
               icon={<ContactSupportIcon />}
             />
             <Divider />
-            {/* TODO Once currentUser api has been updated to use roles we should check if they're admin */}
             {currentUser.isAdmin && (
               <>
                 <NavMenuItem

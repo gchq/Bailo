@@ -36,6 +36,7 @@ export const getCurrentUser = [
   bodyParser.json(),
   async (req: Request, res: Response<GetCurrentUserResponses>) => {
     const _ = parse(req, getCurrentUserSchema)
-    return res.json({ user: { ...req.user, isAdmin: await authentication.hasRole(req.user, Roles.Admin) } })
+    const isAdmin = await authentication.hasRole(req.user, Roles.Admin)
+    return res.json({ user: { ...req.user, isAdmin } })
   },
 ]
