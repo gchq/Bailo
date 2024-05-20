@@ -70,6 +70,7 @@
     "@faker-js/faker": "^8.0.2",
     "@swc/core": "^1.4.4",
     "@types/archiver": "^6.0.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/bunyan": "^1.8.11",
     "@types/clamscan": "^2.0.8",
     "@types/cls-hooked": "^4.3.8",

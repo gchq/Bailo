@@ -1,14 +1,18 @@
 import { useMemo } from 'react'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
-import ReviewsList from 'src/reviews/ReviewsList'
+import ReviewsListContainer from 'src/reviews/ReviewsListContainer'
+import { ReviewListStatus } from 'types/types'
 
 export default function Review() {
   const tabs = useMemo(
     () => [
-      { title: 'Release reviews', path: 'releases', view: <ReviewsList kind='release' /> },
-      { title: 'Access request reviews', path: 'access', view: <ReviewsList kind='access' /> },
-      { title: 'Archived', path: 'archived', view: <ReviewsList kind='archived' /> },
+      { title: 'Your open reviews', path: 'open', view: <ReviewsListContainer status={ReviewListStatus.OPEN} /> },
+      {
+        title: 'Your archived reviews',
+        path: 'archived',
+        view: <ReviewsListContainer status={ReviewListStatus.ARCHIVED} />,
+      },
     ],
     [],
   )

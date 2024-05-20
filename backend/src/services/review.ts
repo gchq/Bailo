@@ -1,5 +1,5 @@
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction } from '../connectors/authorisation/actions.js'
+import { AccessRequestAction, ModelAction, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
@@ -9,7 +9,8 @@ import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import { toEntity } from '../utils/entity.js'
-import { BadReq, GenericError, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, GenericError, NotFound } from '../utils/error.js'
+import { convertStringToId } from '../utils/id.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -144,7 +145,7 @@ export async function respondToReview(
   const update = await Review.findByIdAndUpdate(
     review._id,
     {
-      $push: { responses: { user: toEntity('user', user.dn), ...response } },
+      $push: { responses: { id: convertStringToId(reviewId), user: toEntity('user', user.dn), ...response } },
     },
     { new: true },
   )
@@ -205,6 +206,65 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
     },
   })
   return reviews.some((review) => requiredRoles.accessRequest.includes(review.role))
+}
+
+export async function updateReviewResponseComment(
+  user: UserInterface,
+  modelId: string,
+  reviewId: string,
+  responseId: string,
+  kind: ReviewKindKeys,
+  comment: string,
+  semverOrAccessId: string,
+) {
+  const model = await getModelById(user, modelId)
+
+  let reviewIdQuery
+  switch (kind) {
+    case ReviewKind.Access: {
+      const access = await getAccessRequestById(user, semverOrAccessId)
+      const accessAuth = await authorisation.accessRequest(user, model, access, AccessRequestAction.Update)
+      if (!accessAuth.success) {
+        throw Forbidden(accessAuth.info, { userDn: user.dn, accessRequestId: reviewId })
+      }
+      reviewIdQuery = { modelId, accessRequestId: reviewId, kind }
+      break
+    }
+    case ReviewKind.Release: {
+      const release = await getReleaseBySemver(user, modelId, semverOrAccessId)
+      const releaseAuth = await authorisation.release(user, model, release, ReleaseAction.Update)
+      if (!releaseAuth.success) {
+        throw Forbidden(releaseAuth.info, {
+          userDn: user.dn,
+          modelId: modelId,
+        })
+      }
+      reviewIdQuery = { modelId, semver: reviewId, kind }
+      break
+    }
+
+    default:
+      throw GenericError(500, 'Review kind not recognised', reviewIdQuery)
+  }
+
+  const update = await Review.findOneAndUpdate(
+    { _id: reviewId },
+    { 'responses.$[i].comment': comment, 'user:user': toEntity('user', user.dn) },
+    {
+      arrayFilters: [
+        {
+          'i.id': `${responseId}`,
+          'i.user': `${toEntity('user', user.dn)}`,
+        },
+      ],
+    },
+  )
+  if (!update) {
+    throw GenericError(500, `Updating response to Review, was not successful`, {
+      reviewIdQuery,
+    })
+  }
+  return update
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
