@@ -1,6 +1,7 @@
 import { customAlphabet } from 'nanoid'
 
-import { TokenActionsKeys, TokenDoc, TokenScopeKeys } from '../models/Token.js'
+import { Response } from '../connectors/authorisation/base.js'
+import { TokenActionsKeys, TokenDoc, TokenScope, TokenScopeKeys } from '../models/Token.js'
 import Token from '../models/Token.js'
 import { UserInterface } from '../models/User.js'
 import { BadReq, Forbidden, NotFound, Unauthorized } from '../utils/error.js'
@@ -110,22 +111,68 @@ export async function getTokenFromAuthHeader(header: string) {
   return token
 }
 
-export async function validateTokenForModel(token: TokenDoc, modelId: string, action: TokenActionsKeys) {
-  if (token.scope === 'models' && !token.modelIds.includes(modelId)) {
-    throw Unauthorized('This token may not be used for this model', {
-      accessKey: token.accessKey,
-      modelIds: token.modelIds,
-      modelId,
-    })
+export async function validateTokenForUse(token: TokenDoc | undefined, action: TokenActionsKeys): Promise<Response> {
+  if (!token) {
+    // User session comes without restrictions
+    return {
+      id: action,
+      success: true,
+    }
   }
 
-  if (!token.actions.includes(action)) {
-    throw Unauthorized('This token may not be used for this action', {
-      accessKey: token.accessKey,
-      actions: token.actions,
-      action,
-    })
+  if (token.scope === TokenScope.Models) {
+    return {
+      id: token._id,
+      success: false,
+      info: 'This token must not have model restrictions for this endpoint',
+    }
   }
 
-  return
+  if (token.actions && !token.actions.includes(action)) {
+    return {
+      id: token._id,
+      success: false,
+      info: 'This token may not be used for this action',
+    }
+  }
+
+  return {
+    id: token._id,
+    success: true,
+  }
+}
+
+export async function validateTokenForModel(
+  token: TokenDoc | undefined,
+  modelId: string,
+  action: TokenActionsKeys,
+): Promise<Response> {
+  if (!token) {
+    // User session comes without restrictions
+    return {
+      id: modelId,
+      success: true,
+    }
+  }
+
+  if (token.scope === TokenScope.Models && !token.modelIds.includes(modelId)) {
+    return {
+      id: modelId,
+      success: false,
+      info: 'This token may not be used for this model',
+    }
+  }
+
+  if (token.actions && !token.actions.includes(action)) {
+    return {
+      id: modelId,
+      success: false,
+      info: `This token is missing the required action: ${action}`,
+    }
+  }
+
+  return {
+    id: modelId,
+    success: true,
+  }
 }
