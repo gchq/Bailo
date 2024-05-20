@@ -15,11 +15,15 @@ export default function SchemasPage() {
 
   if (!currentUser || !currentUser.isAdmin) {
     return (
-      <Forbidden errorMessage='If you think this is in error please contact the model owners.' noMargin hideNavButton />
+      <Forbidden
+        errorMessage='If you think this is in error please contact the Bailo admininistrators.'
+        noMargin
+        hideNavButton
+      />
     )
   }
 
-  const error = MultipleErrorWrapper(`Unable to load model page`, {
+  const error = MultipleErrorWrapper(`Unable to load schema page`, {
     isCurrentUserError,
   })
   if (error) return error
