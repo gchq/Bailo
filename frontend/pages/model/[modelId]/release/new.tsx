@@ -13,7 +13,14 @@ import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { FileInterface, FileUploadProgress, FileWithMetadata, FlattenedModelImage, isFileInterface } from 'types/types'
+import {
+  EntryKind,
+  FileInterface,
+  FileUploadProgress,
+  FileWithMetadata,
+  FlattenedModelImage,
+  isFileInterface,
+} from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver } from 'utils/stringUtils'
 
@@ -33,7 +40,7 @@ export default function NewRelease() {
   const sendNotification = useNotification()
 
   const { modelId }: { modelId?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 

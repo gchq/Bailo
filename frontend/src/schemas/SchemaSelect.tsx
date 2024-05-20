@@ -26,7 +26,7 @@ export default function SchemaSelect({ entry }: SchemaSelectProps) {
     entry.kind === EntryKind.MODEL ? SchemaKind.MODEL : SchemaKind.DATA_CARD,
   )
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-  const { mutateModel: mutateEntry } = useGetModel(entry.id)
+  const { mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
 
   const isLoadingData = useMemo(
     () => isSchemasLoading || isCurrentUserLoading,
