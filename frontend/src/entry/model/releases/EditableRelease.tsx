@@ -19,6 +19,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import {
+  EntryKind,
   FileInterface,
   FileUploadProgress,
   FileWithMetadata,
@@ -50,7 +51,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
   const [filesToUploadCount, setFilesToUploadCount] = useState(0)
 
-  const { model, isModelLoading, isModelError } = useGetModel(release.modelId)
+  const { model, isModelLoading, isModelError } = useGetModel(release.modelId, EntryKind.MODEL)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
   const { mutateRelease } = useGetRelease(release.modelId, release.semver)
   const sendNotification = useNotification()

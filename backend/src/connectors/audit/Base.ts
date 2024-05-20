@@ -82,6 +82,11 @@ export const AuditInfo = {
     description: 'Review Response Created',
     auditKind: AuditKind.Create,
   },
+  UpdateReviewResponse: {
+    typeId: 'UpdateReviewResponse',
+    description: 'Review Response Updated',
+    auditKind: AuditKind.Update,
+  },
 
   CreateSchema: { typeId: 'CreateSchema', description: 'Schema Created', auditKind: AuditKind.Create },
   SearchSchemas: { typeId: 'SearchedSchemas', description: 'Schemas Searched', auditKind: AuditKind.Search },
@@ -134,6 +139,7 @@ export abstract class BaseAuditConnector {
 
   abstract onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[])
   abstract onCreateReviewResponse(req: Request, review: ReviewInterface)
+  abstract onUpdateReviewResponse(req: Request, review: ReviewInterface)
 
   abstract onSearchSchemas(req: Request, schemas: SchemaInterface[])
   abstract onCreateSchema(req: Request, schema: SchemaInterface)

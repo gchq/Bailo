@@ -52,11 +52,11 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
                   <UserDisplay dn={username} />
                   {response.decision === Decision.Approve && ' has approved'}
                   {response.decision === Decision.RequestChanges && ' has requested changes'}
-                  {response.decision === Decision.UndoReview && ' has undone their review'}
+                  {response.decision === Decision.Undo && ' has undone their review'}
                 </Typography>
                 {response.decision === Decision.Approve && <Done color='success' fontSize='small' />}
                 {response.decision === Decision.RequestChanges && <HourglassEmpty color='warning' fontSize='small' />}
-                {response.decision === Decision.UndoReview && <Undo fontSize='small' />}
+                {response.decision === Decision.Undo && <Undo fontSize='small' />}
                 {response.outdated && (
                   <Typography sx={{ backgroundColor: theme.palette.warning.light, borderRadius: 1, px: 0.5 }}>
                     Outdated

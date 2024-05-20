@@ -401,7 +401,7 @@ export interface FileWithMetadata {
 export const Decision = {
   RequestChanges: 'request_changes',
   Approve: 'approve',
-  UndoReview: 'undo',
+  Undo: 'undo',
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
@@ -428,6 +428,12 @@ type PartialReviewRequestInterface =
       accessRequestId?: never
       semver: string
     }
+
+export const ReviewKind = {
+  ACCESS: 'access',
+  RELEASE: 'release',
+} as const
+export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
 export type ReviewRequestInterface = {
   model: EntryInterface
@@ -456,4 +462,14 @@ export interface InferenceInterface {
   createdBy: string
   createdAt: string
   updatedAt: string
+}
+
+export const ReviewListStatus = {
+  OPEN: 'open',
+  ARCHIVED: 'archived',
+} as const
+export type ReviewListStatusKeys = (typeof ReviewListStatus)[keyof typeof ReviewListStatus]
+
+export function isReviewKind(value: unknown): value is ReviewKindKeys {
+  return value === ReviewKind.RELEASE || value === ReviewKind.ACCESS
 }

@@ -71,7 +71,7 @@ export default function ReviewWithComment({
       if (
         latestReviewForRole &&
         latestReviewForRole.responses[0] &&
-        latestReviewForRole.responses[0].decision !== Decision.UndoReview
+        latestReviewForRole.responses[0].decision !== Decision.Undo
       ) {
         setShowUndoButton(true)
       } else {
@@ -156,7 +156,7 @@ export default function ReviewWithComment({
                 {showUndoButton && (
                   <>
                     <LoadingButton
-                      onClick={() => submitForm(Decision.UndoReview)}
+                      onClick={() => submitForm(Decision.Undo)}
                       loading={loading}
                       variant='contained'
                       color='warning'
