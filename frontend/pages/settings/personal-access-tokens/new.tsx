@@ -239,7 +239,7 @@ export default function NewToken() {
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
-                  Actions <span style={{ color: theme.palette.error.main }}>*</span>
+                  Permissions <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <Stack direction='row' alignItems='start' justifyContent='center' spacing={2}>
                   <FormControl>
