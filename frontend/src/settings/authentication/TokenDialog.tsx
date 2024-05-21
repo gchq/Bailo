@@ -33,14 +33,9 @@ type TokenDialogProps = {
 }
 
 export default function TokenDialog({ token }: TokenDialogProps) {
-  const [open, setOpen] = useState(false)
   const router = useRouter()
   const { tab } = router.query
   const [tokenCategory, setTokenCategory] = useState<TokenCategoryKeys>(TokenCategory.PERSONAL_ACCESS)
-
-  useEffect(() => {
-    if (token) setOpen(true)
-  }, [token])
 
   useEffect(() => {
     if (isTokenCategory(tab)) {
@@ -49,7 +44,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
   }, [tab, setTokenCategory])
 
   const handleClose = () => {
-    setOpen(false)
+    router.push('/settings?tab=authentication')
   }
 
   const handleListItemClick = (category: TokenCategoryKeys) => {
@@ -57,16 +52,7 @@ export default function TokenDialog({ token }: TokenDialogProps) {
   }
 
   return (
-    <Dialog
-      fullWidth
-      disableEscapeKeyDown
-      maxWidth='xl'
-      open={open}
-      onClose={(_event, reason) => {
-        if (reason !== 'backdropClick') setOpen(false)
-      }}
-      PaperProps={{ sx: { height: '90vh' } }}
-    >
+    <Dialog fullWidth disableEscapeKeyDown maxWidth='xl' open={!!token} PaperProps={{ sx: { height: '90vh' } }}>
       <DialogTitle>Token Created</DialogTitle>
       <DialogContent>
         <Stack
