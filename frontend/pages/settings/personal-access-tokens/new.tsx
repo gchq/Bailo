@@ -24,7 +24,7 @@ import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/authentication/TokenDialog'
-import { TokenAction, TokenActionKeys, TokenInterface, TokenScope } from 'types/types'
+import { TokenAction, TokenActionKeys, TokenActionKind, TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
@@ -33,10 +33,10 @@ const [TokenReadAction, TokenWriteAction] = Object.values(TokenAction).reduce<Re
     let groupedActions = [readActions, writeActions]
     const [name, kind] = action.split(':')
 
-    if (kind === 'read') {
+    if (kind === TokenActionKind.READ) {
       groupedActions = [{ ...readActions, [name]: action }, writeActions]
     }
-    if (kind === 'write') {
+    if (kind === TokenActionKind.WRITE) {
       groupedActions = [readActions, { ...writeActions, [name]: action }]
     }
 
@@ -54,7 +54,8 @@ const isReadAction = (action: TokenActionKeys) => {
 }
 
 const getActionName = (action: TokenActionKeys) => {
-  return action.split(':')[0]
+  const [name, _kind] = action.split(':')
+  return name
 }
 
 const actionOptions = Object.values(TokenAction)

@@ -175,6 +175,13 @@ export const TokenScope = {
 
 export type TokenScopeKeys = (typeof TokenScope)[keyof typeof TokenScope]
 
+export const TokenActionKind = {
+  READ: 'read',
+  WRITE: 'write',
+}
+
+export type TokenActionKindKeys = (typeof TokenActionKind)[keyof typeof TokenActionKind]
+
 export const TokenAction = {
   MODEL_READ: 'model:read',
   MODEL_WRITE: 'model:write',
