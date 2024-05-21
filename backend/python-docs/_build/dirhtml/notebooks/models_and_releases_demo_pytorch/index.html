@@ -61,6 +61,7 @@
 <p class="caption" role="heading"><span class="caption-text">Notebooks:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../access_requests_demo/">Managing Access Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datacards_demo/">Managing Datacards</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../experiment_tracking_demo/">Experiment Tracking with Bailo &amp; MLFlow</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Managing Models &amp; Releases (ResNet-50 Example with PyTorch)</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#Introduction">Introduction</a></li>
@@ -142,8 +143,7 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># LINUX - CPU</span>
-<span class="c1">#! pip install bailo torch torchvision --index-url https://download.pytorch.org/whl/cpu</span>
-<span class="o">!</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>bailo
+<span class="o">!</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>bailo<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cpu
 
 <span class="c1"># MAC &amp; WINDOWS  - CPU</span>
 <span class="c1">#! pip install bailo torch torchvision</span>
@@ -194,7 +194,7 @@
 </section>
 <section id="Creating-and-populating-a-model-card">
 <h3>Creating and populating a model card<a class="headerlink" href="#Creating-and-populating-a-model-card" title="Link to this heading"></a></h3>
-<p>When creating a model card, first we need to generate an empty one using the <code class="docutils literal notranslate"><span class="pre">card_from_schema()</span></code> method. In this instance, we will use <strong>minimal-general-v10-beta</strong>. You can manage custom schemas using the <code class="docutils literal notranslate"><span class="pre">Schema()</span></code> helper class, but this is out of scope for this demo.</p>
+<p>When creating a model card, first we need to generate an empty one using the <code class="docutils literal notranslate"><span class="pre">card_from_schema()</span></code> method. In this instance, we will use <strong>minimal-general-v10</strong>. You can manage custom schemas using the <code class="docutils literal notranslate"><span class="pre">Schema()</span></code> helper class, but this is out of scope for this demo.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -282,12 +282,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#release_one.upload(path=&quot;resnet50_weights.pth&quot;)</span>
-
-<span class="n">release_one</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;large_file.txt&quot;</span><span class="p">)</span>
-
-<span class="c1">#with open(&quot;resnet50_weights.pth&quot;, &quot;rb&quot;) as f:</span>
-    <span class="c1">#release_one.upload(&quot;resnet50_weights.pth&quot;, f)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">release_one</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;resnet50_weights.pth&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -311,16 +306,14 @@
 </div>
 <section id="Downloading-weights-from-the-release">
 <h3>Downloading weights from the release<a class="headerlink" href="#Downloading-weights-from-the-release" title="Link to this heading"></a></h3>
-<p>Similarly you can also download files from release using a response object. In this case, we’ll write them to a new file: <strong>bailo_resnet50_weights.pth</strong>.</p>
+<p>Similarly you can also download specific files from release using the <code class="docutils literal notranslate"><span class="pre">download()</span></code> method. In this case, we’ll write them to a new file: <strong>bailo_resnet50_weights.pth</strong>. <strong>NOTE</strong>: <code class="docutils literal notranslate"><span class="pre">filename</span></code> refers to the filename on Bailo, and <code class="docutils literal notranslate"><span class="pre">path</span></code> is the local destination for your download.</p>
+<p>In addition to this, you can also use the <code class="docutils literal notranslate"><span class="pre">download_all()</span></code> method by providing a local directory path as <code class="docutils literal notranslate"><span class="pre">path</span></code>. By default, this will download all files, but you can provide <code class="docutils literal notranslate"><span class="pre">include</span></code> and <code class="docutils literal notranslate"><span class="pre">exclude</span></code> lists, e.g. <code class="docutils literal notranslate"><span class="pre">include=[&quot;*.txt&quot;,</span> <span class="pre">&quot;*.json&quot;]</span></code> to only include TXT or JSON files.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#res = release_latest.download(&quot;resnet50_weights.pth&quot;)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">release_latest</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;resnet50_weights.pth&quot;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;bailo_resnet50_weights.pth&quot;</span><span class="p">)</span>
-
-<span class="c1">#with open(&quot;bailo_resnet50_weights.pth&quot;, &quot;wb&quot;) as f:</span>
-    <span class="c1">#f.write(res.content)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#release_latest.download(filename=&quot;resnet50_weights.pth&quot;, path=&quot;bailo_resnet50_weights.pth&quot;)</span>
+<span class="n">release_latest</span><span class="o">.</span><span class="n">download_all</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;downloads&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
