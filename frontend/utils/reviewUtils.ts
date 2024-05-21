@@ -1,9 +1,9 @@
 import { cloneDeep, groupBy } from 'lodash-es'
-import { ReviewRequestInterface, ReviewResponse } from 'types/types'
+import { ResponseInterface, ReviewRequestInterface } from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/dateUtils'
 
 interface GroupedReviewResponse {
-  [user: string]: ReviewResponse[]
+  [user: string]: ResponseInterface[]
 }
 
 export function latestReviewsForEachUser(reviews: ReviewRequestInterface[]) {
@@ -11,7 +11,7 @@ export function latestReviewsForEachUser(reviews: ReviewRequestInterface[]) {
   reviews.forEach((review) => {
     const reviewResult: ReviewRequestInterface = cloneDeep(review)
     const groupedResponses: GroupedReviewResponse = groupBy(reviewResult.responses, (response) => response.user)
-    const latestResponses: ReviewResponse[] = []
+    const latestResponses: ResponseInterface[] = []
     Object.keys(groupedResponses).forEach((user) => {
       latestResponses.push(groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1])
     })
@@ -22,7 +22,7 @@ export function latestReviewsForEachUser(reviews: ReviewRequestInterface[]) {
 }
 
 export function reviewResponsesForEachUser(reviews: ReviewRequestInterface[]) {
-  const allResponses: ReviewResponse[] = []
+  const allResponses: ResponseInterface[] = []
   reviews.forEach((review) => {
     const reviewResult: ReviewRequestInterface = cloneDeep(review)
     const groupedResponses: GroupedReviewResponse = groupBy(reviewResult.responses, (response) => response.user)

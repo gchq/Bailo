@@ -49,6 +49,13 @@ export const ImageAction = {
 } as const
 export type ImageActionKeys = (typeof ImageAction)[keyof typeof ImageAction]
 
+export const ResponseAction = {
+  Create: 'response:create',
+  View: 'response:view',
+  Update: 'response:update',
+} as const
+export type ResponseActionKeys = (typeof ResponseAction)[keyof typeof ResponseAction]
+
 export const ActionLookup = {
   [ModelAction.Create]: TokenActions.ModelWrite,
   [ModelAction.View]: TokenActions.ModelRead,
@@ -79,5 +86,9 @@ export const ActionLookup = {
   [ImageAction.List]: TokenActions.ImageRead,
   [ImageAction.Wildcard]: TokenActions.ImageWrite,
   [ImageAction.Delete]: TokenActions.ImageWrite,
+
+  [ResponseAction.Create]: TokenActions.ResponseWrite,
+  [ResponseAction.View]: TokenActions.ResponseRead,
+  [ResponseAction.Update]: TokenActions.ResponseWrite,
 } as const
 export type ActionLookupKeys = (typeof ActionLookup)[keyof typeof ActionLookup]

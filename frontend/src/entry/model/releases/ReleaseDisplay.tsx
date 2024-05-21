@@ -133,16 +133,16 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {(reviewsWithLatestResponses.length > 0 || release.comments.length > 0) && <Divider />}
+              {reviewsWithLatestResponses.length > 0 && release.comments && release.comments.length > 0 && <Divider />}
               <Stack direction='row' justifyContent='space-between' spacing={2}>
                 <div>
                   <ReviewDisplay reviews={reviewsWithLatestResponses} />
                 </div>
-                {release.comments.length > 0 && (
+                {release.commentIds && release.commentIds.length > 0 && (
                   <Tooltip title='Comments'>
                     <Stack direction='row' spacing={1}>
                       <CommentIcon color='primary' />
-                      <Typography variant='caption'>{release.comments.length}</Typography>
+                      <Typography variant='caption'>{release.commentIds.length}</Typography>
                     </Stack>
                   </Tooltip>
                 )}

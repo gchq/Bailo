@@ -4,13 +4,13 @@ import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import { ReleaseDoc } from '../models/Release.js'
-import Review, { Decision, ReviewDoc, ReviewInterface, ReviewResponse } from '../models/Review.js'
+import ResponseModel, { Decision, ResponseInterface, ResponseKind } from '../models/Response.js'
+import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, GenericError, NotFound } from '../utils/error.js'
-import { convertStringToId } from '../utils/id.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -57,6 +57,8 @@ export async function findReviews(
     ModelAction.View,
   )
 
+  //const reviewsWithResponses = reviews.map((review))
+
   return reviews.filter((_, i) => auths[i].success)
 }
 
@@ -100,7 +102,8 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
-export type ReviewResponseParams = Pick<ReviewResponse, 'comment' | 'decision'>
+export type ReviewResponseParams = Pick<ResponseInterface, 'comment' | 'decision'>
+
 export async function respondToReview(
   user: UserInterface,
   modelId: string,
@@ -142,10 +145,21 @@ export async function respondToReview(
   if (!review) {
     throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewIdQuery, role })
   }
+
+  // Store the response
+  const reviewResponse = new ResponseModel({
+    user: toEntity('user', user.dn),
+    kind: ResponseKind.Review,
+    role,
+    ...response,
+  })
+
+  await reviewResponse.save()
+
   const update = await Review.findByIdAndUpdate(
     review._id,
     {
-      $push: { responses: { id: convertStringToId(reviewId), user: toEntity('user', user.dn), ...response } },
+      $push: { responseIds: reviewResponse._id },
     },
     { new: true },
   )
@@ -196,6 +210,7 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
   }
 }
 
+//TODO This won't work for response refactor
 export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
   const reviews = await Review.find({
     accessRequestId: accessRequestIds,

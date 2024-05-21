@@ -102,6 +102,12 @@ export const AuditInfo = {
   ViewInferences: { typeId: 'ViewInferences', description: 'Inferences Viewed', auditKind: AuditKind.View },
 
   CreateExport: { typeId: 'CreateExport', description: 'Model Exported', auditKind: AuditKind.Create },
+
+  UpdateResponse: {
+    typeId: 'UpdateResponse',
+    description: 'Updated a comment or review response',
+    auditKind: AuditKind.Update,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -126,6 +132,8 @@ export abstract class BaseAuditConnector {
   abstract onUpdateRelease(req: Request, release: ReleaseDoc)
   abstract onDeleteRelease(req: Request, modelId: string, semver: string)
   abstract onViewReleases(req: Request, releases: ReleaseDoc[])
+
+  abstract onUpdateResponse(req: Request, responseId: string)
 
   abstract onCreateUserToken(req: Request, token: TokenDoc)
   abstract onViewUserTokens(req: Request, tokens: TokenDoc[])

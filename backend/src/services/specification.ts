@@ -1,7 +1,7 @@
 import { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import { AnyZodObject, z } from 'zod'
 
-import { Decision } from '../models/Review.js'
+import { Decision, ResponseKind } from '../models/Response.js'
 import { TokenActions, TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 
@@ -131,13 +131,18 @@ export const reviewInterfaceSchema = z.object({
   kind: z.string().openapi({ example: 'release' }),
   role: z.string().openapi({ example: 'mtr' }),
 
-  responses: z.array(
-    z.object({
-      user: z.string().openapi({ example: 'user' }),
-      decision: z.nativeEnum(Decision).openapi({ example: 'approve' }),
-      comment: z.string().optional().openapi({ example: 'Looks good!' }),
-    }),
-  ),
+  responses: z.array(z.string().optional()),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
+export const responseInterfaceSchema = z.object({
+  user: z.string().optional().openapi({ example: 'Joe Bloggs' }),
+  kind: z.nativeEnum(ResponseKind).openapi({ example: 'comment' }),
+  role: z.string().optional().openapi({ example: 'mtr' }),
+  decision: z.nativeEnum(Decision).optional().openapi({ example: 'approve' }),
+  comment: z.string().optional().openapi({ example: 'Looks good!' }),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),

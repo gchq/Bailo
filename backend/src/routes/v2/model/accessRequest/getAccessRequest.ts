@@ -5,7 +5,9 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/AccessRequest.js'
+import { ResponseInterface, ResponseKind } from '../../../../models/Response.js'
 import { getAccessRequestById } from '../../../../services/accessRequest.js'
+import { findResponsesById } from '../../../../services/response.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -36,7 +38,7 @@ registerPath({
 })
 
 interface GetAccessRequestResponse {
-  accessRequest: AccessRequestInterface
+  accessRequest: AccessRequestInterface & { comments: ResponseInterface[] }
 }
 
 export const getAccessRequest = [
@@ -45,9 +47,11 @@ export const getAccessRequest = [
     req.audit = AuditInfo.ViewAccessRequest
     const { params } = parse(req, getAccessRequestSchema)
 
-    const accessRequest = await getAccessRequestById(req.user, params.accessRequestId)
+    const accessRequestWithCommentIds = await getAccessRequestById(req.user, params.accessRequestId)
+    const comments = await findResponsesById(req.user, accessRequestWithCommentIds.commentIds)
+    const accessRequest = { ...accessRequestWithCommentIds.toObject(), comments, kind: ResponseKind.Comment }
 
-    await audit.onViewAccessRequest(req, accessRequest)
+    await audit.onViewAccessRequest(req, accessRequestWithCommentIds)
 
     return res.json({
       accessRequest,

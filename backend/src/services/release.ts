@@ -6,10 +6,12 @@ import authorisation from '../connectors/authorisation/index.js'
 import { FileInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../models/Release.js'
+import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isBailoError } from '../types/error.js'
 import { findDuplicates } from '../utils/array.js'
+import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound, Unauthorized } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { getFileById, getFilesByIds } from './file.js'
@@ -197,25 +199,27 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   return updatedRelease
 }
 
-export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, message: string) {
+export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, comment: string) {
+  // Store the response
+  const commentResponse = new ResponseModel({
+    user: toEntity('user', user.dn),
+    kind: ResponseKind.Comment,
+    comment,
+    createdAt: new Date().toISOString(),
+  })
+
+  await commentResponse.save()
+
   const release = await Release.findOne({ modelId, semver })
 
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  const comment = {
-    message,
-    user: user.dn,
-    createdAt: new Date().toISOString(),
-  }
-
   const updatedRelease = await Release.findOneAndUpdate(
     { _id: release._id },
     {
-      $push: {
-        comments: comment,
-      },
+      $push: { commentIds: commentResponse._id },
     },
   )
 
@@ -239,11 +243,13 @@ export async function updateReleaseComment(
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  if (!release.comments) {
+  if (!release.commentIds) {
     throw NotFound(`The requested release does not have any comments to edit.`, { modelId, semver })
   }
 
-  const originalComment = release.comments.find((comment) => comment._id.toString() === commentId)
+  const releaseComments = await ResponseModel.find({ _id: { $in: release.commentIds } })
+
+  const originalComment = releaseComments.find((comment) => comment._id.toString() === commentId)
 
   if (!originalComment) {
     throw NotFound(`The requested release comment was not found.`, { release, commentId })

@@ -5,7 +5,9 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { ModelInterface } from '../../../models/Model.js'
+import { ResponseInterface } from '../../../models/Response.js'
 import { ReviewInterface } from '../../../models/Review.js'
+import { findResponsesById } from '../../../services/response.js'
 import { findReviews } from '../../../services/review.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
 import { ReviewKind } from '../../../types/enums.js'
@@ -42,7 +44,7 @@ registerPath({
 })
 
 interface GetReviewResponse {
-  reviews: Array<ReviewInterface & { model: ModelInterface }>
+  reviews: Array<ReviewInterface & { model: ModelInterface; responses: ResponseInterface[] }>
 }
 
 export const getReviews = [
@@ -53,12 +55,16 @@ export const getReviews = [
       query: { mine, modelId, semver, accessRequestId, kind },
     } = parse(req, getReviewsSchema)
 
-    const reviews = await findReviews(req.user, mine, modelId, semver, accessRequestId, kind)
-    await audit.onSearchReviews(req, reviews)
+    const reviewsWithoutResponses = await findReviews(req.user, mine, modelId, semver, accessRequestId, kind)
+    await audit.onSearchReviews(req, reviewsWithoutResponses)
+
+    const reviews = reviewsWithoutResponses.map(async (review) => {
+      const responsesForReview = await findResponsesById(req.user, review.responseIds)
+      return { ...review, responses: responsesForReview }
+    })
 
     res.setHeader('x-count', reviews.length)
-    return res.json({
-      reviews,
-    })
+    // TODO fix typing
+    return res.json({ reviews: await Promise.all(reviews) })
   },
 ]

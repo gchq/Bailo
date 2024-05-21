@@ -5,9 +5,11 @@ import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestInterface } from '../models/AccessRequest.js'
 import AccessRequest from '../models/AccessRequest.js'
+import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
+import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound, Unauthorized } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import log from './log.js'
@@ -141,18 +143,19 @@ export async function newAccessRequestComment(user: UserInterface, accessRequest
     throw NotFound(`The requested access request was not found.`, { accessRequestId })
   }
 
-  const comment = {
-    message,
-    user: user.dn,
+  const commentResponse = new ResponseModel({
+    user: toEntity('user', user.dn),
+    kind: ResponseKind.Comment,
+    comment: message,
     createdAt: new Date().toISOString(),
-  }
+  })
+
+  await commentResponse.save()
 
   const updatedAccessRequest = await AccessRequest.findOneAndUpdate(
     { _id: accessRequest._id },
     {
-      $push: {
-        comments: comment,
-      },
+      $push: { commentIds: commentResponse._id },
     },
   )
 
@@ -175,11 +178,12 @@ export async function updateAccessRequestComment(
     throw NotFound(`The requested access request was not found.`, { accessRequestId })
   }
 
-  if (!accessRequest.comments) {
+  if (!accessRequest.commentIds) {
     throw NotFound(`The requested access request does not contain any comments to edit.`, { accessRequestId })
   }
 
-  const originalComment = accessRequest.comments.find((comment) => comment._id.toString() === commentId)
+  const accessRequestComments = await ResponseModel.find({ _id: { $in: accessRequest.commentIds } })
+  const originalComment = accessRequestComments.find((comment) => comment._id.toString() === commentId)
 
   if (!originalComment) {
     throw NotFound(`The requested access request comment was not found.`, { accessRequestId, commentId })

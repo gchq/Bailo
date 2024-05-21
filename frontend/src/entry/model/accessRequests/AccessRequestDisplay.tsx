@@ -10,7 +10,7 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { AccessRequestInterface, ReviewRequestInterface, ReviewResponse } from 'types/types'
+import { AccessRequestInterface, ResponseInterface, ReviewRequestInterface } from 'types/types'
 import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
 import { plural } from 'utils/stringUtils'
 
@@ -45,7 +45,7 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
   }
 
   interface GroupedReviewResponse {
-    [user: string]: ReviewResponse[]
+    [user: string]: ResponseInterface[]
   }
 
   return (

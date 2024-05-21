@@ -9,12 +9,12 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
-import { Decision, EntityKind, ReviewResponse } from 'types/types'
+import { Decision, EntityKind, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getRoleDisplay } from 'utils/roles'
 
 type ReviewDecisionDisplayProps = {
-  response: ReviewResponse
+  response: ResponseInterface
   modelId: string
 }
 
@@ -63,7 +63,9 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
                   </Typography>
                 )}
               </Stack>
-              <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
+              <Typography variant='caption'>
+                as {getRoleDisplay(response.role || 'Error fetching model role', modelRoles)}
+              </Typography>
             </Stack>
             <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
           </Stack>

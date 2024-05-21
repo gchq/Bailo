@@ -2,11 +2,11 @@ import { Card, Divider, Stack, Typography } from '@mui/material'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
-import { EntityKind, ReviewComment } from 'types/types'
+import { EntityKind, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 type ReviewCommentDisplayProps = {
-  response: ReviewComment
+  response: ResponseInterface
 }
 
 export default function ReviewCommentDisplay({ response }: ReviewCommentDisplayProps) {
@@ -28,10 +28,10 @@ export default function ReviewCommentDisplay({ response }: ReviewCommentDisplayP
           </Typography>
           <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
         </Stack>
-        {response.message && (
+        {response.comment && (
           <div>
             <Divider sx={{ my: 2 }} />
-            <MarkdownDisplay>{response.message}</MarkdownDisplay>
+            <MarkdownDisplay>{response.comment}</MarkdownDisplay>
           </div>
         )}
       </Card>

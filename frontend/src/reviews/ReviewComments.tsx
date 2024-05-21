@@ -9,14 +9,7 @@ import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
 import ReviewCommentDisplay from 'src/reviews/ReviewCommentDisplay'
 import ReviewDecisionDisplay from 'src/reviews/ReviewDecisionDisplay'
-import {
-  AccessRequestInterface,
-  isReviewResponse,
-  ReleaseInterface,
-  ReviewComment,
-  ReviewResponse,
-  ReviewResponseKind,
-} from 'types/types'
+import { AccessRequestInterface, ReleaseInterface, ResponseInterface, ResponseKind } from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { reviewResponsesForEachUser } from 'utils/reviewUtils'
@@ -61,7 +54,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
   }, [accessRequest, release, reviews])
 
   const reviewDetails = useMemo(() => {
-    let decisionsAndComments: Array<ReviewResponseKind> = []
+    let decisionsAndComments: Array<ResponseInterface> = []
     const groupedResponses = reviewResponsesForEachUser(reviews)
     decisionsAndComments.push(...groupedResponses)
     if (release) {
@@ -72,12 +65,10 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     }
     decisionsAndComments.sort(sortByCreatedAtAscending)
     return decisionsAndComments.map((response) => {
-      if (isReviewResponse(response)) {
-        return (
-          <ReviewDecisionDisplay key={response.createdAt} response={response as ReviewResponse} modelId={modelId} />
-        )
+      if (response.kind === ResponseKind.Review) {
+        return <ReviewDecisionDisplay key={response.createdAt} response={response} modelId={modelId} />
       } else {
-        return <ReviewCommentDisplay key={response.createdAt} response={response as ReviewComment} />
+        return <ReviewCommentDisplay key={response.createdAt} response={response} />
       }
     })
   }, [reviews, release, accessRequest, modelId])
