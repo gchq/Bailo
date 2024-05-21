@@ -31,9 +31,6 @@ describe('Make and approve an access request', () => {
     cy.log('Navigating to token generation page')
     cy.visit(`/settings/personal-access-tokens/new`)
     cy.get('[data-test=tokenDescriptionTextField]').type('This token works for all models')
-    cy.get('[data-test=allModelsCheckbox]').click()
-    cy.get('[data-test=imagereadActionCheckbox]').click()
-    cy.get('[data-test=filereadActionCheckbox]').click()
     cy.get('[data-test=generatePersonalAccessTokenButton]').click()
 
     cy.log('Saving access key and secret key')
@@ -43,8 +40,7 @@ describe('Make and approve an access request', () => {
     cy.get('[data-test=secretKeyText]').invoke('text').as('secretKey')
   })
 
-  // Temporarily disabled until token UI changes go in.
-  it.skip('can push and pull to the registry', function () {
+  it('can push and pull to the registry', function () {
     cy.log('Running all the docker commands to push an image')
     cy.exec(`docker login ${registryUrl} -u ${this.accessKey} -p ${this.secretKey}`, { timeout: 60000 })
     cy.exec(`docker build --tag ${testModelImage} cypress/fixtures/docker-image`, { timeout: 60000 })
@@ -54,7 +50,7 @@ describe('Make and approve an access request', () => {
     cy.exec(`docker push ${registryUrl}/${modelUuidForRegistry}/${testModelImage}:1`, { timeout: 60000 })
   })
 
-  it.skip('can select the image when drafting a release', () => {
+  it('can select the image when drafting a release', () => {
     cy.log('Navigating to the model page and then to the releases tab')
     cy.visit(`/model/${modelUuidForRegistry}`)
     cy.contains(modelNameForRegistry)
