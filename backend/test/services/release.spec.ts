@@ -18,7 +18,11 @@ import {
 vi.mock('../../src/connectors/authorisation/index.js')
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(() => ({ id: 'test_model_id', card: { version: 1 }, settings: { mirroredModelId: 'abc' } })),
+  getModelById: vi.fn(() => ({
+    id: 'test_model_id',
+    card: { version: 1 },
+    settings: { mirror: { sourceModelId: '' } },
+  })),
   getModelCardRevision: vi.fn(),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
@@ -162,7 +166,7 @@ describe('services > release', () => {
     modelMocks.getModelById.mockResolvedValue({
       id: 'test_model_id',
       card: { version: 1 },
-      settings: { mirroredModelId: 'abc' },
+      settings: { mirror: { sourceModelId: '' } },
     })
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
@@ -208,7 +212,7 @@ describe('services > release', () => {
     modelMocks.getModelById.mockResolvedValueOnce({
       id: 'test_model_id',
       card: { version: 999 },
-      settings: { mirroredModelId: 'abc' },
+      settings: { mirror: { sourceModelId: '' } },
     })
     releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
 
@@ -222,7 +226,7 @@ describe('services > release', () => {
     modelMocks.getModelById.mockResolvedValueOnce({
       id: 'test_model_id',
       card: undefined as any,
-      settings: { mirroredModelId: 'abc' },
+      settings: { mirror: { sourceModelId: '' } },
     })
 
     expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
@@ -268,6 +272,17 @@ describe('services > release', () => {
     await updateRelease({} as any, 'model-id', 'v1.0.0', { notes: 'New notes' } as any)
 
     expect(releaseModelMocks.findOneAndUpdate).toBeCalled()
+  })
+
+  test('updateRelease > should throw Bad Req when attempting to update a release on a mirrored model ', async () => {
+    vi.mocked(authorisation.release).mockResolvedValue({
+      info: 'Cannot update a release on a mirrored model.',
+      success: false,
+      id: '',
+    })
+    expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrowError(
+      /^Cannot update a release on a mirrored model./,
+    )
   })
 
   test('newReleaseComment > success', async () => {
@@ -345,9 +360,28 @@ describe('services > release', () => {
     expect(releaseModelMocks.save).not.toBeCalled()
   })
 
+  test('deleteRelease > should throw a bad req when attempting to delete a release from a mirrored model', async () => {
+    const mockRelease = { _id: 'release' }
+
+    releaseModelMocks.findOne.mockResolvedValue(mockRelease)
+
+    vi.mocked(authorisation.release).mockImplementation(async (_user, _model, _release, action) => {
+      if (action === ReleaseAction.View) return { success: true, id: '' }
+      if (action === ReleaseAction.Delete)
+        return { success: false, info: 'Cannot delete a file from a mirrored model.', id: '' }
+
+      return { success: false, info: 'Unknown action.', id: '' }
+    })
+
+    expect(() => deleteRelease({} as any, 'test', 'test')).rejects.toThrowError(
+      /^Cannot remove a file from a mirrored model./,
+    )
+    expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
   test('removeFileFromReleases > no permission', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test', settings: { mirroredModelId: 'abc' } }
+    const mockModel: any = { id: 'test', settings: { mirror: { destinationModelId: 'abc', sourceModelId: '123' } } }
     const mockRelease = { _id: 'release' }
 
     vi.mocked(authorisation.releases).mockResolvedValue([
@@ -368,7 +402,7 @@ describe('services > release', () => {
 
   test('removeFileFromReleases > success', async () => {
     const mockUser: any = { dn: 'test' }
-    const mockModel: any = { id: 'test', settings: { mirroredModelId: 'abc' } }
+    const mockModel: any = { id: 'test', settings: { mirror: { sourceModelId: '' } } }
     const mockRelease = { _id: 'release' }
     const resultObject = { modifiedCount: 2, matchedCount: 2 }
 
@@ -378,6 +412,27 @@ describe('services > release', () => {
     const result = await removeFileFromReleases(mockUser, mockModel, '123')
 
     expect(result).toEqual(resultObject)
+  })
+
+  test('removeFileFromReleases > should throw a bad req when attempting to remove a file from a mirrored model', async () => {
+    const mockUser: any = { dn: 'test' }
+    const mockModel: any = { id: 'test', settings: { mirror: { sourceModelId: '123' } } }
+    const mockRelease = { _id: 'release' }
+
+    vi.mocked(authorisation.releases).mockResolvedValue([
+      {
+        success: false,
+        info: 'Cannot remove a file from a mirrored model.',
+        id: '',
+      },
+    ])
+
+    releaseModelMocks.find.mockResolvedValueOnce([mockRelease, mockRelease])
+
+    expect(() => removeFileFromReleases(mockUser, mockModel, '123')).rejects.toThrowError(
+      /^Cannot remove a file from a mirrored model./,
+    )
+    expect(releaseModelMocks.delete).not.toBeCalled()
   })
 
   test('getFileByReleaseFileName > success', async () => {

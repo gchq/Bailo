@@ -2,15 +2,15 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { UserInterface } from '../../src/models/User.js'
 import {
   _setModelCard,
   canUserActionModelById,
   createModel,
   getModelById,
-  getModelCard,
   getModelCardRevision,
   searchModels,
+  updateModel,
+  updateModelCard,
 } from '../../src/services/model.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -36,7 +36,7 @@ vi.mock('../../src/utils/id.js', () => ({
 }))
 
 const modelMocks = vi.hoisted(() => {
-  const obj: any = { settings: { mirroredModelId: 'abc' } }
+  const obj: any = { settings: { mirror: { sourceModelId: '' } } }
 
   obj.aggregate = vi.fn(() => obj)
   obj.match = vi.fn(() => obj)
@@ -230,17 +230,6 @@ describe('services > model', () => {
     expect(modelCardRevisionModel.save).not.toBeCalled()
   })
 
-  test('getModelCardRevision > should throw BadReq if the user tries to alter a mirrored model card', async () => {
-    vi.mocked(authorisation.model).mockResolvedValueOnce({
-      info: 'You do not have permission',
-      success: false,
-      id: '',
-    })
-
-    const response = getModelCard({} as UserInterface, 'modelId', 1)
-    expect(response).rejects.toThrowError(/^You do not have permission/)
-  })
-
   test('_setModelCard > should save and update model card if user has write permission', async () => {
     const mockUser = { dn: 'testUser' } as any
     const mockModelId = '123'
@@ -252,5 +241,29 @@ describe('services > model', () => {
 
     expect(result).toBeDefined()
     expect(modelCardRevisionModel.save).toBeCalled()
+  })
+
+  test('updateModelCard > should throw an error when attempting to change a model card from mirrored to standard and vice versa', async () => {
+    const mockUser = { dn: 'testUser' } as any
+    const mockModelId = '123'
+    const mockMetadata = { key: 'value' }
+
+    vi.mocked(authorisation.model).mockResolvedValue({
+      info: 'This model card cannot be changed.',
+      success: false,
+      id: '',
+    })
+
+    expect(() => updateModelCard(mockUser, mockModelId, mockMetadata)).rejects.toThrowError(
+      /^This model card cannot be changed./,
+    )
+    expect(modelMocks.save).not.toBeCalled()
+  })
+
+  test('updateModel > should throw an error when attempting to change a model from mirrored to standard and vice versa', async () => {
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'This model cannot be changed.', success: false, id: '' })
+
+    expect(() => updateModel({} as any, '123', {} as any)).rejects.toThrowError(/^This model cannot be changed./)
+    expect(modelMocks.save).not.toBeCalled()
   })
 })

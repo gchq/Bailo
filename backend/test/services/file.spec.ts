@@ -49,7 +49,7 @@ const s3Mocks = vi.hoisted(() => ({
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(),
+  getModelById: vi.fn(() => ({ settings: { mirror: { sourceModelId: '' } } })),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
@@ -128,6 +128,24 @@ describe('services > file', () => {
     )
   })
 
+  test('uploadFile > should throw an error when attempting to upload a file to a mirrored model', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+    const name = 'testFile'
+    const mime = 'text/plain'
+    const stream = new Readable() as any
+
+    vi.mocked(authorisation.file).mockResolvedValue({
+      info: 'Cannot upload file to a mirrored model.',
+      success: false,
+      id: '',
+    })
+
+    expect(() => uploadFile(user, modelId, name, mime, stream)).rejects.toThrowError(
+      /^Cannot upload file to mirrored model./,
+    )
+    expect(fileModelMocks.save).not.toBeCalled()
+  })
   test('removeFile > success', async () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
@@ -168,6 +186,20 @@ describe('services > file', () => {
     expect(() => removeFile(user, modelId, fileId)).rejects.toThrowError(
       /^You do not have permission to delete a file from this model./,
     )
+    expect(fileModelMocks.delete).not.toBeCalled()
+  })
+
+  test('removeFile > should throw an error when attempting to remove a file from a mirrored model', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+    const fileId = 'testFileId'
+
+    vi.mocked(authorisation.file).mockResolvedValue({
+      info: 'Cannot remove file from a mirrored model.',
+      success: false,
+      id: '',
+    })
+    expect(() => removeFile(user, modelId, fileId)).rejects.toThrowError(/^Cannot remove file from a mirrored model./)
     expect(fileModelMocks.delete).not.toBeCalled()
   })
 

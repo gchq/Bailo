@@ -149,9 +149,7 @@ export async function getModelCard(
   if (version === GetModelCardVersionOptions.Latest) {
     const model = await getModelById(user, modelId)
     const card = model.card
-    if (!(model.settings && model.settings.mirroredModelId)) {
-      throw BadReq(`Cannot create a release from a mirrored model`)
-    }
+
     if (!card) {
       throw NotFound('This model has no model card setup', { modelId, version })
     }
@@ -170,9 +168,6 @@ export async function getModelCard(
 export async function getModelCardRevision(user: UserInterface, modelId: string, version: number) {
   const modelCard = await ModelCardRevisionModel.findOne({ modelId, version })
   const model = await getModelById(user, modelId)
-  if (!(model.settings && model.settings.mirroredModelId)) {
-    throw BadReq(`Cannot create a release from a mirrored model`)
-  }
 
   if (!modelCard) {
     throw NotFound(`Version '${version}' does not exist on the requested model`, { modelId, version })
@@ -221,8 +216,8 @@ export async function _setModelCard(
   //
   // It is assumed that this race case will occur infrequently.
   const model = await getModelById(user, modelId)
-  if (!(model.settings && model.settings.mirroredModelId)) {
-    throw BadReq(`Cannot alter a mirrored model`)
+  if (model.settings.mirror.sourceModelId) {
+    throw BadReq(`Cannot alter a mirrored model.`)
   }
 
   // We don't want to copy across other values
@@ -252,8 +247,8 @@ export async function updateModelCard(
   metadata: unknown,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
-  if (!(model.settings && model.settings.mirroredModelId)) {
-    throw BadReq(`You cannot update a mirrored model`, { modelId })
+  if (model.settings.mirror.sourceModelId !== '' || model.settings.mirror.destinationModelId !== '') {
+    throw BadReq(`This model card cannot be changed.`)
   }
 
   if (!model.card) {
@@ -283,6 +278,9 @@ export type UpdateModelParams = Pick<
 >
 export async function updateModel(user: UserInterface, modelId: string, diff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
+  if (model.settings.mirror.sourceModelId !== '' || model.settings.mirror.destinationModelId !== '') {
+    throw BadReq(`This model cannot be changed.`)
+  }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {

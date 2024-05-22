@@ -23,8 +23,8 @@ export async function uploadFile(
   stream: ReadableStream,
 ) {
   const model = await getModelById(user, modelId)
-  if (!(model.settings && model.settings.mirroredModelId)) {
-    throw BadReq(`Cannot upload file to mirrored model`)
+  if (model.settings.mirror.sourceModelId) {
+    throw BadReq(`Cannot upload file to a mirrored model.`)
   }
 
   const fileId = longId()
@@ -138,8 +138,8 @@ export async function getFilesByIds(user: UserInterface, modelId: string, fileId
 export async function removeFile(user: UserInterface, modelId: string, fileId: string) {
   const model = await getModelById(user, modelId)
   const file = await getFileById(user, fileId)
-  if (!(model.settings && model.settings.mirroredModelId)) {
-    throw BadReq(`Cannot remove a file from a mirrored model`)
+  if (model.settings.mirror.sourceModelId) {
+    throw BadReq(`Cannot remove file from a mirrored model`)
   }
 
   const auth = await authorisation.file(user, model, file, FileAction.Delete)
