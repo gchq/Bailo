@@ -3,6 +3,8 @@ from __future__ import annotations
 from json import JSONDecodeError
 
 import requests
+import os
+import getpass
 from requests.auth import HTTPBasicAuth
 from bailo.core.exceptions import BailoException, ResponseException
 
@@ -95,14 +97,30 @@ class PkiAgent(Agent):
 class TokenAgent(Agent):
     def __init__(
         self,
-        access_key: str,
-        secret_key: str,
+        access_key: str | None = None,
+        secret_key: str | None = None,
+        save_tokens: bool = True,
     ):
         """Initiate an agent for API token authentication.
 
         :param access_key: Access key
         :param secret_key: Secret key
+        :param save_tokens: Save tokens as environment variables, defaults to True
         """
+        super().__init__()
+
+        if access_key is None or secret_key is None:
+            try:
+                access_key = os.environ['BAILO_ACCESS_KEY']
+                secret_key = os.environ['BAILO_SECRET_KEY']
+            except:
+                access_key = getpass.getpass("BAILO ACCESS KEY ")
+                secret_key = getpass.getpass("BAILO SECRET KEY ")
+
+        if save_tokens:
+            os.environ['BAILO_ACCESS_KEY'] = access_key
+            os.environ['BAILO_SECRET_KEY'] = secret_key
+
         self.access_key = access_key
         self.secret_key = secret_key
         self.basic = HTTPBasicAuth(access_key, secret_key)
