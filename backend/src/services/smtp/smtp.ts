@@ -8,6 +8,7 @@ import { ReviewDoc } from '../../models/Review.js'
 import config from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import log from '../log.js'
+import { findResponseById } from '../response.js'
 import { buildEmail, EmailContent } from './emailBuilder.js'
 
 let transporter: undefined | Transporter = undefined
@@ -95,10 +96,16 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
     log.info('Not sending email due to SMTP disabled')
     return
   }
-  const reviewResponse = review.responses[0]
+
+  const reviewResponse = await findResponseById(review.responseIds[0])
 
   if (!reviewResponse) {
     log.info('response not found')
+    return
+  }
+
+  if (!reviewResponse.decision) {
+    log.info('response decision not found')
     return
   }
 
@@ -124,10 +131,15 @@ export async function notifyReviewResponseForAccess(review: ReviewDoc, accessReq
     log.info('Not sending email due to SMTP disabled')
     return
   }
-  const reviewResponse = review.responses[0]
+  const reviewResponse = await findResponseById(review.responseIds[0])
 
   if (!reviewResponse) {
     log.info('response not found')
+    return
+  }
+
+  if (!reviewResponse.decision) {
+    log.info('response decision not found')
     return
   }
   const emailContent = buildEmail(

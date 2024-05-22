@@ -70,7 +70,7 @@ No identity or demographic information is detected.
 export const release: ReleaseInterface = {
   modelId: 'example',
   modelCardVersion: 0,
-  comments: [],
+  commentIds: [],
 
   semver: 'v1.0.0',
   notes: `This makes major steps forward in both speed and quality of \
@@ -110,7 +110,7 @@ export const accessRequest: AccessRequestInterface = {
     },
   },
 
-  comments: [],
+  commentIds: [],
 
   deleted: false,
 

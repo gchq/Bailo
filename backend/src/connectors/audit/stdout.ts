@@ -221,6 +221,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  onUpdateResponse(req: Request, responseId: string) {
+    this.checkEventType(AuditInfo.UpdateResponse, req)
+    const event = this.generateEvent(req, { id: responseId })
+    req.log.info(event, req.audit.description)
+  }
+
   onError(req: Request, error: BailoError) {
     if (!req.audit) {
       // No audit information has been attached to the request

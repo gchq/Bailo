@@ -10,7 +10,7 @@ import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
-import { BadReq, Forbidden, InternalError, NotFound, Unauthorized } from '../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -156,53 +156,6 @@ export async function newAccessRequestComment(user: UserInterface, accessRequest
     { _id: accessRequest._id },
     {
       $push: { commentIds: commentResponse._id },
-    },
-  )
-
-  if (!updatedAccessRequest) {
-    throw InternalError(`Updated of access request failed.`, { accessRequestId })
-  }
-
-  return updatedAccessRequest
-}
-
-export async function updateAccessRequestComment(
-  user: UserInterface,
-  accessRequestId: string,
-  commentId: string,
-  message: string,
-) {
-  const accessRequest = await AccessRequest.findOne({ id: accessRequestId })
-
-  if (!accessRequest) {
-    throw NotFound(`The requested access request was not found.`, { accessRequestId })
-  }
-
-  if (!accessRequest.commentIds) {
-    throw NotFound(`The requested access request does not contain any comments to edit.`, { accessRequestId })
-  }
-
-  const accessRequestComments = await ResponseModel.find({ _id: { $in: accessRequest.commentIds } })
-  const originalComment = accessRequestComments.find((comment) => comment._id.toString() === commentId)
-
-  if (!originalComment) {
-    throw NotFound(`The requested access request comment was not found.`, { accessRequestId, commentId })
-  }
-
-  if (user.dn !== originalComment.user) {
-    throw Unauthorized('You do not have permission to update this comment', { accessRequestId, commentId })
-  }
-
-  const updatedAccessRequest = await AccessRequest.findOneAndUpdate(
-    { _id: accessRequest._id, 'comments._id': commentId },
-    { 'comments.$[i].message': message },
-    {
-      arrayFilters: [
-        {
-          'i._id': `${commentId}`,
-          'i.user': `${user.dn}`,
-        },
-      ],
     },
   )
 

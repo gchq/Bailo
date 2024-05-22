@@ -4,7 +4,9 @@ exports[`routes > release > getRelease > 200 > ok 1`] = `
 {
   "release": {
     "_id": "test",
+    "comments": [],
     "files": [],
+    "kind": "comment",
   },
 }
 `;

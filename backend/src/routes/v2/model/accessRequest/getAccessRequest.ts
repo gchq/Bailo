@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/AccessRequest.js'
-import { ResponseInterface, ResponseKind } from '../../../../models/Response.js'
+import { ResponseInterface } from '../../../../models/Response.js'
 import { getAccessRequestById } from '../../../../services/accessRequest.js'
 import { findResponsesById } from '../../../../services/response.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/specification.js'
@@ -49,7 +49,7 @@ export const getAccessRequest = [
 
     const accessRequestWithCommentIds = await getAccessRequestById(req.user, params.accessRequestId)
     const comments = await findResponsesById(req.user, accessRequestWithCommentIds.commentIds)
-    const accessRequest = { ...accessRequestWithCommentIds.toObject(), comments, kind: ResponseKind.Comment }
+    const accessRequest = { ...accessRequestWithCommentIds.toObject(), comments }
 
     await audit.onViewAccessRequest(req, accessRequestWithCommentIds)
 

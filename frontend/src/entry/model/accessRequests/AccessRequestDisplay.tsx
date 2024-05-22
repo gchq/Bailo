@@ -111,11 +111,11 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
             </Stack>
             <Stack direction='row' justifyContent='space-between' spacing={2} sx={{ pt: 2 }}>
               <ReviewDisplay reviews={reviewsWithLatestResponses} />
-              {accessRequest.comments.length > 0 && (
+              {accessRequest.commentIds.length > 0 && (
                 <Stack direction='row' spacing={1}>
                   <CommentIcon color='primary' data-test='commentIcon' />
                   <Typography variant='caption' data-test='commentCount'>
-                    {plural(accessRequest.comments.length, 'comment')}
+                    {plural(accessRequest.commentIds.length, 'comment')}
                   </Typography>
                 </Stack>
               )}

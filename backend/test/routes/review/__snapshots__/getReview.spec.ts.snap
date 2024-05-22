@@ -27,7 +27,14 @@ exports[`routes > review > getReviews > returns only reviews for the specified m
       "createdAt": "2023-08-13T00:00:00.000Z",
       "kind": "release",
       "modelId": "abc",
-      "responses": [],
+      "responses": [
+        {
+          "comment": "This is a comment",
+          "decision": "approve",
+          "kind": "review",
+          "user": "user:user",
+        },
+      ],
       "role": "msro",
       "semver": "3.0.3",
       "updatedAt": "2023-08-14T00:00:00.000Z",
@@ -58,7 +65,14 @@ exports[`routes > review > getReviews > returns reviews 1`] = `
       "createdAt": "2023-08-13T00:00:00.000Z",
       "kind": "release",
       "modelId": "abc",
-      "responses": [],
+      "responses": [
+        {
+          "comment": "This is a comment",
+          "decision": "approve",
+          "kind": "review",
+          "user": "user:user",
+        },
+      ],
       "role": "msro",
       "semver": "3.0.3",
       "updatedAt": "2023-08-14T00:00:00.000Z",

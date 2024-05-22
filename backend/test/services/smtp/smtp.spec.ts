@@ -10,6 +10,7 @@ import {
   requestReviewForRelease,
 } from '../../../src/services/smtp/smtp.js'
 import config from '../../../src/utils/config.js'
+import { NotFound } from '../../../src/utils/error.js'
 
 vi.mock('../../../src/utils/config.js', () => {
   return {
@@ -71,10 +72,32 @@ const emailBuilderMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/smtp/emailBuilder.js', async () => emailBuilderMock)
 
+const responseService = vi.hoisted(() => ({
+  findResponseById: vi.fn(() => ({
+    user: 'user:user',
+    comment: 'This is a comment',
+    decision: 'approve',
+    kind: 'review',
+  })),
+}))
+vi.mock('../../../src/services/response.js', async () => responseService)
+
 describe('services > smtp > smtp', () => {
-  const review = new Review({ role: 'owner', responses: [{ decision: 'approve' }] })
-  const release = new Release({ modelId: 'testmodel-123', semver: '1.2.3', createdBy: 'user:user' })
-  const access = new AccessRequest({ metadata: { overview: { entities: ['user:user'] } } })
+  const review = new Review({
+    role: 'owner',
+    responses: [{ decision: 'approve' }],
+    responseIds: ['664cc8d8b48545fe39c47ddf'],
+  })
+  const release = new Release({
+    modelId: 'testmodel-123',
+    semver: '1.2.3',
+    createdBy: 'user:user',
+    commentIds: ['664cc8d8b48545fe39c47ddf'],
+  })
+  const access = new AccessRequest({
+    metadata: { overview: { entities: ['user:user'] } },
+    commentIds: ['664cc8d8b48545fe39c47ddf'],
+  })
 
   test('that a Release Review email is not sent when disabled in config', async () => {
     vi.spyOn(config, 'smtp', 'get').mockReturnValue({
@@ -174,6 +197,9 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is not sent if a response for a release review cannot be found', async () => {
+    responseService.findResponseById.mockImplementation(() => {
+      throw NotFound
+    })
     await notifyReviewResponseForRelease(new Review({ role: 'owner', responses: [] }), release)
 
     expect(transporterMock.sendMail).not.toBeCalled()
@@ -186,6 +212,9 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is not sent if a response for an access request review cannot be found', async () => {
+    responseService.findResponseById.mockImplementation(() => {
+      throw NotFound
+    })
     await notifyReviewResponseForAccess(new Review({ role: 'owner', responses: [] }), access)
 
     expect(transporterMock.sendMail).not.toBeCalled()

@@ -20,6 +20,12 @@ vi.mock('../../../../src/services/file.ts', () => ({
   getFilesByIds,
 }))
 
+const findResponsesById = vi.hoisted(() => vi.fn(() => []))
+
+vi.mock('../../../../src/services/response.ts', () => ({
+  findResponsesById,
+}))
+
 describe('routes > release > getRelease', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(getReleaseSchema)

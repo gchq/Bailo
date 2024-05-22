@@ -383,6 +383,7 @@ export interface AccessRequestInterface {
   schemaId: string
   deleted: boolean
   metadata: AccessRequestMetadata
+  commentIds: Array<string>
   comments: Array<ResponseInterface>
   createdBy: string
   createdAt: string

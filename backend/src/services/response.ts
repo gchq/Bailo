@@ -3,7 +3,7 @@ import { UserInterface } from '../models/User.js'
 import { toEntity } from '../utils/entity.js'
 import { Forbidden, NotFound } from '../utils/error.js'
 
-export async function findResponseById(_user: UserInterface, responseId: string) {
+export async function findResponseById(responseId: string) {
   const response = await ResponseModel.findOne({
     _id: responseId,
   })

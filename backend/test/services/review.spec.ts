@@ -1,10 +1,10 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import authorisation from '../../src/connectors/authorisation/index.js'
 import AccessRequest from '../../src/models/AccessRequest.js'
 import Model from '../../src/models/Model.js'
 import Release from '../../src/models/Release.js'
-import { Decision, ReviewDoc, ReviewInterface } from '../../src/models/Review.js'
+import { Decision } from '../../src/models/Response.js'
+import { ReviewDoc, ReviewInterface } from '../../src/models/Review.js'
 import {
   checkAccessRequestsApproved,
   createAccessRequestReviews,
@@ -12,7 +12,6 @@ import {
   findReviews,
   respondToReview,
   sendReviewResponseNotification,
-  updateReviewResponseComment,
 } from '../../src/services/review.js'
 import { ReviewKind } from '../../src/types/enums.js'
 
@@ -46,9 +45,41 @@ const reviewModelMock = vi.hoisted(() => {
 
   return model
 })
+
 vi.mock('../../src/models/Review.js', async () => ({
   ...((await vi.importActual('../../src/models/Review.js')) as object),
   default: reviewModelMock,
+}))
+
+const responseModelMock = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.limit = vi.fn(() => obj)
+  obj.unwind = vi.fn(() => obj)
+  obj.at = vi.fn(() => obj)
+  obj.map = vi.fn(() => [])
+  obj.filter = vi.fn(() => [])
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+
+vi.mock('../../src/models/Response.js', async () => ({
+  ...((await vi.importActual('../../src/models/Response.js')) as object),
+  default: responseModelMock,
 }))
 
 const smtpMock = vi.hoisted(() => ({
@@ -271,93 +302,5 @@ describe('services > review', () => {
 
     expect(result).toBe(false)
     expect(reviewModelMock.find.mock.calls).toMatchSnapshot()
-  })
-
-  test('updateReviewResponse > update for release review response sucessful', async () => {
-    releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
-    reviewModelMock.findOneAndUpdate.mockReturnValueOnce({})
-    await updateReviewResponseComment(
-      user,
-      'model-123',
-      'review-123',
-      'response-124123',
-      ReviewKind.Release,
-      'test comment!',
-      '1.0.0',
-    )
-    expect(releaseRequestServiceMock.getReleaseBySemver).toBeCalled()
-    expect(reviewModelMock.findOneAndUpdate).toBeCalled()
-  })
-
-  test('updateReviewResponse > update for access request review response sucessful', async () => {
-    accessRequestServiceMock.getAccessRequestById.mockReturnValueOnce({ createdBy: 'Yellow' })
-    reviewModelMock.findOneAndUpdate.mockReturnValueOnce({})
-    await updateReviewResponseComment(
-      user,
-      'model-123',
-      'review-123',
-      'response-124123',
-      ReviewKind.Access,
-      'test comment!',
-      'access-request-123',
-    )
-    expect(accessRequestServiceMock.getAccessRequestById).toBeCalled()
-    expect(reviewModelMock.findOneAndUpdate).toBeCalled()
-  })
-
-  test('updateReviewREsponse > bad authorisation for release review response update', async () => {
-    vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
-    modelMock.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
-    reviewModelMock.findOneAndUpdate.mockResolvedValue(null)
-    reviewModelMock.findOneAndUpdate.mockReturnValueOnce({})
-    expect(() =>
-      updateReviewResponseComment(
-        user,
-        'model-123',
-        'review-123',
-        'response-124123',
-        ReviewKind.Release,
-        'test comment!',
-        '1.0.0',
-      ),
-    ).rejects.toThrowError(/^You do not have permission/)
-  })
-
-  test('updateReviewResponse > bad authorisation for access request review response update', async () => {
-    reviewModelMock.findOneAndUpdate.mockReturnValueOnce({})
-    vi.mocked(authorisation.accessRequest).mockResolvedValue({
-      info: 'You do not have permission',
-      success: false,
-      id: '',
-    })
-    modelMock.getModelById.mockResolvedValueOnce({ card: { version: 1 } })
-    reviewModelMock.findOneAndUpdate.mockResolvedValue(null)
-    expect(() =>
-      updateReviewResponseComment(
-        user,
-        'model-123',
-        'review-123',
-        'response-124123',
-        ReviewKind.Access,
-        'test comment!',
-        'access-request-123',
-      ),
-    ).rejects.toThrowError(/^You do not have permission/)
-  })
-
-  test('updateReviewResponse > mongo update fails', async () => {
-    reviewModelMock.findOneAndUpdate.mockReturnValueOnce()
-    reviewModelMock.findOneAndUpdate.mockReturnValueOnce({})
-    const result: Promise<ReviewInterface> = updateReviewResponseComment(
-      user,
-      'model-123',
-      'review-123',
-      'response-124123',
-      ReviewKind.Release,
-      'test comment!',
-      '1.0.0',
-    )
-
-    expect(result).rejects.toThrowError(`Updating response to Review, was not successful`)
   })
 })
