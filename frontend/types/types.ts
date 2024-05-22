@@ -161,6 +161,7 @@ export interface PostSimpleUpload {
 
 export interface User {
   dn: string
+  isAdmin: boolean
 }
 
 export interface EntityObject {
@@ -175,12 +176,37 @@ export const TokenScope = {
 
 export type TokenScopeKeys = (typeof TokenScope)[keyof typeof TokenScope]
 
-export const TokenActions = {
-  ImageRead: 'image:read',
-  FileRead: 'file:read',
+export const TokenActionKind = {
+  READ: 'read',
+  WRITE: 'write',
+}
+
+export type TokenActionKindKeys = (typeof TokenActionKind)[keyof typeof TokenActionKind]
+
+export const TokenAction = {
+  MODEL_READ: 'model:read',
+  MODEL_WRITE: 'model:write',
+
+  RELEASE_READ: 'release:read',
+  RELEASE_WRITE: 'release:write',
+
+  ACCESS_REQUEST_READ: 'access_request:read',
+  ACCESS_REQUEST_WRITE: 'access_request:write',
+
+  FILE_READ: 'file:read',
+  FILE_WRITE: 'file:write',
+
+  IMAGE_READ: 'image:read',
+  IMAGE_WRITE: 'image:write',
+
+  SCHEMA_READ: 'schema:read',
+  SCHEMA_WRITE: 'schema:write',
+
+  TOKEN_READ: 'token:read',
+  TOKEN_WRITE: 'token:write',
 } as const
 
-export type TokenActionsKeys = (typeof TokenActions)[keyof typeof TokenActions]
+export type TokenActionKeys = (typeof TokenAction)[keyof typeof TokenAction]
 
 export const TokenCategory = {
   PERSONAL_ACCESS: 'personal access',
@@ -209,7 +235,7 @@ export interface TokenInterface {
   description: string
   scope: TokenScopeKeys
   modelIds: Array<string>
-  actions: Array<TokenActionsKeys>
+  actions: Array<TokenActionKeys>
   accessKey: string
   secretKey: string
   deleted: boolean
@@ -401,6 +427,7 @@ export interface FileWithMetadata {
 export const Decision = {
   RequestChanges: 'request_changes',
   Approve: 'approve',
+  Undo: 'undo',
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
@@ -427,6 +454,12 @@ type PartialReviewRequestInterface =
       accessRequestId?: never
       semver: string
     }
+
+export const ReviewKind = {
+  ACCESS: 'access',
+  RELEASE: 'release',
+} as const
+export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
 export type ReviewRequestInterface = {
   model: EntryInterface
@@ -455,4 +488,14 @@ export interface InferenceInterface {
   createdBy: string
   createdAt: string
   updatedAt: string
+}
+
+export const ReviewListStatus = {
+  OPEN: 'open',
+  ARCHIVED: 'archived',
+} as const
+export type ReviewListStatusKeys = (typeof ReviewListStatus)[keyof typeof ReviewListStatus]
+
+export function isReviewKind(value: unknown): value is ReviewKindKeys {
+  return value === ReviewKind.RELEASE || value === ReviewKind.ACCESS
 }

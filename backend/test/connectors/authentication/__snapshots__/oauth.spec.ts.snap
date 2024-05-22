@@ -7,7 +7,6 @@ exports[`connectors > authentication > oauth > authenticationMiddleware > return
       {
         "session": "session middleware",
       },
-      "body parser middleware",
       "grant middleware",
       [Function],
     ],
@@ -26,6 +25,7 @@ exports[`connectors > authentication > oauth > authenticationMiddleware > return
   },
   {
     "middleware": [
+      "Token Middleware",
       "Authentication Check Middleware",
     ],
     "path": "/api/v2",

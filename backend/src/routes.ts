@@ -14,6 +14,7 @@ import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAcces
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
+import { patchAccessRequestComment } from './routes/v2/model/accessRequest/patchAccessRequestComment.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
 import { postAccessRequestComment } from './routes/v2/model/accessRequest/postAccessRequestComment.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
@@ -45,10 +46,13 @@ import { putWebhook } from './routes/v2/model/webhook/putWebhook.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
+import { patchReleaseComment } from './routes/v2/release/patchReleaseComment.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
 import { postReleaseComment } from './routes/v2/release/postReleaseComment.js'
 import { putRelease } from './routes/v2/release/putRelease.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
+import { patchAccessRequestReviewResponse } from './routes/v2/review/patchAccessRequestReviewResponse.js'
+import { patchReleaseReviewResponse } from './routes/v2/review/patchReleaseReviewResponse.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
 import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
@@ -104,8 +108,13 @@ server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...
 server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
 server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
 server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
+server.patch('/api/v2/model/:modelId/release/:semver/comment/:commentId', ...patchReleaseComment)
 server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
 server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
+server.patch(
+  '/api/v2/model/:modelId/release/:semver/review/:reviewId/response/:responseId',
+  ...patchReleaseReviewResponse,
+)
 
 server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
 server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
@@ -113,7 +122,12 @@ server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAcces
 server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
 server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
+server.patch('/api/v2/model/:modelId/access-request/:accessRequestId/comment/:commentId', ...patchAccessRequestComment)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
+server.patch(
+  '/api/v2/model/:modelId/access-request/:accessRequestId/review/:reviewId/response/:responseId',
+  ...patchAccessRequestReviewResponse,
+)
 
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)

@@ -32,7 +32,7 @@ export default function ModelAccess({ model }: ModelAccessProps) {
   const [errorMessage, setErrorMessage] = useState('')
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
-  const { isModelError, mutateModel } = useGetModel(model.id)
+  const { isModelError, mutateModel } = useGetModel(model.id, model.kind)
   const sendNotification = useNotification()
 
   const accessListEntities = useMemo(

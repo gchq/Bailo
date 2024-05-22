@@ -97,7 +97,7 @@ describe('services > model', () => {
   test('getModelById > no model', async () => {
     modelMocks.findOne.mockResolvedValueOnce(undefined)
 
-    expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^The requested model was not found/)
+    expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^The requested entry was not found/)
   })
 
   test('canUserActionModelById > allowed', async () => {

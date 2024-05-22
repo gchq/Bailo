@@ -7,14 +7,17 @@ import { UserInterface } from '../../models/User.js'
 import { Access, Action } from '../../routes/v1/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../services/accessRequest.js'
 import { checkAccessRequestsApproved } from '../../services/review.js'
+import { validateTokenForModel, validateTokenForUse } from '../../services/token.js'
 import { Roles } from '../authentication/Base.js'
 import authentication from '../authentication/index.js'
 import {
   AccessRequestAction,
   AccessRequestActionKeys,
+  ActionLookup,
   FileAction,
   FileActionKeys,
   ImageAction,
+  ImageActionKeys,
   ModelAction,
   ModelActionKeys,
   ReleaseAction,
@@ -23,7 +26,7 @@ import {
   SchemaActionKeys,
 } from './actions.js'
 
-type Response = { id: string; success: true } | { id: string; success: false; info: string }
+export type Response = { id: string; success: true } | { id: string; success: false; info: string }
 
 export class BasicAuthorisationConnector {
   async hasModelVisibilityAccess(user: UserInterface, model: ModelDoc) {
@@ -77,6 +80,12 @@ export class BasicAuthorisationConnector {
   async models(user: UserInterface, models: Array<ModelDoc>, action: ModelActionKeys): Promise<Array<Response>> {
     return Promise.all(
       models.map(async (model) => {
+        // Is this a constrained user token.
+        const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+        if (!tokenAuth.success) {
+          return tokenAuth
+        }
+
         // Prohibit non-collaborators from seeing private models
         if (!(await this.hasModelVisibilityAccess(user, model))) {
           return {
@@ -100,22 +109,32 @@ export class BasicAuthorisationConnector {
   }
 
   async schemas(user: UserInterface, schemas: Array<SchemaDoc>, action: SchemaActionKeys): Promise<Array<Response>> {
-    if (action === SchemaAction.Create || action === SchemaAction.Delete) {
-      const isAdmin = await authentication.hasRole(user, Roles.Admin)
+    return Promise.all(
+      schemas.map(async (schema) => {
+        // Is this a constrained user token.
+        const tokenAuth = await validateTokenForUse(user.token, ActionLookup[action])
+        if (!tokenAuth.success) {
+          return tokenAuth
+        }
 
-      if (!isAdmin) {
-        return schemas.map((schema) => ({
+        if (action === SchemaAction.Create || action === SchemaAction.Delete) {
+          const isAdmin = await authentication.hasRole(user, Roles.Admin)
+
+          if (!isAdmin) {
+            return {
+              id: schema.id,
+              success: false,
+              info: 'You cannot upload or modify a schema if you are not an admin.',
+            }
+          }
+        }
+
+        return {
           id: schema.id,
-          success: false,
-          info: 'You cannot upload or modify a schema if you are not an admin.',
-        }))
-      }
-    }
-
-    return schemas.map((schema) => ({
-      id: schema.id,
-      success: true,
-    }))
+          success: true,
+        }
+      }),
+    )
   }
 
   async releases(
@@ -133,6 +152,12 @@ export class BasicAuthorisationConnector {
       [ReleaseAction.View]: ModelAction.View,
     }
 
+    // Is this a constrained user token.
+    const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+    if (!tokenAuth.success) {
+      return releases.map(() => tokenAuth)
+    }
+
     return new Array(releases.length).fill(await this.model(user, model, actionMap[action]))
   }
 
@@ -146,6 +171,12 @@ export class BasicAuthorisationConnector {
 
     return Promise.all(
       accessRequests.map(async (request) => {
+        // Is this a constrained user token.
+        const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+        if (!tokenAuth.success) {
+          return tokenAuth
+        }
+
         // Does any individual in the access request share an entity with our user?
         const isNamed = request.metadata.overview.entities.some((value) => entities.includes(value))
 
@@ -158,7 +189,7 @@ export class BasicAuthorisationConnector {
         if (
           !isNamed &&
           (await missingRequiredRole(user, model, ['owner'])) &&
-          [AccessRequestAction.Delete, AccessRequestAction.Update].includes(action)
+          ([AccessRequestAction.Delete, AccessRequestAction.Update] as AccessRequestActionKeys[]).includes(action)
         ) {
           return { success: false, info: 'You cannot change an access request you do not own', id: request.id }
         }
@@ -180,9 +211,15 @@ export class BasicAuthorisationConnector {
 
     return Promise.all(
       files.map(async (file) => {
+        // Is this a constrained user token.
+        const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+        if (!tokenAuth.success) {
+          return tokenAuth
+        }
+
         // If they are not listed on the model, don't let them upload or delete files.
         if (
-          [FileAction.Delete, FileAction.Upload].includes(action) &&
+          ([FileAction.Delete, FileAction.Upload] as FileActionKeys[]).includes(action) &&
           (await missingRequiredRole(user, model, ['owner', 'collaborator']))
         ) {
           return {
@@ -193,7 +230,7 @@ export class BasicAuthorisationConnector {
         }
 
         if (
-          [FileAction.Download].includes(action) &&
+          ([FileAction.Download] as FileActionKeys[]).includes(action) &&
           !model.settings.ungovernedAccess &&
           !hasApprovedAccessRequest &&
           (await missingRequiredRole(user, model, ['owner', 'collaborator', 'consumer']))
@@ -216,16 +253,39 @@ export class BasicAuthorisationConnector {
 
     return Promise.all(
       accesses.map(async (access) => {
-        //also blocks the registry
+        const actions = access.actions.map((action) => {
+          switch (action) {
+            case '*':
+              return ImageAction.Wildcard
+            case 'delete':
+              return ImageAction.Delete
+            case 'list':
+              return ImageAction.List
+            case 'pull':
+              return ImageAction.Pull
+            case 'push':
+              return ImageAction.Push
+          }
+        })
 
-        //Don't allow anything beyond pushing and pulling actions.
+        // Don't allow anything beyond pushing and pulling actions.
         if (
-          !access.actions.every((action) => [ImageAction.Push, ImageAction.Pull, ImageAction.List].includes(action))
+          !actions.every((action) =>
+            ([ImageAction.Push, ImageAction.Pull, ImageAction.List] as ImageActionKeys[]).includes(action),
+          )
         ) {
           return {
             success: false,
             info: 'You are not allowed to complete any actions beyond `push` or `pull` on an image.',
             id: access.name,
+          }
+        }
+
+        // Is this a constrained user token.
+        for (const action of actions) {
+          const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
+          if (!tokenAuth.success) {
+            return tokenAuth
           }
         }
 

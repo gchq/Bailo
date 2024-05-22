@@ -41,13 +41,17 @@ export function useListModels(
   }
 }
 
-export function useGetModel(id?: string) {
+export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
+  const queryParams = {
+    kind,
+  }
+
   const { data, error, mutate } = useSWR<
     {
       model: EntryInterface
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}` : null, fetcher)
+  >(id ? `/api/v2/model/${id}?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
     mutateModel: mutate,

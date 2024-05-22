@@ -10,7 +10,7 @@ import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isBailoError } from '../types/error.js'
 import { findDuplicates } from '../utils/array.js'
-import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound, Unauthorized } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
@@ -204,7 +204,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
 }
 
 export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, message: string) {
-  const release = await getReleaseBySemver(user, modelId, semver)
+  const release = await Release.findOne({ modelId, semver })
 
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
@@ -222,6 +222,53 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
       $push: {
         comments: comment,
       },
+    },
+  )
+
+  if (!updatedRelease) {
+    throw InternalError(`Update of release failed.`, { modelId, semver })
+  }
+
+  return updatedRelease
+}
+
+export async function updateReleaseComment(
+  user: UserInterface,
+  modelId: string,
+  semver: string,
+  commentId: string,
+  message: string,
+) {
+  const release = await Release.findOne({ modelId, semver })
+
+  if (!release) {
+    throw NotFound(`The requested release was not found.`, { modelId, semver })
+  }
+
+  if (!release.comments) {
+    throw NotFound(`The requested release does not have any comments to edit.`, { modelId, semver })
+  }
+
+  const originalComment = release.comments.find((comment) => comment._id.toString() === commentId)
+
+  if (!originalComment) {
+    throw NotFound(`The requested release comment was not found.`, { release, commentId })
+  }
+
+  if (user.dn !== originalComment.user) {
+    throw Unauthorized('You do not have permission to update this comment', { release, commentId })
+  }
+
+  const updatedRelease = await Release.findOneAndUpdate(
+    { _id: release._id, 'comments._id': commentId },
+    { 'comments.$[i].message': message },
+    {
+      arrayFilters: [
+        {
+          'i._id': `${commentId}`,
+          'i.user': `${user.dn}`,
+        },
+      ],
     },
   )
 

@@ -6,12 +6,14 @@ import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
-import ReviewWithComment, { ResponseTypeKeys } from 'src/common/ReviewWithComment'
+import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
+import { DecisionKeys } from 'types/types'
+import { EntryKind } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
@@ -21,7 +23,7 @@ export default function AccessRequestReview() {
 
   const [errorMessage, setErrorMessage] = useState('')
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId)
+  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(modelId)
   const { mutateReviews } = useGetReviewRequestsForModel({
@@ -29,7 +31,7 @@ export default function AccessRequestReview() {
     accessRequestId: `${accessRequestId}`,
   })
 
-  async function handleSubmit(decision: ResponseTypeKeys, comment: string, role: string) {
+  async function handleSubmit(decision: DecisionKeys, comment: string, role: string) {
     setErrorMessage('')
     if (!modelId) {
       return setErrorMessage('Could not find model ID')

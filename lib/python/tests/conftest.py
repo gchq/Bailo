@@ -15,7 +15,8 @@ import random
 import mlflow
 import pytest
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, ModelVisibility, SchemaKind
+from bailo.core.enums import ModelVisibility, SchemaKind
+from bailo.helper.datacard import Datacard
 from bailo.helper.model import Model
 from bailo.helper.schema import Schema
 from example_schemas import METRICS_JSON_SCHEMA
@@ -31,7 +32,6 @@ def example_model(integration_client, metrics_schema):
     model = Model.create(
         client=integration_client,
         name="Yolo-v4",
-        kind=EntryKind.MODEL,
         description="You only look once!",
         team_id="team_id",
         visibility=ModelVisibility.PUBLIC,
@@ -49,6 +49,20 @@ def example_model(integration_client, metrics_schema):
 
 
 @pytest.fixture
+def local_datacard():
+    client = Client("https://example.com")
+    visibility = ModelVisibility.PUBLIC
+    datacard = Datacard(
+        client=client,
+        datacard_id="test-id",
+        name="test",
+        description="test",
+        visibility=visibility,
+    )
+    return datacard
+
+
+@pytest.fixture
 def local_model():
     client = Client("https://example.com")
     visibility = ModelVisibility.PUBLIC
@@ -56,7 +70,6 @@ def local_model():
         client=client,
         model_id="test-id",
         name="test",
-        kind=EntryKind.MODEL,
         description="test",
         visibility=visibility,
     )
@@ -78,7 +91,8 @@ def test_path_large(tmpdir_factory):
     fn = tmpdir_factory.mktemp("data").join("test.pth")
 
     f = open(str(fn), "wb")
-    f.seek(8589934592 - 1)  # 8GB
+    # f.seek(8589934592 - 1)  # 8GB
+    f.seek(512 * 1024 * 1024 - 1)  # 512MB
     f.write(b"\0")
     f.close()
 
