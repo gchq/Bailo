@@ -111,15 +111,15 @@ class TokenAgent(Agent):
 
         if access_key is None or secret_key is None:
             try:
-                access_key = os.environ['BAILO_ACCESS_KEY']
-                secret_key = os.environ['BAILO_SECRET_KEY']
+                access_key = os.environ["BAILO_ACCESS_KEY"]
+                secret_key = os.environ["BAILO_SECRET_KEY"]
             except:
                 access_key = getpass.getpass("BAILO ACCESS KEY ")
                 secret_key = getpass.getpass("BAILO SECRET KEY ")
 
         if save_tokens:
-            os.environ['BAILO_ACCESS_KEY'] = access_key
-            os.environ['BAILO_SECRET_KEY'] = secret_key
+            os.environ["BAILO_ACCESS_KEY"] = access_key
+            os.environ["BAILO_SECRET_KEY"] = secret_key
 
         self.access_key = access_key
         self.secret_key = secret_key
