@@ -5,6 +5,7 @@ from typing import Any
 
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import EntryKind, ModelVisibility, SchemaKind
+from bailo.core.exceptions import BailoException
 from bailo.core.utils import filter_none
 
 
@@ -18,6 +19,9 @@ class Client:
     def __init__(self, url: str, agent: Agent = Agent()):
         self.url = url.rstrip("/") + "/api"
         self.agent = agent
+
+        # Healthcheck
+        self.get_models()
 
     def post_model(
         self,

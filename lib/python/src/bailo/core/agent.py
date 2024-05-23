@@ -99,27 +99,25 @@ class TokenAgent(Agent):
         self,
         access_key: str | None = None,
         secret_key: str | None = None,
-        save_tokens: bool = True,
     ):
         """Initiate an agent for API token authentication.
 
         :param access_key: Access key
         :param secret_key: Secret key
-        :param save_tokens: Save tokens as environment variables, defaults to True
         """
         super().__init__()
 
-        if access_key is None or secret_key is None:
+        if access_key is None:
             try:
                 access_key = os.environ["BAILO_ACCESS_KEY"]
-                secret_key = os.environ["BAILO_SECRET_KEY"]
-            except:
-                access_key = getpass.getpass("BAILO ACCESS KEY ")
-                secret_key = getpass.getpass("BAILO SECRET KEY ")
+            except KeyError:
+                access_key = getpass.getpass("BAILO ACCESS KEY:")
 
-        if save_tokens:
-            os.environ["BAILO_ACCESS_KEY"] = access_key
-            os.environ["BAILO_SECRET_KEY"] = secret_key
+        if secret_key is None:
+            try:
+                secret_key = os.environ["BAILO_SECRET_KEY"]
+            except KeyError:
+                secret_key = getpass.getpass("BAILO SECRET KEY:")
 
         self.access_key = access_key
         self.secret_key = secret_key
