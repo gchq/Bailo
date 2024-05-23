@@ -5,7 +5,6 @@ from typing import Any
 
 from bailo.core.agent import Agent, TokenAgent
 from bailo.core.enums import EntryKind, ModelVisibility, SchemaKind
-from bailo.core.exceptions import BailoException
 from bailo.core.utils import filter_none
 
 
