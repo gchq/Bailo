@@ -52,7 +52,7 @@ export const testAccessRequestWithComments: AccessRequestInterface = {
   modelId: modelId,
   schemaId: accessRequestSchemaId,
   deleted: false,
-  commentIds: [],
+  commentIds: ['comment-1215123123'],
   comments: [testComment],
   createdBy: testEntity,
   metadata: {
