@@ -36,7 +36,7 @@ const ResponseSchema = new Schema<ResponseInterface>(
     kind: { type: String, enum: Object.values(ResponseKind) },
     role: { type: String },
     decision: { type: String, enum: Object.values(Decision) },
-    comment: { type: String, required: true },
+    comment: { type: String },
   },
   {
     timestamps: true,

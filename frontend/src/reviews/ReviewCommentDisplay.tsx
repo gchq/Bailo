@@ -10,11 +10,13 @@ type ReviewCommentDisplayProps = {
 }
 
 export default function ReviewCommentDisplay({ response }: ReviewCommentDisplayProps) {
-  const username = response.user
+  const [entityKind, username] = response.user.split(':')
 
   return (
-    <Stack direction='row' spacing={2} alignItems='center'>
-      <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />
+    <Stack direction='row' spacing={2} alignItems='flex-start'>
+      <div style={{ marginTop: 5 }}>
+        <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} size='chip' />
+      </div>
       <Card
         sx={{
           width: '100%',
@@ -30,7 +32,7 @@ export default function ReviewCommentDisplay({ response }: ReviewCommentDisplayP
         </Stack>
         {response.comment && (
           <div>
-            <Divider sx={{ my: 2 }} />
+            <Divider sx={{ mt: 1, mb: 2 }} />
             <MarkdownDisplay>{response.comment}</MarkdownDisplay>
           </div>
         )}

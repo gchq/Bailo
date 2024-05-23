@@ -22,7 +22,7 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
 
   const theme = useTheme()
-  const username = response.user.split(':')[1]
+  const [entityKind, username] = response.user.split(':')
 
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
@@ -31,8 +31,10 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
   return (
     <>
       {isModelRolesLoading && <Loading />}
-      <Stack direction='row' spacing={2} alignItems='center'>
-        <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />{' '}
+      <Stack direction='row' spacing={2} alignItems='flex-start'>
+        <div style={{ marginTop: 5 }}>
+          <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} size='chip' />
+        </div>
         <Card
           sx={{
             width: '100%',
@@ -48,7 +50,7 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
           >
             <Stack alignItems={{ xs: 'center', sm: 'flex-start' }} spacing={{ xs: 1, sm: 0 }}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
-                <Typography>
+                <Typography data-test='reviewDecisionDisplay'>
                   <UserDisplay dn={username} />
                   {response.decision === Decision.Approve && ' has approved'}
                   {response.decision === Decision.RequestChanges && ' has requested changes'}
@@ -71,7 +73,7 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
           </Stack>
           {response.comment && (
             <div>
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ mt: 1, mb: 2 }} />
               <MarkdownDisplay>{response.comment}</MarkdownDisplay>
             </div>
           )}

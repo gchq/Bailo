@@ -197,12 +197,10 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is not sent if a response for a release review cannot be found', async () => {
-    responseService.findResponseById.mockImplementation(() => {
-      throw NotFound
-    })
-    await notifyReviewResponseForRelease(new Review({ role: 'owner', responses: [] }), release)
-
-    expect(transporterMock.sendMail).not.toBeCalled()
+    responseService.findResponseById.mockRejectedValueOnce(NotFound('Response not found.'))
+    await expect(notifyReviewResponseForRelease(new Review({ role: 'owner', responses: [] }), release)).rejects.toThrow(
+      'Response not found',
+    )
   })
 
   test('that an email is sent after a response for a an access request review', async () => {
@@ -212,12 +210,10 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is not sent if a response for an access request review cannot be found', async () => {
-    responseService.findResponseById.mockImplementation(() => {
-      throw NotFound
-    })
-    await notifyReviewResponseForAccess(new Review({ role: 'owner', responses: [] }), access)
-
-    expect(transporterMock.sendMail).not.toBeCalled()
+    responseService.findResponseById.mockRejectedValueOnce(NotFound('Response not found.'))
+    await expect(notifyReviewResponseForAccess(new Review({ role: 'owner', responses: [] }), access)).rejects.toThrow(
+      'Response not found',
+    )
   })
 
   test('that sendEmail is called for each member of a group entity', async () => {
