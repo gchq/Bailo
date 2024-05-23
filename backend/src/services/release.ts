@@ -204,8 +204,11 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
 }
 
 export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, message: string) {
+  const model = await getModelById(user, modelId)
+  if (model.settings.mirror.sourceModelId) {
+    throw BadReq(`Cannot create a new comment on a mirrored model.`)
+  }
   const release = await Release.findOne({ modelId, semver })
-
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
@@ -240,6 +243,10 @@ export async function updateReleaseComment(
   message: string,
 ) {
   const release = await Release.findOne({ modelId, semver })
+  const model = await getModelById(user, modelId)
+  if (model.settings.mirror.sourceModelId) {
+    throw BadReq(`Cannot update comments on a mirrored model.`)
+  }
 
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })

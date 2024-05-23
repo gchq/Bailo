@@ -19,10 +19,13 @@ export const postModelSchema = z.object({
     settings: z
       .object({
         ungovernedAccess: z.boolean().optional().default(false).openapi({ example: true }),
-        mirroredModelId: z.string(),
+        mirror: z.object({
+          sourceModelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
+          destinationModelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
+        }),
       })
       .optional()
-      .default({ ungovernedAccess: false, mirroredModelId: '' }),
+      .default({ ungovernedAccess: false, mirror: { sourceModelId: '', destinationModelId: '' } }),
   }),
 })
 

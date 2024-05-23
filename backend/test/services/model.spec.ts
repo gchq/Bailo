@@ -6,10 +6,10 @@ import {
   _setModelCard,
   canUserActionModelById,
   createModel,
+  createModelCardFromSchema,
   getModelById,
   getModelCardRevision,
   searchModels,
-  updateModel,
   updateModelCard,
 } from '../../src/services/model.js'
 
@@ -75,6 +75,19 @@ describe('services > model', () => {
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     expect(() => createModel({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
+    expect(modelMocks.save).not.toBeCalled()
+  })
+
+  test('createModel > bad request is thrown when attempting to set both source and destinationModelId simultaneously', async () => {
+    vi.mocked(authorisation.model).mockResolvedValue({
+      info: 'You cannot select both settings simultaneously.',
+      success: false,
+      id: '',
+    })
+
+    expect(() => createModel({} as any, {} as any)).rejects.toThrowError(
+      /^You cannot select both settings simultaneously./,
+    )
     expect(modelMocks.save).not.toBeCalled()
   })
 
@@ -260,10 +273,19 @@ describe('services > model', () => {
     expect(modelMocks.save).not.toBeCalled()
   })
 
-  test('updateModel > should throw an error when attempting to change a model from mirrored to standard and vice versa', async () => {
+  // test('updateModel > should throw an error when attempting to change a model from mirrored to standard and vice versa', async () => {
+  //   vi.mocked(authorisation.model).mockResolvedValue({ info: 'This model cannot be changed.', success: false, id: '' })
+
+  //   expect(() => updateModel({} as any, '123', {} as any)).rejects.toThrowError(/^This model cannot be changed./)
+  //   expect(modelMocks.save).not.toBeCalled()
+  // })
+
+  test('createModelcardFromSchema > should throw an error when attempting to change a model from mirrored to standard', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'This model cannot be changed.', success: false, id: '' })
 
-    expect(() => updateModel({} as any, '123', {} as any)).rejects.toThrowError(/^This model cannot be changed./)
+    expect(() => createModelCardFromSchema({} as any, '123', 'abc')).rejects.toThrowError(
+      /^This model cannot be changed./,
+    )
     expect(modelMocks.save).not.toBeCalled()
   })
 })

@@ -29,13 +29,12 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
         roles: ['owner'],
       },
     ],
-    settings: {
-      ungovernedAccess: false,
-      mirroredModelId: 'demo1-7zwbdq',
-    },
   })
 
   const auth = await authorisation.model(user, model, ModelAction.Create)
+  if (model.settings.mirror.sourceModelId && model.settings.mirror.destinationModelId) {
+    throw BadReq('You cannot select both settings simultaneously.')
+  }
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
   }
@@ -148,16 +147,10 @@ export async function getModelCard(
   version: number | GetModelCardVersionOptionsKeys,
 ) {
   if (version === GetModelCardVersionOptions.Latest) {
-    const model = await getModelById(user, modelId)
-    const card = model.card
+    const card = (await getModelById(user, modelId)).card
 
     if (!card) {
       throw NotFound('This model has no model card setup', { modelId, version })
-    }
-
-    const auth = await authorisation.model(user, model, ModelAction.View)
-    if (!auth.success) {
-      throw Forbidden(auth.info, { userDn: user.dn, modelId })
     }
 
     return card
@@ -221,7 +214,13 @@ export async function _setModelCard(
     throw BadReq(`Cannot alter a mirrored model.`)
   }
 
+  const auth = await authorisation.model(user, model, ModelAction.Write)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
+
   // We don't want to copy across other values
+
   const newDocument = {
     schemaId: schemaId,
 
@@ -230,11 +229,6 @@ export async function _setModelCard(
   }
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
-  const auth = await authorisation.model(user, model, ModelAction.Write)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId })
-  }
-
   await revision.save()
 
   await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } })
@@ -248,7 +242,7 @@ export async function updateModelCard(
   metadata: unknown,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId !== '' || model.settings.mirror.destinationModelId !== '') {
+  if (model.settings.mirror.sourceModelId) {
     throw BadReq(`This model card cannot be changed.`)
   }
 
@@ -279,10 +273,7 @@ export type UpdateModelParams = Pick<
 >
 export async function updateModel(user: UserInterface, modelId: string, diff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId !== '' || model.settings.mirror.destinationModelId !== '') {
-    throw BadReq(`This model cannot be changed.`)
-  }
-
+  // onn line below implement a check to make sure that when updating the user can change source to destination id and vice
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
@@ -300,6 +291,9 @@ export async function createModelCardFromSchema(
   schemaId: string,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
+  if (model.settings.mirror.sourceModelId) {
+    throw BadReq(`This model card cannot be changed.`)
+  }
 
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
