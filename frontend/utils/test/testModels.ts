@@ -5,9 +5,9 @@ import {
   EntryInterface,
   EntryKind,
   EntryVisibility,
-  ReviewComment,
+  ResponseInterface,
+  ResponseKind,
   ReviewRequestInterface,
-  ReviewResponse,
   Role,
   SchemaInterface,
   StepNoRender,
@@ -25,6 +25,7 @@ export const testAccessRequest: AccessRequestInterface = {
   modelId: modelId,
   schemaId: accessRequestSchemaId,
   deleted: false,
+  commentIds: [],
   comments: [],
   createdBy: testEntity,
   metadata: {
@@ -38,10 +39,12 @@ export const testAccessRequest: AccessRequestInterface = {
   updatedAt: new Date().toDateString(),
 }
 
-const testComment: ReviewComment = {
-  message: 'This is a comment',
+const testComment: ResponseInterface = {
+  comment: 'This is a comment',
   user: 'Joe Blogs',
+  kind: ResponseKind.Comment,
   createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 }
 
 export const testAccessRequestWithComments: AccessRequestInterface = {
@@ -49,6 +52,7 @@ export const testAccessRequestWithComments: AccessRequestInterface = {
   modelId: modelId,
   schemaId: accessRequestSchemaId,
   deleted: false,
+  commentIds: [],
   comments: [testComment],
   createdBy: testEntity,
   metadata: {
@@ -89,10 +93,11 @@ export const testV2Model: EntryInterface = {
   createdBy: testEntity,
 }
 
-export const testReviewResponse: ReviewResponse = {
+export const testReviewResponse: ResponseInterface = {
   user: testEntity,
   decision: 'approve',
   role: 'mtr',
+  kind: ResponseKind.Review,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 }
