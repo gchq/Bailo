@@ -20,9 +20,6 @@ class Client:
         self.url = url.rstrip("/") + "/api"
         self.agent = agent
 
-        # Healthcheck
-        self.get_models()
-
     def post_model(
         self,
         name: str,
