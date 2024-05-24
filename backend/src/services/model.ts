@@ -273,7 +273,26 @@ export type UpdateModelParams = Pick<
 >
 export async function updateModel(user: UserInterface, modelId: string, diff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
-  // onn line below implement a check to make sure that when updating the user can change source to destination id and vice
+  if (diff.settings && diff.settings.mirror && diff.settings.mirror.sourceModelId) {
+    throw BadReq('Cannot change mirror model to a standard model.')
+  }
+  if (
+    model.settings.mirror.sourceModelId &&
+    diff.settings &&
+    diff.settings.mirror &&
+    diff.settings.mirror.destinationModelId
+  ) {
+    throw BadReq('Cannot change settings for this model.')
+  }
+  if (
+    diff.settings &&
+    diff.settings.mirror &&
+    diff.settings.mirror.destinationModelId &&
+    diff.settings.mirror.sourceModelId
+  ) {
+    throw BadReq('Cannot select both settings for this model simultaneously.')
+  }
+
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
