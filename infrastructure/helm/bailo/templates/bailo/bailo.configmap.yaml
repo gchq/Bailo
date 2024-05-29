@@ -16,6 +16,13 @@ data:
         port: {{ .Values.service.backendPort }},
       },
 
+      inference: {
+        enabled: {{ .Values.inference.enabled}},
+        connection: {
+          host: '{{ .Values.inference.host }}',
+        },
+      },
+
       app: {
         // Publicly accessible route to service
         protocol: '{{ .Values.config.app.protocol }}',
@@ -132,7 +139,7 @@ data:
           enabled: {{ .Values.config.ui.banner.enabled }},
           text: '{{ .Values.config.ui.banner.text }}',
           colour: '{{ .Values.config.ui.banner.colour }}',
-          textColor: '{{ .Values.config.ui.banner.textColor}}'         
+          textColor: '{{ .Values.config.ui.banner.textColor}}'
         },
 
         // Contact details for the support team
@@ -145,6 +152,14 @@ data:
         // The publicly accessible location of the registry, including host and port
         registry: {
           host: '{{ .Values.route.appPublicRoute }}',
+        },
+
+        inference: {
+          enabled: {{ .Values.inference.enabled}},
+          connection: {
+            host: '{{ .Values.inference.host}}',
+          },
+          gpus: '{{ .Values.inference.gpus }}',
         },
       },
 
