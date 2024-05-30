@@ -2,10 +2,13 @@ from __future__ import annotations
 
 from io import BytesIO
 from typing import Any
+import logging
 
-from bailo.core.agent import Agent, TokenAgent
+from bailo.core.agent import Agent, TokenAgent, PkiAgent
 from bailo.core.enums import EntryKind, ModelVisibility, SchemaKind
 from bailo.core.utils import filter_none
+
+logger = logging.getLogger(__name__)
 
 
 class Client:
@@ -18,6 +21,13 @@ class Client:
     def __init__(self, url: str, agent: Agent = Agent()):
         self.url = url.rstrip("/") + "/api"
         self.agent = agent
+
+        if not (isinstance(self.agent, TokenAgent) or isinstance(self.agent, PkiAgent)):
+            logger.warning(
+                "Client initiated without authentication method - are you sure you don't need TokenAgent or PkiAgent?"
+            )
+
+        logger.debug("Client initiated successfully.")
 
     def post_model(
         self,

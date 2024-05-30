@@ -5,8 +5,12 @@ from json import JSONDecodeError
 import requests
 import os
 import getpass
+import logging
 from requests.auth import HTTPBasicAuth
 from bailo.core.exceptions import BailoException, ResponseException
+
+logging.basicConfig(format="%(levelname)s | %(asctime)s | %(message)s", level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class Agent:
@@ -25,9 +29,12 @@ class Agent:
         """
         self.verify = verify
 
+        logger.debug("Base Agent initiated successfully.")
+
     def __request(self, method, *args, **kwargs):
         kwargs["verify"] = self.verify
 
+        logger.debug(f"{method} to {args[0]}")
         res = requests.request(method, *args, **kwargs)
 
         # Check response for a valid range
@@ -78,6 +85,8 @@ class PkiAgent(Agent):
         self.cert = cert
         self.key = key
 
+        logger.info("PkiAgent initiated successfully.")
+
     def get(self, *args, **kwargs):
         return super().get(*args, cert=(self.cert, self.key), **kwargs)
 
@@ -106,18 +115,27 @@ class TokenAgent(Agent):
         :param secret_key: Secret key
         """
         super().__init__()
+        logger.info("TokenAgent initiated successfully.")
 
         if access_key is None:
+            logger.error("Access key not provided. Trying other sources...")
             try:
                 access_key = os.environ["BAILO_ACCESS_KEY"]
+                logger.info("Access key acquired from BAILO_ACCESS_KEY environment variable.")
             except KeyError:
+                logger.error("Access key not found in BAILO_ACCESS_KEY environment variable. Requires user input.")
                 access_key = getpass.getpass("BAILO ACCESS KEY:")
+                logger.info("Access key acquired from user input.")
 
         if secret_key is None:
+            logger.error("Secret key not provided. Trying other sources...")
             try:
                 secret_key = os.environ["BAILO_SECRET_KEY"]
+                logger.info("Secret key acquired from BAILO_SECRET_KEY environment variable.")
             except KeyError:
+                logger.error("Secret key not found in BAILO_SECRET_KEY environment variable. Requires user input.")
                 secret_key = getpass.getpass("BAILO SECRET KEY:")
+                logger.info("Secret key acquired from user input.")
 
         self.access_key = access_key
         self.secret_key = secret_key

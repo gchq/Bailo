@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from typing import Any
+import logging
 
 from bailo.core.client import Client
+
+logger = logging.getLogger(__name__)
 
 
 class AccessRequest:
@@ -37,6 +40,8 @@ class AccessRequest:
         self.created_by = created_by
         self.deleted = deleted
 
+        logger.debug("Local AccessRequest object created successfully.")
+
     @classmethod
     def from_id(cls, client: Client, model_id: str, access_request_id: str) -> AccessRequest:
         """Return an existing review from Bailo given it's unique ID.
@@ -52,6 +57,8 @@ class AccessRequest:
         metadata = json_access_request["metadata"]
 
         schema_id = json_access_request["schemaId"]
+
+        logger.info(f"Access request {access_request_id} for model {model_id} successfully retrieved from server.")
 
         return cls(
             client,
@@ -82,6 +89,8 @@ class AccessRequest:
         metadata = access_request_json["metadata"]
         created_by = access_request_json["createdBy"]
 
+        logger.info(f"Access request successfully created on server with ID {access_request_id} for model {model_id}.")
+
         return cls(
             client,
             model_id,
@@ -98,11 +107,16 @@ class AccessRequest:
         :return: A message confirming the removal of the access request.
         """
         self.client.delete_access_request(self.model_id, self.access_request_id)
+
+        logger.info(f"Access request {self.access_request_id} successfully deleted on server.")
+
         return True
 
     def update(self):
         """Update the current state of the access request to Bailo."""
         self.client.patch_access_request(self.model_id, self.access_request_id, metadata=self.metadata)
+
+        logger.info(f"Access request {self.access_request_id} successfully updated on server.")
 
     def __str__(self) -> str:
         return f"Access Request: {self.metadata['overview']['name']} - {self.model_id}"
