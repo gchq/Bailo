@@ -108,4 +108,4 @@ class Schema:
         if kind == "accessRequest":
             self.kind = SchemaKind.ACCESS_REQUEST
 
-        logger.debug(f"Attributes for Schema ID {self.id} successfully unpacked.")
+        logger.debug(f"Attributes for Schema ID {self.schema_id} successfully unpacked.")
