@@ -281,27 +281,20 @@ export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'v
 export async function updateModel(
   user: UserInterface,
   modelId: string,
-  diff: Partial<UpdateModelParams> & Partial<{ settings: Partial<Settings> }>,
+  modelDiff: Partial<UpdateModelParams>,
+  settingsDiff?: Partial<Settings>,
 ) {
   const model = await getModelById(user, modelId)
-  if (diff.settings && diff.settings.mirror && diff.settings.mirror.sourceModelId) {
-    throw BadReq('Cannot change standard model to be a mirrored model.')
-  }
-  if (
-    model.settings.mirror.sourceModelId &&
-    diff.settings &&
-    diff.settings.mirror &&
-    diff.settings.mirror.destinationModelId
-  ) {
-    throw BadReq('Cannot set a destination model ID for a mirrored model.')
-  }
-  if (
-    diff.settings &&
-    diff.settings.mirror &&
-    diff.settings.mirror.destinationModelId &&
-    diff.settings.mirror.sourceModelId
-  ) {
-    throw BadReq('You cannot select both mirror settings simultaneously.')
+  if (settingsDiff && settingsDiff.mirror) {
+    if (settingsDiff.mirror.sourceModelId) {
+      throw BadReq('Cannot change standard model to be a mirrored model.')
+    }
+    if (model.settings.mirror.sourceModelId && settingsDiff.mirror.destinationModelId) {
+      throw BadReq('Cannot set a destination model ID for a mirrored model.')
+    }
+    if (settingsDiff.mirror.destinationModelId && settingsDiff.mirror.sourceModelId) {
+      throw BadReq('You cannot select both mirror settings simultaneously.')
+    }
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -309,7 +302,8 @@ export async function updateModel(
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  Object.assign(model, diff)
+  Object.assign(model, modelDiff)
+  Object.assign(model.settings, settingsDiff)
   await model.save()
 
   return model

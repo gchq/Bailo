@@ -18,10 +18,12 @@ export const patchModelSchema = z.object({
     settings: z
       .object({
         ungovernedAccess: z.boolean().optional().openapi({ example: true }),
-        mirror: z.object({
-          sourceModelId: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),
-          destinationModelId: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),
-        }),
+        mirror: z
+          .object({
+            sourceModelId: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),
+            destinationModelId: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),
+          })
+          .optional(),
       })
       .optional(),
     collaborators: z
@@ -69,7 +71,8 @@ export const patchModel = [
       params: { modelId },
     } = parse(req, patchModelSchema)
 
-    const model = await updateModel(req.user, modelId, body)
+    const { settings: settingsDiff, ...modelDiff } = body
+    const model = await updateModel(req.user, modelId, modelDiff, settingsDiff)
     await audit.onUpdateModel(req, model)
 
     return res.json({
