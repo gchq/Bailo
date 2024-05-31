@@ -133,7 +133,7 @@ async function uploadToTemporaryS3Location(
 
 async function getObjectFromTemporaryS3Location(modelId: string, semvers: string[] | undefined) {
   const bucket = config.s3.buckets.uploads
-  const object = `exportQueue/${modelId}.zi`
+  const object = `exportQueue/${modelId}.zip`
   try {
     const stream = (await getObjectStream(bucket, object)).Body as Readable
     log.debug(
