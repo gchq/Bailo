@@ -24,7 +24,7 @@ export async function uploadFile(
 ) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot upload file to a mirrored model.`)
+    throw BadReq(`Cannot upload files to a mirrored model.`)
   }
 
   const fileId = longId()

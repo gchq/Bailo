@@ -24,7 +24,8 @@ export const postModelSchema = z.object({
             sourceModelId: z.string().openapi({ example: 'yolo-v4-abcdef' }).optional(),
             destinationModelId: z.string().openapi({ example: 'yolo-v4-abcdef' }).optional(),
           })
-          .optional(),
+          .optional()
+          .default({}),
       })
       .optional()
       .default({ ungovernedAccess: false }),

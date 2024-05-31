@@ -263,9 +263,12 @@ describe('services > model', () => {
       id: '',
     })
     expect(() =>
-      updateModel({} as any, '123', {
-        settings: { ungovernedAccess: false, mirror: { sourceModelId: '1243', destinationModelId: '' } },
-      }),
+      updateModel(
+        {} as any,
+        '123',
+        {},
+        { ungovernedAccess: false, mirror: { sourceModelId: '1243', destinationModelId: '' } },
+      ),
     ).rejects.toThrowError(/^Cannot change standard model to be a mirrored model./)
   })
 
@@ -276,9 +279,12 @@ describe('services > model', () => {
       id: '',
     })
     expect(() =>
-      updateModel({} as any, '123', {
-        settings: { ungovernedAccess: false, mirror: { sourceModelId: '', destinationModelId: '123' } },
-      }),
+      updateModel(
+        {} as any,
+        '123',
+        {},
+        { ungovernedAccess: false, mirror: { sourceModelId: '', destinationModelId: '123' } },
+      ),
     ).rejects.toThrowError(/^Cannot set a destination model ID for a mirrored model./)
   })
 
@@ -289,9 +295,12 @@ describe('services > model', () => {
       id: '',
     })
     expect(() =>
-      updateModel({} as any, '123', {
-        settings: { ungovernedAccess: false, mirror: { sourceModelId: '123', destinationModelId: '234' } },
-      }),
+      updateModel(
+        {} as any,
+        '123',
+        {},
+        { ungovernedAccess: false, mirror: { sourceModelId: '123', destinationModelId: '234' } },
+      ),
     ).rejects.toThrowError(/^You cannot select both mirror settings simultaneously./)
   })
 

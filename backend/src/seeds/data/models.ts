@@ -31,6 +31,7 @@ export const model: ModelInterface = {
   ],
   settings: {
     ungovernedAccess: true,
+    mirror: {},
   },
 
   card: {

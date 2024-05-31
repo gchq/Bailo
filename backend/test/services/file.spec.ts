@@ -136,13 +136,13 @@ describe('services > file', () => {
     const stream = new Readable() as any
 
     vi.mocked(authorisation.file).mockResolvedValue({
-      info: 'Cannot upload file to a mirrored model.',
+      info: 'Cannot upload files to a mirrored model.',
       success: false,
       id: '',
     })
 
     expect(() => uploadFile(user, modelId, name, mime, stream)).rejects.toThrowError(
-      /^Cannot upload file to mirrored model./,
+      /^Cannot upload files to a mirrored model./,
     )
     expect(fileModelMocks.save).not.toBeCalled()
   })
