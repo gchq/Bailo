@@ -1,4 +1,3 @@
-import parser from 'body-parser'
 import MongoStore from 'connect-mongo'
 import { NextFunction, Request, Response, Router } from 'express'
 import session from 'express-session'
@@ -34,7 +33,6 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
               mongoUrl: getConnectionURI(),
             }),
           }),
-          parser.urlencoded({ extended: true }),
           grant.default.express(config.oauth.grant),
           this.getRoutes(),
         ],

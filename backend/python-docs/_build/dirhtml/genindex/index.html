@@ -55,6 +55,7 @@
 <p class="caption" role="heading"><span class="caption-text">Notebooks:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/access_requests_demo/">Managing Access Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/datacards_demo/">Managing Datacards</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/experiment_tracking_demo/">Experiment Tracking with Bailo &amp; MLFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/models_and_releases_demo_pytorch/">Managing Models &amp; Releases (ResNet-50 Example with PyTorch)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks/schemas_demo/">Managing Schemas</a></li>
@@ -171,13 +172,27 @@
         <li><a href="../bailo.core/#module-bailo.core.exceptions">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     bailo.helper.access_request
 
       <ul>
         <li><a href="../bailo.helper/#module-bailo.helper.access_request">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    bailo.helper.datacard
+
+      <ul>
+        <li><a href="../bailo.helper/#module-bailo.helper.datacard">module</a>
+</li>
+      </ul></li>
+      <li>
+    bailo.helper.entry
+
+      <ul>
+        <li><a href="../bailo.helper/#module-bailo.helper.entry">module</a>
 </li>
       </ul></li>
       <li>
@@ -209,17 +224,17 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="../bailo.helper/#bailo.helper.model.Model.card_from_model">card_from_model() (bailo.helper.model.Model method)</a>
+      <li><a href="../bailo.helper/#bailo.helper.entry.Entry.card_from_schema">card_from_schema() (bailo.helper.entry.Entry method)</a>
 </li>
-      <li><a href="../bailo.helper/#bailo.helper.model.Model.card_from_schema">card_from_schema() (bailo.helper.model.Model method)</a>
-</li>
-      <li><a href="../bailo.helper/#bailo.helper.model.Model.card_from_template">card_from_template() (bailo.helper.model.Model method)</a>
+      <li><a href="../bailo.helper/#bailo.helper.entry.Entry.card_from_template">card_from_template() (bailo.helper.entry.Entry method)</a>
 </li>
       <li><a href="../bailo.core/#bailo.core.client.Client">Client (class in bailo.core.client)</a>
 </li>
       <li><a href="../bailo.helper/#bailo.helper.access_request.AccessRequest.create">create() (bailo.helper.access_request.AccessRequest class method)</a>
 
       <ul>
+        <li><a href="../bailo.helper/#bailo.helper.datacard.Datacard.create">(bailo.helper.datacard.Datacard class method)</a>
+</li>
         <li><a href="../bailo.helper/#bailo.helper.model.Experiment.create">(bailo.helper.model.Experiment class method)</a>
 </li>
         <li><a href="../bailo.helper/#bailo.helper.model.Model.create">(bailo.helper.model.Model class method)</a>
@@ -241,6 +256,16 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../bailo.helper/#bailo.helper.datacard.Datacard.data_card">data_card (bailo.helper.datacard.Datacard property)</a>
+</li>
+      <li><a href="../bailo.helper/#bailo.helper.datacard.Datacard.data_card_schema">data_card_schema (bailo.helper.datacard.Datacard property)</a>
+</li>
+      <li><a href="../bailo.helper/#bailo.helper.datacard.Datacard.data_card_version">data_card_version (bailo.helper.datacard.Datacard property)</a>
+</li>
+      <li><a href="../bailo.core/#bailo.core.enums.EntryKind.DATACARD">DATACARD (bailo.core.enums.EntryKind attribute)</a>
+</li>
+      <li><a href="../bailo.helper/#bailo.helper.datacard.Datacard">Datacard (class in bailo.helper.datacard)</a>
+</li>
       <li><a href="../bailo.core/#bailo.core.agent.Agent.delete">delete() (bailo.core.agent.Agent method)</a>
 
       <ul>
@@ -263,12 +288,20 @@
 </li>
       <li><a href="../bailo.helper/#bailo.helper.release.Release.download">download() (bailo.helper.release.Release method)</a>
 </li>
+      <li><a href="../bailo.helper/#bailo.helper.release.Release.download_all">download_all() (bailo.helper.release.Release method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../bailo.helper/#bailo.helper.entry.Entry">Entry (class in bailo.helper.entry)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../bailo.core/#bailo.core.enums.EntryKind">EntryKind (class in bailo.core.enums)</a>
+</li>
       <li><a href="../bailo.helper/#bailo.helper.model.Experiment">Experiment (class in bailo.helper.model)</a>
 </li>
   </ul></td>
@@ -280,6 +313,8 @@
       <li><a href="../bailo.helper/#bailo.helper.access_request.AccessRequest.from_id">from_id() (bailo.helper.access_request.AccessRequest class method)</a>
 
       <ul>
+        <li><a href="../bailo.helper/#bailo.helper.datacard.Datacard.from_id">(bailo.helper.datacard.Datacard class method)</a>
+</li>
         <li><a href="../bailo.helper/#bailo.helper.model.Model.from_id">(bailo.helper.model.Model class method)</a>
 </li>
         <li><a href="../bailo.helper/#bailo.helper.schema.Schema.from_id">(bailo.helper.schema.Schema class method)</a>
@@ -317,9 +352,9 @@
 </li>
       <li><a href="../bailo.core/#bailo.core.client.Client.get_all_teams">get_all_teams() (bailo.core.client.Client method)</a>
 </li>
-      <li><a href="../bailo.helper/#bailo.helper.model.Model.get_card_latest">get_card_latest() (bailo.helper.model.Model method)</a>
+      <li><a href="../bailo.helper/#bailo.helper.entry.Entry.get_card_latest">get_card_latest() (bailo.helper.entry.Entry method)</a>
 </li>
-      <li><a href="../bailo.helper/#bailo.helper.model.Model.get_card_revision">get_card_revision() (bailo.helper.model.Model method)</a>
+      <li><a href="../bailo.helper/#bailo.helper.entry.Entry.get_card_revision">get_card_revision() (bailo.helper.entry.Entry method)</a>
 </li>
       <li><a href="../bailo.core/#bailo.core.client.Client.get_download_by_filename">get_download_by_filename() (bailo.core.client.Client method)</a>
 </li>
@@ -355,13 +390,13 @@
 </li>
       <li><a href="../bailo.core/#bailo.core.client.Client.get_reviews">get_reviews() (bailo.core.client.Client method)</a>
 </li>
-      <li><a href="../bailo.helper/#bailo.helper.model.Model.get_roles">get_roles() (bailo.helper.model.Model method)</a>
+      <li><a href="../bailo.helper/#bailo.helper.entry.Entry.get_roles">get_roles() (bailo.helper.entry.Entry method)</a>
 </li>
       <li><a href="../bailo.core/#bailo.core.client.Client.get_schema">get_schema() (bailo.core.client.Client method)</a>
 </li>
       <li><a href="../bailo.core/#bailo.core.client.Client.get_team">get_team() (bailo.core.client.Client method)</a>
 </li>
-      <li><a href="../bailo.helper/#bailo.helper.model.Model.get_user_roles">get_user_roles() (bailo.helper.model.Model method)</a>
+      <li><a href="../bailo.helper/#bailo.helper.entry.Entry.get_user_roles">get_user_roles() (bailo.helper.entry.Entry method)</a>
 </li>
       <li><a href="../bailo.core/#bailo.core.client.Client.get_user_teams">get_user_teams() (bailo.core.client.Client method)</a>
 </li>
@@ -387,11 +422,21 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="../bailo.core/#bailo.core.enums.SchemaKind.MODEL">MODEL (bailo.core.enums.SchemaKind attribute)</a>
+      <li><a href="../bailo.core/#bailo.core.enums.EntryKind.MODEL">MODEL (bailo.core.enums.EntryKind attribute)</a>
+
+      <ul>
+        <li><a href="../bailo.core/#bailo.core.enums.SchemaKind.MODEL">(bailo.core.enums.SchemaKind attribute)</a>
 </li>
+      </ul></li>
       <li><a href="../bailo.helper/#bailo.helper.model.Model">Model (class in bailo.helper.model)</a>
 </li>
+      <li><a href="../bailo.helper/#bailo.helper.model.Model.model_card">model_card (bailo.helper.model.Model property)</a>
+</li>
       <li><a href="../bailo.core/#bailo.core.client.Client.model_card_from_schema">model_card_from_schema() (bailo.core.client.Client method)</a>
+</li>
+      <li><a href="../bailo.helper/#bailo.helper.model.Model.model_card_schema">model_card_schema (bailo.helper.model.Model property)</a>
+</li>
+      <li><a href="../bailo.helper/#bailo.helper.model.Model.model_card_version">model_card_version (bailo.helper.model.Model property)</a>
 </li>
       <li><a href="../bailo.core/#bailo.core.enums.Role.MODEL_SENIOR_RESPONSIBLE_OFFICER">MODEL_SENIOR_RESPONSIBLE_OFFICER (bailo.core.enums.Role attribute)</a>
 </li>
@@ -414,6 +459,10 @@
         <li><a href="../bailo.core/#module-bailo.core.exceptions">bailo.core.exceptions</a>
 </li>
         <li><a href="../bailo.helper/#module-bailo.helper.access_request">bailo.helper.access_request</a>
+</li>
+        <li><a href="../bailo.helper/#module-bailo.helper.datacard">bailo.helper.datacard</a>
+</li>
+        <li><a href="../bailo.helper/#module-bailo.helper.entry">bailo.helper.entry</a>
 </li>
         <li><a href="../bailo.helper/#module-bailo.helper.model">bailo.helper.model</a>
 </li>
@@ -541,13 +590,15 @@
       <li><a href="../bailo.helper/#bailo.helper.access_request.AccessRequest.update">update() (bailo.helper.access_request.AccessRequest method)</a>
 
       <ul>
-        <li><a href="../bailo.helper/#bailo.helper.model.Model.update">(bailo.helper.model.Model method)</a>
+        <li><a href="../bailo.helper/#bailo.helper.entry.Entry.update">(bailo.helper.entry.Entry method)</a>
 </li>
         <li><a href="../bailo.helper/#bailo.helper.release.Release.update">(bailo.helper.release.Release method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="../bailo.helper/#bailo.helper.datacard.Datacard.update_data_card">update_data_card() (bailo.helper.datacard.Datacard method)</a>
+</li>
       <li><a href="../bailo.helper/#bailo.helper.model.Model.update_model_card">update_model_card() (bailo.helper.model.Model method)</a>
 </li>
       <li><a href="../bailo.helper/#bailo.helper.release.Release.upload">upload() (bailo.helper.release.Release method)</a>

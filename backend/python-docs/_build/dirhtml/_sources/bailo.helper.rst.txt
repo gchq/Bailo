@@ -7,11 +7,20 @@ bailo.helper package
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: bailo.helper.model
+.. automodule:: bailo.helper.datacard
    :members:
    :undoc-members:
    :show-inheritance:
 
+.. automodule:: bailo.helper.entry
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: bailo.helper.model
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 .. automodule:: bailo.helper.release
    :members:
