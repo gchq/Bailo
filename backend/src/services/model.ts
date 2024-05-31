@@ -14,7 +14,9 @@ import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { findSchemaById } from './schema.js'
 
-export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility' | 'settings'>
+export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'> & {
+  settings: Partial<ModelInterface['settings']>
+}
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
@@ -32,11 +34,19 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   })
 
   const auth = await authorisation.model(user, model, ModelAction.Create)
-  if (model.settings.mirror.sourceModelId && model.settings.mirror.destinationModelId) {
-    throw BadReq('You cannot select both settings simultaneously.')
-  }
+
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
+  }
+
+  if (
+    (model.settings.mirror.sourceModelId && model.settings.mirror.destinationModelId) ||
+    (modelParams.settings &&
+      modelParams.settings.mirror &&
+      modelParams.settings.mirror.destinationModelId &&
+      modelParams.settings.mirror.sourceModelId)
+  ) {
+    throw BadReq('You cannot select both mirror settings simultaneously.')
   }
 
   await model.save()
@@ -274,7 +284,7 @@ export type UpdateModelParams = Pick<
 export async function updateModel(user: UserInterface, modelId: string, diff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
   if (diff.settings && diff.settings.mirror && diff.settings.mirror.sourceModelId) {
-    throw BadReq('Cannot change mirror model to a standard model.')
+    throw BadReq('Cannot change standard model to be a mirrored model.')
   }
   if (
     model.settings.mirror.sourceModelId &&
@@ -282,7 +292,7 @@ export async function updateModel(user: UserInterface, modelId: string, diff: Pa
     diff.settings.mirror &&
     diff.settings.mirror.destinationModelId
   ) {
-    throw BadReq('Cannot change settings for this model.')
+    throw BadReq('Cannot set a destination model ID for a mirrored model.')
   }
   if (
     diff.settings &&
@@ -290,7 +300,7 @@ export async function updateModel(user: UserInterface, modelId: string, diff: Pa
     diff.settings.mirror.destinationModelId &&
     diff.settings.mirror.sourceModelId
   ) {
-    throw BadReq('Cannot select both settings for this model simultaneously.')
+    throw BadReq('You cannot select both mirror settings simultaneously.')
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)

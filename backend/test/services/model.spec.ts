@@ -11,7 +11,6 @@ import {
   getModelCardRevision,
   searchModels,
   updateModel,
-  updateModelCard,
 } from '../../src/services/model.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -257,26 +256,9 @@ describe('services > model', () => {
     expect(modelCardRevisionModel.save).toBeCalled()
   })
 
-  test('updateModelCard > should throw an error when attempting to change a mirrored to a standard model card', async () => {
-    const mockUser = { dn: 'testUser' } as any
-    const mockModelId = '123'
-    const mockMetadata = { key: 'value' }
-
+  test('updateModelCard > should throw a bad request when attempting to change a standard model to mirrored model', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({
-      info: 'This model card cannot be changed.',
-      success: false,
-      id: '',
-    })
-
-    expect(() => updateModelCard(mockUser, mockModelId, mockMetadata)).rejects.toThrowError(
-      /^This model card cannot be changed./,
-    )
-    expect(modelMocks.save).not.toBeCalled()
-  })
-
-  test('updateModel > should throw bad request when attempting to change a mirrored model to a standard model', async () => {
-    vi.mocked(authorisation.model).mockResolvedValue({
-      info: 'Cannot change mirror model to a standard model.',
+      info: 'Cannot change standard model to be a mirrored model.',
       success: false,
       id: '',
     })
@@ -284,20 +266,33 @@ describe('services > model', () => {
       updateModel({} as any, '123', {
         settings: { ungovernedAccess: false, mirror: { sourceModelId: '1243', destinationModelId: '' } },
       }),
-    ).rejects.toThrowError(/^Cannot change mirror model to a standard model./)
+    ).rejects.toThrowError(/^Cannot change standard model to be a mirrored model./)
   })
 
-  test('updateModel > should not allow setting of both standard and mirror model', async () => {
+  test('updateModel > should throw bad request when attempting to change a destinationModel ID to a mirrored model', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({
-      info: 'Cannot select both settings for this model simultaneously.',
+      info: 'Cannot set a destination model ID for a mirrored model.',
       success: false,
       id: '',
     })
     expect(() =>
       updateModel({} as any, '123', {
-        settings: { ungovernedAccess: false, mirror: { sourceModelId: '', destinationModelId: '234' } },
+        settings: { ungovernedAccess: false, mirror: { sourceModelId: '', destinationModelId: '123' } },
       }),
-    ).rejects.toThrowError(/^Cannot select both settings for this model simultaneously./)
+    ).rejects.toThrowError(/^Cannot set a destination model ID for a mirrored model./)
+  })
+
+  test('updateModel > should throw a bad request when attempting to select both standard and mirror model', async () => {
+    vi.mocked(authorisation.model).mockResolvedValue({
+      info: 'You cannot select both mirror settings simultaneously.',
+      success: false,
+      id: '',
+    })
+    expect(() =>
+      updateModel({} as any, '123', {
+        settings: { ungovernedAccess: false, mirror: { sourceModelId: '123', destinationModelId: '234' } },
+      }),
+    ).rejects.toThrowError(/^You cannot select both mirror settings simultaneously./)
   })
 
   test('createModelcardFromSchema > should throw an error when attempting to change a model from mirrored to standard', async () => {
