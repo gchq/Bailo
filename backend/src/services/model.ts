@@ -3,7 +3,7 @@ import { Validator } from 'jsonschema'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { EntryKindKeys } from '../models/Model.js'
+import ModelModel, { EntryKindKeys, Settings } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
@@ -277,11 +277,12 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<
-  ModelInterface,
-  'name' | 'description' | 'visibility' | 'collaborators' | 'settings'
->
-export async function updateModel(user: UserInterface, modelId: string, diff: Partial<UpdateModelParams>) {
+export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility' | 'collaborators'>
+export async function updateModel(
+  user: UserInterface,
+  modelId: string,
+  diff: Partial<UpdateModelParams> & Partial<{ settings: Partial<Settings> }>,
+) {
   const model = await getModelById(user, modelId)
   if (diff.settings && diff.settings.mirror && diff.settings.mirror.sourceModelId) {
     throw BadReq('Cannot change standard model to be a mirrored model.')
