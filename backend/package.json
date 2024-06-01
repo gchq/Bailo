@@ -23,7 +23,7 @@
     "@aws-sdk/client-kms": "^3.565.0",
     "@aws-sdk/client-s3": "^3.421.0",
     "@aws-sdk/lib-storage": "^3.565.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.41.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.46.1",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.48.0",
     "@smithy/node-http-handler": "^2.1.10",
     "@types/express-session": "^1.18.0",
