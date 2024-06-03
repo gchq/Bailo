@@ -33,6 +33,13 @@ const inference = {
   },
 }
 
+const inferenceServiceMocks = vi.hoisted(() => ({
+  createInferenceService: vi.fn(() => ({ ok: true, text: vi.fn(), json: vi.fn() })),
+  updateInferenceService: vi.fn(() => ({ ok: true, text: vi.fn(), json: vi.fn() })),
+}))
+
+vi.mock('../../src/clients/inferencing.js', () => inferenceServiceMocks)
+
 const inferenceModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
