@@ -298,7 +298,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  _.mergeWith({}, model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
+  _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
   await model.save()
 
   return model
