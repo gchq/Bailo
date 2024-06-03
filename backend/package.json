@@ -52,7 +52,7 @@
     "mongoose": "^6.11.3",
     "mongoose-delete": "^0.5.4",
     "morgan": "^1.10.0",
-    "nanoid": "^5.0.6",
+    "nanoid": "^5.0.7",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.13",
     "pretty-bytes": "^6.1.1",
