@@ -17,7 +17,7 @@ import { findSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
   if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot alter a mirrored model card.`)
+    throw BadReq(`Cannot alter a mirrored model.`)
   }
 }
 
@@ -44,12 +44,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  if (
-    modelParams.settings &&
-    modelParams.settings.mirror &&
-    modelParams.settings.mirror.destinationModelId &&
-    modelParams.settings.mirror.sourceModelId
-  ) {
+  if (modelParams?.settings?.mirror?.destinationModelId && modelParams?.settings?.mirror?.sourceModelId) {
     throw BadReq('You cannot select both mirror settings simultaneously.')
   }
 
