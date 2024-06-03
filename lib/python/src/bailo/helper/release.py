@@ -52,8 +52,6 @@ class Release:
         if images is None:
             images = []
 
-        if isinstance(version, str):
-            version = Version(version)
         self.version = version
 
         self.model_card_version = model_card_version
@@ -260,7 +258,7 @@ class Release:
         """
         return self.client.put_release(
             self.model_id,
-            str(self.version),
+            str(self._version_raw),
             self.notes,
             self.draft,
             self.files,
@@ -275,16 +273,33 @@ class Release:
         self.client.delete_release(self.model_id, str(self.version))
         return True
 
+    @property
+    def version(self):
+        return self._version_obj
+
+    @version.setter
+    def version(self, value):
+        if isinstance(value, str):
+            version_obj = value.replace("v", "")
+            version_obj = Version.coerce(version_obj)
+        elif isinstance(value, Version):
+            version_obj = value
+        else:
+            raise TypeError("Provided version not of a supported type.")
+
+        self._version_obj = version_obj
+        self._version_raw = value
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({str(self)})"
 
     def __str__(self) -> str:
-        return f"{self.model_id} v{self.version}"
+        return f"{self.model_id} v{self._version_obj}"
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.version == other.version
+        return self._version_obj == other._version_obj
 
     def __ne__(self, other):
         if not isinstance(other, self.__class__):
@@ -294,22 +309,22 @@ class Release:
     def __lt__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.version < other.version
+        return self._version_obj < other._version_obj
 
     def __le__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.version <= other.version
+        return self._version_obj <= other._version_obj
 
     def __gt__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.version > other.version
+        return self._version_obj > other._version_obj
 
     def __ge__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.version >= other.version
+        return self._version_obj >= other._version_obj
 
     def __hash__(self) -> int:
-        return hash((self.model_id, self.version))
+        return hash((self.model_id, self._version_obj))
