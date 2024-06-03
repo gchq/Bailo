@@ -1,0 +1,51 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`clients > inferencing > createInferencing > success 1`] = `
+[
+  [
+    "http://example.com/api/deploy",
+    {
+      "body": "{}",
+      "headers": Headers {
+        Symbol(headers list): HeadersList {
+          "cookies": null,
+          Symbol(headers map): Map {
+            "content-type" => {
+              "name": "content-type",
+              "value": "application/json",
+            },
+          },
+          Symbol(headers map sorted): null,
+        },
+        Symbol(guard): "none",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`clients > inferencing > updateInferencing > success 1`] = `
+[
+  [
+    "http://example.com/api/update",
+    {
+      "body": "{}",
+      "headers": Headers {
+        Symbol(headers list): HeadersList {
+          "cookies": null,
+          Symbol(headers map): Map {
+            "content-type" => {
+              "name": "content-type",
+              "value": "application/json",
+            },
+          },
+          Symbol(headers map sorted): null,
+        },
+        Symbol(guard): "none",
+      },
+      "method": "PATCH",
+    },
+  ],
+]
+`;
