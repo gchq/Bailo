@@ -2,6 +2,7 @@ let modelUuid = ''
 let accessRequestUuid = ''
 const modelName = 'Test Model'
 const schemaId = 'minimal-access-request-general-v10'
+const accessRequestName = 'Test access request'
 
 describe('Make and approve an access request', () => {
   before(() => {
@@ -47,11 +48,11 @@ describe('Make and approve an access request', () => {
     cy.get('body').contains('Select a different schema')
     cy.get('[data-test=entitySelector]').contains('Joe Bloggs')
     cy.get('#root_name-label').contains('What is the name of the access request?')
-    cy.get('#root_name').type('Test access request')
+    cy.get('#root_name').type(accessRequestName)
     cy.get('[data-test=createAccessRequestButton]', { timeout: 15000 }).click()
 
     cy.url().should('contain', `/model/${modelUuid}/access-request`)
-    cy.get('[data-test=accessRequestContainer]').contains('Test access request')
+    cy.get('[data-test=accessRequestContainer]').contains(accessRequestName)
 
     cy.url()
       .should('contain', `/model/${modelUuid}/access-request`)
@@ -66,7 +67,7 @@ describe('Make and approve an access request', () => {
     cy.visit(`/model/${modelUuid}/access-request/${accessRequestUuid}`)
     cy.log('Reviewing the access request and leaving comments')
     cy.get('[data-test=reviewButton]').click({ force: true })
-    cy.contains(`Reviewing access request ${accessRequestUuid} for model ${modelName}`)
+    cy.contains(`Reviewing access request ${accessRequestName} for model ${modelName}`)
     cy.get('[data-test=reviewWithCommentTextField').type('This is a comment')
     cy.get('[data-test=requestChangesReviewButton').click()
 
