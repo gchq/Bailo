@@ -15,6 +15,12 @@ import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { findSchemaById } from './schema.js'
 
+export function checkModelRestriction(model: ModelInterface) {
+  if (model.settings.mirror.sourceModelId) {
+    throw BadReq(`Cannot alter a mirrored model card.`)
+  }
+}
+
 export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility' | 'settings'>
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
@@ -39,11 +45,10 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   }
 
   if (
-    (model.settings.mirror.sourceModelId && model.settings.mirror.destinationModelId) ||
-    (modelParams.settings &&
-      modelParams.settings.mirror &&
-      modelParams.settings.mirror.destinationModelId &&
-      modelParams.settings.mirror.sourceModelId)
+    modelParams.settings &&
+    modelParams.settings.mirror &&
+    modelParams.settings.mirror.destinationModelId &&
+    modelParams.settings.mirror.sourceModelId
   ) {
     throw BadReq('You cannot select both mirror settings simultaneously.')
   }
@@ -219,9 +224,8 @@ export async function _setModelCard(
   //
   // It is assumed that this race case will occur infrequently.
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot alter a mirrored model.`)
-  }
+
+  checkModelRestriction(model)
 
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
@@ -251,9 +255,7 @@ export async function updateModelCard(
   metadata: unknown,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`This model card cannot be changed.`)
-  }
+  checkModelRestriction(model)
 
   if (!model.card) {
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
@@ -308,9 +310,7 @@ export async function createModelCardFromSchema(
   schemaId: string,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`This model card cannot be changed.`)
-  }
+  checkModelRestriction(model)
 
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {

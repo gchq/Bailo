@@ -11,6 +11,7 @@ import {
   getModelCardRevision,
   searchModels,
   updateModel,
+  updateModelCard,
 } from '../../src/services/model.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -231,14 +232,14 @@ describe('services > model', () => {
 
     vi.mocked(authorisation.model).mockImplementation(async (_user, _model, action) => {
       if (action === ModelAction.View) return { success: true, id: '' }
-      if (action === ModelAction.Write) return { success: false, info: 'Cannot alter a mirrored model', id: '' }
-      if (action === ModelAction.Update) return { success: false, info: 'Cannot alter a mirrored model', id: '' }
+      if (action === ModelAction.Write) return { success: false, info: 'Cannot alter a mirrored model card.', id: '' }
+      if (action === ModelAction.Update) return { success: false, info: 'Cannot alter a mirrored model card.', id: '' }
 
       return { success: false, info: 'Unknown action.', id: '' }
     })
 
     await expect(_setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)).rejects.toThrow(
-      /^Cannot alter a mirrored model/,
+      /^Cannot alter a mirrored model card./,
     )
     expect(modelCardRevisionModel.save).not.toBeCalled()
   })
@@ -256,19 +257,25 @@ describe('services > model', () => {
     expect(modelCardRevisionModel.save).toBeCalled()
   })
 
-  test('updateModelCard > should throw a bad request when attempting to change a standard model to mirrored model', async () => {
+  test('updateModelCard > should throw a bad request when attempting to change mirrored model card', async () => {
+    vi.mocked(authorisation.model).mockResolvedValue({
+      info: 'Cannot alter a mirrored model card.',
+      success: false,
+      id: '',
+    })
+    expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrowError(
+      /^Cannot alter a mirrored model card./,
+    )
+  })
+
+  test('updateModel > should throw bad request when attempting to change a standard model to be a mirrored model', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({
       info: 'Cannot change standard model to be a mirrored model.',
       success: false,
       id: '',
     })
     expect(() =>
-      updateModel(
-        {} as any,
-        '123',
-        {},
-        { ungovernedAccess: false, mirror: { sourceModelId: '1243', destinationModelId: '' } },
-      ),
+      updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '', destinationModelId: '123' } } }),
     ).rejects.toThrowError(/^Cannot change standard model to be a mirrored model./)
   })
 
@@ -279,12 +286,7 @@ describe('services > model', () => {
       id: '',
     })
     expect(() =>
-      updateModel(
-        {} as any,
-        '123',
-        {},
-        { ungovernedAccess: false, mirror: { sourceModelId: '', destinationModelId: '123' } },
-      ),
+      updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '', destinationModelId: '123' } } }),
     ).rejects.toThrowError(/^Cannot set a destination model ID for a mirrored model./)
   })
 
@@ -295,20 +297,19 @@ describe('services > model', () => {
       id: '',
     })
     expect(() =>
-      updateModel(
-        {} as any,
-        '123',
-        {},
-        { ungovernedAccess: false, mirror: { sourceModelId: '123', destinationModelId: '234' } },
-      ),
+      updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '123', destinationModelId: '234' } } }),
     ).rejects.toThrowError(/^You cannot select both mirror settings simultaneously./)
   })
 
   test('createModelcardFromSchema > should throw an error when attempting to change a model from mirrored to standard', async () => {
-    vi.mocked(authorisation.model).mockResolvedValue({ info: 'This model cannot be changed.', success: false, id: '' })
+    vi.mocked(authorisation.model).mockResolvedValue({
+      info: 'Cannot alter a mirrored model card.',
+      success: false,
+      id: '',
+    })
 
     expect(() => createModelCardFromSchema({} as any, '123', 'abc')).rejects.toThrowError(
-      /^This model cannot be changed./,
+      /^Cannot alter a mirrored model card./,
     )
     expect(modelMocks.save).not.toBeCalled()
   })
