@@ -164,7 +164,7 @@ module.exports = {
     inference: {
       enabled: false,
       conneciton: {
-        host: "https://example.com"
+        host: 'http://example.com',
       },
       gpus: {},
     },
