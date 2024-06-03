@@ -14,7 +14,9 @@ import { patchModel, useGetModel } from 'actions/model'
 import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import HelpDialog from 'src/common/HelpDialog'
 import EntityItem from 'src/entry/model/settings/EntityItem'
+import ModelRolesInfo from 'src/entry/model/settings/ModelRolesInfo'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntityObject, EntryInterface } from 'types/types'
@@ -136,7 +138,16 @@ export default function ModelAccess({ model }: ModelAccessProps) {
         <TableHead>
           <TableRow>
             <TableCell>Entity</TableCell>
-            <TableCell>Roles</TableCell>
+            <TableCell>
+              <Stack direction='row' spacing={1} alignItems='center'>
+                <span>Roles</span>
+                <HelpDialog
+                  infoLabel='Roles explained'
+                  dialogTitle='Roles Explained'
+                  content={<ModelRolesInfo modelId={model.id} />}
+                />
+              </Stack>
+            </TableCell>
             <TableCell align='right'>Actions</TableCell>
           </TableRow>
         </TableHead>
