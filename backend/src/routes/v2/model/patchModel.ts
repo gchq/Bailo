@@ -71,8 +71,7 @@ export const patchModel = [
       params: { modelId },
     } = parse(req, patchModelSchema)
 
-    const { settings: settingsDiff, ...modelDiff } = body
-    const model = await updateModel(req.user, modelId, modelDiff, settingsDiff)
+    const model = await updateModel(req.user, modelId, body)
     await audit.onUpdateModel(req, model)
 
     return res.json({

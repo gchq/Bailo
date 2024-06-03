@@ -1,9 +1,10 @@
 import { Validator } from 'jsonschema'
+import _ from 'lodash'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { EntryKindKeys, Settings } from '../models/Model.js'
+import ModelModel, { EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
@@ -275,24 +276,19 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility' | 'collaborators'>
-export async function updateModel(
-  user: UserInterface,
-  modelId: string,
-  modelDiff: Partial<UpdateModelParams>,
-  settingsDiff?: Partial<Settings>,
-) {
+export type UpdateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'> & {
+  settings: Partial<ModelInterface['settings']>
+}
+export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
-  if (settingsDiff && settingsDiff.mirror) {
-    if (settingsDiff.mirror.sourceModelId) {
-      throw BadReq('Cannot change standard model to be a mirrored model.')
-    }
-    if (model.settings.mirror.sourceModelId && settingsDiff.mirror.destinationModelId) {
-      throw BadReq('Cannot set a destination model ID for a mirrored model.')
-    }
-    if (settingsDiff.mirror.destinationModelId && settingsDiff.mirror.sourceModelId) {
-      throw BadReq('You cannot select both mirror settings simultaneously.')
-    }
+  if (modelDiff.settings?.mirror?.sourceModelId) {
+    throw BadReq('Cannot change standard model to be a mirrored model.')
+  }
+  if (model.settings.mirror.sourceModelId && modelDiff.settings?.mirror?.destinationModelId) {
+    throw BadReq('Cannot set a destination model ID for a mirrored model.')
+  }
+  if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
+    throw BadReq('You cannot select both mirror settings simultaneously.')
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -300,8 +296,7 @@ export async function updateModel(
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  Object.assign(model, modelDiff)
-  Object.assign(model.settings, settingsDiff)
+  _.mergeWith({}, model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
   await model.save()
 
   return model
