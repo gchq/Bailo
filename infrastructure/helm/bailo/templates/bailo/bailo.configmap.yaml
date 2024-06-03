@@ -16,13 +16,6 @@ data:
         port: {{ .Values.service.backendPort }},
       },
 
-      inference: {
-        enabled: {{ .Values.inference.enabled}},
-        connection: {
-          host: '{{ .Values.inference.host }}',
-        },
-      },
-
       app: {
         // Publicly accessible route to service
         protocol: '{{ .Values.config.app.protocol }}',

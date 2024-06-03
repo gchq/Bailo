@@ -8,13 +8,6 @@ module.exports = {
     port: 3001,
   },
 
-  inference: {
-    enabled: false,
-    connection: {
-      host: 'http://example.com',
-    },
-  },
-
   app: {
     // Publicly accessible route to service
     protocol: '',
@@ -170,7 +163,9 @@ module.exports = {
 
     inference: {
       enabled: false,
-
+      conneciton: {
+        host: "https://example.com"
+      },
       gpus: {},
     },
   },

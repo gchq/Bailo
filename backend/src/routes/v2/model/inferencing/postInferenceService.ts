@@ -25,7 +25,7 @@ export const postInferenceSchema = z.object({
     }),
   }),
 })
-if (config.inference?.enabled) {
+if (config.ui.inference?.enabled) {
   registerPath({
     method: 'post',
     path: '/api/v2/model/{modelId}/inference',
