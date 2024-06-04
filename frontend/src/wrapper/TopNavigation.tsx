@@ -189,7 +189,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                     </Button>
                     <Menu anchorEl={userMenuAnchorEl} open={actionOpen} onClose={handleMenuClose}>
                       <MenuList>
-                        {/* TODO - currently breaks v1. Re-add when v2 is fully adopted */}
+                        {/* TODO - currently breaks v1. Re-add when v2 is fully adopted
                         <Tooltip title='This feature has been temporarily disabled'>
                           <span>
                             <MenuItem disabled data-test='toggleDarkMode'>
@@ -204,7 +204,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                               />
                             </MenuItem>
                           </span>
-                        </Tooltip>
+                        </Tooltip>*/}
                         <Link href='/settings' color='inherit' underline='none'>
                           <MenuItem data-test='settingsLink'>
                             <ListItemIcon>
