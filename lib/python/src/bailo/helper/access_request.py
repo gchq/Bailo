@@ -40,8 +40,6 @@ class AccessRequest:
         self.created_by = created_by
         self.deleted = deleted
 
-        logger.debug("Local AccessRequest object created successfully.")
-
     @classmethod
     def from_id(cls, client: Client, model_id: str, access_request_id: str) -> AccessRequest:
         """Return an existing review from Bailo given it's unique ID.
@@ -58,7 +56,7 @@ class AccessRequest:
 
         schema_id = json_access_request["schemaId"]
 
-        logger.info(f"Access request {access_request_id} for model {model_id} successfully retrieved from server.")
+        logger.info(f"Access request %s for model %s successfully retrieved from server.", access_request_id, model_id)
 
         return cls(
             client,
@@ -89,7 +87,9 @@ class AccessRequest:
         metadata = access_request_json["metadata"]
         created_by = access_request_json["createdBy"]
 
-        logger.info(f"Access request successfully created on server with ID {access_request_id} for model {model_id}.")
+        logger.info(
+            f"Access request successfully created on server with ID %s for model %s.", access_request_id, model_id
+        )
 
         return cls(
             client,
@@ -108,7 +108,7 @@ class AccessRequest:
         """
         self.client.delete_access_request(self.model_id, self.access_request_id)
 
-        logger.info(f"Access request {self.access_request_id} successfully deleted on server.")
+        logger.info(f"Access request %s successfully deleted on server.", self.access_request_id)
 
         return True
 
@@ -116,7 +116,7 @@ class AccessRequest:
         """Update the current state of the access request to Bailo."""
         self.client.patch_access_request(self.model_id, self.access_request_id, metadata=self.metadata)
 
-        logger.info(f"Access request {self.access_request_id} successfully updated on server.")
+        logger.info(f"Access request %s successfully updated on server.", self.access_request_id)
 
     def __str__(self) -> str:
         return f"Access Request: {self.metadata['overview']['name']} - {self.model_id}"

@@ -36,8 +36,6 @@ class Schema:
         self.kind = kind
         self.json_schema = json_schema
 
-        logger.debug("Local Schema object created successfully.")
-
     @classmethod
     def create(
         cls,
@@ -69,7 +67,7 @@ class Schema:
         res = client.post_schema(
             schema_id=schema_id, name=name, description=description, kind=kind, json_schema=json_schema
         )
-        logger.info(f"Schema successfully created on server with ID {schema_id}.")
+        logger.info(f"Schema successfully created on server with ID %s.", schema_id)
         schema.__unpack(res["schema"])
 
         return schema
@@ -91,7 +89,7 @@ class Schema:
             json_schema={"temp": "temp"},
         )
         res = client.get_schema(schema_id=schema_id)
-        logger.info(f"Schema {schema_id} successfully retrieved from server.")
+        logger.info(f"Schema %s successfully retrieved from server.", schema_id)
         schema.__unpack(res["schema"])
 
         return schema
@@ -108,4 +106,4 @@ class Schema:
         if kind == "accessRequest":
             self.kind = SchemaKind.ACCESS_REQUEST
 
-        logger.debug(f"Attributes for Schema ID {self.schema_id} successfully unpacked.")
+        logger.info(f"Attributes for Schema ID %s successfully unpacked.", self.schema_id)

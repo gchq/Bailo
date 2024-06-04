@@ -6,6 +6,7 @@ import shutil
 from io import BytesIO
 from typing import Any
 import logging
+import warnings
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
@@ -66,8 +67,6 @@ class Release:
         self.draft = draft
         self.files = files
 
-        logger.debug("Local Release object created successfully.")
-
     @classmethod
     def create(
         cls,
@@ -103,7 +102,7 @@ class Release:
             minor,
             draft,
         )
-        logger.info(f"Release {version} successfully created on server for model with ID {model_id}.")
+        logger.info(f"Release %s successfully created on server for model with ID %s.", str(version), model_id)
 
         return cls(
             client,
@@ -134,7 +133,7 @@ class Release:
         minor = res["minor"]
         draft = res["draft"]
 
-        logger.info(f"Release {version} of model ID {model_id} successfully retrieved from server.")
+        logger.info(f"Release %s of model ID %s successfully retrieved from server.", str(version), model_id)
 
         return cls(
             client,
@@ -158,7 +157,7 @@ class Release:
         :return: A JSON response object
         """
         res = self.client.get_download_by_filename(self.model_id, str(self.version), filename)
-        logger.info(f"Downloading file {filename} from version {str(self.version)} of {self.model_id}...")
+        logger.info(f"Downloading file %s from version %s of %s...", filename, str(self.version), self.model_id)
 
         if write:
             if path is None:
@@ -183,9 +182,11 @@ class Release:
                         t.update(len(data))
                         f.write(data)
 
-            logger.info(f"File written to {path}")
+            logger.info(f"File written to %s", path)
 
-        logger.info(f"Downloading of file {filename} from version {str(self.version)} of {self.model_id} completed.")
+        logger.info(
+            f"Downloading of file %s from version %s of %s completed.", filename, str(self.version), self.model_id
+        )
 
         return res
 
@@ -218,7 +219,11 @@ class Release:
             ]
 
         logger.info(
-            f"Downloading {len(file_names)} of {len(orig_file_names)} files for version {str(self.version)} of {self.model_id}..."
+            f"Downloading %d of %%d files for version %s of %s...",
+            len(file_names),
+            len(orig_file_names),
+            str(self.version),
+            {self.model_id},
         )
         os.makedirs(path, exist_ok=True)
         for file in file_names:
@@ -234,12 +239,12 @@ class Release:
         :return: The unique file ID of the file uploaded
         ..note:: If path provided is a directory, it will be uploaded as a zip
         """
-        logger.info(f"Uploading file(s) to version {str(self.version)} of {self.model_id}...")
+        logger.info(f"Uploading file(s) to version %s of %s...", str(self.version), self.model_id)
         name = os.path.split(path)[-1]
 
         if data is None:
             if is_zip := os.path.isdir(path):
-                logger.warning(f"Given path ({path}) is a directory. This will be converted to a zip file for upload.")
+                warnings.warn(f"Given path ({path}) is a directory. This will be converted to a zip file for upload.")
                 shutil.make_archive(name, "zip", path)
                 path = f"{name}.zip"
                 name = path
@@ -269,7 +274,7 @@ class Release:
         self.update()
         if not isinstance(data, BytesIO):
             data.close()
-        logger.info(f"Upload of file {name} to version {str(self.version)} of {self.model_id} complete.")
+        logger.info(f"Upload of file %s to version %s of %s complete.", name, str(self.version), self.model_id)
 
         return res["file"]["id"]
 
@@ -293,7 +298,7 @@ class Release:
         :return: JSON Response object
         """
         self.client.delete_release(self.model_id, str(self.version))
-        logger.info(f"Release {str(self.version)} of {self.model_id} successfully deleted.")
+        logger.info(f"Release %s of %s successfully deleted.", str(self.version), self.model_id)
 
         return True
 

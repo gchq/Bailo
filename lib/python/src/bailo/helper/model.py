@@ -5,6 +5,7 @@ import shutil
 import tempfile
 from typing import Any
 import logging
+import warnings
 
 from bailo.core.client import Client
 from bailo.core.enums import EntryKind, ModelVisibility
@@ -48,8 +49,6 @@ class Model(Entry):
 
         self.model_id = model_id
 
-        logger.debug("Local Model object created successfully.")
-
     @classmethod
     def create(
         cls,
@@ -72,7 +71,7 @@ class Model(Entry):
             name=name, kind=EntryKind.MODEL, description=description, team_id=team_id, visibility=visibility
         )
         model_id = res["model"]["id"]
-        logger.info(f"Model successfully created on server with ID {model_id}.")
+        logger.info(f"Model successfully created on server with ID %s.", model_id)
 
         model = cls(
             client=client,
@@ -98,7 +97,7 @@ class Model(Entry):
         if res["kind"] != "model":
             raise BailoException(f"ID {model_id} does not belong to a model. Did you mean to use Datacard.from_id()?")
 
-        logger.info(f"Model {model_id} successfully retrieved from server.")
+        logger.info(f"Model %s successfully retrieved from server.", model_id)
 
         model = cls(
             client=client,
@@ -174,7 +173,7 @@ class Model(Entry):
         for release in res["releases"]:
             releases.append(self.get_release(version=release["semver"]))
 
-        logger.info(f"Successfully retrieved all releases for model {self.model_id}.")
+        logger.info(f"Successfully retrieved all releases for model %s.", self.model_id)
 
         return releases
 
@@ -196,7 +195,7 @@ class Model(Entry):
             raise BailoException("This model has no releases.")
 
         latest_release = max(releases)
-        logger.info(f"Latest release ({str(latest_release.version)}) for {self.model_id} retrieved successfully.")
+        logger.info(f"latest_release (%s) for %s retrieved successfully.", str(latest_release.version), self.model_id)
 
         return max(releases)
 
@@ -207,7 +206,7 @@ class Model(Entry):
         """
         res = self.client.get_all_images(model_id=self.model_id)
 
-        logger.info(f"Images for {self.model_id} retreived successfully.")
+        logger.info(f"Images for %s retreived successfully.", self.model_id)
 
         return res["images"]
 
@@ -272,8 +271,6 @@ class Experiment:
         self.run = -1
         self.temp_dir = os.path.join(tempfile.gettempdir(), "bailo_runs")
 
-        logger.debug("Local Experiment object created successfully.")
-
     @classmethod
     def create(
         cls,
@@ -299,7 +296,7 @@ class Experiment:
         self.raw.append(self.run_data)
 
         if not is_mlflow:
-            logger.info(f"Bailo tracking run {self.run}.")
+            logger.info(f"Bailo tracking run %d.", self.run)
 
     def log_params(self, params: dict[str, Any]):
         """Logs parameters to the current run.
@@ -339,13 +336,15 @@ class Experiment:
         if ml_flow:
             client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
             runs = client.search_runs(experiment_id)
-            if len(runs) > 0:
+            if len(runs):
                 logger.info(
-                    f"Successfully retrieved MLFlow experiment {experiment_id} from tracking server. {len(runs)} were found."
+                    f"Successfully retrieved MLFlow experiment %s from tracking server. %d were found.",
+                    experiment_id,
+                    len(runs),
                 )
             else:
-                logger.warning(
-                    f"MLFlow experiment {experiment_id} does have any runs and publishing requires at least one valid run. Are you sure the ID is correct?"
+                warnings.warn(
+                    f"MLFlow experiment {experiment_id} does not have any runs and publishing requires at least one valid run. Are you sure the ID is correct?"
                 )
 
             for run in runs:
@@ -365,12 +364,12 @@ class Experiment:
                 if status != "FINISHED":
                     continue
 
-                if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)) > 0:
+                if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)):
                     mlflow_dir = os.path.join(self.temp_dir, f"mlflow_{run_id}")
                     mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
                     artifacts.append(mlflow_dir)
                     logger.info(
-                        f"Successfully downloaded artifacts for MLFlow experiment {experiment_id} to {mlflow_dir}."
+                        f"Successfully downloaded artifacts for MLFlow experiment %s to %s.", experiment_id, mlflow_dir
                     )
 
                 self.start_run(is_mlflow=True)
@@ -380,7 +379,7 @@ class Experiment:
                 self.log_dataset("".join(datasets_str))
                 self.run_data["run"] = info.run_id
 
-            logger.info(f"Successfully imported MLFlow experiment {experiment_id}.")
+            logger.info(f"Successfully imported MLFlow experiment %s.", experiment_id)
         else:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
@@ -400,7 +399,7 @@ class Experiment:
 
         mc = NestedDict(mc)
 
-        if len(self.raw) > 0:
+        if len(self.raw):
             for run in self.raw:
                 if run["run"] == run_id:
                     sel_run = run
@@ -423,7 +422,7 @@ class Experiment:
 
         # Creating a release and uploading artifacts (if artifacts present)
         artifacts = sel_run["artifacts"]
-        if len(artifacts) > 0:
+        if len(artifacts):
             # Create new release
             try:
                 release_latest_version = self.model.get_latest_release().version
@@ -436,7 +435,10 @@ class Experiment:
             release_new = self.model.create_release(version=release_new_version, minor=True, notes=notes)
 
             logger.info(
-                f"Uploading {len(artifacts)} artifacts to version {str(release_new_version)} of model {self.model.model_id}."
+                f"Uploading %d artifacts to version %s of model %s.",
+                len(artifacts),
+                str(release_new_version),
+                self.model.model_id,
             )
 
             for artifact in artifacts:
@@ -445,4 +447,4 @@ class Experiment:
             if os.path.exists(self.temp_dir) and os.path.isdir(self.temp_dir):
                 shutil.rmtree(self.temp_dir)
 
-        logger.info(f"Successfully published experiment run {run_id} to model {self.model.model_id}.")
+        logger.info(f"Successfully published experiment run %s to model %s.", str(run_id), self.model.model_id)

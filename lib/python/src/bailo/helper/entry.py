@@ -32,8 +32,6 @@ class Entry:
         self._card_version = None
         self._card_schema = None
 
-        logger.debug("Local base Entry object created successfully.")
-
     def update(self) -> None:
         """Upload and retrieve any changes to the entry summary on Bailo."""
         res = self.client.patch_model(
@@ -45,7 +43,7 @@ class Entry:
         )
         self._unpack(res["model"])
 
-        logger.info(f"ID {self.id} updated locally and on server.")
+        logger.info(f"ID %s updated locally and on server.", self.id)
 
     def card_from_schema(self, schema_id: str) -> None:
         """Create a card using a schema on Bailo.
@@ -55,7 +53,7 @@ class Entry:
         res = self.client.model_card_from_schema(model_id=self.id, schema_id=schema_id)
         self.__unpack_card(res["card"])
 
-        logger.info(f"Card for ID {self.id} successfully created using schema ID {schema_id}.")
+        logger.info(f"Card for ID %s successfully created using schema ID %s.", self.id, schema_id)
 
     def card_from_template(self):
         """Create a card using a template (not yet implemented).
@@ -69,7 +67,7 @@ class Entry:
         res = self.client.get_model(model_id=self.id)
         if "card" in res["model"]:
             self.__unpack_card(res["model"]["card"])
-            logger.info(f"Latest card for ID {self.id} successfully retrieved.")
+            logger.info(f"Latest card for ID %s successfully retrieved.", self.id)
         else:
             raise BailoException(f"A model card doesn't exist for model {self.id}")
 
@@ -81,7 +79,7 @@ class Entry:
         res = self.client.get_model_card(model_id=self.id, version=version)
         self.__unpack_card(res["modelCard"])
 
-        logger.info(f"Card version {version} for ID {self.id} successfully retrieved.")
+        logger.info(f"Card version %s for ID %s successfully retrieved.", version, self.id)
 
     def get_roles(self):
         """Get all roles for the entry.
@@ -108,7 +106,7 @@ class Entry:
         res = self.client.put_model_card(model_id=self.id, metadata=card)
         self.__unpack_card(res["card"])
 
-        logger.info(f"Card for {self.id} successfully updated on server.")
+        logger.info(f"Card for %s successfully updated on server.", self.id)
 
     def _unpack(self, res):
         self.id = res["id"]
@@ -120,7 +118,7 @@ class Entry:
         else:
             self.visibility = ModelVisibility.PUBLIC
 
-        logger.debug(f"Attributes for ID {self.id} successfully unpacked.")
+        logger.info(f"Attributes for ID %s successfully unpacked.", self.id)
 
     def __unpack_card(self, res):
         self._card_version = res["version"]
@@ -131,4 +129,4 @@ class Entry:
         except KeyError:
             self._card = None
 
-        logger.debug(f"Card attributes for ID {self.id} successfully unpacked.")
+        logger.info(f"Card attributes for ID %s successfully unpacked.", self.id)

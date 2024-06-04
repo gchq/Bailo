@@ -40,8 +40,6 @@ class Datacard(Entry):
 
         self.datacard_id = datacard_id
 
-        logger.debug("Local Datacard object created successfully.")
-
     @classmethod
     def create(
         cls,
@@ -64,7 +62,7 @@ class Datacard(Entry):
             name=name, kind=EntryKind.DATACARD, description=description, team_id=team_id, visibility=visibility
         )
         datacard_id = res["model"]["id"]
-        logger.info(f"Datacard successfully created on server with ID {datacard_id}.")
+        logger.info(f"Datacard successfully created on server with ID %s.", datacard_id)
 
         datacard = cls(
             client=client,
@@ -92,7 +90,7 @@ class Datacard(Entry):
                 f"ID {datacard_id} does not belong to a datacard. Did you mean to use Model.from_id()?"
             )
 
-        logger.info(f"Datacard {datacard_id} successfully retrieved from server.")
+        logger.info(f"Datacard %s successfully retrieved from server.", datacard_id)
 
         datacard = cls(
             client=client,
