@@ -32,10 +32,10 @@ export async function exportModel(
     throw BadReq('You must agree to the disclaimer agreement before being able to export a model.')
   }
   const model = await getModelById(user, modelId)
-  if (!model.settings.mirroredModelId || model.settings.mirroredModelId === '') {
+  if (!model.settings.mirror.destinationModelId) {
     throw BadReq('The ID of the mirrored model has not been set on this model.')
   }
-  const mirroredModelId = model.settings.mirroredModelId
+  const mirroredModelId = model.settings.mirror.destinationModelId
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, model: model.id })
@@ -133,7 +133,7 @@ async function uploadToTemporaryS3Location(
 
 async function getObjectFromTemporaryS3Location(modelId: string, semvers: string[] | undefined) {
   const bucket = config.s3.buckets.uploads
-  const object = `exportQueue/${modelId}.zi`
+  const object = `exportQueue/${modelId}.zip`
   try {
     const stream = (await getObjectStream(bucket, object)).Body as Readable
     log.debug(

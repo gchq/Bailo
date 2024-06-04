@@ -1,4 +1,5 @@
 import { Validator } from 'jsonschema'
+import _ from 'lodash'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
@@ -14,7 +15,13 @@ import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { findSchemaById } from './schema.js'
 
-export type CreateModelParams = Pick<ModelInterface, 'name' | 'kind' | 'teamId' | 'description' | 'visibility'>
+export function checkModelRestriction(model: ModelInterface) {
+  if (model.settings.mirror.sourceModelId) {
+    throw BadReq(`Cannot alter a mirrored model.`)
+  }
+}
+
+export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility' | 'settings'>
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
@@ -32,8 +39,13 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   })
 
   const auth = await authorisation.model(user, model, ModelAction.Create)
+
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
+  }
+
+  if (modelParams?.settings?.mirror?.destinationModelId && modelParams?.settings?.mirror?.sourceModelId) {
+    throw BadReq('You cannot select both mirror settings simultaneously.')
   }
 
   await model.save()
@@ -208,12 +220,15 @@ export async function _setModelCard(
   // It is assumed that this race case will occur infrequently.
   const model = await getModelById(user, modelId)
 
+  checkModelRestriction(model)
+
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
   // We don't want to copy across other values
+
   const newDocument = {
     schemaId: schemaId,
 
@@ -235,11 +250,7 @@ export async function updateModelCard(
   metadata: unknown,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
-
-  const auth = await authorisation.model(user, model, ModelAction.Update)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId })
-  }
+  checkModelRestriction(model)
 
   if (!model.card) {
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
@@ -262,19 +273,27 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<
-  ModelInterface,
-  'name' | 'description' | 'visibility' | 'collaborators' | 'settings'
->
-export async function updateModel(user: UserInterface, modelId: string, diff: Partial<UpdateModelParams>) {
+export type UpdateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'> & {
+  settings: Partial<ModelInterface['settings']>
+}
+export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
   const model = await getModelById(user, modelId)
+  if (modelDiff.settings?.mirror?.sourceModelId) {
+    throw BadReq('Cannot change standard model to be a mirrored model.')
+  }
+  if (model.settings.mirror.sourceModelId && modelDiff.settings?.mirror?.destinationModelId) {
+    throw BadReq('Cannot set a destination model ID for a mirrored model.')
+  }
+  if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
+    throw BadReq('You cannot select both mirror settings simultaneously.')
+  }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  Object.assign(model, diff)
+  _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
   await model.save()
 
   return model
@@ -286,6 +305,7 @@ export async function createModelCardFromSchema(
   schemaId: string,
 ): Promise<ModelCardRevisionDoc> {
   const model = await getModelById(user, modelId)
+  checkModelRestriction(model)
 
   const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {

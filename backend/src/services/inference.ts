@@ -1,3 +1,4 @@
+import { createInferenceService, updateInferenceService } from '../clients/inferencing.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import InferenceModel, { InferenceDoc, InferenceInterface } from '../models/Inference.js'
@@ -65,6 +66,16 @@ export async function createInference(user: UserInterface, modelId: string, infe
       modelId: modelId,
     })
   }
+
+  const inferenceService = {
+    modelId: modelId,
+    image: inferenceParams.image,
+    tag: inferenceParams.tag,
+    port: inferenceParams.settings.port,
+  }
+
+  await createInferenceService(inferenceService)
+
   const inference = new Inference({
     modelId: modelId,
     createdBy: user.dn,
@@ -105,6 +116,15 @@ export async function updateInference(
   }
   const inference = await getInferenceByImage(user, modelId, image, tag)
 
+  const inferenceService = {
+    modelId: modelId,
+    image: image,
+    tag: tag,
+    port: inferenceParams.settings.port,
+  }
+
+  await updateInferenceService(inferenceService)
+
   const updatedInference = await Inference.findOneAndUpdate(
     { modelId: inference.modelId, image: inference.image, tag: inference.tag },
     inferenceParams,
@@ -113,5 +133,6 @@ export async function updateInference(
   if (!updatedInference) {
     throw NotFound(`The requested inference service was not found.`, { updatedInference })
   }
+
   return updatedInference
 }
