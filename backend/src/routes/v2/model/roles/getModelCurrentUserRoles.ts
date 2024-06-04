@@ -29,14 +29,14 @@ export const getModelCurrentUserRoles = [
           name: 'Model Senior Responsible Officer',
           short: 'MSRO',
           kind: RoleKind.SCHEMA,
-          description: 'This is role specified by the schema in accordance with its policy.',
+          description: 'This role is specified by the schema in accordance with its policy.',
         },
         {
           id: 'mtr',
           name: 'Model Technical Reviewer',
           short: 'MTR',
           kind: RoleKind.SCHEMA,
-          description: 'This is role specified by the schema in accordance with its policy.',
+          description: 'This role is specified by the schema in accordance with its policy.',
         },
         {
           id: 'consumer',
