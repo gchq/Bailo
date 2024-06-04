@@ -38,6 +38,11 @@ export interface ModelCardInterface {
   metadata: ModelMetadata
 }
 
+export interface Settings {
+  ungovernedAccess: boolean
+  mirror: { sourceModelId?: string; destinationModelId?: string }
+}
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -51,10 +56,7 @@ export interface ModelInterface {
   card?: ModelCardInterface
 
   collaborators: Array<CollaboratorEntry>
-  settings: {
-    ungovernedAccess: boolean
-    mirroredModelId?: string
-  }
+  settings: Settings
 
   visibility: EntryVisibilityKeys
   deleted: boolean
@@ -92,7 +94,7 @@ const ModelSchema = new Schema<ModelInterface>(
     ],
     settings: {
       ungovernedAccess: { type: Boolean, required: true, default: false },
-      mirroredModelId: { type: String },
+      mirror: { sourceModelId: { type: String }, destinationModelId: { type: String } },
     },
 
     visibility: { type: String, enum: Object.values(EntryVisibility), default: EntryVisibility.Public },
