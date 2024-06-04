@@ -1,7 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
-import { useGetReviewRequestsForModel } from 'actions/review'
+import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -24,10 +24,24 @@ export default function AccessRequest() {
     modelId,
     accessRequestId: accessRequestId || '',
   })
+  const {
+    reviews: userReviews,
+    isReviewsLoading: isUserReviewsLoading,
+    isReviewsError: isUserReviewsError,
+  } = useGetReviewRequestsForUser()
+
+  const userCanReview =
+    reviews.filter((review) =>
+      userReviews.some(
+        (userReview) =>
+          userReview.model.id === review.model.id && userReview.accessRequestId === review.accessRequestId,
+      ),
+    ).length > 0
 
   const error = MultipleErrorWrapper('Unable to load access request', {
     isAccessRequestError,
     isReviewsError,
+    isUserReviewsError,
   })
   if (error) return error
 
@@ -36,10 +50,10 @@ export default function AccessRequest() {
       <Title text={accessRequest ? accessRequest.metadata.overview.name : 'Loading...'} />
       <Container maxWidth='md' sx={{ my: 4 }} data-test='accessRequestContainer'>
         <Paper>
-          {isAccessRequestLoading && isReviewsLoading && <Loading />}
+          {isAccessRequestLoading && isReviewsLoading && isUserReviewsLoading && <Loading />}
           {accessRequest && (
             <>
-              {reviews.length > 0 && <ReviewBanner accessRequest={accessRequest} />}
+              {userCanReview && <ReviewBanner accessRequest={accessRequest} />}
               <Stack spacing={2} sx={{ p: 4 }}>
                 <Stack
                   direction={{ sm: 'row', xs: 'column' }}
