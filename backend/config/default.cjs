@@ -136,6 +136,17 @@ module.exports = {
         subdomain: '',
       },
     },
+    cognito: {
+      identityProviderClient: {
+        region: 'eu-west-2',
+        credentials: {
+          accessKeyId: '',
+          secretAccessKey: '',
+        },
+      },
+      userPoolId: '',
+      userIdAttribute: '',
+    },
   },
 
   avScanning: {
