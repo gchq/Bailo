@@ -20,7 +20,9 @@ import config from '../utils/config.js'
 
 export async function getS3Client() {
   return new S3Client({
-    credentials: config.s3.credentials,
+    ...(config.s3.credentials && {
+      credentials: config.s3.credentials,
+    }),
     endpoint: config.s3.endpoint,
     region: config.s3.region,
     forcePathStyle: config.s3.forcePathStyle,

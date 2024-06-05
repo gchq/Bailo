@@ -190,11 +190,6 @@ module.exports = {
   },
 
   s3: {
-    credentials: {
-      accessKeyId: 'minioadmin',
-      secretAccessKey: 'minioadmin',
-    },
-
     endpoint: 'http://minio:9000',
     region: 'ignored',
     forcePathStyle: true,

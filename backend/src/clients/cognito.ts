@@ -17,7 +17,16 @@ export async function listUsers(query: string, exactMatch = false) {
   } catch (e) {
     throw ConfigurationError('Cannot find userIdAttribute in oauth configuration', { oauthConfiguration: config.oauth })
   }
-  const client = new CognitoIdentityProviderClient(config.oauth.cognito.identityProviderClient)
+
+  let client: CognitoIdentityProviderClient
+  if (
+    config.oauth.cognito.identityProviderClient.credentials.accessKeyId &&
+    config.oauth.cognito.identityProviderClient.credentials.secretAccessKey
+  ) {
+    client = new CognitoIdentityProviderClient(config.oauth.cognito.identityProviderClient)
+  } else {
+    client = new CognitoIdentityProviderClient()
+  }
 
   const command = new ListUsersCommand({
     UserPoolId: userPoolId,
