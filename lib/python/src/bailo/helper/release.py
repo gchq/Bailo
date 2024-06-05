@@ -280,7 +280,7 @@ class Release:
     @version.setter
     def version(self, value):
         if isinstance(value, str):
-            version_obj = value.replace("v", "")
+            version_obj = value.removeprefix("v")
             version_obj = Version.coerce(version_obj)
         elif isinstance(value, Version):
             version_obj = value
