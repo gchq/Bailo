@@ -92,8 +92,6 @@ export default function NewAccessRequest() {
       return
     }
 
-    setSubmitButtonLoading(false)
-
     const body = await res.json()
     router.push(`/model/${modelId}/access-request/${body.accessRequest.id}`)
   }
