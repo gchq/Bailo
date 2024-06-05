@@ -3,7 +3,7 @@ import { Button, Card, Container, Link, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import MessageAlert from 'src/MessageAlert'
@@ -14,6 +14,8 @@ export default function InferenceApp() {
   const { modelId, image, tag }: { modelId?: string; image?: string; tag?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+
+  const [isSpinningUp, setIsSpinningUp] = useState(true)
 
   const serviceEndpoint = useMemo(
     () => `${uiConfig?.inference.connection.host}/inference/${modelId}/${image}/${tag}`,
@@ -50,7 +52,15 @@ export default function InferenceApp() {
                   <Button sx={{ width: 'fit-content' }}>View Settings</Button>
                 </Link>
               </Stack>
-              <iframe src={serviceEndpoint} width='100%' height='600' />
+              {isSpinningUp && (
+                <Stack direction={'row'} spacing={3} alignItems='center' justifyContent='center'>
+                  <Typography fontWeight={'bold'} color={'primary'}>
+                    Spinning up {image}
+                  </Typography>
+                  <Loading />
+                </Stack>
+              )}
+              <iframe src={serviceEndpoint} width='100%' height='600' onLoad={() => setIsSpinningUp(false)} />
             </Stack>
           )}
         </Card>

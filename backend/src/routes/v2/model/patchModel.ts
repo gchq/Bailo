@@ -17,8 +17,13 @@ export const patchModelSchema = z.object({
     visibility: z.nativeEnum(EntryVisibility).optional().openapi({ example: 'private' }),
     settings: z
       .object({
-        ungovernedAccess: z.boolean().optional().default(false).openapi({ example: true }),
-        mirroredModelId: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),
+        ungovernedAccess: z.boolean().optional().openapi({ example: true }),
+        mirror: z
+          .object({
+            sourceModelId: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),
+            destinationModelId: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),
+          })
+          .optional(),
       })
       .optional(),
     collaborators: z

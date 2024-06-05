@@ -43,7 +43,7 @@ vi.mock('../../src/services/log.js', async () => ({
 }))
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(() => ({ settings: { mirroredModelId: 'abc' } })),
+  getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } } })),
   getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(), version: 123 }]),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
@@ -183,7 +183,9 @@ describe('services > mirroredModel', () => {
   })
 
   test('exportModel > missing mirrored model ID', async () => {
-    modelMocks.getModelById.mockReturnValueOnce({ settings: { mirroredModelId: '' } })
+    modelMocks.getModelById.mockReturnValueOnce({
+      settings: { mirror: { destinationModelId: '' } },
+    })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     expect(response).rejects.toThrowError(/^The ID of the mirrored model has not been set on this model./)
     expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
