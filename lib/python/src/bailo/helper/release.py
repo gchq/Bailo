@@ -244,7 +244,7 @@ class Release:
 
         if data is None:
             if is_zip := os.path.isdir(path):
-                warnings.warn(f"Given path ({path}) is a directory. This will be converted to a zip file for upload.")
+                logger.info(f"Given path (%s) is a directory. This will be converted to a zip file for upload.", path)
                 shutil.make_archive(name, "zip", path)
                 path = f"{name}.zip"
                 name = path

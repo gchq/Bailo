@@ -21,7 +21,4 @@ from bailo.helper.release import Release
 from bailo.helper.schema import Schema
 
 
-logging.basicConfig()
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
-logger.propagate = False
+logging.getLogger(__name__).addHandler(logging.NullHandler())
