@@ -98,7 +98,6 @@ export class BasicAuthorisationConnector {
         // Check a user has a role before allowing write actions
         if (
           [ModelAction.Write, ModelAction.Update].some((a) => a === action) &&
-          //Removed 'collaborator' role.
           (await missingRequiredRole(user, model, ['owner']))
         ) {
           return { id: model.id, success: false, info: 'Only the owner can update a model.' }
