@@ -68,10 +68,16 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
       if (response.kind === ResponseKind.Review) {
         return <ReviewDecisionDisplay key={response.createdAt} response={response} modelId={modelId} />
       } else {
-        return <ReviewCommentDisplay key={response.createdAt} response={response} />
+        return (
+          <ReviewCommentDisplay
+            key={response.createdAt}
+            response={response}
+            onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
+          />
+        )
       }
     })
-  }, [reviews, release, accessRequest, modelId])
+  }, [reviews, release, accessRequest, modelId, newReviewComment])
 
   async function submitReviewComment() {
     setCommentSubmissionError('')

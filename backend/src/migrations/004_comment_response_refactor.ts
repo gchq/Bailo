@@ -2,7 +2,6 @@ import AccessRequestModel from '../models/AccessRequest.js'
 import ReleaseModel from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
-import { toEntity } from '../utils/entity.js'
 
 export async function up() {
   // Resolve release comments
@@ -12,14 +11,15 @@ export async function up() {
     if (release.get('comments') !== undefined) {
       for (const releaseComment of release.get('comments')) {
         const newComment = new ResponseModel({
-          user: toEntity('user', releaseComment.user),
+          user: releaseComment.user,
           kind: ResponseKind.Comment,
           comment: releaseComment.message,
           createdAt: releaseComment.createdAt,
+          updatedAt: releaseComment.createdAt,
         })
         await newComment.save()
         release.commentIds.push(newComment._id)
-        release.set('comments', undefined, { strict: false })
+        //release.set('comments', undefined, { strict: false })
       }
       await release.save()
     }
@@ -32,14 +32,15 @@ export async function up() {
     if (accessRequest.get('comments') !== undefined) {
       for (const accessCommment of accessRequest.get('comments')) {
         const newComment = new ResponseModel({
-          user: toEntity('user', accessCommment.user),
+          user: accessCommment.user,
           kind: ResponseKind.Comment,
           comment: accessCommment.message,
           createdAt: accessCommment.createdAt,
+          updatedAt: accessCommment.createdAt,
         })
         await newComment.save()
         accessRequest.commentIds.push(newComment._id)
-        accessRequest.set('comments', undefined, { strict: false })
+        //accessRequest.set('comments', undefined, { strict: false })
       }
     }
     await accessRequest.save()
@@ -58,10 +59,11 @@ export async function up() {
           role: review.role,
           decision: reviewResponse.decision,
           createdAt: reviewResponse.createdAt,
+          updatedAt: reviewResponse.createdAt,
         })
         await newComment.save()
         review.responseIds.push(newComment._id)
-        delete review.comments
+        //delete review.comments
       }
     }
     await review.save()
