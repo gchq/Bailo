@@ -9,6 +9,8 @@ import MuiDrawer from '@mui/material/Drawer'
 import { useTheme } from '@mui/material/styles'
 import { styled } from '@mui/material/styles'
 import { useGetReviewRequestsForUser } from 'actions/review'
+import Image from 'next/image'
+import PythonLogo from 'public/python-logo.svg'
 import { CSSProperties, useCallback, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -151,6 +153,15 @@ export default function SideNavigation({
               icon={<ContactSupportIcon />}
             />
             <Divider />
+            <NavMenuItem
+              href='/docs/python/index.html'
+              selectedPage={page}
+              primaryText='Python Client Docs'
+              drawerOpen={drawerOpen}
+              menuPage=''
+              title='Python Client Docs'
+              icon={<Image src={PythonLogo} alt='python-logo' width={20} height={20} />}
+            />
             {currentUser.isAdmin && (
               <>
                 <NavMenuItem
