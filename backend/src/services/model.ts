@@ -258,21 +258,20 @@ export async function _setModelCard(
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
 
-  if (await isReplicaSet()) {
-    await mongoose.connection
-      .transaction(async function executeUpdate(session) {
-        await revision.save({ session })
-        await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session: session })
-      })
-      .catch((error) => {
-        const message = 'Unable to save model card revision'
-        log.error('Error when updating model card/revision. Transaction rolled back.', error)
-        throw InternalError(message, { modelId })
-      })
-  } else {
-    await revision.save()
-    await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } })
+  if (!isReplicaSet()) {
+    throw InternalError('Database is not in replica set mode, cannot use transactions')
   }
+
+  await mongoose.connection
+    .transaction(async function executeUpdate(session) {
+      await revision.save({ session })
+      await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session: session })
+    })
+    .catch((error) => {
+      const message = 'Unable to save model card revision'
+      log.error('Error when updating model card/revision. Transaction rolled back.', error)
+      throw InternalError(message, { modelId })
+    })
 
   return revision
 }
