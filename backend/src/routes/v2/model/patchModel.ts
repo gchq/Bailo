@@ -12,7 +12,7 @@ import { parse } from '../../../utils/validate.js'
 export const patchModelSchema = z.object({
   body: z.object({
     name: z.string().optional().openapi({ example: 'Yolo v4' }),
-    kind: z.nativeEnum(EntryKind).optional().default(EntryKind.Model),
+    kind: z.nativeEnum(EntryKind).optional().openapi({ example: EntryKind.Model }),
     description: z.string().optional().openapi({ example: 'You only look once' }),
     visibility: z.nativeEnum(EntryVisibility).optional().openapi({ example: 'private' }),
     settings: z

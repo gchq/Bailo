@@ -4,14 +4,15 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
-import ModelAccess from 'src/entry/model/settings/ModelAccess'
+import EntryAccess from 'src/entry/settings/EntryAccess'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import { EntryInterface, EntryKind, EntryKindKeys } from 'types/types'
+import { toTitleCase } from 'utils/stringUtils'
 
 export const SettingsCategory = {
   DETAILS: 'details',
   DANGER: 'danger',
-  ACCESS: 'access',
+  ACCESS_REQUESTS: 'access_requests',
   PERMISSIONS: 'permissions',
 } as const
 
@@ -25,12 +26,12 @@ function isSettingsCategory(
     case EntryKind.MODEL:
       return (
         value === SettingsCategory.DETAILS ||
-        value === SettingsCategory.DANGER ||
-        value === SettingsCategory.ACCESS ||
-        value === SettingsCategory.PERMISSIONS
+        value === SettingsCategory.PERMISSIONS ||
+        value === SettingsCategory.ACCESS_REQUESTS ||
+        value === SettingsCategory.DANGER
       )
     case EntryKind.DATA_CARD:
-      return value === SettingsCategory.DETAILS
+      return value === SettingsCategory.DETAILS || value === SettingsCategory.PERMISSIONS
   }
 }
 
@@ -78,17 +79,17 @@ export default function Settings({ entry }: SettingsProps) {
         >
           Details
         </SimpleListItemButton>
+        <SimpleListItemButton
+          selected={selectedCategory === SettingsCategory.PERMISSIONS}
+          onClick={() => handleListItemClick(SettingsCategory.PERMISSIONS)}
+        >
+          {`${toTitleCase(entry.kind)} Access`}
+        </SimpleListItemButton>
         {entry.kind === EntryKind.MODEL && (
           <>
             <SimpleListItemButton
-              selected={selectedCategory === SettingsCategory.PERMISSIONS}
-              onClick={() => handleListItemClick(SettingsCategory.PERMISSIONS)}
-            >
-              Model Access
-            </SimpleListItemButton>
-            <SimpleListItemButton
-              selected={selectedCategory === SettingsCategory.ACCESS}
-              onClick={() => handleListItemClick(SettingsCategory.ACCESS)}
+              selected={selectedCategory === SettingsCategory.ACCESS_REQUESTS}
+              onClick={() => handleListItemClick(SettingsCategory.ACCESS_REQUESTS)}
             >
               Access Requests
             </SimpleListItemButton>
@@ -103,8 +104,8 @@ export default function Settings({ entry }: SettingsProps) {
       </List>
       <Container sx={{ my: 2 }}>
         {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}
-        {selectedCategory === SettingsCategory.PERMISSIONS && <ModelAccess model={entry} />}
-        {selectedCategory === SettingsCategory.ACCESS && <AccessRequestSettings model={entry} />}
+        {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccess entry={entry} />}
+        {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
         {selectedCategory === SettingsCategory.DANGER && (
           <Stack spacing={2}>
             <Typography variant='h6' component='h2'>

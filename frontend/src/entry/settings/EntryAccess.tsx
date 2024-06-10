@@ -14,25 +14,26 @@ import { patchModel, useGetModel } from 'actions/model'
 import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import EntityItem from 'src/entry/model/settings/EntityItem'
+import EntityItem from 'src/entry/settings/EntityItem'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntityObject, EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
 
-type ModelAccessProps = {
-  model: EntryInterface
+type EntryAccessProps = {
+  entry: EntryInterface
 }
 
-export default function ModelAccess({ model }: ModelAccessProps) {
+export default function EntryAccess({ entry }: EntryAccessProps) {
   const [open, setOpen] = useState(false)
-  const [accessList, setAccessList] = useState<CollaboratorEntry[]>(model.collaborators)
+  const [accessList, setAccessList] = useState<CollaboratorEntry[]>(entry.collaborators)
   const [userListQuery, setUserListQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
-  const { isModelError, mutateModel } = useGetModel(model.id, model.kind)
+  const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
   const sendNotification = useNotification()
 
   const accessListEntities = useMemo(
@@ -43,17 +44,17 @@ export default function ModelAccess({ model }: ModelAccessProps) {
           entity={entity}
           accessList={accessList}
           onAccessListChange={setAccessList}
-          model={model}
+          entry={entry}
         />
       )),
-    [accessList, model],
+    [accessList, entry],
   )
 
   useEffect(() => {
-    if (model) {
-      setAccessList(model.collaborators)
+    if (entry) {
+      setAccessList(entry.collaborators)
     }
-  }, [model])
+  }, [entry])
 
   const onUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
@@ -77,16 +78,16 @@ export default function ModelAccess({ model }: ModelAccessProps) {
 
   async function updateAccessList() {
     setLoading(true)
-    const res = await patchModel(model.id, { collaborators: accessList })
+    const res = await patchModel(entry.id, { collaborators: accessList })
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
     } else {
       sendNotification({
         variant: 'success',
-        msg: 'Model access list updated',
+        msg: `${toTitleCase(entry.kind)} access list updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
-      mutateModel()
+      mutateEntry()
     }
     setLoading(false)
   }
@@ -101,14 +102,14 @@ export default function ModelAccess({ model }: ModelAccessProps) {
     return <MessageAlert message={isUsersError.info.message} severity='error' />
   }
 
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
+  if (isEntryError) {
+    return <MessageAlert message={isEntryError.info.message} severity='error' />
   }
 
   return (
     <Stack spacing={2}>
       <Typography variant='h6' component='h2'>
-        Manage model access
+        {`Manage ${toSentenceCase(entry.kind)} access`}
       </Typography>
       <Autocomplete
         open={open}
@@ -129,7 +130,11 @@ export default function ModelAccess({ model }: ModelAccessProps) {
         }
         loading={isUsersLoading && userListQuery.length >= 3}
         renderInput={(params) => (
-          <TextField {...params} autoFocus label='Add a user or group to the model access list' />
+          <TextField
+            {...params}
+            autoFocus
+            label={`Add a user or group to the ${toSentenceCase(entry.kind)} access list`}
+          />
         )}
       />
       <Table>
