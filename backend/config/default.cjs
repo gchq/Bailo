@@ -24,6 +24,7 @@ module.exports = {
     // Typically generated from `npm run certs`
     privateKey: './certs/key.pem',
     publicKey: './certs/cert.pem',
+    jwks: './certs/jwks.json',
   },
 
   mongo: {

@@ -47,7 +47,7 @@ services:
 
   registry:
     restart: always
-    image: registry:2.8.3
+    image: registry:3.0.0-alpha.1
     ports:
       - 5000:5000
     environment:
@@ -61,7 +61,7 @@ services:
       REGISTRY_AUTH_TOKEN_REALM: http://backend:3001/api/v1/registry_auth
       REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
       REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
-      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
+      REGISTRY_AUTH_TOKEN_JWKS: /certs/jwks.json
     volumes:
       - ./backend/config/registry.conf:/etc/docker/registry/config.yml
       - ./backend/certs:/certs
