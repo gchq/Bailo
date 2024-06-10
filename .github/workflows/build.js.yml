@@ -76,12 +76,12 @@ jobs:
           node-version: 18
           cache: "npm"
 
+      # Install dependencies
+      - run: npm ci
+
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
       - run: npm run certs
-
-      # Install dependencies
-      - run: npm ci
 
       # Run unit tests
       - run: npm run test
@@ -146,6 +146,9 @@ jobs:
           eval $(minikube -p minikube docker-env)
           docker load -i /tmp/bailo_backend.tar
           docker load -i /tmp/bailo_frontend.tar
+
+      # Install dependencies
+      - run: npm ci
 
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
@@ -236,9 +239,6 @@ jobs:
           echo "---------------curl connect to bailo---------------"
           curl $(minikube service node-port --url)
 
-      # Install dependencies
-      - run: npm ci
-
       # Run Cypress integration tests
       #- run: CYPRESS_BASE_URL=$(minikube service node-port --url) npm run cy:run
 
@@ -299,6 +299,9 @@ jobs:
       # Create logs directory
       - run: mkdir logs
 
+      # Install dependencies
+      - run: npm ci
+
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
       - run: npm run certs
@@ -332,9 +335,6 @@ jobs:
           EOT
 
       - run: docker compose -f docker-compose-prod.yml up -d
-
-      # Install dependencies
-      - run: npm ci
 
       # wait for app to start
       - run: |
@@ -416,6 +416,9 @@ jobs:
       # Create logs directory
       - run: mkdir logs
 
+      # Install dependencies
+      - run: npm ci
+
       # Create certs
       - run: sudo chown -R runner:docker backend/certs
       - run: npm run certs
@@ -449,9 +452,6 @@ jobs:
           EOT
 
       - run: docker compose -f docker-compose-prod.yml up -d
-
-      # Install dependencies
-      - run: npm ci
 
       # wait for app to start
       - run: |
