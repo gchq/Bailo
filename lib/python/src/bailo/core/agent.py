@@ -5,8 +5,11 @@ from json import JSONDecodeError
 import requests
 import os
 import getpass
+import logging
 from requests.auth import HTTPBasicAuth
 from bailo.core.exceptions import BailoException, ResponseException
+
+logger = logging.getLogger(__name__)
 
 
 class Agent:
@@ -108,16 +111,24 @@ class TokenAgent(Agent):
         super().__init__()
 
         if access_key is None:
+            logger.info("Access key not provided. Trying other sources...")
             try:
                 access_key = os.environ["BAILO_ACCESS_KEY"]
+                logger.info("Access key acquired from BAILO_ACCESS_KEY environment variable.")
             except KeyError:
+                logger.info("Access key not found in BAILO_ACCESS_KEY environment variable. Requires user input.")
                 access_key = getpass.getpass("BAILO ACCESS KEY:")
+                logger.info("Access key acquired from user input.")
 
         if secret_key is None:
+            logger.info("Secret key not provided. Trying other sources...")
             try:
                 secret_key = os.environ["BAILO_SECRET_KEY"]
+                logger.info("Secret key acquired from BAILO_SECRET_KEY environment variable.")
             except KeyError:
+                logger.info("Secret key not found in BAILO_SECRET_KEY environment variable. Requires user input.")
                 secret_key = getpass.getpass("BAILO SECRET KEY:")
+                logger.info("Secret key acquired from user input.")
 
         self.access_key = access_key
         self.secret_key = secret_key

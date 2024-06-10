@@ -72,8 +72,13 @@ export default function NewSchema() {
         })
 
         if (!response.ok) {
-          const error = await getErrorMessage(response)
           setLoading(false)
+          // Check for 403 errors that do not have a body
+          if (response.status === 403) {
+            return setErrorMessage('403: You do not have the necessary permissions to make this action.')
+          }
+          // Otherwise we check for regular errors
+          const error = await getErrorMessage(response)
           return setErrorMessage(error)
         }
 
