@@ -138,7 +138,7 @@ module.exports = {
     },
     cognito: {
       identityProviderClient: {
-        region: 'eu-west-2',
+        region: 'eu-west-1',
         credentials: {
           accessKeyId: '',
           secretAccessKey: '',
@@ -236,7 +236,7 @@ module.exports = {
         enabled: false,
         keyId: '123-456',
         KMSClient: {
-          region: 'eu-west-2',
+          region: 'eu-west-1',
           credentials: {
             accessKeyId: 'access',
             secretAccessKey: 'secret',
