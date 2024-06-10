@@ -143,16 +143,6 @@ export default function SideNavigation({
               icon={<LinkIcon />}
             />
             <NavMenuItem
-              href='/help'
-              selectedPage={page}
-              primaryText='Support'
-              drawerOpen={drawerOpen}
-              menuPage='help'
-              title='Help & Support'
-              icon={<ContactSupportIcon />}
-            />
-            <Divider />
-            <NavMenuItem
               href='/docs/python/index.html'
               selectedPage={page}
               primaryText='Python Client Docs'
@@ -160,6 +150,16 @@ export default function SideNavigation({
               menuPage=''
               title='Python Client Docs'
               icon={<DescriptionIcon />}
+            />
+            <Divider />
+            <NavMenuItem
+              href='/help'
+              selectedPage={page}
+              primaryText='Support'
+              drawerOpen={drawerOpen}
+              menuPage='help'
+              title='Help & Support'
+              icon={<ContactSupportIcon />}
             />
             {currentUser.isAdmin && (
               <>
