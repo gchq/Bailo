@@ -14,25 +14,30 @@ import {
 } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
 import _ from 'lodash-es'
-import { useMemo } from 'react'
+import { SyntheticEvent, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntityKind, EntryInterface } from 'types/types'
+import { toSentenceCase } from 'utils/stringUtils'
 
 type EntityItemProps = {
   entity: CollaboratorEntry
   accessList: CollaboratorEntry[]
   onAccessListChange: (value: CollaboratorEntry[]) => void
-  model: EntryInterface
+  entry: EntryInterface
 }
 
-export default function EntityItem({ entity, accessList, onAccessListChange, model }: EntityItemProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(model.id)
+export default function EntityItem({ entity, accessList, onAccessListChange, entry }: EntityItemProps) {
+  const {
+    modelRoles: entryRoles,
+    isModelRolesLoading: isEntryRolesLoading,
+    isModelRolesError: isEntryRolesError,
+  } = useGetModelRoles(entry.id)
 
-  const modelRoleOptions = useMemo(() => modelRoles.map((role) => role.id), [modelRoles])
+  const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.id), [entryRoles])
 
-  function onRoleChange(_event: React.SyntheticEvent<Element, Event>, newValues: string[]) {
+  function onRoleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(accessList)
     const index = updatedAccessList.findIndex((access) => access.entity === entity.entity)
     updatedAccessList[index].roles = newValues
@@ -44,14 +49,14 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
   }
 
   function getRole(roleId: string) {
-    const role = modelRoles.find((role) => role.id === roleId)
+    const role = entryRoles.find((role) => role.id === roleId)
     if (!role) return { id: roleId, name: 'Unknown Role' }
 
     return role
   }
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  if (isEntryRolesError) {
+    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
   return (
@@ -63,15 +68,15 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
         </Stack>
       </TableCell>
       <TableCell>
-        {isModelRolesLoading && <Loading />}
-        {!isModelRolesLoading && modelRoles.length > 0 && (
+        {isEntryRolesLoading && <Loading />}
+        {!isEntryRolesLoading && entryRoles.length > 0 && (
           <Autocomplete
             size='small'
             multiple
             aria-label={`role selector input for entity ${entity.entity}`}
             value={entity.roles}
             data-test='accessListAutocomplete'
-            options={modelRoleOptions}
+            options={entryRoleOptions}
             getOptionLabel={(role) => getRole(role).name}
             onChange={onRoleChange}
             renderInput={(params) => <TextField {...params} label='Select roles' />}
@@ -87,7 +92,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, mod
         <Tooltip title='Remove user' arrow>
           <IconButton
             onClick={removeEntity}
-            aria-label={`Remove user ${entity.entity} from model access list`}
+            aria-label={`Remove user ${entity.entity} from ${toSentenceCase(entry.kind)} access list`}
             data-test='accessListRemoveUser'
           >
             <ClearIcon color='secondary' fontSize='inherit' />
