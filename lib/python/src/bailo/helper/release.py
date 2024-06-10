@@ -258,7 +258,7 @@ class Release:
         """
         return self.client.put_release(
             self.model_id,
-            str(self._version_raw),
+            str(self.__version_raw),
             self.notes,
             self.draft,
             self.files,
@@ -275,32 +275,37 @@ class Release:
 
     @property
     def version(self):
-        return self._version_obj
+        return self.__version_obj
 
     @version.setter
     def version(self, value):
-        if isinstance(value, str):
-            if value.startswith("v"):
-                value = value[1:]
-            version_obj = Version.coerce(value)
-        elif isinstance(value, Version):
-            version_obj = value
-        else:
-            raise TypeError("Provided version not of a supported type.")
+        if ("__version_obj" not in self.__dict__) and ("__version_raw" not in self.__dict__):
+            if isinstance(value, str):
+                if value.startswith("v"):
+                    value = value[1:]
+                version_obj = Version.coerce(value)
+            elif isinstance(value, Version):
+                version_obj = value
+            else:
+                raise TypeError("Provided version not of a supported type.")
 
-        self._version_obj = version_obj
-        self._version_raw = value
+            self.__version_obj = version_obj
+            self.__version_raw = value
+        else:
+            raise BailoException(
+                "Version attribute has already been set once. You must create a new Release object to create a new version, or use Model.create_release()."
+            )
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({str(self)})"
 
     def __str__(self) -> str:
-        return f"{self.model_id} v{self._version_obj}"
+        return f"{self.model_id} v{self.__version_obj}"
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self._version_obj == other._version_obj
+        return self.__version_obj == other.__version_obj
 
     def __ne__(self, other):
         if not isinstance(other, self.__class__):
@@ -310,22 +315,22 @@ class Release:
     def __lt__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self._version_obj < other._version_obj
+        return self.__version_obj < other.__version_obj
 
     def __le__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self._version_obj <= other._version_obj
+        return self.__version_obj <= other.__version_obj
 
     def __gt__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self._version_obj > other._version_obj
+        return self.__version_obj > other.__version_obj
 
     def __ge__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self._version_obj >= other._version_obj
+        return self.__version_obj >= other.__version_obj
 
     def __hash__(self) -> int:
-        return hash((self.model_id, self._version_obj))
+        return hash((self.model_id, self.__version_obj))
