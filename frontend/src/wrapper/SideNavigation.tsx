@@ -1,6 +1,7 @@
 import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, Settings as SettingsIcon } from '@mui/icons-material'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
+import DescriptionIcon from '@mui/icons-material/Description'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
@@ -9,8 +10,6 @@ import MuiDrawer from '@mui/material/Drawer'
 import { useTheme } from '@mui/material/styles'
 import { styled } from '@mui/material/styles'
 import { useGetReviewRequestsForUser } from 'actions/review'
-import Image from 'next/image'
-import PythonLogo from 'public/python-logo.svg'
 import { CSSProperties, useCallback, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -160,7 +159,7 @@ export default function SideNavigation({
               drawerOpen={drawerOpen}
               menuPage=''
               title='Python Client Docs'
-              icon={<Image src={PythonLogo} alt='python-logo' width={20} height={20} />}
+              icon={<DescriptionIcon />}
             />
             {currentUser.isAdmin && (
               <>
