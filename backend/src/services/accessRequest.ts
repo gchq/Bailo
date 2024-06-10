@@ -147,23 +147,17 @@ export async function newAccessRequestComment(user: UserInterface, accessRequest
     user: toEntity('user', user.dn),
     kind: ResponseKind.Comment,
     comment: message,
+    parentId: accessRequest._id,
     createdAt: new Date().toISOString(),
   })
 
-  await commentResponse.save()
+  const newComment = await commentResponse.save()
 
-  const updatedAccessRequest = await AccessRequest.findOneAndUpdate(
-    { _id: accessRequest._id },
-    {
-      $push: { commentIds: commentResponse._id },
-    },
-  )
-
-  if (!updatedAccessRequest) {
-    throw InternalError(`Updated of access request failed.`, { accessRequestId })
+  if (!newComment) {
+    throw InternalError('There was a problem saving a new comment for this access request')
   }
 
-  return updatedAccessRequest
+  return commentResponse
 }
 
 export async function getModelAccessRequestsForUser(user: UserInterface, modelId: string) {

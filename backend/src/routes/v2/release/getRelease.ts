@@ -6,10 +6,9 @@ import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { FileInterface } from '../../../models/File.js'
 import { ReleaseInterface } from '../../../models/Release.js'
-import { ResponseInterface, ResponseKind } from '../../../models/Response.js'
+import { ResponseKind } from '../../../models/Response.js'
 import { getFilesByIds } from '../../../services/file.js'
 import { getReleaseBySemver } from '../../../services/release.js'
-import { findResponsesById } from '../../../services/response.js'
 import { registerPath, releaseInterfaceSchema } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -41,7 +40,7 @@ registerPath({
 })
 
 interface getReleaseResponse {
-  release: ReleaseInterface & { files: FileInterface[]; comments: ResponseInterface[] }
+  release: ReleaseInterface & { files: FileInterface[] }
 }
 
 export const getRelease = [
@@ -55,11 +54,10 @@ export const getRelease = [
     const release = await getReleaseBySemver(req.user, modelId, semver)
     await audit.onViewRelease(req, release)
     const files = await getFilesByIds(req.user, modelId, release.fileIds)
-    const comments = await findResponsesById(req.user, release.commentIds)
-    const releaseWithFilesAndComments = { ...release.toObject(), files, comments, kind: ResponseKind.Comment }
+    const releaseWithFiles = { ...release.toObject(), files, kind: ResponseKind.Comment }
 
     return res.json({
-      release: releaseWithFilesAndComments,
+      release: releaseWithFiles,
     })
   },
 ]

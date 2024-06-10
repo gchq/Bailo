@@ -7,7 +7,7 @@ import audit from '../../../../connectors/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/AccessRequest.js'
 import { ResponseInterface } from '../../../../models/Response.js'
 import { getAccessRequestById } from '../../../../services/accessRequest.js'
-import { findResponsesById } from '../../../../services/response.js'
+import { findResponsesByIds } from '../../../../services/response.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -48,7 +48,7 @@ export const getAccessRequest = [
     const { params } = parse(req, getAccessRequestSchema)
 
     const accessRequestWithCommentIds = await getAccessRequestById(req.user, params.accessRequestId)
-    const comments = await findResponsesById(req.user, accessRequestWithCommentIds.commentIds)
+    const comments = await findResponsesByIds(req.user, accessRequestWithCommentIds.commentIds)
     const accessRequest = { ...accessRequestWithCommentIds.toObject(), comments }
 
     await audit.onViewAccessRequest(req, accessRequestWithCommentIds)

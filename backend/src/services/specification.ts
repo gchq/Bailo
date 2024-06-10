@@ -139,9 +139,9 @@ export const reviewInterfaceSchema = z.object({
 
 export const responseInterfaceSchema = z.object({
   user: z.string().optional().openapi({ example: 'Joe Bloggs' }),
-  kind: z.nativeEnum(ResponseKind).openapi({ example: 'comment' }),
+  kind: z.nativeEnum(ResponseKind).openapi({ example: ResponseKind.Comment }),
   role: z.string().optional().openapi({ example: 'mtr' }),
-  decision: z.nativeEnum(Decision).optional().openapi({ example: 'approve' }),
+  decision: z.nativeEnum(Decision).optional().openapi({ example: Decision.Approve }),
   comment: z.string().optional().openapi({ example: 'Looks good!' }),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),

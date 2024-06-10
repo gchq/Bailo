@@ -49,6 +49,7 @@ export async function findReviews(
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     // Populate model as value instead of array
     .unwind({ path: '$model' })
+    .lookup({ from: 'v2_responses', localField: 'responseIds', foreignField: '_id', as: 'responses' })
     .match({ ...(mine && (await findUserInCollaborators(user))) })
 
   const auths = await authorisation.models(
@@ -56,8 +57,6 @@ export async function findReviews(
     reviews.map((review) => review.model),
     ModelAction.View,
   )
-
-  //const reviewsWithResponses = reviews.map((review))
 
   return reviews.filter((_, i) => auths[i].success)
 }
@@ -151,34 +150,28 @@ export async function respondToReview(
     user: toEntity('user', user.dn),
     kind: ResponseKind.Review,
     role,
+    parentId: review._id,
     ...response,
   })
 
   await reviewResponse.save()
-
-  const update = await Review.findByIdAndUpdate(
-    review._id,
-    {
-      $push: { responseIds: reviewResponse._id },
-    },
-    { new: true },
-  )
-  if (!update) {
-    throw GenericError(500, `Adding response to Review was not successful`, { modelId, reviewIdQuery, role })
-  }
-  await sendReviewResponseNotification(update, user)
+  await sendReviewResponseNotification(review, reviewResponse, user)
 
   sendWebhooks(
-    update.modelId,
+    review.modelId,
     WebhookEvent.CreateReviewResponse,
-    `A new response has been added to a review requested for Model ${update.modelId}`,
-    { review: update },
+    `A new response has been added to a review requested for Model ${review.modelId}`,
+    { review: review },
   )
 
-  return update
+  return review
 }
 
-export async function sendReviewResponseNotification(review: ReviewDoc, user: UserInterface) {
+export async function sendReviewResponseNotification(
+  review: ReviewDoc,
+  reviewResponse: ResponseInterface,
+  user: UserInterface,
+) {
   let reviewIdQuery
   switch (review.kind) {
     case ReviewKind.Access: {

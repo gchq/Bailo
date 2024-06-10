@@ -23,8 +23,6 @@ export interface AccessRequestInterface {
   schemaId: string
   metadata: AccessRequestMetadata
 
-  commentIds: Array<string>
-
   deleted: boolean
 
   createdBy: string
@@ -44,8 +42,6 @@ const AccessRequestSchema = new Schema<AccessRequestInterface>(
 
     schemaId: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed, required: true },
-
-    commentIds: [{ type: Schema.Types.ObjectId }],
 
     createdBy: { type: String, required: true },
   },

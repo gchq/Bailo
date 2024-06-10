@@ -1,6 +1,9 @@
 import { Divider, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
+import Loading from 'src/common/Loading'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
+import MessageAlert from 'src/MessageAlert'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import { ReviewRequestInterface } from 'types/types'
 import { timeDifference } from 'utils/dateUtils'
@@ -12,6 +15,8 @@ type ReviewItemProps = {
 
 export default function ReviewItem({ review }: ReviewItemProps) {
   const router = useRouter()
+
+  const { responses, isResponsesLoading, isResponsesError } = useGetResponses([review._id])
 
   function handleListItemClick() {
     router.push(
@@ -26,40 +31,48 @@ export default function ReviewItem({ review }: ReviewItemProps) {
       return `Updated ${timeDifference(new Date(), new Date(review.updatedAt))}.`
     }
   }
+
+  if (isResponsesError) {
+    return <MessageAlert message={isResponsesError.info.message} severity='error' />
+  }
+
   return (
-    <ListItem disablePadding>
-      <ListItemButton onClick={handleListItemClick} aria-label={`Review model ${review.model} ${review.semver}`}>
-        <Stack>
-          <Stack
-            spacing={1}
-            direction='row'
-            justifyContent='flex-start'
-            alignItems='center'
-            divider={<Divider flexItem />}
-          >
-            <Typography color='primary' variant='h6' component='h2' fontWeight='bold'>
-              {review.model.name}
-            </Typography>
-            {review.accessRequestId && (
-              <Typography>
-                {toTitleCase(review.accessRequestId.substring(0, review.accessRequestId.lastIndexOf('-')))}
+    <>
+      {isResponsesLoading && <Loading />}
+      <ListItem disablePadding>
+        <ListItemButton onClick={handleListItemClick} aria-label={`Review model ${review.model} ${review.semver}`}>
+          <Stack>
+            <Stack
+              spacing={1}
+              direction='row'
+              justifyContent='flex-start'
+              alignItems='center'
+              divider={<Divider flexItem />}
+            >
+              <Typography color='primary' variant='h6' component='h2' fontWeight='bold'>
+                {review.model.name}
               </Typography>
-            )}
-            {review.semver && <Typography>{review.semver}</Typography>}
+              {review.accessRequestId && (
+                <Typography>
+                  {toTitleCase(review.accessRequestId.substring(0, review.accessRequestId.lastIndexOf('-')))}
+                </Typography>
+              )}
+              {review.semver && <Typography>{review.semver}</Typography>}
+            </Stack>
+            <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
+              <Typography variant='caption'>{`Created ${timeDifference(
+                new Date(),
+                new Date(review.createdAt),
+              )}.`}</Typography>
+              <Typography variant='caption' sx={{ fontStyle: 'italic' }}>
+                {editedAdornment()}
+              </Typography>
+            </Stack>
+            <ReviewRoleDisplay review={review} />
+            <ReviewDisplay modelId={review.model.id} reviewResponses={responses} />
           </Stack>
-          <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
-            <Typography variant='caption'>{`Created ${timeDifference(
-              new Date(),
-              new Date(review.createdAt),
-            )}.`}</Typography>
-            <Typography variant='caption' sx={{ fontStyle: 'italic' }}>
-              {editedAdornment()}
-            </Typography>
-          </Stack>
-          <ReviewRoleDisplay review={review} />
-          <ReviewDisplay reviews={[review]} />
-        </Stack>
-      </ListItemButton>
-    </ListItem>
+        </ListItemButton>
+      </ListItem>
+    </>
   )
 }

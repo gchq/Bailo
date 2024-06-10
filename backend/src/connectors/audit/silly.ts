@@ -6,6 +6,7 @@ import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
+import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
@@ -58,5 +59,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateInference(_req: Request, _inferences: InferenceDoc) {}
   onCreateS3Export(_req: Request, _modelId: string, _semvers?: string[]) {}
   onError(_req: Request, _error: BailoError) {}
+  onCreateResponse(_req: Request, _responseInterface: ResponseInterface) {}
+  onViewResponses(_req: Request, _responseInters: ResponseInterface[]) {}
   onUpdateResponse(_req: Request, _responseId: string) {}
 }

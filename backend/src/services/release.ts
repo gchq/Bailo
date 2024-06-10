@@ -210,33 +210,28 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
   if (model.settings.mirror.sourceModelId) {
     throw BadReq(`Cannot create a new comment on a mirrored model.`)
   }
-  // Store the response
-  const commentResponse = new ResponseModel({
-    user: toEntity('user', user.dn),
-    kind: ResponseKind.Comment,
-    comment,
-    createdAt: new Date().toISOString(),
-  })
-
-  await commentResponse.save()
 
   const release = await Release.findOne({ modelId, semver })
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  const updatedRelease = await Release.findOneAndUpdate(
-    { _id: release._id },
-    {
-      $push: { commentIds: commentResponse._id },
-    },
-  )
+  // Store the response
+  const commentResponse = new ResponseModel({
+    user: toEntity('user', user.dn),
+    kind: ResponseKind.Comment,
+    comment,
+    createdAt: new Date().toISOString(),
+    parentId: release._id,
+  })
 
-  if (!updatedRelease) {
-    throw InternalError(`Update of release failed.`, { modelId, semver })
+  const savedComment = await commentResponse.save()
+
+  if (!savedComment) {
+    throw InternalError('There was a problem saving this release comment')
   }
 
-  return updatedRelease
+  return commentResponse
 }
 
 export async function getModelReleases(

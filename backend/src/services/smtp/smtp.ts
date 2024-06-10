@@ -97,7 +97,7 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
     return
   }
 
-  const reviewResponse = await findResponseById(review.responseIds[0])
+  const reviewResponse = await findResponseById(review.responseIds[review.responseIds.length - 1])
 
   if (!reviewResponse) {
     log.info('response not found')
@@ -131,7 +131,7 @@ export async function notifyReviewResponseForAccess(review: ReviewDoc, accessReq
     log.info('Not sending email due to SMTP disabled')
     return
   }
-  const reviewResponse = await findResponseById(review.responseIds[0])
+  const reviewResponse = await findResponseById(review.responseIds[review.responseIds.length - 1])
 
   if (!reviewResponse) {
     log.info('response not found')

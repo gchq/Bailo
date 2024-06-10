@@ -4,9 +4,9 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { ReleaseInterface } from '../../../models/Release.js'
+import { ResponseInterface } from '../../../models/Response.js'
 import { newReleaseComment } from '../../../services/release.js'
-import { registerPath, releaseInterfaceSchema } from '../../../services/specification.js'
+import { registerPath, responseInterfaceSchema } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postReleaseCommentSchema = z.object({
@@ -31,7 +31,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            release: releaseInterfaceSchema,
+            release: responseInterfaceSchema,
           }),
         },
       },
@@ -40,7 +40,7 @@ registerPath({
 })
 
 interface PostReleaseCommentResponse {
-  release: ReleaseInterface
+  response: ResponseInterface
 }
 
 export const postReleaseComment = [
@@ -52,12 +52,12 @@ export const postReleaseComment = [
       body,
     } = parse(req, postReleaseCommentSchema)
 
-    const release = await newReleaseComment(req.user, modelId, semver, body.comment)
+    const releaseComment = await newReleaseComment(req.user, modelId, semver, body.comment)
 
-    await audit.onUpdateRelease(req, release)
+    await audit.onCreateResponse(req, releaseComment)
 
     return res.json({
-      release,
+      response: releaseComment,
     })
   },
 ]

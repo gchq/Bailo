@@ -74,7 +74,7 @@ export class BasicAuthorisationConnector {
   }
 
   async response(user: UserInterface, response: ResponseDoc, action: ResponseActionKeys) {
-    return (await this.responses(user, response, action))[0]
+    return (await this.responses(user, [response], action))[0]
   }
 
   async file(user: UserInterface, model: ModelDoc, file: FileInterfaceDoc, action: FileActionKeys) {
@@ -116,14 +116,18 @@ export class BasicAuthorisationConnector {
     )
   }
 
-  async responses(user: UserInterface, response: ResponseDoc, action: ResponseActionKeys): Promise<Response> {
-    if (action === ResponseAction.Update && toEntity('user', user.dn) !== response.user) {
-      return { id: user.dn, success: false, info: 'Only the author can update a comment' }
-    }
-    return {
-      id: user.dn,
-      success: true,
-    }
+  async responses(user: UserInterface, responses: ResponseDoc[], action: ResponseActionKeys): Promise<Array<Response>> {
+    return Promise.all(
+      responses.map(async (response) => {
+        if (action === ResponseAction.Update && toEntity('user', user.dn) !== response.user) {
+          return { id: user.dn, success: false, info: 'Only the author can update a comment' }
+        }
+        return {
+          id: user.dn,
+          success: true,
+        }
+      }),
+    )
   }
 
   async schemas(user: UserInterface, schemas: Array<SchemaDoc>, action: SchemaActionKeys): Promise<Array<Response>> {

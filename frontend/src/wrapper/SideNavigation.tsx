@@ -8,12 +8,13 @@ import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar }
 import MuiDrawer from '@mui/material/Drawer'
 import { useTheme } from '@mui/material/styles'
 import { styled } from '@mui/material/styles'
+import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForUser } from 'actions/review'
-import { CSSProperties, useCallback, useEffect, useState } from 'react'
+import { CSSProperties, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
-import { ReviewRequestInterface, User } from 'types/types'
+import { User } from 'types/types'
 
 import { DRAWER_WIDTH } from '../../utils/constants'
 
@@ -74,33 +75,38 @@ export default function SideNavigation({
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
+  const { responses, isResponsesLoading, isResponsesError } = useGetResponses(reviews.map((review) => review._id))
 
   const theme = useTheme()
-
-  const doesNotContainUserResponse = useCallback(
-    (review: ReviewRequestInterface) => {
-      return currentUser && !review.responses.find((response) => response.user === `user:${currentUser.dn}`)
-    },
-    [currentUser],
-  )
 
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
       if (reviews) {
-        setReviewCount(reviews.filter((filteredReview) => doesNotContainUserResponse(filteredReview)).length)
+        setReviewCount(
+          reviews.filter(
+            (filteredReview) =>
+              !responses.find(
+                (response) => response.user === `user:${currentUser.dn}` && response.parentId === filteredReview._id,
+              ),
+          ).length,
+        )
       }
     }
     fetchReviewCount()
-  }, [onResetErrorMessage, doesNotContainUserResponse, reviews])
+  }, [onResetErrorMessage, reviews, responses, currentUser.dn])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
+  if (isResponsesError) {
+    return <MessageAlert message={isResponsesError.info.message} severity='error' />
+  }
+
   return (
     <Drawer sx={pageTopStyling} variant='permanent' open={drawerOpen}>
-      {isReviewsLoading && <Loading />}
+      {(isReviewsLoading || isResponsesLoading) && <Loading />}
       <Toolbar
         sx={{
           alignItems: 'center',

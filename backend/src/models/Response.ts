@@ -20,6 +20,7 @@ export interface ResponseInterface {
   role?: string
   decision?: DecisionKeys
   comment?: string
+  parentId: Schema.Types.ObjectId
 
   createdAt: string
   updatedAt: string
@@ -33,10 +34,11 @@ export type ResponseDoc = ResponseInterface & Document<any, any, ResponseInterfa
 const ResponseSchema = new Schema<ResponseInterface>(
   {
     user: { type: String, required: true },
-    kind: { type: String, enum: Object.values(ResponseKind) },
+    kind: { type: String, enum: Object.values(ResponseKind), required: true },
     role: { type: String },
     decision: { type: String, enum: Object.values(Decision) },
     comment: { type: String },
+    parentId: { type: Schema.Types.ObjectId, required: true },
   },
   {
     timestamps: true,

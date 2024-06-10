@@ -15,7 +15,17 @@ export async function findResponseById(responseId: string) {
   return response
 }
 
-export async function findResponsesById(_user: UserInterface, responseIds: string[]) {
+export async function getResponsesByParentIds(_user: UserInterface, parentIds: string[]) {
+  const responses = await ResponseModel.find({ parentId: { $in: parentIds } })
+
+  if (!responses) {
+    throw NotFound(`The requested response was not found.`, { parentIds })
+  }
+
+  return responses
+}
+
+export async function findResponsesByIds(_user: UserInterface, responseIds: string[]) {
   const responses = await ResponseModel.find({ _id: { $in: responseIds } })
 
   if (!responses) {
@@ -40,7 +50,7 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   }
 
   response.comment = comment
-  response.save
+  response.save()
 
   return response
 }

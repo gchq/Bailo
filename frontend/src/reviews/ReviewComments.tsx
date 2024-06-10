@@ -2,6 +2,7 @@ import { LoadingButton } from '@mui/lab'
 import { Box, Divider, Stack } from '@mui/material'
 import { postAccessRequestComment, useGetAccessRequest } from 'actions/accessRequest'
 import { postReleaseComment, useGetRelease } from 'actions/release'
+import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -46,22 +47,35 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     modelId,
     ...semverOrAccessRequestIdObject,
   })
+  const { responses, isResponsesLoading, isResponsesError, mutateResponses } = useGetResponses([
+    release ? release._id : accessRequest._id,
+    ...reviews.map((review) => review._id),
+  ])
 
   const hasResponseOrComment = useMemo(() => {
-    const hasReviewResponse = !!reviews.find((review) => review.responses.length > 0)
-    const hasComment = release ? release.comments.length > 0 : accessRequest.comments.length > 0
+    const hasReviewResponse = responses.filter((response) => response.kind === ResponseKind.Review).length > 0
+    const hasComment = responses.filter((response) => response.kind === ResponseKind.Comment).length > 0
     return hasReviewResponse || hasComment
-  }, [accessRequest, release, reviews])
+  }, [responses])
 
   const reviewDetails = useMemo(() => {
     let decisionsAndComments: Array<ResponseInterface> = []
-    const groupedResponses = reviewResponsesForEachUser(reviews)
+    const groupedResponses = reviewResponsesForEachUser(
+      reviews,
+      responses.filter((response) => response.kind === ResponseKind.Review),
+    )
     decisionsAndComments.push(...groupedResponses)
     if (release) {
-      decisionsAndComments = [...decisionsAndComments, ...release.comments]
+      decisionsAndComments = [
+        ...decisionsAndComments,
+        ...responses.filter((response) => response.kind === ResponseKind.Comment),
+      ]
     }
     if (accessRequest) {
-      decisionsAndComments = [...decisionsAndComments, ...accessRequest.comments]
+      decisionsAndComments = [
+        ...decisionsAndComments,
+        ...responses.filter((response) => response.kind === ResponseKind.Comment),
+      ]
     }
     decisionsAndComments.sort(sortByCreatedAtAscending)
     return decisionsAndComments.map((response) => {
@@ -77,7 +91,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
         )
       }
     })
-  }, [reviews, release, accessRequest, modelId, newReviewComment])
+  }, [reviews, release, accessRequest, responses, modelId, newReviewComment])
 
   async function submitReviewComment() {
     setCommentSubmissionError('')
@@ -86,6 +100,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
       const res = await postReleaseComment(modelId, release.semver, newReviewComment)
       if (res.ok) {
         mutateRelease()
+        mutateResponses()
         setNewReviewComment('')
       } else {
         setCommentSubmissionError(await getErrorMessage(res))
@@ -94,6 +109,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
       const res = await postAccessRequestComment(accessRequest.modelId, accessRequest.id, newReviewComment)
       if (res.ok) {
         mutateAccessRequest()
+        mutateResponses()
         setNewReviewComment('')
       } else {
         setCommentSubmissionError(await getErrorMessage(res))
@@ -108,10 +124,14 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
+  if (isResponsesError) {
+    return <MessageAlert message={isResponsesError.info.message} severity='error' />
+  }
+
   return (
     <>
       {(hasResponseOrComment || !isEdit) && <Divider />}
-      {isReviewsLoading && <Loading />}
+      {(isReviewsLoading || isResponsesLoading) && <Loading />}
       {reviewDetails}
       {!isEdit && (
         <Stack spacing={1} justifyContent='center' alignItems='flex-end'>

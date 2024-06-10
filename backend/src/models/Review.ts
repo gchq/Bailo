@@ -14,8 +14,6 @@ export interface ReviewInterface {
   kind: ReviewKindKeys
   role: string
 
-  responseIds: Array<string>
-
   createdAt: Date
   updatedAt: Date
 }
@@ -55,12 +53,6 @@ const ReviewSchema = new Schema<ReviewInterface>(
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
 
     role: { type: String, required: true },
-
-    responseIds: [
-      {
-        type: String,
-      },
-    ],
   },
   {
     timestamps: true,

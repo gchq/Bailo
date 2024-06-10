@@ -48,6 +48,7 @@ import { getReleases } from './routes/v2/release/getReleases.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
 import { postReleaseComment } from './routes/v2/release/postReleaseComment.js'
 import { putRelease } from './routes/v2/release/putRelease.js'
+import { getResponses } from './routes/v2/response/getResponses.js'
 import { patchResponse } from './routes/v2/response/patchResponse.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
@@ -170,6 +171,7 @@ server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/reviews', ...getReviews)
 
+server.get('/api/v2/response', ...getResponses)
 server.patch('/api/v2/response/:responseId', ...patchResponse)
 
 server.get('/api/v2/model/:modelId/roles', ...getModelRoles)

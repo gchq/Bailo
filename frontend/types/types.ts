@@ -74,6 +74,7 @@ export type ResponseKindKeys = (typeof ResponseKind)[keyof typeof ResponseKind]
 export interface ResponseInterface {
   user: string
   kind: ResponseKindKeys
+  parentId: string
   outdated?: boolean
   decision?: DecisionKeys
   comment?: string
@@ -84,6 +85,7 @@ export interface ResponseInterface {
 }
 
 export type ReleaseInterface = {
+  _id: string
   modelId: string
   modelCardVersion: number
   semver: string
@@ -91,8 +93,6 @@ export type ReleaseInterface = {
   minor?: boolean
   draft?: boolean
   fileIds: Array<string>
-  comments: Array<ResponseInterface>
-  commentIds: Array<string>
   files: Array<FileInterface>
   images: Array<FlattenedModelImage>
   deleted: boolean
@@ -403,13 +403,12 @@ export interface AccessRequestMetadata {
 }
 
 export interface AccessRequestInterface {
+  _id: string
   id: string
   modelId: string
   schemaId: string
   deleted: boolean
   metadata: AccessRequestMetadata
-  commentIds: Array<string>
-  comments: Array<ResponseInterface>
   createdBy: string
   createdAt: string
   updatedAt: string
@@ -456,10 +455,10 @@ export const ReviewKind = {
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
 export type ReviewRequestInterface = {
+  _id: string
   model: EntryInterface
   role: string
   kind: 'release' | 'access'
-  responses: ResponseInterface[]
   createdAt: string
   updatedAt: string
 } & PartialReviewRequestInterface
