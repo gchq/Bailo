@@ -147,7 +147,7 @@ export default function SideNavigation({
               selectedPage={page}
               primaryText='Python Client Docs'
               drawerOpen={drawerOpen}
-              menuPage=''
+              menuPage='pythonDocs'
               title='Python Client Docs'
               icon={<DescriptionIcon />}
             />
