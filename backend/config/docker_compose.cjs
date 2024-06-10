@@ -17,14 +17,22 @@ module.exports = {
     publicKey: '/certs/cert.pem',
   },
 
-  minio: {
-    connection: {
-      endPoint: 'minio',
-      port: 9000,
-      useSSL: false,
-      accessKey: 'minioadmin',
-      secretKey: 'minioadmin',
-      region: '',
+  s3: {
+    credentials: {
+      accessKeyId: 'minioadmin',
+      secretAccessKey: 'minioadmin',
+    },
+    endpoint: 'http://minio:9000',
+    region: 'ignored',
+    forcePathStyle: true,
+    rejectUnauthorized: true,
+
+    automaticallyCreateBuckets: true,
+
+    // Names of buckets that Bailo uses
+    buckets: {
+      uploads: 'uploads',
+      registry: 'registry',
     },
   },
 

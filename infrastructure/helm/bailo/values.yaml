@@ -79,8 +79,6 @@ oauth:
     callback: "" # exmaple /
     subdomain: "cognito domain"
   identityProviderClient:
-    accessKeyId: "access"
-    secretAccessKey: "secret"
     userPoolId: "region_id"
     userIdAttribute: "name"
 
