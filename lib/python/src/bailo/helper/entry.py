@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 import logging
+import warnings
 
 from bailo.core.client import Client
 from bailo.core.enums import EntryKind, ModelVisibility
@@ -69,7 +70,9 @@ class Entry:
             self.__unpack_card(res["model"]["card"])
             logger.info(f"Latest card for ID %s successfully retrieved.", self.id)
         else:
-            raise BailoException(f"A model card doesn't exist for model {self.id}")
+            warnings.warn(
+                f"ID {self.id} does not have any associated cards. If needed, create a card with the .card_from_schema() method."
+            )
 
     def get_card_revision(self, version: str) -> None:
         """Get a specific entry card revision from Bailo.
