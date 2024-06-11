@@ -279,7 +279,7 @@ class Release:
 
     @version.setter
     def version(self, value):
-        if ("__version_obj" not in self.__dict__) and ("__version_raw" not in self.__dict__):
+        if ("_Release__version_obj" not in self.__dict__) and ("_Release__version_raw" not in self.__dict__):
             if isinstance(value, str):
                 if value.startswith("v"):
                     value = value[1:]
