@@ -62,6 +62,7 @@ services:
       REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
       REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
       REGISTRY_AUTH_TOKEN_JWKS: /certs/jwks.json
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
     volumes:
       - ./backend/config/registry.conf:/etc/docker/registry/config.yml
       - ./backend/certs:/certs
