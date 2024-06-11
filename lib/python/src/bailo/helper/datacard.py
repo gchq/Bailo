@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from typing import Any
+import logging
 
 from bailo.core.client import Client
 from bailo.core.enums import EntryKind, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.helper.entry import Entry
+
+logger = logging.getLogger(__name__)
 
 
 class Datacard(Entry):
@@ -58,9 +61,12 @@ class Datacard(Entry):
         res = client.post_model(
             name=name, kind=EntryKind.DATACARD, description=description, team_id=team_id, visibility=visibility
         )
+        datacard_id = res["model"]["id"]
+        logger.info(f"Datacard successfully created on server with ID %s.", datacard_id)
+
         datacard = cls(
             client=client,
-            datacard_id=res["model"]["id"],
+            datacard_id=datacard_id,
             name=name,
             description=description,
             visibility=visibility,
@@ -83,6 +89,8 @@ class Datacard(Entry):
             raise BailoException(
                 f"ID {datacard_id} does not belong to a datacard. Did you mean to use Model.from_id()?"
             )
+
+        logger.info(f"Datacard %s successfully retrieved from server.", datacard_id)
 
         datacard = cls(
             client=client,

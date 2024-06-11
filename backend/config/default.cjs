@@ -136,6 +136,17 @@ module.exports = {
         subdomain: '',
       },
     },
+    cognito: {
+      identityProviderClient: {
+        region: 'eu-west-1',
+        credentials: {
+          accessKeyId: '',
+          secretAccessKey: '',
+        },
+      },
+      userPoolId: '',
+      userIdAttribute: '',
+    },
   },
 
   avScanning: {
@@ -191,10 +202,9 @@ module.exports = {
 
   s3: {
     credentials: {
-      accessKeyId: 'minioadmin',
-      secretAccessKey: 'minioadmin',
+      accessKeyId: '',
+      secretAccessKey: '',
     },
-
     endpoint: 'http://minio:9000',
     region: 'ignored',
     forcePathStyle: true,
@@ -226,7 +236,7 @@ module.exports = {
         enabled: false,
         keyId: '123-456',
         KMSClient: {
-          region: 'eu-west-2',
+          region: 'eu-west-1',
           credentials: {
             accessKeyId: 'access',
             secretAccessKey: 'secret',

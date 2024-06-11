@@ -4,7 +4,9 @@ import os
 import fnmatch
 import shutil
 from io import BytesIO
-from typing import Any, Union
+from typing import Any
+import logging
+import warnings
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
@@ -14,6 +16,7 @@ from bailo.core.utils import NO_COLOR
 from semantic_version import Version
 
 BLOCK_SIZE = 1024
+logger = logging.getLogger(__name__)
 
 
 class Release:
@@ -97,6 +100,7 @@ class Release:
             minor,
             draft,
         )
+        logger.info(f"Release %s successfully created on server for model with ID %s.", str(version), model_id)
 
         return cls(
             client,
@@ -127,6 +131,8 @@ class Release:
         minor = res["minor"]
         draft = res["draft"]
 
+        logger.info(f"Release %s of model ID %s successfully retrieved from server.", str(version), model_id)
+
         return cls(
             client,
             model_id,
@@ -149,6 +155,7 @@ class Release:
         :return: A JSON response object
         """
         res = self.client.get_download_by_filename(self.model_id, str(self.version), filename)
+        logger.info(f"Downloading file %s from version %s of %s...", filename, str(self.version), self.model_id)
 
         if write:
             if path is None:
@@ -173,6 +180,12 @@ class Release:
                         t.update(len(data))
                         f.write(data)
 
+            logger.info(f"File written to %s", path)
+
+        logger.info(
+            f"Downloading of file %s from version %s of %s completed.", filename, str(self.version), self.model_id
+        )
+
         return res
 
     def download_all(self, path: str = os.getcwd(), include: list | str = None, exclude: list | str = None):
@@ -188,6 +201,7 @@ class Release:
         if files_metadata == []:
             raise BailoException("Release has no associated files.")
         file_names = [file_metadata["name"] for file_metadata in files_metadata]
+        orig_file_names = file_names
 
         if isinstance(include, str):
             include = [include]
@@ -202,6 +216,13 @@ class Release:
                 file for file in file_names if not any([fnmatch.fnmatch(file, pattern) for pattern in exclude])
             ]
 
+        logger.info(
+            f"Downloading %d of %%d files for version %s of %s...",
+            len(file_names),
+            len(orig_file_names),
+            str(self.version),
+            {self.model_id},
+        )
         os.makedirs(path, exist_ok=True)
         for file in file_names:
             file_path = os.path.join(path, file)
@@ -216,10 +237,12 @@ class Release:
         :return: The unique file ID of the file uploaded
         ..note:: If path provided is a directory, it will be uploaded as a zip
         """
+        logger.info(f"Uploading file(s) to version %s of %s...", str(self.version), self.model_id)
         name = os.path.split(path)[-1]
 
         if data is None:
             if is_zip := os.path.isdir(path):
+                logger.info(f"Given path (%s) is a directory. This will be converted to a zip file for upload.", path)
                 shutil.make_archive(name, "zip", path)
                 path = f"{name}.zip"
                 name = path
@@ -249,6 +272,8 @@ class Release:
         self.update()
         if not isinstance(data, BytesIO):
             data.close()
+        logger.info(f"Upload of file %s to version %s of %s complete.", name, str(self.version), self.model_id)
+
         return res["file"]["id"]
 
     def update(self) -> Any:
@@ -271,6 +296,8 @@ class Release:
         :return: JSON Response object
         """
         self.client.delete_release(self.model_id, str(self.version))
+        logger.info(f"Release %s of %s successfully deleted.", str(self.version), self.model_id)
+
         return True
 
     @property

@@ -1,7 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetRelease } from 'actions/release'
-import { useGetReviewRequestsForModel } from 'actions/review'
+import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -24,15 +24,29 @@ export default function Release() {
     modelId,
     semver: semver || '',
   })
+  const {
+    reviews: userReviews,
+    isReviewsLoading: isUserReviewsLoading,
+    isReviewsError: isUserReviewsError,
+  } = useGetReviewRequestsForUser()
+
+  const userCanReview =
+    reviews.filter((review) =>
+      userReviews.some(
+        (userReview) =>
+          userReview.model.id === review.model.id && userReview.accessRequestId === review.accessRequestId,
+      ),
+    ).length > 0
 
   const error = MultipleErrorWrapper('Unable to load release', {
     isReleaseError,
     isReviewsError,
+    isUserReviewsError,
   })
 
   if (error) return error
 
-  if (!release || (isReleaseLoading && isReviewsLoading)) {
+  if (!release || (isReleaseLoading && isReviewsLoading && isUserReviewsLoading)) {
     return <Loading />
   }
 
@@ -42,7 +56,7 @@ export default function Release() {
       <Container maxWidth='md' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper>
           <>
-            {reviews.length > 0 && <ReviewBanner release={release} />}
+            {userCanReview && <ReviewBanner release={release} />}
             <Stack spacing={2} sx={{ p: 4 }}>
               <Stack
                 direction={{ sm: 'row', xs: 'column' }}

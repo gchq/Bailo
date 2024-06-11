@@ -9,6 +9,12 @@ const configMock = vi.hoisted(
         cognito: {
           userIdAttribute: 'email',
           userPoolId: 'email',
+          identityProviderClient: {
+            credentials: {
+              accessKeyId: '',
+              secretAccessKey: '',
+            },
+          },
         },
       },
     }) as any,

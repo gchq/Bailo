@@ -1,4 +1,3 @@
-import { CognitoIdentityProviderClientConfig } from '@aws-sdk/client-cognito-identity-provider'
 import { KMSClientConfig } from '@aws-sdk/client-kms'
 import bunyan from 'bunyan'
 import _config from 'config'
@@ -140,7 +139,7 @@ export interface Config {
     provider: string
     grant: grant.GrantConfig | grant.GrantOptions
     cognito: {
-      identityProviderClient: CognitoIdentityProviderClientConfig
+      identityProviderClient: { region: string; credentials: { accessKeyId: string; secretAccessKey: string } }
       userPoolId: string
       userIdAttribute: string
     }
