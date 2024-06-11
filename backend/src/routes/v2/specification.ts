@@ -59,7 +59,7 @@ export const getSpecification = [
       },
     ]
 
-    if (config.inference?.enabled) {
+    if (config.ui.inference?.enabled) {
       tags.push({
         name: 'inference',
         description:

@@ -166,7 +166,7 @@ server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
 // Inferencing routes are conditional to Bailo specific configuration
 // NOTE: Enabled if config not loaded for testing purposes
-if (!config.inference || config.inference?.enabled) {
+if (!config.ui?.inference || config.ui.inference?.enabled) {
   server.get('/api/v2/model/:modelId/inferences', ...getInferences)
   server.get('/api/v2/model/:modelId/inference/:image/:tag', ...getInference)
   server.post('/api/v2/model/:modelId/inference', ...postInference)
