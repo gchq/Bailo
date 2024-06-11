@@ -64,7 +64,7 @@ def test_create_get_from_version_update_and_delete_release(
 
 
 @pytest.mark.integration
-def test_nonexistant_file_ids(integration_client, example_model):
+def test_nonexistent_file_ids(integration_client, example_model):
     with pytest.raises(ResponseException):
         release = Release.create(
             client=integration_client,
@@ -79,7 +79,7 @@ def test_nonexistant_file_ids(integration_client, example_model):
 
 
 @pytest.mark.integration
-def create_two_release_with_same_semver(integration_client, example_model):
+def test_create_two_release_with_same_semver(integration_client, example_model):
     Release.create(
         client=integration_client, model_id=example_model.model_id, version="1.1.0", model_card_version=1, notes="test"
     )
@@ -91,3 +91,11 @@ def create_two_release_with_same_semver(integration_client, example_model):
             model_card_version=1,
             notes="test",
         )
+
+
+@pytest.mark.integration
+def test_retrieve_release_with_v_in_version(integration_client, example_model):
+    example_model.create_release(version="v2.0.0", notes=" ")
+    release = Release.from_version(client=integration_client, model_id=example_model.model_id, version="v2.0.0")
+
+    assert str(release.version) == "2.0.0"
