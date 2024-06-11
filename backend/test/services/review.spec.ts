@@ -14,6 +14,7 @@ import {
   sendReviewResponseNotification,
 } from '../../src/services/review.js'
 import { ReviewKind } from '../../src/types/enums.js'
+import { testReviewResponse } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
@@ -185,7 +186,6 @@ describe('services > review', () => {
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
-    expect(reviewModelMock.findByIdAndUpdate).toBeCalled()
     expect(mockWebhookService.sendWebhooks).toBeCalled()
   })
 
@@ -204,12 +204,15 @@ describe('services > review', () => {
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
-    expect(reviewModelMock.findByIdAndUpdate).toBeCalled()
   })
 
   test('respondToReview > access request review  response notification successful', async () => {
     accessRequestServiceMock.getAccessRequestById.mockReturnValueOnce({ createdBy: 'Yellow' })
-    await sendReviewResponseNotification({ kind: 'access', accessRequestId: 'Hello' } as ReviewDoc, user)
+    await sendReviewResponseNotification(
+      { kind: 'access', accessRequestId: 'Hello' } as ReviewDoc,
+      testReviewResponse as any,
+      user,
+    )
 
     expect(accessRequestServiceMock.getAccessRequestById).toBeCalled()
     expect(smtpMock.notifyReviewResponseForAccess).toBeCalled()
@@ -221,7 +224,7 @@ describe('services > review', () => {
     smtpMock.notifyReviewResponseForAccess.mockImplementationOnce(() => {
       throw err
     })
-    await sendReviewResponseNotification({ kind: 'access' } as ReviewDoc, user)
+    await sendReviewResponseNotification({ kind: 'access' } as ReviewDoc, testReviewResponse as any, user)
 
     expect(logMock.error).toHaveBeenCalledWith(
       { review: { kind: 'access' } },
@@ -231,7 +234,11 @@ describe('services > review', () => {
 
   test('respondToReview > release review response notification successful', async () => {
     releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
-    await sendReviewResponseNotification({ kind: 'release', semver: 'Hello' } as ReviewDoc, user)
+    await sendReviewResponseNotification(
+      { kind: 'release', semver: 'Hello' } as ReviewDoc,
+      testReviewResponse as any,
+      user,
+    )
 
     expect(releaseRequestServiceMock.getReleaseBySemver).toBeCalled()
     expect(smtpMock.notifyReviewResponseForRelease).toBeCalled()
@@ -239,7 +246,7 @@ describe('services > review', () => {
 
   test('respondToReview > missing semver', async () => {
     releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
-    await sendReviewResponseNotification({ kind: 'release' } as ReviewDoc, user)
+    await sendReviewResponseNotification({ kind: 'release' } as ReviewDoc, testReviewResponse as any, user)
 
     expect(logMock.error).toHaveBeenCalledWith(
       {
@@ -247,24 +254,6 @@ describe('services > review', () => {
       },
       'Unable to send notification for review response. Cannot find semver.',
     )
-  })
-
-  test('respondToReview > mongo update fails', async () => {
-    reviewModelMock.findByIdAndUpdate.mockReturnValueOnce()
-
-    const result: Promise<ReviewInterface> = respondToReview(
-      user,
-      'modelId',
-      'msro',
-      {
-        decision: Decision.RequestChanges,
-        comment: 'Do better!',
-      },
-      ReviewKind.Release,
-      'semver',
-    )
-
-    expect(result).rejects.toThrowError(`Adding response to Review was not successful`)
   })
 
   test('respondToReview > no reviews found', async () => {

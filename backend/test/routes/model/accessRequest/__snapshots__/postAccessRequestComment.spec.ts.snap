@@ -2,7 +2,7 @@
 
 exports[`routes > release > postReleaseComment > 200 > ok 1`] = `
 {
-  "accessRequest": {
+  "accessRequestComment": {
     "message": "test",
   },
 }

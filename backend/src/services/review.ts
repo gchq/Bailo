@@ -181,7 +181,7 @@ export async function sendReviewResponseNotification(
       }
 
       const access = await getAccessRequestById(user, review.accessRequestId)
-      notifyReviewResponseForAccess(review, access).catch((error) =>
+      notifyReviewResponseForAccess(reviewResponse, access).catch((error) =>
         log.warn({ error }, 'Error when notifying collaborators about review response.'),
       )
       break
@@ -193,7 +193,7 @@ export async function sendReviewResponseNotification(
       }
 
       const release = await getReleaseBySemver(user, review.modelId, review.semver)
-      notifyReviewResponseForRelease(review, release).catch((error) =>
+      notifyReviewResponseForRelease(reviewResponse, release).catch((error) =>
         log.warn({ error }, 'Error when notifying collaborators about review response.'),
       )
       break

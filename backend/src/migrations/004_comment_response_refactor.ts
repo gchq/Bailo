@@ -14,6 +14,7 @@ export async function up() {
           user: releaseComment.user,
           kind: ResponseKind.Comment,
           comment: releaseComment.message,
+          parentId: release._id,
           createdAt: releaseComment.createdAt,
           updatedAt: releaseComment.createdAt,
         })
@@ -35,6 +36,7 @@ export async function up() {
           user: accessCommment.user,
           kind: ResponseKind.Comment,
           comment: accessCommment.message,
+          parentId: accessCommment._id,
           createdAt: accessCommment.createdAt,
           updatedAt: accessCommment.createdAt,
         })
@@ -58,6 +60,7 @@ export async function up() {
           comment: reviewResponse.comment,
           role: review.role,
           decision: reviewResponse.decision,
+          parentId: review._id,
           createdAt: reviewResponse.createdAt,
           updatedAt: reviewResponse.createdAt,
         })

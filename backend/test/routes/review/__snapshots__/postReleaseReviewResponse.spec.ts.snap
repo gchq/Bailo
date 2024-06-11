@@ -5,13 +5,6 @@ exports[`routes > review > postReleaseReviewResponse > audit > expected call 1`]
   "createdAt": 2023-08-13T00:00:00.000Z,
   "kind": "release",
   "modelId": "abc",
-  "responses": [
-    {
-      "comment": "looks amazing!",
-      "decision": "approve",
-      "user": "user",
-    },
-  ],
   "role": "msro",
   "semver": "3.0.2",
   "updatedAt": 2023-08-14T00:00:00.000Z,
@@ -47,13 +40,6 @@ exports[`routes > review > postReleaseReviewResponse > successfully respond to a
     "createdAt": "2023-08-13T00:00:00.000Z",
     "kind": "release",
     "modelId": "abc",
-    "responses": [
-      {
-        "comment": "looks amazing!",
-        "decision": "approve",
-        "user": "user",
-      },
-    ],
     "role": "msro",
     "semver": "3.0.2",
     "updatedAt": "2023-08-14T00:00:00.000Z",
@@ -67,13 +53,6 @@ exports[`routes > review > postReleaseReviewResponse > successfully respond to a
     "createdAt": "2023-08-13T00:00:00.000Z",
     "kind": "release",
     "modelId": "abc",
-    "responses": [
-      {
-        "comment": "looks amazing!",
-        "decision": "approve",
-        "user": "user",
-      },
-    ],
     "role": "msro",
     "semver": "3.0.2",
     "updatedAt": "2023-08-14T00:00:00.000Z",

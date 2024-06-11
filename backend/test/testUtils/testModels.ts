@@ -1,4 +1,6 @@
-import { Decision } from '../../src/models/Response.js'
+import { ObjectId } from 'mongodb'
+
+import { ResponseKind } from '../../src/models/Response.js'
 import { ReviewKind, SchemaKind } from '../../src/types/enums.js'
 
 export const testModelSchema = {
@@ -52,18 +54,21 @@ export const testDeploymentSchema = {
   updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }
 
+export const testReviewResponse = {
+  comment: 'test comment',
+  user: 'user',
+  parentId: new ObjectId(),
+  role: 'mtr',
+  decision: 'approve',
+  kind: ResponseKind.Review,
+  createdAt: '2024-05-17T06:13:41.690Z',
+  updatedAt: '2024-05-17T06:13:41.690Z',
+}
+
 export const testReleaseReviewWithResponses = {
   modelId: 'abc',
   semver: '3.0.2',
   kind: ReviewKind.Release,
-  responses: [
-    {
-      user: 'user',
-      decision: Decision.Approve,
-      comment: 'looks amazing!',
-    },
-  ],
-
   role: 'msro',
 
   createdAt: new Date('08/13/2023'),
@@ -74,14 +79,6 @@ export const testAccessRequestReviewWithResponses = {
   modelId: 'abc',
   accessRequestId: 'test-235',
   kind: ReviewKind.Access,
-  responses: [
-    {
-      user: 'user',
-      decision: Decision.Approve,
-      comment: 'looks amazing!',
-    },
-  ],
-
   role: 'msro',
 
   createdAt: new Date('08/13/2023'),
@@ -109,13 +106,11 @@ export const testAccessRequest = {
   _id: '664e1aa8bda1f88c28e1c0ce',
   id: 'test-access-request-13623',
   modelId: 'test-model-4342',
-  commentIds: ['6646f5953391b094ca4f55ee'],
 }
 
 export const testRelease = {
   modelId: 'test-model-1124',
   semver: '1.0.0',
-  commentIds: ['6646f5953391b094ca4f55ee'],
 }
 
 export const testResponse = {

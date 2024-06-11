@@ -10,7 +10,7 @@ import {
   requestReviewForRelease,
 } from '../../../src/services/smtp/smtp.js'
 import config from '../../../src/utils/config.js'
-import { NotFound } from '../../../src/utils/error.js'
+import { testReviewResponse } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/utils/config.js', () => {
   return {
@@ -153,7 +153,7 @@ describe('services > smtp > smtp', () => {
       },
       from: '"Bailo 📝" <bailo@example.org>',
     })
-    await notifyReviewResponseForRelease(review, release)
+    await notifyReviewResponseForRelease(testReviewResponse as any, release)
 
     expect(transporterMock.sendMail).not.toBeCalled()
   })
@@ -172,7 +172,7 @@ describe('services > smtp > smtp', () => {
       },
       from: '"Bailo 📝" <bailo@example.org>',
     })
-    await notifyReviewResponseForAccess(review, access)
+    await notifyReviewResponseForAccess(testReviewResponse as any, access)
 
     expect(transporterMock.sendMail).not.toBeCalled()
   })
@@ -191,29 +191,15 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent after a response for a release review', async () => {
-    await notifyReviewResponseForRelease(review, release)
+    await notifyReviewResponseForRelease(testReviewResponse as any, release)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('that an email is not sent if a response for a release review cannot be found', async () => {
-    responseService.findResponseById.mockRejectedValueOnce(NotFound('Response not found.'))
-    await expect(notifyReviewResponseForRelease(new Review({ role: 'owner', responses: [] }), release)).rejects.toThrow(
-      'Response not found',
-    )
   })
 
   test('that an email is sent after a response for a an access request review', async () => {
-    await notifyReviewResponseForAccess(review, access)
+    await notifyReviewResponseForAccess(testReviewResponse as any, access)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('that an email is not sent if a response for an access request review cannot be found', async () => {
-    responseService.findResponseById.mockRejectedValueOnce(NotFound('Response not found.'))
-    await expect(notifyReviewResponseForAccess(new Review({ role: 'owner', responses: [] }), access)).rejects.toThrow(
-      'Response not found',
-    )
   })
 
   test('that sendEmail is called for each member of a group entity', async () => {

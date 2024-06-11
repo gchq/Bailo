@@ -15,18 +15,17 @@ export async function createInferenceService(inferenceServiceParams: InferenceSe
   try {
     res = await fetch(`${config.inference.connection.host}/api/deploy`, {
       method: 'POST',
-      headers: new Headers({ 'content-type': 'application/json' }),
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify(inferenceServiceParams),
     })
   } catch (err) {
     throw InternalError('Unable to communicate with the inferencing service.', { err })
   }
-  const body = await res.json()
   if (!res.ok) {
     throw BadReq('Unrecognised response returned by the inferencing service.')
   }
-
-  return body
+  // TODO - Update return object. For now, we are just checking the status
+  return res.json()
 }
 
 export async function updateInferenceService(inferenceServiceParams: InferenceService) {
@@ -34,16 +33,16 @@ export async function updateInferenceService(inferenceServiceParams: InferenceSe
   try {
     res = await fetch(`${config.inference.connection.host}/api/update`, {
       method: 'PATCH',
-      headers: new Headers({ 'content-type': 'application/json' }),
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify(inferenceServiceParams),
     })
   } catch (err) {
     throw InternalError('Unable to communicate with the inferencing service.', { err })
   }
-  const body = await res.json()
+
   if (!res.ok) {
     throw BadReq('Unrecognised response returned by the inferencing service.')
   }
-
-  return body
+  // TODO - Update return object. For now, we are just checking the status
+  return res.json()
 }

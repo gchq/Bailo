@@ -9,6 +9,14 @@ const configMock = vi.hoisted(() => ({
       host: 'http://example.com',
     },
   },
+  ui: {
+    inference: {
+      enabled: true,
+      connection: {
+        host: 'http://example.com',
+      },
+    },
+  },
 }))
 
 vi.mock('../../src/utils/config.js', () => ({

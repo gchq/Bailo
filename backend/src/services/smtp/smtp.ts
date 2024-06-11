@@ -4,11 +4,11 @@ import Mail from 'nodemailer/lib/mailer/index.js'
 import authentication from '../../connectors/authentication/index.js'
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { ReleaseDoc } from '../../models/Release.js'
+import { ResponseInterface } from '../../models/Response.js'
 import { ReviewDoc } from '../../models/Review.js'
 import config from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
 import log from '../log.js'
-import { findResponseById } from '../response.js'
 import { buildEmail, EmailContent } from './emailBuilder.js'
 
 let transporter: undefined | Transporter = undefined
@@ -91,16 +91,19 @@ export async function requestReviewForAccessRequest(
   await dispatchEmail(entity, emailContent)
 }
 
-export async function notifyReviewResponseForRelease(review: ReviewDoc, release: ReleaseDoc) {
+export async function notifyReviewResponseForRelease(reviewResponse: ResponseInterface, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
 
-  const reviewResponse = await findResponseById(review.responseIds[review.responseIds.length - 1])
-
   if (!reviewResponse) {
     log.info('response not found')
+    return
+  }
+
+  if (!reviewResponse.role) {
+    log.info('response role not found')
     return
   }
 
@@ -115,7 +118,7 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
     }`,
     [
       { title: 'Model ID', data: release.modelId },
-      { title: 'Reviewer Role', data: review.role.toUpperCase() },
+      { title: 'Reviewer Role', data: reviewResponse.role.toUpperCase() },
       { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
@@ -126,15 +129,22 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
   await dispatchEmail(toEntity('user', release.createdBy), emailContent)
 }
 
-export async function notifyReviewResponseForAccess(review: ReviewDoc, accessRequest: AccessRequestDoc) {
+export async function notifyReviewResponseForAccess(
+  reviewResponse: ResponseInterface,
+  accessRequest: AccessRequestDoc,
+) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
-  const reviewResponse = await findResponseById(review.responseIds[review.responseIds.length - 1])
 
   if (!reviewResponse) {
     log.info('response not found')
+    return
+  }
+
+  if (!reviewResponse.role) {
+    log.info('response role not found')
     return
   }
 
@@ -148,7 +158,7 @@ export async function notifyReviewResponseForAccess(review: ReviewDoc, accessReq
     }`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
-      { title: 'Reviewer Role', data: review.role.toUpperCase() },
+      { title: 'Reviewer Role', data: reviewResponse.role.toUpperCase() },
       { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
