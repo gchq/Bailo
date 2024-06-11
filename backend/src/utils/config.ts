@@ -22,6 +22,7 @@ export interface Config {
 
     privateKey: string
     publicKey: string
+    jwks: string
   }
 
   connectors: {
