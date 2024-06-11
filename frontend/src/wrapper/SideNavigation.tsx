@@ -1,6 +1,7 @@
 import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, Settings as SettingsIcon } from '@mui/icons-material'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
+import DescriptionIcon from '@mui/icons-material/Description'
 import LinkIcon from '@mui/icons-material/Link'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
@@ -146,6 +147,15 @@ export default function SideNavigation({
               menuPage='api'
               title='API'
               icon={<LinkIcon />}
+            />
+            <NavMenuItem
+              href='/docs/python/index.html'
+              selectedPage={page}
+              primaryText='Python Client Docs'
+              drawerOpen={drawerOpen}
+              menuPage='pythonDocs'
+              title='Python Client Docs'
+              icon={<DescriptionIcon />}
             />
             <NavMenuItem
               href='/help'

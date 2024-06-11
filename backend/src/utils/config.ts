@@ -22,6 +22,7 @@ export interface Config {
 
     privateKey: string
     publicKey: string
+    jwks: string
   }
 
   connectors: {
@@ -99,13 +100,6 @@ export interface Config {
     insecure: boolean
   }
 
-  inference: {
-    enabled: boolean
-    connection: {
-      host: string
-    }
-  }
-
   ui: {
     banner: {
       enabled: boolean
@@ -126,7 +120,9 @@ export interface Config {
 
     inference: {
       enabled: boolean
-
+      connection: {
+        host: string
+      }
       gpus: { [key: string]: string }
     }
   }

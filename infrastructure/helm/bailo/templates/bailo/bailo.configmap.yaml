@@ -146,6 +146,14 @@ data:
         registry: {
           host: '{{ .Values.route.appPublicRoute }}',
         },
+
+        inference: {
+          enabled: {{ .Values.inference.enabled}},
+          connection: {
+            host: '{{ .Values.inference.host}}',
+          },
+          gpus: '{{ .Values.inference.gpus }}',
+        },
       },
 
       connectors: {

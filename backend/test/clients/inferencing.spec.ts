@@ -3,10 +3,12 @@ import { describe, expect, test, vi } from 'vitest'
 import { createInferenceService, updateInferenceService } from '../../src/clients/inferencing.js'
 
 const configMock = vi.hoisted(() => ({
-  inference: {
-    enabled: true,
-    connection: {
-      host: 'http://example.com',
+  ui: {
+    inference: {
+      enabled: true,
+      connection: {
+        host: 'http://example.com',
+      },
     },
   },
   ui: {

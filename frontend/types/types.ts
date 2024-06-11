@@ -392,6 +392,8 @@ export interface EntryForm {
   visibility: EntryVisibilityKeys
 }
 
+export type UpdateEntryForm = Omit<EntryForm, 'kind'>
+
 export interface AccessRequestMetadata {
   overview: {
     name: string

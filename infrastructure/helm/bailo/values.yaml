@@ -256,3 +256,10 @@ connectors:
 instrumentation:
   enabled: false
   debug: false
+
+# Inferencing cluster reference
+inference:
+  enabled: false
+  # Url for the inferencing cluster
+  host: 'https://example.com'
+  gpus:

@@ -9,7 +9,7 @@ import EntryNameInput from 'src/entry/EntryNameInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import TeamSelect from 'src/TeamSelect'
-import { EntryForm, EntryInterface, EntryKindLabel, TeamInterface } from 'types/types'
+import { EntryInterface, EntryKindLabel, TeamInterface, UpdateEntryForm } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
 
@@ -21,7 +21,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [team, setTeam] = useState<TeamInterface | undefined>()
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description)
-  const [visibility, setVisibility] = useState<EntryForm['visibility']>(entry.visibility)
+  const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -39,10 +39,9 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
     setErrorMessage('')
     setIsLoading(true)
 
-    const formData: EntryForm = {
+    const formData: UpdateEntryForm = {
       name,
       teamId: team?.id ?? 'Uncategorised',
-      kind: entry.kind,
       description,
       visibility,
     }
@@ -113,7 +112,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
           <RadioGroup
             defaultValue='public'
             value={visibility}
-            onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
+            onChange={(e) => setVisibility(e.target.value as UpdateEntryForm['visibility'])}
           >
             <FormControlLabel
               value='public'

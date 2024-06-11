@@ -78,7 +78,7 @@ function formatKid(keyBuffer: Buffer) {
   return match.join(':')
 }
 
-async function getKid() {
+export async function getKid() {
   const cert = new X509Certificate(await getPublicKey())
   const der = cert.publicKey.export({ format: 'der', type: 'spki' })
   const hash = createHash('sha256').update(der).digest().slice(0, 30)

@@ -8,13 +8,6 @@ module.exports = {
     port: 3001,
   },
 
-  inference: {
-    enabled: false,
-    connection: {
-      host: 'http://example.com',
-    },
-  },
-
   app: {
     // Publicly accessible route to service
     protocol: '',
@@ -24,6 +17,7 @@ module.exports = {
     // Typically generated from `npm run certs`
     privateKey: './certs/key.pem',
     publicKey: './certs/cert.pem',
+    jwks: './certs/jwks.json',
   },
 
   mongo: {
@@ -181,7 +175,9 @@ module.exports = {
 
     inference: {
       enabled: false,
-
+      conneciton: {
+        host: 'http://example.com',
+      },
       gpus: {},
     },
   },
