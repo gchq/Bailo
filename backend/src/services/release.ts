@@ -218,7 +218,7 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
 
   // Store the response
   const commentResponse = new ResponseModel({
-    user: toEntity('user', user.dn),
+    entity: toEntity('user', user.dn),
     kind: ResponseKind.Comment,
     comment,
     createdAt: new Date().toISOString(),

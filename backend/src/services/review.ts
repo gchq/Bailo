@@ -147,7 +147,7 @@ export async function respondToReview(
 
   // Store the response
   const reviewResponse = new ResponseModel({
-    user: toEntity('user', user.dn),
+    entity: toEntity('user', user.dn),
     kind: ResponseKind.Review,
     role,
     parentId: review._id,

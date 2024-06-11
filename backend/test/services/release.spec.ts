@@ -321,7 +321,7 @@ describe('services > release', () => {
 
     await newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')
 
-    expect(releaseModelMocks.findOneAndUpdate).toBeCalled()
+    expect(responseModelMock.save).toBeCalled()
   })
 
   test('newReleaseComment > should throw bad request when attempting to create a release comment on a mirrored model', async () => {

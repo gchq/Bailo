@@ -1,4 +1,5 @@
 import { Validator } from 'jsonschema'
+import { Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
@@ -144,10 +145,10 @@ export async function newAccessRequestComment(user: UserInterface, accessRequest
   }
 
   const commentResponse = new ResponseModel({
-    user: toEntity('user', user.dn),
+    entity: toEntity('user', user.dn),
     kind: ResponseKind.Comment,
     comment: message,
-    parentId: accessRequest._id,
+    parentId: accessRequest._id as Types.ObjectId,
     createdAt: new Date().toISOString(),
   })
 
