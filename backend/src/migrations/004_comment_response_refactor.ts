@@ -12,7 +12,7 @@ export async function up() {
       for (const releaseComment of release.get('comments')) {
         const username = releaseComment.user.includes(':') ? releaseComment.user : `user:${releaseComment.user}`
         const newComment = new ResponseModel({
-          user: username,
+          entity: username,
           kind: ResponseKind.Comment,
           comment: releaseComment.message,
           parentId: release._id,
@@ -34,10 +34,10 @@ export async function up() {
       for (const accessCommment of accessRequest.get('comments')) {
         const username = accessCommment.user.includes(':') ? accessCommment.user : `user:${accessCommment.user}`
         const newComment = new ResponseModel({
-          user: username,
+          entity: username,
           kind: ResponseKind.Comment,
           comment: accessCommment.message,
-          parentId: accessCommment._id,
+          parentId: accessRequest._id,
           createdAt: accessCommment.createdAt,
           updatedAt: accessCommment.createdAt,
         })
@@ -56,7 +56,7 @@ export async function up() {
       for (const reviewResponse of review.get('responses')) {
         const username = reviewResponse.user.includes(':') ? reviewResponse.user : `user:${reviewResponse.user}`
         const newComment = new ResponseModel({
-          user: username,
+          entity: username,
           kind: ResponseKind.Review,
           comment: reviewResponse.comment,
           role: review.role,

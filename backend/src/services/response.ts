@@ -42,7 +42,7 @@ export async function updateResponse(user: UserInterface, responseId: string, co
     throw NotFound(`The requested response was not found.`, { responseId })
   }
 
-  if (response.user !== toEntity('user', user.dn)) {
+  if (response.entity !== toEntity('user', user.dn)) {
     throw Forbidden('Only the original author can update a comment or review response.', {
       userDn: user.dn,
       responseId,

@@ -88,7 +88,7 @@ export default function SideNavigation({
           reviews.filter(
             (filteredReview) =>
               !responses.find(
-                (response) => response.user === `user:${currentUser.dn}` && response.parentId === filteredReview._id,
+                (response) => response.entity === `user:${currentUser.dn}` && response.parentId === filteredReview._id,
               ),
           ).length,
         )

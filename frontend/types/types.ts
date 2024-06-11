@@ -72,7 +72,7 @@ export const ResponseKind = {
 export type ResponseKindKeys = (typeof ResponseKind)[keyof typeof ResponseKind]
 
 export interface ResponseInterface {
-  user: string
+  entity: string
   kind: ResponseKindKeys
   parentId: string
   outdated?: boolean

@@ -114,7 +114,7 @@ export async function notifyReviewResponseForRelease(reviewResponse: ResponseInt
 
   const emailContent = buildEmail(
     `Release ${release.semver} has been reviewed by ${
-      (await authentication.getUserInformation(toEntity('user', reviewResponse?.user))).name || reviewResponse?.user
+      (await authentication.getUserInformation(toEntity('user', reviewResponse?.entity))).name || reviewResponse?.entity
     }`,
     [
       { title: 'Model ID', data: release.modelId },
@@ -154,7 +154,7 @@ export async function notifyReviewResponseForAccess(
   }
   const emailContent = buildEmail(
     `Access request for model ${accessRequest.modelId} has been reviewed by ${
-      (await authentication.getUserInformation(toEntity('user', reviewResponse?.user))).name || reviewResponse?.user
+      (await authentication.getUserInformation(toEntity('user', reviewResponse?.entity))).name || reviewResponse?.entity
     }`,
     [
       { title: 'Model ID', data: accessRequest.modelId },

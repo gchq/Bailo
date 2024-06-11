@@ -13,7 +13,7 @@ type ReviewCommentDisplayProps = {
 }
 
 export default function ReviewCommentDisplay({ response, onReplyButtonClick }: ReviewCommentDisplayProps) {
-  const [entityKind, username] = response.user.split(':')
+  const [entityKind, username] = response.entity.split(':')
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)

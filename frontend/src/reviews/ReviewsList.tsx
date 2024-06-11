@@ -27,7 +27,7 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
         responses.find(
           (response) =>
             response.parentId === review._id &&
-            response.user === `user:${currentUser.dn}` &&
+            response.entity === `user:${currentUser.dn}` &&
             response.decision === 'approve',
         )
       )

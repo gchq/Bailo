@@ -22,7 +22,7 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
 
   const theme = useTheme()
-  const [entityKind, username] = response.user.split(':')
+  const [entityKind, username] = response.entity.split(':')
 
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />

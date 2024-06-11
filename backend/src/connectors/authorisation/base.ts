@@ -119,7 +119,7 @@ export class BasicAuthorisationConnector {
   async responses(user: UserInterface, responses: ResponseDoc[], action: ResponseActionKeys): Promise<Array<Response>> {
     return Promise.all(
       responses.map(async (response) => {
-        if (action === ResponseAction.Update && toEntity('user', user.dn) !== response.user) {
+        if (action === ResponseAction.Update && toEntity('user', user.dn) !== response.entity) {
           return { id: user.dn, success: false, info: 'Only the author can update a comment' }
         }
         return {
