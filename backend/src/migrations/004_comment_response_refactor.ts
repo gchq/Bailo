@@ -2,7 +2,6 @@ import AccessRequestModel from '../models/AccessRequest.js'
 import ReleaseModel from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
-import { toEntity } from '../utils/entity.js'
 
 export async function up() {
   // Resolve release comments
@@ -11,9 +10,7 @@ export async function up() {
     release.commentIds = []
     if (release.get('comments') !== undefined) {
       for (const releaseComment of release.get('comments')) {
-        const username = !releaseComment.user.includes(':')
-          ? toEntity('user', releaseComment.user)
-          : releaseComment.user
+        const username = releaseComment.user.includes(':') ? releaseComment.user : `user:${releaseComment.user}`
         const newComment = new ResponseModel({
           user: username,
           kind: ResponseKind.Comment,
@@ -23,7 +20,6 @@ export async function up() {
           updatedAt: releaseComment.createdAt,
         })
         await newComment.save()
-        release.commentIds.push(newComment._id)
         //release.set('comments', undefined, { strict: false })
       }
       await release.save()
@@ -36,9 +32,7 @@ export async function up() {
     accessRequest.commentIds = []
     if (accessRequest.get('comments') !== undefined) {
       for (const accessCommment of accessRequest.get('comments')) {
-        const username = !accessCommment.user.includes(':')
-          ? toEntity('user', accessCommment.user)
-          : accessCommment.user
+        const username = accessCommment.user.includes(':') ? accessCommment.user : `user:${accessCommment.user}`
         const newComment = new ResponseModel({
           user: username,
           kind: ResponseKind.Comment,
@@ -48,7 +42,6 @@ export async function up() {
           updatedAt: accessCommment.createdAt,
         })
         await newComment.save()
-        accessRequest.commentIds.push(newComment._id)
         //accessRequest.set('comments', undefined, { strict: false })
       }
     }
@@ -61,9 +54,7 @@ export async function up() {
     review.responseIds = []
     if (review.get('responses') !== undefined) {
       for (const reviewResponse of review.get('responses')) {
-        const username = !reviewResponse.user.includes(':')
-          ? toEntity('user', reviewResponse.user)
-          : reviewResponse.user
+        const username = reviewResponse.user.includes(':') ? reviewResponse.user : `user:${reviewResponse.user}`
         const newComment = new ResponseModel({
           user: username,
           kind: ResponseKind.Review,
@@ -75,7 +66,6 @@ export async function up() {
           updatedAt: reviewResponse.createdAt,
         })
         await newComment.save()
-        review.responseIds.push(newComment._id)
         //delete review.comments
       }
     }
