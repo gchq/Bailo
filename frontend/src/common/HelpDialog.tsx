@@ -1,22 +1,24 @@
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from '@mui/material'
 import { ReactNode, useState } from 'react'
 
 type HelpDialogProps = {
-  dialogTitle: string
+  title: string
   content: ReactNode
 }
 
-export default function HelpDialog({ dialogTitle, content }: HelpDialogProps) {
+export default function HelpDialog({ title, content }: HelpDialogProps) {
   const [open, setOpen] = useState(false)
 
   return (
     <>
-      <IconButton size='small' onClick={() => setOpen(true)}>
-        <HelpOutlineIcon />
-      </IconButton>
+      <Tooltip title={title}>
+        <IconButton size='small' onClick={() => setOpen(true)}>
+          <HelpOutlineIcon />
+        </IconButton>
+      </Tooltip>
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth='md' disableEscapeKeyDown>
-        <DialogTitle>{dialogTitle}</DialogTitle>
+        <DialogTitle>{title}</DialogTitle>
         <DialogContent>{content}</DialogContent>
         <DialogActions>
           <Button color='secondary' variant='outlined' onClick={() => setOpen(false)}>

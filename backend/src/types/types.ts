@@ -3,7 +3,7 @@ export interface User {
 }
 
 export const RoleKind = {
-  MODEL: 'model',
+  ENTRY: 'entry',
   SCHEMA: 'schema',
 } as const
 

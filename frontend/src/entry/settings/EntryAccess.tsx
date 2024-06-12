@@ -146,7 +146,7 @@ export default function EntryAccess({ entry }: EntryAccessProps) {
             <TableCell>
               <Stack direction='row' spacing={1} alignItems='center'>
                 <span>Roles</span>
-                <HelpDialog dialogTitle='Roles Explained' content={<EntryRolesInfo modelId={entry.id} />} />
+                <HelpDialog title='What are roles?' content={<EntryRolesInfo entry={entry} />} />
               </Stack>
             </TableCell>
             <TableCell align='right'>Actions</TableCell>

@@ -121,7 +121,7 @@ export interface EntryCardRevisionInterface {
 }
 
 export const RoleKind = {
-  ENTRY: 'ENTRY',
+  ENTRY: 'entry',
   SCHEMA: 'schema',
 } as const
 
