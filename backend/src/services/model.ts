@@ -21,21 +21,32 @@ export function checkModelRestriction(model: ModelInterface) {
   }
 }
 
-export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility' | 'settings'>
+export type CreateModelParams = Pick<
+  ModelInterface,
+  'name' | 'teamId' | 'description' | 'visibility' | 'settings' | 'collaborators'
+>
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
   // TODO - Find team by teamId to check it's valid. Throw error if not found.
 
+  // Add the creator of the entry if they are not already in the collaborator list
+  const collaborators = modelParams.collaborators.find(
+    (collaborator) => (collaborator.entity === toEntity('user', user.dn)) !== undefined,
+  )
+    ? [...modelParams.collaborators]
+    : [
+        ...modelParams.collaborators,
+        {
+          entity: toEntity('user', user.dn),
+          roles: ['owner'],
+        },
+      ]
+
   const model = new Model({
     ...modelParams,
     id: modelId,
-    collaborators: [
-      {
-        entity: toEntity('user', user.dn),
-        roles: ['owner'],
-      },
-    ],
+    collaborators,
   })
 
   const auth = await authorisation.model(user, model, ModelAction.Create)

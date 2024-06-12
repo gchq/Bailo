@@ -383,6 +383,7 @@ export interface EntryForm {
   teamId: string
   description: string
   visibility: EntryVisibilityKeys
+  collaborators?: CollaboratorEntry[]
 }
 
 export type UpdateEntryForm = Omit<EntryForm, 'kind'>

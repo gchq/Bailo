@@ -12,29 +12,21 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useGetModelRoles } from 'actions/model'
 import _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
-import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
-import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntityKind, EntryInterface } from 'types/types'
+import { CollaboratorEntry, EntityKind, Role } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntityItemProps = {
   entity: CollaboratorEntry
   accessList: CollaboratorEntry[]
   onAccessListChange: (value: CollaboratorEntry[]) => void
-  entry: EntryInterface
+  entryKind: string
+  entryRoles: Role[]
 }
 
-export default function EntityItem({ entity, accessList, onAccessListChange, entry }: EntityItemProps) {
-  const {
-    modelRoles: entryRoles,
-    isModelRolesLoading: isEntryRolesLoading,
-    isModelRolesError: isEntryRolesError,
-  } = useGetModelRoles(entry.id)
-
+export default function EntityItem({ entity, accessList, onAccessListChange, entryKind, entryRoles }: EntityItemProps) {
   const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.id), [entryRoles])
 
   function onRoleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
@@ -55,10 +47,6 @@ export default function EntityItem({ entity, accessList, onAccessListChange, ent
     return role
   }
 
-  if (isEntryRolesError) {
-    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
-  }
-
   return (
     <TableRow>
       <TableCell>
@@ -68,8 +56,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, ent
         </Stack>
       </TableCell>
       <TableCell>
-        {isEntryRolesLoading && <Loading />}
-        {!isEntryRolesLoading && entryRoles.length > 0 && (
+        {entryRoles.length > 0 && (
           <Autocomplete
             size='small'
             multiple
@@ -92,7 +79,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, ent
         <Tooltip title='Remove user' arrow>
           <IconButton
             onClick={removeEntity}
-            aria-label={`Remove user ${entity.entity} from ${toSentenceCase(entry.kind)} access list`}
+            aria-label={`Remove user ${entity.entity} from ${toSentenceCase(entryKind)} access list`}
             data-test='accessListRemoveUser'
           >
             <ClearIcon color='secondary' fontSize='inherit' />
