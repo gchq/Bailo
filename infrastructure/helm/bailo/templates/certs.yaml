@@ -6,4 +6,4 @@ metadata:
     {{- include "bailo.labels" . | nindent 4 }}
 type: Opaque
 data:
-{{ (.Files.Glob "certs/**.pem").AsSecrets | indent 2 }}
+{{ (.Files.Glob "{certs/**.pem,certs/jwks.json}").AsSecrets | indent 2 }}

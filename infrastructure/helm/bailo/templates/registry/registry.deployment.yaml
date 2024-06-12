@@ -15,6 +15,9 @@ spec:
       labels:
         name: registry
     spec:
+      {{- if .Values.registry.serviceAccount }}
+      serviceAccountName: {{ .Values.registry.serviceAccount }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -40,16 +43,6 @@ spec:
           value: {{ .Values.registry.certDir }}/{{ .Values.registry.certFile }}
         - name: REGISTRY_HTTP_TLS_KEY
           value: {{ .Values.registry.certDir }}/{{ .Values.registry.keyFile }}
-        - name: REGISTRY_STORAGE_S3_ACCESSKEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "bailo.fullname" . }}-minio
-              key: root-user
-        - name: REGISTRY_STORAGE_S3_SECRETKEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "bailo.fullname" . }}-minio
-              key: root-password
         - name: REGISTRY_AUTH
           value: "token"
         - name: REGISTRY_AUTH_TOKEN_REALM
@@ -61,6 +54,8 @@ spec:
           value: "RegistryIssuer"
         - name: REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE
           value: {{ .Values.registry.certDir }}/{{ .Values.registry.certFile }}
+        - name: REGISTRY_AUTH_TOKEN_JWKS
+          value: {{ .Values.registry.certDir }}/{{ .Values.registry.jwksFile }}
         - name: REGISTRY_HTTP_SECRET
           valueFrom:
             secretKeyRef:
@@ -87,3 +82,5 @@ spec:
               path: {{ .Values.registry.certFile }}
             - key: {{ .Values.nginxcert.key }}
               path: {{ .Values.registry.keyFile }}
+            - key: {{ .Values.registry.jwksFile }}
+              path: {{ .Values.registry.jwksFile }}
