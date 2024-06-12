@@ -13,7 +13,7 @@ interface InferenceService {
 export async function createInferenceService(inferenceServiceParams: InferenceService) {
   let res
   try {
-    res = await fetch(`${config.inference.connection.host}/api/deploy`, {
+    res = await fetch(`${config.ui.inference.connection.host}/api/deploy`, {
       method: 'POST',
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify(inferenceServiceParams),
@@ -32,7 +32,7 @@ export async function createInferenceService(inferenceServiceParams: InferenceSe
 export async function updateInferenceService(inferenceServiceParams: InferenceService) {
   let res
   try {
-    res = await fetch(`${config.inference.connection.host}/api/update`, {
+    res = await fetch(`${config.ui.inference.connection.host}/api/update`, {
       method: 'PATCH',
       headers: new Headers({ 'content-type': 'application/json' }),
       body: JSON.stringify(inferenceServiceParams),

@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from typing import Any
+import logging
 
 from bailo.core.client import Client
 from bailo.core.enums import SchemaKind
+
+logger = logging.getLogger(__name__)
 
 
 class Schema:
@@ -64,6 +67,7 @@ class Schema:
         res = client.post_schema(
             schema_id=schema_id, name=name, description=description, kind=kind, json_schema=json_schema
         )
+        logger.info(f"Schema successfully created on server with ID %s.", schema_id)
         schema.__unpack(res["schema"])
 
         return schema
@@ -85,6 +89,7 @@ class Schema:
             json_schema={"temp": "temp"},
         )
         res = client.get_schema(schema_id=schema_id)
+        logger.info(f"Schema %s successfully retrieved from server.", schema_id)
         schema.__unpack(res["schema"])
 
         return schema
@@ -100,3 +105,5 @@ class Schema:
             self.kind = SchemaKind.MODEL
         if kind == "accessRequest":
             self.kind = SchemaKind.ACCESS_REQUEST
+
+        logger.info(f"Attributes for Schema ID %s successfully unpacked.", self.schema_id)

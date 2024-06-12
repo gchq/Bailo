@@ -94,7 +94,9 @@ export default function AccessRequestReview() {
                 </Button>
               </Link>
               <Typography variant='h6' component='h1' color='primary'>
-                {model ? `Reviewing access request ${accessRequestId} for model ${model.name}` : 'Loading...'}
+                {model
+                  ? `Reviewing access request ${accessRequest.metadata.overview.name} for model ${model.name}`
+                  : 'Loading...'}
               </Typography>
             </Stack>
             <ReviewWithComment onSubmit={handleSubmit} accessRequest={accessRequest} />

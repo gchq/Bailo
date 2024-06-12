@@ -13,10 +13,6 @@ export const postRequestExportToS3Schema = z.object({
     modelId: z.string(),
   }),
   body: z.object({
-    releases: z
-      .array(z.string())
-      .optional()
-      .openapi({ example: ['0.0.1', '0.0.2'] }),
     disclaimerAgreement: z.boolean(),
   }),
 })
@@ -52,11 +48,11 @@ export const postRequestExportToS3 = [
     req.audit = AuditInfo.CreateExport
     const {
       params: { modelId },
-      body: { disclaimerAgreement, releases },
+      body: { disclaimerAgreement },
     } = parse(req, postRequestExportToS3Schema)
 
-    await exportModel(req.user, modelId, disclaimerAgreement, releases)
-    await audit.onCreateS3Export(req, modelId, releases)
+    await exportModel(req.user, modelId, disclaimerAgreement)
+    await audit.onCreateS3Export(req, modelId)
 
     return res.json({
       message: 'Successfully started export upload.',

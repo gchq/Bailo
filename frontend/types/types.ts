@@ -121,7 +121,7 @@ export interface EntryCardRevisionInterface {
 }
 
 export const RoleKind = {
-  MODEL: 'model',
+  ENTRY: 'ENTRY',
   SCHEMA: 'schema',
 } as const
 
@@ -393,6 +393,8 @@ export interface EntryForm {
   description: string
   visibility: EntryVisibilityKeys
 }
+
+export type UpdateEntryForm = Omit<EntryForm, 'kind'>
 
 export interface AccessRequestMetadata {
   overview: {

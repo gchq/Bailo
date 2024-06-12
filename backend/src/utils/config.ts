@@ -1,4 +1,3 @@
-import { CognitoIdentityProviderClientConfig } from '@aws-sdk/client-cognito-identity-provider'
 import { KMSClientConfig } from '@aws-sdk/client-kms'
 import bunyan from 'bunyan'
 import _config from 'config'
@@ -23,6 +22,7 @@ export interface Config {
 
     privateKey: string
     publicKey: string
+    jwks: string
   }
 
   connectors: {
@@ -100,13 +100,6 @@ export interface Config {
     insecure: boolean
   }
 
-  inference: {
-    enabled: boolean
-    connection: {
-      host: string
-    }
-  }
-
   ui: {
     banner: {
       enabled: boolean
@@ -127,7 +120,9 @@ export interface Config {
 
     inference: {
       enabled: boolean
-
+      connection: {
+        host: string
+      }
       gpus: { [key: string]: string }
     }
   }
@@ -140,7 +135,7 @@ export interface Config {
     provider: string
     grant: grant.GrantConfig | grant.GrantOptions
     cognito: {
-      identityProviderClient: CognitoIdentityProviderClientConfig
+      identityProviderClient: { region: string; credentials: { accessKeyId: string; secretAccessKey: string } }
       userPoolId: string
       userIdAttribute: string
     }

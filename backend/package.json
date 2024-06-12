@@ -11,7 +11,7 @@
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "script": "ts-node src/scripts/runScript.ts",
-    "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360",
+    "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360 && ts-node src/scripts/generateJWKS.ts",
     "seed": "ts-node src/seeds/index.ts"
   },
   "keywords": [],
@@ -20,9 +20,9 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^6.3.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.588.0",
-    "@aws-sdk/client-kms": "^3.565.0",
+    "@aws-sdk/client-kms": "^3.588.0",
     "@aws-sdk/client-s3": "^3.421.0",
-    "@aws-sdk/lib-storage": "^3.565.0",
+    "@aws-sdk/lib-storage": "^3.588.0",
     "@opentelemetry/auto-instrumentations-node": "^0.46.1",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.48.0",
     "@smithy/node-http-handler": "^2.1.10",

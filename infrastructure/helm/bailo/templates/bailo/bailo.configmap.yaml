@@ -132,7 +132,7 @@ data:
           enabled: {{ .Values.config.ui.banner.enabled }},
           text: '{{ .Values.config.ui.banner.text }}',
           colour: '{{ .Values.config.ui.banner.colour }}',
-          textColor: '{{ .Values.config.ui.banner.textColor}}'         
+          textColor: '{{ .Values.config.ui.banner.textColor}}'
         },
 
         // Contact details for the support team
@@ -145,6 +145,14 @@ data:
         // The publicly accessible location of the registry, including host and port
         registry: {
           host: '{{ .Values.route.appPublicRoute }}',
+        },
+
+        inference: {
+          enabled: {{ .Values.inference.enabled}},
+          connection: {
+            host: '{{ .Values.inference.host}}',
+          },
+          gpus: '{{ .Values.inference.gpus }}',
         },
       },
 
@@ -173,11 +181,6 @@ data:
       },
 
       s3: {
-        credentials: {
-          accessKeyId: 'OVERWRITTEN_BY_ENVIRONMENT_VARIABLE',
-          secretAccessKey: 'OVERWRITTEN_BY_ENVIRONMENT_VARIABLE',
-        },
-
         endpoint: '{{ ternary "https" "http" (eq .Values.minio.useSSL true)}}://{{ include "bailo.minio.host" . }}:{{ .Values.minio.service.ports.api }}',
         region: '{{ .Values.minio.region }}',
         forcePathStyle: true,

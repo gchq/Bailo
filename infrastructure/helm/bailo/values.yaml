@@ -79,8 +79,6 @@ oauth:
     callback: "" # exmaple /
     subdomain: "cognito domain"
   identityProviderClient:
-    accessKeyId: "access"
-    secretAccessKey: "secret"
     userPoolId: "region_id"
     userIdAttribute: "name"
 
@@ -258,3 +256,10 @@ connectors:
 instrumentation:
   enabled: false
   debug: false
+
+# Inferencing cluster reference
+inference:
+  enabled: false
+  # Url for the inferencing cluster
+  host: 'https://example.com'
+  gpus:

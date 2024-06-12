@@ -8,13 +8,6 @@ module.exports = {
     port: 3001,
   },
 
-  inference: {
-    enabled: false,
-    connection: {
-      host: 'http://example.com',
-    },
-  },
-
   app: {
     // Publicly accessible route to service
     protocol: '',
@@ -24,6 +17,7 @@ module.exports = {
     // Typically generated from `npm run certs`
     privateKey: './certs/key.pem',
     publicKey: './certs/cert.pem',
+    jwks: './certs/jwks.json',
   },
 
   mongo: {
@@ -136,6 +130,17 @@ module.exports = {
         subdomain: '',
       },
     },
+    cognito: {
+      identityProviderClient: {
+        region: 'eu-west-1',
+        credentials: {
+          accessKeyId: '',
+          secretAccessKey: '',
+        },
+      },
+      userPoolId: '',
+      userIdAttribute: '',
+    },
   },
 
   avScanning: {
@@ -170,7 +175,9 @@ module.exports = {
 
     inference: {
       enabled: false,
-
+      conneciton: {
+        host: 'http://example.com',
+      },
       gpus: {},
     },
   },
@@ -191,10 +198,9 @@ module.exports = {
 
   s3: {
     credentials: {
-      accessKeyId: 'minioadmin',
-      secretAccessKey: 'minioadmin',
+      accessKeyId: '',
+      secretAccessKey: '',
     },
-
     endpoint: 'http://minio:9000',
     region: 'ignored',
     forcePathStyle: true,
@@ -226,7 +232,7 @@ module.exports = {
         enabled: false,
         keyId: '123-456',
         KMSClient: {
-          region: 'eu-west-2',
+          region: 'eu-west-1',
           credentials: {
             accessKeyId: 'access',
             secretAccessKey: 'secret',
