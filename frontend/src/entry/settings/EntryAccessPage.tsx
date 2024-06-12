@@ -2,7 +2,9 @@ import { LoadingButton } from '@mui/lab'
 import { Stack, Typography } from '@mui/material'
 import { patchModel, useGetModel, useGetModelRoles } from 'actions/model'
 import { useState } from 'react'
+import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
+import EntryRolesInfo from 'src/entry/model/settings/EntryRolesInfo'
 import EntryAccess from 'src/entry/settings/EntryAccess'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
@@ -55,9 +57,12 @@ export default function EntryAccessPage({ entry }: EntryAccessPageProps) {
   return (
     <Stack spacing={2}>
       {isEntryRolesLoading && <Loading />}
-      <Typography variant='h6' component='h2'>
-        {`Manage ${toSentenceCase(entry.kind)} access`}
-      </Typography>
+      <Stack spacing={1} direction='row' alignItems='center'>
+        <Typography variant='h6' component='h2'>
+          {`Manage ${toSentenceCase(entry.kind)} access`}
+        </Typography>
+        <HelpDialog title='What are roles?' content={<EntryRolesInfo entry={entry} />} />
+      </Stack>
       <EntryAccess
         value={entry.collaborators}
         onUpdate={(val) => setAccessList(val)}

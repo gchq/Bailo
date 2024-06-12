@@ -2,8 +2,6 @@ import { Autocomplete, Stack, Table, TableBody, TableCell, TableHead, TableRow, 
 import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import HelpDialog from 'src/common/HelpDialog'
-import EntryRolesInfo from 'src/entry/model/settings/EntryRolesInfo'
 import EntityItem from 'src/entry/settings/EntityItem'
 import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntityObject, EntryKindKeys, Role } from 'types/types'
@@ -110,12 +108,7 @@ export default function EntryAccess({ value, onUpdate, entryKind, entryRoles }: 
         <TableHead>
           <TableRow>
             <TableCell>Entity</TableCell>
-            <TableCell>
-              <Stack direction='row' spacing={1} alignItems='center'>
-                <span>Roles</span>
-                <HelpDialog title='What are roles?' content={<EntryRolesInfo entry={entry} />} />
-              </Stack>
-            </TableCell>
+            <TableCell>Roles</TableCell>
             <TableCell align='right'>Actions</TableCell>
           </TableRow>
         </TableHead>
