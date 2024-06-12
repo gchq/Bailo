@@ -32,8 +32,9 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
 
   let collaborators: CollaboratorEntry[] = []
   if (modelParams.collaborators.length > 0) {
-    const collaboratorListContainsOwner =
-      modelParams.collaborators.filter((collaborator) => collaborator.roles.some((role) => role === 'owner')).length > 0
+    const collaboratorListContainsOwner = modelParams.collaborators.some((collaborator) =>
+      collaborator.roles.some((role) => role === 'owner'),
+    )
     if (collaboratorListContainsOwner) {
       collaborators = modelParams.collaborators
     } else {
