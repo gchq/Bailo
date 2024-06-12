@@ -61,13 +61,13 @@ export default function EntryAccessPage({ entry }: EntryAccessPageProps) {
       <EntryAccess
         value={entry.collaborators}
         onUpdate={(val) => setAccessList(val)}
-        errorMessage={errorMessage}
         entryKind={entry.kind}
         entryRoles={entryRoles}
       />
       <LoadingButton variant='contained' aria-label='Save access list' onClick={updateAccessList} loading={loading}>
         Save
       </LoadingButton>
+      <MessageAlert message={errorMessage} severity='error' />
     </Stack>
   )
 }

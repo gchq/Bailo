@@ -13,17 +13,3 @@ exports[`routes > release > patchReleaseComment > audit > expected call 1`] = `
   "message": "test",
 }
 `;
-
-exports[`routes > release > postReleaseComment > 200 > ok 1`] = `
-{
-  "release": {
-    "message": "test",
-  },
-}
-`;
-
-exports[`routes > release > postReleaseComment > audit > expected call 1`] = `
-{
-  "message": "test",
-}
-`;

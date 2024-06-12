@@ -196,7 +196,6 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
                   <EntryAccess
                     value={collaborators}
                     onUpdate={(val) => setCollaborators(val)}
-                    errorMessage={errorMessage}
                     entryKind={EntryKind.MODEL}
                     entryRoles={[
                       { id: 'owner', name: 'Owner' },

@@ -11,11 +11,10 @@ type EntryAccessProps = {
   value: CollaboratorEntry[]
   onUpdate: (list: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
-  errorMessage: string
   entryRoles: Role[]
 }
 
-export default function EntryAccess({ value, onUpdate, entryKind, errorMessage = '', entryRoles }: EntryAccessProps) {
+export default function EntryAccess({ value, onUpdate, entryKind, entryRoles }: EntryAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(value)
   const [userListQuery, setUserListQuery] = useState('')
@@ -115,7 +114,6 @@ export default function EntryAccess({ value, onUpdate, entryKind, errorMessage =
         </TableHead>
         <TableBody>{accessListEntities}</TableBody>
       </Table>
-      <MessageAlert message={errorMessage} severity='error' />
     </Stack>
   )
 }
