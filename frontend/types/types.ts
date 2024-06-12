@@ -369,6 +369,7 @@ export interface EntryInterface {
   description: string
   settings: {
     ungovernedAccess: boolean
+    allowTemplating: boolean
   }
   card: EntryCardInterface
   visibility: EntryVisibilityKeys
