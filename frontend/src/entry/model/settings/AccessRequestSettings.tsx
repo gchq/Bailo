@@ -23,6 +23,7 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
     const updatedModelSettings = {
       settings: {
         ungovernedAccess: allowUngoverned,
+        allowTemplating: false,
       },
     }
 
