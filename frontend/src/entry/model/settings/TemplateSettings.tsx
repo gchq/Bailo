@@ -7,23 +7,22 @@ import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
-type AccessRequestSettingsProps = {
+type TemplateSettingsProps = {
   model: EntryInterface
 }
 
-export default function AccessRequestSettings({ model }: AccessRequestSettingsProps) {
-  const [allowUngoverned, setAllowUngoverned] = useState(model.settings.ungovernedAccess)
+export default function TemplateSettings({ model }: TemplateSettingsProps) {
+  const [allowTemplate, setAllowTemplate] = useState(model.settings.allowTemplating)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const sendNotification = useNotification()
 
   async function handleSave() {
     setLoading(true)
-
     const updatedModelSettings = {
       settings: {
-        ungovernedAccess: allowUngoverned,
-        allowTemplating: false,
+        ungovernedAccess: false,
+        allowTemplating: allowTemplate,
       },
     }
 
@@ -44,26 +43,17 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
   return (
     <Stack spacing={2}>
       <Typography variant='h6' component='h2'>
-        Manage access requests
+        Manage Template
       </Typography>
       <FormControlLabel
-        label='Allow users to make ungoverned access requests'
+        label='Allow users to make a template'
         control={
-          <Checkbox
-            onChange={(event) => setAllowUngoverned(event.target.checked)}
-            checked={allowUngoverned}
-            size='small'
-          />
+          <Checkbox onChange={(event) => setAllowTemplate(event.target.checked)} checked={allowTemplate} size='small' />
         }
       />
       <Divider />
       <div>
-        <LoadingButton
-          variant='contained'
-          aria-label='Save ungoverned access requests'
-          onClick={handleSave}
-          loading={loading}
-        >
+        <LoadingButton variant='contained' aria-label='Save templating' onClick={handleSave} loading={loading}>
           Save
         </LoadingButton>
         <MessageAlert message={errorMessage} severity='error' />
