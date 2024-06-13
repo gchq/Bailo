@@ -258,3 +258,4 @@ information.
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
 [license-url]: https://github.com/gchq/bailo/blob/main/public/LICENSE.txt
 [product-screenshot]: frontend/public/images/bailo-marketplace.png
+````
