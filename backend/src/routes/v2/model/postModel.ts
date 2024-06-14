@@ -19,6 +19,7 @@ export const postModelSchema = z.object({
     settings: z
       .object({
         ungovernedAccess: z.boolean().optional().default(false).openapi({ example: true }),
+        allowTemplating: z.boolean().optional().default(false).openapi({ example: true }),
         mirror: z
           .object({
             sourceModelId: z.string().openapi({ example: 'yolo-v4-abcdef' }).optional(),
@@ -28,7 +29,7 @@ export const postModelSchema = z.object({
           .default({}),
       })
       .optional()
-      .default({ ungovernedAccess: false }),
+      .default({ ungovernedAccess: false, allowTemplating: false }),
   }),
 })
 
