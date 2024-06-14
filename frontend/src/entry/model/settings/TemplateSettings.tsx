@@ -12,7 +12,7 @@ type TemplateSettingsProps = {
 }
 
 export default function TemplateSettings({ model }: TemplateSettingsProps) {
-  const [allowTemplate, setAllowTemplate] = useState(model.settings.allowTemplating)
+  const [allowTemplating, setAllowTemplating] = useState(model.settings.allowTemplating)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const sendNotification = useNotification()
@@ -21,8 +21,8 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
     setLoading(true)
     const updatedModelSettings = {
       settings: {
-        ungovernedAccess: false,
-        allowTemplating: allowTemplate,
+        ungovernedAccess: model.settings.ungovernedAccess,
+        allowTemplating: allowTemplating,
       },
     }
 
@@ -33,7 +33,7 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
     } else {
       sendNotification({
         variant: 'success',
-        msg: 'Access request settings updated',
+        msg: 'Template settings updated',
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }
@@ -48,12 +48,21 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
       <FormControlLabel
         label='Allow users to make a template'
         control={
-          <Checkbox onChange={(event) => setAllowTemplate(event.target.checked)} checked={allowTemplate} size='small' />
+          <Checkbox
+            onChange={(event) => setAllowTemplating(event.target.checked)}
+            checked={allowTemplating}
+            size='small'
+          />
         }
       />
       <Divider />
       <div>
-        <LoadingButton variant='contained' aria-label='Save templating' onClick={handleSave} loading={loading}>
+        <LoadingButton
+          variant='contained'
+          aria-label='Save model template settings'
+          onClick={handleSave}
+          loading={loading}
+        >
           Save
         </LoadingButton>
         <MessageAlert message={errorMessage} severity='error' />
