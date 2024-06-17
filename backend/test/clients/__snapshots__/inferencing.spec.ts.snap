@@ -1,0 +1,31 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`clients > inferencing > createInferencing > success 1`] = `
+[
+  [
+    "http://example.com/api/deploy",
+    {
+      "body": "{}",
+      "headers": {
+        "content-type": "application/json",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`clients > inferencing > updateInferencing > success 1`] = `
+[
+  [
+    "http://example.com/api/update",
+    {
+      "body": "{}",
+      "headers": {
+        "content-type": "application/json",
+      },
+      "method": "PATCH",
+    },
+  ],
+]
+`;
