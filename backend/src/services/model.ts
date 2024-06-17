@@ -31,7 +31,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   // TODO - Find team by teamId to check it's valid. Throw error if not found.
 
   let collaborators: CollaboratorEntry[] = []
-  if (modelParams.collaborators.length > 0) {
+  if (modelParams.collaborators && modelParams.collaborators.length > 0) {
     const collaboratorListContainsOwner = modelParams.collaborators.some((collaborator) =>
       collaborator.roles.some((role) => role === 'owner'),
     )
