@@ -127,10 +127,19 @@ export interface EntryCardRevisionInterface {
   updatedAt: string
 }
 
+export const RoleKind = {
+  ENTRY: 'entry',
+  SCHEMA: 'schema',
+} as const
+
+export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
+
 export interface Role {
   id: string
   name: string
   short?: string
+  kind?: RoleKindKeys
+  description?: string
 }
 
 export const SchemaKind = {
