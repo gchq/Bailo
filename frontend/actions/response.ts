@@ -13,7 +13,7 @@ export function useGetResponses(parentIds: string[]) {
       responses: ResponseInterface[]
     },
     ErrorInfo
-  >(queryParams ? `/api/v2/response?${qs.stringify(queryParams)}` : null, fetcher)
+  >(Object.entries(queryParams).length > 0 ? `/api/v2/response?${qs.stringify(queryParams)}` : null, fetcher)
 
   return {
     mutateResponses: mutate,

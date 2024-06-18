@@ -1,5 +1,5 @@
 import { Menu as MenuIcon } from '@mui/icons-material'
-import { Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { Box, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
@@ -28,9 +28,9 @@ export default function ReviewCommentDisplay({ response, onReplyButtonClick }: R
   return (
     <>
       <Stack direction='row' spacing={2} alignItems='flex-start'>
-        <div style={{ marginTop: 5 }}>
+        <Box mt={2}>
           <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} size='chip' />
-        </div>
+        </Box>
         <Card
           sx={{
             width: '100%',
@@ -57,15 +57,7 @@ export default function ReviewCommentDisplay({ response, onReplyButtonClick }: R
           )}
         </Card>
       </Stack>
-      <Menu
-        id='basic-menu'
-        anchorEl={anchorEl}
-        open={open}
-        onClose={() => setAnchorEl(null)}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
+      <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
         <MenuItem onClick={() => handleReplyOnClick(response.comment)}>Reply</MenuItem>
       </Menu>
     </>

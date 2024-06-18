@@ -49,7 +49,9 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
               sx={{
                 fontStyle: 'italic',
                 background: grey.A200,
-                borderLeft: '2px solid #b8b8b8',
+                borderLeft: '2px',
+                borderLeftStyle: 'solid',
+                borderLeftColor: theme.palette.markdownBorder.main,
                 pt: 2,
                 pl: 1,
                 pb: 0.5,
@@ -83,7 +85,7 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
         },
       },
     }),
-    [theme.palette.container.main],
+    [theme.palette.container.main, theme.palette.markdownBorder.main],
   )
 
   return <ReactMarkdown options={options}>{children}</ReactMarkdown>

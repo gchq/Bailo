@@ -1,7 +1,7 @@
 import { Undo } from '@mui/icons-material'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Card, Divider, Stack, Typography } from '@mui/material'
+import { Box, Card, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
 import Loading from 'src/common/Loading'
@@ -32,9 +32,9 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
     <>
       {isModelRolesLoading && <Loading />}
       <Stack direction='row' spacing={2} alignItems='flex-start'>
-        <div style={{ marginTop: 5 }}>
+        <Box mt={1}>
           <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} size='chip' />
-        </div>
+        </Box>
         <Card
           sx={{
             width: '100%',
@@ -65,9 +65,7 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
                   </Typography>
                 )}
               </Stack>
-              <Typography variant='caption'>
-                as {getRoleDisplay(response.role || 'Error fetching model role', modelRoles)}
-              </Typography>
+              <Typography variant='caption'>as {getRoleDisplay(response.role as string, modelRoles)}</Typography>
             </Stack>
             <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
           </Stack>

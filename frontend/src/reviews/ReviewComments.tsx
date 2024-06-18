@@ -53,8 +53,8 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
   ])
 
   const hasResponseOrComment = useMemo(() => {
-    const hasReviewResponse = responses.filter((response) => response.kind === ResponseKind.Review).length > 0
-    const hasComment = responses.filter((response) => response.kind === ResponseKind.Comment).length > 0
+    const hasReviewResponse = !!responses.find((response) => response.kind === ResponseKind.Review)
+    const hasComment = !!responses.find((response) => response.kind === ResponseKind.Comment)
     return hasReviewResponse || hasComment
   }, [responses])
 

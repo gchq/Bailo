@@ -6,11 +6,13 @@ declare module '@mui/material/styles/createPalette' {
     container: PaletteColor
     customTextInput: PaletteColor
     topNavigation: PaletteColor
+    markdownBorder: PaletteColor
   }
   interface PaletteOptions {
     container: PaletteColorOptions
     customTextInput: PaletteColorOptions
     topNavigation: PaletteColorOptions
+    markdownBorder: PaletteColorOptions
   }
 }
 
@@ -110,6 +112,9 @@ export const lightTheme = createTheme({
       main: '#ed6c02',
       light: '#ffd08b',
     },
+    markdownBorder: {
+      main: '#b8b8b8',
+    },
   },
 })
 
@@ -152,6 +157,9 @@ export const darkTheme = createTheme({
     },
     topNavigation: {
       main: '#fff',
+    },
+    markdownBorder: {
+      main: '#b8b8b8',
     },
   },
   components: {

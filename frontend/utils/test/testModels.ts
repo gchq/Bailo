@@ -19,9 +19,10 @@ const testEntity = 'user:user1'
 const modelId = 'my-test-model'
 const accessRequestSchemaId = 'my-request-schema'
 const modelcardSchemaId = 'my-model-schema'
+const testAccessRequestId = '12315123'
 
 export const testAccessRequest: AccessRequestInterface = {
-  _id: '123125123',
+  _id: testAccessRequestId,
   id: 'my-access-request',
   modelId: modelId,
   schemaId: accessRequestSchemaId,

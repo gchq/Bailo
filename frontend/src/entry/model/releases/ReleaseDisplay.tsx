@@ -152,12 +152,12 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {reviewsWithLatestResponses.length > 0 && commentResponses && commentResponses.length > 0 && <Divider />}
+              {reviewsWithLatestResponses.length > 0 && commentResponses.length > 0 && <Divider />}
               <Stack direction='row' justifyContent='space-between' spacing={2}>
                 <div>
                   <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />
                 </div>
-                {commentResponses && commentResponses.length > 0 && (
+                {commentResponses.length > 0 && (
                   <Tooltip title='Comments'>
                     <Stack direction='row' spacing={1}>
                       <CommentIcon color='primary' />
