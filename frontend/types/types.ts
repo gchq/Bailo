@@ -46,6 +46,8 @@ export interface UiConfig {
 
     gpus: { [key: string]: string }
   }
+
+  tokenActions: { [key: string]: string }
 }
 
 export interface FileInterface {
@@ -192,31 +194,6 @@ export const TokenActionKind = {
 
 export type TokenActionKindKeys = (typeof TokenActionKind)[keyof typeof TokenActionKind]
 
-export const TokenAction = {
-  MODEL_READ: 'model:read',
-  MODEL_WRITE: 'model:write',
-
-  RELEASE_READ: 'release:read',
-  RELEASE_WRITE: 'release:write',
-
-  ACCESS_REQUEST_READ: 'access_request:read',
-  ACCESS_REQUEST_WRITE: 'access_request:write',
-
-  FILE_READ: 'file:read',
-  FILE_WRITE: 'file:write',
-
-  IMAGE_READ: 'image:read',
-  IMAGE_WRITE: 'image:write',
-
-  SCHEMA_READ: 'schema:read',
-  SCHEMA_WRITE: 'schema:write',
-
-  TOKEN_READ: 'token:read',
-  TOKEN_WRITE: 'token:write',
-} as const
-
-export type TokenActionKeys = (typeof TokenAction)[keyof typeof TokenAction]
-
 export const TokenCategory = {
   PERSONAL_ACCESS: 'personal access',
   KUBERNETES: 'kubernetes',
@@ -244,7 +221,7 @@ export interface TokenInterface {
   description: string
   scope: TokenScopeKeys
   modelIds: Array<string>
-  actions: Array<TokenActionKeys>
+  actions: Array<string>
   accessKey: string
   secretKey: string
   deleted: boolean

@@ -26,14 +26,31 @@ export const TokenActions = {
   ImageRead: 'image:read',
   ImageWrite: 'image:write',
 
-  SchemaRead: 'schema:read',
   SchemaWrite: 'schema:write',
+} as const
 
-  TokenRead: 'token:read',
-  TokenWrite: 'token:write',
+export const TokenDescriptions = {
+  [TokenActions.ModelRead]: 'Grants access to view model/data card settings.',
+  [TokenActions.ModelWrite]: 'Grants write access to creation and updating of model/data card settings.',
+
+  [TokenActions.ReleaseRead]: 'Grants access to view releases.',
+  [TokenActions.ReleaseWrite]: 'Grants access to create and update releases.',
+
+  [TokenActions.AccessRequestRead]: 'Grant access to list access requests',
+  [TokenActions.AccessRequestWrite]: 'Grants access to create, approve and comment on access requests.',
+
+  [TokenActions.FileRead]: 'Grant access to download and view files.',
+  [TokenActions.FileWrite]: 'Grant access to upload and delete files.',
+
+  [TokenActions.ImageRead]: 'Grants access to pull and list images from a model repository.',
+  [TokenActions.ImageWrite]: 'Grants access to push and delete images from a model repository.',
+
+  [TokenActions.SchemaWrite]: 'Grants permissions to upload and modify schemas for administrators.',
 } as const
 
 export type TokenActionsKeys = (typeof TokenActions)[keyof typeof TokenActions]
+
+export type TokenDescriptions = (typeof TokenDescriptions)[keyof typeof TokenDescriptions]
 
 export const HashType = {
   Bcrypt: 'bcrypt',

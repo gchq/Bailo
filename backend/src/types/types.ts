@@ -1,3 +1,5 @@
+import { TokenDescriptions } from '../models/Token.js'
+
 export interface User {
   dn: string
 }
@@ -33,4 +35,5 @@ export interface UiConfig {
   registry: {
     host: string
   }
+  tokenActions: typeof TokenDescriptions
 }

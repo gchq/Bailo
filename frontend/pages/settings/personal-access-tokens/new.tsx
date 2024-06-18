@@ -18,60 +18,31 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult, useListModels } from 'actions/model'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { postUserToken } from 'actions/user'
 import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import TokenDialog from 'src/settings/authentication/TokenDialog'
-import { TokenAction, TokenActionKeys, TokenActionKind, TokenInterface, TokenScope } from 'types/types'
+import { TokenActionKind, TokenInterface, TokenScope } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
-
-const [TokenReadAction, TokenWriteAction] = Object.values(TokenAction).reduce<Record<string, TokenActionKeys>[]>(
-  ([readActions, writeActions], action) => {
-    let groupedActions = [readActions, writeActions]
-    const [name, kind] = action.split(':')
-
-    if (kind === TokenActionKind.READ) {
-      groupedActions = [{ ...readActions, [name]: action }, writeActions]
-    }
-    if (kind === TokenActionKind.WRITE) {
-      groupedActions = [readActions, { ...writeActions, [name]: action }]
-    }
-
-    return groupedActions
-  },
-  [{}, {}],
-)
-
-const isReadAction = (action: TokenActionKeys) => {
-  return Object.values(TokenReadAction).includes(action)
-}
-
-const isWriteAction = (action: TokenActionKeys) => {
-  return Object.values(TokenWriteAction).includes(action)
-}
-
-const getActionName = (action: TokenActionKeys) => {
-  const [name, _kind] = action.split(':')
-  return name
-}
-
-const actionOptions = Object.values(TokenAction)
 
 export default function NewToken() {
   const theme = useTheme()
   const [description, setDescription] = useState('')
   const [isAllModels, setIsAllModels] = useState(true)
   const [selectedModels, setSelectedModels] = useState<EntrySearchResult[]>([])
-  const [isAllActions, setIsAllActions] = useState(true)
-  const [selectedActions, setSelectedActions] = useState<TokenActionKeys[]>(actionOptions)
+  const [isAllActions, setIsAllActions] = useState(false)
+  const [selectedActions, setSelectedActions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [token, setToken] = useState<TokenInterface | undefined>()
 
   const { models, isModelsLoading, isModelsError } = useListModels('model')
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const modelsAutocompletePlaceholder = useMemo(() => {
     if (isAllModels) return 'All models selected'
@@ -84,13 +55,36 @@ export default function NewToken() {
     [description, isAllModels, selectedModels.length, selectedActions.length],
   )
 
+  const tokenActions = uiConfig?.tokenActions || []
+
+  const actionOptions = Object.keys(tokenActions)
+
+  const [TokenReadAction, TokenWriteAction] = actionOptions.reduce<Record<string, string>[]>(
+    ([readActions, writeActions], action) => {
+      let groupedActions = [readActions, writeActions]
+      const [name, kind] = action.split(':')
+
+      if (kind === TokenActionKind.READ) {
+        groupedActions = [{ ...readActions, [name]: action }, writeActions]
+      }
+      if (kind === TokenActionKind.WRITE) {
+        groupedActions = [readActions, { ...writeActions, [name]: action }]
+      }
+
+      return groupedActions
+    },
+    [{}, {}],
+  )
+
   const renderActionTags = useCallback(
-    (value: TokenActionKeys[], getTagProps: AutocompleteRenderGetTagProps) =>
+    (value: string[], getTagProps: AutocompleteRenderGetTagProps) =>
       value.map((option, index) => {
+        const isReadAction = (action: string) => {
+          return Object.values(TokenReadAction).includes(action)
+        }
+
         const actionName = getActionName(option)
-        const isRequired =
-          option === TokenAction.MODEL_READ ||
-          (isReadAction(option) && selectedActions.includes(TokenWriteAction[actionName]))
+        const isRequired = isReadAction(option) && selectedActions.includes(TokenWriteAction[actionName])
 
         // overrideProps is used to disable delete functionality for model:read and any selected
         // read actions with a corresponding selected write action
@@ -110,8 +104,25 @@ export default function NewToken() {
           />
         )
       }),
-    [selectedActions],
+    [selectedActions, TokenWriteAction, TokenReadAction],
   )
+
+  if (isUiConfigLoading) {
+    return <Loading />
+  }
+
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message}></MessageAlert>
+  }
+
+  const isWriteAction = (action: string) => {
+    return Object.values(TokenWriteAction).includes(action)
+  }
+
+  const getActionName = (action: string) => {
+    const [name, _kind] = action.split(':')
+    return name
+  }
 
   const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(event.target.value)
@@ -128,18 +139,18 @@ export default function NewToken() {
 
   const handleAllActionsChange = (_event: ChangeEvent<HTMLInputElement>, checked: boolean) => {
     setIsAllActions(checked)
-    setSelectedActions(checked ? actionOptions : [TokenAction.MODEL_READ])
+    setSelectedActions(checked ? actionOptions : [])
   }
 
   const handleSelectedActionsChange = (
     _event: SyntheticEvent<Element, Event>,
-    value: TokenActionKeys[],
+    value: string[],
     reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<TokenActionKeys>,
+    details?: AutocompleteChangeDetails<string>,
   ) => {
     if (reason === 'clear') {
       setIsAllActions(false)
-      setSelectedActions([TokenAction.MODEL_READ])
+      setSelectedActions([])
       return
     }
 
