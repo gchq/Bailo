@@ -65,7 +65,9 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
                   </Typography>
                 )}
               </Stack>
-              <Typography variant='caption'>as {getRoleDisplay(response.role as string, modelRoles)}</Typography>
+              {response.role && (
+                <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
+              )}
             </Stack>
             <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
           </Stack>
