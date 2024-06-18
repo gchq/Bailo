@@ -16,6 +16,15 @@ export const postModelSchema = z.object({
     teamId: z.string(),
     description: z.string(),
     visibility: z.nativeEnum(EntryVisibility).optional().default(EntryVisibility.Public),
+    collaborators: z
+      .array(
+        z.object({
+          entity: z.string().openapi({ example: 'user:user' }),
+          roles: z.array(z.string()).openapi({ example: ['owner', 'contributor'] }),
+        }),
+      )
+      .optional()
+      .default([]),
     settings: z
       .object({
         ungovernedAccess: z.boolean().optional().default(false).openapi({ example: true }),
