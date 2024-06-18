@@ -50,11 +50,6 @@ export default function NewToken() {
     return 'Select models'
   }, [isAllModels, selectedModels.length])
 
-  const isGenerateButtonDisabled = useMemo(
-    () => !description || !(isAllModels || selectedModels.length) || !selectedActions.length,
-    [description, isAllModels, selectedModels.length, selectedActions.length],
-  )
-
   const tokenActions = uiConfig?.tokenActions || []
 
   const actionOptions = Object.keys(tokenActions)
@@ -285,7 +280,7 @@ export default function NewToken() {
                 <LoadingButton
                   variant='contained'
                   loading={isLoading}
-                  disabled={isGenerateButtonDisabled}
+                  disabled={!description}
                   onClick={handleSubmit}
                   data-test='generatePersonalAccessTokenButton'
                 >
