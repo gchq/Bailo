@@ -1,16 +1,16 @@
 import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Box, Button, Card, Container, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetModel } from 'actions/model'
 import { CreateReleaseParams, postRelease, postSimpleFileForRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import useNotification from 'src/hooks/useNotification'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
@@ -22,7 +22,17 @@ import {
   isFileInterface,
 } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { isValidSemver } from 'utils/stringUtils'
+import { isValidSemver, plural } from 'utils/stringUtils'
+
+interface FailedFileUpload {
+  filename: string
+  error: string
+}
+
+interface SuccessfulFileUpload {
+  filename: string
+  fileId: string
+}
 
 export default function NewRelease() {
   const [semver, setSemver] = useState('')
@@ -36,16 +46,29 @@ export default function NewRelease() {
   const [isRegistryError, setIsRegistryError] = useState(false)
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
+  const [successfulFileNames, setSuccessfulFileNames] = useState<SuccessfulFileUpload[]>([])
+  const [failedFileNames, setFailedFileNames] = useState<FailedFileUpload[]>([])
+
   const router = useRouter()
-  const sendNotification = useNotification()
+  const theme = useTheme()
 
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
+  const failedFileList = useMemo(() => {
+    return failedFileNames.map((file) => (
+      <div key={file.filename}>
+        <span style={{ fontWeight: 'bold' }}>{file.filename}</span> - {file.error}
+      </div>
+    ))
+  }, [failedFileNames])
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    setFailedFileNames([])
 
     if (!model) {
       return setErrorMessage('Please wait for the model to finish loading before trying to make a release.')
@@ -62,40 +85,53 @@ export default function NewRelease() {
     setErrorMessage('')
     setLoading(true)
 
-    const fileIds: string[] = []
+    const failedFiles: FailedFileUpload[] = []
+    const successfulFiles: SuccessfulFileUpload[] = []
     for (const file of files) {
       if (isFileInterface(file)) {
-        fileIds.push(file._id)
+        successfulFiles.push({ filename: file.name, fileId: file._id })
         continue
       }
 
-      const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+      if (!successfulFileNames.find((successfulFile) => successfulFile.filename === file.name)) {
+        const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
 
-      const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
-        if (progressEvent.total) {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+        const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+          }
         }
-      }
 
-      try {
-        const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
-        setCurrentFileUploadProgress(undefined)
-        if (fileUploadResponse) {
-          setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
-          fileIds.push(fileUploadResponse.data.file._id)
-        } else {
+        try {
+          const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
           setCurrentFileUploadProgress(undefined)
-          return setLoading(false)
-        }
-      } catch (e) {
-        if (e instanceof Error) {
-          sendNotification({
-            variant: 'error',
-            msg: e.message,
-          })
+          if (fileUploadResponse) {
+            setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
+            successfulFiles.push({ filename: file.name, fileId: fileUploadResponse.data.file._id })
+          } else {
+            setCurrentFileUploadProgress(undefined)
+            setLoading(false)
+          }
+        } catch (e) {
+          if (e instanceof Error) {
+            failedFiles.push({ filename: file.name, error: e.message })
+            setCurrentFileUploadProgress(undefined)
+            setLoading(false)
+          }
         }
       }
+    }
+
+    successfulFiles.forEach((file) => {
+      if (!successfulFileNames.find((successfulFile) => successfulFile.filename === file.filename)) {
+        setSuccessfulFileNames([...successfulFileNames, file])
+      }
+    })
+
+    if (failedFiles.length > 0) {
+      setFailedFileNames(failedFiles)
+      return
     }
 
     const release: CreateReleaseParams = {
@@ -104,7 +140,7 @@ export default function NewRelease() {
       modelCardVersion: model.card.version,
       notes: releaseNotes,
       minor: isMinorRelease,
-      fileIds,
+      fileIds: successfulFileNames.map((file) => file.fileId),
       images: imageList,
     }
 
@@ -184,6 +220,17 @@ export default function NewRelease() {
                   </LoadingButton>
                   <MessageAlert message={errorMessage} severity='error' />
                 </Stack>
+                {failedFileNames.length > 0 && (
+                  <Stack spacing={2}>
+                    <Typography
+                      color={theme.palette.error.main}
+                    >{`Unable to create release due to issues with the following ${plural(
+                      failedFileNames.length,
+                      'file',
+                    )}:`}</Typography>
+                    {failedFileList}
+                  </Stack>
+                )}
               </Stack>
             </Box>
           </Card>

@@ -34,6 +34,10 @@ export async function uploadFile(
 
   const file = new FileModel({ modelId, name, mime, bucket, path, complete: true })
 
+  if (file.name.endsWith('txt')) {
+    throw BadReq('no')
+  }
+
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id })
