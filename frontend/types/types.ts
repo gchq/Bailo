@@ -511,3 +511,13 @@ export type ReviewListStatusKeys = (typeof ReviewListStatus)[keyof typeof Review
 export function isReviewKind(value: unknown): value is ReviewKindKeys {
   return value === ReviewKind.RELEASE || value === ReviewKind.ACCESS
 }
+
+export interface FailedFileUpload {
+  filename: string
+  error: string
+}
+
+export interface SuccessfulFileUpload {
+  filename: string
+  fileId: string
+}

@@ -15,24 +15,16 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
   EntryKind,
+  FailedFileUpload,
   FileInterface,
   FileUploadProgress,
   FileWithMetadata,
   FlattenedModelImage,
   isFileInterface,
+  SuccessfulFileUpload,
 } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { isValidSemver, plural } from 'utils/stringUtils'
-
-interface FailedFileUpload {
-  filename: string
-  error: string
-}
-
-interface SuccessfulFileUpload {
-  filename: string
-  fileId: string
-}
 
 export default function NewRelease() {
   const [semver, setSemver] = useState('')
