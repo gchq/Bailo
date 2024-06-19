@@ -4,6 +4,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import InferenceModel, { InferenceDoc, InferenceInterface } from '../models/Inference.js'
 import Inference from '../models/Inference.js'
 import { UserInterface } from '../models/User.js'
+import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { getModelById } from './model.js'
@@ -74,7 +75,13 @@ export async function createInference(user: UserInterface, modelId: string, infe
     port: inferenceParams.settings.port,
   }
 
-  await createInferenceService(inferenceService)
+  const tokenHeader = config.inference.tokenHeader
+
+  if (!tokenHeader) {
+    throw NotFound('No authentication key exists')
+  }
+
+  await createInferenceService(inferenceService, tokenHeader)
 
   const inference = new Inference({
     modelId: modelId,
@@ -122,8 +129,13 @@ export async function updateInference(
     tag: tag,
     port: inferenceParams.settings.port,
   }
+  const tokenHeader = config.inference.tokenHeader
 
-  await updateInferenceService(inferenceService)
+  if (!tokenHeader) {
+    throw NotFound('No authentication key exists')
+  }
+
+  await updateInferenceService(inferenceService, tokenHeader)
 
   const updatedInference = await Inference.findOneAndUpdate(
     { modelId: inference.modelId, image: inference.image, tag: inference.tag },

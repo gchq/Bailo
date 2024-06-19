@@ -122,6 +122,7 @@ export interface Config {
       connection: {
         host: string
       }
+      authorizationTokenName: string
       gpus: { [key: string]: string }
     }
   }
@@ -173,6 +174,10 @@ export interface Config {
         KMSClient: KMSClientConfig
       }
     }
+  }
+
+  inference: {
+    tokenHeader: string
   }
 }
 

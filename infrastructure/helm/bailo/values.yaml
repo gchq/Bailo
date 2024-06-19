@@ -263,3 +263,5 @@ inference:
   # Url for the inferencing cluster
   host: 'https://example.com'
   gpus:
+  authorizationTokenName: 'inferencing-token'
+  tokenHeader: 'secret token'

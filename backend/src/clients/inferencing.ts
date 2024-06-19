@@ -10,12 +10,12 @@ interface InferenceService {
   port: number
 }
 
-export async function createInferenceService(inferenceServiceParams: InferenceService) {
+export async function createInferenceService(inferenceServiceParams: InferenceService, token: string) {
   let res
   try {
     res = await fetch(`${config.ui.inference.connection.host}/api/deploy`, {
       method: 'POST',
-      headers: new Headers({ 'content-type': 'application/json' }),
+      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${token}` },
       body: JSON.stringify(inferenceServiceParams),
     })
   } catch (err) {
@@ -29,12 +29,12 @@ export async function createInferenceService(inferenceServiceParams: InferenceSe
   return body
 }
 
-export async function updateInferenceService(inferenceServiceParams: InferenceService) {
+export async function updateInferenceService(inferenceServiceParams: InferenceService, token: string) {
   let res
   try {
     res = await fetch(`${config.ui.inference.connection.host}/api/update`, {
       method: 'PATCH',
-      headers: new Headers({ 'content-type': 'application/json' }),
+      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${token}` },
       body: JSON.stringify(inferenceServiceParams),
     })
   } catch (err) {

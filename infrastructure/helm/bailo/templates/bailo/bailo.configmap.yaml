@@ -153,6 +153,7 @@ data:
             host: '{{ .Values.inference.host}}',
           },
           gpus: '{{ .Values.inference.gpus }}',
+          authorizationTokenName: '{{. Values.inference.authorizationTokenName}}'
         },
       },
 
@@ -191,6 +192,10 @@ data:
           registry: '{{ .Values.minio.registryBucket }}',
         },
       },
+
+      inference: {
+        tokenHeader: '{{ .Values.inference.tokenHeader }}'
+      }
     }
 
   custom-environment-variables.cjs: |
