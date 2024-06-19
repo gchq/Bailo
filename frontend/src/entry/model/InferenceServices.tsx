@@ -22,7 +22,7 @@ export default function InferenceServices({ model }: InferenceProps) {
   const [errorMessage, setErrorMessage] = useState('')
   const [healthCheck, setHealthCheck] = useState(false)
 
-  const { tokens, isTokensLoading, isTokensError } = useGetUserTokens()
+  const { tokens, isTokensLoading, isTokensError, mutateTokens } = useGetUserTokens()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   useEffect(() => {
@@ -51,7 +51,6 @@ export default function InferenceServices({ model }: InferenceProps) {
     if (error) return error
     const authorizationTokenName = uiConfig?.inference.authorizationTokenName
     const authorizationAccessKeys = tokens.filter((value) => value.description === authorizationTokenName)
-
     if (authorizationTokenName && authorizationAccessKeys) {
       for (const token of authorizationAccessKeys) {
         deleteUserToken(token.accessKey)
@@ -70,6 +69,7 @@ export default function InferenceServices({ model }: InferenceProps) {
         }
       }
     }
+    mutateTokens()
   }
 
   function handleCreateNewInferenceService() {
