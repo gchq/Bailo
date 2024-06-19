@@ -15,7 +15,7 @@ export async function createInferenceService(inferenceServiceParams: InferenceSe
   try {
     res = await fetch(`${config.ui.inference.connection.host}/api/deploy`, {
       method: 'POST',
-      headers: new Headers({ 'content-type': 'application/json' }),
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify(inferenceServiceParams),
     })
   } catch (err) {
@@ -34,7 +34,7 @@ export async function updateInferenceService(inferenceServiceParams: InferenceSe
   try {
     res = await fetch(`${config.ui.inference.connection.host}/api/update`, {
       method: 'PATCH',
-      headers: new Headers({ 'content-type': 'application/json' }),
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify(inferenceServiceParams),
     })
   } catch (err) {
