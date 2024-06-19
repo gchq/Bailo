@@ -22,7 +22,7 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
     const updatedModelSettings = {
       settings: {
         ungovernedAccess: model.settings.ungovernedAccess,
-        allowTemplating: allowTemplating,
+        allowTemplating,
       },
     }
 
