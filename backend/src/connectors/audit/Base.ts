@@ -5,6 +5,7 @@ import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
+import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
@@ -102,6 +103,22 @@ export const AuditInfo = {
   ViewInferences: { typeId: 'ViewInferences', description: 'Inferences Viewed', auditKind: AuditKind.View },
 
   CreateExport: { typeId: 'CreateExport', description: 'Model Exported', auditKind: AuditKind.Create },
+
+  ViewResponses: {
+    typeId: 'ViewResponses',
+    description: 'View a list of responses',
+    auditKind: AuditKind.View,
+  },
+  CreateResponse: {
+    typeId: 'CreateResponse',
+    description: 'Review or comment responses created',
+    auditKind: AuditKind.Create,
+  },
+  UpdateResponse: {
+    typeId: 'UpdateResponse',
+    description: 'Updated a comment or review response',
+    auditKind: AuditKind.Update,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -126,6 +143,10 @@ export abstract class BaseAuditConnector {
   abstract onUpdateRelease(req: Request, release: ReleaseDoc)
   abstract onDeleteRelease(req: Request, modelId: string, semver: string)
   abstract onViewReleases(req: Request, releases: ReleaseDoc[])
+
+  abstract onCreateResponse(req: Request, responseInterface: ResponseInterface)
+  abstract onViewResponses(req: Request, responseInterfaces: ResponseInterface[])
+  abstract onUpdateResponse(req: Request, responseId: string)
 
   abstract onCreateUserToken(req: Request, token: TokenDoc)
   abstract onViewUserTokens(req: Request, tokens: TokenDoc[])

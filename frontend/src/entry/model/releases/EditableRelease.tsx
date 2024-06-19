@@ -162,8 +162,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
       minor: isMinorRelease,
       fileIds,
       images: imageList,
-      // Comments are ignored when editing a release
-      comments: [],
     }
 
     const response = await putRelease(updatedRelease)

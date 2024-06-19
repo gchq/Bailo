@@ -6,11 +6,8 @@ import {
   createAccessRequest,
   getAccessRequestsByModel,
   getModelAccessRequestsForUser,
-  newAccessRequestComment,
   removeAccessRequest,
-  updateAccessRequestComment,
 } from '../../src/services/accessRequest.js'
-import { testAccessRequest } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -88,29 +85,6 @@ describe('services > accessRequest', () => {
     expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
       /^You do not have permission/,
     )
-  })
-
-  test('newAccessRequestComment > success', async () => {
-    modelMocks.getModelById.mockResolvedValue(undefined)
-    accessRequestModelMocks.findOneAndUpdate.mockResolvedValue({})
-
-    await newAccessRequestComment({} as any, '1.0.0', 'This is a new comment')
-
-    expect(accessRequestModelMocks.findOneAndUpdate).toBeCalled()
-  })
-
-  test('updateAccessRequestComment > success', async () => {
-    accessRequestModelMocks.findOne.mockReturnValue(testAccessRequest)
-    accessRequestModelMocks.findOneAndUpdate.mockReturnValue({})
-
-    await updateAccessRequestComment(
-      { dn: 'user' },
-      testAccessRequest.id,
-      testAccessRequest.comments[0]._id,
-      'This is an updated comment',
-    )
-
-    expect(accessRequestModelMocks.findOneAndUpdate).toBeCalled()
   })
 
   test('getAccessRequestsByModel > good', async () => {

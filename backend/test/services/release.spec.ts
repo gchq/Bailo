@@ -13,11 +13,40 @@ import {
   newReleaseComment,
   removeFileFromReleases,
   updateRelease,
-  updateReleaseComment,
 } from '../../src/services/release.js'
-import { testRelease } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
+
+const responseModelMock = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.limit = vi.fn(() => obj)
+  obj.unwind = vi.fn(() => obj)
+  obj.at = vi.fn(() => obj)
+  obj.map = vi.fn(() => [])
+  obj.filter = vi.fn(() => [])
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+
+vi.mock('../../src/models/Response.js', async () => ({
+  ...((await vi.importActual('../../src/models/Response.js')) as object),
+  default: responseModelMock,
+}))
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({
@@ -292,7 +321,7 @@ describe('services > release', () => {
 
     await newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')
 
-    expect(releaseModelMocks.findOneAndUpdate).toBeCalled()
+    expect(responseModelMock.save).toBeCalled()
   })
 
   test('newReleaseComment > should throw bad request when attempting to create a release comment on a mirrored model', async () => {
@@ -309,38 +338,6 @@ describe('services > release', () => {
     expect(() => newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')).rejects.toThrowError(
       /^Cannot create a new comment on a mirrored model./,
     )
-    expect(releaseModelMocks.findOneAndUpdate).not.toBeCalled()
-  })
-
-  test('updateReleaseComment > success', async () => {
-    releaseModelMocks.findOne.mockResolvedValue(testRelease)
-    releaseModelMocks.findOneAndUpdate.mockResolvedValue({})
-
-    await updateReleaseComment(
-      { dn: 'user' },
-      testRelease.modelId,
-      testRelease.semver,
-      testRelease.comments[0]._id,
-      'This is an updated comment',
-    )
-
-    expect(releaseModelMocks.findOneAndUpdate).toBeCalled()
-  })
-
-  test('updateReleaseComment > should throw bad request when attempting to update a release comment on a mirrored model', async () => {
-    vi.mocked(authorisation.release).mockResolvedValue({
-      info: 'Cannot update comments on a mirrored model.',
-      success: false,
-      id: '',
-    })
-    modelMocks.getModelById.mockResolvedValueOnce({
-      id: 'test_model_id',
-      card: { version: 1 },
-      settings: { mirror: { sourceModelId: '123' } },
-    })
-    expect(() =>
-      updateReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment', 'This is a message'),
-    ).rejects.toThrowError(/^Cannot update comments on a mirrored model./)
     expect(releaseModelMocks.findOneAndUpdate).not.toBeCalled()
   })
 

@@ -65,19 +65,27 @@ export interface FileInterface {
   updatedAt: Date
 }
 
-export type ReviewComment = {
-  message: string
-  user: string
+export const ResponseKind = {
+  Review: 'review',
+  Comment: 'comment',
+} as const
+export type ResponseKindKeys = (typeof ResponseKind)[keyof typeof ResponseKind]
+
+export interface ResponseInterface {
+  entity: string
+  kind: ResponseKindKeys
+  parentId: string
+  outdated?: boolean
+  decision?: DecisionKeys
+  comment?: string
+  role?: string
+
   createdAt: string
-}
-
-export type ReviewResponseKind = ReviewComment | ReviewResponse
-
-export function isReviewResponse(responseKind: ReviewResponseKind) {
-  return 'decision' in responseKind
+  updatedAt: string
 }
 
 export type ReleaseInterface = {
+  _id: string
   modelId: string
   modelCardVersion: number
   semver: string
@@ -85,7 +93,6 @@ export type ReleaseInterface = {
   minor?: boolean
   draft?: boolean
   fileIds: Array<string>
-  comments: Array<ReviewComment>
   files: Array<FileInterface>
   images: Array<FlattenedModelImage>
   deleted: boolean
@@ -409,12 +416,12 @@ export interface AccessRequestMetadata {
 }
 
 export interface AccessRequestInterface {
+  _id: string
   id: string
   modelId: string
   schemaId: string
   deleted: boolean
   metadata: AccessRequestMetadata
-  comments: Array<ReviewComment>
   createdBy: string
   createdAt: string
   updatedAt: string
@@ -444,20 +451,6 @@ export const Decision = {
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
-export interface ReviewResponse {
-  user: string
-  decision: DecisionKeys
-  role: string
-  comment?: string
-  outdated?: boolean
-  createdAt: string
-  updatedAt: string
-}
-
-export interface ReviewResponseWithRole extends ReviewResponse {
-  role: string
-}
-
 type PartialReviewRequestInterface =
   | {
       accessRequestId: string
@@ -475,10 +468,10 @@ export const ReviewKind = {
 export type ReviewKindKeys = (typeof ReviewKind)[keyof typeof ReviewKind]
 
 export type ReviewRequestInterface = {
+  _id: string
   model: EntryInterface
   role: string
   kind: 'release' | 'access'
-  responses: ReviewResponse[]
   createdAt: string
   updatedAt: string
 } & PartialReviewRequestInterface

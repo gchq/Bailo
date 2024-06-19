@@ -1,7 +1,7 @@
 import { Undo } from '@mui/icons-material'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Card, Divider, Stack, Typography } from '@mui/material'
+import { Box, Card, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
 import Loading from 'src/common/Loading'
@@ -9,12 +9,12 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
-import { Decision, EntityKind, ReviewResponse } from 'types/types'
+import { Decision, EntityKind, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getRoleDisplay } from 'utils/roles'
 
 type ReviewDecisionDisplayProps = {
-  response: ReviewResponse
+  response: ResponseInterface
   modelId: string
 }
 
@@ -22,7 +22,7 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
 
   const theme = useTheme()
-  const username = response.user.split(':')[1]
+  const [entityKind, username] = response.entity.split(':')
 
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
@@ -31,8 +31,10 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
   return (
     <>
       {isModelRolesLoading && <Loading />}
-      <Stack direction='row' spacing={2} alignItems='center'>
-        <UserAvatar entity={{ kind: EntityKind.USER, id: username }} size='chip' />{' '}
+      <Stack direction='row' spacing={2} alignItems='flex-start'>
+        <Box mt={1}>
+          <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} size='chip' />
+        </Box>
         <Card
           sx={{
             width: '100%',
@@ -48,7 +50,7 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
           >
             <Stack alignItems={{ xs: 'center', sm: 'flex-start' }} spacing={{ xs: 1, sm: 0 }}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
-                <Typography>
+                <Typography data-test='reviewDecisionDisplay'>
                   <UserDisplay dn={username} />
                   {response.decision === Decision.Approve && ' has approved'}
                   {response.decision === Decision.RequestChanges && ' has requested changes'}
@@ -63,13 +65,15 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
                   </Typography>
                 )}
               </Stack>
-              <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
+              {response.role && (
+                <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
+              )}
             </Stack>
             <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
           </Stack>
           {response.comment && (
             <div>
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ mt: 1, mb: 2 }} />
               <MarkdownDisplay>{response.comment}</MarkdownDisplay>
             </div>
           )}

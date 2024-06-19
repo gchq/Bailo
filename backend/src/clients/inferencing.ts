@@ -21,12 +21,11 @@ export async function createInferenceService(inferenceServiceParams: InferenceSe
   } catch (err) {
     throw InternalError('Unable to communicate with the inferencing service.', { err })
   }
-  const body = await res.json()
   if (!res.ok) {
     throw BadReq('Unrecognised response returned by the inferencing service.')
   }
-
-  return body
+  // TODO - Update return object. For now, we are just checking the status
+  return res.json()
 }
 
 export async function updateInferenceService(inferenceServiceParams: InferenceService) {
@@ -40,10 +39,10 @@ export async function updateInferenceService(inferenceServiceParams: InferenceSe
   } catch (err) {
     throw InternalError('Unable to communicate with the inferencing service.', { err })
   }
-  const body = await res.json()
+
   if (!res.ok) {
     throw BadReq('Unrecognised response returned by the inferencing service.')
   }
-
-  return body
+  // TODO - Update return object. For now, we are just checking the status
+  return res.json()
 }

@@ -1,16 +1,16 @@
 import authentication from '../connectors/authentication/index.js'
-import { AccessRequestAction, ModelAction, ReleaseAction } from '../connectors/authorisation/actions.js'
+import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import { ReleaseDoc } from '../models/Release.js'
-import Review, { Decision, ReviewDoc, ReviewInterface, ReviewResponse } from '../models/Review.js'
+import ResponseModel, { Decision, ResponseInterface, ResponseKind } from '../models/Response.js'
+import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import { toEntity } from '../utils/entity.js'
-import { BadReq, Forbidden, GenericError, NotFound } from '../utils/error.js'
-import { convertStringToId } from '../utils/id.js'
+import { BadReq, GenericError, NotFound } from '../utils/error.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -49,6 +49,7 @@ export async function findReviews(
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     // Populate model as value instead of array
     .unwind({ path: '$model' })
+    .lookup({ from: 'v2_responses', localField: 'responseIds', foreignField: '_id', as: 'responses' })
     .match({ ...(mine && (await findUserInCollaborators(user))) })
 
   const auths = await authorisation.models(
@@ -100,7 +101,8 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
-export type ReviewResponseParams = Pick<ReviewResponse, 'comment' | 'decision'>
+export type ReviewResponseParams = Pick<ResponseInterface, 'comment' | 'decision'>
+
 export async function respondToReview(
   user: UserInterface,
   modelId: string,
@@ -142,29 +144,34 @@ export async function respondToReview(
   if (!review) {
     throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewIdQuery, role })
   }
-  const update = await Review.findByIdAndUpdate(
-    review._id,
-    {
-      $push: { responses: { id: convertStringToId(reviewId), user: toEntity('user', user.dn), ...response } },
-    },
-    { new: true },
-  )
-  if (!update) {
-    throw GenericError(500, `Adding response to Review was not successful`, { modelId, reviewIdQuery, role })
-  }
-  await sendReviewResponseNotification(update, user)
+
+  // Store the response
+  const reviewResponse = new ResponseModel({
+    entity: toEntity('user', user.dn),
+    kind: ResponseKind.Review,
+    role,
+    parentId: review._id,
+    ...response,
+  })
+
+  await reviewResponse.save()
+  await sendReviewResponseNotification(review, reviewResponse, user)
 
   sendWebhooks(
-    update.modelId,
+    review.modelId,
     WebhookEvent.CreateReviewResponse,
-    `A new response has been added to a review requested for Model ${update.modelId}`,
-    { review: update },
+    `A new response has been added to a review requested for Model ${review.modelId}`,
+    { review: review },
   )
 
-  return update
+  return review
 }
 
-export async function sendReviewResponseNotification(review: ReviewDoc, user: UserInterface) {
+export async function sendReviewResponseNotification(
+  review: ReviewDoc,
+  reviewResponse: ResponseInterface,
+  user: UserInterface,
+) {
   let reviewIdQuery
   switch (review.kind) {
     case ReviewKind.Access: {
@@ -174,7 +181,7 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
       }
 
       const access = await getAccessRequestById(user, review.accessRequestId)
-      notifyReviewResponseForAccess(review, access).catch((error) =>
+      notifyReviewResponseForAccess(reviewResponse, access).catch((error) =>
         log.warn({ error }, 'Error when notifying collaborators about review response.'),
       )
       break
@@ -186,7 +193,7 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
       }
 
       const release = await getReleaseBySemver(user, review.modelId, review.semver)
-      notifyReviewResponseForRelease(review, release).catch((error) =>
+      notifyReviewResponseForRelease(reviewResponse, release).catch((error) =>
         log.warn({ error }, 'Error when notifying collaborators about review response.'),
       )
       break
@@ -196,6 +203,7 @@ export async function sendReviewResponseNotification(review: ReviewDoc, user: Us
   }
 }
 
+//TODO This won't work for response refactor
 export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
   const reviews = await Review.find({
     accessRequestId: accessRequestIds,
@@ -206,65 +214,6 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
     },
   })
   return reviews.some((review) => requiredRoles.accessRequest.includes(review.role))
-}
-
-export async function updateReviewResponseComment(
-  user: UserInterface,
-  modelId: string,
-  reviewId: string,
-  responseId: string,
-  kind: ReviewKindKeys,
-  comment: string,
-  semverOrAccessId: string,
-) {
-  const model = await getModelById(user, modelId)
-
-  let reviewIdQuery
-  switch (kind) {
-    case ReviewKind.Access: {
-      const access = await getAccessRequestById(user, semverOrAccessId)
-      const accessAuth = await authorisation.accessRequest(user, model, access, AccessRequestAction.Update)
-      if (!accessAuth.success) {
-        throw Forbidden(accessAuth.info, { userDn: user.dn, accessRequestId: reviewId })
-      }
-      reviewIdQuery = { modelId, accessRequestId: reviewId, kind }
-      break
-    }
-    case ReviewKind.Release: {
-      const release = await getReleaseBySemver(user, modelId, semverOrAccessId)
-      const releaseAuth = await authorisation.release(user, model, release, ReleaseAction.Update)
-      if (!releaseAuth.success) {
-        throw Forbidden(releaseAuth.info, {
-          userDn: user.dn,
-          modelId: modelId,
-        })
-      }
-      reviewIdQuery = { modelId, semver: reviewId, kind }
-      break
-    }
-
-    default:
-      throw GenericError(500, 'Review kind not recognised', reviewIdQuery)
-  }
-
-  const update = await Review.findOneAndUpdate(
-    { _id: reviewId },
-    { 'responses.$[i].comment': comment, 'user:user': toEntity('user', user.dn) },
-    {
-      arrayFilters: [
-        {
-          'i.id': `${responseId}`,
-          'i.user': `${toEntity('user', user.dn)}`,
-        },
-      ],
-    },
-  )
-  if (!update) {
-    throw GenericError(500, `Updating response to Review, was not successful`, {
-      reviewIdQuery,
-    })
-  }
-  return update
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
