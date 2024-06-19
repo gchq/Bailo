@@ -11,6 +11,9 @@ const configMock = vi.hoisted(() => ({
       },
     },
   },
+  inference: {
+    tokenHeader: 'test',
+  },
 }))
 
 vi.mock('../../src/utils/config.js', () => ({
@@ -30,7 +33,7 @@ describe('clients > inferencing', () => {
       text: vi.fn(),
       json: vi.fn(() => ({ message: 'ok' })),
     })
-    const response = await createInferenceService({} as any)
+    const response = await createInferenceService({} as any, 'test')
 
     expect(fetchMock.default).toBeCalled()
     expect(fetchMock.default.mock.calls).toMatchSnapshot()
@@ -43,7 +46,7 @@ describe('clients > inferencing', () => {
       text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
     })
-    expect(() => createInferenceService({} as any)).rejects.toThrowError(
+    expect(() => createInferenceService({} as any, 'test')).rejects.toThrowError(
       /^Unrecognised response returned by the inferencing service./,
     )
   })
@@ -51,7 +54,7 @@ describe('clients > inferencing', () => {
   test('createInferencing > rejected', async () => {
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
 
-    expect(() => createInferenceService({} as any)).rejects.toThrowError(
+    expect(() => createInferenceService({} as any, 'test')).rejects.toThrowError(
       /^Unable to communicate with the inferencing service./,
     )
   })
@@ -62,7 +65,7 @@ describe('clients > inferencing', () => {
       text: vi.fn(),
       json: vi.fn(() => ({ message: 'ok' })),
     })
-    const response = await updateInferenceService({} as any)
+    const response = await updateInferenceService({} as any, 'test')
 
     expect(fetchMock.default).toBeCalled()
     expect(fetchMock.default.mock.calls).toMatchSnapshot()
@@ -75,7 +78,7 @@ describe('clients > inferencing', () => {
       text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
     })
-    expect(() => updateInferenceService({} as any)).rejects.toThrowError(
+    expect(() => updateInferenceService({} as any, 'test')).rejects.toThrowError(
       /^Unrecognised response returned by the inferencing service./,
     )
   })
@@ -83,7 +86,7 @@ describe('clients > inferencing', () => {
   test('updateInferencing > rejected', async () => {
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
 
-    expect(() => updateInferenceService({} as any)).rejects.toThrowError(
+    expect(() => updateInferenceService({} as any, 'test')).rejects.toThrowError(
       /^Unable to communicate with the inferencing service./,
     )
   })
