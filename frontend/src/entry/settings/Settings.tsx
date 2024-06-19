@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
+import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
 import EntryAccessPage from 'src/entry/settings/EntryAccessPage'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import { EntryInterface, EntryKind, EntryKindKeys } from 'types/types'
@@ -14,6 +15,7 @@ export const SettingsCategory = {
   DANGER: 'danger',
   ACCESS_REQUESTS: 'access_requests',
   PERMISSIONS: 'permissions',
+  TEMPLATE: 'template',
 } as const
 
 export type SettingsCategoryKeys = (typeof SettingsCategory)[keyof typeof SettingsCategory]
@@ -28,7 +30,8 @@ function isSettingsCategory(
         value === SettingsCategory.DETAILS ||
         value === SettingsCategory.PERMISSIONS ||
         value === SettingsCategory.ACCESS_REQUESTS ||
-        value === SettingsCategory.DANGER
+        value === SettingsCategory.DANGER ||
+        value === SettingsCategory.TEMPLATE
       )
     case EntryKind.DATA_CARD:
       return value === SettingsCategory.DETAILS || value === SettingsCategory.PERMISSIONS
@@ -94,6 +97,12 @@ export default function Settings({ entry }: SettingsProps) {
               Access Requests
             </SimpleListItemButton>
             <SimpleListItemButton
+              selected={selectedCategory === SettingsCategory.TEMPLATE}
+              onClick={() => handleListItemClick(SettingsCategory.TEMPLATE)}
+            >
+              Template
+            </SimpleListItemButton>
+            <SimpleListItemButton
               selected={selectedCategory === SettingsCategory.DANGER}
               onClick={() => handleListItemClick(SettingsCategory.DANGER)}
             >
@@ -106,6 +115,7 @@ export default function Settings({ entry }: SettingsProps) {
         {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}
         {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessPage entry={entry} />}
         {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
+        {selectedCategory === SettingsCategory.TEMPLATE && <TemplateSettings model={entry} />}
         {selectedCategory === SettingsCategory.DANGER && (
           <Stack spacing={2}>
             <Typography variant='h6' component='h2'>
