@@ -153,7 +153,7 @@ data:
             host: '{{ .Values.inference.host}}',
           },
           gpus: '{{ .Values.inference.gpus }}',
-          authorizationTokenName: '{{. Values.inference.authorizationTokenName}}'
+          authorizationTokenName: '{{ .Values.inference.authorizationTokenName }}'
         },
       },
 
