@@ -120,10 +120,19 @@ export interface EntryCardRevisionInterface {
   updatedAt: string
 }
 
+export const RoleKind = {
+  ENTRY: 'entry',
+  SCHEMA: 'schema',
+} as const
+
+export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
+
 export interface Role {
   id: string
   name: string
   short?: string
+  kind?: RoleKindKeys
+  description?: string
 }
 
 export const SchemaKind = {
@@ -369,6 +378,7 @@ export interface EntryInterface {
   description: string
   settings: {
     ungovernedAccess: boolean
+    allowTemplating: boolean
   }
   card: EntryCardInterface
   visibility: EntryVisibilityKeys
@@ -383,6 +393,7 @@ export interface EntryForm {
   teamId: string
   description: string
   visibility: EntryVisibilityKeys
+  collaborators?: CollaboratorEntry[]
 }
 
 export type UpdateEntryForm = Omit<EntryForm, 'kind'>

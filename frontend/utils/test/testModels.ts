@@ -82,6 +82,7 @@ export const testV2Model: EntryInterface = {
   ],
   settings: {
     ungovernedAccess: false,
+    allowTemplating: false,
   },
   teamId: 'test-team',
   card: testModelCard,

@@ -18,6 +18,7 @@ export const patchModelSchema = z.object({
     settings: z
       .object({
         ungovernedAccess: z.boolean().optional().openapi({ example: true }),
+        allowTemplating: z.boolean().optional().openapi({ example: true }),
         mirror: z
           .object({
             sourceModelId: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),

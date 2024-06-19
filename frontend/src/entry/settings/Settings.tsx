@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
-import EntryAccess from 'src/entry/settings/EntryAccess'
+import EntryAccessPage from 'src/entry/settings/EntryAccessPage'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import { EntryInterface, EntryKind, EntryKindKeys } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
@@ -104,7 +104,7 @@ export default function Settings({ entry }: SettingsProps) {
       </List>
       <Container sx={{ my: 2 }}>
         {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}
-        {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccess entry={entry} />}
+        {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessPage entry={entry} />}
         {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
         {selectedCategory === SettingsCategory.DANGER && (
           <Stack spacing={2}>

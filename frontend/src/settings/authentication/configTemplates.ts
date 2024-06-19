@@ -12,9 +12,9 @@ metadata:
   name:  ${toKebabCase(description)}-secret
 data:
   .dockerconfigjson: ${btoa(
-    `{"auths":{"${registryUrl}":{"username":"${accessKey}","password":"${secretKey}","auth":${btoa(
+    `{"auths":{"${registryUrl}":{"username":"${accessKey}","password":"${secretKey}","auth":"${btoa(
       `${accessKey}:${secretKey}`,
-    )}}}}`,
+    )}"}}}`,
   )}
 type: kubernetes.io/dockerconfigjson`
 }

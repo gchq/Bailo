@@ -14,6 +14,7 @@ export default async function DisableUngovernedModel() {
       'This model does not allow ungoverned access, users should create an access request to get the artefacts from this.',
     settings: {
       ungovernedAccess: false,
+      allowTemplating: false,
       mirror: {},
     },
   })

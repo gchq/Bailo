@@ -178,7 +178,7 @@ minio:
 # Registry Dependencies
 registry:
   repository: registry
-  tag: 2
+  tag: 3.0.0-alpha.1
   enabled: true
   protocol: "https"
   #host: "bailo-registry" # service name
@@ -186,7 +186,9 @@ registry:
   insecure: "true"
   certDir: "/certs"
   certFile: cert.pem #use san.cnf to create certs
+  jwksFile: jwks.json
   keyFile: key.pem
+  serviceAccount: ''
 
 # Nginx Dependencies
 nginxAuth:
@@ -210,11 +212,6 @@ openshift:
 
 # Instance Settings
 config:
-  s2i:
-    name: "seldonio - 1.10.0"
-    image: seldonio/seldon-core-s2i-python37:1.10.0
-  supportEmail: "support@example.com"
-
   ui:
     banner:
       enabled: false
@@ -230,9 +227,6 @@ config:
     user: "mailuser"
     pass: "mailpass"
     from: "bailo@example.com"
-
-  build:
-    environment: img # 'img' for k8s | eks and  'openshfit' for openshift
 
   app:
     protocol: "https"
@@ -265,3 +259,6 @@ inference:
   gpus:
   authorizationTokenName: 'inferencing-token'
   tokenHeader: 'secret token'
+
+backend:
+  serviceAccount: ''

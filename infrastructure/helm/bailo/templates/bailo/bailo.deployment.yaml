@@ -21,6 +21,9 @@ spec:
       labels:
         name: backend
     spec:
+      {{- if .Values.backend.serviceAccount }}
+      serviceAccountName: {{ .Values.backend.serviceAccount }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
