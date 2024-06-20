@@ -258,7 +258,6 @@ inference:
   host: 'https://example.com'
   gpus:
   authorizationTokenName: 'inferencing-token'
-  tokenHeader: 'secret token'
 
 backend:
   serviceAccount: ''

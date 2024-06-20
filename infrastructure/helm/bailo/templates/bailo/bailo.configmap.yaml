@@ -192,10 +192,6 @@ data:
           registry: '{{ .Values.minio.registryBucket }}',
         },
       },
-
-      inference: {
-        tokenHeader: '{{ .Values.inference.tokenHeader }}'
-      }
     }
 
   custom-environment-variables.cjs: |
@@ -212,4 +208,7 @@ data:
       instrumentation: {
         authenticationToken: 'OTEL_EXPORTER_TOKEN',
       },
+      inference: {
+        tokenHeader: 'INFERENCING_WRITE_TOKEN'
+      }
     }
