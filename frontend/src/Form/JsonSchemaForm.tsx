@@ -119,14 +119,14 @@ export default function JsonSchemaForm({
 
   return (
     <Grid container spacing={2} sx={{ mt: 1 }}>
-      <Grid item xs={12} sm={3} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
+      <Grid item xs={12} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
               <ListItem key={step.schema.title} disablePadding>
                 <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
                   <Stack direction='row' spacing={2}>
-                    <Typography>{step.schema.title}</Typography>
+                    <Typography sx={{ wordBreak: 'break-word' }}>{step.schema.title}</Typography>
                     {displayLabelValidation && <ValidationErrorIcon step={step} />}
                   </Stack>
                 </ListItemButton>
@@ -135,7 +135,7 @@ export default function JsonSchemaForm({
           </List>
         </Stepper>
       </Grid>
-      <Grid item xs={12} sm={9} md={10}>
+      <Grid item xs={12} md={10}>
         <Form
           schema={currentStep.schema}
           formData={currentStep.state}
