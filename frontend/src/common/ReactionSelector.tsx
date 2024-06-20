@@ -44,7 +44,7 @@ export default function ReactionSelector({ response, mutateResponses }: Reaction
       }
       return (
         <Tooltip title={title}>
-          <Button onClick={() => handleReactionOnClick(kind)} variant='outlined' startIcon={icon}>
+          <Button size='small' onClick={() => handleReactionOnClick(kind)} variant='outlined' startIcon={icon}>
             {users.length}
           </Button>
         </Tooltip>
@@ -92,7 +92,7 @@ export default function ReactionSelector({ response, mutateResponses }: Reaction
   return (
     <>
       {isCurrentUserLoading && <Loading />}
-      <Stack direction='row' spacing={1} alignItems='center'>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
         <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
           <InsertEmoticon fontSize='small' />
         </IconButton>
