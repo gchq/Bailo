@@ -93,6 +93,7 @@ export interface ResponseReaction {
 export const ReactionKind = {
   LIKE: 'like',
   DISLIKE: 'dislike',
+  CELEBRATE: 'celebrate',
 } as const
 export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 
