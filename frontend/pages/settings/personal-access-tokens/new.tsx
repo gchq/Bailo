@@ -31,6 +31,13 @@ import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
 export default function NewToken() {
+  const { models, isModelsLoading, isModelsError } = useListModels('model')
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+
+  const tokenActions = uiConfig?.tokenActions || {}
+
+  const actionOptions = Object.keys(tokenActions)
+
   const theme = useTheme()
   const [description, setDescription] = useState('')
   const [isAllModels, setIsAllModels] = useState(true)
@@ -41,18 +48,11 @@ export default function NewToken() {
   const [errorMessage, setErrorMessage] = useState('')
   const [token, setToken] = useState<TokenInterface | undefined>()
 
-  const { models, isModelsLoading, isModelsError } = useListModels('model')
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-
   const modelsAutocompletePlaceholder = useMemo(() => {
     if (isAllModels) return 'All models selected'
     if (selectedModels.length) return ''
     return 'Select models'
   }, [isAllModels, selectedModels.length])
-
-  const tokenActions = uiConfig?.tokenActions || []
-
-  const actionOptions = Object.keys(tokenActions)
 
   const [TokenReadAction, TokenWriteAction] = actionOptions.reduce<Record<string, string>[]>(
     ([readActions, writeActions], action) => {
