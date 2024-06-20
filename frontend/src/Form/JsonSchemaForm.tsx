@@ -123,12 +123,18 @@ export default function JsonSchemaForm({
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
-              <ListItem key={step.schema.title} disablePadding>
+              <ListItem key={step.schema.title} disablePadding style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
-                  <Stack direction='row' spacing={2}>
-                    <Typography sx={{ wordBreak: 'break-word' }}>{step.schema.title}</Typography>
-                    {displayLabelValidation && <ValidationErrorIcon step={step} />}
-                  </Stack>
+                  <Typography
+                    sx={{
+                      wordBreak: 'break-word',
+                      color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.common.black,
+                    }}
+                    width='100%'
+                  >
+                    {step.schema.title}
+                  </Typography>
+                  {displayLabelValidation && <ValidationErrorIcon step={step} />}
                 </ListItemButton>
               </ListItem>
             ))}
