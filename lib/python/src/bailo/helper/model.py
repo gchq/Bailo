@@ -75,7 +75,7 @@ class Model(Entry):
 
         model = cls(
             client=client,
-            model_id=res["model"]["id"],
+            model_id=model_id,
             name=name,
             description=description,
             visibility=visibility,
@@ -110,6 +110,94 @@ class Model(Entry):
         model.get_card_latest()
 
         return model
+
+    @classmethod
+    def from_mlflow(
+        cls,
+        client: Client,
+        mlflow_uri: str,
+        team_id: str,
+        name: str,
+        schema_id: str | None = None,
+        version: str | None = None,
+        files: bool = True,
+        visibility: ModelVisibility | None = None,
+    ) -> Model:
+        """Import an MLFlow Model into Bailo.
+
+        :param client: A client object used to interact with Bailo
+        :param mlflow_uri: MLFlow server URI
+        :param team_id: A unique team ID
+        :param name: Name of model (on MLFlow). Same name will be used on Bailo
+        :param schema_id: A unique schema ID, only required when files is True, defaults to None
+        :param version: Specific MLFlow model version to import, defaults to None
+        :param files: Import files?, defaults to True
+        :param visibility: Visibility of model on Bailo, using ModelVisibility enum (e.g Public or Private), defaults to None
+        :return: A model object
+        """
+        if mlflow:
+            mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
+            mlflow.set_tracking_uri(mlflow_uri)
+            filter_string = f"name = '{name}'"
+
+            res = mlflow_client.search_model_versions(filter_string=filter_string, order_by=["version_number DESC"])
+            if len(res):
+                if version:
+                    for model in res:
+                        if model.version == version:
+                            sel_model = model
+                            break
+                        sel_model = None
+                else:
+                    sel_model = res[0]
+
+                if not sel_model:
+                    raise BailoException(
+                        "No MLFlow model found. Are you sure the name/alias/version provided is correct?"
+                    )
+
+                name = sel_model.name
+                description = sel_model.description + " Imported from MLFlow."
+                bailo_res = client.post_model(
+                    name=name, kind=EntryKind.MODEL, description=description, team_id=team_id, visibility=visibility
+                )
+                model_id = bailo_res["model"]["id"]
+                logger.info(f"MLFlow model successfully imported to Bailo with ID %s.", model_id)
+
+                model = cls(
+                    client=client,
+                    model_id=model_id,
+                    name=name,
+                    description=description,
+                    visibility=visibility,
+                )
+                model._unpack(bailo_res["model"])
+
+                if files:
+                    if schema_id is None:
+                        raise BailoException(
+                            "Unable to upload files to Bailo. schema_id argument is required in order to create a release."
+                        )
+                    model.card_from_schema(schema_id=schema_id)
+                    release = model.create_release(version=Version.coerce(str(sel_model.version)), notes=" ")
+                    run_id = sel_model.run_id
+                    if run_id is None:
+                        raise BailoException(
+                            "MLFlow model does not have an assosciated run_id, therefore artifacts cannot be transfered."
+                        )
+
+                    mlflow_run = mlflow_client.get_run(run_id)
+                    artifact_uri = mlflow_run.info.artifact_uri
+                    if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)):
+                        temp_dir = os.path.join(tempfile.gettempdir(), "mlflow_model")
+                        mlflow_dir = os.path.join(temp_dir, f"mlflow_{run_id}")
+                        mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
+                        release.upload(mlflow_dir)
+                return model
+            else:
+                raise BailoException("No MLFlow models found. Are you sure the name/alias/version provided is correct?")
+        else:
+            raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
     def update_model_card(self, model_card: dict[str, Any] | None = None) -> None:
         """Upload and retrieve any changes to the model card on Bailo.
