@@ -57,6 +57,14 @@ export default function NewRelease() {
     ))
   }, [failedFileNames])
 
+  const handleFileOnChange = (newFiles: (File | FileInterface)[]) => {
+    const removedDeletedFilesFromSuccessList = successfulFileNames.filter((file) =>
+      newFiles.some((newFile) => file.filename !== newFile.name),
+    )
+    setSuccessfulFileNames(removedDeletedFilesFromSuccessList)
+    setFiles(newFiles)
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -132,7 +140,7 @@ export default function NewRelease() {
       modelCardVersion: model.card.version,
       notes: releaseNotes,
       minor: isMinorRelease,
-      fileIds: successfulFileNames.map((file) => file.fileId),
+      fileIds: successfulFiles.map((file) => file.fileId),
       images: imageList,
     }
 
@@ -190,7 +198,7 @@ export default function NewRelease() {
                   onSemverChange={(value) => setSemver(value)}
                   onReleaseNotesChange={(value) => setReleaseNotes(value)}
                   onMinorReleaseChange={(value) => setIsMinorRelease(value)}
-                  onFilesChange={(value) => setFiles(value)}
+                  onFilesChange={(value) => handleFileOnChange(value)}
                   filesMetadata={filesMetadata}
                   onFilesMetadataChange={(value) => setFilesMetadata(value)}
                   onImageListChange={(value) => setImageList(value)}

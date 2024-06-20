@@ -105,6 +105,14 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
+  const handleFileOnChange = (newFiles: (File | FileInterface)[]) => {
+    const removedDeletedFilesFromSuccessList = successfulFileNames.filter((file) =>
+      newFiles.some((newFile) => file.filename !== newFile.name),
+    )
+    setSuccessfulFileNames(removedDeletedFilesFromSuccessList)
+    setFiles(newFiles)
+  }
+
   if (isModelError) {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
@@ -170,7 +178,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         }
       }
     }
-
     successfulFiles.forEach((file) => {
       if (!successfulFileNames.find((successfulFile) => successfulFile.filename === file.filename)) {
         setSuccessfulFileNames([...successfulFileNames, file])
@@ -188,7 +195,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
       modelCardVersion: model.card.version,
       notes: releaseNotes,
       minor: isMinorRelease,
-      fileIds: successfulFileNames.map((file) => file.fileId),
+      fileIds: successfulFiles.map((file) => file.fileId),
       images: imageList,
       // Comments are ignored when editing a release
       comments: [],
@@ -256,7 +263,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onSemverChange={(value) => setSemver(value)}
         onReleaseNotesChange={(value) => setReleaseNotes(value)}
         onMinorReleaseChange={(value) => setIsMinorRelease(value)}
-        onFilesChange={(value) => setFiles(value)}
+        onFilesChange={(value) => handleFileOnChange(value)}
         onFilesMetadataChange={(value) => setFilesMetadata(value)}
         onImageListChange={(value) => setImageList(value)}
         onRegistryError={handleRegistryError}
