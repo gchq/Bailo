@@ -126,8 +126,13 @@ def standard_experiment(example_model, test_path):
 
 
 @pytest.fixture
-def mlflow_id(test_path):
-    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri="http://127.0.0.1:5000")
+def mlflow_uri():
+    return "http://127.0.0.1:5001"
+
+
+@pytest.fixture
+def mlflow_id(test_path, mlflow_uri):
+    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
     experiment_name = f"Test_{str(random.randint(1, 1000000))}"
     mlflow_id = mlflow_client.create_experiment(name=experiment_name)
 
@@ -138,7 +143,7 @@ def mlflow_id(test_path):
     }
 
     # Setting local tracking URI and experiment name
-    mlflow.set_tracking_uri(uri="http://127.0.0.1:5000")
+    mlflow.set_tracking_uri(uri=mlflow_uri)
     mlflow.set_experiment(experiment_id=mlflow_id)
 
     # Logging the same metrics to the local MLFlow server
@@ -149,6 +154,29 @@ def mlflow_id(test_path):
         mlflow.set_tag("Training Info", "YOLOv5 Demo Model")
 
     return mlflow_id
+
+
+@pytest.fixture
+def mlflow_model(mlflow_id, mlflow_uri):
+    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
+    model_name = f"Test_{str(random.randint(1, 1000000))}"
+    mlflow_client.create_registered_model(name=model_name, description="Test Description")
+
+    run = mlflow_client.search_runs(mlflow_id)[0]
+    run_id = run.info.run_id
+    artifact_uri = run.info.artifact_uri
+    mlflow_client.create_model_version(name=model_name, source=artifact_uri, run_id=run_id)
+
+    return model_name
+
+
+@pytest.fixture
+def mlflow_model_no_run(mlflow_id, mlflow_uri):
+    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
+    model_name = f"Test_{str(random.randint(1, 1000000))}"
+    mlflow_client.create_registered_model(name=model_name, description="Test Description")
+
+    return model_name
 
 
 @pytest.fixture
