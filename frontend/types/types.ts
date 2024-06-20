@@ -79,10 +79,22 @@ export interface ResponseInterface {
   decision?: DecisionKeys
   comment?: string
   role?: string
+  reactions?: ResponseReaction[]
 
   createdAt: string
   updatedAt: string
 }
+
+export interface ResponseReaction {
+  kind: ReactionKindKeys
+  users: string[]
+}
+
+export const ReactionKind = {
+  LIKE: 'like',
+  DISLIKE: 'dislike',
+} as const
+export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 
 export type ReleaseInterface = {
   _id: string

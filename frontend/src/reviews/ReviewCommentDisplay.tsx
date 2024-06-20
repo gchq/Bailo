@@ -2,6 +2,7 @@ import { Menu as MenuIcon } from '@mui/icons-material'
 import { Box, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
+import ReactionSelector from 'src/common/ReactionSelector'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import { EntityKind, ResponseInterface } from 'types/types'
@@ -10,9 +11,14 @@ import { formatDateString } from 'utils/dateUtils'
 type ReviewCommentDisplayProps = {
   response: ResponseInterface
   onReplyButtonClick: (value: string) => void
+  mutateResponses: () => void
 }
 
-export default function ReviewCommentDisplay({ response, onReplyButtonClick }: ReviewCommentDisplayProps) {
+export default function ReviewCommentDisplay({
+  response,
+  onReplyButtonClick,
+  mutateResponses,
+}: ReviewCommentDisplayProps) {
   const [entityKind, username] = response.entity.split(':')
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -55,6 +61,7 @@ export default function ReviewCommentDisplay({ response, onReplyButtonClick }: R
               <MarkdownDisplay>{response.comment}</MarkdownDisplay>
             </div>
           )}
+          <ReactionSelector response={response} mutateResponses={mutateResponses} />
         </Card>
       </Stack>
       <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>

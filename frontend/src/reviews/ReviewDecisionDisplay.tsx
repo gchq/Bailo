@@ -6,6 +6,7 @@ import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
+import ReactionSelector from 'src/common/ReactionSelector'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
@@ -16,9 +17,10 @@ import { getRoleDisplay } from 'utils/roles'
 type ReviewDecisionDisplayProps = {
   response: ResponseInterface
   modelId: string
+  mutateResponses: () => void
 }
 
-export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecisionDisplayProps) {
+export default function ReviewDecisionDisplay({ response, modelId, mutateResponses }: ReviewDecisionDisplayProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
 
   const theme = useTheme()
@@ -71,12 +73,15 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
             </Stack>
             <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
           </Stack>
-          {response.comment && (
-            <div>
-              <Divider sx={{ mt: 1, mb: 2 }} />
-              <MarkdownDisplay>{response.comment}</MarkdownDisplay>
-            </div>
-          )}
+          <Stack spacing={2}>
+            {response.comment && (
+              <div>
+                <Divider sx={{ mt: 1, mb: 2 }} />
+                <MarkdownDisplay>{response.comment}</MarkdownDisplay>
+              </div>
+            )}
+            <ReactionSelector response={response} mutateResponses={mutateResponses} />
+          </Stack>
         </Card>
       </Stack>
     </>

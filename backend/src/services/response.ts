@@ -1,4 +1,4 @@
-import ResponseModel from '../models/Response.js'
+import ResponseModel, { ReactionKindKeys, ResponseReaction } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { toEntity } from '../utils/entity.js'
 import { Forbidden, NotFound } from '../utils/error.js'
@@ -23,6 +23,23 @@ export async function getResponsesByParentIds(_user: UserInterface, parentIds: s
   }
 
   return responses
+}
+
+export async function getResponseById(user: UserInterface, responseId: string) {
+  const response = await ResponseModel.findOne({ _id: responseId })
+
+  if (!response) {
+    throw NotFound(`The requested response was not found.`, { responseId })
+  }
+
+  if (response.entity !== toEntity('user', user.dn)) {
+    throw Forbidden('Only the original author can update a comment or review response.', {
+      userDn: user.dn,
+      responseId,
+    })
+  }
+
+  return response
 }
 
 export async function findResponsesByIds(_user: UserInterface, responseIds: string[]) {
@@ -50,6 +67,36 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   }
 
   response.comment = comment
+  response.save()
+
+  return response
+}
+
+export async function updateResponsReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
+  const response = await ResponseModel.findOne({ _id: responseId })
+
+  if (!response) {
+    throw NotFound(`The requested response was not found.`, { responseId })
+  }
+
+  if (response.reactions === undefined) {
+    response.reactions = []
+  }
+
+  const updatedReaction = response.reactions.find((reaction) => reaction.kind === kind)
+
+  if (!updatedReaction) {
+    const newReaction: ResponseReaction = {
+      kind,
+      users: [user.dn],
+    }
+    response.reactions.push(newReaction)
+  } else {
+    updatedReaction.users.includes(user.dn)
+      ? (updatedReaction.users = updatedReaction.users.filter((reactionUser) => reactionUser !== user.dn))
+      : updatedReaction.users.push(user.dn)
+  }
+
   response.save()
 
   return response
