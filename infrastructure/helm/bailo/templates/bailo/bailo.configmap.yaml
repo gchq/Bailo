@@ -195,6 +195,7 @@ data:
       modelMirror: {
         enabled: {{ .Values.modelMirror.enabled }},
         export: {
+          bucket: '{{ .Values.modelMirror.export.bucket }}',
           kmsSignature: {
             enabled: {{ .Values.modelMirror.export.kmsSignature.enabled }},
             keyId: '{{ .Values.modelMirror.export.kmsSignature.keyId }}',
@@ -225,8 +226,8 @@ data:
           kmsSignature: {
             KMSClient: {
               credentials: {
-                accessKeyId: KMS_ACCESS_KEY,
-                secretAccessKey: KMS_ACCESS_KEY,
+                accessKeyId: 'KMS_ACCESS_KEY',
+                secretAccessKey: 'KMS_ACCESS_KEY',
               },
             },
           },
