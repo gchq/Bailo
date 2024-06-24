@@ -50,7 +50,11 @@ export default function NewSchema() {
   )
 
   const schemaTypeDescription = useMemo(() => {
-    const schemaKinds = Object.values(SchemaKind).map((schemaKind) => camelCaseToSentenceCase(schemaKind))
+    const schemaKinds = Object.values(SchemaKind).map((schemaKind) =>
+      schemaKind === SchemaKind.MODEL
+        ? `${camelCaseToSentenceCase(schemaKind)} Card`
+        : camelCaseToSentenceCase(schemaKind),
+    )
     const last = schemaKinds.pop()
     return `Schemas are used for ${schemaKinds.join(', ')} and ${last} forms`
   }, [])
