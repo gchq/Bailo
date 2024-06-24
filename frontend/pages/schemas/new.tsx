@@ -165,9 +165,10 @@ export default function NewSchema() {
                 >
                   <MenuItem value={SchemaKind.MODEL}>Model</MenuItem>
                   <MenuItem value={SchemaKind.ACCESS_REQUEST}>Access Request</MenuItem>
+                  <MenuItem value={SchemaKind.DATA_CARD}>Data Card</MenuItem>
                 </Select>
                 <Typography variant='caption'>
-                  Schemas are used for both model cards and access request forms
+                  Schemas are used for model card, access request and data card forms
                 </Typography>
               </Stack>
               <Button variant='outlined' component='label' aria-label='Schema JSON file upload button'>
