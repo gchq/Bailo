@@ -8,8 +8,16 @@ export const toTitleCase = (value: string): string => {
     .join(' ')
 }
 
+export const camelCaseToTitleCase = (value: string): string => {
+  return toTitleCase(value.replace(/([A-Z])/g, ' $1'))
+}
+
 export const toSentenceCase = (value: string): string => {
   return `${value.charAt(0).toUpperCase()}${value.slice(1)}`.replace(/[-_]/g, ' ')
+}
+
+export const camelCaseToSentenceCase = (value: string): string => {
+  return toSentenceCase(value.replace(/([A-Z])/g, ' $1'))
 }
 
 export const plural = (value: number, phrase: string) => {
