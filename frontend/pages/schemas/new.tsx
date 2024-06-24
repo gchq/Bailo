@@ -5,13 +5,14 @@ import { styled } from '@mui/material/styles'
 import { useTheme } from '@mui/material/styles'
 import { postSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { ChangeEvent, FormEvent, useState } from 'react'
+import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
 import RichTextEditor from 'src/common/RichTextEditor'
 import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { SchemaKind, SchemaKindKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { camelCaseToSentenceCase, camelCaseToTitleCase } from 'utils/stringUtils'
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -37,6 +38,22 @@ export default function NewSchema() {
 
   const router = useRouter()
   const theme = useTheme()
+
+  const schemaTypeOptions = useMemo(
+    () =>
+      Object.values(SchemaKind).map((schemaKind) => (
+        <MenuItem value={schemaKind} key={schemaKind}>
+          {camelCaseToTitleCase(schemaKind)}
+        </MenuItem>
+      )),
+    [],
+  )
+
+  const schemaTypeDescription = useMemo(() => {
+    const schemaKinds = Object.values(SchemaKind).map((schemaKind) => camelCaseToSentenceCase(schemaKind))
+    const last = schemaKinds.pop()
+    return `Schemas are used for ${schemaKinds.join(', ')} and ${last} forms`
+  }, [])
 
   const handleUploadChange = (event: ChangeEvent<HTMLInputElement>) => {
     const fileReader = new FileReader()
@@ -163,13 +180,9 @@ export default function NewSchema() {
                   value={schemaKind}
                   onChange={(e) => setSchemaKind(e.target.value as SchemaKindKeys)}
                 >
-                  <MenuItem value={SchemaKind.MODEL}>Model</MenuItem>
-                  <MenuItem value={SchemaKind.ACCESS_REQUEST}>Access Request</MenuItem>
-                  <MenuItem value={SchemaKind.DATA_CARD}>Data Card</MenuItem>
+                  {schemaTypeOptions}
                 </Select>
-                <Typography variant='caption'>
-                  Schemas are used for model card, access request and data card forms
-                </Typography>
+                <Typography variant='caption'>{schemaTypeDescription}</Typography>
               </Stack>
               <Button variant='outlined' component='label' aria-label='Schema JSON file upload button'>
                 {filename !== '' ? filename : 'Select schema'}
