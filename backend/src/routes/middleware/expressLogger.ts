@@ -33,7 +33,7 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
     clientIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
   })
 
-  req.log.trace({ url: `${req.baseUrl}${req.url}`, method: req.method }, 'Request received.')
+  req.log.trace({ url: `${req.baseUrl}${req.url}`, method: req.method, user: req.user }, 'Request received.')
   res.setHeader('x-request-id', req.reqId)
 
   await morganLog(req, res)
