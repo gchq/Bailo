@@ -239,17 +239,6 @@ export const TokenCategory = {
 
 export type TokenCategoryKeys = (typeof TokenCategory)[keyof typeof TokenCategory]
 
-export function isTokenCategory(value: string | string[] | undefined): value is TokenCategoryKeys {
-  return (
-    value === TokenCategory.PERSONAL_ACCESS ||
-    value === TokenCategory.KUBERNETES ||
-    value === TokenCategory.ROCKET ||
-    value === TokenCategory.PODMAN ||
-    value === TokenCategory.DOCKER_LOGIN ||
-    value === TokenCategory.DOCKER_CONFIGURATION
-  )
-}
-
 export interface TokenInterface {
   user: string
   description: string
