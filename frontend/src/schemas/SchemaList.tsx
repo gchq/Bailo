@@ -1,4 +1,4 @@
-import { Button, List, Stack, Typography } from '@mui/material'
+import { Button, Card, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
 import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
 import { useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
@@ -7,6 +7,7 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { SchemaInterface, SchemaKindKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { camelCaseToTitleCase } from 'utils/stringUtils'
 
 interface SchemaDisplayProps {
   schemaKind: SchemaKindKeys
@@ -52,50 +53,42 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     [mutateSchemas],
   )
 
-  const schemaList = useMemo(() => {
-    return (
-      <Stack spacing={2}>
-        {schemas.map((schema) => (
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            alignItems='center'
-            justifyContent='space-between'
-            key={schema.id}
-          >
-            <Typography>{schema.name}</Typography>
-            <Stack spacing={1} direction={{ xs: 'column', md: 'row' }}>
-              <Button variant='outlined' onClick={() => handleSetSchemaActive(schema)}>
-                {schema.active ? 'Mark as inactive' : 'Mark as active'}
-              </Button>
-              <Button variant='contained' onClick={() => handleDeleteSchemaButtonOnClick(schema.id)}>
-                Delete
-              </Button>
-            </Stack>
-            <MessageAlert message={errorMessage} severity='error' />
-            <ConfirmationDialogue
-              open={open}
-              title='Delete schema'
-              onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
-              onCancel={() => setOpen(false)}
-              errorMessage={errorMessage}
-              dialogMessage={
-                'Deleting this schema will break any existing models that are using it. Are you sure you want to do this?'
-              }
-            />
+  const schemaList = useMemo(
+    () =>
+      schemas.map((schema, index) => (
+        <ListItem divider={index < schemas.length - 1} key={schema.id}>
+          <ListItemText>{schema.name}</ListItemText>
+          <Stack spacing={1} direction={{ xs: 'column', md: 'row' }}>
+            <Button size='small' variant='outlined' onClick={() => handleSetSchemaActive(schema)}>
+              {schema.active ? 'Mark as inactive' : 'Mark as active'}
+            </Button>
+            <Button size='small' variant='contained' onClick={() => handleDeleteSchemaButtonOnClick(schema.id)}>
+              Delete
+            </Button>
           </Stack>
-        ))}
-      </Stack>
-    )
-  }, [
-    schemas,
-    errorMessage,
-    open,
-    schemaToBeDeleted,
-    handleDeleteConfirm,
-    handleDeleteSchemaButtonOnClick,
-    handleSetSchemaActive,
-  ])
+          <MessageAlert message={errorMessage} severity='error' />
+          <ConfirmationDialogue
+            open={open}
+            title='Delete schema'
+            onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
+            onCancel={() => setOpen(false)}
+            errorMessage={errorMessage}
+            dialogMessage={
+              'Deleting this schema will break any existing models that are using it. Are you sure you want to do this?'
+            }
+          />
+        </ListItem>
+      )),
+    [
+      schemas,
+      errorMessage,
+      open,
+      schemaToBeDeleted,
+      handleDeleteConfirm,
+      handleDeleteSchemaButtonOnClick,
+      handleSetSchemaActive,
+    ],
+  )
 
   if (isSchemasLoading) {
     return <Loading />
@@ -106,9 +99,12 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   }
 
   return (
-    <>
+    <Card sx={{ p: 2 }}>
+      <Typography color='primary' variant='h6' component='h2'>
+        {`${camelCaseToTitleCase(schemaKind)} Schemas`}
+      </Typography>
       <List>{schemaList}</List>
       {schemas.length == 0 && <EmptyBlob text='No schemas to show' />}
-    </>
+    </Card>
   )
 }

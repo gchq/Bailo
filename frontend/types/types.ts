@@ -150,6 +150,10 @@ export const SchemaKind = {
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
+export const isSchemaKind = (value: unknown): value is SchemaKindKeys => {
+  return Object.values(SchemaKind).includes(value as SchemaKindKeys)
+}
+
 export interface FileInterface {
   _id: string
   modelId: string
