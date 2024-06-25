@@ -22,6 +22,10 @@ from bailo.helper.schema import Schema
 from example_schemas import METRICS_JSON_SCHEMA
 
 
+def pytest_configure(config):
+    config.mlflow_uri = "http://127.0.0.1:5000"
+
+
 @pytest.fixture
 def integration_client():
     return Client("http://localhost:8080")
@@ -126,13 +130,8 @@ def standard_experiment(example_model, test_path):
 
 
 @pytest.fixture
-def mlflow_uri():
-    return "http://127.0.0.1:5001"
-
-
-@pytest.fixture
-def mlflow_id(test_path, mlflow_uri):
-    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
+def mlflow_id(test_path, request):
+    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=request.config.mlflow_uri)
     experiment_name = f"Test_{str(random.randint(1, 1000000))}"
     mlflow_id = mlflow_client.create_experiment(name=experiment_name)
 
@@ -143,7 +142,7 @@ def mlflow_id(test_path, mlflow_uri):
     }
 
     # Setting local tracking URI and experiment name
-    mlflow.set_tracking_uri(uri=mlflow_uri)
+    mlflow.set_tracking_uri(uri=request.config.mlflow_uri)
     mlflow.set_experiment(experiment_id=mlflow_id)
 
     # Logging the same metrics to the local MLFlow server
@@ -157,22 +156,22 @@ def mlflow_id(test_path, mlflow_uri):
 
 
 @pytest.fixture
-def mlflow_model(mlflow_id, mlflow_uri):
-    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
+def mlflow_model(mlflow_id, request):
+    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=request.config.mlflow_uri)
     model_name = f"Test_{str(random.randint(1, 1000000))}"
     mlflow_client.create_registered_model(name=model_name, description="Test Description")
 
     run = mlflow_client.search_runs(mlflow_id)[0]
     run_id = run.info.run_id
     artifact_uri = run.info.artifact_uri
-    mlflow_client.create_model_version(name=model_name, source=artifact_uri, run_id=run_id)
+    mlflow_client.create_model_version(name=model_name, source=artifact_uri, run_id=run_id, description="Test Model.")
 
     return model_name
 
 
 @pytest.fixture
-def mlflow_model_no_run(mlflow_id, mlflow_uri):
-    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
+def mlflow_model_no_run(mlflow_id, request):
+    mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=request.config.mlflow_uri)
     model_name = f"Test_{str(random.randint(1, 1000000))}"
     mlflow_client.create_registered_model(name=model_name, description="Test Description")
 

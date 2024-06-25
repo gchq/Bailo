@@ -135,23 +135,22 @@ class Model(Entry):
         :param visibility: Visibility of model on Bailo, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: A model object
         """
-        if mlflow:
+        if ml_flow:
             mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
             mlflow.set_tracking_uri(mlflow_uri)
             filter_string = f"name = '{name}'"
 
             res = mlflow_client.search_model_versions(filter_string=filter_string, order_by=["version_number DESC"])
             if len(res):
+                sel_model = None
                 if version:
                     for model in res:
                         if model.version == version:
                             sel_model = model
-                            break
-                        sel_model = None
                 else:
                     sel_model = res[0]
 
-                if not sel_model:
+                if sel_model is None:
                     raise BailoException(
                         "No MLFlow model found. Are you sure the name/alias/version provided is correct?"
                     )
@@ -188,6 +187,11 @@ class Model(Entry):
 
                     mlflow_run = mlflow_client.get_run(run_id)
                     artifact_uri = mlflow_run.info.artifact_uri
+                    if artifact_uri is None:
+                        raise BailoException(
+                            "Artifact URI could not be found, therefore artifacts cannot be transfered."
+                        )
+
                     if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)):
                         temp_dir = os.path.join(tempfile.gettempdir(), "mlflow_model")
                         mlflow_dir = os.path.join(temp_dir, f"mlflow_{run_id}")
