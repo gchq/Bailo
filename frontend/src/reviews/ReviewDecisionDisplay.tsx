@@ -6,10 +6,10 @@ import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
-import ReactionSelector from 'src/common/ReactionSelector'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
+import ReactionButtons from 'src/reviews/ReactionButtons'
 import { Decision, EntityKind, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getRoleDisplay } from 'utils/roles'
@@ -73,15 +73,15 @@ export default function ReviewDecisionDisplay({ response, modelId, mutateRespons
             </Stack>
             <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
           </Stack>
-          <Stack spacing={2}>
-            {response.comment && (
-              <div>
-                <Divider sx={{ mt: 1, mb: 2 }} />
+          {response.comment && (
+            <Box my={1}>
+              <Divider sx={{ mb: 2 }} />
+              <Box mx={1}>
                 <MarkdownDisplay>{response.comment}</MarkdownDisplay>
-              </div>
-            )}
-            <ReactionSelector response={response} mutateResponses={mutateResponses} />
-          </Stack>
+              </Box>
+            </Box>
+          )}
+          <ReactionButtons response={response} mutateResponses={mutateResponses} />
         </Card>
       </Stack>
     </>

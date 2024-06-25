@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { ReactionKindKeys, ResponseInterface, ResponseKind } from '../../../models/Response.js'
-import { updateResponsReaction } from '../../../services/response.js'
+import { updateResponseReaction } from '../../../services/response.js'
 import { registerPath, responseInterfaceSchema } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -20,7 +20,7 @@ registerPath({
   method: 'patch',
   path: '/api/v2/response/{responseId}',
   tags: ['response'],
-  description: 'Update either a comment or a review response',
+  description: `Update either a comment or a review response's reactions`,
   schema: patchResponseReactionSchema,
   responses: {
     200: {
@@ -48,7 +48,7 @@ export const patchResponseReaction = [
       params: { responseId, kind },
     } = parse(req, patchResponseReactionSchema)
 
-    const response = await updateResponsReaction(req.user, responseId, kind as ReactionKindKeys)
+    const response = await updateResponseReaction(req.user, responseId, kind as ReactionKindKeys)
 
     await audit.onUpdateResponse(req, responseId)
 

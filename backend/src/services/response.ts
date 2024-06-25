@@ -72,7 +72,7 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   return response
 }
 
-export async function updateResponsReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
+export async function updateResponseReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
   const response = await ResponseModel.findOne({ _id: responseId })
 
   if (!response) {
