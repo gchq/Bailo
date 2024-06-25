@@ -403,7 +403,7 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
   const file = files.find((file) => file.name === fileName)
 
   if (!file) {
-    throw NotFound(`The requested filename was not found on the release.`, { modelId, semver, fileName })
+    throw NotFound(`The requested file name was not found on the release.`, { modelId, semver, fileName })
   }
 
   return file

@@ -513,11 +513,11 @@ export function isReviewKind(value: unknown): value is ReviewKindKeys {
 }
 
 export interface FailedFileUpload {
-  filename: string
+  fileName: string
   error: string
 }
 
 export interface SuccessfulFileUpload {
-  filename: string
+  fileName: string
   fileId: string
 }

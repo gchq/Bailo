@@ -1,5 +1,4 @@
-import { Divider, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Alert, Box, Divider, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import {
   deleteRelease,
@@ -53,8 +52,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   const [open, setOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
   const [filesToUploadCount, setFilesToUploadCount] = useState(0)
-  const [successfulFileNames, setSuccessfulFileNames] = useState<SuccessfulFileUpload[]>([])
-  const [failedFileNames, setFailedFileNames] = useState<FailedFileUpload[]>([])
+  const [successfulFileUploads, setSuccessfulFileUploads] = useState<SuccessfulFileUpload[]>([])
+  const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
 
   const { model, isModelLoading, isModelError } = useGetModel(release.modelId, EntryKind.MODEL)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
@@ -62,7 +61,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const router = useRouter()
-  const theme = useTheme()
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
@@ -80,13 +78,18 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
     }
   }, [model, mutateReleases, semver, router])
 
-  const failedFileList = useMemo(() => {
-    return failedFileNames.map((file) => (
-      <div key={file.filename}>
-        <span style={{ fontWeight: 'bold' }}>{file.filename}</span> - {file.error}
-      </div>
-    ))
-  }, [failedFileNames])
+  const failedFileList = useMemo(
+    () =>
+      failedFileUploads.map((file) => (
+        <div key={file.fileName}>
+          <Box component='span' fontWeight='bold'>
+            {file.fileName}
+          </Box>
+          {` - ${file.error}`}
+        </div>
+      )),
+    [failedFileUploads],
+  )
 
   const resetForm = useCallback(() => {
     setSemver(release.semver)
@@ -106,10 +109,11 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   }, [isEdit, setUnsavedChanges])
 
   const handleFileOnChange = (newFiles: (File | FileInterface)[]) => {
-    const removedDeletedFilesFromSuccessList = successfulFileNames.filter((file) =>
-      newFiles.some((newFile) => file.filename !== newFile.name),
+    // Filter out any deleted files from success list
+    const filteredUploads = successfulFileUploads.filter((file) =>
+      newFiles.some((newFile) => file.fileName !== newFile.name),
     )
-    setSuccessfulFileNames(removedDeletedFilesFromSuccessList)
+    setSuccessfulFileUploads(filteredUploads)
     setFiles(newFiles)
   }
 
@@ -132,24 +136,24 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
 
   const handleSubmit = async () => {
     setIsLoading(true)
-    setFailedFileNames([])
+    setFailedFileUploads([])
     const failedFiles: FailedFileUpload[] = []
     const successfulFiles: SuccessfulFileUpload[] = []
     const newFilesToUpload: File[] = []
     for (const file of files) {
       isFileInterface(file)
-        ? successfulFiles.push({ filename: file.name, fileId: file._id })
+        ? successfulFiles.push({ fileName: file.name, fileId: file._id })
         : newFilesToUpload.push(file)
     }
 
     setFilesToUploadCount(newFilesToUpload.length)
     for (const file of newFilesToUpload) {
       if (isFileInterface(file)) {
-        successfulFiles.push({ filename: file.name, fileId: file._id })
+        successfulFiles.push({ fileName: file.name, fileId: file._id })
         continue
       }
 
-      if (!successfulFileNames.find((successfulFile) => successfulFile.filename === file.name)) {
+      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
         const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
 
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
@@ -164,14 +168,14 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
-            successfulFiles.push({ filename: file.name, fileId: fileUploadResponse.data.file._id })
+            successfulFiles.push({ fileName: file.name, fileId: fileUploadResponse.data.file._id })
           } else {
             setCurrentFileUploadProgress(undefined)
             return setIsLoading(false)
           }
         } catch (e) {
           if (e instanceof Error) {
-            failedFiles.push({ filename: file.name, error: e.message })
+            failedFiles.push({ fileName: file.name, error: e.message })
             setIsLoading(false)
             setCurrentFileUploadProgress(undefined)
           }
@@ -179,13 +183,13 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
       }
     }
     successfulFiles.forEach((file) => {
-      if (!successfulFileNames.find((successfulFile) => successfulFile.filename === file.filename)) {
-        setSuccessfulFileNames([...successfulFileNames, file])
+      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.fileName)) {
+        setSuccessfulFileUploads([...successfulFileUploads, file])
       }
     })
 
     if (failedFiles.length > 0) {
-      setFailedFileNames(failedFiles)
+      setFailedFileUploads(failedFiles)
       return
     }
 
@@ -197,8 +201,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
       minor: isMinorRelease,
       fileIds: successfulFiles.map((file) => file.fileId),
       images: imageList,
-      // Comments are ignored when editing a release
-      comments: [],
     }
 
     const response = await putRelease(updatedRelease)
@@ -236,16 +238,16 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         errorMessage={errorMessage}
         isRegistryError={isRegistryError}
       />
-      {failedFileNames.length > 0 && (
-        <Stack spacing={2}>
-          <Typography
-            color={theme.palette.error.main}
-          >{`Unable to create release due to issues with the following ${plural(
-            failedFileNames.length,
-            'file',
-          )}:`}</Typography>
-          {failedFileList}
-        </Stack>
+      {failedFileUploads.length > 0 && (
+        <Alert severity='error' sx={{ my: 2 }}>
+          <Stack spacing={1}>
+            <Typography>{`Unable to create release due to issues with the following ${plural(
+              failedFileUploads.length,
+              'file',
+            )}:`}</Typography>
+            {failedFileList}
+          </Stack>
+        </Alert>
       )}
       <Divider />
       <ReleaseForm

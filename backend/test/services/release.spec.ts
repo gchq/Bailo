@@ -508,7 +508,7 @@ describe('services > release', () => {
     fileMocks.getFilesByIds.mockResolvedValueOnce([{ name: 'not_test.png' }])
 
     const result = getFileByReleaseFileName(mockUser, modelId, semver, fileName)
-    expect(result).rejects.toThrowError(/^The requested filename was not found on the release./)
+    expect(result).rejects.toThrowError(/^The requested file name was not found on the release./)
   })
 
   test('getReleasesForExport > release not found', async () => {

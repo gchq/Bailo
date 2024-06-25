@@ -1,7 +1,6 @@
 import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Card, Container, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { Alert, Box, Button, Card, Container, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { CreateReleaseParams, postRelease, postSimpleFileForRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
@@ -38,37 +37,42 @@ export default function NewRelease() {
   const [isRegistryError, setIsRegistryError] = useState(false)
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
-  const [successfulFileNames, setSuccessfulFileNames] = useState<SuccessfulFileUpload[]>([])
-  const [failedFileNames, setFailedFileNames] = useState<FailedFileUpload[]>([])
+  const [successfulFileUploads, setSuccessfulFileUploads] = useState<SuccessfulFileUpload[]>([])
+  const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
 
   const router = useRouter()
-  const theme = useTheme()
 
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
-  const failedFileList = useMemo(() => {
-    return failedFileNames.map((file) => (
-      <div key={file.filename}>
-        <span style={{ fontWeight: 'bold' }}>{file.filename}</span> - {file.error}
-      </div>
-    ))
-  }, [failedFileNames])
+  const failedFileList = useMemo(
+    () =>
+      failedFileUploads.map((file) => (
+        <div key={file.fileName}>
+          <Box component='span' fontWeight='bold'>
+            {file.fileName}
+          </Box>
+          {` - ${file.error}`}
+        </div>
+      )),
+    [failedFileUploads],
+  )
 
   const handleFileOnChange = (newFiles: (File | FileInterface)[]) => {
-    const removedDeletedFilesFromSuccessList = successfulFileNames.filter((file) =>
-      newFiles.some((newFile) => file.filename !== newFile.name),
+    // Filter out any deleted files from success list
+    const filteredUploads = successfulFileUploads.filter((file) =>
+      newFiles.some((newFile) => file.fileName !== newFile.name),
     )
-    setSuccessfulFileNames(removedDeletedFilesFromSuccessList)
+    setSuccessfulFileUploads(filteredUploads)
     setFiles(newFiles)
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    setFailedFileNames([])
+    setFailedFileUploads([])
 
     if (!model) {
       return setErrorMessage('Please wait for the model to finish loading before trying to make a release.')
@@ -89,11 +93,11 @@ export default function NewRelease() {
     const successfulFiles: SuccessfulFileUpload[] = []
     for (const file of files) {
       if (isFileInterface(file)) {
-        successfulFiles.push({ filename: file.name, fileId: file._id })
+        successfulFiles.push({ fileName: file.name, fileId: file._id })
         continue
       }
 
-      if (!successfulFileNames.find((successfulFile) => successfulFile.filename === file.name)) {
+      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
         const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
 
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
@@ -108,14 +112,14 @@ export default function NewRelease() {
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
-            successfulFiles.push({ filename: file.name, fileId: fileUploadResponse.data.file._id })
+            successfulFiles.push({ fileName: file.name, fileId: fileUploadResponse.data.file._id })
           } else {
             setCurrentFileUploadProgress(undefined)
             setLoading(false)
           }
         } catch (e) {
           if (e instanceof Error) {
-            failedFiles.push({ filename: file.name, error: e.message })
+            failedFiles.push({ fileName: file.name, error: e.message })
             setCurrentFileUploadProgress(undefined)
             setLoading(false)
           }
@@ -124,13 +128,13 @@ export default function NewRelease() {
     }
 
     successfulFiles.forEach((file) => {
-      if (!successfulFileNames.find((successfulFile) => successfulFile.filename === file.filename)) {
-        setSuccessfulFileNames([...successfulFileNames, file])
+      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.fileName)) {
+        setSuccessfulFileUploads([...successfulFileUploads, file])
       }
     })
 
     if (failedFiles.length > 0) {
-      setFailedFileNames(failedFiles)
+      setFailedFileUploads(failedFiles)
       return
     }
 
@@ -220,16 +224,16 @@ export default function NewRelease() {
                   </LoadingButton>
                   <MessageAlert message={errorMessage} severity='error' />
                 </Stack>
-                {failedFileNames.length > 0 && (
-                  <Stack spacing={2}>
-                    <Typography
-                      color={theme.palette.error.main}
-                    >{`Unable to create release due to issues with the following ${plural(
-                      failedFileNames.length,
-                      'file',
-                    )}:`}</Typography>
-                    {failedFileList}
-                  </Stack>
+                {failedFileUploads.length > 0 && (
+                  <Alert severity='error' sx={{ my: 2 }}>
+                    <Stack spacing={1}>
+                      <Typography>{`Unable to create release due to issues with the following ${plural(
+                        failedFileUploads.length,
+                        'file',
+                      )}:`}</Typography>
+                      {failedFileList}
+                    </Stack>
+                  </Alert>
                 )}
               </Stack>
             </Box>
