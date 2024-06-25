@@ -46,6 +46,9 @@ export interface UiConfig {
 
     gpus: { [key: string]: string }
   }
+  modelMirror: {
+    enabled: boolean
+  }
 }
 
 export interface FileInterface {
@@ -364,6 +367,7 @@ export interface CollaboratorEntry {
 export const EntryKindLabel = {
   model: 'model',
   'data-card': 'data card',
+  'mirrored-model': 'mirrored model',
 } as const
 export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindLabel]
 
@@ -372,6 +376,14 @@ export const EntryKind = {
   DATA_CARD: 'data-card',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
+
+export const DisplayKind = {
+  MODEL: 'model',
+  DATA_CARD: 'data-card',
+  MIRRORED_MODEL: 'mirrored-model',
+} as const
+
+export type DisplayKindKeys = (typeof DisplayKind)[keyof typeof DisplayKind]
 
 export const isEntryKind = (value: unknown): value is EntryKindKeys => {
   return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD)
@@ -386,6 +398,10 @@ export interface EntryInterface {
   settings: {
     ungovernedAccess: boolean
     allowTemplating: boolean
+    mirror: {
+      sourceModelId: string
+      sourceDestination: string
+    }
   }
   card: EntryCardInterface
   visibility: EntryVisibilityKeys
@@ -401,6 +417,12 @@ export interface EntryForm {
   description: string
   visibility: EntryVisibilityKeys
   collaborators?: CollaboratorEntry[]
+  settings?: {
+    mirror?: {
+      sourceModelId?: string
+      destinationModelId?: string
+    }
+  }
 }
 
 export type UpdateEntryForm = Omit<EntryForm, 'kind'>

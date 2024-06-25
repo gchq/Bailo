@@ -25,7 +25,7 @@ export async function exportModel(
   disclaimerAgreement: boolean,
   semvers?: Array<string>,
 ) {
-  if (!config.modelMirror.enabled) {
+  if (!config.ui.modelMirror.enabled) {
     throw BadReq('Model mirroring has not been enabled.')
   }
   if (!disclaimerAgreement) {

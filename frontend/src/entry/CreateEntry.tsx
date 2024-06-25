@@ -24,10 +24,12 @@ import Loading from 'src/common/Loading'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
 import EntryAccess from 'src/entry/settings/EntryAccess'
+import SourceModelInput from 'src/entry/SourceModelnput'
 import MessageAlert from 'src/MessageAlert'
 import TeamSelect from 'src/TeamSelect'
 import {
   CollaboratorEntry,
+  DisplayKind,
   EntityKind,
   EntryForm,
   EntryKind,
@@ -41,16 +43,18 @@ import { toTitleCase } from 'utils/stringUtils'
 
 type CreateEntryProps = {
   kind: EntryKindKeys
+  displayKind
   onBackClick: () => void
 }
 
-export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
+export default function CreateEntry({ kind, displayKind, onBackClick }: CreateEntryProps) {
   const router = useRouter()
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [team, setTeam] = useState<TeamInterface | undefined>()
   const [name, setName] = useState('')
+  const [sourceModelId, setSourceModelId] = useState('')
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
@@ -73,6 +77,11 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
       description,
       visibility,
       collaborators,
+      settings: {
+        mirror: {
+          sourceModelId,
+        },
+      },
     }
     const response = await postModel(formData)
 
@@ -92,7 +101,7 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Private</Typography>
           <Typography variant='caption'>
-            {`Only named individuals will be able to view this ${EntryKindLabel[kind]}`}
+            {`Only named individuals will be able to view this ${EntryKindLabel[displayKind]}`}
           </Typography>
         </Stack>
       </Stack>
@@ -106,7 +115,7 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Public</Typography>
           <Typography variant='caption'>
-            {`Any authorised user will be able to see this ${EntryKindLabel[kind]}`}
+            {`Any authorised user will be able to see this ${EntryKindLabel[displayKind]}`}
           </Typography>
         </Stack>
       </Stack>
@@ -127,7 +136,7 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
           </Button>
           <Stack spacing={2} alignItems='center' justifyContent='center'>
             <Typography variant='h6' component='h1' color='primary'>
-              {`Create ${toTitleCase(kind)}`}
+              {`Create ${toTitleCase(displayKind)}`}
             </Typography>
             <FileUpload color='primary' fontSize='large' />
             {kind === EntryKind.MODEL && (
@@ -146,6 +155,9 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
                 <TeamSelect value={team} onChange={(value) => setTeam(value)} />
                 <EntryNameInput autoFocus value={name} kind={kind} onChange={(value) => setName(value)} />
+                {displayKind === DisplayKind.MIRRORED_MODEL && (
+                  <SourceModelInput autoFocus onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
+                )}
               </Stack>
               <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
             </>
@@ -216,7 +228,7 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
                     data-test='createEntryButton'
                     loading={loading}
                   >
-                    {`Create ${EntryKindLabel[kind]}`}
+                    {`Create ${EntryKindLabel[displayKind]}`}
                   </LoadingButton>
                 </span>
               </Tooltip>

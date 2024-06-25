@@ -59,7 +59,11 @@ export default function Model() {
               view: <InferenceServices model={model} />,
               hidden: !uiConfig.inference.enabled,
             },
-            { title: 'Settings', path: 'settings', view: <Settings entry={model} /> },
+            {
+              title: 'Settings',
+              path: 'settings',
+              view: <Settings entry={model} />,
+            },
           ]
         : [],
     [model, uiConfig, currentUserRoles],
