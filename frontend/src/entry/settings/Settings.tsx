@@ -52,9 +52,14 @@ export default function Settings({ entry }: SettingsProps) {
 
   useEffect(() => {
     if (isSettingsCategory(category, entry.kind)) {
-      setSelectedCategory(category ?? SettingsCategory.DETAILS)
+      setSelectedCategory(category)
+    } else if (category) {
+      setSelectedCategory(SettingsCategory.DETAILS)
+      router.replace({
+        query: { ...router.query, category: SettingsCategory.DETAILS },
+      })
     }
-  }, [category, entry.kind])
+  }, [category, entry.kind, router])
 
   const handleListItemClick = (category: SettingsCategoryKeys) => {
     setSelectedCategory(category)
