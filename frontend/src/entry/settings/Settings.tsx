@@ -1,8 +1,10 @@
 import { LoadingButton } from '@mui/lab'
 import { Container, Divider, List, Stack, Typography } from '@mui/material'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
+import ExportModelSettings from 'src/entry/model/mirroredModels/ExportSettings'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
 import EntryAccessPage from 'src/entry/settings/EntryAccessPage'
@@ -15,6 +17,7 @@ export const SettingsCategory = {
   DANGER: 'danger',
   ACCESS_REQUESTS: 'access_requests',
   PERMISSIONS: 'permissions',
+  MIRRORED_MODELS: 'mirrored_models',
   TEMPLATE: 'template',
 } as const
 
@@ -31,6 +34,7 @@ function isSettingsCategory(
         value === SettingsCategory.PERMISSIONS ||
         value === SettingsCategory.ACCESS_REQUESTS ||
         value === SettingsCategory.DANGER ||
+        value === SettingsCategory.MIRRORED_MODELS ||
         value === SettingsCategory.TEMPLATE
       )
     case EntryKind.DATA_CARD:
@@ -47,6 +51,8 @@ export default function Settings({ entry }: SettingsProps) {
   const router = useRouter()
 
   const { category } = router.query
+
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
 
@@ -102,6 +108,17 @@ export default function Settings({ entry }: SettingsProps) {
             >
               Template
             </SimpleListItemButton>
+            {!entry.settings.mirror?.sourceModelId &&
+              uiConfig?.modelMirror.enabled &&
+              !isUiConfigError &&
+              !isUiConfigLoading && (
+                <SimpleListItemButton
+                  selected={selectedCategory === SettingsCategory.MIRRORED_MODELS}
+                  onClick={() => handleListItemClick(SettingsCategory.MIRRORED_MODELS)}
+                >
+                  Mirrored Models
+                </SimpleListItemButton>
+              )}
             <SimpleListItemButton
               selected={selectedCategory === SettingsCategory.DANGER}
               onClick={() => handleListItemClick(SettingsCategory.DANGER)}
@@ -115,6 +132,7 @@ export default function Settings({ entry }: SettingsProps) {
         {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}
         {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessPage entry={entry} />}
         {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
+        {selectedCategory === SettingsCategory.MIRRORED_MODELS && <ExportModelSettings model={entry} />}
         {selectedCategory === SettingsCategory.TEMPLATE && <TemplateSettings model={entry} />}
         {selectedCategory === SettingsCategory.DANGER && (
           <Stack spacing={2}>
