@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 
 import config from '../utils/config.js'
-import { BadReq, InternalError } from '../utils/error.js'
+import { BadReq, InternalError, Unauthorized } from '../utils/error.js'
 
 interface InferenceService {
   modelId: string
@@ -10,12 +10,17 @@ interface InferenceService {
   port: number
 }
 
-export async function createInferenceService(inferenceServiceParams: InferenceService, token: string) {
+export async function createInferenceService(inferenceServiceParams: InferenceService) {
   let res
   try {
+    const authorisationToken = config.inference.authorisationToken
+
+    if (!authorisationToken) {
+      throw Unauthorized('No authentication key exists')
+    }
     res = await fetch(`${config.ui.inference.connection.host}/api/deploy`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${token}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authorisationToken}` },
       body: JSON.stringify(inferenceServiceParams),
     })
   } catch (err) {
@@ -29,12 +34,18 @@ export async function createInferenceService(inferenceServiceParams: InferenceSe
   return body
 }
 
-export async function updateInferenceService(inferenceServiceParams: InferenceService, token: string) {
+export async function updateInferenceService(inferenceServiceParams: InferenceService) {
   let res
   try {
+    const authorisationToken = config.inference.authorisationToken
+
+    if (!authorisationToken) {
+      throw Unauthorized('No authentication key exists')
+    }
+
     res = await fetch(`${config.ui.inference.connection.host}/api/update`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${token}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authorisationToken}` },
       body: JSON.stringify(inferenceServiceParams),
     })
   } catch (err) {

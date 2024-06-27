@@ -27,9 +27,18 @@ export default function InferenceServices({ model }: InferenceProps) {
 
   useEffect(() => {
     async function checkAuthentication() {
-      fetch(`${uiConfig?.inference.connection.host}/api/health`, { credentials: 'include' }).then((response) => {
-        setHealthCheck(response.status === 200)
-      })
+      try {
+        setErrorMessage('')
+        const response = await fetch(`${uiConfig?.inference.connection.host}/api/health`, { credentials: 'include' })
+        setHealthCheck(response.ok)
+        if (!response.ok) {
+          setErrorMessage(await getErrorMessage(response))
+          return setErrorMessage('Login failed when when accessing the inferencing service')
+        }
+      } catch (err) {
+        setHealthCheck(false)
+        return setErrorMessage('Something went wrong requesting the inferencing service')
+      }
     }
     checkAuthentication()
   }, [uiConfig])
@@ -47,13 +56,18 @@ export default function InferenceServices({ model }: InferenceProps) {
   )
 
   const handleCreateToken = async () => {
+    setErrorMessage('')
     const error = MultipleErrorWrapper('Unable to create an authenication token', { isTokensError, isUiConfigError })
     if (error) return error
     const authorizationTokenName = uiConfig?.inference.authorizationTokenName
     const authorizationAccessKeys = tokens.filter((value) => value.description === authorizationTokenName)
     if (authorizationTokenName && authorizationAccessKeys) {
       for (const token of authorizationAccessKeys) {
-        deleteUserToken(token.accessKey)
+        const response = await deleteUserToken(token.accessKey)
+
+        if (!response.ok) {
+          setErrorMessage(await getErrorMessage(response))
+        }
       }
       const response = await postUserToken(authorizationTokenName, 'all', [], ['model:read'])
 
@@ -61,11 +75,15 @@ export default function InferenceServices({ model }: InferenceProps) {
         setErrorMessage(await getErrorMessage(response))
       } else {
         const { token } = await response.json()
-        const inferenceCheck = await sendTokenToService(`${uiConfig.inference.connection.host}/api/login`, token)
-        if (!inferenceCheck.ok) {
-          setErrorMessage('Login failed when when accessing the inferencing service')
-        } else {
-          router.reload()
+        try {
+          const inferenceCheck = await sendTokenToService(`${uiConfig.inference.connection.host}/api/login`, token)
+          if (!inferenceCheck.ok) {
+            setErrorMessage('Login failed when when accessing the inferencing service')
+          } else {
+            router.reload()
+          }
+        } catch (err) {
+          return setErrorMessage('Something went wrong requesting the inferencing service')
         }
       }
     }

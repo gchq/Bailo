@@ -209,6 +209,6 @@ data:
         authenticationToken: 'OTEL_EXPORTER_TOKEN',
       },
       inference: {
-        tokenHeader: 'INFERENCING_WRITE_TOKEN'
+        authorisationToken: 'INFERENCING_WRITE_TOKEN'
       }
     }

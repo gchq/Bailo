@@ -244,6 +244,6 @@ module.exports = {
   },
 
   inference: {
-    tokenHeader: '',
+    authorisationToken: '',
   },
 }

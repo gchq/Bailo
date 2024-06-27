@@ -11,7 +11,7 @@ import {
 
 const configMock = vi.hoisted(() => ({
   inference: {
-    tokenHeader: 'test',
+    authorisationToken: 'test',
   },
 }))
 

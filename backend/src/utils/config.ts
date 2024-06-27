@@ -178,7 +178,7 @@ export interface Config {
   }
 
   inference: {
-    tokenHeader: string
+    authorisationToken: string
   }
 }
 
