@@ -31,7 +31,11 @@ export default function ExportModel({ modelId }: ExportModelProps) {
         return setErrorMessage(error)
       }
       setLoading(false)
-      sendNotification({ variant: 'success', msg: 'Successfully started export upload.' })
+      sendNotification({
+        variant: 'success',
+        msg: 'Successfully started export upload.',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
     }
   }
 
@@ -40,27 +44,25 @@ export default function ExportModel({ modelId }: ExportModelProps) {
   }
 
   return (
-    <>
-      <Container maxWidth='md'>
-        <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-          <Typography variant='h6' component='h1' color='primary' align='center'>
-            Model Export Agreement
-          </Typography>
-          <Box component='form' onSubmit={handleSubmit}>
-            <Stack spacing={2} alignItems='start' justifyContent='start'>
-              <ModelExportAgreement />
-              <FormControlLabel
-                control={<Checkbox checked={checked} onChange={handleChecked} />}
-                label='I agree to the terms and conditions of this model export agreement'
-              ></FormControlLabel>
-              <LoadingButton variant='contained' loading={loading} disabled={!checked} type='submit'>
-                Submit
-              </LoadingButton>
-              <MessageAlert message={errorMessage} severity='error' />
-            </Stack>
-          </Box>
-        </Card>
-      </Container>
-    </>
+    <Container maxWidth='md'>
+      <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
+        <Typography variant='h6' component='h1' color='primary' align='center'>
+          Model Export Agreement
+        </Typography>
+        <Box component='form' onSubmit={handleSubmit}>
+          <Stack spacing={2} alignItems='start' justifyContent='start'>
+            <ModelExportAgreement />
+            <FormControlLabel
+              control={<Checkbox checked={checked} onChange={handleChecked} />}
+              label='I agree to the terms and conditions of this model export agreement'
+            />
+            <LoadingButton variant='contained' loading={loading} disabled={!checked} type='submit'>
+              Submit
+            </LoadingButton>
+            <MessageAlert message={errorMessage} severity='error' />
+          </Stack>
+        </Box>
+      </Card>
+    </Container>
   )
 }

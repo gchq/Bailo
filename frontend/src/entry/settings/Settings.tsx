@@ -3,12 +3,14 @@ import { Container, Divider, List, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
-import ExportModelSettings from 'src/entry/model/mirroredModels/ExportSettings'
+import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
 import EntryAccessPage from 'src/entry/settings/EntryAccessPage'
 import EntryDetails from 'src/entry/settings/EntryDetails'
+import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind, EntryKindKeys } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
 
@@ -75,6 +77,14 @@ export default function Settings({ entry }: SettingsProps) {
     // TODO - Delete model API request and setLoading(false) on error
   }
 
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
+  if (isUiConfigLoading || !uiConfig) {
+    return <Loading />
+  }
+
   return (
     <Stack
       direction={{ xs: 'column', sm: 'row' }}
@@ -108,17 +118,14 @@ export default function Settings({ entry }: SettingsProps) {
             >
               Template
             </SimpleListItemButton>
-            {!entry.settings.mirror?.sourceModelId &&
-              uiConfig?.modelMirror.enabled &&
-              !isUiConfigError &&
-              !isUiConfigLoading && (
-                <SimpleListItemButton
-                  selected={selectedCategory === SettingsCategory.MIRRORED_MODELS}
-                  onClick={() => handleListItemClick(SettingsCategory.MIRRORED_MODELS)}
-                >
-                  Mirrored Models
-                </SimpleListItemButton>
-              )}
+            {!entry.settings.mirror?.sourceModelId && uiConfig.modelMirror.enabled && (
+              <SimpleListItemButton
+                selected={selectedCategory === SettingsCategory.MIRRORED_MODELS}
+                onClick={() => handleListItemClick(SettingsCategory.MIRRORED_MODELS)}
+              >
+                Mirrored Models
+              </SimpleListItemButton>
+            )}
             <SimpleListItemButton
               selected={selectedCategory === SettingsCategory.DANGER}
               onClick={() => handleListItemClick(SettingsCategory.DANGER)}
@@ -132,7 +139,7 @@ export default function Settings({ entry }: SettingsProps) {
         {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}
         {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessPage entry={entry} />}
         {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
-        {selectedCategory === SettingsCategory.MIRRORED_MODELS && <ExportModelSettings model={entry} />}
+        {selectedCategory === SettingsCategory.MIRRORED_MODELS && <ExportSettings model={entry} />}
         {selectedCategory === SettingsCategory.TEMPLATE && <TemplateSettings model={entry} />}
         {selectedCategory === SettingsCategory.DANGER && (
           <Stack spacing={2}>
