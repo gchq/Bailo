@@ -12,10 +12,10 @@ import { hasRole } from 'utils/roles'
 type ReleasesProps = {
   model: EntryInterface
   currentUserRoles: string[]
-  readOnly: boolean
+  readOnly?: boolean
 }
 
-export default function Releases({ model, currentUserRoles, readOnly }: ReleasesProps) {
+export default function Releases({ model, currentUserRoles, readOnly = false }: ReleasesProps) {
   const router = useRouter()
   const [latestRelease, setLatestRelease] = useState('')
 

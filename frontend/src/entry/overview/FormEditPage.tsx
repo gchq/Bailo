@@ -17,10 +17,10 @@ import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 
 type FormEditPageProps = {
   entry: EntryInterface
-  readOnly: boolean
+  readOnly?: boolean
 }
 
-export default function FormEditPage({ entry, readOnly }: FormEditPageProps) {
+export default function FormEditPage({ entry, readOnly = false }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')

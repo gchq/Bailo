@@ -11,10 +11,10 @@ import { EntryInterface } from 'types/types'
 
 type AccessRequestsProps = {
   model: EntryInterface
-  readOnly: boolean
+  readOnly?: boolean
 }
 
-export default function ModelImages({ model, readOnly }: AccessRequestsProps) {
+export default function ModelImages({ model, readOnly = false }: AccessRequestsProps) {
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
   const [openUploadImageDialog, setOpenUploadImageDialog] = useState(false)
