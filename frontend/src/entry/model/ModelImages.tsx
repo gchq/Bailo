@@ -11,9 +11,10 @@ import { EntryInterface } from 'types/types'
 
 type AccessRequestsProps = {
   model: EntryInterface
+  readOnly: boolean
 }
 
-export default function ModelImages({ model }: AccessRequestsProps) {
+export default function ModelImages({ model, readOnly }: AccessRequestsProps) {
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
   const [openUploadImageDialog, setOpenUploadImageDialog] = useState(false)
@@ -49,7 +50,7 @@ export default function ModelImages({ model }: AccessRequestsProps) {
       {isModelImagesLoading && <Loading />}
       <Container sx={{ my: 2 }}>
         <Stack spacing={4}>
-          <Box sx={{ textAlign: 'right' }}>
+          <Box sx={{ textAlign: 'right' }} hidden={readOnly}>
             <Button variant='outlined' onClick={() => setOpenUploadImageDialog(true)} data-test='pushImageButton'>
               Push image
             </Button>

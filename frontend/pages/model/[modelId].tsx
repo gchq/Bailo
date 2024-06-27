@@ -32,11 +32,21 @@ export default function Model() {
     () =>
       model && uiConfig
         ? [
-            { title: 'Overview', path: 'overview', view: <Overview entry={model} /> },
+            {
+              title: 'Overview',
+              path: 'overview',
+              view: <Overview entry={model} readOnly={!!model.settings.mirror.sourceModelId} />,
+            },
             {
               title: 'Releases',
               path: 'releases',
-              view: <Releases model={model} currentUserRoles={currentUserRoles} />,
+              view: (
+                <Releases
+                  model={model}
+                  currentUserRoles={currentUserRoles}
+                  readOnly={!!model.settings.mirror.sourceModelId}
+                />
+              ),
               disabled: !model.card,
               disabledText: 'Select a schema to view this tab',
             },
@@ -51,7 +61,7 @@ export default function Model() {
             {
               title: 'Registry',
               path: 'registry',
-              view: <ModelImages model={model} />,
+              view: <ModelImages model={model} readOnly={!!model.settings.mirror.sourceModelId} />,
             },
             {
               title: 'Inferencing',
@@ -94,6 +104,7 @@ export default function Model() {
           requiredUrlParams={{ modelId: model.id }}
           showCopyButton
           textToCopy={model.id}
+          sourceModelId={model.settings.mirror.sourceModelId}
         />
       )}
     </>

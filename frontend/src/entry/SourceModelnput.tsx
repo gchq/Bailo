@@ -7,10 +7,9 @@ const htmlId = 'entry-source-modelid-input'
 type EntrySourceModelInputProps = {
   value: string
   onChange: (value: string) => void
-  autoFocus?: boolean
 }
 
-export default function SourceModelInput({ value, onChange, autoFocus = false }: EntrySourceModelInputProps) {
+export default function SourceModelInput({ value, onChange }: EntrySourceModelInputProps) {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value)
   }
@@ -22,7 +21,6 @@ export default function SourceModelInput({ value, onChange, autoFocus = false }:
         value={value}
         size='small'
         onChange={handleChange}
-        autoFocus={autoFocus}
         data-test='entrySourceModelInput'
       ></TextField>
     </LabelledInput>

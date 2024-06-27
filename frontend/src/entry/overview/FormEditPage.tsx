@@ -17,9 +17,10 @@ import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 
 type FormEditPageProps = {
   entry: EntryInterface
+  readOnly: boolean
 }
 
-export default function FormEditPage({ entry }: FormEditPageProps) {
+export default function FormEditPage({ entry, readOnly }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
@@ -142,6 +143,7 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
                 onClick={() => setIsEdit(!isEdit)}
                 sx={{ mb: { xs: 2 } }}
                 data-test='editEntryCardButton'
+                hidden={readOnly}
               >
                 {`Edit ${EntryCardKindLabel[entry.kind]}`}
               </Button>

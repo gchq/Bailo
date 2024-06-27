@@ -180,25 +180,27 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
 
   return (
     <Box py={1}>
-      <EditableFormHeading
-        heading={
-          <div>
-            <Typography fontWeight='bold'>Release name</Typography>
-            <Typography>{`${model.name} - ${release.semver}`}</Typography>
-          </div>
-        }
-        editButtonText='Edit Release'
-        deleteButtonText='Delete Release'
-        showDeleteButton
-        isEdit={isEdit}
-        isLoading={isLoading}
-        onEdit={handleEdit}
-        onCancel={handleCancel}
-        onSubmit={handleSubmit}
-        onDelete={() => setOpen(true)}
-        errorMessage={errorMessage}
-        isRegistryError={isRegistryError}
-      />
+      {model.settings.mirror.sourceModelId && (
+        <EditableFormHeading
+          heading={
+            <div>
+              <Typography fontWeight='bold'>Release name</Typography>
+              <Typography>{`${model.name} - ${release.semver}`}</Typography>
+            </div>
+          }
+          editButtonText='Edit Release'
+          deleteButtonText='Delete Release'
+          showDeleteButton
+          isEdit={isEdit}
+          isLoading={isLoading}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSubmit={handleSubmit}
+          onDelete={() => setOpen(true)}
+          errorMessage={errorMessage}
+          isRegistryError={isRegistryError}
+        />
+      )}
       <ReleaseForm
         editable
         isEdit={isEdit}

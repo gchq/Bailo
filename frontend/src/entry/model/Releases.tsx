@@ -12,9 +12,10 @@ import { hasRole } from 'utils/roles'
 type ReleasesProps = {
   model: EntryInterface
   currentUserRoles: string[]
+  readOnly: boolean
 }
 
-export default function Releases({ model, currentUserRoles }: ReleasesProps) {
+export default function Releases({ model, currentUserRoles, readOnly }: ReleasesProps) {
   const router = useRouter()
   const [latestRelease, setLatestRelease] = useState('')
 
@@ -28,10 +29,10 @@ export default function Releases({ model, currentUserRoles }: ReleasesProps) {
           model={model}
           release={release}
           latestRelease={latestRelease}
-          hideReviewBanner={!hasRole(currentUserRoles, ['msro', 'mtr'])}
+          hideReviewBanner={!hasRole(currentUserRoles, ['msro', 'mtr']) || readOnly}
         />
       )),
-    [latestRelease, model, releases, currentUserRoles],
+    [latestRelease, model, releases, currentUserRoles, readOnly],
   )
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export default function Releases({ model, currentUserRoles }: ReleasesProps) {
   return (
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
-        <Box sx={{ textAlign: 'right' }}>
+        <Box sx={{ textAlign: 'right' }} hidden={readOnly}>
           <Button
             variant='outlined'
             onClick={handleDraftNewRelease}

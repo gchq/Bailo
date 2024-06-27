@@ -156,7 +156,7 @@ export default function CreateEntry({ kind, displayKind, onBackClick }: CreateEn
                 <TeamSelect value={team} onChange={(value) => setTeam(value)} />
                 <EntryNameInput autoFocus value={name} kind={kind} onChange={(value) => setName(value)} />
                 {displayKind === DisplayKind.MIRRORED_MODEL && (
-                  <SourceModelInput autoFocus onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
+                  <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
                 )}
               </Stack>
               <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
