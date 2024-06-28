@@ -39,6 +39,6 @@ describe('services > token', () => {
 
   test('test that a token cannot create another token', async () => {
     const func = () => createToken({ ...testUser, token: { user: testUser.dn } as any }, {} as any)
-    expect(func).rejects.toThrowError('A token cannot be used to create another token')
+    await expect(func).rejects.toThrowError('A token cannot be used to create another token')
   })
 })
