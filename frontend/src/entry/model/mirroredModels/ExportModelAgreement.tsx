@@ -29,13 +29,14 @@ export default function ExportModel({ modelId }: ExportModelProps) {
 
         const error = await getErrorMessage(response)
         return setErrorMessage(error)
+      } else {
+        setLoading(false)
+        sendNotification({
+          variant: 'success',
+          msg: 'Successfully started export upload.',
+          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+        })
       }
-      setLoading(false)
-      sendNotification({
-        variant: 'success',
-        msg: 'Successfully started export upload.',
-        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-      })
     }
   }
 

@@ -38,12 +38,13 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
+    } else {
+      sendNotification({
+        variant: 'success',
+        msg: 'Model export settings updated',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
     }
-    sendNotification({
-      variant: 'success',
-      msg: 'Model export settings updated',
-      anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-    })
 
     setLoading(false)
   }

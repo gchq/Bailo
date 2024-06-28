@@ -1,7 +1,7 @@
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Checkbox, FormControlLabel, Grid, IconButton, Tooltip, Typography } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
-import { ChangeEvent, useMemo, useState } from 'react'
+import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
 import MessageAlert from 'src/MessageAlert'
@@ -17,11 +17,15 @@ export default function ReleaseSelector({ model, selectedReleases, setSelectedRe
   const [checked, setChecked] = useState(false)
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  const selectedReleasesDisplay = useMemo(() => {
-    const handleRemoveRelease = async (removedRelease: ReleaseInterface) => {
+  const handleRemoveRelease = useCallback(
+    (removedRelease: ReleaseInterface) => {
       setChecked(false)
       setSelectedReleases(selectedReleases.filter((release) => release.semver !== removedRelease.semver))
-    }
+    },
+    [selectedReleases, setSelectedReleases],
+  )
+
+  const selectedReleasesDisplay = useMemo(() => {
     return selectedReleases.map((release) => (
       <>
         <Grid item xs={10}>
@@ -36,18 +40,19 @@ export default function ReleaseSelector({ model, selectedReleases, setSelectedRe
         </Grid>
       </>
     ))
-  }, [selectedReleases, model, setSelectedReleases])
+  }, [selectedReleases, model, handleRemoveRelease])
 
   const handleChecked = async (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedReleases(event.target.checked ? releases : [])
     setChecked(event.target.checked)
   }
 
+  if (isReleasesError) {
+    return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  }
+
   if (isReleasesLoading) {
     return <Loading />
-  }
-  if (isReleasesError) {
-    ;<MessageAlert message={isReleasesError.info.message} severity='error' />
   }
 
   return (
