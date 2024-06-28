@@ -396,11 +396,11 @@ export interface EntryInterface {
   teamId: string
   description: string
   settings: {
-    ungovernedAccess: boolean
-    allowTemplating: boolean
-    mirror: {
-      sourceModelId: string
-      sourceDestination: string
+    ungovernedAccess?: boolean
+    allowTemplating?: boolean
+    mirror?: {
+      sourceModelId?: string
+      sourceDestination?: string
     }
   }
   card: EntryCardInterface

@@ -35,7 +35,7 @@ export default function Model() {
             {
               title: 'Overview',
               path: 'overview',
-              view: <Overview entry={model} readOnly={!!model.settings.mirror.sourceModelId} />,
+              view: <Overview entry={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
             },
             {
               title: 'Releases',
@@ -44,7 +44,7 @@ export default function Model() {
                 <Releases
                   model={model}
                   currentUserRoles={currentUserRoles}
-                  readOnly={!!model.settings.mirror.sourceModelId}
+                  readOnly={!!model.settings.mirror?.sourceModelId}
                 />
               ),
               disabled: !model.card,
@@ -61,7 +61,7 @@ export default function Model() {
             {
               title: 'Registry',
               path: 'registry',
-              view: <ModelImages model={model} readOnly={!!model.settings.mirror.sourceModelId} />,
+              view: <ModelImages model={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
             },
             {
               title: 'Inferencing',
@@ -104,7 +104,7 @@ export default function Model() {
           requiredUrlParams={{ modelId: model.id }}
           showCopyButton
           textToCopy={model.id}
-          sourceModelId={model.settings.mirror.sourceModelId}
+          sourceModelId={model.settings.mirror?.sourceModelId}
         />
       )}
     </>
