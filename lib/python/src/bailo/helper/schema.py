@@ -108,8 +108,8 @@ class Schema:
 
         logger.info(f"Attributes for Schema ID %s successfully unpacked.", self.schema_id)
 
-    @classmethod
-    def get_all_schema_ids(cls, client: Client, kind: SchemaKind | None = None) -> list[str]:
+    @staticmethod
+    def get_all_schema_ids(client: Client, kind: SchemaKind | None = None) -> list[str]:
         """Return all schema ids for a given type.
 
         :param client: A client object used to interact with Bailo
