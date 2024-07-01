@@ -16,8 +16,8 @@ describe('Create new model', () => {
     cy.visit(newModelUrl)
     cy.get('[data-test=createModelButton]').click()
 
-    cy.get('[data-test=entryNameInput]').type('test model')
-    cy.get('[data-test=entryDescriptionInput]').type('test description')
+    cy.get('[data-test=entryNameInput]').type('test model', { force: true })
+    cy.get('[data-test=entryDescriptionInput]').type('test description', { force: true })
 
     cy.get('[data-test=publicButtonSelector]').click()
     cy.get('[data-test=createEntryButton]').click()
@@ -38,8 +38,8 @@ describe('Create new model', () => {
     cy.get('[data-test=createModelButton]').click()
 
     cy.log('Filling out the form to make a private model and submitting')
-    cy.get('[data-test=entryNameInput]').type('test model')
-    cy.get('[data-test=entryDescriptionInput]').type('test description')
+    cy.get('[data-test=entryNameInput]').type('test model', { force: true })
+    cy.get('[data-test=entryDescriptionInput]').type('test description', { force: true })
 
     cy.get('[data-test=privateButtonSelector]').click()
     cy.get('[data-test=createEntryButton]').click()
