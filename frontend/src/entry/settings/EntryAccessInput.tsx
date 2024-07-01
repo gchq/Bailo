@@ -17,7 +17,7 @@ import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntityObject, EntryKindKeys, Role } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
-type EntryAccessProps = {
+type EntryAccessInputProps = {
   value: CollaboratorEntry[]
   onUpdate: (list: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
@@ -33,14 +33,14 @@ type EntryAccessProps = {
     }
 )
 
-export default function EntryAccess({
+export default function EntryAccessInput({
   value,
   onUpdate,
   entryKind,
   entryRoles,
   isReadOnly = false,
   requiredRolesText = '',
-}: EntryAccessProps) {
+}: EntryAccessInputProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(value)
   const [userListQuery, setUserListQuery] = useState('')

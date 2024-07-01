@@ -14,6 +14,7 @@ const morganLog = promisify(
         'response-time': tokens['response-time'](req, res),
         status: tokens.status(req, res),
         user: req.user,
+        requestId: req.reqId,
         ...(tokens.res(req, res, 'content-length') && { 'content-length': tokens.res(req, res, 'content-length') }),
       }
       req.log.trace(info, `Request completed.`)
@@ -33,7 +34,16 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
     clientIp: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
   })
 
-  req.log.trace({ url: `${req.baseUrl}${req.url}`, method: req.method }, 'Request received.')
+  req.log.trace(
+    {
+      url: `${req.baseUrl}${req.url}`,
+      method: req.method,
+      user: req.user,
+      requestId: req.reqId,
+      ...(req.headers['user-agent'] && { agent: req.headers['user-agent'] }),
+    },
+    'Request received.',
+  )
   res.setHeader('x-request-id', req.reqId)
 
   await morganLog(req, res)

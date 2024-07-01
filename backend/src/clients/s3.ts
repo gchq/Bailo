@@ -50,8 +50,8 @@ export async function putObjectStream(
     log.debug(
       {
         ...progress,
-        ...(progress.loaded && { loaded: prettyBytes(progress.loaded) }),
-        ...(progress.total && { total: prettyBytes(progress.total) }),
+        ...(progress.loaded && { loaded: prettyBytes(progress.loaded), loadedBytes: progress.loaded }),
+        ...(progress.total && { total: prettyBytes(progress.total), totalBytes: progress.total }),
       },
       'Object upload is in progress',
     )
