@@ -137,7 +137,7 @@ class Model(Entry):
         """
         if not ml_flow:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
-        
+
         mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
         mlflow.set_tracking_uri(mlflow_uri)
         filter_string = f"name = '{name}'"
@@ -145,7 +145,7 @@ class Model(Entry):
         res = mlflow_client.search_model_versions(filter_string=filter_string, order_by=["version_number DESC"])
         if not len(res):
             raise BailoException("No MLFlow models found. Are you sure the name/alias/version provided is correct?")
-        
+
         sel_model = None
         if version:
             for model in res:
@@ -155,9 +155,7 @@ class Model(Entry):
             sel_model = res[0]
 
         if sel_model is None:
-            raise BailoException(
-                "No MLFlow model found. Are you sure the name/alias/version provided is correct?"
-            )
+            raise BailoException("No MLFlow model found. Are you sure the name/alias/version provided is correct?")
 
         name = sel_model.name
         description = sel_model.description + " Imported from MLFlow."
@@ -192,9 +190,7 @@ class Model(Entry):
             mlflow_run = mlflow_client.get_run(run_id)
             artifact_uri = mlflow_run.info.artifact_uri
             if artifact_uri is None:
-                raise BailoException(
-                    "Artifact URI could not be found, therefore artifacts cannot be transfered."
-                )
+                raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transfered.")
 
             if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)):
                 temp_dir = os.path.join(tempfile.gettempdir(), "mlflow_model")
@@ -202,7 +198,6 @@ class Model(Entry):
                 mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
                 release.upload(mlflow_dir)
         return model
-
 
     def update_model_card(self, model_card: dict[str, Any] | None = None) -> None:
         """Upload and retrieve any changes to the model card on Bailo.
@@ -428,7 +423,7 @@ class Experiment:
         """
         if not ml_flow:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
-        
+
         client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
         runs = client.search_runs(experiment_id)
         if len(runs):
