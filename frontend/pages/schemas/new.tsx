@@ -33,7 +33,7 @@ export default function NewSchema() {
   const [schemaName, setSchemaName] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [schemaKind, setSchemaKind] = useState<SchemaKindKeys>(SchemaKind.MODEL)
-  const [filename, setFilename] = useState('')
+  const [fileName, setFileName] = useState('')
   const [loading, setLoading] = useState(false)
 
   const router = useRouter()
@@ -66,7 +66,7 @@ export default function NewSchema() {
       fileReader.readAsText(fileToUpload, 'UTF-8')
       fileReader.onload = (onloadEvent) => {
         if (onloadEvent?.target?.result) {
-          setFilename(fileToUpload.name)
+          setFileName(fileToUpload.name)
           setJsonSchema(onloadEvent.target.result.toString())
         }
       }
@@ -189,7 +189,7 @@ export default function NewSchema() {
                 <Typography variant='caption'>{schemaTypeDescription}</Typography>
               </Stack>
               <Button variant='outlined' component='label' aria-label='Schema JSON file upload button'>
-                {filename !== '' ? filename : 'Select schema'}
+                {fileName !== '' ? fileName : 'Select schema'}
                 <VisuallyHiddenInput type='file' onChange={handleUploadChange} />
               </Button>
               <Stack alignItems='flex-end'>

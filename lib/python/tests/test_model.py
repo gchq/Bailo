@@ -166,9 +166,55 @@ def test_publish_experiment_standard_ordered(standard_experiment):
 
 
 @pytest.mark.mlflow
-def test_import_experiment_from_mlflow_and_publish(mlflow_id, example_model):
+def test_import_model_from_mlflow(integration_client, mlflow_model, request):
+    model = Model.from_mlflow(
+        client=integration_client,
+        mlflow_uri=request.config.mlflow_uri,
+        team_id="Uncategorised",
+        schema_id="minimal-general-v10",
+        name=mlflow_model,
+    )
+
+    assert len(model.get_releases()) == 1
+    assert model.name == mlflow_model
+
+
+@pytest.mark.mlflow
+def test_import_nonexistent_model_from_mlflow(integration_client, request):
+    with pytest.raises(BailoException):
+        model = Model.from_mlflow(
+            client=integration_client,
+            mlflow_uri=request.config.mlflow_uri,
+            team_id="Uncategorised",
+            schema_id="minimal-general-v10",
+            name="fake-model-name",
+        )
+
+
+@pytest.mark.mlflow
+def test_import_model_files_no_run(integration_client, mlflow_model_no_run, request):
+    with pytest.raises(BailoException):
+        model = Model.from_mlflow(
+            client=integration_client,
+            mlflow_uri=request.config.mlflow_uri,
+            team_id="Uncategorised",
+            schema_id="minimal-general-v10",
+            name=mlflow_model_no_run,
+        )
+
+
+@pytest.mark.mlflow
+def test_import_model_no_schema(integration_client, mlflow_model, request):
+    with pytest.raises(BailoException):
+        model = Model.from_mlflow(
+            client=integration_client, mlflow_uri=request.config.mlflow_uri, team_id="Uncategorised", name=mlflow_model
+        )
+
+
+@pytest.mark.mlflow
+def test_import_experiment_from_mlflow_and_publish(mlflow_id, example_model, request):
     experiment_mlflow = example_model.create_experiment()
-    experiment_mlflow.from_mlflow(tracking_uri="http://127.0.0.1:5000", experiment_id=mlflow_id)
+    experiment_mlflow.from_mlflow(tracking_uri=request.config.mlflow_uri, experiment_id=mlflow_id)
 
     run_id = experiment_mlflow.raw[0]["run"]
     experiment_mlflow.publish(mc_loc="performance.performanceMetrics", run_id=run_id)
