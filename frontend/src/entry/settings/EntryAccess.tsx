@@ -1,4 +1,14 @@
-import { Autocomplete, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material'
+import {
+  Autocomplete,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+} from '@mui/material'
 import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
@@ -12,9 +22,25 @@ type EntryAccessProps = {
   onUpdate: (list: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
   entryRoles: Role[]
-}
+} & (
+  | {
+      isReadOnly: true
+      requiredRolesText: string
+    }
+  | {
+      isReadOnly?: false
+      requiredRolesText?: never
+    }
+)
 
-export default function EntryAccess({ value, onUpdate, entryKind, entryRoles }: EntryAccessProps) {
+export default function EntryAccess({
+  value,
+  onUpdate,
+  entryKind,
+  entryRoles,
+  isReadOnly = false,
+  requiredRolesText = '',
+}: EntryAccessProps) {
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(value)
   const [userListQuery, setUserListQuery] = useState('')
@@ -31,9 +57,11 @@ export default function EntryAccess({ value, onUpdate, entryKind, entryRoles }: 
           onAccessListChange={setAccessList}
           entryRoles={entryRoles}
           entryKind={entryKind}
+          isReadOnly={isReadOnly}
+          requiredRolesText={requiredRolesText}
         />
       )),
-    [accessList, entryKind, entryRoles],
+    [accessList, entryKind, entryRoles, isReadOnly, requiredRolesText],
   )
 
   useEffect(() => {
@@ -78,32 +106,35 @@ export default function EntryAccess({ value, onUpdate, entryKind, entryRoles }: 
 
   return (
     <Stack spacing={2}>
-      <Autocomplete
-        open={open}
-        onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
-        size='small'
-        noOptionsText={noOptionsText}
-        onInputChange={debounceOnInputChange}
-        groupBy={(option) => option.kind.toUpperCase()}
-        getOptionLabel={(option) => option.id}
-        isOptionEqualToValue={(option, value) => option.id === value.id}
-        onChange={onUserChange}
-        options={users}
-        filterOptions={(options) =>
-          options.filter(
-            (option) => !accessList.find((collaborator) => collaborator.entity === `${option.kind}:${option.id}`),
-          )
-        }
-        loading={isUsersLoading && userListQuery.length >= 3}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            autoFocus
-            label={`Add a user or group to the ${toSentenceCase(entryKind)} access list`}
-          />
-        )}
-      />
+      <Tooltip title={requiredRolesText}>
+        <Autocomplete
+          open={open}
+          disabled={isReadOnly}
+          onOpen={() => setOpen(true)}
+          onClose={() => setOpen(false)}
+          size='small'
+          noOptionsText={noOptionsText}
+          onInputChange={debounceOnInputChange}
+          groupBy={(option) => option.kind.toUpperCase()}
+          getOptionLabel={(option) => option.id}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          onChange={onUserChange}
+          options={users}
+          filterOptions={(options) =>
+            options.filter(
+              (option) => !accessList.find((collaborator) => collaborator.entity === `${option.kind}:${option.id}`),
+            )
+          }
+          loading={isUsersLoading && userListQuery.length >= 3}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              autoFocus
+              label={`Add a user or group to the ${toSentenceCase(entryKind)} access list`}
+            />
+          )}
+        />
+      </Tooltip>
       <Table>
         <TableHead>
           <TableRow>

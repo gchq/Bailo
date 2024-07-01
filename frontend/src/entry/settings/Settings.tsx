@@ -1,13 +1,14 @@
-import { LoadingButton } from '@mui/lab'
-import { Container, Divider, List, Stack, Typography } from '@mui/material'
+import { Container, Divider, List, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
+import DangerZone from 'src/entry/settings/DangerZone'
 import EntryAccessPage from 'src/entry/settings/EntryAccessPage'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import { EntryInterface, EntryKind, EntryKindKeys } from 'types/types'
+import { getRequiredRolesText, hasRole } from 'utils/roles'
 import { toTitleCase } from 'utils/stringUtils'
 
 export const SettingsCategory = {
@@ -40,15 +41,20 @@ function isSettingsCategory(
 
 type SettingsProps = {
   entry: EntryInterface
+  currentUserRoles: string[]
 }
 
-export default function Settings({ entry }: SettingsProps) {
-  const [loading, setLoading] = useState(false)
+export default function Settings({ entry, currentUserRoles }: SettingsProps) {
   const router = useRouter()
 
   const { category } = router.query
 
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
+
+  const [isReadOnly, requiredRolesText] = useMemo(() => {
+    const validRoles = ['owner']
+    return [!hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
+  }, [currentUserRoles])
 
   useEffect(() => {
     if (isSettingsCategory(category, entry.kind)) {
@@ -61,12 +67,6 @@ export default function Settings({ entry }: SettingsProps) {
     router.replace({
       query: { ...router.query, category },
     })
-  }
-
-  const handleDeleteModel = () => {
-    setLoading(true)
-
-    // TODO - Delete model API request and setLoading(false) on error
   }
 
   return (
@@ -100,7 +100,7 @@ export default function Settings({ entry }: SettingsProps) {
               selected={selectedCategory === SettingsCategory.TEMPLATE}
               onClick={() => handleListItemClick(SettingsCategory.TEMPLATE)}
             >
-              Template
+              Templating
             </SimpleListItemButton>
             <SimpleListItemButton
               selected={selectedCategory === SettingsCategory.DANGER}
@@ -112,19 +112,20 @@ export default function Settings({ entry }: SettingsProps) {
         )}
       </List>
       <Container sx={{ my: 2 }}>
-        {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}
-        {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessPage entry={entry} />}
-        {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
-        {selectedCategory === SettingsCategory.TEMPLATE && <TemplateSettings model={entry} />}
+        {selectedCategory === SettingsCategory.DETAILS && (
+          <EntryDetails entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+        )}
+        {selectedCategory === SettingsCategory.PERMISSIONS && (
+          <EntryAccessPage entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+        )}
+        {selectedCategory === SettingsCategory.ACCESS_REQUESTS && (
+          <AccessRequestSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+        )}
+        {selectedCategory === SettingsCategory.TEMPLATE && (
+          <TemplateSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+        )}
         {selectedCategory === SettingsCategory.DANGER && (
-          <Stack spacing={2}>
-            <Typography variant='h6' component='h2'>
-              Danger Zone!
-            </Typography>
-            <LoadingButton variant='contained' disabled onClick={handleDeleteModel} loading={loading}>
-              Delete model
-            </LoadingButton>
-          </Stack>
+          <DangerZone entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
         )}
       </Container>
     </Stack>

@@ -31,7 +31,7 @@ export default function TeamSelect({ value, onChange, loading = false }: TeamSel
     </LabelledInput>
   )
 
-  // TODO - Use this autocomplete and remove the above TextField once teams have been implemented
+  // TODO - Use this autocomplete and remove the above TextField once teams have been implemented. (Note: disable with tooltip if user doesn't have owner role)
   return (
     <LabelledInput required label='Team' htmlFor={htmlId}>
       <Autocomplete

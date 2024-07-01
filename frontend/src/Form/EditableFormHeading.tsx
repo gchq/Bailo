@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Button, Stack } from '@mui/material'
+import { Button, Stack, Tooltip } from '@mui/material'
 import { ReactNode } from 'react'
 import MessageAlert from 'src/MessageAlert'
 
@@ -16,7 +16,16 @@ type EditableFormHeadingProps = {
   errorMessage?: string
   deleteButtonText?: string
   showDeleteButton?: boolean
-}
+} & (
+  | {
+      canUserEditOrDelete: boolean
+      actionButtonsTooltip: string
+    }
+  | {
+      canUserEditOrDelete?: never
+      actionButtonsTooltip?: never
+    }
+)
 
 export default function EditableFormHeading({
   heading,
@@ -31,6 +40,8 @@ export default function EditableFormHeading({
   deleteButtonText = 'Delete',
   showDeleteButton = false,
   isRegistryError = false,
+  canUserEditOrDelete = true,
+  actionButtonsTooltip = '',
 }: EditableFormHeadingProps) {
   return (
     <Stack sx={{ pb: 2 }}>
@@ -42,22 +53,29 @@ export default function EditableFormHeading({
       >
         {heading}
         {!isEdit && (
-          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
-            <Button variant='outlined' onClick={onEdit} data-test='editFormButton' disabled={isRegistryError}>
-              {editButtonText}
-            </Button>
-            {showDeleteButton && (
+          <Tooltip title={actionButtonsTooltip}>
+            <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
               <Button
-                variant='contained'
-                color='secondary'
-                onClick={onDelete}
-                data-test='deleteFormButton'
-                disabled={isRegistryError}
+                variant='outlined'
+                onClick={onEdit}
+                data-test='editFormButton'
+                disabled={isRegistryError || !canUserEditOrDelete}
               >
-                {deleteButtonText}
+                {editButtonText}
               </Button>
-            )}
-          </Stack>
+              {showDeleteButton && (
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  onClick={onDelete}
+                  data-test='deleteFormButton'
+                  disabled={isRegistryError || !canUserEditOrDelete}
+                >
+                  {deleteButtonText}
+                </Button>
+              )}
+            </Stack>
+          </Tooltip>
         )}
         {isEdit && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
