@@ -235,8 +235,8 @@ module.exports = {
         KMSClient: {
           region: 'eu-west-1',
           credentials: {
-            accessKeyId: 'access',
-            secretAccessKey: 'secret',
+            accessKeyId: '',
+            secretAccessKey: '',
           },
         },
       },

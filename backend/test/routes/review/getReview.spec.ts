@@ -18,6 +18,20 @@ const mockReviewService = vi.hoisted(() => {
 })
 vi.mock('../../../src/services/review.js', () => mockReviewService)
 
+const mockResponseService = vi.hoisted(() => {
+  return {
+    findResponsesById: vi.fn(() => [
+      {
+        user: 'user:user',
+        comment: 'This is a comment',
+        decision: 'approve',
+        kind: 'review',
+      },
+    ]),
+  }
+})
+vi.mock('../../../src/services/response.js', () => mockResponseService)
+
 describe('routes > review > getReviews', () => {
   const endpoint = `/api/v2/reviews`
 

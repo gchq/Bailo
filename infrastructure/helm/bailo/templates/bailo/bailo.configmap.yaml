@@ -192,6 +192,20 @@ data:
           registry: '{{ .Values.minio.registryBucket }}',
         },
       },
+
+      modelMirror: {
+        enabled: {{ .Values.modelMirror.enabled }},
+        export: {
+          bucket: '{{ .Values.modelMirror.export.bucket }}',
+          kmsSignature: {
+            enabled: {{ .Values.modelMirror.export.kmsSignature.enabled }},
+            keyId: '{{ .Values.modelMirror.export.kmsSignature.keyId }}',
+            KMSClient: {
+              region: '{{ .Values.modelMirror.export.kmsSignature.KMSClient.region }}',
+            },
+          },
+        },
+      },
     }
 
   custom-environment-variables.cjs: |
@@ -210,5 +224,17 @@ data:
       },
       inference: {
         authorisationToken: 'INFERENCING_WRITE_TOKEN'
-      }
+      },
+      modelMirror: {
+        export: {
+          kmsSignature: {
+            KMSClient: {
+              credentials: {
+                accessKeyId: 'KMS_ACCESS_KEY',
+                secretAccessKey: 'KMS_ACCESS_KEY',
+              },
+            },
+          },
+        },
+      },
     }

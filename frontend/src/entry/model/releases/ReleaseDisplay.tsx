@@ -1,5 +1,6 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
 import { Box, Button, Card, Divider, Stack, Tooltip, Typography } from '@mui/material'
+import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
@@ -14,7 +15,7 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, ReleaseInterface, ReviewRequestInterface } from 'types/types'
+import { EntryInterface, ReleaseInterface, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
@@ -39,8 +40,18 @@ export default function ReleaseDisplay({
   })
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const {
+    responses: commentResponses,
+    isResponsesLoading: isCommentResponsesLoading,
+    isResponsesError: isCommentResponsesError,
+  } = useGetResponses([release._id])
+  const {
+    responses: reviewResponses,
+    isResponsesLoading: isReviewResponsesLoading,
+    isResponsesError: isReviewResponsesError,
+  } = useGetResponses([...reviews.map((review) => review._id)])
 
-  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ReviewRequestInterface[]>([])
+  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ResponseInterface[]>([])
 
   function latestVersionAdornment() {
     if (release.semver === latestRelease) {
@@ -50,10 +61,10 @@ export default function ReleaseDisplay({
 
   useEffect(() => {
     if (!isReviewsLoading && reviews) {
-      const latestReviews = latestReviewsForEachUser(reviews)
+      const latestReviews = latestReviewsForEachUser(reviews, reviewResponses)
       setReviewsWithLatestResponses(latestReviews)
     }
-  }, [reviews, isReviewsLoading])
+  }, [reviews, isReviewsLoading, reviewResponses])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
@@ -63,9 +74,17 @@ export default function ReleaseDisplay({
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
+  if (isCommentResponsesError) {
+    return <MessageAlert message={isCommentResponsesError.info.message} severity='error' />
+  }
+
+  if (isReviewResponsesError) {
+    return <MessageAlert message={isReviewResponsesError.info.message} severity='error' />
+  }
+
   return (
     <>
-      {(isReviewsLoading || isUiConfigLoading) && <Loading />}
+      {(isReviewsLoading || isUiConfigLoading || isCommentResponsesLoading || isReviewResponsesLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
           {reviews.length > 0 && !hideReviewBanner && <ReviewBanner release={release} />}
@@ -133,16 +152,16 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {(reviewsWithLatestResponses.length > 0 || release.comments.length > 0) && <Divider />}
+              {reviewsWithLatestResponses.length > 0 && commentResponses.length > 0 && <Divider />}
               <Stack direction='row' justifyContent='space-between' spacing={2}>
                 <div>
-                  <ReviewDisplay reviews={reviewsWithLatestResponses} />
+                  <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />
                 </div>
-                {release.comments.length > 0 && (
+                {commentResponses.length > 0 && (
                   <Tooltip title='Comments'>
                     <Stack direction='row' spacing={1}>
                       <CommentIcon color='primary' />
-                      <Typography variant='caption'>{release.comments.length}</Typography>
+                      <Typography variant='caption'>{commentResponses.length}</Typography>
                     </Stack>
                   </Tooltip>
                 )}

@@ -6,11 +6,13 @@ import authorisation from '../connectors/authorisation/index.js'
 import { FileInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../models/Release.js'
+import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isBailoError } from '../types/error.js'
 import { findDuplicates } from '../utils/array.js'
-import { BadReq, Forbidden, InternalError, NotFound, Unauthorized } from '../utils/error.js'
+import { toEntity } from '../utils/entity.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
@@ -203,87 +205,33 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   return updatedRelease
 }
 
-export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, message: string) {
+export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, comment: string) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {
     throw BadReq(`Cannot create a new comment on a mirrored model.`)
   }
+
   const release = await Release.findOne({ modelId, semver })
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  const comment = {
-    message,
-    user: user.dn,
+  // Store the response
+  const commentResponse = new ResponseModel({
+    entity: toEntity('user', user.dn),
+    kind: ResponseKind.Comment,
+    comment,
     createdAt: new Date().toISOString(),
+    parentId: release._id,
+  })
+
+  const savedComment = await commentResponse.save()
+
+  if (!savedComment) {
+    throw InternalError('There was a problem saving this release comment')
   }
 
-  const updatedRelease = await Release.findOneAndUpdate(
-    { _id: release._id },
-    {
-      $push: {
-        comments: comment,
-      },
-    },
-  )
-
-  if (!updatedRelease) {
-    throw InternalError(`Update of release failed.`, { modelId, semver })
-  }
-
-  return updatedRelease
-}
-
-export async function updateReleaseComment(
-  user: UserInterface,
-  modelId: string,
-  semver: string,
-  commentId: string,
-  message: string,
-) {
-  const release = await Release.findOne({ modelId, semver })
-  const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot update comments on a mirrored model.`)
-  }
-
-  if (!release) {
-    throw NotFound(`The requested release was not found.`, { modelId, semver })
-  }
-
-  if (!release.comments) {
-    throw NotFound(`The requested release does not have any comments to edit.`, { modelId, semver })
-  }
-
-  const originalComment = release.comments.find((comment) => comment._id.toString() === commentId)
-
-  if (!originalComment) {
-    throw NotFound(`The requested release comment was not found.`, { release, commentId })
-  }
-
-  if (user.dn !== originalComment.user) {
-    throw Unauthorized('You do not have permission to update this comment', { release, commentId })
-  }
-
-  const updatedRelease = await Release.findOneAndUpdate(
-    { _id: release._id, 'comments._id': commentId },
-    { 'comments.$[i].message': message },
-    {
-      arrayFilters: [
-        {
-          'i._id': `${commentId}`,
-          'i.user': `${user.dn}`,
-        },
-      ],
-    },
-  )
-
-  if (!updatedRelease) {
-    throw InternalError(`Update of release failed.`, { modelId, semver })
-  }
-
-  return updatedRelease
+  return commentResponse
 }
 
 export async function getModelReleases(
@@ -403,7 +351,7 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
   const file = files.find((file) => file.name === fileName)
 
   if (!file) {
-    throw NotFound(`The requested filename was not found on the release.`, { modelId, semver, fileName })
+    throw NotFound(`The requested file name was not found on the release.`, { modelId, semver, fileName })
   }
 
   return file

@@ -47,6 +47,18 @@ spec:
                 secretKeyRef:
                   name: {{ include "bailo.fullname" . }}-minio
                   key: root-password
+            {{- if .Values.modelMirror.export.kmsSignature.enabled }}
+            - name: KMS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-kms
+                  key: access
+            - name: KMS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-kms
+                  key: secret
+            {{- end }}
             - name: MONGO_PASSWORD
               valueFrom:
                 secretKeyRef:

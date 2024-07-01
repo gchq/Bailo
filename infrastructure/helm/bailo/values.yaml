@@ -251,6 +251,16 @@ instrumentation:
   enabled: false
   debug: false
 
+modelMirror:
+  enabled: false
+  export:
+    kmsSignature:
+      enabled: false
+      keyId: '123'
+      KMSClient:
+        region: 'eu-west-1'
+        accessKey: ''
+        secretKey: ''
 # Inferencing cluster reference
 inference:
   enabled: false

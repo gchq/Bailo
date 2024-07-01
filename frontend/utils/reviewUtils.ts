@@ -1,31 +1,30 @@
-import { cloneDeep, groupBy } from 'lodash-es'
-import { ReviewRequestInterface, ReviewResponse } from 'types/types'
+import { groupBy } from 'lodash-es'
+import { ResponseInterface, ReviewRequestInterface } from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/dateUtils'
 
 interface GroupedReviewResponse {
-  [user: string]: ReviewResponse[]
+  [user: string]: ResponseInterface[]
 }
 
-export function latestReviewsForEachUser(reviews: ReviewRequestInterface[]) {
-  const latestReviews: ReviewRequestInterface[] = []
+export function latestReviewsForEachUser(reviews: ReviewRequestInterface[], responses: ResponseInterface[]) {
+  const latestReviewResponses: ResponseInterface[] = []
   reviews.forEach((review) => {
-    const reviewResult: ReviewRequestInterface = cloneDeep(review)
-    const groupedResponses: GroupedReviewResponse = groupBy(reviewResult.responses, (response) => response.user)
-    const latestResponses: ReviewResponse[] = []
+    const filteredResponses = responses.filter((response) => response.parentId === review._id)
+    const groupedResponses: GroupedReviewResponse = groupBy(filteredResponses, (response) => response.entity)
+    const latestResponses: ResponseInterface[] = []
     Object.keys(groupedResponses).forEach((user) => {
       latestResponses.push(groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1])
     })
-    reviewResult.responses = latestResponses
-    latestReviews.push(reviewResult)
+    latestReviewResponses.push(...latestResponses)
   })
-  return latestReviews
+  return latestReviewResponses
 }
 
-export function reviewResponsesForEachUser(reviews: ReviewRequestInterface[]) {
-  const allResponses: ReviewResponse[] = []
+export function reviewResponsesForEachUser(reviews: ReviewRequestInterface[], responses: ResponseInterface[]) {
+  const allResponses: ResponseInterface[] = []
   reviews.forEach((review) => {
-    const reviewResult: ReviewRequestInterface = cloneDeep(review)
-    const groupedResponses: GroupedReviewResponse = groupBy(reviewResult.responses, (response) => response.user)
+    const filteredResponses = responses.filter((response) => response.parentId === review._id)
+    const groupedResponses: GroupedReviewResponse = groupBy(filteredResponses, (response) => response.entity)
     Object.keys(groupedResponses).forEach((user) => {
       const sortedResponses = groupedResponses[user].sort(sortByCreatedAtAscending)
       sortedResponses.forEach((response, index) => {

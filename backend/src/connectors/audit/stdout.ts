@@ -5,6 +5,7 @@ import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
+import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
@@ -218,6 +219,24 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       ...(review.semver && { semver: review.semver }),
       ...(review.accessRequestId && { semver: review.accessRequestId }),
     })
+    req.log.info(event, req.audit.description)
+  }
+
+  onViewResponses(req: Request, responseInterfaces: ResponseInterface[]) {
+    this.checkEventType(AuditInfo.CreateResponse, req)
+    const event = this.generateEvent(req, { responseInterfaces })
+    req.log.info(event, req.audit.description)
+  }
+
+  onCreateResponse(req: Request, ResponseInterface: ResponseInterface) {
+    this.checkEventType(AuditInfo.CreateResponse, req)
+    const event = this.generateEvent(req, { id: ResponseInterface['_id'] })
+    req.log.info(event, req.audit.description)
+  }
+
+  onUpdateResponse(req: Request, responseId: string) {
+    this.checkEventType(AuditInfo.UpdateResponse, req)
+    const event = this.generateEvent(req, { id: responseId })
     req.log.info(event, req.audit.description)
   }
 
