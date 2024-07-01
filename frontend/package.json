@@ -57,7 +57,7 @@
     "typescript": "5.0.4"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^14.2.3",
+    "@next/bundle-analyzer": "^14.2.4",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
     "@types/lodash-es": "^4.17.12",
