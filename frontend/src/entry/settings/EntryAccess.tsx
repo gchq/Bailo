@@ -12,11 +12,11 @@ import { CollaboratorEntry, EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
 
-type EntryAccessPageProps = {
+type EntryAccessProps = {
   entry: EntryInterface
 }
 
-export default function EntryAccessPage({ entry }: EntryAccessPageProps) {
+export default function EntryAccess({ entry }: EntryAccessProps) {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(entry.collaborators)
