@@ -24,7 +24,7 @@
     "@aws-sdk/client-s3": "^3.421.0",
     "@aws-sdk/lib-storage": "^3.588.0",
     "@opentelemetry/auto-instrumentations-node": "^0.46.1",
-    "@opentelemetry/exporter-logs-otlp-proto": "^0.48.0",
+    "@opentelemetry/exporter-logs-otlp-proto": "^0.52.1",
     "@smithy/node-http-handler": "^2.1.10",
     "@types/express-session": "^1.18.0",
     "app-root-path": "^3.1.0",
