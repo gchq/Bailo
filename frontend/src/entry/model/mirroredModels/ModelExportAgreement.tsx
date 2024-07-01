@@ -14,10 +14,5 @@ export default function ModelExportAgreement() {
     return <Loading />
   }
 
-  return (
-    <>
-      {isUiConfigLoading && <Loading />}
-      <MarkdownDisplay>{uiConfig.modelMirror.disclaimer}</MarkdownDisplay>
-    </>
-  )
+  return <MarkdownDisplay>{uiConfig.modelMirror.disclaimer}</MarkdownDisplay>
 }
