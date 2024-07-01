@@ -110,15 +110,10 @@ def standard_experiment(example_model, test_path):
         "scale": 0.5,
     }
 
-    # Arbitrary metrics
-    metrics = {
-        "accuracy": 0.98,
-    }
-
-    for x in range(5):
+    for x in range(1, 6):
         experiment.start_run()
         experiment.log_params(params)
-        experiment.log_metrics(metrics)
+        experiment.log_metrics({"accuracy": x * 0.1})
         experiment.log_artifacts([str(test_path)])
         experiment.log_dataset("test_dataset")
 
