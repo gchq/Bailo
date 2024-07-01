@@ -21,7 +21,7 @@
     "@asteasolutions/zod-to-openapi": "^6.3.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.588.0",
     "@aws-sdk/client-kms": "^3.588.0",
-    "@aws-sdk/client-s3": "^3.421.0",
+    "@aws-sdk/client-s3": "^3.606.0",
     "@aws-sdk/lib-storage": "^3.588.0",
     "@opentelemetry/auto-instrumentations-node": "^0.46.1",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.48.0",
