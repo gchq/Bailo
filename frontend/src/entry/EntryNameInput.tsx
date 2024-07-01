@@ -13,11 +13,11 @@ type EntryNameInputProps = {
   autoFocus?: boolean
 } & (
   | {
-      isReadOnly: true
+      isReadOnly: boolean
       requiredRolesText: string
     }
   | {
-      isReadOnly?: false
+      isReadOnly?: never
       requiredRolesText?: never
     }
 )

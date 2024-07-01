@@ -9,11 +9,11 @@ type EntryDescriptionInputProps = {
   onChange: (value: string) => void
 } & (
   | {
-      isReadOnly: true
+      isReadOnly: boolean
       requiredRolesText: string
     }
   | {
-      isReadOnly?: false
+      isReadOnly?: never
       requiredRolesText?: never
     }
 )

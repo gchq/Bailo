@@ -24,11 +24,11 @@ type EntryAccessProps = {
   entryRoles: Role[]
 } & (
   | {
-      isReadOnly: true
+      isReadOnly: boolean
       requiredRolesText: string
     }
   | {
-      isReadOnly?: false
+      isReadOnly?: never
       requiredRolesText?: never
     }
 )
