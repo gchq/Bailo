@@ -77,7 +77,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
               <ReleaseSelector
                 model={model}
                 selectedReleases={selectedReleases}
-                setSelectedReleases={setSelectedReleases}
+                onUpdateSelectedReleases={setSelectedReleases}
               />
                */}
               <LoadingButton

@@ -7,22 +7,22 @@ import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface } from 'types/types'
 
-type ReleasesSelectorProps = {
+type ReleaseSelectorProps = {
   model: EntryInterface
   selectedReleases: ReleaseInterface[]
-  setSelectedReleases: (values: ReleaseInterface[]) => void
+  onUpdateSelectedReleases: (values: ReleaseInterface[]) => void
 }
 
-export default function ReleaseSelector({ model, selectedReleases, setSelectedReleases }: ReleasesSelectorProps) {
+export default function ReleaseSelector({ model, selectedReleases, onUpdateSelectedReleases }: ReleaseSelectorProps) {
   const [checked, setChecked] = useState(false)
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
   const handleRemoveRelease = useCallback(
     (removedRelease: ReleaseInterface) => {
       setChecked(false)
-      setSelectedReleases(selectedReleases.filter((release) => release.semver !== removedRelease.semver))
+      onUpdateSelectedReleases(selectedReleases.filter((release) => release.semver !== removedRelease.semver))
     },
-    [selectedReleases, setSelectedReleases],
+    [selectedReleases, onUpdateSelectedReleases],
   )
 
   const selectedReleasesDisplay = useMemo(() => {
@@ -43,7 +43,7 @@ export default function ReleaseSelector({ model, selectedReleases, setSelectedRe
   }, [selectedReleases, model, handleRemoveRelease])
 
   const handleChecked = async (event: ChangeEvent<HTMLInputElement>) => {
-    setSelectedReleases(event.target.checked ? releases : [])
+    onUpdateSelectedReleases(event.target.checked ? releases : [])
     setChecked(event.target.checked)
   }
 
