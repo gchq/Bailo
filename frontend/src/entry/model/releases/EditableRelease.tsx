@@ -180,7 +180,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
 
   return (
     <Box py={1}>
-      {model.settings.mirror?.sourceModelId && (
+      {(!model.settings.mirror || model.settings.mirror?.sourceModelId) && (
         <EditableFormHeading
           heading={
             <div>
