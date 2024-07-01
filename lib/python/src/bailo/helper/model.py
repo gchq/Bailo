@@ -482,11 +482,13 @@ class Experiment:
         """Publishes a given experiments results to the model card.
 
         :param mc_loc: Location of metrics in the model card (e.g. performance.performanceMetrics)
-        :param run_id: Local experiment run ID to be selected
         :param semver: Semantic version of release to create (if artifacts present), defaults to 0.1.0 or next
         :param notes: Notes for release, defaults to ""
+        :param run_id: Local experiment run ID to be selected, defaults to None
+        :param select_by: String describing experiment to be selected (e.g. "MIN|MAX:accuracy"), defaults to None
 
         ..note:: mc_loc is dependent on the model card schema being used
+        ..warning:: User must specify either run_id or select_by, otherwise the code will error
         """
         mc = self.model.model_card
         if mc is None:
