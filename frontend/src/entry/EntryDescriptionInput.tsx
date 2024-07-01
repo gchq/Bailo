@@ -34,9 +34,6 @@ export default function EntryDescriptionInput({
         <span>
           <TextField
             fullWidth
-            multiline
-            minRows={4}
-            maxRows={10}
             id={htmlId}
             value={value}
             size='small'
