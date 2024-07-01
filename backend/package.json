@@ -60,7 +60,7 @@
     "semver": "^7.6.2",
     "shelljs": "^0.8.5",
     "utility-types": "^3.11.0",
-    "uuid": "^9.0.1",
+    "uuid": "^10.0.0",
     "yargs": "^17.7.1",
     "zod": "^3.23.8",
     "zod-error": "^1.5.0"
@@ -85,7 +85,7 @@
     "@types/nodemailer": "^6.4.15",
     "@types/shelljs": "^0.8.15",
     "@types/supertest": "^6.0.2",
-    "@types/uuid": "^9.0.7",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^5.59.5",
     "@typescript-eslint/parser": "^5.62.0",
     "@vitest/coverage-v8": "^1.4.0",
