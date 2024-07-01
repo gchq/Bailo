@@ -124,6 +124,9 @@ export interface Config {
       }
       gpus: { [key: string]: string }
     }
+    modelMirror: {
+      enabled: boolean
+    }
   }
 
   session: {
@@ -163,7 +166,6 @@ export interface Config {
   }
 
   modelMirror: {
-    enabled: boolean
     export: {
       maxSize: number
       bucket: string

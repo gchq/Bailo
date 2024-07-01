@@ -219,25 +219,27 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
 
   return (
     <Stack spacing={2}>
-      <EditableFormHeading
-        heading={
-          <div>
-            <Typography fontWeight='bold'>Release name</Typography>
-            <Typography>{`${model.name} - ${release.semver}`}</Typography>
-          </div>
-        }
-        editButtonText='Edit Release'
-        deleteButtonText='Delete Release'
-        showDeleteButton
-        isEdit={isEdit}
-        isLoading={isLoading}
-        onEdit={handleEdit}
-        onCancel={handleCancel}
-        onSubmit={handleSubmit}
-        onDelete={() => setOpen(true)}
-        errorMessage={errorMessage}
-        isRegistryError={isRegistryError}
-      />
+      {(!model.settings.mirror || model.settings.mirror?.sourceModelId) && (
+        <EditableFormHeading
+          heading={
+            <div>
+              <Typography fontWeight='bold'>Release name</Typography>
+              <Typography>{`${model.name} - ${release.semver}`}</Typography>
+            </div>
+          }
+          editButtonText='Edit Release'
+          deleteButtonText='Delete Release'
+          showDeleteButton
+          isEdit={isEdit}
+          isLoading={isLoading}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSubmit={handleSubmit}
+          onDelete={() => setOpen(true)}
+          errorMessage={errorMessage}
+          isRegistryError={isRegistryError}
+        />
+      )}
       {failedFileUploads.length > 0 && (
         <Alert severity='error' sx={{ my: 2 }}>
           <Stack spacing={1}>

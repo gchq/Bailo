@@ -180,6 +180,9 @@ module.exports = {
       },
       gpus: {},
     },
+    modelMirror: {
+      enabled: false,
+    },
   },
 
   connectors: {
@@ -224,7 +227,6 @@ module.exports = {
   },
 
   modelMirror: {
-    enabled: false,
     export: {
       maxSize: 100 * 1024 * 1024 * 1024,
       bucket: 'exports',

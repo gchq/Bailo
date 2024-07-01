@@ -10,6 +10,7 @@ export interface EntrySearchResult {
   description: string
   tags: Array<string>
   kind: EntryKindKeys
+  readonly?: boolean
 }
 
 export function useListModels(
