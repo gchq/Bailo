@@ -25,6 +25,7 @@ export default function EntryNameInput({ value, kind, onChange, autoFocus = fals
         autoFocus={autoFocus}
         value={value}
         size='small'
+        id={htmlId}
         onChange={handleChange}
         data-test='entryNameInput'
       />
