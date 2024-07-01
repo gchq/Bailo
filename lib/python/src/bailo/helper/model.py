@@ -383,7 +383,14 @@ class Experiment:
         else:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
-    def publish(self, mc_loc: str, run_id: str, semver: str = "0.1.0", notes: str = ""):
+    def publish(
+        self,
+        mc_loc: str,
+        semver: str = "0.1.0",
+        notes: str = "",
+        run_id: str | None = None,
+        select_by: str | None = None,
+    ):
         """Publishes a given experiments results to the model card.
 
         :param mc_loc: Location of metrics in the model card (e.g. performance.performanceMetrics)
@@ -400,12 +407,19 @@ class Experiment:
         mc = NestedDict(mc)
 
         if len(self.raw):
-            for run in self.raw:
-                if run["run"] == run_id:
-                    sel_run = run
-                    break
-            else:
-                raise NameError(f"Run {run_id} does not exist.")
+            if (select_by is None) and (run_id is None):
+                raise BailoException(
+                    "Either select_by (e.g. 'MIN|MAX:accuracy) or run_id is required to publish an experiment run."
+                )
+            if (select_by is not None) and (run_id is None):
+                sel_run = self.__select_run(select_by=select_by)
+            if run_id is not None:
+                for run in self.raw:
+                    if run["run"] == run_id:
+                        sel_run = run
+                        break
+                else:
+                    raise NameError(f"Run {run_id} does not exist.")
         else:
             raise BailoException(f"This experiment has no runs to publish.")
 
@@ -448,3 +462,32 @@ class Experiment:
                 shutil.rmtree(self.temp_dir)
 
         logger.info(f"Successfully published experiment run %s to model %s.", str(run_id), self.model.model_id)
+
+    def __select_run(self, select_by: str):
+        # Parse target and order from select_by string
+        select_by_split = select_by.split(":")
+        order_str = select_by_split[0].upper()
+        order_opt = ["MIN", "MAX"]
+        if order_str not in order_opt:
+            raise BailoException(f"Runs can only be ordered by MIN or MAX, not {order_str}.")
+        target_str = select_by_split[1]
+
+        # Extract target value for each run
+        runs = self.raw
+        for run in runs:
+            metrics = run["metrics"]
+            for m in metrics:
+                target_value = m.get(target_str, None)
+            if target_value is not None:
+                run["target"] = target_value
+            else:
+                raise BailoException(
+                    f"Target '{target_str}' could not be found in at least one experiment run, or is not an integer. Therefore ordering cannot take place."
+                )
+
+        # Sort experiment runs by target value into ascending order, and select first or last depending on order_str
+        ordered_runs = sorted(runs, key=lambda run: run["target"])
+        if order_str == "MIN":
+            return ordered_runs[0]
+        if order_str == "MAX":
+            return ordered_runs[-1]
