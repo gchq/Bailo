@@ -87,7 +87,13 @@ async function copyToExportBucketWithSignatures(
   const streamForDigest = await getObjectFromTemporaryS3Location(modelId, semvers)
   const messageDigest = await generateDigest(streamForDigest)
   log.debug({ modelId, semvers }, 'Generating signatures.')
-  signatures = await sign(messageDigest)
+  try {
+    signatures = await sign(messageDigest)
+  } catch (e) {
+    log.error({ modelId }, 'Error generating signature for export.')
+    throw e
+  }
+
   log.debug({ modelId, semvers }, 'Successfully generated signatures')
   log.debug({ modelId, semvers }, 'Getting stream from S3 to upload to export location.')
   const streamToCopy = await getObjectFromTemporaryS3Location(modelId, semvers)

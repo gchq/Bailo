@@ -1,7 +1,3 @@
-export interface User {
-  dn: string
-}
-
 export const RoleKind = {
   ENTRY: 'entry',
   SCHEMA: 'schema',
