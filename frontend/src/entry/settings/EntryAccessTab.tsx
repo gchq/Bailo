@@ -12,13 +12,13 @@ import { CollaboratorEntry, EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
 
-type EntryAccessPageProps = {
+type EntryAccessTabProps = {
   entry: EntryInterface
   isReadOnly: boolean
   requiredRolesText: string
 }
 
-export default function EntryAccessPage({ entry, isReadOnly, requiredRolesText }: EntryAccessPageProps) {
+export default function EntryAccessTab({ entry, isReadOnly, requiredRolesText }: EntryAccessTabProps) {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(entry.collaborators)

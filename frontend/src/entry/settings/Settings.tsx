@@ -5,7 +5,7 @@ import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
 import DangerZone from 'src/entry/settings/DangerZone'
-import EntryAccessPage from 'src/entry/settings/EntryAccessPage'
+import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import { EntryInterface, EntryKind, EntryKindKeys } from 'types/types'
 import { getRequiredRolesText, hasRole } from 'utils/roles'
@@ -116,7 +116,7 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
           <EntryDetails entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
         )}
         {selectedCategory === SettingsCategory.PERMISSIONS && (
-          <EntryAccessPage entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+          <EntryAccessTab entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
         )}
         {selectedCategory === SettingsCategory.ACCESS_REQUESTS && (
           <AccessRequestSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
