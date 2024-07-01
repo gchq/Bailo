@@ -16,7 +16,7 @@ export default function DangerZone({ entry, isReadOnly, requiredRolesText }: Dan
   const handleDeleteEntry = () => {
     setLoading(true)
 
-    // TODO - Delete model API request and setLoading(false) on error
+    // TODO - Delete entry API request and setLoading(false) on success/fail
   }
 
   return (
