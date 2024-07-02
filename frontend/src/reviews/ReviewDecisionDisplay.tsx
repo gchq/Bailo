@@ -9,6 +9,7 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
+import ReactionButtons from 'src/reviews/ReactionButtons'
 import { Decision, EntityKind, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getRoleDisplay } from 'utils/roles'
@@ -16,9 +17,10 @@ import { getRoleDisplay } from 'utils/roles'
 type ReviewDecisionDisplayProps = {
   response: ResponseInterface
   modelId: string
+  mutateResponses: () => void
 }
 
-export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecisionDisplayProps) {
+export default function ReviewDecisionDisplay({ response, modelId, mutateResponses }: ReviewDecisionDisplayProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
 
   const theme = useTheme()
@@ -72,11 +74,14 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
             <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
           </Stack>
           {response.comment && (
-            <div>
-              <Divider sx={{ mt: 1, mb: 2 }} />
-              <MarkdownDisplay>{response.comment}</MarkdownDisplay>
-            </div>
+            <Box my={1}>
+              <Divider sx={{ mb: 2 }} />
+              <Box mx={1}>
+                <MarkdownDisplay>{response.comment}</MarkdownDisplay>
+              </Box>
+            </Box>
           )}
+          <ReactionButtons response={response} mutateResponses={mutateResponses} />
         </Card>
       </Stack>
     </>

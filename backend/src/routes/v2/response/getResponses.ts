@@ -17,7 +17,7 @@ export const getResponseSchema = z.object({
 
 registerPath({
   method: 'get',
-  path: '/api/v2/response',
+  path: '/api/v2/responses',
   tags: ['response'],
   description: 'Get a list of responses with matching parent IDs',
   schema: getResponseSchema,

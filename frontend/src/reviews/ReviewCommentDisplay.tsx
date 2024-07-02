@@ -4,15 +4,21 @@ import { useState } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
+import ReactionButtons from 'src/reviews/ReactionButtons'
 import { EntityKind, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 type ReviewCommentDisplayProps = {
   response: ResponseInterface
   onReplyButtonClick: (value: string) => void
+  mutateResponses: () => void
 }
 
-export default function ReviewCommentDisplay({ response, onReplyButtonClick }: ReviewCommentDisplayProps) {
+export default function ReviewCommentDisplay({
+  response,
+  onReplyButtonClick,
+  mutateResponses,
+}: ReviewCommentDisplayProps) {
   const [entityKind, username] = response.entity.split(':')
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -50,11 +56,14 @@ export default function ReviewCommentDisplay({ response, onReplyButtonClick }: R
             </Stack>
           </Stack>
           {response.comment && (
-            <div>
-              <Divider sx={{ mt: 1, mb: 2 }} />
-              <MarkdownDisplay>{response.comment}</MarkdownDisplay>
-            </div>
+            <Box my={1}>
+              <Divider sx={{ mb: 2 }} />
+              <Box mx={1}>
+                <MarkdownDisplay>{response.comment}</MarkdownDisplay>
+              </Box>
+            </Box>
           )}
+          <ReactionButtons response={response} mutateResponses={mutateResponses} />
         </Card>
       </Stack>
       <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>

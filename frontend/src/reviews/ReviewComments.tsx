@@ -80,18 +80,26 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     decisionsAndComments.sort(sortByCreatedAtAscending)
     return decisionsAndComments.map((response) => {
       if (response.kind === ResponseKind.Review) {
-        return <ReviewDecisionDisplay key={response.createdAt} response={response} modelId={modelId} />
+        return (
+          <ReviewDecisionDisplay
+            key={response.createdAt}
+            response={response}
+            modelId={modelId}
+            mutateResponses={mutateResponses}
+          />
+        )
       } else {
         return (
           <ReviewCommentDisplay
             key={response.createdAt}
             response={response}
             onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
+            mutateResponses={mutateResponses}
           />
         )
       }
     })
-  }, [reviews, release, accessRequest, responses, modelId, newReviewComment])
+  }, [reviews, responses, release, accessRequest, modelId, mutateResponses, newReviewComment])
 
   async function submitReviewComment() {
     setCommentSubmissionError('')
