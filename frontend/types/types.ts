@@ -46,6 +46,10 @@ export interface UiConfig {
 
     gpus: { [key: string]: string }
   }
+  modelMirror: {
+    enabled: boolean
+    disclaimer: string
+  }
 }
 
 export interface FileInterface {
@@ -384,8 +388,12 @@ export interface EntryInterface {
   teamId: string
   description: string
   settings: {
-    ungovernedAccess: boolean
-    allowTemplating: boolean
+    ungovernedAccess?: boolean
+    allowTemplating?: boolean
+    mirror?: {
+      sourceModelId?: string
+      destinationModelId?: string
+    }
   }
   card: EntryCardInterface
   visibility: EntryVisibilityKeys
