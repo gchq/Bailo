@@ -1,4 +1,5 @@
 import { useGetModel } from 'actions/model'
+import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
@@ -8,6 +9,7 @@ import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { EntryKind } from 'types/types'
+import { getCurrentUserRoles } from 'utils/roles'
 
 export default function DataCard() {
   const router = useRouter()
@@ -17,27 +19,39 @@ export default function DataCard() {
     isModelLoading: isDataCardLoading,
     isModelError: isDataCardError,
   } = useGetModel(dataCardId, EntryKind.DATA_CARD)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+
+  const currentUserRoles = useMemo(() => getCurrentUserRoles(dataCard, currentUser), [dataCard, currentUser])
 
   const tabs = useMemo(
     () =>
       dataCard
         ? [
-            { title: 'Overview', path: 'overview', view: <Overview entry={dataCard} /> },
-            { title: 'Settings', path: 'settings', view: <Settings entry={dataCard} /> },
+            {
+              title: 'Overview',
+              path: 'overview',
+              view: <Overview entry={dataCard} currentUserRoles={currentUserRoles} />,
+            },
+            {
+              title: 'Settings',
+              path: 'settings',
+              view: <Settings entry={dataCard} currentUserRoles={currentUserRoles} />,
+            },
           ]
         : [],
-    [dataCard],
+    [currentUserRoles, dataCard],
   )
 
   const error = MultipleErrorWrapper(`Unable to load data card page`, {
     isDataCardError,
+    isCurrentUserError,
   })
   if (error) return error
 
   return (
     <>
       <Title text={dataCard ? dataCard.name : 'Loading...'} />
-      {isDataCardLoading && <Loading />}
+      {(isDataCardLoading || isCurrentUserLoading) && <Loading />}
       {dataCard && (
         <PageWithTabs
           showCopyButton

@@ -27,7 +27,7 @@ export default function AccessRequests({ model, currentUserRoles }: AccessReques
             <AccessRequestDisplay
               accessRequest={accessRequest}
               key={accessRequest.metadata.overview.name}
-              hideReviewBanner={!hasRole(currentUserRoles, ['msro', 'mtr'])}
+              hideReviewBanner={!hasRole(currentUserRoles, ['msro'])}
             />
           ))
       ) : (

@@ -1,4 +1,4 @@
-import { Box, Button, Container, Stack } from '@mui/material'
+import { Box, Button, Container, Stack, Tooltip } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
@@ -7,7 +7,7 @@ import Loading from 'src/common/Loading'
 import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
-import { hasRole } from 'utils/roles'
+import { getRequiredRolesText, hasRole } from 'utils/roles'
 
 type ReleasesProps = {
   model: EntryInterface
@@ -34,6 +34,11 @@ export default function Releases({ model, currentUserRoles }: ReleasesProps) {
     [latestRelease, model, releases, currentUserRoles],
   )
 
+  const [canDraftRelease, requiredRolesText] = useMemo(() => {
+    const validRoles = ['owner', 'contributor']
+    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
+  }, [currentUserRoles])
+
   useEffect(() => {
     if (model && releases.length > 0) {
       setLatestRelease(releases[0].semver)
@@ -51,15 +56,19 @@ export default function Releases({ model, currentUserRoles }: ReleasesProps) {
   return (
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
-        <Box sx={{ textAlign: 'right' }}>
-          <Button
-            variant='outlined'
-            onClick={handleDraftNewRelease}
-            disabled={!model.card}
-            data-test='draftNewReleaseButton'
-          >
-            Draft new Release
-          </Button>
+        <Box sx={{ ml: 'auto' }}>
+          <Tooltip title={requiredRolesText}>
+            <span>
+              <Button
+                variant='outlined'
+                onClick={handleDraftNewRelease}
+                disabled={!canDraftRelease || !model.card}
+                data-test='draftNewReleaseButton'
+              >
+                Draft new Release
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
         {isReleasesLoading && <Loading />}
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}

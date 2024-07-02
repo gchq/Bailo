@@ -13,9 +13,10 @@ type OverviewPageKeys = (typeof OverviewPage)[keyof typeof OverviewPage]
 
 type OverviewProps = {
   entry: EntryInterface
+  currentUserRoles: string[]
 }
 
-export default function Overview({ entry }: OverviewProps) {
+export default function Overview({ entry, currentUserRoles }: OverviewProps) {
   const page: OverviewPageKeys = useMemo(
     () => (entry.card && entry.card.schemaId ? OverviewPage.FORM : OverviewPage.TEMPLATE),
     [entry.card],
@@ -24,7 +25,7 @@ export default function Overview({ entry }: OverviewProps) {
   return (
     <Container sx={{ my: 2 }}>
       {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
-      {page === OverviewPage.FORM && <FormEditPage entry={entry} />}
+      {page === OverviewPage.FORM && <FormEditPage entry={entry} currentUserRoles={currentUserRoles} />}
     </Container>
   )
 }
