@@ -66,28 +66,9 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
               Delete
             </Button>
           </Stack>
-          <MessageAlert message={errorMessage} severity='error' />
-          <ConfirmationDialogue
-            open={open}
-            title='Delete schema'
-            onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
-            onCancel={() => setOpen(false)}
-            errorMessage={errorMessage}
-            dialogMessage={
-              'Deleting this schema will break any existing models that are using it. Are you sure you want to do this?'
-            }
-          />
         </ListItem>
       )),
-    [
-      schemas,
-      errorMessage,
-      open,
-      schemaToBeDeleted,
-      handleDeleteConfirm,
-      handleDeleteSchemaButtonOnClick,
-      handleSetSchemaActive,
-    ],
+    [schemas, handleDeleteSchemaButtonOnClick, handleSetSchemaActive],
   )
 
   if (isSchemasLoading) {
@@ -103,8 +84,19 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
       <Typography color='primary' variant='h6' component='h2'>
         {`${camelCaseToTitleCase(schemaKind)} Schemas`}
       </Typography>
+      <MessageAlert message={errorMessage} severity='error' />
       <List>{schemaList}</List>
       {schemas.length == 0 && <EmptyBlob text='No schemas to show' />}
+      <ConfirmationDialogue
+        open={open}
+        title='Delete schema'
+        onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
+        onCancel={() => setOpen(false)}
+        errorMessage={errorMessage}
+        dialogMessage={
+          'Deleting this schema will break any existing models that are using it. Are you sure you want to do this?'
+        }
+      />
     </Card>
   )
 }
