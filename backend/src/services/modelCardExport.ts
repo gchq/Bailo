@@ -1,4 +1,3 @@
-import { readFile } from 'fs/promises'
 import { outdent } from 'outdent'
 import showdown from 'showdown'
 
@@ -77,7 +76,7 @@ export async function renderToHtml(
   const html = `
     <html>
       <head>
-        <style>${await readFile('./node_modules/gutenberg-css/dist/gutenberg.min.css', { encoding: 'utf-8' })}</style>
+        <style>.exampe { color: red; }</style>
       </head>
       <body>${body}</body>
     </html>

@@ -1,11 +1,16 @@
-import { describe, expect, test, vi } from 'vitest'
 import { Request, Response } from 'express'
-import { getModelCardHtml } from '../../../../src/routes/v2/model/modelcard/getModelCardHtml.js'
-import { renderToHtml } from '../../../../src/services/export.js'
-import audit from '../../../../src/connectors/audit/index.js'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/services/export.js')
+import audit from '../../../../src/connectors/audit/index.js'
+import { getModelCardHtml } from '../../../../src/routes/v2/model/modelcard/getModelCardHtml.js'
+import { renderToHtml } from '../../../../src/services/modelCardExport.js'
+
+vi.mock('../../../../src/services/modelCardExport.js')
 vi.mock('../../../../src/connectors/audit/index.js')
+
+const noop = () => {
+  // noop
+}
 
 describe('routes > modelcard > getModelCardHtml', () => {
   const mockUser = { dn: 'testUser' } as any
@@ -25,11 +30,11 @@ describe('routes > modelcard > getModelCardHtml', () => {
   } as unknown as Response
 
   beforeEach(() => {
-    vi.mocked(renderToHtml).mockResolvedValue({ html: mockHtml, card: mockCard })
+    vi.mocked(renderToHtml).mockResolvedValue({ html: mockHtml, card: mockCard } as any)
   })
 
   test('should return HTML and call audit', async () => {
-    await getModelCardHtml[1](req, res)
+    await getModelCardHtml[1](req, res, noop)
 
     expect(renderToHtml).toHaveBeenCalledWith(mockUser, mockModelId, mockVersion)
     expect(audit.onViewModelCard).toHaveBeenCalledWith(req, mockModelId, mockCard)
@@ -37,8 +42,8 @@ describe('routes > modelcard > getModelCardHtml', () => {
   })
 
   test('should set audit info', async () => {
-    await getModelCardHtml[1](req, res)
+    await getModelCardHtml[1](req, res, noop)
 
-    expect(req.audit).toEqual({ typeId: 'ViewModelCard', description: 'View model card', auditKind: 'view' })
+    expect(req.audit).toEqual({ typeId: 'ViewModelCard', description: 'Model Card Viewed', auditKind: 'View' })
   })
 })

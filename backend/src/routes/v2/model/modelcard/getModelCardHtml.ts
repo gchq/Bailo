@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
-import { renderToHtml } from '../../../../services/export.js'
+import { renderToHtml } from '../../../../services/modelCardExport.js'
 import { registerPath } from '../../../../services/specification.js'
 import { GetModelCardVersionOptions } from '../../../../types/enums.js'
 import { parse } from '../../../../utils/validate.js'
