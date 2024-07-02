@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
-import EntryAccessPage from 'src/entry/settings/EntryAccessPage'
+import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import { EntryInterface, EntryKind, EntryKindKeys } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
@@ -118,7 +118,7 @@ export default function Settings({ entry }: SettingsProps) {
       </List>
       <Container sx={{ my: 2 }}>
         {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}
-        {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessPage entry={entry} />}
+        {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessTab entry={entry} />}
         {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
         {selectedCategory === SettingsCategory.TEMPLATE && <TemplateSettings model={entry} />}
         {selectedCategory === SettingsCategory.DANGER && (
