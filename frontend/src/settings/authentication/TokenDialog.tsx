@@ -17,7 +17,7 @@ import DockerIcon from 'public/docker-icon.svg'
 import KubernetesIcon from 'public/kubernetes-icon.svg'
 import PodmanIcon from 'public/podman-logo.svg'
 import RktLogo from 'public/rkt-logo.svg'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import MessageAlert from 'src/MessageAlert'
 import DockerConfiguration from 'src/settings/authentication/DockerConfiguration'
@@ -26,7 +26,7 @@ import KubernetesSecret from 'src/settings/authentication/KubernetesSecret'
 import PersonalAccessToken from 'src/settings/authentication/PersonalAccessToken'
 import PodmanLogin from 'src/settings/authentication/PodmanLogin'
 import RocketConfiguration from 'src/settings/authentication/RocketConfiguration'
-import { isTokenCategory, TokenCategory, TokenCategoryKeys, TokenInterface } from 'types/types'
+import { TokenCategory, TokenCategoryKeys, TokenInterface } from 'types/types'
 
 type TokenDialogProps = {
   token: TokenInterface
@@ -34,14 +34,7 @@ type TokenDialogProps = {
 
 export default function TokenDialog({ token }: TokenDialogProps) {
   const router = useRouter()
-  const { tab } = router.query
   const [tokenCategory, setTokenCategory] = useState<TokenCategoryKeys>(TokenCategory.PERSONAL_ACCESS)
-
-  useEffect(() => {
-    if (isTokenCategory(tab)) {
-      setTokenCategory(tab ?? TokenCategory.PERSONAL_ACCESS)
-    }
-  }, [tab, setTokenCategory])
 
   const handleClose = () => {
     router.push('/settings?tab=authentication')
