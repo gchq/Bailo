@@ -178,6 +178,7 @@ module.exports = {
       conneciton: {
         host: 'http://example.com',
       },
+      authorizationTokenName: 'inferencing-token',
       gpus: {},
     },
     modelMirror: {
@@ -243,5 +244,9 @@ module.exports = {
         },
       },
     },
+  },
+
+  inference: {
+    authorisationToken: '',
   },
 }

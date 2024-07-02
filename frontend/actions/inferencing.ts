@@ -1,5 +1,6 @@
+import { Buffer } from 'buffer'
 import useSWR from 'swr'
-import { InferenceInterface } from 'types/types'
+import { InferenceInterface, TokenInterface } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -52,5 +53,14 @@ export async function putInference(modelId: string, image: string, tag: string, 
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(inference),
+  })
+}
+
+export async function sendTokenToService(loginEndpoint: string, token: TokenInterface) {
+  return fetch(loginEndpoint, {
+    headers: {
+      Authorization: 'Basic ' + Buffer.from(`${token.accessKey}:${token.secretKey}`, 'utf8').toString('base64'),
+    },
+    credentials: 'include',
   })
 }

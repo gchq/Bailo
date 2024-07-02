@@ -43,7 +43,7 @@ export interface UiConfig {
     connection: {
       host: string
     }
-
+    authorizationTokenName: string
     gpus: { [key: string]: string }
   }
   modelMirror: {

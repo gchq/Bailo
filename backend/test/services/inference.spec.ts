@@ -9,6 +9,17 @@ import {
   updateInference,
 } from '../../src/services/inference.js'
 
+const configMock = vi.hoisted(() => ({
+  inference: {
+    authorisationToken: 'test',
+  },
+}))
+
+vi.mock('../../src/utils/config.js', () => ({
+  __esModule: true,
+  default: configMock,
+}))
+
 vi.mock('../../src/connectors/authorisation/index.js')
 
 const modelMocks = vi.hoisted(() => ({

@@ -11,6 +11,9 @@ const configMock = vi.hoisted(() => ({
       },
     },
   },
+  inference: {
+    authorisationToken: 'test',
+  },
 }))
 
 vi.mock('../../src/utils/config.js', () => ({
