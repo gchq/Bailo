@@ -1,5 +1,5 @@
 import ResponseModel, { Decision, ResponseInterface, ResponseKind } from '../models/Response.js'
-import { ReviewDoc, ReviewInterface } from '../models/Review.js'
+import { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
@@ -72,7 +72,7 @@ export async function respondToReview(
   response: ReviewResponseParams,
   kind: ReviewKindKeys,
   reviewId: string,
-): Promise<{ review: ReviewInterface; response: ResponseInterface }> {
+): Promise<ResponseInterface> {
   const review = await findReviewForResponse(user, modelId, role, kind, reviewId)
 
   // Store the response
@@ -94,7 +94,7 @@ export async function respondToReview(
     { review: review },
   )
 
-  return { review, response: reviewResponse }
+  return reviewResponse
 }
 
 async function sendReviewResponseNotification(
