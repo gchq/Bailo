@@ -1,4 +1,4 @@
-import { Box, Button, Card, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
@@ -25,8 +25,8 @@ export default function PageWithTabs({
   actionButtonOnClick,
   requiredUrlParams = {},
   showCopyButton = false,
-  textToCopy,
-  sourceModelId,
+  textToCopy = '',
+  sourceModelId = '',
 }: {
   title: string
   tabs: PageTab[]
@@ -112,49 +112,31 @@ export default function PageWithTabs({
 
   return (
     <>
-      <Stack>
-        {sourceModelId && (
-          <Card
-            style={{
-              position: 'fixed',
-              left: 70,
-              right: 0,
-              top: 95,
-              backgroundColor: 'black',
-              borderRadius: 0,
-              color: 'white',
-            }}
-          >
-            <Typography justifyContent='center' align='center'>
-              [READONLY] Mirrored from {sourceModelId}
-            </Typography>
-          </Card>
-        )}
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          divider={<Divider flexItem orientation='vertical' />}
-          alignItems='center'
-          spacing={{ sm: 2 }}
-          sx={{ p: 2 }}
-        >
-          <Stack direction='row'>
-            <Typography component='h1' color='primary' variant='h6'>
-              {title}
-            </Typography>
-            {showCopyButton && (
-              <CopyToClipboardButton
-                textToCopy={textToCopy ? textToCopy : title}
-                notificationText='Copied to clipboard'
-                ariaLabel='copy to clipboard'
-              />
-            )}
-          </Stack>
-          {displayActionButton && (
-            <Button variant='contained' onClick={actionButtonOnClick}>
-              {actionButtonTitle}
-            </Button>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        divider={<Divider flexItem orientation='vertical' />}
+        alignItems='center'
+        spacing={{ sm: 2 }}
+        sx={{ p: 2 }}
+      >
+        <Stack direction='row'>
+          <Typography component='h1' color='primary' variant='h6'>
+            {title}
+          </Typography>
+          {showCopyButton && (
+            <CopyToClipboardButton
+              textToCopy={textToCopy ? textToCopy : title}
+              notificationText='Copied to clipboard'
+              ariaLabel='copy to clipboard'
+            />
           )}
         </Stack>
+        {displayActionButton && (
+          <Button variant='contained' onClick={actionButtonOnClick}>
+            {actionButtonTitle}
+          </Button>
+        )}
+        {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
       </Stack>
       <Tabs
         value={currentTab || false}

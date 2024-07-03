@@ -16,6 +16,7 @@ type EditableFormHeadingProps = {
   errorMessage?: string
   deleteButtonText?: string
   showDeleteButton?: boolean
+  readOnly?: boolean
 }
 
 export default function EditableFormHeading({
@@ -31,6 +32,7 @@ export default function EditableFormHeading({
   deleteButtonText = 'Delete',
   showDeleteButton = false,
   isRegistryError = false,
+  readOnly = false,
 }: EditableFormHeadingProps) {
   return (
     <Stack sx={{ pb: 2 }}>
@@ -41,24 +43,25 @@ export default function EditableFormHeading({
         spacing={2}
       >
         {heading}
-        {!isEdit && (
-          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
-            <Button variant='outlined' onClick={onEdit} data-test='editFormButton' disabled={isRegistryError}>
-              {editButtonText}
-            </Button>
-            {showDeleteButton && (
-              <Button
-                variant='contained'
-                color='secondary'
-                onClick={onDelete}
-                data-test='deleteFormButton'
-                disabled={isRegistryError}
-              >
-                {deleteButtonText}
+        {!isEdit ||
+          (!readOnly && (
+            <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
+              <Button variant='outlined' onClick={onEdit} data-test='editFormButton' disabled={isRegistryError}>
+                {editButtonText}
               </Button>
-            )}
-          </Stack>
-        )}
+              {showDeleteButton && (
+                <Button
+                  variant='contained'
+                  color='secondary'
+                  onClick={onDelete}
+                  data-test='deleteFormButton'
+                  disabled={isRegistryError}
+                >
+                  {deleteButtonText}
+                </Button>
+              )}
+            </Stack>
+          ))}
         {isEdit && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
             <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton'>

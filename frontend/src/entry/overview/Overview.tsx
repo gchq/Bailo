@@ -23,7 +23,7 @@ export default function Overview({ entry, readOnly = false }: OverviewProps) {
     [entry.card],
   )
 
-  return readOnly ? (
+  return readOnly && !entry.card ? (
     <MessageAlert
       severity='warning'
       message='This mirrored model has no model card. Please export the model card from the source model.'

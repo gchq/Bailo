@@ -52,16 +52,18 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
   return (
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
-        <Box sx={{ textAlign: 'right' }} hidden={readOnly}>
-          <Button
-            variant='outlined'
-            onClick={handleDraftNewRelease}
-            disabled={!model.card}
-            data-test='draftNewReleaseButton'
-          >
-            Draft new Release
-          </Button>
-        </Box>
+        {!readOnly && (
+          <Box sx={{ textAlign: 'right' }}>
+            <Button
+              variant='outlined'
+              onClick={handleDraftNewRelease}
+              disabled={!model.card}
+              data-test='draftNewReleaseButton'
+            >
+              Draft new Release
+            </Button>
+          </Box>
+        )}
         {isReleasesLoading && <Loading />}
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
         {releaseDisplays}

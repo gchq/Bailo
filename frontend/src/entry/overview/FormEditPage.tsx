@@ -138,15 +138,16 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
               <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
                 View History
               </Button>
-              <Button
-                variant='outlined'
-                onClick={() => setIsEdit(!isEdit)}
-                sx={{ mb: { xs: 2 } }}
-                data-test='editEntryCardButton'
-                hidden={readOnly}
-              >
-                {`Edit ${EntryCardKindLabel[entry.kind]}`}
-              </Button>
+              {readOnly && (
+                <Button
+                  variant='outlined'
+                  onClick={() => setIsEdit(!isEdit)}
+                  sx={{ mb: { xs: 2 } }}
+                  data-test='editEntryCardButton'
+                >
+                  {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                </Button>
+              )}
             </Stack>
           )}
           {isEdit && (

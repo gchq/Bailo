@@ -29,7 +29,6 @@ import MessageAlert from 'src/MessageAlert'
 import TeamSelect from 'src/TeamSelect'
 import {
   CollaboratorEntry,
-  DisplayKind,
   EntityKind,
   EntryForm,
   EntryKind,
@@ -43,11 +42,11 @@ import { toTitleCase } from 'utils/stringUtils'
 
 type CreateEntryProps = {
   kind: EntryKindKeys
-  displayKind
+  entryKind
   onBackClick: () => void
 }
 
-export default function CreateEntry({ kind, displayKind, onBackClick }: CreateEntryProps) {
+export default function CreateEntry({ kind, entryKind, onBackClick }: CreateEntryProps) {
   const router = useRouter()
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
@@ -101,7 +100,7 @@ export default function CreateEntry({ kind, displayKind, onBackClick }: CreateEn
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Private</Typography>
           <Typography variant='caption'>
-            {`Only named individuals will be able to view this ${EntryKindLabel[displayKind]}`}
+            {`Only named individuals will be able to view this ${EntryKindLabel[entryKind]}`}
           </Typography>
         </Stack>
       </Stack>
@@ -115,7 +114,7 @@ export default function CreateEntry({ kind, displayKind, onBackClick }: CreateEn
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Public</Typography>
           <Typography variant='caption'>
-            {`Any authorised user will be able to see this ${EntryKindLabel[displayKind]}`}
+            {`Any authorised user will be able to see this ${EntryKindLabel[entryKind]}`}
           </Typography>
         </Stack>
       </Stack>
@@ -136,7 +135,7 @@ export default function CreateEntry({ kind, displayKind, onBackClick }: CreateEn
           </Button>
           <Stack spacing={2} alignItems='center' justifyContent='center'>
             <Typography variant='h6' component='h1' color='primary'>
-              {`Create ${toTitleCase(displayKind)}`}
+              {`Create ${toTitleCase(entryKind)}`}
             </Typography>
             <FileUpload color='primary' fontSize='large' />
             {kind === EntryKind.MODEL && (
@@ -155,7 +154,7 @@ export default function CreateEntry({ kind, displayKind, onBackClick }: CreateEn
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
                 <TeamSelect value={team} onChange={(value) => setTeam(value)} />
                 <EntryNameInput autoFocus value={name} kind={kind} onChange={(value) => setName(value)} />
-                {displayKind === DisplayKind.MIRRORED_MODEL && (
+                {entryKind === EntryKind.MIRRORED_MODEL && (
                   <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
                 )}
               </Stack>
@@ -228,7 +227,7 @@ export default function CreateEntry({ kind, displayKind, onBackClick }: CreateEn
                     data-test='createEntryButton'
                     loading={loading}
                   >
-                    {`Create ${EntryKindLabel[displayKind]}`}
+                    {`Create ${EntryKindLabel[entryKind]}`}
                   </LoadingButton>
                 </span>
               </Tooltip>

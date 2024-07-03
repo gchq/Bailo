@@ -35,9 +35,10 @@ type EditableReleaseProps = {
   release: ReleaseInterface
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
+  readOnly?: boolean
 }
 
-export default function EditableRelease({ release, isEdit, onIsEditChange }: EditableReleaseProps) {
+export default function EditableRelease({ release, isEdit, onIsEditChange, readOnly = false }: EditableReleaseProps) {
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
@@ -219,27 +220,27 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
 
   return (
     <Stack spacing={2}>
-      {(!model.settings.mirror || model.settings.mirror?.sourceModelId) && (
-        <EditableFormHeading
-          heading={
-            <div>
-              <Typography fontWeight='bold'>Release name</Typography>
-              <Typography>{`${model.name} - ${release.semver}`}</Typography>
-            </div>
-          }
-          editButtonText='Edit Release'
-          deleteButtonText='Delete Release'
-          showDeleteButton
-          isEdit={isEdit}
-          isLoading={isLoading}
-          onEdit={handleEdit}
-          onCancel={handleCancel}
-          onSubmit={handleSubmit}
-          onDelete={() => setOpen(true)}
-          errorMessage={errorMessage}
-          isRegistryError={isRegistryError}
-        />
-      )}
+      <EditableFormHeading
+        heading={
+          <div>
+            <Typography fontWeight='bold'>Release name</Typography>
+            <Typography>{`${model.name} - ${release.semver}`}</Typography>
+          </div>
+        }
+        editButtonText='Edit Release'
+        deleteButtonText='Delete Release'
+        showDeleteButton
+        isEdit={isEdit}
+        isLoading={isLoading}
+        onEdit={handleEdit}
+        onCancel={handleCancel}
+        onSubmit={handleSubmit}
+        onDelete={() => setOpen(true)}
+        errorMessage={errorMessage}
+        isRegistryError={isRegistryError}
+        readOnly={readOnly}
+      />
+      )
       {failedFileUploads.length > 0 && (
         <Alert severity='error' sx={{ my: 2 }}>
           <Stack spacing={1}>
