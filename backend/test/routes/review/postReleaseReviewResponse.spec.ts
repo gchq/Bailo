@@ -13,7 +13,7 @@ vi.mock('../../../src/connectors/authorisation/index.js')
 
 const mockResponseService = vi.hoisted(() => {
   return {
-    respondToReview: vi.fn(() => ({ review: {}, response: testReviewResponse })),
+    respondToReview: vi.fn(() => testReviewResponse),
   }
 })
 vi.mock('../../../src/services/response.js', () => mockResponseService)

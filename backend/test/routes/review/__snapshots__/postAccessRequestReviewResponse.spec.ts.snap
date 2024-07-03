@@ -38,12 +38,30 @@ exports[`routes > review > postAccessRequestReviewResponse > missing review deci
 
 exports[`routes > review > postAccessRequestReviewResponse > successfully respond to a review 1`] = `
 {
-  "review": {},
+  "response": {
+    "comment": "test comment",
+    "createdAt": "2024-05-17T06:13:41.690Z",
+    "decision": "approve",
+    "kind": "release",
+    "parentId": "66854110aab20df2b7481a82",
+    "role": "mtr",
+    "updatedAt": "2024-05-17T06:13:41.690Z",
+    "user": "user",
+  },
 }
 `;
 
 exports[`routes > review > postAccessRequestReviewResponse > successfully respond to a review without a comment 1`] = `
 {
-  "review": {},
+  "response": {
+    "comment": "test comment",
+    "createdAt": "2024-05-17T06:13:41.690Z",
+    "decision": "approve",
+    "kind": "release",
+    "parentId": "66854110aab20df2b7481a82",
+    "role": "mtr",
+    "updatedAt": "2024-05-17T06:13:41.690Z",
+    "user": "user",
+  },
 }
 `;
