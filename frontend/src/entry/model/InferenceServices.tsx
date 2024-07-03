@@ -32,7 +32,6 @@ export default function InferenceServices({ model }: InferenceProps) {
         const response = await fetch(`${uiConfig?.inference.connection.host}/api/health`, { credentials: 'include' })
         setHealthCheck(response.ok)
         if (!response.ok) {
-          setErrorMessage(await getErrorMessage(response))
           return setErrorMessage('Login failed when when accessing the inferencing service')
         }
       } catch (err) {
@@ -61,12 +60,14 @@ export default function InferenceServices({ model }: InferenceProps) {
     if (error) return error
     const authorizationTokenName = uiConfig?.inference.authorizationTokenName
     const authorizationAccessKeys = tokens.filter((value) => value.description === authorizationTokenName)
-    if (authorizationTokenName && authorizationAccessKeys) {
+    if (authorizationTokenName && authorizationAccessKeys.length > 0) {
       for (const token of authorizationAccessKeys) {
         const response = await deleteUserToken(token.accessKey)
 
         if (!response.ok) {
           setErrorMessage(await getErrorMessage(response))
+          mutateTokens()
+          return
         }
       }
       const response = await postUserToken(authorizationTokenName, 'all', [], ['model:read'])
@@ -98,6 +99,14 @@ export default function InferenceServices({ model }: InferenceProps) {
     return <MessageAlert message={isInferencesError.info.message} severity='error' />
   }
 
+  if (isTokensError) {
+    return <MessageAlert message={isTokensError.info.message} severity='error' />
+  }
+
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
   if (isTokensLoading || isUiConfigLoading) {
     return <Loading />
   }
@@ -124,9 +133,9 @@ export default function InferenceServices({ model }: InferenceProps) {
               Yes
             </Button>
           </Stack>
-          {errorMessage && <MessageAlert message={errorMessage} severity='error' />}
         </Stack>
       )}
+      <MessageAlert message={errorMessage} severity='error' />
     </Container>
   )
 }

@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import fetch, { Response } from 'node-fetch'
 
 import config from '../utils/config.js'
 import { BadReq, InternalError, Unauthorized } from '../utils/error.js'
@@ -11,7 +11,7 @@ interface InferenceService {
 }
 
 export async function createInferenceService(inferenceServiceParams: InferenceService) {
-  let res
+  let res: Response
   try {
     const authorisationToken = config.inference.authorisationToken
 
@@ -34,7 +34,7 @@ export async function createInferenceService(inferenceServiceParams: InferenceSe
 }
 
 export async function updateInferenceService(inferenceServiceParams: InferenceService) {
-  let res
+  let res: Response
   try {
     const authorisationToken = config.inference.authorisationToken
 

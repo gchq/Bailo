@@ -22,12 +22,16 @@ export default function InferenceApp() {
     [uiConfig, modelId, image, tag],
   )
 
-  if (isModelError && isModelLoading) {
+  if (isModelError) {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
 
-  if (isUiConfigError && isUiConfigLoading) {
+  if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
+  if (isModelLoading || isUiConfigLoading) {
+    return <Loading />
   }
 
   return (
