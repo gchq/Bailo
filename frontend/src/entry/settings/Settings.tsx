@@ -11,7 +11,7 @@ import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
 import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, EntryKind, EntryKindKeys } from 'types/types'
+import { EntryInterface, EntryKind, UiConfig } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
 
 export const SettingsCategory = {
@@ -20,35 +20,32 @@ export const SettingsCategory = {
   ACCESS_REQUESTS: 'access_requests',
   PERMISSIONS: 'permissions',
   MIRRORED_MODELS: 'mirrored_models',
-  TEMPLATE: 'template',
+  TEMPLATING: 'templating',
 } as const
 
 export type SettingsCategoryKeys = (typeof SettingsCategory)[keyof typeof SettingsCategory]
 
 function isSettingsCategory(
   value: string | string[] | undefined,
-  entryKind: EntryKindKeys,
+  entry: EntryInterface,
+  uiConfig: UiConfig | undefined,
 ): value is SettingsCategoryKeys {
-  switch (entryKind) {
+  switch (entry.kind) {
     case EntryKind.MODEL:
       return (
         value === SettingsCategory.DETAILS ||
         value === SettingsCategory.PERMISSIONS ||
         value === SettingsCategory.ACCESS_REQUESTS ||
+        value === SettingsCategory.TEMPLATING ||
         value === SettingsCategory.DANGER ||
-        value === SettingsCategory.MIRRORED_MODELS ||
-        value === SettingsCategory.TEMPLATE
-      )
-    case EntryKind.MIRRORED_MODEL:
-      return (
-        value === SettingsCategory.DETAILS ||
-        value === SettingsCategory.PERMISSIONS ||
-        value === SettingsCategory.ACCESS_REQUESTS ||
-        value === SettingsCategory.DANGER ||
-        value === SettingsCategory.TEMPLATE
+        (value === SettingsCategory.MIRRORED_MODELS &&
+          !entry.settings.mirror?.sourceModelId &&
+          !!uiConfig?.modelMirror.enabled)
       )
     case EntryKind.DATA_CARD:
       return value === SettingsCategory.DETAILS || value === SettingsCategory.PERMISSIONS
+    default:
+      return false
   }
 }
 
@@ -67,7 +64,7 @@ export default function Settings({ entry }: SettingsProps) {
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
 
   useEffect(() => {
-    if (isSettingsCategory(category, entry.kind)) {
+    if (isSettingsCategory(category, entry, uiConfig)) {
       setSelectedCategory(category)
     } else if (category) {
       setSelectedCategory(SettingsCategory.DETAILS)
@@ -75,7 +72,7 @@ export default function Settings({ entry }: SettingsProps) {
         query: { ...router.query, category: SettingsCategory.DETAILS },
       })
     }
-  }, [category, entry.kind, router])
+  }, [category, entry, router, uiConfig])
 
   const handleListItemClick = (category: SettingsCategoryKeys) => {
     setSelectedCategory(category)
@@ -126,8 +123,8 @@ export default function Settings({ entry }: SettingsProps) {
               Access Requests
             </SimpleListItemButton>
             <SimpleListItemButton
-              selected={selectedCategory === SettingsCategory.TEMPLATE}
-              onClick={() => handleListItemClick(SettingsCategory.TEMPLATE)}
+              selected={selectedCategory === SettingsCategory.TEMPLATING}
+              onClick={() => handleListItemClick(SettingsCategory.TEMPLATING)}
             >
               Template
             </SimpleListItemButton>
@@ -153,7 +150,7 @@ export default function Settings({ entry }: SettingsProps) {
         {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessTab entry={entry} />}
         {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
         {selectedCategory === SettingsCategory.MIRRORED_MODELS && <ExportSettings model={entry} />}
-        {selectedCategory === SettingsCategory.TEMPLATE && <TemplateSettings model={entry} />}
+        {selectedCategory === SettingsCategory.TEMPLATING && <TemplateSettings model={entry} />}
         {selectedCategory === SettingsCategory.DANGER && (
           <Stack spacing={2}>
             <Typography variant='h6' component='h2'>
