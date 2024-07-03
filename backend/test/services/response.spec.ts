@@ -147,6 +147,52 @@ describe('services > response', () => {
     )
   })
 
+  test('respondToReview > log when failed to send access request response notification', async () => {
+    reviewMock.findReviewForResponse.mockReturnValueOnce(testAccessRequestReview as any)
+    smtpMock.notifyReviewResponseForAccess.mockRejectedValueOnce('failed to send')
+    await respondToReview(
+      user,
+      'modelId',
+      'msro',
+      {
+        decision: Decision.RequestChanges,
+        comment: 'Do better!',
+      },
+      ReviewKind.Access,
+      'accessRequestId',
+    )
+    // Allow for completion of asynchronous content
+    await new Promise((r) => setTimeout(r))
+
+    expect(responseModelMock.save).toHaveBeenCalledOnce()
+    expect(accessRequestServiceMock.getAccessRequestById).toHaveBeenCalledOnce()
+    expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
+    expect(logMock.warn).toHaveBeenCalledOnce()
+  })
+
+  test('respondToReview > log when failed to send release response notification', async () => {
+    smtpMock.notifyReviewResponseForRelease.mockRejectedValueOnce('failed to send')
+    await respondToReview(
+      user,
+      'modelId',
+      'msro',
+      {
+        decision: Decision.RequestChanges,
+        comment: 'Do better!',
+      },
+      ReviewKind.Release,
+      'semver',
+    )
+    // Allow for completion of asynchronous content
+    await new Promise((r) => setTimeout(r))
+
+    expect(responseModelMock.save).toHaveBeenCalledOnce()
+    expect(smtpMock.notifyReviewResponseForRelease).toHaveBeenCalledOnce()
+    expect(releaseServiceMock.getReleaseBySemver).toHaveBeenCalledOnce()
+    expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
+    expect(logMock.warn).toHaveBeenCalledOnce()
+  })
+
   test('respondToReview > missing semver', async () => {
     reviewMock.findReviewForResponse.mockReturnValueOnce({ kind: 'release' } as any)
     await respondToReview(
