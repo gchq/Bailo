@@ -23,7 +23,7 @@ import { FormEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
-import EntryAccess from 'src/entry/settings/EntryAccess'
+import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import SourceModelInput from 'src/entry/SourceModelnput'
 import MessageAlert from 'src/MessageAlert'
 import TeamSelect from 'src/TeamSelect'
@@ -204,7 +204,7 @@ export default function CreateEntry({ kind, entryKind, onBackClick }: CreateEntr
                   schema has been selected.
                 </Typography>
                 <Box sx={{ marginTop: 1 }}>
-                  <EntryAccess
+                  <EntryAccessInput
                     value={collaborators}
                     onUpdate={(val) => setCollaborators(val)}
                     entryKind={EntryKind.MODEL}

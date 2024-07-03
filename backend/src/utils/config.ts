@@ -126,6 +126,7 @@ export interface Config {
     }
     modelMirror: {
       enabled: boolean
+      disclaimer: string
     }
   }
 

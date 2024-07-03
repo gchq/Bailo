@@ -48,6 +48,7 @@ export interface UiConfig {
   }
   modelMirror: {
     enabled: boolean
+    disclaimer: string
   }
 }
 
@@ -153,6 +154,10 @@ export const SchemaKind = {
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
+export const isSchemaKind = (value: unknown): value is SchemaKindKeys => {
+  return Object.values(SchemaKind).includes(value as SchemaKindKeys)
+}
+
 export interface FileInterface {
   _id: string
   modelId: string
@@ -237,17 +242,6 @@ export const TokenCategory = {
 } as const
 
 export type TokenCategoryKeys = (typeof TokenCategory)[keyof typeof TokenCategory]
-
-export function isTokenCategory(value: string | string[] | undefined): value is TokenCategoryKeys {
-  return (
-    value === TokenCategory.PERSONAL_ACCESS ||
-    value === TokenCategory.KUBERNETES ||
-    value === TokenCategory.ROCKET ||
-    value === TokenCategory.PODMAN ||
-    value === TokenCategory.DOCKER_LOGIN ||
-    value === TokenCategory.DOCKER_CONFIGURATION
-  )
-}
 
 export interface TokenInterface {
   user: string
@@ -393,7 +387,7 @@ export interface EntryInterface {
     allowTemplating?: boolean
     mirror?: {
       sourceModelId?: string
-      sourceDestination?: string
+      destinationModelId?: string
     }
   }
   card: EntryCardInterface

@@ -182,6 +182,7 @@ module.exports = {
     },
     modelMirror: {
       enabled: false,
+      disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
     },
   },
 

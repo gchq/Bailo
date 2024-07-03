@@ -21,6 +21,9 @@ const configMock = vi.hoisted(
         },
       },
       s3: { buckets: { uploads: 'test' } },
+      ui: {
+        modelMirror: { enabled: true },
+      },
       modelMirror: {
         export: {
           maxSize: 100,
