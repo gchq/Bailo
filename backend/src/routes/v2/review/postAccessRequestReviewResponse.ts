@@ -44,7 +44,7 @@ export const postAccessRequestReviewResponse = [
       accessRequestId,
     )
 
-    await audit.onCreateReviewResponse(req, review, response)
+    await audit.onCreateReviewResponse(req, response)
 
     return res.json({
       review,

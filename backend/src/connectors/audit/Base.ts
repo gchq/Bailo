@@ -144,7 +144,9 @@ export abstract class BaseAuditConnector {
   abstract onDeleteRelease(req: Request, modelId: string, semver: string)
   abstract onViewReleases(req: Request, releases: ReleaseDoc[])
 
-  abstract onCreateResponse(req: Request, responseInterface: ResponseInterface)
+  abstract onCreateCommentResponse(req: Request, response: ResponseInterface)
+  abstract onCreateReviewResponse(req: Request, response: ResponseInterface)
+
   abstract onViewResponses(req: Request, responseInterfaces: ResponseInterface[])
   abstract onUpdateResponse(req: Request, responseId: string)
 
@@ -159,8 +161,6 @@ export abstract class BaseAuditConnector {
   abstract onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[])
 
   abstract onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[])
-  abstract onCreateReviewResponse(req: Request, review: ReviewInterface, response: ResponseInterface)
-  abstract onUpdateReviewResponse(req: Request, review: ReviewInterface)
 
   abstract onSearchSchemas(req: Request, schemas: SchemaInterface[])
   abstract onCreateSchema(req: Request, schema: SchemaInterface)

@@ -202,33 +202,22 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onCreateReviewResponse(req: Request, review: ReviewInterface) {
+  onCreateReviewResponse(req: Request, response: ResponseInterface) {
     this.checkEventType(AuditInfo.CreateReviewResponse, req)
     const event = this.generateEvent(req, {
-      modelId: review.modelId,
-      ...(review.semver && { semver: review.semver }),
-      ...(review.accessRequestId && { semver: review.accessRequestId }),
-    })
-    req.log.info(event, req.audit.description)
-  }
-
-  onUpdateReviewResponse(req: Request, review: ReviewInterface) {
-    this.checkEventType(AuditInfo.UpdateReviewResponse, req)
-    const event = this.generateEvent(req, {
-      modelId: review.modelId,
-      ...(review.semver && { semver: review.semver }),
-      ...(review.accessRequestId && { semver: review.accessRequestId }),
+      reviewId: response.parentId,
+      ...(response.decision && { decision: response.decision }),
     })
     req.log.info(event, req.audit.description)
   }
 
   onViewResponses(req: Request, responseInterfaces: ResponseInterface[]) {
-    this.checkEventType(AuditInfo.CreateResponse, req)
+    this.checkEventType(AuditInfo.ViewResponses, req)
     const event = this.generateEvent(req, { responseInterfaces })
     req.log.info(event, req.audit.description)
   }
 
-  onCreateResponse(req: Request, ResponseInterface: ResponseInterface) {
+  onCreateCommentResponse(req: Request, ResponseInterface: ResponseInterface) {
     this.checkEventType(AuditInfo.CreateResponse, req)
     const event = this.generateEvent(req, { id: ResponseInterface['_id'] })
     req.log.info(event, req.audit.description)
