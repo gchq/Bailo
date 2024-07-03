@@ -1,5 +1,6 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
+import { useGetModel } from 'actions/model'
 import { useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
 import { useRouter } from 'next/router'
@@ -12,6 +13,7 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
+import { EntryKind } from 'types/types'
 
 export default function Release() {
   const router = useRouter()
@@ -20,6 +22,7 @@ export default function Release() {
   const [isEdit, setIsEdit] = useState(false)
 
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
+  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,
     semver: semver || '',
@@ -40,13 +43,14 @@ export default function Release() {
 
   const error = MultipleErrorWrapper('Unable to load release', {
     isReleaseError,
+    isModelError,
     isReviewsError,
     isUserReviewsError,
   })
 
   if (error) return error
 
-  if (!release || (isReleaseLoading && isReviewsLoading && isUserReviewsLoading)) {
+  if (!release || !model || (isReleaseLoading && isReviewsLoading && isUserReviewsLoading && isModelLoading)) {
     return <Loading />
   }
 
@@ -79,7 +83,14 @@ export default function Release() {
                   />
                 </Stack>
               </Stack>
-              {release && <EditableRelease release={release} isEdit={isEdit} onIsEditChange={setIsEdit} />}
+              {release && (
+                <EditableRelease
+                  release={release}
+                  isEdit={isEdit}
+                  onIsEditChange={setIsEdit}
+                  readOnly={!!model.settings.mirror?.sourceModelId}
+                />
+              )}
               <ReviewComments release={release} isEdit={isEdit} />
             </Stack>
           </>

@@ -240,7 +240,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         isRegistryError={isRegistryError}
         readOnly={readOnly}
       />
-      )
       {failedFileUploads.length > 0 && (
         <Alert severity='error' sx={{ my: 2 }}>
           <Stack spacing={1}>
