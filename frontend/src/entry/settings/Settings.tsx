@@ -39,6 +39,14 @@ function isSettingsCategory(
         value === SettingsCategory.MIRRORED_MODELS ||
         value === SettingsCategory.TEMPLATE
       )
+    case EntryKind.MIRRORED_MODEL:
+      return (
+        value === SettingsCategory.DETAILS ||
+        value === SettingsCategory.PERMISSIONS ||
+        value === SettingsCategory.ACCESS_REQUESTS ||
+        value === SettingsCategory.DANGER ||
+        value === SettingsCategory.TEMPLATE
+      )
     case EntryKind.DATA_CARD:
       return value === SettingsCategory.DETAILS || value === SettingsCategory.PERMISSIONS
   }

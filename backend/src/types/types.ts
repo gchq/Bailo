@@ -31,5 +31,6 @@ export interface UiConfig {
   }
   modelMirror: {
     enabled: boolean
+    disclaimer: string
   }
 }
