@@ -31,7 +31,6 @@ export default function EntryList({
               {entry.name}
             </MuiLink>
           </Link>
-          {entry.readonly && <Typography>readonly</Typography>}
         </Stack>
         <Typography variant='body1' sx={{ marginBottom: 2 }}>
           {entry.description}
