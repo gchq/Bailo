@@ -368,13 +368,18 @@ export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindL
 export const EntryKind = {
   MODEL: 'model',
   DATA_CARD: 'data-card',
-  MIRRORED_MODEL: 'mirrored-model',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
 export const isEntryKind = (value: unknown): value is EntryKindKeys => {
   return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD)
 }
+
+export const CreateEntryKind = {
+  ...EntryKind,
+  MIRRORED_MODEL: 'mirrored-model',
+} as const
+export type CreateEntryKindKeys = (typeof CreateEntryKind)[keyof typeof CreateEntryKind]
 
 export interface EntryInterface {
   id: string

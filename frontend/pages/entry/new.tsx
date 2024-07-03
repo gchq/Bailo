@@ -6,10 +6,10 @@ import Loading from 'src/common/Loading'
 import CreateEntry from 'src/entry/CreateEntry'
 import EntryCard from 'src/entry/EntryCard'
 import MessageAlert from 'src/MessageAlert'
-import { EntryKind, EntryKindKeys } from 'types/types'
+import { CreateEntryKind, CreateEntryKindKeys } from 'types/types'
 
 export default function NewEntry() {
-  const [entryKind, setEntryKind] = useState<EntryKindKeys | undefined>()
+  const [createEntryKind, setCreateEntryKind] = useState<CreateEntryKindKeys | undefined>()
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
@@ -20,14 +20,14 @@ export default function NewEntry() {
           title: 'Create Model',
           description:
             'Creating a model allows you to create artefacts and images, write a model card and control who has access over your model. Use it when you have used training data to create a model, or are using a model from another source.',
-          handleClick: () => setEntryKind(EntryKind.MODEL),
+          handleClick: () => setCreateEntryKind(CreateEntryKind.MODEL),
           dataTest: 'createModelButton',
         },
         {
           title: 'Create Mirrored Model',
           description:
             'Mirrored models allow models to be copied from other deployments using an external model ID. These are imported as read only models and should be updated via the source.',
-          handleClick: () => setEntryKind(EntryKind.MIRRORED_MODEL),
+          handleClick: () => setCreateEntryKind(CreateEntryKind.MIRRORED_MODEL),
           dataTest: 'createDataCardButton',
           disabled: !uiConfig?.modelMirror.enabled,
         },
@@ -35,7 +35,7 @@ export default function NewEntry() {
           title: 'Create Data Card',
           description:
             'Data cards allow you to track and reference the training data used to generate your models. Adding data cards to Bailo allows you to link it to any model, keep track of its storage location and other accreditation requirements.',
-          handleClick: () => setEntryKind(EntryKind.DATA_CARD),
+          handleClick: () => setCreateEntryKind(CreateEntryKind.DATA_CARD),
           dataTest: 'createMirroredModel',
         },
       ].filter((entryCardProp) => !entryCardProp.disabled),
@@ -53,12 +53,8 @@ export default function NewEntry() {
   return (
     <>
       <Container>
-        {entryKind ? (
-          <CreateEntry
-            kind={entryKind === EntryKind.MIRRORED_MODEL ? EntryKind.MODEL : entryKind}
-            entryKind={entryKind}
-            onBackClick={() => setEntryKind(undefined)}
-          />
+        {createEntryKind ? (
+          <CreateEntry createEntryKind={createEntryKind} onBackClick={() => setCreateEntryKind(undefined)} />
         ) : (
           <Card sx={{ p: 4, mb: 4 }}>
             <Stack spacing={4} justifyContent='center' alignItems='center'>
