@@ -1,6 +1,3 @@
-import { ObjectId } from 'mongodb'
-
-import { ResponseKind } from '../../src/models/Response.js'
 import { ReviewKind, SchemaKind } from '../../src/types/enums.js'
 
 export const testModelSchema = {
@@ -57,32 +54,12 @@ export const testDeploymentSchema = {
 export const testReviewResponse = {
   comment: 'test comment',
   user: 'user',
-  parentId: new ObjectId(),
+  parentId: '66854110aab20df2b7481a82',
   role: 'mtr',
   decision: 'approve',
-  kind: ResponseKind.Review,
+  kind: ReviewKind.Release,
   createdAt: '2024-05-17T06:13:41.690Z',
   updatedAt: '2024-05-17T06:13:41.690Z',
-}
-
-export const testReleaseReviewWithResponses = {
-  modelId: 'abc',
-  semver: '3.0.2',
-  kind: ReviewKind.Release,
-  role: 'msro',
-
-  createdAt: new Date('08/13/2023'),
-  updatedAt: new Date('08/14/2023'),
-}
-
-export const testAccessRequestReviewWithResponses = {
-  modelId: 'abc',
-  accessRequestId: 'test-235',
-  kind: ReviewKind.Access,
-  role: 'msro',
-
-  createdAt: new Date('08/13/2023'),
-  updatedAt: new Date('08/14/2023'),
 }
 
 export const testReleaseReview = {

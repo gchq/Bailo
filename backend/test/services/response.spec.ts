@@ -1,44 +1,18 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import AccessRequest from '../../src/models/AccessRequest.js'
-import Model from '../../src/models/Model.js'
-import Release from '../../src/models/Release.js'
-import { createAccessRequestReviews, createReleaseReviews, findReviews } from '../../src/services/review.js'
+import { Decision } from '../../src/models/Response.js'
+import { ReviewDoc } from '../../src/models/Review.js'
+import {
+  checkAccessRequestsApproved,
+  respondToReview,
+  sendReviewResponseNotification,
+} from '../../src/services/response.js'
+import { ReviewKind } from '../../src/types/enums.js'
+import { testReleaseReview, testReviewResponse } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
-}))
-
-const reviewModelMock = vi.hoisted(() => {
-  const obj: any = { kind: 'access', accessRequestId: 'Hello' }
-
-  obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
-  obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.findByIdAndUpdate = vi.fn(() => obj)
-  obj.updateOne = vi.fn(() => obj)
-  obj.save = vi.fn(() => obj)
-  obj.limit = vi.fn(() => obj)
-  obj.unwind = vi.fn(() => obj)
-  obj.at = vi.fn(() => obj)
-  obj.map = vi.fn(() => [])
-  obj.filter = vi.fn(() => [])
-
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-
-vi.mock('../../src/models/Review.js', async () => ({
-  ...((await vi.importActual('../../src/models/Review.js')) as object),
-  default: reviewModelMock,
 }))
 
 const responseModelMock = vi.hoisted(() => {
@@ -80,6 +54,12 @@ const smtpMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
 
+const reviewMock = vi.hoisted(() => ({
+  findReviewsForAccessRequests: vi.fn(() => [testReleaseReview]),
+  findReviewForResponse: vi.fn(() => testReviewResponse),
+}))
+vi.mock('../../src/services/review.js', async () => reviewMock)
+
 const modelMock = vi.hoisted(() => ({
   getModelById: vi.fn(),
 }))
@@ -118,49 +98,6 @@ vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 describe('services > review', () => {
   const user: any = { dn: 'test' }
 
-  test('findReviews > all reviews for user', async () => {
-    await findReviews(user, true)
-
-    expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
-  })
-
-  test('findReviews > active reviews for a specific model', async () => {
-    await findReviews(user, false, 'modelId')
-
-    expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
-  })
-
-  test('createReleaseReviews > No entities found for required roles', async () => {
-    const result: Promise<void> = createReleaseReviews(new Model(), new Release())
-
-    expect(smtpMock.requestReviewForRelease).not.toBeCalled()
-    expect(result).resolves.not.toThrowError()
-    expect(reviewModelMock.save).toBeCalled()
-  })
-
-  test('createReleaseReviews > successful', async () => {
-    await createReleaseReviews(
-      new Model({ collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr'] }] }),
-      new Release(),
-    )
-
-    expect(reviewModelMock.save).toBeCalled()
-    expect(smtpMock.requestReviewForRelease).toBeCalled()
-  })
-
-  test('createAccessRequestReviews > successful', async () => {
-    await createAccessRequestReviews(
-      new Model({ collaborators: [{ entity: 'user:user', roles: ['msro', 'mtr'] }] }),
-      new AccessRequest(),
-    )
-
-    expect(reviewModelMock.save).toBeCalled()
-    expect(smtpMock.requestReviewForAccessRequest).toBeCalled()
-  })
-
-  /*
   test('respondToReview > release successful', async () => {
     await respondToReview(
       user,
@@ -174,8 +111,8 @@ describe('services > review', () => {
       'semver',
     )
 
-    expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(responseModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(responseModelMock.match.mock.calls.at(1)).toMatchSnapshot()
     expect(mockWebhookService.sendWebhooks).toBeCalled()
   })
 
@@ -192,8 +129,8 @@ describe('services > review', () => {
       'accessRequestId',
     )
 
-    expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(responseModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(responseModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
   test('respondToReview > access request review  response notification successful', async () => {
@@ -247,9 +184,9 @@ describe('services > review', () => {
   })
 
   test('respondToReview > no reviews found', async () => {
-    reviewModelMock.limit.mockReturnValueOnce([])
+    reviewMock.findReviewForResponse.mockRejectedValueOnce('Unable to find Review to respond to')
 
-    const result: Promise<ReviewInterface> = respondToReview(
+    const result = respondToReview(
       user,
       'modelId',
       'msro',
@@ -262,25 +199,25 @@ describe('services > review', () => {
     )
 
     expect(result).rejects.toThrowError(`Unable to find Review to respond to`)
-    expect(reviewModelMock.findByIdAndUpdate).not.toBeCalled()
+    expect(responseModelMock.save).not.toBeCalled()
   })
 
   test('checkAccessRequestsApproved > approved access request exists', async () => {
-    reviewModelMock.find.mockReturnValueOnce([{ role: 'msro' }, { role: 'random' }])
+    reviewMock.findReviewsForAccessRequests.mockReturnValueOnce([{ role: 'msro' }, { role: 'random' }] as any)
+    responseModelMock.find.mockReturnValueOnce(['approved'])
 
     const result = await checkAccessRequestsApproved(['access-1', 'access-2'])
 
     expect(result).toBe(true)
-    expect(reviewModelMock.find.mock.calls).toMatchSnapshot()
+    expect(reviewMock.findReviewsForAccessRequests.mock.calls).toMatchSnapshot()
   })
 
   test('checkAccessRequestsApproved > no approved access requests with a required role', async () => {
-    reviewModelMock.find.mockReturnValueOnce([{ role: 'random' }])
+    reviewMock.findReviewsForAccessRequests.mockReturnValueOnce([{ role: 'random' }] as any)
 
     const result = await checkAccessRequestsApproved(['access-1', 'access-2'])
 
     expect(result).toBe(false)
-    expect(reviewModelMock.find.mock.calls).toMatchSnapshot()
+    expect(reviewMock.findReviewsForAccessRequests.mock.calls).toMatchSnapshot()
   })
-    */
 })

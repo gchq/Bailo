@@ -15,10 +15,10 @@ vi.mock('../../../src/services/accessRequest.js', () => mockAccessRequestService
 const mockModelService = vi.hoisted(() => ({}))
 vi.mock('../../../src/services/model.js', () => mockModelService)
 
-const mockReviewService = vi.hoisted(() => ({
+const mockResponseService = vi.hoisted(() => ({
   checkAccessRequestsApproved: vi.fn(),
 }))
-vi.mock('../../../src/services/review.js', () => mockReviewService)
+vi.mock('../../../src/services/response.js', () => mockResponseService)
 
 const mockAuthentication = vi.hoisted(() => ({
   getUserModelRoles: vi.fn(() => [] as Array<string>),
@@ -43,7 +43,7 @@ describe('connectors > authorisation > base', () => {
     const connector = new BasicAuthorisationConnector()
     mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([{ id: 'accessRequest' }])
     const approvedAccessRequest = true
-    mockReviewService.checkAccessRequestsApproved.mockReturnValueOnce(approvedAccessRequest)
+    mockResponseService.checkAccessRequestsApproved.mockReturnValueOnce(approvedAccessRequest)
 
     const result = await connector.hasApprovedAccessRequest(user, model)
 

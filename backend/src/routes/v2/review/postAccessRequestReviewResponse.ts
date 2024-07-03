@@ -6,7 +6,7 @@ import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { Decision } from '../../../models/Response.js'
 import { ReviewInterface } from '../../../models/Review.js'
-import { respondToReview } from '../../../services/review.js'
+import { respondToReview } from '../../../services/response.js'
 import { ReviewKind } from '../../../types/enums.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -35,9 +35,16 @@ export const postAccessRequestReviewResponse = [
       body: { role, ...body },
     } = parse(req, postAccessRequestReviewResponseSchema)
 
-    const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Access, accessRequestId)
+    const { review, response } = await respondToReview(
+      req.user,
+      modelId,
+      role,
+      body,
+      ReviewKind.Access,
+      accessRequestId,
+    )
 
-    await audit.onCreateReviewResponse(req, review)
+    await audit.onCreateReviewResponse(req, review, response)
 
     return res.json({
       review,

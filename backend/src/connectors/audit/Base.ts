@@ -159,7 +159,7 @@ export abstract class BaseAuditConnector {
   abstract onViewAccessRequests(req: Request, accessRequests: AccessRequestDoc[])
 
   abstract onSearchReviews(req: Request, reviews: (ReviewInterface & { model: ModelInterface })[])
-  abstract onCreateReviewResponse(req: Request, review: ReviewInterface)
+  abstract onCreateReviewResponse(req: Request, review: ReviewInterface, response: ResponseInterface)
   abstract onUpdateReviewResponse(req: Request, review: ReviewInterface)
 
   abstract onSearchSchemas(req: Request, schemas: SchemaInterface[])
