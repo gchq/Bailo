@@ -2,7 +2,7 @@ import { TextField } from '@mui/material'
 import { ChangeEvent } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 
-const htmlId = 'entry-source-modelid-input'
+const htmlId = 'entry-source-model-id-input'
 
 type SourceModelInputProps = {
   value: string

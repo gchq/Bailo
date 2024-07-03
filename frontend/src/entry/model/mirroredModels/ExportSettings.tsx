@@ -65,9 +65,9 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
         <AccordionDetails>
           <Box component='form' onSubmit={handleSave}>
             <Stack spacing={2}>
-              <LabelledInput label={'Destination modelId'} htmlFor={'destination-modelid'} required>
+              <LabelledInput label={'Destination Model ID'} htmlFor={'destination-model-id'} required>
                 <TextField
-                  id='destination-modelid'
+                  id='destination-model-id'
                   value={destinationModelId}
                   onChange={handleDestinationModelId}
                   size='small'

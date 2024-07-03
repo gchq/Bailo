@@ -17,12 +17,14 @@ export default function EntryCard({ title, description, dataTest, handleClick }:
         m: 2,
       }}
     >
-      <Stack spacing={2}>
-        <Typography component='h2' variant='h6' color='primary'>
-          {title}
-        </Typography>
-        <Typography>{description}</Typography>
-        <Button variant='contained' onClick={handleClick} sx={{ width: '100%' }} data-test={dataTest}>
+      <Stack spacing={2} justifyContent='space-between' sx={{ height: '100%' }}>
+        <Stack spacing={2}>
+          <Typography component='h2' variant='h6' color='primary'>
+            {title}
+          </Typography>
+          <Typography>{description}</Typography>
+        </Stack>
+        <Button fullWidth variant='contained' onClick={handleClick} data-test={dataTest}>
           Create
         </Button>
       </Stack>
