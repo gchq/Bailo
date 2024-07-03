@@ -181,6 +181,10 @@ module.exports = {
       authorizationTokenName: 'inferencing-token',
       gpus: {},
     },
+    modelMirror: {
+      enabled: false,
+      disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+    },
   },
 
   connectors: {
@@ -225,7 +229,6 @@ module.exports = {
   },
 
   modelMirror: {
-    enabled: false,
     export: {
       maxSize: 100 * 1024 * 1024 * 1024,
       bucket: 'exports',

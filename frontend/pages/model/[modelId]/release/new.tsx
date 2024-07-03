@@ -115,23 +115,26 @@ export default function NewRelease() {
             successfulFiles.push({ fileName: file.name, fileId: fileUploadResponse.data.file._id })
           } else {
             setCurrentFileUploadProgress(undefined)
-            setLoading(false)
           }
         } catch (e) {
           if (e instanceof Error) {
             failedFiles.push({ fileName: file.name, error: e.message })
             setCurrentFileUploadProgress(undefined)
-            setLoading(false)
           }
         }
       }
     }
 
-    successfulFiles.forEach((file) => {
-      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.fileName)) {
-        setSuccessfulFileUploads([...successfulFileUploads, file])
-      }
-    })
+    const updatedSuccessfulFiles = successfulFiles.reduce(
+      (updatedFiles, file) => {
+        if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.fileName)) {
+          updatedFiles.push(file)
+        }
+        return updatedFiles
+      },
+      [...successfulFileUploads],
+    )
+    setSuccessfulFileUploads(updatedSuccessfulFiles)
 
     if (failedFiles.length > 0) {
       setFailedFileUploads(failedFiles)
@@ -152,13 +155,13 @@ export default function NewRelease() {
 
     if (!response.ok) {
       setErrorMessage(await getErrorMessage(response))
-      setLoading(false)
     } else {
       const body = await response.json()
       setUploadedFiles([])
       setCurrentFileUploadProgress(undefined)
       router.push(`/model/${modelId}/release/${body.release.semver}`)
     }
+    setLoading(false)
   }
 
   const error = MultipleErrorWrapper(`Unable to load release page`, {

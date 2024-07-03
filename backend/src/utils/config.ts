@@ -125,6 +125,10 @@ export interface Config {
       authorizationTokenName: string
       gpus: { [key: string]: string }
     }
+    modelMirror: {
+      enabled: boolean
+      disclaimer: string
+    }
   }
 
   session: {

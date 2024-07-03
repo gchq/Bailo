@@ -12,6 +12,10 @@ export interface EntrySearchResult {
   kind: EntryKindKeys
 }
 
+export interface ModelExportRequest {
+  disclaimerAgreement: boolean
+}
+
 export function useListModels(
   kind?: EntryKindKeys,
   filters: string[] = [],
@@ -125,5 +129,13 @@ export async function patchModel(
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(delta),
+  })
+}
+
+export async function postModelExportToS3(id: string, modelExport: ModelExportRequest) {
+  return fetch(`/api/v2/model/${id}/export/s3`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(modelExport),
   })
 }
