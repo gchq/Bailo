@@ -46,11 +46,17 @@ class Entry:
 
         logger.info(f"ID %s updated locally and on server.", self.id)
 
-    def card_from_schema(self, schema_id: str) -> None:
+    def card_from_schema(self, schema_id: str | None = None) -> None:
         """Create a card using a schema on Bailo.
 
-        :param schema_id: A unique schema ID
+        :param schema_id: A unique schema ID, defaults to None. If None, either minimal-general-v10 or minimal-data-card-v10 is used
         """
+        if schema_id is None:
+            if self.kind == EntryKind.MODEL:
+                schema_id = "minimal-general-v10"
+            if self.kind == EntryKind.DATACARD:
+                schema_id = "minimal-data-card-v10"
+
         res = self.client.model_card_from_schema(model_id=self.id, schema_id=schema_id)
         self.__unpack_card(res["card"])
 

@@ -118,7 +118,7 @@ class Model(Entry):
         mlflow_uri: str,
         team_id: str,
         name: str,
-        schema_id: str | None = None,
+        schema_id: str = "minimal-general-v10",
         version: str | None = None,
         files: bool = True,
         visibility: ModelVisibility | None = None,
@@ -129,7 +129,7 @@ class Model(Entry):
         :param mlflow_uri: MLFlow server URI
         :param team_id: A unique team ID
         :param name: Name of model (on MLFlow). Same name will be used on Bailo
-        :param schema_id: A unique schema ID, only required when files is True, defaults to None
+        :param schema_id: A unique schema ID, only required when files is True, defaults to minimal-general-v10
         :param version: Specific MLFlow model version to import, defaults to None
         :param files: Import files?, defaults to True
         :param visibility: Visibility of model on Bailo, using ModelVisibility enum (e.g Public or Private), defaults to None
@@ -175,10 +175,6 @@ class Model(Entry):
         model._unpack(bailo_res["model"])
 
         if files:
-            if schema_id is None:
-                raise BailoException(
-                    "Unable to upload files to Bailo. schema_id argument is required in order to create a release."
-                )
             model.card_from_schema(schema_id=schema_id)
             release = model.create_release(version=Version.coerce(str(sel_model.version)), notes=" ")
             run_id = sel_model.run_id
