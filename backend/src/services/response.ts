@@ -97,7 +97,7 @@ export async function respondToReview(
   return { review, response: reviewResponse }
 }
 
-export async function sendReviewResponseNotification(
+async function sendReviewResponseNotification(
   review: ReviewDoc,
   reviewResponse: ResponseInterface,
   user: UserInterface,
@@ -134,16 +134,6 @@ export async function sendReviewResponseNotification(
 }
 
 export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
-  /*
-  const reviews = await Review.find({
-    accessRequestId: accessRequestIds,
-    responses: {
-      $elemMatch: {
-        decision: Decision.Approve,
-      },
-    },
-  })
-    */
   const reviews = await findReviewsForAccessRequests(accessRequestIds)
   const approvals = await ResponseModel.find({
     parentId: reviews.map((review) => review._id),

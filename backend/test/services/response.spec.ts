@@ -1,14 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import { Decision } from '../../src/models/Response.js'
-import { ReviewDoc } from '../../src/models/Review.js'
-import {
-  checkAccessRequestsApproved,
-  respondToReview,
-  sendReviewResponseNotification,
-} from '../../src/services/response.js'
+import { checkAccessRequestsApproved, respondToReview } from '../../src/services/response.js'
 import { ReviewKind } from '../../src/types/enums.js'
-import { testReleaseReview, testReviewResponse } from '../testUtils/testModels.js'
+import { testAccessRequestReview, testReleaseReview } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
@@ -56,24 +51,19 @@ vi.mock('../../src/services/smtp/smtp.js', async () => smtpMock)
 
 const reviewMock = vi.hoisted(() => ({
   findReviewsForAccessRequests: vi.fn(() => [testReleaseReview]),
-  findReviewForResponse: vi.fn(() => testReviewResponse),
+  findReviewForResponse: vi.fn(() => testReleaseReview),
 }))
 vi.mock('../../src/services/review.js', async () => reviewMock)
-
-const modelMock = vi.hoisted(() => ({
-  getModelById: vi.fn(),
-}))
-vi.mock('../../src/services/model.js', async () => modelMock)
 
 const accessRequestServiceMock = vi.hoisted(() => ({
   getAccessRequestById: vi.fn(),
 }))
 vi.mock('../../src/services/accessRequest.js', async () => accessRequestServiceMock)
 
-const releaseRequestServiceMock = vi.hoisted(() => ({
+const releaseServiceMock = vi.hoisted(() => ({
   getReleaseBySemver: vi.fn(),
 }))
-vi.mock('../../src/services/release.js', async () => releaseRequestServiceMock)
+vi.mock('../../src/services/release.js', async () => releaseServiceMock)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -95,7 +85,7 @@ const mockWebhookService = vi.hoisted(() => {
 })
 vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
-describe('services > review', () => {
+describe('services > response', () => {
   const user: any = { dn: 'test' }
 
   test('respondToReview > release successful', async () => {
@@ -111,12 +101,14 @@ describe('services > review', () => {
       'semver',
     )
 
-    expect(responseModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(responseModelMock.match.mock.calls.at(1)).toMatchSnapshot()
-    expect(mockWebhookService.sendWebhooks).toBeCalled()
+    expect(responseModelMock.save).toHaveBeenCalledOnce()
+    expect(smtpMock.notifyReviewResponseForRelease).toHaveBeenCalledOnce()
+    expect(releaseServiceMock.getReleaseBySemver).toHaveBeenCalledOnce()
+    expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
   })
 
   test('respondToReview > access request successful', async () => {
+    reviewMock.findReviewForResponse.mockReturnValueOnce(testAccessRequestReview as any)
     await respondToReview(
       user,
       'modelId',
@@ -129,29 +121,25 @@ describe('services > review', () => {
       'accessRequestId',
     )
 
-    expect(responseModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(responseModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(responseModelMock.save).toHaveBeenCalledOnce()
+    expect(smtpMock.notifyReviewResponseForAccess).toHaveBeenCalledOnce()
+    expect(accessRequestServiceMock.getAccessRequestById).toHaveBeenCalledOnce()
+    expect(mockWebhookService.sendWebhooks).toHaveBeenCalledOnce()
   })
 
-  test('respondToReview > access request review  response notification successful', async () => {
-    accessRequestServiceMock.getAccessRequestById.mockReturnValueOnce({ createdBy: 'Yellow' })
-    await sendReviewResponseNotification(
-      { kind: 'access', accessRequestId: 'Hello' } as ReviewDoc,
-      testReviewResponse as any,
+  test('respondToReview > unable to send notification due to missing access request ID', async () => {
+    reviewMock.findReviewForResponse.mockReturnValueOnce({ kind: 'access' } as any)
+    await respondToReview(
       user,
+      'modelId',
+      'msro',
+      {
+        decision: Decision.RequestChanges,
+        comment: 'Do better!',
+      },
+      ReviewKind.Access,
+      'accessRequestId',
     )
-
-    expect(accessRequestServiceMock.getAccessRequestById).toBeCalled()
-    expect(smtpMock.notifyReviewResponseForAccess).toBeCalled()
-  })
-
-  test('respondToReview > missing access request ID', async () => {
-    releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
-    const err = Error('test error')
-    smtpMock.notifyReviewResponseForAccess.mockImplementationOnce(() => {
-      throw err
-    })
-    await sendReviewResponseNotification({ kind: 'access' } as ReviewDoc, testReviewResponse as any, user)
 
     expect(logMock.error).toHaveBeenCalledWith(
       { review: { kind: 'access' } },
@@ -159,21 +147,19 @@ describe('services > review', () => {
     )
   })
 
-  test('respondToReview > release review response notification successful', async () => {
-    releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
-    await sendReviewResponseNotification(
-      { kind: 'release', semver: 'Hello' } as ReviewDoc,
-      testReviewResponse as any,
-      user,
-    )
-
-    expect(releaseRequestServiceMock.getReleaseBySemver).toBeCalled()
-    expect(smtpMock.notifyReviewResponseForRelease).toBeCalled()
-  })
-
   test('respondToReview > missing semver', async () => {
-    releaseRequestServiceMock.getReleaseBySemver.mockReturnValueOnce({ createdBy: 'Yellow' })
-    await sendReviewResponseNotification({ kind: 'release' } as ReviewDoc, testReviewResponse as any, user)
+    reviewMock.findReviewForResponse.mockReturnValueOnce({ kind: 'release' } as any)
+    await respondToReview(
+      user,
+      'modelId',
+      'msro',
+      {
+        decision: Decision.RequestChanges,
+        comment: 'Do better!',
+      },
+      ReviewKind.Release,
+      'semver',
+    )
 
     expect(logMock.error).toHaveBeenCalledWith(
       {

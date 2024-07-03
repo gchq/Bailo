@@ -73,6 +73,17 @@ export const testReleaseReview = {
   updatedAt: new Date('08/14/2023'),
 }
 
+export const testAccessRequestReview = {
+  modelId: 'abc',
+  accessRequestId: 'cba',
+  kind: ReviewKind.Access,
+
+  role: 'msro',
+  responses: [],
+  createdAt: new Date('08/13/2023'),
+  updatedAt: new Date('08/14/2023'),
+}
+
 export const testModelCardRevision = {
   modelId: 'abc',
   CreatedBy: 'user',

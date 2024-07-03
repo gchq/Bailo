@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`services > review > checkAccessRequestsApproved > approved access request exists 1`] = `
+exports[`services > response > checkAccessRequestsApproved > approved access request exists 1`] = `
 [
   [
     [
@@ -11,7 +11,7 @@ exports[`services > review > checkAccessRequestsApproved > approved access reque
 ]
 `;
 
-exports[`services > review > checkAccessRequestsApproved > no approved access requests with a required role 1`] = `
+exports[`services > response > checkAccessRequestsApproved > no approved access requests with a required role 1`] = `
 [
   [
     [
@@ -21,11 +21,3 @@ exports[`services > review > checkAccessRequestsApproved > no approved access re
   ],
 ]
 `;
-
-exports[`services > review > respondToReview > access request successful 1`] = `undefined`;
-
-exports[`services > review > respondToReview > access request successful 2`] = `undefined`;
-
-exports[`services > review > respondToReview > release successful 1`] = `undefined`;
-
-exports[`services > review > respondToReview > release successful 2`] = `undefined`;
