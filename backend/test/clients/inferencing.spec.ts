@@ -62,7 +62,7 @@ describe('clients > inferencing', () => {
   test('createInferencing > no authorization token', async () => {
     vi.spyOn(configMock, 'inference', 'get').mockReturnValueOnce({ authorisationToken: '' })
 
-    expect(() => updateInferenceService({} as any)).rejects.toThrowError(/^No authentication key exists./)
+    expect(() => createInferenceService({} as any)).rejects.toThrowError(/^No authentication key exists./)
   })
 
   test('updateInferencing > success', async () => {

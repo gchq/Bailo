@@ -11,13 +11,14 @@ interface InferenceService {
 }
 
 export async function createInferenceService(inferenceServiceParams: InferenceService) {
+  const authorisationToken = config.inference.authorisationToken
+
+  if (authorisationToken === '') {
+    throw Unauthorized('No authentication key exists.')
+  }
+
   let res: Response
   try {
-    const authorisationToken = config.inference.authorisationToken
-
-    if (!authorisationToken) {
-      throw Unauthorized('No authentication key exists')
-    }
     res = await fetch(`${config.ui.inference.connection.host}/api/deploy`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authorisationToken}` },
@@ -34,14 +35,15 @@ export async function createInferenceService(inferenceServiceParams: InferenceSe
 }
 
 export async function updateInferenceService(inferenceServiceParams: InferenceService) {
+  const authorisationToken = config.inference.authorisationToken
+
+  if (authorisationToken === '') {
+    throw Unauthorized('No authentication key exists.')
+  }
+
   let res: Response
+
   try {
-    const authorisationToken = config.inference.authorisationToken
-
-    if (!authorisationToken) {
-      throw Unauthorized('No authentication key exists')
-    }
-
     res = await fetch(`${config.ui.inference.connection.host}/api/update`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authorisationToken}` },
