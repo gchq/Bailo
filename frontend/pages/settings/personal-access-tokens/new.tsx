@@ -54,21 +54,25 @@ export default function NewToken() {
     return 'Select models'
   }, [isAllModels, selectedModels.length])
 
-  const [TokenReadAction, TokenWriteAction] = actionOptions.reduce<Record<string, string>[]>(
-    ([readActions, writeActions], action) => {
-      let groupedActions = [readActions, writeActions]
-      const [name, kind] = action.split(':')
+  const [TokenReadAction, TokenWriteAction] = useMemo(
+    () =>
+      actionOptions.reduce<Record<string, string>[]>(
+        ([readActions, writeActions], action) => {
+          let groupedActions = [readActions, writeActions]
+          const [name, kind] = action.split(':')
 
-      if (kind === TokenActionKind.READ) {
-        groupedActions = [{ ...readActions, [name]: action }, writeActions]
-      }
-      if (kind === TokenActionKind.WRITE) {
-        groupedActions = [readActions, { ...writeActions, [name]: action }]
-      }
+          if (kind === TokenActionKind.READ) {
+            groupedActions = [{ ...readActions, [name]: action }, writeActions]
+          }
+          if (kind === TokenActionKind.WRITE) {
+            groupedActions = [readActions, { ...writeActions, [name]: action }]
+          }
 
-      return groupedActions
-    },
-    [{}, {}],
+          return groupedActions
+        },
+        [{}, {}],
+      ),
+    [actionOptions],
   )
 
   const renderActionTags = useCallback(
@@ -101,14 +105,6 @@ export default function NewToken() {
       }),
     [selectedActions, TokenWriteAction, TokenReadAction],
   )
-
-  if (isUiConfigLoading) {
-    return <Loading />
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message}></MessageAlert>
-  }
 
   const isWriteAction = (action: string) => {
     return Object.values(TokenWriteAction).includes(action)
@@ -178,6 +174,14 @@ export default function NewToken() {
     }
 
     setIsLoading(false)
+  }
+
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message}></MessageAlert>
+  }
+
+  if (isUiConfigLoading) {
+    return <Loading />
   }
 
   return (
