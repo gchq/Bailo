@@ -123,7 +123,7 @@ export default function JsonSchemaForm({
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
-              <ListItem key={step.schema.title} disablePadding style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <ListItem key={step.schema.title} disablePadding sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
                   <Typography
                     sx={{
