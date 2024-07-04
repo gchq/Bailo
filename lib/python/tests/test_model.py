@@ -165,6 +165,12 @@ def test_publish_experiment_standard_ordered(standard_experiment):
     assert expected_accuracy == actual_accuracy
 
 
+@pytest.mark.integration
+def test_publush_experiment_standard_invalid_select_by(standard_experiment):
+    with pytest.raises(BailoException):
+        standard_experiment.publish(mc_loc="performance.performanceMetrics", select_by="MAX:accuracy")
+
+
 @pytest.mark.mlflow
 def test_import_model_from_mlflow(integration_client, mlflow_model, request):
     model = Model.from_mlflow(

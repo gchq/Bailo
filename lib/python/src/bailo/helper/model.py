@@ -485,7 +485,7 @@ class Experiment:
         :param semver: Semantic version of release to create (if artifacts present), defaults to 0.1.0 or next
         :param notes: Notes for release, defaults to ""
         :param run_id: Local experiment run ID to be selected, defaults to None
-        :param select_by: String describing experiment to be selected (e.g. "MIN|MAX:accuracy"), defaults to None
+        :param select_by: String describing experiment to be selected (e.g. "accuracy MIN|MAX"), defaults to None
 
         ..note:: mc_loc is dependent on the model card schema being used
         ..warning:: User must specify either run_id or select_by, otherwise the code will error
@@ -496,22 +496,22 @@ class Experiment:
 
         mc = NestedDict(mc)
 
-        if len(self.raw):
-            if (select_by is None) and (run_id is None):
-                raise BailoException(
-                    "Either select_by (e.g. 'MIN|MAX:accuracy) or run_id is required to publish an experiment run."
-                )
-            if (select_by is not None) and (run_id is None):
-                sel_run = self.__select_run(select_by=select_by)
-            if run_id is not None:
-                for run in self.raw:
-                    if run["run"] == run_id:
-                        sel_run = run
-                        break
-                else:
-                    raise NameError(f"Run {run_id} does not exist.")
-        else:
+        if len(self.raw) == 0:
             raise BailoException(f"This experiment has no runs to publish.")
+        if run_id is None:
+            raise NameError(f"Run {run_id} does not exist.")
+        if (select_by is None) and (run_id is None):
+            raise BailoException(
+                "Either select_by (e.g. 'accuracy MIN|MAX') or run_id is required to publish an experiment run."
+            )
+
+        if (select_by is not None) and (run_id is None):
+            sel_run = self.__select_run(select_by=select_by)
+
+        for run in self.raw:
+            if run["run"] == run_id:
+                sel_run = run
+                break
 
         values = []
 
@@ -555,19 +555,19 @@ class Experiment:
 
     def __select_run(self, select_by: str):
         # Parse target and order from select_by string
-        select_by_split = select_by.split(":")
-        order_str = select_by_split[0].upper()
+        select_by_split = select_by.split(" ")
+        order_str = select_by_split[1].upper()
         order_opt = ["MIN", "MAX"]
         if order_str not in order_opt:
             raise BailoException(f"Runs can only be ordered by MIN or MAX, not {order_str}.")
-        target_str = select_by_split[1]
+        target_str = select_by_split[0]
 
         # Extract target value for each run
         runs = self.raw
         for run in runs:
             metrics = run["metrics"]
-            for m in metrics:
-                target_value = m.get(target_str, None)
+            for metric in metrics:
+                target_value = metric.get(target_str, None)
             if target_value is not None:
                 run["target"] = target_value
             else:
