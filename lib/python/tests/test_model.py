@@ -153,7 +153,7 @@ def test_publish_experiment_standard(standard_experiment):
 
 @pytest.mark.integration
 def test_publish_experiment_standard_ordered(standard_experiment):
-    standard_experiment.publish(mc_loc="performance.performanceMetrics", select_by="MAX:accuracy")
+    standard_experiment.publish(mc_loc="performance.performanceMetrics", select_by="accuracy MAX")
 
     model_card = standard_experiment.model.model_card
     model_card = NestedDict(model_card)
@@ -166,7 +166,7 @@ def test_publish_experiment_standard_ordered(standard_experiment):
 
 
 @pytest.mark.integration
-def test_publush_experiment_standard_invalid_select_by(standard_experiment):
+def test_publish_experiment_standard_invalid_select_by(standard_experiment):
     with pytest.raises(BailoException):
         standard_experiment.publish(mc_loc="performance.performanceMetrics", select_by="MAX:accuracy")
 

@@ -498,8 +498,6 @@ class Experiment:
 
         if len(self.raw) == 0:
             raise BailoException(f"This experiment has no runs to publish.")
-        if run_id is None:
-            raise NameError(f"Run {run_id} does not exist.")
         if (select_by is None) and (run_id is None):
             raise BailoException(
                 "Either select_by (e.g. 'accuracy MIN|MAX') or run_id is required to publish an experiment run."
@@ -508,10 +506,13 @@ class Experiment:
         if (select_by is not None) and (run_id is None):
             sel_run = self.__select_run(select_by=select_by)
 
-        for run in self.raw:
-            if run["run"] == run_id:
-                sel_run = run
-                break
+        if run_id is not None:
+            for run in self.raw:
+                if run["run"] == run_id:
+                    sel_run = run
+                    break
+            else:
+                raise NameError(f"Run {run_id} does not exist.")
 
         values = []
 
@@ -556,6 +557,8 @@ class Experiment:
     def __select_run(self, select_by: str):
         # Parse target and order from select_by string
         select_by_split = select_by.split(" ")
+        if len(select_by_split) != 2:
+            raise BailoException("Invalid select_by string. Expected format is 'metric_name MIN|MAX'.")
         order_str = select_by_split[1].upper()
         order_opt = ["MIN", "MAX"]
         if order_str not in order_opt:
