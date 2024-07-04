@@ -1,7 +1,7 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
 import { Card, Grid, Stack, Typography } from '@mui/material'
+import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
-import { groupBy } from 'lodash-es'
 import { useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
@@ -10,8 +10,9 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { AccessRequestInterface, ReviewRequestInterface, ReviewResponse } from 'types/types'
-import { formatDateString, sortByCreatedAtAscending } from 'utils/dateUtils'
+import { AccessRequestInterface, ResponseInterface } from 'types/types'
+import { formatDateString } from 'utils/dateUtils'
+import { latestReviewsForEachUser } from 'utils/reviewUtils'
 import { plural } from 'utils/stringUtils'
 
 type AccessRequestDisplayProps = {
@@ -24,33 +25,39 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
     modelId: accessRequest.modelId,
     accessRequestId: accessRequest.id,
   })
+  const {
+    responses: commentResponses,
+    isResponsesLoading: isCommentResponsesLoading,
+    isResponsesError: isCommentResponsesError,
+  } = useGetResponses([accessRequest._id])
+  const {
+    responses: reviewResponses,
+    isResponsesLoading: isReviewResponsesLoading,
+    isResponsesError: isReviewResponsesError,
+  } = useGetResponses([...reviews.map((review) => review._id)])
 
-  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ReviewRequestInterface[]>([])
-
+  const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ResponseInterface[]>([])
   useEffect(() => {
     if (!isReviewsLoading && reviews) {
-      const result = reviews
-      result.forEach((review) => {
-        const groupedResponses: GroupedReviewResponse = groupBy(review.responses, (response) => response.user)
-        Object.keys(groupedResponses).forEach((user) => {
-          review.responses = [groupedResponses[user].sort(sortByCreatedAtAscending)[groupedResponses[user].length - 1]]
-        })
-      })
-      setReviewsWithLatestResponses(result)
+      const latestReviews = latestReviewsForEachUser(reviews, reviewResponses)
+      setReviewsWithLatestResponses(latestReviews)
     }
-  }, [reviews, isReviewsLoading])
+  }, [reviews, isReviewsLoading, reviewResponses])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
-  interface GroupedReviewResponse {
-    [user: string]: ReviewResponse[]
+  if (isReviewResponsesError) {
+    return <MessageAlert message={isReviewResponsesError.info.message} severity='error' />
+  }
+  if (isCommentResponsesError) {
+    return <MessageAlert message={isCommentResponsesError.info.message} severity='error' />
   }
 
   return (
     <>
-      {isReviewsLoading && <Loading />}
+      {(isReviewsLoading || isReviewResponsesLoading || isCommentResponsesLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
           {reviews.length > 0 && !hideReviewBanner && <ReviewBanner accessRequest={accessRequest} />}
@@ -110,12 +117,12 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
               </Card>
             </Stack>
             <Stack direction='row' justifyContent='space-between' spacing={2} sx={{ pt: 2 }}>
-              <ReviewDisplay reviews={reviewsWithLatestResponses} />
-              {accessRequest.comments.length > 0 && (
+              <ReviewDisplay reviewResponses={reviewsWithLatestResponses} modelId={accessRequest.modelId} />
+              {commentResponses.length > 0 && (
                 <Stack direction='row' spacing={1}>
                   <CommentIcon color='primary' data-test='commentIcon' />
                   <Typography variant='caption' data-test='commentCount'>
-                    {plural(accessRequest.comments.length, 'comment')}
+                    {plural(commentResponses.length, 'comment')}
                   </Typography>
                 </Stack>
               )}

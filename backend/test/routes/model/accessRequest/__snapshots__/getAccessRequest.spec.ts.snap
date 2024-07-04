@@ -3,13 +3,19 @@
 exports[`routes > accessRequest > getAccessRequest > 200 > ok 1`] = `
 {
   "accessRequest": {
-    "example": "test",
+    "_id": "664e1aa8bda1f88c28e1c0ce",
+    "deleted": false,
+    "id": "test-access-request-13623",
+    "modelId": "test-model-4342",
   },
 }
 `;
 
 exports[`routes > accessRequest > getAccessRequest > audit > expected call 1`] = `
 {
-  "example": "test",
+  "_id": "664e1aa8bda1f88c28e1c0ce",
+  "deleted": false,
+  "id": "test-access-request-13623",
+  "modelId": "test-model-4342",
 }
 `;

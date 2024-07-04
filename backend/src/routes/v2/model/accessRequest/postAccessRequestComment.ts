@@ -4,9 +4,9 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
-import { AccessRequestInterface } from '../../../../models/AccessRequest.js'
+import { ResponseInterface } from '../../../../models/Response.js'
 import { newAccessRequestComment } from '../../../../services/accessRequest.js'
-import { accessRequestInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import { registerPath, responseInterfaceSchema } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const postAccessRequestCommentSchema = z.object({
@@ -27,11 +27,11 @@ registerPath({
   schema: postAccessRequestCommentSchema,
   responses: {
     200: {
-      description: 'The updated access request.',
+      description: 'The new access request comment.',
       content: {
         'application/json': {
           schema: z.object({
-            accessRequest: accessRequestInterfaceSchema,
+            accessRequestComment: responseInterfaceSchema,
           }),
         },
       },
@@ -40,7 +40,7 @@ registerPath({
 })
 
 interface PostRequestCommentResponse {
-  accessRequest: AccessRequestInterface
+  accessRequestComment: ResponseInterface
 }
 
 export const postAccessRequestComment = [
@@ -52,12 +52,12 @@ export const postAccessRequestComment = [
       params: { accessRequestId },
     } = parse(req, postAccessRequestCommentSchema)
 
-    const accessRequest = await newAccessRequestComment(req.user, accessRequestId, body.comment)
+    const accessRequestComment = await newAccessRequestComment(req.user, accessRequestId, body.comment)
 
-    await audit.onUpdateAccessRequest(req, accessRequest)
+    await audit.onCreateResponse(req, accessRequestComment)
 
     return res.json({
-      accessRequest,
+      accessRequestComment,
     })
   },
 ]

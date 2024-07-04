@@ -45,6 +45,10 @@ const audit = {
 
   onCreateS3Export: vi.fn(),
 
+  onCreateResponse: vi.fn(),
+  onViewResponses: vi.fn(),
+  onUpdateResponse: vi.fn(),
+
   onError: vi.fn(),
 }
 export default audit

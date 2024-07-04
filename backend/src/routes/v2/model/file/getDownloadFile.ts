@@ -34,7 +34,7 @@ registerPath({
   method: 'get',
   path: '/api/v2/model/{modelId}/release/{semver}/file/{fileName}/download',
   tags: ['file'],
-  description: 'Download a file by filename and release.',
+  description: 'Download a file by file name and release.',
   schema: z.object({
     params: z.object({
       modelId: z.string(),

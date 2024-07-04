@@ -4,7 +4,6 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { ModelInterface } from '../../../models/Model.js'
 import { ReviewInterface } from '../../../models/Review.js'
 import { findReviews } from '../../../services/review.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
@@ -42,7 +41,7 @@ registerPath({
 })
 
 interface GetReviewResponse {
-  reviews: Array<ReviewInterface & { model: ModelInterface }>
+  reviews: Array<ReviewInterface>
 }
 
 export const getReviews = [
@@ -57,8 +56,6 @@ export const getReviews = [
     await audit.onSearchReviews(req, reviews)
 
     res.setHeader('x-count', reviews.length)
-    return res.json({
-      reviews,
-    })
+    return res.json({ reviews })
   },
 ]

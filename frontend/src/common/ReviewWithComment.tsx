@@ -1,6 +1,7 @@
 import { LoadingButton } from '@mui/lab'
 import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { useGetResponses } from 'actions/response'
 import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
@@ -56,6 +57,8 @@ export default function ReviewWithComment({
     modelId,
     ...semverOrAccessRequestIdObject,
   })
+
+  const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
   const [reviewRequest, setReviewRequest] = useState(reviews[0])
 
@@ -65,20 +68,16 @@ export default function ReviewWithComment({
 
   useEffect(() => {
     if (reviewRequest) {
-      const latestReviewForRole = latestReviewsForEachUser([reviewRequest]).find(
+      const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
         (latestReview) => latestReview.role === reviewRequest.role,
       )
-      if (
-        latestReviewForRole &&
-        latestReviewForRole.responses[0] &&
-        latestReviewForRole.responses[0].decision !== Decision.Undo
-      ) {
+      if (latestReviewForRole && latestReviewForRole.decision !== Decision.Undo) {
         setShowUndoButton(true)
       } else {
         setShowUndoButton(false)
       }
     }
-  }, [reviewRequest])
+  }, [responses, reviewRequest])
 
   function submitForm(decision: DecisionKeys) {
     setErrorText('')
@@ -107,9 +106,13 @@ export default function ReviewWithComment({
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
+  if (isResponsesError) {
+    return <MessageAlert message={isResponsesError.info.message} severity='error' />
+  }
+
   return (
     <>
-      {(isReviewsLoading || isModelRolesLoading) && <Loading />}
+      {(isReviewsLoading || isModelRolesLoading || isResponsesLoading) && <Loading />}
       <div data-test='reviewWithCommentContent'>
         {modelRoles.length === 0 && (
           <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>

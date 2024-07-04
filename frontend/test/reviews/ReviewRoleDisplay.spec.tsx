@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { useGetModelRoles } from 'actions/model'
+import { useGetResponses } from 'actions/response'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import {
   testAccessRequestReview,
@@ -7,6 +8,7 @@ import {
   testManagerRole,
   testReleaseReview,
   testReleaseReviewNoResponses,
+  testReviewResponse,
 } from 'utils/test/testModels'
 import { describe, expect, vi } from 'vitest'
 
@@ -21,6 +23,10 @@ vi.mock('actions/model', () => ({
   useGetModelRoles: vi.fn(),
 }))
 
+vi.mock('actions/response', () => ({
+  useGetResponses: vi.fn(),
+}))
+
 describe('ReviewRoleDisplay', () => {
   const testMessageAccess = 'This access needs to be reviewed by the Manager.'
   const testMessageRelease = 'This release needs to be reviewed by the Manager.'
@@ -31,6 +37,12 @@ describe('ReviewRoleDisplay', () => {
       isModelRolesLoading: false,
       isModelRolesError: undefined,
       mutateModelRoles: vi.fn(),
+    })
+    vi.mocked(useGetResponses).mockReturnValue({
+      responses: [],
+      isResponsesLoading: false,
+      isResponsesError: undefined,
+      mutateResponses: vi.fn(),
     })
     mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReviewNoResponses} />)
@@ -46,6 +58,12 @@ describe('ReviewRoleDisplay', () => {
       isModelRolesError: undefined,
       mutateModelRoles: vi.fn(),
     })
+    vi.mocked(useGetResponses).mockReturnValue({
+      responses: [],
+      isResponsesLoading: false,
+      isResponsesError: undefined,
+      mutateResponses: vi.fn(),
+    })
     mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testReleaseReviewNoResponses} />)
     await waitFor(async () => {
@@ -59,6 +77,12 @@ describe('ReviewRoleDisplay', () => {
       isModelRolesLoading: false,
       isModelRolesError: undefined,
       mutateModelRoles: vi.fn(),
+    })
+    vi.mocked(useGetResponses).mockReturnValue({
+      responses: [testReviewResponse],
+      isResponsesLoading: false,
+      isResponsesError: undefined,
+      mutateResponses: vi.fn(),
     })
     mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReview} />)
@@ -74,6 +98,12 @@ describe('ReviewRoleDisplay', () => {
       isModelRolesLoading: false,
       isModelRolesError: undefined,
       mutateModelRoles: vi.fn(),
+    })
+    vi.mocked(useGetResponses).mockReturnValue({
+      responses: [testReviewResponse],
+      isResponsesLoading: false,
+      isResponsesError: undefined,
+      mutateResponses: vi.fn(),
     })
     mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testReleaseReview} />)

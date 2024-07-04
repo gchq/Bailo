@@ -180,6 +180,10 @@ module.exports = {
       },
       gpus: {},
     },
+    modelMirror: {
+      enabled: false,
+      disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+    },
   },
 
   connectors: {
@@ -224,7 +228,6 @@ module.exports = {
   },
 
   modelMirror: {
-    enabled: false,
     export: {
       maxSize: 100 * 1024 * 1024 * 1024,
       bucket: 'exports',
@@ -234,8 +237,8 @@ module.exports = {
         KMSClient: {
           region: 'eu-west-1',
           credentials: {
-            accessKeyId: 'access',
-            secretAccessKey: 'secret',
+            accessKeyId: '',
+            secretAccessKey: '',
           },
         },
       },

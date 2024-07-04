@@ -1,42 +1,25 @@
-import { LoadingButton } from '@mui/lab'
-import {
-  Autocomplete,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-} from '@mui/material'
-import { patchModel, useGetModel } from 'actions/model'
+import { Autocomplete, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material'
 import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import HelpDialog from 'src/common/HelpDialog'
-import EntryRolesInfo from 'src/entry/model/settings/EntryRolesInfo'
 import EntityItem from 'src/entry/settings/EntityItem'
-import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntityObject, EntryInterface } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
-import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
+import { CollaboratorEntry, EntityObject, EntryKindKeys, Role } from 'types/types'
+import { toSentenceCase } from 'utils/stringUtils'
 
-type EntryAccessProps = {
-  entry: EntryInterface
+type EntryAccessInputProps = {
+  value: CollaboratorEntry[]
+  onUpdate: (list: CollaboratorEntry[]) => void
+  entryKind: EntryKindKeys
+  entryRoles: Role[]
 }
 
-export default function EntryAccess({ entry }: EntryAccessProps) {
+export default function EntryAccessInput({ value, onUpdate, entryKind, entryRoles }: EntryAccessInputProps) {
   const [open, setOpen] = useState(false)
-  const [accessList, setAccessList] = useState<CollaboratorEntry[]>(entry.collaborators)
+  const [accessList, setAccessList] = useState<CollaboratorEntry[]>(value)
   const [userListQuery, setUserListQuery] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
-  const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
-  const sendNotification = useNotification()
 
   const accessListEntities = useMemo(
     () =>
@@ -46,17 +29,22 @@ export default function EntryAccess({ entry }: EntryAccessProps) {
           entity={entity}
           accessList={accessList}
           onAccessListChange={setAccessList}
-          entry={entry}
+          entryRoles={entryRoles}
+          entryKind={entryKind}
         />
       )),
-    [accessList, entry],
+    [accessList, entryKind, entryRoles],
   )
 
   useEffect(() => {
-    if (entry) {
-      setAccessList(entry.collaborators)
+    if (value) {
+      setAccessList(value)
     }
-  }, [entry])
+  }, [value])
+
+  useEffect(() => {
+    onUpdate(accessList)
+  }, [accessList, onUpdate])
 
   const onUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
@@ -78,22 +66,6 @@ export default function EntryAccess({ entry }: EntryAccessProps) {
     handleInputChange(event, value)
   }, 500)
 
-  async function updateAccessList() {
-    setLoading(true)
-    const res = await patchModel(entry.id, { collaborators: accessList })
-    if (!res.ok) {
-      setErrorMessage(await getErrorMessage(res))
-    } else {
-      sendNotification({
-        variant: 'success',
-        msg: `${toTitleCase(entry.kind)} access list updated`,
-        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-      })
-      mutateEntry()
-    }
-    setLoading(false)
-  }
-
   const noOptionsText = useMemo(() => {
     if (userListQuery.length < 3) return 'Please enter at least three characters'
     if (isUsersError?.status === 413) return 'Too many results, please refine your search'
@@ -104,15 +76,8 @@ export default function EntryAccess({ entry }: EntryAccessProps) {
     return <MessageAlert message={isUsersError.info.message} severity='error' />
   }
 
-  if (isEntryError) {
-    return <MessageAlert message={isEntryError.info.message} severity='error' />
-  }
-
   return (
     <Stack spacing={2}>
-      <Typography variant='h6' component='h2'>
-        {`Manage ${toSentenceCase(entry.kind)} access`}
-      </Typography>
       <Autocomplete
         open={open}
         onOpen={() => setOpen(true)}
@@ -135,7 +100,7 @@ export default function EntryAccess({ entry }: EntryAccessProps) {
           <TextField
             {...params}
             autoFocus
-            label={`Add a user or group to the ${toSentenceCase(entry.kind)} access list`}
+            label={`Add a user or group to the ${toSentenceCase(entryKind)} access list`}
           />
         )}
       />
@@ -143,21 +108,12 @@ export default function EntryAccess({ entry }: EntryAccessProps) {
         <TableHead>
           <TableRow>
             <TableCell>Entity</TableCell>
-            <TableCell>
-              <Stack direction='row' spacing={1} alignItems='center'>
-                <span>Roles</span>
-                <HelpDialog title='What are roles?' content={<EntryRolesInfo entry={entry} />} />
-              </Stack>
-            </TableCell>
+            <TableCell>Roles</TableCell>
             <TableCell align='right'>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>{accessListEntities}</TableBody>
       </Table>
-      <LoadingButton variant='contained' aria-label='Save access list' onClick={updateAccessList} loading={loading}>
-        Save
-      </LoadingButton>
-      <MessageAlert message={errorMessage} severity='error' />
     </Stack>
   )
 }

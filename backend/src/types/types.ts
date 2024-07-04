@@ -1,9 +1,5 @@
 import { TokenDescriptions } from '../models/Token.js'
 
-export interface User {
-  dn: string
-}
-
 export const RoleKind = {
   ENTRY: 'entry',
   SCHEMA: 'schema',
