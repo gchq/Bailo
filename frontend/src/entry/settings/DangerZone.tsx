@@ -30,7 +30,7 @@ export default function DangerZone({ entry, isReadOnly, requiredRolesText }: Dan
           <LoadingButton
             fullWidth
             variant='contained'
-            disabled={isReadOnly || true}
+            disabled={true || isReadOnly}
             onClick={handleDeleteEntry}
             loading={loading}
           >
