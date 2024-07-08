@@ -34,9 +34,9 @@ export default function NewToken() {
   const { models, isModelsLoading, isModelsError } = useListModels('model')
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const tokenActions = uiConfig?.tokenActions || {}
+  const tokenActions = useMemo(() => uiConfig?.tokenActions || {}, [uiConfig])
 
-  const actionOptions = Object.keys(tokenActions)
+  const actionOptions = useMemo(() => Object.keys(tokenActions), [tokenActions])
 
   const theme = useTheme()
   const [description, setDescription] = useState('')
