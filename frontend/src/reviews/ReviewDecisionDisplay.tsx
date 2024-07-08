@@ -4,6 +4,7 @@ import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Box, Card, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
+import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
@@ -21,10 +22,15 @@ type ReviewDecisionDisplayProps = {
 }
 
 export default function ReviewDecisionDisplay({ response, modelId, mutateResponses }: ReviewDecisionDisplayProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
-
   const theme = useTheme()
-  const [entityKind, username] = response.entity.split(':')
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const [entityKind, username] = useMemo(() => response.entity.split(':'), [response.entity])
+
+  const handleReactionsError = useCallback((message: string) => {
+    setErrorMessage(message)
+  }, [])
 
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
@@ -81,7 +87,8 @@ export default function ReviewDecisionDisplay({ response, modelId, mutateRespons
               </Box>
             </Box>
           )}
-          <ReactionButtons response={response} mutateResponses={mutateResponses} />
+          <ReactionButtons response={response} mutateResponses={mutateResponses} onError={handleReactionsError} />
+          <MessageAlert message={errorMessage} severity='error' />
         </Card>
       </Stack>
     </>

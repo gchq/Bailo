@@ -1,9 +1,10 @@
 import { Menu as MenuIcon } from '@mui/icons-material'
 import { Box, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
+import MessageAlert from 'src/MessageAlert'
 import ReactionButtons from 'src/reviews/ReactionButtons'
 import { EntityKind, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
@@ -19,10 +20,14 @@ export default function ReviewCommentDisplay({
   onReplyButtonClick,
   mutateResponses,
 }: ReviewCommentDisplayProps) {
-  const [entityKind, username] = response.entity.split(':')
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const [entityKind, username] = useMemo(() => response.entity.split(':'), [response.entity])
+
+  const handleReactionsError = useCallback((message: string) => {
+    setErrorMessage(message)
+  }, [])
 
   const handleReplyOnClick = (value: string | undefined) => {
     setAnchorEl(null)
@@ -63,10 +68,11 @@ export default function ReviewCommentDisplay({
               </Box>
             </Box>
           )}
-          <ReactionButtons response={response} mutateResponses={mutateResponses} />
+          <ReactionButtons response={response} mutateResponses={mutateResponses} onError={handleReactionsError} />
+          <MessageAlert message={errorMessage} severity='error' />
         </Card>
       </Stack>
-      <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
+      <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
         <MenuItem onClick={() => handleReplyOnClick(response.comment)}>Reply</MenuItem>
       </Menu>
     </>

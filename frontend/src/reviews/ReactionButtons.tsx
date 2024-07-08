@@ -3,30 +3,38 @@ import { IconButton, Popover, Stack } from '@mui/material'
 import { patchResponseReaction } from 'actions/response'
 import { useGetCurrentUser } from 'actions/user'
 import _ from 'lodash-es'
-import { ReactNode, useCallback, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
 import ReactionDisplay from 'src/reviews/ReactionDisplay'
 import { ReactionKind, ReactionKindKeys, ResponseInterface } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 
 interface ReactionButtonsProps {
   response: ResponseInterface
   mutateResponses: () => void
+  onError: (message: string) => void
 }
 
-export default function ReactionButtons({ response, mutateResponses }: ReactionButtonsProps) {
+export default function ReactionButtons({ response, mutateResponses, onError }: ReactionButtonsProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+
+  useEffect(() => {
+    if (isCurrentUserError) {
+      onError(isCurrentUserError.info.message)
+    }
+  }, [isCurrentUserError, onError])
 
   const handleReactionClick = useCallback(
     async (kind: ReactionKindKeys) => {
       const res = await patchResponseReaction(response['_id'], kind)
-      if (res.ok) {
-        mutateResponses()
-        setAnchorEl(null)
+      if (!res.ok) {
+        onError(await getErrorMessage(res))
       }
+      mutateResponses()
+      setAnchorEl(null)
     },
-    [mutateResponses, response],
+    [mutateResponses, onError, response],
   )
 
   const reactionsList = useMemo(
@@ -78,10 +86,6 @@ export default function ReactionButtons({ response, mutateResponses }: ReactionB
       return false
     }
     return !!response.reactions.find((reaction) => reaction.kind === kind)?.users.includes(currentUser.dn)
-  }
-
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
 
   return (
