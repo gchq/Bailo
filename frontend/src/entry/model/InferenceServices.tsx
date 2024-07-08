@@ -1,4 +1,4 @@
-import { Box, Button, Container, Stack } from '@mui/material'
+import { Box, Button, Container, Stack, Tooltip } from '@mui/material'
 import { useGetInferencesForModelId } from 'actions/inferencing'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
@@ -7,14 +7,22 @@ import Loading from 'src/common/Loading'
 import InferenceDisplay from 'src/entry/model/inferencing/InferenceDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
+import { getRequiredRolesText, hasRole } from 'utils/roles'
 
 type InferenceProps = {
   model: EntryInterface
+  currentUserRoles: string[]
 }
 
-export default function InferenceServices({ model }: InferenceProps) {
+export default function InferenceServices({ model, currentUserRoles }: InferenceProps) {
   const router = useRouter()
   const { inferences, isInferencesLoading, isInferencesError } = useGetInferencesForModelId(model.id)
+
+  const [canCreateService, requiredRolesText] = useMemo(() => {
+    const validRoles = ['owner', 'contributor']
+    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
+  }, [currentUserRoles])
+
   const inferenceDisplays = useMemo(
     () =>
       inferences.length ? (
@@ -39,9 +47,13 @@ export default function InferenceServices({ model }: InferenceProps) {
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
         <Box sx={{ textAlign: 'right' }}>
-          <Button variant='outlined' onClick={handleCreateNewInferenceService}>
-            Create Service
-          </Button>
+          <Tooltip title={requiredRolesText}>
+            <span>
+              <Button variant='outlined' disabled={!canCreateService} onClick={handleCreateNewInferenceService}>
+                Create Service
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
         {isInferencesLoading && <Loading />}
         {inferenceDisplays}

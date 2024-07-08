@@ -8,6 +8,8 @@ type EditableFormHeadingProps = {
   editButtonText: string
   isEdit: boolean
   isLoading: boolean
+  canUserEditOrDelete: boolean
+  actionButtonsTooltip: string
   onEdit: () => void
   onCancel: () => void
   onSubmit: () => void
@@ -16,16 +18,7 @@ type EditableFormHeadingProps = {
   errorMessage?: string
   deleteButtonText?: string
   showDeleteButton?: boolean
-} & (
-  | {
-      canUserEditOrDelete: boolean
-      actionButtonsTooltip: string
-    }
-  | {
-      canUserEditOrDelete?: never
-      actionButtonsTooltip?: never
-    }
-)
+}
 
 export default function EditableFormHeading({
   heading,

@@ -57,7 +57,7 @@ export default function Model() {
             {
               title: 'Inferencing',
               path: 'inferencing',
-              view: <InferenceServices model={model} />,
+              view: <InferenceServices model={model} currentUserRoles={currentUserRoles} />,
               hidden: !uiConfig.inference.enabled,
             },
             {
