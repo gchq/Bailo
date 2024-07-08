@@ -124,6 +124,10 @@ export interface Config {
       }
       gpus: { [key: string]: string }
     }
+    modelMirror: {
+      enabled: boolean
+      disclaimer: string
+    }
   }
 
   session: {

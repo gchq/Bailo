@@ -11,7 +11,7 @@
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "script": "ts-node src/scripts/runScript.ts",
-    "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360 && ts-node src/scripts/generateJWKS.ts",
+    "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360 && npx tsx src/scripts/generateJWKS.ts",
     "seed": "ts-node src/seeds/index.ts"
   },
   "keywords": [],
@@ -59,6 +59,7 @@
     "qs": "^6.12.1",
     "semver": "^7.6.2",
     "shelljs": "^0.8.5",
+    "tsx": "^4.16.2",
     "utility-types": "^3.11.0",
     "uuid": "^9.0.1",
     "yargs": "^17.7.1",

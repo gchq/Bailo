@@ -5,18 +5,18 @@ import { useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
 import EntryRolesInfo from 'src/entry/model/settings/EntryRolesInfo'
-import EntryAccess from 'src/entry/settings/EntryAccess'
+import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
 
-type EntryAccessPageProps = {
+type EntryAccessTabProps = {
   entry: EntryInterface
 }
 
-export default function EntryAccessPage({ entry }: EntryAccessPageProps) {
+export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(entry.collaborators)
@@ -63,7 +63,7 @@ export default function EntryAccessPage({ entry }: EntryAccessPageProps) {
         </Typography>
         <HelpDialog title='What are roles?' content={<EntryRolesInfo entry={entry} />} />
       </Stack>
-      <EntryAccess
+      <EntryAccessInput
         value={entry.collaborators}
         onUpdate={(val) => setAccessList(val)}
         entryKind={entry.kind}

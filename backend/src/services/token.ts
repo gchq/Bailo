@@ -17,6 +17,11 @@ interface CreateTokenProps {
 
 const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQSRTUVWXYZ')
 export async function createToken(user: UserInterface, { description, scope, modelIds, actions }: CreateTokenProps) {
+  if (user.token) {
+    // Prevent escalating token privileges
+    throw Forbidden('A token cannot be used to create another token', { accessKey: user.token.accessKey })
+  }
+
   const accessKey = `BAC_${nanoid(8)}`
   const secretKey = `BSK_${nanoid(12)}`
 
