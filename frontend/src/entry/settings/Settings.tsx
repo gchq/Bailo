@@ -1,12 +1,16 @@
 import { Container, Divider, List, Stack } from '@mui/material'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
+import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
 import DangerZone from 'src/entry/settings/DangerZone'
 import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDetails from 'src/entry/settings/EntryDetails'
+import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind, EntryKindKeys } from 'types/types'
 import { getRequiredRolesText, hasRole } from 'utils/roles'
 import { toTitleCase } from 'utils/stringUtils'
@@ -16,6 +20,7 @@ export const SettingsCategory = {
   DANGER: 'danger',
   ACCESS_REQUESTS: 'access_requests',
   PERMISSIONS: 'permissions',
+  MIRRORED_MODELS: 'mirrored_models',
   TEMPLATE: 'template',
 } as const
 
@@ -32,6 +37,7 @@ function isSettingsCategory(
         value === SettingsCategory.PERMISSIONS ||
         value === SettingsCategory.ACCESS_REQUESTS ||
         value === SettingsCategory.DANGER ||
+        value === SettingsCategory.MIRRORED_MODELS ||
         value === SettingsCategory.TEMPLATE
       )
     case EntryKind.DATA_CARD:
@@ -49,6 +55,8 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
 
   const { category } = router.query
 
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
 
   const [isReadOnly, requiredRolesText] = useMemo(() => {
@@ -58,15 +66,28 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
 
   useEffect(() => {
     if (isSettingsCategory(category, entry.kind)) {
-      setSelectedCategory(category ?? SettingsCategory.DETAILS)
+      setSelectedCategory(category)
+    } else if (category) {
+      setSelectedCategory(SettingsCategory.DETAILS)
+      router.replace({
+        query: { ...router.query, category: SettingsCategory.DETAILS },
+      })
     }
-  }, [category, entry.kind])
+  }, [category, entry.kind, router])
 
   const handleListItemClick = (category: SettingsCategoryKeys) => {
     setSelectedCategory(category)
     router.replace({
       query: { ...router.query, category },
     })
+  }
+
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
+  if (isUiConfigLoading || !uiConfig) {
+    return <Loading />
   }
 
   return (
@@ -102,6 +123,14 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
             >
               Templating
             </SimpleListItemButton>
+            {!entry.settings.mirror?.sourceModelId && uiConfig.modelMirror.enabled && (
+              <SimpleListItemButton
+                selected={selectedCategory === SettingsCategory.MIRRORED_MODELS}
+                onClick={() => handleListItemClick(SettingsCategory.MIRRORED_MODELS)}
+              >
+                Mirrored Models
+              </SimpleListItemButton>
+            )}
             <SimpleListItemButton
               selected={selectedCategory === SettingsCategory.DANGER}
               onClick={() => handleListItemClick(SettingsCategory.DANGER)}
@@ -124,6 +153,7 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
         {selectedCategory === SettingsCategory.TEMPLATE && (
           <TemplateSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
         )}
+        {selectedCategory === SettingsCategory.MIRRORED_MODELS && <ExportSettings model={entry} />}
         {selectedCategory === SettingsCategory.DANGER && (
           <DangerZone entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
         )}

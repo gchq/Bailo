@@ -16,7 +16,7 @@ export default function SchemasPage() {
   if (!currentUser || !currentUser.isAdmin) {
     return (
       <Forbidden
-        errorMessage='If you think this is in error please contact the Bailo admininistrators.'
+        errorMessage='If you think this is in error please contact the Bailo administrators.'
         noMargin
         hideNavButton
       />
