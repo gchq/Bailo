@@ -54,7 +54,7 @@ export const postReleaseComment = [
 
     const releaseComment = await newReleaseComment(req.user, modelId, semver, body.comment)
 
-    await audit.onCreateResponse(req, releaseComment)
+    await audit.onCreateCommentResponse(req, releaseComment)
 
     return res.json({
       response: releaseComment,

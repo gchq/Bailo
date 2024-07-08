@@ -32,7 +32,7 @@ describe('routes > release > postReleaseComment', () => {
     )
 
     expect(res.statusCode).toBe(200)
-    expect(audit.onCreateResponse).toBeCalled()
-    expect(audit.onCreateResponse.mock.calls.at(0)?.at(1)).toMatchSnapshot()
+    expect(audit.onCreateCommentResponse).toBeCalled()
+    expect(audit.onCreateCommentResponse.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })
