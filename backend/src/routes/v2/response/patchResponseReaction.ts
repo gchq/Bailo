@@ -2,8 +2,6 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { AuditInfo } from '../../../connectors/audit/Base.js'
-import audit from '../../../connectors/audit/index.js'
 import { ReactionKindKeys, ResponseInterface, ResponseKind } from '../../../models/Response.js'
 import { updateResponseReaction } from '../../../services/response.js'
 import { registerPath, responseInterfaceSchema } from '../../../services/specification.js'
@@ -43,14 +41,11 @@ interface PatchResponseReactionResponse {
 export const patchResponseReaction = [
   bodyParser.json(),
   async (req: Request, res: Response<PatchResponseReactionResponse>) => {
-    req.audit = AuditInfo.UpdateResponse
     const {
       params: { responseId, kind },
     } = parse(req, patchResponseReactionSchema)
 
     const response = await updateResponseReaction(req.user, responseId, kind as ReactionKindKeys)
-
-    await audit.onUpdateResponse(req, responseId)
 
     return res.json({
       response,
