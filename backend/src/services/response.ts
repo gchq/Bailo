@@ -25,23 +25,6 @@ export async function getResponsesByParentIds(_user: UserInterface, parentIds: s
   return responses
 }
 
-export async function getResponseById(user: UserInterface, responseId: string) {
-  const response = await ResponseModel.findOne({ _id: responseId })
-
-  if (!response) {
-    throw NotFound(`The requested response was not found.`, { responseId })
-  }
-
-  if (response.entity !== toEntity('user', user.dn)) {
-    throw Forbidden('Only the original author can update a comment or review response.', {
-      userDn: user.dn,
-      responseId,
-    })
-  }
-
-  return response
-}
-
 export async function findResponsesByIds(_user: UserInterface, responseIds: string[]) {
   const responses = await ResponseModel.find({ _id: { $in: responseIds } })
 
@@ -91,10 +74,10 @@ export async function updateResponseReaction(user: UserInterface, responseId: st
       users: [user.dn],
     }
     response.reactions.push(newReaction)
+  } else if (updatedReaction.users.includes(user.dn)) {
+    updatedReaction.users = updatedReaction.users.filter((reactionUser) => reactionUser !== user.dn)
   } else {
-    updatedReaction.users.includes(user.dn)
-      ? (updatedReaction.users = updatedReaction.users.filter((reactionUser) => reactionUser !== user.dn))
-      : updatedReaction.users.push(user.dn)
+    updatedReaction.users.push(user.dn)
   }
 
   response.save()
