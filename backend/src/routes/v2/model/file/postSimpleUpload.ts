@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { Readable } from 'stream'
 import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
@@ -52,12 +53,12 @@ export const postSimpleUpload = [
     } = parse(req, postSimpleUploadSchema)
 
     // The `putObjectStream` function takes in a `StreamingBlobPayloadInputTypes`.  This type
-    // includes the 'ReadableStream' interface for handling streaming payloads, but a request
-    // is not by default assignable to this type.
+    // includes the 'Readable' interface for handling streaming payloads, but a request is not
+    // by default assignable to this type.
     //
     // In practice, it is fine, as the only reason this assignment is not possible is due
     // to a missing `.locked` parameter which is not a required field for our uploads.
-    const file = await uploadFile(req.user, modelId, name, mime, req as unknown as ReadableStream)
+    const file = await uploadFile(req.user, modelId, name, mime, req as unknown as Readable)
     await audit.onCreateFile(req, file)
 
     return res.json({

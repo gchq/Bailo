@@ -34,7 +34,7 @@ describe('routes > model > file > postSimpleUpload', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateFile).toBeCalled()
-    expect(audit.onCreateFile.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onCreateFile.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('400 > no name', async () => {

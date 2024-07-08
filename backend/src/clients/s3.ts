@@ -34,7 +34,7 @@ export async function getS3Client() {
 export async function putObjectStream(
   bucket: string,
   key: string,
-  body: ReadableStream | PassThrough | Readable,
+  body: PassThrough | Readable,
   metadata?: Record<string, string>,
 ) {
   const upload = new Upload({

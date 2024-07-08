@@ -48,6 +48,6 @@ describe('routes > accessRequest > getAccessRequest', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewAccessRequest).toBeCalled()
-    expect(audit.onViewAccessRequest.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onViewAccessRequest.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })
