@@ -7,7 +7,6 @@ import { useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import InferenceDisplay from 'src/entry/model/inferencing/InferenceDisplay'
-import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
@@ -32,7 +31,7 @@ export default function InferenceServices({ model }: InferenceProps) {
         const response = await fetch(`${uiConfig?.inference.connection.host}/api/health`, { credentials: 'include' })
         setHealthCheck(response.ok)
         if (!response.ok) {
-          return setErrorMessage('Login failed when when accessing the inferencing service')
+          return setErrorMessage(await getErrorMessage(response))
         }
       } catch (err) {
         setHealthCheck(false)
@@ -56,8 +55,7 @@ export default function InferenceServices({ model }: InferenceProps) {
 
   const handleCreateToken = async () => {
     setErrorMessage('')
-    const error = MultipleErrorWrapper('Unable to create an authenication token', { isTokensError, isUiConfigError })
-    if (error) return error
+
     const authorizationTokenName = uiConfig?.inference.authorizationTokenName
     const authorizationAccessKeys = tokens.filter((value) => value.description === authorizationTokenName)
     if (authorizationTokenName && authorizationAccessKeys.length > 0) {
