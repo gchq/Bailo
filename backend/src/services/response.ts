@@ -4,7 +4,7 @@ import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import { toEntity } from '../utils/entity.js'
-import { Forbidden, GenericError, NotFound } from '../utils/error.js'
+import { Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getReleaseBySemver } from './release.js'
@@ -129,7 +129,7 @@ async function sendReviewResponseNotification(
       break
     }
     default:
-      throw GenericError(500, 'Review Kind not recognised', reviewIdQuery)
+      throw InternalError('Review Kind not recognised', reviewIdQuery)
   }
 }
 
