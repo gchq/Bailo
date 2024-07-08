@@ -13,8 +13,8 @@ type ErrorResponse = {
   error: Error
 }
 
-export const textFetcher = async (input: RequestInfo, init: RequestInit) => {
-  const res = await fetch(input, init)
+export const textFetcher = async (path: any) => {
+  const res = await fetch(path)
 
   if (!res.ok) {
     await handleSWRError(res)
@@ -23,8 +23,8 @@ export const textFetcher = async (input: RequestInfo, init: RequestInit) => {
   return res.text()
 }
 
-export const fetcher = async (input: RequestInfo, init: RequestInit) => {
-  const res = await fetch(input, init)
+export const fetcher = async (path: any) => {
+  const res = await fetch(path)
 
   if (!res.ok) {
     await handleSWRError(res)
