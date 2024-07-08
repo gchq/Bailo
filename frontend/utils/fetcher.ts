@@ -13,16 +13,6 @@ type ErrorResponse = {
   error: Error
 }
 
-export const textFetcher = async (path: any) => {
-  const res = await fetch(path)
-
-  if (!res.ok) {
-    await handleSWRError(res)
-  }
-
-  return res.text()
-}
-
 export const fetcher = async (path: any) => {
   const res = await fetch(path)
 
