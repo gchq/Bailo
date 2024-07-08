@@ -153,7 +153,9 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
         {selectedCategory === SettingsCategory.TEMPLATE && (
           <TemplateSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
         )}
-        {selectedCategory === SettingsCategory.MIRRORED_MODELS && <ExportSettings model={entry} />}
+        {selectedCategory === SettingsCategory.MIRRORED_MODELS && (
+          <ExportSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+        )}
         {selectedCategory === SettingsCategory.DANGER && (
           <DangerZone entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
         )}
