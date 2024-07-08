@@ -62,10 +62,6 @@ export async function updateResponseReaction(user: UserInterface, responseId: st
     throw NotFound(`The requested response was not found.`, { responseId })
   }
 
-  if (response.reactions === undefined) {
-    response.reactions = []
-  }
-
   const updatedReaction = response.reactions.find((reaction) => reaction.kind === kind)
 
   if (!updatedReaction) {

@@ -83,7 +83,7 @@ export interface ResponseInterface {
   decision?: DecisionKeys
   comment?: string
   role?: string
-  reactions?: ResponseReaction[]
+  reactions: ResponseReaction[]
 
   createdAt: string
   updatedAt: string

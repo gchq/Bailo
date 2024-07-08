@@ -21,7 +21,7 @@ export interface ResponseInterface {
   decision?: DecisionKeys
   comment?: string
   parentId: Schema.Types.ObjectId
-  reactions?: ResponseReaction[]
+  reactions: ResponseReaction[]
 
   createdAt: string
   updatedAt: string
