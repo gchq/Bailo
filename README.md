@@ -121,7 +121,7 @@ npm run script -- addUploadSchema
 ```
 
 > NOTE: Scripts are also written in Typescript. In production, run them using `node`, in development, run them using
-> `ts-node` or `npm run script`.
+> `tsx` or `npm run script`.
 
 <br />
 
