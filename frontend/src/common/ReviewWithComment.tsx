@@ -145,7 +145,6 @@ export default function ReviewWithComment({
               value={reviewRequest}
               getOptionLabel={(option) => getRoleDisplay(option.role, modelRoles)}
               options={reviews}
-              defaultValue={reviewRequest}
               renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
             />
             <TextField
