@@ -70,6 +70,32 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   return response
 }
 
+export async function updateResponseReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
+  const response = await ResponseModel.findOne({ _id: responseId })
+
+  if (!response) {
+    throw NotFound(`The requested response was not found.`, { responseId })
+  }
+
+  const updatedReaction = response.reactions.find((reaction) => reaction.kind === kind)
+
+  if (!updatedReaction) {
+    const newReaction: ResponseReaction = {
+      kind,
+      users: [user.dn],
+    }
+    response.reactions.push(newReaction)
+  } else if (updatedReaction.users.includes(user.dn)) {
+    updatedReaction.users = updatedReaction.users.filter((reactionUser) => reactionUser !== user.dn)
+  } else {
+    updatedReaction.users.push(user.dn)
+  }
+
+  response.save()
+
+  return response
+}
+
 export type ReviewResponseParams = Pick<ResponseInterface, 'comment' | 'decision'>
 export async function respondToReview(
   user: UserInterface,
@@ -137,32 +163,6 @@ async function sendReviewResponseNotification(
     default:
       throw InternalError('Review Kind not recognised', reviewIdQuery)
   }
-}
-
-export async function updateResponseReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
-  const response = await ResponseModel.findOne({ _id: responseId })
-
-  if (!response) {
-    throw NotFound(`The requested response was not found.`, { responseId })
-  }
-
-  const updatedReaction = response.reactions.find((reaction) => reaction.kind === kind)
-
-  if (!updatedReaction) {
-    const newReaction: ResponseReaction = {
-      kind,
-      users: [user.dn],
-    }
-    response.reactions.push(newReaction)
-  } else if (updatedReaction.users.includes(user.dn)) {
-    updatedReaction.users = updatedReaction.users.filter((reactionUser) => reactionUser !== user.dn)
-  } else {
-    updatedReaction.users.push(user.dn)
-  }
-
-  response.save()
-
-  return response
 }
 
 export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
