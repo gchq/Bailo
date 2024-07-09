@@ -112,6 +112,36 @@ class Model(Entry):
         return model
 
     @classmethod
+    def search(
+        cls,
+        client: Client,
+        task: str | None = None,
+        libraries: list[str] | None = None,
+        filters: list[str] | None = None,
+        search: str = "",
+    ) -> list[Model]:
+        """Return a list of model objects from Bailo, based on search parameters.
+
+        :param client: A client object used to interact with Bailo
+        :param task: Model task (e.g. image classification), defaults to None
+        :param libraries: Model library (e.g. TensorFlow), defaults to None
+        :param filters: Custom filters, defaults to None
+        :param search: String to be located in model cards, defaults to ""
+        :return: List of model objects
+        """
+        res = client.get_models(kind=EntryKind.MODEL, task=task, libraries=libraries, filters=filters, search=search)
+        models = []
+
+        for model in res["models"]:
+            res_model = client.get_model(model_id=model["id"])["model"]
+            model_obj = cls(client=client, model_id=model["id"], name=model["name"], description=model["description"])
+            model_obj._unpack(res_model)
+            model_obj.get_card_latest()
+            models.append(model_obj)
+
+        return models
+
+    @classmethod
     def from_mlflow(
         cls,
         client: Client,
@@ -452,6 +482,7 @@ class Experiment:
 
             if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)):
                 mlflow_dir = os.path.join(self.temp_dir, f"mlflow_{run_id}")
+                print(artifact_uri)
                 mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
                 artifacts.append(mlflow_dir)
                 logger.info(

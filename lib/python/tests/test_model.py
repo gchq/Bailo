@@ -54,6 +54,14 @@ def test_create_get_from_id_and_update(
 
 
 @pytest.mark.integration
+def test_search_models(integration_client):
+    models = Model.search(client=integration_client)
+
+    for model in models:
+        assert isinstance(model, Model)
+
+
+@pytest.mark.integration
 def test_get_and_update_latest_model_card(integration_client):
     model = Model.create(
         client=integration_client,
