@@ -185,4 +185,32 @@ describe('connectors > authorisation > base', () => {
       success: false,
     })
   })
+
+  test('image > push with no roles', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([])
+
+    const result = await connector.images(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      [
+        {
+          type: 'repository',
+          name: 'testModel',
+          actions: ['push'],
+        },
+      ],
+    )
+    expect(result).toStrictEqual([
+      {
+        id: 'testModel',
+        info: 'You do not have permission to upload an image.',
+        success: false,
+      },
+    ])
+  })
 })
