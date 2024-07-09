@@ -62,8 +62,9 @@ export default function ReviewWithComment({
 
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
-  const { role } = router.query
-  const [reviewRequest, setReviewRequest] = useState(reviews[0])
+  const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface>(
+    reviews.find((review) => review.role === router.query.role) || reviews[0],
+  )
 
   function invalidComment() {
     return reviewComment.trim() === '' ? true : false
@@ -144,7 +145,7 @@ export default function ReviewWithComment({
               value={reviewRequest}
               getOptionLabel={(option) => getRoleDisplay(option.role, modelRoles)}
               options={reviews}
-              defaultValue={typeof role === 'string' ? reviews.find((review) => review.role === role) : null}
+              defaultValue={reviewRequest}
               renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
             />
             <TextField
