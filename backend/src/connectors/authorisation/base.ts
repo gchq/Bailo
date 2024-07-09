@@ -5,7 +5,7 @@ import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
 import { SchemaDoc } from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
-import { Access, Action } from '../../routes/v1/registryAuth.js'
+import { Access } from '../../routes/v1/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../services/accessRequest.js'
 import { checkAccessRequestsApproved } from '../../services/review.js'
 import { validateTokenForModel, validateTokenForUse } from '../../services/token.js'
@@ -314,7 +314,7 @@ export class BasicAuthorisationConnector {
         // If they are not listed on the model, don't let them upload or delete images.
         if (
           (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator'])) &&
-          access.actions.includes(ImageAction.Push as Action)
+          actions.includes(ImageAction.Push)
         ) {
           return {
             success: false,
@@ -326,7 +326,7 @@ export class BasicAuthorisationConnector {
         if (
           !hasAccessRequest &&
           (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator', 'consumer'])) &&
-          access.actions.includes(ImageAction.Pull as Action) &&
+          actions.includes(ImageAction.Pull) &&
           !model.settings.ungovernedAccess
         ) {
           return {
