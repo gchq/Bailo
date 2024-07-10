@@ -3,7 +3,7 @@ import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MessageAlert from 'src/MessageAlert'
 
-export default function ModelExportAgreement() {
+export default function ModelExportAgreementText() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   if (isUiConfigError) {

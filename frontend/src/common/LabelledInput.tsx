@@ -13,7 +13,7 @@ export default function LabelledInput({ label, htmlFor, children, required = fal
   const theme = useTheme()
 
   return (
-    <Stack width='100%'>
+    <Stack alignItems='flex-start'>
       <Typography component='label' fontWeight='bold' htmlFor={htmlFor}>
         {label}
         {required && (
