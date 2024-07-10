@@ -1,4 +1,4 @@
-FROM node:18-alpine as installer
+FROM node:22-alpine as installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -13,7 +13,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
-FROM node:18-alpine AS runner
+FROM node:22-alpine AS runner
 
 RUN apk add --no-cache libc6-compat
 RUN apk update

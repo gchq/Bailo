@@ -3,12 +3,14 @@ import useSWR from 'swr'
 import { ReactionKindKeys, ResponseInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
+const emptyArray = []
+
 export function useGetResponses(parentIds: string[]) {
   const queryParams = {
     ...(parentIds.length > 0 && { parentIds }),
   }
 
-  const { data, error, mutate } = useSWR<
+  const { data, error, mutate, isLoading } = useSWR<
     {
       responses: ResponseInterface[]
     },
@@ -17,8 +19,8 @@ export function useGetResponses(parentIds: string[]) {
 
   return {
     mutateResponses: mutate,
-    responses: data ? data.responses : [],
-    isResponsesLoading: !error && !data,
+    responses: data ? data.responses : emptyArray,
+    isResponsesLoading: isLoading && !error,
     isResponsesError: error,
   }
 }
