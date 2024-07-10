@@ -14,6 +14,7 @@ import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { EntryKind } from 'types/types'
+import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
   const router = useRouter()
@@ -22,11 +23,7 @@ export default function Model() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const currentUserRoles = useMemo(
-    () =>
-      model?.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === currentUser?.dn)?.roles || [],
-    [model, currentUser],
-  )
+  const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
 
   const tabs = useMemo(
     () =>
@@ -35,7 +32,13 @@ export default function Model() {
             {
               title: 'Overview',
               path: 'overview',
-              view: <Overview entry={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
+              view: (
+                <Overview
+                  entry={model}
+                  currentUserRoles={currentUserRoles}
+                  readOnly={!!model.settings.mirror?.sourceModelId}
+                />
+              ),
             },
             {
               title: 'Releases',
@@ -61,18 +64,24 @@ export default function Model() {
             {
               title: 'Registry',
               path: 'registry',
-              view: <ModelImages model={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
+              view: (
+                <ModelImages
+                  model={model}
+                  currentUserRoles={currentUserRoles}
+                  readOnly={!!model.settings.mirror?.sourceModelId}
+                />
+              ),
             },
             {
               title: 'Inferencing',
               path: 'inferencing',
-              view: <InferenceServices model={model} />,
+              view: <InferenceServices model={model} currentUserRoles={currentUserRoles} />,
               hidden: !uiConfig.inference.enabled,
             },
             {
               title: 'Settings',
               path: 'settings',
-              view: <Settings entry={model} />,
+              view: <Settings entry={model} currentUserRoles={currentUserRoles} />,
             },
           ]
         : [],

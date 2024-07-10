@@ -1,4 +1,4 @@
-import { Box, Button, Container, Stack } from '@mui/material'
+import { Box, Button, Container, Stack, Tooltip } from '@mui/material'
 import { useGetModelImages } from 'actions/model'
 import { useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -8,13 +8,15 @@ import ModelImageDisplay from 'src/entry/model/registry/ModelImageDisplay'
 import UploadModelImageDialog from 'src/entry/model/registry/UploadModelImageDialog'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
+import { getRequiredRolesText, hasRole } from 'utils/roles'
 
 type AccessRequestsProps = {
   model: EntryInterface
   readOnly?: boolean
+  currentUserRoles: string[]
 }
 
-export default function ModelImages({ model, readOnly = false }: AccessRequestsProps) {
+export default function ModelImages({ model, currentUserRoles, readOnly = false }: AccessRequestsProps) {
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
   const [openUploadImageDialog, setOpenUploadImageDialog] = useState(false)
@@ -30,6 +32,11 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
       ),
     [modelImages, model.name],
   )
+
+  const [canPushImage, requiredRolesText] = useMemo(() => {
+    const validRoles = ['owner', 'contributor']
+    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
+  }, [currentUserRoles])
 
   if (isModelImagesError) {
     if (isModelImagesError.status === 403) {
@@ -51,10 +58,19 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
       <Container sx={{ my: 2 }}>
         <Stack spacing={4}>
           {!readOnly && (
-            <Box sx={{ textAlign: 'right' }}>
-              <Button variant='outlined' onClick={() => setOpenUploadImageDialog(true)} data-test='pushImageButton'>
-                Push image
-              </Button>
+            <Box sx={{ ml: 'auto' }}>
+              <Tooltip title={requiredRolesText}>
+                <span>
+                  <Button
+                    variant='outlined'
+                    disabled={!canPushImage}
+                    onClick={() => setOpenUploadImageDialog(true)}
+                    data-test='pushImageButton'
+                  >
+                    Push Image
+                  </Button>
+                </span>
+              </Tooltip>
               <UploadModelImageDialog
                 open={openUploadImageDialog}
                 handleClose={() => setOpenUploadImageDialog(false)}

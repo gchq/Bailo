@@ -1,6 +1,6 @@
 {
   "watch": ["src", "config"],
   "ignore": [".git"],
-  "exec": "node --no-warnings=ExperimentalWarning --loader ts-node/esm --inspect=0.0.0.0:9229 src/index.ts",
+  "exec": "tsx --no-warnings=ExperimentalWarning --inspect=0.0.0.0:9229 src/index.ts",
   "ext": "js ts cjs"
 }

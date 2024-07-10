@@ -108,7 +108,7 @@ export default function NewAccessRequest() {
       <Title text='Access Request' />
       {isLoading && <Loading />}
       {!isLoading && (
-        <Container maxWidth='md'>
+        <Container maxWidth='lg'>
           <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
             {(!model || !model.card) && (
               <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>

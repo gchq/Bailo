@@ -145,10 +145,30 @@ def test_publish_experiment_standard(standard_experiment):
     model_card = NestedDict(model_card)
     metrics_array = model_card[("performance", "performanceMetrics")][0]["datasetMetrics"]
 
-    expected_accuracy = 0.98
+    expected_accuracy = 0.1
     actual_accuracy = metrics_array[0]["value"]
 
     assert expected_accuracy == actual_accuracy
+
+
+@pytest.mark.integration
+def test_publish_experiment_standard_ordered(standard_experiment):
+    standard_experiment.publish(mc_loc="performance.performanceMetrics", select_by="accuracy MAX")
+
+    model_card = standard_experiment.model.model_card
+    model_card = NestedDict(model_card)
+    metrics_array = model_card[("performance", "performanceMetrics")][0]["datasetMetrics"]
+
+    expected_accuracy = 0.5
+    actual_accuracy = metrics_array[0]["value"]
+
+    assert expected_accuracy == actual_accuracy
+
+
+@pytest.mark.integration
+def test_publish_experiment_standard_invalid_select_by(standard_experiment):
+    with pytest.raises(BailoException):
+        standard_experiment.publish(mc_loc="performance.performanceMetrics", select_by="MAX:accuracy")
 
 
 @pytest.mark.mlflow

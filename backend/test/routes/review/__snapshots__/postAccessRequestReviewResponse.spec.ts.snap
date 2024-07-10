@@ -2,12 +2,14 @@
 
 exports[`routes > review > postAccessRequestReviewResponse > audit > expected call 1`] = `
 {
-  "createdAt": 2023-08-13T00:00:00.000Z,
+  "comment": "test comment",
+  "createdAt": "2024-05-17T06:13:41.690Z",
+  "decision": "approve",
   "kind": "release",
-  "modelId": "abc",
-  "role": "msro",
-  "semver": "3.0.2",
-  "updatedAt": 2023-08-14T00:00:00.000Z,
+  "parentId": "66854110aab20df2b7481a82",
+  "role": "mtr",
+  "updatedAt": "2024-05-17T06:13:41.690Z",
+  "user": "user",
 }
 `;
 
@@ -36,26 +38,30 @@ exports[`routes > review > postAccessRequestReviewResponse > missing review deci
 
 exports[`routes > review > postAccessRequestReviewResponse > successfully respond to a review 1`] = `
 {
-  "review": {
-    "createdAt": "2023-08-13T00:00:00.000Z",
+  "response": {
+    "comment": "test comment",
+    "createdAt": "2024-05-17T06:13:41.690Z",
+    "decision": "approve",
     "kind": "release",
-    "modelId": "abc",
-    "role": "msro",
-    "semver": "3.0.2",
-    "updatedAt": "2023-08-14T00:00:00.000Z",
+    "parentId": "66854110aab20df2b7481a82",
+    "role": "mtr",
+    "updatedAt": "2024-05-17T06:13:41.690Z",
+    "user": "user",
   },
 }
 `;
 
 exports[`routes > review > postAccessRequestReviewResponse > successfully respond to a review without a comment 1`] = `
 {
-  "review": {
-    "createdAt": "2023-08-13T00:00:00.000Z",
+  "response": {
+    "comment": "test comment",
+    "createdAt": "2024-05-17T06:13:41.690Z",
+    "decision": "approve",
     "kind": "release",
-    "modelId": "abc",
-    "role": "msro",
-    "semver": "3.0.2",
-    "updatedAt": "2023-08-14T00:00:00.000Z",
+    "parentId": "66854110aab20df2b7481a82",
+    "role": "mtr",
+    "updatedAt": "2024-05-17T06:13:41.690Z",
+    "user": "user",
   },
 }
 `;

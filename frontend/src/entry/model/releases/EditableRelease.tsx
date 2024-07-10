@@ -29,16 +29,24 @@ import {
   SuccessfulFileUpload,
 } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { getRequiredRolesText, hasRole } from 'utils/roles'
 import { plural } from 'utils/stringUtils'
 
 type EditableReleaseProps = {
   release: ReleaseInterface
+  currentUserRoles: string[]
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
   readOnly?: boolean
 }
 
-export default function EditableRelease({ release, isEdit, onIsEditChange, readOnly = false }: EditableReleaseProps) {
+export default function EditableRelease({
+  release,
+  currentUserRoles,
+  isEdit,
+  onIsEditChange,
+  readOnly = false,
+}: EditableReleaseProps) {
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
@@ -62,6 +70,11 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const router = useRouter()
+
+  const [canUserEditOrDelete, actionButtonsTooltip] = useMemo(() => {
+    const validRoles = ['owner', 'contributor']
+    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
+  }, [currentUserRoles])
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
@@ -230,6 +243,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         editButtonText='Edit Release'
         deleteButtonText='Delete Release'
         showDeleteButton
+        canUserEditOrDelete={canUserEditOrDelete}
+        actionButtonsTooltip={actionButtonsTooltip}
         isEdit={isEdit}
         isLoading={isLoading}
         onEdit={handleEdit}

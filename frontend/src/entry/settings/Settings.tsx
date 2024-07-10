@@ -1,17 +1,18 @@
-import { LoadingButton } from '@mui/lab'
-import { Container, Divider, List, Stack, Typography } from '@mui/material'
+import { Container, Divider, List, Stack } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
 import AccessRequestSettings from 'src/entry/model/settings/AccessRequestSettings'
 import TemplateSettings from 'src/entry/model/settings/TemplateSettings'
+import DangerZone from 'src/entry/settings/DangerZone'
 import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind, UiConfig } from 'types/types'
+import { getRequiredRolesText, hasRole } from 'utils/roles'
 import { toTitleCase } from 'utils/stringUtils'
 
 export const SettingsCategory = {
@@ -51,10 +52,10 @@ function isSettingsCategory(
 
 type SettingsProps = {
   entry: EntryInterface
+  currentUserRoles: string[]
 }
 
-export default function Settings({ entry }: SettingsProps) {
-  const [loading, setLoading] = useState(false)
+export default function Settings({ entry, currentUserRoles }: SettingsProps) {
   const router = useRouter()
 
   const { category } = router.query
@@ -62,6 +63,11 @@ export default function Settings({ entry }: SettingsProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
+
+  const [isReadOnly, requiredRolesText] = useMemo(() => {
+    const validRoles = ['owner']
+    return [!hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
+  }, [currentUserRoles])
 
   useEffect(() => {
     if (isSettingsCategory(category, entry, uiConfig)) {
@@ -79,12 +85,6 @@ export default function Settings({ entry }: SettingsProps) {
     router.replace({
       query: { ...router.query, category },
     })
-  }
-
-  const handleDeleteModel = () => {
-    setLoading(true)
-
-    // TODO - Delete model API request and setLoading(false) on error
   }
 
   if (isUiConfigError) {
@@ -126,7 +126,7 @@ export default function Settings({ entry }: SettingsProps) {
               selected={selectedCategory === SettingsCategory.TEMPLATING}
               onClick={() => handleListItemClick(SettingsCategory.TEMPLATING)}
             >
-              Template
+              Templating
             </SimpleListItemButton>
             {!entry.settings.mirror?.sourceModelId && uiConfig.modelMirror.enabled && (
               <SimpleListItemButton
@@ -146,20 +146,23 @@ export default function Settings({ entry }: SettingsProps) {
         )}
       </List>
       <Container sx={{ my: 2 }}>
-        {selectedCategory === SettingsCategory.DETAILS && <EntryDetails entry={entry} />}
-        {selectedCategory === SettingsCategory.PERMISSIONS && <EntryAccessTab entry={entry} />}
-        {selectedCategory === SettingsCategory.ACCESS_REQUESTS && <AccessRequestSettings model={entry} />}
-        {selectedCategory === SettingsCategory.MIRRORED_MODELS && <ExportSettings model={entry} />}
-        {selectedCategory === SettingsCategory.TEMPLATING && <TemplateSettings model={entry} />}
+        {selectedCategory === SettingsCategory.DETAILS && (
+          <EntryDetails entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+        )}
+        {selectedCategory === SettingsCategory.PERMISSIONS && (
+          <EntryAccessTab entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+        )}
+        {selectedCategory === SettingsCategory.ACCESS_REQUESTS && (
+          <AccessRequestSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+        )}
+        {selectedCategory === SettingsCategory.TEMPLATING && (
+          <TemplateSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+        )}
+        {selectedCategory === SettingsCategory.MIRRORED_MODELS && (
+          <ExportSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
+        )}
         {selectedCategory === SettingsCategory.DANGER && (
-          <Stack spacing={2}>
-            <Typography variant='h6' component='h2'>
-              Danger Zone!
-            </Typography>
-            <LoadingButton variant='contained' disabled onClick={handleDeleteModel} loading={loading}>
-              Delete model
-            </LoadingButton>
-          </Stack>
+          <DangerZone entry={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
         )}
       </Container>
     </Stack>
