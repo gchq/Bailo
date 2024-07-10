@@ -228,7 +228,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 <span>
                   <LoadingButton
                     variant='contained'
-                    disabled={!isFormValid}
+                    disabled={!isFormValid || (!sourceModelId && createEntryKind === CreateEntryKind.MIRRORED_MODEL)}
                     type='submit'
                     data-test='createEntryButton'
                     loading={loading}
