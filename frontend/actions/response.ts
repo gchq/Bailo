@@ -8,7 +8,7 @@ export function useGetResponses(parentIds: string[]) {
     ...(parentIds.length > 0 && { parentIds }),
   }
 
-  const { data, error, mutate } = useSWR<
+  const { data, error, mutate, isLoading } = useSWR<
     {
       responses: ResponseInterface[]
     },
@@ -17,8 +17,8 @@ export function useGetResponses(parentIds: string[]) {
 
   return {
     mutateResponses: mutate,
-    responses: data ? data.responses : [],
-    isResponsesLoading: !error && !data,
+    responses: data ? data.responses : Array<ResponseInterface>,
+    isResponsesLoading: isLoading && !error,
     isResponsesError: error,
   }
 }
