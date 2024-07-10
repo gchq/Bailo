@@ -1,4 +1,4 @@
-import DeleteIcon from '@mui/icons-material/Delete'
+import ClearIcon from '@mui/icons-material/Clear'
 import { Checkbox, FormControlLabel, Grid, IconButton, Tooltip, Typography } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
@@ -11,9 +11,17 @@ type ReleaseSelectorProps = {
   model: EntryInterface
   selectedReleases: ReleaseInterface[]
   onUpdateSelectedReleases: (values: ReleaseInterface[]) => void
+  isReadOnly: boolean
+  requiredRolesText: string
 }
 
-export default function ReleaseSelector({ model, selectedReleases, onUpdateSelectedReleases }: ReleaseSelectorProps) {
+export default function ReleaseSelector({
+  model,
+  selectedReleases,
+  onUpdateSelectedReleases,
+  isReadOnly,
+  requiredRolesText,
+}: ReleaseSelectorProps) {
   const [checked, setChecked] = useState(false)
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
@@ -34,7 +42,7 @@ export default function ReleaseSelector({ model, selectedReleases, onUpdateSelec
         <Grid item xs={2}>
           <Tooltip title={'Remove'}>
             <IconButton onClick={() => handleRemoveRelease(release)}>
-              <DeleteIcon color={'error'} />
+              <ClearIcon color={'error'} />
             </IconButton>
           </Tooltip>
         </Grid>
@@ -58,7 +66,12 @@ export default function ReleaseSelector({ model, selectedReleases, onUpdateSelec
   return (
     <>
       <Typography fontWeight='bold'>Select Releases</Typography>
-      <FormControlLabel control={<Checkbox checked={checked} onChange={handleChecked} />} label='Select all' />
+      <Tooltip title={requiredRolesText}>
+        <FormControlLabel
+          control={<Checkbox checked={checked} disabled={isReadOnly} onChange={handleChecked} />}
+          label='Select all'
+        />
+      </Tooltip>
       <Grid container spacing={2} alignItems='center'>
         {selectedReleasesDisplay}
       </Grid>

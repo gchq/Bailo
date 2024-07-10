@@ -155,7 +155,7 @@ minio:
   createBuckets: "false" # attempt to create buckets
   uploadBucket: uploads # required for Bailo
   registryBucket: registry # required for Bailo
-  #host: "bailo-minio" # service name
+  host: "bailo-minio"
   service:
     ports:
       api: 31111 # default 9000

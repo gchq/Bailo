@@ -54,7 +54,7 @@ export const postAccessRequestComment = [
 
     const accessRequestComment = await newAccessRequestComment(req.user, accessRequestId, body.comment)
 
-    await audit.onCreateResponse(req, accessRequestComment)
+    await audit.onCreateCommentResponse(req, accessRequestComment)
 
     return res.json({
       accessRequestComment,

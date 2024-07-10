@@ -1,4 +1,4 @@
-import { Box, Button, Container, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Stack, Tooltip, Typography } from '@mui/material'
 import { sendTokenToService, useGetInferencesForModelId } from 'actions/inferencing'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { deleteUserToken, postUserToken, useGetUserTokens } from 'actions/user'
@@ -10,12 +10,14 @@ import InferenceDisplay from 'src/entry/model/inferencing/InferenceDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { getRequiredRolesText, hasRole } from 'utils/roles'
 
 type InferenceProps = {
   model: EntryInterface
+  currentUserRoles: string[]
 }
 
-export default function InferenceServices({ model }: InferenceProps) {
+export default function InferenceServices({ model, currentUserRoles }: InferenceProps) {
   const router = useRouter()
   const { inferences, isInferencesLoading, isInferencesError } = useGetInferencesForModelId(model.id)
   const [errorMessage, setErrorMessage] = useState('')
@@ -40,6 +42,11 @@ export default function InferenceServices({ model }: InferenceProps) {
     }
     checkAuthentication()
   }, [uiConfig])
+
+  const [canCreateService, requiredRolesText] = useMemo(() => {
+    const validRoles = ['owner', 'contributor']
+    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
+  }, [currentUserRoles])
 
   const inferenceDisplays = useMemo(
     () =>
@@ -114,9 +121,13 @@ export default function InferenceServices({ model }: InferenceProps) {
       {healthCheck ? (
         <Stack spacing={4}>
           <Box sx={{ textAlign: 'right' }}>
-            <Button variant='outlined' onClick={handleCreateNewInferenceService}>
-              Create Service
-            </Button>
+            <Tooltip title={requiredRolesText}>
+              <span>
+                <Button variant='outlined' disabled={!canCreateService} onClick={handleCreateNewInferenceService}>
+                  Create Service
+                </Button>
+              </span>
+            </Tooltip>
           </Box>
           {isInferencesLoading && <Loading />}
           {inferenceDisplays}

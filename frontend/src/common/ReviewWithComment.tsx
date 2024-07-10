@@ -2,6 +2,7 @@ import { LoadingButton } from '@mui/lab'
 import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetResponses } from 'actions/response'
+import { useRouter } from 'next/router'
 import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
@@ -40,6 +41,7 @@ export default function ReviewWithComment({
   accessRequest,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
+  const router = useRouter()
   const [reviewComment, setReviewComment] = useState('')
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
@@ -60,7 +62,9 @@ export default function ReviewWithComment({
 
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
-  const [reviewRequest, setReviewRequest] = useState(reviews[0])
+  const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface>(
+    reviews.find((review) => review.role === router.query.role) || reviews[0],
+  )
 
   function invalidComment() {
     return reviewComment.trim() === '' ? true : false
@@ -78,6 +82,12 @@ export default function ReviewWithComment({
       }
     }
   }, [responses, reviewRequest])
+
+  useEffect(() => {
+    router.replace({
+      query: { ...router.query, role: reviewRequest.role },
+    })
+  }, [router, reviewRequest])
 
   function submitForm(decision: DecisionKeys) {
     setErrorText('')

@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > response > checkAccessRequestsApproved > approved access request exists 1`] = `
+[
+  [
+    [
+      "access-1",
+      "access-2",
+    ],
+  ],
+]
+`;
+
+exports[`services > response > checkAccessRequestsApproved > no approved access requests with a required role 1`] = `
+[
+  [
+    [
+      "access-1",
+      "access-2",
+    ],
+  ],
+]
+`;

@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
+import { Checkbox, Divider, FormControlLabel, Stack, Tooltip, Typography } from '@mui/material'
 import { patchModel } from 'actions/model'
 import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'
@@ -9,9 +9,11 @@ import { getErrorMessage } from 'utils/fetcher'
 
 type TemplateSettingsProps = {
   model: EntryInterface
+  isReadOnly: boolean
+  requiredRolesText: string
 }
 
-export default function TemplateSettings({ model }: TemplateSettingsProps) {
+export default function TemplateSettings({ model, isReadOnly, requiredRolesText }: TemplateSettingsProps) {
   const [allowTemplating, setAllowTemplating] = useState(model.settings.allowTemplating)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -43,28 +45,38 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
   return (
     <Stack spacing={2}>
       <Typography variant='h6' component='h2'>
-        Manage Template
+        Manage Templating
       </Typography>
-      <FormControlLabel
-        label='Allow users to make a template'
-        control={
-          <Checkbox
-            onChange={(event) => setAllowTemplating(event.target.checked)}
-            checked={allowTemplating}
-            size='small'
+      <div>
+        <Tooltip title={requiredRolesText}>
+          <FormControlLabel
+            label='Allow users to make a template'
+            control={
+              <Checkbox
+                onChange={(event) => setAllowTemplating(event.target.checked)}
+                checked={allowTemplating}
+                disabled={isReadOnly}
+                size='small'
+              />
+            }
           />
-        }
-      />
+        </Tooltip>
+      </div>
       <Divider />
       <div>
-        <LoadingButton
-          variant='contained'
-          aria-label='Save model template settings'
-          onClick={handleSave}
-          loading={loading}
-        >
-          Save
-        </LoadingButton>
+        <Tooltip title={requiredRolesText}>
+          <span>
+            <LoadingButton
+              variant='contained'
+              aria-label='Save model template settings'
+              disabled={isReadOnly}
+              onClick={handleSave}
+              loading={loading}
+            >
+              Save
+            </LoadingButton>
+          </span>
+        </Tooltip>
         <MessageAlert message={errorMessage} severity='error' />
       </div>
     </Stack>
