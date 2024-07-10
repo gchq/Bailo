@@ -135,7 +135,6 @@ server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download
 server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
 server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
 server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
-server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
 server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
