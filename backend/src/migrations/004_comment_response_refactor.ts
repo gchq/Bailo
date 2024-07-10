@@ -5,9 +5,8 @@ import ReviewModel from '../models/Review.js'
 
 export async function up() {
   // Resolve release comments
-  const releases: any = await ReleaseModel.find({})
+  const releases = await ReleaseModel.find({})
   for (const release of releases) {
-    release.commentIds = []
     if (release.get('comments') !== undefined) {
       for (const releaseComment of release.get('comments')) {
         const username = releaseComment.user.includes(':') ? releaseComment.user : `user:${releaseComment.user}`
@@ -20,38 +19,34 @@ export async function up() {
           updatedAt: releaseComment.createdAt,
         })
         await newComment.save()
-        //release.set('comments', undefined, { strict: false })
       }
       await release.save()
     }
   }
 
   // Resolve access request comments
-  const accessRequests: any = await AccessRequestModel.find({})
+  const accessRequests = await AccessRequestModel.find({})
   for (const accessRequest of accessRequests) {
-    accessRequest.commentIds = []
     if (accessRequest.get('comments') !== undefined) {
-      for (const accessCommment of accessRequest.get('comments')) {
-        const username = accessCommment.user.includes(':') ? accessCommment.user : `user:${accessCommment.user}`
+      for (const accessComment of accessRequest.get('comments')) {
+        const username = accessComment.user.includes(':') ? accessComment.user : `user:${accessComment.user}`
         const newComment = new ResponseModel({
           entity: username,
           kind: ResponseKind.Comment,
-          comment: accessCommment.message,
+          comment: accessComment.message,
           parentId: accessRequest._id,
-          createdAt: accessCommment.createdAt,
-          updatedAt: accessCommment.createdAt,
+          createdAt: accessComment.createdAt,
+          updatedAt: accessComment.createdAt,
         })
         await newComment.save()
-        //accessRequest.set('comments', undefined, { strict: false })
       }
+      await accessRequest.save()
     }
-    await accessRequest.save()
   }
 
   // Resolve review comments
-  const reviews: any = await ReviewModel.find({})
+  const reviews = await ReviewModel.find({})
   for (const review of reviews) {
-    review.responseIds = []
     if (review.get('responses') !== undefined) {
       for (const reviewResponse of review.get('responses')) {
         const username = reviewResponse.user.includes(':') ? reviewResponse.user : `user:${reviewResponse.user}`
@@ -66,10 +61,9 @@ export async function up() {
           updatedAt: reviewResponse.createdAt,
         })
         await newComment.save()
-        //delete review.comments
       }
+      await review.save()
     }
-    await review.save()
   }
 }
 
