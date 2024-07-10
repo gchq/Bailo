@@ -18,7 +18,7 @@ import {
 const testEntity = 'user:user1'
 const modelId = 'my-test-model'
 const accessRequestSchemaId = 'my-request-schema'
-const modelcardSchemaId = 'my-model-schema'
+const modelCardSchemaId = 'my-model-schema'
 const testAccessRequestId = '12315123'
 
 export const testAccessRequest: AccessRequestInterface = {
@@ -44,6 +44,7 @@ export const testComment: ResponseInterface = {
   entity: 'Joe Blogs',
   kind: ResponseKind.Comment,
   parentId: '22626234234234',
+  reactions: [],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 }
@@ -66,7 +67,7 @@ export const testAccessRequestWithComments: AccessRequestInterface = {
 }
 
 export const testModelCard: EntryCardInterface = {
-  schemaId: modelcardSchemaId,
+  schemaId: modelCardSchemaId,
   metadata: {},
   version: 1,
   createdBy: testEntity,
@@ -100,6 +101,7 @@ export const testReviewResponse: ResponseInterface = {
   decision: 'approve',
   role: 'mtr',
   kind: ResponseKind.Review,
+  reactions: [],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 }
@@ -107,7 +109,7 @@ export const testReviewResponse: ResponseInterface = {
 export const testAccessRequestReview: ReviewRequestInterface = {
   _id: '123125123',
   model: testV2Model,
-  role: 'mrso',
+  role: 'msro',
   semver: '1.0.0',
   kind: 'access',
   createdAt: new Date().toISOString(),
@@ -117,7 +119,7 @@ export const testAccessRequestReview: ReviewRequestInterface = {
 export const testReleaseReview: ReviewRequestInterface = {
   _id: '123125123',
   model: testV2Model,
-  role: 'mrso',
+  role: 'msro',
   semver: '1.0.0',
   kind: 'release',
   createdAt: new Date().toISOString(),
@@ -127,7 +129,7 @@ export const testReleaseReview: ReviewRequestInterface = {
 export const testAccessRequestReviewNoResponses: ReviewRequestInterface = {
   _id: '123125123',
   model: testV2Model,
-  role: 'mrso',
+  role: 'msro',
   kind: 'access',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -136,7 +138,7 @@ export const testAccessRequestReviewNoResponses: ReviewRequestInterface = {
 export const testReleaseReviewNoResponses: ReviewRequestInterface = {
   _id: '123125123',
   model: testV2Model,
-  role: 'mrso',
+  role: 'msro',
   kind: 'release',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
