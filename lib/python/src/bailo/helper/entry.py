@@ -56,7 +56,6 @@ class Entry:
                 schema_id = MinimalSchema.MODEL
             if self.kind == EntryKind.DATACARD:
                 schema_id = MinimalSchema.DATACARD
-            warnings.warn(f"Schema ID not provided, will attempt to default to {schema_id}.")
 
         res = self.client.model_card_from_schema(model_id=self.id, schema_id=schema_id)
         self.__unpack_card(res["card"])
