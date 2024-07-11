@@ -139,7 +139,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
               <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
                 View History
               </Button>
-              {readOnly && (
+              {!readOnly && (
                 <Tooltip title={requiredRolesText}>
                   <span>
                     <Button
