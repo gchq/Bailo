@@ -57,8 +57,14 @@ def test_create_get_from_id_and_update(
 def test_search_models(integration_client):
     models = Model.search(client=integration_client)
 
-    for model in models:
-        assert isinstance(model, Model)
+    assert all(isinstance(model, Model) for model in models)
+
+
+@pytest.mark.integration
+def test_search_models_specific(integration_client):
+    models = Model.search(client=integration_client, search="You only look once!")
+
+    assert all(model.name == "Yolo-v4" for model in models)
 
 
 @pytest.mark.integration

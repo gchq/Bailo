@@ -4,6 +4,7 @@ from typing import Any
 import logging
 
 from bailo.core.client import Client
+from bailo.core.enums import MinimalSchema
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,7 @@ class AccessRequest:
 
     @classmethod
     def create(
-        cls, client: Client, model_id: str, metadata: Any, schema_id: str = "minimal-access-request-general-v10"
+        cls, client: Client, model_id: str, metadata: Any, schema_id: str = MinimalSchema.ACCESS_REQUEST
     ) -> AccessRequest:
         """Make an access request for the model.
 

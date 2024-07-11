@@ -8,7 +8,7 @@ import logging
 import warnings
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, ModelVisibility
+from bailo.core.enums import EntryKind, ModelVisibility, MinimalSchema
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 from bailo.helper.entry import Entry
@@ -148,7 +148,7 @@ class Model(Entry):
         mlflow_uri: str,
         team_id: str,
         name: str,
-        schema_id: str = "minimal-general-v10",
+        schema_id: str = MinimalSchema.MODEL,
         version: str | None = None,
         files: bool = True,
         visibility: ModelVisibility | None = None,
@@ -355,6 +355,12 @@ class Model(Entry):
     def model_card_schema(self, value):
         self._card_schema = value
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({str(self)})"
+
+    def __str__(self) -> str:
+        return f"{self.model_id}"
+
 
 class Experiment:
     """Represent an experiment locally.
@@ -482,7 +488,6 @@ class Experiment:
 
             if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)):
                 mlflow_dir = os.path.join(self.temp_dir, f"mlflow_{run_id}")
-                print(artifact_uri)
                 mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
                 artifacts.append(mlflow_dir)
                 logger.info(

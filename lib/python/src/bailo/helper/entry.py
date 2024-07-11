@@ -5,7 +5,7 @@ import logging
 import warnings
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, ModelVisibility
+from bailo.core.enums import EntryKind, ModelVisibility, MinimalSchema
 from bailo.core.exceptions import BailoException
 
 logger = logging.getLogger(__name__)
@@ -53,9 +53,10 @@ class Entry:
         """
         if schema_id is None:
             if self.kind == EntryKind.MODEL:
-                schema_id = "minimal-general-v10"
+                schema_id = MinimalSchema.MODEL
             if self.kind == EntryKind.DATACARD:
-                schema_id = "minimal-data-card-v10"
+                schema_id = MinimalSchema.DATACARD
+            warnings.warn(f"Schema ID not provided, will attempt to default to {schema_id}.")
 
         res = self.client.model_card_from_schema(model_id=self.id, schema_id=schema_id)
         self.__unpack_card(res["card"])
