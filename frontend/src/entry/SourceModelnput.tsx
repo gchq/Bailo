@@ -16,7 +16,14 @@ export default function SourceModelInput({ value, onChange }: SourceModelInputPr
 
   return (
     <LabelledInput required label='Source Model ID' htmlFor={htmlId}>
-      <TextField id={htmlId} value={value} size='small' onChange={handleChange} data-test='entrySourceModelInput' />
+      <TextField
+        id={htmlId}
+        value={value}
+        size='small'
+        onChange={handleChange}
+        data-test='entrySourceModelInput'
+        required
+      />
     </LabelledInput>
   )
 }

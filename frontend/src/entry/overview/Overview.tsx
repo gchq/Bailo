@@ -32,7 +32,9 @@ export default function Overview({ entry, currentUserRoles, readOnly = false }: 
   ) : (
     <Container sx={{ my: 2 }}>
       {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
-      {page === OverviewPage.FORM && <FormEditPage entry={entry} currentUserRoles={currentUserRoles} readOnly />}
+      {page === OverviewPage.FORM && (
+        <FormEditPage entry={entry} currentUserRoles={currentUserRoles} readOnly={readOnly} />
+      )}
     </Container>
   )
 }

@@ -68,7 +68,10 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     [createEntryKind],
   )
 
-  const isFormValid = useMemo(() => name && description, [name, description])
+  const isFormValid = useMemo(
+    () => name && description && (sourceModelId || createEntryKind !== CreateEntryKind.MIRRORED_MODEL),
+    [name, description, createEntryKind, sourceModelId],
+  )
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -228,7 +231,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 <span>
                   <LoadingButton
                     variant='contained'
-                    disabled={!isFormValid || (!sourceModelId && createEntryKind === CreateEntryKind.MIRRORED_MODEL)}
+                    disabled={!isFormValid}
                     type='submit'
                     data-test='createEntryButton'
                     loading={loading}
