@@ -1,6 +1,17 @@
 import { Schema } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+  Card,
+  Container,
+  Grid,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { postFromSchema } from 'actions/modelCard'
 import { useGetSchemas } from 'actions/schema'
@@ -55,6 +66,13 @@ export default function SchemaSelect({ entry }: SchemaSelectProps) {
     },
     [currentUser, entry, mutateEntry, router],
   )
+
+  const accordionStyling = {
+    '&:before': {
+      display: 'none',
+    },
+    width: '100%',
+  } as const
 
   const activeSchemaButtons = useMemo(
     () =>
@@ -120,18 +138,30 @@ export default function SchemaSelect({ entry }: SchemaSelectProps) {
               </Typography>
             </Stack>
             <Stack sx={{ mt: 2 }} spacing={2} alignItems='center'>
-              <Typography color='primary' variant='h6' component='h2'>
-                Active Schemas
-              </Typography>
-              <Grid container spacing={2} justifyContent='center'>
-                {activeSchemaButtons}
-              </Grid>
-              <Typography color='primary' variant='h6' component='h2'>
-                Inactive Schemas
-              </Typography>
-              <Grid container spacing={2} justifyContent='center'>
-                {inactiveSchemaButtons}
-              </Grid>
+              <Accordion defaultExpanded sx={accordionStyling}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h2'>
+                    Active Schemas
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container spacing={2} justifyContent='center'>
+                    {activeSchemaButtons}
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
+              <Accordion sx={accordionStyling}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h2'>
+                    Inactive Schemas
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container spacing={2} justifyContent='center'>
+                    {inactiveSchemaButtons}
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
               <MessageAlert message={errorMessage} severity='error' />
             </Stack>
           </Card>
