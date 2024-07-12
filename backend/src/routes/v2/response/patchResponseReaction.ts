@@ -18,7 +18,7 @@ registerPath({
   method: 'patch',
   path: '/api/v2/response/{responseId}/reaction/{kind}',
   tags: ['response'],
-  description: `Update either a comment or a review response's reactions`,
+  description: `Update a response's reactions`,
   schema: patchResponseReactionSchema,
   responses: {
     200: {
