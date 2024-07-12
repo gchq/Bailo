@@ -1,8 +1,8 @@
-import { Box, Button, Divider, Stack, Typography } from '@mui/material'
+import { Box, Button, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { putModelCard, useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import TextInputDialog from 'src/common/TextInputDialog'
@@ -14,12 +14,14 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryCardKindLabel, EntryInterface, SplitSchemaNoRender } from 'types/types'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
+import { getRequiredRolesText, hasRole } from 'utils/roles'
 
 type FormEditPageProps = {
   entry: EntryInterface
+  currentUserRoles: string[]
 }
 
-export default function FormEditPage({ entry }: FormEditPageProps) {
+export default function FormEditPage({ entry, currentUserRoles }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
@@ -33,6 +35,11 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
 
   const sendNotification = useNotification()
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+
+  const [canEdit, requiredRolesText] = useMemo(() => {
+    const validRoles = ['owner', 'contributor']
+    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
+  }, [currentUserRoles])
 
   async function onSubmit() {
     if (schema) {
@@ -127,24 +134,22 @@ export default function FormEditPage({ entry }: FormEditPageProps) {
             </Stack>
           </div>
           {!isEdit && (
-            <Stack
-              direction='row'
-              spacing={1}
-              justifyContent='flex-end'
-              divider={<Divider orientation='vertical' flexItem />}
-              sx={{ mb: { xs: 2 } }}
-            >
+            <Stack direction='row' spacing={1} justifyContent='flex-end' sx={{ mb: { xs: 2 } }}>
               <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
                 View History
               </Button>
-              <Button
-                variant='outlined'
-                onClick={() => setIsEdit(!isEdit)}
-                sx={{ mb: { xs: 2 } }}
-                data-test='editEntryCardButton'
-              >
-                {`Edit ${EntryCardKindLabel[entry.kind]}`}
-              </Button>
+              <Tooltip title={requiredRolesText}>
+                <span>
+                  <Button
+                    variant='outlined'
+                    disabled={!canEdit}
+                    onClick={() => setIsEdit(!isEdit)}
+                    data-test='editEntryCardButton'
+                  >
+                    {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                  </Button>
+                </span>
+              </Tooltip>
             </Stack>
           )}
           {isEdit && (
