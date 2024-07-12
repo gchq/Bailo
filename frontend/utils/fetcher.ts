@@ -13,8 +13,8 @@ type ErrorResponse = {
   error: Error
 }
 
-export const fetcher = async (path: any) => {
-  const res = await fetch(path)
+export const fetcher = async (url: string) => {
+  const res = await fetch(url)
 
   if (!res.ok) {
     await handleSWRError(res)
