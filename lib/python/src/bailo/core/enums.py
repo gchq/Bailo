@@ -35,3 +35,11 @@ class EntryKind(ValuedEnum):
 
     MODEL = "model"
     DATACARD = "data-card"
+
+
+class MinimalSchema(ValuedEnum):
+    """A minimal schema."""
+
+    MODEL = "minimal-general-v10"
+    DATACARD = "minimal-data-card-v10"
+    ACCESS_REQUEST = "minimal-access-request-general-v10"

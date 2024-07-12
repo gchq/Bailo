@@ -232,7 +232,7 @@ class Release:
         """Upload a file to the release.
 
         :param path: The path, or name of file or directory to be uploaded
-        :param data: A BytesIO object if not loading from disk
+        :param data: A BytesIO object if not loading from disk, defaults to None
 
         :return: The unique file ID of the file uploaded
         ..note:: If path provided is a directory, it will be uploaded as a zip

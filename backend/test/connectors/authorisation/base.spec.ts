@@ -185,4 +185,61 @@ describe('connectors > authorisation > base', () => {
       success: false,
     })
   })
+
+  test('image > push with no roles', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([])
+
+    const result = await connector.images(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      [
+        {
+          type: 'repository',
+          name: 'testModel',
+          actions: ['push'],
+        },
+      ],
+    )
+    expect(result).toStrictEqual([
+      {
+        id: 'testModel',
+        info: 'You do not have permission to upload an image.',
+        success: false,
+      },
+    ])
+  })
+
+  test('image > pull with no roles', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([])
+
+    const result = await connector.images(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+        settings: { ungovernedAccess: false },
+      } as ModelDoc,
+      [
+        {
+          type: 'repository',
+          name: 'testModel',
+          actions: ['pull'],
+        },
+      ],
+    )
+    expect(result).toStrictEqual([
+      {
+        id: 'testModel',
+        info: 'You need to have an approved access request to download an image.',
+        success: false,
+      },
+    ])
+  })
 })
