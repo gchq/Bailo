@@ -91,7 +91,7 @@ export async function updateResponseReaction(user: UserInterface, responseId: st
     updatedReaction.users.push(user.dn)
   }
 
-  response.save()
+  await response.save()
 
   return response
 }
