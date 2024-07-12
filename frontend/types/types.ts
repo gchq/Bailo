@@ -404,7 +404,7 @@ export interface EntryForm {
   collaborators: CollaboratorEntry[]
 }
 
-export type UpdateEntryForm = Omit<EntryForm, 'kind'>
+export type UpdateEntryForm = Omit<EntryForm, 'kind' | 'collaborators'>
 
 export interface AccessRequestMetadata {
   overview: {
