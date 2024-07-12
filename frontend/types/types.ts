@@ -401,10 +401,10 @@ export interface EntryForm {
   teamId: string
   description: string
   visibility: EntryVisibilityKeys
-  collaborators?: CollaboratorEntry[]
+  collaborators: CollaboratorEntry[]
 }
 
-export type UpdateEntryForm = Omit<EntryForm, 'kind'>
+export type UpdateEntryForm = Omit<EntryForm, 'kind' | 'collaborators'>
 
 export interface AccessRequestMetadata {
   overview: {
