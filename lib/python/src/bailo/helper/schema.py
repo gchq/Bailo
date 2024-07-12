@@ -94,6 +94,17 @@ class Schema:
 
         return schema
 
+    @staticmethod
+    def get_all_schema_ids(client: Client, kind: SchemaKind | None = None) -> list[str]:
+        """Return all schema ids for a given type.
+
+        :param client: A client object used to interact with Bailo
+        :param kind: Enum to define schema kind (e.g. Model or AccessRequest), defaults to None
+        :return: List of schema IDs
+        """
+        all_schemas = client.get_all_schemas(kind=kind)
+        return [schema["id"] for schema in all_schemas["schemas"]]
+
     def __unpack(self, res) -> None:
         self.schema_id = res["id"]
         self.name = res["name"]
@@ -107,14 +118,3 @@ class Schema:
             self.kind = SchemaKind.ACCESS_REQUEST
 
         logger.info(f"Attributes for Schema ID %s successfully unpacked.", self.schema_id)
-
-    @staticmethod
-    def get_all_schema_ids(client: Client, kind: SchemaKind | None = None) -> list[str]:
-        """Return all schema ids for a given type.
-
-        :param client: A client object used to interact with Bailo
-        :param kind: Enum to define schema kind (e.g. Model or AccessRequest), defaults to None
-        :return: List of schema IDs
-        """
-        all_schemas = client.get_all_schemas(kind=kind)
-        return [schema["id"] for schema in all_schemas["schemas"]]
