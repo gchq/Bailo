@@ -45,7 +45,7 @@ const audit = {
 
   onCreateS3Export: vi.fn(),
 
-  onCreateResponse: vi.fn(),
+  onCreateCommentResponse: vi.fn(),
   onViewResponses: vi.fn(),
   onUpdateResponse: vi.fn(),
 

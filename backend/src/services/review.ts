@@ -4,24 +4,13 @@ import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import { ReleaseDoc } from '../models/Release.js'
-import ResponseModel, { Decision, ResponseInterface, ResponseKind } from '../models/Response.js'
 import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
-import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
-import { toEntity } from '../utils/entity.js'
-import { BadReq, GenericError, NotFound } from '../utils/error.js'
-import { getAccessRequestById } from './accessRequest.js'
+import { BadReq, NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
-import { getReleaseBySemver } from './release.js'
-import {
-  notifyReviewResponseForAccess,
-  notifyReviewResponseForRelease,
-  requestReviewForAccessRequest,
-  requestReviewForRelease,
-} from './smtp/smtp.js'
-import { sendWebhooks } from './webhook.js'
+import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 // This should be replaced by using the dynamic schema
 const requiredRoles = {
@@ -101,16 +90,13 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
-export type ReviewResponseParams = Pick<ResponseInterface, 'comment' | 'decision'>
-
-export async function respondToReview(
+export async function findReviewForResponse(
   user: UserInterface,
   modelId: string,
   role: string,
-  response: ReviewResponseParams,
   kind: ReviewKindKeys,
   reviewId: string,
-): Promise<ReviewInterface> {
+): Promise<ReviewDoc> {
   let reviewIdQuery
   switch (kind) {
     case ReviewKind.Access:
@@ -126,7 +112,7 @@ export async function respondToReview(
   // Authorisation check to make sure the user can access a model
   await getModelById(user, modelId)
 
-  const review = (
+  const review: ReviewDoc = (
     await Review.aggregate()
       .match({
         modelId,
@@ -145,75 +131,15 @@ export async function respondToReview(
     throw NotFound(`Unable to find Review to respond to.`, { modelId, reviewIdQuery, role })
   }
 
-  // Store the response
-  const reviewResponse = new ResponseModel({
-    entity: toEntity('user', user.dn),
-    kind: ResponseKind.Review,
-    role,
-    parentId: review._id,
-    ...response,
-  })
-
-  await reviewResponse.save()
-  await sendReviewResponseNotification(review, reviewResponse, user)
-
-  sendWebhooks(
-    review.modelId,
-    WebhookEvent.CreateReviewResponse,
-    `A new response has been added to a review requested for Model ${review.modelId}`,
-    { review: review },
-  )
-
   return review
 }
 
-export async function sendReviewResponseNotification(
-  review: ReviewDoc,
-  reviewResponse: ResponseInterface,
-  user: UserInterface,
-) {
-  let reviewIdQuery
-  switch (review.kind) {
-    case ReviewKind.Access: {
-      if (!review.accessRequestId) {
-        log.error({ review }, 'Unable to send notification for review response. Cannot find access request ID.')
-        return
-      }
-
-      const access = await getAccessRequestById(user, review.accessRequestId)
-      notifyReviewResponseForAccess(reviewResponse, access).catch((error) =>
-        log.warn({ error }, 'Error when notifying collaborators about review response.'),
-      )
-      break
-    }
-    case ReviewKind.Release: {
-      if (!review.semver) {
-        log.error({ review }, 'Unable to send notification for review response. Cannot find semver.')
-        return
-      }
-
-      const release = await getReleaseBySemver(user, review.modelId, review.semver)
-      notifyReviewResponseForRelease(reviewResponse, release).catch((error) =>
-        log.warn({ error }, 'Error when notifying collaborators about review response.'),
-      )
-      break
-    }
-    default:
-      throw GenericError(500, 'Review Kind not recognised', reviewIdQuery)
-  }
-}
-
 //TODO This won't work for response refactor
-export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
+export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
   const reviews = await Review.find({
     accessRequestId: accessRequestIds,
-    responses: {
-      $elemMatch: {
-        decision: Decision.Approve,
-      },
-    },
   })
-  return reviews.some((review) => requiredRoles.accessRequest.includes(review.role))
+  return reviews.filter((review) => requiredRoles.accessRequest.includes(review.role))
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
