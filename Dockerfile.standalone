@@ -25,8 +25,8 @@ RUN apt install git curl wget gnupg ca-certificates iproute2 nginx supervisor -y
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - &&\
     apt install nodejs -y
 
-ENV MINIO_ROOT_USER=minioadmin
-ENV MINIO_ROOT_PASSWORD=minioadmin
+#ENV MINIO_ROOT_USER=minioadmin
+#ENV MINIO_ROOT_PASSWORD=minioadmin
 VOLUME minio-data
 RUN wget https://dl.min.io/server/minio/release/linux-amd64/minio &&\
     wget https://dl.min.io/client/mc/release/linux-amd64/mc &&\
