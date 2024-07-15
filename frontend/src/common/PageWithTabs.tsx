@@ -25,7 +25,8 @@ export default function PageWithTabs({
   actionButtonOnClick,
   requiredUrlParams = {},
   showCopyButton = false,
-  textToCopy,
+  textToCopy = '',
+  sourceModelId = '',
 }: {
   title: string
   tabs: PageTab[]
@@ -35,6 +36,7 @@ export default function PageWithTabs({
   requiredUrlParams?: ParsedUrlQuery
   showCopyButton?: boolean
   textToCopy?: string
+  sourceModelId?: string
 }) {
   const router = useRouter()
   const { tab } = router.query
@@ -134,6 +136,7 @@ export default function PageWithTabs({
             {actionButtonTitle}
           </Button>
         )}
+        {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
       </Stack>
       <Tabs
         value={currentTab || false}

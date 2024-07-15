@@ -5,7 +5,6 @@ export interface BailoError extends Error {
   id?: string
   documentationUrl?: string
 }
-
 export enum EntityKind {
   USER = 'user',
   GROUP = 'group',
@@ -361,6 +360,7 @@ export interface CollaboratorEntry {
 export const EntryKindLabel = {
   model: 'model',
   'data-card': 'data card',
+  'mirrored-model': 'mirrored model',
 } as const
 export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindLabel]
 
@@ -373,6 +373,12 @@ export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 export const isEntryKind = (value: unknown): value is EntryKindKeys => {
   return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD)
 }
+
+export const CreateEntryKind = {
+  ...EntryKind,
+  MIRRORED_MODEL: 'mirrored-model',
+} as const
+export type CreateEntryKindKeys = (typeof CreateEntryKind)[keyof typeof CreateEntryKind]
 
 export interface EntryInterface {
   id: string
@@ -401,7 +407,13 @@ export interface EntryForm {
   teamId: string
   description: string
   visibility: EntryVisibilityKeys
-  collaborators: CollaboratorEntry[]
+  collaborators?: CollaboratorEntry[]
+  settings?: {
+    mirror?: {
+      sourceModelId?: string
+      destinationModelId?: string
+    }
+  }
 }
 
 export type UpdateEntryForm = Omit<EntryForm, 'kind' | 'collaborators'>

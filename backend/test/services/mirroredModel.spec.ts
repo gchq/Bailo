@@ -15,10 +15,12 @@ vi.mock('../../src/connectors/authorisation/index.js', async () => ({
 const configMock = vi.hoisted(
   () =>
     ({
-      s3: { buckets: { uploads: 'test' } },
       ui: {
-        modelMirror: { enabled: true },
+        modelMirror: {
+          enabled: true,
+        },
       },
+      s3: { buckets: { uploads: 'test' } },
       modelMirror: {
         export: {
           maxSize: 100,

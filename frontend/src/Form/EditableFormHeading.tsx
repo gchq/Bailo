@@ -18,6 +18,7 @@ type EditableFormHeadingProps = {
   errorMessage?: string
   deleteButtonText?: string
   showDeleteButton?: boolean
+  readOnly?: boolean
 }
 
 export default function EditableFormHeading({
@@ -33,6 +34,7 @@ export default function EditableFormHeading({
   deleteButtonText = 'Delete',
   showDeleteButton = false,
   isRegistryError = false,
+  readOnly = false,
   canUserEditOrDelete = true,
   actionButtonsTooltip = '',
 }: EditableFormHeadingProps) {
@@ -45,7 +47,7 @@ export default function EditableFormHeading({
         spacing={2}
       >
         {heading}
-        {!isEdit && (
+        {!isEdit && !readOnly && (
           <Tooltip title={actionButtonsTooltip}>
             <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
               <Button

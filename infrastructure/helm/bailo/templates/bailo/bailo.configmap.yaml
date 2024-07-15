@@ -155,6 +155,11 @@ data:
           gpus: '{{ .Values.inference.gpus }}',
           authorizationTokenName: '{{ .Values.inference.authorizationTokenName }}'
         },
+
+        modelMirror: {
+          enabled: '{{ .Values.modelMirror.enabled }}',
+          disclaimer '{{ .Values.modelMirror.disclaimer }}'
+        }
       },
 
       connectors: {
@@ -194,7 +199,6 @@ data:
       },
 
       modelMirror: {
-        enabled: {{ .Values.modelMirror.enabled }},
         export: {
           bucket: '{{ .Values.modelMirror.export.bucket }}',
           kmsSignature: {

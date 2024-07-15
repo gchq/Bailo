@@ -1,4 +1,4 @@
-import { Box, Link as MuiLink, Typography } from '@mui/material'
+import { Box, Link as MuiLink, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
 import Link from 'next/link'
@@ -25,11 +25,13 @@ export default function EntryList({
   const entriesDisplay = useMemo(() => {
     return entries.map((entry, index) => (
       <Fragment key={entry.id}>
-        <Link style={{ textDecoration: 'none' }} href={`${entry.kind}/${entry.id}`} passHref>
-          <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}>
-            {entry.name}
-          </MuiLink>
-        </Link>
+        <Stack direction='row'>
+          <Link style={{ textDecoration: 'none' }} href={`${entry.kind}/${entry.id}`} passHref>
+            <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}>
+              {entry.name}
+            </MuiLink>
+          </Link>
+        </Stack>
         <Typography variant='body1' sx={{ marginBottom: 2 }}>
           {entry.description}
         </Typography>

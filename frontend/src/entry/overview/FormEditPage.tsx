@@ -18,10 +18,11 @@ import { getRequiredRolesText, hasRole } from 'utils/roles'
 
 type FormEditPageProps = {
   entry: EntryInterface
+  readOnly?: boolean
   currentUserRoles: string[]
 }
 
-export default function FormEditPage({ entry, currentUserRoles }: FormEditPageProps) {
+export default function FormEditPage({ entry, currentUserRoles, readOnly = false }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
@@ -138,18 +139,20 @@ export default function FormEditPage({ entry, currentUserRoles }: FormEditPagePr
               <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
                 View History
               </Button>
-              <Tooltip title={requiredRolesText}>
-                <span>
-                  <Button
-                    variant='outlined'
-                    disabled={!canEdit}
-                    onClick={() => setIsEdit(!isEdit)}
-                    data-test='editEntryCardButton'
-                  >
-                    {`Edit ${EntryCardKindLabel[entry.kind]}`}
-                  </Button>
-                </span>
-              </Tooltip>
+              {!readOnly && (
+                <Tooltip title={requiredRolesText}>
+                  <span>
+                    <Button
+                      variant='outlined'
+                      disabled={!canEdit}
+                      onClick={() => setIsEdit(!isEdit)}
+                      data-test='editEntryCardButton'
+                    >
+                      {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
             </Stack>
           )}
           {isEdit && (

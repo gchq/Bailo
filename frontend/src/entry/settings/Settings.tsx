@@ -11,7 +11,7 @@ import DangerZone from 'src/entry/settings/DangerZone'
 import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, EntryKind, EntryKindKeys } from 'types/types'
+import { EntryInterface, EntryKind, UiConfig } from 'types/types'
 import { getRequiredRolesText, hasRole } from 'utils/roles'
 import { toTitleCase } from 'utils/stringUtils'
 
@@ -21,27 +21,32 @@ export const SettingsCategory = {
   ACCESS_REQUESTS: 'access_requests',
   PERMISSIONS: 'permissions',
   MIRRORED_MODELS: 'mirrored_models',
-  TEMPLATE: 'template',
+  TEMPLATING: 'templating',
 } as const
 
 export type SettingsCategoryKeys = (typeof SettingsCategory)[keyof typeof SettingsCategory]
 
 function isSettingsCategory(
   value: string | string[] | undefined,
-  entryKind: EntryKindKeys,
+  entry: EntryInterface,
+  uiConfig: UiConfig | undefined,
 ): value is SettingsCategoryKeys {
-  switch (entryKind) {
+  switch (entry.kind) {
     case EntryKind.MODEL:
       return (
         value === SettingsCategory.DETAILS ||
         value === SettingsCategory.PERMISSIONS ||
         value === SettingsCategory.ACCESS_REQUESTS ||
+        value === SettingsCategory.TEMPLATING ||
         value === SettingsCategory.DANGER ||
-        value === SettingsCategory.MIRRORED_MODELS ||
-        value === SettingsCategory.TEMPLATE
+        (value === SettingsCategory.MIRRORED_MODELS &&
+          !entry.settings.mirror?.sourceModelId &&
+          !!uiConfig?.modelMirror.enabled)
       )
     case EntryKind.DATA_CARD:
       return value === SettingsCategory.DETAILS || value === SettingsCategory.PERMISSIONS
+    default:
+      return false
   }
 }
 
@@ -65,7 +70,7 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
   }, [currentUserRoles])
 
   useEffect(() => {
-    if (isSettingsCategory(category, entry.kind)) {
+    if (isSettingsCategory(category, entry, uiConfig)) {
       setSelectedCategory(category)
     } else if (category) {
       setSelectedCategory(SettingsCategory.DETAILS)
@@ -73,7 +78,7 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
         query: { ...router.query, category: SettingsCategory.DETAILS },
       })
     }
-  }, [category, entry.kind, router])
+  }, [category, entry, router, uiConfig])
 
   const handleListItemClick = (category: SettingsCategoryKeys) => {
     setSelectedCategory(category)
@@ -118,8 +123,8 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
               Access Requests
             </SimpleListItemButton>
             <SimpleListItemButton
-              selected={selectedCategory === SettingsCategory.TEMPLATE}
-              onClick={() => handleListItemClick(SettingsCategory.TEMPLATE)}
+              selected={selectedCategory === SettingsCategory.TEMPLATING}
+              onClick={() => handleListItemClick(SettingsCategory.TEMPLATING)}
             >
               Templating
             </SimpleListItemButton>
@@ -150,7 +155,7 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
         {selectedCategory === SettingsCategory.ACCESS_REQUESTS && (
           <AccessRequestSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
         )}
-        {selectedCategory === SettingsCategory.TEMPLATE && (
+        {selectedCategory === SettingsCategory.TEMPLATING && (
           <TemplateSettings model={entry} isReadOnly={isReadOnly} requiredRolesText={requiredRolesText} />
         )}
         {selectedCategory === SettingsCategory.MIRRORED_MODELS && (

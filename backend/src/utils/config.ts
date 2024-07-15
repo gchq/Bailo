@@ -168,7 +168,6 @@ export interface Config {
   }
 
   modelMirror: {
-    enabled: boolean
     export: {
       maxSize: number
       bucket: string
