@@ -20,7 +20,7 @@ export default function ModelSchema() {
     <>
       <Title text='Select a schema' />
       {isModelLoading && <Loading />}
-      {model && <SchemaSelect schemaKind={SchemaKind.MODEL} entry={model} id={modelId} />}
+      {model && <SchemaSelect schemaKind={SchemaKind.MODEL} entry={model} />}
     </>
   )
 }
