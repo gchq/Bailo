@@ -26,14 +26,14 @@ export default function TeamSelect({ value, onChange, loading = false }: TeamSel
 
   // Replaced with a disabled TextField until teams are implemented
   return (
-    <LabelledInput required label='Team' htmlFor={htmlId}>
+    <LabelledInput fullWidth required label='Team' htmlFor={htmlId}>
       <TextField disabled id={htmlId} value='Uncategorised' size='small' />
     </LabelledInput>
   )
 
   // TODO - Use this autocomplete and remove the above TextField once teams have been implemented. (Note: disable with tooltip if user doesn't have owner role)
   return (
-    <LabelledInput required label='Team' htmlFor={htmlId}>
+    <LabelledInput fullWidth required label='Team' htmlFor={htmlId}>
       <Autocomplete
         id={htmlId}
         value={value}

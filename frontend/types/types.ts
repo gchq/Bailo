@@ -5,7 +5,6 @@ export interface BailoError extends Error {
   id?: string
   documentationUrl?: string
 }
-
 export enum EntityKind {
   USER = 'user',
   GROUP = 'group',
@@ -43,7 +42,7 @@ export interface UiConfig {
     connection: {
       host: string
     }
-
+    authorizationTokenName: string
     gpus: { [key: string]: string }
   }
   modelMirror: {
@@ -417,7 +416,7 @@ export interface EntryForm {
   }
 }
 
-export type UpdateEntryForm = Omit<EntryForm, 'kind'>
+export type UpdateEntryForm = Omit<EntryForm, 'kind' | 'collaborators'>
 
 export interface AccessRequestMetadata {
   overview: {

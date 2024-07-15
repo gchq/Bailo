@@ -29,7 +29,7 @@ export default function EntryDescriptionInput({
   }
 
   return (
-    <LabelledInput required label='Description' htmlFor={htmlId}>
+    <LabelledInput fullWidth required label='Description' htmlFor={htmlId}>
       <Tooltip title={requiredRolesText}>
         <span>
           <TextField

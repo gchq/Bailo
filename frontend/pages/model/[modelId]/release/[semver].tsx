@@ -63,6 +63,7 @@ export default function Release() {
 
   if (
     !release ||
+    !model ||
     isReleaseLoading ||
     isReviewsLoading ||
     isUserReviewsLoading ||

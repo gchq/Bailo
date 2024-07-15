@@ -35,7 +35,7 @@ export default function EntryNameInput({
   }
 
   return (
-    <LabelledInput required label={`${toTitleCase(kind)} Name`} htmlFor={htmlId}>
+    <LabelledInput fullWidth required label={`${toTitleCase(kind)} Name`} htmlFor={htmlId}>
       <Tooltip title={requiredRolesText}>
         <span>
           <TextField

@@ -122,6 +122,7 @@ export interface Config {
       connection: {
         host: string
       }
+      authorizationTokenName: string
       gpus: { [key: string]: string }
     }
     modelMirror: {
@@ -182,6 +183,10 @@ export interface Config {
         }
       }
     }
+  }
+
+  inference: {
+    authorisationToken: string
   }
 }
 
