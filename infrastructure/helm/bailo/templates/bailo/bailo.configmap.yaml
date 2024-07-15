@@ -153,6 +153,7 @@ data:
             host: '{{ .Values.inference.host}}',
           },
           gpus: '{{ .Values.inference.gpus }}',
+          authorizationTokenName: '{{ .Values.inference.authorizationTokenName }}'
         },
       },
 
@@ -220,6 +221,9 @@ data:
       },
       instrumentation: {
         authenticationToken: 'OTEL_EXPORTER_TOKEN',
+      },
+      inference: {
+        authorisationToken: 'INFERENCING_WRITE_TOKEN'
       },
       modelMirror: {
         export: {
