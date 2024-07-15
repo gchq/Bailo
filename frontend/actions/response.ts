@@ -24,3 +24,11 @@ export function useGetResponses(parentIds: string[]) {
     isResponsesError: error,
   }
 }
+
+export function patchResponse(responseId: string, comment: string) {
+  return fetch(`/api/v2/response/${responseId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
+  })
+}

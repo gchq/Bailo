@@ -4,6 +4,7 @@ import { postAccessRequestComment, useGetAccessRequest } from 'actions/accessReq
 import { postReleaseComment, useGetRelease } from 'actions/release'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
+import { useGetCurrentUser } from 'actions/user'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
@@ -32,8 +33,10 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
   const [newReviewComment, setNewReviewComment] = useState('')
   const [commentSubmissionError, setCommentSubmissionError] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
+
   const { mutateRelease } = useGetRelease(release?.modelId, release?.semver)
   const { mutateAccessRequest } = useGetAccessRequest(accessRequest?.modelId, accessRequest?.id)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
     () =>
@@ -80,18 +83,29 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     decisionsAndComments.sort(sortByCreatedAtAscending)
     return decisionsAndComments.map((response) => {
       if (response.kind === ResponseKind.Review) {
-        return <ReviewDecisionDisplay key={response.createdAt} response={response} modelId={modelId} />
+        return (
+          <ReviewDecisionDisplay
+            key={response.createdAt}
+            response={response}
+            modelId={modelId}
+            onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
+            currentUser={currentUser}
+            mutateResponses={mutateResponses}
+          />
+        )
       } else {
         return (
           <ReviewCommentDisplay
             key={response.createdAt}
             response={response}
             onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
+            currentUser={currentUser}
+            mutateResponses={mutateResponses}
           />
         )
       }
     })
-  }, [reviews, release, accessRequest, responses, modelId, newReviewComment])
+  }, [reviews, responses, release, accessRequest, modelId, currentUser, mutateResponses, newReviewComment])
 
   async function submitReviewComment() {
     setCommentSubmissionError('')
@@ -128,10 +142,14 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     return <MessageAlert message={isResponsesError.info.message} severity='error' />
   }
 
+  if (isCurrentUserError) {
+    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
+  }
+
   return (
     <>
       {(hasResponseOrComment || !isEdit) && <Divider />}
-      {(isReviewsLoading || isResponsesLoading) && <Loading />}
+      {(isReviewsLoading || isResponsesLoading || isCurrentUserLoading) && <Loading />}
       {reviewDetails}
       {!isEdit && (
         <Stack spacing={1} justifyContent='center' alignItems='flex-end'>

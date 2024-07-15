@@ -5,9 +5,18 @@ export const formatDate = (date: Date) => {
   return date.toDateString()
 }
 
+export const formatDateTime = (date: Date) => {
+  return date.toUTCString()
+}
+
 export const formatDateString = (value: string) => {
   const date = new Date(value)
   return formatDate(date)
+}
+
+export const formatDateTimeString = (value: string) => {
+  const date = new Date(value)
+  return formatDateTime(date)
 }
 
 export const sortByCreatedAtDescending = <T extends { createdAt: string }>(a: T, b: T) => {
