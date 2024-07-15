@@ -275,7 +275,7 @@ describe('services > mirroredModel', () => {
   test('exportModel > export uploaded to S3 for model cards and releases', async () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '3.2.1'])
 
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
   })
 
   test('exportModel > unable to upload to tmp S3 location', async () => {

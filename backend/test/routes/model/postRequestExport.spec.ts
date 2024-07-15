@@ -32,6 +32,6 @@ describe('routes > model > postModel', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateS3Export).toBeCalled()
-    expect(audit.onCreateS3Export.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onCreateS3Export.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

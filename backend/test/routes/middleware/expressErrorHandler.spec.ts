@@ -45,6 +45,6 @@ describe('middleware > expressErrorHandler', () => {
     await expressErrorHandler(error, req, res, vi.fn() as any)
 
     expect(audit.onError).toBeCalled()
-    expect(audit.onError.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onError.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

@@ -31,7 +31,7 @@ describe('routes > schema > getSchemas', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onSearchSchemas).toBeCalled()
-    expect(audit.onSearchSchemas.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onSearchSchemas.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('returns only model schemas with the model parameter', async () => {

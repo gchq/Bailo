@@ -36,6 +36,6 @@ describe('routes > accessRequest > deleteAccessRequest', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onDeleteAccessRequest).toBeCalled()
-    expect(audit.onDeleteAccessRequest.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onDeleteAccessRequest.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

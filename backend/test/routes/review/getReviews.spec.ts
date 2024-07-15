@@ -25,7 +25,7 @@ describe('routes > review > getReviews', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onSearchReviews).toBeCalled()
-    expect(audit.onSearchReviews.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onSearchReviews.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('returns reviews', async () => {

@@ -28,7 +28,7 @@ describe('routes > accessRequest > postAccessRequest', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateAccessRequest).toBeCalled()
-    expect(audit.onCreateAccessRequest.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onCreateAccessRequest.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('400 > no description', async () => {
