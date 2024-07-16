@@ -1,0 +1,93 @@
+FROM node:18-alpine as backend
+RUN apk add --no-cache libc6-compat
+RUN apk update
+WORKDIR /app
+COPY backend/package*.json ./
+RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
+COPY backend .
+RUN npm run build
+
+FROM node:18-alpine as frontend
+RUN apk add --no-cache libc6-compat
+RUN apk update
+WORKDIR /app
+COPY frontend/package*.json ./
+RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
+COPY frontend .
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm run build
+
+FROM ubuntu:jammy
+RUN apt update
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt install git curl wget gnupg ca-certificates iproute2 nginx supervisor -y
+
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - &&\
+    apt install nodejs -y
+
+#ENV MINIO_ROOT_USER=minioadmin
+#ENV MINIO_ROOT_PASSWORD=minioadmin
+VOLUME minio-data
+RUN wget https://dl.min.io/server/minio/release/linux-amd64/minio &&\
+    wget https://dl.min.io/client/mc/release/linux-amd64/mc &&\
+    chmod +x minio &&\
+    chmod +x mc &&\
+    mv minio /usr/local/bin/ &&\
+    mv mc /usr/local/bin/
+
+RUN wget -qO - https://pgp.mongodb.com/server-6.0.asc |  gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-6.0.gpg &&\
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" |  tee /etc/apt/sources.list.d/mongodb-org-6.0.list &&\
+    apt update &&\
+    apt install mongodb-org -y &&\
+    mkdir -m 777 -p /data/db
+
+COPY infrastructure/standalone/nginx.conf /etc/nginx/nginx.conf
+
+RUN wget https://github.com/distribution/distribution/releases/download/v2.8.3/registry_2.8.3_linux_amd64.tar.gz &&\
+    tar -xvf registry_2.8.3_linux_amd64.tar.gz &&\
+    mv registry /usr/local/bin/
+ENV REGISTRY_HTTP_TLS_CERTIFICATE=/app/backend/certs/cert.pem
+ENV REGISTRY_HTTP_TLS_KEY=/app/backend/certs/key.pem
+ENV REGISTRY_STORAGE_S3_ACCESSKEY=minioadmin
+ENV REGISTRY_STORAGE_S3_SECRETKEY=minioadmin
+ENV REGISTRY_AUTH=token
+ENV REGISTRY_AUTH_TOKEN_REALM=http://localhost:3001/api/v1/registry_auth
+ENV REGISTRY_AUTH_TOKEN_SERVICE=RegistryAuth
+ENV REGISTRY_AUTH_TOKEN_ISSUER=RegistryIssuer
+ENV REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/app/backend/certs/cert.pem
+COPY infrastructure/standalone/registry.conf /registry.conf
+
+RUN wget https://github.com/tweedegolf/mailcrab/releases/download/v1.2.0/mailcrab-linux-x86-64-gnu-v1.2.0 &&\
+    chmod +x mailcrab-linux-x86-64-gnu-v1.2.0 &&\
+    mv mailcrab-linux-x86-64-gnu-v1.2.0 /usr/local/bin/mailcrab
+
+# Backend
+WORKDIR /app/backend
+COPY backend/package*.json ./
+COPY backend/certs/san.cnf ./
+RUN --mount=type=cache,target=/cache/npm npm install --omit=dev --cache=/cache/npm
+RUN mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config ./san.cnf -extensions 'v3_req' -days 360
+COPY backend/python-docs python-docs
+COPY --from=backend /app/config config
+COPY --from=backend /app/dist .
+COPY infrastructure/standalone/local.cjs config/local.cjs
+ENV NODE_ENV production
+
+# Frontend
+WORKDIR /app/frontend
+COPY --from=frontend /app/next.config.mjs .
+COPY --from=frontend /app/package.json .
+COPY --from=frontend /app/.next/standalone ./
+COPY --from=frontend /app/.next/static ./.next/static
+COPY --from=frontend /app/public ./public
+ENV NEXT_TELEMETRY_DISABLED 1
+
+COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+WORKDIR /
+
+EXPOSE 8080
+EXPOSE 9000
+EXPOSE 27017
+
+ENTRYPOINT ["/usr/bin/supervisord"]
