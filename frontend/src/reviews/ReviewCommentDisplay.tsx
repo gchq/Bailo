@@ -45,6 +45,7 @@ export default function ReviewCommentDisplay({
   const handleEditOnCancel = () => {
     setIsEditMode(false)
     setEditCommentErrorMessage('')
+    setComment(response.comment || '')
   }
 
   const handleEditOnSave = async () => {
@@ -77,7 +78,7 @@ export default function ReviewCommentDisplay({
             </Typography>
             <Stack direction='row' alignItems='center' spacing={1}>
               <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
-              <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
+              <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label='Actions'>
                 <MoreHorizIcon />
               </IconButton>
             </Stack>

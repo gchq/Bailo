@@ -38,7 +38,7 @@ export default function EditableReviewComment({
       )}
       {isEditMode && (
         <>
-          <RichTextEditor value={comment} onChange={(input) => onCommentChange(input)} />
+          <RichTextEditor value={comment} onChange={onCommentChange} />
           <Stack sx={{ textAlign: 'right', pt: 2 }} direction='row' spacing={1} justifyContent='right'>
             <Button onClick={onCancel}>Cancel</Button>
             <Button variant='contained' onClick={onSave}>
