@@ -1,14 +1,12 @@
-import { Menu as MenuIcon } from '@mui/icons-material'
-import { Box, Button, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
+import { Box, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { patchResponse } from 'actions/response'
 import { useState } from 'react'
-import MarkdownDisplay from 'src/common/MarkdownDisplay'
-import RichTextEditor from 'src/common/RichTextEditor'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
+import EditableReviewComment from 'src/reviews/EditableReviewComment'
 import { EntityKind, ResponseInterface, User } from 'types/types'
-import { formatDateString, formatDateTimeString } from 'utils/dateUtils'
+import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
 type ReviewCommentDisplayProps = {
@@ -26,11 +24,9 @@ export default function ReviewCommentDisplay({
 }: ReviewCommentDisplayProps) {
   const [entityKind, username] = response.entity.split(':')
 
-  const theme = useTheme()
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isEditMode, setIsEditMode] = useState(false)
-  const [updatedComment, setUpdatedComment] = useState('')
+  const [comment, setComment] = useState(response.comment || '')
   const [editCommentErrorMessage, setEditCommentErrorMessage] = useState('')
 
   const open = Boolean(anchorEl)
@@ -43,13 +39,12 @@ export default function ReviewCommentDisplay({
   }
 
   const handleEditOnClick = () => {
-    setUpdatedComment(response.comment || '')
     setIsEditMode(true)
   }
 
   const handleEditOnSave = async () => {
     setEditCommentErrorMessage('')
-    const res = await patchResponse(response['_id'], updatedComment)
+    const res = await patchResponse(response._id, comment)
     if (!res.ok) {
       setEditCommentErrorMessage(await getErrorMessage(res))
     } else {
@@ -70,7 +65,6 @@ export default function ReviewCommentDisplay({
             p: 1,
           }}
         >
-          {isEditMode}
           <Stack direction='row' spacing={1} alignItems='center' sx={{ width: '100%' }} justifyContent='space-between'>
             <Typography>
               <UserDisplay dn={username} />
@@ -79,37 +73,25 @@ export default function ReviewCommentDisplay({
             <Stack direction='row' alignItems='center' spacing={1}>
               <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
               <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
-                <MenuIcon />
+                <MoreHorizIcon />
               </IconButton>
             </Stack>
           </Stack>
           <Divider sx={{ mt: 1, mb: 2 }} />
-          {response.comment && !isEditMode && (
-            <Stack spacing={2}>
-              <MarkdownDisplay>{response.comment}</MarkdownDisplay>
-              {response.updatedAt !== response.createdAt && (
-                <Typography variant='caption' sx={{ fontStyle: 'italic' }}>
-                  Updated {formatDateTimeString(response.updatedAt)}
-                </Typography>
-              )}
-            </Stack>
-          )}
-          {isEditMode && (
-            <>
-              <RichTextEditor value={updatedComment} onChange={(input) => setUpdatedComment(input)} />
-              <Box sx={{ float: 'right' }}>
-                <Button onClick={handleEditOnSave}>Save</Button>
-              </Box>
-              <Typography variant='caption' color={theme.palette.error.main}>
-                {editCommentErrorMessage}
-              </Typography>
-            </>
-          )}
+          <EditableReviewComment
+            comment={comment}
+            setComment={setComment}
+            response={response}
+            isEditMode={isEditMode}
+            setIsEditMode={setIsEditMode}
+            editCommentErrorMessage={editCommentErrorMessage}
+            onSave={handleEditOnSave}
+          />
         </Card>
       </Stack>
       <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
-        <MenuItem onClick={() => handleReplyOnClick(response.comment)}>Reply</MenuItem>
-        {currentUser && currentUser.dn === username && <MenuItem onClick={handleEditOnClick}>Edit comment</MenuItem>}
+        <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>
+        {currentUser && currentUser.dn === username && <MenuItem onClick={handleEditOnClick}>Edit</MenuItem>}
       </Menu>
     </>
   )

@@ -85,7 +85,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
       if (response.kind === ResponseKind.Review) {
         return (
           <ReviewDecisionDisplay
-            key={response.createdAt}
+            key={response._id}
             response={response}
             modelId={modelId}
             onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
@@ -96,7 +96,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
       } else {
         return (
           <ReviewCommentDisplay
-            key={response.createdAt}
+            key={response._id}
             response={response}
             onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
             currentUser={currentUser}

@@ -75,6 +75,7 @@ export const ResponseKind = {
 export type ResponseKindKeys = (typeof ResponseKind)[keyof typeof ResponseKind]
 
 export interface ResponseInterface {
+  _id: string
   entity: string
   kind: ResponseKindKeys
   parentId: string
