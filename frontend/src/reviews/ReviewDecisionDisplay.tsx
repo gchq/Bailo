@@ -1,28 +1,75 @@
 import { Undo } from '@mui/icons-material'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
-import { Box, Card, Divider, Stack, Typography } from '@mui/material'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
+import { Box, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
+import { patchResponse } from 'actions/response'
+import { useState } from 'react'
 import Loading from 'src/common/Loading'
-import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
-import { Decision, EntityKind, ResponseInterface } from 'types/types'
+import EditableReviewComment from 'src/reviews/EditableReviewComment'
+import { Decision, EntityKind, ResponseInterface, User } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
+import { getErrorMessage } from 'utils/fetcher'
 import { getRoleDisplay } from 'utils/roles'
 
 type ReviewDecisionDisplayProps = {
   response: ResponseInterface
   modelId: string
+  onReplyButtonClick: (value: string) => void
+  currentUser: User | undefined
+  mutateResponses: () => void
 }
 
-export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecisionDisplayProps) {
+export default function ReviewDecisionDisplay({
+  response,
+  modelId,
+  onReplyButtonClick,
+  currentUser,
+  mutateResponses,
+}: ReviewDecisionDisplayProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [comment, setComment] = useState(response.comment || '')
+  const [editCommentErrorMessage, setEditCommentErrorMessage] = useState('')
+  const open = Boolean(anchorEl)
 
   const theme = useTheme()
   const [entityKind, username] = response.entity.split(':')
+
+  const handleReplyOnClick = (value: string | undefined) => {
+    setAnchorEl(null)
+    if (value) {
+      onReplyButtonClick(value.replace(/^/gm, '>'))
+    }
+  }
+
+  const handleEditOnClick = () => {
+    setIsEditMode(true)
+  }
+
+  const handleEditOnCancel = () => {
+    setIsEditMode(false)
+    setEditCommentErrorMessage('')
+    setComment(response.comment || '')
+  }
+
+  const handleEditOnSave = async () => {
+    setEditCommentErrorMessage('')
+    const res = await patchResponse(response._id, comment)
+    if (!res.ok) {
+      setEditCommentErrorMessage(await getErrorMessage(res))
+    } else {
+      mutateResponses()
+      setIsEditMode(false)
+    }
+  }
 
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
@@ -69,16 +116,29 @@ export default function ReviewDecisionDisplay({ response, modelId }: ReviewDecis
                 <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
               )}
             </Stack>
-            <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
+            <Stack direction='row' alignItems='center' spacing={1}>
+              <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
+              <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label='Actions'>
+                <MoreHorizIcon />
+              </IconButton>
+            </Stack>
           </Stack>
-          {response.comment && (
-            <div>
-              <Divider sx={{ mt: 1, mb: 2 }} />
-              <MarkdownDisplay>{response.comment}</MarkdownDisplay>
-            </div>
-          )}
+          <Divider sx={{ mt: 1, mb: 2 }} />
+          <EditableReviewComment
+            comment={comment}
+            onCommentChange={setComment}
+            response={response}
+            isEditMode={isEditMode}
+            editCommentErrorMessage={editCommentErrorMessage}
+            onSave={handleEditOnSave}
+            onCancel={handleEditOnCancel}
+          />
         </Card>
       </Stack>
+      <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
+        <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>
+        {currentUser && currentUser.dn === username && <MenuItem onClick={handleEditOnClick}>Edit comment</MenuItem>}
+      </Menu>
     </>
   )
 }
