@@ -137,6 +137,7 @@ export default function EditableRelease({ release, currentUserRoles, isEdit, onI
   }
 
   const handleCancel = () => {
+    setErrorMessage('')
     resetForm()
     onIsEditChange(false)
   }
