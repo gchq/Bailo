@@ -7,26 +7,26 @@ import { formatDateTimeString } from 'utils/dateUtils'
 
 interface EditableReviewCommentProps {
   comment: string
-  setComment: (value: string) => void
+  onCommentChange: (value: string) => void
   response: ResponseInterface
   isEditMode: boolean
-  setIsEditMode: (value: boolean) => void
   editCommentErrorMessage: string
+  onCancel: () => void
   onSave: () => void
 }
 
 export default function EditableReviewComment({
   comment,
-  setComment,
+  onCommentChange,
   response,
   isEditMode,
-  setIsEditMode,
   editCommentErrorMessage,
+  onCancel,
   onSave,
 }: EditableReviewCommentProps) {
   return (
     <>
-      {comment && !isEditMode && (
+      {!isEditMode && (
         <Stack spacing={2}>
           <MarkdownDisplay>{comment}</MarkdownDisplay>
           {response.updatedAt !== response.createdAt && (
@@ -38,9 +38,9 @@ export default function EditableReviewComment({
       )}
       {isEditMode && (
         <>
-          <RichTextEditor value={comment} onChange={(input) => setComment(input)} />
+          <RichTextEditor value={comment} onChange={(input) => onCommentChange(input)} />
           <Stack sx={{ textAlign: 'right', pt: 2 }} direction='row' spacing={1} justifyContent='right'>
-            <Button onClick={() => setIsEditMode(false)}>Cancel</Button>
+            <Button onClick={onCancel}>Cancel</Button>
             <Button variant='contained' onClick={onSave}>
               Save
             </Button>

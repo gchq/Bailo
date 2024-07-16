@@ -42,6 +42,11 @@ export default function ReviewCommentDisplay({
     setIsEditMode(true)
   }
 
+  const handleEditOnCancel = () => {
+    setIsEditMode(false)
+    setEditCommentErrorMessage('')
+  }
+
   const handleEditOnSave = async () => {
     setEditCommentErrorMessage('')
     const res = await patchResponse(response._id, comment)
@@ -80,11 +85,11 @@ export default function ReviewCommentDisplay({
           <Divider sx={{ mt: 1, mb: 2 }} />
           <EditableReviewComment
             comment={comment}
-            setComment={setComment}
+            onCommentChange={setComment}
             response={response}
             isEditMode={isEditMode}
-            setIsEditMode={setIsEditMode}
             editCommentErrorMessage={editCommentErrorMessage}
+            onCancel={handleEditOnCancel}
             onSave={handleEditOnSave}
           />
         </Card>
