@@ -76,7 +76,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#Importing-existing-experiments-from-MLFlow-into-Bailo">Importing existing experiments from MLFlow into Bailo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Publishing-results-to-Bailo">Publishing results to Bailo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Publishing-results-to-Bailo">Publishing results to Bailo</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Publishing-a-specific-run">Publishing a specific run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Publishing-the-best-run">Publishing the best run</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="models_and_releases_demo_pytorch.html">Managing Models &amp; Releases (ResNet-50 Example with PyTorch)</a></li>
@@ -282,7 +286,11 @@
 </section>
 <section id="Publishing-results-to-Bailo">
 <h2>Publishing results to Bailo<a class="headerlink" href="#Publishing-results-to-Bailo" title="Link to this heading"></a></h2>
-<p>Experiment runs can be published to the model card using the <code class="docutils literal notranslate"><span class="pre">Experiment.publish()</span></code> method, <strong>one at a time</strong>. This is because the intended use is only to publish the most successful run. Therefore, you must specify the <strong>run_id</strong> to publish, as well as specify the location of the metrics in your schema (in this case <em>performance.performanceMetrics</em> as per the schema we defined earlier).</p>
+<p>Experiment runs can be published to the model card using the <code class="docutils literal notranslate"><span class="pre">Experiment.publish()</span></code> method, <strong>one at a time</strong>. This is because the intended use is only to publish the most successful run. Therefore, you must specify the <strong>run_id</strong> to publish, or specify an order so the client can select the best result. As well as this, you must specify the location of the metrics in your schema (in this case <em>performance.performanceMetrics</em> as per the schema we defined earlier).</p>
+<p>Examples for both scenarios can be seen below.</p>
+<section id="Publishing-a-specific-run">
+<h3>Publishing a specific run<a class="headerlink" href="#Publishing-a-specific-run" title="Link to this heading"></a></h3>
+<p>To publish a specific run, you must pass the <code class="docutils literal notranslate"><span class="pre">run_id</span></code> into the method. In this example, use one of the IDs we created in the previous steps.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
@@ -291,7 +299,21 @@
 </pre></div>
 </div>
 </div>
-<p>If successful, our metrics should now be under the <strong>Performance</strong> tab of your model card on the UI! Additionally, our artifact will have been published as a new release.</p>
+</section>
+<section id="Publishing-the-best-run">
+<h3>Publishing the best run<a class="headerlink" href="#Publishing-the-best-run" title="Link to this heading"></a></h3>
+<p>To publish the best run, you must define what the best is for your use case. This can be done using the <code class="docutils literal notranslate"><span class="pre">select_by</span></code> parameter with a string e.g. <code class="docutils literal notranslate"><span class="pre">accuracy</span> <span class="pre">MIN|MAX</span></code>. Depending on the requirements, <code class="docutils literal notranslate"><span class="pre">accuracy</span></code> could be any metric you have defined in your experiment.</p>
+<p>In the below example, we will use <code class="docutils literal notranslate"><span class="pre">accuracy</span> <span class="pre">MAX</span></code> to publish the experiment run with the highest accuracy.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">experiment_mlflow</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">mc_loc</span><span class="o">=</span><span class="s2">&quot;performance.performanceMetrics&quot;</span><span class="p">,</span> <span class="n">select_by</span><span class="o">=</span><span class="s2">&quot;accuracy MAX&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>If successful, our metrics should now be under the <strong>Performance</strong> tab of your model card on the UI! Additionally, our artifact will have been published as a new release (<em>this will have been done twice if you ran both the above steps</em>).</p>
+</section>
 </section>
 </section>
 
