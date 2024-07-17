@@ -37,6 +37,21 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
 
   const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.SCHEMA), [getFilteredRoles])
 
+  const permissionTableRows = useMemo(() => {
+    return rows.map((row) => (
+      <TableRow key={row.permission} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+        <TableCell component='th' scope='row'>
+          {row.permission}
+        </TableCell>
+        <TableCell align='center'>{row.roles.includes('owner') ? <Done /> : <></>}</TableCell>
+        <TableCell align='center'>{row.roles.includes('contributor') ? <Done /> : <></>}</TableCell>
+        <TableCell align='center'>{row.roles.includes('consumer') ? <Done /> : <></>}</TableCell>
+        <TableCell align='center'>{row.roles.includes('releaseReviewer') ? <Done /> : <></>}</TableCell>
+        <TableCell align='center'>{row.roles.includes('accessReviewer') ? <Done /> : <></>}</TableCell>
+      </TableRow>
+    ))
+  }, [])
+
   if (isEntryRolesError) {
     return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
@@ -71,20 +86,7 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
                       <TableCell align='right'>Access Reviewer</TableCell>
                     </TableRow>
                   </TableHead>
-                  <TableBody>
-                    {rows.map((row) => (
-                      <TableRow key={row.permission} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                        <TableCell component='th' scope='row'>
-                          {row.permission}
-                        </TableCell>
-                        <TableCell align='center'>{row.roles.includes('owner') ? <Done /> : <></>}</TableCell>
-                        <TableCell align='center'>{row.roles.includes('contributor') ? <Done /> : <></>}</TableCell>
-                        <TableCell align='center'>{row.roles.includes('consumer') ? <Done /> : <></>}</TableCell>
-                        <TableCell align='center'>{row.roles.includes('releaseReviewer') ? <Done /> : <></>}</TableCell>
-                        <TableCell align='center'>{row.roles.includes('accessReviewer') ? <Done /> : <></>}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
+                  <TableBody>{permissionTableRows}</TableBody>
                 </Table>
               </TableContainer>
             </Stack>
