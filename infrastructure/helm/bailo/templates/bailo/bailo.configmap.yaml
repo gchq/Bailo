@@ -158,7 +158,7 @@ data:
 
         modelMirror: {
           enabled: '{{ .Values.modelMirror.enabled }}',
-          disclaimer '{{ .Values.modelMirror.disclaimer }}'
+          disclaimer: '{{ .Values.modelMirror.disclaimer }}'
         }
       },
 
