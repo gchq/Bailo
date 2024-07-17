@@ -103,6 +103,10 @@ resources:
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
+  backend:
+    limits:
+      cpu: 400m
+      memory: 800Mi
 
 # Pod placement
 nodeSelector: {}
