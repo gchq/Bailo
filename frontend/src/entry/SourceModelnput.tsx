@@ -15,7 +15,7 @@ export default function SourceModelInput({ value, onChange }: SourceModelInputPr
   }
 
   return (
-    <LabelledInput required label='Source Model ID' htmlFor={htmlId}>
+    <LabelledInput fullWidth required label='Source Model ID' htmlFor={htmlId}>
       <TextField
         id={htmlId}
         value={value}
