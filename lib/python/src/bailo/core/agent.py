@@ -135,16 +135,21 @@ class TokenAgent(Agent):
         self.basic = HTTPBasicAuth(access_key, secret_key)
 
     def get(self, *args, **kwargs):
+        args[0] = args[0].replace("v2", "v2/token")
         return super().get(*args, auth=self.basic, **kwargs)
 
     def post(self, *args, **kwargs):
+        args[0] = args[0].replace("v2", "v2/token")
         return super().post(*args, auth=self.basic, **kwargs)
 
     def put(self, *args, **kwargs):
+        args[0] = args[0].replace("v2", "v2/token")
         return super().put(*args, auth=self.basic, **kwargs)
 
     def patch(self, *args, **kwargs):
+        args[0] = args[0].replace("v2", "v2/token")
         return super().patch(*args, auth=self.basic, **kwargs)
 
     def delete(self, *args, **kwargs):
+        args[0] = args[0].replace("v2", "v2/token")
         return super().delete(*args, auth=self.basic, **kwargs)
