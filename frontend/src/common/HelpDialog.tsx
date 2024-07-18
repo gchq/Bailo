@@ -1,21 +1,12 @@
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Slide, Tooltip } from '@mui/material'
-import { TransitionProps } from '@mui/material/transitions'
-import { forwardRef, ReactNode, useState } from 'react'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Tooltip } from '@mui/material'
+import { ReactNode, useState } from 'react'
+import { Transition } from 'utils/transitions'
 
 type HelpDialogProps = {
   title: string
   content: ReactNode
 }
-
-const Transition = forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction='up' ref={ref} {...props} />
-})
 
 export default function HelpDialog({ title, content }: HelpDialogProps) {
   const [open, setOpen] = useState(false)
@@ -34,14 +25,7 @@ export default function HelpDialog({ title, content }: HelpDialogProps) {
           <HelpOutlineIcon />
         </IconButton>
       </Tooltip>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        //maxWidth='md'
-        keepMounted
-        disableEscapeKeyDown
-        TransitionComponent={Transition}
-      >
+      <Dialog open={open} onClose={handleClose} maxWidth='md' keepMounted TransitionComponent={Transition}>
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{content}</DialogContent>
         <DialogActions>
