@@ -6,11 +6,14 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  Slide,
   Stack,
   Typography,
 } from '@mui/material'
+import { TransitionProps } from '@mui/material/transitions'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
+import { forwardRef } from 'react'
 import Loading from 'src/common/Loading'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import Link from 'src/Link'
@@ -22,6 +25,15 @@ interface UploadModelImageDialogProps {
   handleClose: () => void
   model: EntryInterface
 }
+
+const Transition = forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 export default function UploadModelImageDialog({ open, handleClose, model }: UploadModelImageDialogProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -39,7 +51,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
     <>
       {(isUiConfigLoading || isCurrentUserLoading) && <Loading />}
       {uiConfig && currentUser && (
-        <Dialog open={open} onClose={handleClose}>
+        <Dialog open={open} onClose={handleClose} keepMounted disableEscapeKeyDown TransitionComponent={Transition}>
           <DialogTitle color='primary'>Pushing an Image for this Model</DialogTitle>
           <DialogContent>
             <Stack spacing={2}>

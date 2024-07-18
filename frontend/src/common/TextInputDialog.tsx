@@ -1,5 +1,6 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
-import { useState } from 'react'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Slide, TextField } from '@mui/material'
+import { TransitionProps } from '@mui/material/transitions'
+import { forwardRef, useState } from 'react'
 
 interface TextUploadDialogProps {
   open: boolean
@@ -9,6 +10,15 @@ interface TextUploadDialogProps {
   submitButtonText?: string
   dialogTitle?: string
 }
+
+const Transition = forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 export default function TextInputDialog({
   open,
@@ -25,7 +35,14 @@ export default function TextInputDialog({
     setFormData('')
   }
   return (
-    <Dialog maxWidth='lg' open={open} onClose={onClose}>
+    <Dialog
+      maxWidth='lg'
+      open={open}
+      onClose={onClose}
+      keepMounted
+      disableEscapeKeyDown
+      TransitionComponent={Transition}
+    >
       <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent sx={{ p: 2 }}>
         <TextField

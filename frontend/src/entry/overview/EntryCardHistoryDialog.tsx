@@ -3,6 +3,7 @@ import {
   DialogActions,
   DialogTitle,
   Paper,
+  Slide,
   Table,
   TableCell,
   TableContainer,
@@ -11,8 +12,9 @@ import {
 } from '@mui/material'
 import Dialog from '@mui/material/Dialog'
 import { useTheme } from '@mui/material/styles'
+import { TransitionProps } from '@mui/material/transitions'
 import { useGetModelCardRevisions } from 'actions/modelCard'
-import { useMemo } from 'react'
+import { forwardRef, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import EntryCardRevision from 'src/entry/overview/EntryCardRevision'
 import MessageAlert from 'src/MessageAlert'
@@ -25,6 +27,15 @@ type EntryCardHistoryDialogProps = {
   open: boolean
   setOpen: (isOpen: boolean) => void
 }
+
+const Transition = forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 export default function EntryCardHistoryDialog({ entry, open, setOpen }: EntryCardHistoryDialogProps) {
   const theme = useTheme()
@@ -50,7 +61,15 @@ export default function EntryCardHistoryDialog({ entry, open, setOpen }: EntryCa
   return (
     <>
       {isEntryCardRevisionsLoading && <Loading />}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm'>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        fullWidth
+        maxWidth='sm'
+        keepMounted
+        disableEscapeKeyDown
+        TransitionComponent={Transition}
+      >
         <DialogTitle>
           {`${toTitleCase(EntryCardKindLabel[entry.kind])} History - `}
           <span style={{ color: theme.palette.primary.main }}>{entry.name}</span>

@@ -8,16 +8,18 @@ import {
   DialogTitle,
   Divider,
   List,
+  Slide,
   Stack,
   Typography,
 } from '@mui/material'
+import { TransitionProps } from '@mui/material/transitions'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import DockerIcon from 'public/docker-icon.svg'
 import KubernetesIcon from 'public/kubernetes-icon.svg'
 import PodmanIcon from 'public/podman-logo.svg'
 import RktLogo from 'public/rkt-logo.svg'
-import { useState } from 'react'
+import { forwardRef, useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import MessageAlert from 'src/MessageAlert'
 import DockerConfiguration from 'src/settings/authentication/DockerConfiguration'
@@ -32,6 +34,15 @@ type TokenDialogProps = {
   token: TokenInterface
 }
 
+const Transition = forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction='up' ref={ref} {...props} />
+})
+
 export default function TokenDialog({ token }: TokenDialogProps) {
   const router = useRouter()
   const [tokenCategory, setTokenCategory] = useState<TokenCategoryKeys>(TokenCategory.PERSONAL_ACCESS)
@@ -45,7 +56,15 @@ export default function TokenDialog({ token }: TokenDialogProps) {
   }
 
   return (
-    <Dialog fullWidth disableEscapeKeyDown maxWidth='xl' open={!!token} PaperProps={{ sx: { height: '90vh' } }}>
+    <Dialog
+      fullWidth
+      disableEscapeKeyDown
+      maxWidth='xl'
+      open={!!token}
+      PaperProps={{ sx: { height: '90vh' } }}
+      keepMounted
+      TransitionComponent={Transition}
+    >
       <DialogTitle>Token Created</DialogTitle>
       <DialogContent>
         <Stack

@@ -1,9 +1,12 @@
+import { Slide } from '@mui/material'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import { TransitionProps } from '@mui/material/transitions'
 import Typography from '@mui/material/Typography'
+import { forwardRef } from 'react'
 import MessageAlert from 'src/MessageAlert'
 
 type ConfirmationDialogProps = {
@@ -15,6 +18,15 @@ type ConfirmationDialogProps = {
   errorMessage?: string
 }
 
+const Transition = forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction='up' ref={ref} {...props} />
+})
+
 export default function ConfirmationDialogue({
   open,
   title,
@@ -24,7 +36,7 @@ export default function ConfirmationDialogue({
   dialogMessage = 'Are you sure you want to perform this action?',
 }: ConfirmationDialogProps) {
   return (
-    <Dialog fullWidth open={open} onClose={onCancel}>
+    <Dialog fullWidth open={open} onClose={onCancel} keepMounted disableEscapeKeyDown TransitionComponent={Transition}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Typography>{dialogMessage}</Typography>
