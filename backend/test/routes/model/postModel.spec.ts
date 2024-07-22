@@ -32,7 +32,7 @@ describe('routes > model > postModel', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateModel).toBeCalled()
-    expect(audit.onCreateModel.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onCreateModel.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('400 > no description', async () => {

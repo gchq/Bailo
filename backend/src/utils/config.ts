@@ -122,6 +122,7 @@ export interface Config {
       connection: {
         host: string
       }
+      authorizationTokenName: string
       gpus: { [key: string]: string }
     }
     modelMirror: {
@@ -167,7 +168,6 @@ export interface Config {
   }
 
   modelMirror: {
-    enabled: boolean
     export: {
       maxSize: number
       bucket: string
@@ -183,6 +183,10 @@ export interface Config {
         }
       }
     }
+  }
+
+  inference: {
+    authorisationToken: string
   }
 }
 

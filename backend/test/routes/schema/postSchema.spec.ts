@@ -35,6 +35,6 @@ describe('routes > schema > postSchema', async () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateSchema).toBeCalled()
-    expect(audit.onCreateSchema.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onCreateSchema.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

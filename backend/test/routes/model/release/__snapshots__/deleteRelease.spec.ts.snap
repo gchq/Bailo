@@ -6,6 +6,6 @@ exports[`routes > release > deleteRelease > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > release > deleteRelease > audit > expected call 1`] = `"recusandae"`;
+exports[`routes > release > deleteRelease > audit > expected call 1`] = `"vespillo"`;
 
 exports[`routes > release > deleteRelease > audit > expected call 2`] = `"3.5.5"`;

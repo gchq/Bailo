@@ -40,6 +40,7 @@ export const testAccessRequest: AccessRequestInterface = {
 }
 
 export const testComment: ResponseInterface = {
+  _id: '125151231231',
   comment: 'This is a comment',
   entity: 'Joe Blogs',
   kind: ResponseKind.Comment,
@@ -96,6 +97,7 @@ export const testV2Model: EntryInterface = {
 }
 
 export const testReviewResponse: ResponseInterface = {
+  _id: '125151231233',
   parentId: '123125123',
   entity: testEntity,
   decision: 'approve',

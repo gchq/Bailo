@@ -25,6 +25,14 @@ export function useGetResponses(parentIds: string[]) {
   }
 }
 
+export function patchResponse(responseId: string, comment: string) {
+  return fetch(`/api/v2/response/${responseId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
+  })
+}
+
 export async function patchResponseReaction(id: string, kind: ReactionKindKeys) {
   return fetch(`/api/v2/response/${id}/reaction/${kind}`, {
     method: 'PATCH',

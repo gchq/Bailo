@@ -30,7 +30,7 @@ describe('routes > accessRequest > patchAccessRequest', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onUpdateAccessRequest).toBeCalled()
-    expect(audit.onUpdateAccessRequest.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onUpdateAccessRequest.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('400 > no name', async () => {
