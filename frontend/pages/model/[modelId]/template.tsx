@@ -1,8 +1,8 @@
 import { ArrowBack, FileCopy } from '@mui/icons-material'
+import { LoadingButton } from '@mui/lab'
 import { Autocomplete, Button, Card, Container, Stack, TextField, Typography } from '@mui/material'
 import { EntrySearchResult, useGetModel, useListModels } from 'actions/model'
 import { postFromTemplate } from 'actions/modelCard'
-import _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -19,6 +19,7 @@ export default function ModelTemplateSelect() {
 
   const [selectedModel, setSelectedModel] = useState<EntrySearchResult | null>(null)
   const [submissionErrorText, setSubmissionErrorText] = useState('')
+  const [isButtonLoading, setIsButtonLoading] = useState(false)
 
   const {
     model: entry,
@@ -33,7 +34,7 @@ export default function ModelTemplateSelect() {
   } = useListModels(EntryKind.MODEL, [], '', [], '', true)
 
   const handleChange = (_event: SyntheticEvent, newValue: EntrySearchResult | null) => {
-    setSelectedModel(newValue ?? null)
+    setSelectedModel(newValue)
   }
 
   const handleSubmit = async () => {
@@ -46,10 +47,12 @@ export default function ModelTemplateSelect() {
       setSubmissionErrorText('You must select a template.')
       return
     }
+    setIsButtonLoading(true)
     const res = await postFromTemplate(entry.id, selectedModel.id)
-
     if (!res.ok) {
       setSubmissionErrorText(await getErrorMessage(res))
+      setIsButtonLoading(false)
+      return
     }
 
     await mutateEntry()
@@ -79,25 +82,30 @@ export default function ModelTemplateSelect() {
               </Link>
               <Stack spacing={2} justifyContent='center' alignItems='center'>
                 <Typography variant='h5' component='h1' color='primary'>
-                  Choose a model to use as a template
+                  Select a model to use as a template
                 </Typography>
                 <FileCopy fontSize='large' color='primary' />
-                <Typography variant='body1'>Some models are made available to be used as templates.</Typography>
+                <Typography>
+                  Only models that have been configured to allow templating can be used as a template.
+                </Typography>
                 <Autocomplete
                   options={entries}
-                  sx={{ width: '100%' }}
+                  fullWidth
                   getOptionLabel={(option: EntrySearchResult) => option.name}
                   value={selectedModel}
                   onChange={handleChange}
                   renderInput={(params) => (
-                    <TextField {...params} size='small' placeholder='Search for an entry to use a template' />
+                    <TextField {...params} size='small' placeholder='Search for a model to use a template' />
                   )}
                 />
-                <div>
-                  <Button variant='contained' disabled={!selectedModel} onClick={handleSubmit}>
-                    Create from template
-                  </Button>
-                </div>
+                <LoadingButton
+                  variant='contained'
+                  disabled={!selectedModel}
+                  onClick={handleSubmit}
+                  loading={isButtonLoading}
+                >
+                  Create from template
+                </LoadingButton>
                 <MessageAlert message={submissionErrorText} severity='error' />
               </Stack>
             </>

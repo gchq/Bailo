@@ -53,7 +53,6 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
                   variant='contained'
                   href={`/${entry.kind}/${entry.id}/template`}
                   LinkComponent={Link}
-                  disabled
                 >
                   Create
                 </Button>
