@@ -3,6 +3,7 @@ import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, Tab
 import { Stack } from '@mui/system'
 import { useGetModelRoles } from 'actions/model'
 import { ReactNode, useCallback, useMemo } from 'react'
+import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, RoleKind } from 'types/types'
@@ -10,6 +11,20 @@ import { toSentenceCase } from 'utils/stringUtils'
 
 interface EntryRolesInfoProps {
   entry: EntryInterface
+}
+
+enum RoleValue {
+  OWNER = 'owner',
+  CONTRIBUTOR = 'contributor',
+  CONSUMER = 'consumer',
+  RELEASE_REVIEWER = 'releaseReviewer',
+  ACCESS_REVIEWER = 'accessReviewer',
+}
+
+interface Row {
+  permission: string
+  roles: RoleValue[]
+  helpText?: string
 }
 
 export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
@@ -37,17 +52,32 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
 
   const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.SCHEMA), [getFilteredRoles])
 
+  const showPopover = (row: Row) => {
+    if (row.helpText) {
+      return <HelpPopover>{row.helpText}</HelpPopover>
+    }
+  }
+
+  const canRoleDoAction = (role: RoleValue, roles: RoleValue[]) => {
+    if (roles.includes(role)) {
+      return <Done />
+    }
+  }
+
   const permissionTableRows = useMemo(() => {
     return rows.map((row) => (
       <TableRow key={row.permission} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
-          {row.permission}
+          <Stack direction='row' alignItems='center'>
+            {row.permission}
+            {showPopover(row)}
+          </Stack>
         </TableCell>
-        <TableCell align='center'>{row.roles.includes('owner') ? <Done /> : <></>}</TableCell>
-        <TableCell align='center'>{row.roles.includes('contributor') ? <Done /> : <></>}</TableCell>
-        <TableCell align='center'>{row.roles.includes('consumer') ? <Done /> : <></>}</TableCell>
-        <TableCell align='center'>{row.roles.includes('releaseReviewer') ? <Done /> : <></>}</TableCell>
-        <TableCell align='center'>{row.roles.includes('accessReviewer') ? <Done /> : <></>}</TableCell>
+        <TableCell align='center'>{canRoleDoAction(RoleValue.OWNER, row.roles)}</TableCell>
+        <TableCell align='center'>{canRoleDoAction(RoleValue.CONTRIBUTOR, row.roles)}</TableCell>
+        <TableCell align='center'>{canRoleDoAction(RoleValue.CONSUMER, row.roles)}</TableCell>
+        <TableCell align='center'>{canRoleDoAction(RoleValue.RELEASE_REVIEWER, row.roles)}</TableCell>
+        <TableCell align='center'>{canRoleDoAction(RoleValue.ACCESS_REVIEWER, row.roles)}</TableCell>
       </TableRow>
     ))
   }, [])
@@ -108,53 +138,60 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
   )
 }
 
-const rows = [
+const rows: Row[] = [
   {
     permission: 'View private model',
-    roles: ['owner', 'contributor', 'consumer', 'releaseReviewer', 'accessReviewer'],
+    roles: [
+      RoleValue.OWNER,
+      RoleValue.CONTRIBUTOR,
+      RoleValue.CONSUMER,
+      RoleValue.RELEASE_REVIEWER,
+      RoleValue.ACCESS_REVIEWER,
+    ],
   },
   {
     permission: 'Edit a model card',
-    roles: ['owner', 'contributor'],
+    roles: [RoleValue.OWNER, RoleValue.CONTRIBUTOR],
   },
   {
     permission: 'Draft a release',
-    roles: ['owner', 'contributor'],
+    roles: [RoleValue.OWNER, RoleValue.CONTRIBUTOR],
   },
   {
     permission: 'Edit a release',
-    roles: ['owner', 'contributor'],
+    roles: [RoleValue.OWNER, RoleValue.CONTRIBUTOR],
   },
   {
     permission: 'Request inferencing service',
-    roles: ['owner', 'contributor'],
+    roles: [RoleValue.OWNER, RoleValue.CONTRIBUTOR],
   },
   {
     permission: 'Push an image',
-    roles: ['owner', 'contributor'],
+    roles: [RoleValue.OWNER, RoleValue.CONTRIBUTOR],
   },
   {
     permission: 'Edit or delete an inferencing form',
-    roles: ['owner', 'contributor'],
+    roles: [RoleValue.OWNER, RoleValue.CONTRIBUTOR],
   },
   {
     permission: 'Request access',
-    roles: ['owner', 'contributor', 'consumer'],
+    roles: [RoleValue.OWNER, RoleValue.CONTRIBUTOR, RoleValue.CONSUMER],
   },
   {
     permission: 'Edit or delete any access request',
-    roles: ['owner'],
+    roles: [RoleValue.OWNER],
+    helpText: 'You can also edit/delete an access request if you an Additional Contact',
   },
   {
     permission: 'Update model settings',
-    roles: ['owner'],
+    roles: [RoleValue.OWNER],
   },
   {
     permission: 'Review a release',
-    roles: ['releaseReviewer'],
+    roles: [RoleValue.RELEASE_REVIEWER],
   },
   {
     permission: 'Review an access request',
-    roles: ['accessReviewer'],
+    roles: [RoleValue.ACCESS_REVIEWER],
   },
 ]
