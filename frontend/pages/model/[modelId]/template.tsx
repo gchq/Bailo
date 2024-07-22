@@ -20,8 +20,17 @@ export default function ModelTemplateSelect() {
   const [selectedModel, setSelectedModel] = useState<EntrySearchResult | null>(null)
   const [submissionErrorText, setSubmissionErrorText] = useState('')
 
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
-  const { models, isModelsLoading, isModelsError } = useListModels(EntryKind.MODEL, [], '', [], '', true)
+  const {
+    model: entry,
+    isModelLoading: isEntryLoading,
+    isModelError: isEntryError,
+    mutateModel: mutateEntry,
+  } = useGetModel(modelId, EntryKind.MODEL)
+  const {
+    models: entries,
+    isModelsLoading: isEntriesLoading,
+    isModelsError: isEntriesError,
+  } = useListModels(EntryKind.MODEL, [], '', [], '', true)
 
   const handleChange = (_event: SyntheticEvent, newValue: EntrySearchResult | null) => {
     setSelectedModel(newValue ?? null)
@@ -29,7 +38,7 @@ export default function ModelTemplateSelect() {
 
   const handleSubmit = async () => {
     setSubmissionErrorText('')
-    if (!model) {
+    if (!entry) {
       setSubmissionErrorText('Could not find model to create using template.')
       return
     }
@@ -37,32 +46,35 @@ export default function ModelTemplateSelect() {
       setSubmissionErrorText('You must select a template.')
       return
     }
-    const res = await postFromTemplate(model.id, selectedModel.id)
+    const res = await postFromTemplate(entry.id, selectedModel.id)
 
     if (!res.ok) {
       setSubmissionErrorText(await getErrorMessage(res))
     }
+
+    await mutateEntry()
+    router.push(`/${entry.kind}/${entry.id}`)
   }
 
-  if (isModelError) {
-    return <ErrorWrapper message={isModelError.info.message} />
+  if (isEntryError) {
+    return <ErrorWrapper message={isEntryError.info.message} />
   }
 
-  if (isModelsError) {
-    return <ErrorWrapper message={isModelsError.info.message} />
+  if (isEntriesError) {
+    return <ErrorWrapper message={isEntriesError.info.message} />
   }
 
   return (
     <>
       <Title text='Select a model template' />
-      {(isModelsLoading || isModelLoading) && <Loading />}
+      {(isEntriesLoading || isEntryLoading) && <Loading />}
       <Container maxWidth='md'>
         <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
-          {model && (
+          {entry && (
             <>
-              <Link href={`/${model.kind}/${model.id}`}>
+              <Link href={`/${entry.kind}/${entry.id}`}>
                 <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
-                  {`Back to ${EntryKindLabel[model.kind]}`}
+                  {`Back to ${EntryKindLabel[entry.kind]}`}
                 </Button>
               </Link>
               <Stack spacing={2} justifyContent='center' alignItems='center'>
@@ -72,7 +84,7 @@ export default function ModelTemplateSelect() {
                 <FileCopy fontSize='large' color='primary' />
                 <Typography variant='body1'>Some models are made available to be used as templates.</Typography>
                 <Autocomplete
-                  options={models}
+                  options={entries}
                   sx={{ width: '100%' }}
                   getOptionLabel={(option: EntrySearchResult) => option.name}
                   value={selectedModel}
