@@ -52,32 +52,30 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
 
   const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.SCHEMA), [getFilteredRoles])
 
-  const showPopover = (row: Row) => {
-    if (row.helpText) {
-      return <HelpPopover>{row.helpText}</HelpPopover>
-    }
-  }
-
-  const canRoleDoAction = (role: RoleValue, roles: RoleValue[]) => {
-    if (roles.includes(role)) {
-      return <Done />
-    }
-  }
-
   const permissionTableRows = useMemo(() => {
     return rows.map((row) => (
       <TableRow key={row.permission} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
         <TableCell component='th' scope='row'>
           <Stack direction='row' alignItems='center'>
             {row.permission}
-            {showPopover(row)}
+            <RowHelpText row={row} />
           </Stack>
         </TableCell>
-        <TableCell align='center'>{canRoleDoAction(RoleValue.OWNER, row.roles)}</TableCell>
-        <TableCell align='center'>{canRoleDoAction(RoleValue.CONTRIBUTOR, row.roles)}</TableCell>
-        <TableCell align='center'>{canRoleDoAction(RoleValue.CONSUMER, row.roles)}</TableCell>
-        <TableCell align='center'>{canRoleDoAction(RoleValue.RELEASE_REVIEWER, row.roles)}</TableCell>
-        <TableCell align='center'>{canRoleDoAction(RoleValue.ACCESS_REVIEWER, row.roles)}</TableCell>
+        <TableCell align='center'>
+          <RoleActionIcon role={RoleValue.OWNER} roles={row.roles} />
+        </TableCell>
+        <TableCell align='center'>
+          <RoleActionIcon role={RoleValue.CONTRIBUTOR} roles={row.roles} />
+        </TableCell>
+        <TableCell align='center'>
+          <RoleActionIcon role={RoleValue.CONSUMER} roles={row.roles} />
+        </TableCell>
+        <TableCell align='center'>
+          <RoleActionIcon role={RoleValue.RELEASE_REVIEWER} roles={row.roles} />
+        </TableCell>
+        <TableCell align='center'>
+          <RoleActionIcon role={RoleValue.ACCESS_REVIEWER} roles={row.roles} />
+        </TableCell>
       </TableRow>
     ))
   }, [])
@@ -180,7 +178,7 @@ const rows: Row[] = [
   {
     permission: 'Edit or delete any access request',
     roles: [RoleValue.OWNER],
-    helpText: 'You can also edit/delete an access request if you an Additional Contact',
+    helpText: 'You can also edit/delete an access request if you are an Additional Contact',
   },
   {
     permission: 'Update model settings',
@@ -195,3 +193,28 @@ const rows: Row[] = [
     roles: [RoleValue.ACCESS_REVIEWER],
   },
 ]
+
+type RowHelpTextProps = {
+  row: Row
+}
+
+function RowHelpText({ row }: RowHelpTextProps) {
+  if (!row.helpText) {
+    return null
+  }
+
+  return <HelpPopover>{row.helpText}</HelpPopover>
+}
+
+type RoleActionIconProps = {
+  role: RoleValue
+  roles: RoleValue[]
+}
+
+function RoleActionIcon({ role, roles }: RoleActionIconProps) {
+  if (!roles.includes(role)) {
+    return null
+  }
+
+  return <Done />
+}
