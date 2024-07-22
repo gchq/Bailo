@@ -32,6 +32,7 @@ import { putInference } from './routes/v2/model/inferencing/putInferenceService.
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
 import { getModelCardRevisions } from './routes/v2/model/modelcard/getModelCardRevisions.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
+import { postFromTemplate } from './routes/v2/model/modelcard/postFromTemplate.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
@@ -91,11 +92,9 @@ server.post('/api/v2/model/:modelId/export/s3', ...postRequestExportToS3)
 
 server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
 server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)
-server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
-
-// *server.get('/api/v2/template/models', ...getModelTemplates)
-// *server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
+server.put('/api/v2/model/:modelId/model-cards', ...putModelCard) // *server.get('/api/v2/template/models', ...getModelTemplates)
 // *server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
+server.post(`/api/v2/model/:modelId/setup/from-template`, ...postFromTemplate)
 server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
 server.post('/api/v2/model/:modelId/releases', ...postRelease)
