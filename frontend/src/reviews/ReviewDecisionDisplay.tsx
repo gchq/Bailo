@@ -54,6 +54,7 @@ export default function ReviewDecisionDisplay({
   }
 
   const handleEditOnClick = () => {
+    setAnchorEl(null)
     setIsEditMode(true)
   }
 

@@ -42,6 +42,7 @@ export default function ReviewCommentDisplay({
   }
 
   const handleEditOnClick = () => {
+    setAnchorEl(null)
     setIsEditMode(true)
   }
 
