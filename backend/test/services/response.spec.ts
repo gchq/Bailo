@@ -4,7 +4,6 @@ import { Decision, ReactionKind } from '../../src/models/Response.js'
 import {
   checkAccessRequestsApproved,
   findResponseById,
-  findResponsesByIds,
   getResponsesByParentIds,
   respondToReview,
   updateResponse,
@@ -126,19 +125,6 @@ describe('services > response', () => {
     await expect(getResponsesByParentIds({} as any, ['test'])).rejects.toThrowError(
       'The requested response was not found.',
     )
-  })
-
-  test('findResponsesByIds > success', async () => {
-    const mockResponses = [{ _id: 'response' }]
-
-    responseModelMock.find.mockResolvedValueOnce(mockResponses)
-
-    expect(await findResponsesByIds({} as any, ['test'])).toBe(mockResponses)
-  })
-  test('findResponsesByIds > response not found', async () => {
-    responseModelMock.find.mockResolvedValueOnce(undefined)
-
-    await expect(findResponsesByIds({} as any, ['test'])).rejects.toThrowError('The requested response was not found.')
   })
 
   test('updateResponse > success', async () => {

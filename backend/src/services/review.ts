@@ -38,7 +38,6 @@ export async function findReviews(
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     // Populate model as value instead of array
     .unwind({ path: '$model' })
-    .lookup({ from: 'v2_responses', localField: 'responseIds', foreignField: '_id', as: 'responses' })
     .match({ ...(mine && (await findUserInCollaborators(user))) })
 
   const auths = await authorisation.models(

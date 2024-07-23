@@ -40,16 +40,6 @@ export async function getResponsesByParentIds(_user: UserInterface, parentIds: s
   return responses
 }
 
-export async function findResponsesByIds(_user: UserInterface, responseIds: string[]) {
-  const responses = await ResponseModel.find({ _id: { $in: responseIds } })
-
-  if (!responses) {
-    throw NotFound(`The requested response was not found.`, { responseIds })
-  }
-
-  return responses
-}
-
 export async function updateResponse(user: UserInterface, responseId: string, comment: string) {
   const response = await ResponseModel.findOne({ _id: responseId })
 
