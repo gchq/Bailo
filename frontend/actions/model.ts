@@ -22,6 +22,7 @@ export function useListModels(
   task = '',
   libraries: string[] = [],
   search = '',
+  allowTemplating?: boolean,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -29,6 +30,7 @@ export function useListModels(
     ...(task && { task }),
     ...(libraries.length > 0 && { libraries }),
     ...(search && { search }),
+    ...(allowTemplating && { allowTemplating }),
   }
   const { data, error, mutate } = useSWR<
     {

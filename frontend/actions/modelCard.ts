@@ -18,6 +18,14 @@ export async function postFromSchema(modelId: string, schemaId: string) {
   }
 }
 
+export async function postFromTemplate(modelId: string, templateId: string) {
+  return fetch(`/api/v2/model/${modelId}/setup/from-template`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ templateId }),
+  })
+}
+
 export async function putModelCard(modelId: string, metadata: unknown) {
   try {
     const response = await axios({
