@@ -37,9 +37,16 @@ type EditableReleaseProps = {
   currentUserRoles: string[]
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
+  readOnly?: boolean
 }
 
-export default function EditableRelease({ release, currentUserRoles, isEdit, onIsEditChange }: EditableReleaseProps) {
+export default function EditableRelease({
+  release,
+  currentUserRoles,
+  isEdit,
+  onIsEditChange,
+  readOnly = false,
+}: EditableReleaseProps) {
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
@@ -137,6 +144,7 @@ export default function EditableRelease({ release, currentUserRoles, isEdit, onI
   }
 
   const handleCancel = () => {
+    setErrorMessage('')
     resetForm()
     onIsEditChange(false)
   }
@@ -246,6 +254,7 @@ export default function EditableRelease({ release, currentUserRoles, isEdit, onI
         onDelete={() => setOpen(true)}
         errorMessage={errorMessage}
         isRegistryError={isRegistryError}
+        readOnly={readOnly}
       />
       {failedFileUploads.length > 0 && (
         <Alert severity='error' sx={{ my: 2 }}>

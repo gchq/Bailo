@@ -12,10 +12,11 @@ import { getRequiredRolesText, hasRole } from 'utils/roles'
 
 type AccessRequestsProps = {
   model: EntryInterface
+  readOnly?: boolean
   currentUserRoles: string[]
 }
 
-export default function ModelImages({ model, currentUserRoles }: AccessRequestsProps) {
+export default function ModelImages({ model, currentUserRoles, readOnly = false }: AccessRequestsProps) {
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
   const [openUploadImageDialog, setOpenUploadImageDialog] = useState(false)
@@ -56,25 +57,27 @@ export default function ModelImages({ model, currentUserRoles }: AccessRequestsP
       {isModelImagesLoading && <Loading />}
       <Container sx={{ my: 2 }}>
         <Stack spacing={4}>
-          <Box sx={{ ml: 'auto' }}>
-            <Tooltip title={requiredRolesText}>
-              <span>
-                <Button
-                  variant='outlined'
-                  disabled={!canPushImage}
-                  onClick={() => setOpenUploadImageDialog(true)}
-                  data-test='pushImageButton'
-                >
-                  Push Image
-                </Button>
-              </span>
-            </Tooltip>
-            <UploadModelImageDialog
-              open={openUploadImageDialog}
-              handleClose={() => setOpenUploadImageDialog(false)}
-              model={model}
-            />
-          </Box>
+          {!readOnly && (
+            <Box sx={{ ml: 'auto' }}>
+              <Tooltip title={requiredRolesText}>
+                <span>
+                  <Button
+                    variant='outlined'
+                    disabled={!canPushImage}
+                    onClick={() => setOpenUploadImageDialog(true)}
+                    data-test='pushImageButton'
+                  >
+                    Push Image
+                  </Button>
+                </span>
+              </Tooltip>
+              <UploadModelImageDialog
+                open={openUploadImageDialog}
+                handleClose={() => setOpenUploadImageDialog(false)}
+                model={model}
+              />
+            </Box>
+          )}
           {modelImageList}
         </Stack>
       </Container>

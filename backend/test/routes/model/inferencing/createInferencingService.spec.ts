@@ -28,6 +28,6 @@ describe('routes > inferencing > postInference', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateInference).toBeCalled()
-    expect(audit.onCreateInference.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onCreateInference.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

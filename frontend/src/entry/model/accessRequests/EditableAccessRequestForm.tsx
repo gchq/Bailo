@@ -21,7 +21,7 @@ import MessageAlert from 'src/MessageAlert'
 import { AccessRequestInterface, EntryKind, SplitSchemaNoRender } from 'types/types'
 import { entitiesIncludesCurrentUser } from 'utils/entityUtils'
 import { getErrorMessage } from 'utils/fetcher'
-import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
+import { getStepsData, getStepsFromSchema, validateForm } from 'utils/formUtils'
 import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 type EditableAccessRequestFormProps = {
@@ -81,6 +81,16 @@ export default function EditableAccessRequestForm({
     if (schema) {
       setErrorMessage('')
       setIsLoading(true)
+
+      for (const step of splitSchema.steps) {
+        const isValid = validateForm(step)
+
+        if (!isValid) {
+          setIsLoading(false)
+          return
+        }
+      }
+
       const data = getStepsData(splitSchema, true)
       const res = await patchAccessRequest(accessRequest.modelId, accessRequest.id, data)
       if (!res.ok) {

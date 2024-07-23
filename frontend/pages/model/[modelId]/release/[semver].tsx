@@ -24,6 +24,8 @@ export default function Release() {
   const [isEdit, setIsEdit] = useState(false)
 
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
+  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,
     semver: semver || '',
@@ -33,7 +35,6 @@ export default function Release() {
     isReviewsLoading: isUserReviewsLoading,
     isReviewsError: isUserReviewsError,
   } = useGetReviewRequestsForUser()
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
@@ -52,9 +53,9 @@ export default function Release() {
 
   const error = MultipleErrorWrapper('Unable to load release', {
     isReleaseError,
+    isModelError,
     isReviewsError,
     isUserReviewsError,
-    isModelError,
     isCurrentUserError,
   })
 
@@ -62,6 +63,7 @@ export default function Release() {
 
   if (
     !release ||
+    !model ||
     isReleaseLoading ||
     isReviewsLoading ||
     isUserReviewsLoading ||
@@ -106,6 +108,7 @@ export default function Release() {
                   currentUserRoles={currentUserRoles}
                   isEdit={isEdit}
                   onIsEditChange={setIsEdit}
+                  readOnly={!!model?.settings.mirror?.sourceModelId}
                 />
               )}
               <ReviewComments release={release} isEdit={isEdit} />

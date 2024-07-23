@@ -86,6 +86,13 @@ sharing.
 
 ### Installation:
 
+To run in standalone mode, not development mode (http://localhost:8080). Not for production use:
+
+````bash
+docker build -t "bailo:standalone" -f ./Dockerfile.standalone .
+docker run --name bailo -p 8080:8080 -d bailo:standalone
+```bash
+
 To run in development mode (modified files on your host machine will be reloaded into the running application):
 
 ```bash
@@ -98,7 +105,7 @@ docker compose build --parallel
 
 # Then run the development instance of Bailo.
 docker compose up -d
-```
+````
 
 On first run, it may take a while (up to 30 seconds) to start up. It needs to build several hundred TypeScript modules.
 These are cached however, so future starts only require a few seconds. You should access the site via
@@ -251,3 +258,7 @@ information.
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
 [license-url]: https://github.com/gchq/bailo/blob/main/public/LICENSE.txt
 [product-screenshot]: frontend/public/images/bailo-marketplace.png
+
+```
+
+```

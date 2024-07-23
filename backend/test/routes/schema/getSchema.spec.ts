@@ -34,7 +34,7 @@ describe('routes > schema > getSchema', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewSchema).toBeCalled()
-    expect(audit.onViewSchema.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onViewSchema.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('returns the schema with the matching ID', async () => {

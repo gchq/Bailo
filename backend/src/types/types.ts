@@ -29,4 +29,8 @@ export interface UiConfig {
   registry: {
     host: string
   }
+  modelMirror: {
+    enabled: boolean
+    disclaimer: string
+  }
 }

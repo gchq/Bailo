@@ -73,6 +73,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
                 variant='contained'
                 sx={{ width: '100%' }}
                 data-test='createSchemaFromScratchButton'
+                disabled={!!entry.settings.mirror?.sourceModelId}
               >
                 Create
               </Button>

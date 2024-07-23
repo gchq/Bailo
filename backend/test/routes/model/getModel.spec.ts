@@ -32,6 +32,6 @@ describe('routes > model > getModel', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewModel).toBeCalled()
-    expect(audit.onViewModel.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onViewModel.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

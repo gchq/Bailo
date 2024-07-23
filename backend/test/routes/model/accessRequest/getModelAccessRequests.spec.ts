@@ -35,6 +35,6 @@ describe('routes > accessRequest > getModelAccessRequests', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewAccessRequests).toBeCalled()
-    expect(audit.onViewAccessRequests.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onViewAccessRequests.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

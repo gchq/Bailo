@@ -8,7 +8,7 @@ import logging
 import warnings
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, ModelVisibility
+from bailo.core.enums import EntryKind, ModelVisibility, MinimalSchema
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 from bailo.helper.entry import Entry
@@ -112,13 +112,43 @@ class Model(Entry):
         return model
 
     @classmethod
+    def search(
+        cls,
+        client: Client,
+        task: str | None = None,
+        libraries: list[str] | None = None,
+        filters: list[str] | None = None,
+        search: str = "",
+    ) -> list[Model]:
+        """Return a list of model objects from Bailo, based on search parameters.
+
+        :param client: A client object used to interact with Bailo
+        :param task: Model task (e.g. image classification), defaults to None
+        :param libraries: Model library (e.g. TensorFlow), defaults to None
+        :param filters: Custom filters, defaults to None
+        :param search: String to be located in model cards, defaults to ""
+        :return: List of model objects
+        """
+        res = client.get_models(kind=EntryKind.MODEL, task=task, libraries=libraries, filters=filters, search=search)
+        models = []
+
+        for model in res["models"]:
+            res_model = client.get_model(model_id=model["id"])["model"]
+            model_obj = cls(client=client, model_id=model["id"], name=model["name"], description=model["description"])
+            model_obj._unpack(res_model)
+            model_obj.get_card_latest()
+            models.append(model_obj)
+
+        return models
+
+    @classmethod
     def from_mlflow(
         cls,
         client: Client,
         mlflow_uri: str,
         team_id: str,
         name: str,
-        schema_id: str | None = None,
+        schema_id: str = MinimalSchema.MODEL,
         version: str | None = None,
         files: bool = True,
         visibility: ModelVisibility | None = None,
@@ -129,7 +159,7 @@ class Model(Entry):
         :param mlflow_uri: MLFlow server URI
         :param team_id: A unique team ID
         :param name: Name of model (on MLFlow). Same name will be used on Bailo
-        :param schema_id: A unique schema ID, only required when files is True, defaults to None
+        :param schema_id: A unique schema ID, only required when files is True, defaults to minimal-general-v10
         :param version: Specific MLFlow model version to import, defaults to None
         :param files: Import files?, defaults to True
         :param visibility: Visibility of model on Bailo, using ModelVisibility enum (e.g Public or Private), defaults to None
@@ -175,10 +205,6 @@ class Model(Entry):
         model._unpack(bailo_res["model"])
 
         if files:
-            if schema_id is None:
-                raise BailoException(
-                    "Unable to upload files to Bailo. schema_id argument is required in order to create a release."
-                )
             model.card_from_schema(schema_id=schema_id)
             release = model.create_release(version=Version.coerce(str(sel_model.version)), notes=" ")
             run_id = sel_model.run_id
@@ -328,6 +354,12 @@ class Model(Entry):
     @model_card_schema.setter
     def model_card_schema(self, value):
         self._card_schema = value
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({str(self)})"
+
+    def __str__(self) -> str:
+        return f"{self.model_id}"
 
 
 class Experiment:

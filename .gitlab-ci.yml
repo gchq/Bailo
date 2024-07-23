@@ -16,13 +16,19 @@ os-backend-build:
       allow_failure: true
   image:
     name: docker:latest
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ''
   services:
-    - docker:dind
+    - name: docker:stable-dind
+      command:
+        - '--tls=false'
+        - '--host=tcp://0.0.0.0:2375'
   before_script:
     - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
     - cd backend
   script:
-    - docker build -t backend-ci:$OS_TAG .
+    - DOCKER_BUILDKIT=1 docker build -t backend-ci:$OS_TAG .
     - docker tag backend-ci:$OS_TAG $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/backend-ci:$OS_TAG
     - docker push $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/backend-ci:$OS_TAG
 
@@ -36,13 +42,19 @@ os-frontend-build:
       allow_failure: true
   image:
     name: docker:latest
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ''
   services:
-    - docker:dind
+    - name: docker:stable-dind
+      command:
+        - '--tls=false'
+        - '--host=tcp://0.0.0.0:2375'
   before_script:
     - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
     - cd frontend
   script:
-    - docker build -t frontend-ci:$OS_TAG .
+    - DOCKER_BUILDKIT=1 docker build -t frontend-ci:$OS_TAG .
     - docker tag frontend-ci:$OS_TAG $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/frontend-ci:$OS_TAG
     - docker push $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/frontend-ci:$OS_TAG
 
@@ -118,8 +130,14 @@ aws-backend-build:
       allow_failure: true
   image:
     name: docker:latest
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ''
   services:
-    - docker:dind
+    - name: docker:stable-dind
+      command:
+        - '--tls=false'
+        - '--host=tcp://0.0.0.0:2375'
   before_script:
     - apk add --no-cache curl jq python3 py3-pip
     - pip install awscli --break-system-packages
@@ -129,7 +147,7 @@ aws-backend-build:
     - docker --version
     - cd backend
   script:
-    - docker build -t $DOCKER_REGISTRY/$APP_NAME_BACKEND:$AWS_TAG .
+    - DOCKER_BUILDKIT=1 docker build -t $DOCKER_REGISTRY/$APP_NAME_BACKEND:$AWS_TAG .
     - docker push $DOCKER_REGISTRY/$APP_NAME_BACKEND:$AWS_TAG
 
 aws-frontend-build:
@@ -142,8 +160,14 @@ aws-frontend-build:
       allow_failure: true
   image:
     name: docker:latest
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ''
   services:
-    - docker:dind
+    - name: docker:stable-dind
+      command:
+        - '--tls=false'
+        - '--host=tcp://0.0.0.0:2375'
   before_script:
     - apk add --no-cache curl jq python3 py3-pip
     - pip install awscli --break-system-packages
@@ -153,5 +177,5 @@ aws-frontend-build:
     - docker --version
     - cd frontend
   script:
-    - docker build -t $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$AWS_TAG .
+    - DOCKER_BUILDKIT=1 docker build -t $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$AWS_TAG .
     - docker push $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$AWS_TAG
