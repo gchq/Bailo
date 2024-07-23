@@ -19,6 +19,7 @@ import PodmanIcon from 'public/podman-logo.svg'
 import RktLogo from 'public/rkt-logo.svg'
 import { useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
+import { Transition } from 'src/common/Transition'
 import MessageAlert from 'src/MessageAlert'
 import DockerConfiguration from 'src/settings/authentication/DockerConfiguration'
 import DockerLogin from 'src/settings/authentication/DockerLogin'
@@ -27,7 +28,6 @@ import PersonalAccessToken from 'src/settings/authentication/PersonalAccessToken
 import PodmanLogin from 'src/settings/authentication/PodmanLogin'
 import RocketConfiguration from 'src/settings/authentication/RocketConfiguration'
 import { TokenCategory, TokenCategoryKeys, TokenInterface } from 'types/types'
-import { Transition } from 'utils/transitions'
 
 type TokenDialogProps = {
   token: TokenInterface
@@ -51,7 +51,6 @@ export default function TokenDialog({ token }: TokenDialogProps) {
       maxWidth='xl'
       open={!!token}
       PaperProps={{ sx: { height: '90vh' } }}
-      keepMounted
       TransitionComponent={Transition}
     >
       <DialogTitle>Token Created</DialogTitle>

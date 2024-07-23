@@ -14,12 +14,12 @@ import { useTheme } from '@mui/material/styles'
 import { useGetModelCardRevisions } from 'actions/modelCard'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
+import { Transition } from 'src/common/Transition'
 import EntryCardRevision from 'src/entry/overview/EntryCardRevision'
 import MessageAlert from 'src/MessageAlert'
 import { EntryCardKindLabel, EntryInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/dateUtils'
 import { toTitleCase } from 'utils/stringUtils'
-import { Transition } from 'utils/transitions'
 
 type EntryCardHistoryDialogProps = {
   entry: EntryInterface
@@ -51,14 +51,7 @@ export default function EntryCardHistoryDialog({ entry, open, setOpen }: EntryCa
   return (
     <>
       {isEntryCardRevisionsLoading && <Loading />}
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        fullWidth
-        maxWidth='sm'
-        keepMounted
-        TransitionComponent={Transition}
-      >
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm' TransitionComponent={Transition}>
         <DialogTitle>
           {`${toTitleCase(EntryCardKindLabel[entry.kind])} History - `}
           <span style={{ color: theme.palette.primary.main }}>{entry.name}</span>

@@ -4,8 +4,8 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
+import { Transition } from 'src/common/Transition'
 import MessageAlert from 'src/MessageAlert'
-import { Transition } from 'utils/transitions'
 
 type ConfirmationDialogProps = {
   open: boolean
@@ -25,7 +25,7 @@ export default function ConfirmationDialogue({
   dialogMessage = 'Are you sure you want to perform this action?',
 }: ConfirmationDialogProps) {
   return (
-    <Dialog fullWidth open={open} onClose={onCancel} keepMounted TransitionComponent={Transition}>
+    <Dialog fullWidth open={open} onClose={onCancel} TransitionComponent={Transition}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Typography>{dialogMessage}</Typography>
