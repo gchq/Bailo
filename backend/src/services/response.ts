@@ -1,4 +1,10 @@
-import ResponseModel, { Decision, ResponseInterface, ResponseKind } from '../models/Response.js'
+import ResponseModel, {
+  Decision,
+  ReactionKindKeys,
+  ResponseInterface,
+  ResponseKind,
+  ResponseReaction,
+} from '../models/Response.js'
 import { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
@@ -60,6 +66,32 @@ export async function updateResponse(user: UserInterface, responseId: string, co
 
   response.comment = comment
   response.save()
+
+  return response
+}
+
+export async function updateResponseReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
+  const response = await ResponseModel.findOne({ _id: responseId })
+
+  if (!response) {
+    throw NotFound(`The requested response was not found.`, { responseId })
+  }
+
+  const updatedReaction = response.reactions.find((reaction) => reaction.kind === kind)
+
+  if (!updatedReaction) {
+    const newReaction: ResponseReaction = {
+      kind,
+      users: [user.dn],
+    }
+    response.reactions.push(newReaction)
+  } else if (updatedReaction.users.includes(user.dn)) {
+    updatedReaction.users = updatedReaction.users.filter((reactionUser) => reactionUser !== user.dn)
+  } else {
+    updatedReaction.users.push(user.dn)
+  }
+
+  await response.save()
 
   return response
 }

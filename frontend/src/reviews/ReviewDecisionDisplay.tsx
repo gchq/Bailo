@@ -6,7 +6,7 @@ import { Box, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } fro
 import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
 import { patchResponse } from 'actions/response'
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
@@ -32,16 +32,19 @@ export default function ReviewDecisionDisplay({
   currentUser,
   mutateResponses,
 }: ReviewDecisionDisplayProps) {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
-
+  const theme = useTheme()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isEditMode, setIsEditMode] = useState(false)
   const [comment, setComment] = useState(response.comment || '')
-  const [editCommentErrorMessage, setEditCommentErrorMessage] = useState('')
-  const open = Boolean(anchorEl)
+  const [errorMessage, setErrorMessage] = useState('')
 
-  const theme = useTheme()
-  const [entityKind, username] = response.entity.split(':')
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+
+  const [entityKind, username] = useMemo(() => response.entity.split(':'), [response.entity])
+
+  const handleReactionsError = useCallback((message: string) => {
+    setErrorMessage(message)
+  }, [])
 
   const handleReplyOnClick = (value: string | undefined) => {
     setAnchorEl(null)
@@ -51,20 +54,21 @@ export default function ReviewDecisionDisplay({
   }
 
   const handleEditOnClick = () => {
+    setAnchorEl(null)
     setIsEditMode(true)
   }
 
   const handleEditOnCancel = () => {
     setIsEditMode(false)
-    setEditCommentErrorMessage('')
+    setErrorMessage('')
     setComment(response.comment || '')
   }
 
   const handleEditOnSave = async () => {
-    setEditCommentErrorMessage('')
+    setErrorMessage('')
     const res = await patchResponse(response._id, comment)
     if (!res.ok) {
-      setEditCommentErrorMessage(await getErrorMessage(res))
+      setErrorMessage(await getErrorMessage(res))
     } else {
       mutateResponses()
       setIsEditMode(false)
@@ -129,13 +133,15 @@ export default function ReviewDecisionDisplay({
             onCommentChange={setComment}
             response={response}
             isEditMode={isEditMode}
-            editCommentErrorMessage={editCommentErrorMessage}
             onSave={handleEditOnSave}
             onCancel={handleEditOnCancel}
+            onReactionsError={handleReactionsError}
+            mutateResponses={mutateResponses}
           />
+          <MessageAlert message={errorMessage} severity='error' />
         </Card>
       </Stack>
-      <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
+      <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
         <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>
         {currentUser && currentUser.dn === username && <MenuItem onClick={handleEditOnClick}>Edit comment</MenuItem>}
       </Menu>

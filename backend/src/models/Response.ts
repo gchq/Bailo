@@ -21,10 +21,23 @@ export interface ResponseInterface {
   decision?: DecisionKeys
   comment?: string
   parentId: Schema.Types.ObjectId
+  reactions: ResponseReaction[]
 
   createdAt: string
   updatedAt: string
 }
+
+export interface ResponseReaction {
+  kind: ReactionKindKeys
+  users: string[]
+}
+
+export const ReactionKind = {
+  LIKE: 'like',
+  DISLIKE: 'dislike',
+  CELEBRATE: 'celebrate',
+} as const
+export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
@@ -39,6 +52,12 @@ const ResponseSchema = new Schema<ResponseInterface>(
     decision: { type: String, enum: Object.values(Decision) },
     comment: { type: String },
     parentId: { type: Schema.Types.ObjectId, required: true },
+    reactions: [
+      {
+        kind: { type: String, enum: Object.values(ReactionKind) },
+        users: [{ type: String }],
+      },
+    ],
   },
   {
     timestamps: true,

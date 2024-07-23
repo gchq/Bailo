@@ -50,6 +50,7 @@ import { postReleaseComment } from './routes/v2/release/postReleaseComment.js'
 import { putRelease } from './routes/v2/release/putRelease.js'
 import { getResponses } from './routes/v2/response/getResponses.js'
 import { patchResponse } from './routes/v2/response/patchResponse.js'
+import { patchResponseReaction } from './routes/v2/response/patchResponseReaction.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
@@ -134,7 +135,6 @@ server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download
 server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
 server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
 server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
-server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
 server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
@@ -171,8 +171,9 @@ server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/reviews', ...getReviews)
 
-server.get('/api/v2/response', ...getResponses)
+server.get('/api/v2/responses', ...getResponses)
 server.patch('/api/v2/response/:responseId', ...patchResponse)
+server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReaction)
 
 server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
 server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
