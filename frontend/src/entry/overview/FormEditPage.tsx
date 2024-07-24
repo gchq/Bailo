@@ -8,6 +8,7 @@ import Loading from 'src/common/Loading'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
+import ExportModelCardDialog from 'src/entry/overview/ExportModelCardDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
@@ -31,6 +32,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
   const { mutateModelCardRevisions: mutateEntryCardRevisions } = useGetModelCardRevisions(entry.id)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -136,6 +138,9 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
           </div>
           {!isEdit && (
             <Stack direction='row' spacing={1} justifyContent='flex-end' sx={{ mb: { xs: 2 } }}>
+              <Button variant='outlined' onClick={() => setExportDialogOpen(true)}>
+                Export as PDF
+              </Button>
               <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
                 View History
               </Button>
@@ -184,6 +189,12 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
         onSubmit={handleJsonFormOnSubmit}
         helperText={`Paste in raw JSON to fill in the ${EntryCardKindLabel[entry.kind]} form`}
         dialogTitle='Add Raw JSON to Form'
+      />
+      <ExportModelCardDialog
+        entry={entry}
+        splitSchema={splitSchema}
+        open={exportDialogOpen}
+        setOpen={setExportDialogOpen}
       />
     </>
   )
