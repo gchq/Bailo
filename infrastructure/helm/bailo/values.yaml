@@ -273,6 +273,7 @@ inference:
   host: 'https://example.com'
   gpus:
   authorizationTokenName: 'inferencing-token'
+  authorisationToken: ''
 
 backend:
   serviceAccount: ''
