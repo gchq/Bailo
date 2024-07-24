@@ -71,7 +71,7 @@ spec:
                   name: {{ include "bailo.fullname" . }}-apm
                   key: auth-token
             {{- end }}
-            {{- if .Values.inferencing.enabled }}
+            {{- if .Values.inference.enabled }}
             - name: INFERENCING_WRITE_TOKEN
               valueFrom:
                 secretKeyRef:
