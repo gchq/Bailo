@@ -10,6 +10,7 @@ import Image from 'next/legacy/image'
 import Link from './Link'
 import imageLoader from './imageLoader'
 import { Button, IconButton, Tooltip } from '@mui/material'
+import nextConfig from '../next.config.mjs'
 
 const drawerWidth = 240
 
@@ -63,7 +64,7 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
               <Link href='/' color='inherit' underline='none'>
                 <Image
                   loader={imageLoader}
-                  src='/logo-horizontal-light.png'
+                  src={`${nextConfig.basePath}/logo-horizontal-light.png`}
                   alt='Logo'
                   width={142}
                   height={60}
