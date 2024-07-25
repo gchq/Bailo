@@ -10,7 +10,7 @@ import Image from 'next/legacy/image'
 import Link from './Link'
 import imageLoader from './imageLoader'
 import { Button, IconButton, Tooltip } from '@mui/material'
-import nextConfig from '../next.config.mjs'
+import bailoLogo from '../public/logo-horizontal-light.png'
 
 const drawerWidth = 240
 
@@ -61,20 +61,13 @@ export default function Wrapper({ title, page, children }: WrapperProps): ReactE
             }}
           >
             <Box sx={{ display: { xs: 'flex', cursor: 'pointer' } }}>
-              <Link href='/' color='inherit' underline='none'>
-                <Image
-                  loader={imageLoader}
-                  src={`${nextConfig.basePath}/logo-horizontal-light.png`}
-                  alt='Logo'
-                  width={142}
-                  height={60}
-                  priority
-                />
+              <Link href='/'>
+                <Image loader={imageLoader} src={bailoLogo} alt='Logo' width={142} height={60} priority />
               </Link>
             </Box>
-            <Button href='/docs/' sx={{ color: 'white' }}>
-              Documentation
-            </Button>
+            <Link href='/docs'>
+              <Button sx={{ color: 'white' }}>Documentation</Button>
+            </Link>
             <Button href='https://github.com/gchq/bailo' sx={{ color: 'white' }}>
               Github
             </Button>
