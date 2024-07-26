@@ -60,7 +60,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
         {!readOnly && (
           <Box sx={{ ml: 'auto' }}>
             <Tooltip title={requiredRolesText}>
-              <span>
+              <Box sx={{ textAlign: 'right' }}>
                 <Button
                   variant='outlined'
                   onClick={handleDraftNewRelease}
@@ -69,7 +69,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
                 >
                   Draft new Release
                 </Button>
-              </span>
+              </Box>
             </Tooltip>
           </Box>
         )}

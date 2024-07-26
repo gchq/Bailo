@@ -6,12 +6,12 @@ import {
   AutocompleteChangeReason,
   AutocompleteRenderGetTagProps,
   Button,
-  Card,
   Checkbox,
   Chip,
   Container,
   FormControl,
   FormControlLabel,
+  Paper,
   Stack,
   TextField,
   Typography,
@@ -178,7 +178,7 @@ export default function NewToken() {
     <>
       <Title text='Personal Access Token' />
       <Container maxWidth='md'>
-        <Card sx={{ my: 4, p: 4 }}>
+        <Paper sx={{ my: 4, p: 4 }}>
           <Stack spacing={2}>
             <div>
               <Link href={'/settings?tab=authentication'}>
@@ -284,7 +284,7 @@ export default function NewToken() {
               </Stack>
             </Stack>
           </Stack>
-        </Card>
+        </Paper>
       </Container>
       {token && <TokenDialog token={token} />}
     </>

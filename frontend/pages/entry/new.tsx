@@ -1,12 +1,14 @@
 import { FileUpload } from '@mui/icons-material'
-import { Box, Card, Container, Stack, Typography } from '@mui/material'
+import { Box, Container, Paper, Stack, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import CreateEntry from 'src/entry/CreateEntry'
 import EntryCard from 'src/entry/EntryCard'
 import MessageAlert from 'src/MessageAlert'
 import { CreateEntryKind, CreateEntryKindKeys } from 'types/types'
+import { toTitleCase } from 'utils/stringUtils'
 
 export default function NewEntry() {
   const [createEntryKind, setCreateEntryKind] = useState<CreateEntryKindKeys | undefined>()
@@ -52,11 +54,12 @@ export default function NewEntry() {
 
   return (
     <>
+      <Title text={`New ${toTitleCase(createEntryKind?.replace('-', ' ') || '')}`} />
       <Container>
         {createEntryKind ? (
           <CreateEntry createEntryKind={createEntryKind} onBackClick={() => setCreateEntryKind(undefined)} />
         ) : (
-          <Card sx={{ p: 4, mb: 4 }}>
+          <Paper sx={{ p: 4, mb: 4 }}>
             <Stack spacing={4} justifyContent='center' alignItems='center'>
               <Typography variant='h6' component='h1' color='primary'>
                 Create Entry
@@ -68,7 +71,7 @@ export default function NewEntry() {
                 ))}
               </Box>
             </Stack>
-          </Card>
+          </Paper>
         )}
       </Container>
     </>
