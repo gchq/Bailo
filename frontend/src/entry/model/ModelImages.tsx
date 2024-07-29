@@ -58,7 +58,7 @@ export default function ModelImages({ model, currentUserRoles, readOnly = false 
       <Container sx={{ my: 2 }}>
         <Stack spacing={4}>
           {!readOnly && (
-            <Box sx={{ ml: 'auto' }}>
+            <>
               <Tooltip title={requiredRolesText}>
                 <Box sx={{ textAlign: 'right' }}>
                   <Button
@@ -76,7 +76,7 @@ export default function ModelImages({ model, currentUserRoles, readOnly = false 
                 handleClose={() => setOpenUploadImageDialog(false)}
                 model={model}
               />
-            </Box>
+            </>
           )}
           {modelImageList}
         </Stack>

@@ -8,7 +8,7 @@ import CreateEntry from 'src/entry/CreateEntry'
 import EntryCard from 'src/entry/EntryCard'
 import MessageAlert from 'src/MessageAlert'
 import { CreateEntryKind, CreateEntryKindKeys } from 'types/types'
-import { toTitleCase } from 'utils/stringUtils'
+import { camelCaseToTitleCase } from 'utils/stringUtils'
 
 export default function NewEntry() {
   const [createEntryKind, setCreateEntryKind] = useState<CreateEntryKindKeys | undefined>()
@@ -54,7 +54,7 @@ export default function NewEntry() {
 
   return (
     <>
-      <Title text={`New ${toTitleCase(createEntryKind?.replace('-', ' ') || '')}`} />
+      <Title text={`New ${createEntryKind ? camelCaseToTitleCase(createEntryKind) : 'Entry'}`} />
       <Container>
         {createEntryKind ? (
           <CreateEntry createEntryKind={createEntryKind} onBackClick={() => setCreateEntryKind(undefined)} />
