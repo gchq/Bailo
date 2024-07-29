@@ -1,7 +1,7 @@
 import Card from '@mui/material/Card'
 import { useGetUiConfig } from 'actions/uiConfig'
 
-function Banner() {
+export default function Banner() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const style = {
@@ -26,5 +26,3 @@ function Banner() {
 
   return <Card sx={style}>{uiConfig.banner.text}</Card>
 }
-
-export default Banner

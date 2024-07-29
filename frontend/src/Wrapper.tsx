@@ -4,6 +4,7 @@ import Toolbar from '@mui/material/Toolbar'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import Announcement from 'src/Annoucement'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 
@@ -67,6 +68,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   return (
     <>
       <Banner />
+      <Announcement />
       <Box sx={{ display: 'flex' }}>
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
         {currentUser && (
