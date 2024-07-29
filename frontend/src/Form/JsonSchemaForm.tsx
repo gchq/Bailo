@@ -1,80 +1,14 @@
-import AddIcon from '@mui/icons-material/Add'
-import RemoveIcon from '@mui/icons-material/Remove'
-import {
-  Box,
-  Button,
-  Card,
-  Grid,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  Stack,
-  Stepper,
-  Typography,
-} from '@mui/material'
+import { Grid, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
-import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema } from '@rjsf/utils'
+import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useState } from 'react'
+import { ArrayFieldTemplate, DescriptionFieldTemplate, ObjectFieldTemplate } from 'src/Form/FormTemplates'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import { setStepState, widgets } from 'utils/formUtils'
-
-function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
-  return (
-    <Card sx={{ p: 2 }}>
-      <Typography fontWeight='bold' variant='h5' component='h3'>
-        {props.title}
-      </Typography>
-      {props.items.map((element) => (
-        <Grid key={element.key} container spacing={2}>
-          <Grid item xs={11}>
-            <Box>{element.children}</Box>
-          </Grid>
-          <Grid item xs={1}>
-            {props.formContext.editMode && (
-              <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
-                <RemoveIcon color='error' />
-              </IconButton>
-            )}
-          </Grid>
-        </Grid>
-      ))}
-      {props.canAdd && props.formContext.editMode && (
-        <Button size='small' type='button' onClick={props.onAddClick} startIcon={<AddIcon />}>
-          Add Item
-        </Button>
-      )}
-    </Card>
-  )
-}
-
-function DescriptionFieldTemplate() {
-  return <></>
-}
-
-function ObjectFieldTemplate({ title, properties, description }: ObjectFieldTemplateProps) {
-  return (
-    <Box sx={{ pl: 2, mb: 3 }}>
-      <Stack spacing={2}>
-        <div>
-          <Typography fontWeight='bold' variant='h6' component='h3'>
-            {title}
-          </Typography>
-          <Typography variant='caption'>{description}</Typography>
-        </div>
-        {properties.map((element) => (
-          <div key={element.name} className='property-wrapper'>
-            {element.content}
-          </div>
-        ))}
-      </Stack>
-    </Box>
-  )
-}
 
 // TODO - add validation BAI-866
 export default function JsonSchemaForm({
