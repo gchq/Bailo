@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Stack, StackProps, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { ReactNode } from 'react'
 
@@ -7,13 +7,22 @@ interface LabelledInputProps {
   htmlFor: string
   children: ReactNode
   required?: boolean
+  fullWidth?: boolean
 }
 
-export default function LabelledInput({ label, htmlFor, children, required = false }: LabelledInputProps) {
+export default function LabelledInput({
+  label,
+  htmlFor,
+  children,
+  required = false,
+  fullWidth = false,
+}: LabelledInputProps) {
   const theme = useTheme()
 
+  const stackProps: StackProps = fullWidth ? { width: '100%' } : { alignItems: 'flex-start' }
+
   return (
-    <Stack width='100%'>
+    <Stack {...stackProps}>
       <Typography component='label' fontWeight='bold' htmlFor={htmlFor}>
         {label}
         {required && (

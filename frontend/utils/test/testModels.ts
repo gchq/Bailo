@@ -5,9 +5,9 @@ import {
   EntryInterface,
   EntryKind,
   EntryVisibility,
-  ReviewComment,
+  ResponseInterface,
+  ResponseKind,
   ReviewRequestInterface,
-  ReviewResponse,
   Role,
   SchemaInterface,
   StepNoRender,
@@ -18,14 +18,15 @@ import {
 const testEntity = 'user:user1'
 const modelId = 'my-test-model'
 const accessRequestSchemaId = 'my-request-schema'
-const modelcardSchemaId = 'my-model-schema'
+const modelCardSchemaId = 'my-model-schema'
+const testAccessRequestId = '12315123'
 
 export const testAccessRequest: AccessRequestInterface = {
+  _id: testAccessRequestId,
   id: 'my-access-request',
   modelId: modelId,
   schemaId: accessRequestSchemaId,
   deleted: false,
-  comments: [],
   createdBy: testEntity,
   metadata: {
     overview: {
@@ -38,18 +39,23 @@ export const testAccessRequest: AccessRequestInterface = {
   updatedAt: new Date().toDateString(),
 }
 
-const testComment: ReviewComment = {
-  message: 'This is a comment',
-  user: 'Joe Blogs',
+export const testComment: ResponseInterface = {
+  _id: '125151231231',
+  comment: 'This is a comment',
+  entity: 'Joe Blogs',
+  kind: ResponseKind.Comment,
+  parentId: '22626234234234',
+  reactions: [],
   createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 }
 
 export const testAccessRequestWithComments: AccessRequestInterface = {
+  _id: '123125123',
   id: 'my-access-request',
   modelId: modelId,
   schemaId: accessRequestSchemaId,
   deleted: false,
-  comments: [testComment],
   createdBy: testEntity,
   metadata: {
     overview: {
@@ -62,7 +68,7 @@ export const testAccessRequestWithComments: AccessRequestInterface = {
 }
 
 export const testModelCard: EntryCardInterface = {
-  schemaId: modelcardSchemaId,
+  schemaId: modelCardSchemaId,
   metadata: {},
   version: 1,
   createdBy: testEntity,
@@ -82,6 +88,7 @@ export const testV2Model: EntryInterface = {
   ],
   settings: {
     ungovernedAccess: false,
+    allowTemplating: false,
   },
   teamId: 'test-team',
   card: testModelCard,
@@ -89,48 +96,52 @@ export const testV2Model: EntryInterface = {
   createdBy: testEntity,
 }
 
-export const testReviewResponse: ReviewResponse = {
-  user: testEntity,
+export const testReviewResponse: ResponseInterface = {
+  _id: '125151231233',
+  parentId: '123125123',
+  entity: testEntity,
   decision: 'approve',
   role: 'mtr',
+  kind: ResponseKind.Review,
+  reactions: [],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 }
 
 export const testAccessRequestReview: ReviewRequestInterface = {
+  _id: '123125123',
   model: testV2Model,
-  role: 'mrso',
+  role: 'msro',
   semver: '1.0.0',
   kind: 'access',
-  responses: [testReviewResponse],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 }
 
 export const testReleaseReview: ReviewRequestInterface = {
+  _id: '123125123',
   model: testV2Model,
-  role: 'mrso',
+  role: 'msro',
   semver: '1.0.0',
   kind: 'release',
-  responses: [testReviewResponse],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 }
 
 export const testAccessRequestReviewNoResponses: ReviewRequestInterface = {
+  _id: '123125123',
   model: testV2Model,
-  role: 'mrso',
+  role: 'msro',
   kind: 'access',
-  responses: [],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   accessRequestId: 'my-access-request',
 }
 export const testReleaseReviewNoResponses: ReviewRequestInterface = {
+  _id: '123125123',
   model: testV2Model,
-  role: 'mrso',
+  role: 'msro',
   kind: 'release',
-  responses: [],
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   accessRequestId: 'my-release',

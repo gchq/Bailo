@@ -1,14 +1,17 @@
 import { Validator } from 'jsonschema'
+import { Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestInterface } from '../models/AccessRequest.js'
 import AccessRequest from '../models/AccessRequest.js'
+import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
-import { BadReq, Forbidden, InternalError, NotFound, Unauthorized } from '../utils/error.js'
+import { toEntity } from '../utils/entity.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
@@ -124,6 +127,20 @@ export async function updateAccessRequest(
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
+  // Ensure that the AR meets the schema
+  const schema = await findSchemaById(accessRequest.schemaId)
+  try {
+    new Validator().validate(accessRequest.metadata, schema.jsonSchema, { throwAll: true, required: true })
+  } catch (error) {
+    if (isValidatorResultError(error)) {
+      throw BadReq('Access Request Metadata could not be validated against the schema.', {
+        schemaId: accessRequest.schemaId,
+        validationErrors: error.errors,
+      })
+    }
+    throw error
+  }
+
   if (diff.metadata) {
     accessRequest.metadata = diff.metadata
     accessRequest.markModified('metadata')
@@ -141,72 +158,21 @@ export async function newAccessRequestComment(user: UserInterface, accessRequest
     throw NotFound(`The requested access request was not found.`, { accessRequestId })
   }
 
-  const comment = {
-    message,
-    user: user.dn,
+  const commentResponse = new ResponseModel({
+    entity: toEntity('user', user.dn),
+    kind: ResponseKind.Comment,
+    comment: message,
+    parentId: accessRequest._id as Types.ObjectId,
     createdAt: new Date().toISOString(),
+  })
+
+  const newComment = await commentResponse.save()
+
+  if (!newComment) {
+    throw InternalError('There was a problem saving a new comment for this access request')
   }
 
-  const updatedAccessRequest = await AccessRequest.findOneAndUpdate(
-    { _id: accessRequest._id },
-    {
-      $push: {
-        comments: comment,
-      },
-    },
-  )
-
-  if (!updatedAccessRequest) {
-    throw InternalError(`Updated of access request failed.`, { accessRequestId })
-  }
-
-  return updatedAccessRequest
-}
-
-export async function updateAccessRequestComment(
-  user: UserInterface,
-  accessRequestId: string,
-  commentId: string,
-  message: string,
-) {
-  const accessRequest = await AccessRequest.findOne({ id: accessRequestId })
-
-  if (!accessRequest) {
-    throw NotFound(`The requested access request was not found.`, { accessRequestId })
-  }
-
-  if (!accessRequest.comments) {
-    throw NotFound(`The requested access request does not contain any comments to edit.`, { accessRequestId })
-  }
-
-  const originalComment = accessRequest.comments.find((comment) => comment._id.toString() === commentId)
-
-  if (!originalComment) {
-    throw NotFound(`The requested access request comment was not found.`, { accessRequestId, commentId })
-  }
-
-  if (user.dn !== originalComment.user) {
-    throw Unauthorized('You do not have permission to update this comment', { accessRequestId, commentId })
-  }
-
-  const updatedAccessRequest = await AccessRequest.findOneAndUpdate(
-    { _id: accessRequest._id, 'comments._id': commentId },
-    { 'comments.$[i].message': message },
-    {
-      arrayFilters: [
-        {
-          'i._id': `${commentId}`,
-          'i.user': `${user.dn}`,
-        },
-      ],
-    },
-  )
-
-  if (!updatedAccessRequest) {
-    throw InternalError(`Updated of access request failed.`, { accessRequestId })
-  }
-
-  return updatedAccessRequest
+  return commentResponse
 }
 
 export async function getModelAccessRequestsForUser(user: UserInterface, modelId: string) {

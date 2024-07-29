@@ -1,9 +1,11 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest } from 'actions/accessRequest'
+import { useGetModel } from 'actions/model'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
+import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -12,6 +14,8 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
+import { EntryKind } from 'types/types'
+import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 export default function AccessRequest() {
   const router = useRouter()
@@ -29,28 +33,42 @@ export default function AccessRequest() {
     isReviewsLoading: isUserReviewsLoading,
     isReviewsError: isUserReviewsError,
   } = useGetReviewRequestsForUser()
+  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const userCanReview =
-    reviews.filter((review) =>
-      userReviews.some(
-        (userReview) =>
-          userReview.model.id === review.model.id && userReview.accessRequestId === review.accessRequestId,
-      ),
-    ).length > 0
+  const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
+
+  const userCanReview = useMemo(
+    () =>
+      hasRole(currentUserRoles, ['msro']) &&
+      reviews.filter((review) =>
+        userReviews.some(
+          (userReview) =>
+            userReview.model.id === review.model.id && userReview.accessRequestId === review.accessRequestId,
+        ),
+      ).length > 0,
+    [currentUserRoles, reviews, userReviews],
+  )
 
   const error = MultipleErrorWrapper('Unable to load access request', {
     isAccessRequestError,
     isReviewsError,
     isUserReviewsError,
+    isModelError,
+    isCurrentUserError,
   })
   if (error) return error
 
   return (
     <>
       <Title text={accessRequest ? accessRequest.metadata.overview.name : 'Loading...'} />
-      <Container maxWidth='md' sx={{ my: 4 }} data-test='accessRequestContainer'>
+      <Container maxWidth='lg' sx={{ my: 4 }} data-test='accessRequestContainer'>
         <Paper>
-          {isAccessRequestLoading && isReviewsLoading && isUserReviewsLoading && <Loading />}
+          {(isAccessRequestLoading ||
+            isReviewsLoading ||
+            isUserReviewsLoading ||
+            isModelLoading ||
+            isCurrentUserLoading) && <Loading />}
           {accessRequest && (
             <>
               {userCanReview && <ReviewBanner accessRequest={accessRequest} />}

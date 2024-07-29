@@ -3,23 +3,6 @@ import MongooseDelete from 'mongoose-delete'
 
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 
-export const Decision = {
-  RequestChanges: 'request_changes',
-  Approve: 'approve',
-  Undo: 'undo',
-} as const
-export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
-
-export interface ReviewResponse {
-  user: string
-  id: string
-  decision: DecisionKeys
-  comment?: string
-
-  createdAt: Date
-  updatedAt: Date
-}
-
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -30,8 +13,6 @@ export interface ReviewInterface {
 
   kind: ReviewKindKeys
   role: string
-
-  responses: Array<ReviewResponse>
 
   createdAt: Date
   updatedAt: Date
@@ -72,22 +53,6 @@ const ReviewSchema = new Schema<ReviewInterface>(
     kind: { type: String, enum: Object.values(ReviewKind), required: true },
 
     role: { type: String, required: true },
-
-    responses: [
-      {
-        type: new Schema<ReviewResponse>(
-          {
-            id: { type: String, required: true },
-            user: { type: String, required: true },
-            decision: { type: String, enum: Object.values(Decision), required: true },
-            comment: { type: String, required: false },
-          },
-          {
-            timestamps: true,
-          },
-        ),
-      },
-    ],
   },
   {
     timestamps: true,

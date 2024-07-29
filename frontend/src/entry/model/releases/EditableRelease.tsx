@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Alert, Box, Divider, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import {
   deleteRelease,
@@ -10,32 +10,43 @@ import {
 } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
-import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import {
   EntryKind,
+  FailedFileUpload,
   FileInterface,
   FileUploadProgress,
   FileWithMetadata,
   FlattenedModelImage,
   isFileInterface,
   ReleaseInterface,
+  SuccessfulFileUpload,
 } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { getRequiredRolesText, hasRole } from 'utils/roles'
+import { plural } from 'utils/stringUtils'
 
 type EditableReleaseProps = {
   release: ReleaseInterface
+  currentUserRoles: string[]
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
+  readOnly?: boolean
 }
 
-export default function EditableRelease({ release, isEdit, onIsEditChange }: EditableReleaseProps) {
+export default function EditableRelease({
+  release,
+  currentUserRoles,
+  isEdit,
+  onIsEditChange,
+  readOnly = false,
+}: EditableReleaseProps) {
   const [semver, setSemver] = useState(release.semver)
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
@@ -50,14 +61,20 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   const [open, setOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
   const [filesToUploadCount, setFilesToUploadCount] = useState(0)
+  const [successfulFileUploads, setSuccessfulFileUploads] = useState<SuccessfulFileUpload[]>([])
+  const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
 
   const { model, isModelLoading, isModelError } = useGetModel(release.modelId, EntryKind.MODEL)
   const { mutateReleases } = useGetReleasesForModelId(release.modelId)
   const { mutateRelease } = useGetRelease(release.modelId, release.semver)
-  const sendNotification = useNotification()
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const router = useRouter()
+
+  const [canUserEditOrDelete, actionButtonsTooltip] = useMemo(() => {
+    const validRoles = ['owner', 'contributor']
+    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
+  }, [currentUserRoles])
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
@@ -74,6 +91,19 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
       }
     }
   }, [model, mutateReleases, semver, router])
+
+  const failedFileList = useMemo(
+    () =>
+      failedFileUploads.map((file) => (
+        <div key={file.fileName}>
+          <Box component='span' fontWeight='bold'>
+            {file.fileName}
+          </Box>
+          {` - ${file.error}`}
+        </div>
+      )),
+    [failedFileUploads],
+  )
 
   const resetForm = useCallback(() => {
     setSemver(release.semver)
@@ -92,6 +122,15 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
+  const handleFileOnChange = (newFiles: (File | FileInterface)[]) => {
+    // Filter out any deleted files from success list
+    const filteredUploads = successfulFileUploads.filter((file) =>
+      newFiles.some((newFile) => file.fileName !== newFile.name),
+    )
+    setSuccessfulFileUploads(filteredUploads)
+    setFiles(newFiles)
+  }
+
   if (isModelError) {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
@@ -105,53 +144,68 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   }
 
   const handleCancel = () => {
+    setErrorMessage('')
     resetForm()
     onIsEditChange(false)
   }
 
   const handleSubmit = async () => {
     setIsLoading(true)
-    const fileIds: string[] = []
+    setFailedFileUploads([])
+    const failedFiles: FailedFileUpload[] = []
+    const successfulFiles: SuccessfulFileUpload[] = []
     const newFilesToUpload: File[] = []
     for (const file of files) {
-      isFileInterface(file) ? fileIds.push(file._id) : newFilesToUpload.push(file)
+      isFileInterface(file)
+        ? successfulFiles.push({ fileName: file.name, fileId: file._id })
+        : newFilesToUpload.push(file)
     }
 
     setFilesToUploadCount(newFilesToUpload.length)
-
     for (const file of newFilesToUpload) {
       if (isFileInterface(file)) {
-        fileIds.push(file._id)
+        successfulFiles.push({ fileName: file.name, fileId: file._id })
         continue
       }
 
-      const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
+        const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
 
-      const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
-        if (progressEvent.total) {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+        const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
+          }
         }
-      }
 
-      try {
-        const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
-        setCurrentFileUploadProgress(undefined)
-        if (fileUploadResponse) {
-          setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
-          fileIds.push(fileUploadResponse.data.file._id)
-        } else {
+        try {
+          const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
           setCurrentFileUploadProgress(undefined)
-          return setIsLoading(false)
-        }
-      } catch (e) {
-        if (e instanceof Error) {
-          sendNotification({
-            variant: 'error',
-            msg: e.message,
-          })
+          if (fileUploadResponse) {
+            setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
+            successfulFiles.push({ fileName: file.name, fileId: fileUploadResponse.data.file._id })
+          } else {
+            setCurrentFileUploadProgress(undefined)
+            return setIsLoading(false)
+          }
+        } catch (e) {
+          if (e instanceof Error) {
+            failedFiles.push({ fileName: file.name, error: e.message })
+            setIsLoading(false)
+            setCurrentFileUploadProgress(undefined)
+          }
         }
       }
+    }
+    successfulFiles.forEach((file) => {
+      if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.fileName)) {
+        setSuccessfulFileUploads([...successfulFileUploads, file])
+      }
+    })
+
+    if (failedFiles.length > 0) {
+      setFailedFileUploads(failedFiles)
+      return
     }
 
     const updatedRelease: UpdateReleaseParams = {
@@ -160,10 +214,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
       modelCardVersion: model.card.version,
       notes: releaseNotes,
       minor: isMinorRelease,
-      fileIds,
+      fileIds: successfulFiles.map((file) => file.fileId),
       images: imageList,
-      // Comments are ignored when editing a release
-      comments: [],
     }
 
     const response = await putRelease(updatedRelease)
@@ -181,7 +233,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
   }
 
   return (
-    <Box py={1}>
+    <Stack spacing={2}>
       <EditableFormHeading
         heading={
           <div>
@@ -192,6 +244,8 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         editButtonText='Edit Release'
         deleteButtonText='Delete Release'
         showDeleteButton
+        canUserEditOrDelete={canUserEditOrDelete}
+        actionButtonsTooltip={actionButtonsTooltip}
         isEdit={isEdit}
         isLoading={isLoading}
         onEdit={handleEdit}
@@ -200,7 +254,20 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onDelete={() => setOpen(true)}
         errorMessage={errorMessage}
         isRegistryError={isRegistryError}
+        readOnly={readOnly}
       />
+      {failedFileUploads.length > 0 && (
+        <Alert severity='error' sx={{ my: 2 }}>
+          <Stack spacing={1}>
+            <Typography>{`Unable to create release due to issues with the following ${plural(
+              failedFileUploads.length,
+              'file',
+            )}:`}</Typography>
+            {failedFileList}
+          </Stack>
+        </Alert>
+      )}
+      <Divider />
       <ReleaseForm
         editable
         isEdit={isEdit}
@@ -216,7 +283,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
         onSemverChange={(value) => setSemver(value)}
         onReleaseNotesChange={(value) => setReleaseNotes(value)}
         onMinorReleaseChange={(value) => setIsMinorRelease(value)}
-        onFilesChange={(value) => setFiles(value)}
+        onFilesChange={(value) => handleFileOnChange(value)}
         onFilesMetadataChange={(value) => setFilesMetadata(value)}
         onImageListChange={(value) => setImageList(value)}
         onRegistryError={handleRegistryError}
@@ -234,6 +301,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange }: Edi
           'Are you sure you want to delete this release? You will be unable to create a new release using this semver unless an admin restores it for you.'
         }
       />
-    </Box>
+    </Stack>
   )
 }

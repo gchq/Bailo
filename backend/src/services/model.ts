@@ -4,7 +4,7 @@ import _ from 'lodash'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { EntryKindKeys } from '../models/Model.js'
+import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
@@ -13,6 +13,7 @@ import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { NotImplemented } from '../utils/result.js'
 import { findSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -21,21 +22,38 @@ export function checkModelRestriction(model: ModelInterface) {
   }
 }
 
-export type CreateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility' | 'settings'>
+export type CreateModelParams = Pick<
+  ModelInterface,
+  'name' | 'teamId' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
+>
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
   // TODO - Find team by teamId to check it's valid. Throw error if not found.
 
-  const model = new Model({
-    ...modelParams,
-    id: modelId,
-    collaborators: [
+  let collaborators: CollaboratorEntry[] = []
+  if (modelParams.collaborators && modelParams.collaborators.length > 0) {
+    const collaboratorListContainsOwner = modelParams.collaborators.some((collaborator) =>
+      collaborator.roles.some((role) => role === 'owner'),
+    )
+    if (collaboratorListContainsOwner) {
+      collaborators = modelParams.collaborators
+    } else {
+      throw BadReq('At least one collaborator must be given the owner role.')
+    }
+  } else {
+    collaborators = [
       {
         entity: toEntity('user', user.dn),
         roles: ['owner'],
       },
-    ],
+    ]
+  }
+
+  const model = new Model({
+    ...modelParams,
+    id: modelId,
+    collaborators,
   })
 
   const auth = await authorisation.model(user, model, ModelAction.Create)
@@ -91,6 +109,7 @@ export async function searchModels(
   filters: Array<GetModelFiltersKeys>,
   search: string,
   task?: string,
+  allowTemplating?: boolean,
 ): Promise<Array<ModelInterface>> {
   const query: any = {}
 
@@ -112,6 +131,10 @@ export async function searchModels(
 
   if (search) {
     query.$text = { $search: search }
+  }
+
+  if (allowTemplating) {
+    query['settings.allowTemplating'] = true
   }
 
   for (const filter of filters) {
@@ -321,4 +344,12 @@ export async function createModelCardFromSchema(
 
   const revision = await _setModelCard(user, modelId, schemaId, 1, {})
   return revision
+}
+
+export async function createModelCardFromTemplate(
+  _user: UserInterface,
+  _modelId: string,
+  _schemaId: string,
+): Promise<ModelCardRevisionDoc> {
+  throw NotImplemented({}, 'This feature is not yet implemented')
 }

@@ -4,8 +4,8 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { Decision, ReviewInterface } from '../../../models/Review.js'
-import { respondToReview } from '../../../services/review.js'
+import { Decision, ResponseInterface } from '../../../models/Response.js'
+import { respondToReview } from '../../../services/response.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
 import { ReviewKind } from '../../../types/enums.js'
 import { parse } from '../../../utils/validate.js'
@@ -43,7 +43,7 @@ registerPath({
 })
 
 interface PostReleaseReviewResponse {
-  review: ReviewInterface
+  response: ResponseInterface
 }
 
 export const postReleaseReviewResponse = [
@@ -55,12 +55,12 @@ export const postReleaseReviewResponse = [
       body: { role, ...body },
     } = parse(req, postReleaseReviewResponseSchema)
 
-    const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Release, semver)
+    const response = await respondToReview(req.user, modelId, role, body, ReviewKind.Release, semver)
 
-    await audit.onCreateReviewResponse(req, review)
+    await audit.onCreateReviewResponse(req, response)
 
     return res.json({
-      review,
+      response,
     })
   },
 ]

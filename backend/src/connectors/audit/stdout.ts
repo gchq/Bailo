@@ -5,6 +5,7 @@ import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
+import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
@@ -201,23 +202,30 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onCreateReviewResponse(req: Request, review: ReviewInterface) {
+  onCreateReviewResponse(req: Request, response: ResponseInterface) {
     this.checkEventType(AuditInfo.CreateReviewResponse, req)
     const event = this.generateEvent(req, {
-      modelId: review.modelId,
-      ...(review.semver && { semver: review.semver }),
-      ...(review.accessRequestId && { semver: review.accessRequestId }),
+      reviewId: response.parentId,
+      ...(response.decision && { decision: response.decision }),
     })
     req.log.info(event, req.audit.description)
   }
 
-  onUpdateReviewResponse(req: Request, review: ReviewInterface) {
-    this.checkEventType(AuditInfo.UpdateReviewResponse, req)
-    const event = this.generateEvent(req, {
-      modelId: review.modelId,
-      ...(review.semver && { semver: review.semver }),
-      ...(review.accessRequestId && { semver: review.accessRequestId }),
-    })
+  onViewResponses(req: Request, responseInterfaces: ResponseInterface[]) {
+    this.checkEventType(AuditInfo.ViewResponses, req)
+    const event = this.generateEvent(req, { responseInterfaces })
+    req.log.info(event, req.audit.description)
+  }
+
+  onCreateCommentResponse(req: Request, ResponseInterface: ResponseInterface) {
+    this.checkEventType(AuditInfo.CreateResponse, req)
+    const event = this.generateEvent(req, { id: ResponseInterface['_id'] })
+    req.log.info(event, req.audit.description)
+  }
+
+  onUpdateResponse(req: Request, responseId: string) {
+    this.checkEventType(AuditInfo.UpdateResponse, req)
+    const event = this.generateEvent(req, { id: responseId })
     req.log.info(event, req.audit.description)
   }
 

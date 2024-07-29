@@ -18,7 +18,7 @@ vi.mock('../../../../src/services/model.js', async () => {
   }
 })
 
-describe('routes > model > postModel', () => {
+describe('routes > model > postModel > schema', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(postFromSchemaSchema)
     const res = await testPost('/api/v2/model/example/setup/from-schema', fixture)
@@ -33,8 +33,8 @@ describe('routes > model > postModel', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateModelCard).toBeCalled()
-    expect(audit.onCreateModelCard.mock.calls.at(0).at(1)).toMatchSnapshot()
-    expect(audit.onCreateModelCard.mock.calls.at(0).at(2)).toMatchSnapshot()
+    expect(audit.onCreateModelCard.mock.calls.at(0)?.at(1)).toMatchSnapshot()
+    expect(audit.onCreateModelCard.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })
 
   test('400 > no description', async () => {

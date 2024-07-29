@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > model > postModel > 200 > ok 1`] = `
+exports[`routes > model > postModel > schema > 200 > ok 1`] = `
 {
   "card": {
     "_id": "test",
@@ -8,7 +8,7 @@ exports[`routes > model > postModel > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > model > postModel > 400 > no description 1`] = `
+exports[`routes > model > postModel > schema > 400 > no description 1`] = `
 {
   "error": {
     "context": {
@@ -31,9 +31,9 @@ exports[`routes > model > postModel > 400 > no description 1`] = `
 }
 `;
 
-exports[`routes > model > postModel > audit > expected call 1`] = `"example"`;
+exports[`routes > model > postModel > schema > audit > expected call 1`] = `"example"`;
 
-exports[`routes > model > postModel > audit > expected call 2`] = `
+exports[`routes > model > postModel > schema > audit > expected call 2`] = `
 {
   "_id": "test",
 }

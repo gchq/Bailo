@@ -1,10 +1,11 @@
+import { Buffer } from 'buffer'
 import useSWR from 'swr'
-import { InferenceInterface } from 'types/types'
+import { InferenceInterface, TokenInterface } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetInferencesForModelId(modelId: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       inferences: InferenceInterface[]
     },
@@ -14,13 +15,13 @@ export function useGetInferencesForModelId(modelId: string) {
   return {
     mutateInferences: mutate,
     inferences: data ? data.inferences : [],
-    isInferencesLoading: !error && !data,
+    isInferencesLoading: isLoading,
     isInferencesError: error,
   }
 }
 
 export function useGetInference(modelId?: string, image?: string, tag?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       inference: InferenceInterface
     },
@@ -30,7 +31,7 @@ export function useGetInference(modelId?: string, image?: string, tag?: string) 
   return {
     mutateInference: mutate,
     inference: data?.inference,
-    isInferenceLoading: !error && !data,
+    isInferenceLoading: isLoading,
     isInferenceError: error,
   }
 }
@@ -52,5 +53,14 @@ export async function putInference(modelId: string, image: string, tag: string, 
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(inference),
+  })
+}
+
+export async function sendTokenToService(loginEndpoint: string, token: TokenInterface) {
+  return fetch(loginEndpoint, {
+    headers: {
+      Authorization: 'Basic ' + Buffer.from(`${token.accessKey}:${token.secretKey}`, 'utf8').toString('base64'),
+    },
+    credentials: 'include',
   })
 }

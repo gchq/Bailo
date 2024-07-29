@@ -14,6 +14,7 @@ import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import { EntryKind } from 'types/types'
+import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
   const router = useRouter()
@@ -22,21 +23,33 @@ export default function Model() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const currentUserRoles = useMemo(
-    () =>
-      model?.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === currentUser?.dn)?.roles || [],
-    [model, currentUser],
-  )
+  const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
 
   const tabs = useMemo(
     () =>
       model && uiConfig
         ? [
-            { title: 'Overview', path: 'overview', view: <Overview entry={model} /> },
+            {
+              title: 'Overview',
+              path: 'overview',
+              view: (
+                <Overview
+                  entry={model}
+                  currentUserRoles={currentUserRoles}
+                  readOnly={!!model.settings.mirror?.sourceModelId}
+                />
+              ),
+            },
             {
               title: 'Releases',
               path: 'releases',
-              view: <Releases model={model} currentUserRoles={currentUserRoles} />,
+              view: (
+                <Releases
+                  model={model}
+                  currentUserRoles={currentUserRoles}
+                  readOnly={!!model.settings.mirror?.sourceModelId}
+                />
+              ),
               disabled: !model.card,
               disabledText: 'Select a schema to view this tab',
             },
@@ -51,15 +64,25 @@ export default function Model() {
             {
               title: 'Registry',
               path: 'registry',
-              view: <ModelImages model={model} />,
+              view: (
+                <ModelImages
+                  model={model}
+                  currentUserRoles={currentUserRoles}
+                  readOnly={!!model.settings.mirror?.sourceModelId}
+                />
+              ),
             },
             {
               title: 'Inferencing',
               path: 'inferencing',
-              view: <InferenceServices model={model} />,
+              view: <InferenceServices model={model} currentUserRoles={currentUserRoles} />,
               hidden: !uiConfig.inference.enabled,
             },
-            { title: 'Settings', path: 'settings', view: <Settings entry={model} /> },
+            {
+              title: 'Settings',
+              path: 'settings',
+              view: <Settings entry={model} currentUserRoles={currentUserRoles} />,
+            },
           ]
         : [],
     [model, uiConfig, currentUserRoles],
@@ -90,6 +113,7 @@ export default function Model() {
           requiredUrlParams={{ modelId: model.id }}
           showCopyButton
           textToCopy={model.id}
+          sourceModelId={model.settings.mirror?.sourceModelId}
         />
       )}
     </>

@@ -103,6 +103,10 @@ resources:
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
+  backend:
+    limits:
+      cpu: 400m
+      memory: 800Mi
 
 # Pod placement
 nodeSelector: {}
@@ -155,7 +159,7 @@ minio:
   createBuckets: "false" # attempt to create buckets
   uploadBucket: uploads # required for Bailo
   registryBucket: registry # required for Bailo
-  #host: "bailo-minio" # service name
+  host: "bailo-minio"
   service:
     ports:
       api: 31111 # default 9000
@@ -251,12 +255,25 @@ instrumentation:
   enabled: false
   debug: false
 
+modelMirror:
+  enabled: false
+  disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting'
+  export:
+    kmsSignature:
+      enabled: false
+      keyId: '123'
+      KMSClient:
+        region: 'eu-west-1'
+        accessKey: ''
+        secretKey: ''
 # Inferencing cluster reference
 inference:
   enabled: false
   # Url for the inferencing cluster
   host: 'https://example.com'
   gpus:
+  authorizationTokenName: 'inferencing-token'
+  authorisationToken: ''
 
 backend:
   serviceAccount: ''

@@ -12,7 +12,7 @@ export interface PostSchemaParams {
 }
 
 export function useGetSchemas(kind?: SchemaKindKeys) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       schemas: SchemaInterface[]
     },
@@ -22,13 +22,13 @@ export function useGetSchemas(kind?: SchemaKindKeys) {
   return {
     mutateSchemas: mutate,
     schemas: data ? data.schemas : [],
-    isSchemasLoading: !error && !data,
+    isSchemasLoading: isLoading,
     isSchemasError: error,
   }
 }
 
 export function useGetSchema(id: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       schema: SchemaInterface
     },
@@ -38,7 +38,7 @@ export function useGetSchema(id: string) {
   return {
     mutateSchema: mutate,
     schema: data ? data.schema : undefined,
-    isSchemaLoading: !error && !data,
+    isSchemaLoading: isLoading,
     isSchemaError: error,
   }
 }

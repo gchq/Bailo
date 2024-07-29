@@ -12,12 +12,17 @@ export interface EntrySearchResult {
   kind: EntryKindKeys
 }
 
+export interface ModelExportRequest {
+  disclaimerAgreement: boolean
+}
+
 export function useListModels(
   kind?: EntryKindKeys,
   filters: string[] = [],
   task = '',
   libraries: string[] = [],
   search = '',
+  allowTemplating?: boolean,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -25,8 +30,9 @@ export function useListModels(
     ...(task && { task }),
     ...(libraries.length > 0 && { libraries }),
     ...(search && { search }),
+    ...(allowTemplating && { allowTemplating }),
   }
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       models: EntrySearchResult[]
     },
@@ -36,7 +42,7 @@ export function useListModels(
   return {
     mutateModels: mutate,
     models: data ? data.models : [],
-    isModelsLoading: !error && !data,
+    isModelsLoading: isLoading,
     isModelsError: error,
   }
 }
@@ -46,7 +52,7 @@ export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
     kind,
   }
 
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       model: EntryInterface
     },
@@ -56,13 +62,13 @@ export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
   return {
     mutateModel: mutate,
     model: data ? data.model : undefined,
-    isModelLoading: !error && !data,
+    isModelLoading: isLoading,
     isModelError: error,
   }
 }
 
 export function useGetModelRoles(id?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       roles: Role[]
     },
@@ -72,13 +78,13 @@ export function useGetModelRoles(id?: string) {
   return {
     mutateModelRoles: mutate,
     modelRoles: data ? data.roles : [],
-    isModelRolesLoading: !error && !data,
+    isModelRolesLoading: isLoading,
     isModelRolesError: error,
   }
 }
 
 export function useGetModelImages(id?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       images: ModelImage[]
     },
@@ -88,13 +94,13 @@ export function useGetModelImages(id?: string) {
   return {
     mutateModelImages: mutate,
     modelImages: data ? data.images : [],
-    isModelImagesLoading: !error && !data,
+    isModelImagesLoading: isLoading,
     isModelImagesError: error,
   }
 }
 
 export function useGetModelRolesCurrentUser(id?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       roles: Role[]
     },
@@ -104,7 +110,7 @@ export function useGetModelRolesCurrentUser(id?: string) {
   return {
     mutateModelRolesCurrentUser: mutate,
     modelRolesCurrentUser: data ? data.roles : [],
-    isModelRolesCurrentUserLoading: !error && !data,
+    isModelRolesCurrentUserLoading: isLoading,
     isModelRolesCurrentUserError: error,
   }
 }
@@ -125,5 +131,13 @@ export async function patchModel(
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(delta),
+  })
+}
+
+export async function postModelExportToS3(id: string, modelExport: ModelExportRequest) {
+  return fetch(`/api/v2/model/${id}/export/s3`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(modelExport),
   })
 }

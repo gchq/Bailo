@@ -54,6 +54,20 @@ def test_create_get_from_id_and_update(
 
 
 @pytest.mark.integration
+def test_search_models(integration_client):
+    models = Model.search(client=integration_client)
+
+    assert all(isinstance(model, Model) for model in models)
+
+
+@pytest.mark.integration
+def test_search_models_specific(integration_client):
+    models = Model.search(client=integration_client, search="You only look once!")
+
+    assert all(model.name == "Yolo-v4" for model in models)
+
+
+@pytest.mark.integration
 def test_get_and_update_latest_model_card(integration_client):
     model = Model.create(
         client=integration_client,
@@ -145,16 +159,82 @@ def test_publish_experiment_standard(standard_experiment):
     model_card = NestedDict(model_card)
     metrics_array = model_card[("performance", "performanceMetrics")][0]["datasetMetrics"]
 
-    expected_accuracy = 0.98
+    expected_accuracy = 0.1
     actual_accuracy = metrics_array[0]["value"]
 
     assert expected_accuracy == actual_accuracy
 
 
+@pytest.mark.integration
+def test_publish_experiment_standard_ordered(standard_experiment):
+    standard_experiment.publish(mc_loc="performance.performanceMetrics", select_by="accuracy MAX")
+
+    model_card = standard_experiment.model.model_card
+    model_card = NestedDict(model_card)
+    metrics_array = model_card[("performance", "performanceMetrics")][0]["datasetMetrics"]
+
+    expected_accuracy = 0.5
+    actual_accuracy = metrics_array[0]["value"]
+
+    assert expected_accuracy == actual_accuracy
+
+
+@pytest.mark.integration
+def test_publish_experiment_standard_invalid_select_by(standard_experiment):
+    with pytest.raises(BailoException):
+        standard_experiment.publish(mc_loc="performance.performanceMetrics", select_by="MAX:accuracy")
+
+
 @pytest.mark.mlflow
-def test_import_experiment_from_mlflow_and_publish(mlflow_id, example_model):
+def test_import_model_from_mlflow(integration_client, mlflow_model, request):
+    model = Model.from_mlflow(
+        client=integration_client,
+        mlflow_uri=request.config.mlflow_uri,
+        team_id="Uncategorised",
+        schema_id="minimal-general-v10",
+        name=mlflow_model,
+    )
+
+    assert len(model.get_releases()) == 1
+    assert model.name == mlflow_model
+
+
+@pytest.mark.mlflow
+def test_import_nonexistent_model_from_mlflow(integration_client, request):
+    with pytest.raises(BailoException):
+        model = Model.from_mlflow(
+            client=integration_client,
+            mlflow_uri=request.config.mlflow_uri,
+            team_id="Uncategorised",
+            schema_id="minimal-general-v10",
+            name="fake-model-name",
+        )
+
+
+@pytest.mark.mlflow
+def test_import_model_files_no_run(integration_client, mlflow_model_no_run, request):
+    with pytest.raises(BailoException):
+        model = Model.from_mlflow(
+            client=integration_client,
+            mlflow_uri=request.config.mlflow_uri,
+            team_id="Uncategorised",
+            schema_id="minimal-general-v10",
+            name=mlflow_model_no_run,
+        )
+
+
+@pytest.mark.mlflow
+def test_import_model_no_schema(integration_client, mlflow_model, request):
+    with pytest.raises(BailoException):
+        model = Model.from_mlflow(
+            client=integration_client, mlflow_uri=request.config.mlflow_uri, team_id="Uncategorised", name=mlflow_model
+        )
+
+
+@pytest.mark.mlflow
+def test_import_experiment_from_mlflow_and_publish(mlflow_id, example_model, request):
     experiment_mlflow = example_model.create_experiment()
-    experiment_mlflow.from_mlflow(tracking_uri="http://127.0.0.1:5000", experiment_id=mlflow_id)
+    experiment_mlflow.from_mlflow(tracking_uri=request.config.mlflow_uri, experiment_id=mlflow_id)
 
     run_id = experiment_mlflow.raw[0]["run"]
     experiment_mlflow.publish(mc_loc="performance.performanceMetrics", run_id=run_id)

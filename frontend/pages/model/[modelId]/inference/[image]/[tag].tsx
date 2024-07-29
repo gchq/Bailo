@@ -30,6 +30,10 @@ export default function InferenceApp() {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
+  if (isModelLoading || isUiConfigLoading) {
+    return <Loading />
+  }
+
   return (
     <>
       <Title text='Inferencing Service' />

@@ -1,6 +1,8 @@
 import { LoadingButton } from '@mui/lab'
 import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { useGetResponses } from 'actions/response'
+import { useRouter } from 'next/router'
 import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
@@ -39,6 +41,7 @@ export default function ReviewWithComment({
   accessRequest,
 }: ReviewWithCommentProps) {
   const theme = useTheme()
+  const router = useRouter()
   const [reviewComment, setReviewComment] = useState('')
   const [errorText, setErrorText] = useState('')
   const [selectOpen, setSelectOpen] = useState(false)
@@ -56,8 +59,12 @@ export default function ReviewWithComment({
     modelId,
     ...semverOrAccessRequestIdObject,
   })
+
+  const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
-  const [reviewRequest, setReviewRequest] = useState(reviews[0])
+  const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface>(
+    reviews.find((review) => review.role === router.query.role) || reviews[0],
+  )
 
   function invalidComment() {
     return reviewComment.trim() === '' ? true : false
@@ -65,20 +72,22 @@ export default function ReviewWithComment({
 
   useEffect(() => {
     if (reviewRequest) {
-      const latestReviewForRole = latestReviewsForEachUser([reviewRequest]).find(
+      const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
         (latestReview) => latestReview.role === reviewRequest.role,
       )
-      if (
-        latestReviewForRole &&
-        latestReviewForRole.responses[0] &&
-        latestReviewForRole.responses[0].decision !== Decision.Undo
-      ) {
+      if (latestReviewForRole && latestReviewForRole.decision !== Decision.Undo) {
         setShowUndoButton(true)
       } else {
         setShowUndoButton(false)
       }
     }
-  }, [reviewRequest])
+  }, [responses, reviewRequest])
+
+  useEffect(() => {
+    router.replace({
+      query: { ...router.query, role: reviewRequest.role },
+    })
+  }, [router, reviewRequest])
 
   function submitForm(decision: DecisionKeys) {
     setErrorText('')
@@ -107,9 +116,13 @@ export default function ReviewWithComment({
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
+  if (isResponsesError) {
+    return <MessageAlert message={isResponsesError.info.message} severity='error' />
+  }
+
   return (
     <>
-      {(isReviewsLoading || isModelRolesLoading) && <Loading />}
+      {(isReviewsLoading || isModelRolesLoading || isResponsesLoading) && <Loading />}
       <div data-test='reviewWithCommentContent'>
         {modelRoles.length === 0 && (
           <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>

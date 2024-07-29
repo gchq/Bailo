@@ -10,6 +10,7 @@ import {
   requestReviewForRelease,
 } from '../../../src/services/smtp/smtp.js'
 import config from '../../../src/utils/config.js'
+import { testReviewResponse } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/utils/config.js', () => {
   return {
@@ -71,10 +72,29 @@ const emailBuilderMock = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/smtp/emailBuilder.js', async () => emailBuilderMock)
 
+const responseService = vi.hoisted(() => ({
+  findResponseById: vi.fn(() => ({
+    user: 'user:user',
+    comment: 'This is a comment',
+    decision: 'approve',
+    kind: 'review',
+  })),
+}))
+vi.mock('../../../src/services/response.js', async () => responseService)
+
 describe('services > smtp > smtp', () => {
-  const review = new Review({ role: 'owner', responses: [{ decision: 'approve' }] })
-  const release = new Release({ modelId: 'testmodel-123', semver: '1.2.3', createdBy: 'user:user' })
-  const access = new AccessRequest({ metadata: { overview: { entities: ['user:user'] } } })
+  const review = new Review({
+    role: 'owner',
+    responses: [{ decision: 'approve' }],
+  })
+  const release = new Release({
+    modelId: 'testmodel-123',
+    semver: '1.2.3',
+    createdBy: 'user:user',
+  })
+  const access = new AccessRequest({
+    metadata: { overview: { entities: ['user:user'] } },
+  })
 
   test('that a Release Review email is not sent when disabled in config', async () => {
     vi.spyOn(config, 'smtp', 'get').mockReturnValue({
@@ -130,7 +150,7 @@ describe('services > smtp > smtp', () => {
       },
       from: '"Bailo 📝" <bailo@example.org>',
     })
-    await notifyReviewResponseForRelease(review, release)
+    await notifyReviewResponseForRelease(testReviewResponse as any, release)
 
     expect(transporterMock.sendMail).not.toBeCalled()
   })
@@ -149,7 +169,7 @@ describe('services > smtp > smtp', () => {
       },
       from: '"Bailo 📝" <bailo@example.org>',
     })
-    await notifyReviewResponseForAccess(review, access)
+    await notifyReviewResponseForAccess(testReviewResponse as any, access)
 
     expect(transporterMock.sendMail).not.toBeCalled()
   })
@@ -168,27 +188,15 @@ describe('services > smtp > smtp', () => {
   })
 
   test('that an email is sent after a response for a release review', async () => {
-    await notifyReviewResponseForRelease(review, release)
+    await notifyReviewResponseForRelease(testReviewResponse as any, release)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('that an email is not sent if a response for a release review cannot be found', async () => {
-    await notifyReviewResponseForRelease(new Review({ role: 'owner', responses: [] }), release)
-
-    expect(transporterMock.sendMail).not.toBeCalled()
   })
 
   test('that an email is sent after a response for a an access request review', async () => {
-    await notifyReviewResponseForAccess(review, access)
+    await notifyReviewResponseForAccess(testReviewResponse as any, access)
 
     expect(transporterMock.sendMail.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('that an email is not sent if a response for an access request review cannot be found', async () => {
-    await notifyReviewResponseForAccess(new Review({ role: 'owner', responses: [] }), access)
-
-    expect(transporterMock.sendMail).not.toBeCalled()
   })
 
   test('that sendEmail is called for each member of a group entity', async () => {

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "lib": ["es2023"],
+    "target": "es2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
@@ -12,9 +13,5 @@
     "noImplicitAny": false,
     "composite": true
   },
-  "include": ["global.d.ts", "src/**/*", "src/**/*.json", "package.json", "package-lock.json", "test/**/*"],
-  "ts-node": {
-    "esm": true,
-    "swc": true
-  }
+  "include": ["global.d.ts", "src/**/*", "src/**/*.json", "package.json", "package-lock.json", "test/**/*"]
 }

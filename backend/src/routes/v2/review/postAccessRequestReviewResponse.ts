@@ -4,8 +4,8 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { Decision, ReviewInterface } from '../../../models/Review.js'
-import { respondToReview } from '../../../services/review.js'
+import { Decision, ResponseInterface } from '../../../models/Response.js'
+import { respondToReview } from '../../../services/response.js'
 import { ReviewKind } from '../../../types/enums.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -22,7 +22,7 @@ export const postAccessRequestReviewResponseSchema = z.object({
 })
 
 interface PostAccessRequestReviewResponse {
-  review: ReviewInterface
+  response: ResponseInterface
 }
 
 export const postAccessRequestReviewResponse = [
@@ -34,12 +34,12 @@ export const postAccessRequestReviewResponse = [
       body: { role, ...body },
     } = parse(req, postAccessRequestReviewResponseSchema)
 
-    const review = await respondToReview(req.user, modelId, role, body, ReviewKind.Access, accessRequestId)
+    const response = await respondToReview(req.user, modelId, role, body, ReviewKind.Access, accessRequestId)
 
-    await audit.onCreateReviewResponse(req, review)
+    await audit.onCreateReviewResponse(req, response)
 
     return res.json({
-      review,
+      response,
     })
   },
 ]

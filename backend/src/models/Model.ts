@@ -40,6 +40,7 @@ export interface ModelCardInterface {
 
 export interface Settings {
   ungovernedAccess: boolean
+  allowTemplating: boolean
   mirror: { sourceModelId?: string; destinationModelId?: string }
 }
 
@@ -94,6 +95,7 @@ const ModelSchema = new Schema<ModelInterface>(
     ],
     settings: {
       ungovernedAccess: { type: Boolean, required: true, default: false },
+      allowTemplating: { type: Boolean, required: true, default: false },
       mirror: { sourceModelId: { type: String }, destinationModelId: { type: String } },
     },
 

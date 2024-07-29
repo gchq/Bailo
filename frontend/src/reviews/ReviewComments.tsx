@@ -2,21 +2,16 @@ import { LoadingButton } from '@mui/lab'
 import { Box, Divider, Stack } from '@mui/material'
 import { postAccessRequestComment, useGetAccessRequest } from 'actions/accessRequest'
 import { postReleaseComment, useGetRelease } from 'actions/release'
+import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
+import { useGetCurrentUser } from 'actions/user'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
 import ReviewCommentDisplay from 'src/reviews/ReviewCommentDisplay'
 import ReviewDecisionDisplay from 'src/reviews/ReviewDecisionDisplay'
-import {
-  AccessRequestInterface,
-  isReviewResponse,
-  ReleaseInterface,
-  ReviewComment,
-  ReviewResponse,
-  ReviewResponseKind,
-} from 'types/types'
+import { AccessRequestInterface, ReleaseInterface, ResponseInterface, ResponseKind } from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { reviewResponsesForEachUser } from 'utils/reviewUtils'
@@ -38,8 +33,10 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
   const [newReviewComment, setNewReviewComment] = useState('')
   const [commentSubmissionError, setCommentSubmissionError] = useState('')
   const [submitButtonLoading, setSubmitButtonLoading] = useState(false)
+
   const { mutateRelease } = useGetRelease(release?.modelId, release?.semver)
   const { mutateAccessRequest } = useGetAccessRequest(accessRequest?.modelId, accessRequest?.id)
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
     () =>
@@ -53,34 +50,62 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     modelId,
     ...semverOrAccessRequestIdObject,
   })
+  const { responses, isResponsesLoading, isResponsesError, mutateResponses } = useGetResponses([
+    release ? release._id : accessRequest._id,
+    ...reviews.map((review) => review._id),
+  ])
 
   const hasResponseOrComment = useMemo(() => {
-    const hasReviewResponse = !!reviews.find((review) => review.responses.length > 0)
-    const hasComment = release ? release.comments.length > 0 : accessRequest.comments.length > 0
+    const hasReviewResponse = !!responses.find((response) => response.kind === ResponseKind.Review)
+    const hasComment = !!responses.find((response) => response.kind === ResponseKind.Comment)
     return hasReviewResponse || hasComment
-  }, [accessRequest, release, reviews])
+  }, [responses])
 
   const reviewDetails = useMemo(() => {
-    let decisionsAndComments: Array<ReviewResponseKind> = []
-    const groupedResponses = reviewResponsesForEachUser(reviews)
+    let decisionsAndComments: Array<ResponseInterface> = []
+    const groupedResponses = reviewResponsesForEachUser(
+      reviews,
+      responses.filter((response) => response.kind === ResponseKind.Review),
+    )
     decisionsAndComments.push(...groupedResponses)
     if (release) {
-      decisionsAndComments = [...decisionsAndComments, ...release.comments]
+      decisionsAndComments = [
+        ...decisionsAndComments,
+        ...responses.filter((response) => response.kind === ResponseKind.Comment),
+      ]
     }
     if (accessRequest) {
-      decisionsAndComments = [...decisionsAndComments, ...accessRequest.comments]
+      decisionsAndComments = [
+        ...decisionsAndComments,
+        ...responses.filter((response) => response.kind === ResponseKind.Comment),
+      ]
     }
     decisionsAndComments.sort(sortByCreatedAtAscending)
     return decisionsAndComments.map((response) => {
-      if (isReviewResponse(response)) {
+      if (response.kind === ResponseKind.Review) {
         return (
-          <ReviewDecisionDisplay key={response.createdAt} response={response as ReviewResponse} modelId={modelId} />
+          <ReviewDecisionDisplay
+            key={response._id}
+            response={response}
+            modelId={modelId}
+            onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
+            currentUser={currentUser}
+            mutateResponses={mutateResponses}
+          />
         )
       } else {
-        return <ReviewCommentDisplay key={response.createdAt} response={response as ReviewComment} />
+        return (
+          <ReviewCommentDisplay
+            key={response._id}
+            response={response}
+            onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
+            currentUser={currentUser}
+            mutateResponses={mutateResponses}
+          />
+        )
       }
     })
-  }, [reviews, release, accessRequest, modelId])
+  }, [reviews, responses, release, accessRequest, modelId, currentUser, mutateResponses, newReviewComment])
 
   async function submitReviewComment() {
     setCommentSubmissionError('')
@@ -89,6 +114,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
       const res = await postReleaseComment(modelId, release.semver, newReviewComment)
       if (res.ok) {
         mutateRelease()
+        mutateResponses()
         setNewReviewComment('')
       } else {
         setCommentSubmissionError(await getErrorMessage(res))
@@ -97,6 +123,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
       const res = await postAccessRequestComment(accessRequest.modelId, accessRequest.id, newReviewComment)
       if (res.ok) {
         mutateAccessRequest()
+        mutateResponses()
         setNewReviewComment('')
       } else {
         setCommentSubmissionError(await getErrorMessage(res))
@@ -111,10 +138,18 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
+  if (isResponsesError) {
+    return <MessageAlert message={isResponsesError.info.message} severity='error' />
+  }
+
+  if (isCurrentUserError) {
+    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
+  }
+
   return (
     <>
       {(hasResponseOrComment || !isEdit) && <Divider />}
-      {isReviewsLoading && <Loading />}
+      {(isReviewsLoading || isResponsesLoading || isCurrentUserLoading) && <Loading />}
       {reviewDetails}
       {!isEdit && (
         <Stack spacing={1} justifyContent='center' alignItems='flex-end'>

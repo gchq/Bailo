@@ -12,29 +12,31 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useGetModelRoles } from 'actions/model'
 import _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
-import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
-import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntityKind, EntryInterface } from 'types/types'
+import { CollaboratorEntry, EntityKind, Role } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntityItemProps = {
   entity: CollaboratorEntry
   accessList: CollaboratorEntry[]
   onAccessListChange: (value: CollaboratorEntry[]) => void
-  entry: EntryInterface
+  entryKind: string
+  entryRoles: Role[]
+  isReadOnly: boolean
+  requiredRolesText: string
 }
 
-export default function EntityItem({ entity, accessList, onAccessListChange, entry }: EntityItemProps) {
-  const {
-    modelRoles: entryRoles,
-    isModelRolesLoading: isEntryRolesLoading,
-    isModelRolesError: isEntryRolesError,
-  } = useGetModelRoles(entry.id)
-
+export default function EntityItem({
+  entity,
+  accessList,
+  onAccessListChange,
+  entryKind,
+  entryRoles,
+  isReadOnly,
+  requiredRolesText,
+}: EntityItemProps) {
   const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.id), [entryRoles])
 
   function onRoleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
@@ -55,10 +57,6 @@ export default function EntityItem({ entity, accessList, onAccessListChange, ent
     return role
   }
 
-  if (isEntryRolesError) {
-    return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
-  }
-
   return (
     <TableRow>
       <TableCell>
@@ -68,35 +66,40 @@ export default function EntityItem({ entity, accessList, onAccessListChange, ent
         </Stack>
       </TableCell>
       <TableCell>
-        {isEntryRolesLoading && <Loading />}
-        {!isEntryRolesLoading && entryRoles.length > 0 && (
-          <Autocomplete
-            size='small'
-            multiple
-            aria-label={`role selector input for entity ${entity.entity}`}
-            value={entity.roles}
-            data-test='accessListAutocomplete'
-            options={entryRoleOptions}
-            getOptionLabel={(role) => getRole(role).name}
-            onChange={onRoleChange}
-            renderInput={(params) => <TextField {...params} label='Select roles' />}
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip label={getRole(option).name} {...getTagProps({ index })} key={option} />
-              ))
-            }
-          />
+        {entryRoles.length > 0 && (
+          <Tooltip title={requiredRolesText}>
+            <Autocomplete
+              multiple
+              disabled={isReadOnly}
+              size='small'
+              aria-label={`role selector input for entity ${entity.entity}`}
+              value={entity.roles}
+              data-test='accessListAutocomplete'
+              options={entryRoleOptions}
+              getOptionLabel={(role) => getRole(role).name}
+              onChange={onRoleChange}
+              renderInput={(params) => <TextField {...params} label='Select roles' />}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip label={getRole(option).name} {...getTagProps({ index })} key={option} />
+                ))
+              }
+            />
+          </Tooltip>
         )}
       </TableCell>
       <TableCell align='right'>
-        <Tooltip title='Remove user' arrow>
-          <IconButton
-            onClick={removeEntity}
-            aria-label={`Remove user ${entity.entity} from ${toSentenceCase(entry.kind)} access list`}
-            data-test='accessListRemoveUser'
-          >
-            <ClearIcon color='secondary' fontSize='inherit' />
-          </IconButton>
+        <Tooltip title={isReadOnly ? requiredRolesText : 'Remove user'}>
+          <span>
+            <IconButton
+              aria-label={`Remove user ${entity.entity} from ${toSentenceCase(entryKind)} access list`}
+              disabled={isReadOnly}
+              onClick={removeEntity}
+              data-test='accessListRemoveUser'
+            >
+              <ClearIcon color={isReadOnly ? 'disabled' : 'secondary'} fontSize='inherit' />
+            </IconButton>
+          </span>
         </Tooltip>
       </TableCell>
     </TableRow>

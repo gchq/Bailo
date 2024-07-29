@@ -178,7 +178,12 @@ module.exports = {
       conneciton: {
         host: 'http://example.com',
       },
+      authorizationTokenName: 'inferencing-token',
       gpus: {},
+    },
+    modelMirror: {
+      enabled: false,
+      disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
     },
   },
 
@@ -224,7 +229,6 @@ module.exports = {
   },
 
   modelMirror: {
-    enabled: false,
     export: {
       maxSize: 100 * 1024 * 1024 * 1024,
       bucket: 'exports',
@@ -234,11 +238,15 @@ module.exports = {
         KMSClient: {
           region: 'eu-west-1',
           credentials: {
-            accessKeyId: 'access',
-            secretAccessKey: 'secret',
+            accessKeyId: '',
+            secretAccessKey: '',
           },
         },
       },
     },
+  },
+
+  inference: {
+    authorisationToken: '',
   },
 }

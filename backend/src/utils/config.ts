@@ -1,4 +1,3 @@
-import { KMSClientConfig } from '@aws-sdk/client-kms'
 import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
@@ -123,7 +122,12 @@ export interface Config {
       connection: {
         host: string
       }
+      authorizationTokenName: string
       gpus: { [key: string]: string }
+    }
+    modelMirror: {
+      enabled: boolean
+      disclaimer: string
     }
   }
 
@@ -164,16 +168,25 @@ export interface Config {
   }
 
   modelMirror: {
-    enabled: boolean
     export: {
       maxSize: number
       bucket: string
       kmsSignature: {
         enabled: boolean
         keyId: string
-        KMSClient: KMSClientConfig
+        KMSClient: {
+          region: string
+          credentials: {
+            accessKeyId: string
+            secretAccessKey: string
+          }
+        }
       }
     }
+  }
+
+  inference: {
+    authorisationToken: string
   }
 }
 

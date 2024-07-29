@@ -1,7 +1,3 @@
-export interface User {
-  dn: string
-}
-
 export const RoleKind = {
   ENTRY: 'entry',
   SCHEMA: 'schema',
@@ -32,5 +28,9 @@ export interface UiConfig {
 
   registry: {
     host: string
+  }
+  modelMirror: {
+    enabled: boolean
+    disclaimer: string
   }
 }

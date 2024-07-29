@@ -15,10 +15,10 @@ vi.mock('../../../src/services/accessRequest.js', () => mockAccessRequestService
 const mockModelService = vi.hoisted(() => ({}))
 vi.mock('../../../src/services/model.js', () => mockModelService)
 
-const mockReviewService = vi.hoisted(() => ({
+const mockResponseService = vi.hoisted(() => ({
   checkAccessRequestsApproved: vi.fn(),
 }))
-vi.mock('../../../src/services/review.js', () => mockReviewService)
+vi.mock('../../../src/services/response.js', () => mockResponseService)
 
 const mockAuthentication = vi.hoisted(() => ({
   getUserModelRoles: vi.fn(() => [] as Array<string>),
@@ -43,7 +43,7 @@ describe('connectors > authorisation > base', () => {
     const connector = new BasicAuthorisationConnector()
     mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([{ id: 'accessRequest' }])
     const approvedAccessRequest = true
-    mockReviewService.checkAccessRequestsApproved.mockReturnValueOnce(approvedAccessRequest)
+    mockResponseService.checkAccessRequestsApproved.mockReturnValueOnce(approvedAccessRequest)
 
     const result = await connector.hasApprovedAccessRequest(user, model)
 
@@ -184,5 +184,62 @@ describe('connectors > authorisation > base', () => {
       info: 'You cannot interact with a private model that you do not have access to.',
       success: false,
     })
+  })
+
+  test('image > push with no roles', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([])
+
+    const result = await connector.images(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      [
+        {
+          type: 'repository',
+          name: 'testModel',
+          actions: ['push'],
+        },
+      ],
+    )
+    expect(result).toStrictEqual([
+      {
+        id: 'testModel',
+        info: 'You do not have permission to upload an image.',
+        success: false,
+      },
+    ])
+  })
+
+  test('image > pull with no roles', async () => {
+    const connector = new BasicAuthorisationConnector()
+
+    mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([])
+
+    const result = await connector.images(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+        settings: { ungovernedAccess: false },
+      } as ModelDoc,
+      [
+        {
+          type: 'repository',
+          name: 'testModel',
+          actions: ['pull'],
+        },
+      ],
+    )
+    expect(result).toStrictEqual([
+      {
+        id: 'testModel',
+        info: 'You need to have an approved access request to download an image.',
+        success: false,
+      },
+    ])
   })
 })

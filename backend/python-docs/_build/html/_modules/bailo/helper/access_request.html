@@ -55,6 +55,7 @@
 <p class="caption" role="heading"><span class="caption-text">Notebooks:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks/access_requests_demo.html">Managing Access Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks/datacards_demo.html">Managing Datacards</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks/experiment_tracking_demo.html">Experiment Tracking with Bailo &amp; MLFlow</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks/models_and_releases_demo_pytorch.html">Managing Models &amp; Releases (ResNet-50 Example with PyTorch)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks/schemas_demo.html">Managing Schemas</a></li>
@@ -88,8 +89,12 @@
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">from</span> <span class="nn">bailo.core.client</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="kn">from</span> <span class="nn">bailo.core.enums</span> <span class="kn">import</span> <span class="n">MinimalSchema</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="AccessRequest">
@@ -144,6 +149,8 @@
 
         <span class="n">schema_id</span> <span class="o">=</span> <span class="n">json_access_request</span><span class="p">[</span><span class="s2">&quot;schemaId&quot;</span><span class="p">]</span>
 
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Access request %s for model %s successfully retrieved from server.&quot;</span><span class="p">,</span> <span class="n">access_request_id</span><span class="p">,</span> <span class="n">model_id</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">client</span><span class="p">,</span>
             <span class="n">model_id</span><span class="p">,</span>
@@ -158,7 +165,9 @@
 <div class="viewcode-block" id="AccessRequest.create">
 <a class="viewcode-back" href="../../../bailo.helper.html#bailo.helper.access_request.AccessRequest.create">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">,</span> <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">schema_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessRequest</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">,</span> <span class="n">model_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">schema_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">MinimalSchema</span><span class="o">.</span><span class="n">ACCESS_REQUEST</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessRequest</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make an access request for the model.</span>
 
 <span class="sd">        Posts an access request to Bailo to be reviewed</span>
@@ -166,7 +175,7 @@
 <span class="sd">        :param client: A client object used to interact with Bailo</span>
 <span class="sd">        :param name: The name of the access request</span>
 <span class="sd">        :param model_id: A unique model ID within Bailo</span>
-<span class="sd">        :param schema_id: A unique schema ID</span>
+<span class="sd">        :param schema_id: A unique schema ID, defaults to minimal-access-request-general-v10</span>
 <span class="sd">        :return: JSON response object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">access_request_json</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post_access_request</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">metadata</span><span class="p">,</span> <span class="n">schema_id</span><span class="p">)[</span><span class="s2">&quot;accessRequest&quot;</span><span class="p">]</span>
@@ -175,6 +184,10 @@
         <span class="n">access_request_id</span> <span class="o">=</span> <span class="n">access_request_json</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
         <span class="n">metadata</span> <span class="o">=</span> <span class="n">access_request_json</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
         <span class="n">created_by</span> <span class="o">=</span> <span class="n">access_request_json</span><span class="p">[</span><span class="s2">&quot;createdBy&quot;</span><span class="p">]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Access request successfully created on server with ID %s for model %s.&quot;</span><span class="p">,</span> <span class="n">access_request_id</span><span class="p">,</span> <span class="n">model_id</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">client</span><span class="p">,</span>
@@ -195,6 +208,9 @@
 <span class="sd">        :return: A message confirming the removal of the access request.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">delete_access_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">access_request_id</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Access request %s successfully deleted on server.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">access_request_id</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="kc">True</span></div>
 
 
@@ -202,7 +218,9 @@
 <a class="viewcode-back" href="../../../bailo.helper.html#bailo.helper.access_request.AccessRequest.update">[docs]</a>
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the current state of the access request to Bailo.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">patch_access_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">access_request_id</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">patch_access_request</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">access_request_id</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Access request %s successfully updated on server.&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">access_request_id</span><span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

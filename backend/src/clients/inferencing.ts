@@ -1,7 +1,7 @@
-import fetch from 'node-fetch'
+import fetch, { Response } from 'node-fetch'
 
 import config from '../utils/config.js'
-import { BadReq, InternalError } from '../utils/error.js'
+import { BadReq, InternalError, Unauthorized } from '../utils/error.js'
 
 interface InferenceService {
   modelId: string
@@ -11,39 +11,51 @@ interface InferenceService {
 }
 
 export async function createInferenceService(inferenceServiceParams: InferenceService) {
-  let res
+  const authorisationToken = config.inference.authorisationToken
+
+  if (authorisationToken === '') {
+    throw Unauthorized('No authentication key exists.')
+  }
+
+  let res: Response
   try {
     res = await fetch(`${config.ui.inference.connection.host}/api/deploy`, {
       method: 'POST',
-      headers: new Headers({ 'content-type': 'application/json' }),
+      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authorisationToken}` },
       body: JSON.stringify(inferenceServiceParams),
     })
   } catch (err) {
     throw InternalError('Unable to communicate with the inferencing service.', { err })
   }
-  const body = await res.json()
   if (!res.ok) {
     throw BadReq('Unrecognised response returned by the inferencing service.')
   }
-
-  return body
+  // TODO - Update return object. For now, we are just checking the status
+  return res.json()
 }
 
 export async function updateInferenceService(inferenceServiceParams: InferenceService) {
-  let res
+  const authorisationToken = config.inference.authorisationToken
+
+  if (authorisationToken === '') {
+    throw Unauthorized('No authentication key exists.')
+  }
+
+  let res: Response
+
   try {
     res = await fetch(`${config.ui.inference.connection.host}/api/update`, {
       method: 'PATCH',
-      headers: new Headers({ 'content-type': 'application/json' }),
+      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authorisationToken}` },
       body: JSON.stringify(inferenceServiceParams),
     })
   } catch (err) {
     throw InternalError('Unable to communicate with the inferencing service.', { err })
   }
-  const body = await res.json()
+
   if (!res.ok) {
     throw BadReq('Unrecognised response returned by the inferencing service.')
   }
-
-  return body
+  // TODO - Update return object. For now, we are just checking the status
+  return res.json()
 }

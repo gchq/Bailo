@@ -20,6 +20,9 @@ export const TokenActions = {
   AccessRequestRead: 'access_request:read',
   AccessRequestWrite: 'access_request:write',
 
+  ResponseWrite: 'response:write',
+  ResponseRead: 'response:read',
+
   FileRead: 'file:read',
   FileWrite: 'file:write',
 

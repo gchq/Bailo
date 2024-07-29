@@ -15,9 +15,13 @@ vi.mock('../../src/connectors/authorisation/index.js', async () => ({
 const configMock = vi.hoisted(
   () =>
     ({
+      ui: {
+        modelMirror: {
+          enabled: true,
+        },
+      },
       s3: { buckets: { uploads: 'test' } },
       modelMirror: {
-        enabled: true,
         export: {
           maxSize: 100,
           kmsSignature: {
@@ -100,7 +104,7 @@ vi.mock('stream', () => streamMocks)
 
 describe('services > mirroredModel', () => {
   test('exportModel > not enabled', async () => {
-    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValueOnce({ enabled: false })
+    vi.spyOn(configMock, 'ui', 'get').mockReturnValueOnce({ modelMirror: { enabled: false } })
     const response = exportModel({} as UserInterface, 'modelId', true)
 
     expect(response).rejects.toThrowError('Model mirroring has not been enabled.')
@@ -273,7 +277,7 @@ describe('services > mirroredModel', () => {
   test('exportModel > export uploaded to S3 for model cards and releases', async () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '3.2.1'])
 
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
   })
 
   test('exportModel > unable to upload to tmp S3 location', async () => {

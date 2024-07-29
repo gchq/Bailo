@@ -1,4 +1,5 @@
 import Box from '@mui/material/Box'
+import { grey } from '@mui/material/colors'
 import Link from '@mui/material/Link'
 import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
@@ -42,6 +43,26 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
           component: Typography,
           props: { paragraph: true },
         },
+        blockquote: {
+          component: (props: any) => (
+            <Box
+              sx={{
+                fontStyle: 'italic',
+                background: grey.A200,
+                borderLeft: '2px',
+                borderLeftStyle: 'solid',
+                borderLeftColor: theme.palette.markdownBorder.main,
+                pt: 2,
+                pl: 1,
+                pb: 0.5,
+                pr: 1,
+                ml: 2,
+                mb: 2,
+              }}
+              {...props}
+            />
+          ),
+        },
         a: { component: Link },
         li: {
           component: (props: any) => (
@@ -64,7 +85,7 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
         },
       },
     }),
-    [theme.palette.container.main],
+    [theme.palette.container.main, theme.palette.markdownBorder.main],
   )
 
   return <ReactMarkdown options={options}>{children}</ReactMarkdown>

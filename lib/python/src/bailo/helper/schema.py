@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
 import logging
+from typing import Any, List
 
 from bailo.core.client import Client
 from bailo.core.enums import SchemaKind
@@ -93,6 +93,17 @@ class Schema:
         schema.__unpack(res["schema"])
 
         return schema
+
+    @staticmethod
+    def get_all_schema_ids(client: Client, kind: SchemaKind | None = None) -> list[str]:
+        """Return all schema ids for a given type.
+
+        :param client: A client object used to interact with Bailo
+        :param kind: Enum to define schema kind (e.g. Model or AccessRequest), defaults to None
+        :return: List of schema IDs
+        """
+        all_schemas = client.get_all_schemas(kind=kind)
+        return [schema["id"] for schema in all_schemas["schemas"]]
 
     def __unpack(self, res) -> None:
         self.schema_id = res["id"]

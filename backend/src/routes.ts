@@ -14,7 +14,6 @@ import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAcces
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
-import { patchAccessRequestComment } from './routes/v2/model/accessRequest/patchAccessRequestComment.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
 import { postAccessRequestComment } from './routes/v2/model/accessRequest/postAccessRequestComment.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
@@ -34,6 +33,7 @@ import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
 import { getModelCardHtml } from './routes/v2/model/modelcard/getModelCardHtml.js'
 import { getModelCardRevisions } from './routes/v2/model/modelcard/getModelCardRevisions.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
+import { postFromTemplate } from './routes/v2/model/modelcard/postFromTemplate.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
@@ -47,13 +47,13 @@ import { putWebhook } from './routes/v2/model/webhook/putWebhook.js'
 import { deleteRelease } from './routes/v2/release/deleteRelease.js'
 import { getRelease } from './routes/v2/release/getRelease.js'
 import { getReleases } from './routes/v2/release/getReleases.js'
-import { patchReleaseComment } from './routes/v2/release/patchReleaseComment.js'
 import { postRelease } from './routes/v2/release/postRelease.js'
 import { postReleaseComment } from './routes/v2/release/postReleaseComment.js'
 import { putRelease } from './routes/v2/release/putRelease.js'
+import { getResponses } from './routes/v2/response/getResponses.js'
+import { patchResponse } from './routes/v2/response/patchResponse.js'
+import { patchResponseReaction } from './routes/v2/response/patchResponseReaction.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
-import { patchAccessRequestReviewResponse } from './routes/v2/review/patchAccessRequestReviewResponse.js'
-import { patchReleaseReviewResponse } from './routes/v2/review/patchReleaseReviewResponse.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
 import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
@@ -95,11 +95,9 @@ server.post('/api/v2/model/:modelId/export/s3', ...postRequestExportToS3)
 server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
 server.get('/api/v2/model/:modelId/model-card/:version/html', ...getModelCardHtml)
 server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)
-server.put('/api/v2/model/:modelId/model-cards', ...putModelCard)
-
-// *server.get('/api/v2/template/models', ...getModelTemplates)
-// *server.post('/api/v2/model/:modelId/setup/from-template', ...postFromTemplate)
+server.put('/api/v2/model/:modelId/model-cards', ...putModelCard) // *server.get('/api/v2/template/models', ...getModelTemplates)
 // *server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
+server.post(`/api/v2/model/:modelId/setup/from-template`, ...postFromTemplate)
 server.post('/api/v2/model/:modelId/setup/from-schema', ...postFromSchema)
 
 server.post('/api/v2/model/:modelId/releases', ...postRelease)
@@ -110,13 +108,8 @@ server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...
 server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
 server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
 server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
-server.patch('/api/v2/model/:modelId/release/:semver/comment/:commentId', ...patchReleaseComment)
 server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
 server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
-server.patch(
-  '/api/v2/model/:modelId/release/:semver/review/:reviewId/response/:responseId',
-  ...patchReleaseReviewResponse,
-)
 
 server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
 server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
@@ -124,12 +117,7 @@ server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAcces
 server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
 server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
-server.patch('/api/v2/model/:modelId/access-request/:accessRequestId/comment/:commentId', ...patchAccessRequestComment)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
-server.patch(
-  '/api/v2/model/:modelId/access-request/:accessRequestId/review/:reviewId/response/:responseId',
-  ...patchAccessRequestReviewResponse,
-)
 
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
@@ -148,7 +136,6 @@ server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download
 server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
 server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
 server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
-server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseReviewResponse)
 
 server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
@@ -184,6 +171,10 @@ server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/reviews', ...getReviews)
+
+server.get('/api/v2/responses', ...getResponses)
+server.patch('/api/v2/response/:responseId', ...patchResponse)
+server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReaction)
 
 server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
 server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)

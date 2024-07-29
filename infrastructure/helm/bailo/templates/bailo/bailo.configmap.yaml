@@ -153,7 +153,13 @@ data:
             host: '{{ .Values.inference.host}}',
           },
           gpus: '{{ .Values.inference.gpus }}',
+          authorizationTokenName: '{{ .Values.inference.authorizationTokenName }}'
         },
+
+        modelMirror: {
+          enabled: '{{ .Values.modelMirror.enabled }}',
+          disclaimer: '{{ .Values.modelMirror.disclaimer }}'
+        }
       },
 
       connectors: {
@@ -191,6 +197,19 @@ data:
           registry: '{{ .Values.minio.registryBucket }}',
         },
       },
+
+      modelMirror: {
+        export: {
+          bucket: '{{ .Values.modelMirror.export.bucket }}',
+          kmsSignature: {
+            enabled: {{ .Values.modelMirror.export.kmsSignature.enabled }},
+            keyId: '{{ .Values.modelMirror.export.kmsSignature.keyId }}',
+            KMSClient: {
+              region: '{{ .Values.modelMirror.export.kmsSignature.KMSClient.region }}',
+            },
+          },
+        },
+      },
     }
 
   custom-environment-variables.cjs: |
@@ -206,5 +225,20 @@ data:
       },
       instrumentation: {
         authenticationToken: 'OTEL_EXPORTER_TOKEN',
+      },
+      inference: {
+        authorisationToken: 'INFERENCING_WRITE_TOKEN'
+      },
+      modelMirror: {
+        export: {
+          kmsSignature: {
+            KMSClient: {
+              credentials: {
+                accessKeyId: 'KMS_ACCESS_KEY',
+                secretAccessKey: 'KMS_ACCESS_KEY',
+              },
+            },
+          },
+        },
       },
     }

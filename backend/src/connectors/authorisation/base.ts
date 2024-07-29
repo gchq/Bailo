@@ -2,12 +2,14 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
+import { ResponseDoc } from '../../models/Response.js'
 import { SchemaDoc } from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
-import { Access, Action } from '../../routes/v1/registryAuth.js'
+import { Access } from '../../routes/v1/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../services/accessRequest.js'
-import { checkAccessRequestsApproved } from '../../services/review.js'
+import { checkAccessRequestsApproved } from '../../services/response.js'
 import { validateTokenForModel, validateTokenForUse } from '../../services/token.js'
+import { toEntity } from '../../utils/entity.js'
 import { Roles } from '../authentication/Base.js'
 import authentication from '../authentication/index.js'
 import {
@@ -22,6 +24,8 @@ import {
   ModelActionKeys,
   ReleaseAction,
   ReleaseActionKeys,
+  ResponseAction,
+  ResponseActionKeys,
   SchemaAction,
   SchemaActionKeys,
 } from './actions.js'
@@ -69,6 +73,10 @@ export class BasicAuthorisationConnector {
     return (await this.accessRequests(user, model, [accessRequest], action))[0]
   }
 
+  async response(user: UserInterface, response: ResponseDoc, action: ResponseActionKeys) {
+    return (await this.responses(user, [response], action))[0]
+  }
+
   async file(user: UserInterface, model: ModelDoc, file: FileInterfaceDoc, action: FileActionKeys) {
     return (await this.files(user, model, [file], action))[0]
   }
@@ -104,6 +112,20 @@ export class BasicAuthorisationConnector {
         }
 
         return { id: model.id, success: true }
+      }),
+    )
+  }
+
+  async responses(user: UserInterface, responses: ResponseDoc[], action: ResponseActionKeys): Promise<Array<Response>> {
+    return Promise.all(
+      responses.map(async (response) => {
+        if (action === ResponseAction.Update && toEntity('user', user.dn) !== response.entity) {
+          return { id: user.dn, success: false, info: 'Only the author can update a comment' }
+        }
+        return {
+          id: user.dn,
+          success: true,
+        }
       }),
     )
   }
@@ -292,7 +314,7 @@ export class BasicAuthorisationConnector {
         // If they are not listed on the model, don't let them upload or delete images.
         if (
           (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator'])) &&
-          access.actions.includes(ImageAction.Push as Action)
+          actions.includes(ImageAction.Push)
         ) {
           return {
             success: false,
@@ -304,7 +326,7 @@ export class BasicAuthorisationConnector {
         if (
           !hasAccessRequest &&
           (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator', 'consumer'])) &&
-          access.actions.includes(ImageAction.Pull as Action) &&
+          actions.includes(ImageAction.Pull) &&
           !model.settings.ungovernedAccess
         ) {
           return {

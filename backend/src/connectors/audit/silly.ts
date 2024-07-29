@@ -6,6 +6,7 @@ import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
+import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
@@ -44,8 +45,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onDeleteAccessRequest(_req: Request, _accessRequestId: string) {}
   onViewAccessRequests(_req: Request, _accessRequests: AccessRequestDoc[]) {}
   onSearchReviews(_req: Request, _reviews: (ReviewInterface & { model: ModelInterface })[]) {}
-  onCreateReviewResponse(_req: Request, _review: ReviewInterface) {}
-  onUpdateReviewResponse(_req: Request, _review: ReviewInterface) {}
+  onCreateReviewResponse(_req: Request, _response: ResponseInterface) {}
   onSearchSchemas(_req: Request, _schemas: SchemaInterface[]) {}
   onCreateSchema(_req: Request, _schema: SchemaInterface) {}
   onDeleteSchema(_req: Request, _schemaId: string) {}
@@ -58,4 +58,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateInference(_req: Request, _inferences: InferenceDoc) {}
   onCreateS3Export(_req: Request, _modelId: string, _semvers?: string[]) {}
   onError(_req: Request, _error: BailoError) {}
+  onCreateCommentResponse(_req: Request, _responseInterface: ResponseInterface) {}
+  onViewResponses(_req: Request, _responseInters: ResponseInterface[]) {}
+  onUpdateResponse(_req: Request, _responseId: string) {}
 }

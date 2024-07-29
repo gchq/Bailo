@@ -9,7 +9,14 @@ const uint8ArrayFromHexString = (hexstring) =>
 
 export async function sign(hash: string) {
   const keyId = config.modelMirror.export.kmsSignature.keyId
-  const client = new KMSClient(config.modelMirror.export.kmsSignature.KMSClient)
+  const clientConfig = config.modelMirror.export.kmsSignature.KMSClient
+  const client = new KMSClient({
+    ...(clientConfig.credentials?.accessKeyId &&
+      clientConfig.credentials?.secretAccessKey && {
+        credentials: clientConfig.credentials,
+        region: clientConfig.region,
+      }),
+  })
 
   const describeKeyCommand = new DescribeKeyCommand({ KeyId: keyId })
   const keyResponse = await client.send(describeKeyCommand)

@@ -4,6 +4,7 @@ import Mail from 'nodemailer/lib/mailer/index.js'
 import authentication from '../../connectors/authentication/index.js'
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { ReleaseDoc } from '../../models/Release.js'
+import { ResponseInterface } from '../../models/Response.js'
 import { ReviewDoc } from '../../models/Review.js'
 import config from '../../utils/config.js'
 import { toEntity } from '../../utils/entity.js'
@@ -90,25 +91,34 @@ export async function requestReviewForAccessRequest(
   await dispatchEmail(entity, emailContent)
 }
 
-export async function notifyReviewResponseForRelease(review: ReviewDoc, release: ReleaseDoc) {
+export async function notifyReviewResponseForRelease(reviewResponse: ResponseInterface, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
-  const reviewResponse = review.responses[0]
 
   if (!reviewResponse) {
     log.info('response not found')
     return
   }
 
+  if (!reviewResponse.role) {
+    log.info('response role not found')
+    return
+  }
+
+  if (!reviewResponse.decision) {
+    log.info('response decision not found')
+    return
+  }
+
   const emailContent = buildEmail(
     `Release ${release.semver} has been reviewed by ${
-      (await authentication.getUserInformation(toEntity('user', reviewResponse?.user))).name || reviewResponse?.user
+      (await authentication.getUserInformation(reviewResponse.entity)).name
     }`,
     [
       { title: 'Model ID', data: release.modelId },
-      { title: 'Reviewer Role', data: review.role.toUpperCase() },
+      { title: 'Reviewer Role', data: reviewResponse.role.toUpperCase() },
       { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
@@ -119,24 +129,36 @@ export async function notifyReviewResponseForRelease(review: ReviewDoc, release:
   await dispatchEmail(toEntity('user', release.createdBy), emailContent)
 }
 
-export async function notifyReviewResponseForAccess(review: ReviewDoc, accessRequest: AccessRequestDoc) {
+export async function notifyReviewResponseForAccess(
+  reviewResponse: ResponseInterface,
+  accessRequest: AccessRequestDoc,
+) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')
     return
   }
-  const reviewResponse = review.responses[0]
 
   if (!reviewResponse) {
     log.info('response not found')
     return
   }
+
+  if (!reviewResponse.role) {
+    log.info('response role not found')
+    return
+  }
+
+  if (!reviewResponse.decision) {
+    log.info('response decision not found')
+    return
+  }
   const emailContent = buildEmail(
     `Access request for model ${accessRequest.modelId} has been reviewed by ${
-      (await authentication.getUserInformation(toEntity('user', reviewResponse?.user))).name || reviewResponse?.user
+      (await authentication.getUserInformation(reviewResponse.entity)).name
     }`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
-      { title: 'Reviewer Role', data: review.role.toUpperCase() },
+      { title: 'Reviewer Role', data: reviewResponse.role.toUpperCase() },
       { title: 'Decision', data: reviewResponse.decision.replace(/_/g, ' ') },
     ],
     [
