@@ -1,6 +1,6 @@
 import { FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Fragment } from 'react'
+import { ChangeEvent, Fragment } from 'react'
 
 interface CustomTextInputProps {
   label?: string
@@ -20,7 +20,7 @@ export default function CheckboxInput(props: CustomTextInputProps) {
 
   const theme = useTheme()
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value === 'true')
   }
 
