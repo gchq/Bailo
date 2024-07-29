@@ -1,5 +1,5 @@
 import { ArrowBack } from '@mui/icons-material'
-import { Button, Card, Container, Link, Stack, Typography } from '@mui/material'
+import { Button, Container, Link, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
@@ -39,7 +39,7 @@ export default function InferenceApp() {
       <Title text='Inferencing Service' />
       {(isModelLoading || isUiConfigLoading) && <Loading />}
       <Container maxWidth='lg'>
-        <Card sx={{ my: 4, p: 4 }}>
+        <Paper sx={{ my: 4, p: 4 }}>
           {model && (
             <Stack spacing={2}>
               <Typography component='h1' variant='h4' color='primary' fontWeight='bold'>
@@ -67,7 +67,7 @@ export default function InferenceApp() {
               <iframe src={serviceEndpoint} width='100%' height='600' onLoad={() => setIsSpinningUp(false)} />
             </Stack>
           )}
-        </Card>
+        </Paper>
       </Container>
     </>
   )

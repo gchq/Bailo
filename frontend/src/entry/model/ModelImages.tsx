@@ -58,9 +58,9 @@ export default function ModelImages({ model, currentUserRoles, readOnly = false 
       <Container sx={{ my: 2 }}>
         <Stack spacing={4}>
           {!readOnly && (
-            <Box sx={{ ml: 'auto' }}>
+            <>
               <Tooltip title={requiredRolesText}>
-                <span>
+                <Box sx={{ textAlign: 'right' }}>
                   <Button
                     variant='outlined'
                     disabled={!canPushImage}
@@ -69,14 +69,14 @@ export default function ModelImages({ model, currentUserRoles, readOnly = false 
                   >
                     Push Image
                   </Button>
-                </span>
+                </Box>
               </Tooltip>
               <UploadModelImageDialog
                 open={openUploadImageDialog}
                 handleClose={() => setOpenUploadImageDialog(false)}
                 model={model}
               />
-            </Box>
+            </>
           )}
           {modelImageList}
         </Stack>

@@ -1,5 +1,5 @@
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import { Button, Card, Container } from '@mui/material'
+import { Button, Container, Paper } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -31,12 +31,12 @@ export default function EntryCardVersion({ entryCard, schema, entryId, entryKind
 
   return (
     <Container>
-      <Card sx={{ p: 4, my: 4 }}>
+      <Paper sx={{ p: 4, my: 4 }}>
         <Button startIcon={<ArrowBackIosIcon />} onClick={() => router.push(`/${entryKind}/${entryId}`)}>
           {`Back to ${EntryKindLabel[entryKind]}`}
         </Button>
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} />
-      </Card>
+      </Paper>
     </Container>
   )
 }
