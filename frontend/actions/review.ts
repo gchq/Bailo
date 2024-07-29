@@ -11,7 +11,7 @@ import {
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetReviewRequestsForUser() {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]
     },
@@ -21,7 +21,7 @@ export function useGetReviewRequestsForUser() {
   return {
     mutateReviews: mutate,
     reviews: data ? data.reviews : [],
-    isReviewsLoading: !error && !data,
+    isReviewsLoading: isLoading,
     isReviewsError: error,
   }
 }
@@ -41,7 +41,7 @@ type GetReviewRequestsForModelQuery = {
 } & SemverOrAccessRequestId
 
 export function useGetReviewRequestsForModel({ modelId, semver, accessRequestId }: GetReviewRequestsForModelQuery) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]
     },
@@ -60,7 +60,7 @@ export function useGetReviewRequestsForModel({ modelId, semver, accessRequestId 
 
   return {
     reviews: data ? data.reviews : [],
-    isReviewsLoading: !error && !data,
+    isReviewsLoading: isLoading,
     isReviewsError: error,
     mutateReviews: mutate,
   }

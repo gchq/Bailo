@@ -20,7 +20,7 @@ export function useGetResponses(parentIds: string[]) {
   return {
     mutateResponses: mutate,
     responses: data ? data.responses : emptyArray,
-    isResponsesLoading: isLoading && !error,
+    isResponsesLoading: isLoading,
     isResponsesError: error,
   }
 }

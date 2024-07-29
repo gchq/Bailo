@@ -32,7 +32,7 @@ export function useListModels(
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
   }
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       models: EntrySearchResult[]
     },
@@ -42,7 +42,7 @@ export function useListModels(
   return {
     mutateModels: mutate,
     models: data ? data.models : [],
-    isModelsLoading: !error && !data,
+    isModelsLoading: isLoading,
     isModelsError: error,
   }
 }
@@ -52,7 +52,7 @@ export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
     kind,
   }
 
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       model: EntryInterface
     },
@@ -62,13 +62,13 @@ export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
   return {
     mutateModel: mutate,
     model: data ? data.model : undefined,
-    isModelLoading: !error && !data,
+    isModelLoading: isLoading,
     isModelError: error,
   }
 }
 
 export function useGetModelRoles(id?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       roles: Role[]
     },
@@ -78,13 +78,13 @@ export function useGetModelRoles(id?: string) {
   return {
     mutateModelRoles: mutate,
     modelRoles: data ? data.roles : [],
-    isModelRolesLoading: !error && !data,
+    isModelRolesLoading: isLoading,
     isModelRolesError: error,
   }
 }
 
 export function useGetModelImages(id?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       images: ModelImage[]
     },
@@ -94,13 +94,13 @@ export function useGetModelImages(id?: string) {
   return {
     mutateModelImages: mutate,
     modelImages: data ? data.images : [],
-    isModelImagesLoading: !error && !data,
+    isModelImagesLoading: isLoading,
     isModelImagesError: error,
   }
 }
 
 export function useGetModelRolesCurrentUser(id?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       roles: Role[]
     },
@@ -110,7 +110,7 @@ export function useGetModelRolesCurrentUser(id?: string) {
   return {
     mutateModelRolesCurrentUser: mutate,
     modelRolesCurrentUser: data ? data.roles : [],
-    isModelRolesCurrentUserLoading: !error && !data,
+    isModelRolesCurrentUserLoading: isLoading,
     isModelRolesCurrentUserError: error,
   }
 }
