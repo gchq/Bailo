@@ -37,7 +37,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
   }
 
   const emailContent = buildEmail(
-    `ACTION REQUIRED: Release ${release.semver} has been created for model ${release.modelId}`,
+    `Release ${release.semver} has been created for model ${release.modelId}`,
     [
       { title: 'Model ID', data: release.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
@@ -51,6 +51,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
       { name: 'Open Release', url: getReleaseUrl(release) },
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
+    `ACTION REQUIRED: Release ${release.semver} has been created for model ${release.modelId}`,
   )
 
   await dispatchEmail(entity, emailContent)
@@ -67,7 +68,7 @@ export async function requestReviewForAccessRequest(
   }
 
   const emailContent = buildEmail(
-    `ACTION REQUIRED: Request for Entities '${accessRequest.metadata.overview.entities}' access to the model '${accessRequest.modelId}'`,
+    `Request for Entities '${accessRequest.metadata.overview.entities}' access to the model '${accessRequest.modelId}'`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
@@ -86,6 +87,7 @@ export async function requestReviewForAccessRequest(
       },
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
+    `ACTION REQUIRED: Request for Entities '${accessRequest.metadata.overview.entities}' access to the model '${accessRequest.modelId}'`,
   )
 
   await dispatchEmail(entity, emailContent)
