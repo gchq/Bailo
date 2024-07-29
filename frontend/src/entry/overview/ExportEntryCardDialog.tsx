@@ -11,14 +11,14 @@ import { ArrayFieldTemplate, DescriptionFieldTemplate, ObjectFieldTemplate } fro
 import { EntryInterface, SplitSchemaNoRender } from 'types/types'
 import { widgets } from 'utils/formUtils'
 
-type EntryCardHistoryDialogProps = {
+type ExportEntryCardDialogProps = {
   entry: EntryInterface
   splitSchema: SplitSchemaNoRender
   open: boolean
   setOpen: (isOpen: boolean) => void
 }
 
-export default function ExportModelCardDialog({ entry, splitSchema, open, setOpen }: EntryCardHistoryDialogProps) {
+export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpen }: ExportEntryCardDialogProps) {
   const theme = useTheme()
   const modelCardContentRef = useRef<HTMLDivElement>(null)
   const exportModelCard = useReactToPrint({

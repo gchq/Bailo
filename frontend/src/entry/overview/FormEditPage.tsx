@@ -8,7 +8,7 @@ import Loading from 'src/common/Loading'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
-import ExportModelCardDialog from 'src/entry/overview/ExportModelCardDialog'
+import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
@@ -190,7 +190,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
         helperText={`Paste in raw JSON to fill in the ${EntryCardKindLabel[entry.kind]} form`}
         dialogTitle='Add Raw JSON to Form'
       />
-      <ExportModelCardDialog
+      <ExportEntryCardDialog
         entry={entry}
         splitSchema={splitSchema}
         open={exportDialogOpen}
