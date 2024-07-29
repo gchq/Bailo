@@ -7,6 +7,7 @@ import {
   canUserActionModelById,
   createModel,
   createModelCardFromSchema,
+  createModelCardFromTemplate,
   getModelById,
   getModelCardRevision,
   searchModels,
@@ -310,5 +311,18 @@ describe('services > model', () => {
       /^Cannot alter a mirrored model./,
     )
     expect(modelMocks.save).not.toBeCalled()
+  })
+
+  test('crateModelCardFromTemplate > requesting to use a template without a model card will throw an error', async () => {
+    const testModel = {
+      name: 'test model',
+      settings: {
+        mirror: {},
+      },
+    }
+    modelMocks.findOne.mockResolvedValue(testModel)
+    expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')).rejects.toThrowError(
+      /^The template model is missing a modelcard/,
+    )
   })
 })
