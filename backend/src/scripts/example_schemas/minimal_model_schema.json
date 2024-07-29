@@ -58,8 +58,13 @@
           "properties": {
             "questionThree": {
               "title": "Question three",
-              "description": "This is another question",
+              "description": "This is number question",
               "type": "number"
+            },
+            "questionFour": {
+              "title": "Question four",
+              "description": "This is a checkbox question",
+              "type": "boolean"
             }
           }
         }
