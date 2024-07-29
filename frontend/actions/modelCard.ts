@@ -41,7 +41,7 @@ export async function putModelCard(modelId: string, metadata: unknown) {
 }
 
 export function useGetEntryCard(entryId?: string, entryCardVersion?: number) {
-  const { data, error } = useSWR<
+  const { data, isLoading, error } = useSWR<
     {
       modelCard: EntryCardInterface
     },
@@ -50,13 +50,13 @@ export function useGetEntryCard(entryId?: string, entryCardVersion?: number) {
 
   return {
     entryCard: data ? data.modelCard : undefined,
-    isEntryCardLoading: !error && !data,
+    isEntryCardLoading: isLoading,
     isEntryCardError: error,
   }
 }
 
 export function useGetModelCardRevisions(modelId: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       modelCardRevisions: EntryCardRevisionInterface[]
     },
@@ -66,7 +66,7 @@ export function useGetModelCardRevisions(modelId: string) {
   return {
     mutateModelCardRevisions: mutate,
     modelCardRevisions: data ? data.modelCardRevisions : [],
-    isModelCardRevisionsLoading: !error && !data,
+    isModelCardRevisionsLoading: isLoading,
     isModelCardRevisionsError: error,
   }
 }
