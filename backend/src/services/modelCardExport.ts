@@ -76,9 +76,27 @@ export async function renderToHtml(
   const html = `
     <html>
       <head>
-        <style>.exampe { color: red; }</style>
+        <style>
+          body { margin: 0px; font-family: Helvetica; color: #1e1e1e; background-color: #f9f9f9; }
+          h1 { text-align: center }
+          h2 { margin-top: 32px; margin-bottom: 16px }
+          h3 { margin-top: 24px; margin-bottom: 8px }
+          h4 { margin-top: 16px; margin-bottom: 8px }
+          h5 { margin-top: 16px; margin-bottom: 8px }
+          h6 { margin-top: 16px; margin-bottom: 8px }
+          p { margin-top: 8px; margin-bottom: 8px }
+        </style>
       </head>
-      <body>${body}</body>
+      <body>
+        <div style="padding-left: 8px; height: 64px; width: 100%; background: linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)">
+          <div style="line-height: 64px; color: white; font-size: 20px; text-align: left; max-width: 900px; margin: auto">
+            Bailo
+          </div>
+        </div>
+        <div style="margin: 8px; max-width: 900px; margin: auto; margin-bottom: 16px">
+          ${body}
+        </div>
+      </body>
     </html>
   `
 
@@ -139,7 +157,7 @@ function recursiveRender(obj: any, schema: Fragment, output = '', depth = 1) {
 
       for (const value of obj) {
         output += outdent`\n\n
-          ${'#'.repeat(depth + 1)} Entry #${count}
+          ${'#'.repeat(depth + 1)} Entry #${count + 1}
         `
         output = recursiveRender(value, schema.items, output, depth + 1)
       }
@@ -164,11 +182,17 @@ function recursiveRender(obj: any, schema: Fragment, output = '', depth = 1) {
         obj = 'No response'
       }
 
-      output += outdent`\n\n
-          ${'#'.repeat(depth)} ${schema.title}
+      if (schema.title) {
+        output += outdent`\n\n
+            ${'#'.repeat(depth)} ${schema.title}
 
-          ${obj}
-      `
+            ${obj}
+        `
+      } else {
+        output += outdent`\n\n
+            ${obj}
+        `
+      }
       break
     default:
       throw new Error(
