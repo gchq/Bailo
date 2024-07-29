@@ -58,20 +58,18 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
         {!readOnly && (
-          <>
-            <Tooltip title={requiredRolesText}>
-              <Box sx={{ textAlign: 'right' }}>
-                <Button
-                  variant='outlined'
-                  onClick={handleDraftNewRelease}
-                  disabled={!canDraftRelease || !model.card}
-                  data-test='draftNewReleaseButton'
-                >
-                  Draft new Release
-                </Button>
-              </Box>
-            </Tooltip>
-          </>
+          <Tooltip title={requiredRolesText}>
+            <Box sx={{ textAlign: 'right' }}>
+              <Button
+                variant='outlined'
+                onClick={handleDraftNewRelease}
+                disabled={!canDraftRelease || !model.card}
+                data-test='draftNewReleaseButton'
+              >
+                Draft new Release
+              </Button>
+            </Box>
+          </Tooltip>
         )}
         {isReleasesLoading && <Loading />}
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
