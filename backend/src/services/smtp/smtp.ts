@@ -37,7 +37,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
   }
 
   const emailContent = buildEmail(
-    `Release ${release.semver} has been created for model ${release.modelId}`,
+    `ACTION REQUIRED: Release ${release.semver} has been created for model ${release.modelId}`,
     [
       { title: 'Model ID', data: release.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
@@ -67,7 +67,7 @@ export async function requestReviewForAccessRequest(
   }
 
   const emailContent = buildEmail(
-    `Request for Entities '${accessRequest.metadata.overview.entities}' access to the model '${accessRequest.modelId}'`,
+    `ACTION REQUIRED: Request for Entities '${accessRequest.metadata.overview.entities}' access to the model '${accessRequest.modelId}'`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
