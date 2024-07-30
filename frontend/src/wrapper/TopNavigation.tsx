@@ -117,7 +117,12 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
               <IconButton onClick={handleNavMenuClicked}>
                 <MenuIcon sx={{ color: theme.palette.topNavigation.main }} />
               </IconButton>
-              <Menu anchorEl={navbarAnchorEl} open={navbarMenuOpen} onClose={() => setNavbarAnchorEl(null)}>
+              <Menu
+                anchorEl={navbarAnchorEl}
+                open={navbarMenuOpen}
+                onClose={() => setNavbarAnchorEl(null)}
+                sx={{ py: 0 }}
+              >
                 <Link href='/entry/new'>
                   <MenuItem>
                     <ListItemIcon>

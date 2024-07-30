@@ -7,9 +7,9 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Card,
   Divider,
   FormControlLabel,
+  Paper,
   Radio,
   RadioGroup,
   Stack,
@@ -137,7 +137,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   return (
     <>
       {isCurrentUserLoading && <Loading />}
-      <Card sx={{ p: 4, mb: 4 }}>
+      <Paper sx={{ p: 4, mb: 4 }}>
         <Stack spacing={1}>
           <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />} onClick={() => onBackClick()}>
             Back
@@ -244,7 +244,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
             </Box>
           </Stack>
         </Box>
-      </Card>
+      </Paper>
     </>
   )
 }

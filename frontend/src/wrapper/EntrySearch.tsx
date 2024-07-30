@@ -92,9 +92,9 @@ export default function EntrySearch() {
 
   return (
     <Stack>
-      <Search>
+      <Search sx={{ pl: 1 }}>
         <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
-          <SearchIcon sx={{ ml: 1 }} />
+          <SearchIcon />
           <StyledInputBase
             placeholder='Search'
             inputProps={{ 'aria-label': 'search for a data card or model' }}
@@ -120,17 +120,23 @@ export default function EntrySearch() {
             horizontal: 152,
           }}
         >
-          {isEntriesLoading && <Loading />}
-          {!isEntriesLoading && (
-            <List dense disablePadding>
-              {modelList}
-            </List>
-          )}
-          {!isEntriesLoading && modelList.length === 0 && (
-            <Box sx={{ p: 4, minWidth: '272px' }}>
-              <EmptyBlob text='No data cards/models found' />
-            </Box>
-          )}
+          <Box sx={{ minWidth: '272px', borderTopLeftRadius: 20 }}>
+            {isEntriesLoading && (
+              <Box sx={{ p: 4 }}>
+                <Loading />
+              </Box>
+            )}
+            {!isEntriesLoading && (
+              <List dense disablePadding>
+                {modelList}
+              </List>
+            )}
+            {!isEntriesLoading && modelList.length === 0 && (
+              <Box sx={{ p: 4 }}>
+                <EmptyBlob text='No data cards/models found' />
+              </Box>
+            )}
+          </Box>
         </Popover>
       )}
     </Stack>

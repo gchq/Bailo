@@ -152,10 +152,10 @@ export default function Marketplace() {
               variant='filled'
               onSubmit={onFilterSubmit}
             >
-              <InputLabel htmlFor='model-filter-input'>Filter models</InputLabel>
+              <InputLabel htmlFor='entry-filter-input'>Search</InputLabel>
               <FilledInput
-                sx={{ flex: 1, backgroundColor: theme.palette.background.paper }}
-                id='model-filter-input'
+                sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2 }}
+                id='entry-filter-input'
                 value={filter}
                 disableUnderline
                 onChange={handleFilterChange}

@@ -117,7 +117,7 @@ export default function PageWithTabs({
         divider={<Divider flexItem orientation='vertical' />}
         alignItems='center'
         spacing={{ sm: 2 }}
-        sx={{ p: 2 }}
+        sx={{ px: 2, pb: 2 }}
       >
         <Stack direction='row'>
           <Typography component='h1' color='primary' variant='h6'>

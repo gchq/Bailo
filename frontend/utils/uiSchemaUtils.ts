@@ -41,9 +41,5 @@ function createBaseSchema(schema: any) {
     }
   }
 
-  if (schema.type === 'boolean') {
-    uiSchema['ui:widget'] = 'radio'
-  }
-
   return uiSchema
 }

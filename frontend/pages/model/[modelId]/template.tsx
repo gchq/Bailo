@@ -1,6 +1,6 @@
 import { ArrowBack, FileCopy } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
-import { Autocomplete, Button, Card, Container, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
 import { EntrySearchResult, useGetModel, useListModels } from 'actions/model'
 import { postFromTemplate } from 'actions/modelCard'
 import { useRouter } from 'next/router'
@@ -72,7 +72,7 @@ export default function ModelTemplateSelect() {
       <Title text='Select a model template' />
       {(isEntriesLoading || isEntryLoading) && <Loading />}
       <Container maxWidth='md'>
-        <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
+        <Paper sx={{ mx: 'auto', my: 4, p: 4 }}>
           {entry && (
             <>
               <Link href={`/${entry.kind}/${entry.id}`}>
@@ -110,7 +110,7 @@ export default function ModelTemplateSelect() {
               </Stack>
             </>
           )}
-        </Card>
+        </Paper>
       </Container>
     </>
   )

@@ -51,6 +51,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
       { name: 'Open Release', url: getReleaseUrl(release) },
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
+    true,
   )
 
   await dispatchEmail(entity, emailContent)
@@ -86,6 +87,7 @@ export async function requestReviewForAccessRequest(
       },
       { name: 'See Reviews', url: `${appBaseUrl}/review` },
     ],
+    true,
   )
 
   await dispatchEmail(entity, emailContent)

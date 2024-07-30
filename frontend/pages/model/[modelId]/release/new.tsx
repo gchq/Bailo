@@ -1,6 +1,6 @@
 import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
-import { Alert, Box, Button, Card, Container, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { CreateReleaseParams, postRelease, postSimpleFileForRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
@@ -175,7 +175,7 @@ export default function NewRelease() {
       {isModelLoading && <Loading />}
       {model && !isModelLoading && (
         <Container maxWidth='md'>
-          <Card sx={{ my: 4, p: 4 }}>
+          <Paper sx={{ my: 4, p: 4 }}>
             <Box component='form' onSubmit={handleSubmit}>
               <Stack spacing={4}>
                 <Link href={`/model/${modelId}?tab=releases`}>
@@ -240,7 +240,7 @@ export default function NewRelease() {
                 )}
               </Stack>
             </Box>
-          </Card>
+          </Paper>
         </Container>
       )}
     </>

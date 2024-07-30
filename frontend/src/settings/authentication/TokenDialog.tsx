@@ -19,6 +19,7 @@ import PodmanIcon from 'public/podman-logo.svg'
 import RktLogo from 'public/rkt-logo.svg'
 import { useState } from 'react'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
+import { Transition } from 'src/common/Transition'
 import MessageAlert from 'src/MessageAlert'
 import DockerConfiguration from 'src/settings/authentication/DockerConfiguration'
 import DockerLogin from 'src/settings/authentication/DockerLogin'
@@ -45,7 +46,13 @@ export default function TokenDialog({ token }: TokenDialogProps) {
   }
 
   return (
-    <Dialog fullWidth disableEscapeKeyDown maxWidth='xl' open={!!token} PaperProps={{ sx: { height: '90vh' } }}>
+    <Dialog
+      fullWidth
+      maxWidth='xl'
+      open={!!token}
+      PaperProps={{ sx: { height: '90vh' } }}
+      TransitionComponent={Transition}
+    >
       <DialogTitle>Token Created</DialogTitle>
       <DialogContent>
         <Stack
