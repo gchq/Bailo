@@ -12,6 +12,7 @@ import {
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
 import Loading from 'src/common/Loading'
+import { Transition } from 'src/common/Transition'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -39,7 +40,7 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
     <>
       {(isUiConfigLoading || isCurrentUserLoading) && <Loading />}
       {uiConfig && currentUser && (
-        <Dialog open={open} onClose={handleClose}>
+        <Dialog open={open} onClose={handleClose} TransitionComponent={Transition}>
           <DialogTitle color='primary'>Pushing an Image for this Model</DialogTitle>
           <DialogContent>
             <Stack spacing={2}>
