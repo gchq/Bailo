@@ -68,7 +68,6 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   return (
     <>
       <Banner />
-      <Announcement />
       <Box sx={{ display: 'flex' }}>
         {!isUiConfigLoading && uiConfig && uiConfig.banner.enabled && <Box sx={{ mt: 20 }} />}
         {currentUser && (

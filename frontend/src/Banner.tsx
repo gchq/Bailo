@@ -1,3 +1,4 @@
+import { Alert, Stack, Typography } from '@mui/material'
 import Card from '@mui/material/Card'
 import { useGetUiConfig } from 'actions/uiConfig'
 
@@ -24,5 +25,12 @@ export default function Banner() {
     return null
   }
 
-  return <Card sx={style}>{uiConfig.banner.text}</Card>
+  return (
+    <Card sx={style}>
+      <Stack>
+        <Typography>{uiConfig.banner.text}</Typography>
+        <Alert severity='info'>Test</Alert>
+      </Stack>
+    </Card>
+  )
 }
