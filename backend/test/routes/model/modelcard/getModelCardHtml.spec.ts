@@ -27,8 +27,8 @@ describe('routes > model > modelcard > getModelCardHtml', () => {
     const res = await testGet(`/api/v2/model/${fixture.params.modelId}/model-card/${fixture.params.version}/html`)
 
     expect(renderToHtml).toHaveBeenCalledWith(testUser, fixture.params.modelId, fixture.params.version)
+    expect(audit.onViewModelCard).toHaveBeenCalled()
     expect(res.statusCode).toBe(200)
     expect(res.text).toBe('test')
-    expect(audit.onViewModelCard).toHaveBeenCalled()
   })
 })
