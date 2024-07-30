@@ -10,7 +10,7 @@ vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/connectors/audit/index.js')
 
-describe('routes > modelcard > getModelCardHtml', () => {
+describe('routes > model > modelcard > getModelCardHtml', () => {
   test('should return HTML and call audit', async () => {
     const html = { html: 'test', card: 'card' }
     vi.mock('../../../src/services/modelCardExport.js', () => ({
