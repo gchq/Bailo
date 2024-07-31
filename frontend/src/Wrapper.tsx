@@ -2,6 +2,7 @@ import Box from '@mui/material/Box'
 import { useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import { useGetUiConfig } from 'actions/uiConfig'
+import Cookies from 'js-cookie'
 import { useRouter } from 'next/router'
 import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import Announcement from 'src/Annoucement'
@@ -18,6 +19,8 @@ export type WrapperProps = {
   children?: ReactNode
 }
 
+const DISMISSED_COOKIE_NAME = 'dismissedTimestamp'
+
 export default function Wrapper({ children }: WrapperProps): ReactElement {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
@@ -31,6 +34,13 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
 
   const isDocsPage = useMemo(() => router.route.startsWith('/docs'), [router])
   const page = useMemo(() => router.route.split('/')[1].replace('/', ''), [router])
+
+  const dismissedTimestamp = Cookies.get(DISMISSED_COOKIE_NAME)
+  const [annoucementBannerOpen, setAnnouncementBannerOpen] = useState(
+    uiConfig && uiConfig.announcement.enabled && dismissedTimestamp
+      ? new Date(dismissedTimestamp) < new Date(uiConfig.announcement.startTimestamp)
+      : false,
+  )
 
   useEffect(() => {
     if (!isUiConfigLoading) {
@@ -51,6 +61,11 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
 
   const toggleDrawer = (): void => {
     setOpen(!open)
+  }
+
+  const handleAnnouncementOnClose = () => {
+    setAnnouncementBannerOpen(false)
+    Cookies.set(DISMISSED_COOKIE_NAME, new Date().toISOString())
   }
 
   if (isUiConfigError) {
@@ -106,6 +121,16 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
               </>
             )}
           </Box>
+          {isUiConfigLoading && <Loading />}
+          {uiConfig && (
+            <Box sx={{ mb: 2 }}>
+              {annoucementBannerOpen ? (
+                <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
+              ) : (
+                <></>
+              )}
+            </Box>
+          )}
         </Box>
       </Box>
     </>
