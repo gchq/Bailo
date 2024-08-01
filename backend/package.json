@@ -87,7 +87,7 @@
     "@types/mjml": "^4.7.4",
     "@types/mongoose-delete": "^1.0.5",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^20.14.10",
+    "@types/node": "^22.0.2",
     "@types/nodemailer": "^6.4.15",
     "@types/shelljs": "^0.8.15",
     "@types/supertest": "^6.0.2",
