@@ -14,7 +14,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "husky": "^9.0.11",
+    "husky": "^9.1.4",
     "lint-staged": "^15.2.5",
     "prettier": "^3.2.5"
   }
