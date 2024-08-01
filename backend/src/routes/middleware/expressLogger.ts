@@ -17,7 +17,7 @@ const morganLog = promisify(
         requestId: req.reqId,
         ...(tokens.res(req, res, 'content-length') && { 'content-length': tokens.res(req, res, 'content-length') }),
       }
-      req.log.trace(info, `Request completed.`)
+      req.log.debug(info)
 
       return ''
     },
