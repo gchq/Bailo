@@ -8,6 +8,7 @@ import Loading from 'src/common/Loading'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
+import EntryCardRolesDialog from 'src/entry/overview/EntryCardRolesDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -31,6 +32,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
   const { mutateModelCardRevisions: mutateEntryCardRevisions } = useGetModelCardRevisions(entry.id)
+  const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
@@ -138,6 +140,9 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
           </div>
           {!isEdit && (
             <Stack direction='row' spacing={1} justifyContent='flex-end' sx={{ mb: { xs: 2 } }}>
+              <Button variant='outlined' onClick={() => setRolesDialogOpen(true)}>
+                View Roles
+              </Button>
               <Button variant='outlined' onClick={() => setExportDialogOpen(true)}>
                 Export as PDF
               </Button>
@@ -183,6 +188,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
         )}
       </Box>
       <EntryCardHistoryDialog entry={entry} open={historyDialogOpen} setOpen={setHistoryDialogOpen} />
+      <EntryCardRolesDialog entry={entry} open={rolesDialogOpen} setOpen={setRolesDialogOpen} />
       <TextInputDialog
         open={jsonUploadDialogOpen}
         onClose={() => setJsonUploadDialogOpen(false)}
