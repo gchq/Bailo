@@ -100,7 +100,10 @@ export interface GetUserTokenListResponse {
 }
 
 export function useGetUserTokenList() {
-  const { data, isLoading, error, mutate } = useSWR<GetUserTokenListResponse, ErrorInfo>('/api/v2/user/tokens', fetcher)
+  const { data, isLoading, error, mutate } = useSWR<GetUserTokenListResponse, ErrorInfo>(
+    '/api/v2/user/tokens/list',
+    fetcher,
+  )
 
   return {
     mutateTokenActions: mutate,
