@@ -26,6 +26,7 @@
         "metrics": {
           "type": "array",
           "title": "Metrics",
+          "widget": "metricsWidget",
           "items": {
             "type": "object",
             "title": "",
