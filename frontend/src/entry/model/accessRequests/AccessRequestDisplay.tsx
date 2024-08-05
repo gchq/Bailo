@@ -123,7 +123,9 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
                   <Tooltip title='Reviews'>
                     <Stack direction='row' spacing={1}>
                       <RateReviewIcon color='primary' />
-                      <Typography variant='caption'>{reviewResponses.length}</Typography>
+                      <Typography variant='caption' data-test='reviewCount'>
+                        {reviewResponses.length}
+                      </Typography>
                     </Stack>
                   </Tooltip>
                 )}
@@ -131,7 +133,9 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
                   <Tooltip title='Comments'>
                     <Stack direction='row' spacing={1}>
                       <CommentIcon color='primary' />
-                      <Typography variant='caption'>{commentResponses.length}</Typography>
+                      <Typography variant='caption' data-test='commentCount'>
+                        {commentResponses.length}
+                      </Typography>
                     </Stack>
                   </Tooltip>
                 )}
