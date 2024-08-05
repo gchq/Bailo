@@ -194,6 +194,11 @@ export interface EntityObject {
   id: string
 }
 
+export interface TokenAction {
+  id: string
+  description: string
+}
+
 export const TokenScope = {
   All: 'all',
   Models: 'models',
