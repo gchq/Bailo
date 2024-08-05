@@ -11,14 +11,6 @@ type EntryCardRoleDialogProps = {
 }
 
 export default function EntryCardRolesDialog({ entry, open, setOpen }: EntryCardRoleDialogProps) {
-  // const theme = useTheme()
-  // const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
-  // const {
-  //   modelRoles: entryRoles,
-  //   isModelRolesLoading: isEntryRolesLoading,
-  //   isModelRolesError: isEntryRolesError,
-  // } = useGetModelRoles(entry.id)
-
   return (
     <>
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm' TransitionComponent={Transition}>
