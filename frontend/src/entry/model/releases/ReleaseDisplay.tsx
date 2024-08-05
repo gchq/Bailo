@@ -1,4 +1,5 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
+import RateReviewIcon from '@mui/icons-material/RateReview'
 import { Box, Button, Card, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
@@ -152,19 +153,28 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              {reviewsWithLatestResponses.length > 0 && commentResponses.length > 0 && <Divider />}
               <Stack direction='row' justifyContent='space-between' spacing={2}>
                 <div>
                   <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />
                 </div>
-                {commentResponses.length > 0 && (
-                  <Tooltip title='Comments'>
-                    <Stack direction='row' spacing={1}>
-                      <CommentIcon color='primary' />
-                      <Typography variant='caption'>{commentResponses.length}</Typography>
-                    </Stack>
-                  </Tooltip>
-                )}
+                <Stack direction='row' spacing={2}>
+                  {reviewResponses.length > 0 && (
+                    <Tooltip title='Reviews'>
+                      <Stack direction='row' spacing={1}>
+                        <RateReviewIcon color='primary' />
+                        <Typography variant='caption'>{reviewResponses.length}</Typography>
+                      </Stack>
+                    </Tooltip>
+                  )}
+                  {commentResponses.length > 0 && (
+                    <Tooltip title='Comments'>
+                      <Stack direction='row' spacing={1}>
+                        <CommentIcon color='primary' />
+                        <Typography variant='caption'>{commentResponses.length}</Typography>
+                      </Stack>
+                    </Tooltip>
+                  )}
+                </Stack>
               </Stack>
             </Stack>
           </Stack>
