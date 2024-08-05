@@ -24,13 +24,6 @@ export default function EntryCardRolesDialog({ entry, open, setOpen }: EntryCard
       <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='sm' TransitionComponent={Transition}>
         <DialogTitle>Roles</DialogTitle>
         <EntryRoleList entry={entry} />
-        {/* <Grid container spacing={2}>
-          {entry.collaborators.map((entryentry, index) => (
-            <div key={index}>
-              <EntryRoleList entryentry={entryentry}></EntryRoleList>
-            </div>
-          ))}
-        </Grid> */}
       </Dialog>
     </>
   )

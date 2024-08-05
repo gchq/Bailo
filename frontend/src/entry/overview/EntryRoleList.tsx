@@ -1,4 +1,4 @@
-import { Chip, Grid } from '@mui/material'
+import { Chip, Grid, Typography } from '@mui/material'
 import { EntryInterface } from 'types/types'
 
 type EntryCardRoleDialogProps = {
@@ -8,16 +8,22 @@ type EntryCardRoleDialogProps = {
 export default function EntryRoleList({ entry }: EntryCardRoleDialogProps) {
   return (
     <>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} paddingX={5} paddingBottom={2}>
         {entry.collaborators.map((user, index) => (
-          <div key={index}>
+          <>
             <Grid key={index} item xs={6}>
-              <Chip label={user.entity} />
+              <Typography variant='h5' fontStyle={'bold'} borderRadius={2}>
+                {user.entity}
+              </Typography>
             </Grid>
             <Grid key={index} item xs={6}>
-              <Chip label={user.roles} />
+              {user.roles.map((role) => (
+                <>
+                  <Chip style={{ margin: 1 }} label={role} />
+                </>
+              ))}
             </Grid>
-          </div>
+          </>
         ))}
       </Grid>
     </>
