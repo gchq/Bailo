@@ -54,7 +54,6 @@ export default function DataCard() {
       {(isDataCardLoading || isCurrentUserLoading) && <Loading />}
       {dataCard && (
         <PageWithTabs
-          showCopyButton
           title={dataCard.name}
           subheading={`ID: ${dataCard.id}`}
           tabs={tabs}

@@ -112,7 +112,6 @@ export default function Model() {
           actionButtonTitle='Request access'
           actionButtonOnClick={requestAccess}
           requiredUrlParams={{ modelId: model.id }}
-          showCopyButton
           titleToCopy={model.name}
           subheadingToCopy={model.id}
           sourceModelId={model.settings.mirror?.sourceModelId}

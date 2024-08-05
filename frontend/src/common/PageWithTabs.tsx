@@ -25,7 +25,6 @@ export default function PageWithTabs({
   displayActionButton = false,
   actionButtonOnClick,
   requiredUrlParams = {},
-  showCopyButton = false,
   titleToCopy = '',
   subheadingToCopy = '',
   sourceModelId = '',
@@ -37,7 +36,6 @@ export default function PageWithTabs({
   displayActionButton?: boolean
   actionButtonOnClick?: () => void
   requiredUrlParams?: ParsedUrlQuery
-  showCopyButton?: boolean
   titleToCopy?: string
   subheadingToCopy?: string
   sourceModelId?: string
@@ -129,7 +127,7 @@ export default function PageWithTabs({
             <Typography component='h1' color='primary' variant='h6'>
               {title}
             </Typography>
-            {showCopyButton && (
+            {titleToCopy.length > 0 && (
               <CopyToClipboardButton
                 textToCopy={titleToCopy ? titleToCopy : title}
                 notificationText='Copied to clipboard'
@@ -142,11 +140,13 @@ export default function PageWithTabs({
               <Typography variant='caption' sx={{ color: darken(theme.palette.primary.main, 0.4) }}>
                 {subheading}
               </Typography>
-              <CopyToClipboardButton
-                textToCopy={subheadingToCopy ? subheadingToCopy : subheading}
-                notificationText='Copied to clipboard'
-                ariaLabel='copy to clipboard'
-              />
+              {subheadingToCopy.length > 0 && (
+                <CopyToClipboardButton
+                  textToCopy={subheadingToCopy ? subheadingToCopy : subheading}
+                  notificationText='Copied to clipboard'
+                  ariaLabel='copy to clipboard'
+                />
+              )}
             </Stack>
           )}
         </Stack>
