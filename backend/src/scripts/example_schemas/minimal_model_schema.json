@@ -23,6 +23,24 @@
           },
           "uniqueItems": true
         },
+        "metrics": {
+          "type": "array",
+          "title": "Metrics",
+          "items": {
+            "type": "object",
+            "title": "",
+            "properties": {
+              "name": {
+                "title": "Metric name",
+                "type": "string"
+              },
+              "value": {
+                "title": "Model performance metric value",
+                "type": "number"
+              }
+            }
+          }
+        },
         "tags": {
           "title": "Descriptive tags for the model.",
           "description": "These tags will be searchable and will help others find this model.  Type in a tag, then press the 'enter key' to add it.",
