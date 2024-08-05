@@ -1,8 +1,9 @@
 import { Autocomplete, Box, Chip, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FormContextType } from '@rjsf/utils'
+import MetricItem from 'src/MuiForms/MetricItem'
 
-interface MetricValue {
+export interface MetricValue {
   name: string
   value: number
 }
@@ -33,8 +34,8 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           </Typography>
           {value.map((metric) => (
             <Stack direction='row' spacing={1} key={`${metric.name}-${metric.value}`}>
-              <Typography>{metric.name}</Typography>
-              <Typography>{metric.value}</Typography>
+              <TextField>{metric.name}</TextField>
+              <TextField>{metric.value}</TextField>
             </Stack>
           ))}
         </>
@@ -46,10 +47,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
           {value.map((metric) => (
-            <Stack direction='row' spacing={1} key={`${metric.name}-${metric.value}`}>
-              <Typography>{metric.name}</Typography>
-              <Typography>{metric.value}</Typography>
-            </Stack>
+            <MetricItem key={`${metric.name}-${metric.value}`} metric={metric} />
           ))}
         </>
       )}
