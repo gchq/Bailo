@@ -1,5 +1,3 @@
-import { TokenDescriptions } from '../models/Token.js'
-
 export const RoleKind = {
   ENTRY: 'entry',
   SCHEMA: 'schema',
@@ -31,5 +29,4 @@ export interface UiConfig {
   registry: {
     host: string
   }
-  tokenActions: typeof TokenDescriptions
 }

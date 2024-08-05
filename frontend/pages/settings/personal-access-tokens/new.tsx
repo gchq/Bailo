@@ -18,8 +18,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult, useListModels } from 'actions/model'
-import { useGetUiConfig } from 'actions/uiConfig'
-import { postUserToken } from 'actions/user'
+import { postUserToken, useGetUserTokenList } from 'actions/user'
 import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -32,11 +31,13 @@ import { plural } from 'utils/stringUtils'
 
 export default function NewToken() {
   const { models, isModelsLoading, isModelsError } = useListModels('model')
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { tokenActions, isTokenActionsLoading, isTokenActionsError } = useGetUserTokenList()
 
-  const tokenActions = useMemo(() => uiConfig?.tokenActions || {}, [uiConfig])
+  const actionOptions = useMemo(() => tokenActions.map((tokenAction) => tokenAction.id), [tokenActions])
 
-  const actionOptions = useMemo(() => Object.keys(tokenActions), [tokenActions])
+  const isWriteAction = (action: string) => {
+    return Object.values(TokenWriteAction).includes(action)
+  }
 
   const theme = useTheme()
   const [description, setDescription] = useState('')
@@ -106,10 +107,6 @@ export default function NewToken() {
     [selectedActions, TokenWriteAction, TokenReadAction],
   )
 
-  const isWriteAction = (action: string) => {
-    return Object.values(TokenWriteAction).includes(action)
-  }
-
   const getActionName = (action: string) => {
     const [name, _kind] = action.split(':')
     return name
@@ -176,11 +173,11 @@ export default function NewToken() {
     setIsLoading(false)
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message}></MessageAlert>
+  if (isTokenActionsError) {
+    return <MessageAlert message={isTokenActionsError.info.message}></MessageAlert>
   }
 
-  if (isUiConfigLoading) {
+  if (isTokenActionsLoading) {
     return <Loading />
   }
 

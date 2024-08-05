@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import { UserInformation } from 'src/common/UserDisplay'
 import useSWR from 'swr'
-import { EntityObject, EntryInterface, TokenInterface, TokenScopeKeys, User } from 'types/types'
+import { EntityObject, EntryInterface, TokenAction, TokenInterface, TokenScopeKeys, User } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -70,6 +70,21 @@ export function useGetUserTokens() {
     tokens: data?.tokens || [],
     isTokensLoading: !error && !data,
     isTokensError: error,
+  }
+}
+
+interface GetUserTokenList {
+  tokenActionMap: TokenAction[]
+}
+
+export function useGetUserTokenList() {
+  const { data, error, mutate } = useSWR<GetUserTokenList, ErrorInfo>('/api/v2/user/tokens/list', fetcher)
+
+  return {
+    mutateTokenActions: mutate,
+    tokenActions: data?.tokenActionMap || [],
+    isTokenActionsLoading: !error && !data,
+    isTokenActionsError: error,
   }
 }
 

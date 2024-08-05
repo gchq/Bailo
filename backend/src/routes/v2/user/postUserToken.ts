@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { TokenActions, TokenInterface, TokenScope } from '../../../models/Token.js'
+import { tokenActionIds, TokenInterface, TokenScope } from '../../../models/Token.js'
 import { registerPath, userTokenSchema } from '../../../services/specification.js'
 import { createToken } from '../../../services/token.js'
 import { parse } from '../../../utils/validate.js'
@@ -14,8 +14,8 @@ export const postUserTokenSchema = z.object({
     description: z.string().openapi({ example: 'user token' }),
 
     scope: z.nativeEnum(TokenScope).openapi({ example: 'models' }),
-    modelIds: z.array(z.string()).openapi({ example: ['yozlo-v4-abcdef'] }),
-    actions: z.array(z.nativeEnum(TokenActions)).openapi({ example: ['image:read', 'file:read'] }),
+    modelIds: z.array(z.string()).openapi({ example: ['yolo-v4-abcdef'] }),
+    actions: z.array(z.enum(['image:read', ...tokenActionIds])).openapi({ example: ['image:read', 'file:read'] }),
   }),
 })
 

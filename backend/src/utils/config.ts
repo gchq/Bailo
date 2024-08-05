@@ -5,7 +5,6 @@ import grant from 'grant'
 import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
-import { TokenDescriptions } from '../models/Token.js'
 import { DefaultSchema } from '../services/schema.js'
 import { deepFreeze } from './object.js'
 
@@ -125,8 +124,6 @@ export interface Config {
       }
       gpus: { [key: string]: string }
     }
-
-    tokenActions: typeof TokenDescriptions
     modelMirror: {
       enabled: boolean
       disclaimer: string
@@ -190,5 +187,4 @@ export interface Config {
 }
 
 const config: Config = _config.util.toObject()
-config.ui.tokenActions = TokenDescriptions
 export default deepFreeze(config) as Config

@@ -47,7 +47,6 @@ export interface UiConfig {
     gpus: { [key: string]: string }
   }
 
-  tokenActions: { [key: string]: string }
   modelMirror: {
     enabled: boolean
     disclaimer: string

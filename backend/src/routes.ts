@@ -65,6 +65,7 @@ import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
 import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
+import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
 import config from './utils/config.js'
@@ -199,6 +200,7 @@ server.get('/api/v2/config/ui', ...getUiConfig)
 
 server.post('/api/v2/user/tokens', ...postUserToken)
 server.get('/api/v2/user/tokens', ...getUserTokens)
+server.get('/api/v2/user/tokens/list', ...getUserTokenList)
 // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
 server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
