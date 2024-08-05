@@ -19,7 +19,7 @@ export const postReleaseSchema = z.object({
     modelCardVersion: z.coerce.number().optional(),
 
     semver: z.string(),
-    notes: z.string(),
+    notes: z.string().min(1, 'Please provide release notes.'),
 
     minor: z.coerce.boolean().optional().default(false),
     draft: z.coerce.boolean().optional().default(false),

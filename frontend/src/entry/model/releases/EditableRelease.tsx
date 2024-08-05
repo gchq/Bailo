@@ -255,6 +255,7 @@ export default function EditableRelease({
         errorMessage={errorMessage}
         isRegistryError={isRegistryError}
         readOnly={readOnly}
+        disableSaveButton={releaseNotes === ''}
       />
       {failedFileUploads.length > 0 && (
         <Alert severity='error' sx={{ my: 2 }}>
