@@ -124,7 +124,7 @@ export default function PageWithTabs({
         spacing={{ xs: 1, sm: 2 }}
         sx={{ px: 2, pb: 2 }}
       >
-        <Stack spacing={1}>
+        <Stack>
           <Stack direction='row'>
             <Typography component='h1' color='primary' variant='h6'>
               {title}
