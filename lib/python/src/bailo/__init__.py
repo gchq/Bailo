@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import logging
 
-# Package Version 2.5.0
-__version__ = "2.5.0"
+# Package Version 2.5.1
+__version__ = "2.5.1"
 
 
 from bailo.core.agent import Agent, PkiAgent, TokenAgent
