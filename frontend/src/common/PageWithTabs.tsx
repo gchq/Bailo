@@ -27,7 +27,7 @@ export default function PageWithTabs({
   requiredUrlParams = {},
   showCopyButton = false,
   titleToCopy = '',
-  subheadindToCopy = '',
+  subheadingToCopy = '',
   sourceModelId = '',
 }: {
   title: string
@@ -39,7 +39,7 @@ export default function PageWithTabs({
   requiredUrlParams?: ParsedUrlQuery
   showCopyButton?: boolean
   titleToCopy?: string
-  subheadindToCopy?: string
+  subheadingToCopy?: string
   sourceModelId?: string
 }) {
   const router = useRouter()
@@ -143,7 +143,7 @@ export default function PageWithTabs({
                 {subheading}
               </Typography>
               <CopyToClipboardButton
-                textToCopy={subheadindToCopy ? subheadindToCopy : subheading}
+                textToCopy={subheadingToCopy ? subheadingToCopy : subheading}
                 notificationText='Copied to clipboard'
                 ariaLabel='copy to clipboard'
               />

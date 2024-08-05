@@ -60,7 +60,7 @@ export default function DataCard() {
           tabs={tabs}
           requiredUrlParams={{ dataCardId: dataCard.id }}
           titleToCopy={dataCard.name}
-          subheadindToCopy={dataCard.id}
+          subheadingToCopy={dataCard.id}
         />
       )}
     </>

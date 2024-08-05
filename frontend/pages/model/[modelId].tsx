@@ -114,7 +114,7 @@ export default function Model() {
           requiredUrlParams={{ modelId: model.id }}
           showCopyButton
           titleToCopy={model.name}
-          subheadindToCopy={model.id}
+          subheadingToCopy={model.id}
           sourceModelId={model.settings.mirror?.sourceModelId}
         />
       )}
