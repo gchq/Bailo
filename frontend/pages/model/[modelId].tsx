@@ -106,13 +106,15 @@ export default function Model() {
       {model && (
         <PageWithTabs
           title={model.name}
+          subheading={`ID: ${model.id}`}
           tabs={tabs}
           displayActionButton={model.card !== undefined}
           actionButtonTitle='Request access'
           actionButtonOnClick={requestAccess}
           requiredUrlParams={{ modelId: model.id }}
           showCopyButton
-          textToCopy={model.id}
+          titleToCopy={model.name}
+          subheadindToCopy={model.id}
           sourceModelId={model.settings.mirror?.sourceModelId}
         />
       )}
