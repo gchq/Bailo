@@ -1,3 +1,4 @@
+import Dangerous from '@mui/icons-material/DangerousOutlined'
 import { Chip } from '@mui/material'
 import { CollaboratorEntry } from 'types/types'
 
@@ -7,10 +8,15 @@ type EntryCardChipSetProps = {
 
 export default function EntryCardRolesChipSet({ entryCollaborator }: EntryCardChipSetProps) {
   return entryCollaborator.roles.length === 0 ? (
-    <Chip style={{ marginRight: 2, marginBottom: 2, color: 'red', fontWeight: 'bold' }} label='no roles' />
+    <Chip
+      variant='outlined'
+      style={{ marginRight: 2, marginBottom: 2, backgroundColor: '#B00020', color: 'white', alignContent: 'center' }}
+      icon={<Dangerous style={{ color: 'white' }} />}
+      label='No Roles'
+    />
   ) : (
     entryCollaborator.roles.map((role) => {
-      return <Chip key={role} style={{ marginRight: 2, marginBottom: 2 }} label={role} />
+      return <Chip key={role} variant='outlined' style={{ marginRight: 2, marginBottom: 2 }} label={role} />
     })
   )
 }
