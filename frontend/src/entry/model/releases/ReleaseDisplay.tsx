@@ -1,6 +1,6 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import { Box, Button, Card, Divider, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Card, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -102,7 +102,7 @@ export default function ReleaseDisplay({
                 alignItems='center'
                 spacing={1}
               >
-                <Link href={`/model/${model.id}/release/${release.semver}`}>
+                <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`}>
                   <Typography component='h2' variant='h6' color='primary'>
                     {model.name} - {release.semver}
                   </Typography>
@@ -153,28 +153,28 @@ export default function ReleaseDisplay({
                   ))}
                 </>
               )}
-              <Stack direction='row' justifyContent='space-between' spacing={2}>
-                <div>
-                  <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />
-                </div>
-                <Stack direction='row' spacing={2}>
-                  {reviewResponses.length > 0 && (
-                    <Tooltip title='Reviews'>
-                      <Stack direction='row' spacing={1}>
-                        <ListAltIcon color='primary' />
-                        <Typography variant='caption'>{reviewResponses.length}</Typography>
-                      </Stack>
-                    </Tooltip>
-                  )}
-                  {commentResponses.length > 0 && (
-                    <Tooltip title='Comments'>
-                      <Stack direction='row' spacing={1}>
-                        <CommentIcon color='primary' />
-                        <Typography variant='caption'>{commentResponses.length}</Typography>
-                      </Stack>
-                    </Tooltip>
-                  )}
-                </Stack>
+              <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2}>
+                <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />
+                <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>
+                  <Stack direction='row' spacing={2}>
+                    {reviewResponses.length > 0 && (
+                      <Tooltip title='Reviews'>
+                        <Stack direction='row' spacing={1}>
+                          <ListAltIcon color='primary' />
+                          <Typography variant='caption'>{reviewResponses.length}</Typography>
+                        </Stack>
+                      </Tooltip>
+                    )}
+                    {commentResponses.length > 0 && (
+                      <Tooltip title='Comments'>
+                        <Stack direction='row' spacing={1}>
+                          <CommentIcon color='primary' />
+                          <Typography variant='caption'>{commentResponses.length}</Typography>
+                        </Stack>
+                      </Tooltip>
+                    )}
+                  </Stack>
+                </IconButton>
               </Stack>
             </Stack>
           </Stack>
