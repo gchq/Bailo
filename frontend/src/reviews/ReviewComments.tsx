@@ -5,7 +5,8 @@ import { postReleaseComment, useGetRelease } from 'actions/release'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
-import { useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
@@ -38,6 +39,9 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
   const { mutateAccessRequest } = useGetAccessRequest(accessRequest?.modelId, accessRequest?.id)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
+  const ref = useRef<HTMLDivElement>(null)
+  const { asPath } = useRouter()
+
   const [modelId, semverOrAccessRequestIdObject] = useMemo(
     () =>
       release
@@ -54,6 +58,12 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     release ? release._id : accessRequest._id,
     ...reviews.map((review) => review._id),
   ])
+
+  useEffect(() => {
+    if (!isResponsesLoading && ref && asPath.split('#')[1] === 'responses') {
+      ref.current?.scrollIntoView()
+    }
+  }, [asPath, isResponsesLoading, ref])
 
   const hasResponseOrComment = useMemo(() => {
     const hasReviewResponse = !!responses.find((response) => response.kind === ResponseKind.Review)
@@ -147,7 +157,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
   }
 
   return (
-    <>
+    <Stack spacing={2} ref={ref}>
       {(hasResponseOrComment || !isEdit) && <Divider />}
       {(isReviewsLoading || isResponsesLoading || isCurrentUserLoading) && <Loading />}
       {reviewDetails}
@@ -172,6 +182,6 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
           <MessageAlert severity='error' message={commentSubmissionError} />
         </Stack>
       )}
-    </>
+    </Stack>
   )
 }
