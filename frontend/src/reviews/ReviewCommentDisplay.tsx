@@ -72,12 +72,12 @@ export default function ReviewCommentDisplay({
     }
   }
 
-  if (isUserInformationLoading) {
-    return <Loading />
-  }
-
   if (isUserInformationError) {
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
+  }
+
+  if (isUserInformationLoading) {
+    return <Loading />
   }
 
   return (

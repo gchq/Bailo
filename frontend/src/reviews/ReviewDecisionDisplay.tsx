@@ -82,16 +82,16 @@ export default function ReviewDecisionDisplay({
     }
   }
 
-  if (isUserInformationLoading) {
-    return <Loading />
-  }
-
   if (isUserInformationError) {
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
   }
 
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
+  }
+
+  if (isUserInformationLoading) {
+    return <Loading />
   }
 
   return (
