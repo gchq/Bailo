@@ -1,5 +1,5 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
-import RateReviewIcon from '@mui/icons-material/RateReview'
+import ListAltIcon from '@mui/icons-material/ListAlt'
 import { Card, Grid, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
@@ -122,7 +122,7 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
                 {reviewResponses.length > 0 && (
                   <Tooltip title='Reviews'>
                     <Stack direction='row' spacing={1}>
-                      <RateReviewIcon color='primary' />
+                      <ListAltIcon color='primary' />
                       <Typography variant='caption' data-test='reviewCount'>
                         {reviewResponses.length}
                       </Typography>
