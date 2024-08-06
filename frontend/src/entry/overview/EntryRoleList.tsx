@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material'
-import EntryCardEntityRoleRowProps from 'src/entry/overview/EntryCardEntityRoleRow'
+import EntryCardEntityRoleRow from 'src/entry/overview/EntryCardEntityRoleRow'
 import { EntryInterface } from 'types/types'
 
 type EntryCardRoleDialogProps = {
@@ -16,7 +16,7 @@ export default function EntryRoleList({ entry }: EntryCardRoleDialogProps) {
         <Grid item xs={6}>
           Roles
         </Grid>
-        <EntryCardEntityRoleRowProps entryCollaborators={entry.collaborators} />
+        <EntryCardEntityRoleRow entryCollaborators={entry.collaborators} />
       </Grid>
     </>
   )
