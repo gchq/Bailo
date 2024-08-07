@@ -137,8 +137,8 @@ data:
 
         // Show announcement banner at the bottom of the screen
         announcement: {
-          enabled: {{ .Values.config.ui.announcement.enabled }}
-          text: {{ .Values.config.ui.announcement.text }}
+          enabled: {{ .Values.config.ui.announcement.enabled }},
+          text: {{ .Values.config.ui.announcement.text }},
           startTimestamp: {{ .Values.config.ui.announcement.startTimestamp }}
         }
 
