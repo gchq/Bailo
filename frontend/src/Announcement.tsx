@@ -2,7 +2,7 @@ import { Close } from '@mui/icons-material'
 import CampaignIcon from '@mui/icons-material/Campaign'
 import { Box, Button, Grid, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 interface AnnoucementProps {
   message: string
   onClose: () => void
@@ -13,22 +13,20 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
 
   const [showFullText, setShowFullText] = useState(false)
 
-  const announcementText = () => {
+  const announcementText = useMemo(() => {
     return message.length > 100 ? (
       <Stack>
         <Typography>
           {!showFullText ? `${message.slice(0, 100)}...` : message}
-          <span>
-            <Button variant='text' size='small' onClick={() => setShowFullText(!showFullText)}>
-              {showFullText ? 'Show less' : 'Show more'}
-            </Button>
-          </span>
+          <Button variant='text' size='small' onClick={() => setShowFullText(!showFullText)}>
+            {showFullText ? 'Show less' : 'Show more'}
+          </Button>
         </Typography>
       </Stack>
     ) : (
       message
     )
-  }
+  }, [message, showFullText])
 
   return (
     <>
@@ -38,14 +36,19 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
           p: 1,
           position: 'absolute',
           bottom: 0,
-          m: 4,
+          mb: 4,
           borderStyle: 'solid',
           borderWidth: 2,
           borderColor: theme.palette.primary.main,
           borderRadius: 1,
+          left: 0,
+          right: 0,
+          maxWidth: 'md',
+          ml: 'auto',
+          mr: 'auto',
         }}
       >
-        <Stack spacing={1}>
+        <Stack spacing={1} alignItems='center'>
           <Grid container justifyContent='space-between' alignItems='center'>
             <Grid item xs={1} />
             <Grid item xs={10} sx={{ textAlign: 'center' }}>
@@ -69,9 +72,7 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
               </IconButton>
             </Grid>
           </Grid>
-          <Typography color='primary' sx={{ textAlign: 'center' }}>
-            {announcementText()}
-          </Typography>
+          {announcementText}
         </Stack>
       </Box>
     </>

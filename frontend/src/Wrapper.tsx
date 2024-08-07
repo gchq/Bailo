@@ -5,7 +5,7 @@ import { useGetUiConfig } from 'actions/uiConfig'
 import Cookies from 'js-cookie'
 import { useRouter } from 'next/router'
 import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import Announcement from 'src/Annoucement'
+import Announcement from 'src/Announcement'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 
@@ -19,7 +19,7 @@ export type WrapperProps = {
   children?: ReactNode
 }
 
-const DISMISSED_COOKIE_NAME = 'dismissedTimestamp'
+const DISMISSED_COOKIE_NAME = 'dismissed-timestamp'
 
 export default function Wrapper({ children }: WrapperProps): ReactElement {
   const theme = useTheme()
@@ -36,11 +36,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   const page = useMemo(() => router.route.split('/')[1].replace('/', ''), [router])
 
   const dismissedTimestamp = Cookies.get(DISMISSED_COOKIE_NAME)
-  const [annoucementBannerOpen, setAnnouncementBannerOpen] = useState(
-    uiConfig && uiConfig.announcement.enabled && dismissedTimestamp
-      ? new Date(dismissedTimestamp) < new Date(uiConfig.announcement.startTimestamp)
-      : false,
-  )
+  const [annoucementBannerOpen, setAnnouncementBannerOpen] = useState(false)
 
   useEffect(() => {
     if (!isUiConfigLoading) {
@@ -54,6 +50,16 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
       }
     }
   }, [isUiConfigLoading, uiConfig, isDocsPage])
+
+  useEffect(() => {
+    if (uiConfig) {
+      setAnnouncementBannerOpen(
+        uiConfig &&
+          uiConfig.announcement.enabled &&
+          (!dismissedTimestamp || new Date(dismissedTimestamp) < new Date(uiConfig.announcement.startTimestamp)),
+      )
+    }
+  }, [dismissedTimestamp, uiConfig])
 
   const handleSideNavigationError = useCallback((message: string) => setErrorMessage(message), [])
 
@@ -124,10 +130,8 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
           {isUiConfigLoading && <Loading />}
           {uiConfig && (
             <Box sx={{ mb: 2 }}>
-              {annoucementBannerOpen ? (
+              {annoucementBannerOpen && (
                 <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
-              ) : (
-                <></>
               )}
             </Box>
           )}

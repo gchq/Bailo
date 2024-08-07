@@ -187,9 +187,9 @@ module.exports = {
     },
 
     announcement: {
-      enabled: true,
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut porttitor massa lorem, eget tempus enim placerat quis. Donec ante odio, imperdiet eget mauris nec, mattis consectetur nunc. Sed massa lacus, eleifend in ex nec, facilisis tempus enim. Quisque consectetur fringilla sagittis. Fusce sollicitudin scelerisque neque id ullamcorper.',
-      startTimestamp: '2024-07-31T16:12:17.142Z',
+      enabled: false,
+      text: '',
+      startTimestamp: '',
     },
   },
 
