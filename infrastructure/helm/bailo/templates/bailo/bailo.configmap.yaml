@@ -140,7 +140,7 @@ data:
           enabled: {{ .Values.config.ui.announcement.enabled }},
           text: {{ .Values.config.ui.announcement.text }},
           startTimestamp: {{ .Values.config.ui.announcement.startTimestamp }}
-        }
+        },
 
         // Contact details for the support team
         issues: {
