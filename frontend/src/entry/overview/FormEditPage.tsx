@@ -149,7 +149,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
           </div>
           {!isEdit && (
             <div>
-              <Button variant='contained' onClick={handleActionButtonClick}>
+              <Button data-test='openEntryOverviewActions' variant='contained' onClick={handleActionButtonClick}>
                 Actions
               </Button>
               <Menu anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>

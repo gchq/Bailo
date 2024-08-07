@@ -65,6 +65,7 @@ describe('Create new model', () => {
     cy.visit(`/model/${modelUuid}`)
     cy.contains('Edit model card')
     cy.log('Test that we can edit the model card')
+    cy.get('[data-test=openEntryOverviewActions]').click()
     cy.get('[data-test=editEntryCardButton]').click()
     cy.get('#root_modelSummary').type('This is a test summary')
     cy.get('[data-test=cancelEditEntryCardButton]').click({ force: true })
