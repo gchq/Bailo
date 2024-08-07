@@ -20,7 +20,6 @@ export default function MetricItem({ metric, onChange, onDelete }: MetricItemPro
   const handleMetricValueOnChange = useCallback(
     (value: string) => {
       const valueAsStringOrNumber: string | number = value
-      parseInt(valueAsStringOrNumber)
       setErrorMessage('')
       if (!isValidNumber(value)) {
         setErrorMessage('Metric value must be a valid whole number')

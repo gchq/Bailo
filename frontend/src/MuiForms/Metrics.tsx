@@ -60,7 +60,10 @@ export default function Metrics({ onChange, value, label, formContext, required 
       const updatedMetricArray = _.cloneDeep(metricsWithIds)
       const index = metricsWithIds.findIndex((metric) => metric.id === updatedMetricItem.id)
       updatedMetricArray[index] = updatedMetricItem
-      onChange(updatedMetricArray.map((metric) => ({ name: metric.name, value: parseInt(metric.value as string) })))
+      // Defaulting to an empty string will allow the input to empty. User will be prompted to enter a valid number.
+      onChange(
+        updatedMetricArray.map((metric) => ({ name: metric.name, value: parseInt(metric.value as string) || '' })),
+      )
     },
     [metricsWithIds, onChange],
   )
