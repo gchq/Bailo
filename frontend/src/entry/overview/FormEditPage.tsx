@@ -1,7 +1,8 @@
-import { Box, Button, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { putModelCard, useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
+import React from 'react'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
@@ -35,6 +36,16 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+
+  function handleActionButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleActionButtonClose = () => {
+    setAnchorEl(null)
+  }
 
   const sendNotification = useNotification()
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
@@ -137,28 +148,30 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
             </Stack>
           </div>
           {!isEdit && (
-            <Stack direction='row' spacing={1} justifyContent='flex-end' sx={{ mb: { xs: 2 } }}>
-              <Button variant='outlined' onClick={() => setExportDialogOpen(true)}>
-                Export as PDF
+            <div>
+              <Button variant='contained' onClick={handleActionButtonClick}>
+                Actions
               </Button>
-              <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
-                View History
-              </Button>
-              {!readOnly && (
-                <Tooltip title={requiredRolesText}>
-                  <span>
-                    <Button
-                      variant='outlined'
-                      disabled={!canEdit}
-                      onClick={() => setIsEdit(!isEdit)}
-                      data-test='editEntryCardButton'
-                    >
-                      {`Edit ${EntryCardKindLabel[entry.kind]}`}
-                    </Button>
-                  </span>
-                </Tooltip>
-              )}
-            </Stack>
+              <Menu anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
+                <MenuItem>
+                  <ListItemText onClick={() => setExportDialogOpen(true)}>Export as PDF</ListItemText>
+                </MenuItem>
+                <MenuItem>
+                  <ListItemText onClick={() => setHistoryDialogOpen(true)}>View History</ListItemText>
+                </MenuItem>
+                {!readOnly && (
+                  <Tooltip title={requiredRolesText}>
+                    <span>
+                      <MenuItem disabled={!canEdit}>
+                        <ListItemText onClick={() => setIsEdit(!isEdit)} data-test='editEntryCardButton'>
+                          {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                        </ListItemText>
+                      </MenuItem>
+                    </span>
+                  </Tooltip>
+                )}
+              </Menu>
+            </div>
           )}
           {isEdit && (
             <SaveAndCancelButtons
