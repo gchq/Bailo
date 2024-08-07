@@ -11,32 +11,34 @@ export const TokenScope = {
 export type TokenScopeKeys = (typeof TokenScope)[keyof typeof TokenScope]
 
 export const TokenActions = {
-  ModelRead: 'model:read',
-  ModelWrite: 'model:write',
+  ModelRead: { id: 'model:read', description: 'Grants access to view model/data card settings.' },
+  ModelWrite: {
+    id: 'model:write',
+    description: 'Grants write access to creation and updating of model/data card settings.',
+  },
+  ReleaseRead: { id: 'release:read', description: 'Grants access to view releases.' },
+  ReleaseWrite: { id: 'release:write', description: 'Grants access to create and update releases.' },
 
-  ReleaseRead: 'release:read',
-  ReleaseWrite: 'release:write',
+  AccessRequestRead: { id: 'access_request:read', description: 'Grant access to list access requests' },
+  AccessRequestWrite: {
+    id: 'access_request:write',
+    description: 'Grants access to create, approve and comment on access requests.',
+  },
+  FileRead: { id: 'file:read', description: 'Grant access to download and view files.' },
+  FileWrite: { id: 'file:write', description: 'Grant access to upload and delete files.' },
 
-  AccessRequestRead: 'access_request:read',
-  AccessRequestWrite: 'access_request:write',
+  ImageRead: { id: 'image:read', description: 'Grants access to pull and list images from a model repository.' },
+  ImageWrite: { id: 'image:write', description: 'Grants access to push and delete images from a model repository.' },
 
-  ResponseWrite: 'response:write',
-  ResponseRead: 'response:read',
-
-  FileRead: 'file:read',
-  FileWrite: 'file:write',
-
-  ImageRead: 'image:read',
-  ImageWrite: 'image:write',
-
-  SchemaRead: 'schema:read',
-  SchemaWrite: 'schema:write',
-
-  TokenRead: 'token:read',
-  TokenWrite: 'token:write',
+  SchemaWrite: {
+    id: 'schema:write',
+    description: 'Grants permissions to upload and modify schemas for administrators.',
+  },
 } as const
 
-export type TokenActionsKeys = (typeof TokenActions)[keyof typeof TokenActions]
+export const tokenActionIds = Object.values(TokenActions).map((tokenAction) => tokenAction.id)
+
+export type TokenActionsKeys = (typeof TokenActions)[keyof typeof TokenActions]['id']
 
 export const HashType = {
   Bcrypt: 'bcrypt',
@@ -80,7 +82,7 @@ const TokenSchema = new Schema<TokenInterface>(
 
     scope: { type: String, enum: Object.values(TokenScope), required: true },
     modelIds: [{ type: String }],
-    actions: [{ type: String, enum: Object.values(TokenActions) }],
+    actions: [{ type: String, enum: tokenActionIds }],
 
     accessKey: { type: String, required: true, unique: true, index: true },
     secretKey: { type: String, required: true, select: false },
