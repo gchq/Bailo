@@ -1,7 +1,5 @@
-import CloseIcon from '@mui/icons-material/Close'
 import {
   Button,
-  IconButton,
   Paper,
   Stack,
   Table,
@@ -10,16 +8,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FormContextType } from '@rjsf/utils'
 import _ from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import MessageAlert from 'src/MessageAlert'
-import { isValidNumber } from 'utils/stringUtils'
+import MetricItem from 'src/MuiForms/MetricItem'
 import { v4 as uuidv4 } from 'uuid'
 
 export interface MetricValue {
@@ -43,7 +38,6 @@ interface MetricsProps {
 
 export default function Metrics({ onChange, value, label, formContext, required }: MetricsProps) {
   const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>([])
-  const [errorMessage, setErrorMessage] = useState('')
   const theme = useTheme()
 
   useEffect(() => {
@@ -66,23 +60,9 @@ export default function Metrics({ onChange, value, label, formContext, required 
       const updatedMetricArray = _.cloneDeep(metricsWithIds)
       const index = metricsWithIds.findIndex((metric) => metric.id === updatedMetricItem.id)
       updatedMetricArray[index] = updatedMetricItem
-      onChange(updatedMetricArray.map((metric) => ({ name: metric.name, value: metric.value })))
+      onChange(updatedMetricArray.map((metric) => ({ name: metric.name, value: parseInt(metric.value as string) })))
     },
     [metricsWithIds, onChange],
-  )
-
-  const handleAndValidateMetricValue = useCallback(
-    (metric: MetricValueWithId, value: string) => {
-      let valueAsStringOrNumber: string | number = value
-      setErrorMessage('')
-      if (!isValidNumber(value) || value.length === 0) {
-        setErrorMessage('Metric value must be a valid number')
-      } else {
-        valueAsStringOrNumber = parseInt(value)
-      }
-      handleMetricItemOnChange({ id: metric.id, name: metric.name, value: valueAsStringOrNumber })
-    },
-    [handleMetricItemOnChange],
   )
 
   const handleDeleteItem = useCallback(
@@ -96,31 +76,9 @@ export default function Metrics({ onChange, value, label, formContext, required 
 
   const metricItems = useMemo(() => {
     return metricsWithIds.map((metric, index) => (
-      <Stack key={index} direction='row' spacing={1}>
-        <TextField
-          size='small'
-          value={metric.name}
-          onChange={(e) => handleMetricItemOnChange({ id: metric.id, name: e.target.value, value: metric.value })}
-        />
-        <TextField
-          size='small'
-          value={metric.value}
-          onChange={(e) => handleAndValidateMetricValue(metric, e.target.value)}
-        />
-        <Tooltip title='Remove item'>
-          <IconButton>
-            <CloseIcon sx={{ color: theme.palette.error.main }} onClick={() => handleDeleteItem(metric.id)} />
-          </IconButton>
-        </Tooltip>
-      </Stack>
+      <MetricItem key={index} metric={metric} onChange={handleMetricItemOnChange} onDelete={handleDeleteItem} />
     ))
-  }, [
-    handleAndValidateMetricValue,
-    handleDeleteItem,
-    handleMetricItemOnChange,
-    metricsWithIds,
-    theme.palette.error.main,
-  ])
+  }, [handleDeleteItem, handleMetricItemOnChange, metricsWithIds])
 
   const metricsTableRows = useMemo(() => {
     return value.map((metric) => (
@@ -142,7 +100,6 @@ export default function Metrics({ onChange, value, label, formContext, required 
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
           <Stack spacing={2}>{metricItems}</Stack>
-          <MessageAlert key={errorMessage} message={errorMessage} severity='error' />
           <Button onClick={() => handleChange([...value, { name: '', value: 0 }])}>Add item</Button>
         </Stack>
       )}
