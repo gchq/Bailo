@@ -71,6 +71,7 @@ describe('Create new model', () => {
     cy.get('#root_modelSummary').type('This is a test summary')
     cy.get('[data-test=cancelEditEntryCardButton]').click({ force: true })
     cy.contains('This is a test summary').should('not.exist')
+    cy.get('[data-test=openEntryOverviewActions]').click()
     cy.get('[data-test=editEntryCardButton]').click({ force: true })
     cy.get('#root_modelSummary').type('This is a test summary')
     cy.get('[data-test=saveEntryCardButton]').click({ force: true })
