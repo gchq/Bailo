@@ -15,7 +15,7 @@ export const putReleaseSchema = z.object({
     semver: z.string(),
   }),
   body: z.object({
-    notes: z.string(),
+    notes: z.string().min(1, 'Please provide release notes.'),
     draft: z.coerce.boolean().optional().default(false),
 
     fileIds: z.array(z.string()),

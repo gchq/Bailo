@@ -1,7 +1,9 @@
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import { Box, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { patchResponse } from 'actions/response'
+import { useGetUserInformation } from 'actions/user'
 import { useCallback, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import MessageAlert from 'src/MessageAlert'
@@ -30,6 +32,10 @@ export default function ReviewCommentDisplay({
 
   const [entityKind, username] = useMemo(() => response.entity.split(':'), [response.entity])
 
+  const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
+    response.entity.split(':')[1],
+  )
+
   const handleReactionsError = useCallback((message: string) => {
     setErrorMessage(message)
   }, [])
@@ -37,7 +43,10 @@ export default function ReviewCommentDisplay({
   const handleReplyOnClick = (value: string | undefined) => {
     setAnchorEl(null)
     if (value) {
-      onReplyButtonClick(value.replace(/^/gm, '>'))
+      const username = userInformation ? userInformation.name : response.entity.split(':')[1]
+      const originalComment = value.replace(/^/gm, '>')
+      const quote = `> Replying to **${username}** on **${formatDateString(response.createdAt)}** \n>\n${originalComment}`
+      onReplyButtonClick(quote)
     }
   }
 
@@ -61,6 +70,14 @@ export default function ReviewCommentDisplay({
       mutateResponses()
       setIsEditMode(false)
     }
+  }
+
+  if (isUserInformationError) {
+    return <MessageAlert message={isUserInformationError.info.message} severity='error' />
+  }
+
+  if (isUserInformationLoading) {
+    return <Loading />
   }
 
   return (

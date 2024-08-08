@@ -1,5 +1,6 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
-import { Card, Grid, Stack, Typography } from '@mui/material'
+import ListAltIcon from '@mui/icons-material/ListAlt'
+import { Card, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useEffect, useState } from 'react'
@@ -13,7 +14,6 @@ import MessageAlert from 'src/MessageAlert'
 import { AccessRequestInterface, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
-import { plural } from 'utils/stringUtils'
 
 type AccessRequestDisplayProps = {
   accessRequest: AccessRequestInterface
@@ -116,16 +116,32 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
                 </Grid>
               </Card>
             </Stack>
-            <Stack direction='row' justifyContent='space-between' spacing={2} sx={{ pt: 2 }}>
+            <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2} sx={{ pt: 2 }}>
               <ReviewDisplay reviewResponses={reviewsWithLatestResponses} modelId={accessRequest.modelId} />
-              {commentResponses.length > 0 && (
-                <Stack direction='row' spacing={1}>
-                  <CommentIcon color='primary' data-test='commentIcon' />
-                  <Typography variant='caption' data-test='commentCount'>
-                    {plural(commentResponses.length, 'comment')}
-                  </Typography>
+              <IconButton href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}#responses`}>
+                <Stack direction='row' spacing={2}>
+                  {reviewResponses.length > 0 && (
+                    <Tooltip title='Reviews'>
+                      <Stack direction='row' spacing={1}>
+                        <ListAltIcon color='primary' />
+                        <Typography variant='caption' data-test='reviewCount'>
+                          {reviewResponses.length}
+                        </Typography>
+                      </Stack>
+                    </Tooltip>
+                  )}
+                  {commentResponses.length > 0 && (
+                    <Tooltip title='Comments'>
+                      <Stack direction='row' spacing={1}>
+                        <CommentIcon color='primary' />
+                        <Typography variant='caption' data-test='commentCount'>
+                          {commentResponses.length}
+                        </Typography>
+                      </Stack>
+                    </Tooltip>
+                  )}
                 </Stack>
-              )}
+              </IconButton>
             </Stack>
           </Stack>
         </Card>
