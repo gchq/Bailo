@@ -2,7 +2,7 @@ import { Box, Button, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography }
 import { useGetModel } from 'actions/model'
 import { putModelCard, useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
-import React from 'react'
+import React, { Fragment } from 'react'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
@@ -148,22 +148,42 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
             </Stack>
           </div>
           {!isEdit && (
-            <div>
+            <Fragment>
               <Button data-test='openEntryOverviewActions' variant='contained' onClick={handleActionButtonClick}>
                 Actions
               </Button>
               <Menu anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
                 <MenuItem>
-                  <ListItemText onClick={() => setExportDialogOpen(true)}>Export as PDF</ListItemText>
+                  <ListItemText
+                    onClick={() => {
+                      handleActionButtonClose()
+                      setExportDialogOpen(true)
+                    }}
+                  >
+                    Export as PDF
+                  </ListItemText>
                 </MenuItem>
                 <MenuItem>
-                  <ListItemText onClick={() => setHistoryDialogOpen(true)}>View History</ListItemText>
+                  <ListItemText
+                    onClick={() => {
+                      handleActionButtonClose()
+                      setHistoryDialogOpen(true)
+                    }}
+                  >
+                    View History
+                  </ListItemText>
                 </MenuItem>
                 {!readOnly && (
                   <Tooltip title={requiredRolesText}>
                     <span>
                       <MenuItem disabled={!canEdit}>
-                        <ListItemText onClick={() => setIsEdit(!isEdit)} data-test='editEntryCardButton'>
+                        <ListItemText
+                          onClick={() => {
+                            handleActionButtonClose()
+                            setIsEdit(!isEdit)
+                          }}
+                          data-test='editEntryCardButton'
+                        >
                           {`Edit ${EntryCardKindLabel[entry.kind]}`}
                         </ListItemText>
                       </MenuItem>
@@ -171,7 +191,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
                   </Tooltip>
                 )}
               </Menu>
-            </div>
+            </Fragment>
           )}
           {isEdit && (
             <SaveAndCancelButtons
