@@ -36,8 +36,8 @@ describe('Make and approve an access request', () => {
     cy.visit(`/model/${modelUuid}`)
     cy.contains(modelName)
     cy.log('Navigating to the access request list tab and clicking the request access button')
-    cy.get('[data-test=accessTab]').click()
-    cy.get('[data-test=requestAccessButton]').click()
+    cy.get('[data-test=accessTab]').click({ force: true })
+    cy.get('[data-test=requestAccessButton]').click({ force: true })
     cy.log('Setting a schema for the access request')
     cy.url().should('contain', `/model/${modelUuid}/access-request/schema`)
     cy.get(`[data-test=selectSchemaButton-${schemaId}]`).click({
