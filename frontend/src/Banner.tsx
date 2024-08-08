@@ -1,4 +1,4 @@
-import { Stack, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import Card from '@mui/material/Card'
 import { useGetUiConfig } from 'actions/uiConfig'
 
@@ -27,9 +27,7 @@ export default function Banner() {
 
   return (
     <Card sx={style}>
-      <Stack>
-        <Typography>{uiConfig.banner.text}</Typography>
-      </Stack>
+      <Typography>{uiConfig.banner.text}</Typography>
     </Card>
   )
 }

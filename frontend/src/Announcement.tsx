@@ -17,7 +17,7 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
     return message.length > 100 ? (
       <Stack>
         <Typography>
-          {!showFullText ? `${message.slice(0, 100)}...` : message}
+          {showFullText ? message : `${message.slice(0, 100)}...`}
           <Button variant='text' size='small' onClick={() => setShowFullText(!showFullText)}>
             {showFullText ? 'Show less' : 'Show more'}
           </Button>
@@ -29,52 +29,49 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
   }, [message, showFullText])
 
   return (
-    <>
-      <Box
-        sx={{
-          backgroundColor: theme.palette.info.light,
-          p: 1,
-          position: 'absolute',
-          bottom: 0,
-          mb: 4,
-          borderStyle: 'solid',
-          borderWidth: 2,
-          borderColor: theme.palette.primary.main,
-          borderRadius: 1,
-          left: 0,
-          right: 0,
-          maxWidth: 'md',
-          ml: 'auto',
-          mr: 'auto',
-        }}
-      >
-        <Stack spacing={1} alignItems='center'>
-          <Grid container justifyContent='space-between' alignItems='center'>
-            <Grid item xs={1} />
-            <Grid item xs={10} sx={{ textAlign: 'center' }}>
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
-                sx={{ width: '100%' }}
-                justifyContent='center'
-                alignItems='center'
-              >
-                <CampaignIcon color='primary' />
-                <Typography color='primary' fontWeight='bold' sx={{ textAlign: 'center' }}>
-                  Announcement
-                </Typography>
-                <CampaignIcon color='primary' />
-              </Stack>
-            </Grid>
-            <Grid item xs={1} sx={{ textAlign: 'right' }}>
-              <IconButton size='small' onClick={onClose}>
-                <Close color='primary' />
-              </IconButton>
-            </Grid>
+    <Box
+      sx={{
+        backgroundColor: theme.palette.info.light,
+        p: 1,
+        position: 'absolute',
+        bottom: 0,
+        mb: 4,
+        borderStyle: 'solid',
+        borderWidth: 2,
+        borderColor: theme.palette.primary.main,
+        borderRadius: 1,
+        left: 0,
+        right: 0,
+        maxWidth: 'md',
+        mx: 'auto',
+      }}
+    >
+      <Stack spacing={1} alignItems='center'>
+        <Grid container justifyContent='space-between' alignItems='center'>
+          <Grid item xs={1} />
+          <Grid item xs={10} sx={{ textAlign: 'center' }}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+              sx={{ width: '100%' }}
+              justifyContent='center'
+              alignItems='center'
+            >
+              <CampaignIcon color='primary' />
+              <Typography color='primary' fontWeight='bold' sx={{ textAlign: 'center' }}>
+                Announcement
+              </Typography>
+              <CampaignIcon color='primary' />
+            </Stack>
           </Grid>
-          {announcementText}
-        </Stack>
-      </Box>
-    </>
+          <Grid item xs={1} sx={{ textAlign: 'right' }}>
+            <IconButton size='small' onClick={onClose}>
+              <Close color='primary' />
+            </IconButton>
+          </Grid>
+        </Grid>
+        {announcementText}
+      </Stack>
+    </Box>
   )
 }
