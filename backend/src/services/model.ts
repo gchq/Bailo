@@ -350,22 +350,21 @@ export async function createModelCardFromTemplate(
   modelId: string,
   templateId: string,
 ): Promise<ModelCardRevisionDoc> {
+  if (modelId === templateId) {
+    throw BadReq('The model and template ID must be different', { modelId, templateId })
+  }
   const model = await getModelById(user, modelId)
   checkModelRestriction(model)
   const template = await getModelById(user, templateId)
-  checkModelRestriction(template)
 
-  const modelAuth = await authorisation.model(user, model, ModelAction.Write)
-  if (!modelAuth.success) {
-    throw Forbidden(modelAuth.info, { userDn: user.dn, modelId })
-  }
+  // Check to make sure user can access the template. We already check for the model auth later on in _setModelCard
   const templateAuth = await authorisation.model(user, template, ModelAction.View)
   if (!templateAuth.success) {
     throw Forbidden(templateAuth.info, { userDn: user.dn, modelId })
   }
 
   if (!template.card) {
-    throw BadReq('The template model is missing a modelcard', { modelId })
+    throw BadReq('The template model is missing a modelcard', { modelId, templateId })
   }
 
   const revision = await _setModelCard(user, modelId, template.card.schemaId, 1, template.card.metadata)
