@@ -69,11 +69,9 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
         entryKind={entry.kind}
         entryRoles={entryRoles}
       />
-      <div>
-        <LoadingButton variant='contained' aria-label='Save access list' onClick={updateAccessList} loading={loading}>
-          Save
-        </LoadingButton>
-      </div>
+      <LoadingButton variant='contained' aria-label='Save access list' onClick={updateAccessList} loading={loading}>
+        Save
+      </LoadingButton>
       <MessageAlert message={errorMessage} severity='error' />
     </Stack>
   )

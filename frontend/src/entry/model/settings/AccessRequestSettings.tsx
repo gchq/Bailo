@@ -46,18 +46,16 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
       <Typography variant='h6' component='h2'>
         Manage access requests
       </Typography>
-      <div>
-        <FormControlLabel
-          label='Allow users to make ungoverned access requests'
-          control={
-            <Checkbox
-              onChange={(event) => setAllowUngoverned(event.target.checked)}
-              checked={allowUngoverned}
-              size='small'
-            />
-          }
-        />
-      </div>
+      <FormControlLabel
+        label='Allow users to make ungoverned access requests'
+        control={
+          <Checkbox
+            onChange={(event) => setAllowUngoverned(event.target.checked)}
+            checked={allowUngoverned}
+            size='small'
+          />
+        }
+      />
       <Divider />
       <div>
         <LoadingButton

@@ -8,7 +8,7 @@ import Loading from 'src/common/Loading'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
-import EntryCardRolesDialog from 'src/entry/overview/EntryCardRolesDialog'
+import EntryCardRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -140,11 +140,11 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
           </div>
           {!isEdit && (
             <Stack direction='row' spacing={1} justifyContent='flex-end' sx={{ mb: { xs: 2 } }}>
-              <Button variant='outlined' onClick={() => setRolesDialogOpen(true)}>
-                View Roles
-              </Button>
               <Button variant='outlined' onClick={() => setExportDialogOpen(true)}>
                 Export as PDF
+              </Button>
+              <Button variant='outlined' onClick={() => setRolesDialogOpen(true)}>
+                View Roles
               </Button>
               <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
                 View History
@@ -188,7 +188,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
         )}
       </Box>
       <EntryCardHistoryDialog entry={entry} open={historyDialogOpen} setOpen={setHistoryDialogOpen} />
-      <EntryCardRolesDialog entry={entry} open={rolesDialogOpen} setOpen={setRolesDialogOpen} />
+      <EntryCardRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
       <TextInputDialog
         open={jsonUploadDialogOpen}
         onClose={() => setJsonUploadDialogOpen(false)}
