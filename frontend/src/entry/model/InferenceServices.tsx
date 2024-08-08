@@ -65,7 +65,7 @@ export default function InferenceServices({ model, currentUserRoles }: Inference
 
     const authorizationTokenName = uiConfig?.inference.authorizationTokenName
     const authorizationAccessKeys = tokens.filter((value) => value.description === authorizationTokenName)
-    if (authorizationTokenName && authorizationAccessKeys.length > 0) {
+    if (authorizationTokenName) {
       for (const token of authorizationAccessKeys) {
         const response = await deleteUserToken(token.accessKey)
 
