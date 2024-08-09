@@ -1,5 +1,5 @@
 import { green, red, yellow } from '@mui/material/colors'
-import { createTheme, ThemeOptions } from '@mui/material/styles'
+import { createTheme, Theme, ThemeOptions } from '@mui/material/styles'
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -7,12 +7,14 @@ declare module '@mui/material/styles/createPalette' {
     customTextInput: PaletteColor
     topNavigation: PaletteColor
     markdownBorder: PaletteColor
+    navbarGradient: boolean
   }
   interface PaletteOptions {
     container: PaletteColorOptions
     customTextInput: PaletteColorOptions
     topNavigation: PaletteColorOptions
     markdownBorder: PaletteColorOptions
+    navbarGradient: boolean
   }
 }
 
@@ -38,6 +40,11 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
       disableElevation: true,
     },
   },
+}
+
+export interface ThemeMapping {
+  key: string
+  theme: Theme
 }
 
 export const lightTheme = createTheme({
@@ -90,6 +97,7 @@ export const lightTheme = createTheme({
   },
   palette: {
     mode: 'light',
+    navbarGradient: true,
     primary: {
       main: '#54278e',
     },
@@ -125,6 +133,10 @@ export const lightTheme = createTheme({
 export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
+    navbarGradient: false,
+    markdownBorder: {
+      main: '#b8b8b8',
+    },
     primary: {
       main: '#f37f58',
       contrastText: '#fff',
@@ -161,9 +173,6 @@ export const darkTheme = createTheme({
     },
     topNavigation: {
       main: '#fff',
-    },
-    markdownBorder: {
-      main: '#b8b8b8',
     },
   },
   components: {
@@ -250,3 +259,21 @@ export const darkTheme = createTheme({
     },
   },
 })
+
+export const ThemeName = {
+  Light: 'light',
+  Dark: 'dark',
+} as const
+
+const lightThemeMapping = {
+  key: ThemeName.Light,
+  theme: lightTheme,
+  title: 'Light',
+}
+const darkThemeMapping = {
+  key: ThemeName.Dark,
+  theme: darkTheme,
+  title: 'Dark (beta)',
+}
+
+export const themeList = [lightThemeMapping, darkThemeMapping]

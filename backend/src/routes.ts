@@ -68,7 +68,9 @@ import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
 import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
+import { getUserSettings } from './routes/v2/user/getUserSettings.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
+import { patchUserSettings } from './routes/v2/user/patchUserSettings.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
 import config from './utils/config.js'
 
@@ -203,6 +205,8 @@ server.post('/api/v2/user/tokens', ...postUserToken)
 server.get('/api/v2/user/tokens', ...getUserTokens)
 // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
 server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
+server.get('/api/v2/user/settings', ...getUserSettings)
+server.patch('/api/v2/user/settings', ...patchUserSettings)
 
 server.get('/api/v2/specification', ...getSpecification)
 
