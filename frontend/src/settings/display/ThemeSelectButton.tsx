@@ -4,7 +4,7 @@ import { patchCurrentUserSettings, useGetCurrentUserSettings } from 'actions/use
 import { useContext } from 'react'
 import ThemeModeContext from 'src/contexts/themeModeContext'
 import useNotification from 'src/hooks/useNotification'
-import ThemeCircle from 'src/settings/display/ThemeCircle'
+import ThemeSquare from 'src/settings/display/ThemeSquare'
 import { themeList, ThemeMapping } from 'src/theme'
 
 interface ExampleDisplayProps {
@@ -43,11 +43,11 @@ export default function ThemeSelectButton({ theme }: ExampleDisplayProps) {
           <Button onClick={updateTheme} variant='contained' sx={{ width: '100%' }}>
             {displayText()}
           </Button>
-          <Stack direction='row' spacing={2}>
-            <ThemeCircle colour={theme.theme.palette.primary.main} />
-            <ThemeCircle colour={theme.theme.palette.secondary.main} />
-            <ThemeCircle colour={theme.theme.palette.text.primary} />
-            <ThemeCircle colour={theme.theme.palette.container.main} />
+          <Stack direction='row'>
+            <ThemeSquare colour={theme.theme.palette.primary.main} />
+            <ThemeSquare colour={theme.theme.palette.secondary.main} />
+            <ThemeSquare colour={theme.theme.palette.text.primary} />
+            <ThemeSquare colour={theme.theme.palette.container.main} />
           </Stack>
         </Stack>
       </Paper>
