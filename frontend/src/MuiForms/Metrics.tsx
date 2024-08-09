@@ -15,6 +15,7 @@ import { FormContextType } from '@rjsf/utils'
 import _ from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import MetricItem from 'src/MuiForms/MetricItem'
+import { isValidNumber } from 'utils/stringUtils'
 import { v4 as uuidv4 } from 'uuid'
 
 export interface MetricValue {
@@ -60,9 +61,11 @@ export default function Metrics({ onChange, value, label, formContext, required 
       const updatedMetricArray = _.cloneDeep(metricsWithIds)
       const index = metricsWithIds.findIndex((metric) => metric.id === updatedMetricItem.id)
       updatedMetricArray[index] = updatedMetricItem
-      // Defaulting to an empty string will allow the input to empty. User will be prompted to enter a valid number.
       onChange(
-        updatedMetricArray.map((metric) => ({ name: metric.name, value: parseInt(metric.value as string) || '' })),
+        updatedMetricArray.map((metric) => ({
+          name: metric.name,
+          value: isValidNumber(metric.value as string) ? parseInt(metric.value as string) : metric.value,
+        })),
       )
     },
     [metricsWithIds, onChange],
