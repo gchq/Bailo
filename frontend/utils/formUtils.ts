@@ -7,6 +7,7 @@ import DataCardSelector from 'src/MuiForms/DataCardSelector'
 import DateSelector from 'src/MuiForms/DateSelector'
 import Dropdown from 'src/MuiForms/Dropdown'
 import EntitySelector from 'src/MuiForms/EntitySelector'
+import Metrics from 'src/MuiForms/Metrics'
 import MultipleDropdown from 'src/MuiForms/MultipleDropdown'
 import Nothing from 'src/MuiForms/Nothing'
 import RichTextInput from 'src/MuiForms/RichTextInput'
@@ -25,6 +26,7 @@ export const widgets = {
   SelectWidget: Dropdown,
   multiSelector: MultipleDropdown,
   dataCardSelector: DataCardSelector,
+  metricsWidget: Metrics,
   nothing: Nothing,
 }
 

@@ -38,6 +38,11 @@ export const isValidPortNumber = (portNumber: string) => {
   )
 }
 
+export const isValidNumber = (numberOrString: string) => {
+  const numericString = Number(numberOrString)
+  return numberOrString.length > 0 && !isNaN(numericString) && Number.isInteger(numericString)
+}
+
 export const toKebabCase = (value: string): string => {
   return value
     .replace(/[^\w -]/g, '')
