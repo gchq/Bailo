@@ -363,8 +363,8 @@ export async function createModelCardFromTemplate(
     throw Forbidden(templateAuth.info, { userDn: user.dn, modelId })
   }
 
-  if (!template.card) {
-    throw BadReq('The template model is missing a modelcard', { modelId, templateId })
+  if (!template.card?.schemaId) {
+    throw BadReq('The template model is missing a model card', { modelId, templateId })
   }
 
   const revision = await _setModelCard(user, modelId, template.card.schemaId, 1, template.card.metadata)
