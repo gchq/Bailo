@@ -2,11 +2,11 @@ import { Chip } from '@mui/material'
 import { useMemo } from 'react'
 import { CollaboratorEntry } from 'types/types'
 
-type EntryCardChipSetProps = {
+type EntryRolesChipSetProps = {
   entryCollaborator: CollaboratorEntry
 }
 
-export default function EntryCardRolesChipSet({ entryCollaborator }: EntryCardChipSetProps) {
+export default function EntryRolesChipSet({ entryCollaborator }: EntryRolesChipSetProps) {
   const roleChips = useMemo(
     () => entryCollaborator.roles.map((role) => <Chip key={role} label={role} color='primary' sx={{ mr: 1 }} />),
     [entryCollaborator.roles],

@@ -1,28 +1,27 @@
-import GroupIcon from '@mui/icons-material/Groups'
-import UserIcon from '@mui/icons-material/Person'
 import { Grid, Stack } from '@mui/material'
 import { Fragment, useMemo } from 'react'
-import UserDisplay from 'src/common/UserDisplay'
-import EntryCardRolesChipSet from 'src/entry/overview/EntryCardRolesChipSet'
-import { CollaboratorEntry, EntryInterface } from 'types/types'
+import EntityIcon from 'src/entry/EntityIcon'
+import EntityNameDisplay from 'src/entry/EntityNameDisplay'
+import EntryRolesChipSet from 'src/entry/overview/EntryRolesChipSet'
+import { EntryInterface } from 'types/types'
 
-type EntryCardRoleDialogProps = {
+type EntryRoleListProps = {
   entry: EntryInterface
 }
 
-export default function EntryRoleList({ entry }: EntryCardRoleDialogProps) {
+export default function EntryRoleList({ entry }: EntryRoleListProps) {
   const rows = useMemo(
     () =>
       entry.collaborators.map((collaborator) => (
         <Fragment key={collaborator.entity}>
           <Grid item xs={6}>
             <Stack direction='row' alignItems='center' spacing={1}>
-              <EntryCollaboratorIcon entryCollaborator={collaborator} />
-              <EntryCollaboratorName entryCollaborator={collaborator} />
+              <EntityIcon entryCollaborator={collaborator} />
+              <EntityNameDisplay entryCollaborator={collaborator} />
             </Stack>
           </Grid>
           <Grid item xs={6}>
-            <EntryCardRolesChipSet entryCollaborator={collaborator} />
+            <EntryRolesChipSet entryCollaborator={collaborator} />
           </Grid>
         </Fragment>
       )),
@@ -39,23 +38,5 @@ export default function EntryRoleList({ entry }: EntryCardRoleDialogProps) {
       </Grid>
       {rows}
     </Grid>
-  )
-}
-
-type EntryCollaboratorProps = {
-  entryCollaborator: CollaboratorEntry
-}
-
-function EntryCollaboratorIcon({ entryCollaborator }: EntryCollaboratorProps) {
-  const isUser = useMemo(() => entryCollaborator.entity.startsWith('user:'), [entryCollaborator])
-  return isUser ? <UserIcon color='primary' /> : <GroupIcon color='secondary' />
-}
-
-function EntryCollaboratorName({ entryCollaborator }: EntryCollaboratorProps) {
-  const entityName = useMemo(() => entryCollaborator.entity.split('/').pop()!, [entryCollaborator])
-  return (
-    <>
-      <UserDisplay dn={entityName} />
-    </>
   )
 }
