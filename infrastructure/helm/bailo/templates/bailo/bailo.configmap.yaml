@@ -135,6 +135,13 @@ data:
           textColor: '{{ .Values.config.ui.banner.textColor}}'
         },
 
+        // Show announcement banner at the bottom of the screen
+        announcement: {
+          enabled: {{ .Values.config.ui.announcement.enabled }},
+          text: {{ .Values.config.ui.announcement.text }},
+          startTimestamp: {{ .Values.config.ui.announcement.startTimestamp }}
+        },
+
         // Contact details for the support team
         issues: {
           label: 'Bailo Support Team',

@@ -129,6 +129,12 @@ export interface Config {
       enabled: boolean
       disclaimer: string
     }
+
+    announcement: {
+      enabled: boolean
+      text: string
+      startTimestamp: string
+    }
   }
 
   session: {

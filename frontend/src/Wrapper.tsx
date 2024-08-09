@@ -2,10 +2,13 @@ import Box from '@mui/material/Box'
 import { useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import { useGetUiConfig } from 'actions/uiConfig'
+import cookies from 'js-cookie'
 import { useRouter } from 'next/router'
 import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import Announcement from 'src/Announcement'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
+import { DISMISSED_COOKIE_NAME } from 'utils/constants'
 
 import { useGetCurrentUser } from '../actions/user'
 import Banner from './Banner'
@@ -31,6 +34,9 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   const isDocsPage = useMemo(() => router.route.startsWith('/docs'), [router])
   const page = useMemo(() => router.route.split('/')[1].replace('/', ''), [router])
 
+  const dismissedTimestamp = cookies.get(DISMISSED_COOKIE_NAME)
+  const [annoucementBannerOpen, setAnnouncementBannerOpen] = useState(false)
+
   useEffect(() => {
     if (!isUiConfigLoading) {
       if (uiConfig && uiConfig.banner.enabled) {
@@ -44,12 +50,26 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
     }
   }, [isUiConfigLoading, uiConfig, isDocsPage])
 
+  useEffect(() => {
+    if (uiConfig) {
+      setAnnouncementBannerOpen(
+        uiConfig.announcement.enabled &&
+          (!dismissedTimestamp || new Date(dismissedTimestamp) < new Date(uiConfig.announcement.startTimestamp)),
+      )
+    }
+  }, [dismissedTimestamp, uiConfig])
+
   const handleSideNavigationError = useCallback((message: string) => setErrorMessage(message), [])
 
   const resetErrorMessage = useCallback(() => setErrorMessage(''), [])
 
   const toggleDrawer = (): void => {
     setOpen(!open)
+  }
+
+  const handleAnnouncementOnClose = () => {
+    setAnnouncementBannerOpen(false)
+    cookies.set(DISMISSED_COOKIE_NAME, new Date().toISOString())
   }
 
   if (isUiConfigError) {
@@ -105,6 +125,10 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
               </>
             )}
           </Box>
+          {isUiConfigLoading && <Loading />}
+          {uiConfig && annoucementBannerOpen && (
+            <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
+          )}
         </Box>
       </Box>
     </>
