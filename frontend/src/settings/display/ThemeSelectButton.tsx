@@ -1,9 +1,10 @@
-import { Button } from '@mui/material'
+import { Button, Paper, Stack } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { patchCurrentUserSettings, useGetCurrentUserSettings } from 'actions/user'
 import { useContext } from 'react'
 import ThemeModeContext from 'src/contexts/themeModeContext'
 import useNotification from 'src/hooks/useNotification'
+import ThemeCircle from 'src/settings/display/ThemeCircle'
 import { themeList, ThemeMapping } from 'src/theme'
 
 interface ExampleDisplayProps {
@@ -19,6 +20,7 @@ export default function ThemeSelectButton({ theme }: ExampleDisplayProps) {
     const themeListItem = themeList.find((themeListItem) => theme.key === themeListItem.key)
     return themeListItem === undefined ? theme.key : themeListItem.title
   }
+
   async function updateTheme() {
     const updatedSettings = await patchCurrentUserSettings({ themeKey: theme.key })
     if (updatedSettings.status === 200) {
@@ -35,10 +37,20 @@ export default function ThemeSelectButton({ theme }: ExampleDisplayProps) {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <Button variant='outlined' sx={{ width: '200px' }} onClick={updateTheme}>
-        {displayText()}
-      </Button>
+    <ThemeProvider theme={theme.theme}>
+      <Paper sx={{ border: 'solid 1px', borderRadius: 2 }}>
+        <Stack spacing={2} sx={{ p: 2 }}>
+          <Button onClick={updateTheme} variant='contained' sx={{ width: '100%' }}>
+            {displayText()}
+          </Button>
+          <Stack direction='row' spacing={2}>
+            <ThemeCircle colour={theme.theme.palette.primary.main} />
+            <ThemeCircle colour={theme.theme.palette.secondary.main} />
+            <ThemeCircle colour={theme.theme.palette.text.primary} />
+            <ThemeCircle colour={theme.theme.palette.container.main} />
+          </Stack>
+        </Stack>
+      </Paper>
     </ThemeProvider>
   )
 }
