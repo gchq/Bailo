@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Card, Checkbox, Container, FormControlLabel, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Card, Checkbox, Container, FormControlLabel, Stack, Typography } from '@mui/material'
 import { postModelExportToS3 } from 'actions/model'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import ModelExportAgreementText from 'src/entry/model/mirroredModels/ModelExportAgreementText'
@@ -7,13 +7,11 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { getErrorMessage } from 'utils/fetcher'
 
-type ExportModelProps = {
+type ExportModelAgreementProps = {
   modelId: string
-  isReadOnly: boolean
-  requiredRolesText: string
 }
 
-export default function ExportModel({ modelId, isReadOnly, requiredRolesText }: ExportModelProps) {
+export default function ExportModelAgreement({ modelId }: ExportModelAgreementProps) {
   const [checked, setChecked] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -55,19 +53,13 @@ export default function ExportModel({ modelId, isReadOnly, requiredRolesText }: 
         <Box component='form' onSubmit={handleSubmit}>
           <Stack spacing={2} alignItems='start' justifyContent='start'>
             <ModelExportAgreementText />
-            <Tooltip title={requiredRolesText}>
-              <FormControlLabel
-                control={<Checkbox checked={checked} disabled={isReadOnly} onChange={handleChecked} />}
-                label='I agree to the terms and conditions of this model export agreement'
-              />
-            </Tooltip>
-            <Tooltip title={requiredRolesText}>
-              <span>
-                <LoadingButton variant='contained' loading={loading} disabled={!checked} type='submit'>
-                  Submit
-                </LoadingButton>
-              </span>
-            </Tooltip>
+            <FormControlLabel
+              control={<Checkbox checked={checked} onChange={handleChecked} />}
+              label='I agree to the terms and conditions of this model export agreement'
+            />
+            <LoadingButton variant='contained' loading={loading} disabled={!checked} type='submit'>
+              Submit
+            </LoadingButton>
             <MessageAlert message={errorMessage} severity='error' />
           </Stack>
         </Box>
