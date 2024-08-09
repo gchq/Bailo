@@ -322,7 +322,7 @@ describe('services > model', () => {
     }
     modelMocks.findOne.mockResolvedValue(testModel)
     expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')).rejects.toThrowError(
-      /^The template model is missing a modelcard/,
+      /^The template model is missing a model card/,
     )
   })
 })
