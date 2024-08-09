@@ -1,7 +1,6 @@
 import '@fontsource/pacifico'
 
 import { Add, KeyboardArrowDown, KeyboardArrowUp, Menu as MenuIcon, Person, Settings } from '@mui/icons-material'
-import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LogoutIcon from '@mui/icons-material/Logout'
 import {
   Box,
@@ -14,9 +13,7 @@ import {
   MenuItem,
   MenuList,
   Stack,
-  Switch,
   Toolbar,
-  Tooltip,
   Typography,
   useMediaQuery,
 } from '@mui/material'
@@ -24,7 +21,7 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { alpha, styled, useTheme } from '@mui/material/styles'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { CSSProperties, MouseEvent, useContext, useMemo, useState } from 'react'
+import { CSSProperties, MouseEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import EntrySearch from 'src/wrapper/EntrySearch'
 
@@ -32,7 +29,6 @@ import bailoLogo from '../../public/logo-horizontal-light.png'
 import { User } from '../../types/types'
 import { DRAWER_WIDTH } from '../../utils/constants'
 import ExpandableButton from '../common/ExpandableButton'
-import ThemeModeContext from '../contexts/themeModeContext'
 import Link from '../Link'
 
 export type TopNavigationProps = {
@@ -69,11 +65,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
 
   const actionOpen = useMemo(() => !!userMenuAnchorEl, [userMenuAnchorEl])
   const navbarMenuOpen = useMemo(() => !!navbarAnchorEl, [navbarAnchorEl])
-  const isDarkMode = useMemo(() => localStorage.getItem('dark_mode_enabled') === 'true', [])
 
   const router = useRouter()
   const theme = useTheme()
-  const { toggleDarkMode } = useContext(ThemeModeContext)
   const isSmOrLarger = useMediaQuery(theme.breakpoints.up('sm'))
 
   const handleUserMenuClicked = (event: MouseEvent<HTMLButtonElement>) => {
@@ -100,10 +94,9 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
       sx={{
         ...pageTopStyling,
         top: 'unset',
-        background:
-          theme.palette.mode === 'light'
-            ? 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)'
-            : '#242424',
+        background: theme.palette.navbarGradient
+          ? `linear-gradient(276deg, ${theme.palette.secondary.main} 0%, ${theme.palette.primary.main} 100%)`
+          : `${theme.palette.background}`,
       }}
     >
       <Toolbar
@@ -132,16 +125,6 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                   </MenuItem>
                 </Link>
                 <Divider />
-                <Tooltip title='This feature has been temporarily disabled'>
-                  <span>
-                    <MenuItem disabled data-test='toggleDarkMode'>
-                      <ListItemIcon>
-                        <DarkModeIcon fontSize='small' />
-                      </ListItemIcon>
-                      <Switch size='small' checked={isDarkMode} onChange={toggleDarkMode} />
-                    </MenuItem>
-                  </span>
-                </Tooltip>
                 <Link href='/api/logout' color='inherit' underline='none'>
                   <MenuItem data-test='logoutLink'>
                     <ListItemIcon>

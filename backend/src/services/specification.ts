@@ -271,3 +271,11 @@ export const UserInformationSchema = z.object({
   name: z.string().optional().openapi({ example: 'Joe Bloggs' }),
   organisation: z.string().optional().openapi({ example: 'Acme Corp' }),
 })
+
+export const userSettingsSchema = z.object({
+  dn: z.string().openapi({ example: 'user' }),
+  theme: z.string().openapi('light'),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
