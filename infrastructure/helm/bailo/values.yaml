@@ -225,7 +225,7 @@ config:
 
     announcement:
       enabled: false
-      text: '',
+      text: ''
       startTimestamp: ''
 
   smtp:
