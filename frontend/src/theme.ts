@@ -108,6 +108,10 @@ export const lightTheme = createTheme({
     topNavigation: {
       main: '#fff',
     },
+    info: {
+      main: '#0288d1',
+      light: '#e5f6fd',
+    },
     warning: {
       main: '#ed6c02',
       light: '#ffd08b',

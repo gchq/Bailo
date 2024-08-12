@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Checkbox, Divider, FormControlLabel, Stack, Tooltip, Typography } from '@mui/material'
+import { Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
 import { patchModel } from 'actions/model'
 import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'
@@ -9,11 +9,9 @@ import { getErrorMessage } from 'utils/fetcher'
 
 type AccessRequestSettingsProps = {
   model: EntryInterface
-  isReadOnly: boolean
-  requiredRolesText: string
 }
 
-export default function AccessRequestSettings({ model, isReadOnly, requiredRolesText }: AccessRequestSettingsProps) {
+export default function AccessRequestSettings({ model }: AccessRequestSettingsProps) {
   const [allowUngoverned, setAllowUngoverned] = useState(model.settings.ungovernedAccess)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -48,36 +46,26 @@ export default function AccessRequestSettings({ model, isReadOnly, requiredRoles
       <Typography variant='h6' component='h2'>
         Manage access requests
       </Typography>
-      <div>
-        <Tooltip title={requiredRolesText}>
-          <FormControlLabel
-            label='Allow users to make ungoverned access requests'
-            control={
-              <Checkbox
-                onChange={(event) => setAllowUngoverned(event.target.checked)}
-                checked={allowUngoverned}
-                disabled={isReadOnly}
-                size='small'
-              />
-            }
+      <FormControlLabel
+        label='Allow users to make ungoverned access requests'
+        control={
+          <Checkbox
+            onChange={(event) => setAllowUngoverned(event.target.checked)}
+            checked={allowUngoverned}
+            size='small'
           />
-        </Tooltip>
-      </div>
+        }
+      />
       <Divider />
       <div>
-        <Tooltip title={requiredRolesText}>
-          <span>
-            <LoadingButton
-              variant='contained'
-              aria-label='Save ungoverned access requests'
-              disabled={isReadOnly}
-              onClick={handleSave}
-              loading={loading}
-            >
-              Save
-            </LoadingButton>
-          </span>
-        </Tooltip>
+        <LoadingButton
+          variant='contained'
+          aria-label='Save ungoverned access requests'
+          onClick={handleSave}
+          loading={loading}
+        >
+          Save
+        </LoadingButton>
         <MessageAlert message={errorMessage} severity='error' />
       </div>
     </Stack>

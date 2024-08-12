@@ -1,16 +1,14 @@
 import { LoadingButton } from '@mui/lab'
-import { Stack, Tooltip, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 import { EntryInterface } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
 
 type DangerZoneProps = {
   entry: EntryInterface
-  isReadOnly: boolean
-  requiredRolesText: string
 }
 
-export default function DangerZone({ entry, isReadOnly, requiredRolesText }: DangerZoneProps) {
+export default function DangerZone({ entry }: DangerZoneProps) {
   const [loading, setLoading] = useState(false)
 
   const handleDeleteEntry = () => {
@@ -24,20 +22,10 @@ export default function DangerZone({ entry, isReadOnly, requiredRolesText }: Dan
       <Typography variant='h6' component='h2'>
         Danger Zone!
       </Typography>
-      <Tooltip title={requiredRolesText}>
-        <span>
-          {/* TODO - Set disabled to disabled={isReadOnly} when re-enabling delete functionality */}
-          <LoadingButton
-            fullWidth
-            variant='contained'
-            disabled={true || isReadOnly}
-            onClick={handleDeleteEntry}
-            loading={loading}
-          >
-            {`Delete ${toTitleCase(entry.kind)}`}
-          </LoadingButton>
-        </span>
-      </Tooltip>
+      {/* TODO - Remove disabled prop when reenabling delete functionality */}
+      <LoadingButton fullWidth variant='contained' disabled onClick={handleDeleteEntry} loading={loading}>
+        {`Delete ${toTitleCase(entry.kind)}`}
+      </LoadingButton>
     </Stack>
   )
 }

@@ -1,7 +1,8 @@
+import { Typography } from '@mui/material'
 import Card from '@mui/material/Card'
 import { useGetUiConfig } from 'actions/uiConfig'
 
-function Banner() {
+export default function Banner() {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const style = {
@@ -24,7 +25,9 @@ function Banner() {
     return null
   }
 
-  return <Card sx={style}>{uiConfig.banner.text}</Card>
+  return (
+    <Card sx={style}>
+      <Typography>{uiConfig.banner.text}</Typography>
+    </Card>
+  )
 }
-
-export default Banner
