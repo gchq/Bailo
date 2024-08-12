@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Stack, Tooltip, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { patchModel, useGetModel, useGetModelRoles } from 'actions/model'
 import { useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
@@ -14,11 +14,9 @@ import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
 
 type EntryAccessTabProps = {
   entry: EntryInterface
-  isReadOnly: boolean
-  requiredRolesText: string
 }
 
-export default function EntryAccessTab({ entry, isReadOnly, requiredRolesText }: EntryAccessTabProps) {
+export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(entry.collaborators)
@@ -70,24 +68,10 @@ export default function EntryAccessTab({ entry, isReadOnly, requiredRolesText }:
         onUpdate={(val) => setAccessList(val)}
         entryKind={entry.kind}
         entryRoles={entryRoles}
-        isReadOnly={isReadOnly}
-        requiredRolesText={requiredRolesText}
       />
-      <div>
-        <Tooltip title={requiredRolesText}>
-          <span>
-            <LoadingButton
-              variant='contained'
-              aria-label='Save access list'
-              disabled={isReadOnly}
-              onClick={updateAccessList}
-              loading={loading}
-            >
-              Save
-            </LoadingButton>
-          </span>
-        </Tooltip>
-      </div>
+      <LoadingButton variant='contained' aria-label='Save access list' onClick={updateAccessList} loading={loading}>
+        Save
+      </LoadingButton>
       <MessageAlert message={errorMessage} severity='error' />
     </Stack>
   )
