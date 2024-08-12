@@ -147,19 +147,6 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
               <Menu MenuListProps={{ dense: true }} anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
                 <MenuItem>
                   <ListItemIcon>
-                    <PersonIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setRolesDialogOpen(true)
-                    }}
-                  >
-                    View Roles
-                  </ListItemText>
-                </MenuItem>
-                <MenuItem>
-                  <ListItemIcon>
                     <PictureAsPdfIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText
@@ -169,6 +156,19 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
                     }}
                   >
                     Export as PDF
+                  </ListItemText>
+                </MenuItem>
+                <MenuItem>
+                  <ListItemIcon>
+                    <PersonIcon fontSize='small' />
+                  </ListItemIcon>
+                  <ListItemText
+                    onClick={() => {
+                      handleActionButtonClose()
+                      setRolesDialogOpen(true)
+                    }}
+                  >
+                    View Roles
                   </ListItemText>
                 </MenuItem>
                 <MenuItem>
