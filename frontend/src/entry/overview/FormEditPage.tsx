@@ -1,17 +1,14 @@
-import EditIcon from '@mui/icons-material/Edit'
-import HistoryIcon from '@mui/icons-material/History'
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { putModelCard, useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
-import React from 'react'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
+import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -20,44 +17,29 @@ import MessageAlert from 'src/MessageAlert'
 import { EntryCardKindLabel, EntryInterface, SplitSchemaNoRender } from 'types/types'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 import { getRequiredRolesText, hasRole } from 'utils/roles'
-
 type FormEditPageProps = {
   entry: EntryInterface
   readOnly?: boolean
   currentUserRoles: string[]
 }
-
 export default function FormEditPage({ entry, currentUserRoles, readOnly = false }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
-
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
   const { mutateModelCardRevisions: mutateEntryCardRevisions } = useGetModelCardRevisions(entry.id)
+  const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-
-  function handleActionButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleActionButtonClose = () => {
-    setAnchorEl(null)
-  }
-
   const sendNotification = useNotification()
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
-
   const [canEdit, requiredRolesText] = useMemo(() => {
     const validRoles = ['owner', 'contributor']
     return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
   }, [currentUserRoles])
-
   async function onSubmit() {
     if (schema) {
       setErrorMessage('')
@@ -73,7 +55,6 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
       setLoading(false)
     }
   }
-
   function onCancel() {
     if (schema) {
       mutateEntry()
@@ -85,23 +66,18 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
       setIsEdit(false)
     }
   }
-
   useEffect(() => {
     if (!entry || !schema) return
     const metadata = entry.card.metadata
     const steps = getStepsFromSchema(schema, {}, ['properties.contacts'], metadata)
-
     for (const step of steps) {
       step.steps = steps
     }
-
     setSplitSchema({ reference: schema.id, steps })
   }, [schema, entry])
-
   useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
-
   function handleJsonFormOnSubmit(formData: string) {
     setJsonUploadDialogOpen(false)
     try {
@@ -120,15 +96,12 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
       })
     }
   }
-
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
-
   if (isEntryError) {
     return <MessageAlert message={isEntryError.info.message} severity='error' />
   }
-
   return (
     <>
       {isSchemaLoading && <Loading />}
@@ -151,57 +124,31 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
             </Stack>
           </div>
           {!isEdit && (
-            <>
-              <Button data-test='openEntryOverviewActions' variant='contained' onClick={handleActionButtonClick}>
-                Actions
+            <Stack direction='row' spacing={1} justifyContent='flex-end' sx={{ mb: { xs: 2 } }}>
+              <Button variant='outlined' onClick={() => setExportDialogOpen(true)}>
+                Export as PDF
               </Button>
-              <Menu MenuListProps={{ dense: true }} anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
-                <MenuItem>
-                  <ListItemIcon>
-                    <PictureAsPdfIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setExportDialogOpen(true)
-                    }}
-                  >
-                    Export as PDF
-                  </ListItemText>
-                </MenuItem>
-                <MenuItem>
-                  <ListItemIcon>
-                    <HistoryIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setHistoryDialogOpen(true)
-                    }}
-                  >
-                    View History
-                  </ListItemText>
-                </MenuItem>
-                {!readOnly && (
-                  <Tooltip title={requiredRolesText}>
-                    <MenuItem disabled={!canEdit}>
-                      <ListItemIcon>
-                        <EditIcon fontSize='small' />
-                      </ListItemIcon>
-                      <ListItemText
-                        onClick={() => {
-                          handleActionButtonClose()
-                          setIsEdit(!isEdit)
-                        }}
-                        data-test='editEntryCardButton'
-                      >
-                        {`Edit ${EntryCardKindLabel[entry.kind]}`}
-                      </ListItemText>
-                    </MenuItem>
-                  </Tooltip>
-                )}
-              </Menu>
-            </>
+              <Button variant='outlined' onClick={() => setRolesDialogOpen(true)}>
+                View Roles
+              </Button>
+              <Button variant='outlined' onClick={() => setHistoryDialogOpen(true)}>
+                View History
+              </Button>
+              {!readOnly && (
+                <Tooltip title={requiredRolesText}>
+                  <span>
+                    <Button
+                      variant='outlined'
+                      disabled={!canEdit}
+                      onClick={() => setIsEdit(!isEdit)}
+                      data-test='editEntryCardButton'
+                    >
+                      {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
+            </Stack>
           )}
           {isEdit && (
             <SaveAndCancelButtons
@@ -226,6 +173,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
         )}
       </Box>
       <EntryCardHistoryDialog entry={entry} open={historyDialogOpen} setOpen={setHistoryDialogOpen} />
+      <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
       <TextInputDialog
         open={jsonUploadDialogOpen}
         onClose={() => setJsonUploadDialogOpen(false)}
