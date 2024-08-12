@@ -1,4 +1,7 @@
-import { Box, Button, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import HistoryIcon from '@mui/icons-material/History'
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { putModelCard, useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
@@ -148,12 +151,15 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
             </Stack>
           </div>
           {!isEdit && (
-            <Fragment>
+            <>
               <Button data-test='openEntryOverviewActions' variant='contained' onClick={handleActionButtonClick}>
                 Actions
               </Button>
-              <Menu anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
+              <Menu MenuListProps={{ dense: true }} anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
                 <MenuItem>
+                  <ListItemIcon>
+                    <PictureAsPdfIcon fontSize='small' />
+                  </ListItemIcon>
                   <ListItemText
                     onClick={() => {
                       handleActionButtonClose()
@@ -164,6 +170,9 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
                   </ListItemText>
                 </MenuItem>
                 <MenuItem>
+                  <ListItemIcon>
+                    <HistoryIcon fontSize='small' />
+                  </ListItemIcon>
                   <ListItemText
                     onClick={() => {
                       handleActionButtonClose()
@@ -175,23 +184,24 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
                 </MenuItem>
                 {!readOnly && (
                   <Tooltip title={requiredRolesText}>
-                    <span>
-                      <MenuItem disabled={!canEdit}>
-                        <ListItemText
-                          onClick={() => {
-                            handleActionButtonClose()
-                            setIsEdit(!isEdit)
-                          }}
-                          data-test='editEntryCardButton'
-                        >
-                          {`Edit ${EntryCardKindLabel[entry.kind]}`}
-                        </ListItemText>
-                      </MenuItem>
-                    </span>
+                    <MenuItem disabled={!canEdit}>
+                      <ListItemIcon>
+                        <EditIcon fontSize='small' />
+                      </ListItemIcon>
+                      <ListItemText
+                        onClick={() => {
+                          handleActionButtonClose()
+                          setIsEdit(!isEdit)
+                        }}
+                        data-test='editEntryCardButton'
+                      >
+                        {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                      </ListItemText>
+                    </MenuItem>
                   </Tooltip>
                 )}
               </Menu>
-            </Fragment>
+            </>
           )}
           {isEdit && (
             <SaveAndCancelButtons
