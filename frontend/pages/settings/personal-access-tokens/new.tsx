@@ -49,6 +49,11 @@ export default function NewToken() {
   const [errorMessage, setErrorMessage] = useState('')
   const [token, setToken] = useState<TokenInterface | undefined>()
 
+  const isGenerateButtonDisabled = useMemo(
+    () => !description || !(isAllModels || selectedModels.length) || !selectedActions.length,
+    [description, isAllModels, selectedModels.length, selectedActions.length],
+  )
+
   const modelsAutocompletePlaceholder = useMemo(() => {
     if (isAllModels) return 'All models selected'
     if (selectedModels.length) return ''
@@ -281,7 +286,7 @@ export default function NewToken() {
                 <LoadingButton
                   variant='contained'
                   loading={isLoading}
-                  disabled={!description}
+                  disabled={isGenerateButtonDisabled}
                   onClick={handleSubmit}
                   data-test='generatePersonalAccessTokenButton'
                 >
