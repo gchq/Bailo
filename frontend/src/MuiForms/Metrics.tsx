@@ -15,6 +15,7 @@ import { FormContextType } from '@rjsf/utils'
 import _ from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import MetricItem from 'src/MuiForms/MetricItem'
+import { isValidNumber } from 'utils/stringUtils'
 import { v4 as uuidv4 } from 'uuid'
 
 export interface MetricValue {
@@ -63,7 +64,7 @@ export default function Metrics({ onChange, value, label, formContext, required 
       onChange(
         updatedMetricArray.map((metric) => ({
           name: metric.name,
-          value: metric.value,
+          value: isValidNumber(metric.value as string) ? parseInt(metric.value as string) : metric.value,
         })),
       )
     },
