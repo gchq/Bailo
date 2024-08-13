@@ -12,7 +12,7 @@ interface CreateTokenProps {
 
   scope: TokenScopeKeys
   modelIds: Array<string>
-  actions: Array<TokenActionsKeys>
+  actions: Array<string>
 }
 
 const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQSRTUVWXYZ')

@@ -1,7 +1,7 @@
 import { ArrowBack } from '@mui/icons-material'
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Card, Container, Link, Typography } from '@mui/material'
+import { Box, Button, Container, Link, Paper, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
 import { CreateInferenceParams, postInference } from 'actions/inferencing'
 import { useGetModel } from 'actions/model'
@@ -81,7 +81,7 @@ export default function NewInference() {
       {isModelLoading && <Loading />}
       {model && !isModelLoading && (
         <Container maxWidth='md'>
-          <Card sx={{ my: 4, p: 4 }}>
+          <Paper sx={{ my: 4, p: 4 }}>
             <Box component='form' onSubmit={handleSubmit}>
               <Stack spacing={4}>
                 <Link href={`/model/${modelId}?tab=inferencing`}>
@@ -122,7 +122,7 @@ export default function NewInference() {
                 <MessageAlert message={errorMessage} severity='error' />
               </Stack>
             </Box>
-          </Card>
+          </Paper>
         </Container>
       )}
     </>

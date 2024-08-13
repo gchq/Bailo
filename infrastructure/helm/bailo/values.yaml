@@ -223,6 +223,11 @@ config:
       colour: "#047a06"
       textColor: "black"
 
+    announcement:
+      enabled: false
+      text: ''
+      startTimestamp: ''
+
   smtp:
     #host: 'mail' #service name
     port: 1025

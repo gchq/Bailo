@@ -1,5 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
 import { useState } from 'react'
+import { Transition } from 'src/common/Transition'
 
 interface TextUploadDialogProps {
   open: boolean
@@ -25,7 +26,7 @@ export default function TextInputDialog({
     setFormData('')
   }
   return (
-    <Dialog maxWidth='lg' open={open} onClose={onClose}>
+    <Dialog maxWidth='lg' open={open} onClose={onClose} TransitionComponent={Transition}>
       <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent sx={{ p: 2 }}>
         <TextField

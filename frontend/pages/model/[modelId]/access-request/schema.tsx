@@ -7,9 +7,9 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Card,
   Container,
   Grid,
+  Paper,
   Stack,
   Typography,
 } from '@mui/material'
@@ -95,7 +95,7 @@ export default function AccessRequestSchema() {
       {isSchemasLoading && <Loading />}
       {schemas && !isSchemasLoading && (
         <Container maxWidth='md'>
-          <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
+          <Paper sx={{ mx: 'auto', my: 4, p: 4 }}>
             <Link href={`/model/${modelId}`}>
               <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                 Back to model
@@ -139,7 +139,7 @@ export default function AccessRequestSchema() {
                 </AccordionDetails>
               </Accordion>
             </Stack>
-          </Card>
+          </Paper>
         </Container>
       )}
     </>

@@ -17,9 +17,14 @@ export type actions = {
   url: string
 }
 
-export function buildEmail(title: string, metadata: Info[], actions: actions[]): EmailContent {
+export function buildEmail(
+  title: string,
+  metadata: Info[],
+  actions: actions[],
+  actionRequired?: boolean,
+): EmailContent {
   return {
-    subject: title,
+    subject: actionRequired ? `ACTION REQUIRED: ${title}` : title,
     text: emailText(title, metadata, actions),
     html: emailHtml(title, metadata, actions),
   }

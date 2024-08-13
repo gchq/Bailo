@@ -57,38 +57,34 @@ export const ResponseAction = {
 export type ResponseActionKeys = (typeof ResponseAction)[keyof typeof ResponseAction]
 
 export const ActionLookup = {
-  [ModelAction.Create]: TokenActions.ModelWrite,
-  [ModelAction.View]: TokenActions.ModelRead,
-  [ModelAction.Update]: TokenActions.ModelWrite,
-  [ModelAction.Write]: TokenActions.ModelWrite,
+  [ModelAction.Create]: TokenActions.ModelWrite.id,
+  [ModelAction.View]: TokenActions.ModelRead.id,
+  [ModelAction.Update]: TokenActions.ModelWrite.id,
+  [ModelAction.Write]: TokenActions.ModelWrite.id,
 
-  [ReleaseAction.Create]: TokenActions.ReleaseWrite,
-  [ReleaseAction.View]: TokenActions.ReleaseRead,
-  [ReleaseAction.Delete]: TokenActions.ReleaseWrite,
-  [ReleaseAction.Update]: TokenActions.ReleaseWrite,
+  [ReleaseAction.Create]: TokenActions.ReleaseWrite.id,
+  [ReleaseAction.View]: TokenActions.ReleaseRead.id,
+  [ReleaseAction.Delete]: TokenActions.ReleaseWrite.id,
+  [ReleaseAction.Update]: TokenActions.ReleaseWrite.id,
 
-  [AccessRequestAction.Create]: TokenActions.AccessRequestWrite,
-  [AccessRequestAction.View]: TokenActions.AccessRequestRead,
-  [AccessRequestAction.Update]: TokenActions.AccessRequestWrite,
-  [AccessRequestAction.Delete]: TokenActions.AccessRequestWrite,
+  [AccessRequestAction.Create]: TokenActions.AccessRequestWrite.id,
+  [AccessRequestAction.View]: TokenActions.AccessRequestRead.id,
+  [AccessRequestAction.Update]: TokenActions.AccessRequestWrite.id,
+  [AccessRequestAction.Delete]: TokenActions.AccessRequestWrite.id,
 
-  [SchemaAction.Create]: TokenActions.SchemaWrite,
-  [SchemaAction.Delete]: TokenActions.SchemaWrite,
-  [SchemaAction.Update]: TokenActions.SchemaWrite,
+  [SchemaAction.Create]: TokenActions.SchemaWrite.id,
+  [SchemaAction.Delete]: TokenActions.SchemaWrite.id,
+  [SchemaAction.Update]: TokenActions.SchemaWrite.id,
 
-  [FileAction.Delete]: TokenActions.FileWrite,
-  [FileAction.Upload]: TokenActions.FileWrite,
-  [FileAction.View]: TokenActions.FileRead,
-  [FileAction.Download]: TokenActions.FileRead,
+  [FileAction.Delete]: TokenActions.FileWrite.id,
+  [FileAction.Upload]: TokenActions.FileWrite.id,
+  [FileAction.View]: TokenActions.FileRead.id,
+  [FileAction.Download]: TokenActions.FileRead.id,
 
-  [ImageAction.Pull]: TokenActions.ImageRead,
-  [ImageAction.Push]: TokenActions.ImageWrite,
-  [ImageAction.List]: TokenActions.ImageRead,
-  [ImageAction.Wildcard]: TokenActions.ImageWrite,
-  [ImageAction.Delete]: TokenActions.ImageWrite,
-
-  [ResponseAction.Create]: TokenActions.ResponseWrite,
-  [ResponseAction.View]: TokenActions.ResponseRead,
-  [ResponseAction.Update]: TokenActions.ResponseWrite,
+  [ImageAction.Pull]: TokenActions.ImageRead.id,
+  [ImageAction.Push]: TokenActions.ImageWrite.id,
+  [ImageAction.List]: TokenActions.ImageRead.id,
+  [ImageAction.Wildcard]: TokenActions.ImageWrite.id,
+  [ImageAction.Delete]: TokenActions.ImageWrite.id,
 } as const
 export type ActionLookupKeys = (typeof ActionLookup)[keyof typeof ActionLookup]

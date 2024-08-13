@@ -1,6 +1,6 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { LoadingButton } from '@mui/lab'
-import { Button, Card, Container, Stack, Typography } from '@mui/material'
+import { Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { postAccessRequest } from 'actions/accessRequest'
 import { useGetModel } from 'actions/model'
 import { useGetSchema } from 'actions/schema'
@@ -109,7 +109,7 @@ export default function NewAccessRequest() {
       {isLoading && <Loading />}
       {!isLoading && (
         <Container maxWidth='lg'>
-          <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
+          <Paper sx={{ mx: 'auto', my: 4, p: 4 }}>
             {(!model || !model.card) && (
               <Typography>Access requests can not be requested if a schema is not set for this model.</Typography>
             )}
@@ -141,7 +141,7 @@ export default function NewAccessRequest() {
                 </Stack>
               </Stack>
             )}
-          </Card>
+          </Paper>
         </Container>
       )}
     </>

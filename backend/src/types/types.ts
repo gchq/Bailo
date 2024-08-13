@@ -33,4 +33,10 @@ export interface UiConfig {
     enabled: boolean
     disclaimer: string
   }
+
+  announcement: {
+    enabled: boolean
+    text: string
+    startTimestamp: string
+  }
 }

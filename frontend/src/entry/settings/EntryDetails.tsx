@@ -15,11 +15,9 @@ import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
 
 type EntryDetailsProps = {
   entry: EntryInterface
-  isReadOnly: boolean
-  requiredRolesText: string
 }
 
-export default function EntryDetails({ entry, isReadOnly, requiredRolesText }: EntryDetailsProps) {
+export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [team, setTeam] = useState<TeamInterface | undefined>()
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description)
@@ -37,13 +35,11 @@ export default function EntryDetails({ entry, isReadOnly, requiredRolesText }: E
   const isFormValid = useMemo(() => team && name && description, [team, name, description])
 
   const saveButtonTooltip = useMemo(() => {
-    if (isReadOnly) {
-      return requiredRolesText
-    } else if (!isFormValid) {
+    if (!isFormValid) {
       return 'Please make sure all required fields are filled out'
     }
     return ''
-  }, [isFormValid, isReadOnly, requiredRolesText])
+  }, [isFormValid])
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -111,58 +107,39 @@ export default function EntryDetails({ entry, isReadOnly, requiredRolesText }: E
           </Typography>
           <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
             <TeamSelect value={team} loading={isTeamLoading} onChange={(value) => setTeam(value)} />
-            <EntryNameInput
-              autoFocus
-              value={name}
-              kind={entry.kind}
-              isReadOnly={isReadOnly}
-              requiredRolesText={requiredRolesText}
-              onChange={(value) => setName(value)}
-            />
+            <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
           </Stack>
-          <EntryDescriptionInput
-            value={description}
-            isReadOnly={isReadOnly}
-            requiredRolesText={requiredRolesText}
-            onChange={(value) => setDescription(value)}
-          />
+          <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
         </>
         <Divider />
         <>
           <Typography variant='h6' component='h2'>
             Access control
           </Typography>
-          <Tooltip title={requiredRolesText} placement='bottom-start'>
-            <RadioGroup
-              defaultValue='public'
-              value={visibility}
-              onChange={(e) => setVisibility(e.target.value as UpdateEntryForm['visibility'])}
-            >
-              <FormControlLabel
-                value='public'
-                control={<Radio disabled={isReadOnly} />}
-                label={publicLabel()}
-                data-test='publicButtonSelector'
-              />
-              <FormControlLabel
-                value='private'
-                control={<Radio disabled={isReadOnly} />}
-                label={privateLabel()}
-                data-test='privateButtonSelector'
-              />
-            </RadioGroup>
-          </Tooltip>
+          <RadioGroup
+            defaultValue='public'
+            value={visibility}
+            onChange={(e) => setVisibility(e.target.value as UpdateEntryForm['visibility'])}
+          >
+            <FormControlLabel
+              value='public'
+              control={<Radio />}
+              label={publicLabel()}
+              data-test='publicButtonSelector'
+            />
+            <FormControlLabel
+              value='private'
+              control={<Radio />}
+              label={privateLabel()}
+              data-test='privateButtonSelector'
+            />
+          </RadioGroup>
         </>
         <Divider />
         <div>
           <Tooltip title={saveButtonTooltip}>
             <span>
-              <LoadingButton
-                variant='contained'
-                loading={isLoading}
-                disabled={isReadOnly || !isFormValid}
-                type='submit'
-              >
+              <LoadingButton variant='contained' loading={isLoading} disabled={!isFormValid} type='submit'>
                 Save
               </LoadingButton>
             </span>

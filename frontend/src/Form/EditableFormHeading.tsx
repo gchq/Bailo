@@ -19,6 +19,7 @@ type EditableFormHeadingProps = {
   deleteButtonText?: string
   showDeleteButton?: boolean
   readOnly?: boolean
+  disableSaveButton?: boolean
 }
 
 export default function EditableFormHeading({
@@ -37,6 +38,7 @@ export default function EditableFormHeading({
   readOnly = false,
   canUserEditOrDelete = true,
   actionButtonsTooltip = '',
+  disableSaveButton = false,
 }: EditableFormHeadingProps) {
   return (
     <Stack sx={{ pb: 2 }}>
@@ -82,7 +84,7 @@ export default function EditableFormHeading({
               loading={isLoading}
               onClick={onSubmit}
               data-test='saveEditFormButton'
-              disabled={isRegistryError}
+              disabled={isRegistryError || disableSaveButton}
             >
               Save
             </LoadingButton>

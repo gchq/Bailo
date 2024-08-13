@@ -30,6 +30,7 @@ import { getInferences } from './routes/v2/model/inferencing/getInferenceService
 import { postInference } from './routes/v2/model/inferencing/postInferenceService.js'
 import { putInference } from './routes/v2/model/inferencing/putInferenceService.js'
 import { getModelCard } from './routes/v2/model/modelcard/getModelCard.js'
+import { getModelCardHtml } from './routes/v2/model/modelcard/getModelCardHtml.js'
 import { getModelCardRevisions } from './routes/v2/model/modelcard/getModelCardRevisions.js'
 import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
 import { postFromTemplate } from './routes/v2/model/modelcard/postFromTemplate.js'
@@ -67,6 +68,7 @@ import { getTeams } from './routes/v2/team/getTeams.js'
 import { postTeam } from './routes/v2/team/postTeam.js'
 import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
+import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
 import config from './utils/config.js'
@@ -92,6 +94,7 @@ server.patch('/api/v2/model/:modelId', ...patchModel)
 server.post('/api/v2/model/:modelId/export/s3', ...postRequestExportToS3)
 
 server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
+server.get('/api/v2/model/:modelId/model-card/:version/html', ...getModelCardHtml)
 server.get('/api/v2/model/:modelId/model-card-revisions', ...getModelCardRevisions)
 server.put('/api/v2/model/:modelId/model-cards', ...putModelCard) // *server.get('/api/v2/template/models', ...getModelTemplates)
 // *server.post('/api/v2/model/:modelId/setup/from-existing', ...postFromExisting)
@@ -199,6 +202,7 @@ server.get('/api/v2/config/ui', ...getUiConfig)
 
 server.post('/api/v2/user/tokens', ...postUserToken)
 server.get('/api/v2/user/tokens', ...getUserTokens)
+server.get('/api/v2/user/tokens/list', ...getUserTokenList)
 // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
 server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22-alpine as installer
+FROM node:22-alpine AS installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
