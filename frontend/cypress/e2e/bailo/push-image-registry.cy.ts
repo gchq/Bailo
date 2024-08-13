@@ -31,6 +31,7 @@ describe('Make and approve an access request', () => {
     cy.log('Navigating to token generation page')
     cy.visit(`/settings/personal-access-tokens/new`)
     cy.get('[data-test=tokenDescriptionTextField]').type('This token works for all models')
+    cy.get('[data-test=allActionsCheckbox]').click()
     cy.get('[data-test=generatePersonalAccessTokenButton]').click()
 
     cy.log('Saving access key and secret key')
