@@ -6,6 +6,7 @@ import {
   FormControlLabel,
   Paper,
   Stack,
+  styled,
   Table,
   TableBody,
   TableCell,
@@ -15,7 +16,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { DateTimePicker } from '@mui/x-date-pickers'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { Dayjs } from 'dayjs'
@@ -36,7 +36,6 @@ type LogsProps = {
 
 export default function Logs({ entry, currentUserRoles }: LogsProps) {
   const router = useRouter()
-  const theme = useTheme()
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
@@ -58,6 +57,16 @@ export default function Logs({ entry, currentUserRoles }: LogsProps) {
       })
     }
   }, [currentUserRoles, router])
+
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.action.hover,
+    },
+    // hide last border
+    '&:last-child td, &:last-child th': {
+      border: 0,
+    },
+  }))
 
   const entryKindDisplay = useCallback(
     (kind: string) => {
@@ -102,19 +111,16 @@ export default function Logs({ entry, currentUserRoles }: LogsProps) {
       .filter((log) => betweenDateFilters(log.timestamp))
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .map((log) => (
-        <TableRow
-          key={log.timestamp}
-          sx={{ '&:last-child td, &:last-child th': { border: 0 }, backgroundColor: theme.palette.container.main }}
-        >
+        <StyledTableRow key={log.timestamp} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
           <TableCell component='th' scope='row'>
             <UserDisplay dn={log.userDn} />
           </TableCell>
           <TableCell>{log.kind === EntryLogKind.Entry ? entryKindDisplay(log.kind) : log.kind}</TableCell>
           <TableCell>{log.log}</TableCell>
           <TableCell>{formatDateTimeString(log.timestamp)}</TableCell>
-        </TableRow>
+        </StyledTableRow>
       ))
-  }, [betweenDateFilters, entry.logs, entryKindDisplay, includesTypeFilter, tableFilter, theme.palette.container.main])
+  }, [StyledTableRow, betweenDateFilters, entry.logs, entryKindDisplay, includesTypeFilter, tableFilter])
 
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
@@ -170,17 +176,20 @@ export default function Logs({ entry, currentUserRoles }: LogsProps) {
                 placeholder='Filter by user, kind, log message or time'
                 value={tableFilter}
                 onChange={(e) => setTableFilter(e.target.value)}
+                size='small'
               />
               <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
                 <DateTimePicker
                   label='Start date'
                   value={startDateFilter}
                   onChange={(newValue) => setStartDateFilter(newValue)}
+                  slotProps={{ textField: { size: 'small' } }}
                 />
                 <DateTimePicker
                   label='End date'
                   value={endDateFilter}
                   onChange={(newValue) => setEndDateFilter(newValue)}
+                  slotProps={{ textField: { size: 'small' } }}
                 />
               </Stack>
             </Stack>
