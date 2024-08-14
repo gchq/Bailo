@@ -55,6 +55,7 @@ const modelMocks = vi.hoisted(() => ({
     settings: { mirror: { sourceModelId: '' } },
   })),
   getModelCardRevision: vi.fn(),
+  addLogToModel: vi.fn(),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 

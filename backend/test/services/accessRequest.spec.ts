@@ -13,6 +13,7 @@ vi.mock('../../src/connectors/authorisation/index.js')
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
+  addLogToModel: vi.fn(),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
