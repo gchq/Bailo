@@ -15,6 +15,23 @@ export const EntryKind = {
 
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
+export const EntryLogKind = {
+  Entry: 'Entry',
+  Form: 'Form',
+  Release: 'Release',
+  AccessRequest: 'Access Request',
+  Review: 'Review',
+} as const
+
+export type EntryLogKindKeys = (typeof EntryLogKind)[keyof typeof EntryLogKind]
+
+export interface EntryLog {
+  userDn: string
+  log: string
+  timestamp: string
+  kind: EntryLogKindKeys
+}
+
 export interface CollaboratorEntry {
   entity: string
   roles: Array<'owner' | 'contributor' | 'consumer' | string>
@@ -55,6 +72,7 @@ export interface ModelInterface {
   teamId?: string
   description: string
   card?: ModelCardInterface
+  logs?: EntryLog[]
 
   collaborators: Array<CollaboratorEntry>
   settings: Settings
@@ -91,6 +109,14 @@ const ModelSchema = new Schema<ModelInterface>(
       {
         entity: { type: String, required: true },
         roles: [{ type: String }],
+      },
+    ],
+    logs: [
+      {
+        userDn: { type: String, required: true },
+        log: { type: String, required: true },
+        timestamp: { type: String, required: true },
+        kind: { type: String, enum: Object.values(EntryLogKind) },
       },
     ],
     settings: {

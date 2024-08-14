@@ -1,3 +1,4 @@
+import { EntryLogKind } from '../models/Model.js'
 import ResponseModel, {
   Decision,
   ReactionKindKeys,
@@ -13,6 +14,7 @@ import { toEntity } from '../utils/entity.js'
 import { Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
+import { addLogToModel } from './model.js'
 import { getReleaseBySemver } from './release.js'
 import { findReviewForResponse, findReviewsForAccessRequests } from './review.js'
 import { notifyReviewResponseForAccess, notifyReviewResponseForRelease } from './smtp/smtp.js'
@@ -114,6 +116,12 @@ export async function respondToReview(
     WebhookEvent.CreateReviewResponse,
     `A new response has been added to a review requested for Model ${review.modelId}`,
     { review: review },
+  )
+  addLogToModel(
+    user,
+    review.modelId,
+    `A new response has been added to a review for a ${kind === ReviewKind.Release ? 'release' : 'access request'}`,
+    EntryLogKind.Review,
   )
 
   return reviewResponse

@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
+import Logs from 'src/entry/logs/Logs'
 import AccessRequests from 'src/entry/model/AccessRequests'
 import InferenceServices from 'src/entry/model/InferenceServices'
 import ModelImages from 'src/entry/model/ModelImages'
@@ -82,6 +83,13 @@ export default function Model() {
               path: 'inferencing',
               view: <InferenceServices model={model} currentUserRoles={currentUserRoles} />,
               hidden: !uiConfig.inference.enabled,
+            },
+            {
+              title: 'Logs',
+              path: 'logs',
+              disabled: isReadOnly,
+              disabledText: requiredRolesText,
+              view: <Logs entry={model} currentUserRoles={currentUserRoles} />,
             },
             {
               title: 'Settings',

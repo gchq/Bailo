@@ -4,7 +4,7 @@ import _ from 'lodash'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
+import ModelModel, { CollaboratorEntry, EntryKindKeys, EntryLogKind, EntryLogKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
@@ -14,6 +14,7 @@ import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { NotImplemented } from '../utils/result.js'
+import { toSentenceCase } from '../utils/stringUtils.js'
 import { findSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -293,6 +294,8 @@ export async function updateModelCard(
   }
 
   const revision = await _setModelCard(user, modelId, model.card.schemaId, model.card.version + 1, metadata)
+  addLogToModel(user, modelId, 'Form updated', EntryLogKind.Form)
+
   return revision
 }
 
@@ -318,6 +321,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
 
   _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
   await model.save()
+  addLogToModel(user, modelId, `${toSentenceCase(model.kind).replace('-', ' ')} updated`, EntryLogKind.Entry)
 
   return model
 }
@@ -352,4 +356,18 @@ export async function createModelCardFromTemplate(
   _schemaId: string,
 ): Promise<ModelCardRevisionDoc> {
   throw NotImplemented({}, 'This feature is not yet implemented')
+}
+
+export async function addLogToModel(user: UserInterface, modelId: string, log: string, kind: EntryLogKindKeys) {
+  const model = await getModelById(user, modelId)
+  if (!model.logs) {
+    model.logs = []
+  }
+  model.logs.push({
+    userDn: user.dn,
+    log,
+    timestamp: new Date().toISOString(),
+    kind,
+  })
+  await model.save()
 }

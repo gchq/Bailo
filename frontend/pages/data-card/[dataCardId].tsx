@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
+import Logs from 'src/entry/logs/Logs'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
@@ -36,6 +37,13 @@ export default function DataCard() {
               title: 'Overview',
               path: 'overview',
               view: <Overview entry={dataCard} currentUserRoles={currentUserRoles} />,
+            },
+            {
+              title: 'Logs',
+              path: 'logs',
+              disabled: isReadOnly,
+              disabledText: requiredRolesText,
+              view: <Logs entry={dataCard} currentUserRoles={currentUserRoles} />,
             },
             {
               title: 'Settings',

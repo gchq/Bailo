@@ -6,6 +6,7 @@ import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestInterface } from '../models/AccessRequest.js'
 import AccessRequest from '../models/AccessRequest.js'
+import { EntryLogKind } from '../models/Model.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
@@ -14,7 +15,7 @@ import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import log from './log.js'
-import { getModelById } from './model.js'
+import { addLogToModel, getModelById } from './model.js'
 import { createAccessRequestReviews } from './review.js'
 import { findSchemaById } from './schema.js'
 import { sendWebhooks } from './webhook.js'
@@ -70,6 +71,13 @@ export async function createAccessRequest(
     WebhookEvent.CreateAccessRequest,
     `Access Request ${accessRequest.id} has been created for model ${accessRequest.modelId}`,
     { accessRequest },
+  )
+
+  addLogToModel(
+    user,
+    modelId,
+    `Access Request ${accessRequest.id} has been created for model ${accessRequest.modelId}`,
+    EntryLogKind.AccessRequest,
   )
 
   return accessRequest
@@ -147,6 +155,12 @@ export async function updateAccessRequest(
   }
 
   await accessRequest.save()
+  addLogToModel(
+    user,
+    accessRequest.modelId,
+    `Access request ${accessRequest.id} has been updated`,
+    EntryLogKind.AccessRequest,
+  )
 
   return accessRequest
 }
@@ -171,6 +185,13 @@ export async function newAccessRequestComment(user: UserInterface, accessRequest
   if (!newComment) {
     throw InternalError('There was a problem saving a new comment for this access request')
   }
+
+  addLogToModel(
+    user,
+    accessRequest.modelId,
+    `Comment posted on access request ${accessRequest.id}`,
+    EntryLogKind.AccessRequest,
+  )
 
   return commentResponse
 }

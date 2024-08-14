@@ -4,7 +4,7 @@ import { Optional } from 'utility-types'
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileInterface } from '../models/File.js'
-import { ModelDoc, ModelInterface } from '../models/Model.js'
+import { EntryLogKind, ModelDoc, ModelInterface } from '../models/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
@@ -16,7 +16,7 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
-import { getModelById, getModelCardRevision } from './model.js'
+import { addLogToModel, getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
@@ -174,6 +174,8 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     { release },
   )
 
+  addLogToModel(user, release.modelId, `Release ${release.semver} has been created`, EntryLogKind.Release)
+
   return release
 }
 
@@ -201,6 +203,8 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
+
+  addLogToModel(user, release.modelId, `Release ${release.semver} has been updated`, EntryLogKind.Release)
 
   return updatedRelease
 }
@@ -230,6 +234,8 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
   if (!savedComment) {
     throw InternalError('There was a problem saving this release comment')
   }
+
+  addLogToModel(user, release.modelId, `Comment posted on release ${release.semver}`, EntryLogKind.Release)
 
   return commentResponse
 }

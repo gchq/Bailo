@@ -397,6 +397,7 @@ export interface EntryInterface {
   card: EntryCardInterface
   visibility: EntryVisibilityKeys
   collaborators: CollaboratorEntry[]
+  logs: EntryLog[]
   createdBy: string
   createdAt: Date
 }
@@ -527,4 +528,21 @@ export interface FailedFileUpload {
 export interface SuccessfulFileUpload {
   fileName: string
   fileId: string
+}
+
+export const EntryLogKind = {
+  Entry: 'Entry',
+  Form: 'Form',
+  Release: 'Release',
+  AccessRequest: 'Access Request',
+  Review: 'Review',
+} as const
+
+export type EntryLogKindKeys = (typeof EntryLogKind)[keyof typeof EntryLogKind]
+
+export interface EntryLog {
+  userDn: string
+  log: string
+  timestamp: string
+  kind: EntryLogKindKeys
 }
