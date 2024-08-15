@@ -4,6 +4,8 @@ import useSWR from 'swr'
 import { EntryForm, EntryInterface, EntryKindKeys, ModelImage, Role } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
+const emptyArray = []
+
 export interface EntrySearchResult {
   id: string
   name: string
@@ -41,7 +43,7 @@ export function useListModels(
 
   return {
     mutateModels: mutate,
-    models: data ? data.models : [],
+    models: data ? data.models : emptyArray,
     isModelsLoading: isLoading,
     isModelsError: error,
   }
@@ -77,7 +79,7 @@ export function useGetModelRoles(id?: string) {
 
   return {
     mutateModelRoles: mutate,
-    modelRoles: data ? data.roles : [],
+    modelRoles: data ? data.roles : emptyArray,
     isModelRolesLoading: isLoading,
     isModelRolesError: error,
   }
@@ -93,7 +95,7 @@ export function useGetModelImages(id?: string) {
 
   return {
     mutateModelImages: mutate,
-    modelImages: data ? data.images : [],
+    modelImages: data ? data.images : emptyArray,
     isModelImagesLoading: isLoading,
     isModelImagesError: error,
   }
@@ -109,7 +111,7 @@ export function useGetModelRolesCurrentUser(id?: string) {
 
   return {
     mutateModelRolesCurrentUser: mutate,
-    modelRolesCurrentUser: data ? data.roles : [],
+    modelRolesCurrentUser: data ? data.roles : emptyArray,
     isModelRolesCurrentUserLoading: isLoading,
     isModelRolesCurrentUserError: error,
   }

@@ -2,6 +2,8 @@ import useSWR from 'swr'
 import { AccessRequestInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
+const emptyArray = []
+
 export function useGetAccessRequestsForModelId(modelId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -12,7 +14,7 @@ export function useGetAccessRequestsForModelId(modelId?: string) {
 
   return {
     mutateAccessRequests: mutate,
-    accessRequests: data ? data.accessRequests : [],
+    accessRequests: data ? data.accessRequests : emptyArray,
     isAccessRequestsLoading: isLoading,
     isAccessRequestsError: error,
   }

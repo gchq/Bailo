@@ -4,6 +4,8 @@ import useSWR from 'swr'
 import { ReleaseInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
+const emptyArray = []
+
 export function useGetReleasesForModelId(modelId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -14,7 +16,7 @@ export function useGetReleasesForModelId(modelId?: string) {
 
   return {
     mutateReleases: mutate,
-    releases: data ? data.releases : [],
+    releases: data ? data.releases : emptyArray,
     isReleasesLoading: isLoading,
     isReleasesError: error,
   }

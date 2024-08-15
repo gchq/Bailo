@@ -10,6 +10,8 @@ import {
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
+const emptyArray = []
+
 export function useGetReviewRequestsForUser() {
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -20,7 +22,7 @@ export function useGetReviewRequestsForUser() {
 
   return {
     mutateReviews: mutate,
-    reviews: data ? data.reviews : [],
+    reviews: data ? data.reviews : emptyArray,
     isReviewsLoading: isLoading,
     isReviewsError: error,
   }

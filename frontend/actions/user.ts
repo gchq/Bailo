@@ -5,6 +5,8 @@ import { EntityObject, EntryInterface, TokenAction, TokenInterface, TokenScopeKe
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
+const emptyArray = []
+
 export function useListUsers(q: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -22,7 +24,7 @@ export function useListUsers(q: string) {
 
   return {
     mutateUsers: mutate,
-    users: data ? data.results : [],
+    users: data ? data.results : emptyArray,
     isUsersLoading: isLoading,
     isUsersError: error,
   }
@@ -70,7 +72,7 @@ export function useGetUserTokens() {
 
   return {
     mutateTokens: mutate,
-    tokens: data?.tokens || [],
+    tokens: data?.tokens || emptyArray,
     isTokensLoading: isLoading,
     isTokensError: error,
   }
@@ -107,7 +109,7 @@ export function useGetUserTokenList() {
 
   return {
     mutateTokenActions: mutate,
-    tokenActions: data?.tokenActionMap || [],
+    tokenActions: data?.tokenActionMap || emptyArray,
     isTokenActionsLoading: isLoading,
     isTokenActionsError: error,
   }
