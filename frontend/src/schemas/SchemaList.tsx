@@ -1,11 +1,13 @@
-import { Button, Card, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
+import { Button, Card, Link, List, ListItem, ListItemButton, ListItemText, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import { useListModels } from 'actions/model'
 import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
 import { useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import { SchemaInterface, SchemaKindKeys } from 'types/types'
+import { EntryKind, SchemaInterface, SchemaKind, SchemaKindKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { camelCaseToTitleCase } from 'utils/stringUtils'
 
@@ -16,9 +18,20 @@ interface SchemaDisplayProps {
 export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const { schemas, isSchemasLoading, isSchemasError, mutateSchemas } = useGetSchemas(schemaKind)
 
+  const theme = useTheme()
+
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
   const [schemaToBeDeleted, setSchemaToBeDeleted] = useState('')
+  const { models, isModelsLoading, isModelsError } = useListModels(
+    schemaKind === SchemaKind.MODEL ? EntryKind.MODEL : EntryKind.DATA_CARD,
+    [],
+    '',
+    [],
+    '',
+    false,
+    schemaToBeDeleted,
+  )
 
   const handleSetSchemaActive = useCallback(
     async (schema: SchemaInterface) => {
@@ -79,6 +92,14 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />
   }
 
+  if (isModelsError) {
+    return <MessageAlert message={isModelsError.info.message} severity='error' />
+  }
+
+  if (isModelsLoading) {
+    return <Loading />
+  }
+
   return (
     <Card sx={{ p: 2 }}>
       <Typography color='primary' variant='h6' component='h2'>
@@ -93,10 +114,33 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
         onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
         onCancel={() => setOpen(false)}
         errorMessage={errorMessage}
-        dialogMessage={
-          'Deleting this schema will break any existing models that are using it. Are you sure you want to do this?'
-        }
-      />
+        dialogMessage={`${models.length > 0 ? 'Deleting this schema will break these models' : "This schema isn't used by any models currently"}. Are you sure you want to do this?`}
+      >
+        <List sx={{ maxHeight: '100%', overflow: 'auto' }}>
+          {models.map((model) => (
+            <Link href={`/model/${model.id}`} underline='none' key={model.id}>
+              <ListItemButton>
+                <ListItemText
+                  primary={model.name}
+                  secondary={model.description}
+                  primaryTypographyProps={{
+                    style: {
+                      fontWeight: 'bold',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      color: theme.palette.primary.main,
+                    },
+                  }}
+                  secondaryTypographyProps={{
+                    style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+                  }}
+                />
+              </ListItemButton>
+            </Link>
+          ))}
+        </List>
+      </ConfirmationDialogue>
     </Card>
   )
 }
