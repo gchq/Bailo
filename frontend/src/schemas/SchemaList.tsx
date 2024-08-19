@@ -1,4 +1,4 @@
-import { Button, Card, Link, List, ListItem, ListItemButton, ListItemText, Stack, Typography } from '@mui/material'
+import { Button, Card, List, ListItem, ListItemButton, ListItemText, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { useGetReviewRequestsForUser } from 'actions/review'
@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { EntryKind, SchemaInterface, SchemaKind, SchemaKindKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
@@ -16,7 +17,7 @@ interface SchemaDisplayProps {
   schemaKind: SchemaKindKeys
 }
 
-interface ObjectsToDelete {
+interface ObjectToDelete {
   primary: string
   secondary: string
   link: string
@@ -40,12 +41,12 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     false,
     schemaToBeDeleted,
   )
-  const [objectsToDelete, setObjectsToDelete] = useState<ObjectsToDelete[]>([])
+  const [objectsToDelete, setObjectToDelete] = useState<ObjectToDelete[]>([])
 
   useEffect(() => {
     switch (schemaKind) {
       case SchemaKind.ACCESS_REQUEST:
-        return setObjectsToDelete(
+        return setObjectToDelete(
           reviews.map((review) => {
             return { primary: review.model.name, secondary: review.role, link: `/model/${review.model.id}?tab=access` }
           }),
@@ -53,7 +54,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
 
       case SchemaKind.DATA_CARD:
       case SchemaKind.MODEL:
-        return setObjectsToDelete(
+        return setObjectToDelete(
           models.map((model) => {
             return { primary: model.name, secondary: model.description, link: `/model/${model.id}` }
           }),
@@ -120,7 +121,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
             primary={object.primary}
             secondary={object.secondary}
             primaryTypographyProps={{
-              style: {
+              sx: {
                 fontWeight: 'bold',
                 whiteSpace: 'nowrap',
                 textOverflow: 'ellipsis',
@@ -129,17 +130,13 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
               },
             }}
             secondaryTypographyProps={{
-              style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+              sx: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
             }}
           />
         </ListItemButton>
       </Link>
     ))
   }, [theme.palette.primary.main, objectsToDelete])
-
-  if (isSchemasLoading) {
-    return <Loading />
-  }
 
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />
@@ -149,15 +146,11 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     return <MessageAlert message={isModelsError.info.message} severity='error' />
   }
 
-  if (isModelsLoading) {
-    return <Loading />
-  }
-
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
-  if (isReviewsLoading) {
+  if (isReviewsLoading || isModelsLoading || isSchemasLoading) {
     return <Loading />
   }
 
