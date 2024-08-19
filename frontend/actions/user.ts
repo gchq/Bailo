@@ -5,7 +5,7 @@ import { EntityObject, EntryInterface, TokenAction, TokenInterface, TokenScopeKe
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-const emptyArray = []
+const emptyEntityList = []
 
 export function useListUsers(q: string) {
   const { data, isLoading, error, mutate } = useSWR<
@@ -24,7 +24,7 @@ export function useListUsers(q: string) {
 
   return {
     mutateUsers: mutate,
-    users: data ? data.results : emptyArray,
+    users: data ? data.results : emptyEntityList,
     isUsersLoading: isLoading,
     isUsersError: error,
   }
@@ -67,12 +67,14 @@ interface GetUserTokensResponse {
   tokens: TokenInterface[]
 }
 
+const emptyTokenList = []
+
 export function useGetUserTokens() {
   const { data, isLoading, error, mutate } = useSWR<GetUserTokensResponse, ErrorInfo>('/api/v2/user/tokens', fetcher)
 
   return {
     mutateTokens: mutate,
-    tokens: data?.tokens || emptyArray,
+    tokens: data?.tokens || emptyTokenList,
     isTokensLoading: isLoading,
     isTokensError: error,
   }
@@ -101,6 +103,8 @@ export interface GetUserTokenListResponse {
   tokenActionMap: TokenAction[]
 }
 
+const emptyTokenActionList = []
+
 export function useGetUserTokenList() {
   const { data, isLoading, error, mutate } = useSWR<GetUserTokenListResponse, ErrorInfo>(
     '/api/v2/user/tokens/list',
@@ -109,7 +113,7 @@ export function useGetUserTokenList() {
 
   return {
     mutateTokenActions: mutate,
-    tokenActions: data?.tokenActionMap || emptyArray,
+    tokenActions: data?.tokenActionMap || emptyTokenActionList,
     isTokenActionsLoading: isLoading,
     isTokenActionsError: error,
   }

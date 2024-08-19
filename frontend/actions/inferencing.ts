@@ -4,7 +4,7 @@ import { InferenceInterface, TokenInterface } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
-const emptyArray = []
+const emptyInferencesList = []
 
 export function useGetInferencesForModelId(modelId: string) {
   const { data, isLoading, error, mutate } = useSWR<
@@ -16,7 +16,7 @@ export function useGetInferencesForModelId(modelId: string) {
 
   return {
     mutateInferences: mutate,
-    inferences: data ? data.inferences : emptyArray,
+    inferences: data ? data.inferences : emptyInferencesList,
     isInferencesLoading: isLoading,
     isInferencesError: error,
   }
