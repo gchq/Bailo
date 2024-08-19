@@ -4,6 +4,8 @@ import { EntryCardInterface, EntryCardRevisionInterface } from 'types/types'
 import { handleAxiosError } from 'utils/axios'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
+const emptyModelCardRevisionsList = []
+
 export async function postFromSchema(modelId: string, schemaId: string) {
   try {
     const response = await axios({
@@ -65,7 +67,7 @@ export function useGetModelCardRevisions(modelId: string) {
 
   return {
     mutateModelCardRevisions: mutate,
-    modelCardRevisions: data ? data.modelCardRevisions : [],
+    modelCardRevisions: data ? data.modelCardRevisions : emptyModelCardRevisionsList,
     isModelCardRevisionsLoading: isLoading,
     isModelCardRevisionsError: error,
   }
