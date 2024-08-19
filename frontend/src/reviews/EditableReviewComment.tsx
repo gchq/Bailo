@@ -32,9 +32,9 @@ export default function EditableReviewComment({
         <Stack spacing={2}>
           <MarkdownDisplay>{comment}</MarkdownDisplay>
           <ReactionButtons response={response} mutateResponses={mutateResponses} onError={onReactionsError} />
-          {response.updatedAt !== response.createdAt && (
+          {response.commentEditedAt && (
             <Typography variant='caption' sx={{ fontStyle: 'italic' }}>
-              Edited {formatDateTimeString(response.updatedAt)}
+              Edited {formatDateTimeString(response.commentEditedAt)}
             </Typography>
           )}
         </Stack>

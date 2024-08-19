@@ -128,8 +128,11 @@ describe('services > response', () => {
   })
 
   test('updateResponse > success', async () => {
+    const date = new Date(1970, 0, 1, 0)
+    vi.setSystemTime(date)
+
     const mockResponse = { _id: 'response', entity: 'user:user', comment: 'test', save: vi.fn() }
-    const mockUpdatedResponse = { ...mockResponse, comment: 'updated' }
+    const mockUpdatedResponse = { ...mockResponse, comment: 'updated', commentEditedAt: date.toISOString() }
 
     responseModelMock.findOne.mockResolvedValueOnce(mockResponse)
     entityUtilMock.toEntity.mockReturnValueOnce('user:user')
