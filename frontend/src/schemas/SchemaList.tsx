@@ -41,12 +41,12 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     false,
     schemaToBeDeleted,
   )
-  const [objectsToDelete, setObjectToDelete] = useState<ObjectToDelete[]>([])
+  const [objectsToDelete, setObjectsToDelete] = useState<ObjectToDelete[]>([])
 
   useEffect(() => {
     switch (schemaKind) {
       case SchemaKind.ACCESS_REQUEST:
-        return setObjectToDelete(
+        return setObjectsToDelete(
           reviews.map((review) => {
             return { primary: review.model.name, secondary: review.role, link: `/model/${review.model.id}?tab=access` }
           }),
@@ -54,7 +54,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
 
       case SchemaKind.DATA_CARD:
       case SchemaKind.MODEL:
-        return setObjectToDelete(
+        return setObjectsToDelete(
           models.map((model) => {
             return { primary: model.name, secondary: model.description, link: `/model/${model.id}` }
           }),
