@@ -1,5 +1,4 @@
 import { Validator } from 'jsonschema'
-import _ from 'lodash'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
@@ -321,7 +320,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
+  Object.assign(model, modelDiff)
   await model.save()
 
   return model
