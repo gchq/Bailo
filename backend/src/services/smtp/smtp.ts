@@ -57,7 +57,7 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
   await dispatchEmail(entity, emailContent)
 }
 
-const pluralRequestUsers = (value: number) => {
+const requestingEntitiesText = (value: number) => {
   return `${value} ${value === 1 ? `user/group is` : `users/groups are`}`
 }
 
@@ -72,7 +72,7 @@ export async function requestReviewForAccessRequest(
   }
 
   const emailContent = buildEmail(
-    `${pluralRequestUsers(accessRequest.metadata.overview.entities.length)} requesting access to model ${accessRequest.modelId}`,
+    `${requestingEntitiesText(accessRequest.metadata.overview.entities.length)} requesting access to model ${accessRequest.modelId}`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
