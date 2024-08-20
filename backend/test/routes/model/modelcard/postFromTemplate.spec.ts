@@ -15,6 +15,7 @@ vi.mock('../../../../src/services/model.js', async () => {
   return {
     ...actual,
     createModelCardFromTemplate: vi.fn(() => ({ _id: 'test' })),
+    getModelById: vi.fn(() => ({ settings: { mirror: { sourceModelId: '' } } })),
   }
 })
 
