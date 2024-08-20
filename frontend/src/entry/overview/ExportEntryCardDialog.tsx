@@ -7,6 +7,7 @@ import Image from 'next/image'
 import logo from 'public/horizontal-dark.png'
 import { useMemo, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
+import { Transition } from 'src/common/Transition'
 import { ArrayFieldTemplate, DescriptionFieldTemplate, ObjectFieldTemplate } from 'src/Form/FormTemplates'
 import { EntryInterface, SplitSchemaNoRender } from 'types/types'
 import { widgets } from 'utils/formUtils'
@@ -60,7 +61,7 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
   }, [splitSchema.steps])
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md'>
+    <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth='md' TransitionComponent={Transition}>
       <DialogContent ref={modelCardContentRef}>
         <Stack spacing={2} divider={<Divider />}>
           <Stack direction='row' alignItems='center'>

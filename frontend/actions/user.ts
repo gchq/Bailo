@@ -4,7 +4,7 @@ import useSWR from 'swr'
 import {
   EntityObject,
   EntryInterface,
-  TokenActionKeys,
+  TokenAction,
   TokenInterface,
   TokenScopeKeys,
   User,
@@ -12,6 +12,8 @@ import {
 } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
+
+const emptyEntityList = []
 
 export function useListUsers(q: string) {
   const { data, isLoading, error, mutate } = useSWR<
@@ -30,7 +32,7 @@ export function useListUsers(q: string) {
 
   return {
     mutateUsers: mutate,
-    users: data ? data.results : [],
+    users: data ? data.results : emptyEntityList,
     isUsersLoading: isLoading,
     isUsersError: error,
   }
@@ -73,12 +75,14 @@ interface GetUserTokensResponse {
   tokens: TokenInterface[]
 }
 
+const emptyTokenList = []
+
 export function useGetUserTokens() {
   const { data, isLoading, error, mutate } = useSWR<GetUserTokensResponse, ErrorInfo>('/api/v2/user/tokens', fetcher)
 
   return {
     mutateTokens: mutate,
-    tokens: data?.tokens || [],
+    tokens: data?.tokens || emptyTokenList,
     isTokensLoading: isLoading,
     isTokensError: error,
   }
@@ -88,7 +92,7 @@ export function postUserToken(
   description: string,
   scope: TokenScopeKeys,
   modelIds: EntryInterface['id'][],
-  actions: TokenActionKeys[],
+  actions: string[],
 ) {
   return fetch('/api/v2/user/tokens', {
     method: 'post',
@@ -124,4 +128,23 @@ export function patchCurrentUserSettings(diff: Partial<UserSettings>) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(diff),
   })
+}
+export interface GetUserTokenListResponse {
+  tokenActionMap: TokenAction[]
+}
+
+const emptyTokenActionList = []
+
+export function useGetUserTokenList() {
+  const { data, isLoading, error, mutate } = useSWR<GetUserTokenListResponse, ErrorInfo>(
+    '/api/v2/user/tokens/list',
+    fetcher,
+  )
+
+  return {
+    mutateTokenActions: mutate,
+    tokenActions: data?.tokenActionMap || emptyTokenActionList,
+    isTokenActionsLoading: isLoading,
+    isTokenActionsError: error,
+  }
 }
