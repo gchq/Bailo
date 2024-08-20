@@ -101,7 +101,12 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
             renderTags={(value, getTagProps) =>
               value.map((option, index) => (
                 <Box key={option.name} sx={{ maxWidth: '200px' }}>
-                  <Chip {...getTagProps({ index })} sx={{ textOverflow: 'ellipsis' }} label={option.name} />
+                  <Chip
+                    {...getTagProps({ index })}
+                    color='secondary'
+                    sx={{ textOverflow: 'ellipsis' }}
+                    label={option.name}
+                  />
                 </Box>
               ))
             }
@@ -144,6 +149,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
                     dataCards.find((dataCard) => dataCard.id === currentDataCardId)?.name ||
                     'Unable to find data card name'
                   }
+                  color='secondary'
                   key={currentDataCardId}
                   onClick={() => router.push(`/data-card/${currentDataCardId}`)}
                   sx={{ width: 'fit-content' }}

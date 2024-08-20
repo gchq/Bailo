@@ -131,6 +131,9 @@ export const lightTheme = createTheme({
 })
 
 export const darkTheme = createTheme({
+  components: {
+    ...defaultComponentOverrides,
+  },
   palette: {
     mode: 'dark',
     navbarGradient: false,

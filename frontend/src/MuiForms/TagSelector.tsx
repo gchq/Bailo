@@ -35,7 +35,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             options={[]}
             renderTags={(tagValue: string[], getTagProps) =>
               tagValue.map((option: string, index: number) => (
-                <Chip variant='outlined' label={option} {...getTagProps({ index })} key={option} />
+                <Chip variant='outlined' color='primary' label={option} {...getTagProps({ index })} key={option} />
               ))
             }
             renderInput={(params) => (
@@ -71,7 +71,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             <Typography
               sx={{
                 fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
+                color: theme.palette.text.primary,
               }}
             >
               Unanswered
@@ -80,7 +80,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {value.map((tag) => (
-                <Chip label={tag} key={tag} sx={{ width: 'fit-content' }} />
+                <Chip label={tag} color='secondary' key={tag} sx={{ width: 'fit-content' }} />
               ))}
             </Stack>
           </Box>
