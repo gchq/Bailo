@@ -138,11 +138,10 @@ export const darkTheme = createTheme({
       main: '#b8b8b8',
     },
     primary: {
-      main: '#f37f58',
-      contrastText: '#fff',
+      main: '#ccbbe2;',
     },
     secondary: {
-      main: '#ecc3b1',
+      main: '#d62560',
     },
     error: {
       main: red.A200,
@@ -173,89 +172,6 @@ export const darkTheme = createTheme({
     },
     topNavigation: {
       main: '#fff',
-    },
-  },
-  components: {
-    ...defaultComponentOverrides,
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiListItem: {
-      styleOverrides: {
-        button: {
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiListItemButton: {
-      styleOverrides: {
-        root: {
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-            borderRight: 'solid',
-            borderWidth: '2px',
-            borderColor: '#f7a4c0',
-          },
-          '&.Mui-selected': {
-            borderRight: 'solid',
-            borderWidth: '2px',
-            borderColor: '#d62560',
-          },
-        },
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        outlined: {
-          color: '#fff',
-        },
-        contained: {
-          color: '#fff',
-        },
-        text: {
-          color: '#fff',
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiAccordionSummary: {
-      styleOverrides: {
-        root: {
-          color: '#fff',
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiChip: {
-      styleOverrides: {
-        filled: {
-          color: 'black',
-        },
-        deleteIcon: {
-          color: '#3f3f3f',
-        },
-      },
     },
   },
 })

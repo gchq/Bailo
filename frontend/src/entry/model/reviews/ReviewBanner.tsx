@@ -36,7 +36,7 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
   return (
     <Paper
       sx={{
-        color: 'white',
+        color: theme.palette.mode === 'light' ? 'white' : 'black',
         backgroundColor: theme.palette.primary.main,
         py: 1,
         display: 'flex',
@@ -59,7 +59,13 @@ export default function ReviewBanner({ release, accessRequest }: ReviewBannerPro
           <ReviewIcon />
           <Typography>Ready for review</Typography>
         </Stack>
-        <Button variant='outlined' color='inherit' size='small' onClick={handleReviewOnClick} data-test='reviewButton'>
+        <Button
+          variant='contained'
+          color={theme.palette.mode === 'light' ? 'primary' : 'secondary'}
+          size='small'
+          onClick={handleReviewOnClick}
+          data-test='reviewButton'
+        >
           Review
         </Button>
       </Stack>
