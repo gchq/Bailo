@@ -71,7 +71,7 @@ class Model(Entry):
             name=name, kind=EntryKind.MODEL, description=description, team_id=team_id, visibility=visibility
         )
         model_id = res["model"]["id"]
-        logger.info(f"Model successfully created on server with ID %s.", model_id)
+        logger.info("Model successfully created on server with ID {model_id}.")
 
         model = cls(
             client=client,
@@ -188,12 +188,12 @@ class Model(Entry):
             raise BailoException("No MLFlow model found. Are you sure the name/alias/version provided is correct?")
 
         name = sel_model.name
-        description = sel_model.description + " Imported from MLFlow."
+        description = str(sel_model.description) + " Imported from MLFlow."
         bailo_res = client.post_model(
             name=name, kind=EntryKind.MODEL, description=description, team_id=team_id, visibility=visibility
         )
         model_id = bailo_res["model"]["id"]
-        logger.info(f"MLFlow model successfully imported to Bailo with ID %s.", model_id)
+        logger.info("MLFlow model successfully imported to Bailo with ID {model_id}.")
 
         model = cls(
             client=client,
@@ -287,7 +287,7 @@ class Model(Entry):
         for release in res["releases"]:
             releases.append(self.get_release(version=release["semver"]))
 
-        logger.info(f"Successfully retrieved all releases for model %s.", self.model_id)
+        logger.info("Successfully retrieved all releases for model {self.model_id}.")
 
         return releases
 
@@ -305,7 +305,7 @@ class Model(Entry):
         :return: Release object
         """
         releases = self.get_releases()
-        if releases == []:
+        if not releases:
             raise BailoException("This model has no releases.")
 
         latest_release = max(releases)
@@ -320,7 +320,7 @@ class Model(Entry):
         """
         res = self.client.get_all_images(model_id=self.model_id)
 
-        logger.info(f"Images for %s retreived successfully.", self.model_id)
+        logger.info("Images for {self.model_id} retreived successfully.")
 
         return res["images"]
 
@@ -457,7 +457,7 @@ class Experiment:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
         client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
-        runs = client.search_runs(experiment_id)
+        runs = client.search_runs([experiment_id])
         if len(runs):
             logger.info(
                 f"Successfully retrieved MLFlow experiment %s from tracking server. %d were found.",
@@ -478,7 +478,7 @@ class Experiment:
             run_id = info.run_id
             status = info.status
             datasets = inputs.dataset_inputs
-            datasets_str = [dataset.name for dataset in datasets]
+            datasets_str = [dataset.__str__ for dataset in datasets]
 
             artifacts = []
 
