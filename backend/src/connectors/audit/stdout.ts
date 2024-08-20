@@ -52,9 +52,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
+  onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface) {
     this.checkEventType(AuditInfo.CreateModelCard, req)
-    const event = this.generateEvent(req, { modelId, version: modelCard.version })
+    const event = this.generateEvent(req, { model, version: modelCard.version })
     req.log.info(event, req.audit.description)
   }
 
