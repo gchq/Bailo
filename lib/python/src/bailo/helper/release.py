@@ -4,7 +4,7 @@ import os
 import fnmatch
 import shutil
 from io import BytesIO
-from typing import Any
+from typing import Any, IO
 import logging
 import warnings
 from tqdm import tqdm
@@ -188,7 +188,7 @@ class Release:
 
         return res
 
-    def download_all(self, path: str = os.getcwd(), include: list | str = None, exclude: list | str = None):
+    def download_all(self, path: str = os.getcwd(), include: list | str = "", exclude: list | str = ""):
         """Writes all files to disk given a local directory.
 
         :param include: List or string of fnmatch statements for file names to include, defaults to None
@@ -247,7 +247,7 @@ class Release:
                 path = f"{name}.zip"
                 name = path
 
-            data = open(path, "rb")
+            data: IO = open(path, "rb")
 
             if is_zip:
                 os.remove(path)

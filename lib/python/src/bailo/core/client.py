@@ -35,15 +35,16 @@ class Client:
         :param visibility: Enum to define model visibility (e.g public or private)
         :return: JSON response object
         """
+        _visibility: str = "public"
         if visibility is not None:
-            visibility = str(visibility)
+            _visibility = str(visibility)
 
         filtered_json = filter_none(
             {
                 "name": name,
                 "kind": kind,
                 "description": description,
-                "visibility": visibility,
+                "visibility": _visibility,
                 "teamId": team_id,
             }
         )
@@ -454,12 +455,12 @@ class Client:
         :param version: Model version, defaults to None
         :return: JSON response object.
         """
-        active = repr(active).lower()
+        _active = repr(active).lower()
 
         return self.agent.get(
             f"{self.url}/v2/reviews",
             params={
-                "active": active,
+                "active": _active,
                 "modelId": model_id,
                 "semver": version,
             },

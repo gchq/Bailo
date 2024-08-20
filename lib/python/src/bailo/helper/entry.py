@@ -97,7 +97,7 @@ class Entry:
         res = self.client.get_model_card(model_id=self.id, version=version)
         self.__unpack_card(res["modelCard"])
 
-        logger.info(f"Card version %s for ID %s successfully retrieved.", version, self.id)
+        logger.info(f"Card version {version} for ID {self.id} successfully retrieved.")
 
     def get_roles(self):
         """Get all roles for the entry.

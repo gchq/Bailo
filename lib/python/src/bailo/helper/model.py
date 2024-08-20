@@ -214,11 +214,11 @@ class Model(Entry):
                 )
 
             mlflow_run = mlflow_client.get_run(run_id)
-            artifact_uri = mlflow_run.info.artifact_uri
+            artifact_uri: str = str(mlflow_run.info.artifact_uri)
             if artifact_uri is None:
                 raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transfered.")
 
-            if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)):
+            if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:
                 temp_dir = os.path.join(tempfile.gettempdir(), "mlflow_model")
                 mlflow_dir = os.path.join(temp_dir, f"mlflow_{run_id}")
                 mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
@@ -416,7 +416,7 @@ class Experiment:
         self.raw.append(self.run_data)
 
         if not is_mlflow:
-            logger.info(f"Bailo tracking run %d.", self.run)
+            logger.info(f"Bailo tracking run {self.run}.")
 
     def log_params(self, params: dict[str, Any]):
         """Logs parameters to the current run.
@@ -474,25 +474,22 @@ class Experiment:
             info = run.info
             inputs = run.inputs
 
-            artifact_uri = info.artifact_uri
+            artifact_uri: str = str(info.artifact_uri)
             run_id = info.run_id
             status = info.status
             datasets = inputs.dataset_inputs
-            datasets_str = [dataset.__str__ for dataset in datasets]
+            datasets_str = [dataset.dataset.name for dataset in datasets]
 
             artifacts = []
-
             # MLFlow run must be status FINISHED
             if status != "FINISHED":
                 continue
 
-            if len(mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri)):
+            if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:
                 mlflow_dir = os.path.join(self.temp_dir, f"mlflow_{run_id}")
                 mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
                 artifacts.append(mlflow_dir)
-                logger.info(
-                    f"Successfully downloaded artifacts for MLFlow experiment %s to %s.", experiment_id, mlflow_dir
-                )
+                logger.info(f"Successfully downloaded artifacts for MLFlow experiment {experiment_id} to {mlflow_dir}.")
 
             self.start_run(is_mlflow=True)
             self.log_params(data.params)
@@ -535,6 +532,7 @@ class Experiment:
                 "Either select_by (e.g. 'accuracy MIN|MAX') or run_id is required to publish an experiment run."
             )
 
+        sel_run: dict
         if (select_by is not None) and (run_id is None):
             sel_run = self.__select_run(select_by=select_by)
 
@@ -586,7 +584,7 @@ class Experiment:
 
         logger.info(f"Successfully published experiment run %s to model %s.", str(run_id), self.model.model_id)
 
-    def __select_run(self, select_by: str):
+    def __select_run(self, select_by: str) -> dict:
         # Parse target and order from select_by string
         select_by_split = select_by.split(" ")
         if len(select_by_split) != 2:
@@ -614,5 +612,5 @@ class Experiment:
         ordered_runs = sorted(runs, key=lambda run: run["target"])
         if order_str == "MIN":
             return ordered_runs[0]
-        if order_str == "MAX":
+        else:  # MAX
             return ordered_runs[-1]
