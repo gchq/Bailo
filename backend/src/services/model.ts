@@ -5,12 +5,15 @@ import { ModelAction, ModelActionKeys } from '../connectors/authorisation/action
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
-import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ModelCardRevisionModel, {
+  ModelCardRevisionDoc,
+  ModelCardRevisionInterface,
+} from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
-import { BadReq, Forbidden, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { NotImplemented } from '../utils/result.js'
 import { findSchemaById } from './schema.js'
@@ -356,4 +359,67 @@ export async function createModelCardFromTemplate(
   _schemaId: string,
 ): Promise<ModelCardRevisionDoc> {
   throw NotImplemented({}, 'This feature is not yet implemented')
+}
+
+export async function saveImportedModelCard(modelCard: ModelCardRevisionInterface, sourceModelId: string) {
+  const model = await Model.findOne({
+    id: modelCard.modelId,
+  })
+  if (!model) {
+    throw NotFound(`The mirrored model ID found in the notification cannot be found.`, { modelId: modelCard.modelId })
+  }
+  if (!model.settings.mirror.sourceModelId) {
+    throw InternalError('Cannot import model card to non mirrored model.')
+  }
+  if (model.settings.mirror.sourceModelId !== sourceModelId) {
+    throw InternalError('The source model ID of the mirrored model does not match the model Id of the imported model', {
+      sourceModelId: model.settings.mirror.sourceModelId,
+      importedModelId: sourceModelId,
+    })
+  }
+
+  const schema = await findSchemaById(modelCard.schemaId)
+  try {
+    new Validator().validate(modelCard.metadata, schema.jsonSchema, { throwAll: true, required: true })
+  } catch (error) {
+    if (isValidatorResultError(error)) {
+      throw BadReq('Model metadata could not be validated against the schema.', {
+        schemaId: modelCard.schemaId,
+        validationErrors: error.errors,
+      })
+    }
+    throw error
+  }
+
+  return await ModelCardRevisionModel.findOneAndUpdate(
+    { modelId: modelCard.modelId, version: modelCard.version },
+    modelCard,
+    {
+      upsert: true,
+    },
+  )
+}
+
+export async function setLatestImportedModelCard(modelId: string) {
+  // Add check for mirrored model
+  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }).sort({ version: -1 }).limit(1)
+  await ModelModel.updateOne({ id: modelId }, { $set: { card: latestModelCard } })
+}
+
+export function isModelCardRevision(data: unknown): data is ModelCardRevisionInterface {
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+  // Hard to debug
+  if (
+    !('modelId' in data) ||
+    !('schemaId' in data) ||
+    !('version' in data) ||
+    !('createdBy' in data) ||
+    !('updatedAt' in data) ||
+    !('createdAt' in data)
+  ) {
+    return false
+  }
+  return true
 }

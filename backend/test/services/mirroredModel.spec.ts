@@ -3,7 +3,22 @@ import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
-import { exportModel } from '../../src/services/mirroredModel.js'
+import { exportModel, importModel } from '../../src/services/mirroredModel.js'
+
+const fflateMock = vi.hoisted(() => ({
+  unzipSync: vi.fn(),
+}))
+vi.mock('fflate', async () => fflateMock)
+
+const bufferMock = vi.hoisted(() => ({
+  unzipSync: vi.fn(),
+}))
+vi.mock('node:buffer', async () => bufferMock)
+
+const fetchMock = vi.hoisted(() => ({
+  default: vi.fn(() => ({ ok: true, body: vi.fn(), text: vi.fn() })),
+}))
+vi.mock('node-fetch', async () => fetchMock)
 
 const authMock = vi.hoisted(() => ({
   model: vi.fn(() => ({ success: true })),
@@ -49,6 +64,9 @@ vi.mock('../../src/services/log.js', async () => ({
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } } })),
   getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(), version: 123 }]),
+  setLatestImportedModelCard: vi.fn(),
+  saveImportedModelCard: vi.fn(),
+  isModelCardRevision: vi.fn(() => true),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
@@ -292,5 +310,184 @@ describe('services > mirroredModel', () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
     expect(logMock.error).toBeCalledWith(expect.any(Object), 'Failed to retrieve stream from temporary S3 location.')
+  })
+
+  test('importModel > missing custom properties', async () => {
+    const result = importModel({} as UserInterface, {
+      jobId: '',
+      correlationId: '',
+      flowId: '',
+      jobReference: '',
+      jobTimestamp: '',
+      classification: '',
+      expiryTimestamp: '',
+      payloadUrl: '',
+      processedFilesCount: 123,
+      processedFiles: [{ name: '', path: '', status: '' }],
+    })
+
+    await expect(result).rejects.toThrowError('Missing mirrored model ID.')
+  })
+
+  test('importModel > missing mirrored model Id', async () => {
+    const result = importModel({} as UserInterface, {
+      jobId: '',
+      correlationId: '',
+      flowId: '',
+      jobReference: '',
+      jobTimestamp: '',
+      classification: '',
+      expiryTimestamp: '',
+      payloadUrl: '',
+      processedFilesCount: 123,
+      processedFiles: [{ name: '', path: '', status: '' }],
+      customProperties: {},
+    })
+
+    await expect(result).rejects.toThrowError('Missing mirrored model ID.')
+  })
+
+  test('importModel > mirrored model Id empty', async () => {
+    const result = importModel({} as UserInterface, {
+      jobId: '',
+      correlationId: '',
+      flowId: '',
+      jobReference: '',
+      jobTimestamp: '',
+      classification: '',
+      expiryTimestamp: '',
+      payloadUrl: '',
+      processedFilesCount: 123,
+      processedFiles: [{ name: '', path: '', status: '' }],
+      customProperties: { mirroredModelId: '' },
+    })
+
+    await expect(result).rejects.toThrowError('Missing mirrored model ID.')
+  })
+
+  test('importModel > error when getting zip file', async () => {
+    fetchMock.default.mockRejectedValueOnce('a')
+    const result = importModel({} as UserInterface, {
+      jobId: '',
+      correlationId: '',
+      flowId: '',
+      jobReference: '',
+      jobTimestamp: '',
+      classification: '',
+      expiryTimestamp: '',
+      payloadUrl: '',
+      processedFilesCount: 123,
+      processedFiles: [{ name: '', path: '', status: '' }],
+      customProperties: { mirroredModelId: 'abc' },
+    })
+
+    await expect(result).rejects.toThrowError('Unable to get the file.')
+  })
+
+  test('importModel > non 200 response when getting zip file', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: false, body: vi.fn(), text: vi.fn() })
+    const result = importModel({} as UserInterface, {
+      jobId: '',
+      correlationId: '',
+      flowId: '',
+      jobReference: '',
+      jobTimestamp: '',
+      classification: '',
+      expiryTimestamp: '',
+      payloadUrl: '',
+      processedFilesCount: 123,
+      processedFiles: [{ name: '', path: '', status: '' }],
+      customProperties: { mirroredModelId: 'abc' },
+    })
+
+    await expect(result).rejects.toThrowError('Unable to get zip file.')
+  })
+
+  test('importModel > file missing from body', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, text: vi.fn() } as any)
+    const result = importModel({} as UserInterface, {
+      jobId: '',
+      correlationId: '',
+      flowId: '',
+      jobReference: '',
+      jobTimestamp: '',
+      classification: '',
+      expiryTimestamp: '',
+      payloadUrl: '',
+      processedFilesCount: 123,
+      processedFiles: [{ name: '', path: '', status: '' }],
+      customProperties: { mirroredModelId: 'abc' },
+    })
+
+    await expect(result).rejects.toThrowError('Unable to get the file.')
+  })
+
+  test('importModel > save each imported model card', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockReturnValueOnce({
+      file1: Buffer.from(JSON.stringify({ modelId: 'abc' })),
+      file2: Buffer.from(JSON.stringify({ modelId: 'abc' })),
+    })
+    await importModel({} as UserInterface, {
+      jobId: '',
+      correlationId: '',
+      flowId: '',
+      jobReference: '',
+      jobTimestamp: '',
+      classification: '',
+      expiryTimestamp: '',
+      payloadUrl: '',
+      processedFilesCount: 123,
+      processedFiles: [{ name: '', path: '', status: '' }],
+      customProperties: { mirroredModelId: 'abc' },
+    })
+
+    await expect(modelMocks.saveImportedModelCard.mock.calls.length).toBe(2)
+  })
+
+  test('importModel > cannot parse into model card', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockReturnValueOnce({
+      file1: Buffer.from(JSON.stringify({})),
+    })
+    modelMocks.isModelCardRevision.mockReturnValueOnce(false)
+    const result = importModel({} as UserInterface, {
+      jobId: '',
+      correlationId: '',
+      flowId: '',
+      jobReference: '',
+      jobTimestamp: '',
+      classification: '',
+      expiryTimestamp: '',
+      payloadUrl: '',
+      processedFilesCount: 123,
+      processedFiles: [{ name: '', path: '', status: '' }],
+      customProperties: { mirroredModelId: 'abc' },
+    })
+
+    await expect(result).rejects.toThrowError(/^Data cannot be converted into a model card./)
+  })
+
+  test('importModel > different model IDs in zip files', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockReturnValueOnce({
+      file1: Buffer.from(JSON.stringify({ modelId: 'abc' })),
+      file2: Buffer.from(JSON.stringify({ modelId: 'cba' })),
+    })
+    const result = importModel({} as UserInterface, {
+      jobId: '',
+      correlationId: '',
+      flowId: '',
+      jobReference: '',
+      jobTimestamp: '',
+      classification: '',
+      expiryTimestamp: '',
+      payloadUrl: '',
+      processedFilesCount: 123,
+      processedFiles: [{ name: '', path: '', status: '' }],
+      customProperties: { mirroredModelId: 'abc' },
+    })
+
+    await expect(result).rejects.toThrowError(/^Zip file contains model cards for multiple models./)
   })
 })
