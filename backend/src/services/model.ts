@@ -354,6 +354,9 @@ export async function createModelCardFromTemplate(
     throw BadReq('The model and template ID must be different', { modelId, templateId })
   }
   const model = await getModelById(user, modelId)
+  if (model.card?.schemaId) {
+    throw BadReq('This model already has a model card.', { modelId })
+  }
   checkModelRestriction(model)
   const template = await getModelById(user, templateId)
   // Check to make sure user can access the template. We already check for the model auth later on in _setModelCard
