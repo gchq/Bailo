@@ -8,6 +8,14 @@ export const ModelAction = {
 } as const
 export type ModelActionKeys = (typeof ModelAction)[keyof typeof ModelAction]
 
+export const ModelCardAction = {
+  Create: 'model_card:create',
+  View: 'model_card:view',
+  Update: 'model_card:update',
+  Write: 'model_card:write',
+} as const
+export type ModelCardActionKeys = (typeof ModelCardAction)[keyof typeof ModelCardAction]
+
 export const ReleaseAction = {
   Create: 'release:create',
   View: 'release:view',

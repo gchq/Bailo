@@ -1,6 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ModelAction, ReleaseAction, SchemaAction } from '../../../src/connectors/authorisation/actions.js'
+import {
+  ModelAction,
+  ModelCardAction,
+  ReleaseAction,
+  SchemaAction,
+} from '../../../src/connectors/authorisation/actions.js'
 import { BasicAuthorisationConnector } from '../../../src/connectors/authorisation/base.js'
 import { ModelDoc } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
@@ -112,6 +117,26 @@ describe('connectors > authorisation > base', () => {
         visibility: 'private',
       } as ModelDoc,
       ModelAction.Create,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      success: true,
+    })
+  })
+
+  test('modelCard > private model with contributor roles', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
+
+    const result = await connector.modelCard(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'private',
+      } as ModelDoc,
+      ModelCardAction.Create,
     )
 
     expect(result).toStrictEqual({

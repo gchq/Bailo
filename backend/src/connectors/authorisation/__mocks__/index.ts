@@ -7,6 +7,9 @@ const auth = {
   model: vi.fn(() => ({ success: true })),
   models: vi.fn(() => [{ success: true }]),
 
+  modelCard: vi.fn(() => [{ success: true }]),
+  modelCards: vi.fn(() => [{ success: true }]),
+
   schema: vi.fn(() => ({ success: true })),
   schemas: vi.fn(() => [{ success: true }]),
 
