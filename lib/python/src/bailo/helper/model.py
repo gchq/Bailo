@@ -390,7 +390,7 @@ class Experiment:
         self.raw = []
         self.run = -1
         self.temp_dir = os.path.join(tempfile.gettempdir(), "bailo_runs")
-        self.uploadDone = False
+        self.published = False
 
     @classmethod
     def create(
@@ -520,6 +520,8 @@ class Experiment:
         ..note:: mc_loc is dependent on the model card schema being used
         ..warning:: User must specify either run_id or select_by, otherwise the code will error
         """
+        if self.published:
+            raise BailoException("This experiment has already been published.")
         mc = self.model.model_card
         if mc is None:
             raise BailoException("Model card needs to be populated before publishing an experiment.")
@@ -576,12 +578,9 @@ class Experiment:
                 str(release_new_version),
                 self.model.model_id,
             )
-            if not self.uploadDone:
-                for artifact in artifacts:
-                    release_new.upload(path=artifact)
-                self.uploadDone = True
-            else:
-                raise BailoException("Experiment data already uploaded.")
+            for artifact in artifacts:
+                release_new.upload(path=artifact)
+            self.published = True
 
             if os.path.exists(self.temp_dir) and os.path.isdir(self.temp_dir):
                 shutil.rmtree(self.temp_dir)
