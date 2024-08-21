@@ -56,7 +56,6 @@ class Client:
 
     def get_models(
         self,
-        kind: EntryKind = EntryKind.MODEL,
         task: str | None = None,
         libraries: list[str] | None = None,
         filters: list[str] | None = None,
@@ -64,7 +63,6 @@ class Client:
     ):
         """Find and returns a list of models based on provided search terms.
 
-        :param kind: Either a Model or a Datacard
         :param task: Model task (e.g. image classification), defaults to None
         :param libraries: Model library (e.g. TensorFlow), defaults to None
         :param filters: Custom filters, defaults to None

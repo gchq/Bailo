@@ -4,9 +4,8 @@ import os
 import fnmatch
 import shutil
 from io import BytesIO
-from typing import Any, IO
+from typing import Any
 import logging
-import warnings
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
@@ -228,7 +227,7 @@ class Release:
             file_path = os.path.join(path, file)
             self.download(filename=file, path=file_path)
 
-    def upload(self, path: str, data: BytesIO | None = None) -> str:
+    def upload(self, path: str, data: BytesIO | None = None) -> str:  # type: ignore
         """Upload a file to the release.
 
         :param path: The path, or name of file or directory to be uploaded
@@ -239,22 +238,29 @@ class Release:
         """
         logger.info(f"Uploading file(s) to version %s of %s...", str(self.version), self.model_id)
         name = os.path.split(path)[-1]
+        to_close = False
 
         if data is None:
-            if is_zip := os.path.isdir(path):
+            # If we havent passed in a file object, we must create one from the path.
+            zip_required = os.path.isdir(path)
+            if zip_required:
                 logger.info(f"Given path (%s) is a directory. This will be converted to a zip file for upload.", path)
                 shutil.make_archive(name, "zip", path)
                 path = f"{name}.zip"
                 name = path
 
-            data: IO = open(path, "rb")
+            # TODO maybe this should be a `tempfile.NamedTemporaryFile`
+            data: BytesIO = open(path, "rb")  # type: ignore
+            to_close = True
 
-            if is_zip:
+            # TODO this would be removed with a tempfile approach
+            if zip_required:
                 os.remove(path)
 
+        # cache the current file position then move to the end and get the size before moving it back.
         old_file_position = data.tell()
         data.seek(0, os.SEEK_END)
-        size = data.tell()
+        size: int = data.tell()
         data.seek(old_file_position, os.SEEK_SET)
 
         if NO_COLOR:
@@ -265,12 +271,12 @@ class Release:
         with tqdm(
             total=size, unit="B", unit_scale=True, unit_divisor=BLOCK_SIZE, postfix=f"uploading {name}", colour=colour
         ) as t:
-            wrapped_buffer = CallbackIOWrapper(t.update, data, "read")
-            res = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()
+            wrapped_buffer: BytesIO = CallbackIOWrapper(t.update, data, "read")  # type: ignore
+            res: dict[str, Any] = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()
 
         self.files.append(res["file"]["id"])
         self.update()
-        if not isinstance(data, BytesIO):
+        if to_close:
             data.close()
         logger.info(f"Upload of file %s to version %s of %s complete.", name, str(self.version), self.model_id)
 

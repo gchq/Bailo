@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class Agent:
     """Base API Agent for talking with Bailo.
-
+    
     Wraps each request in an exception handler that maps API errors to Python Bailo errors, among status codes less than 400.
     """
 

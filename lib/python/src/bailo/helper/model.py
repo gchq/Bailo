@@ -129,7 +129,7 @@ class Model(Entry):
         :param search: String to be located in model cards, defaults to ""
         :return: List of model objects
         """
-        res = client.get_models(kind=EntryKind.MODEL, task=task, libraries=libraries, filters=filters, search=search)
+        res = client.get_models(task=task, libraries=libraries, filters=filters, search=search)
         models = []
 
         for model in res["models"]:
