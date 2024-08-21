@@ -1,5 +1,13 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`routes > model > postModel > schema > 200 > ok 1`] = `
+{
+  "card": {
+    "_id": "test",
+  },
+}
+`;
+
 exports[`routes > model > postModel > schema > 400 > no description 1`] = `
 {
   "error": {
@@ -20,5 +28,21 @@ exports[`routes > model > postModel > schema > 400 > no description 1`] = `
     "message": "Path: body.schemaId - Message: Must specify schema id within the body",
     "name": "Bailo Error",
   },
+}
+`;
+
+exports[`routes > model > postModel > schema > audit > expected call 1`] = `
+{
+  "settings": {
+    "mirror": {
+      "sourceModelId": "",
+    },
+  },
+}
+`;
+
+exports[`routes > model > postModel > schema > audit > expected call 2`] = `
+{
+  "_id": "test",
 }
 `;
