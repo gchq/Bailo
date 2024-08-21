@@ -390,6 +390,7 @@ class Experiment:
         self.raw = []
         self.run = -1
         self.temp_dir = os.path.join(tempfile.gettempdir(), "bailo_runs")
+        self.uploadDone = False
 
     @classmethod
     def create(
@@ -575,9 +576,12 @@ class Experiment:
                 str(release_new_version),
                 self.model.model_id,
             )
-
-            for artifact in artifacts:
-                release_new.upload(path=artifact)
+            if not self.uploadDone:
+                for artifact in artifacts:
+                    release_new.upload(path=artifact)
+                self.uploadDone = True
+            else:
+                raise BailoException("Experiment data already uploaded.")
 
             if os.path.exists(self.temp_dir) and os.path.isdir(self.temp_dir):
                 shutil.rmtree(self.temp_dir)

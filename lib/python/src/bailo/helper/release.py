@@ -237,23 +237,22 @@ class Release:
         ..note:: If path provided is a directory, it will be uploaded as a zip
         """
         logger.info(f"Uploading file(s) to version %s of %s...", str(self.version), self.model_id)
-        name = os.path.split(path)[-1]
-        to_close = False
 
+        to_close = False
         if data is None:
             # If we havent passed in a file object, we must create one from the path.
-            zip_required = os.path.isdir(path)
+            # Check if file exists, if it does the zip required
+            zip_required = not os.path.isfile(path)
+
             if zip_required:
+                name = os.path.split(path)[-1]
                 logger.info(f"Given path (%s) is a directory. This will be converted to a zip file for upload.", path)
                 shutil.make_archive(name, "zip", path)
                 path = f"{name}.zip"
                 name = path
-
-            # TODO maybe this should be a `tempfile.NamedTemporaryFile`
             data: BytesIO = open(path, "rb")  # type: ignore
             to_close = True
 
-            # TODO this would be removed with a tempfile approach
             if zip_required:
                 os.remove(path)
 
@@ -278,6 +277,7 @@ class Release:
         self.update()
         if to_close:
             data.close()
+        self.isUploaded = True
         logger.info(f"Upload of file %s to version %s of %s complete.", name, str(self.version), self.model_id)
 
         return res["file"]["id"]
