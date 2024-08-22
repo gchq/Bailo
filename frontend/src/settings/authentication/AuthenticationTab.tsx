@@ -29,7 +29,7 @@ export default function AuthenticationTab() {
   const tokenList = useMemo(
     () =>
       tokens.length > 0 && !isTokensLoading ? (
-        tokens.map((token, index) => (
+        tokens.reverse().map((token, index) => (
           <Fragment key={token.accessKey}>
             <Stack direction='row' alignItems='center' justifyContent='space-between'>
               <Typography>{token.description}</Typography>
