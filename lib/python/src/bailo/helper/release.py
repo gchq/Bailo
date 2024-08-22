@@ -240,13 +240,13 @@ class Release:
 
         to_close = False
         # If no datastream object provided
+        name = os.path.split(path)[-1]
         if data is None:
             # If we havent passed in a file object, we must create one from the path.
             # Check if file exists, if it does the zip required
             zip_required = not os.path.isfile(path)
 
             if zip_required:
-                name = os.path.split(path)[-1]
                 logger.info(f"Given path (%s) is a directory. This will be converted to a zip file for upload.", path)
                 shutil.make_archive(name, "zip", path)
                 path = f"{name}.zip"
