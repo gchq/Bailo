@@ -520,6 +520,8 @@ class Experiment:
         ..note:: mc_loc is dependent on the model card schema being used
         ..warning:: User must specify either run_id or select_by, otherwise the code will error
         """
+
+        # Check if already published, can only published once
         if self.published:
             raise BailoException("This experiment has already been published.")
         mc = self.model.model_card

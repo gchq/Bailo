@@ -239,6 +239,7 @@ class Release:
         logger.info(f"Uploading file(s) to version %s of %s...", str(self.version), self.model_id)
 
         to_close = False
+        # If no datastream object provided
         if data is None:
             # If we havent passed in a file object, we must create one from the path.
             # Check if file exists, if it does the zip required
@@ -250,6 +251,7 @@ class Release:
                 shutil.make_archive(name, "zip", path)
                 path = f"{name}.zip"
                 name = path
+
             data: BytesIO = open(path, "rb")  # type: ignore
             to_close = True
 
