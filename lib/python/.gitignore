@@ -131,3 +131,6 @@ dmypy.json
 
 # VS Code
 .vscode/
+
+#resnet
+/docs/notebooks/resnet50_weights.pth

@@ -537,7 +537,7 @@ class Experiment:
                 "Either select_by (e.g. 'accuracy MIN|MAX') or run_id is required to publish an experiment run."
             )
 
-        sel_run: dict
+        sel_run: dict[str, Any]
         if (select_by is not None) and (run_id is None):
             sel_run = self.__select_run(select_by=select_by)
 
