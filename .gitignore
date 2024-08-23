@@ -24,3 +24,4 @@ infrastructure/helm/bailo/local.yaml
 # MLFlow
 mlruns/
 mlartifacts/
+
