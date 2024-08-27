@@ -3,6 +3,8 @@ import useSWR from 'swr'
 import { SchemaInterface, SchemaKindKeys } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
+const emptySchemaList = []
+
 export interface PostSchemaParams {
   id: string
   name: string
@@ -21,7 +23,7 @@ export function useGetSchemas(kind?: SchemaKindKeys) {
 
   return {
     mutateSchemas: mutate,
-    schemas: data ? data.schemas : [],
+    schemas: data ? data.schemas : emptySchemaList,
     isSchemasLoading: isLoading,
     isSchemasError: error,
   }

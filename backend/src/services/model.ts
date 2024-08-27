@@ -1,5 +1,4 @@
 import { Validator } from 'jsonschema'
-import _ from 'lodash'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ModelCardAction } from '../connectors/authorisation/actions.js'
@@ -110,6 +109,7 @@ export async function searchModels(
   search: string,
   task?: string,
   allowTemplating?: boolean,
+  schemaId?: string,
 ): Promise<Array<ModelInterface>> {
   const query: any = {}
 
@@ -131,6 +131,10 @@ export async function searchModels(
 
   if (search) {
     query.$text = { $search: search }
+  }
+
+  if (schemaId) {
+    query['card.schemaId'] = { $all: schemaId }
   }
 
   if (allowTemplating) {
@@ -316,7 +320,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
+  Object.assign(model, modelDiff)
   await model.save()
 
   return model

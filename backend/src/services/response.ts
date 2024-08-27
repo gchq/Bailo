@@ -55,6 +55,7 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   }
 
   response.comment = comment
+  response.commentEditedAt = new Date().toISOString()
   response.save()
 
   return response
