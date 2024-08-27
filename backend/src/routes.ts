@@ -211,6 +211,6 @@ server.get('/api/v2/specification', ...getSpecification)
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/_build/dirhtml')))
+server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)
