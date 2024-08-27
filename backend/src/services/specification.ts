@@ -143,6 +143,7 @@ export const responseInterfaceSchema = z.object({
   role: z.string().optional().openapi({ example: 'mtr' }),
   decision: z.nativeEnum(Decision).optional().openapi({ example: Decision.Approve }),
   comment: z.string().optional().openapi({ example: 'Looks good!' }),
+  commentEditedAt: z.string().optional().openapi({ example: new Date().toISOString() }),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
