@@ -90,6 +90,7 @@ export interface ResponseInterface {
   comment?: string
   role?: string
   reactions: ResponseReaction[]
+  commentEditedAt?: string
 
   createdAt: string
   updatedAt: string

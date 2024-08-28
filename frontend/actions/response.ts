@@ -3,7 +3,7 @@ import useSWR from 'swr'
 import { ReactionKindKeys, ResponseInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
-const emptyArray = []
+const emptyResponseList = []
 
 export function useGetResponses(parentIds: string[]) {
   const queryParams = {
@@ -19,7 +19,7 @@ export function useGetResponses(parentIds: string[]) {
 
   return {
     mutateResponses: mutate,
-    responses: data ? data.responses : emptyArray,
+    responses: data ? data.responses : emptyResponseList,
     isResponsesLoading: isLoading,
     isResponsesError: error,
   }

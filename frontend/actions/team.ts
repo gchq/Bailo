@@ -2,6 +2,8 @@ import useSWR from 'swr'
 import { TeamInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
+const emptyTeamList = []
+
 export const useGetTeams = () => {
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -11,7 +13,7 @@ export const useGetTeams = () => {
   >('/api/v2/teams/', fetcher)
 
   return {
-    teams: data ? data.teams : [],
+    teams: data ? data.teams : emptyTeamList,
     isTeamsLoading: isLoading,
     isTeamsError: error,
     mutateTeams: mutate,

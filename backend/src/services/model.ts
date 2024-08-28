@@ -109,6 +109,7 @@ export async function searchModels(
   search: string,
   task?: string,
   allowTemplating?: boolean,
+  schemaId?: string,
 ): Promise<Array<ModelInterface>> {
   const query: any = {}
 
@@ -130,6 +131,10 @@ export async function searchModels(
 
   if (search) {
     query.$text = { $search: search }
+  }
+
+  if (schemaId) {
+    query['card.schemaId'] = { $all: schemaId }
   }
 
   if (allowTemplating) {

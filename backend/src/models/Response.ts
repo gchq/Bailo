@@ -22,6 +22,7 @@ export interface ResponseInterface {
   comment?: string
   parentId: Schema.Types.ObjectId
   reactions: ResponseReaction[]
+  commentEditedAt?: string
 
   createdAt: string
   updatedAt: string
@@ -58,6 +59,7 @@ const ResponseSchema = new Schema<ResponseInterface>(
         users: [{ type: String }],
       },
     ],
+    commentEditedAt: { type: String },
   },
   {
     timestamps: true,

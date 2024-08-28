@@ -1,24 +1,66 @@
-import { Button, Card, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
+import { Button, Card, List, ListItem, ListItemButton, ListItemText, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import { useListModels } from 'actions/model'
+import { useGetReviewRequestsForUser } from 'actions/review'
 import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { SchemaInterface, SchemaKindKeys } from 'types/types'
+import { EntryKind, SchemaInterface, SchemaKind, SchemaKindKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { camelCaseToTitleCase } from 'utils/stringUtils'
+import { camelCaseToSentenceCase, camelCaseToTitleCase } from 'utils/stringUtils'
 
 interface SchemaDisplayProps {
   schemaKind: SchemaKindKeys
 }
 
+interface ObjectToDelete {
+  primary: string
+  secondary: string
+  link: string
+}
+
 export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const { schemas, isSchemasLoading, isSchemasError, mutateSchemas } = useGetSchemas(schemaKind)
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
+
+  const theme = useTheme()
 
   const [errorMessage, setErrorMessage] = useState('')
   const [open, setOpen] = useState(false)
   const [schemaToBeDeleted, setSchemaToBeDeleted] = useState('')
+  const { models, isModelsLoading, isModelsError } = useListModels(
+    schemaKind === SchemaKind.MODEL ? EntryKind.MODEL : EntryKind.DATA_CARD,
+    [],
+    '',
+    [],
+    '',
+    false,
+    schemaToBeDeleted,
+  )
+  const [objectsToDelete, setObjectsToDelete] = useState<ObjectToDelete[]>([])
+
+  useEffect(() => {
+    switch (schemaKind) {
+      case SchemaKind.ACCESS_REQUEST:
+        return setObjectsToDelete(
+          reviews.map((review) => {
+            return { primary: review.model.name, secondary: review.role, link: `/model/${review.model.id}?tab=access` }
+          }),
+        )
+
+      case SchemaKind.DATA_CARD:
+      case SchemaKind.MODEL:
+        return setObjectsToDelete(
+          models.map((model) => {
+            return { primary: model.name, secondary: model.description, link: `/model/${model.id}` }
+          }),
+        )
+    }
+  }, [reviews, models, schemaKind])
 
   const handleSetSchemaActive = useCallback(
     async (schema: SchemaInterface) => {
@@ -71,12 +113,45 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     [schemas, handleDeleteSchemaButtonOnClick, handleSetSchemaActive],
   )
 
-  if (isSchemasLoading) {
-    return <Loading />
-  }
+  const objectsToDeleteList = useMemo(() => {
+    return objectsToDelete.map((object) => (
+      <Link href={object.link} underline='none' key={object.link}>
+        <ListItemButton>
+          <ListItemText
+            primary={object.primary}
+            secondary={object.secondary}
+            primaryTypographyProps={{
+              sx: {
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                color: theme.palette.primary.main,
+              },
+            }}
+            secondaryTypographyProps={{
+              sx: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+            }}
+          />
+        </ListItemButton>
+      </Link>
+    ))
+  }, [theme.palette.primary.main, objectsToDelete])
 
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />
+  }
+
+  if (isModelsError) {
+    return <MessageAlert message={isModelsError.info.message} severity='error' />
+  }
+
+  if (isReviewsError) {
+    return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  }
+
+  if (isReviewsLoading || isModelsLoading || isSchemasLoading) {
+    return <Loading />
   }
 
   return (
@@ -93,10 +168,10 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
         onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
         onCancel={() => setOpen(false)}
         errorMessage={errorMessage}
-        dialogMessage={
-          'Deleting this schema will break any existing models that are using it. Are you sure you want to do this?'
-        }
-      />
+        dialogMessage={`${models.length > 0 ? `Deleting this schema will break these ${camelCaseToSentenceCase(schemaKind)}s` : `This schema isn't currently used by any ${camelCaseToSentenceCase(schemaKind)}s`}. Are you sure you want to do this?`}
+      >
+        <List sx={{ maxHeight: '100%', overflow: 'auto' }}>{objectsToDeleteList}</List>
+      </ConfirmationDialogue>
     </Card>
   )
 }
