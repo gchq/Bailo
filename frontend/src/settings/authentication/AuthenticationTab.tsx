@@ -9,7 +9,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { TokenInterface } from 'types/types'
-import { formatDateString } from 'utils/dateUtils'
+import { formatDateString, sortByCreatedAtDescending } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function AuthenticationTab() {
@@ -25,35 +25,38 @@ export default function AuthenticationTab() {
     setTokenToDelete(accessKey)
     setIsConfirmationDialogOpen(true)
   }, [])
-
   const tokenList = useMemo(
     () =>
       tokens.length > 0 && !isTokensLoading ? (
-        tokens.reverse().map((token, index) => (
-          <Fragment key={token.accessKey}>
-            <Stack direction='row' alignItems='center' justifyContent='space-between'>
-              <Typography>{token.description}</Typography>
-              <Box pl={1}>
-                <Typography variant='caption' mr={1}>
-                  Created on
-                  <Typography variant='caption' fontWeight='bold'>
-                    {` ${formatDateString(token.createdAt)}`}
+        tokens
+          .sort((token1, token2) => {
+            return sortByCreatedAtDescending(token1, token2)
+          })
+          .map((token, index) => (
+            <Fragment key={token.accessKey}>
+              <Stack direction='row' alignItems='center' justifyContent='space-between'>
+                <Typography>{token.description}</Typography>
+                <Box pl={1}>
+                  <Typography variant='caption' mr={1}>
+                    Created on
+                    <Typography variant='caption' fontWeight='bold'>
+                      {` ${formatDateString(token.createdAt)}`}
+                    </Typography>
                   </Typography>
-                </Typography>
-                <Tooltip title='Delete token'>
-                  <IconButton
-                    color='primary'
-                    onClick={() => handleOpenConfirmationDialog(token.accessKey)}
-                    aria-label='delete access key'
-                  >
-                    <Delete />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Stack>
-            {index !== tokens.length - 1 && <Box sx={{ borderBottom: 1, borderColor: 'divider', my: 2 }} />}
-          </Fragment>
-        ))
+                  <Tooltip title='Delete token'>
+                    <IconButton
+                      color='primary'
+                      onClick={() => handleOpenConfirmationDialog(token.accessKey)}
+                      aria-label='delete access key'
+                    >
+                      <Delete />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Stack>
+              {index !== tokens.length - 1 && <Box sx={{ borderBottom: 1, borderColor: 'divider', my: 2 }} />}
+            </Fragment>
+          ))
       ) : (
         <EmptyBlob text='No tokens found' />
       ),
