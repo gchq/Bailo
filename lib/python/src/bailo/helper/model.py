@@ -617,5 +617,5 @@ class Experiment:
         ordered_runs = sorted(runs, key=lambda run: run["target"])
         if order_str == "MIN":
             return ordered_runs[0]
-        else:  # MAX
+        if order_str == "MAX":  # MAX
             return ordered_runs[-1]

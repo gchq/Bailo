@@ -453,7 +453,7 @@ class Client:
         :param version: Model version, defaults to None
         :return: JSON response object.
         """
-        _active = repr(active).lower()
+        _active = str(active).lower()
 
         return self.agent.get(
             f"{self.url}/v2/reviews",
