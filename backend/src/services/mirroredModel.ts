@@ -42,7 +42,7 @@ export async function exportModel(
   }
   const model = await getModelById(user, modelId)
   if (!model.settings.mirror.destinationModelId) {
-    throw BadReq('The ID of the mirrored model has not been set on this model.')
+    throw BadReq(`The 'Destination Model ID' has not been set on this model.`)
   }
   const mirroredModelId = model.settings.mirror.destinationModelId
   const auth = await authorisation.model(user, model, ModelAction.Update)
