@@ -7,19 +7,37 @@ import audit from '../../../connectors/audit/index.js'
 import { Decision, ResponseInterface } from '../../../models/Response.js'
 import { respondToReview } from '../../../services/response.js'
 import { ReviewKind } from '../../../types/enums.js'
+import { getEnumValues } from '../../../utils/enum.js'
 import { parse } from '../../../utils/validate.js'
 
-export const postAccessRequestReviewResponseSchema = z.object({
+const nonConditionalFields = z.object({
   params: z.object({
     modelId: z.string(),
     accessRequestId: z.string(),
   }),
   body: z.object({
     role: z.string(),
-    comment: z.string().optional(),
-    decision: z.nativeEnum(Decision),
   }),
 })
+
+const optionalComment = z.object({
+  body: z.object({
+    comment: z.string().optional(),
+    decision: z.enum(getEnumValues(Decision)).exclude([Decision.RequestChanges]),
+  }),
+})
+
+const mandatoryComment = z.object({
+  body: z.object({
+    comment: z.string().min(1, 'A comment must be supplied when requesting changes'),
+    decision: z.literal(Decision.RequestChanges),
+  }),
+})
+
+export const postAccessRequestReviewResponseSchema = z.intersection(
+  nonConditionalFields,
+  z.union([optionalComment, mandatoryComment]),
+)
 
 interface PostAccessRequestReviewResponse {
   response: ResponseInterface
