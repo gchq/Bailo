@@ -13,7 +13,6 @@ import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
-import { NotImplemented } from '../utils/result.js'
 import { findSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -352,9 +351,28 @@ export async function createModelCardFromSchema(
 }
 
 export async function createModelCardFromTemplate(
-  _user: UserInterface,
-  _modelId: string,
-  _schemaId: string,
+  user: UserInterface,
+  modelId: string,
+  templateId: string,
 ): Promise<ModelCardRevisionDoc> {
-  throw NotImplemented({}, 'This feature is not yet implemented')
+  if (modelId === templateId) {
+    throw BadReq('The model and template ID must be different', { modelId, templateId })
+  }
+  const model = await getModelById(user, modelId)
+  if (model.card?.schemaId) {
+    throw BadReq('This model already has a model card.', { modelId })
+  }
+  checkModelRestriction(model)
+  const template = await getModelById(user, templateId)
+  // Check to make sure user can access the template. We already check for the model auth later on in _setModelCard
+  const templateAuth = await authorisation.model(user, template, ModelAction.View)
+  if (!templateAuth.success) {
+    throw Forbidden(templateAuth.info, { userDn: user.dn, templateId })
+  }
+
+  if (!template.card?.schemaId) {
+    throw BadReq('The template model is missing a model card', { modelId, templateId })
+  }
+  const revision = await _setModelCard(user, modelId, template.card.schemaId, 1, template.card.metadata)
+  return revision
 }
