@@ -94,8 +94,8 @@ const ModelSchema = new Schema<ModelInterface>(
       },
     ],
     settings: {
-      ungovernedAccess: { type: Boolean, required: true, default: false },
-      allowTemplating: { type: Boolean, required: true, default: false },
+      ungovernedAccess: { type: Boolean, default: false },
+      allowTemplating: { type: Boolean, default: false },
       mirror: { sourceModelId: { type: String }, destinationModelId: { type: String } },
     },
 
