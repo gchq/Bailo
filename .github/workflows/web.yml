@@ -61,6 +61,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('lib/landing/package-lock.json') }}-
 
+      - name: Build HTML
+        uses: ammaraskar/sphinx-action@master
+        with:
+          docs-folder: "backend/docs/"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: html-docs
+          path: backend/docs/python-docs/html
+
       - name: Install dependencies
         run: npm i
       - name: Run generator
