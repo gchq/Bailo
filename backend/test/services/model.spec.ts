@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { ModelCardAction } from '../../src/connectors/authorisation/actions.js'
+import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import {
   _setModelCard,
@@ -209,9 +209,9 @@ describe('services > model', () => {
     const mockVersion = 1
     const mockMetadata = { key: 'value' }
 
-    vi.mocked(authorisation.modelCard).mockImplementation(async (_user, _model, action) => {
-      if (action === ModelCardAction.View) return { success: true, id: '' }
-      if (action === ModelCardAction.Write)
+    vi.mocked(authorisation.model).mockImplementation(async (_user, _model, action) => {
+      if (action === ModelAction.View) return { success: true, id: '' }
+      if (action === ModelAction.Write)
         return { success: false, info: 'You do not have permission to update this model card', id: '' }
 
       return { success: false, info: 'Unknown action.', id: '' }
@@ -230,10 +230,10 @@ describe('services > model', () => {
     const mockVersion = 1
     const mockMetadata = { key: 'value' }
 
-    vi.mocked(authorisation.modelCard).mockImplementation(async (_user, _model, action) => {
-      if (action === ModelCardAction.View) return { success: true, id: '' }
-      if (action === ModelCardAction.Write) return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
-      if (action === ModelCardAction.Update) return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
+    vi.mocked(authorisation.model).mockImplementation(async (_user, _model, action) => {
+      if (action === ModelAction.View) return { success: true, id: '' }
+      if (action === ModelAction.Write) return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
+      if (action === ModelAction.Update) return { success: false, info: 'Cannot alter a mirrored model.', id: '' }
 
       return { success: false, info: 'Unknown action.', id: '' }
     })
@@ -250,13 +250,6 @@ describe('services > model', () => {
     const mockSchemaId = 'abc'
     const mockVersion = 1
     const mockMetadata = { key: 'value' }
-
-    vi.mocked(authorisation.modelCard).mockImplementation(async (_user, _model, action) => {
-      if (action === ModelCardAction.View) return { success: true, id: '' }
-      if (action === ModelCardAction.Write) return { success: true, id: '' }
-
-      return { success: false, info: 'Unknown action.', id: '' }
-    })
 
     const result = await _setModelCard(mockUser, mockModelId, mockSchemaId, mockVersion, mockMetadata)
 

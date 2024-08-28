@@ -22,8 +22,6 @@ import {
   ImageActionKeys,
   ModelAction,
   ModelActionKeys,
-  ModelCardAction,
-  ModelCardActionKeys,
   ReleaseAction,
   ReleaseActionKeys,
   ResponseAction,
@@ -56,10 +54,6 @@ export class BasicAuthorisationConnector {
 
   async model(user: UserInterface, model: ModelDoc, action: ModelActionKeys) {
     return (await this.models(user, [model], action))[0]
-  }
-
-  async modelCard(user: UserInterface, model: ModelDoc, action: ModelCardActionKeys) {
-    return (await this.modelCards(user, [model], action))[0]
   }
 
   async schema(user: UserInterface, schema: SchemaDoc, action: SchemaActionKeys) {
@@ -115,35 +109,6 @@ export class BasicAuthorisationConnector {
           (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro']))
         ) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
-        }
-
-        return { id: model.id, success: true }
-      }),
-    )
-  }
-
-  async modelCards(
-    user: UserInterface,
-    models: Array<ModelDoc>,
-    action: ModelCardActionKeys,
-  ): Promise<Array<Response>> {
-    return Promise.all(
-      models.map(async (model) => {
-        // Prohibit non-collaborators from seeing private model Cards
-        if (!(await this.hasModelVisibilityAccess(user, model))) {
-          return {
-            id: model.id,
-            success: false,
-            info: 'You cannot interact with a private model card that you do not have access to.',
-          }
-        }
-
-        // Check a user has a role before allowing write actions
-        if (
-          [ModelCardAction.Write, ModelCardAction.Update].some((a) => a === action) &&
-          (await missingRequiredRole(user, model, ['owner', 'contributor']))
-        ) {
-          return { id: model.id, success: false, info: 'You do not have permission to update a model card.' }
         }
 
         return { id: model.id, success: true }

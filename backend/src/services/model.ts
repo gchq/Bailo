@@ -1,7 +1,7 @@
 import { Validator } from 'jsonschema'
 
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction, ModelActionKeys, ModelCardAction } from '../connectors/authorisation/actions.js'
+import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
@@ -249,7 +249,7 @@ export async function _setModelCard(
 
   checkModelRestriction(model)
 
-  const auth = await authorisation.modelCard(user, model, ModelCardAction.Write)
+  const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
@@ -334,7 +334,7 @@ export async function createModelCardFromSchema(
   const model = await getModelById(user, modelId)
   checkModelRestriction(model)
 
-  const auth = await authorisation.modelCard(user, model, ModelCardAction.Write)
+  const auth = await authorisation.model(user, model, ModelAction.Write)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
