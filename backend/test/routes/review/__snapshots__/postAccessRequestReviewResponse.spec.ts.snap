@@ -19,18 +19,21 @@ exports[`routes > review > postAccessRequestReviewResponse > missing review deci
     "context": {
       "errors": [
         {
-          "code": "invalid_type",
-          "expected": "'request_changes' | 'approve' | 'undo'",
-          "message": "Required",
+          "code": "invalid_union_discriminator",
+          "message": "Invalid discriminator value. Expected 'approve' | 'undo' | 'request_changes'",
+          "options": [
+            "approve",
+            "undo",
+            "request_changes",
+          ],
           "path": [
             "body",
             "decision",
           ],
-          "received": "undefined",
         },
       ],
     },
-    "message": "Path: body.decision - Message: Required",
+    "message": "Path: body.decision - Message: Invalid discriminator value. Expected 'approve' | 'undo' | 'request_changes'",
     "name": "Bailo Error",
   },
 }
