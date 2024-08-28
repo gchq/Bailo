@@ -105,8 +105,9 @@ export class BasicAuthorisationConnector {
 
         // Check a user has a role before allowing write actions
         if (
-          [ModelAction.Write, ModelAction.Update].some((a) => a === action) &&
-          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro']))
+          ([ModelAction.Write, ModelAction.Update].some((a) => a === action) &&
+            (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro', 'contributor']))) ||
+          (ModelAction.Update === action && (await missingRequiredRole(user, model, ['owner'])))
         ) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
         }
