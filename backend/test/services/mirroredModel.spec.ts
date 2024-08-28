@@ -345,7 +345,7 @@ describe('services > mirroredModel', () => {
       file1: Buffer.from(JSON.stringify({ modelId: 'abc' })),
       file2: Buffer.from(JSON.stringify({ modelId: 'abc' })),
     })
-    importModel({} as UserInterface, 'model-id', 'https://test.com')
+    await importModel({} as UserInterface, 'model-id', 'https://test.com')
 
     await expect(modelMocks.saveImportedModelCard.mock.calls.length).toBe(2)
   })
