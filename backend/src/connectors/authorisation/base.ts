@@ -106,7 +106,7 @@ export class BasicAuthorisationConnector {
         // Check a user has a role before allowing write actions
         if (
           [ModelAction.Write, ModelAction.Update].some((a) => a === action) &&
-          (await missingRequiredRole(user, model, ['owner']))
+          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro']))
         ) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
         }
@@ -210,7 +210,7 @@ export class BasicAuthorisationConnector {
          */
         if (
           !isNamed &&
-          (await missingRequiredRole(user, model, ['owner'])) &&
+          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro'])) &&
           ([AccessRequestAction.Delete, AccessRequestAction.Update] as AccessRequestActionKeys[]).includes(action)
         ) {
           return { success: false, info: 'You cannot change an access request you do not own.', id: request.id }
@@ -242,7 +242,7 @@ export class BasicAuthorisationConnector {
         // If they are not listed on the model, don't let them upload or delete files.
         if (
           ([FileAction.Delete, FileAction.Upload] as FileActionKeys[]).includes(action) &&
-          (await missingRequiredRole(user, model, ['owner', 'contributor', 'collaborator']))
+          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor', 'collaborator']))
         ) {
           return {
             success: false,
@@ -313,7 +313,7 @@ export class BasicAuthorisationConnector {
 
         // If they are not listed on the model, don't let them upload or delete images.
         if (
-          (await missingRequiredRole(user, model, ['owner', 'contributor', 'collaborator'])) &&
+          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor', 'collaborator'])) &&
           actions.includes(ImageAction.Push)
         ) {
           return {
