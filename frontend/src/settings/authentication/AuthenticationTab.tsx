@@ -28,7 +28,7 @@ export default function AuthenticationTab() {
   const tokenList = useMemo(
     () =>
       tokens.length > 0 && !isTokensLoading ? (
-        tokens
+        [...tokens]
           .sort((token1, token2) => {
             return sortByCreatedAtDescending(token1, token2)
           })
