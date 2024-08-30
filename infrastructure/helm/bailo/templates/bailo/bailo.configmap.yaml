@@ -164,7 +164,7 @@ data:
         },
 
         modelMirror: {
-          enabled: '{{ .Values.modelMirror.enabled }}',
+          enabled: {{ .Values.modelMirror.enabled }},
           disclaimer: '{{ .Values.modelMirror.disclaimer }}'
         }
       },
