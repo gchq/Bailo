@@ -61,7 +61,7 @@
     "outdent": "^0.8.0",
     "pretty-bytes": "^6.1.1",
     "qs": "^6.12.2",
-    "semver": "^7.6.2",
+    "semver": "^7.6.3",
     "shelljs": "^0.8.5",
     "showdown": "^2.1.0",
     "tsx": "^4.16.5",
