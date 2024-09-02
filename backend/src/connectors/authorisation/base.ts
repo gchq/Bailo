@@ -242,7 +242,7 @@ export class BasicAuthorisationConnector {
         // If they are not listed on the model, don't let them upload or delete files.
         if (
           ([FileAction.Delete, FileAction.Upload] as FileActionKeys[]).includes(action) &&
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator']))
+          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor']))
         ) {
           return {
             success: false,
@@ -255,7 +255,7 @@ export class BasicAuthorisationConnector {
           ([FileAction.Download] as FileActionKeys[]).includes(action) &&
           !model.settings.ungovernedAccess &&
           !hasApprovedAccessRequest &&
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator', 'consumer']))
+          (await missingRequiredRole(user, model, ['owner', 'contributor', 'msro', 'mtr', 'consumer']))
         ) {
           return {
             success: false,
@@ -313,7 +313,7 @@ export class BasicAuthorisationConnector {
 
         // If they are not listed on the model, don't let them upload or delete images.
         if (
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator'])) &&
+          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor'])) &&
           actions.includes(ImageAction.Push)
         ) {
           return {
@@ -325,7 +325,7 @@ export class BasicAuthorisationConnector {
 
         if (
           !hasAccessRequest &&
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator', 'consumer'])) &&
+          (await missingRequiredRole(user, model, ['owner', 'contributor', 'msro', 'mtr', 'consumer'])) &&
           actions.includes(ImageAction.Pull) &&
           !model.settings.ungovernedAccess
         ) {

@@ -44,7 +44,7 @@ export default function InferenceServices({ model, currentUserRoles }: Inference
   }, [uiConfig])
 
   const [canCreateService, requiredRolesText] = useMemo(() => {
-    const validRoles = ['owner', 'contributor']
+    const validRoles = ['owner', 'mtr', 'msro', 'contributor']
     return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
   }, [currentUserRoles])
 
