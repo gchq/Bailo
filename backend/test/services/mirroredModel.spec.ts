@@ -209,7 +209,7 @@ describe('services > mirroredModel', () => {
       settings: { mirror: { destinationModelId: '' } },
     })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
-    expect(response).rejects.toThrowError(/^The ID of the mirrored model has not been set on this model./)
+    expect(response).rejects.toThrowError(/^The 'Destination Model ID' has not been set on this model./)
     expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
