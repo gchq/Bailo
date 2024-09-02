@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22.6.0-alpine AS installer
+FROM node:22.7.0-alpine AS installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -13,7 +13,7 @@ RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 COPY . .
 RUN npm run build
 
-FROM node:22.6.0-alpine AS runner
+FROM node:22.7.0-alpine AS runner
 
 RUN apk update
 RUN apk add --no-cache libc6-compat ca-certificates
