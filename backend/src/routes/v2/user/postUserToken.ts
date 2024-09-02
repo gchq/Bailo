@@ -11,10 +11,10 @@ import { parse } from '../../../utils/validate.js'
 
 export const postUserTokenSchema = z.object({
   body: z.object({
-    description: z.string().openapi({ example: 'user token' }),
+    description: z.string().openapi({ example: 'user token' }).min(1, 'You must provide a description'),
 
     scope: z.nativeEnum(TokenScope).openapi({ example: 'models' }),
-    modelIds: z.array(z.string()).openapi({ example: ['yolo-v4-abcdef'] }),
+    modelIds: z.array(z.string().min(1, 'You must provide a valid model ID')).openapi({ example: ['yolo-v4-abcdef'] }),
     actions: z.array(z.enum(['image:read', ...tokenActionIds])).openapi({ example: ['image:read', 'file:read'] }),
   }),
 })

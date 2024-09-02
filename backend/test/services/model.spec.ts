@@ -319,6 +319,12 @@ describe('services > model', () => {
       settings: {
         mirror: {},
       },
+    }
+    const testTemplate = {
+      name: 'test template',
+      settings: {
+        mirror: {},
+      },
       card: {
         schemaId: 'test-schema',
         version: '1',
@@ -330,13 +336,14 @@ describe('services > model', () => {
         },
       },
     }
-    modelMocks.findOne.mockResolvedValue(testModel)
+    modelMocks.findOne.mockResolvedValueOnce(testModel)
+    modelMocks.findOne.mockResolvedValueOnce(testTemplate)
     await createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')
     expect(modelCardRevisionModel.save).toBeCalled()
     expect(modelMocks.updateOne).toBeCalled()
   })
 
-  test('crateModelCardFromTemplate > requesting to use a template without a model card will throw an error', async () => {
+  test('createModelCardFromTemplate > requesting to use a template without a model card will throw an error', async () => {
     const testModel = {
       name: 'test model',
       settings: {
@@ -349,13 +356,13 @@ describe('services > model', () => {
     )
   })
 
-  test('crateModelCardFromTemplate > throw bad request when supplying the same template and model id', async () => {
+  test('createModelCardFromTemplate > throw bad request when supplying the same template and model id', async () => {
     expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testModel')).rejects.toThrowError(
       'The model and template ID must be different',
     )
   })
 
-  test('crateModelCardFromTemplate > throw forbidden when user does not have access to template', async () => {
+  test('createModelCardFromTemplate > throw forbidden when user does not have access to template', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({
       info: 'User does not have access to model',
       success: false,
