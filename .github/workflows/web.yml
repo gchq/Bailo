@@ -30,6 +30,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install pandoc
+        run: sudo apt install pandoc
+
       - name: Setup Python
         uses: actions/setup-python@v3
         with:
@@ -43,7 +46,7 @@ jobs:
       - name: Build docs
         run: |
           make html
-          
+
   # Build job
   build:
     runs-on: ubuntu-latest
