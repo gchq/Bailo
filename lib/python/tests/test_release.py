@@ -56,9 +56,7 @@ def test_create_get_from_version_update_and_delete_release(
     release.notes = "testing-1234"
     release.update()
 
-    get_release = Release.from_version(
-        integration_client, example_model.model_id, version
-    )
+    get_release = Release.from_version(integration_client, example_model.model_id, version)
 
     assert get_release.notes == "testing-1234"
     # Check the release can be retrieved
@@ -105,8 +103,6 @@ def test_create_two_release_with_same_semver(integration_client, example_model):
 @pytest.mark.integration
 def test_retrieve_release_with_v_in_version(integration_client, example_model):
     example_model.create_release(version="v2.0.0", notes=" ")
-    release = Release.from_version(
-        client=integration_client, model_id=example_model.model_id, version="v2.0.0"
-    )
+    release = Release.from_version(client=integration_client, model_id=example_model.model_id, version="v2.0.0")
 
     assert str(release.version) == "2.0.0"

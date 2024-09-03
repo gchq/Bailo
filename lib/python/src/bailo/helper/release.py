@@ -118,9 +118,7 @@ class Release:
         )
 
     @classmethod
-    def from_version(
-        cls, client: Client, model_id: str, version: Version | str
-    ) -> Release:
+    def from_version(cls, client: Client, model_id: str, version: Version | str) -> Release:
         """Return an existing release from Bailo.
 
         :param client: A client object used to interact with Bailo
@@ -154,9 +152,7 @@ class Release:
             draft,
         )
 
-    def download(
-        self, filename: str, write: bool = True, path: str | None = None
-    ) -> Any:
+    def download(self, filename: str, write: bool = True, path: str | None = None) -> Any:
         """Returns a response object given the file name and optionally writes file to disk.
 
         :param filename: The name of the file to retrieve
@@ -165,9 +161,7 @@ class Release:
 
         :return: A JSON response object
         """
-        res = self.client.get_download_by_filename(
-            self.model_id, str(self.version), filename
-        )
+        res = self.client.get_download_by_filename(self.model_id, str(self.version), filename)
         logger.info(
             f"Downloading file %s from version %s of %s...",
             filename,
@@ -223,9 +217,7 @@ class Release:
         :raises BailoException: If the release has no files assigned to it
         ..note:: Fnmatch statements support Unix shell-style wildcards.
         """
-        files_metadata = self.client.get_release(self.model_id, str(self.version))[
-            "release"
-        ]["files"]
+        files_metadata = self.client.get_release(self.model_id, str(self.version))["release"]["files"]
         if files_metadata == []:
             raise BailoException("Release has no associated files.")
         file_names = [file_metadata["name"] for file_metadata in files_metadata]
@@ -237,17 +229,11 @@ class Release:
             exclude = [exclude]
 
         if include is not None:
-            file_names = [
-                file
-                for file in file_names
-                if any([fnmatch.fnmatch(file, pattern) for pattern in include])
-            ]
+            file_names = [file for file in file_names if any([fnmatch.fnmatch(file, pattern) for pattern in include])]
 
         if exclude is not None:
             file_names = [
-                file
-                for file in file_names
-                if not any([fnmatch.fnmatch(file, pattern) for pattern in exclude])
+                file for file in file_names if not any([fnmatch.fnmatch(file, pattern) for pattern in exclude])
             ]
 
         logger.info(
@@ -320,9 +306,7 @@ class Release:
             colour=colour,
         ) as t:
             wrapped_buffer = CallbackIOWrapper(t.update, data, "read")  # type: ignore
-            res: dict[str, Any] = self.client.simple_upload(
-                self.model_id, name, wrapped_buffer
-            ).json()
+            res: dict[str, Any] = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()
 
         self.files.append(res["file"]["id"])
         self.update()
@@ -358,9 +342,7 @@ class Release:
         :return: JSON Response object
         """
         self.client.delete_release(self.model_id, str(self.version))
-        logger.info(
-            f"Release %s of %s successfully deleted.", str(self.version), self.model_id
-        )
+        logger.info(f"Release %s of %s successfully deleted.", str(self.version), self.model_id)
 
         return True
 
@@ -370,9 +352,7 @@ class Release:
 
     @version.setter
     def version(self, value):
-        if ("_Release__version_obj" not in self.__dict__) and (
-            "_Release__version_raw" not in self.__dict__
-        ):
+        if ("_Release__version_obj" not in self.__dict__) and ("_Release__version_raw" not in self.__dict__):
             if isinstance(value, str):
                 if value.startswith("v"):
                     value = value[1:]

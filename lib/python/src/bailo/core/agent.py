@@ -42,9 +42,7 @@ class Agent:
             raise BailoException(res.json()["error"]["message"])
         except JSONDecodeError:
             # No response given
-            raise ResponseException(
-                f"{res.status_code} Cannot {method} to {res.request.url}"
-            )
+            raise ResponseException(f"{res.status_code} Cannot {method} to {res.request.url}")
 
     def get(self, *args, **kwargs):
         return self.__request("GET", *args, **kwargs)
@@ -116,13 +114,9 @@ class TokenAgent(Agent):
             logger.info("Access key not provided. Trying other sources...")
             try:
                 access_key = os.environ["BAILO_ACCESS_KEY"]
-                logger.info(
-                    "Access key acquired from BAILO_ACCESS_KEY environment variable."
-                )
+                logger.info("Access key acquired from BAILO_ACCESS_KEY environment variable.")
             except KeyError:
-                logger.info(
-                    "Access key not found in BAILO_ACCESS_KEY environment variable. Requires user input."
-                )
+                logger.info("Access key not found in BAILO_ACCESS_KEY environment variable. Requires user input.")
                 access_key = getpass.getpass("BAILO ACCESS KEY:")
                 logger.info("Access key acquired from user input.")
 
@@ -130,13 +124,9 @@ class TokenAgent(Agent):
             logger.info("Secret key not provided. Trying other sources...")
             try:
                 secret_key = os.environ["BAILO_SECRET_KEY"]
-                logger.info(
-                    "Secret key acquired from BAILO_SECRET_KEY environment variable."
-                )
+                logger.info("Secret key acquired from BAILO_SECRET_KEY environment variable.")
             except KeyError:
-                logger.info(
-                    "Secret key not found in BAILO_SECRET_KEY environment variable. Requires user input."
-                )
+                logger.info("Secret key not found in BAILO_SECRET_KEY environment variable. Requires user input.")
                 secret_key = getpass.getpass("BAILO SECRET KEY:")
                 logger.info("Secret key acquired from user input.")
 

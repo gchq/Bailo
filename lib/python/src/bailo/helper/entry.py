@@ -69,9 +69,7 @@ class Entry:
         res = self.client.model_card_from_schema(model_id=self.id, schema_id=schema_id)
         self.__unpack_card(res["card"])
 
-        logger.info(
-            "Card for ID {self.id} successfully created using schema ID {schema_id}."
-        )
+        logger.info("Card for ID {self.id} successfully created using schema ID {schema_id}.")
 
     def card_from_template(self):
         """Create a card using a template (not yet implemented).
@@ -99,9 +97,7 @@ class Entry:
         res = self.client.get_model_card(model_id=self.id, version=version)
         self.__unpack_card(res["modelCard"])
 
-        logger.info(
-            f"Card version %s for ID %s successfully retrieved.", version, self.id
-        )
+        logger.info(f"Card version %s for ID %s successfully retrieved.", version, self.id)
 
     def get_roles(self):
         """Get all roles for the entry.

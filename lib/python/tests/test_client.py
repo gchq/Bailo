@@ -36,9 +36,7 @@ def test_get_models(requests_mock):
 
 
 def test_get_model(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/model/test_id", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/model/test_id", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_model(model_id="test_id")
@@ -47,9 +45,7 @@ def test_get_model(requests_mock):
 
 
 def test_patch_model(requests_mock):
-    requests_mock.patch(
-        "https://example.com/api/v2/model/test_id", json={"success": True}
-    )
+    requests_mock.patch("https://example.com/api/v2/model/test_id", json={"success": True})
 
     client = Client("https://example.com")
     result = client.patch_model(
@@ -61,9 +57,7 @@ def test_patch_model(requests_mock):
 
 
 def test_get_model_card(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/model/test_id/model-card/v1", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/model/test_id/model-card/v1", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_model_card(model_id="test_id", version="v1")
@@ -72,9 +66,7 @@ def test_get_model_card(requests_mock):
 
 
 def test_put_model_card(requests_mock):
-    requests_mock.put(
-        "https://example.com/api/v2/model/test_id/model-cards", json={"success": True}
-    )
+    requests_mock.put("https://example.com/api/v2/model/test_id/model-cards", json={"success": True})
 
     x = {"test": "object"}
     y = json.dumps(x)
@@ -98,9 +90,7 @@ def test_model_card_from_schema(requests_mock):
 
 
 def test_post_release(requests_mock):
-    requests_mock.post(
-        "https://example.com/api/v2/model/test_id/releases", json={"success": True}
-    )
+    requests_mock.post("https://example.com/api/v2/model/test_id/releases", json={"success": True})
 
     client = Client("https://example.com")
     result = client.post_release(
@@ -116,9 +106,7 @@ def test_post_release(requests_mock):
 
 
 def test_get_all_releases(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/model/test_id/releases", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/model/test_id/releases", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_all_releases(
@@ -129,9 +117,7 @@ def test_get_all_releases(requests_mock):
 
 
 def test_get_release(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/model/test_id/release/v1", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/model/test_id/release/v1", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_release(
@@ -143,9 +129,7 @@ def test_get_release(requests_mock):
 
 
 def test_delete_release(requests_mock):
-    requests_mock.delete(
-        "https://example.com/api/v2/model/test_id/release/v1", json={"success": True}
-    )
+    requests_mock.delete("https://example.com/api/v2/model/test_id/release/v1", json={"success": True})
 
     client = Client("https://example.com")
     result = client.delete_release(
@@ -157,9 +141,7 @@ def test_delete_release(requests_mock):
 
 
 def test_get_files(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/model/test_id/files", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/model/test_id/files", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_files(
@@ -175,9 +157,7 @@ def test_get_files(requests_mock):
 
 
 def test_get_all_images(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/model/test_id/images", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/model/test_id/images", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_all_images(
@@ -188,9 +168,7 @@ def test_get_all_images(requests_mock):
 
 
 def test_get_all_schemas(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/schemas?kind=model", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/schemas?kind=model", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_all_schemas(kind=SchemaKind.MODEL)
@@ -199,9 +177,7 @@ def test_get_all_schemas(requests_mock):
 
 
 def test_get_schema(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/schema/test_id", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/schema/test_id", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_schema(schema_id="test_id")
@@ -225,9 +201,7 @@ def test_post_schema(requests_mock):
 
 
 def test_get_reviews(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/reviews?active=true", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/reviews?active=true", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_reviews(
@@ -238,9 +212,7 @@ def test_get_reviews(requests_mock):
 
 
 def test_get_model_roles(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/model/test_id/roles", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/model/test_id/roles", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_model_roles(
@@ -251,9 +223,7 @@ def test_get_model_roles(requests_mock):
 
 
 def test_get_model_user_roles(requests_mock):
-    requests_mock.get(
-        "https://example.com/api/v2/model/test_id/roles/mine", json={"success": True}
-    )
+    requests_mock.get("https://example.com/api/v2/model/test_id/roles/mine", json={"success": True})
 
     client = Client("https://example.com")
     result = client.get_model_user_roles(
@@ -306,9 +276,7 @@ def test_get_team(requests_mock):
 
 
 def test_patch_team(requests_mock):
-    requests_mock.patch(
-        "https://example.com/api/v2/team/test_id", json={"success": True}
-    )
+    requests_mock.patch("https://example.com/api/v2/team/test_id", json={"success": True})
 
     client = Client("https://example.com")
     result = client.patch_team(
@@ -353,9 +321,7 @@ def test_post_access_request(requests_mock):
     y = json.dumps(x)
 
     client = Client("https://example.com")
-    result = client.post_access_request(
-        model_id="test_id", metadata=y, schema_id="test_id"
-    )
+    result = client.post_access_request(model_id="test_id", metadata=y, schema_id="test_id")
 
     assert result == {"success": True}
 
@@ -367,9 +333,7 @@ def test_delete_access_request(requests_mock):
     )
 
     client = Client("https://example.com")
-    result = client.delete_access_request(
-        model_id="test_id", access_request_id="test_id"
-    )
+    result = client.delete_access_request(model_id="test_id", access_request_id="test_id")
 
     assert result == {"success": True}
 
