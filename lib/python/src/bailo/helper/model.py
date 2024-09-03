@@ -71,7 +71,7 @@ class Model(Entry):
             name=name, kind=EntryKind.MODEL, description=description, team_id=team_id, visibility=visibility
         )
         model_id = res["model"]["id"]
-        logger.info("Model successfully created on server with ID %s.", model_id)
+        logger.info(f"Model successfully created on server with ID %s.", model_id)
 
         model = cls(
             client=client,
