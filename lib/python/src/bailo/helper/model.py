@@ -71,7 +71,7 @@ class Model(Entry):
             name=name, kind=EntryKind.MODEL, description=description, team_id=team_id, visibility=visibility
         )
         model_id = res["model"]["id"]
-        logger.info("Model successfully created on server with ID {model_id}.")
+        logger.info("Model successfully created on server with ID %s.", model_id)
 
         model = cls(
             client=client,
@@ -193,7 +193,7 @@ class Model(Entry):
             name=name, kind=EntryKind.MODEL, description=description, team_id=team_id, visibility=visibility
         )
         model_id = bailo_res["model"]["id"]
-        logger.info(f"MLFlow model successfully imported to Bailo with ID.", model_id)
+        logger.info(f"MLFlow model successfully imported to Bailo with ID %s", model_id)
 
         model = cls(
             client=client,
@@ -287,7 +287,7 @@ class Model(Entry):
         for release in res["releases"]:
             releases.append(self.get_release(version=release["semver"]))
 
-        logger.info("Successfully retrieved all releases for model {self.model_id}.")
+        logger.info(f"Successfully retrieved all releases for model %s.", self.model_id)
 
         return releases
 
@@ -320,7 +320,7 @@ class Model(Entry):
         """
         res = self.client.get_all_images(model_id=self.model_id)
 
-        logger.info("Images for {self.model_id} retreived successfully.")
+        logger.info(f"Images for %s retreived successfully.", self.model_id )
 
         return res["images"]
 
@@ -417,7 +417,7 @@ class Experiment:
         self.raw.append(self.run_data)
 
         if not is_mlflow:
-            logger.info(f"Bailo tracking run {self.run}.")
+            logger.info(f"Bailo tracking run %s.", self.run)
 
     def log_params(self, params: dict[str, Any]):
         """Logs parameters to the current run.
@@ -490,7 +490,7 @@ class Experiment:
                 mlflow_dir = os.path.join(self.temp_dir, f"mlflow_{run_id}")
                 mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
                 artifacts.append(mlflow_dir)
-                logger.info(f"Successfully downloaded artifacts for MLFlow experiment {experiment_id} to {mlflow_dir}.")
+                logger.info(f"Successfully downloaded artifacts for MLFlow experiment %s to %s.", experiment_id, mlflow_dir)
 
             self.start_run(is_mlflow=True)
             self.log_params(data.params)
