@@ -261,7 +261,7 @@ class Release:
         # cache the current file position then move to the end and get the size before moving it back.
         old_file_position = data.tell()
         data.seek(0, os.SEEK_END)
-        size: int = data.tell()
+        size = data.tell()
         data.seek(old_file_position, os.SEEK_SET)
 
         if NO_COLOR:
@@ -272,7 +272,7 @@ class Release:
         with tqdm(
             total=size, unit="B", unit_scale=True, unit_divisor=BLOCK_SIZE, postfix=f"uploading {name}", colour=colour
         ) as t:
-            wrapped_buffer: BytesIO = CallbackIOWrapper(t.update, data, "read")  # type: ignore
+            wrapped_buffer = CallbackIOWrapper(t.update, data, "read")  # type: ignore
             res: dict[str, Any] = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()
 
         self.files.append(res["file"]["id"])

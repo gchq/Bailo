@@ -193,7 +193,7 @@ class Model(Entry):
             name=name, kind=EntryKind.MODEL, description=description, team_id=team_id, visibility=visibility
         )
         model_id = bailo_res["model"]["id"]
-        logger.info("MLFlow model successfully imported to Bailo with ID {model_id}.")
+        logger.info(f"MLFlow model successfully imported to Bailo with ID.", model_id)
 
         model = cls(
             client=client,
@@ -537,7 +537,7 @@ class Experiment:
                 "Either select_by (e.g. 'accuracy MIN|MAX') or run_id is required to publish an experiment run."
             )
 
-        sel_run: dict[str, Any]
+        sel_run: dict[any, any]
         if (select_by is not None) and (run_id is None):
             sel_run = self.__select_run(select_by=select_by)
 
