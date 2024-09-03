@@ -65,8 +65,6 @@ class Entry:
     def card_from_template(self, template_id: str) -> None:
         """Create a card using a template (not yet implemented).
 
-        #template is modelid? as it is not entry-specific, but model specific and you grab the template for the modelcard from
-        the model which has specific modelid. have I just described ids with unecessary verbosenes?yes
         """
         res = self.client.model_card_from_template(model_id=self.id, template_id=template_id)
         self.__unpack_card(res["card"])
