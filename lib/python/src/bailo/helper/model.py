@@ -44,7 +44,12 @@ class Model(Entry):
         visibility: ModelVisibility | None = None,
     ) -> None:
         super().__init__(
-            client=client, id=model_id, name=name, description=description, kind=EntryKind.MODEL, visibility=visibility
+            client=client,
+            id=model_id,
+            name=name,
+            description=description,
+            kind=EntryKind.MODEL,
+            visibility=visibility,
         )
 
         self.model_id = model_id
@@ -68,7 +73,11 @@ class Model(Entry):
         :return: Model object
         """
         res = client.post_model(
-            name=name, kind=EntryKind.MODEL, description=description, team_id=team_id, visibility=visibility
+            name=name,
+            kind=EntryKind.MODEL,
+            description=description,
+            team_id=team_id,
+            visibility=visibility,
         )
         model_id = res["model"]["id"]
         logger.info(f"Model successfully created on server with ID %s.", model_id)
@@ -95,7 +104,9 @@ class Model(Entry):
         """
         res = client.get_model(model_id=model_id)["model"]
         if res["kind"] != "model":
-            raise BailoException(f"ID {model_id} does not belong to a model. Did you mean to use Datacard.from_id()?")
+            raise BailoException(
+                f"ID {model_id} does not belong to a model. Did you mean to use Datacard.from_id()?"
+            )
 
         logger.info(f"Model %s successfully retrieved from server.", model_id)
 
@@ -129,12 +140,19 @@ class Model(Entry):
         :param search: String to be located in model cards, defaults to ""
         :return: List of model objects
         """
-        res = client.get_models(task=task, libraries=libraries, filters=filters, search=search)
+        res = client.get_models(
+            task=task, libraries=libraries, filters=filters, search=search
+        )
         models = []
 
         for model in res["models"]:
             res_model = client.get_model(model_id=model["id"])["model"]
-            model_obj = cls(client=client, model_id=model["id"], name=model["name"], description=model["description"])
+            model_obj = cls(
+                client=client,
+                model_id=model["id"],
+                name=model["name"],
+                description=model["description"],
+            )
             model_obj._unpack(res_model)
             model_obj.get_card_latest()
             models.append(model_obj)
@@ -166,15 +184,21 @@ class Model(Entry):
         :return: A model object
         """
         if not ml_flow:
-            raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
+            raise ImportError(
+                "Optional MLFlow dependencies (needed for this method) are not installed."
+            )
 
         mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
         mlflow.set_tracking_uri(mlflow_uri)
         filter_string = f"name = '{name}'"
 
-        res = mlflow_client.search_model_versions(filter_string=filter_string, order_by=["version_number DESC"])
+        res = mlflow_client.search_model_versions(
+            filter_string=filter_string, order_by=["version_number DESC"]
+        )
         if not len(res):
-            raise BailoException("No MLFlow models found. Are you sure the name/alias/version provided is correct?")
+            raise BailoException(
+                "No MLFlow models found. Are you sure the name/alias/version provided is correct?"
+            )
 
         sel_model = None
         if version:
@@ -185,12 +209,18 @@ class Model(Entry):
             sel_model = res[0]
 
         if sel_model is None:
-            raise BailoException("No MLFlow model found. Are you sure the name/alias/version provided is correct?")
+            raise BailoException(
+                "No MLFlow model found. Are you sure the name/alias/version provided is correct?"
+            )
 
         name = sel_model.name
         description = str(sel_model.description) + " Imported from MLFlow."
         bailo_res = client.post_model(
-            name=name, kind=EntryKind.MODEL, description=description, team_id=team_id, visibility=visibility
+            name=name,
+            kind=EntryKind.MODEL,
+            description=description,
+            team_id=team_id,
+            visibility=visibility,
         )
         model_id = bailo_res["model"]["id"]
         logger.info(f"MLFlow model successfully imported to Bailo with ID %s", model_id)
@@ -206,7 +236,9 @@ class Model(Entry):
 
         if files:
             model.card_from_schema(schema_id=schema_id)
-            release = model.create_release(version=Version.coerce(str(sel_model.version)), notes=" ")
+            release = model.create_release(
+                version=Version.coerce(str(sel_model.version)), notes=" "
+            )
             run_id = sel_model.run_id
             if run_id is None:
                 raise BailoException(
@@ -216,12 +248,16 @@ class Model(Entry):
             mlflow_run = mlflow_client.get_run(run_id)
             artifact_uri: str = str(mlflow_run.info.artifact_uri)
             if artifact_uri is None:
-                raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transfered.")
+                raise BailoException(
+                    "Artifact URI could not be found, therefore artifacts cannot be transfered."
+                )
 
             if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:
                 temp_dir = os.path.join(tempfile.gettempdir(), "mlflow_model")
                 mlflow_dir = os.path.join(temp_dir, f"mlflow_{run_id}")
-                mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
+                mlflow.artifacts.download_artifacts(
+                    artifact_uri=artifact_uri, dst_path=mlflow_dir
+                )
                 release.upload(mlflow_dir)
         return model
 
@@ -309,7 +345,11 @@ class Model(Entry):
             raise BailoException("This model has no releases.")
 
         latest_release = max(releases)
-        logger.info(f"latest_release (%s) for %s retrieved successfully.", str(latest_release.version), self.model_id)
+        logger.info(
+            f"latest_release (%s) for %s retrieved successfully.",
+            str(latest_release.version),
+            self.model_id,
+        )
 
         return max(releases)
 
@@ -320,7 +360,7 @@ class Model(Entry):
         """
         res = self.client.get_all_images(model_id=self.model_id)
 
-        logger.info(f"Images for %s retreived successfully.", self.model_id )
+        logger.info(f"Images for %s retreived successfully.", self.model_id)
 
         return res["images"]
 
@@ -412,7 +452,13 @@ class Experiment:
         """
         self.run += 1
 
-        self.run_data = {"run": self.run, "params": [], "metrics": [], "artifacts": [], "dataset": ""}
+        self.run_data = {
+            "run": self.run,
+            "params": [],
+            "metrics": [],
+            "artifacts": [],
+            "dataset": "",
+        }
 
         self.raw.append(self.run_data)
 
@@ -455,7 +501,9 @@ class Experiment:
         :raises ImportError: Import error if MLFlow not installed
         """
         if not ml_flow:
-            raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
+            raise ImportError(
+                "Optional MLFlow dependencies (needed for this method) are not installed."
+            )
 
         client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
         runs = client.search_runs([experiment_id])
@@ -488,9 +536,15 @@ class Experiment:
 
             if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:
                 mlflow_dir = os.path.join(self.temp_dir, f"mlflow_{run_id}")
-                mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
+                mlflow.artifacts.download_artifacts(
+                    artifact_uri=artifact_uri, dst_path=mlflow_dir
+                )
                 artifacts.append(mlflow_dir)
-                logger.info(f"Successfully downloaded artifacts for MLFlow experiment %s to %s.", experiment_id, mlflow_dir)
+                logger.info(
+                    f"Successfully downloaded artifacts for MLFlow experiment %s to %s.",
+                    experiment_id,
+                    mlflow_dir,
+                )
 
             self.start_run(is_mlflow=True)
             self.log_params(data.params)
@@ -526,7 +580,9 @@ class Experiment:
             raise BailoException("This experiment has already been published.")
         mc = self.model.model_card
         if mc is None:
-            raise BailoException("Model card needs to be populated before publishing an experiment.")
+            raise BailoException(
+                "Model card needs to be populated before publishing an experiment."
+            )
 
         mc = NestedDict(mc)
 
@@ -572,7 +628,9 @@ class Experiment:
 
             run_id = sel_run["run"]
             notes = f"{notes} (Run ID: {run_id})"
-            release_new = self.model.create_release(version=release_new_version, minor=True, notes=notes)
+            release_new = self.model.create_release(
+                version=release_new_version, minor=True, notes=notes
+            )
 
             logger.info(
                 f"Uploading %d artifacts to version %s of model %s.",
@@ -587,17 +645,25 @@ class Experiment:
             if os.path.exists(self.temp_dir) and os.path.isdir(self.temp_dir):
                 shutil.rmtree(self.temp_dir)
 
-        logger.info(f"Successfully published experiment run %s to model %s.", str(run_id), self.model.model_id)
+        logger.info(
+            f"Successfully published experiment run %s to model %s.",
+            str(run_id),
+            self.model.model_id,
+        )
 
     def __select_run(self, select_by: str) -> dict:
         # Parse target and order from select_by string
         select_by_split = select_by.split(" ")
         if len(select_by_split) != 2:
-            raise BailoException("Invalid select_by string. Expected format is 'metric_name MIN|MAX'.")
+            raise BailoException(
+                "Invalid select_by string. Expected format is 'metric_name MIN|MAX'."
+            )
         order_str = select_by_split[1].upper()
         order_opt = ["MIN", "MAX"]
         if order_str not in order_opt:
-            raise BailoException(f"Runs can only be ordered by MIN or MAX, not {order_str}.")
+            raise BailoException(
+                f"Runs can only be ordered by MIN or MAX, not {order_str}."
+            )
         target_str = select_by_split[0]
 
         # Extract target value for each run

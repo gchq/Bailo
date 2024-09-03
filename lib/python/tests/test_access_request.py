@@ -28,7 +28,9 @@ def test_access_request():
 def test_create_get_from_version_update_and_delete_access_request(
     name, schema_id, created_by, end_date, integration_client, example_model
 ):
-    metadata = {"overview": {"entities": [created_by], "name": name, "endDate": end_date}}
+    metadata = {
+        "overview": {"entities": [created_by], "name": name, "endDate": end_date}
+    }
     # Create access request
     ar = AccessRequest.create(
         client=integration_client,
@@ -38,7 +40,9 @@ def test_create_get_from_version_update_and_delete_access_request(
     )
 
     # Get access request
-    get_ar = AccessRequest.from_id(integration_client, example_model.model_id, ar.access_request_id)
+    get_ar = AccessRequest.from_id(
+        integration_client, example_model.model_id, ar.access_request_id
+    )
 
     # Check they're the same access request
     assert ar == get_ar

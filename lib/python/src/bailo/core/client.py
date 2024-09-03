@@ -115,9 +115,18 @@ class Client:
         :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
         :return: JSON response object
         """
-        filtered_json = filter_none({"name": name, "kind": kind, "description": description, "visibility": visibility})
+        filtered_json = filter_none(
+            {
+                "name": name,
+                "kind": kind,
+                "description": description,
+                "visibility": visibility,
+            }
+        )
 
-        return self.agent.patch(f"{self.url}/v2/model/{model_id}", json=filtered_json).json()
+        return self.agent.patch(
+            f"{self.url}/v2/model/{model_id}", json=filtered_json
+        ).json()
 
     def get_model_card(
         self,
@@ -206,7 +215,9 @@ class Client:
                 "images": images,
             }
         )
-        return self.agent.post(f"{self.url}/v2/model/{model_id}/releases", json=filtered_json).json()
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/releases", json=filtered_json
+        ).json()
 
     def put_release(
         self,
@@ -309,11 +320,15 @@ class Client:
         """
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
-                f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+                f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download",
+                stream=True,
+                timeout=10_000,
             )
         else:
             return self.agent.get(
-                f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+                f"{self.url}/v2/model/{model_id}/file/{file_id}/download",
+                stream=True,
+                timeout=10_000,
             )
 
     def get_download_by_filename(
@@ -337,7 +352,9 @@ class Client:
             )
         else:
             return self.agent.get(
-                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download", stream=True, timeout=10_000
+                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download",
+                stream=True,
+                timeout=10_000,
             )
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
@@ -480,7 +497,9 @@ class Client:
         :param decision: Either approve or request changes
         :param comment: A comment to go with the review
         """
-        filtered_json = filter_none({"role": role, "decision": decision, "comment": comment})
+        filtered_json = filter_none(
+            {"role": role, "decision": decision, "comment": comment}
+        )
         return self.agent.post(
             f"{self.url}/v2/model/{model_id}/release/{version}/review",
             json=filtered_json,

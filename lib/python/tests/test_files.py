@@ -64,7 +64,9 @@ def test_file_download_filter(example_model, tmpdir):
         file.seek(0)
 
     downloads_path = tmpdir.mkdir("downloads")
-    example_release.download_all(path=downloads_path, include=["*.txt"], exclude=["to_exclude.txt"])
+    example_release.download_all(
+        path=downloads_path, include=["*.txt"], exclude=["to_exclude.txt"]
+    )
 
     assert os.listdir(downloads_path) == ["test2.txt"]
 

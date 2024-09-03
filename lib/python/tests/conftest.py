@@ -154,12 +154,16 @@ def mlflow_id(test_path, request):
 def mlflow_model(mlflow_id, request):
     mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=request.config.mlflow_uri)
     model_name = f"Test_{str(random.randint(1, 1000000))}"
-    mlflow_client.create_registered_model(name=model_name, description="Test Description")
+    mlflow_client.create_registered_model(
+        name=model_name, description="Test Description"
+    )
 
     run = mlflow_client.search_runs(mlflow_id)[0]
     run_id = run.info.run_id
     artifact_uri = run.info.artifact_uri
-    mlflow_client.create_model_version(name=model_name, source=artifact_uri, run_id=run_id, description="Test Model.")
+    mlflow_client.create_model_version(
+        name=model_name, source=artifact_uri, run_id=run_id, description="Test Model."
+    )
 
     return model_name
 
@@ -168,7 +172,9 @@ def mlflow_model(mlflow_id, request):
 def mlflow_model_no_run(mlflow_id, request):
     mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=request.config.mlflow_uri)
     model_name = f"Test_{str(random.randint(1, 1000000))}"
-    mlflow_client.create_registered_model(name=model_name, description="Test Description")
+    mlflow_client.create_registered_model(
+        name=model_name, description="Test Description"
+    )
 
     return model_name
 

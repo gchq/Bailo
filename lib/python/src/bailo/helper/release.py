@@ -99,7 +99,11 @@ class Release:
             minor,
             draft,
         )
-        logger.info(f"Release %s successfully created on server for model with ID %s.", str(version), model_id)
+        logger.info(
+            f"Release %s successfully created on server for model with ID %s.",
+            str(version),
+            model_id,
+        )
 
         return cls(
             client,
@@ -114,7 +118,9 @@ class Release:
         )
 
     @classmethod
-    def from_version(cls, client: Client, model_id: str, version: Version | str) -> Release:
+    def from_version(
+        cls, client: Client, model_id: str, version: Version | str
+    ) -> Release:
         """Return an existing release from Bailo.
 
         :param client: A client object used to interact with Bailo
@@ -130,7 +136,11 @@ class Release:
         minor = res["minor"]
         draft = res["draft"]
 
-        logger.info(f"Release %s of model ID %s successfully retrieved from server.", str(version), model_id)
+        logger.info(
+            f"Release %s of model ID %s successfully retrieved from server.",
+            str(version),
+            model_id,
+        )
 
         return cls(
             client,
@@ -144,7 +154,9 @@ class Release:
             draft,
         )
 
-    def download(self, filename: str, write: bool = True, path: str | None = None) -> Any:
+    def download(
+        self, filename: str, write: bool = True, path: str | None = None
+    ) -> Any:
         """Returns a response object given the file name and optionally writes file to disk.
 
         :param filename: The name of the file to retrieve
@@ -153,8 +165,15 @@ class Release:
 
         :return: A JSON response object
         """
-        res = self.client.get_download_by_filename(self.model_id, str(self.version), filename)
-        logger.info(f"Downloading file %s from version %s of %s...", filename, str(self.version), self.model_id)
+        res = self.client.get_download_by_filename(
+            self.model_id, str(self.version), filename
+        )
+        logger.info(
+            f"Downloading file %s from version %s of %s...",
+            filename,
+            str(self.version),
+            self.model_id,
+        )
 
         if write:
             if path is None:
@@ -182,12 +201,20 @@ class Release:
             logger.info(f"File written to %s", path)
 
         logger.info(
-            f"Downloading of file %s from version %s of %s completed.", filename, str(self.version), self.model_id
+            f"Downloading of file %s from version %s of %s completed.",
+            filename,
+            str(self.version),
+            self.model_id,
         )
 
         return res
 
-    def download_all(self, path: str = os.getcwd(), include: list | str = "", exclude: list | str = ""):
+    def download_all(
+        self,
+        path: str = os.getcwd(),
+        include: list | str = "",
+        exclude: list | str = "",
+    ):
         """Writes all files to disk given a local directory.
 
         :param include: List or string of fnmatch statements for file names to include, defaults to None
@@ -196,7 +223,9 @@ class Release:
         :raises BailoException: If the release has no files assigned to it
         ..note:: Fnmatch statements support Unix shell-style wildcards.
         """
-        files_metadata = self.client.get_release(self.model_id, str(self.version))["release"]["files"]
+        files_metadata = self.client.get_release(self.model_id, str(self.version))[
+            "release"
+        ]["files"]
         if files_metadata == []:
             raise BailoException("Release has no associated files.")
         file_names = [file_metadata["name"] for file_metadata in files_metadata]
@@ -208,11 +237,17 @@ class Release:
             exclude = [exclude]
 
         if include is not None:
-            file_names = [file for file in file_names if any([fnmatch.fnmatch(file, pattern) for pattern in include])]
+            file_names = [
+                file
+                for file in file_names
+                if any([fnmatch.fnmatch(file, pattern) for pattern in include])
+            ]
 
         if exclude is not None:
             file_names = [
-                file for file in file_names if not any([fnmatch.fnmatch(file, pattern) for pattern in exclude])
+                file
+                for file in file_names
+                if not any([fnmatch.fnmatch(file, pattern) for pattern in exclude])
             ]
 
         logger.info(
@@ -236,7 +271,11 @@ class Release:
         :return: The unique file ID of the file uploaded
         ..note:: If path provided is a directory, it will be uploaded as a zip
         """
-        logger.info(f"Uploading file(s) to version %s of %s...", str(self.version), self.model_id)
+        logger.info(
+            f"Uploading file(s) to version %s of %s...",
+            str(self.version),
+            self.model_id,
+        )
 
         to_close = False
         # If no datastream object provided
@@ -247,7 +286,10 @@ class Release:
             zip_required = not os.path.isfile(path)
 
             if zip_required:
-                logger.info(f"Given path (%s) is a directory. This will be converted to a zip file for upload.", path)
+                logger.info(
+                    f"Given path (%s) is a directory. This will be converted to a zip file for upload.",
+                    path,
+                )
                 shutil.make_archive(name, "zip", path)
                 path = f"{name}.zip"
                 name = path
@@ -270,17 +312,29 @@ class Release:
             colour = "blue"
 
         with tqdm(
-            total=size, unit="B", unit_scale=True, unit_divisor=BLOCK_SIZE, postfix=f"uploading {name}", colour=colour
+            total=size,
+            unit="B",
+            unit_scale=True,
+            unit_divisor=BLOCK_SIZE,
+            postfix=f"uploading {name}",
+            colour=colour,
         ) as t:
             wrapped_buffer = CallbackIOWrapper(t.update, data, "read")  # type: ignore
-            res: dict[str, Any] = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()
+            res: dict[str, Any] = self.client.simple_upload(
+                self.model_id, name, wrapped_buffer
+            ).json()
 
         self.files.append(res["file"]["id"])
         self.update()
         if to_close:
             data.close()
         self.isUploaded = True
-        logger.info(f"Upload of file %s to version %s of %s complete.", name, str(self.version), self.model_id)
+        logger.info(
+            f"Upload of file %s to version %s of %s complete.",
+            name,
+            str(self.version),
+            self.model_id,
+        )
 
         return res["file"]["id"]
 
@@ -304,7 +358,9 @@ class Release:
         :return: JSON Response object
         """
         self.client.delete_release(self.model_id, str(self.version))
-        logger.info(f"Release %s of %s successfully deleted.", str(self.version), self.model_id)
+        logger.info(
+            f"Release %s of %s successfully deleted.", str(self.version), self.model_id
+        )
 
         return True
 
@@ -314,7 +370,9 @@ class Release:
 
     @version.setter
     def version(self, value):
-        if ("_Release__version_obj" not in self.__dict__) and ("_Release__version_raw" not in self.__dict__):
+        if ("_Release__version_obj" not in self.__dict__) and (
+            "_Release__version_raw" not in self.__dict__
+        ):
             if isinstance(value, str):
                 if value.startswith("v"):
                     value = value[1:]

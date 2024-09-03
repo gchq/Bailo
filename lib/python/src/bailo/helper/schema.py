@@ -65,7 +65,11 @@ class Schema:
             json_schema=json_schema,
         )
         res = client.post_schema(
-            schema_id=schema_id, name=name, description=description, kind=kind, json_schema=json_schema
+            schema_id=schema_id,
+            name=name,
+            description=description,
+            kind=kind,
+            json_schema=json_schema,
         )
         logger.info(f"Schema successfully created on server with ID %s.", schema_id)
         schema.__unpack(res["schema"])
@@ -117,4 +121,6 @@ class Schema:
         if kind == "accessRequest":
             self.kind = SchemaKind.ACCESS_REQUEST
 
-        logger.info(f"Attributes for Schema ID %s successfully unpacked.", self.schema_id)
+        logger.info(
+            f"Attributes for Schema ID %s successfully unpacked.", self.schema_id
+        )

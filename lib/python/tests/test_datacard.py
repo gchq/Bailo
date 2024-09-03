@@ -89,4 +89,6 @@ def test_get_model_as_datacard(integration_client):
     )
 
     with pytest.raises(BailoException):
-        datacard = Datacard.from_id(client=integration_client, datacard_id=model.model_id)
+        datacard = Datacard.from_id(
+            client=integration_client, datacard_id=model.model_id
+        )
