@@ -60,7 +60,7 @@
     "nodemailer": "^6.9.14",
     "outdent": "^0.8.0",
     "pretty-bytes": "^6.1.1",
-    "qs": "^6.12.2",
+    "qs": "^6.13.0",
     "semver": "^7.6.3",
     "shelljs": "^0.8.5",
     "showdown": "^2.1.0",
