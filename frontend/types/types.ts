@@ -70,9 +70,23 @@ export interface FileInterface {
 
   complete: boolean
 
+  avScan: {
+    state: ScanStateKeys
+    isInfected?: boolean
+    viruses?: Array<unknown>
+  }
+
   createdAt: Date
   updatedAt: Date
 }
+
+export const ScanState = {
+  NotScanned: 'notScanned',
+  InProgress: 'inProgress',
+  Complete: 'complete',
+  Error: 'error',
+} as const
+export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
 
 export const ResponseKind = {
   Review: 'review',
