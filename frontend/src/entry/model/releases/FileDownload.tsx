@@ -1,7 +1,6 @@
-import { Coronavirus } from '@mui/icons-material'
-import { Box, Button, Grid, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { Done, Warning } from '@mui/icons-material'
+import { Chip, Grid, Link, Stack, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
-import { useState } from 'react'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
 
 type FileDownloadProps = {
@@ -10,12 +9,21 @@ type FileDownloadProps = {
 }
 
 export default function FileDownload({ modelId, file }: FileDownloadProps) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-
-  const stateDisplay = (state: string) => {
-    const result = state.replace(/([A-Z])/g, ' $1')
-    return result.charAt(0).toUpperCase() + result.slice(1)
+  const avChip = (fileScan: FileInterface['avScan']) => {
+    if (fileScan.state !== ScanState.Complete) {
+      return <Chip size='small' label='Virus scan in progress' />
+    }
+    if (fileScan.viruses && fileScan.viruses.length > 0) {
+      return (
+        <Chip
+          color={'error'}
+          icon={<Warning />}
+          size='small'
+          label={`Virus scan failed: ${fileScan.viruses.length} threats found`}
+        />
+      )
+    }
+    return <Chip color={'success'} icon={<Done />} size='small' label={'Virus scan passed'} />
   }
 
   return (
@@ -32,45 +40,13 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
                     </Typography>
                   </Link>
                 </Tooltip>
-                <Button
-                  variant='contained'
-                  size='small'
-                  startIcon={<Coronavirus />}
-                  onClick={(e) => setAnchorEl(anchorEl ? null : e.currentTarget)}
-                >
-                  AV Results
-                </Button>
+                {avChip(file.avScan)}
               </Stack>
             </Grid>
             <Grid item xs={1} textAlign='right'>
               <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
             </Grid>
           </Grid>
-          <Popover
-            open={open}
-            anchorEl={anchorEl}
-            onClose={() => setAnchorEl(null)}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'center',
-            }}
-          >
-            <Box sx={{ p: 1 }}>
-              <Stack>
-                <Typography>Scan status: {stateDisplay(file.avScan.state)}</Typography>
-                {file.avScan.state === ScanState.Complete && (
-                  <Typography fontWeight='bold'>{file.avScan.isInfected ? 'Infected' : 'Not infected'}</Typography>
-                )}
-                {file.avScan.state === ScanState.Complete && file.avScan.viruses && file.avScan.isInfected && (
-                  <Typography>Viruses found: {file.avScan.viruses.length}</Typography>
-                )}
-              </Stack>
-            </Box>
-          </Popover>
         </>
       )}
     </>
