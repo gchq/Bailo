@@ -52,8 +52,6 @@
    "outputs": [],
    "source": [
     "# Necessary import statements\n",
-    "# Install dependencies...\n",
-    "! pip install mlflow bailo\n",
     "\n",
     "from bailo import Datacard, Client\n",
     "\n",

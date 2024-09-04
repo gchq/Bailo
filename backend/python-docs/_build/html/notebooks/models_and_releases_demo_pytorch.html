@@ -7,6 +7,7 @@
   <title>Managing Models &amp; Releases (ResNet-50 Example with PyTorch) &mdash; Bailo Python Client Docs 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.png"/>
@@ -17,7 +18,7 @@
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../_static/documentation_options.js?v=01f34227"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
         <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
@@ -114,277 +115,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-div.rendered_html th {
-  font-weight: bold;
-}
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-
-/* CSS overrides for sphinx_rtd_theme */
-
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
-
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<section id="Managing-Models-&amp;-Releases-(ResNet-50-Example-with-PyTorch)">
+  <section id="Managing-Models-&amp;-Releases-(ResNet-50-Example-with-PyTorch)">
 <h1>Managing Models &amp; Releases (ResNet-50 Example with PyTorch)<a class="headerlink" href="#Managing-Models-&-Releases-(ResNet-50-Example-with-PyTorch)" title="Link to this heading"></a></h1>
 <p>The Bailo python client enables intuitive interaction with the Bailo service, from within a python environment. This example notebook will run through the following concepts:</p>
 <ul class="simple">
@@ -404,7 +135,7 @@ div.rendered_html tbody tr:hover {
 <p>The Bailo python client is split into two sub-packages: <strong>core</strong> and <strong>helper</strong>.</p>
 <ul class="simple">
 <li><p><strong>Core:</strong> For direct interactions with the service endpoints.</p></li>
-<li><p><strong>Helper:</strong> For more intuitive interactions with the service, using classes (e.g. Model) to handle operations.</p></li>
+<li><p><strong>Helper:</strong> For more intuitive interactions with the service, using classes (e.g. Model) to handle operations.</p></li>
 </ul>
 <p>In order to create helper classes, you will first need to instantiate a <code class="docutils literal notranslate"><span class="pre">Client()</span></code> object from the core. By default, this object will not support any authentication. However, Bailo also supports PKI authentication, which you can use from Python by passing a <code class="docutils literal notranslate"><span class="pre">PkiAgent()</span></code> object into the <code class="docutils literal notranslate"><span class="pre">Client()</span></code> object when you instantiate it.</p>
 <p><strong>IMPORTANT: Select the relevant pip install command based on your environment.</strong></p>
@@ -412,8 +143,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># LINUX - CPU</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># LINUX - CPU</span>
 <span class="o">!</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>bailo<span class="w"> </span>torch<span class="w"> </span>torchvision<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cpu
 
 <span class="c1"># MAC &amp; WINDOWS  - CPU</span>
@@ -425,8 +155,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Necessary import statements</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Necessary import statements</span>
 
 <span class="kn">from</span> <span class="nn">bailo</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Client</span>
 <span class="kn">import</span> <span class="nn">torch</span>
@@ -452,8 +181,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ResNet-50&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;ResNet-50 model for image classification.&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="s2">&quot;uncategorised&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ResNet-50&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;ResNet-50 model for image classification.&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="s2">&quot;uncategorised&quot;</span><span class="p">)</span>
 
 <span class="n">model_id</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_id</span>
 </pre></div>
@@ -468,34 +196,24 @@ div.rendered_html tbody tr:hover {
 <section id="Creating-and-populating-a-model-card">
 <h3>Creating and populating a model card<a class="headerlink" href="#Creating-and-populating-a-model-card" title="Link to this heading"></a></h3>
 <p>When creating a model card, first we need to generate an empty one using the <code class="docutils literal notranslate"><span class="pre">card_from_schema()</span></code> method. In this instance, we will use <strong>minimal-general-v10</strong>. You can manage custom schemas using the <code class="docutils literal notranslate"><span class="pre">Schema()</span></code> helper class, but this is out of scope for this demo.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model</span><span class="o">.</span><span class="n">card_from_schema</span><span class="p">(</span><span class="n">schema_id</span><span class="o">=</span><span class="s1">&#39;minimal-general-v10&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">card_from_schema</span><span class="p">(</span><span class="n">schema_id</span><span class="o">=</span><span class="s1">&#39;minimal-general-v10&#39;</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model card version is </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">model_card_version</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Model card version is 1.
-</pre></div></div>
-</div>
 <p>If successful, the above will have created a new model card, and the <code class="docutils literal notranslate"><span class="pre">model_card_version</span></code> attribute should be set to 1.</p>
 <p>Next, we can populate the model card using the <code class="docutils literal notranslate"><span class="pre">update_model_card()</span></code> method. This can be used any time you want to make changes, and the backend will create a new model card version each time. We’ll learn how to retrieve model cards later (either the latest, or a specific release).</p>
 <p>NOTE: Your model card must match the schema, otherwise an error will be thrown.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">new_card</span> <span class="o">=</span> <span class="p">{</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">new_card</span> <span class="o">=</span> <span class="p">{</span>
   <span class="s1">&#39;overview&#39;</span><span class="p">:</span> <span class="p">{</span>
     <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="p">[],</span>
     <span class="s1">&#39;modelSummary&#39;</span><span class="p">:</span> <span class="s1">&#39;ResNet-50 model for image classification.&#39;</span><span class="p">,</span>
@@ -508,14 +226,6 @@ Model card version is 1.
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Model card version is 2.
-</pre></div></div>
-</div>
 <p>If successful, the <code class="docutils literal notranslate"><span class="pre">model_card_version</span></code> will now be 2!</p>
 </section>
 </section>
@@ -524,24 +234,15 @@ Model card version is 2.
 <section id="Using-the-.from_id()-method">
 <h3>Using the .from_id() method<a class="headerlink" href="#Using-the-.from_id()-method" title="Link to this heading"></a></h3>
 <p>In this section, we’ll retrieve our previous model using the <code class="docutils literal notranslate"><span class="pre">Model.from_id()</span></code> classmethod. This will create your <code class="docutils literal notranslate"><span class="pre">Model()</span></code> object as before, but using existing information retrieved from the service.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">from_id</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">from_id</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="n">model_id</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model description: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Model description: ResNet-50 model for image classification.
-</pre></div></div>
 </div>
 <p>If successful, the model description we set earlier should be displayed above.</p>
 </section>
@@ -556,8 +257,7 @@ Model description: ResNet-50 model for image classification.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">release_one</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_release</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.0.0&#39;</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="s1">&#39;Initial model weights.&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">release_one</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_release</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.0.0&#39;</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="s1">&#39;Initial model weights.&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -569,8 +269,7 @@ Model description: ResNet-50 model for image classification.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">torch_model</span> <span class="o">=</span> <span class="n">resnet50</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">ResNet50_Weights</span><span class="o">.</span><span class="n">DEFAULT</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">torch_model</span> <span class="o">=</span> <span class="n">resnet50</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">ResNet50_Weights</span><span class="o">.</span><span class="n">DEFAULT</span><span class="p">)</span>
 <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">torch_model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="s1">&#39;resnet50_weights.pth&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -580,30 +279,13 @@ Model description: ResNet-50 model for image classification.
 <h3>Uploading weights to the release<a class="headerlink" href="#Uploading-weights-to-the-release" title="Link to this heading"></a></h3>
 <p>To upload files for a release, we can use the release <code class="docutils literal notranslate"><span class="pre">upload()</span></code> method which will take a file name, and a <code class="docutils literal notranslate"><span class="pre">BytesIO</span></code> type containing the file contents. In this case, we’re using the <strong>resnet50_weights.pth</strong> we prepared in the last step.</p>
 <p>NOTE: The <code class="docutils literal notranslate"><span class="pre">upload()</span></code> method takes a <code class="docutils literal notranslate"><span class="pre">BytesIO</span></code> type to allow for other integrations, such as with S3.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">release_one</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;resnet50_weights.pth&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">release_one</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;resnet50_weights.pth&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-100%|<span class="ansi-blue-fg">██████████</span>| 97.8M/97.8M [00:01&lt;00:00, 55.8MB/s, uploading resnet50_weights.pth]
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&#39;66c4bb45daa30af637519b6e&#39;
-</pre></div></div>
 </div>
 </section>
 </section>
@@ -614,8 +296,7 @@ Model description: ResNet-50 model for image classification.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">release_latest</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_latest_release</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">release_latest</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_latest_release</span><span class="p">()</span>
 <span class="n">release_one</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_release</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="s1">&#39;1.0.0&#39;</span><span class="p">)</span>
 
 <span class="c1">#To demonstrate this is the same release:</span>
@@ -627,13 +308,12 @@ Model description: ResNet-50 model for image classification.
 <section id="Downloading-weights-from-the-release">
 <h3>Downloading weights from the release<a class="headerlink" href="#Downloading-weights-from-the-release" title="Link to this heading"></a></h3>
 <p>Similarly you can also download specific files from release using the <code class="docutils literal notranslate"><span class="pre">download()</span></code> method. In this case, we’ll write them to a new file: <strong>bailo_resnet50_weights.pth</strong>. <strong>NOTE</strong>: <code class="docutils literal notranslate"><span class="pre">filename</span></code> refers to the filename on Bailo, and <code class="docutils literal notranslate"><span class="pre">path</span></code> is the local destination for your download.</p>
-<p>In addition to this, you can also use the <code class="docutils literal notranslate"><span class="pre">download_all()</span></code> method by providing a local directory path as <code class="docutils literal notranslate"><span class="pre">path</span></code>. By default, this will download all files, but you can provide <code class="docutils literal notranslate"><span class="pre">include</span></code> and <code class="docutils literal notranslate"><span class="pre">exclude</span></code> lists, e.g. <code class="docutils literal notranslate"><span class="pre">include=[&quot;*.txt&quot;,</span> <span class="pre">&quot;*.json&quot;]</span></code> to only include TXT or JSON files.</p>
+<p>In addition to this, you can also use the <code class="docutils literal notranslate"><span class="pre">download_all()</span></code> method by providing a local directory path as <code class="docutils literal notranslate"><span class="pre">path</span></code>. By default, this will download all files, but you can provide <code class="docutils literal notranslate"><span class="pre">include</span></code> and <code class="docutils literal notranslate"><span class="pre">exclude</span></code> lists, e.g. <code class="docutils literal notranslate"><span class="pre">include=[&quot;*.txt&quot;,</span> <span class="pre">&quot;*.json&quot;]</span></code> to only include TXT or JSON files.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">#release_latest.download(filename=&quot;resnet50_weights.pth&quot;, path=&quot;bailo_resnet50_weights.pth&quot;)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#release_latest.download(filename=&quot;resnet50_weights.pth&quot;, path=&quot;bailo_resnet50_weights.pth&quot;)</span>
 <span class="n">release_latest</span><span class="o">.</span><span class="n">download_all</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;downloads&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -646,8 +326,7 @@ Model description: ResNet-50 model for image classification.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;downloads/resnet50_weights.pth&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;downloads/resnet50_weights.pth&quot;</span><span class="p">)</span>
 <span class="n">torch_model</span> <span class="o">=</span> <span class="n">resnet50</span><span class="p">()</span>
 <span class="n">torch_model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
 </pre></div>
@@ -660,8 +339,8 @@ Model description: ResNet-50 model for image classification.
 <h2>Searching for models<a class="headerlink" href="#Searching-for-models" title="Link to this heading"></a></h2>
 <p>In addition to fetching specific models, you can also use the <code class="docutils literal notranslate"><span class="pre">Model.search()</span></code> method to return a list of <code class="docutils literal notranslate"><span class="pre">Model()</span></code> objects that match your parameters. These parameters can be:</p>
 <ul class="simple">
-<li><p>Task of the model (e.g. image classification).</p></li>
-<li><p>Libraries used for the model (e.g. PyTorch).</p></li>
+<li><p>Task of the model (e.g. image classification).</p></li>
+<li><p>Libraries used for the model (e.g. PyTorch).</p></li>
 <li><p>Model card search (string to be found in model cards).</p></li>
 </ul>
 <p>In the below example, we’ll just search for all models with no filters.</p>
@@ -669,8 +348,7 @@ Model description: ResNet-50 model for image classification.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">models</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">models</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
 </pre></div>
