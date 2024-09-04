@@ -38,7 +38,7 @@ export default function EditableInference({ inference, currentUserRoles }: Edita
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   const [canUserEditOrDelete, actionButtonsTooltip] = useMemo(() => {
-    const validRoles = ['owner', 'contributor']
+    const validRoles = ['owner', 'mtr', 'msro', 'contributor']
     return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
   }, [currentUserRoles])
 

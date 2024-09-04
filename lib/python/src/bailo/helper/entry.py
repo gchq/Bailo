@@ -71,12 +71,12 @@ class Entry:
 
         logger.info(f"Card for ID %s successfully created using schema ID %s.", self.id, schema_id)
 
-    def card_from_template(self):
-        """Create a card using a template (not yet implemented).
+    def card_from_template(self, template_id: str) -> None:
+        """Create a card using a template (not yet implemented)."""
+        res = self.client.model_card_from_template(model_id=self.id, template_id=template_id)
+        self.__unpack_card(res["card"])
 
-        :raises NotImplementedError: Not implemented error
-        """
-        raise NotImplementedError
+        logger.info(f"Card for ID %s successfully created using template ID %s", self.id, template_id)
 
     def get_card_latest(self) -> None:
         """Get the latest card from Bailo."""

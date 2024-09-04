@@ -7,6 +7,7 @@ import {
   canUserActionModelById,
   createModel,
   createModelCardFromSchema,
+  createModelCardFromTemplate,
   getModelById,
   getModelCardRevision,
   searchModels,
@@ -310,5 +311,65 @@ describe('services > model', () => {
       /^Cannot alter a mirrored model./,
     )
     expect(modelMocks.save).not.toBeCalled()
+  })
+
+  test('crateModelCardFromTemplate > can create a model using a template', async () => {
+    const testModel = {
+      name: 'test model',
+      settings: {
+        mirror: {},
+      },
+    }
+    const testTemplate = {
+      name: 'test template',
+      settings: {
+        mirror: {},
+      },
+      card: {
+        schemaId: 'test-schema',
+        version: '1',
+        createdBy: 'User',
+        metadata: {
+          overview: {
+            questionOne: 'test',
+          },
+        },
+      },
+    }
+    modelMocks.findOne.mockResolvedValueOnce(testModel)
+    modelMocks.findOne.mockResolvedValueOnce(testTemplate)
+    await createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')
+    expect(modelCardRevisionModel.save).toBeCalled()
+    expect(modelMocks.updateOne).toBeCalled()
+  })
+
+  test('createModelCardFromTemplate > requesting to use a template without a model card will throw an error', async () => {
+    const testModel = {
+      name: 'test model',
+      settings: {
+        mirror: {},
+      },
+    }
+    modelMocks.findOne.mockResolvedValue(testModel)
+    expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')).rejects.toThrowError(
+      /^The template model is missing a model card/,
+    )
+  })
+
+  test('createModelCardFromTemplate > throw bad request when supplying the same template and model id', async () => {
+    expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testModel')).rejects.toThrowError(
+      'The model and template ID must be different',
+    )
+  })
+
+  test('createModelCardFromTemplate > throw forbidden when user does not have access to template', async () => {
+    vi.mocked(authorisation.model).mockResolvedValue({
+      info: 'User does not have access to model',
+      success: false,
+      id: '',
+    })
+    expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')).rejects.toThrowError(
+      'User does not have access to model',
+    )
   })
 })

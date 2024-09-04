@@ -89,6 +89,17 @@ def test_model_card_from_schema(requests_mock):
     assert result == {"success": True}
 
 
+def test_model_card_from_template(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_id/setup/from-template",
+        json={"success": True},
+    )
+
+    client = Client("https://example.com")
+    result = client.model_card_from_template(model_id="test_id", template_id="test_id")
+    assert result == {"success": True}
+
+
 def test_post_release(requests_mock):
     requests_mock.post("https://example.com/api/v2/model/test_id/releases", json={"success": True})
 

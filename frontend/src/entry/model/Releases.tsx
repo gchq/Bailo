@@ -36,7 +36,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
   )
 
   const [canDraftRelease, requiredRolesText] = useMemo(() => {
-    const validRoles = ['owner', 'contributor']
+    const validRoles = ['owner', 'mtr', 'msro', 'contributor']
     return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
   }, [currentUserRoles])
 

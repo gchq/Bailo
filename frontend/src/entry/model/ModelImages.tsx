@@ -34,7 +34,7 @@ export default function ModelImages({ model, currentUserRoles, readOnly = false 
   )
 
   const [canPushImage, requiredRolesText] = useMemo(() => {
-    const validRoles = ['owner', 'contributor']
+    const validRoles = ['owner', 'mtr', 'msro', 'contributor']
     return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
   }, [currentUserRoles])
 
