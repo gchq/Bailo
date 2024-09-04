@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A comma-separated list of package or module names from where C extensions may &mdash; Bailo Python Client Docs 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=b2731ba4"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Bailo Python Client Docs
+              <img src="../_static/vertical-white.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme_link/">Bailo Python Client</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Packages:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../bailo.core/">bailo.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bailo.helper/">bailo.helper package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notebooks:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/access_requests_demo/">Managing Access Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/datacards_demo/">Managing Datacards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/experiment_tracking_demo/">Experiment Tracking with Bailo &amp; MLFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/models_and_releases_demo_pytorch/">Managing Models &amp; Releases (ResNet-50 Example with PyTorch)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks/schemas_demo/">Managing Schemas</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Bailo Python Client Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">A comma-separated list of package or module names from where C extensions may</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/pylint.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<p>[MASTER]</p>
+<section id="a-comma-separated-list-of-package-or-module-names-from-where-c-extensions-may">
+<h1>A comma-separated list of package or module names from where C extensions may<a class="headerlink" href="#a-comma-separated-list-of-package-or-module-names-from-where-c-extensions-may" title="Link to this heading"></a></h1>
+</section>
+<section id="be-loaded-extensions-are-loading-into-the-active-python-interpreter-and-may">
+<h1>be loaded. Extensions are loading into the active Python interpreter and may<a class="headerlink" href="#be-loaded-extensions-are-loading-into-the-active-python-interpreter-and-may" title="Link to this heading"></a></h1>
+</section>
+<section id="run-arbitrary-code">
+<h1>run arbitrary code.<a class="headerlink" href="#run-arbitrary-code" title="Link to this heading"></a></h1>
+<p>extension-pkg-whitelist=numpy,torch,cv2,pyodbc,pydantic,ciso8601,netcdf4,scipy</p>
+</section>
+<section id="add-files-or-directories-to-the-blacklist-they-should-be-base-names-not">
+<h1>Add files or directories to the blacklist. They should be base names, not<a class="headerlink" href="#add-files-or-directories-to-the-blacklist-they-should-be-base-names-not" title="Link to this heading"></a></h1>
+</section>
+<section id="paths">
+<h1>paths.<a class="headerlink" href="#paths" title="Link to this heading"></a></h1>
+<p>ignore=CVS</p>
+</section>
+<section id="add-files-or-directories-matching-the-regex-patterns-to-the-blacklist-the">
+<h1>Add files or directories matching the regex patterns to the blacklist. The<a class="headerlink" href="#add-files-or-directories-matching-the-regex-patterns-to-the-blacklist-the" title="Link to this heading"></a></h1>
+</section>
+<section id="regex-matches-against-base-names-not-paths">
+<h1>regex matches against base names, not paths.<a class="headerlink" href="#regex-matches-against-base-names-not-paths" title="Link to this heading"></a></h1>
+<p>ignore-patterns=test.*?py,conftest.py</p>
+</section>
+<section id="python-code-to-execute-usually-for-sys-path-manipulation-such-as">
+<h1>Python code to execute, usually for sys.path manipulation such as<a class="headerlink" href="#python-code-to-execute-usually-for-sys-path-manipulation-such-as" title="Link to this heading"></a></h1>
+</section>
+<section id="pygtk-require">
+<h1>pygtk.require().<a class="headerlink" href="#pygtk-require" title="Link to this heading"></a></h1>
+<p>init-hook=’import sys; sys.setrecursionlimit(8 * sys.getrecursionlimit())’</p>
+</section>
+<section id="use-multiple-processes-to-speed-up-pylint-specifying-0-will-auto-detect-the">
+<h1>Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the<a class="headerlink" href="#use-multiple-processes-to-speed-up-pylint-specifying-0-will-auto-detect-the" title="Link to this heading"></a></h1>
+</section>
+<section id="number-of-processors-available-to-use">
+<h1>number of processors available to use.<a class="headerlink" href="#number-of-processors-available-to-use" title="Link to this heading"></a></h1>
+<p>jobs=0</p>
+</section>
+<section id="control-the-amount-of-potential-inferred-values-when-inferring-a-single">
+<h1>Control the amount of potential inferred values when inferring a single<a class="headerlink" href="#control-the-amount-of-potential-inferred-values-when-inferring-a-single" title="Link to this heading"></a></h1>
+</section>
+<section id="object-this-can-help-the-performance-when-dealing-with-large-functions-or">
+<h1>object. This can help the performance when dealing with large functions or<a class="headerlink" href="#object-this-can-help-the-performance-when-dealing-with-large-functions-or" title="Link to this heading"></a></h1>
+</section>
+<section id="complex-nested-conditions">
+<h1>complex, nested conditions.<a class="headerlink" href="#complex-nested-conditions" title="Link to this heading"></a></h1>
+<p>limit-inference-results=100</p>
+</section>
+<section id="list-of-plugins-as-comma-separated-values-of-python-module-names-to-load">
+<h1>List of plugins (as comma separated values of python module names) to load,<a class="headerlink" href="#list-of-plugins-as-comma-separated-values-of-python-module-names-to-load" title="Link to this heading"></a></h1>
+</section>
+<section id="usually-to-register-additional-checkers">
+<h1>usually to register additional checkers.<a class="headerlink" href="#usually-to-register-additional-checkers" title="Link to this heading"></a></h1>
+</section>
+<section id="pickle-collected-data-for-later-comparisons">
+<h1>Pickle collected data for later comparisons.<a class="headerlink" href="#pickle-collected-data-for-later-comparisons" title="Link to this heading"></a></h1>
+<p>persistent=yes</p>
+</section>
+<section id="specify-a-configuration-file">
+<h1>Specify a configuration file.<a class="headerlink" href="#specify-a-configuration-file" title="Link to this heading"></a></h1>
+<p>#rcfile=</p>
+</section>
+<section id="when-enabled-pylint-would-attempt-to-guess-common-misconfiguration-and-emit">
+<h1>When enabled, pylint would attempt to guess common misconfiguration and emit<a class="headerlink" href="#when-enabled-pylint-would-attempt-to-guess-common-misconfiguration-and-emit" title="Link to this heading"></a></h1>
+</section>
+<section id="user-friendly-hints-instead-of-false-positive-error-messages">
+<h1>user-friendly hints instead of false-positive error messages.<a class="headerlink" href="#user-friendly-hints-instead-of-false-positive-error-messages" title="Link to this heading"></a></h1>
+<p>suggestion-mode=yes</p>
+</section>
+<section id="allow-loading-of-arbitrary-c-extensions-extensions-are-imported-into-the">
+<h1>Allow loading of arbitrary C extensions. Extensions are imported into the<a class="headerlink" href="#allow-loading-of-arbitrary-c-extensions-extensions-are-imported-into-the" title="Link to this heading"></a></h1>
+</section>
+<section id="active-python-interpreter-and-may-run-arbitrary-code">
+<h1>active Python interpreter and may run arbitrary code.<a class="headerlink" href="#active-python-interpreter-and-may-run-arbitrary-code" title="Link to this heading"></a></h1>
+<p>unsafe-load-any-extension=no</p>
+<p>[MESSAGES CONTROL]</p>
+</section>
+<section id="only-show-warnings-with-the-listed-confidence-levels-leave-empty-to-show">
+<h1>Only show warnings with the listed confidence levels. Leave empty to show<a class="headerlink" href="#only-show-warnings-with-the-listed-confidence-levels-leave-empty-to-show" title="Link to this heading"></a></h1>
+</section>
+<section id="all-valid-levels-high-inference-inference-failure-undefined">
+<h1>all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED.<a class="headerlink" href="#all-valid-levels-high-inference-inference-failure-undefined" title="Link to this heading"></a></h1>
+<p>confidence=</p>
+</section>
+<section id="disable-the-message-report-category-or-checker-with-the-given-id-s-you">
+<h1>Disable the message, report, category or checker with the given id(s). You<a class="headerlink" href="#disable-the-message-report-category-or-checker-with-the-given-id-s-you" title="Link to this heading"></a></h1>
+</section>
+<section id="can-either-give-multiple-identifiers-separated-by-comma-or-put-this">
+<h1>can either give multiple identifiers separated by comma (,) or put this<a class="headerlink" href="#can-either-give-multiple-identifiers-separated-by-comma-or-put-this" title="Link to this heading"></a></h1>
+</section>
+<section id="option-multiple-times-only-on-the-command-line-not-in-the-configuration">
+<h1>option multiple times (only on the command line, not in the configuration<a class="headerlink" href="#option-multiple-times-only-on-the-command-line-not-in-the-configuration" title="Link to this heading"></a></h1>
+</section>
+<section id="file-where-it-should-appear-only-once-you-can-also-use-disable-all-to">
+<h1>file where it should appear only once). You can also use “–disable=all” to<a class="headerlink" href="#file-where-it-should-appear-only-once-you-can-also-use-disable-all-to" title="Link to this heading"></a></h1>
+</section>
+<section id="disable-everything-first-and-then-reenable-specific-checks-for-example-if">
+<h1>disable everything first and then reenable specific checks. For example, if<a class="headerlink" href="#disable-everything-first-and-then-reenable-specific-checks-for-example-if" title="Link to this heading"></a></h1>
+</section>
+<section id="you-want-to-run-only-the-similarities-checker-you-can-use-disable-all">
+<h1>you want to run only the similarities checker, you can use “–disable=all<a class="headerlink" href="#you-want-to-run-only-the-similarities-checker-you-can-use-disable-all" title="Link to this heading"></a></h1>
+</section>
+<section id="enable-similarities-if-you-want-to-run-only-the-classes-checker-but-have">
+<h1>–enable=similarities”. If you want to run only the classes checker, but have<a class="headerlink" href="#enable-similarities-if-you-want-to-run-only-the-classes-checker-but-have" title="Link to this heading"></a></h1>
+</section>
+<section id="no-warning-level-messages-displayed-use-disable-all-enable-classes">
+<h1>no Warning level messages displayed, use “–disable=all –enable=classes<a class="headerlink" href="#no-warning-level-messages-displayed-use-disable-all-enable-classes" title="Link to this heading"></a></h1>
+</section>
+<section id="disable-w">
+<h1>–disable=W”.<a class="headerlink" href="#disable-w" title="Link to this heading"></a></h1>
+<p>#disable=</p>
+</section>
+<section id="enable-the-message-report-category-or-checker-with-the-given-id-s-you-can">
+<h1>Enable the message, report, category or checker with the given id(s). You can<a class="headerlink" href="#enable-the-message-report-category-or-checker-with-the-given-id-s-you-can" title="Link to this heading"></a></h1>
+</section>
+<section id="either-give-multiple-identifier-separated-by-comma-or-put-this-option">
+<h1>either give multiple identifier separated by comma (,) or put this option<a class="headerlink" href="#either-give-multiple-identifier-separated-by-comma-or-put-this-option" title="Link to this heading"></a></h1>
+</section>
+<section id="multiple-time-only-on-the-command-line-not-in-the-configuration-file-where">
+<h1>multiple time (only on the command line, not in the configuration file where<a class="headerlink" href="#multiple-time-only-on-the-command-line-not-in-the-configuration-file-where" title="Link to this heading"></a></h1>
+</section>
+<section id="it-should-appear-only-once-see-also-the-disable-option-for-examples">
+<h1>it should appear only once). See also the “–disable” option for examples.<a class="headerlink" href="#it-should-appear-only-once-see-also-the-disable-option-for-examples" title="Link to this heading"></a></h1>
+<p>enable=c-extension-no-member</p>
+<p>[REPORTS]</p>
+</section>
+<section id="python-expression-which-should-return-a-score-less-than-or-equal-to-10-you">
+<h1>Python expression which should return a score less than or equal to 10. You<a class="headerlink" href="#python-expression-which-should-return-a-score-less-than-or-equal-to-10-you" title="Link to this heading"></a></h1>
+</section>
+<section id="have-access-to-the-variables-error-warning-refactor-and-convention">
+<h1>have access to the variables ‘error’, ‘warning’, ‘refactor’, and ‘convention’<a class="headerlink" href="#have-access-to-the-variables-error-warning-refactor-and-convention" title="Link to this heading"></a></h1>
+</section>
+<section id="which-contain-the-number-of-messages-in-each-category-as-well-as-statement">
+<h1>which contain the number of messages in each category, as well as ‘statement’<a class="headerlink" href="#which-contain-the-number-of-messages-in-each-category-as-well-as-statement" title="Link to this heading"></a></h1>
+</section>
+<section id="which-is-the-total-number-of-statements-analyzed-this-score-is-used-by-the">
+<h1>which is the total number of statements analyzed. This score is used by the<a class="headerlink" href="#which-is-the-total-number-of-statements-analyzed-this-score-is-used-by-the" title="Link to this heading"></a></h1>
+</section>
+<section id="global-evaluation-report-rp0004">
+<h1>global evaluation report (RP0004).<a class="headerlink" href="#global-evaluation-report-rp0004" title="Link to this heading"></a></h1>
+<p>evaluation=10.0 - ((float(5 _ error + warning + refactor + convention) / statement) _ 10)</p>
+</section>
+<section id="template-used-to-display-messages-this-is-a-python-new-style-format-string">
+<h1>Template used to display messages. This is a python new-style format string<a class="headerlink" href="#template-used-to-display-messages-this-is-a-python-new-style-format-string" title="Link to this heading"></a></h1>
+</section>
+<section id="used-to-format-the-message-information-see-doc-for-all-details">
+<h1>used to format the message information. See doc for all details.<a class="headerlink" href="#used-to-format-the-message-information-see-doc-for-all-details" title="Link to this heading"></a></h1>
+<p>#msg-template=</p>
+</section>
+<section id="set-the-output-format-available-formats-are-text-parseable-colorized-json">
+<h1>Set the output format. Available formats are text, parseable, colorized, json<a class="headerlink" href="#set-the-output-format-available-formats-are-text-parseable-colorized-json" title="Link to this heading"></a></h1>
+</section>
+<section id="and-msvs-visual-studio-you-can-also-give-a-reporter-class-e-g">
+<h1>and msvs (visual studio). You can also give a reporter class, e.g.<a class="headerlink" href="#and-msvs-visual-studio-you-can-also-give-a-reporter-class-e-g" title="Link to this heading"></a></h1>
+</section>
+<section id="mypackage-mymodule-myreporterclass">
+<h1>mypackage.mymodule.MyReporterClass.<a class="headerlink" href="#mypackage-mymodule-myreporterclass" title="Link to this heading"></a></h1>
+<p>output-format=text</p>
+</section>
+<section id="tells-whether-to-display-a-full-report-or-only-the-messages">
+<h1>Tells whether to display a full report or only the messages.<a class="headerlink" href="#tells-whether-to-display-a-full-report-or-only-the-messages" title="Link to this heading"></a></h1>
+<p>reports=no</p>
+</section>
+<section id="activate-the-evaluation-score">
+<h1>Activate the evaluation score.<a class="headerlink" href="#activate-the-evaluation-score" title="Link to this heading"></a></h1>
+<p>score=yes</p>
+<p>[REFACTORING]</p>
+</section>
+<section id="maximum-number-of-nested-blocks-for-function-method-body">
+<h1>Maximum number of nested blocks for function / method body<a class="headerlink" href="#maximum-number-of-nested-blocks-for-function-method-body" title="Link to this heading"></a></h1>
+<p>max-nested-blocks=5</p>
+</section>
+<section id="complete-name-of-functions-that-never-returns-when-checking-for">
+<h1>Complete name of functions that never returns. When checking for<a class="headerlink" href="#complete-name-of-functions-that-never-returns-when-checking-for" title="Link to this heading"></a></h1>
+</section>
+<section id="inconsistent-return-statements-if-a-never-returning-function-is-called-then">
+<h1>inconsistent-return-statements if a never returning function is called then<a class="headerlink" href="#inconsistent-return-statements-if-a-never-returning-function-is-called-then" title="Link to this heading"></a></h1>
+</section>
+<section id="it-will-be-considered-as-an-explicit-return-statement-and-no-message-will-be">
+<h1>it will be considered as an explicit return statement and no message will be<a class="headerlink" href="#it-will-be-considered-as-an-explicit-return-statement-and-no-message-will-be" title="Link to this heading"></a></h1>
+</section>
+<section id="printed">
+<h1>printed.<a class="headerlink" href="#printed" title="Link to this heading"></a></h1>
+<p>never-returning-functions=sys.exit</p>
+<p>[BASIC]</p>
+</section>
+<section id="naming-style-matching-correct-argument-names">
+<h1>Naming style matching correct argument names.<a class="headerlink" href="#naming-style-matching-correct-argument-names" title="Link to this heading"></a></h1>
+<p>argument-naming-style=snake_case</p>
+</section>
+<section id="regular-expression-matching-correct-argument-names-overrides-argument">
+<h1>Regular expression matching correct argument names. Overrides argument-<a class="headerlink" href="#regular-expression-matching-correct-argument-names-overrides-argument" title="Link to this heading"></a></h1>
+</section>
+<section id="naming-style">
+<h1>naming-style.<a class="headerlink" href="#naming-style" title="Link to this heading"></a></h1>
+<p>#argument-rgx=</p>
+</section>
+<section id="naming-style-matching-correct-attribute-names">
+<h1>Naming style matching correct attribute names.<a class="headerlink" href="#naming-style-matching-correct-attribute-names" title="Link to this heading"></a></h1>
+<p>attr-naming-style=snake_case</p>
+</section>
+<section id="regular-expression-matching-correct-attribute-names-overrides-attr-naming">
+<h1>Regular expression matching correct attribute names. Overrides attr-naming-<a class="headerlink" href="#regular-expression-matching-correct-attribute-names-overrides-attr-naming" title="Link to this heading"></a></h1>
+</section>
+<section id="style">
+<h1>style.<a class="headerlink" href="#style" title="Link to this heading"></a></h1>
+<p>#attr-rgx=</p>
+</section>
+<section id="bad-variable-names-which-should-always-be-refused-separated-by-a-comma">
+<h1>Bad variable names which should always be refused, separated by a comma.<a class="headerlink" href="#bad-variable-names-which-should-always-be-refused-separated-by-a-comma" title="Link to this heading"></a></h1>
+<p>bad-names=foo, bar, baz, toto, tutu, tata</p>
+</section>
+<section id="naming-style-matching-correct-class-attribute-names">
+<h1>Naming style matching correct class attribute names.<a class="headerlink" href="#naming-style-matching-correct-class-attribute-names" title="Link to this heading"></a></h1>
+<p>class-attribute-naming-style=any</p>
+</section>
+<section id="regular-expression-matching-correct-class-attribute-names-overrides-class">
+<h1>Regular expression matching correct class attribute names. Overrides class-<a class="headerlink" href="#regular-expression-matching-correct-class-attribute-names-overrides-class" title="Link to this heading"></a></h1>
+</section>
+<section id="attribute-naming-style">
+<h1>attribute-naming-style.<a class="headerlink" href="#attribute-naming-style" title="Link to this heading"></a></h1>
+<p>#class-attribute-rgx=</p>
+</section>
+<section id="naming-style-matching-correct-class-names">
+<h1>Naming style matching correct class names.<a class="headerlink" href="#naming-style-matching-correct-class-names" title="Link to this heading"></a></h1>
+<p>class-naming-style=PascalCase</p>
+</section>
+<section id="regular-expression-matching-correct-class-names-overrides-class-naming">
+<h1>Regular expression matching correct class names. Overrides class-naming-<a class="headerlink" href="#regular-expression-matching-correct-class-names-overrides-class-naming" title="Link to this heading"></a></h1>
+</section>
+<section id="id1">
+<h1>style.<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>#class-rgx=</p>
+</section>
+<section id="naming-style-matching-correct-constant-names">
+<h1>Naming style matching correct constant names.<a class="headerlink" href="#naming-style-matching-correct-constant-names" title="Link to this heading"></a></h1>
+<p>const-naming-style=UPPER_CASE</p>
+</section>
+<section id="regular-expression-matching-correct-constant-names-overrides-const-naming">
+<h1>Regular expression matching correct constant names. Overrides const-naming-<a class="headerlink" href="#regular-expression-matching-correct-constant-names-overrides-const-naming" title="Link to this heading"></a></h1>
+</section>
+<section id="id2">
+<h1>style.<a class="headerlink" href="#id2" title="Link to this heading"></a></h1>
+<p>#const-rgx=</p>
+</section>
+<section id="minimum-line-length-for-functions-classes-that-require-docstrings-shorter">
+<h1>Minimum line length for functions/classes that require docstrings, shorter<a class="headerlink" href="#minimum-line-length-for-functions-classes-that-require-docstrings-shorter" title="Link to this heading"></a></h1>
+</section>
+<section id="ones-are-exempt">
+<h1>ones are exempt.<a class="headerlink" href="#ones-are-exempt" title="Link to this heading"></a></h1>
+<p>docstring-min-length=-1</p>
+</section>
+<section id="naming-style-matching-correct-function-names">
+<h1>Naming style matching correct function names.<a class="headerlink" href="#naming-style-matching-correct-function-names" title="Link to this heading"></a></h1>
+<p>function-naming-style=snake_case</p>
+</section>
+<section id="regular-expression-matching-correct-function-names-overrides-function">
+<h1>Regular expression matching correct function names. Overrides function-<a class="headerlink" href="#regular-expression-matching-correct-function-names-overrides-function" title="Link to this heading"></a></h1>
+</section>
+<section id="id3">
+<h1>naming-style.<a class="headerlink" href="#id3" title="Link to this heading"></a></h1>
+<p>#function-rgx=</p>
+</section>
+<section id="good-variable-names-which-should-always-be-accepted-separated-by-a-comma">
+<h1>Good variable names which should always be accepted, separated by a comma.<a class="headerlink" href="#good-variable-names-which-should-always-be-accepted-separated-by-a-comma" title="Link to this heading"></a></h1>
+<p>good-names=i, j, k, ex, Run, _, df, n, N, t, T, ax</p>
+</section>
+<section id="include-a-hint-for-the-correct-naming-format-with-invalid-name">
+<h1>Include a hint for the correct naming format with invalid-name.<a class="headerlink" href="#include-a-hint-for-the-correct-naming-format-with-invalid-name" title="Link to this heading"></a></h1>
+<p>include-naming-hint=no</p>
+</section>
+<section id="naming-style-matching-correct-inline-iteration-names">
+<h1>Naming style matching correct inline iteration names.<a class="headerlink" href="#naming-style-matching-correct-inline-iteration-names" title="Link to this heading"></a></h1>
+<p>inlinevar-naming-style=any</p>
+</section>
+<section id="regular-expression-matching-correct-inline-iteration-names-overrides">
+<h1>Regular expression matching correct inline iteration names. Overrides<a class="headerlink" href="#regular-expression-matching-correct-inline-iteration-names-overrides" title="Link to this heading"></a></h1>
+</section>
+<section id="inlinevar-naming-style">
+<h1>inlinevar-naming-style.<a class="headerlink" href="#inlinevar-naming-style" title="Link to this heading"></a></h1>
+<p>#inlinevar-rgx=</p>
+</section>
+<section id="naming-style-matching-correct-method-names">
+<h1>Naming style matching correct method names.<a class="headerlink" href="#naming-style-matching-correct-method-names" title="Link to this heading"></a></h1>
+<p>method-naming-style=snake_case</p>
+</section>
+<section id="regular-expression-matching-correct-method-names-overrides-method-naming">
+<h1>Regular expression matching correct method names. Overrides method-naming-<a class="headerlink" href="#regular-expression-matching-correct-method-names-overrides-method-naming" title="Link to this heading"></a></h1>
+</section>
+<section id="id4">
+<h1>style.<a class="headerlink" href="#id4" title="Link to this heading"></a></h1>
+<p>#method-rgx=</p>
+</section>
+<section id="naming-style-matching-correct-module-names">
+<h1>Naming style matching correct module names.<a class="headerlink" href="#naming-style-matching-correct-module-names" title="Link to this heading"></a></h1>
+<p>module-naming-style=any</p>
+</section>
+<section id="regular-expression-matching-correct-module-names-overrides-module-naming">
+<h1>Regular expression matching correct module names. Overrides module-naming-<a class="headerlink" href="#regular-expression-matching-correct-module-names-overrides-module-naming" title="Link to this heading"></a></h1>
+</section>
+<section id="id5">
+<h1>style.<a class="headerlink" href="#id5" title="Link to this heading"></a></h1>
+<p>#module-rgx=</p>
+</section>
+<section id="colon-delimited-sets-of-names-that-determine-each-other-s-naming-style-when">
+<h1>Colon-delimited sets of names that determine each other’s naming style when<a class="headerlink" href="#colon-delimited-sets-of-names-that-determine-each-other-s-naming-style-when" title="Link to this heading"></a></h1>
+</section>
+<section id="the-name-regexes-allow-several-styles">
+<h1>the name regexes allow several styles.<a class="headerlink" href="#the-name-regexes-allow-several-styles" title="Link to this heading"></a></h1>
+<p>name-group=</p>
+</section>
+<section id="regular-expression-which-should-only-match-function-or-class-names-that-do">
+<h1>Regular expression which should only match function or class names that do<a class="headerlink" href="#regular-expression-which-should-only-match-function-or-class-names-that-do" title="Link to this heading"></a></h1>
+</section>
+<section id="not-require-a-docstring">
+<h1>not require a docstring.<a class="headerlink" href="#not-require-a-docstring" title="Link to this heading"></a></h1>
+<p>no-docstring-rgx=^_</p>
+</section>
+<section id="list-of-decorators-that-produce-properties-such-as-abc-abstractproperty-add">
+<h1>List of decorators that produce properties, such as abc.abstractproperty. Add<a class="headerlink" href="#list-of-decorators-that-produce-properties-such-as-abc-abstractproperty-add" title="Link to this heading"></a></h1>
+</section>
+<section id="to-this-list-to-register-other-decorators-that-produce-valid-properties">
+<h1>to this list to register other decorators that produce valid properties.<a class="headerlink" href="#to-this-list-to-register-other-decorators-that-produce-valid-properties" title="Link to this heading"></a></h1>
+</section>
+<section id="these-decorators-are-taken-in-consideration-only-for-invalid-name">
+<h1>These decorators are taken in consideration only for invalid-name.<a class="headerlink" href="#these-decorators-are-taken-in-consideration-only-for-invalid-name" title="Link to this heading"></a></h1>
+<p>property-classes=abc.abstractproperty</p>
+</section>
+<section id="naming-style-matching-correct-variable-names">
+<h1>Naming style matching correct variable names.<a class="headerlink" href="#naming-style-matching-correct-variable-names" title="Link to this heading"></a></h1>
+<p>variable-naming-style=snake_case</p>
+</section>
+<section id="regular-expression-matching-correct-variable-names-overrides-variable">
+<h1>Regular expression matching correct variable names. Overrides variable-<a class="headerlink" href="#regular-expression-matching-correct-variable-names-overrides-variable" title="Link to this heading"></a></h1>
+</section>
+<section id="id6">
+<h1>naming-style.<a class="headerlink" href="#id6" title="Link to this heading"></a></h1>
+<p>#variable-rgx=</p>
+<p>[FORMAT]</p>
+</section>
+<section id="expected-format-of-line-ending-e-g-empty-any-line-ending-lf-or-crlf">
+<h1>Expected format of line ending, e.g. empty (any line ending), LF or CRLF.<a class="headerlink" href="#expected-format-of-line-ending-e-g-empty-any-line-ending-lf-or-crlf" title="Link to this heading"></a></h1>
+<p>expected-line-ending-format=</p>
+</section>
+<section id="regexp-for-a-line-that-is-allowed-to-be-longer-than-the-limit">
+<h1>Regexp for a line that is allowed to be longer than the limit.<a class="headerlink" href="#regexp-for-a-line-that-is-allowed-to-be-longer-than-the-limit" title="Link to this heading"></a></h1>
+<p>ignore-long-lines=^\s*(# )?.*[‘”]?&lt;?https?://\S+&gt;?</p>
+</section>
+<section id="number-of-spaces-of-indent-required-inside-a-hanging-or-continued-line">
+<h1>Number of spaces of indent required inside a hanging or continued line.<a class="headerlink" href="#number-of-spaces-of-indent-required-inside-a-hanging-or-continued-line" title="Link to this heading"></a></h1>
+<p>indent-after-paren=4</p>
+</section>
+<section id="string-used-as-indentation-unit-this-is-usually-4-spaces-or-t-1">
+<h1>String used as indentation unit. This is usually “ “ (4 spaces) or “\t” (1<a class="headerlink" href="#string-used-as-indentation-unit-this-is-usually-4-spaces-or-t-1" title="Link to this heading"></a></h1>
+</section>
+<section id="tab">
+<h1>tab).<a class="headerlink" href="#tab" title="Link to this heading"></a></h1>
+<p>indent-string=’ ‘</p>
+</section>
+<section id="maximum-number-of-characters-on-a-single-line">
+<h1>Maximum number of characters on a single line.<a class="headerlink" href="#maximum-number-of-characters-on-a-single-line" title="Link to this heading"></a></h1>
+<p>max-line-length=120</p>
+</section>
+<section id="maximum-number-of-lines-in-a-module">
+<h1>Maximum number of lines in a module.<a class="headerlink" href="#maximum-number-of-lines-in-a-module" title="Link to this heading"></a></h1>
+<p>max-module-lines=1000</p>
+</section>
+<section id="list-of-optional-constructs-for-which-whitespace-checking-is-disabled-dict">
+<h1>List of optional constructs for which whitespace checking is disabled. `dict-<a class="headerlink" href="#list-of-optional-constructs-for-which-whitespace-checking-is-disabled-dict" title="Link to this heading"></a></h1>
+</section>
+<section id="separator-is-used-to-allow-tabulation-in-dicts-etc-1-1-n222-2">
+<h1>separator` is used to allow tabulation in dicts, etc.: {1 : 1,\n222: 2}.<a class="headerlink" href="#separator-is-used-to-allow-tabulation-in-dicts-etc-1-1-n222-2" title="Link to this heading"></a></h1>
+</section>
+<section id="trailing-comma-allows-a-space-between-comma-and-closing-bracket-a">
+<h1><code class="docutils literal notranslate"><span class="pre">trailing-comma</span></code> allows a space between comma and closing bracket: (a, ).<a class="headerlink" href="#trailing-comma-allows-a-space-between-comma-and-closing-bracket-a" title="Link to this heading"></a></h1>
+</section>
+<section id="empty-line-allows-space-only-lines">
+<h1><code class="docutils literal notranslate"><span class="pre">empty-line</span></code> allows space-only lines.<a class="headerlink" href="#empty-line-allows-space-only-lines" title="Link to this heading"></a></h1>
+<p>no-space-check=trailing-comma, dict-separator</p>
+</section>
+<section id="allow-the-body-of-a-class-to-be-on-the-same-line-as-the-declaration-if-body">
+<h1>Allow the body of a class to be on the same line as the declaration if body<a class="headerlink" href="#allow-the-body-of-a-class-to-be-on-the-same-line-as-the-declaration-if-body" title="Link to this heading"></a></h1>
+</section>
+<section id="contains-single-statement">
+<h1>contains single statement.<a class="headerlink" href="#contains-single-statement" title="Link to this heading"></a></h1>
+<p>single-line-class-stmt=no</p>
+</section>
+<section id="allow-the-body-of-an-if-to-be-on-the-same-line-as-the-test-if-there-is-no">
+<h1>Allow the body of an if to be on the same line as the test if there is no<a class="headerlink" href="#allow-the-body-of-an-if-to-be-on-the-same-line-as-the-test-if-there-is-no" title="Link to this heading"></a></h1>
+</section>
+<section id="else">
+<h1>else.<a class="headerlink" href="#else" title="Link to this heading"></a></h1>
+<p>single-line-if-stmt=no</p>
+<p>[LOGGING]</p>
+</section>
+<section id="format-style-used-to-check-logging-format-string-old-means-using">
+<h1>Format style used to check logging format string. <code class="docutils literal notranslate"><span class="pre">old</span></code> means using %<a class="headerlink" href="#format-style-used-to-check-logging-format-string-old-means-using" title="Link to this heading"></a></h1>
+</section>
+<section id="formatting-new-is-for-formatting-and-fstr-is-for-f-strings">
+<h1>formatting, <code class="docutils literal notranslate"><span class="pre">new</span></code> is for <code class="docutils literal notranslate"><span class="pre">{}</span></code> formatting,and <code class="docutils literal notranslate"><span class="pre">fstr</span></code> is for f-strings.<a class="headerlink" href="#formatting-new-is-for-formatting-and-fstr-is-for-f-strings" title="Link to this heading"></a></h1>
+<p>logging-format-style=old</p>
+</section>
+<section id="logging-modules-to-check-that-the-string-format-arguments-are-in-logging">
+<h1>Logging modules to check that the string format arguments are in logging<a class="headerlink" href="#logging-modules-to-check-that-the-string-format-arguments-are-in-logging" title="Link to this heading"></a></h1>
+</section>
+<section id="function-parameter-format">
+<h1>function parameter format.<a class="headerlink" href="#function-parameter-format" title="Link to this heading"></a></h1>
+<p>logging-modules=logging</p>
+<p>[MISCELLANEOUS]</p>
+</section>
+<section id="list-of-note-tags-to-take-in-consideration-separated-by-a-comma">
+<h1>List of note tags to take in consideration, separated by a comma.<a class="headerlink" href="#list-of-note-tags-to-take-in-consideration-separated-by-a-comma" title="Link to this heading"></a></h1>
+<p>notes=FIXME, XXX, TODO</p>
+<p>[SIMILARITIES]</p>
+</section>
+<section id="ignore-comments-when-computing-similarities">
+<h1>Ignore comments when computing similarities.<a class="headerlink" href="#ignore-comments-when-computing-similarities" title="Link to this heading"></a></h1>
+<p>ignore-comments=yes</p>
+</section>
+<section id="ignore-docstrings-when-computing-similarities">
+<h1>Ignore docstrings when computing similarities.<a class="headerlink" href="#ignore-docstrings-when-computing-similarities" title="Link to this heading"></a></h1>
+<p>ignore-docstrings=yes</p>
+</section>
+<section id="ignore-imports-when-computing-similarities">
+<h1>Ignore imports when computing similarities.<a class="headerlink" href="#ignore-imports-when-computing-similarities" title="Link to this heading"></a></h1>
+<p>ignore-imports=yes</p>
+</section>
+<section id="minimum-lines-number-of-a-similarity">
+<h1>Minimum lines number of a similarity.<a class="headerlink" href="#minimum-lines-number-of-a-similarity" title="Link to this heading"></a></h1>
+<p>min-similarity-lines=9</p>
+<p>[SPELLING]</p>
+</section>
+<section id="limits-count-of-emitted-suggestions-for-spelling-mistakes">
+<h1>Limits count of emitted suggestions for spelling mistakes.<a class="headerlink" href="#limits-count-of-emitted-suggestions-for-spelling-mistakes" title="Link to this heading"></a></h1>
+<p>max-spelling-suggestions=4</p>
+</section>
+<section id="spelling-dictionary-name-available-dictionaries-none-to-make-it-work">
+<h1>Spelling dictionary name. Available dictionaries: none. To make it work,<a class="headerlink" href="#spelling-dictionary-name-available-dictionaries-none-to-make-it-work" title="Link to this heading"></a></h1>
+</section>
+<section id="install-the-python-enchant-package">
+<h1>install the python-enchant package.<a class="headerlink" href="#install-the-python-enchant-package" title="Link to this heading"></a></h1>
+<p>spelling-dict=</p>
+</section>
+<section id="list-of-comma-separated-words-that-should-not-be-checked">
+<h1>List of comma separated words that should not be checked.<a class="headerlink" href="#list-of-comma-separated-words-that-should-not-be-checked" title="Link to this heading"></a></h1>
+<p>spelling-ignore-words=</p>
+</section>
+<section id="a-path-to-a-file-that-contains-the-private-dictionary-one-word-per-line">
+<h1>A path to a file that contains the private dictionary; one word per line.<a class="headerlink" href="#a-path-to-a-file-that-contains-the-private-dictionary-one-word-per-line" title="Link to this heading"></a></h1>
+<p>spelling-private-dict-file=</p>
+</section>
+<section id="tells-whether-to-store-unknown-words-to-the-private-dictionary-see-the">
+<h1>Tells whether to store unknown words to the private dictionary (see the<a class="headerlink" href="#tells-whether-to-store-unknown-words-to-the-private-dictionary-see-the" title="Link to this heading"></a></h1>
+</section>
+<section id="spelling-private-dict-file-option-instead-of-raising-a-message">
+<h1>–spelling-private-dict-file option) instead of raising a message.<a class="headerlink" href="#spelling-private-dict-file-option-instead-of-raising-a-message" title="Link to this heading"></a></h1>
+<p>spelling-store-unknown-words=no</p>
+<p>[STRING]</p>
+</section>
+<section id="this-flag-controls-whether-the-implicit-str-concat-in-sequence-should">
+<h1>This flag controls whether the implicit-str-concat-in-sequence should<a class="headerlink" href="#this-flag-controls-whether-the-implicit-str-concat-in-sequence-should" title="Link to this heading"></a></h1>
+</section>
+<section id="generate-a-warning-on-implicit-string-concatenation-in-sequences-defined-over">
+<h1>generate a warning on implicit string concatenation in sequences defined over<a class="headerlink" href="#generate-a-warning-on-implicit-string-concatenation-in-sequences-defined-over" title="Link to this heading"></a></h1>
+</section>
+<section id="several-lines">
+<h1>several lines.<a class="headerlink" href="#several-lines" title="Link to this heading"></a></h1>
+<p>check-str-concat-over-line-jumps=no</p>
+<p>[TYPECHECK]</p>
+</section>
+<section id="list-of-decorators-that-produce-context-managers-such-as">
+<h1>List of decorators that produce context managers, such as<a class="headerlink" href="#list-of-decorators-that-produce-context-managers-such-as" title="Link to this heading"></a></h1>
+</section>
+<section id="contextlib-contextmanager-add-to-this-list-to-register-other-decorators-that">
+<h1>contextlib.contextmanager. Add to this list to register other decorators that<a class="headerlink" href="#contextlib-contextmanager-add-to-this-list-to-register-other-decorators-that" title="Link to this heading"></a></h1>
+</section>
+<section id="produce-valid-context-managers">
+<h1>produce valid context managers.<a class="headerlink" href="#produce-valid-context-managers" title="Link to this heading"></a></h1>
+<p>contextmanager-decorators=contextlib.contextmanager</p>
+</section>
+<section id="list-of-members-which-are-set-dynamically-and-missed-by-pylint-inference">
+<h1>List of members which are set dynamically and missed by pylint inference<a class="headerlink" href="#list-of-members-which-are-set-dynamically-and-missed-by-pylint-inference" title="Link to this heading"></a></h1>
+</section>
+<section id="system-and-so-shouldn-t-trigger-e1101-when-accessed-python-regular">
+<h1>system, and so shouldn’t trigger E1101 when accessed. Python regular<a class="headerlink" href="#system-and-so-shouldn-t-trigger-e1101-when-accessed-python-regular" title="Link to this heading"></a></h1>
+</section>
+<section id="expressions-are-accepted">
+<h1>expressions are accepted.<a class="headerlink" href="#expressions-are-accepted" title="Link to this heading"></a></h1>
+<p>generated-members=numpy.<em>,np.</em>,pyspark.sql.functions,collect_list</p>
+</section>
+<section id="tells-whether-missing-members-accessed-in-mixin-class-should-be-ignored-a">
+<h1>Tells whether missing members accessed in mixin class should be ignored. A<a class="headerlink" href="#tells-whether-missing-members-accessed-in-mixin-class-should-be-ignored-a" title="Link to this heading"></a></h1>
+</section>
+<section id="mixin-class-is-detected-if-its-name-ends-with-mixin-case-insensitive">
+<h1>mixin class is detected if its name ends with “mixin” (case insensitive).<a class="headerlink" href="#mixin-class-is-detected-if-its-name-ends-with-mixin-case-insensitive" title="Link to this heading"></a></h1>
+<p>ignore-mixin-members=yes</p>
+</section>
+<section id="tells-whether-to-warn-about-missing-members-when-the-owner-of-the-attribute">
+<h1>Tells whether to warn about missing members when the owner of the attribute<a class="headerlink" href="#tells-whether-to-warn-about-missing-members-when-the-owner-of-the-attribute" title="Link to this heading"></a></h1>
+</section>
+<section id="is-inferred-to-be-none">
+<h1>is inferred to be None.<a class="headerlink" href="#is-inferred-to-be-none" title="Link to this heading"></a></h1>
+<p>ignore-none=yes</p>
+</section>
+<section id="this-flag-controls-whether-pylint-should-warn-about-no-member-and-similar">
+<h1>This flag controls whether pylint should warn about no-member and similar<a class="headerlink" href="#this-flag-controls-whether-pylint-should-warn-about-no-member-and-similar" title="Link to this heading"></a></h1>
+</section>
+<section id="checks-whenever-an-opaque-object-is-returned-when-inferring-the-inference">
+<h1>checks whenever an opaque object is returned when inferring. The inference<a class="headerlink" href="#checks-whenever-an-opaque-object-is-returned-when-inferring-the-inference" title="Link to this heading"></a></h1>
+</section>
+<section id="can-return-multiple-potential-results-while-evaluating-a-python-object-but">
+<h1>can return multiple potential results while evaluating a Python object, but<a class="headerlink" href="#can-return-multiple-potential-results-while-evaluating-a-python-object-but" title="Link to this heading"></a></h1>
+</section>
+<section id="some-branches-might-not-be-evaluated-which-results-in-partial-inference-in">
+<h1>some branches might not be evaluated, which results in partial inference. In<a class="headerlink" href="#some-branches-might-not-be-evaluated-which-results-in-partial-inference-in" title="Link to this heading"></a></h1>
+</section>
+<section id="that-case-it-might-be-useful-to-still-emit-no-member-and-other-checks-for">
+<h1>that case, it might be useful to still emit no-member and other checks for<a class="headerlink" href="#that-case-it-might-be-useful-to-still-emit-no-member-and-other-checks-for" title="Link to this heading"></a></h1>
+</section>
+<section id="the-rest-of-the-inferred-objects">
+<h1>the rest of the inferred objects.<a class="headerlink" href="#the-rest-of-the-inferred-objects" title="Link to this heading"></a></h1>
+<p>ignore-on-opaque-inference=yes</p>
+</section>
+<section id="list-of-class-names-for-which-member-attributes-should-not-be-checked-useful">
+<h1>List of class names for which member attributes should not be checked (useful<a class="headerlink" href="#list-of-class-names-for-which-member-attributes-should-not-be-checked-useful" title="Link to this heading"></a></h1>
+</section>
+<section id="for-classes-with-dynamically-set-attributes-this-supports-the-use-of">
+<h1>for classes with dynamically set attributes). This supports the use of<a class="headerlink" href="#for-classes-with-dynamically-set-attributes-this-supports-the-use-of" title="Link to this heading"></a></h1>
+</section>
+<section id="qualified-names">
+<h1>qualified names.<a class="headerlink" href="#qualified-names" title="Link to this heading"></a></h1>
+<p>ignored-classes=optparse.Values,thread._local,_thread._local,numpy,torch,swagger_client</p>
+</section>
+<section id="list-of-module-names-for-which-member-attributes-should-not-be-checked">
+<h1>List of module names for which member attributes should not be checked<a class="headerlink" href="#list-of-module-names-for-which-member-attributes-should-not-be-checked" title="Link to this heading"></a></h1>
+</section>
+<section id="useful-for-modules-projects-where-namespaces-are-manipulated-during-runtime">
+<h1>(useful for modules/projects where namespaces are manipulated during runtime<a class="headerlink" href="#useful-for-modules-projects-where-namespaces-are-manipulated-during-runtime" title="Link to this heading"></a></h1>
+</section>
+<section id="and-thus-existing-member-attributes-cannot-be-deduced-by-static-analysis-it">
+<h1>and thus existing member attributes cannot be deduced by static analysis). It<a class="headerlink" href="#and-thus-existing-member-attributes-cannot-be-deduced-by-static-analysis-it" title="Link to this heading"></a></h1>
+</section>
+<section id="supports-qualified-module-names-as-well-as-unix-pattern-matching">
+<h1>supports qualified module names, as well as Unix pattern matching.<a class="headerlink" href="#supports-qualified-module-names-as-well-as-unix-pattern-matching" title="Link to this heading"></a></h1>
+<p>ignored-modules=numpy,torch,swagger_client,netCDF4,scipy</p>
+</section>
+<section id="show-a-hint-with-possible-names-when-a-member-name-was-not-found-the-aspect">
+<h1>Show a hint with possible names when a member name was not found. The aspect<a class="headerlink" href="#show-a-hint-with-possible-names-when-a-member-name-was-not-found-the-aspect" title="Link to this heading"></a></h1>
+</section>
+<section id="of-finding-the-hint-is-based-on-edit-distance">
+<h1>of finding the hint is based on edit distance.<a class="headerlink" href="#of-finding-the-hint-is-based-on-edit-distance" title="Link to this heading"></a></h1>
+<p>missing-member-hint=yes</p>
+</section>
+<section id="the-minimum-edit-distance-a-name-should-have-in-order-to-be-considered-a">
+<h1>The minimum edit distance a name should have in order to be considered a<a class="headerlink" href="#the-minimum-edit-distance-a-name-should-have-in-order-to-be-considered-a" title="Link to this heading"></a></h1>
+</section>
+<section id="similar-match-for-a-missing-member-name">
+<h1>similar match for a missing member name.<a class="headerlink" href="#similar-match-for-a-missing-member-name" title="Link to this heading"></a></h1>
+<p>missing-member-hint-distance=1</p>
+</section>
+<section id="the-total-number-of-similar-names-that-should-be-taken-in-consideration-when">
+<h1>The total number of similar names that should be taken in consideration when<a class="headerlink" href="#the-total-number-of-similar-names-that-should-be-taken-in-consideration-when" title="Link to this heading"></a></h1>
+</section>
+<section id="showing-a-hint-for-a-missing-member">
+<h1>showing a hint for a missing member.<a class="headerlink" href="#showing-a-hint-for-a-missing-member" title="Link to this heading"></a></h1>
+<p>missing-member-max-choices=1</p>
+</section>
+<section id="list-of-decorators-that-change-the-signature-of-a-decorated-function">
+<h1>List of decorators that change the signature of a decorated function.<a class="headerlink" href="#list-of-decorators-that-change-the-signature-of-a-decorated-function" title="Link to this heading"></a></h1>
+<p>signature-mutators=</p>
+<p>[VARIABLES]</p>
+</section>
+<section id="list-of-additional-names-supposed-to-be-defined-in-builtins-remember-that">
+<h1>List of additional names supposed to be defined in builtins. Remember that<a class="headerlink" href="#list-of-additional-names-supposed-to-be-defined-in-builtins-remember-that" title="Link to this heading"></a></h1>
+</section>
+<section id="you-should-avoid-defining-new-builtins-when-possible">
+<h1>you should avoid defining new builtins when possible.<a class="headerlink" href="#you-should-avoid-defining-new-builtins-when-possible" title="Link to this heading"></a></h1>
+<p>additional-builtins=dbutils</p>
+</section>
+<section id="tells-whether-unused-global-variables-should-be-treated-as-a-violation">
+<h1>Tells whether unused global variables should be treated as a violation.<a class="headerlink" href="#tells-whether-unused-global-variables-should-be-treated-as-a-violation" title="Link to this heading"></a></h1>
+<p>allow-global-unused-variables=yes</p>
+</section>
+<section id="list-of-strings-which-can-identify-a-callback-function-by-name-a-callback">
+<h1>List of strings which can identify a callback function by name. A callback<a class="headerlink" href="#list-of-strings-which-can-identify-a-callback-function-by-name-a-callback" title="Link to this heading"></a></h1>
+</section>
+<section id="name-must-start-or-end-with-one-of-those-strings">
+<h1>name must start or end with one of those strings.<a class="headerlink" href="#name-must-start-or-end-with-one-of-those-strings" title="Link to this heading"></a></h1>
+<p>callbacks=cb_, _cb</p>
+</section>
+<section id="a-regular-expression-matching-the-name-of-dummy-variables-i-e-expected-to">
+<h1>A regular expression matching the name of dummy variables (i.e. expected to<a class="headerlink" href="#a-regular-expression-matching-the-name-of-dummy-variables-i-e-expected-to" title="Link to this heading"></a></h1>
+</section>
+<section id="not-be-used">
+<h1>not be used).<a class="headerlink" href="#not-be-used" title="Link to this heading"></a></h1>
+<p>dummy-variables-rgx=<em>+$|(</em>[a-zA-Z0-9_]*[a-zA-Z0-9]+?$)|dummy|^ignored*|^unused*</p>
+</section>
+<section id="argument-names-that-match-this-expression-will-be-ignored-default-to-name">
+<h1>Argument names that match this expression will be ignored. Default to name<a class="headerlink" href="#argument-names-that-match-this-expression-will-be-ignored-default-to-name" title="Link to this heading"></a></h1>
+</section>
+<section id="with-leading-underscore">
+<h1>with leading underscore.<a class="headerlink" href="#with-leading-underscore" title="Link to this heading"></a></h1>
+<p>ignored-argument-names=<em>.*|^ignored</em>|^unused_</p>
+</section>
+<section id="tells-whether-we-should-check-for-unused-import-in-init-files">
+<h1>Tells whether we should check for unused import in <strong>init</strong> files.<a class="headerlink" href="#tells-whether-we-should-check-for-unused-import-in-init-files" title="Link to this heading"></a></h1>
+<p>init-import=no</p>
+</section>
+<section id="list-of-qualified-module-names-which-can-have-objects-that-can-redefine">
+<h1>List of qualified module names which can have objects that can redefine<a class="headerlink" href="#list-of-qualified-module-names-which-can-have-objects-that-can-redefine" title="Link to this heading"></a></h1>
+</section>
+<section id="builtins">
+<h1>builtins.<a class="headerlink" href="#builtins" title="Link to this heading"></a></h1>
+<p>redefining-builtins-modules=six.moves,past.builtins,future.builtins,builtins,io</p>
+<p>[CLASSES]</p>
+</section>
+<section id="list-of-method-names-used-to-declare-i-e-assign-instance-attributes">
+<h1>List of method names used to declare (i.e. assign) instance attributes.<a class="headerlink" href="#list-of-method-names-used-to-declare-i-e-assign-instance-attributes" title="Link to this heading"></a></h1>
+<p>defining-attr-methods=<strong>init</strong>, <strong>new</strong>, setUp, <strong>post_init</strong></p>
+</section>
+<section id="list-of-member-names-which-should-be-excluded-from-the-protected-access">
+<h1>List of member names, which should be excluded from the protected access<a class="headerlink" href="#list-of-member-names-which-should-be-excluded-from-the-protected-access" title="Link to this heading"></a></h1>
+</section>
+<section id="warning">
+<h1>warning.<a class="headerlink" href="#warning" title="Link to this heading"></a></h1>
+<p>exclude-protected=_asdict, _fields, _replace, _source, _make</p>
+</section>
+<section id="list-of-valid-names-for-the-first-argument-in-a-class-method">
+<h1>List of valid names for the first argument in a class method.<a class="headerlink" href="#list-of-valid-names-for-the-first-argument-in-a-class-method" title="Link to this heading"></a></h1>
+<p>valid-classmethod-first-arg=cls</p>
+</section>
+<section id="list-of-valid-names-for-the-first-argument-in-a-metaclass-class-method">
+<h1>List of valid names for the first argument in a metaclass class method.<a class="headerlink" href="#list-of-valid-names-for-the-first-argument-in-a-metaclass-class-method" title="Link to this heading"></a></h1>
+<p>valid-metaclass-classmethod-first-arg=cls</p>
+<p>[DESIGN]</p>
+</section>
+<section id="maximum-number-of-arguments-for-function-method">
+<h1>Maximum number of arguments for function / method.<a class="headerlink" href="#maximum-number-of-arguments-for-function-method" title="Link to this heading"></a></h1>
+<p>max-args=5</p>
+</section>
+<section id="maximum-number-of-attributes-for-a-class-see-r0902">
+<h1>Maximum number of attributes for a class (see R0902).<a class="headerlink" href="#maximum-number-of-attributes-for-a-class-see-r0902" title="Link to this heading"></a></h1>
+<p>max-attributes=7</p>
+</section>
+<section id="maximum-number-of-boolean-expressions-in-an-if-statement-see-r0916">
+<h1>Maximum number of boolean expressions in an if statement (see R0916).<a class="headerlink" href="#maximum-number-of-boolean-expressions-in-an-if-statement-see-r0916" title="Link to this heading"></a></h1>
+<p>max-bool-expr=5</p>
+</section>
+<section id="maximum-number-of-branch-for-function-method-body">
+<h1>Maximum number of branch for function / method body.<a class="headerlink" href="#maximum-number-of-branch-for-function-method-body" title="Link to this heading"></a></h1>
+<p>max-branches=12</p>
+</section>
+<section id="maximum-number-of-locals-for-function-method-body">
+<h1>Maximum number of locals for function / method body.<a class="headerlink" href="#maximum-number-of-locals-for-function-method-body" title="Link to this heading"></a></h1>
+<p>max-locals=15</p>
+</section>
+<section id="maximum-number-of-parents-for-a-class-see-r0901">
+<h1>Maximum number of parents for a class (see R0901).<a class="headerlink" href="#maximum-number-of-parents-for-a-class-see-r0901" title="Link to this heading"></a></h1>
+<p>max-parents=7</p>
+</section>
+<section id="maximum-number-of-public-methods-for-a-class-see-r0904">
+<h1>Maximum number of public methods for a class (see R0904).<a class="headerlink" href="#maximum-number-of-public-methods-for-a-class-see-r0904" title="Link to this heading"></a></h1>
+<p>max-public-methods=20</p>
+</section>
+<section id="maximum-number-of-return-yield-for-function-method-body">
+<h1>Maximum number of return / yield for function / method body.<a class="headerlink" href="#maximum-number-of-return-yield-for-function-method-body" title="Link to this heading"></a></h1>
+<p>max-returns=6</p>
+</section>
+<section id="maximum-number-of-statements-in-function-method-body">
+<h1>Maximum number of statements in function / method body.<a class="headerlink" href="#maximum-number-of-statements-in-function-method-body" title="Link to this heading"></a></h1>
+<p>max-statements=50</p>
+</section>
+<section id="minimum-number-of-public-methods-for-a-class-see-r0903">
+<h1>Minimum number of public methods for a class (see R0903).<a class="headerlink" href="#minimum-number-of-public-methods-for-a-class-see-r0903" title="Link to this heading"></a></h1>
+<p>min-public-methods=2</p>
+<p>[IMPORTS]</p>
+</section>
+<section id="list-of-modules-that-can-be-imported-at-any-level-not-just-the-top-level">
+<h1>List of modules that can be imported at any level, not just the top level<a class="headerlink" href="#list-of-modules-that-can-be-imported-at-any-level-not-just-the-top-level" title="Link to this heading"></a></h1>
+</section>
+<section id="one">
+<h1>one.<a class="headerlink" href="#one" title="Link to this heading"></a></h1>
+<p>allow-any-import-level=</p>
+</section>
+<section id="allow-wildcard-imports-from-modules-that-define-all">
+<h1>Allow wildcard imports from modules that define <strong>all</strong>.<a class="headerlink" href="#allow-wildcard-imports-from-modules-that-define-all" title="Link to this heading"></a></h1>
+<p>allow-wildcard-with-all=no</p>
+</section>
+<section id="analyse-import-fallback-blocks-this-can-be-used-to-support-both-python-2-and">
+<h1>Analyse import fallback blocks. This can be used to support both Python 2 and<a class="headerlink" href="#analyse-import-fallback-blocks-this-can-be-used-to-support-both-python-2-and" title="Link to this heading"></a></h1>
+</section>
+<section id="compatible-code-which-means-that-the-block-might-have-code-that-exists">
+<h1>3 compatible code, which means that the block might have code that exists<a class="headerlink" href="#compatible-code-which-means-that-the-block-might-have-code-that-exists" title="Link to this heading"></a></h1>
+</section>
+<section id="only-in-one-or-another-interpreter-leading-to-false-positives-when-analysed">
+<h1>only in one or another interpreter, leading to false positives when analysed.<a class="headerlink" href="#only-in-one-or-another-interpreter-leading-to-false-positives-when-analysed" title="Link to this heading"></a></h1>
+<p>analyse-fallback-blocks=no</p>
+</section>
+<section id="deprecated-modules-which-should-not-be-used-separated-by-a-comma">
+<h1>Deprecated modules which should not be used, separated by a comma.<a class="headerlink" href="#deprecated-modules-which-should-not-be-used-separated-by-a-comma" title="Link to this heading"></a></h1>
+<p>deprecated-modules=optparse,tkinter.tix</p>
+</section>
+<section id="create-a-graph-of-external-dependencies-in-the-given-file-report-rp0402-must">
+<h1>Create a graph of external dependencies in the given file (report RP0402 must<a class="headerlink" href="#create-a-graph-of-external-dependencies-in-the-given-file-report-rp0402-must" title="Link to this heading"></a></h1>
+</section>
+<section id="not-be-disabled">
+<h1>not be disabled).<a class="headerlink" href="#not-be-disabled" title="Link to this heading"></a></h1>
+<p>ext-import-graph=</p>
+</section>
+<section id="create-a-graph-of-every-i-e-internal-and-external-dependencies-in-the">
+<h1>Create a graph of every (i.e. internal and external) dependencies in the<a class="headerlink" href="#create-a-graph-of-every-i-e-internal-and-external-dependencies-in-the" title="Link to this heading"></a></h1>
+</section>
+<section id="given-file-report-rp0402-must-not-be-disabled">
+<h1>given file (report RP0402 must not be disabled).<a class="headerlink" href="#given-file-report-rp0402-must-not-be-disabled" title="Link to this heading"></a></h1>
+<p>import-graph=</p>
+</section>
+<section id="create-a-graph-of-internal-dependencies-in-the-given-file-report-rp0402-must">
+<h1>Create a graph of internal dependencies in the given file (report RP0402 must<a class="headerlink" href="#create-a-graph-of-internal-dependencies-in-the-given-file-report-rp0402-must" title="Link to this heading"></a></h1>
+</section>
+<section id="id7">
+<h1>not be disabled).<a class="headerlink" href="#id7" title="Link to this heading"></a></h1>
+<p>int-import-graph=</p>
+</section>
+<section id="force-import-order-to-recognize-a-module-as-part-of-the-standard">
+<h1>Force import order to recognize a module as part of the standard<a class="headerlink" href="#force-import-order-to-recognize-a-module-as-part-of-the-standard" title="Link to this heading"></a></h1>
+</section>
+<section id="compatibility-libraries">
+<h1>compatibility libraries.<a class="headerlink" href="#compatibility-libraries" title="Link to this heading"></a></h1>
+<p>known-standard-library=</p>
+</section>
+<section id="force-import-order-to-recognize-a-module-as-part-of-a-third-party-library">
+<h1>Force import order to recognize a module as part of a third party library.<a class="headerlink" href="#force-import-order-to-recognize-a-module-as-part-of-a-third-party-library" title="Link to this heading"></a></h1>
+<p>known-third-party=enchant, azureiai-logistics-inventoryplanning</p>
+</section>
+<section id="couples-of-modules-and-preferred-modules-separated-by-a-comma">
+<h1>Couples of modules and preferred modules, separated by a comma.<a class="headerlink" href="#couples-of-modules-and-preferred-modules-separated-by-a-comma" title="Link to this heading"></a></h1>
+<p>preferred-modules=</p>
+<p>[EXCEPTIONS]</p>
+</section>
+<section id="exceptions-that-will-emit-a-warning-when-being-caught-defaults-to">
+<h1>Exceptions that will emit a warning when being caught. Defaults to<a class="headerlink" href="#exceptions-that-will-emit-a-warning-when-being-caught-defaults-to" title="Link to this heading"></a></h1>
+</section>
+<section id="baseexception-exception">
+<h1>“BaseException, Exception”.<a class="headerlink" href="#baseexception-exception" title="Link to this heading"></a></h1>
+<p>overgeneral-exceptions=BaseException, Exception</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, GCHQ.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
