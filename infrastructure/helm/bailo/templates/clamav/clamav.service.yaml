@@ -1,0 +1,17 @@
+{{- if .Values.clamav.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bailo.fullname" . }}-clamav
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.clamav.port }}
+      targetPort: {{ .Values.clamav.port }}
+      protocol: TCP
+      name: http
+  selector:
+    name: clamav
+{{- end }}

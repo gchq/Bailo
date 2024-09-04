@@ -62,6 +62,14 @@ data:
         insecure: {{ .Values.registry.insecure }},
       },
 
+      avScanning: {
+        enabled: {{ .Values.clamav.enabled }},
+        clamdscan: {
+          host: 'http://{{ include "bailo.fullname" . }}-clamav',
+          port: {{ .Values.clamav.port }},
+        },
+      },
+
       smtp: {
         // Enable / disable all email sending
         enabled: true,

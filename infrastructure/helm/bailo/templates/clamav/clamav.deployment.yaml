@@ -1,0 +1,28 @@
+{{- if .Values.clamav.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bailo.fullname" . }}-clamav
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: clamav
+  template:
+    metadata:
+      labels:
+        name: clamav
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ include "bailo.fullname" . }}-clamav
+        image: clamav/clamav:latest
+{{- end }}

@@ -282,3 +282,7 @@ inference:
 
 backend:
   serviceAccount: ''
+
+clamav:
+  enabled: false
+  port: 3310
