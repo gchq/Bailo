@@ -35,6 +35,7 @@ const modelCardRevisionModel = vi.hoisted(() => {
   const obj: any = {}
 
   obj.findOne = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.sort = vi.fn(() => obj)
@@ -69,6 +70,7 @@ const modelMocks = vi.hoisted(() => {
   obj.append = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.findByIdAndUpdate = vi.fn(() => obj)
@@ -339,7 +341,7 @@ describe('services > model', () => {
     modelMocks.findOne.mockResolvedValueOnce()
     const result = saveImportedModelCard({} as ModelCardRevisionInterface, '')
 
-    expect(result).rejects.toThrowError(/^The mirrored model ID found in the notification cannot be found./)
+    expect(result).rejects.toThrowError(/^Cannot find model to import model card./)
   })
 
   test('saveImportedModelCard > model not mirrored model', async () => {

@@ -29,7 +29,7 @@ registerPath({
           schema: z.object({
             mirroredModelId: z.string(),
             sourceModelId: z.string(),
-            modelCardVersions: z.array(z.string()),
+            modelCardVersions: z.array(z.number()),
           }),
         },
       },
@@ -37,7 +37,7 @@ registerPath({
   },
 })
 
-interface PostRequestExportResponse {
+interface PostRequestImportResponse {
   mirroredModelId: string
   sourceModelId: string
   modelCardVersions: number[]
@@ -45,7 +45,7 @@ interface PostRequestExportResponse {
 
 export const postRequestImportFromS3 = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostRequestExportResponse>) => {
+  async (req: Request, res: Response<PostRequestImportResponse>) => {
     req.audit = AuditInfo.CreateImport
     const {
       body: { payloadUrl, mirroredModelId },

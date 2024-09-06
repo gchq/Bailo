@@ -385,7 +385,7 @@ export async function saveImportedModelCard(modelCard: ModelCardRevisionInterfac
     id: modelCard.modelId,
   })
   if (!model) {
-    throw NotFound(`The mirrored model ID found in the notification cannot be found.`, { modelId: modelCard.modelId })
+    throw NotFound(`Cannot find model to import model card.`, { modelId: modelCard.modelId })
   }
   if (!model.settings.mirror.sourceModelId) {
     throw InternalError('Cannot import model card to non mirrored model.')
@@ -420,9 +420,17 @@ export async function saveImportedModelCard(modelCard: ModelCardRevisionInterfac
 }
 
 export async function setLatestImportedModelCard(modelId: string) {
-  // Add check for mirrored model
-  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }).sort({ version: -1 }).limit(1)
-  await ModelModel.updateOne({ id: modelId }, { $set: { card: latestModelCard } })
+  const latestModelCard = await ModelCardRevisionModel.find({ modelId }).sort({ version: -1 }).limit(1)
+  if (!latestModelCard) {
+    throw NotFound('Cannot find latest model card.')
+  }
+  const result = await ModelModel.findOneAndUpdate(
+    { id: modelId, 'settings.mirror.sourceModelId': { $exists: true, $ne: '' } },
+    { $set: { card: latestModelCard } },
+  )
+  if (!result) {
+    throw InternalError('Unable update model with latest model card ID.')
+  }
 }
 
 export function isModelCardRevision(data: unknown): data is ModelCardRevisionInterface {

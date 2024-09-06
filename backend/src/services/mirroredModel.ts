@@ -96,21 +96,24 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
   try {
     res = await fetch(payloadUrl)
   } catch (err) {
-    throw InternalError('Unable to get the file.', { err })
+    throw InternalError('Unable to get the file.', { err, payloadUrl })
   }
   if (!res.ok) {
-    throw InternalError('Unable to get zip file.', { response: { status: res.status, body: await res.text() } })
+    throw InternalError('Unable to get zip file.', {
+      payloadUrl,
+      response: { status: res.status, body: await res.text() },
+    })
   }
 
   if (!res.body) {
-    throw InternalError('Unable to get the file.')
+    throw InternalError('Unable to get the file.', { payloadUrl })
   }
 
   const modelCards: ModelCardRevisionInterface[] = []
-  const test = new Uint8Array(await res.arrayBuffer())
+  const zipData = new Uint8Array(await res.arrayBuffer())
   let zipContent
   try {
-    zipContent = fflate.unzipSync(test, {
+    zipContent = fflate.unzipSync(zipData, {
       filter(file) {
         return /[0-9]+.json/.test(file.name)
       },
@@ -136,8 +139,8 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
   return { mirroredModelId, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) }
 }
 
-function parseModelCard(modelCardString: string, mirroredModelId: string, sourceModelId?: string) {
-  const modelCard = JSON.parse(modelCardString)
+function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceModelId?: string) {
+  const modelCard = JSON.parse(modelCardJson)
   if (!isModelCardRevision(modelCard)) {
     throw InternalError('Data cannot be converted into a model card.')
   }
