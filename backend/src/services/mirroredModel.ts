@@ -108,11 +108,17 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
 
   const modelCards: ModelCardRevisionInterface[] = []
   const test = new Uint8Array(await res.arrayBuffer())
-  const zipContent = fflate.unzipSync(test, {
-    filter(file) {
-      return /[0-9]+.json/.test(file.name)
-    },
-  })
+  let zipContent
+  try {
+    zipContent = fflate.unzipSync(test, {
+      filter(file) {
+        return /[0-9]+.json/.test(file.name)
+      },
+    })
+  } catch (error) {
+    log.error({ error }, 'Unable to read zip file.')
+    throw InternalError('Unable to read zip file.', { mirroredModelId })
+  }
   Object.keys(zipContent).forEach(function (key) {
     const { modelCard, sourceModelId: newSourceModelId } = parseModelCard(
       Buffer.from(zipContent[key]).toString('utf8'),

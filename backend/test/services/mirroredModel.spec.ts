@@ -377,4 +377,14 @@ describe('services > mirroredModel', () => {
 
     await expect(result).rejects.toThrowError(/^Zip file contains model cards for multiple models./)
   })
+
+  test('importModel > invalid zip data', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockImplementationOnce(() => {
+      throw Error('Cannot import file.')
+    })
+    const result = importModel({} as UserInterface, 'model-id', 'https://test.com')
+
+    await expect(result).rejects.toThrowError(/^Unable to read zip file./)
+  })
 })
