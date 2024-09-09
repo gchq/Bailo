@@ -49,8 +49,8 @@ export async function exportModel(
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, model: model.id })
   }
-  if (semvers && semvers.length > 1) {
-    await checkTotalFileSize(model.id, semvers)
+  if (semvers && semvers.length > 0) {
+    await checkReleaseFiles(user, model.id, semvers)
   }
   log.debug('Request checks complete')
 
@@ -304,17 +304,6 @@ async function addReleasesToZip(user: UserInterface, model: ModelDoc, semvers: s
 async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: ReleaseDoc, zip: archiver.Archiver) {
   log.debug('Adding release to zip file of releases.', { user, modelId: model.id, semver: release.semver })
   const files: FileInterfaceDoc[] = await getFilesByIds(user, release.modelId, release.fileIds)
-  const errors: Array<{ message: string; context?: { [key: string]: unknown } }> = []
-  const failedFileScans = await checkReleaseFiles(files)
-  if (Object.keys(failedFileScans).length > 0) {
-    errors.push({
-      message: 'All files do not have a successful AV scan.',
-      context: { unsuccessfulFiles: failedFileScans },
-    })
-  }
-  if (errors.length > 0) {
-    throw BadReq('Unable to export release.', { modelId: release.modelId, semver: release.semver, errors })
-  }
 
   const baseUri = `releases/${release.semver}`
   try {
@@ -332,36 +321,44 @@ async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: Re
   return zip
 }
 
-async function checkTotalFileSize(modelId: string, semvers: string[]) {
+async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: string[]) {
   const fileIds = await getAllFileIds(modelId, semvers)
-  if (fileIds.length === 0) {
-    return
+  // Check the total size of the export if more than one release is being exported
+  if (semvers.length > 1) {
+    if (fileIds.length === 0) {
+      return
+    }
+    const totalFileSize = await getTotalFileSize(fileIds)
+    log.debug(
+      { modelId, semvers, size: prettyBytes(totalFileSize) },
+      'Calculated estimated total file size included in export.',
+    )
+    if (totalFileSize > config.modelMirror.export.maxSize) {
+      throw BadReq('Requested export is too large.', {
+        size: totalFileSize,
+        maxSize: config.modelMirror.export.maxSize,
+      })
+    }
   }
-  const totalFileSize = await getTotalFileSize(fileIds)
-  log.debug(
-    { modelId, semvers, size: prettyBytes(totalFileSize) },
-    'Calculated estimated total file size included in export.',
-  )
-  if (totalFileSize > config.modelMirror.export.maxSize) {
-    throw BadReq('Requested export is too large.', { size: totalFileSize, maxSize: config.modelMirror.export.maxSize })
-  }
-}
 
-async function checkReleaseFiles(
-  files: FileInterfaceDoc[],
-): Promise<{ [key: string]: 'Unable to find scan information.' | 'File is infected.' }> {
-  return files.reduce((a, file) => {
+  const files: FileInterfaceDoc[] = await getFilesByIds(user, modelId, fileIds)
+  const scanErrors: {
+    missingScan: Array<{ name: string; id: string }>
+    incompleteScan: Array<{ name: string; id: string }>
+    failedScan: Array<{ name: string; id: string }>
+  } = { missingScan: [], incompleteScan: [], failedScan: [] }
+  for (const file of files) {
     if (!file.avScan) {
-      return { ...a, [file._id]: 'Unable to find scan information.' }
+      scanErrors.missingScan.push({ name: file.name, id: file.id })
+    } else if (file.avScan.state !== ScanState.Complete) {
+      scanErrors.incompleteScan.push({ name: file.name, id: file.id })
+    } else if (file.avScan.isInfected) {
+      scanErrors.failedScan.push({ name: file.name, id: file.id })
     }
-    if (file.avScan.state !== ScanState.Complete) {
-      return { ...a, [file._id]: 'Scan is not complete.' }
-    }
-    if (file.avScan.isInfected) {
-      return { ...a, [file._id]: 'File is infected.' }
-    }
-    return a
-  }, {})
+  }
+  if (scanErrors.missingScan.length > 0 || scanErrors.incompleteScan.length > 0 || scanErrors.failedScan.length > 0) {
+    throw BadReq('The releases contain file(s) that do not have a clean AV scan.', { scanErrors })
+  }
 }
 
 async function generateDigest(file: Readable) {
