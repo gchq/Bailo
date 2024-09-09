@@ -420,7 +420,7 @@ export async function saveImportedModelCard(modelCard: ModelCardRevisionInterfac
 }
 
 export async function setLatestImportedModelCard(modelId: string) {
-  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }).sort({ version: -1 })
+  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }, undefined, { sort: { version: -1 } })
   if (!latestModelCard) {
     throw NotFound('Cannot find latest model card.')
   }

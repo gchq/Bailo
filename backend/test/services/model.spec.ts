@@ -401,7 +401,7 @@ describe('services > model', () => {
   })
 
   test('setLatestImportedModelCard > cannot find latest model card', async () => {
-    modelCardRevisionModel.sort.mockResolvedValueOnce()
+    modelCardRevisionModel.findOne.mockResolvedValueOnce()
     const result = setLatestImportedModelCard('abc')
 
     await expect(result).rejects.toThrowError(/^Cannot find latest model card./)
