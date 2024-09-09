@@ -45,6 +45,7 @@
     "dev-null": "^0.1.1",
     "express": "^5.0.0-beta.1",
     "express-session": "^1.18.0",
+    "fflate": "^0.8.2",
     "grant": "^5.4.22",
     "jsonschema": "^1.4.1",
     "jsonwebtoken": "^9.0.2",
