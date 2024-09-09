@@ -430,7 +430,10 @@ export async function setLatestImportedModelCard(modelId: string) {
     { $set: { card: latestModelCard } },
   )
   if (!result) {
-    throw InternalError('Unable to set latest model card of mirrored model.')
+    throw InternalError('Unable to set latest model card of mirrored model.', {
+      modelId,
+      version: latestModelCard.version,
+    })
   }
 }
 
