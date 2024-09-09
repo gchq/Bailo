@@ -14,7 +14,7 @@ reclaimPolicy: Retain
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
   #volumeBindingMode: Immediate
- 
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -40,4 +40,16 @@ spec:
   resources:
     requests:
       storage: {{ .Values.aws.pvcMongoStorage }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.aws.pvcClamAVName }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.aws.storageName }}
+  resources:
+    requests:
+      storage: {{ .Values.aws.pvcClamAVStorage }}
 {{- end }}

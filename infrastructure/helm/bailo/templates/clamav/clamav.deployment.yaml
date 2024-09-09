@@ -24,5 +24,39 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
       - name: {{ include "bailo.fullname" . }}-clamav
-        image: clamav/clamav:latest
+        ports:
+          - name: clamavport
+            containerPort: 3310
+            protocol: TCP
+        image: {{ .Values.clamav.image }}
+        command:
+          - /bin/sh
+        args:
+          - -c
+          - /init-unprivileged # Runs ClamAV as non-root unprivileged user. https://docs.clamav.net/manual/Installing/Docker.html#running-clamd-using-non-root-user-using---user-and---entrypoint
+        resources:
+          requests:
+            memory: "100Mi"
+            ephemeral-storage: "100Mi"
+            cpu: "200m"
+          limits:
+            memory: "4Gi" # This is a memory requirement for ClamAV see here: https://docs.clamav.net/manual/Installing/Docker.html#memory-ram-requirements
+            ephemeral-storage: "300Mi"
+            cpu: "1"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: clamav-lib
+          mountPath: /var/lib/clamav
+        - name: clamav-log
+          mountPath: /var/log/clamav
+        securityContext:
+          allowPrivilegeEscalation: false
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: clamav-lib
+          emptyDir: {}
+        - name: clamav-log
+          emptyDir: {}
 {{- end }}

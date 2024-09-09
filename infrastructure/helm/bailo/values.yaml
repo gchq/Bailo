@@ -285,4 +285,6 @@ backend:
 
 clamav:
   enabled: false
+  #host: "bailo-clamav" # service name
+  image: clamav/clamav:latest_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
   port: 3310

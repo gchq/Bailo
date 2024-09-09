@@ -65,7 +65,7 @@ data:
       avScanning: {
         enabled: {{ .Values.clamav.enabled }},
         clamdscan: {
-          host: 'http://{{ include "bailo.fullname" . }}-clamav',
+          host: '{{ include "bailo.fullname" . }}-clamav',
           port: {{ .Values.clamav.port }},
         },
       },
