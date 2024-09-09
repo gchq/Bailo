@@ -53,7 +53,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
   const sendNotification = useNotification()
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
   const [canEdit, requiredRolesText] = useMemo(() => {
-    const validRoles = ['owner', 'contributor']
+    const validRoles = ['owner', 'mtr', 'msro', 'contributor']
     return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
   }, [currentUserRoles])
   async function onSubmit() {

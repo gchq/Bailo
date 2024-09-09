@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto'
 
 import archiver from 'archiver'
+import * as fflate from 'fflate'
+import fetch, { Response } from 'node-fetch'
 import prettyBytes from 'pretty-bytes'
 import stream, { PassThrough, Readable } from 'stream'
 
@@ -10,13 +12,20 @@ import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileInterfaceDoc, ScanState } from '../models/File.js'
 import { ModelDoc } from '../models/Model.js'
+import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import { downloadFile, getFilesByIds, getTotalFileSize } from './file.js'
 import log from './log.js'
-import { getModelById, getModelCardRevisions } from './model.js'
+import {
+  getModelById,
+  getModelCardRevisions,
+  isModelCardRevision,
+  saveImportedModelCard,
+  setLatestImportedModelCard,
+} from './model.js'
 import { getAllFileIds, getReleasesForExport } from './release.js'
 
 export async function exportModel(
@@ -33,15 +42,15 @@ export async function exportModel(
   }
   const model = await getModelById(user, modelId)
   if (!model.settings.mirror.destinationModelId) {
-    throw BadReq('The ID of the mirrored model has not been set on this model.')
+    throw BadReq(`The 'Destination Model ID' has not been set on this model.`)
   }
   const mirroredModelId = model.settings.mirror.destinationModelId
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, model: model.id })
   }
-  if (semvers && semvers.length > 1) {
-    await checkTotalFileSize(model.id, semvers)
+  if (semvers && semvers.length > 0) {
+    await checkReleaseFiles(user, model.id, semvers)
   }
   log.debug('Request checks complete')
 
@@ -77,6 +86,76 @@ export async function exportModel(
   log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
 }
 
+export async function importModel(_user: UserInterface, mirroredModelId: string, payloadUrl: string) {
+  if (mirroredModelId === '') {
+    throw BadReq('Missing mirrored model ID.')
+  }
+  let sourceModelId
+
+  let res: Response
+  try {
+    res = await fetch(payloadUrl)
+  } catch (err) {
+    throw InternalError('Unable to get the file.', { err, payloadUrl })
+  }
+  if (!res.ok) {
+    throw InternalError('Unable to get zip file.', {
+      payloadUrl,
+      response: { status: res.status, body: await res.text() },
+    })
+  }
+
+  if (!res.body) {
+    throw InternalError('Unable to get the file.', { payloadUrl })
+  }
+
+  const modelCards: ModelCardRevisionInterface[] = []
+  const zipData = new Uint8Array(await res.arrayBuffer())
+  let zipContent
+  try {
+    zipContent = fflate.unzipSync(zipData, {
+      filter(file) {
+        return /[0-9]+.json/.test(file.name)
+      },
+    })
+  } catch (error) {
+    log.error({ error }, 'Unable to read zip file.')
+    throw InternalError('Unable to read zip file.', { mirroredModelId })
+  }
+  Object.keys(zipContent).forEach(function (key) {
+    const { modelCard, sourceModelId: newSourceModelId } = parseModelCard(
+      Buffer.from(zipContent[key]).toString('utf8'),
+      mirroredModelId,
+      sourceModelId,
+    )
+    if (!sourceModelId) {
+      sourceModelId = newSourceModelId
+    }
+    modelCards.push(modelCard)
+  })
+
+  await Promise.all(modelCards.map((card) => saveImportedModelCard(card, sourceModelId)))
+  await setLatestImportedModelCard(mirroredModelId)
+  return { mirroredModelId, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) }
+}
+
+function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceModelId?: string) {
+  const modelCard = JSON.parse(modelCardJson)
+  if (!isModelCardRevision(modelCard)) {
+    throw InternalError('Data cannot be converted into a model card.')
+  }
+  const modelId = modelCard.modelId
+  modelCard.modelId = mirroredModelId
+  delete modelCard['_id']
+  if (!sourceModelId) {
+    return { modelCard, sourceModelId: modelId }
+  }
+  if (sourceModelId !== modelId) {
+    throw InternalError('Zip file contains model cards for multiple models.', { modelIds: [sourceModelId, modelId] })
+  }
+  return { modelCard }
+}
+
 async function copyToExportBucketWithSignatures(
   modelId: string,
   semvers: string[] | undefined,
@@ -93,7 +172,6 @@ async function copyToExportBucketWithSignatures(
     log.error({ modelId }, 'Error generating signature for export.')
     throw e
   }
-
   log.debug({ modelId, semvers }, 'Successfully generated signatures')
   log.debug({ modelId, semvers }, 'Getting stream from S3 to upload to export location.')
   const streamToCopy = await getObjectFromTemporaryS3Location(modelId, semvers)
@@ -226,17 +304,6 @@ async function addReleasesToZip(user: UserInterface, model: ModelDoc, semvers: s
 async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: ReleaseDoc, zip: archiver.Archiver) {
   log.debug('Adding release to zip file of releases.', { user, modelId: model.id, semver: release.semver })
   const files: FileInterfaceDoc[] = await getFilesByIds(user, release.modelId, release.fileIds)
-  const errors: Array<{ message: string; context?: { [key: string]: unknown } }> = []
-  const failedFileScans = await checkReleaseFiles(files)
-  if (Object.keys(failedFileScans).length > 0) {
-    errors.push({
-      message: 'All files do not have a successful AV scan.',
-      context: { unsuccessfulFiles: failedFileScans },
-    })
-  }
-  if (errors.length > 0) {
-    throw BadReq('Unable to export release.', { modelId: release.modelId, semver: release.semver, errors })
-  }
 
   const baseUri = `releases/${release.semver}`
   try {
@@ -244,7 +311,7 @@ async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: Re
     for (const file of files) {
       zip.append(JSON.stringify(file.toJSON()), { name: `${baseUri}/files/${file._id}/fileDocument.json` })
       zip.append((await downloadFile(user, file._id)).Body as stream.Readable, {
-        name: `${baseUri}/files/${file._id}/${file.name}`,
+        name: `${baseUri}/files/${file._id}/fileContent`,
       })
     }
   } catch (error: any) {
@@ -254,36 +321,46 @@ async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: Re
   return zip
 }
 
-async function checkTotalFileSize(modelId: string, semvers: string[]) {
+async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: string[]) {
   const fileIds = await getAllFileIds(modelId, semvers)
-  if (fileIds.length === 0) {
-    return
+  // Check the total size of the export if more than one release is being exported
+  if (semvers.length > 1) {
+    if (fileIds.length === 0) {
+      return
+    }
+    const totalFileSize = await getTotalFileSize(fileIds)
+    log.debug(
+      { modelId, semvers, size: prettyBytes(totalFileSize) },
+      'Calculated estimated total file size included in export.',
+    )
+    if (totalFileSize > config.modelMirror.export.maxSize) {
+      throw BadReq('Requested export is too large.', {
+        size: totalFileSize,
+        maxSize: config.modelMirror.export.maxSize,
+      })
+    }
   }
-  const totalFileSize = await getTotalFileSize(fileIds)
-  log.debug(
-    { modelId, semvers, size: prettyBytes(totalFileSize) },
-    'Calculated estimated total file size included in export.',
-  )
-  if (totalFileSize > config.modelMirror.export.maxSize) {
-    throw BadReq('Requested export is too large.', { size: totalFileSize, maxSize: config.modelMirror.export.maxSize })
-  }
-}
 
-async function checkReleaseFiles(
-  files: FileInterfaceDoc[],
-): Promise<{ [key: string]: 'Unable to find scan information.' | 'File is infected.' }> {
-  return files.reduce((a, file) => {
-    if (!file.avScan) {
-      return { ...a, [file._id]: 'Unable to find scan information.' }
+  if (config.avScanning.enabled) {
+    const files: FileInterfaceDoc[] = await getFilesByIds(user, modelId, fileIds)
+    const scanErrors: {
+      missingScan: Array<{ name: string; id: string }>
+      incompleteScan: Array<{ name: string; id: string }>
+      failedScan: Array<{ name: string; id: string }>
+    } = { missingScan: [], incompleteScan: [], failedScan: [] }
+    for (const file of files) {
+      if (!file.avScan) {
+        scanErrors.missingScan.push({ name: file.name, id: file.id })
+      } else if (file.avScan.state !== ScanState.Complete) {
+        scanErrors.incompleteScan.push({ name: file.name, id: file.id })
+      } else if (file.avScan.isInfected) {
+        scanErrors.failedScan.push({ name: file.name, id: file.id })
+      }
     }
-    if (file.avScan.state !== ScanState.Complete) {
-      return { ...a, [file._id]: 'Scan is not complete.' }
+    if (scanErrors.missingScan.length > 0 || scanErrors.incompleteScan.length > 0 || scanErrors.failedScan.length > 0) {
+      throw BadReq('The releases contain file(s) that do not have a clean AV scan.', { scanErrors })
     }
-    if (file.avScan.isInfected) {
-      return { ...a, [file._id]: 'File is infected.' }
-    }
-    return a
-  }, {})
+  }
 }
 
 async function generateDigest(file: Readable) {

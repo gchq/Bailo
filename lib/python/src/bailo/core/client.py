@@ -172,6 +172,17 @@ class Client:
             },
         ).json()
 
+    def model_card_from_template(self, model_id: str, template_id: str | None):
+        """Create a model card using a given template ID (previously created models, model ID)
+        :param model_id: Unique model ID
+        :param tempate_id Previous model's unique ID to be used as template for new model card
+        :return: JSON response object
+        """
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/setup/from-template",
+            json={"templateId": template_id},
+        ).json()
+
     def post_release(
         self,
         model_id: str,

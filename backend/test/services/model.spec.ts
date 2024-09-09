@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { ModelCardRevisionInterface } from '../../src/models/ModelCardRevision.js'
 import {
   _setModelCard,
   canUserActionModelById,
@@ -10,18 +11,35 @@ import {
   createModelCardFromTemplate,
   getModelById,
   getModelCardRevision,
+  isModelCardRevision,
+  saveImportedModelCard,
   searchModels,
+  setLatestImportedModelCard,
   updateModel,
   updateModelCard,
 } from '../../src/services/model.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
+const schemaMock = vi.hoisted(() => ({
+  findSchemaById: vi.fn(() => ({ jsonschema: {} })),
+}))
+vi.mock('../../src/services/schema.js', async () => schemaMock)
+
+const validatorType = vi.hoisted(() => ({
+  isValidatorResultError: vi.fn(() => true),
+}))
+vi.mock('../../src/types/ValidatorResultError.js', async () => validatorType)
+
 const modelCardRevisionModel = vi.hoisted(() => {
   const obj: any = {}
 
   obj.findOne = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.limit = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -37,6 +55,11 @@ vi.mock('../../src/utils/id.js', () => ({
   convertStringToId: idMocks.convertStringToId,
 }))
 
+const validator = vi.hoisted(() => ({ validate: vi.fn() }))
+vi.mock('jsonschema', () => ({
+  Validator: vi.fn(() => validator),
+}))
+
 const modelMocks = vi.hoisted(() => {
   const obj: any = { settings: { mirror: { sourceModelId: '' } } }
 
@@ -47,6 +70,7 @@ const modelMocks = vi.hoisted(() => {
   obj.append = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.findByIdAndUpdate = vi.fn(() => obj)
@@ -74,14 +98,14 @@ describe('services > model', () => {
   })
 
   test('createModel > bad authorisation', async () => {
-    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+    vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
     expect(() => createModel({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
     expect(modelMocks.save).not.toBeCalled()
   })
 
   test('createModel > bad request is thrown when attempting to set both source and destinationModelId simultaneously', async () => {
-    vi.mocked(authorisation.model).mockResolvedValue({
+    vi.mocked(authorisation.model).mockResolvedValueOnce({
       info: 'You cannot select both settings simultaneously.',
       success: false,
       id: '',
@@ -125,7 +149,7 @@ describe('services > model', () => {
     // getModelById call should initially succeed
     vi.mocked(authorisation.model).mockResolvedValueOnce({ success: true, id: '' })
     // But then the action trigger should fail
-    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+    vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
     modelMocks.findOne.mockResolvedValueOnce({} as any)
 
@@ -169,7 +193,7 @@ describe('services > model', () => {
     const mockModelId = '123'
     const mockVersion = 1
 
-    modelCardRevisionModel.findOne = vi.fn().mockResolvedValue(undefined)
+    modelCardRevisionModel.findOne.mockResolvedValueOnce(undefined)
 
     await expect(getModelCardRevision(mockUser, mockModelId, mockVersion)).rejects.toThrow(
       /^Version '.*' does not exist/,
@@ -182,7 +206,7 @@ describe('services > model', () => {
     const mockVersion = 1
     const mockModelCard = { modelId: mockModelId, version: mockVersion }
 
-    modelCardRevisionModel.findOne = vi.fn().mockResolvedValue(mockModelCard)
+    modelCardRevisionModel.findOne.mockResolvedValueOnce(mockModelCard)
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
     await expect(getModelCardRevision(mockUser, mockModelId, mockVersion)).rejects.toThrow(
@@ -196,7 +220,7 @@ describe('services > model', () => {
     const mockVersion = 1
     const mockModelCard = { modelId: mockModelId, version: mockVersion }
 
-    modelCardRevisionModel.findOne = vi.fn().mockResolvedValue(mockModelCard)
+    modelCardRevisionModel.findOne.mockResolvedValueOnce(mockModelCard)
 
     const result = await getModelCardRevision(mockUser, mockModelId, mockVersion)
 
@@ -311,6 +335,114 @@ describe('services > model', () => {
       /^Cannot alter a mirrored model./,
     )
     expect(modelMocks.save).not.toBeCalled()
+  })
+
+  test('saveImportedModelCard > model does not exist', async () => {
+    modelMocks.findOne.mockResolvedValueOnce()
+    const result = saveImportedModelCard({} as ModelCardRevisionInterface, '')
+
+    expect(result).rejects.toThrowError(/^Cannot find model to import model card./)
+  })
+
+  test('saveImportedModelCard > model not mirrored model', async () => {
+    modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: '' } } })
+    const result = saveImportedModelCard({} as ModelCardRevisionInterface, '')
+
+    expect(result).rejects.toThrowError(/^Cannot import model card to non mirrored model./)
+  })
+
+  test('saveImportedModelCard > mirrored model ID incorrect', async () => {
+    modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
+    const result = saveImportedModelCard({} as ModelCardRevisionInterface, 'cba')
+
+    expect(result).rejects.toThrowError(
+      /^The source model ID of the mirrored model does not match the model Id of the imported model/,
+    )
+  })
+
+  test('saveImportedModelCard > unable to validate model card', async () => {
+    modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
+    validator.validate.mockImplementationOnce(() => {
+      throw Error('Unable to validate.')
+    })
+
+    const result = saveImportedModelCard({} as ModelCardRevisionInterface, 'abc')
+
+    expect(result).rejects.toThrowError(/^Model metadata could not be validated against the schema./)
+  })
+
+  test('saveImportedModelCard > unknown error when trying to validate model card', async () => {
+    modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
+    validator.validate.mockImplementationOnce(() => {
+      throw Error('Unable to validate.')
+    })
+    validatorType.isValidatorResultError.mockReturnValueOnce(false)
+
+    const result = saveImportedModelCard({} as ModelCardRevisionInterface, 'abc')
+
+    expect(result).rejects.toThrowError(/^Unable to validate./)
+  })
+
+  test('saveImportedModelCard > successfully saves model card', async () => {
+    modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
+    await saveImportedModelCard({ modelId: 'id', version: 'version' } as any, 'abc')
+
+    expect(modelCardRevisionModel.findOneAndUpdate).toBeCalledWith(
+      { modelId: 'id', version: 'version' },
+      { modelId: 'id', version: 'version' },
+      { upsert: true },
+    )
+  })
+
+  test('setLatestImportedModelCard > success', async () => {
+    await setLatestImportedModelCard('abc')
+
+    expect(modelMocks.updateOne).toHaveBeenCalledOnce
+  })
+
+  test('setLatestImportedModelCard > cannot find latest model card', async () => {
+    modelCardRevisionModel.findOne.mockResolvedValueOnce()
+    const result = setLatestImportedModelCard('abc')
+
+    await expect(result).rejects.toThrowError(/^Cannot find latest model card./)
+  })
+
+  test('setLatestImportedModelCard > cannot update model', async () => {
+    modelMocks.findOneAndUpdate.mockResolvedValueOnce()
+    const result = setLatestImportedModelCard('abc')
+
+    await expect(result).rejects.toThrowError(/^Unable to set latest model card of mirrored model./)
+  })
+
+  test('isModelCardRevision > success', async () => {
+    const result = isModelCardRevision({
+      modelId: '',
+      schemaId: '',
+      version: '',
+      createdBy: '',
+      updatedAt: '',
+      createdAt: '',
+    })
+
+    expect(result).toBe(true)
+  })
+
+  test('isModelCardRevision > missing property', async () => {
+    const result = isModelCardRevision({
+      schemaId: '',
+      version: '',
+      createdBy: '',
+      updatedAt: '',
+      createdAt: '',
+    })
+
+    expect(result).toBe(false)
+  })
+
+  test('isModelCardRevision > wrong type', async () => {
+    const result = isModelCardRevision(null)
+
+    expect(result).toBe(false)
   })
 
   test('crateModelCardFromTemplate > can create a model using a template', async () => {
