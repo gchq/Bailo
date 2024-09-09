@@ -93,7 +93,7 @@ export async function renderToHtml(
             Bailo
           </div>
         </div>
-        <div style="margin: 8px; max-width: 900px; margin: auto; margin-bottom: 16px">
+        <div style="margin: 8px; max-width: 900px; margin: auto; margin-bottom: 16px; overflow-wrap: break-word">
           ${body}
         </div>
       </body>
