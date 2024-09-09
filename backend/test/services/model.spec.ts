@@ -411,7 +411,7 @@ describe('services > model', () => {
     modelMocks.findOneAndUpdate.mockResolvedValueOnce()
     const result = setLatestImportedModelCard('abc')
 
-    await expect(result).rejects.toThrowError(/^Unable update model with latest model card ID./)
+    await expect(result).rejects.toThrowError(/^Unable to set latest model card of mirrored model./)
   })
 
   test('isModelCardRevision > success', async () => {

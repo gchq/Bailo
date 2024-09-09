@@ -341,23 +341,25 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     }
   }
 
-  const files: FileInterfaceDoc[] = await getFilesByIds(user, modelId, fileIds)
-  const scanErrors: {
-    missingScan: Array<{ name: string; id: string }>
-    incompleteScan: Array<{ name: string; id: string }>
-    failedScan: Array<{ name: string; id: string }>
-  } = { missingScan: [], incompleteScan: [], failedScan: [] }
-  for (const file of files) {
-    if (!file.avScan) {
-      scanErrors.missingScan.push({ name: file.name, id: file.id })
-    } else if (file.avScan.state !== ScanState.Complete) {
-      scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-    } else if (file.avScan.isInfected) {
-      scanErrors.failedScan.push({ name: file.name, id: file.id })
+  if (config.avScanning.enabled) {
+    const files: FileInterfaceDoc[] = await getFilesByIds(user, modelId, fileIds)
+    const scanErrors: {
+      missingScan: Array<{ name: string; id: string }>
+      incompleteScan: Array<{ name: string; id: string }>
+      failedScan: Array<{ name: string; id: string }>
+    } = { missingScan: [], incompleteScan: [], failedScan: [] }
+    for (const file of files) {
+      if (!file.avScan) {
+        scanErrors.missingScan.push({ name: file.name, id: file.id })
+      } else if (file.avScan.state !== ScanState.Complete) {
+        scanErrors.incompleteScan.push({ name: file.name, id: file.id })
+      } else if (file.avScan.isInfected) {
+        scanErrors.failedScan.push({ name: file.name, id: file.id })
+      }
     }
-  }
-  if (scanErrors.missingScan.length > 0 || scanErrors.incompleteScan.length > 0 || scanErrors.failedScan.length > 0) {
-    throw BadReq('The releases contain file(s) that do not have a clean AV scan.', { scanErrors })
+    if (scanErrors.missingScan.length > 0 || scanErrors.incompleteScan.length > 0 || scanErrors.failedScan.length > 0) {
+      throw BadReq('The releases contain file(s) that do not have a clean AV scan.', { scanErrors })
+    }
   }
 }
 

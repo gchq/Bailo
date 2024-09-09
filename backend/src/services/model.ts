@@ -422,7 +422,7 @@ export async function saveImportedModelCard(modelCard: ModelCardRevisionInterfac
 export async function setLatestImportedModelCard(modelId: string) {
   const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }, undefined, { sort: { version: -1 } })
   if (!latestModelCard) {
-    throw NotFound('Cannot find latest model card.')
+    throw NotFound('Cannot find latest model card.', { modelId })
   }
 
   const result = await ModelModel.findOneAndUpdate(
@@ -430,7 +430,7 @@ export async function setLatestImportedModelCard(modelId: string) {
     { $set: { card: latestModelCard } },
   )
   if (!result) {
-    throw InternalError('Unable update model with latest model card ID.')
+    throw InternalError('Unable to set latest model card of mirrored model.')
   }
 }
 
