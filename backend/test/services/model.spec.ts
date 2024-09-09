@@ -400,6 +400,20 @@ describe('services > model', () => {
     expect(modelMocks.updateOne).toHaveBeenCalledOnce
   })
 
+  test('setLatestImportedModelCard > cannot find latest model card', async () => {
+    modelCardRevisionModel.sort.mockResolvedValueOnce()
+    const result = setLatestImportedModelCard('abc')
+
+    await expect(result).rejects.toThrowError(/^Cannot find latest model card./)
+  })
+
+  test('setLatestImportedModelCard > cannot update model', async () => {
+    modelMocks.findOneAndUpdate.mockResolvedValueOnce()
+    const result = setLatestImportedModelCard('abc')
+
+    await expect(result).rejects.toThrowError(/^Unable update model with latest model card ID./)
+  })
+
   test('isModelCardRevision > success', async () => {
     const result = isModelCardRevision({
       modelId: '',
