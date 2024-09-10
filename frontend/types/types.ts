@@ -73,7 +73,7 @@ export interface FileInterface {
   avScan: {
     state: ScanStateKeys
     isInfected?: boolean
-    viruses?: Array<unknown>
+    viruses?: Array<string>
   }
 
   createdAt: Date

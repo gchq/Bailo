@@ -1,7 +1,9 @@
 import { Done, Warning } from '@mui/icons-material'
-import { Chip, Grid, Link, Stack, Tooltip, Typography } from '@mui/material'
+import { Chip, Grid, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
+import { useMemo, useState } from 'react'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
+import { plural } from 'utils/stringUtils'
 
 type FileDownloadProps = {
   modelId: string
@@ -9,22 +11,52 @@ type FileDownloadProps = {
 }
 
 export default function FileDownload({ modelId, file }: FileDownloadProps) {
-  const avChip = (fileScan: FileInterface['avScan']) => {
-    if (fileScan.state !== ScanState.Complete) {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+
+  const open = Boolean(anchorEl)
+
+  const avChip = useMemo(() => {
+    if (!isFileInterface(file)) {
+      return <Chip size='small' label='Virus scan results could not be found' />
+    }
+    if (file.avScan.state !== ScanState.Complete) {
       return <Chip size='small' label='Virus scan in progress' />
     }
-    if (fileScan.viruses && fileScan.viruses.length > 0) {
+    if (file.avScan.viruses && file.avScan.viruses.length > 0) {
       return (
-        <Chip
-          color={'error'}
-          icon={<Warning />}
-          size='small'
-          label={`Virus scan failed: ${fileScan.viruses.length} threats found`}
-        />
+        <>
+          <Chip
+            color={'error'}
+            icon={<Warning />}
+            size='small'
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            label={`Virus scan failed: ${plural(file.avScan.viruses.length, 'threat')} found`}
+          />
+          <Popover
+            open={open}
+            anchorEl={anchorEl}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'center',
+            }}
+          >
+            <Stack spacing={2} sx={{ p: 2 }}>
+              <Typography fontWeight='bold'>
+                The virus scan found the following {plural(file.avScan.viruses.length, 'threat')}
+              </Typography>
+              <ul>{file.avScan.viruses && file.avScan.viruses.map((virus) => <li key={virus}>{virus}</li>)}</ul>
+            </Stack>
+          </Popover>
+        </>
       )
     }
     return <Chip color={'success'} icon={<Done />} size='small' label={'Virus scan passed'} />
-  }
+  }, [anchorEl, file, open])
 
   return (
     <>
@@ -40,7 +72,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
                     </Typography>
                   </Link>
                 </Tooltip>
-                {avChip(file.avScan)}
+                {avChip}
               </Stack>
             </Grid>
             <Grid item xs={1} textAlign='right'>
