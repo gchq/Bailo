@@ -46,6 +46,11 @@ jobs:
       - name: Build docs
         run: |
           make html
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          name: python-docs
+          path: ./backend/docs/python-docs/html
 
   # Build job
   build:
@@ -58,6 +63,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Download Python Docs
+        uses: actions/download-artifact@v1
+        with:
+          name: python-docs
+          path: ./backend/docs/python-docs/html
 
       - name: Setup Node
         uses: actions/setup-node@v3
