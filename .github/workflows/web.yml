@@ -49,6 +49,7 @@ jobs:
 
   # Build job
   build:
+    needs: sphinx
     runs-on: ubuntu-latest
     defaults:
       run:
