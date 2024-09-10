@@ -16,7 +16,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
   const open = Boolean(anchorEl)
 
   const avChip = useMemo(() => {
-    if (!isFileInterface(file)) {
+    if (!isFileInterface(file) || file.avScan === undefined) {
       return <Chip size='small' label='Virus scan results could not be found' />
     }
     if (file.avScan.state !== ScanState.Complete) {

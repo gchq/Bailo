@@ -70,7 +70,8 @@ export interface FileInterface {
 
   complete: boolean
 
-  avScan: {
+  // Older files may not have AV run against them
+  avScan?: {
     state: ScanStateKeys
     isInfected?: boolean
     viruses?: Array<string>
