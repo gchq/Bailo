@@ -13,6 +13,45 @@ export interface Role {
   description?: string
 }
 
+export const EntryRole = {
+  OWNER: 'owner',
+  CONTRIBUTOR: 'contributor',
+  CONSUMER: 'consumer',
+  MTR: 'mtr',
+  MSRO: 'msro',
+} as const
+
+export type PermissionDetail = {
+  hasPermission: boolean
+  reason?: string
+}
+
+export interface EntryUserPermissions {
+  editEntryCard: PermissionDetail
+
+  viewEntrySettings: PermissionDetail
+
+  createRelease: PermissionDetail
+  editRelease: PermissionDetail
+  deleteRelease: PermissionDetail
+  reviewRelease: PermissionDetail
+
+  reviewAccessRequest: PermissionDetail
+
+  pushModelImage: PermissionDetail
+
+  createInferenceService: PermissionDetail
+  editInferenceService: PermissionDetail
+  deleteInferenceService: PermissionDetail
+
+  exportMirroredModel: PermissionDetail
+}
+
+export interface AccessRequestUserPermissions {
+  editAccessRequest: PermissionDetail
+  deleteAccessRequest: PermissionDetail
+}
+
 export interface UiConfig {
   banner: {
     enabled: boolean

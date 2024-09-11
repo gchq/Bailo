@@ -12,10 +12,12 @@ import ModelCardRevisionModel, {
 } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
+import { EntryRole, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { getReason, userHasPermission } from '../utils/permissions.js'
 import { findSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -453,4 +455,85 @@ export function isModelCardRevision(data: unknown): data is ModelCardRevisionInt
     return false
   }
   return true
+}
+
+export async function getCurrentUserPermissionsByModel(
+  user: UserInterface,
+  modelId: string,
+): Promise<EntryUserPermissions> {
+  const model = await getModelById(user, modelId)
+
+  const isMirroredModel = !!model.settings.mirror.sourceModelId
+  const currentUserRoles =
+    model.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === user.dn)?.roles || []
+
+  const editEntryCardValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
+  const viewEntrySettingsValidRoles = [EntryRole.OWNER]
+  const createReleaseValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
+  const editReleaseValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
+  const deleteReleaseValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
+  const reviewReleaseValidRoles = [EntryRole.MTR, EntryRole.MSRO]
+  const reviewAccessRequestValidRoles = [EntryRole.MSRO]
+  const pushModelImageValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
+  const createInferenceServiceValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
+  const editInferenceServiceValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
+  const deleteInferenceServiceValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
+  const exportMirroredModelValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
+
+  return {
+    editEntryCard: {
+      hasPermission: userHasPermission(currentUserRoles, editEntryCardValidRoles, isMirroredModel, true),
+      reason: getReason(currentUserRoles, editEntryCardValidRoles, isMirroredModel, true),
+    },
+
+    viewEntrySettings: {
+      hasPermission: userHasPermission(currentUserRoles, viewEntrySettingsValidRoles, isMirroredModel, false),
+      reason: getReason(currentUserRoles, viewEntrySettingsValidRoles, isMirroredModel, false),
+    },
+
+    createRelease: {
+      hasPermission: userHasPermission(currentUserRoles, createReleaseValidRoles, isMirroredModel, true),
+      reason: getReason(currentUserRoles, createReleaseValidRoles, isMirroredModel, true),
+    },
+    editRelease: {
+      hasPermission: userHasPermission(currentUserRoles, editReleaseValidRoles, isMirroredModel, true),
+      reason: getReason(currentUserRoles, editReleaseValidRoles, isMirroredModel, true),
+    },
+    deleteRelease: {
+      hasPermission: userHasPermission(currentUserRoles, deleteReleaseValidRoles, isMirroredModel, true),
+      reason: getReason(currentUserRoles, deleteReleaseValidRoles, isMirroredModel, true),
+    },
+    reviewRelease: {
+      hasPermission: userHasPermission(currentUserRoles, reviewReleaseValidRoles, isMirroredModel, true),
+      reason: getReason(currentUserRoles, reviewReleaseValidRoles, isMirroredModel, true),
+    },
+
+    reviewAccessRequest: {
+      hasPermission: userHasPermission(currentUserRoles, reviewAccessRequestValidRoles, isMirroredModel, false),
+      reason: getReason(currentUserRoles, reviewAccessRequestValidRoles, isMirroredModel, false),
+    },
+
+    pushModelImage: {
+      hasPermission: userHasPermission(currentUserRoles, pushModelImageValidRoles, isMirroredModel, true),
+      reason: getReason(currentUserRoles, pushModelImageValidRoles, isMirroredModel, true),
+    },
+
+    createInferenceService: {
+      hasPermission: userHasPermission(currentUserRoles, createInferenceServiceValidRoles, isMirroredModel, false),
+      reason: getReason(currentUserRoles, createInferenceServiceValidRoles, isMirroredModel, false),
+    },
+    editInferenceService: {
+      hasPermission: userHasPermission(currentUserRoles, editInferenceServiceValidRoles, isMirroredModel, false),
+      reason: getReason(currentUserRoles, editInferenceServiceValidRoles, isMirroredModel, false),
+    },
+    deleteInferenceService: {
+      hasPermission: userHasPermission(currentUserRoles, deleteInferenceServiceValidRoles, isMirroredModel, false),
+      reason: getReason(currentUserRoles, deleteInferenceServiceValidRoles, isMirroredModel, false),
+    },
+
+    exportMirroredModel: {
+      hasPermission: userHasPermission(currentUserRoles, exportMirroredModelValidRoles, isMirroredModel, false),
+      reason: getReason(currentUserRoles, exportMirroredModelValidRoles, isMirroredModel, false),
+    },
+  }
 }

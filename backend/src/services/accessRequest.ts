@@ -9,10 +9,12 @@ import AccessRequest from '../models/AccessRequest.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
+import { AccessRequestUserPermissions, EntryRole } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { getReason, userHasPermission } from '../utils/permissions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { createAccessRequestReviews } from './review.js'
@@ -182,4 +184,40 @@ export async function getModelAccessRequestsForUser(user: UserInterface, modelId
   })
 
   return accessRequests
+}
+
+export async function getCurrentUserPermissionsByAccessRequest(
+  user: UserInterface,
+  accessRequestId: string,
+): Promise<AccessRequestUserPermissions> {
+  const accessRequest = await getAccessRequestById(user, accessRequestId)
+  const model = await getModelById(user, accessRequest.modelId)
+
+  const isMirroredModel = !!model.settings.mirror.sourceModelId
+  const currentUserRoles =
+    model.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === user.dn)?.roles || []
+  const isAdditionalContact = accessRequest.metadata.overview.entities.some(
+    (entity) => entity.split(':')[1] === user.dn,
+  )
+
+  const editAccessRequestValidRoles = [EntryRole.OWNER]
+  const deleteAccessRequestValidRoles = [EntryRole.OWNER]
+
+  return {
+    editAccessRequest: {
+      hasPermission:
+        isAdditionalContact || userHasPermission(currentUserRoles, editAccessRequestValidRoles, isMirroredModel, false),
+      reason: isAdditionalContact
+        ? ''
+        : getReason(currentUserRoles, editAccessRequestValidRoles, isMirroredModel, false),
+    },
+    deleteAccessRequest: {
+      hasPermission:
+        isAdditionalContact ||
+        userHasPermission(currentUserRoles, deleteAccessRequestValidRoles, isMirroredModel, false),
+      reason: isAdditionalContact
+        ? ''
+        : getReason(currentUserRoles, deleteAccessRequestValidRoles, isMirroredModel, false),
+    },
+  }
 }
