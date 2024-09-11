@@ -36,6 +36,10 @@ export interface Config {
     audit: {
       kind: AuditKindKeys
     }
+
+    fileScanners: {
+      kinds: string[]
+    }
   }
 
   smtp: {
