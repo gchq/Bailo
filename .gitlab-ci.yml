@@ -148,7 +148,9 @@ aws-backend-build:
     - cd backend
   script:
     - DOCKER_BUILDKIT=1 docker build -t $DOCKER_REGISTRY/$APP_NAME_BACKEND:$AWS_TAG .
+    - docker tag $DOCKER_REGISTRY/$APP_NAME_BACKEND:$AWS_TAG $DOCKER_REGISTRY/$APP_NAME_BACKEND:$OS_TAG
     - docker push $DOCKER_REGISTRY/$APP_NAME_BACKEND:$AWS_TAG
+    - docker push $DOCKER_REGISTRY/$APP_NAME_BACKEND:$OS_TAG
 
 aws-frontend-build:
   stage: aws_build
@@ -178,4 +180,6 @@ aws-frontend-build:
     - cd frontend
   script:
     - DOCKER_BUILDKIT=1 docker build -t $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$AWS_TAG .
+    - docker tag $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$AWS_TAG $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$OS_TAG
     - docker push $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$AWS_TAG
+    - docker push $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$OS_TAG
