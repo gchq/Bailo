@@ -18,13 +18,14 @@ export interface DefaultSchema {
 }
 
 export async function findSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaInterface[]> {
-  const baseSchemas = await Schema.find({ ...(kind && { kind }) }).sort({ createdAt: -1 })
+  const baseSchemas = await Schema.find({ ...(kind && { kind }), hidden: false }).sort({ createdAt: -1 })
   return baseSchemas
 }
 
-export async function findSchemaById(schemaId: string) {
+export async function findSchemaById(schemaId: string, includeHidden = false) {
   const schema = await Schema.findOne({
     id: schemaId,
+    ...(!includeHidden && { hidden: false }),
   })
 
   if (!schema) {
@@ -82,7 +83,7 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
 export type UpdateSchemaParams = Pick<SchemaInterface, 'active'>
 
 export async function updateSchema(user: UserInterface, schemaId: string, diff: Partial<UpdateSchemaParams>) {
-  const schema = await findSchemaById(schemaId)
+  const schema = await findSchemaById(schemaId, true)
 
   const auth = await authorisation.schema(user, schema, SchemaAction.Update)
   if (!auth.success) {
