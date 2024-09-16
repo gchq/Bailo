@@ -1,4 +1,18 @@
-import { Button, Card, List, ListItem, ListItemButton, ListItemText, Stack, Typography } from '@mui/material'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import {
+  Button,
+  Card,
+  Chip,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { useGetReviewRequestsForUser } from 'actions/review'
@@ -24,13 +38,14 @@ interface ObjectToDelete {
 }
 
 export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
-  const { schemas, isSchemasLoading, isSchemasError, mutateSchemas } = useGetSchemas(schemaKind)
+  const { schemas, isSchemasLoading, isSchemasError, mutateSchemas } = useGetSchemas(schemaKind, true)
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
 
   const theme = useTheme()
 
   const [errorMessage, setErrorMessage] = useState('')
-  const [open, setOpen] = useState(false)
+  const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [schemaToBeDeleted, setSchemaToBeDeleted] = useState('')
   const { models, isModelsLoading, isModelsError } = useListModels(
     schemaKind === SchemaKind.MODEL ? EntryKind.MODEL : EntryKind.DATA_CARD,
@@ -42,6 +57,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     schemaToBeDeleted,
   )
   const [objectsToDelete, setObjectsToDelete] = useState<ObjectToDelete[]>([])
+  const isActionsMenuOpen = useMemo(() => !!anchorEl, [anchorEl])
 
   useEffect(() => {
     switch (schemaKind) {
@@ -62,11 +78,11 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     }
   }, [reviews, models, schemaKind])
 
-  const handleSetSchemaActive = useCallback(
-    async (schema: SchemaInterface) => {
+  const handlePatchSchema = useCallback(
+    async (schemaId: SchemaInterface['id'], diff: Partial<SchemaInterface>) => {
+      setAnchorEl(null)
       setErrorMessage('')
-      const updatedSchema = { ...schema, active: !schema.active }
-      const res = await patchSchema(updatedSchema.id, { active: updatedSchema.active })
+      const res = await patchSchema(schemaId, diff)
       if (!res.ok) {
         setErrorMessage(await getErrorMessage(res))
       } else {
@@ -76,8 +92,8 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     [mutateSchemas],
   )
 
-  const handleDeleteSchemaButtonOnClick = useCallback((schemaId: string) => {
-    setOpen(true)
+  const handleDeleteSchema = useCallback((schemaId: string) => {
+    setIsConfirmationDialogOpen(true)
     setSchemaToBeDeleted(schemaId)
   }, [])
 
@@ -89,7 +105,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
         setErrorMessage(await getErrorMessage(res))
       } else {
         mutateSchemas()
-        setOpen(false)
+        setIsConfirmationDialogOpen(false)
       }
     },
     [mutateSchemas],
@@ -100,17 +116,54 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
       schemas.map((schema, index) => (
         <ListItem divider={index < schemas.length - 1} key={schema.id}>
           <ListItemText>{schema.name}</ListItemText>
-          <Stack spacing={1} direction={{ xs: 'column', md: 'row' }}>
-            <Button size='small' variant='outlined' onClick={() => handleSetSchemaActive(schema)}>
-              {schema.active ? 'Mark as inactive' : 'Mark as active'}
+          <Stack spacing={1} direction={{ xs: 'column', md: 'row' }} alignItems='center'>
+            <Chip
+              label={schema.active ? 'Active' : 'Inactive'}
+              size='small'
+              color={schema.active ? 'success' : 'warning'}
+            />
+            {schema.hidden && <Chip label='Hidden' size='small' color='error' />}
+            <Button
+              id='schema-actions-button'
+              size='small'
+              variant='contained'
+              aria-controls={isActionsMenuOpen ? 'schema-actions-menu' : undefined}
+              aria-haspopup='true'
+              aria-expanded={isActionsMenuOpen ? 'true' : undefined}
+              endIcon={isActionsMenuOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              onClick={(event) => setAnchorEl(event.currentTarget)}
+            >
+              Actions
             </Button>
-            <Button size='small' variant='contained' onClick={() => handleDeleteSchemaButtonOnClick(schema.id)}>
-              Delete
-            </Button>
+            <Menu
+              id='schema-actions-menu'
+              open={isActionsMenuOpen}
+              anchorEl={anchorEl}
+              MenuListProps={{
+                'aria-labelledby': 'schema-actions-button',
+              }}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'center',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'center',
+              }}
+              onClose={() => setAnchorEl(null)}
+            >
+              <MenuItem onClick={() => handlePatchSchema(schema.id, { active: !schema.active })}>
+                {schema.active ? 'Mark as inactive' : 'Mark as active'}
+              </MenuItem>
+              <MenuItem onClick={() => handlePatchSchema(schema.id, { hidden: !schema.hidden })}>
+                {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
+              </MenuItem>
+              <MenuItem onClick={() => handleDeleteSchema(schema.id)}>Delete</MenuItem>
+            </Menu>
           </Stack>
         </ListItem>
       )),
-    [schemas, handleDeleteSchemaButtonOnClick, handleSetSchemaActive],
+    [schemas, isActionsMenuOpen, anchorEl, handlePatchSchema, handleDeleteSchema],
   )
 
   const objectsToDeleteList = useMemo(() => {
@@ -163,10 +216,10 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
       <List>{schemaList}</List>
       {schemas.length == 0 && <EmptyBlob text='No schemas to show' />}
       <ConfirmationDialogue
-        open={open}
+        open={isConfirmationDialogOpen}
         title='Delete schema'
         onConfirm={() => handleDeleteConfirm(schemaToBeDeleted)}
-        onCancel={() => setOpen(false)}
+        onCancel={() => setIsConfirmationDialogOpen(false)}
         errorMessage={errorMessage}
         dialogMessage={`${models.length > 0 ? `Deleting this schema will break these ${camelCaseToSentenceCase(schemaKind)}s` : `This schema isn't currently used by any ${camelCaseToSentenceCase(schemaKind)}s`}. Are you sure you want to do this?`}
       >
