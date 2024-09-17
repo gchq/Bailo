@@ -17,9 +17,9 @@ export interface DefaultSchema {
   jsonSchema: JsonSchema
 }
 
-export async function findSchemasByKind(kind: SchemaKindKeys, includeHidden = false): Promise<SchemaInterface[]> {
+export async function findSchemasByKind(kind?: SchemaKindKeys, includeHidden = false): Promise<SchemaInterface[]> {
   const baseSchemas = await Schema.find({
-    kind,
+    ...(kind && { kind }),
     ...(!includeHidden && { hidden: false }),
   }).sort({ createdAt: -1 })
   return baseSchemas
