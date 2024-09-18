@@ -20,6 +20,9 @@ const config = {
     authorisation: {
       kind: 'basic',
     },
+    fileScanners: {
+      kinds: ['clamAv'],
+    },
   },
   log: {
     level: 'debug',

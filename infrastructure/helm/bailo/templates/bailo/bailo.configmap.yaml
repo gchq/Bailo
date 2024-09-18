@@ -189,6 +189,10 @@ data:
         audit: {
           kind: '{{ .Values.connectors.audit.kind }}',
         },
+
+        fileScanners: {
+          kinds: '{{ .Values.connectors.fileScanners.kinds }}',
+        },
       },
 
       log: {
