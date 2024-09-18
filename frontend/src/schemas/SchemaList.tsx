@@ -17,7 +17,7 @@ import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -57,7 +57,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     schemaToBeDeleted,
   )
   const [objectsToDelete, setObjectsToDelete] = useState<ObjectToDelete[]>([])
-  const isActionsMenuOpen = useMemo(() => !!anchorEl, [anchorEl])
+  const [openMenuSchemaId, setOpenMenuSchemaId] = useState<SchemaInterface['id'] | null>(null)
 
   useEffect(() => {
     switch (schemaKind) {
@@ -78,9 +78,22 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     }
   }, [reviews, models, schemaKind])
 
+  const handleOpenMenu = useCallback(
+    (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>, schemaId: SchemaInterface['id']) => {
+      setAnchorEl(event.currentTarget)
+      setOpenMenuSchemaId(schemaId)
+    },
+    [],
+  )
+
+  const handleCloseMenu = useCallback(() => {
+    setAnchorEl(null)
+    setOpenMenuSchemaId(null)
+  }, [])
+
   const handlePatchSchema = useCallback(
     async (schemaId: SchemaInterface['id'], diff: Partial<SchemaInterface>) => {
-      setAnchorEl(null)
+      handleCloseMenu()
       setErrorMessage('')
       const res = await patchSchema(schemaId, diff)
       if (!res.ok) {
@@ -89,13 +102,17 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
         mutateSchemas()
       }
     },
-    [mutateSchemas],
+    [handleCloseMenu, mutateSchemas],
   )
 
-  const handleDeleteSchema = useCallback((schemaId: string) => {
-    setIsConfirmationDialogOpen(true)
-    setSchemaToBeDeleted(schemaId)
-  }, [])
+  const handleDeleteSchema = useCallback(
+    (schemaId: string) => {
+      handleCloseMenu()
+      setIsConfirmationDialogOpen(true)
+      setSchemaToBeDeleted(schemaId)
+    },
+    [handleCloseMenu],
+  )
 
   const handleDeleteConfirm = useCallback(
     async (schemaId: string) => {
@@ -113,57 +130,60 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
 
   const schemaList = useMemo(
     () =>
-      schemas.map((schema, index) => (
-        <ListItem divider={index < schemas.length - 1} key={schema.id}>
-          <ListItemText>{schema.name}</ListItemText>
-          <Stack spacing={1} direction={{ xs: 'column', md: 'row' }} alignItems='center'>
-            <Chip
-              label={schema.active ? 'Active' : 'Inactive'}
-              size='small'
-              color={schema.active ? 'success' : 'warning'}
-            />
-            {schema.hidden && <Chip label='Hidden' size='small' color='error' />}
-            <Button
-              id='schema-actions-button'
-              size='small'
-              variant='contained'
-              aria-controls={isActionsMenuOpen ? 'schema-actions-menu' : undefined}
-              aria-haspopup='true'
-              aria-expanded={isActionsMenuOpen ? 'true' : undefined}
-              endIcon={isActionsMenuOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-              onClick={(event) => setAnchorEl(event.currentTarget)}
-            >
-              Actions
-            </Button>
-            <Menu
-              id='schema-actions-menu'
-              open={isActionsMenuOpen}
-              anchorEl={anchorEl}
-              MenuListProps={{
-                'aria-labelledby': 'schema-actions-button',
-              }}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
-              }}
-              onClose={() => setAnchorEl(null)}
-            >
-              <MenuItem onClick={() => handlePatchSchema(schema.id, { active: !schema.active })}>
-                {schema.active ? 'Mark as inactive' : 'Mark as active'}
-              </MenuItem>
-              <MenuItem onClick={() => handlePatchSchema(schema.id, { hidden: !schema.hidden })}>
-                {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
-              </MenuItem>
-              <MenuItem onClick={() => handleDeleteSchema(schema.id)}>Delete</MenuItem>
-            </Menu>
-          </Stack>
-        </ListItem>
-      )),
-    [schemas, isActionsMenuOpen, anchorEl, handlePatchSchema, handleDeleteSchema],
+      schemas.map((schema, index) => {
+        const open = !!anchorEl && openMenuSchemaId === schema.id
+        return (
+          <ListItem divider={index < schemas.length - 1} key={schema.id}>
+            <ListItemText>{schema.name}</ListItemText>
+            <Stack spacing={1} direction={{ xs: 'column', md: 'row' }} alignItems='center'>
+              <Chip
+                label={schema.active ? 'Active' : 'Inactive'}
+                size='small'
+                color={schema.active ? 'success' : 'warning'}
+              />
+              {schema.hidden && <Chip label='Hidden' size='small' color='error' />}
+              <Button
+                id={`schema-actions-button-${schema.id}`}
+                size='small'
+                variant='contained'
+                aria-controls={open ? `schema-actions-menu-${schema.id}` : undefined}
+                aria-haspopup='true'
+                aria-expanded={open ? 'true' : undefined}
+                endIcon={open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                onClick={(event) => handleOpenMenu(event, schema.id)}
+              >
+                Actions
+              </Button>
+              <Menu
+                id={`schema-actions-menu-${schema.id}`}
+                open={open}
+                anchorEl={anchorEl}
+                MenuListProps={{
+                  'aria-labelledby': `schema-actions-button-${schema.id}`,
+                }}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+                onClose={handleCloseMenu}
+              >
+                <MenuItem onClick={() => handlePatchSchema(schema.id, { active: !schema.active })}>
+                  {schema.active ? 'Mark as inactive' : 'Mark as active'}
+                </MenuItem>
+                <MenuItem onClick={() => handlePatchSchema(schema.id, { hidden: !schema.hidden })}>
+                  {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
+                </MenuItem>
+                <MenuItem onClick={() => handleDeleteSchema(schema.id)}>Delete</MenuItem>
+              </Menu>
+            </Stack>
+          </ListItem>
+        )
+      }),
+    [schemas, openMenuSchemaId, anchorEl, handleCloseMenu, handleOpenMenu, handlePatchSchema, handleDeleteSchema],
   )
 
   const objectsToDeleteList = useMemo(() => {
