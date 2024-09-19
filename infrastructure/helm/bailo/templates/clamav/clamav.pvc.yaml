@@ -1,0 +1,14 @@
+{{- if .Values.clamav.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.aws.pvcClamAVName }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.aws.storageName }}
+  resources:
+    requests:
+      storage: {{ .Values.aws.pvcClamAVStorage }}
+{{- end }}

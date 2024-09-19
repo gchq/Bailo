@@ -72,7 +72,7 @@ export default function EditableRelease({
   const router = useRouter()
 
   const [canUserEditOrDelete, actionButtonsTooltip] = useMemo(() => {
-    const validRoles = ['owner', 'contributor']
+    const validRoles = ['owner', 'mtr', 'msro', 'contributor']
     return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
   }, [currentUserRoles])
 

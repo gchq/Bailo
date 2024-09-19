@@ -104,6 +104,7 @@ export const AuditInfo = {
   ViewInferences: { typeId: 'ViewInferences', description: 'Inferences Viewed', auditKind: AuditKind.View },
 
   CreateExport: { typeId: 'CreateExport', description: 'Model Exported', auditKind: AuditKind.Create },
+  CreateImport: { typeId: 'CreateImport', description: 'Model Imported', auditKind: AuditKind.Create },
 
   ViewResponses: {
     typeId: 'ViewResponses',
@@ -191,6 +192,7 @@ export abstract class BaseAuditConnector {
   abstract onUpdateUserSettings(req: Request, userSettings: UserSettingsInterface)
 
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[])
+  abstract onCreateImport(req: Request, mirroredModelId: string, sourceModelId: string, modelCardVersions: number[])
 
   abstract onError(req: Request, error: BailoError)
 

@@ -62,6 +62,14 @@ data:
         insecure: {{ .Values.registry.insecure }},
       },
 
+      avScanning: {
+        enabled: {{ .Values.clamav.enabled }},
+        clamdscan: {
+          host: '{{ include "bailo.fullname" . }}-clamav',
+          port: {{ .Values.clamav.port }},
+        },
+      },
+
       smtp: {
         // Enable / disable all email sending
         enabled: true,
@@ -138,8 +146,8 @@ data:
         // Show announcement banner at the bottom of the screen
         announcement: {
           enabled: {{ .Values.config.ui.announcement.enabled }},
-          text: {{ .Values.config.ui.announcement.text }},
-          startTimestamp: {{ .Values.config.ui.announcement.startTimestamp }}
+          text: '{{ .Values.config.ui.announcement.text }}',
+          startTimestamp: '{{ .Values.config.ui.announcement.startTimestamp }}'
         },
 
         // Contact details for the support team
@@ -164,7 +172,7 @@ data:
         },
 
         modelMirror: {
-          enabled: '{{ .Values.modelMirror.enabled }}',
+          enabled: {{ .Values.modelMirror.enabled }},
           disclaimer: '{{ .Values.modelMirror.disclaimer }}'
         }
       },
