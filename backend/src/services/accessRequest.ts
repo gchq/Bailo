@@ -128,7 +128,7 @@ export async function updateAccessRequest(
   }
 
   // Ensure that the AR meets the schema
-  const schema = await findSchemaById(accessRequest.schemaId)
+  const schema = await findSchemaById(accessRequest.schemaId, true)
   try {
     new Validator().validate(accessRequest.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
