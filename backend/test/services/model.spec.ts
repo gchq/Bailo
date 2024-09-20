@@ -22,7 +22,7 @@ import {
 vi.mock('../../src/connectors/authorisation/index.js')
 
 const schemaMock = vi.hoisted(() => ({
-  findSchemaById: vi.fn(() => ({ jsonschema: {} })),
+  getSchemaById: vi.fn(() => ({ jsonschema: {} })),
 }))
 vi.mock('../../src/services/schema.js', async () => schemaMock)
 
