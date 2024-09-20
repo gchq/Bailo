@@ -1,7 +1,10 @@
 import { Done, Warning } from '@mui/icons-material'
 import { Chip, Grid, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { useGetUiConfig } from 'actions/uiConfig'
 import prettyBytes from 'pretty-bytes'
 import { useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
+import MessageAlert from 'src/MessageAlert'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
@@ -12,6 +15,8 @@ type FileDownloadProps = {
 
 export default function FileDownload({ modelId, file }: FileDownloadProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const open = Boolean(anchorEl)
 
@@ -58,6 +63,14 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
     return <Chip color={'success'} icon={<Done />} size='small' label={'Virus scan passed'} />
   }, [anchorEl, file, open])
 
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
+  if (isUiConfigLoading) {
+    return <Loading />
+  }
+
   return (
     <>
       {isFileInterface(file) && (
@@ -72,7 +85,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
                     </Typography>
                   </Link>
                 </Tooltip>
-                {avChip}
+                {uiConfig && uiConfig.avScanning && avChip}
               </Stack>
             </Grid>
             <Grid item xs={1} textAlign='right'>
