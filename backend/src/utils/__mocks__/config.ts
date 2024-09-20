@@ -21,7 +21,7 @@ const config = {
       kind: 'basic',
     },
     fileScanners: {
-      kinds: ['clamAv'],
+      kinds: ['clamAV'],
     },
   },
   log: {

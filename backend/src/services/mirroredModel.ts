@@ -351,9 +351,16 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     for (const file of files) {
       if (!file.avScan) {
         scanErrors.missingScan.push({ name: file.name, id: file.id })
-      } else if (file.avScan.state !== ScanState.Complete) {
+      } else if (
+        file.avScan.some(
+          (scanResult) =>
+            scanResult.state === ScanState.NotScanned ||
+            scanResult.state === ScanState.Error ||
+            scanResult.state === ScanState.InProgress,
+        )
+      ) {
         scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-      } else if (file.avScan.isInfected) {
+      } else if (file.avScan.some((scanResult) => scanResult.isInfected)) {
         scanErrors.failedScan.push({ name: file.name, id: file.id })
       }
     }
