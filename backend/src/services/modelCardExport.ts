@@ -4,7 +4,7 @@ import showdown from 'showdown'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { getModelById, getModelCard } from './model.js'
-import { findSchemaById } from './schema.js'
+import { getSchemaById } from './schema.js'
 
 type Common = {
   title: string
@@ -48,7 +48,7 @@ export async function renderToMarkdown(
     throw new Error('Could not find specified model card')
   }
 
-  const schema = await findSchemaById(card.schemaId, true)
+  const schema = await getSchemaById(card.schemaId)
   if (!schema) {
     throw new Error('Trying to export model with no corresponding card')
   }
