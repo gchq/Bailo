@@ -349,7 +349,7 @@ export async function createModelCardFromSchema(
   // Ensure schema exists
   const schema = await getSchemaById(schemaId)
   if (schema.hidden) {
-    throw BadReq('Cannot create new Model Card using a hidden schema.', { schemaId })
+    throw BadReq('Cannot create a new Entity using a hidden schema.', { schemaId, kind: schema.kind })
   }
 
   const revision = await _setModelCard(user, modelId, schemaId, 1, {})
