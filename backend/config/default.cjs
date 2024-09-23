@@ -144,7 +144,6 @@ module.exports = {
   },
 
   avScanning: {
-    enabled: false,
     clamdscan: {
       host: '127.0.0.1',
       port: 3310,
@@ -208,10 +207,6 @@ module.exports = {
 
     audit: {
       kind: 'silly',
-    },
-
-    avScanning: {
-      enabled: true,
     },
   },
 

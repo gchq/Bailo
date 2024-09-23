@@ -74,25 +74,23 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
   return (
     <>
       {isFileInterface(file) && (
-        <>
-          <Grid container alignItems='center' key={file.name}>
-            <Grid item xs={11}>
-              <Stack direction='row' alignItems='center' spacing={2}>
-                <Tooltip title={file.name}>
-                  <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
-                    <Typography noWrap textOverflow='ellipsis'>
-                      {file.name}
-                    </Typography>
-                  </Link>
-                </Tooltip>
-                {uiConfig && uiConfig.avScanning && avChip}
-              </Stack>
-            </Grid>
-            <Grid item xs={1} textAlign='right'>
-              <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-            </Grid>
+        <Grid container alignItems='center' key={file.name}>
+          <Grid item xs={11}>
+            <Stack direction='row' alignItems='center' spacing={2}>
+              <Tooltip title={file.name}>
+                <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
+                  <Typography noWrap textOverflow='ellipsis'>
+                    {file.name}
+                  </Typography>
+                </Link>
+              </Tooltip>
+              {uiConfig && uiConfig.avScanning && avChip}
+            </Stack>
           </Grid>
-        </>
+          <Grid item xs={1} textAlign='right'>
+            <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+          </Grid>
+        </Grid>
       )}
     </>
   )

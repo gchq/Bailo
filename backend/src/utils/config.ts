@@ -170,7 +170,6 @@ export interface Config {
   }
 
   avScanning: {
-    enabled: boolean
     clamdscan: {
       host: string
       port: number
