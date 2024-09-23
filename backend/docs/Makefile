@@ -7,7 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = .
 BUILDDIR      = _build
-BACKENDDIR	  = ../../../backend/python-docs
+BACKENDDIR	  = ./python-docs
 
 # Put it first so that "make" without argument is like "make help".
 help:
