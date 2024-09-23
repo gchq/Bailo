@@ -38,7 +38,7 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 
   await file.save()
 
-  if (config.avScanning.enabled) {
+  if (config.ui.avScanning.enabled) {
     if (!av) {
       try {
         av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
