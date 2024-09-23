@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.9.20-bullseye AS sphinx-docs
+FROM python:3.12.6-bullseye AS sphinx-docs
 
 RUN apt update && apt install -y pandoc
 
