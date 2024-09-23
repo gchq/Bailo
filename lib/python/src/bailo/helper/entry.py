@@ -6,12 +6,21 @@ import warnings
 
 from bailo.core.client import Client
 from bailo.core.enums import EntryKind, ModelVisibility, MinimalSchema
-from bailo.core.exceptions import BailoException
 
 logger = logging.getLogger(__name__)
 
 
 class Entry:
+    """Represent an entry in Bailo
+
+    :param client: A client object used to interact with Bailo
+    :param id: A unique ID for the entry
+    :param name: Name of the entry
+    :param description: Description of the entry
+    :param visibility: Visibility of model, using ModelVisiblility enum (i.e. Public or Private), defaults to None
+    :param kind: Represents whether entry type (i.e. Model or Datacard)
+    """
+
     def __init__(
         self,
         client: Client,
@@ -74,7 +83,7 @@ class Entry:
         res = self.client.get_model(model_id=self.id)
         if "card" in res["model"]:
             self.__unpack_card(res["model"]["card"])
-            logger.info(f"Latest card for ID %s successfully retrieved.", self.id)
+            logger.info("Latest card for ID %s successfully retrieved.", self.id)
         else:
             warnings.warn(
                 f"ID {self.id} does not have any associated cards. If needed, create a card with the .card_from_schema() method."
