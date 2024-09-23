@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set BACKENDDIR=..\..\..\backend\python-docs
+set BACKENDDIR=python-docs
 
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (

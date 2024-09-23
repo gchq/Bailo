@@ -3,6 +3,7 @@
 exports[`routes > schema > putSchema > audit > expected call 1`] = `
 {
   "active": false,
+  "hidden": false,
 }
 `;
 
@@ -10,6 +11,7 @@ exports[`routes > schema > putSchema > successfully updates the schema 1`] = `
 {
   "schema": {
     "active": false,
+    "hidden": false,
   },
 }
 `;

@@ -6,12 +6,15 @@ import { ModelAction, ModelActionKeys } from '../connectors/authorisation/action
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
-import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ModelCardRevisionModel, {
+  ModelCardRevisionDoc,
+  ModelCardRevisionInterface,
+} from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
-import { BadReq, Forbidden, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { findSchemaById } from './schema.js'
 
@@ -283,7 +286,7 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const schema = await findSchemaById(model.card.schemaId)
+  const schema = await findSchemaById(model.card.schemaId, true)
   try {
     new Validator().validate(metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
@@ -375,4 +378,79 @@ export async function createModelCardFromTemplate(
   }
   const revision = await _setModelCard(user, modelId, template.card.schemaId, 1, template.card.metadata)
   return revision
+}
+
+export async function saveImportedModelCard(modelCard: ModelCardRevisionInterface, sourceModelId: string) {
+  const model = await Model.findOne({
+    id: modelCard.modelId,
+  })
+  if (!model) {
+    throw NotFound(`Cannot find model to import model card.`, { modelId: modelCard.modelId })
+  }
+  if (!model.settings.mirror.sourceModelId) {
+    throw InternalError('Cannot import model card to non mirrored model.')
+  }
+  if (model.settings.mirror.sourceModelId !== sourceModelId) {
+    throw InternalError('The source model ID of the mirrored model does not match the model Id of the imported model', {
+      sourceModelId: model.settings.mirror.sourceModelId,
+      importedModelId: sourceModelId,
+    })
+  }
+
+  const schema = await findSchemaById(modelCard.schemaId, true)
+  try {
+    new Validator().validate(modelCard.metadata, schema.jsonSchema, { throwAll: true, required: true })
+  } catch (error) {
+    if (isValidatorResultError(error)) {
+      throw BadReq('Model metadata could not be validated against the schema.', {
+        schemaId: modelCard.schemaId,
+        validationErrors: error.errors,
+      })
+    }
+    throw error
+  }
+
+  return await ModelCardRevisionModel.findOneAndUpdate(
+    { modelId: modelCard.modelId, version: modelCard.version },
+    modelCard,
+    {
+      upsert: true,
+    },
+  )
+}
+
+export async function setLatestImportedModelCard(modelId: string) {
+  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }, undefined, { sort: { version: -1 } })
+  if (!latestModelCard) {
+    throw NotFound('Cannot find latest model card.', { modelId })
+  }
+
+  const result = await ModelModel.findOneAndUpdate(
+    { id: modelId, 'settings.mirror.sourceModelId': { $exists: true, $ne: '' } },
+    { $set: { card: latestModelCard } },
+  )
+  if (!result) {
+    throw InternalError('Unable to set latest model card of mirrored model.', {
+      modelId,
+      version: latestModelCard.version,
+    })
+  }
+}
+
+export function isModelCardRevision(data: unknown): data is ModelCardRevisionInterface {
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+  // Hard to debug
+  if (
+    !('modelId' in data) ||
+    !('schemaId' in data) ||
+    !('version' in data) ||
+    !('createdBy' in data) ||
+    !('updatedAt' in data) ||
+    !('createdAt' in data)
+  ) {
+    return false
+  }
+  return true
 }

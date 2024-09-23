@@ -6,12 +6,21 @@ import warnings
 
 from bailo.core.client import Client
 from bailo.core.enums import EntryKind, ModelVisibility, MinimalSchema
-from bailo.core.exceptions import BailoException
 
 logger = logging.getLogger(__name__)
 
 
 class Entry:
+    """Represent an entry in Bailo
+
+    :param client: A client object used to interact with Bailo
+    :param id: A unique ID for the entry
+    :param name: Name of the entry
+    :param description: Description of the entry
+    :param visibility: Visibility of model, using ModelVisiblility enum (i.e. Public or Private), defaults to None
+    :param kind: Represents whether entry type (i.e. Model or Datacard)
+    """
+
     def __init__(
         self,
         client: Client,
@@ -46,7 +55,7 @@ class Entry:
 
         logger.info(f"ID %s updated locally and on server.", self.id)
 
-    def card_from_schema(self, schema_id: str | None = None) -> None:
+    def card_from_schema(self, schema_id: str) -> None:
         """Create a card using a schema on Bailo.
 
         :param schema_id: A unique schema ID, defaults to None. If None, either minimal-general-v10 or minimal-data-card-v10 is used
@@ -62,19 +71,19 @@ class Entry:
 
         logger.info(f"Card for ID %s successfully created using schema ID %s.", self.id, schema_id)
 
-    def card_from_template(self):
-        """Create a card using a template (not yet implemented).
+    def card_from_template(self, template_id: str) -> None:
+        """Create a card using a template (not yet implemented)."""
+        res = self.client.model_card_from_template(model_id=self.id, template_id=template_id)
+        self.__unpack_card(res["card"])
 
-        :raises NotImplementedError: Not implemented error
-        """
-        raise NotImplementedError
+        logger.info(f"Card for ID %s successfully created using template ID %s", self.id, template_id)
 
     def get_card_latest(self) -> None:
         """Get the latest card from Bailo."""
         res = self.client.get_model(model_id=self.id)
         if "card" in res["model"]:
             self.__unpack_card(res["model"]["card"])
-            logger.info(f"Latest card for ID %s successfully retrieved.", self.id)
+            logger.info("Latest card for ID %s successfully retrieved.", self.id)
         else:
             warnings.warn(
                 f"ID {self.id} does not have any associated cards. If needed, create a card with the .card_from_schema() method."

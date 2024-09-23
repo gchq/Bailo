@@ -38,6 +38,7 @@ import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
+import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
@@ -92,6 +93,7 @@ server.get('/api/v2/model/:modelId', ...getModel)
 server.patch('/api/v2/model/:modelId', ...patchModel)
 
 server.post('/api/v2/model/:modelId/export/s3', ...postRequestExportToS3)
+server.post('/api/v2/model/import/s3', ...postRequestImportFromS3)
 
 server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
 server.get('/api/v2/model/:modelId/model-card/:version/html', ...getModelCardHtml)
@@ -211,6 +213,6 @@ server.get('/api/v2/specification', ...getSpecification)
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/_build/dirhtml')))
+server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)
