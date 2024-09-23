@@ -192,7 +192,7 @@ module.exports = {
     },
 
     avScanning: {
-      enabled: true,
+      enabled: false,
     },
   },
 

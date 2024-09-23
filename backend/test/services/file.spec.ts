@@ -26,8 +26,10 @@ vi.mock('../../src/services/log.js', async () => ({
 const configMock = vi.hoisted(
   () =>
     ({
-      avScanning: {
-        enabled: false,
+      ui: {
+        avScanning: {
+          enabled: false,
+        },
       },
       s3: {
         buckets: {
