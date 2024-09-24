@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { SchemaInterface } from '../../../models/Schema.js'
-import { findSchemasByKind } from '../../../services/schema.js'
+import { searchSchemas } from '../../../services/schema.js'
 import { registerPath, schemaInterfaceSchema } from '../../../services/specification.js'
 import { SchemaKind } from '../../../types/enums.js'
 import { parse, strictCoerceBoolean } from '../../../utils/validate.js'
@@ -13,7 +13,7 @@ import { parse, strictCoerceBoolean } from '../../../utils/validate.js'
 export const getSchemasSchema = z.object({
   query: z.object({
     kind: z.nativeEnum(SchemaKind).optional(),
-    includeHidden: strictCoerceBoolean(z.boolean().optional().default(false)),
+    hidden: strictCoerceBoolean(z.boolean().optional()),
   }),
 })
 
@@ -47,7 +47,7 @@ export const getSchemas = [
     req.audit = AuditInfo.SearchSchemas
     const { query } = parse(req, getSchemasSchema)
 
-    const schemas = await findSchemasByKind(query.kind, query.includeHidden)
+    const schemas = await searchSchemas(query.kind, query.hidden)
     await audit.onSearchSchemas(req, schemas)
 
     return res.json({

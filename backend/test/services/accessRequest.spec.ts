@@ -17,7 +17,7 @@ const modelMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/model.js', () => modelMocks)
 
 const schemaMocks = vi.hoisted(() => ({
-  findSchemaById: vi.fn(),
+  getSchemaById: vi.fn(),
 }))
 vi.mock('../../src/services/schema.js', () => schemaMocks)
 
@@ -62,7 +62,7 @@ const accessRequest = {
 describe('services > accessRequest', () => {
   test('createAccessRequest > simple', async () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
-    schemaMocks.findSchemaById.mockResolvedValue({ jsonSchema: {} })
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
 
     await createAccessRequest({} as any, 'example-model', accessRequest)
 
@@ -80,7 +80,7 @@ describe('services > accessRequest', () => {
     })
 
     modelMocks.getModelById.mockResolvedValue(undefined)
-    schemaMocks.findSchemaById.mockResolvedValue({ jsonSchema: {} })
+    schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
 
     expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
       /^You do not have permission/,

@@ -16,7 +16,7 @@ import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
-import { findSchemaById } from './schema.js'
+import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
   if (model.settings.mirror.sourceModelId) {
@@ -286,7 +286,7 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const schema = await findSchemaById(model.card.schemaId, true)
+  const schema = await getSchemaById(model.card.schemaId)
   try {
     new Validator().validate(metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
@@ -347,7 +347,10 @@ export async function createModelCardFromSchema(
   }
 
   // Ensure schema exists
-  await findSchemaById(schemaId)
+  const schema = await getSchemaById(schemaId)
+  if (schema.hidden) {
+    throw BadReq('Cannot create a new Card using a hidden schema.', { schemaId, kind: schema.kind })
+  }
 
   const revision = await _setModelCard(user, modelId, schemaId, 1, {})
   return revision
@@ -397,7 +400,7 @@ export async function saveImportedModelCard(modelCard: ModelCardRevisionInterfac
     })
   }
 
-  const schema = await findSchemaById(modelCard.schemaId, true)
+  const schema = await getSchemaById(modelCard.schemaId)
   try {
     new Validator().validate(modelCard.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
