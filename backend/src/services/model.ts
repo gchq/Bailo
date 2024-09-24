@@ -475,6 +475,7 @@ export async function getCurrentUserPermissionsByModel(
   // Inferencing uses model authorisation
   const createInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Create)
   const editInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Update)
+  const exportMirroredModelAuth = await authorisation.model(user, model, ModelAction.Update)
 
   return {
     editEntryCard: {
@@ -512,6 +513,11 @@ export async function getCurrentUserPermissionsByModel(
     editInferenceService: {
       hasPermission: editInferenceServiceAuth.success,
       ...(!editInferenceServiceAuth.success && { info: editInferenceServiceAuth.info }),
+    },
+
+    exportMirroredModel: {
+      hasPermission: exportMirroredModelAuth.success,
+      ...(!exportMirroredModelAuth.success && { info: exportMirroredModelAuth.info }),
     },
   }
 }

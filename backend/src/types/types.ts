@@ -31,6 +31,8 @@ export interface EntryUserPermissions {
 
   createInferenceService: PermissionDetail
   editInferenceService: PermissionDetail
+
+  exportMirroredModel: PermissionDetail
 }
 
 export interface AccessRequestUserPermissions {
