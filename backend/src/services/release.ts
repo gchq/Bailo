@@ -276,15 +276,34 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
   return releases
 }
 
-export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
-  const model = await getModelById(user, modelId)
+export async function getReleaseBySemverRange(user: UserInterface, _modelID: string, _semver: string) {
+  const model = await getModelById(user, _modelID)
   const release = await Release.findOne({
-    modelId,
-    semver,
+    modelId: _modelID,
+    semver: { $gte: _semver },
   })
 
   if (!release) {
-    throw NotFound(`The requested release was not found.`, { modelId, semver })
+    throw NotFound(`The requested release was not found.`, { _modelID, _semver })
+  }
+
+  const auth = await authorisation.release(user, model, release, ReleaseAction.View)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
+  }
+
+  return release
+}
+
+export async function getReleaseBySemver(user: UserInterface, _modelId: string, _semver: boolean) {
+  const model = await getModelById(user, _modelId)
+  const release = await Release.findOne({
+    modelId: _modelId,
+    semver: _semver,
+  })
+
+  if (!release) {
+    throw NotFound(`The requested release was not found.`, { _modelId, _semver })
   }
 
   const auth = await authorisation.release(user, model, release, ReleaseAction.View)
