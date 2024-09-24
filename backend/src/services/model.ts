@@ -286,7 +286,7 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const schema = await findSchemaById(model.card.schemaId)
+  const schema = await findSchemaById(model.card.schemaId, true)
   try {
     new Validator().validate(metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
@@ -397,7 +397,7 @@ export async function saveImportedModelCard(modelCard: ModelCardRevisionInterfac
     })
   }
 
-  const schema = await findSchemaById(modelCard.schemaId)
+  const schema = await findSchemaById(modelCard.schemaId, true)
   try {
     new Validator().validate(modelCard.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {

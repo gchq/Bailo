@@ -140,6 +140,10 @@ export interface Config {
       text: string
       startTimestamp: string
     }
+
+    avScanning: {
+      enabled: boolean
+    }
   }
 
   session: {
@@ -171,7 +175,6 @@ export interface Config {
   }
 
   avScanning: {
-    enabled: boolean
     clamdscan: {
       host: string
       port: number

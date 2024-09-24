@@ -34,9 +34,9 @@ const configMock = vi.hoisted(
         modelMirror: {
           enabled: true,
         },
-      },
-      avScanning: {
-        enabled: true,
+        avScanning: {
+          enabled: true,
+        },
       },
       s3: { buckets: { uploads: 'test' } },
       modelMirror: {

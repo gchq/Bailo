@@ -48,7 +48,7 @@ export async function renderToMarkdown(
     throw new Error('Could not find specified model card')
   }
 
-  const schema = await findSchemaById(card.schemaId)
+  const schema = await findSchemaById(card.schemaId, true)
   if (!schema) {
     throw new Error('Trying to export model with no corresponding card')
   }

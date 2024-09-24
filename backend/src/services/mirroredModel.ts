@@ -341,7 +341,7 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     }
   }
 
-  if (config.avScanning.enabled) {
+  if (config.ui.avScanning.enabled) {
     const files: FileInterfaceDoc[] = await getFilesByIds(user, modelId, fileIds)
     const scanErrors: {
       missingScan: Array<{ name: string; id: string }>

@@ -144,7 +144,6 @@ module.exports = {
   },
 
   avScanning: {
-    enabled: true,
     clamdscan: {
       host: '127.0.0.1',
       port: 3310,
@@ -190,6 +189,10 @@ module.exports = {
       enabled: false,
       text: '',
       startTimestamp: '',
+    },
+
+    avScanning: {
+      enabled: true,
     },
   },
 
