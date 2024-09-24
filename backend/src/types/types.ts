@@ -26,17 +26,11 @@ export interface EntryUserPermissions {
   createRelease: PermissionDetail
   editRelease: PermissionDetail
   deleteRelease: PermissionDetail
-  reviewRelease: PermissionDetail
-
-  reviewAccessRequest: PermissionDetail
 
   pushModelImage: PermissionDetail
 
   createInferenceService: PermissionDetail
   editInferenceService: PermissionDetail
-  deleteInferenceService: PermissionDetail
-
-  exportMirroredModel: PermissionDetail
 }
 
 export interface AccessRequestUserPermissions {
