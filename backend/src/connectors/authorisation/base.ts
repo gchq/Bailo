@@ -60,17 +60,17 @@ export class BasicAuthorisationConnector {
     return (await this.schemas(user, [schema], action))[0]
   }
 
-  async release(user: UserInterface, model: ModelDoc, release: ReleaseDoc, action: ReleaseActionKeys) {
-    return (await this.releases(user, model, [release], action))[0]
+  async release(user: UserInterface, model: ModelDoc, action: ReleaseActionKeys, release?: ReleaseDoc) {
+    return (await this.releases(user, model, release ? [release] : [], action))[0]
   }
 
   async accessRequest(
     user: UserInterface,
     model: ModelDoc,
-    accessRequest: AccessRequestDoc,
     action: AccessRequestActionKeys,
+    accessRequest?: AccessRequestDoc,
   ) {
-    return (await this.accessRequests(user, model, [accessRequest], action))[0]
+    return (await this.accessRequests(user, model, accessRequest ? [accessRequest] : [], action))[0]
   }
 
   async response(user: UserInterface, response: ResponseDoc, action: ResponseActionKeys) {
@@ -181,10 +181,10 @@ export class BasicAuthorisationConnector {
     // Is this a constrained user token.
     const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
     if (!tokenAuth.success) {
-      return releases.map(() => tokenAuth)
+      return releases.length ? releases.map(() => tokenAuth) : [tokenAuth]
     }
 
-    return new Array(releases.length).fill(await this.model(user, model, actionMap[action]))
+    return new Array(releases.length || 1).fill(await this.model(user, model, actionMap[action]))
   }
 
   async accessRequests(

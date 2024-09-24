@@ -13,17 +13,9 @@ export interface Role {
   description?: string
 }
 
-export const EntryRole = {
-  OWNER: 'owner',
-  CONTRIBUTOR: 'contributor',
-  CONSUMER: 'consumer',
-  MTR: 'mtr',
-  MSRO: 'msro',
-} as const
-
 export type PermissionDetail = {
   hasPermission: boolean
-  reason?: string
+  info?: string
 }
 
 export interface EntryUserPermissions {

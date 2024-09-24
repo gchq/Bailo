@@ -2,7 +2,7 @@ import { Validator } from 'jsonschema'
 import _ from 'lodash'
 
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
+import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
@@ -12,12 +12,11 @@ import ModelCardRevisionModel, {
 } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
-import { EntryRole, EntryUserPermissions } from '../types/types.js'
+import { EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
-import { getReason, userHasPermission } from '../utils/permissions.js'
 import { findSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -463,77 +462,56 @@ export async function getCurrentUserPermissionsByModel(
 ): Promise<EntryUserPermissions> {
   const model = await getModelById(user, modelId)
 
-  const isMirroredModel = !!model.settings.mirror.sourceModelId
-  const currentUserRoles =
-    model.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === user.dn)?.roles || []
-
-  const editEntryCardValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
-  const viewEntrySettingsValidRoles = [EntryRole.OWNER]
-  const createReleaseValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
-  const editReleaseValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
-  const deleteReleaseValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
-  const reviewReleaseValidRoles = [EntryRole.MTR, EntryRole.MSRO]
-  const reviewAccessRequestValidRoles = [EntryRole.MSRO]
-  const pushModelImageValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
-  const createInferenceServiceValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
-  const editInferenceServiceValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
-  const deleteInferenceServiceValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
-  const exportMirroredModelValidRoles = [EntryRole.OWNER, EntryRole.CONTRIBUTOR]
+  const editEntryCardAuth = await authorisation.model(user, model, ModelAction.Write)
+  const viewEntrySettingsAuth = await authorisation.model(user, model, ModelAction.Update)
+  const createReleaseAuth = await authorisation.release(user, model, ReleaseAction.Create)
+  const editReleaseAuth = await authorisation.release(user, model, ReleaseAction.Update)
+  const deleteReleaseAuth = await authorisation.release(user, model, ReleaseAction.Delete)
+  const pushModelImageAuth = await authorisation.image(user, model, {
+    type: 'repository',
+    name: modelId,
+    actions: ['push'],
+  })
+  // Inferencing uses model authorisation
+  const createInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Create)
+  const editInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Update)
 
   return {
     editEntryCard: {
-      hasPermission: userHasPermission(currentUserRoles, editEntryCardValidRoles, isMirroredModel, true),
-      reason: getReason(currentUserRoles, editEntryCardValidRoles, isMirroredModel, true),
+      hasPermission: editEntryCardAuth.success,
+      ...(!editEntryCardAuth.success && { info: editEntryCardAuth.info }),
     },
 
     viewEntrySettings: {
-      hasPermission: userHasPermission(currentUserRoles, viewEntrySettingsValidRoles, isMirroredModel, false),
-      reason: getReason(currentUserRoles, viewEntrySettingsValidRoles, isMirroredModel, false),
+      hasPermission: viewEntrySettingsAuth.success,
+      ...(!viewEntrySettingsAuth.success && { info: viewEntrySettingsAuth.info }),
     },
 
     createRelease: {
-      hasPermission: userHasPermission(currentUserRoles, createReleaseValidRoles, isMirroredModel, true),
-      reason: getReason(currentUserRoles, createReleaseValidRoles, isMirroredModel, true),
+      hasPermission: createReleaseAuth.success,
+      ...(!createReleaseAuth.success && { info: createReleaseAuth.info }),
     },
     editRelease: {
-      hasPermission: userHasPermission(currentUserRoles, editReleaseValidRoles, isMirroredModel, true),
-      reason: getReason(currentUserRoles, editReleaseValidRoles, isMirroredModel, true),
+      hasPermission: editReleaseAuth.success,
+      ...(!editReleaseAuth.success && { info: editReleaseAuth.info }),
     },
     deleteRelease: {
-      hasPermission: userHasPermission(currentUserRoles, deleteReleaseValidRoles, isMirroredModel, true),
-      reason: getReason(currentUserRoles, deleteReleaseValidRoles, isMirroredModel, true),
-    },
-    reviewRelease: {
-      hasPermission: userHasPermission(currentUserRoles, reviewReleaseValidRoles, isMirroredModel, true),
-      reason: getReason(currentUserRoles, reviewReleaseValidRoles, isMirroredModel, true),
-    },
-
-    reviewAccessRequest: {
-      hasPermission: userHasPermission(currentUserRoles, reviewAccessRequestValidRoles, isMirroredModel, false),
-      reason: getReason(currentUserRoles, reviewAccessRequestValidRoles, isMirroredModel, false),
+      hasPermission: deleteReleaseAuth.success,
+      ...(!deleteReleaseAuth.success && { info: deleteReleaseAuth.info }),
     },
 
     pushModelImage: {
-      hasPermission: userHasPermission(currentUserRoles, pushModelImageValidRoles, isMirroredModel, true),
-      reason: getReason(currentUserRoles, pushModelImageValidRoles, isMirroredModel, true),
+      hasPermission: pushModelImageAuth.success,
+      ...(!pushModelImageAuth.success && { info: pushModelImageAuth.info }),
     },
 
     createInferenceService: {
-      hasPermission: userHasPermission(currentUserRoles, createInferenceServiceValidRoles, isMirroredModel, false),
-      reason: getReason(currentUserRoles, createInferenceServiceValidRoles, isMirroredModel, false),
+      hasPermission: createInferenceServiceAuth.success,
+      ...(!createInferenceServiceAuth.success && { info: createInferenceServiceAuth.info }),
     },
     editInferenceService: {
-      hasPermission: userHasPermission(currentUserRoles, editInferenceServiceValidRoles, isMirroredModel, false),
-      reason: getReason(currentUserRoles, editInferenceServiceValidRoles, isMirroredModel, false),
-    },
-    deleteInferenceService: {
-      hasPermission: userHasPermission(currentUserRoles, deleteInferenceServiceValidRoles, isMirroredModel, false),
-      reason: getReason(currentUserRoles, deleteInferenceServiceValidRoles, isMirroredModel, false),
-    },
-
-    exportMirroredModel: {
-      hasPermission: userHasPermission(currentUserRoles, exportMirroredModelValidRoles, isMirroredModel, false),
-      reason: getReason(currentUserRoles, exportMirroredModelValidRoles, isMirroredModel, false),
+      hasPermission: editInferenceServiceAuth.success,
+      ...(!editInferenceServiceAuth.success && { info: editInferenceServiceAuth.info }),
     },
   }
 }

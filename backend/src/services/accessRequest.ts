@@ -9,12 +9,11 @@ import AccessRequest from '../models/AccessRequest.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
-import { AccessRequestUserPermissions, EntryRole } from '../types/types.js'
+import { AccessRequestUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
-import { getReason, userHasPermission } from '../utils/permissions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { createAccessRequestReviews } from './review.js'
@@ -53,7 +52,7 @@ export async function createAccessRequest(
     ...accessRequestInfo,
   })
 
-  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Create)
+  const auth = await authorisation.accessRequest(user, model, AccessRequestAction.Create, accessRequest)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -81,7 +80,7 @@ export async function removeAccessRequest(user: UserInterface, accessRequestId: 
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Delete)
+  const auth = await authorisation.accessRequest(user, model, AccessRequestAction.Delete, accessRequest)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -107,7 +106,7 @@ export async function getAccessRequestById(user: UserInterface, accessRequestId:
 
   const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.View)
+  const auth = await authorisation.accessRequest(user, model, AccessRequestAction.View, accessRequest)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -124,7 +123,7 @@ export async function updateAccessRequest(
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
+  const auth = await authorisation.accessRequest(user, model, AccessRequestAction.Update, accessRequest)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -193,31 +192,17 @@ export async function getCurrentUserPermissionsByAccessRequest(
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  const isMirroredModel = !!model.settings.mirror.sourceModelId
-  const currentUserRoles =
-    model.collaborators.find((collaborator) => collaborator.entity.split(':')[1] === user.dn)?.roles || []
-  const isAdditionalContact = accessRequest.metadata.overview.entities.some(
-    (entity) => entity.split(':')[1] === user.dn,
-  )
-
-  const editAccessRequestValidRoles = [EntryRole.OWNER]
-  const deleteAccessRequestValidRoles = [EntryRole.OWNER]
+  const editAccessRequestAuth = await authorisation.accessRequest(user, model, AccessRequestAction.Update)
+  const deleteAccessRequestAuth = await authorisation.accessRequest(user, model, AccessRequestAction.Delete)
 
   return {
     editAccessRequest: {
-      hasPermission:
-        isAdditionalContact || userHasPermission(currentUserRoles, editAccessRequestValidRoles, isMirroredModel, false),
-      reason: isAdditionalContact
-        ? ''
-        : getReason(currentUserRoles, editAccessRequestValidRoles, isMirroredModel, false),
+      hasPermission: editAccessRequestAuth.success,
+      ...(!editAccessRequestAuth.success && { info: editAccessRequestAuth.info }),
     },
     deleteAccessRequest: {
-      hasPermission:
-        isAdditionalContact ||
-        userHasPermission(currentUserRoles, deleteAccessRequestValidRoles, isMirroredModel, false),
-      reason: isAdditionalContact
-        ? ''
-        : getReason(currentUserRoles, deleteAccessRequestValidRoles, isMirroredModel, false),
+      hasPermission: deleteAccessRequestAuth.success,
+      ...(!deleteAccessRequestAuth.success && { info: deleteAccessRequestAuth.info }),
     },
   }
 }

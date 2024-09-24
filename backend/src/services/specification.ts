@@ -230,7 +230,7 @@ export const inferenceInterfaceSchema = z.object({
 
 export const permissionDetailSchema = z.object({
   hasPermission: z.boolean(),
-  reason: z.string().optional(),
+  info: z.string().optional(),
 })
 
 export const entryUserPermissionsSchema = z.object({
