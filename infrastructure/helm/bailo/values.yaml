@@ -261,7 +261,7 @@ connectors:
   audit:
     kind: 'silly'
 
-  fileScanning:
+  fileScanners:
     kinds: ['clamAV']
 
 instrumentation:
