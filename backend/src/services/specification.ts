@@ -246,9 +246,6 @@ export const entryUserPermissionsSchema = z.object({
   createRelease: permissionDetailSchema,
   editRelease: permissionDetailSchema,
   deleteRelease: permissionDetailSchema,
-  reviewRelease: permissionDetailSchema,
-
-  reviewAccessRequest: permissionDetailSchema,
 
   pushModelImage: permissionDetailSchema,
 
