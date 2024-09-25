@@ -196,13 +196,17 @@ export async function getCurrentUserPermissionsByAccessRequest(
   const deleteAccessRequestAuth = await authorisation.accessRequest(user, model, AccessRequestAction.Delete)
 
   return {
-    editAccessRequest: {
-      hasPermission: editAccessRequestAuth.success,
-      ...(!editAccessRequestAuth.success && { info: editAccessRequestAuth.info }),
-    },
-    deleteAccessRequest: {
-      hasPermission: deleteAccessRequestAuth.success,
-      ...(!deleteAccessRequestAuth.success && { info: deleteAccessRequestAuth.info }),
-    },
+    editAccessRequest: editAccessRequestAuth.success
+      ? { hasPermission: editAccessRequestAuth.success }
+      : {
+          hasPermission: editAccessRequestAuth.success,
+          info: editAccessRequestAuth.info,
+        },
+    deleteAccessRequest: deleteAccessRequestAuth.success
+      ? { hasPermission: deleteAccessRequestAuth.success }
+      : {
+          hasPermission: deleteAccessRequestAuth.success,
+          info: deleteAccessRequestAuth.info,
+        },
   }
 }

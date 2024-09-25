@@ -228,10 +228,15 @@ export const inferenceInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
-export const permissionDetailSchema = z.object({
-  hasPermission: z.boolean(),
-  info: z.string().optional(),
-})
+export const permissionDetailSchema = z.discriminatedUnion('hasPermission', [
+  z.object({
+    hasPermission: z.literal(true),
+  }),
+  z.object({
+    hasPermission: z.literal(false),
+    info: z.string(),
+  }),
+])
 
 export const entryUserPermissionsSchema = z.object({
   editEntryCard: permissionDetailSchema,

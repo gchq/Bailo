@@ -478,46 +478,64 @@ export async function getCurrentUserPermissionsByModel(
   const exportMirroredModelAuth = await authorisation.model(user, model, ModelAction.Update)
 
   return {
-    editEntryCard: {
-      hasPermission: editEntryCardAuth.success,
-      ...(!editEntryCardAuth.success && { info: editEntryCardAuth.info }),
-    },
+    editEntryCard: editEntryCardAuth.success
+      ? { hasPermission: editEntryCardAuth.success }
+      : {
+          hasPermission: editEntryCardAuth.success,
+          info: editEntryCardAuth.info,
+        },
 
-    viewEntrySettings: {
-      hasPermission: viewEntrySettingsAuth.success,
-      ...(!viewEntrySettingsAuth.success && { info: viewEntrySettingsAuth.info }),
-    },
+    viewEntrySettings: viewEntrySettingsAuth.success
+      ? { hasPermission: viewEntrySettingsAuth.success }
+      : {
+          hasPermission: viewEntrySettingsAuth.success,
+          info: viewEntrySettingsAuth.info,
+        },
 
-    createRelease: {
-      hasPermission: createReleaseAuth.success,
-      ...(!createReleaseAuth.success && { info: createReleaseAuth.info }),
-    },
-    editRelease: {
-      hasPermission: editReleaseAuth.success,
-      ...(!editReleaseAuth.success && { info: editReleaseAuth.info }),
-    },
-    deleteRelease: {
-      hasPermission: deleteReleaseAuth.success,
-      ...(!deleteReleaseAuth.success && { info: deleteReleaseAuth.info }),
-    },
+    createRelease: createReleaseAuth.success
+      ? { hasPermission: createReleaseAuth.success }
+      : {
+          hasPermission: createReleaseAuth.success,
+          info: createReleaseAuth.info,
+        },
+    editRelease: editReleaseAuth.success
+      ? { hasPermission: editReleaseAuth.success }
+      : {
+          hasPermission: editReleaseAuth.success,
+          info: editReleaseAuth.info,
+        },
+    deleteRelease: deleteReleaseAuth.success
+      ? { hasPermission: deleteReleaseAuth.success }
+      : {
+          hasPermission: deleteReleaseAuth.success,
+          info: deleteReleaseAuth.info,
+        },
 
-    pushModelImage: {
-      hasPermission: pushModelImageAuth.success,
-      ...(!pushModelImageAuth.success && { info: pushModelImageAuth.info }),
-    },
+    pushModelImage: pushModelImageAuth.success
+      ? { hasPermission: pushModelImageAuth.success }
+      : {
+          hasPermission: pushModelImageAuth.success,
+          info: pushModelImageAuth.info,
+        },
 
-    createInferenceService: {
-      hasPermission: createInferenceServiceAuth.success,
-      ...(!createInferenceServiceAuth.success && { info: createInferenceServiceAuth.info }),
-    },
-    editInferenceService: {
-      hasPermission: editInferenceServiceAuth.success,
-      ...(!editInferenceServiceAuth.success && { info: editInferenceServiceAuth.info }),
-    },
+    createInferenceService: createInferenceServiceAuth.success
+      ? { hasPermission: createInferenceServiceAuth.success }
+      : {
+          hasPermission: createInferenceServiceAuth.success,
+          info: createInferenceServiceAuth.info,
+        },
+    editInferenceService: editInferenceServiceAuth.success
+      ? { hasPermission: editInferenceServiceAuth.success }
+      : {
+          hasPermission: editInferenceServiceAuth.success,
+          info: editInferenceServiceAuth.info,
+        },
 
-    exportMirroredModel: {
-      hasPermission: exportMirroredModelAuth.success,
-      ...(!exportMirroredModelAuth.success && { info: exportMirroredModelAuth.info }),
-    },
+    exportMirroredModel: exportMirroredModelAuth.success
+      ? { hasPermission: exportMirroredModelAuth.success }
+      : {
+          hasPermission: exportMirroredModelAuth.success,
+          info: exportMirroredModelAuth.info,
+        },
   }
 }

@@ -13,10 +13,15 @@ export interface Role {
   description?: string
 }
 
-export type PermissionDetail = {
-  hasPermission: boolean
-  info?: string
-}
+export type PermissionDetail =
+  | {
+      hasPermission: true
+      info?: never
+    }
+  | {
+      hasPermission: false
+      info: string
+    }
 
 export interface EntryUserPermissions {
   editEntryCard: PermissionDetail
