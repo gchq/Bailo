@@ -27,7 +27,15 @@ const configMock = vi.hoisted(
   () =>
     ({
       avScanning: {
-        enabled: false,
+        clamdscan: {
+          host: 'test',
+          port: 8080,
+        },
+      },
+      ui: {
+        avScanning: {
+          enabled: false,
+        },
       },
       s3: {
         buckets: {
@@ -100,7 +108,8 @@ describe('services > file', () => {
   })
 
   test('uploadFile > virus scan initialised', async () => {
-    vi.spyOn(configMock, 'avScanning', 'get').mockReturnValue({ enabled: true, clamdscan: 'test' })
+    vi.spyOn(configMock, 'avScanning', 'get').mockReturnValue({ clamdscan: 'test' })
+    vi.spyOn(configMock, 'ui', 'get').mockReturnValue({ avScanning: { enabled: true } })
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const name = 'testFile'

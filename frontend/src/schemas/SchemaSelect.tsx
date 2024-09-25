@@ -35,6 +35,7 @@ export default function SchemaSelect({ entry }: SchemaSelectProps) {
   const [errorMessage, setErrorMessage] = useState('')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(
     entry.kind === EntryKind.MODEL ? SchemaKind.MODEL : SchemaKind.DATA_CARD,
+    false,
   )
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)

@@ -71,4 +71,8 @@ export interface UiConfig {
     text: string
     startTimestamp: string
   }
+
+  avScanning: {
+    enabled: boolean
+  }
 }

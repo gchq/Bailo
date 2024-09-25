@@ -14,14 +14,14 @@ vi.mock('../../../src/connectors/authorisation/index.js')
 const mockSchemaService = vi.hoisted(() => {
   return {
     addDefaultSchemas: vi.fn(),
-    findSchemaById: vi.fn(),
+    getSchemaById: vi.fn(),
   }
 })
 vi.mock('../../../src/services/schema.js', () => mockSchemaService)
 
 describe('routes > schema > getSchema', () => {
   test('returns the schema with the matching ID', async () => {
-    mockSchemaService.findSchemaById.mockReturnValueOnce(testModelSchema)
+    mockSchemaService.getSchemaById.mockReturnValueOnce(testModelSchema)
     const res = await testGet(`/api/v2/schema/${testModelSchema.id}`)
 
     expect(res.statusCode).toBe(200)
@@ -29,7 +29,7 @@ describe('routes > schema > getSchema', () => {
   })
 
   test('audit > expected call', async () => {
-    mockSchemaService.findSchemaById.mockReturnValueOnce(testModelSchema)
+    mockSchemaService.getSchemaById.mockReturnValueOnce(testModelSchema)
     const res = await testGet(`/api/v2/schema/${testModelSchema.id}`)
 
     expect(res.statusCode).toBe(200)
@@ -38,7 +38,7 @@ describe('routes > schema > getSchema', () => {
   })
 
   test('returns the schema with the matching ID', async () => {
-    mockSchemaService.findSchemaById.mockRejectedValueOnce(NotFound('Schema not found.'))
+    mockSchemaService.getSchemaById.mockRejectedValueOnce(NotFound('Schema not found.'))
     const res = await testGet(`/api/v2/schema/does-not-exist`)
 
     expect(res.statusCode).toBe(404)

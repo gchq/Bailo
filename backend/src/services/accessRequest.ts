@@ -17,7 +17,7 @@ import { convertStringToId } from '../utils/id.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { createAccessRequestReviews } from './review.js'
-import { findSchemaById } from './schema.js'
+import { getSchemaById } from './schema.js'
 import { sendWebhooks } from './webhook.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
@@ -30,7 +30,10 @@ export async function createAccessRequest(
   const model = await getModelById(user, modelId)
 
   // Ensure that the AR meets the schema
-  const schema = await findSchemaById(accessRequestInfo.schemaId)
+  const schema = await getSchemaById(accessRequestInfo.schemaId)
+  if (schema.hidden) {
+    throw BadReq('Cannot create new Access Request using a hidden schema.', { schemaId: accessRequestInfo.schemaId })
+  }
   try {
     new Validator().validate(accessRequestInfo.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
@@ -129,7 +132,7 @@ export async function updateAccessRequest(
   }
 
   // Ensure that the AR meets the schema
-  const schema = await findSchemaById(accessRequest.schemaId)
+  const schema = await getSchemaById(accessRequest.schemaId)
   try {
     new Validator().validate(accessRequest.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
