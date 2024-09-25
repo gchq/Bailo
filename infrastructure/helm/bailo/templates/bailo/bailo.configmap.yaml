@@ -175,6 +175,10 @@ data:
           enabled: {{ .Values.modelMirror.enabled }},
           disclaimer: '{{ .Values.modelMirror.disclaimer }}'
         }
+
+        avScanning: {
+          enabled: {{ .Values.config.ui.avScanning.enabled }},
+        }
       },
 
       connectors: {
