@@ -11,6 +11,10 @@ let av: NodeClam
 
 export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   constructor() {
+    if (!config.avScanning.clamdscan) {
+      log.error('Unable to fetch Clam AV details from config')
+      return
+    }
     super()
   }
 
