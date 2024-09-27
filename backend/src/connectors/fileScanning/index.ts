@@ -11,7 +11,7 @@ export type FileScanKindKeys = (typeof FileScanKind)[keyof typeof FileScanKind]
 let fileScanningConnector: undefined | BaseFileScanningConnector = undefined
 
 const fileScanConnectors: BaseFileScanningConnector[] = []
-export function getFileScanningConnectors(_cache = true) {
+export async function getFileScanningConnectors(_cache = true) {
   config.connectors.fileScanners.kinds.forEach(async (fileScanner) => {
     switch (fileScanner) {
       case FileScanKind.ClamAv:
