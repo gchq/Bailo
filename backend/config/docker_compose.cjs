@@ -69,7 +69,7 @@ module.exports = {
 
   ui: {
     avScanning: {
-      enabled: true,
+      enabled: false,
     },
   },
 }
