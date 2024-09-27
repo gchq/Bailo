@@ -5,6 +5,7 @@ import { getObjectStream } from '../../clients/s3.js'
 import FileModel, { FileInterfaceDoc, ScanState } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
+import { ConfigurationError } from '../../utils/error.js'
 import { BaseFileScanningConnector, FileScanResult } from './Base.js'
 
 let av: NodeClam
@@ -15,11 +16,13 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   }
 
   async init() {
-    if (!av) {
+    if (av) {
       try {
         av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
       } catch (error) {
-        log.error(error, 'Unable to connect to ClamAV.')
+        throw ConfigurationError('Cannot retrieve Clam AV config', {
+          clamAvConfig: config.avScanning,
+        })
       }
     }
   }
