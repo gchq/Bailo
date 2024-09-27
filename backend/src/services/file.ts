@@ -36,9 +36,10 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
   await file.save()
 
   if (config.ui.avScanning.enabled) {
-    const fileScanConnectors = await getFileScanningConnectors()
-    fileScanConnectors.forEach((fileScanner) => {
-      fileScanner.scan(file)
+    const fileScanConnectors = getFileScanningConnectors()
+    fileScanConnectors.forEach(async (fileScanner) => {
+      await fileScanner.init()
+      await fileScanner.scan(file)
     })
   }
 

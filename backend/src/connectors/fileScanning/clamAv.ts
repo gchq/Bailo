@@ -16,7 +16,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   }
 
   async init() {
-    if (av) {
+    if (!av) {
       try {
         av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
       } catch (error) {
