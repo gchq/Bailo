@@ -16,7 +16,6 @@ export async function getFileScanningConnectors(_cache = true) {
     switch (fileScanner) {
       case FileScanKind.ClamAv:
         fileScanningConnector = new ClamAvFileScanningConnector()
-        await fileScanningConnector.init()
         fileScanConnectors.push(fileScanningConnector)
         break
       default:
@@ -24,6 +23,7 @@ export async function getFileScanningConnectors(_cache = true) {
           validKinds: Object.values(FileScanKind),
         })
     }
+    await fileScanningConnector.init()
   })
   return fileScanConnectors
 }
