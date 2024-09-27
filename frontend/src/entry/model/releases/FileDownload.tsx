@@ -28,67 +28,61 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
     ) {
       return <Chip size='small' label='Virus scan results could not be found' />
     }
-    const allTestsPassed = file.avScan.every((scan) => !scan.isInfected)
     const threatsFound = file.avScan.reduce((acc, scan) => {
       return scan.viruses ? scan.viruses.length + acc : acc
     }, 0)
     if (file.avScan.some((scan) => scan.state !== ScanState.Complete)) {
       return <Chip size='small' label='Virus scan in progress' />
     }
-    if (threatsFound) {
-      return (
-        <>
-          <Chip
-            color={'error'}
-            icon={<Warning />}
-            size='small'
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-            label={`Virus scan failed: ${plural(threatsFound, 'threat')} found`}
-          />
-          <Popover
-            open={open}
-            anchorEl={anchorEl}
-            onClose={() => setAnchorEl(null)}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'center',
-            }}
-          >
-            <Stack spacing={2} sx={{ p: 2 }} divider={<Divider flexItem />}>
-              {file.avScan.map((scanResult) => (
-                <Fragment key={scanResult.toolName}>
-                  {scanResult.isInfected ? (
-                    <>
-                      <Stack spacing={1} direction='row'>
-                        <Error color='error' />
-                        <Typography>
-                          <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> found the following threats:
-                        </Typography>
-                      </Stack>
-                      <ul>{scanResult.viruses && scanResult.viruses.map((virus) => <li key={virus}>{virus}</li>)}</ul>
-                    </>
-                  ) : (
+    return (
+      <>
+        <Chip
+          color={threatsFound ? 'error' : 'success'}
+          icon={threatsFound ? <Warning /> : <Done />}
+          size='small'
+          onClick={(e) => setAnchorEl(e.currentTarget)}
+          label={threatsFound ? `Virus scan failed: ${plural(threatsFound, 'threat')} found` : 'Virus scan passed'}
+        />
+        <Popover
+          open={open}
+          anchorEl={anchorEl}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+        >
+          <Stack spacing={2} sx={{ p: 2 }} divider={<Divider flexItem />}>
+            {file.avScan.map((scanResult) => (
+              <Fragment key={scanResult.toolName}>
+                {scanResult.isInfected ? (
+                  <>
                     <Stack spacing={1} direction='row'>
-                      <Done color='success' />
+                      <Error color='error' />
                       <Typography>
-                        <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> did not find any threats
+                        <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> found the following threats:
                       </Typography>
                     </Stack>
-                  )}
-                </Fragment>
-              ))}
-            </Stack>
-          </Popover>
-        </>
-      )
-    }
-    if (allTestsPassed) {
-      return <Chip color={'success'} icon={<Done />} size='small' label={'Virus scan passed'} />
-    }
+                    <ul>{scanResult.viruses && scanResult.viruses.map((virus) => <li key={virus}>{virus}</li>)}</ul>
+                  </>
+                ) : (
+                  <Stack spacing={1} direction='row'>
+                    <Done color='success' />
+                    <Typography>
+                      <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> did not find any threats
+                    </Typography>
+                  </Stack>
+                )}
+              </Fragment>
+            ))}
+          </Stack>
+        </Popover>
+      </>
+    )
   }, [anchorEl, file, open])
 
   if (isUiConfigError) {
