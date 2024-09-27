@@ -8,12 +8,16 @@ export const FileScanKind = {
 } as const
 export type FileScanKindKeys = (typeof FileScanKind)[keyof typeof FileScanKind]
 
+let fileScanningConnector: undefined | BaseFileScanningConnector = undefined
+
 const fileScanConnectors: BaseFileScanningConnector[] = []
 export function getFileScanningConnectors(_cache = true) {
   config.connectors.fileScanners.kinds.forEach((fileScanner) => {
     switch (fileScanner) {
       case FileScanKind.ClamAv:
-        fileScanConnectors.push(new ClamAvFileScanningConnector())
+        fileScanningConnector = new ClamAvFileScanningConnector()
+        fileScanConnectors.push(fileScanningConnector)
+        fileScanningConnector.init()
         break
       default:
         throw ConfigurationError(`'${fileScanner}' is not a valid file scanning kind.`, {

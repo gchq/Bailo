@@ -11,23 +11,20 @@ let av: NodeClam
 
 export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   constructor() {
-    if (!config.avScanning.clamdscan) {
-      log.error('Unable to fetch Clam AV details from config')
-      return
-    }
     super()
   }
 
-  async scan(file: FileInterfaceDoc) {
+  async init() {
     if (!av) {
       try {
         av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
       } catch (error) {
         log.error(error, 'Unable to connect to ClamAV.')
-        const updatedAvScanArray = [...file.avScan, { toolName: 'Clam AV', state: ScanState.Error }]
-        await file.update({ $set: { avScan: updatedAvScanArray } })
       }
     }
+  }
+
+  async scan(file: FileInterfaceDoc) {
     const avStream = av.passthrough()
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     s3Stream.pipe(avStream)
