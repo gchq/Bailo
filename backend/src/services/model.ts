@@ -466,6 +466,7 @@ export async function getCurrentUserPermissionsByModel(
 ): Promise<EntryUserPermissions> {
   const model = await getModelById(user, modelId)
 
+  const editEntryAuth = await authorisation.model(user, model, ModelAction.Update)
   const editEntryCardAuth = await authorisation.model(user, model, ModelAction.Write)
   const createReleaseAuth = await authorisation.release(user, model, ReleaseAction.Create)
   const editReleaseAuth = await authorisation.release(user, model, ReleaseAction.Update)
@@ -481,6 +482,7 @@ export async function getCurrentUserPermissionsByModel(
   const exportMirroredModelAuth = await authorisation.model(user, model, ModelAction.Update)
 
   return {
+    editEntry: authResponseToUserPermission(editEntryAuth),
     editEntryCard: authResponseToUserPermission(editEntryCardAuth),
 
     createRelease: authResponseToUserPermission(createReleaseAuth),
