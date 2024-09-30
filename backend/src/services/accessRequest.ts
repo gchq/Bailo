@@ -55,7 +55,7 @@ export async function createAccessRequest(
     ...accessRequestInfo,
   })
 
-  const auth = await authorisation.accessRequest(user, model, AccessRequestAction.Create, accessRequest)
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Create)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -83,7 +83,7 @@ export async function removeAccessRequest(user: UserInterface, accessRequestId: 
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, AccessRequestAction.Delete, accessRequest)
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Delete)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -109,7 +109,7 @@ export async function getAccessRequestById(user: UserInterface, accessRequestId:
 
   const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, AccessRequestAction.View, accessRequest)
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.View)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -126,7 +126,7 @@ export async function updateAccessRequest(
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  const auth = await authorisation.accessRequest(user, model, AccessRequestAction.Update, accessRequest)
+  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
@@ -195,8 +195,18 @@ export async function getCurrentUserPermissionsByAccessRequest(
   const accessRequest = await getAccessRequestById(user, accessRequestId)
   const model = await getModelById(user, accessRequest.modelId)
 
-  const editAccessRequestAuth = await authorisation.accessRequest(user, model, AccessRequestAction.Update)
-  const deleteAccessRequestAuth = await authorisation.accessRequest(user, model, AccessRequestAction.Delete)
+  const editAccessRequestAuth = await authorisation.accessRequest(
+    user,
+    model,
+    accessRequest,
+    AccessRequestAction.Update,
+  )
+  const deleteAccessRequestAuth = await authorisation.accessRequest(
+    user,
+    model,
+    accessRequest,
+    AccessRequestAction.Delete,
+  )
 
   return {
     editAccessRequest: editAccessRequestAuth.success

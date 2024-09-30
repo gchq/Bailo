@@ -67,10 +67,10 @@ export class BasicAuthorisationConnector {
   async accessRequest(
     user: UserInterface,
     model: ModelDoc,
+    accessRequest: AccessRequestDoc,
     action: AccessRequestActionKeys,
-    accessRequest?: AccessRequestDoc,
   ) {
-    return (await this.accessRequests(user, model, accessRequest ? [accessRequest] : [], action))[0]
+    return (await this.accessRequests(user, model, [accessRequest], action))[0]
   }
 
   async response(user: UserInterface, response: ResponseDoc, action: ResponseActionKeys) {
