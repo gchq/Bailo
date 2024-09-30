@@ -324,6 +324,12 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
 
   _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
+
+  // Re-check the authorisation after model has updated
+  const recheckAuth = await authorisation.model(user, model, ModelAction.Update)
+  if (!recheckAuth.success) {
+    throw Forbidden(recheckAuth.info, { userDn: user.dn })
+  }
   await model.save()
 
   return model
