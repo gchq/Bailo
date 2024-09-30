@@ -14,6 +14,7 @@ import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { authResponseToUserPermission } from '../utils/permissions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { createAccessRequestReviews } from './review.js'
@@ -209,17 +210,7 @@ export async function getCurrentUserPermissionsByAccessRequest(
   )
 
   return {
-    editAccessRequest: editAccessRequestAuth.success
-      ? { hasPermission: editAccessRequestAuth.success }
-      : {
-          hasPermission: editAccessRequestAuth.success,
-          info: editAccessRequestAuth.info,
-        },
-    deleteAccessRequest: deleteAccessRequestAuth.success
-      ? { hasPermission: deleteAccessRequestAuth.success }
-      : {
-          hasPermission: deleteAccessRequestAuth.success,
-          info: deleteAccessRequestAuth.info,
-        },
+    editAccessRequest: authResponseToUserPermission(editAccessRequestAuth),
+    deleteAccessRequest: authResponseToUserPermission(deleteAccessRequestAuth),
   }
 }

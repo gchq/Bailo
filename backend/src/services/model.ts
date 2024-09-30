@@ -17,6 +17,7 @@ import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { authResponseToUserPermission } from '../utils/permissions.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -480,57 +481,17 @@ export async function getCurrentUserPermissionsByModel(
   const exportMirroredModelAuth = await authorisation.model(user, model, ModelAction.Update)
 
   return {
-    editEntryCard: editEntryCardAuth.success
-      ? { hasPermission: editEntryCardAuth.success }
-      : {
-          hasPermission: editEntryCardAuth.success,
-          info: editEntryCardAuth.info,
-        },
+    editEntryCard: authResponseToUserPermission(editEntryCardAuth),
 
-    createRelease: createReleaseAuth.success
-      ? { hasPermission: createReleaseAuth.success }
-      : {
-          hasPermission: createReleaseAuth.success,
-          info: createReleaseAuth.info,
-        },
-    editRelease: editReleaseAuth.success
-      ? { hasPermission: editReleaseAuth.success }
-      : {
-          hasPermission: editReleaseAuth.success,
-          info: editReleaseAuth.info,
-        },
-    deleteRelease: deleteReleaseAuth.success
-      ? { hasPermission: deleteReleaseAuth.success }
-      : {
-          hasPermission: deleteReleaseAuth.success,
-          info: deleteReleaseAuth.info,
-        },
+    createRelease: authResponseToUserPermission(createReleaseAuth),
+    editRelease: authResponseToUserPermission(editReleaseAuth),
+    deleteRelease: authResponseToUserPermission(deleteReleaseAuth),
 
-    pushModelImage: pushModelImageAuth.success
-      ? { hasPermission: pushModelImageAuth.success }
-      : {
-          hasPermission: pushModelImageAuth.success,
-          info: pushModelImageAuth.info,
-        },
+    pushModelImage: authResponseToUserPermission(pushModelImageAuth),
 
-    createInferenceService: createInferenceServiceAuth.success
-      ? { hasPermission: createInferenceServiceAuth.success }
-      : {
-          hasPermission: createInferenceServiceAuth.success,
-          info: createInferenceServiceAuth.info,
-        },
-    editInferenceService: editInferenceServiceAuth.success
-      ? { hasPermission: editInferenceServiceAuth.success }
-      : {
-          hasPermission: editInferenceServiceAuth.success,
-          info: editInferenceServiceAuth.info,
-        },
+    createInferenceService: authResponseToUserPermission(createInferenceServiceAuth),
+    editInferenceService: authResponseToUserPermission(editInferenceServiceAuth),
 
-    exportMirroredModel: exportMirroredModelAuth.success
-      ? { hasPermission: exportMirroredModelAuth.success }
-      : {
-          hasPermission: exportMirroredModelAuth.success,
-          info: exportMirroredModelAuth.info,
-        },
+    exportMirroredModel: authResponseToUserPermission(exportMirroredModelAuth),
   }
 }
