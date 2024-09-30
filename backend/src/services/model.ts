@@ -113,6 +113,7 @@ export async function searchModels(
   task?: string,
   allowTemplating?: boolean,
   schemaId?: string,
+  _currentPage?: string,
 ): Promise<Array<ModelInterface>> {
   const query: any = {}
 
