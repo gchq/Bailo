@@ -241,8 +241,6 @@ export const permissionDetailSchema = z.discriminatedUnion('hasPermission', [
 export const entryUserPermissionsSchema = z.object({
   editEntryCard: permissionDetailSchema,
 
-  viewEntrySettings: permissionDetailSchema,
-
   createRelease: permissionDetailSchema,
   editRelease: permissionDetailSchema,
   deleteRelease: permissionDetailSchema,

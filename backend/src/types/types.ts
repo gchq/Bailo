@@ -26,8 +26,6 @@ export type PermissionDetail =
 export interface EntryUserPermissions {
   editEntryCard: PermissionDetail
 
-  viewEntrySettings: PermissionDetail
-
   createRelease: PermissionDetail
   editRelease: PermissionDetail
   deleteRelease: PermissionDetail

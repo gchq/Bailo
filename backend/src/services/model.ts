@@ -466,7 +466,6 @@ export async function getCurrentUserPermissionsByModel(
   const model = await getModelById(user, modelId)
 
   const editEntryCardAuth = await authorisation.model(user, model, ModelAction.Write)
-  const viewEntrySettingsAuth = await authorisation.model(user, model, ModelAction.Update)
   const createReleaseAuth = await authorisation.release(user, model, ReleaseAction.Create)
   const editReleaseAuth = await authorisation.release(user, model, ReleaseAction.Update)
   const deleteReleaseAuth = await authorisation.release(user, model, ReleaseAction.Delete)
@@ -486,13 +485,6 @@ export async function getCurrentUserPermissionsByModel(
       : {
           hasPermission: editEntryCardAuth.success,
           info: editEntryCardAuth.info,
-        },
-
-    viewEntrySettings: viewEntrySettingsAuth.success
-      ? { hasPermission: viewEntrySettingsAuth.success }
-      : {
-          hasPermission: viewEntrySettingsAuth.success,
-          info: viewEntrySettingsAuth.info,
         },
 
     createRelease: createReleaseAuth.success
