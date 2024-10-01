@@ -36,7 +36,7 @@
     "body-parser": "^1.20.3",
     "bunyan": "^1.8.15",
     "chalk": "^5.3.0",
-    "clamscan": "^2.2.2",
+    "clamscan": "^2.3.1",
     "cls-hooked": "^4.2.2",
     "config": "^3.3.12",
     "connect-mongo": "^5.1.0",
