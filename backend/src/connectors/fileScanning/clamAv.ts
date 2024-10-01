@@ -9,6 +9,7 @@ import { ConfigurationError } from '../../utils/error.js'
 import { BaseFileScanningConnector, FileScanResult } from './Base.js'
 
 let av: NodeClam
+const toolName = 'Clam AV'
 
 export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   constructor() {
@@ -32,18 +33,26 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     s3Stream.pipe(avStream)
     log.info({ modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan started.')
-    const updatedAvScanArray = [...file.avScan, { toolName: 'Clam AV', state: ScanState.InProgress }]
-    await file.update({ $set: { avScan: updatedAvScanArray } })
+    if (!file.avScan.find((result) => result.toolName === toolName)) {
+      const updatedAvScanArray = [...file.avScan, { toolName: toolName, state: ScanState.InProgress }]
+      file.avScan = updatedAvScanArray
+      await FileModel.updateOne(
+        { _id: file._id },
+        {
+          $set: { avScan: updatedAvScanArray },
+        },
+      )
+    }
     avStream.on('scan-complete', async (result) => {
       log.info({ result, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan complete.')
       const newResult: FileScanResult = {
-        toolName: 'Clam AV',
+        toolName: toolName,
         state: ScanState.Complete,
         isInfected: result.isInfected,
         viruses: result.viruses,
       }
       await FileModel.updateOne(
-        { _id: file._id, 'avScan.toolName': 'Clam AV' },
+        { _id: file._id, 'avScan.toolName': toolName },
         {
           $set: { 'avScan.$': newResult },
         },
@@ -52,11 +61,11 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     avStream.on('error', async (error) => {
       log.error({ error, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan errored.')
       const newResult: FileScanResult = {
-        toolName: 'Clam AV',
+        toolName: toolName,
         state: ScanState.Error,
       }
       await FileModel.updateOne(
-        { _id: file._id, 'avScan.toolName': 'Clam AV' },
+        { _id: file._id, 'avScan.toolName': toolName },
         {
           $set: { 'avScan.$': newResult },
         },
@@ -65,11 +74,11 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     avStream.on('timeout', async (error) => {
       log.error({ error, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan timed out.')
       const newResult: FileScanResult = {
-        toolName: 'Clam AV',
+        toolName: toolName,
         state: ScanState.Error,
       }
       await FileModel.updateOne(
-        { _id: file._id, 'avScan.toolName': 'Clam AV' },
+        { _id: file._id, 'avScan.toolName': toolName },
         {
           $set: { 'avScan.$': newResult },
         },
