@@ -3,8 +3,9 @@ import { Readable } from 'stream'
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import { FileScanResult } from '../connectors/fileScanning/Base.js'
 import { getFileScanningConnectors } from '../connectors/fileScanning/index.js'
-import FileModel from '../models/File.js'
+import FileModel, { FileInterface, ScanState } from '../models/File.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
@@ -36,13 +37,33 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
   await file.save()
 
   if (config.ui.avScanning.enabled) {
-    const fileScanConnectors = getFileScanningConnectors()
-    fileScanConnectors.forEach(async (fileScanner) => {
-      await fileScanner.scan(file)
+    const scanners = getFileScanningConnectors(file)
+    scanners.forEach((scanner) => {
+      scanner.scan(file)
     })
   }
 
   return file
+}
+
+export async function updateFileWithResults(file: FileInterface, result: FileScanResult, toolName) {
+  if (!file.avScan.find((result) => result.toolName === toolName)) {
+    const updatedAvScanArray = [...file.avScan, { toolName: toolName, state: ScanState.InProgress }]
+    file.avScan = updatedAvScanArray
+    await FileModel.updateOne(
+      { _id: file._id },
+      {
+        $set: { avScan: updatedAvScanArray },
+      },
+    )
+  } else {
+    await FileModel.updateOne(
+      { _id: file._id, 'avScan.toolName': toolName },
+      {
+        $set: { 'avScan.$': result },
+      },
+    )
+  }
 }
 
 export async function downloadFile(user: UserInterface, fileId: string, range?: { start: number; end: number }) {

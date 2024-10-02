@@ -2,14 +2,15 @@ import NodeClam from 'clamscan'
 import { Readable } from 'stream'
 
 import { getObjectStream } from '../../clients/s3.js'
-import FileModel, { FileInterfaceDoc, ScanState } from '../../models/File.js'
+import { FileInterfaceDoc, ScanState } from '../../models/File.js'
+import { updateFileWithResults } from '../../services/file.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseFileScanningConnector, FileScanResult } from './Base.js'
+import { BaseFileScanningConnector } from './Base.js'
 
 let av: NodeClam
-const toolName = 'Clam AV'
+export const clamAvToolName = 'Clam AV'
 
 export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   constructor() {
@@ -40,55 +41,39 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     s3Stream.pipe(avStream)
     log.info({ modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan started.')
-    if (!file.avScan.find((result) => result.toolName === toolName)) {
-      const updatedAvScanArray = [...file.avScan, { toolName: toolName, state: ScanState.InProgress }]
-      file.avScan = updatedAvScanArray
-      await FileModel.updateOne(
-        { _id: file._id },
-        {
-          $set: { avScan: updatedAvScanArray },
-        },
-      )
-    }
     avStream.on('scan-complete', async (result) => {
       log.info({ result, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan complete.')
-      const newResult: FileScanResult = {
-        toolName: toolName,
-        state: ScanState.Complete,
-        isInfected: result.isInfected,
-        viruses: result.viruses,
-      }
-      await FileModel.updateOne(
-        { _id: file._id, 'avScan.toolName': toolName },
+      updateFileWithResults(
+        file,
         {
-          $set: { 'avScan.$': newResult },
+          toolName: clamAvToolName,
+          state: ScanState.Complete,
+          isInfected: result.isInfected,
+          viruses: result.viruses,
         },
+        clamAvToolName,
       )
     })
     avStream.on('error', async (error) => {
       log.error({ error, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan errored.')
-      const newResult: FileScanResult = {
-        toolName: toolName,
-        state: ScanState.Error,
-      }
-      await FileModel.updateOne(
-        { _id: file._id, 'avScan.toolName': toolName },
+      updateFileWithResults(
+        file,
         {
-          $set: { 'avScan.$': newResult },
+          toolName: clamAvToolName,
+          state: ScanState.Error,
         },
+        clamAvToolName,
       )
     })
     avStream.on('timeout', async (error) => {
       log.error({ error, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan timed out.')
-      const newResult: FileScanResult = {
-        toolName: toolName,
-        state: ScanState.Error,
-      }
-      await FileModel.updateOne(
-        { _id: file._id, 'avScan.toolName': toolName },
+      updateFileWithResults(
+        file,
         {
-          $set: { 'avScan.$': newResult },
+          toolName: clamAvToolName,
+          state: ScanState.Error,
         },
+        clamAvToolName,
       )
     })
   }
