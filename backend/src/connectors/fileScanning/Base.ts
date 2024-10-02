@@ -7,6 +7,5 @@ export interface FileScanResult {
 }
 
 export abstract class BaseFileScanningConnector {
-  abstract init()
   abstract scan(file: FileInterface)
 }

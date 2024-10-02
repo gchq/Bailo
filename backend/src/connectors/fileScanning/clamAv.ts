@@ -17,18 +17,25 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   }
 
   async init() {
-    if (!av) {
-      try {
-        av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
-      } catch (error) {
-        throw ConfigurationError('Cannot retrieve Clam AV config', {
-          clamAvConfig: config.avScanning,
-        })
-      }
+    try {
+      av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
+    } catch (error) {
+      throw ConfigurationError('Could not scan file as Clam AV is not running.', {
+        clamAvConfig: config.avScanning,
+      })
     }
   }
 
   async scan(file: FileInterfaceDoc) {
+    await this.init()
+    if (!av) {
+      throw ConfigurationError(
+        'Clam AV does not look like it is running. Chec that it has been correctly initialised by calling the init function.',
+        {
+          clamAvConfig: config.avScanning,
+        },
+      )
+    }
     const avStream = av.passthrough()
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     s3Stream.pipe(avStream)
