@@ -36,7 +36,7 @@ export default function DateSelector(props: DateSelectorProps) {
       </Typography>
       {formContext.editMode && (
         <DatePicker
-          value={dayjs(value)}
+          value={value ? dayjs(value) : undefined}
           onChange={handleChange}
           format='DD-MM-YYYY'
           sx={{ '.MuiInputBase-input': { p: '10px' } }}
