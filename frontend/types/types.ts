@@ -547,3 +547,8 @@ export interface SuccessfulFileUpload {
   fileName: string
   fileId: string
 }
+
+export interface UserSettings {
+  dn: string
+  themeKey: string
+}

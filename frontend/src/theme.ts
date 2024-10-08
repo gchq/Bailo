@@ -1,5 +1,5 @@
 import { green, red, yellow } from '@mui/material/colors'
-import { createTheme, ThemeOptions } from '@mui/material/styles'
+import { createTheme, Theme, ThemeOptions } from '@mui/material/styles'
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
@@ -7,12 +7,14 @@ declare module '@mui/material/styles/createPalette' {
     customTextInput: PaletteColor
     topNavigation: PaletteColor
     markdownBorder: PaletteColor
+    navbarGradient: boolean
   }
   interface PaletteOptions {
     container: PaletteColorOptions
     customTextInput: PaletteColorOptions
     topNavigation: PaletteColorOptions
     markdownBorder: PaletteColorOptions
+    navbarGradient: boolean
   }
 }
 
@@ -38,6 +40,11 @@ const defaultComponentOverrides: ThemeOptions['components'] = {
       disableElevation: true,
     },
   },
+}
+
+export interface ThemeMapping {
+  key: string
+  theme: Theme
 }
 
 export const lightTheme = createTheme({
@@ -90,6 +97,7 @@ export const lightTheme = createTheme({
   },
   palette: {
     mode: 'light',
+    navbarGradient: true,
     primary: {
       main: '#54278e',
     },
@@ -123,14 +131,20 @@ export const lightTheme = createTheme({
 })
 
 export const darkTheme = createTheme({
+  components: {
+    ...defaultComponentOverrides,
+  },
   palette: {
     mode: 'dark',
+    navbarGradient: false,
+    markdownBorder: {
+      main: '#b8b8b8',
+    },
     primary: {
-      main: '#f37f58',
-      contrastText: '#fff',
+      main: '#ccbbe2;',
     },
     secondary: {
-      main: '#ecc3b1',
+      main: '#d62560',
     },
     error: {
       main: red.A200,
@@ -162,91 +176,23 @@ export const darkTheme = createTheme({
     topNavigation: {
       main: '#fff',
     },
-    markdownBorder: {
-      main: '#b8b8b8',
-    },
-  },
-  components: {
-    ...defaultComponentOverrides,
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiListItem: {
-      styleOverrides: {
-        button: {
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiListItemButton: {
-      styleOverrides: {
-        root: {
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-            borderRight: 'solid',
-            borderWidth: '2px',
-            borderColor: '#f7a4c0',
-          },
-          '&.Mui-selected': {
-            borderRight: 'solid',
-            borderWidth: '2px',
-            borderColor: '#d62560',
-          },
-        },
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        outlined: {
-          color: '#fff',
-        },
-        contained: {
-          color: '#fff',
-        },
-        text: {
-          color: '#fff',
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiAccordionSummary: {
-      styleOverrides: {
-        root: {
-          color: '#fff',
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiChip: {
-      styleOverrides: {
-        filled: {
-          color: 'black',
-        },
-        deleteIcon: {
-          color: '#3f3f3f',
-        },
-      },
-    },
   },
 })
+
+export const ThemeName = {
+  Light: 'light',
+  Dark: 'dark',
+} as const
+
+const lightThemeMapping = {
+  key: ThemeName.Light,
+  theme: lightTheme,
+  title: 'Light',
+}
+const darkThemeMapping = {
+  key: ThemeName.Dark,
+  theme: darkTheme,
+  title: 'Dark (beta)',
+}
+
+export const themeList = [lightThemeMapping, darkThemeMapping]
