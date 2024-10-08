@@ -20,6 +20,7 @@ import { useRouter } from 'next/router'
 import React, { ChangeEvent, Fragment, useCallback, useEffect, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import Loading from 'src/common/Loading'
+import PaginationSelector from 'src/common/PaginationSelector'
 import Title from 'src/common/Title'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
@@ -39,6 +40,7 @@ export default function Marketplace() {
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
+  const [currentPage, setCurrentPage] = useState<number | string>(1)
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, isModelsError, isModelsLoading } = useListModels(
@@ -47,6 +49,9 @@ export default function Marketplace() {
     selectedTask,
     selectedLibraries,
     debouncedFilter,
+    undefined,
+    undefined,
+    currentPage,
   )
 
   const {
@@ -96,6 +101,14 @@ export default function Marketplace() {
       })
     },
     [router],
+  )
+
+  const handleCurrentPageChange = useCallback(
+    (newPage: number | string) => {
+      setCurrentPage(newPage)
+      updateQueryParams('currentPage', newPage as string)
+    },
+    [updateQueryParams],
   )
 
   const handleFilterChange = useCallback(
@@ -233,26 +246,36 @@ export default function Marketplace() {
                 </Tabs>
               </Box>
               {isModelsLoading && <Loading />}
-              {!isModelsLoading && selectedTab === EntryKind.MODEL && (
-                <div data-test='modelListBox'>
-                  <EntryList
-                    entries={models}
-                    entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
-                    selectedChips={selectedLibraries}
-                    onSelectedChipsChange={handleLibrariesOnChange}
-                  />
-                </div>
-              )}
-              {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
-                <div data-test='dataCardListBox'>
-                  <EntryList
-                    entries={dataCards}
-                    entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
-                    selectedChips={selectedLibraries}
-                    onSelectedChipsChange={handleLibrariesOnChange}
-                  />
-                </div>
-              )}
+              <Stack spacing={2}>
+                <PaginationSelector
+                  currentPage={currentPage}
+                  onChange={(newValue) => handleCurrentPageChange(newValue)}
+                />
+                {!isModelsLoading && selectedTab === EntryKind.MODEL && (
+                  <div data-test='modelListBox'>
+                    <EntryList
+                      entries={models}
+                      entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
+                      selectedChips={selectedLibraries}
+                      onSelectedChipsChange={handleLibrariesOnChange}
+                    />
+                  </div>
+                )}
+                {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
+                  <div data-test='dataCardListBox'>
+                    <EntryList
+                      entries={dataCards}
+                      entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
+                      selectedChips={selectedLibraries}
+                      onSelectedChipsChange={handleLibrariesOnChange}
+                    />
+                  </div>
+                )}
+                <PaginationSelector
+                  currentPage={currentPage}
+                  onChange={(newValue) => handleCurrentPageChange(newValue)}
+                />
+              </Stack>
             </Paper>
           </Box>
         </Stack>
