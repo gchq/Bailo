@@ -21,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        runAsUser: {{ .Values.clamav.runAsUser }}
       containers:
       - name: {{ include "bailo.fullname" . }}-clamav
         ports:
@@ -29,11 +29,8 @@ spec:
             containerPort: 3310
             protocol: TCP
         image: {{ .Values.clamav.image }}
-        command:
-          - /bin/sh
-        args:
-          - -c
-          - /init-unprivileged # Runs ClamAV as non-root unprivileged user. https://docs.clamav.net/manual/Installing/Docker.html#running-clamd-using-non-root-user-using---user-and---entrypoint
+        command: ["/bin/sh", "-c"]
+        args: ["/init-unprivileged && chown -R 1002:1002 /var/lib/clamav"] # Runs ClamAV as non-root unprivileged user. https://docs.clamav.net/manual/Installing/Docker.html#running-clamd-using-non-root-user-using---user-and---entrypoint
         resources:
           requests:
             memory: "100Mi"
@@ -59,5 +56,5 @@ spec:
           emptyDir: {}
         - name: clamav-signatures
           persistentVolumeClaim:
-            claimName: {{ .Values.aws.pvcClamAVName }}
+            claimName: {{ include "bailo.fullname" . }}-clamav-pvc
 {{- end }}
