@@ -9,10 +9,12 @@ import AccessRequest from '../models/AccessRequest.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
+import { AccessRequestUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { authResponseToUserPermission } from '../utils/permissions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { createAccessRequestReviews } from './review.js'
@@ -185,4 +187,30 @@ export async function getModelAccessRequestsForUser(user: UserInterface, modelId
   })
 
   return accessRequests
+}
+
+export async function getCurrentUserPermissionsByAccessRequest(
+  user: UserInterface,
+  accessRequestId: string,
+): Promise<AccessRequestUserPermissions> {
+  const accessRequest = await getAccessRequestById(user, accessRequestId)
+  const model = await getModelById(user, accessRequest.modelId)
+
+  const editAccessRequestAuth = await authorisation.accessRequest(
+    user,
+    model,
+    accessRequest,
+    AccessRequestAction.Update,
+  )
+  const deleteAccessRequestAuth = await authorisation.accessRequest(
+    user,
+    model,
+    accessRequest,
+    AccessRequestAction.Delete,
+  )
+
+  return {
+    editAccessRequest: authResponseToUserPermission(editAccessRequestAuth),
+    deleteAccessRequest: authResponseToUserPermission(deleteAccessRequestAuth),
+  }
 }

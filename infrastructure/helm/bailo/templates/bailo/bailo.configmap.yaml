@@ -177,7 +177,7 @@ data:
         },
 
         "avScanning": {
-          enabled: false
+          enabled: {{ .Values.clamav.enabled }},
         }
       },
 

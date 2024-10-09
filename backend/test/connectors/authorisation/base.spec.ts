@@ -156,8 +156,8 @@ describe('connectors > authorisation > base', () => {
         id: 'testModel',
         visibility: 'private',
       } as ModelDoc,
-      {} as ReleaseDoc,
       ReleaseAction.Create,
+      {} as ReleaseDoc,
     )
 
     expect(result).toStrictEqual({
@@ -175,8 +175,8 @@ describe('connectors > authorisation > base', () => {
         id: 'testModel',
         visibility: 'private',
       } as ModelDoc,
-      {} as ReleaseDoc,
       ReleaseAction.Create,
+      {} as ReleaseDoc,
     )
 
     expect(result).toStrictEqual({

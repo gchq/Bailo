@@ -228,6 +228,38 @@ export const inferenceInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+export const permissionDetailSchema = z.discriminatedUnion('hasPermission', [
+  z.object({
+    hasPermission: z.literal(true),
+  }),
+  z.object({
+    hasPermission: z.literal(false),
+    info: z.string(),
+  }),
+])
+
+export const entryUserPermissionsSchema = z.object({
+  editEntry: permissionDetailSchema,
+  editEntryCard: permissionDetailSchema,
+
+  createRelease: permissionDetailSchema,
+  editRelease: permissionDetailSchema,
+  deleteRelease: permissionDetailSchema,
+
+  pushModelImage: permissionDetailSchema,
+
+  createInferenceService: permissionDetailSchema,
+  editInferenceService: permissionDetailSchema,
+  deleteInferenceService: permissionDetailSchema,
+
+  exportMirroredModel: permissionDetailSchema,
+})
+
+export const accessRequestUserPermissionsSchema = z.object({
+  editAccessRequest: permissionDetailSchema,
+  deleteAccessRequest: permissionDetailSchema,
+})
+
 export const userTokenSchema = z.object({
   description: z.string().openapi({ example: 'user token' }),
 
