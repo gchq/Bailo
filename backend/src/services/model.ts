@@ -2,7 +2,7 @@ import { Validator } from 'jsonschema'
 import _ from 'lodash'
 
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
+import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
@@ -12,10 +12,12 @@ import ModelCardRevisionModel, {
 } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
+import { EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { authResponseToUserPermission } from '../utils/permissions.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -462,4 +464,42 @@ export function isModelCardRevision(data: unknown): data is ModelCardRevisionInt
     return false
   }
   return true
+}
+
+export async function getCurrentUserPermissionsByModel(
+  user: UserInterface,
+  modelId: string,
+): Promise<EntryUserPermissions> {
+  const model = await getModelById(user, modelId)
+
+  const editEntryAuth = await authorisation.model(user, model, ModelAction.Update)
+  const editEntryCardAuth = await authorisation.model(user, model, ModelAction.Write)
+  const createReleaseAuth = await authorisation.release(user, model, ReleaseAction.Create)
+  const editReleaseAuth = await authorisation.release(user, model, ReleaseAction.Update)
+  const deleteReleaseAuth = await authorisation.release(user, model, ReleaseAction.Delete)
+  const pushModelImageAuth = await authorisation.image(user, model, {
+    type: 'repository',
+    name: modelId,
+    actions: ['push'],
+  })
+  // Inferencing uses model authorisation
+  const createInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Create)
+  const editInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Update)
+  const exportMirroredModelAuth = await authorisation.model(user, model, ModelAction.Update)
+
+  return {
+    editEntry: authResponseToUserPermission(editEntryAuth),
+    editEntryCard: authResponseToUserPermission(editEntryCardAuth),
+
+    createRelease: authResponseToUserPermission(createReleaseAuth),
+    editRelease: authResponseToUserPermission(editReleaseAuth),
+    deleteRelease: authResponseToUserPermission(deleteReleaseAuth),
+
+    pushModelImage: authResponseToUserPermission(pushModelImageAuth),
+
+    createInferenceService: authResponseToUserPermission(createInferenceServiceAuth),
+    editInferenceService: authResponseToUserPermission(editInferenceServiceAuth),
+
+    exportMirroredModel: authResponseToUserPermission(exportMirroredModelAuth),
+  }
 }
