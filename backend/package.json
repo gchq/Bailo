@@ -22,7 +22,7 @@
     "@aws-sdk/client-cognito-identity-provider": "^3.637.0",
     "@aws-sdk/client-kms": "^3.621.0",
     "@aws-sdk/client-s3": "^3.637.0",
-    "@aws-sdk/lib-storage": "^3.637.0",
+    "@aws-sdk/lib-storage": "^3.658.1",
     "@opentelemetry/auto-instrumentations-node": "^0.50.0",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.53.0",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.53.0",
