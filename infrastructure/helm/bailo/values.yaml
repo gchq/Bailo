@@ -228,6 +228,9 @@ config:
       text: ''
       startTimestamp: ''
 
+    avScanning:
+      enabled: false
+
   smtp:
     #host: 'mail' #service name
     port: 1025
@@ -255,6 +258,9 @@ connectors:
 
   audit:
     kind: 'silly'
+
+  fileScanners:
+    kinds: ['clamAV']
 
 instrumentation:
   enabled: false

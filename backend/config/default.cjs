@@ -208,6 +208,10 @@ module.exports = {
     audit: {
       kind: 'silly',
     },
+
+    fileScanners: {
+      kinds: ['clamAV'],
+    },
   },
 
   s3: {

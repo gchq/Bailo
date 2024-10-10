@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { ClamAvFileScanningConnector } from '../../src/connectors/fileScanning/clamAv.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   downloadFile,
@@ -14,6 +15,7 @@ import {
 } from '../../src/services/file.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
+vi.mock('../../src/connectors/fileScanning/index.js')
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -43,6 +45,11 @@ const configMock = vi.hoisted(
           registry: 'registry',
         },
       },
+      connectors: {
+        fileScanners: {
+          kinds: ['clamAV'],
+        },
+      },
     }) as any,
 )
 vi.mock('../../src/utils/config.js', () => ({
@@ -50,11 +57,21 @@ vi.mock('../../src/utils/config.js', () => ({
   default: configMock,
 }))
 
+const fileScanningConnector = vi.hoisted(() => ({
+  getFileScanningConnectors: vi.fn(() => [new ClamAvFileScanningConnector()]),
+}))
+vi.mock('../../src/connectors/fileScanning/index.js', () => fileScanningConnector)
+
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
   getObjectStream: vi.fn(() => ({ Body: { pipe: vi.fn() } })),
 }))
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
+
+const clamAvScan = vi.hoisted(() => ({
+  scan: vi.fn(() => {}),
+}))
+vi.mock('../../src/connectors/fileScanning/clamAv.js')
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({ settings: { mirror: { sourceModelId: '' } } })),
@@ -110,6 +127,12 @@ describe('services > file', () => {
   test('uploadFile > virus scan initialised', async () => {
     vi.spyOn(configMock, 'avScanning', 'get').mockReturnValue({ clamdscan: 'test' })
     vi.spyOn(configMock, 'ui', 'get').mockReturnValue({ avScanning: { enabled: true } })
+    vi.spyOn(configMock, 'connectors', 'get').mockReturnValue({
+      fileScanners: {
+        kinds: ['clamAV'],
+      },
+    })
+    vi.mocked(clamAvScan.scan).mockImplementation(() => {})
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const name = 'testFile'

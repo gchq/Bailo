@@ -179,6 +179,10 @@ data:
         "avScanning": {
           enabled: {{ .Values.clamav.enabled }},
         }
+
+        avScanning: {
+          enabled: {{ .Values.config.ui.avScanning.enabled }},
+        }
       },
 
       connectors: {
@@ -192,6 +196,10 @@ data:
 
         audit: {
           kind: '{{ .Values.connectors.audit.kind }}',
+        },
+
+        fileScanners: {
+          kinds: '{{ .Values.connectors.fileScanners.kinds }}',
         },
       },
 
