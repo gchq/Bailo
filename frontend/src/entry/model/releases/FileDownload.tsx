@@ -1,6 +1,6 @@
 import { Done, Error, Warning } from '@mui/icons-material'
 import { Chip, Divider, Grid, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
+import { useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -16,7 +16,7 @@ type FileDownloadProps = {
 export default function FileDownload({ modelId, file }: FileDownloadProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
 
   const open = Boolean(anchorEl)
 
@@ -85,11 +85,11 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
     )
   }, [anchorEl, file, open])
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  if (isScannersError) {
+    return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
 
-  if (isUiConfigLoading) {
+  if (isScannersLoading) {
     return <Loading />
   }
 
@@ -106,7 +106,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
                   </Typography>
                 </Link>
               </Tooltip>
-              {uiConfig && uiConfig.avScanning && avChip}
+              {scanners && avChip}
             </Stack>
           </Grid>
           <Grid item xs={1} textAlign='right'>
