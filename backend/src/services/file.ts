@@ -4,8 +4,8 @@ import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult } from '../connectors/fileScanning/Base.js'
-import { getFileScanningConnectors } from '../connectors/fileScanning/index.js'
-import FileModel, { FileInterface, ScanState } from '../models/File.js'
+import runFileScanners from '../connectors/fileScanning/index.js'
+import FileModel, { FileInterface } from '../models/File.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
@@ -37,32 +37,33 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
   await file.save()
 
   if (config.ui.avScanning.enabled) {
-    const scanners = getFileScanningConnectors(file)
-    scanners.forEach((scanner) => {
-      scanner.scan(file)
-    })
+    runFileScanners()
+      .scan(file)
+      .then((resultsArray) => updateFileWithResults(file, resultsArray))
   }
 
   return file
 }
 
-export async function updateFileWithResults(file: FileInterface, result: FileScanResult, toolName) {
-  if (!file.avScan.find((result) => result.toolName === toolName)) {
-    const updatedAvScanArray = [...file.avScan, { toolName: toolName, state: ScanState.InProgress }]
-    file.avScan = updatedAvScanArray
-    await FileModel.updateOne(
-      { _id: file._id },
-      {
-        $set: { avScan: updatedAvScanArray },
-      },
-    )
-  } else {
-    await FileModel.updateOne(
-      { _id: file._id, 'avScan.toolName': toolName },
-      {
-        $set: { 'avScan.$': result },
-      },
-    )
+export async function updateFileWithResults(file: FileInterface, results: FileScanResult[]) {
+  for (const result of results) {
+    if (!file.avScan.find((avScanResult) => avScanResult.toolName === result.toolName)) {
+      const updatedAvScanArray = [...file.avScan, { toolName: result.toolName, state: result.state }]
+      file.avScan = updatedAvScanArray
+      await FileModel.updateOne(
+        { _id: file._id },
+        {
+          $set: { avScan: updatedAvScanArray },
+        },
+      )
+    } else {
+      await FileModel.updateOne(
+        { _id: file._id, 'avScan.toolName': result.toolName },
+        {
+          $set: { 'avScan.$': result },
+        },
+      )
+    }
   }
 }
 

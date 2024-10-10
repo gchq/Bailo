@@ -7,5 +7,6 @@ export interface FileScanResult {
 }
 
 export abstract class BaseFileScanningConnector {
-  abstract scan(file: FileInterface)
+  abstract info(): string[]
+  abstract scan(file: FileInterface): Promise<FileScanResult[]>
 }
