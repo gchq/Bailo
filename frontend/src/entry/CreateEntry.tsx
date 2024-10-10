@@ -1,4 +1,4 @@
-import { ArrowBack, FileUpload, Lock, LockOpen } from '@mui/icons-material'
+import { ArrowBack, FileUpload, FolderCopy, Lock, LockOpen } from '@mui/icons-material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import LoadingButton from '@mui/lab/LoadingButton'
 import {
@@ -7,12 +7,14 @@ import {
   AccordionSummary,
   Box,
   Button,
+  Checkbox,
   Divider,
   FormControlLabel,
   Paper,
   Radio,
   RadioGroup,
   Stack,
+  Switch,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -60,6 +62,8 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
   )
+  const [ungovernedAccess, setungovernedAccess] = useState<boolean>(false)
+  const [allowTemplating, setAllowTemplating] = useState<boolean>(true)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -86,6 +90,8 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
       visibility,
       collaborators,
       settings: {
+        ungovernedAccess,
+        allowTemplating,
         mirror: {
           sourceModelId,
         },
@@ -124,6 +130,20 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
           <Typography fontWeight='bold'>Public</Typography>
           <Typography variant='caption'>
             {`Any authorised user will be able to see this ${EntryKindLabel[createEntryKind]}`}
+          </Typography>
+        </Stack>
+      </Stack>
+    )
+  }
+
+  const templateLabel = () => {
+    return (
+      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+        <FolderCopy />
+        <Stack sx={{ my: 1 }}>
+          <Typography fontWeight='bold'>Templating</Typography>
+          <Typography variant='caption'>
+            {`Allow this to be used as a template for another ${EntryKindLabel[createEntryKind]}`}
           </Typography>
         </Stack>
       </Stack>
@@ -174,24 +194,36 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               <Typography component='h3' variant='h6'>
                 Access control
               </Typography>
-              <RadioGroup
-                defaultValue='public'
-                value={visibility}
-                onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
-              >
-                <FormControlLabel
-                  value='public'
-                  control={<Radio />}
-                  label={publicLabel()}
-                  data-test='publicButtonSelector'
-                />
-                <FormControlLabel
-                  value='private'
-                  control={<Radio />}
-                  label={privateLabel()}
-                  data-test='privateButtonSelector'
-                />
-              </RadioGroup>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <RadioGroup
+                  defaultValue='public'
+                  value={visibility}
+                  onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
+                >
+                  <FormControlLabel
+                    value='public'
+                    control={<Radio />}
+                    label={publicLabel()}
+                    data-test='publicButtonSelector'
+                  />
+                  <FormControlLabel
+                    value='private'
+                    control={<Radio />}
+                    label={privateLabel()}
+                    data-test='privateButtonSelector'
+                  />
+                  <FormControlLabel
+                    value='false'
+                    control={
+                      <Checkbox
+                        onChange={(event) => setAllowTemplating(event.target.checked)}
+                        checked={allowTemplating}
+                      />
+                    }
+                    label={templateLabel()}
+                  />
+                </RadioGroup>
+              </Box>
             </>
             <Accordion sx={{ borderTop: 'none' }}>
               <AccordionSummary
@@ -224,6 +256,16 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                     ]}
                   />
                 </Box>
+                <FormControlLabel
+                  label='Ungoverned access requests'
+                  control={
+                    <Switch
+                      onChange={(e) => setungovernedAccess(e.target.checked)}
+                      checked={ungovernedAccess}
+                      size='small'
+                    />
+                  }
+                />
               </AccordionDetails>
             </Accordion>
             <Box sx={{ textAlign: 'right' }}>
