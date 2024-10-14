@@ -34,7 +34,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     await this.init()
     if (!av) {
       throw ConfigurationError(
-        'Clam AV does not look like it is running. Chec that it has been correctly initialised by calling the init function.',
+        'Clam AV does not look like it is running. Check that it has been correctly initialised by calling the init function.',
         {
           clamAvConfig: config.avScanning,
         },
