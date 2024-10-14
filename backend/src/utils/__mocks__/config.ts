@@ -35,9 +35,6 @@ const config = {
   instrumentation: {
     enabled: false,
   },
-  avScanning: {
-    enabled: false,
-  },
 }
 
 export default config

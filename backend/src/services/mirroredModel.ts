@@ -10,6 +10,7 @@ import { sign } from '../clients/kms.js'
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import runFileScanners from '../connectors/fileScanning/index.js'
 import { FileInterfaceDoc, ScanState } from '../models/File.js'
 import { ModelDoc } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
@@ -341,7 +342,7 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     }
   }
 
-  if (config.ui.avScanning.enabled) {
+  if (runFileScanners().info()) {
     const files: FileInterfaceDoc[] = await getFilesByIds(user, modelId, fileIds)
     const scanErrors: {
       missingScan: Array<{ name: string; id: string }>

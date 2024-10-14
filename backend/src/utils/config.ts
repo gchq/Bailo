@@ -140,10 +140,6 @@ export interface Config {
       text: string
       startTimestamp: string
     }
-
-    avScanning: {
-      enabled: boolean
-    }
   }
 
   session: {

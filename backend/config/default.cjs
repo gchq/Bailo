@@ -190,10 +190,6 @@ module.exports = {
       text: '',
       startTimestamp: '',
     },
-
-    avScanning: {
-      enabled: false,
-    },
   },
 
   connectors: {

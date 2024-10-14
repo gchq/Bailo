@@ -36,7 +36,7 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 
   await file.save()
 
-  if (config.ui.avScanning.enabled) {
+  if (runFileScanners().info()) {
     runFileScanners()
       .scan(file)
       .then((resultsArray) => updateFileWithResults(file, resultsArray))

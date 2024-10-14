@@ -230,9 +230,6 @@ config:
       text: ''
       startTimestamp: ''
 
-    avScanning:
-      enabled: false
-
   smtp:
     #host: 'mail' #service name
     port: 1025

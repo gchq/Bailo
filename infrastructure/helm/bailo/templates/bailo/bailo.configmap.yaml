@@ -63,7 +63,6 @@ data:
       },
 
       avScanning: {
-        enabled: {{ .Values.clamav.enabled }},
         clamdscan: {
           host: '{{ include "bailo.fullname" . }}-clamav',
           port: {{ .Values.clamav.port }},
@@ -174,10 +173,6 @@ data:
         modelMirror: {
           enabled: {{ .Values.modelMirror.enabled }},
           disclaimer: '{{ .Values.modelMirror.disclaimer }}'
-        }
-
-        avScanning: {
-          enabled: {{ .Values.config.ui.avScanning.enabled }},
         }
       },
 

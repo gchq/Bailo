@@ -5,6 +5,13 @@ import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
 import { exportModel, importModel } from '../../src/services/mirroredModel.js'
 
+const fileScanningMock = vi.hoisted(() => ({
+  default: vi.fn(() => ({
+    info: vi.fn(() => []),
+  })),
+}))
+vi.mock('../../src/connectors/fileScanning/index.js', async () => fileScanningMock)
+
 const fflateMock = vi.hoisted(() => ({
   unzipSync: vi.fn(),
 }))
@@ -27,14 +34,14 @@ vi.mock('../../src/connectors/authorisation/index.js', async () => ({
   default: authMock,
 }))
 
+// const fileScanConnectors: BaseFileScanningConnector[] = [new ClamAvFileScanningConnector()]
+// const wrapper = new FileScanningWrapper(fileScanConnectors)
+
 const configMock = vi.hoisted(
   () =>
     ({
       ui: {
         modelMirror: {
-          enabled: true,
-        },
-        avScanning: {
           enabled: true,
         },
       },
