@@ -1,4 +1,4 @@
-import { ArrowBack, FileUpload, FolderCopy, Lock, LockOpen } from '@mui/icons-material'
+import { ArrowBack, FileUpload, FolderCopy, Gavel, Lock, LockOpen } from '@mui/icons-material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import LoadingButton from '@mui/lab/LoadingButton'
 import {
@@ -62,8 +62,8 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
   )
-  const [ungovernedAccess, setungovernedAccess] = useState<boolean>(false)
-  const [allowTemplating, setAllowTemplating] = useState<boolean>(true)
+  const [ungovernedAccess, setungovernedAccess] = useState(false)
+  const [allowTemplating, setAllowTemplating] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -150,6 +150,20 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     )
   }
 
+  const ungovAccessLabel = () => {
+    return (
+      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+        <Gavel />
+        <Stack sx={{ my: 1 }}>
+          <Typography fontWeight='bold'>Ungoverned Access Requests</Typography>
+          <Typography variant='caption'>
+            {`Allow users to request access without the need for authorisation from ${EntryKindLabel[createEntryKind]} owners`}
+          </Typography>
+        </Stack>
+      </Stack>
+    )
+  }
+
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
   }
@@ -194,36 +208,24 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               <Typography component='h3' variant='h6'>
                 Access control
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <RadioGroup
-                  defaultValue='public'
-                  value={visibility}
-                  onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
-                >
-                  <FormControlLabel
-                    value='public'
-                    control={<Radio />}
-                    label={publicLabel()}
-                    data-test='publicButtonSelector'
-                  />
-                  <FormControlLabel
-                    value='private'
-                    control={<Radio />}
-                    label={privateLabel()}
-                    data-test='privateButtonSelector'
-                  />
-                  <FormControlLabel
-                    value='false'
-                    control={
-                      <Checkbox
-                        onChange={(event) => setAllowTemplating(event.target.checked)}
-                        checked={allowTemplating}
-                      />
-                    }
-                    label={templateLabel()}
-                  />
-                </RadioGroup>
-              </Box>
+              <RadioGroup
+                defaultValue='public'
+                value={visibility}
+                onChange={(e) => setVisibility(e.target.value as EntryForm['visibility'])}
+              >
+                <FormControlLabel
+                  value='public'
+                  control={<Radio />}
+                  label={publicLabel()}
+                  data-test='publicButtonSelector'
+                />
+                <FormControlLabel
+                  value='private'
+                  control={<Radio />}
+                  label={privateLabel()}
+                  data-test='privateButtonSelector'
+                />
+              </RadioGroup>
             </>
             <Accordion sx={{ borderTop: 'none' }}>
               <AccordionSummary
@@ -256,16 +258,32 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                     ]}
                   />
                 </Box>
-                <FormControlLabel
-                  label='Ungoverned access requests'
-                  control={
-                    <Switch
-                      onChange={(e) => setungovernedAccess(e.target.checked)}
-                      checked={ungovernedAccess}
-                      size='small'
-                    />
-                  }
-                />
+                <Stack spacing={2}>
+                  <Typography variant='h6' component='h2'>
+                    Additional settings
+                  </Typography>
+                  <FormControlLabel
+                    label={ungovAccessLabel()}
+                    control={
+                      <Switch
+                        onChange={(e) => setungovernedAccess(e.target.checked)}
+                        checked={ungovernedAccess}
+                        size='small'
+                      />
+                    }
+                  />
+                  <FormControlLabel
+                    value='false'
+                    control={
+                      <Switch
+                        onChange={(event) => setAllowTemplating(event.target.checked)}
+                        checked={allowTemplating}
+                        size='small'
+                      />
+                    }
+                    label={templateLabel()}
+                  />
+                </Stack>
               </AccordionDetails>
             </Accordion>
             <Box sx={{ textAlign: 'right' }}>
