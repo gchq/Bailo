@@ -92,6 +92,8 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
   }
   let sourceModelId
 
+  log.info({ mirroredModelId, payloadUrl }, 'Received a request to import a model.')
+
   let res: Response
   try {
     res = await fetch(payloadUrl)
@@ -108,6 +110,8 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
   if (!res.body) {
     throw InternalError('Unable to get the file.', { payloadUrl })
   }
+
+  log.info({ mirroredModelId, payloadUrl }, 'Obtained the file from the payload URL.')
 
   const modelCards: ModelCardRevisionInterface[] = []
   const zipData = new Uint8Array(await res.arrayBuffer())
@@ -134,8 +138,15 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
     modelCards.push(modelCard)
   })
 
+  log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
+
   await Promise.all(modelCards.map((card) => saveImportedModelCard(card, sourceModelId)))
   await setLatestImportedModelCard(mirroredModelId)
+  log.info(
+    { mirroredModelId, payloadUrl, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) },
+    'Finished importing the collection of model cards.',
+  )
+
   return { mirroredModelId, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) }
 }
 
