@@ -206,7 +206,7 @@ module.exports = {
     },
 
     fileScanners: {
-      kinds: ['clamAV'],
+      kinds: [],
     },
   },
 

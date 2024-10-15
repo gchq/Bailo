@@ -10,6 +10,7 @@ interface GetFileScanningInfoResponse {
 export const getFilescanningInfo = [
   bodyParser.json(),
   async (req: Request, res: Response<GetFileScanningInfoResponse>) => {
-    return res.json({ scanners: runFileScanners().info() })
+    const scanners = runFileScanners()
+    return res.json({ scanners: scanners.info() })
   },
 ]

@@ -5,7 +5,7 @@ import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult } from '../connectors/fileScanning/Base.js'
 import runFileScanners from '../connectors/fileScanning/index.js'
-import FileModel, { FileInterface } from '../models/File.js'
+import FileModel, { FileInterface, ScanState } from '../models/File.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
@@ -36,10 +36,17 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 
   await file.save()
 
-  if (runFileScanners().info()) {
-    runFileScanners()
-      .scan(file)
-      .then((resultsArray) => updateFileWithResults(file, resultsArray))
+  const scanners = runFileScanners()
+
+  if (scanners.info()) {
+    const resultsInprogress = scanners.info().map((scannerName) => {
+      return {
+        toolName: scannerName,
+        state: ScanState.InProgress,
+      }
+    })
+    await updateFileWithResults(file, resultsInprogress)
+    scanners.scan(file).then((resultsArray) => updateFileWithResults(file, resultsArray))
   }
 
   return file
@@ -48,12 +55,10 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 export async function updateFileWithResults(file: FileInterface, results: FileScanResult[]) {
   for (const result of results) {
     if (!file.avScan.find((avScanResult) => avScanResult.toolName === result.toolName)) {
-      const updatedAvScanArray = [...file.avScan, { toolName: result.toolName, state: result.state }]
-      file.avScan = updatedAvScanArray
       await FileModel.updateOne(
         { _id: file._id },
         {
-          $set: { avScan: updatedAvScanArray },
+          $set: { avScan: { toolName: result.toolName, state: result.state } },
         },
       )
     } else {

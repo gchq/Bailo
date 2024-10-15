@@ -31,7 +31,6 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   }
 
   async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
-    await this.init()
     if (!av) {
       throw ConfigurationError(
         'Clam AV does not look like it is running. Check that it has been correctly initialised by calling the init function.',

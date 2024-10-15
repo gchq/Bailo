@@ -342,7 +342,8 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     }
   }
 
-  if (runFileScanners().info()) {
+  const scanners = runFileScanners()
+  if (scanners.info()) {
     const files: FileInterfaceDoc[] = await getFilesByIds(user, modelId, fileIds)
     const scanErrors: {
       missingScan: Array<{ name: string; id: string }>
@@ -352,14 +353,7 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     for (const file of files) {
       if (!file.avScan) {
         scanErrors.missingScan.push({ name: file.name, id: file.id })
-      } else if (
-        file.avScan.some(
-          (scanResult) =>
-            scanResult.state === ScanState.NotScanned ||
-            scanResult.state === ScanState.Error ||
-            scanResult.state === ScanState.InProgress,
-        )
-      ) {
+      } else if (file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
         scanErrors.incompleteScan.push({ name: file.name, id: file.id })
       } else if (file.avScan.some((scanResult) => scanResult.isInfected)) {
         scanErrors.failedScan.push({ name: file.name, id: file.id })

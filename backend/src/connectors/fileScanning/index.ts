@@ -10,11 +10,21 @@ export const FileScanKind = {
 export type FileScanKindKeys = (typeof FileScanKind)[keyof typeof FileScanKind]
 
 const fileScanConnectors: BaseFileScanningConnector[] = []
-export default function runFileScanners() {
+let scannerWrapper: undefined | BaseFileScanningConnector = undefined
+export default function runFileScanners(cache = true) {
+  if (scannerWrapper && cache) {
+    return scannerWrapper
+  }
   config.connectors.fileScanners.kinds.forEach(async (fileScanner) => {
     switch (fileScanner) {
       case FileScanKind.ClamAv:
-        fileScanConnectors.push(new ClamAvFileScanningConnector())
+        try {
+          const scanner = new ClamAvFileScanningConnector()
+          scanner.init()
+          fileScanConnectors.push(scanner)
+        } catch (error) {
+          throw ConfigurationError('Could not configure or initialise Clam AV')
+        }
         break
       default:
         throw ConfigurationError(`'${fileScanner}' is not a valid file scanning kind.`, {
@@ -22,7 +32,6 @@ export default function runFileScanners() {
         })
     }
   })
-
-  const wrapper = new FileScanningWrapper(fileScanConnectors)
-  return wrapper
+  scannerWrapper = new FileScanningWrapper(fileScanConnectors)
+  return scannerWrapper
 }

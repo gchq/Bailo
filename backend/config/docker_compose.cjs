@@ -66,4 +66,10 @@ module.exports = {
       host: 'clamd',
     },
   },
+
+  connectors: {
+    fileScanners: {
+      kinds: ['clamAV'],
+    },
+  },
 }
