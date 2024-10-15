@@ -135,16 +135,10 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     )
   }
 
-  const handleShallowRouting = () => {
-    if (router.pathname !== '/entry/new') {
-      router.push('/entry/new', undefined, { shallow: true })
-    }
-  }
-
   const TemplateLabel = ({ createEntryKind }) => {
     const CreateTemplateLabel = useMemo(() => {
       return (
-        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} onClick={handleShallowRouting}>
+        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
           <FolderCopy />
           <Stack sx={{ my: 1 }}>
             <Typography fontWeight='bold'>Templating</Typography>
@@ -162,7 +156,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const UngovernedAccessLabel = ({ createEntryKind }) => {
     const createUngovernedAccessLabel = useMemo(() => {
       return (
-        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} onClick={handleShallowRouting}>
+        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
           <Gavel />
           <Stack sx={{ my: 1 }}>
             <Typography fontWeight='bold'>Ungoverned Access Requests</Typography>
