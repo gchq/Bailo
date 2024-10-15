@@ -5,7 +5,7 @@ import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
-import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../models/Release.js'
+import Release, { ImageRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
@@ -248,7 +248,9 @@ export async function getModelReleases(
   const model = await getModelById(user, modelId)
 
   const auths = await authorisation.releases(user, model, results, ReleaseAction.View)
-  return results.filter((_, i) => auths[i].success)
+  return results
+    .filter((_, i) => auths[i].success)
+    .map((result) => ({ ...result, semver: semverObjectToString(result.semver) }))
 }
 
 export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
@@ -276,18 +278,40 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
   return releases
 }
 
-export async function getReleaseBySemverRange(user: UserInterface, _modelID: string, _semver: string) {
-  const model = await getModelById(user, _modelID)
+export function semverStringToObject(semver: string) {
+  const vIdentifierIndex = semver.indexOf('v')
+  const trimmedSemver = vIdentifierIndex === -1 ? semver : semver.slice(vIdentifierIndex + 1)
+  const [version, metadata] = trimmedSemver.split('-')
+  const [major, minor, patch] = version.split('.')
+  const majorNum: number = Number(major)
+  const minorNum: number = Number(minor)
+  const patchNum: number = Number(patch)
+  return { major: majorNum, minor: minorNum, patch: patchNum, ...(metadata && { metadata }) }
+}
+
+export function semverObjectToString(semver: SemverObject) {
+  let metadata: string
+  if (semver.metadata != undefined) {
+    metadata = `-${semver.metadata}`
+  } else {
+    metadata = ``
+  }
+  return `${semver.major}.${semver.minor}.${semver.patch}${metadata}`
+}
+
+export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
+  const model = await getModelById(user, modelId)
+  const semverObj = semverStringToObject(semver)
   const release = await Release.findOne({
-    modelId: _modelID,
-    semver: { $gte: _semver },
+    modelId,
+    semver: semverObj,
   })
 
   if (!release) {
-    throw NotFound(`The requested release was not found.`, { _modelID, _semver })
+    throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  const auth = await authorisation.release(user, model, release, ReleaseAction.View)
+  const auth = await authorisation.release(user, model, release, ReleaseAction.View) // TODO change this to .releases and then check change auth success to map over multiple releases
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }
@@ -295,15 +319,18 @@ export async function getReleaseBySemverRange(user: UserInterface, _modelID: str
   return release
 }
 
-export async function getReleaseBySemver(user: UserInterface, _modelId: string, _semver: boolean) {
-  const model = await getModelById(user, _modelId)
+export async function getReleaseBySemverLatest(user: UserInterface, modelID: string, semver: string) {
+  const model = await getModelById(user, modelID)
+  const semverObj = semverStringToObject(semver)
   const release = await Release.findOne({
-    modelId: _modelId,
-    semver: _semver,
+    modelId: modelID,
+    'semver.major': { $gte: semverObj.major },
+    'semver.minor': { $gte: semverObj.minor },
+    'semver.patch': { $gte: semverObj.patch },
   })
 
   if (!release) {
-    throw NotFound(`The requested release was not found.`, { _modelId, _semver })
+    throw NotFound(`The requested release was not found.`, { modelID, semver })
   }
 
   const auth = await authorisation.release(user, model, release, ReleaseAction.View)

@@ -1,6 +1,8 @@
 import { Document, model, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
+import { semverObjectToString, semverStringToObject } from '../services/release.js'
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -35,12 +37,29 @@ export interface ImageRef {
 // object from Mongoose it should use this interface
 export type ReleaseDoc = ReleaseInterface & Document<any, any, ReleaseInterface>
 
-const ReleaseSchema = new Schema<ReleaseInterface>(
+export interface SemverObject {
+  major: number
+  minor: number
+  patch: number
+  metadata?: string
+}
+
+const ReleaseSchema = new Schema<ReleaseInterface & { semver: string | SemverObject }>(
   {
     modelId: { type: String, required: true },
     modelCardVersion: { type: Number, required: true },
 
-    semver: { type: String, required: true },
+    semver: {
+      type: Schema.Types.Mixed,
+      required: true,
+      set: function (semver: string) {
+        return semverStringToObject(semver)
+      },
+      get: function (semver: SemverObject) {
+        return semverObjectToString(semver)
+      },
+    },
+
     notes: { type: String, required: true },
 
     minor: { type: Boolean, required: true },
@@ -60,6 +79,8 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
   {
     timestamps: true,
     collection: 'v2_releases',
+    toJSON: { getters: true },
+    toObject: { getters: true },
   },
 )
 
