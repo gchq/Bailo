@@ -191,9 +191,9 @@ async function sendEmail(email: Mail.Options) {
       ...email,
     })
     log.info({ messageId: info.messageId }, 'Email sent')
-  } catch (err) {
+  } catch (error) {
     const content = { to: email.to, subject: email.subject, text: email.text }
-    log.warn({ content, err }, `Unable to send email`)
+    log.warn({ content, error }, `Unable to send email`)
     return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
   }
 }
