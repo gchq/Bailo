@@ -107,7 +107,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     }
   }
 
-  const privateLabel = () => {
+  const privateLabel = useMemo(() => {
     return (
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <Lock />
@@ -119,9 +119,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
         </Stack>
       </Stack>
     )
-  }
+  }, [createEntryKind])
 
-  const publicLabel = () => {
+  const publicLabel = useMemo(() => {
     return (
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <LockOpen />
@@ -133,43 +133,35 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
         </Stack>
       </Stack>
     )
-  }
+  }, [createEntryKind])
 
-  const TemplateLabel = ({ createEntryKind }) => {
-    const CreateTemplateLabel = useMemo(() => {
-      return (
-        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
-          <FolderCopy />
-          <Stack sx={{ my: 1 }}>
-            <Typography fontWeight='bold'>Templating</Typography>
-            <Typography variant='caption'>
-              {`Allow this to be used as a template for another ${EntryKindLabel[createEntryKind]}`}
-            </Typography>
-          </Stack>
+  const allowTemplatingLabel = useMemo(() => {
+    return (
+      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+        <FolderCopy />
+        <Stack sx={{ my: 1 }}>
+          <Typography fontWeight='bold'>Templating</Typography>
+          <Typography variant='caption'>
+            {`Allow this to be used as a template for another ${EntryKindLabel[createEntryKind]}`}
+          </Typography>
         </Stack>
-      )
-    }, [createEntryKind])
+      </Stack>
+    )
+  }, [createEntryKind])
 
-    return CreateTemplateLabel
-  }
-
-  const UngovernedAccessLabel = ({ createEntryKind }) => {
-    const createUngovernedAccessLabel = useMemo(() => {
-      return (
-        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
-          <Gavel />
-          <Stack sx={{ my: 1 }}>
-            <Typography fontWeight='bold'>Ungoverned Access Requests</Typography>
-            <Typography variant='caption'>
-              {`Allow users to request access without the need for authorisation from ${EntryKindLabel[createEntryKind]} owners`}
-            </Typography>
-          </Stack>
+  const ungovernedAccessLabel = useMemo(() => {
+    return (
+      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+        <Gavel />
+        <Stack sx={{ my: 1 }}>
+          <Typography fontWeight='bold'>Ungoverned Access Requests</Typography>
+          <Typography variant='caption'>
+            {`Allow users to request access without the need for authorisation from ${EntryKindLabel[createEntryKind]} owners`}
+          </Typography>
         </Stack>
-      )
-    }, [createEntryKind])
-
-    return createUngovernedAccessLabel
-  }
+      </Stack>
+    )
+  }, [createEntryKind])
 
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
@@ -223,13 +215,13 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 <FormControlLabel
                   value='public'
                   control={<Radio />}
-                  label={publicLabel()}
+                  label={publicLabel}
                   data-test='publicButtonSelector'
                 />
                 <FormControlLabel
                   value='private'
                   control={<Radio />}
-                  label={privateLabel()}
+                  label={privateLabel}
                   data-test='privateButtonSelector'
                 />
               </RadioGroup>
@@ -277,7 +269,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                         size='small'
                       />
                     }
-                    label={UngovernedAccessLabel({ createEntryKind })}
+                    label={ungovernedAccessLabel}
                   />
                   <FormControlLabel
                     control={
@@ -287,7 +279,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                         size='small'
                       />
                     }
-                    label={TemplateLabel({ createEntryKind })}
+                    label={allowTemplatingLabel}
                   />
                 </Stack>
               </AccordionDetails>
