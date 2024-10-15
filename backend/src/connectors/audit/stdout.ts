@@ -340,9 +340,15 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onCreateImport(req: Request, mirroredModelId: string, sourceModelId: string, modelCardVersions: number[]) {
+  onCreateImport(
+    req: Request,
+    mirroredModelId: string,
+    sourceModelId: string,
+    modelCardVersions: number[],
+    exporter: string,
+  ) {
     this.checkEventType(AuditInfo.CreateImport, req)
-    const event = this.generateEvent(req, { mirroredModelId, sourceModelId, modelCardVersions })
+    const event = this.generateEvent(req, { mirroredModelId, sourceModelId, modelCardVersions, exporter })
     req.log.info(event, req.audit.description)
   }
 }
