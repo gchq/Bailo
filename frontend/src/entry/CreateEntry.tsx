@@ -7,7 +7,6 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Checkbox,
   Divider,
   FormControlLabel,
   Paper,
@@ -136,32 +135,46 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     )
   }
 
-  const templateLabel = () => {
-    return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
-        <FolderCopy />
-        <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Templating</Typography>
-          <Typography variant='caption'>
-            {`Allow this to be used as a template for another ${EntryKindLabel[createEntryKind]}`}
-          </Typography>
-        </Stack>
-      </Stack>
-    )
+  const handleShallowRouting = () => {
+    if (router.pathname !== '/entry/new') {
+      router.push('/entry/new', undefined, { shallow: true })
+    }
   }
 
-  const ungovAccessLabel = () => {
-    return (
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
-        <Gavel />
-        <Stack sx={{ my: 1 }}>
-          <Typography fontWeight='bold'>Ungoverned Access Requests</Typography>
-          <Typography variant='caption'>
-            {`Allow users to request access without the need for authorisation from ${EntryKindLabel[createEntryKind]} owners`}
-          </Typography>
+  const TemplateLabel = ({ createEntryKind }) => {
+    const CreateTemplateLabel = useMemo(() => {
+      return (
+        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} onClick={handleShallowRouting}>
+          <FolderCopy />
+          <Stack sx={{ my: 1 }}>
+            <Typography fontWeight='bold'>Templating</Typography>
+            <Typography variant='caption'>
+              {`Allow this to be used as a template for another ${EntryKindLabel[createEntryKind]}`}
+            </Typography>
+          </Stack>
         </Stack>
-      </Stack>
-    )
+      )
+    }, [createEntryKind])
+
+    return CreateTemplateLabel
+  }
+
+  const UngovernedAccessLabel = ({ createEntryKind }) => {
+    const createUngovernedAccessLabel = useMemo(() => {
+      return (
+        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} onClick={handleShallowRouting}>
+          <Gavel />
+          <Stack sx={{ my: 1 }}>
+            <Typography fontWeight='bold'>Ungoverned Access Requests</Typography>
+            <Typography variant='caption'>
+              {`Allow users to request access without the need for authorisation from ${EntryKindLabel[createEntryKind]} owners`}
+            </Typography>
+          </Stack>
+        </Stack>
+      )
+    }, [createEntryKind])
+
+    return createUngovernedAccessLabel
   }
 
   if (isCurrentUserError) {
@@ -263,7 +276,6 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                     Additional settings
                   </Typography>
                   <FormControlLabel
-                    label={ungovAccessLabel()}
                     control={
                       <Switch
                         onChange={(e) => setungovernedAccess(e.target.checked)}
@@ -271,9 +283,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                         size='small'
                       />
                     }
+                    label={UngovernedAccessLabel({ createEntryKind })}
                   />
                   <FormControlLabel
-                    value='false'
                     control={
                       <Switch
                         onChange={(event) => setAllowTemplating(event.target.checked)}
@@ -281,7 +293,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                         size='small'
                       />
                     }
-                    label={templateLabel()}
+                    label={TemplateLabel({ createEntryKind })}
                   />
                 </Stack>
               </AccordionDetails>
