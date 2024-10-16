@@ -23,7 +23,6 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   async init() {
     try {
       av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
-      console.log(av)
     } catch (error) {
       throw ConfigurationError('Could not scan file as Clam AV is not running.', {
         clamAvConfig: config.avScanning,

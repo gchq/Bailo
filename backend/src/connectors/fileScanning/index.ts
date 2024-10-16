@@ -20,7 +20,7 @@ export default function runFileScanners(cache = true) {
       case FileScanKind.ClamAv:
         try {
           const scanner = new ClamAvFileScanningConnector()
-          scanner.init()
+          await scanner.init()
           fileScanConnectors.push(scanner)
         } catch (error) {
           throw ConfigurationError('Could not configure or initialise Clam AV')
