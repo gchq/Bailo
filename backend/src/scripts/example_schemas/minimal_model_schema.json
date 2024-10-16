@@ -67,7 +67,13 @@
           "type": "object",
           "properties": {
             "q1": { "title": "Question one", "description": "This is a question", "type": "string" },
-            "q2": { "title": "Question two", "description": "This is a question", "type": "string" }
+            "q2": { "title": "Question two", "description": "This is a question", "type": "string" },
+            "q3": {
+              "title": "Question three",
+              "description": "This is a date question",
+              "type": "string",
+              "format": "date"
+            }
           }
         },
         "sectionTwo": {

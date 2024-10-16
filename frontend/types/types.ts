@@ -428,6 +428,8 @@ export interface EntryForm {
   visibility: EntryVisibilityKeys
   collaborators?: CollaboratorEntry[]
   settings?: {
+    ungovernedAccess: boolean
+    allowTemplating: boolean
     mirror?: {
       sourceModelId?: string
       destinationModelId?: string

@@ -145,60 +145,53 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
                 Actions
               </Button>
               <Menu MenuListProps={{ dense: true }} anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
-                <MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setExportDialogOpen(true)
+                  }}
+                >
                   <ListItemIcon>
                     <PictureAsPdfIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setExportDialogOpen(true)
-                    }}
-                  >
-                    Export as PDF
-                  </ListItemText>
+                  <ListItemText>Export as PDF</ListItemText>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setRolesDialogOpen(true)
+                  }}
+                >
                   <ListItemIcon>
                     <PersonIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setRolesDialogOpen(true)
-                    }}
-                  >
-                    View Roles
-                  </ListItemText>
+                  <ListItemText>View Roles</ListItemText>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setHistoryDialogOpen(true)
+                  }}
+                >
                   <ListItemIcon>
                     <HistoryIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setHistoryDialogOpen(true)
-                    }}
-                  >
-                    View History
-                  </ListItemText>
+                  <ListItemText>View History</ListItemText>
                 </MenuItem>
                 {!readOnly && (
                   <Tooltip title={requiredRolesText}>
-                    <MenuItem disabled={!canEdit}>
+                    <MenuItem
+                      disabled={!canEdit}
+                      onClick={() => {
+                        handleActionButtonClose()
+                        setIsEdit(!isEdit)
+                      }}
+                      data-test='editEntryCardButton'
+                    >
                       <ListItemIcon>
                         <EditIcon fontSize='small' />
                       </ListItemIcon>
-                      <ListItemText
-                        onClick={() => {
-                          handleActionButtonClose()
-                          setIsEdit(!isEdit)
-                        }}
-                        data-test='editEntryCardButton'
-                      >
-                        {`Edit ${EntryCardKindLabel[entry.kind]}`}
-                      </ListItemText>
+                      <ListItemText>{`Edit ${EntryCardKindLabel[entry.kind]}`}</ListItemText>
                     </MenuItem>
                   </Tooltip>
                 )}

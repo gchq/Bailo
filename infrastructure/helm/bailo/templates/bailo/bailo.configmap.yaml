@@ -173,6 +173,10 @@ data:
         modelMirror: {
           enabled: {{ .Values.modelMirror.enabled }},
           disclaimer: '{{ .Values.modelMirror.disclaimer }}'
+        },
+
+        "avScanning": {
+          enabled: {{ .Values.clamav.enabled }},
         }
       },
 

@@ -9,6 +9,7 @@ import {
   createModel,
   createModelCardFromSchema,
   createModelCardFromTemplate,
+  getCurrentUserPermissionsByModel,
   getModelById,
   getModelCardRevision,
   isModelCardRevision,
@@ -18,11 +19,12 @@ import {
   updateModel,
   updateModelCard,
 } from '../../src/services/model.js'
+import { EntryUserPermissions } from '../../src/types/types.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
 const schemaMock = vi.hoisted(() => ({
-  findSchemaById: vi.fn(() => ({ jsonschema: {} })),
+  getSchemaById: vi.fn(() => ({ jsonschema: {} })),
 }))
 vi.mock('../../src/services/schema.js', async () => schemaMock)
 
@@ -503,5 +505,75 @@ describe('services > model', () => {
     expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')).rejects.toThrowError(
       'User does not have access to model',
     )
+  })
+
+  test('getCurrentUserPermissionsByModel > current user has all model permissions', async () => {
+    const mockUser = { dn: 'testUser' } as any
+    const mockModelId = '123'
+    const mockPermissions: EntryUserPermissions = {
+      editEntry: { hasPermission: true },
+      editEntryCard: { hasPermission: true },
+      createRelease: { hasPermission: true },
+      editRelease: { hasPermission: true },
+      deleteRelease: { hasPermission: true },
+      pushModelImage: { hasPermission: true },
+      createInferenceService: { hasPermission: true },
+      editInferenceService: { hasPermission: true },
+      exportMirroredModel: { hasPermission: true },
+    }
+
+    modelMocks.findOne.mockResolvedValueOnce('mocked')
+    vi.mocked(authorisation.model)
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: true, id: '' })
+    vi.mocked(authorisation.release)
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: true, id: '' })
+    vi.mocked(authorisation.image).mockResolvedValueOnce({ success: true, id: '' })
+
+    const permissions = await getCurrentUserPermissionsByModel(mockUser, mockModelId)
+
+    expect(modelMocks.findOne).toBeCalled()
+    expect(permissions).toEqual(mockPermissions)
+  })
+
+  test('getCurrentUserPermissionsByModel > current user has no model permissions', async () => {
+    const mockUser = { dn: 'testUser' } as any
+    const mockModelId = '123'
+    const mockPermissions: EntryUserPermissions = {
+      editEntry: { hasPermission: false, info: 'mocked' },
+      editEntryCard: { hasPermission: false, info: 'mocked' },
+      createRelease: { hasPermission: false, info: 'mocked' },
+      editRelease: { hasPermission: false, info: 'mocked' },
+      deleteRelease: { hasPermission: false, info: 'mocked' },
+      pushModelImage: { hasPermission: false, info: 'mocked' },
+      createInferenceService: { hasPermission: false, info: 'mocked' },
+      editInferenceService: { hasPermission: false, info: 'mocked' },
+      exportMirroredModel: { hasPermission: false, info: 'mocked' },
+    }
+
+    modelMocks.findOne.mockResolvedValueOnce('mocked')
+    vi.mocked(authorisation.model)
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+    vi.mocked(authorisation.release)
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+    vi.mocked(authorisation.image).mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+
+    const permissions = await getCurrentUserPermissionsByModel(mockUser, mockModelId)
+
+    expect(modelMocks.findOne).toBeCalled()
+    expect(permissions).toEqual(mockPermissions)
   })
 })

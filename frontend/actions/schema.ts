@@ -14,10 +14,10 @@ export interface PostSchemaParams {
   jsonSchema: any
 }
 
-export function useGetSchemas(kind: SchemaKindKeys, includeHidden = false) {
+export function useGetSchemas(kind: SchemaKindKeys, hidden?: boolean) {
   const queryParams = {
     kind,
-    includeHidden,
+    ...(hidden != undefined && { hidden }),
   }
 
   const { data, isLoading, error, mutate } = useSWR<

@@ -9,14 +9,16 @@ import AccessRequest from '../models/AccessRequest.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
+import { AccessRequestUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
+import { authResponseToUserPermission } from '../utils/permissions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { createAccessRequestReviews } from './review.js'
-import { findSchemaById } from './schema.js'
+import { getSchemaById } from './schema.js'
 import { sendWebhooks } from './webhook.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
@@ -29,7 +31,10 @@ export async function createAccessRequest(
   const model = await getModelById(user, modelId)
 
   // Ensure that the AR meets the schema
-  const schema = await findSchemaById(accessRequestInfo.schemaId)
+  const schema = await getSchemaById(accessRequestInfo.schemaId)
+  if (schema.hidden) {
+    throw BadReq('Cannot create new Access Request using a hidden schema.', { schemaId: accessRequestInfo.schemaId })
+  }
   try {
     new Validator().validate(accessRequestInfo.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
@@ -128,7 +133,7 @@ export async function updateAccessRequest(
   }
 
   // Ensure that the AR meets the schema
-  const schema = await findSchemaById(accessRequest.schemaId, true)
+  const schema = await getSchemaById(accessRequest.schemaId)
   try {
     new Validator().validate(accessRequest.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
@@ -182,4 +187,30 @@ export async function getModelAccessRequestsForUser(user: UserInterface, modelId
   })
 
   return accessRequests
+}
+
+export async function getCurrentUserPermissionsByAccessRequest(
+  user: UserInterface,
+  accessRequestId: string,
+): Promise<AccessRequestUserPermissions> {
+  const accessRequest = await getAccessRequestById(user, accessRequestId)
+  const model = await getModelById(user, accessRequest.modelId)
+
+  const editAccessRequestAuth = await authorisation.accessRequest(
+    user,
+    model,
+    accessRequest,
+    AccessRequestAction.Update,
+  )
+  const deleteAccessRequestAuth = await authorisation.accessRequest(
+    user,
+    model,
+    accessRequest,
+    AccessRequestAction.Delete,
+  )
+
+  return {
+    editAccessRequest: authResponseToUserPermission(editAccessRequestAuth),
+    deleteAccessRequest: authResponseToUserPermission(deleteAccessRequestAuth),
+  }
 }

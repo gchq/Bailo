@@ -13,6 +13,7 @@ import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
 import { getFilescanningInfo } from './routes/v2/filescanning/getFilescanningInfo.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
+import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
@@ -24,6 +25,7 @@ import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMult
 import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
 import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
 import { getModel } from './routes/v2/model/getModel.js'
+import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
@@ -122,6 +124,10 @@ server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...delet
 server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
+server.get(
+  '/api/v2/model/:modelId/access-request/:accessRequestId/permissions/mine',
+  ...getAccessRequestCurrentUserPermissions,
+)
 
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
@@ -182,6 +188,7 @@ server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReac
 
 server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
 server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
+server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
 
 server.post('/api/v2/teams', ...postTeam)
 server.get('/api/v2/teams', ...getTeams)

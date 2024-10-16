@@ -38,7 +38,7 @@ interface ObjectToDelete {
 }
 
 export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
-  const { schemas, isSchemasLoading, isSchemasError, mutateSchemas } = useGetSchemas(schemaKind, true)
+  const { schemas, isSchemasLoading, isSchemasError, mutateSchemas } = useGetSchemas(schemaKind)
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
 
   const theme = useTheme()

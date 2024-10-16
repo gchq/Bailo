@@ -181,7 +181,13 @@ export abstract class BaseAuditConnector {
   )
 
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[])
-  abstract onCreateImport(req: Request, mirroredModelId: string, sourceModelId: string, modelCardVersions: number[])
+  abstract onCreateImport(
+    req: Request,
+    mirroredModelId: string,
+    sourceModelId: string,
+    modelCardVersions: number[],
+    exporter: string,
+  )
 
   abstract onError(req: Request, error: BailoError)
 

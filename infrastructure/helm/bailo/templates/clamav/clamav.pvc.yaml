@@ -1,14 +1,17 @@
 {{- if .Values.clamav.enabled }}
----
-apiVersion: v1
+
 kind: PersistentVolumeClaim
+apiVersion: v1
 metadata:
-  name: {{ .Values.aws.pvcClamAVName }}
+  name: {{ include "bailo.fullname" . }}-clamav-pvc
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
 spec:
   accessModes:
-    - ReadWriteOnce
-  storageClassName: {{ .Values.aws.storageName }}
+  {{- range .Values.clamav.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
   resources:
     requests:
-      storage: {{ .Values.aws.pvcClamAVStorage }}
+      storage: {{ .Values.clamav.size | quote }}
 {{- end }}

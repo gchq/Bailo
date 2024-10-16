@@ -28,7 +28,7 @@ import { SchemaInterface, SchemaKind } from 'types/types'
 export default function AccessRequestSchema() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.ACCESS_REQUEST)
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.ACCESS_REQUEST, false)
 
   const [loading, setLoading] = useState(false)
 

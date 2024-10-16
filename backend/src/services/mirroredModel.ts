@@ -62,7 +62,7 @@ export async function exportModel(
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug({ modelId, semvers }, 'Using signatures. Uploading to temporary S3 location first.')
     uploadToTemporaryS3Location(modelId, semvers, s3Stream).then(() =>
-      copyToExportBucketWithSignatures(modelId, semvers, mirroredModelId).catch((error) =>
+      copyToExportBucketWithSignatures(modelId, semvers, mirroredModelId, user.dn).catch((error) =>
         log.error({ modelId, semvers, error }, 'Failed to upload export to export location with signatures'),
       ),
     )
@@ -93,6 +93,8 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
   }
   let sourceModelId
 
+  log.info({ mirroredModelId, payloadUrl }, 'Received a request to import a model.')
+
   let res: Response
   try {
     res = await fetch(payloadUrl)
@@ -109,6 +111,8 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
   if (!res.body) {
     throw InternalError('Unable to get the file.', { payloadUrl })
   }
+
+  log.info({ mirroredModelId, payloadUrl }, 'Obtained the file from the payload URL.')
 
   const modelCards: ModelCardRevisionInterface[] = []
   const zipData = new Uint8Array(await res.arrayBuffer())
@@ -135,8 +139,15 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
     modelCards.push(modelCard)
   })
 
+  log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
+
   await Promise.all(modelCards.map((card) => saveImportedModelCard(card, sourceModelId)))
   await setLatestImportedModelCard(mirroredModelId)
+  log.info(
+    { mirroredModelId, payloadUrl, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) },
+    'Finished importing the collection of model cards.',
+  )
+
   return { mirroredModelId, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) }
 }
 
@@ -161,6 +172,7 @@ async function copyToExportBucketWithSignatures(
   modelId: string,
   semvers: string[] | undefined,
   mirroredModelId: string,
+  exporter: string,
 ) {
   let signatures = {}
   log.debug({ modelId, semvers }, 'Getting stream from S3 to generate signatures.')
@@ -179,6 +191,7 @@ async function copyToExportBucketWithSignatures(
   await uploadToExportS3Location(modelId, semvers, streamToCopy, {
     modelId,
     mirroredModelId,
+    exporter,
     ...signatures,
   })
 }

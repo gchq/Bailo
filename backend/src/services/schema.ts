@@ -17,18 +17,17 @@ export interface DefaultSchema {
   jsonSchema: JsonSchema
 }
 
-export async function findSchemasByKind(kind?: SchemaKindKeys, includeHidden = false): Promise<SchemaInterface[]> {
-  const baseSchemas = await Schema.find({
+export async function searchSchemas(kind?: SchemaKindKeys, hidden?: boolean): Promise<SchemaInterface[]> {
+  const schemas = await Schema.find({
     ...(kind && { kind }),
-    ...(!includeHidden && { hidden: false }),
+    ...(hidden != undefined && { hidden }),
   }).sort({ createdAt: -1 })
-  return baseSchemas
+  return schemas
 }
 
-export async function findSchemaById(schemaId: string, includeHidden = false) {
+export async function getSchemaById(schemaId: string) {
   const schema = await Schema.findOne({
     id: schemaId,
-    ...(!includeHidden && { hidden: false }),
   })
 
   if (!schema) {
@@ -86,7 +85,7 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
 export type UpdateSchemaParams = Partial<Pick<SchemaInterface, 'active' | 'hidden'>>
 
 export async function updateSchema(user: UserInterface, schemaId: string, diff: UpdateSchemaParams) {
-  const schema = await findSchemaById(schemaId, true)
+  const schema = await getSchemaById(schemaId)
 
   const auth = await authorisation.schema(user, schema, SchemaAction.Update)
   if (!auth.success) {
