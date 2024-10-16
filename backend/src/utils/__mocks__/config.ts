@@ -20,6 +20,9 @@ const config = {
     authorisation: {
       kind: 'basic',
     },
+    fileScanners: {
+      kinds: ['clamAV'],
+    },
   },
   log: {
     level: 'debug',
@@ -30,9 +33,6 @@ const config = {
     },
   },
   instrumentation: {
-    enabled: false,
-  },
-  avScanning: {
     enabled: false,
   },
 }

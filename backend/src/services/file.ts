@@ -1,19 +1,17 @@
-import NodeClam from 'clamscan'
 import { Readable } from 'stream'
 
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { FileAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import FileModel, { ScanState } from '../models/File.js'
+import { FileScanResult } from '../connectors/fileScanning/Base.js'
+import runFileScanners from '../connectors/fileScanning/index.js'
+import FileModel, { FileInterface, ScanState } from '../models/File.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { longId } from '../utils/id.js'
-import log from './log.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
-
-let av: NodeClam
 
 export async function uploadFile(user: UserInterface, modelId: string, name: string, mime: string, stream: Readable) {
   const model = await getModelById(user, modelId)
@@ -38,41 +36,42 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 
   await file.save()
 
-  if (config.ui.avScanning.enabled) {
-    if (!av) {
-      try {
-        av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
-      } catch (error) {
-        log.error(error, 'Unable to connect to ClamAV.')
-        return file
-      }
-    }
-    const avStream = av.passthrough()
-    const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
-    s3Stream.pipe(avStream)
-    log.info({ modelId, fileId: file._id, name }, 'Scan started.')
+  const scanners = runFileScanners()
 
-    avStream.on('scan-complete', async (result) => {
-      log.info({ result, modelId, fileId: file._id, name }, 'Scan complete.')
-      await file.update({
-        avScan: { state: ScanState.Complete, isInfected: result.isInfected, viruses: result.viruses },
-      })
+  if (scanners.info()) {
+    const resultsInprogress = scanners.info().map((scannerName) => {
+      return {
+        toolName: scannerName,
+        state: ScanState.InProgress,
+      }
     })
-    avStream.on('error', async (error) => {
-      log.error({ error, modelId, fileId: file._id, name }, 'Scan errored.')
-      await file.update({
-        avScan: { state: ScanState.Error },
-      })
-    })
-    avStream.on('timeout', async (error) => {
-      log.error({ error, modelId, fileId: file._id, name }, 'Scan timed out.')
-      await file.update({
-        avScan: { state: ScanState.Error },
-      })
+    await updateFileWithResults(file, resultsInprogress)
+    scanners.scan(file).then((resultsArray) => {
+      updateFileWithResults(file, resultsArray)
     })
   }
 
   return file
+}
+
+export async function updateFileWithResults(file: FileInterface, results: FileScanResult[]) {
+  for (const result of results) {
+    if (!file.avScan.find((avScanResult) => avScanResult.toolName === result.toolName)) {
+      await FileModel.updateOne(
+        { _id: file._id },
+        {
+          $set: { avScan: { toolName: result.toolName, state: result.state } },
+        },
+      )
+    } else {
+      await FileModel.updateOne(
+        { _id: file._id, 'avScan.toolName': result.toolName },
+        {
+          $set: { 'avScan.$': result },
+        },
+      )
+    }
+  }
 }
 
 export async function downloadFile(user: UserInterface, fileId: string, range?: { start: number; end: number }) {

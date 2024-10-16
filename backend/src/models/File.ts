@@ -1,6 +1,8 @@
 import { Document, model, ObjectId, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
+import { FileScanResult } from '../connectors/fileScanning/Base.js'
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -17,11 +19,7 @@ export interface FileInterface {
 
   complete: boolean
 
-  avScan: {
-    state: ScanStateKeys
-    isInfected?: boolean
-    viruses?: Array<unknown>
-  }
+  avScan: Array<FileScanResult>
 
   createdAt: Date
   updatedAt: Date
@@ -51,11 +49,14 @@ const FileSchema = new Schema<FileInterface>(
     bucket: { type: String, required: true },
     path: { type: String, required: true },
 
-    avScan: {
-      state: { type: String, enum: Object.values(ScanState), default: 'notScanned' },
-      isInfected: { type: Boolean },
-      viruses: [{ type: String }],
-    },
+    avScan: [
+      {
+        toolName: { type: String },
+        state: { type: String, enum: Object.values(ScanState) },
+        isInfected: { type: Boolean },
+        viruses: [{ type: String }],
+      },
+    ],
 
     complete: { type: Boolean, default: false },
   },
