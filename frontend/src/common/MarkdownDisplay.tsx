@@ -41,7 +41,11 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
         },
         p: {
           component: Typography,
-          props: { paragraph: true },
+          props: {
+            style: {
+              overflowWrap: 'break-word',
+            },
+          },
         },
         blockquote: {
           component: (props: any) => (
