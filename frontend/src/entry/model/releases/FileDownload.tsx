@@ -2,7 +2,7 @@ import { Done, Error, Warning } from '@mui/icons-material'
 import { Chip, Divider, Grid, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
-import { Fragment, useMemo, useState } from 'react'
+import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
@@ -13,12 +13,44 @@ type FileDownloadProps = {
   file: FileInterface | File
 }
 
+interface ChipDetails {
+  label: string
+  colour: 'error' | 'warning' | 'success'
+  icon: ReactElement
+}
+
 export default function FileDownload({ modelId, file }: FileDownloadProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
 
   const open = Boolean(anchorEl)
+
+  const threatsFound = (file: FileInterface) => {
+    if (file.avScan === undefined) {
+      return 0
+    }
+    return file.avScan.reduce((acc, scan) => {
+      return scan.viruses ? scan.viruses.length + acc : acc
+    }, 0)
+  }
+
+  const chipDetails = useCallback((file: FileInterface): ChipDetails => {
+    if (file.avScan === undefined) {
+      return { label: 'Virus scan results could not be found.', colour: 'warning', icon: <Warning /> }
+    }
+    if (file.avScan.some((scan) => scan.state === ScanState.Error)) {
+      return { label: 'One or more virus scanning tools failed.', colour: 'warning', icon: <Warning /> }
+    }
+    if (threatsFound(file)) {
+      return {
+        label: `Virus scan failed: ${plural(threatsFound(file), 'threat')} found`,
+        colour: 'error',
+        icon: <Error />,
+      }
+    }
+    return { label: 'Virus scan passed', colour: 'success', icon: <Done /> }
+  }, [])
 
   const avChip = useMemo(() => {
     if (
@@ -28,20 +60,17 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
     ) {
       return <Chip size='small' label='Virus scan results could not be found' />
     }
-    const threatsFound = file.avScan.reduce((acc, scan) => {
-      return scan.viruses ? scan.viruses.length + acc : acc
-    }, 0)
-    if (file.avScan.some((scan) => scan.state !== ScanState.Complete)) {
+    if (file.avScan.some((scan) => scan.state === ScanState.InProgress)) {
       return <Chip size='small' label='Virus scan in progress' />
     }
     return (
       <>
         <Chip
-          color={threatsFound ? 'error' : 'success'}
-          icon={threatsFound ? <Warning /> : <Done />}
+          color={chipDetails(file).colour}
+          icon={chipDetails(file).icon}
           size='small'
           onClick={(e) => setAnchorEl(e.currentTarget)}
-          label={threatsFound ? `Virus scan failed: ${plural(threatsFound, 'threat')} found` : 'Virus scan passed'}
+          label={chipDetails(file).label}
         />
         <Popover
           open={open}
@@ -71,9 +100,10 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
                   </>
                 ) : (
                   <Stack spacing={1} direction='row'>
-                    <Done color='success' />
+                    {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
                     <Typography>
-                      <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> did not find any threats
+                      <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
+                      {scanResult.state === 'error' ? 'was not able to be run' : 'did not find any threats'}
                     </Typography>
                   </Stack>
                 )}
@@ -83,7 +113,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
         </Popover>
       </>
     )
-  }, [anchorEl, file, open])
+  }, [anchorEl, chipDetails, file, open])
 
   if (isScannersError) {
     return <MessageAlert message={isScannersError.info.message} severity='error' />

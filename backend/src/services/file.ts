@@ -46,7 +46,9 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
       }
     })
     await updateFileWithResults(file, resultsInprogress)
-    scanners.scan(file).then((resultsArray) => updateFileWithResults(file, resultsArray))
+    scanners.scan(file).then((resultsArray) => {
+      updateFileWithResults(file, resultsArray)
+    })
   }
 
   return file
