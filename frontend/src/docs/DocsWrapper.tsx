@@ -65,7 +65,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
               <ListItemText primary={doc.title} primaryTypographyProps={{ fontWeight: 'bold' }} />
             </ListItem>
           ) : (
-            <Link passHref href={path} legacyBehavior>
+            <Link passHref href={path} style={{ textDecoration: 'none', color: 'black' }}>
               <ListItemButton dense selected={isSelected} sx={{ pl: paddingLeft }}>
                 <ListItemText
                   primary={doc.title}
@@ -133,7 +133,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
                   color: theme.palette.primary.main,
                 },
                 'a:visited': {
-                  color: theme.palette.primary.main,
+                  color: theme.palette.secondary.main,
                 },
                 blockquote: {
                   fontStyle: 'italic',
