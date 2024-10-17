@@ -28,7 +28,7 @@ export default function IntroCard({ title, user, url, children }: IntroCardProps
         </Typography>
       </CardContent>
       <CardActions>
-        <Link passHref href={url} legacyBehavior>
+        <Link passHref href={url}>
           <Button size='small'>Learn More</Button>
         </Link>
       </CardActions>
