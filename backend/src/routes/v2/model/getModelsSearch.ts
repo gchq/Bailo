@@ -21,6 +21,7 @@ export const getModelsSearchSchema = z.object({
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
     currentPage: z.string().optional(),
+    pageSize: z.string().optional(),
   }),
 })
 
@@ -45,7 +46,6 @@ registerPath({
                 kind: z.string().openapi({ example: EntryKind.Model }),
                 allowTemplating: z.boolean().openapi({ example: true }),
                 schemaId: z.string().optional(),
-                currentPage: z.string().optional(),
               }),
             ),
             totalEntries: z.number(),
@@ -74,7 +74,7 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>) => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, currentPage = '0' },
+      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, currentPage = '0', pageSize = '10' },
     } = parse(req, getModelsSearchSchema)
 
     const foundModels = await searchModels(
@@ -87,6 +87,7 @@ export const getModelsSearch = [
       allowTemplating,
       schemaId,
       parseInt(currentPage) || 0,
+      parseInt(pageSize) || 10,
     )
     const models = foundModels.results.map((model) => ({
       id: model.id,

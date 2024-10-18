@@ -1,35 +1,52 @@
 import { ArrowBack, ArrowForward } from '@mui/icons-material'
-import { IconButton, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
+import {
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { useCallback, useMemo } from 'react'
 
 interface PaginationSelectorProps {
   currentPage: number | string
-  onChange: (newValue: number | string) => void
+  currentPageOnChange: (newValue: number | string) => void
   totalEntries: number
+  pageSize: number | string
+  pageSizeOnChange: (newValue: number | string) => void
 }
 
-export default function PaginationSelector({ currentPage, onChange, totalEntries }: PaginationSelectorProps) {
+export default function PaginationSelector({
+  currentPage,
+  currentPageOnChange,
+  totalEntries,
+  pageSize,
+  pageSizeOnChange,
+}: PaginationSelectorProps) {
   const lastPage = useMemo(() => {
-    return totalEntries / 10
-  }, [totalEntries])
+    return Math.ceil(totalEntries / parseInt(pageSize as string))
+  }, [pageSize, totalEntries])
 
   const handleBackPage = useCallback(() => {
     if (currentPage > 1) {
-      onChange(parseInt(currentPage as string) - 1)
+      currentPageOnChange(parseInt(currentPage as string) - 1)
     }
-  }, [currentPage, onChange])
+  }, [currentPage, currentPageOnChange])
 
   const handleForwardPage = useCallback(() => {
-    if (currentPage < lastPage - 1) {
-      onChange(parseInt(currentPage as string) + 1)
+    if (currentPage < lastPage) {
+      currentPageOnChange(parseInt(currentPage as string) + 1)
     }
-  }, [currentPage, lastPage, onChange])
+  }, [currentPage, lastPage, currentPageOnChange])
 
   const handleManualPageChange = useCallback(
     (event: SelectChangeEvent) => {
-      onChange(parseInt(event.target.value) || '')
+      currentPageOnChange(parseInt(event.target.value) || '')
     },
-    [onChange],
+    [currentPageOnChange],
   )
 
   const menuItems = useMemo(() => {
@@ -62,6 +79,21 @@ export default function PaginationSelector({ currentPage, onChange, totalEntries
         {menuItems}
       </Select>
       <Typography>of {Math.round(lastPage)}</Typography>
+      <FormControl sx={{ m: 1, minWidth: 100 }}>
+        <InputLabel id='page-size-selector'>Page size</InputLabel>
+        <Select
+          labelId='page-size-selector'
+          label='Page size'
+          size='small'
+          value={pageSize}
+          onChange={(event) => pageSizeOnChange(event.target.value)}
+        >
+          <MenuItem value={10}>10</MenuItem>
+          <MenuItem value={20}>20</MenuItem>
+          <MenuItem value={50}>50</MenuItem>
+          <MenuItem value={100}>100</MenuItem>
+        </Select>
+      </FormControl>
       <IconButton size='small' color='primary' onClick={handleForwardPage}>
         <ArrowForward />
       </IconButton>

@@ -32,6 +32,7 @@ export function useListModels(
   allowTemplating?: boolean,
   schemaId?: string,
   currentPage?: number | string,
+  pageSize?: number | string,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -42,6 +43,7 @@ export function useListModels(
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
     ...(currentPage && { currentPage }),
+    ...(pageSize && { pageSize }),
   }
   const { data, isLoading, error, mutate } = useSWR<EntrySearchResults, ErrorInfo>(
     Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null,

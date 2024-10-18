@@ -41,6 +41,7 @@ export default function Marketplace() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [currentPage, setCurrentPage] = useState<number | string>(1)
+  const [pageSize, setPageSize] = useState<number | string>(10)
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, totalModels, isModelsError, isModelsLoading } = useListModels(
@@ -52,13 +53,25 @@ export default function Marketplace() {
     undefined,
     undefined,
     currentPage,
+    pageSize,
   )
 
   const {
     models: dataCards,
+    totalModels: totalDataCards,
     isModelsError: isDataCardsError,
     isModelsLoading: isDataCardsLoading,
-  } = useListModels(EntryKind.DATA_CARD, selectedTypes, selectedTask, selectedLibraries, debouncedFilter)
+  } = useListModels(
+    EntryKind.DATA_CARD,
+    selectedTypes,
+    selectedTask,
+    selectedLibraries,
+    debouncedFilter,
+    undefined,
+    undefined,
+    currentPage,
+    pageSize,
+  )
 
   const theme = useTheme()
   const router = useRouter()
@@ -107,6 +120,14 @@ export default function Marketplace() {
     (newPage: number | string) => {
       setCurrentPage(newPage)
       updateQueryParams('currentPage', newPage as string)
+    },
+    [updateQueryParams],
+  )
+
+  const handlePageSizeChange = useCallback(
+    (newValue: number | string) => {
+      setPageSize(newValue)
+      updateQueryParams('pageSize', newValue as string)
     },
     [updateQueryParams],
   )
@@ -234,12 +255,12 @@ export default function Marketplace() {
               <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
                 <Tabs value={selectedTab} indicatorColor='secondary'>
                   <Tab
-                    label={`Models ${models ? `(${models.length})` : ''}`}
+                    label={`Models ${totalModels ? `(${totalModels})` : ''}`}
                     value={EntryKind.MODEL}
                     onClick={() => setSelectedTab(EntryKind.MODEL)}
                   />
                   <Tab
-                    label={`Data Cards ${dataCards ? `(${dataCards.length})` : ''}`}
+                    label={`Data Cards ${totalDataCards ? `(${totalDataCards})` : ''}`}
                     value={EntryKind.DATA_CARD}
                     onClick={() => setSelectedTab(EntryKind.DATA_CARD)}
                   />
@@ -249,8 +270,10 @@ export default function Marketplace() {
               <Stack spacing={2}>
                 <PaginationSelector
                   currentPage={currentPage}
-                  onChange={(newValue) => handleCurrentPageChange(newValue)}
+                  currentPageOnChange={(newValue) => handleCurrentPageChange(newValue)}
                   totalEntries={totalModels}
+                  pageSize={pageSize}
+                  pageSizeOnChange={(newValue) => handlePageSizeChange(newValue)}
                 />
                 {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                   <div data-test='modelListBox'>
@@ -274,8 +297,10 @@ export default function Marketplace() {
                 )}
                 <PaginationSelector
                   currentPage={currentPage}
-                  onChange={(newValue) => handleCurrentPageChange(newValue)}
+                  currentPageOnChange={(newValue) => handleCurrentPageChange(newValue)}
                   totalEntries={totalModels}
+                  pageSize={pageSize}
+                  pageSizeOnChange={(newValue) => handlePageSizeChange(newValue)}
                 />
               </Stack>
             </Paper>

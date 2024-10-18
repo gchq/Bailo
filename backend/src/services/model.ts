@@ -122,6 +122,7 @@ export async function searchModels(
   allowTemplating?: boolean,
   schemaId?: string,
   currentPage: number = 0,
+  pageSize: number = 10,
 ): Promise<ModelSearchResult> {
   const query: any = {}
 
@@ -174,8 +175,8 @@ export async function searchModels(
 
   const promise = Promise.all([
     ModelModel.find(query)
-      .limit(10)
-      .skip(10 * currentPage)
+      .limit(pageSize)
+      .skip((currentPage - 1) * pageSize)
       .sort(!search ? { updatedAt: -1 } : { score: { $meta: 'textScore' } }),
     ModelModel.find(query).countDocuments(),
   ])
