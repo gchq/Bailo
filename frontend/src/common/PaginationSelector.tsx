@@ -1,13 +1,18 @@
 import { ArrowBack, ArrowForward } from '@mui/icons-material'
-import { IconButton, Stack, TextField } from '@mui/material'
-import { useCallback } from 'react'
+import { IconButton, MenuItem, Select, SelectChangeEvent, Stack, Typography } from '@mui/material'
+import { useCallback, useMemo } from 'react'
 
 interface PaginationSelectorProps {
   currentPage: number | string
   onChange: (newValue: number | string) => void
+  totalEntries: number
 }
 
-export default function PaginationSelector({ currentPage, onChange }: PaginationSelectorProps) {
+export default function PaginationSelector({ currentPage, onChange, totalEntries }: PaginationSelectorProps) {
+  const lastPage = useMemo(() => {
+    return totalEntries / 10
+  }, [totalEntries])
+
   const handleBackPage = useCallback(() => {
     if (currentPage > 1) {
       onChange(parseInt(currentPage as string) - 1)
@@ -15,22 +20,48 @@ export default function PaginationSelector({ currentPage, onChange }: Pagination
   }, [currentPage, onChange])
 
   const handleForwardPage = useCallback(() => {
-    onChange(parseInt(currentPage as string) + 1)
-  }, [currentPage, onChange])
+    if (currentPage < lastPage - 1) {
+      onChange(parseInt(currentPage as string) + 1)
+    }
+  }, [currentPage, lastPage, onChange])
 
   const handleManualPageChange = useCallback(
-    (newValue: string) => {
-      onChange(parseInt(newValue) || '')
+    (event: SelectChangeEvent) => {
+      onChange(parseInt(event.target.value) || '')
     },
     [onChange],
   )
 
+  const menuItems = useMemo(() => {
+    return [...Array(lastPage | 0)].map((_, i) => {
+      return (
+        <MenuItem key={i} value={i + 1}>
+          {i + 1}
+        </MenuItem>
+      )
+    })
+  }, [lastPage])
+
   return (
-    <Stack direction='row' sx={{ width: '100%' }} justifyContent='space-between'>
+    <Stack spacing={2} direction='row' sx={{ width: '100%', p: 2 }} justifyContent='center' alignItems='center'>
       <IconButton size='small' color='primary' onClick={handleBackPage}>
         <ArrowBack />
       </IconButton>
-      <TextField size='small' value={currentPage} onChange={(e) => handleManualPageChange(e.target.value)} />
+      <Typography>Page:</Typography>
+      <Select
+        size='small'
+        value={currentPage.toString()}
+        label='Age'
+        onChange={handleManualPageChange}
+        MenuProps={{
+          style: {
+            maxHeight: 400,
+          },
+        }}
+      >
+        {menuItems}
+      </Select>
+      <Typography>of {Math.round(lastPage)}</Typography>
       <IconButton size='small' color='primary' onClick={handleForwardPage}>
         <ArrowForward />
       </IconButton>

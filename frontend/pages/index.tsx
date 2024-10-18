@@ -43,7 +43,7 @@ export default function Marketplace() {
   const [currentPage, setCurrentPage] = useState<number | string>(1)
   const debouncedFilter = useDebounce(filter, 250)
 
-  const { models, isModelsError, isModelsLoading } = useListModels(
+  const { models, totalModels, isModelsError, isModelsLoading } = useListModels(
     EntryKind.MODEL,
     selectedTypes,
     selectedTask,
@@ -250,6 +250,7 @@ export default function Marketplace() {
                 <PaginationSelector
                   currentPage={currentPage}
                   onChange={(newValue) => handleCurrentPageChange(newValue)}
+                  totalEntries={totalModels}
                 />
                 {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                   <div data-test='modelListBox'>
@@ -274,6 +275,7 @@ export default function Marketplace() {
                 <PaginationSelector
                   currentPage={currentPage}
                   onChange={(newValue) => handleCurrentPageChange(newValue)}
+                  totalEntries={totalModels}
                 />
               </Stack>
             </Paper>

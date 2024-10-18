@@ -30,6 +30,12 @@ export type CreateModelParams = Pick<
   ModelInterface,
   'name' | 'teamId' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
 >
+
+type ModelSearchResult = {
+  results: Array<ModelInterface>
+  totalEntries: number
+}
+
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
@@ -115,8 +121,8 @@ export async function searchModels(
   task?: string,
   allowTemplating?: boolean,
   schemaId?: string,
-  _currentPage?: string,
-): Promise<Array<ModelInterface>> {
+  currentPage: number = 0,
+): Promise<ModelSearchResult> {
   const query: any = {}
 
   if (kind) {
@@ -166,21 +172,17 @@ export async function searchModels(
     }
   }
 
-  let cursor = ModelModel
-    // Find only matching documents
-    .find(query)
+  const promise = Promise.all([
+    ModelModel.find(query)
+      .limit(10)
+      .skip(10 * currentPage)
+      .sort(!search ? { updatedAt: -1 } : { score: { $meta: 'textScore' } }),
+    ModelModel.find(query).countDocuments(),
+  ])
+  const [results, count] = await promise
 
-  if (!search) {
-    // Sort by last updated
-    cursor = cursor.sort({ updatedAt: -1 })
-  } else {
-    // Sort by text search
-    cursor = cursor.sort({ score: { $meta: 'textScore' } })
-  }
-
-  const results = await cursor
   const auths = await authorisation.models(user, results, ModelAction.View)
-  return results.filter((_, i) => auths[i].success)
+  return { results: results.filter((_, i) => auths[i].success), totalEntries: count }
 }
 
 export async function getModelCard(

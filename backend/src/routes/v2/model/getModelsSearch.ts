@@ -48,6 +48,7 @@ registerPath({
                 currentPage: z.string().optional(),
               }),
             ),
+            totalEntries: z.number(),
           }),
         },
       },
@@ -65,6 +66,7 @@ export interface ModelSearchResult {
 
 interface GetModelsResponse {
   models: Array<ModelSearchResult>
+  totalEntries: number
 }
 
 export const getModelsSearch = [
@@ -72,7 +74,7 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>) => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, currentPage },
+      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, currentPage = '0' },
     } = parse(req, getModelsSearchSchema)
 
     const foundModels = await searchModels(
@@ -84,9 +86,9 @@ export const getModelsSearch = [
       task,
       allowTemplating,
       schemaId,
-      currentPage,
+      parseInt(currentPage) || 0,
     )
-    const models = foundModels.map((model) => ({
+    const models = foundModels.results.map((model) => ({
       id: model.id,
       name: model.name,
       description: model.description,
@@ -96,6 +98,6 @@ export const getModelsSearch = [
 
     await audit.onSearchModel(req, models)
 
-    return res.json({ models })
+    return res.json({ models, totalEntries: foundModels.totalEntries })
   },
 ]
