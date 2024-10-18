@@ -4,7 +4,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
-import { putModelCard, useGetModelCardRevisions } from 'actions/modelCard'
+import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import React from 'react'
 import { useContext, useEffect, useMemo, useState } from 'react'
@@ -33,7 +33,6 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
   const [errorMessage, setErrorMessage] = useState('')
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
-  const { mutateModelCardRevisions: mutateEntryCardRevisions } = useGetModelCardRevisions(entry.id)
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
@@ -64,7 +63,6 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
       const res = await putModelCard(entry.id, data)
       if (res.status && res.status < 400) {
         setIsEdit(false)
-        mutateEntryCardRevisions()
       } else {
         setErrorMessage(res.data)
       }
@@ -145,60 +143,53 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
                 Actions
               </Button>
               <Menu MenuListProps={{ dense: true }} anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
-                <MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setExportDialogOpen(true)
+                  }}
+                >
                   <ListItemIcon>
                     <PictureAsPdfIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setExportDialogOpen(true)
-                    }}
-                  >
-                    Export as PDF
-                  </ListItemText>
+                  <ListItemText>Export as PDF</ListItemText>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setRolesDialogOpen(true)
+                  }}
+                >
                   <ListItemIcon>
                     <PersonIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setRolesDialogOpen(true)
-                    }}
-                  >
-                    View Roles
-                  </ListItemText>
+                  <ListItemText>View Roles</ListItemText>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setHistoryDialogOpen(true)
+                  }}
+                >
                   <ListItemIcon>
                     <HistoryIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setHistoryDialogOpen(true)
-                    }}
-                  >
-                    View History
-                  </ListItemText>
+                  <ListItemText>View History</ListItemText>
                 </MenuItem>
                 {!readOnly && (
                   <Tooltip title={requiredRolesText}>
-                    <MenuItem disabled={!canEdit}>
+                    <MenuItem
+                      disabled={!canEdit}
+                      onClick={() => {
+                        handleActionButtonClose()
+                        setIsEdit(!isEdit)
+                      }}
+                      data-test='editEntryCardButton'
+                    >
                       <ListItemIcon>
                         <EditIcon fontSize='small' />
                       </ListItemIcon>
-                      <ListItemText
-                        onClick={() => {
-                          handleActionButtonClose()
-                          setIsEdit(!isEdit)
-                        }}
-                        data-test='editEntryCardButton'
-                      >
-                        {`Edit ${EntryCardKindLabel[entry.kind]}`}
-                      </ListItemText>
+                      <ListItemText>{`Edit ${EntryCardKindLabel[entry.kind]}`}</ListItemText>
                     </MenuItem>
                   </Tooltip>
                 )}
@@ -227,7 +218,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
           />
         )}
       </Box>
-      <EntryCardHistoryDialog entry={entry} open={historyDialogOpen} setOpen={setHistoryDialogOpen} />
+      {historyDialogOpen && <EntryCardHistoryDialog entry={entry} setOpen={setHistoryDialogOpen} />}
       <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
       <TextInputDialog
         open={jsonUploadDialogOpen}

@@ -5,9 +5,11 @@ import { UserInterface } from '../../src/models/User.js'
 import {
   createAccessRequest,
   getAccessRequestsByModel,
+  getCurrentUserPermissionsByAccessRequest,
   getModelAccessRequestsForUser,
   removeAccessRequest,
 } from '../../src/services/accessRequest.js'
+import { AccessRequestUserPermissions } from '../../src/types/types.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -73,7 +75,7 @@ describe('services > accessRequest', () => {
   })
 
   test('createAccessRequest > bad authorisation', async () => {
-    vi.mocked(authorisation.accessRequest).mockResolvedValue({
+    vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({
       info: 'You do not have permission',
       success: false,
       id: '',
@@ -126,5 +128,47 @@ describe('services > accessRequest', () => {
     await getModelAccessRequestsForUser(user, 'test-model')
 
     expect(accessRequestModelMocks.find.mock.calls).matchSnapshot()
+  })
+
+  test('getCurrentUserPermissionsByAccessRequest > current user has all access request permissions', async () => {
+    const mockUser = { dn: 'testUser' } as any
+    const mockAccessRequestId = '123'
+    const mockPermissions: AccessRequestUserPermissions = {
+      editAccessRequest: { hasPermission: true },
+      deleteAccessRequest: { hasPermission: true },
+    }
+
+    accessRequestModelMocks.findOne.mockResolvedValueOnce('mocked')
+    modelMocks.getModelById.mockResolvedValueOnce('mocked')
+    vi.mocked(authorisation.accessRequest)
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: true, id: '' })
+
+    const permissions = await getCurrentUserPermissionsByAccessRequest(mockUser, mockAccessRequestId)
+
+    expect(accessRequestModelMocks.findOne).toBeCalled()
+    expect(permissions).toEqual(mockPermissions)
+  })
+
+  test('getCurrentUserPermissionsByAccessRequest > current user has no access request permissions', async () => {
+    const mockUser = { dn: 'testUser' } as any
+    const mockAccessRequestId = '123'
+    const mockPermissions: AccessRequestUserPermissions = {
+      editAccessRequest: { hasPermission: false, info: 'mocked' },
+      deleteAccessRequest: { hasPermission: false, info: 'mocked' },
+    }
+
+    accessRequestModelMocks.findOne.mockResolvedValueOnce('mocked')
+    modelMocks.getModelById.mockResolvedValueOnce('mocked')
+    vi.mocked(authorisation.accessRequest)
+      .mockResolvedValueOnce({ success: true, id: '' })
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+      .mockResolvedValueOnce({ success: false, info: 'mocked', id: '' })
+
+    const permissions = await getCurrentUserPermissionsByAccessRequest(mockUser, mockAccessRequestId)
+
+    expect(accessRequestModelMocks.findOne).toBeCalled()
+    expect(permissions).toEqual(mockPermissions)
   })
 })

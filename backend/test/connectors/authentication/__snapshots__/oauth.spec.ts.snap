@@ -38,10 +38,12 @@ exports[`connectors > authentication > oauth > getRoutes > returns expected rout
   Layer {
     "handle": [Function],
     "keys": [],
+    "matchers": [
+      [Function],
+    ],
     "name": "handle",
     "params": undefined,
     "path": undefined,
-    "regexp": /\\^\\\\/api\\\\/login\\(\\?:\\\\/\\)\\?\\$/i,
     "route": Route {
       "methods": {
         "get": true,
@@ -51,22 +53,28 @@ exports[`connectors > authentication > oauth > getRoutes > returns expected rout
         Layer {
           "handle": [Function],
           "keys": [],
+          "matchers": [
+            [Function],
+          ],
           "method": "get",
           "name": "<anonymous>",
           "params": undefined,
           "path": undefined,
-          "regexp": /\\^\\(\\?:\\\\/\\)\\?\\$/i,
+          "slash": false,
         },
       ],
     },
+    "slash": false,
   },
   Layer {
     "handle": [Function],
     "keys": [],
+    "matchers": [
+      [Function],
+    ],
     "name": "handle",
     "params": undefined,
     "path": undefined,
-    "regexp": /\\^\\\\/api\\\\/logout\\(\\?:\\\\/\\)\\?\\$/i,
     "route": Route {
       "methods": {
         "get": true,
@@ -76,14 +84,18 @@ exports[`connectors > authentication > oauth > getRoutes > returns expected rout
         Layer {
           "handle": [Function],
           "keys": [],
+          "matchers": [
+            [Function],
+          ],
           "method": "get",
           "name": "<anonymous>",
           "params": undefined,
           "path": undefined,
-          "regexp": /\\^\\(\\?:\\\\/\\)\\?\\$/i,
+          "slash": false,
         },
       ],
     },
+    "slash": false,
   },
 ]
 `;
