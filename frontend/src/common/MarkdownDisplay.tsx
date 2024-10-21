@@ -67,7 +67,7 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
           component: (props: TypographyProps) => (
             <Typography
               component='span'
-              style={{
+              sx={{
                 wordWrap: 'break-word',
               }}
               {...props}
