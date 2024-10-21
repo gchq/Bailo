@@ -29,7 +29,7 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
         },
         h3: {
           component: (props: TypographyProps) => (
-            <Typography gutterBottom variant='h6' component='h2' sx={{ wordWrap: 'break-word' }} {...props} />
+            <Typography gutterBottom variant='h6' component='h3' sx={{ wordWrap: 'break-word' }} {...props} />
           ),
         },
         h4: {
@@ -68,8 +68,6 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
             <Typography
               component='span'
               style={{
-                overflowX: 'auto',
-                backgroundColor: theme.palette.container.main,
                 wordWrap: 'break-word',
               }}
               {...props}
