@@ -6,6 +6,7 @@ import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import ReactMarkdown from 'markdown-to-jsx'
 import { useMemo } from 'react'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 
 export type MarkdownDisplayProps = {
   children: string
@@ -24,28 +25,23 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
         },
         h2: {
           component: (props: TypographyProps) => (
-            <Typography gutterBottom variant='h6' component='h2' sx={{ wordWrap: 'break-word' }} {...props} />
+            <Typography gutterBottom variant='h5' component='h2' sx={{ wordWrap: 'break-word' }} {...props} />
           ),
         },
         h3: {
           component: (props: TypographyProps) => (
-            <Typography gutterBottom variant='subtitle1' component='h2' sx={{ wordWrap: 'break-word' }} {...props} />
+            <Typography gutterBottom variant='h6' component='h2' sx={{ wordWrap: 'break-word' }} {...props} />
           ),
         },
         h4: {
           component: (props: TypographyProps) => (
-            <Typography
-              gutterBottom
-              paragraph
-              variant='caption'
-              component='h2'
-              sx={{ wordWrap: 'break-word' }}
-              {...props}
-            />
+            <Typography gutterBottom variant='subtitle1' component='h4' sx={{ wordWrap: 'break-word' }} {...props} />
           ),
         },
         p: {
-          component: (props: TypographyProps) => <Typography sx={{ wordWrap: 'break-word' }} {...props} />,
+          component: (props: TypographyProps) => (
+            <Typography component='p' sx={{ wordWrap: 'break-word' }} {...props} />
+          ),
         },
         blockquote: {
           component: (props: any) => (
@@ -62,6 +58,19 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
                 pr: 1,
                 ml: 2,
                 mb: 2,
+                wordWrap: 'break-word',
+              }}
+              {...props}
+            />
+          ),
+        },
+        span: {
+          component: (props: TypographyProps) => (
+            <Typography
+              component='span'
+              style={{
+                overflowX: 'auto',
+                backgroundColor: theme.palette.container.main,
                 wordWrap: 'break-word',
               }}
               {...props}
@@ -88,11 +97,28 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
         pre: {
           component: (props: any) => (
             <pre
-              style={{ overflowX: 'auto', backgroundColor: theme.palette.container.main }}
-              sx={{ wordWrap: 'break-word' }}
+              style={{ overflowX: 'auto', backgroundColor: theme.palette.container.main, wordWrap: 'break-word' }}
               {...props}
             />
           ),
+        },
+        code: {
+          component: ({ children, ...props }: any) => {
+            const language = props.className ? props.className.replace('lang-', '') : ''
+
+            return (
+              <Box
+                component='code'
+                sx={{
+                  backgroundColor: theme.palette.grey[200],
+                  fontFamily: 'monospace',
+                }}
+                {...props}
+              >
+                {language ? <SyntaxHighlighter language={language}>{children}</SyntaxHighlighter> : children}
+              </Box>
+            )
+          },
         },
         table: {
           component: (props: any) => (
@@ -103,7 +129,7 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
         },
       },
     }),
-    [theme.palette.container.main, theme.palette.markdownBorder.main],
+    [theme.palette.container.main, theme.palette.grey, theme.palette.markdownBorder.main],
   )
 
   return <ReactMarkdown options={options}>{children}</ReactMarkdown>
