@@ -6,7 +6,6 @@ import { useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import ReactMarkdown from 'markdown-to-jsx'
 import { useMemo } from 'react'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 
 export type MarkdownDisplayProps = {
   children: string
@@ -102,24 +101,6 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
             />
           ),
         },
-        code: {
-          component: ({ children, ...props }: any) => {
-            const language = props.className ? props.className.replace('lang-', '') : ''
-
-            return (
-              <Box
-                component='code'
-                sx={{
-                  backgroundColor: theme.palette.grey[200],
-                  fontFamily: 'monospace',
-                }}
-                {...props}
-              >
-                {language ? <SyntaxHighlighter language={language}>{children}</SyntaxHighlighter> : children}
-              </Box>
-            )
-          },
-        },
         table: {
           component: (props: any) => (
             <div style={{ overflowX: 'auto' }}>
@@ -129,7 +110,7 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
         },
       },
     }),
-    [theme.palette.container.main, theme.palette.grey, theme.palette.markdownBorder.main],
+    [theme.palette.container.main, theme.palette.markdownBorder.main],
   )
 
   return <ReactMarkdown options={options}>{children}</ReactMarkdown>
