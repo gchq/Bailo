@@ -549,3 +549,31 @@ export interface SuccessfulFileUpload {
   fileName: string
   fileId: string
 }
+
+export type PermissionDetail =
+  | {
+      hasPermission: true
+      info?: never
+    }
+  | {
+      hasPermission: false
+      info: string
+    }
+
+export interface UserPermissions {
+  editEntry: PermissionDetail
+  editEntryCard: PermissionDetail
+  editAccessRequest: PermissionDetail
+  deleteAccessRequest: PermissionDetail
+  reviewAccessRequest: PermissionDetail
+  createRelease: PermissionDetail
+  editRelease: PermissionDetail
+  deleteRelease: PermissionDetail
+  reviewRelease: PermissionDetail
+  pushModelImage: PermissionDetail
+  createInferenceService: PermissionDetail
+  editInferenceService: PermissionDetail
+  exportMirroredModel: PermissionDetail
+}
+
+export type RestrictedActionKeys = keyof UserPermissions
