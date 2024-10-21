@@ -6,6 +6,11 @@ import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyModelList = []
 
+export interface EntrySearchResults {
+  models: EntrySearchResult[]
+  totalEntries: number
+}
+
 export interface EntrySearchResult {
   id: string
   name: string
@@ -26,6 +31,8 @@ export function useListModels(
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
+  currentPage?: number | string,
+  pageSize?: number | string,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -35,17 +42,18 @@ export function useListModels(
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
+    ...(currentPage && { currentPage }),
+    ...(pageSize && { pageSize }),
   }
-  const { data, isLoading, error, mutate } = useSWR<
-    {
-      models: EntrySearchResult[]
-    },
-    ErrorInfo
-  >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
+  const { data, isLoading, error, mutate } = useSWR<EntrySearchResults, ErrorInfo>(
+    Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null,
+    fetcher,
+  )
 
   return {
     mutateModels: mutate,
     models: data ? data.models : emptyModelList,
+    totalModels: data ? data.totalEntries : 0,
     isModelsLoading: isLoading,
     isModelsError: error,
   }
