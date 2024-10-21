@@ -1,3 +1,4 @@
+import { TypographyProps } from '@mui/material'
 import Box from '@mui/material/Box'
 import { grey } from '@mui/material/colors'
 import Link from '@mui/material/Link'
@@ -17,31 +18,29 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
     () => ({
       overrides: {
         h1: {
-          component: Typography,
-          props: {
-            gutterBottom: true,
-            variant: 'h4',
-          },
+          component: (props: TypographyProps) => (
+            <Typography gutterBottom variant='h4' component='h1' sx={{ wordWrap: 'break-word' }} {...props} />
+          ),
         },
         h2: {
-          component: Typography,
-          props: { gutterBottom: true, variant: 'h6' },
+          component: (props: TypographyProps) => (
+            <Typography gutterBottom variant='h5' component='h2' sx={{ wordWrap: 'break-word' }} {...props} />
+          ),
         },
         h3: {
-          component: Typography,
-          props: { gutterBottom: true, variant: 'subtitle1' },
+          component: (props: TypographyProps) => (
+            <Typography gutterBottom variant='h6' component='h3' sx={{ wordWrap: 'break-word' }} {...props} />
+          ),
         },
         h4: {
-          component: Typography,
-          props: {
-            gutterBottom: true,
-            variant: 'caption',
-            paragraph: true,
-          },
+          component: (props: TypographyProps) => (
+            <Typography gutterBottom variant='subtitle1' component='h4' sx={{ wordWrap: 'break-word' }} {...props} />
+          ),
         },
         p: {
-          component: Typography,
-          props: { paragraph: true },
+          component: (props: TypographyProps) => (
+            <Typography component='p' sx={{ wordWrap: 'break-word' }} {...props} />
+          ),
         },
         blockquote: {
           component: (props: any) => (
@@ -58,22 +57,46 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
                 pr: 1,
                 ml: 2,
                 mb: 2,
+                wordWrap: 'break-word',
               }}
               {...props}
             />
           ),
         },
-        a: { component: Link },
+        span: {
+          component: (props: TypographyProps) => (
+            <Typography
+              component='span'
+              sx={{
+                wordWrap: 'break-word',
+              }}
+              {...props}
+            />
+          ),
+        },
+        a: {
+          component: (props: any) => (
+            <Link
+              sx={{
+                wordWrap: 'break-word',
+              }}
+              {...props}
+            />
+          ),
+        },
         li: {
           component: (props: any) => (
             <Box component='li' sx={{ mt: 1 }}>
-              <Typography component='span' {...props} />
+              <Typography component='span' sx={{ wordWrap: 'break-word' }} {...props} />
             </Box>
           ),
         },
         pre: {
           component: (props: any) => (
-            <pre style={{ overflowX: 'auto', backgroundColor: theme.palette.container.main }} {...props} />
+            <pre
+              style={{ overflowX: 'auto', backgroundColor: theme.palette.container.main, wordWrap: 'break-word' }}
+              {...props}
+            />
           ),
         },
         table: {
