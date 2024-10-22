@@ -26,7 +26,7 @@ export default function EntryList({
     return entries.map((entry, index) => (
       <Fragment key={entry.id}>
         <Stack direction='row'>
-          <Link style={{ textDecoration: 'none' }} href={`${entry.kind}/${entry.id}`} passHref legacyBehavior>
+          <Link style={{ textDecoration: 'none' }} href={`${entry.kind}/${entry.id}`} passHref>
             <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}>
               {entry.name}
             </MuiLink>
