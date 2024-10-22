@@ -70,7 +70,7 @@ export default function Help() {
                   </Typography>
                 </CardContent>
                 <CardActions sx={{ justifyContent: 'center' }}>
-                  <Link passHref href='/docs'>
+                  <Link passHref href='/docs' legacyBehavior>
                     <Button variant='contained' sx={{ mx: 'auto', mb: 2, width: 200 }} data-test='documentationLink'>
                       View documentation
                     </Button>

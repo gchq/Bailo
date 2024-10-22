@@ -65,7 +65,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
               <ListItemText primary={doc.title} primaryTypographyProps={{ fontWeight: 'bold' }} />
             </ListItem>
           ) : (
-            <Link passHref href={path} style={{ textDecoration: 'none', color: 'black' }}>
+            <Link passHref href={path} style={{ textDecoration: 'none', color: 'black' }} legacyBehavior>
               <ListItemButton dense selected={isSelected} sx={{ pl: paddingLeft }}>
                 <ListItemText
                   primary={doc.title}
