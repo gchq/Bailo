@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 
-import runFileScanners from '../../../connectors/fileScanning/index.js'
+import scanners from '../../../connectors/fileScanning/index.js'
 
 interface GetFileScanningInfoResponse {
   scanners: string[]
@@ -10,7 +10,6 @@ interface GetFileScanningInfoResponse {
 export const getFilescanningInfo = [
   bodyParser.json(),
   async (req: Request, res: Response<GetFileScanningInfoResponse>) => {
-    const scanners = runFileScanners()
     return res.json({ scanners: scanners.info() })
   },
 ]

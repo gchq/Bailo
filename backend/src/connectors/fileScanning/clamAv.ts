@@ -39,36 +39,29 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
         },
       )
     }
-    const avStream = av.passthrough()
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
-    s3Stream.pipe(avStream)
-    log.info({ modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan started.')
-    const res: FileScanResult = await new Promise((resolve) => {
-      avStream
-        .on('scan-complete', (result) => {
-          log.info({ modelId: file.modelId, fileId: file._id, name: file.name, result }, 'Scan complete.')
-          resolve({
-            toolName: clamAvToolName,
-            state: ScanState.Complete,
-            isInfected: result.isInfected,
-            viruses: result.viruses,
-          })
-        })
-        .on('error', (err) => {
-          log.error({ err, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan errored.')
-          resolve({
-            toolName: clamAvToolName,
-            state: ScanState.Error,
-          })
-        })
-      avStream.on('timeout', async (error) => {
-        log.error({ error, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan timed out.')
-        resolve({
+    try {
+      const { isInfected, viruses } = await av.scanStream(s3Stream)
+      log.info(
+        { modelId: file.modelId, fileId: file._id, name: file.name, result: { isInfected, viruses } },
+        'Scan complete.',
+      )
+      return [
+        {
+          toolName: clamAvToolName,
+          state: ScanState.Complete,
+          isInfected,
+          viruses,
+        },
+      ]
+    } catch (error) {
+      log.error({ error, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan errored.')
+      return [
+        {
           toolName: clamAvToolName,
           state: ScanState.Error,
-        })
-      })
-    })
-    return [res]
+        },
+      ]
+    }
   }
 }
