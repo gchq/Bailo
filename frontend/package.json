@@ -58,7 +58,8 @@
     "swagger-ui-react": "^5.17.14",
     "swr": "^2.2.5",
     "typescript": "5.5.3",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "react-syntax-highlighter": "15.5.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.4",
