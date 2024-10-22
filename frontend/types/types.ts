@@ -55,9 +55,6 @@ export interface UiConfig {
     text: string
     startTimestamp: string
   }
-  avScanning: {
-    enabled: boolean
-  }
 }
 
 export interface FileInterface {
@@ -74,14 +71,17 @@ export interface FileInterface {
   complete: boolean
 
   // Older files may not have AV run against them
-  avScan?: {
-    state: ScanStateKeys
-    isInfected?: boolean
-    viruses?: Array<string>
-  }
+  avScan?: AvScanResult[]
 
   createdAt: Date
   updatedAt: Date
+}
+
+export interface AvScanResult {
+  state: ScanStateKeys
+  isInfected?: boolean
+  viruses?: Array<string>
+  toolName: string
 }
 
 export const ScanState = {

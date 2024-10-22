@@ -5,6 +5,7 @@ import grant from 'grant'
 import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
+import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
 import { DefaultSchema } from '../services/schema.js'
 import { deepFreeze } from './object.js'
 
@@ -35,6 +36,10 @@ export interface Config {
 
     audit: {
       kind: AuditKindKeys
+    }
+
+    fileScanners: {
+      kinds: FileScanKindKeys[]
     }
   }
 
@@ -134,10 +139,6 @@ export interface Config {
       enabled: boolean
       text: string
       startTimestamp: string
-    }
-
-    avScanning: {
-      enabled: boolean
     }
   }
 

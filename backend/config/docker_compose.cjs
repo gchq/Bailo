@@ -67,9 +67,9 @@ module.exports = {
     },
   },
 
-  ui: {
-    avScanning: {
-      enabled: false,
+  connectors: {
+    fileScanners: {
+      kinds: ['clamAV'],
     },
   },
 }

@@ -190,10 +190,6 @@ module.exports = {
       text: '',
       startTimestamp: '',
     },
-
-    avScanning: {
-      enabled: false,
-    },
   },
 
   connectors: {
@@ -207,6 +203,10 @@ module.exports = {
 
     audit: {
       kind: 'silly',
+    },
+
+    fileScanners: {
+      kinds: [],
     },
   },
 
