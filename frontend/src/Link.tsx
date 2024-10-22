@@ -29,9 +29,9 @@ export const NextLinkComposed = forwardRef<HTMLAnchorElement, NextLinkComposedPr
         shallow={shallow}
         passHref
         locale={locale}
-        legacyBehavior
+        {...other}
       >
-        <Anchor ref={ref} {...other} />
+        {props.children}
       </NextLink>
     )
   },
