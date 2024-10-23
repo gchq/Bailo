@@ -319,15 +319,162 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
   return release
 }
 
+function getQuerySyntax(semver: string, modelID: string) {
+  //Currently contain test queries, to see if these work, then add logic and string manip
+  let trimmedSemver
+  if (semver.charAt(0) === '^' || semver.charAt(0) === '~') {
+    trimmedSemver = semver.slice(1)
+  } else {
+    trimmedSemver = semver
+  }
+  const semverObj = semverStringToObject(trimmedSemver)
+  //TODO INCLUDE CHECK THAT X IS ALWAYS AFTER A NUMBER, NEVER PRECEEDES OTHERWISE IT IS INCORRECT SYNTAX
+  if (semver.includes('x') || semver.includes('X') || semver.includes('*')) {
+    const newSemver = semver.replace('X', 'x').replace('*', 'x')
+    //return query for x range
+    const splitSemver = newSemver.split('.')
+    if (splitSemver[0].includes('x')) {
+      return {
+        modelId: modelID,
+      }
+    } else if (splitSemver[1].includes('x')) {
+      return {
+        modelId: modelID,
+        'semver.major': semverObj.major,
+      }
+    } else {
+      return {
+        modelId: modelID,
+        'semver.major': semverObj.major,
+        'semver.minor': semverObj.minor,
+      }
+    }
+  } else if (semver.includes('^')) {
+    //return query CARET RANGE
+    const splitSemver = trimmedSemver.split('.')
+    if (splitSemver[0] == '0') {
+      return {
+        modelId: modelID,
+        $or: [
+          {
+            'semver.major': 0,
+            'semver.minor': semverObj.minor,
+            'semver.patch': { $gte: semverObj.patch },
+          },
+        ],
+      }
+    } else if (splitSemver[1] == '0') {
+      return {
+        modelId: modelID,
+        semver: semverObj,
+        // This is equivalent to grabbing one specific release
+        //but it may have caveats in the future with the possible, future inclusion of pre-release identifiers etc
+      }
+    } else if (splitSemver[2] == '0') {
+      //What to put here? Is it invalid?
+    } else {
+      //Invalid?
+      //Check for all
+      return {
+        modelId: modelID,
+        semver: semverObj, //Keep this or just remove, this would mean all releases would be returned if this is used in find()
+      }
+    }
+  } else if (semver.includes('~')) {
+    //return query TILDE RANGE
+    const splitSemver = trimmedSemver.split('.') //THINK THIS COULD BE IMPROVED
+    const count = splitSemver.length
+    switch (count) {
+      case 1: {
+        return {
+          modelId: modelID,
+          'semver.major': semverObj.major,
+        }
+        break
+      }
+      case 2: {
+        return {
+          modelId: modelID,
+          'semver.major': semverObj.major,
+          'semver.minor': semverObj.minor,
+        }
+        break
+      }
+      case 3: {
+        return {
+          modelId: modelID,
+          'semver.major': semverObj.major,
+          'semver.minor': semverObj.minor,
+          'semver.patch': { $gte: semverObj.patch },
+        }
+        break
+      }
+    }
+  } else if (semver.includes('-')) {
+    //return query HYPEN RANGE
+    return {
+      modelId: modelID,
+      $and: [
+        {
+          $or: [
+            {
+              'semver.major': { $gte: semverObj.major },
+              'semver.minor': { $gte: semverObj.minor },
+              'semver.patch': { $gte: semverObj.patch },
+            },
+            {
+              'semver.major': { $gt: semverObj.major },
+            },
+            {
+              'semver.major': { $gte: semverObj.major },
+              'semver.minor': { $gt: semverObj.minor },
+            },
+          ],
+        },
+        {
+          $or: [
+            {
+              'semver.major': { $lte: semverObj.major },
+              'semver.minor': { $lte: semverObj.minor },
+              'semver.patch': { $lt: semverObj.patch },
+            },
+            {
+              'semver.major': { $lt: semverObj.major },
+            },
+            {
+              'semver.major': { $lte: semverObj.major },
+              'semver.minor': { $lt: semverObj.minor },
+            },
+          ],
+        },
+      ],
+    }
+  } else {
+    return {
+      modelId: modelID,
+      $or: [
+        {
+          'semver.major': { $gte: semverObj.major },
+          'semver.minor': { $gte: semverObj.minor },
+          'semver.patch': { $gte: semverObj.patch },
+        },
+        {
+          'semver.major': { $gt: semverObj.major },
+        },
+        {
+          'semver.major': { $gte: semverObj.major },
+          'semver.minor': { $gt: semverObj.minor },
+        },
+      ],
+    }
+  }
+}
+
 export async function getReleaseBySemverLatest(user: UserInterface, modelID: string, semver: string) {
   const model = await getModelById(user, modelID)
-  const semverObj = semverStringToObject(semver)
-  const release = await Release.findOne({
-    modelId: modelID,
-    'semver.major': { $gte: semverObj.major },
-    'semver.minor': { $gte: semverObj.minor },
-    'semver.patch': { $gte: semverObj.patch },
-  })
+
+  const query = getQuerySyntax(semver, modelID)
+  const release = await Release.findOne(query)
 
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelID, semver })
