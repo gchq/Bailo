@@ -22,7 +22,6 @@ RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 
 COPY . .
 COPY --from=sphinx-docs /app/docs/python-docs python-docs
-RUN ls python-docs
 
 EXPOSE 3001
 EXPOSE 9229
