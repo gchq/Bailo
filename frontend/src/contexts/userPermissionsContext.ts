@@ -3,7 +3,7 @@ import { defaultPermissions, UserPermissionsHook } from 'src/hooks/UserPermissio
 
 const UserPermissionsContext = createContext<UserPermissionsHook>({
   userPermissions: defaultPermissions,
-  setUserPermissions: () => undefined,
+  setEntryId: () => undefined,
 })
 
 export default UserPermissionsContext

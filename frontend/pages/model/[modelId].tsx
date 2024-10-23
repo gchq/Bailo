@@ -2,10 +2,11 @@ import { useGetModel } from 'actions/model'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
+import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import AccessRequests from 'src/entry/model/AccessRequests'
 import InferenceServices from 'src/entry/model/InferenceServices'
 import ModelImages from 'src/entry/model/ModelImages'
@@ -23,6 +24,9 @@ export default function Model() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
+  const { setEntryId } = useContext(UserPermissionsContext)
+  setEntryId(modelId || '')
+
   const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
 
   const [isReadOnly, requiredRolesText] = useMemo(() => {
@@ -37,13 +41,7 @@ export default function Model() {
             {
               title: 'Overview',
               path: 'overview',
-              view: (
-                <Overview
-                  entry={model}
-                  currentUserRoles={currentUserRoles}
-                  readOnly={!!model.settings.mirror?.sourceModelId}
-                />
-              ),
+              view: <Overview entry={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
             },
             {
               title: 'Releases',

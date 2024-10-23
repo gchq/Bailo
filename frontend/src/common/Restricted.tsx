@@ -19,7 +19,11 @@ export default function Restricted({ action, fallback, children }: RestrictedPro
   }
 
   if (fallback) {
-    return <Tooltip title={permission.info}>{fallback}</Tooltip>
+    return (
+      <Tooltip title={permission.info}>
+        <div>{fallback}</div>
+      </Tooltip>
+    )
   }
 
   return null

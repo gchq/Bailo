@@ -4,7 +4,7 @@ import { PermissionDetail, UserPermissions } from 'types/types'
 
 export type UserPermissionsHook = {
   userPermissions: UserPermissions
-  setUserPermissions: (permissions: UserPermissions) => void
+  setEntryId: (entryId: string) => void
 }
 
 const defaultPermissionDetail: PermissionDetail = {
@@ -27,8 +27,9 @@ export const defaultPermissions: UserPermissions = {
   exportMirroredModel: defaultPermissionDetail,
 }
 
-export default function useUserPermissions(entryId: string): UserPermissionsHook {
+export default function useUserPermissions(): UserPermissionsHook {
   const [userPermissions, setUserPermissions] = useState<UserPermissions>(defaultPermissions)
+  const [entryId, setEntryId] = useState('')
 
   const {
     userPermissions: permissions,
@@ -43,6 +44,6 @@ export default function useUserPermissions(entryId: string): UserPermissionsHook
   }, [isUserPermissionsError, isUserPermissionsLoading, permissions])
   return {
     userPermissions,
-    setUserPermissions,
+    setEntryId,
   }
 }

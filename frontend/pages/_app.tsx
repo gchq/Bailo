@@ -12,6 +12,8 @@ import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { SnackbarProvider } from 'notistack'
 import { useEffect } from 'react'
+import UserPermissionsContext from 'src/contexts/userPermissionsContext'
+import useUserPermissions from 'src/hooks/UserPermissionsHook'
 import Wrapper from 'src/Wrapper'
 
 import ThemeModeContext from '../src/contexts/themeModeContext'
@@ -23,6 +25,7 @@ export default function MyApp(props: AppProps) {
   const { Component, pageProps } = props
   const themeModeValue = useThemeMode()
   const unsavedChangesValue = useUnsavedChanges()
+  const userPermissions = useUserPermissions()
 
   // This is set so that 'react-markdown-editor' respects the theme set by MUI.
   useEffect(() => {
@@ -39,14 +42,16 @@ export default function MyApp(props: AppProps) {
       <ThemeProvider theme={themeModeValue.theme}>
         <UnsavedChangesContext.Provider value={unsavedChangesValue}>
           <ThemeModeContext.Provider value={themeModeValue}>
-            <SnackbarProvider>
-              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
-                <CssBaseline />
-                <Wrapper>
-                  <Component {...pageProps} />
-                </Wrapper>
-              </LocalizationProvider>
-            </SnackbarProvider>
+            <UserPermissionsContext.Provider value={userPermissions}>
+              <SnackbarProvider>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
+                  <CssBaseline />
+                  <Wrapper>
+                    <Component {...pageProps} />
+                  </Wrapper>
+                </LocalizationProvider>
+              </SnackbarProvider>
+            </UserPermissionsContext.Provider>
           </ThemeModeContext.Provider>
         </UnsavedChangesContext.Provider>
       </ThemeProvider>
