@@ -85,7 +85,7 @@ services:
       context: ./backend/
       dockerfile: ./Dockerfile.dev
     volumes:
-      - ./backend:/app
+      - ./backend/src:/app/src
       - ./backend/certs:/certs
       - ./backend/certs:/usr/local/share/ca-certificates
     ports:
