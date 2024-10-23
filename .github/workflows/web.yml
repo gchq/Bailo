@@ -47,7 +47,7 @@ jobs:
         run: |
           make html
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: python-docs
           path: ./backend/docs/python-docs/html
