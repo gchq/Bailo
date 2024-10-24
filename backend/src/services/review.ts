@@ -89,6 +89,14 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
+export async function removeAccessRequestReview(accessRequestId: string) {
+  const accessRequestReview = await findReviewForAccessRequest(accessRequestId)
+
+  await accessRequestReview.delete()
+
+  return { accessRequestId }
+}
+
 export async function findReviewForResponse(
   user: UserInterface,
   modelId: string,
@@ -139,6 +147,16 @@ export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
     accessRequestId: accessRequestIds,
   })
   return reviews.filter((review) => requiredRoles.accessRequest.includes(review.role))
+}
+
+export async function findReviewForAccessRequest(accessRequestId: string) {
+  const review = await Review.findOne({ accessRequestId: accessRequestId })
+
+  if (!review || !requiredRoles.accessRequest.includes(review.role)) {
+    throw NotFound('The requested access request review was not found.', { accessRequestId })
+  }
+
+  return review
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
