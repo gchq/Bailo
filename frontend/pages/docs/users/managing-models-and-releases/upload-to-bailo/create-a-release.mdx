@@ -1,4 +1,5 @@
-import Image from 'next/legacy/image'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
+import Image from 'next/image'
 import Box from '@mui/material/Box'
 import bailoNewRelease from 'public/docs/bailo_new_release.png'
 import bailoNewReleaseForm from 'public/docs/bailo_new_release_form.png'
@@ -8,16 +9,12 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 
 Once you have uploaded a model, go to the **_Releases_** tab, and click on **_Draft new Release_**.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoNewRelease} />
-</Box>
+<MigrationImageBehaviour src={bailoNewRelease} />
 
 This will bring up a small form that will require you to choose a semver, add release notes and gives you the option of
 uploading files and images.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoNewReleaseForm} />
-</Box>
+<MigrationImageBehaviour src={bailoNewReleaseForm} />
 
 Once the form is filled out, click on **_Create Release_** to submit all details.
 

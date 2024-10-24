@@ -1,5 +1,7 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
+import Image from 'next/image'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
+
 import Box from '@mui/material/Box'
 
 import bailoResetApprovals from '../../../../public/docs/bailo_upload_new_schema.png'
@@ -13,9 +15,7 @@ production system.
 To add a new schema, visit [/schemas/list](/schemas/list) on a Bailo instance. To manage schemas you will need to hold
 the 'admin' role on the Bailo instance. Click the 'Upload a new Schema' button in the top left.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoResetApprovals} />
-</Box>
+<MigrationImageBehaviour src={bailoResetApprovals} />
 
 This will bring up a form to create a new schema. A description of each field is below:
 

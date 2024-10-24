@@ -1,5 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 import Box from '@mui/material/Box'
 
 import modelOverview from 'public/docs/bailo_model_overview.png'
@@ -15,21 +15,15 @@ authorise and keep tracking of anyone who wants to request access.
 
 Visit the model overview page. From here you can click the "Request Access" button to create a new access request:
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={modelOverview} />
-</Box>
+<MigrationImageBehaviour src={modelOverview} />
 
 Much like creating a model, access requests forms require a schema, this can be selected like so:
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={selectAccessRequestSchema} />
-</Box>
+<MigrationImageBehaviour src={selectAccessRequestSchema} />
 
 Finally, fill out the form and submit your access request:
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={createAccessRequest} />
-</Box>
+<MigrationImageBehaviour src={createAccessRequest} />
 
 ## Review Process
 

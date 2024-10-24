@@ -1,5 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 
 import pushingAnImage from '../../../../public/docs/Pushing-an-image.png'
 import registryTab from '../../../../public/docs/Registry-tab.png'
@@ -14,7 +14,7 @@ Images can be pushed to the Docker registry attached to the hosted Bailo environ
 specific models so that they can be attached to releases. The steps on doing this will be detailed below, but can also
 be found inside the UI on the registry of a model.
 
-<Image src={registryTab} />
+<MigrationImageBehaviour src={registryTab} />
 
 Clicking on the "Push Image" button will display a dialog window that will make the process easier, but essentially the
 process is:
@@ -32,14 +32,14 @@ Once you have pushed a Docker image to the registry it will be made available fo
 the image has been assigned to the model using the steps in the previous page, all you need to do is select the image
 using the drop down on the release creating page like so:
 
-<Image src={selectingAnImage} />
+<MigrationImageBehaviour src={selectingAnImage} />
 
 ## Accessing an image
 
 When an image is attached to a release, you will see them listed as part of the release display in the `Releases` tab on
 the model page like so:
 
-<Image src={ModelReleaseImageList} />
+<MigrationImageBehaviour src={ModelReleaseImageList} />
 
 These paths can be copied for use in the following command:
 
