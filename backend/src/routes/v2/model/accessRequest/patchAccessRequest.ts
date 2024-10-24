@@ -15,6 +15,7 @@ export const patchAccessRequestSchema = z.object({
     metadata: accessRequestMetadata,
   }),
   params: z.object({
+    modelId: z.string(),
     accessRequestId: z.string(),
   }),
 })
