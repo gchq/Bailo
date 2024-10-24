@@ -1,5 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 import Box from '@mui/material/Box'
 
 import releases from 'public/docs/bailo_releases.png'
@@ -10,14 +10,10 @@ import release from 'public/docs/bailo_release.png'
 Files are attached to model releases. You can download files from a release in one of two ways - by either finding the
 release in the `Releases` tab and clicking the file download link:
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={releases} />
-</Box>
+<MigrationImageBehaviour src={releases} />
 
 or alternatively, visiting the page for a specific release and clicking the file download link:
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={release} />
-</Box>
+<MigrationImageBehaviour src={release} />
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

@@ -1,4 +1,4 @@
-import Image from 'next/legacy/image'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 import Box from '@mui/material/Box'
 import bailoModelAccess from 'public/docs/bailo_model_access.png'
 import DocsWrapper from 'src/docs/DocsWrapper'
@@ -12,8 +12,6 @@ Select **_*Model Access*_** in the side menu.
 Here you can select, from the **_*select roles*_** drop down menu, the roles that you want to review your model for
 approval.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoModelAccess} />
-</Box>
+<MigrationImageBehaviour src={bailoModelAccess} />
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

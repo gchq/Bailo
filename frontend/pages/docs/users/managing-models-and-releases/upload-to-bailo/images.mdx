@@ -1,7 +1,6 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
-import Image from 'next/legacy/image'
-
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 import bailoPushImage from 'public/docs/bailo_push_image_to_docker_container.png'
 import bailoImageRelease from 'public/docs/bailo_add_image_to_release.png'
 
@@ -14,17 +13,13 @@ upload them to a model and then add them to a release.
 
 You can push a model to Bailo by following the instructions in the registry tab of your model.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoPushImage} />
-</Box>
+<MigrationImageBehaviour src={bailoPushImage} />
 
 ## Adding an image to a release
 
 Once your image has been pushed to Bailo's registry you can now add it to one of your releases.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoImageRelease} />
-</Box>
+<MigrationImageBehaviour src={bailoImageRelease} />
 
 ## What is a docker container?
 
