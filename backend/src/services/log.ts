@@ -16,7 +16,7 @@ interface BunyanLog {
   msg: string
 }
 
-interface RequestLog extends BunyanLog {
+interface RequestCompletedLog extends BunyanLog {
   method: string
   url: string
   status: number
@@ -84,9 +84,9 @@ export class Writer extends WritableStream {
     return typeof value === 'object' ? util.inspect(value) : String(value)
   }
 
-  static isRequest(data: any): data is RequestLog {
+  static isRequestCompleted(data: any): data is RequestCompletedLog {
     const keys = Object.keys(data)
-    return ['requestId', 'url', 'method'].every((k) => keys.includes(k))
+    return ['requestId', 'url', 'method'].every((k) => keys.includes(k)) && data.msg === 'Request completed'
   }
 
   static getAttributes(data: any) {
@@ -105,7 +105,7 @@ export class Writer extends WritableStream {
     ])
     let keys = Object.keys(attributes)
 
-    if (Writer.isRequest(data)) {
+    if (Writer.isRequestCompleted(data)) {
       // this is probably a req object.
       attributes = omit(attributes, ['requestId', 'agent'])
       keys = Object.keys(attributes)
@@ -137,7 +137,7 @@ export class Writer extends WritableStream {
     const formattedAttributes = attributes.length ? `${data.msg ? ' ' : ''}(${attributes})` : ''
 
     let message
-    if (Writer.isRequest(data)) {
+    if (Writer.isRequestCompleted(data)) {
       message = `${level} - ${data.status} ${data.method} ${data.url} ${data['response-time']}ms`
     } else {
       message = `${level} - (${src}): ${data.msg}${formattedAttributes}`
