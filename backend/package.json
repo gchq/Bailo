@@ -89,6 +89,7 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.5.1",
     "@types/nodemailer": "^6.4.15",
+    "@types/semver": "^7.5.8",
     "@types/shelljs": "^0.8.15",
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^10.0.0",

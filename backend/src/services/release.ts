@@ -1,4 +1,4 @@
-import semver from 'semver'
+import semVer from 'semver'
 import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
@@ -22,7 +22,7 @@ import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
 async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
-  if (!semver.valid(release.semver)) {
+  if (!semVer.valid(release.semver)) {
     throw BadReq(`The version '${release.semver}' is not a valid semver value.`)
   }
 
@@ -321,14 +321,21 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
 
 function getQuerySyntax(semver: string, modelID: string) {
   //Currently contain test queries, to see if these work, then add logic and string manip
+  const isSemverValid = semVer.validRange(semver, { includePrerelease: true })
+
+  if (!isSemverValid) {
+    throw BadReq(`Semver ('${semver}') is invalid `)
+  }
   let trimmedSemver
   if (semver.charAt(0) === '^' || semver.charAt(0) === '~') {
     trimmedSemver = semver.slice(1)
   } else {
     trimmedSemver = semver
   }
+
   const semverObj = semverStringToObject(trimmedSemver)
   //TODO INCLUDE CHECK THAT X IS ALWAYS AFTER A NUMBER, NEVER PRECEEDES OTHERWISE IT IS INCORRECT SYNTAX
+
   if (semver.includes('x') || semver.includes('X') || semver.includes('*')) {
     const newSemver = semver.replace('X', 'x').replace('*', 'x')
     //return query for x range
@@ -352,33 +359,33 @@ function getQuerySyntax(semver: string, modelID: string) {
   } else if (semver.includes('^')) {
     //return query CARET RANGE
     const splitSemver = trimmedSemver.split('.')
-    if (splitSemver[0] == '0') {
+    if (splitSemver[0] === '0') {
+      if (splitSemver[1] === '0') {
+        if (splitSemver[2] === '0') {
+          //What to put here? Is it invalid?
+          throw BadReq(`The semver range '${semver}' is not valid. Must not contain all 0 values. `)
+        }
+        return {
+          modelId: modelID,
+          semver: semverObj,
+          // This is equivalent to grabbing one specific release
+          //but it may have caveats in the future with the possible, future inclusion of pre-release identifiers etc
+        }
+      }
       return {
         modelId: modelID,
-        $or: [
-          {
-            'semver.major': 0,
-            'semver.minor': semverObj.minor,
-            'semver.patch': { $gte: semverObj.patch },
-          },
-        ],
+        'semver.major': 0,
+        'semver.minor': semverObj.minor,
+        'semver.patch': { $gte: semverObj.patch },
       }
-    } else if (splitSemver[1] == '0') {
-      return {
-        modelId: modelID,
-        semver: semverObj,
-        // This is equivalent to grabbing one specific release
-        //but it may have caveats in the future with the possible, future inclusion of pre-release identifiers etc
-      }
-    } else if (splitSemver[2] == '0') {
-      //What to put here? Is it invalid?
     } else {
+      //normal
       //Invalid?
-      //Check for all
-      return {
-        modelId: modelID,
-        semver: semverObj, //Keep this or just remove, this would mean all releases would be returned if this is used in find()
-      }
+      //   //Check for all
+      //   return {
+      //     modelId: modelID,
+      //     semver: semverObj, //Keep this or just remove, this would mean all releases would be returned if this is used in find()
+      //   }
     }
   } else if (semver.includes('~')) {
     //return query TILDE RANGE
@@ -450,22 +457,13 @@ function getQuerySyntax(semver: string, modelID: string) {
       ],
     }
   } else {
-    return {
-      modelId: modelID,
-      $or: [
-        {
-          'semver.major': { $gte: semverObj.major },
-          'semver.minor': { $gte: semverObj.minor },
-          'semver.patch': { $gte: semverObj.patch },
-        },
-        {
-          'semver.major': { $gt: semverObj.major },
-        },
-        {
-          'semver.major': { $gte: semverObj.major },
-          'semver.minor': { $gt: semverObj.minor },
-        },
-      ],
+    if (semVer.valid(semver)) {
+      return {
+        modelId: modelID,
+        semver: semverObj,
+      }
+    } else {
+      throw BadReq(`The version '${semver}' is not a valid semver value.`)
     }
   }
 }
