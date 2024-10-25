@@ -2,16 +2,16 @@ import { LoadingButton } from '@mui/lab'
 import { Box, Card, Checkbox, Container, FormControlLabel, Stack, Typography } from '@mui/material'
 import { postModelExportToS3 } from 'actions/model'
 import { ChangeEvent, FormEvent, useState } from 'react'
-import ModelExportAgreement from 'src/entry/model/mirroredModels/ModelExportAgreement'
+import ModelExportAgreementText from 'src/entry/model/mirroredModels/ModelExportAgreementText'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { getErrorMessage } from 'utils/fetcher'
 
-type ExportModelProps = {
+type ExportModelAgreementProps = {
   modelId: string
 }
 
-export default function ExportModel({ modelId }: ExportModelProps) {
+export default function ExportModelAgreement({ modelId }: ExportModelAgreementProps) {
   const [checked, setChecked] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -52,7 +52,7 @@ export default function ExportModel({ modelId }: ExportModelProps) {
         </Typography>
         <Box component='form' onSubmit={handleSubmit}>
           <Stack spacing={2} alignItems='start' justifyContent='start'>
-            <ModelExportAgreement />
+            <ModelExportAgreementText />
             <FormControlLabel
               control={<Checkbox checked={checked} onChange={handleChecked} />}
               label='I agree to the terms and conditions of this model export agreement'

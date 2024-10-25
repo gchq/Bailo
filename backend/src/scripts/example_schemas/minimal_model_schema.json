@@ -23,6 +23,25 @@
           },
           "uniqueItems": true
         },
+        "metrics": {
+          "type": "array",
+          "title": "Metrics",
+          "widget": "metricsWidget",
+          "items": {
+            "type": "object",
+            "title": "",
+            "properties": {
+              "name": {
+                "title": "Metric name",
+                "type": "string"
+              },
+              "value": {
+                "title": "Model performance metric value",
+                "type": "number"
+              }
+            }
+          }
+        },
         "tags": {
           "title": "Descriptive tags for the model.",
           "description": "These tags will be searchable and will help others find this model.  Type in a tag, then press the 'enter key' to add it.",
@@ -48,7 +67,13 @@
           "type": "object",
           "properties": {
             "q1": { "title": "Question one", "description": "This is a question", "type": "string" },
-            "q2": { "title": "Question two", "description": "This is a question", "type": "string" }
+            "q2": { "title": "Question two", "description": "This is a question", "type": "string" },
+            "q3": {
+              "title": "Question three",
+              "description": "This is a date question",
+              "type": "string",
+              "format": "date"
+            }
           }
         },
         "sectionTwo": {
@@ -58,8 +83,13 @@
           "properties": {
             "questionThree": {
               "title": "Question three",
-              "description": "This is another question",
+              "description": "This is number question",
               "type": "number"
+            },
+            "questionFour": {
+              "title": "Question four",
+              "description": "This is a checkbox question",
+              "type": "boolean"
             }
           }
         }

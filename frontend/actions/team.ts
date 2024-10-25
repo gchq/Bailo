@@ -2,8 +2,10 @@ import useSWR from 'swr'
 import { TeamInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
+const emptyTeamList = []
+
 export const useGetTeams = () => {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       teams: TeamInterface[]
     },
@@ -11,15 +13,15 @@ export const useGetTeams = () => {
   >('/api/v2/teams/', fetcher)
 
   return {
-    teams: data ? data.teams : [],
-    isTeamsLoading: !error && !data,
+    teams: data ? data.teams : emptyTeamList,
+    isTeamsLoading: isLoading,
     isTeamsError: error,
     mutateTeams: mutate,
   }
 }
 
 export const useGetTeam = (teamId: string) => {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       team: TeamInterface
     },
@@ -28,7 +30,7 @@ export const useGetTeam = (teamId: string) => {
 
   return {
     team: data ? data.team : undefined,
-    isTeamLoading: !error && !data,
+    isTeamLoading: isLoading,
     isTeamError: error,
     mutateTeam: mutate,
   }

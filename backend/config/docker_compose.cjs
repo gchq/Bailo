@@ -62,9 +62,14 @@ module.exports = {
   },
 
   avScanning: {
-    enabled: true,
     clamdscan: {
       host: 'clamd',
+    },
+  },
+
+  ui: {
+    avScanning: {
+      enabled: false,
     },
   },
 }

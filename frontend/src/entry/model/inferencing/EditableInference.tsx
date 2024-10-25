@@ -1,7 +1,7 @@
 import { Stack, Typography } from '@mui/material'
 import { putInference, UpdateInferenceParams, useGetInference } from 'actions/inferencing'
 import { useGetModel } from 'actions/model'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import InferenceForm from 'src/entry/model/inferencing/InferenceForm'
@@ -10,13 +10,15 @@ import MessageAlert from 'src/MessageAlert'
 import { EntryKind, InferenceInterface } from 'types/types'
 import { FlattenedModelImage } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { getRequiredRolesText, hasRole } from 'utils/roles'
 import { isValidPortNumber } from 'utils/stringUtils'
 
 type EditableInferenceProps = {
   inference: InferenceInterface
+  currentUserRoles: string[]
 }
 
-export default function EditableInference({ inference }: EditableInferenceProps) {
+export default function EditableInference({ inference, currentUserRoles }: EditableInferenceProps) {
   const [image, setImage] = useState<FlattenedModelImage>({
     name: inference.image,
     tag: inference.tag,
@@ -35,6 +37,11 @@ export default function EditableInference({ inference }: EditableInferenceProps)
   const { mutateInference } = useGetInference(inference.modelId, inference.image, inference.tag)
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
+  const [canUserEditOrDelete, actionButtonsTooltip] = useMemo(() => {
+    const validRoles = ['owner', 'mtr', 'msro', 'contributor']
+    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
+  }, [currentUserRoles])
+
   const resetForm = useCallback(() => {
     setDescription(inference.description)
     setPort(inference.settings.port.toString())
@@ -52,14 +59,6 @@ export default function EditableInference({ inference }: EditableInferenceProps)
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
-  if (!model || isModelLoading) {
-    return <Loading />
-  }
-
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
-  }
-
   const handleEdit = () => {
     onIsEditChange(true)
   }
@@ -67,6 +66,14 @@ export default function EditableInference({ inference }: EditableInferenceProps)
   const handleCancel = () => {
     resetForm()
     onIsEditChange(false)
+  }
+
+  if (isModelError) {
+    return <MessageAlert message={isModelError.info.message} severity='error' />
+  }
+
+  if (!model || isModelLoading) {
+    return <Loading />
   }
 
   const handleSubmit = async () => {
@@ -110,6 +117,8 @@ export default function EditableInference({ inference }: EditableInferenceProps)
         onEdit={handleEdit}
         onCancel={handleCancel}
         onSubmit={handleSubmit}
+        canUserEditOrDelete={canUserEditOrDelete}
+        actionButtonsTooltip={actionButtonsTooltip}
         errorMessage={errorMessage}
         isRegistryError={isRegistryError}
         editButtonText='Edit Settings'

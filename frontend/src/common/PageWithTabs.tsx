@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
+import { Box, Button, darken, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors/'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
@@ -19,28 +19,33 @@ export interface PageTab {
 
 export default function PageWithTabs({
   title,
+  subheading,
   tabs,
   actionButtonTitle = '',
   displayActionButton = false,
   actionButtonOnClick,
   requiredUrlParams = {},
-  showCopyButton = false,
-  textToCopy,
+  titleToCopy = '',
+  subheadingToCopy = '',
+  sourceModelId = '',
 }: {
   title: string
+  subheading?: string
   tabs: PageTab[]
   actionButtonTitle?: string
   displayActionButton?: boolean
   actionButtonOnClick?: () => void
   requiredUrlParams?: ParsedUrlQuery
-  showCopyButton?: boolean
-  textToCopy?: string
+  titleToCopy?: string
+  subheadingToCopy?: string
+  sourceModelId?: string
 }) {
   const router = useRouter()
   const { tab } = router.query
 
   const [currentTab, setCurrentTab] = useState('')
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
+  const theme = useTheme()
 
   useEffect(() => {
     if (!tabs.length) return
@@ -114,19 +119,35 @@ export default function PageWithTabs({
         direction={{ xs: 'column', sm: 'row' }}
         divider={<Divider flexItem orientation='vertical' />}
         alignItems='center'
-        spacing={{ sm: 2 }}
-        sx={{ p: 2 }}
+        spacing={{ xs: 1, sm: 2 }}
+        sx={{ px: 2, pb: 2 }}
       >
-        <Stack direction='row'>
-          <Typography component='h1' color='primary' variant='h6'>
-            {title}
-          </Typography>
-          {showCopyButton && (
-            <CopyToClipboardButton
-              textToCopy={textToCopy ? textToCopy : title}
-              notificationText='Copied to clipboard'
-              ariaLabel='copy to clipboard'
-            />
+        <Stack>
+          <Stack direction='row'>
+            <Typography component='h1' color='primary' variant='h6'>
+              {title}
+            </Typography>
+            {titleToCopy.length > 0 && (
+              <CopyToClipboardButton
+                textToCopy={titleToCopy ? titleToCopy : title}
+                notificationText='Copied to clipboard'
+                ariaLabel='copy to clipboard'
+              />
+            )}
+          </Stack>
+          {subheading && (
+            <Stack direction='row' alignItems='center'>
+              <Typography variant='caption' sx={{ color: darken(theme.palette.primary.main, 0.4) }}>
+                {subheading}
+              </Typography>
+              {subheadingToCopy.length > 0 && (
+                <CopyToClipboardButton
+                  textToCopy={subheadingToCopy ? subheadingToCopy : subheading}
+                  notificationText='Copied to clipboard'
+                  ariaLabel='copy to clipboard'
+                />
+              )}
+            </Stack>
           )}
         </Stack>
         {displayActionButton && (
@@ -134,6 +155,7 @@ export default function PageWithTabs({
             {actionButtonTitle}
           </Button>
         )}
+        {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
       </Stack>
       <Tabs
         value={currentTab || false}

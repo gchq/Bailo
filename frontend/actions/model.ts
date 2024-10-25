@@ -4,6 +4,8 @@ import useSWR from 'swr'
 import { EntryForm, EntryInterface, EntryKindKeys, ModelImage, Role } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
+const emptyModelList = []
+
 export interface EntrySearchResult {
   id: string
   name: string
@@ -22,6 +24,8 @@ export function useListModels(
   task = '',
   libraries: string[] = [],
   search = '',
+  allowTemplating?: boolean,
+  schemaId?: string,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -29,8 +33,10 @@ export function useListModels(
     ...(task && { task }),
     ...(libraries.length > 0 && { libraries }),
     ...(search && { search }),
+    ...(allowTemplating && { allowTemplating }),
+    ...(schemaId && { schemaId }),
   }
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       models: EntrySearchResult[]
     },
@@ -39,8 +45,8 @@ export function useListModels(
 
   return {
     mutateModels: mutate,
-    models: data ? data.models : [],
-    isModelsLoading: !error && !data,
+    models: data ? data.models : emptyModelList,
+    isModelsLoading: isLoading,
     isModelsError: error,
   }
 }
@@ -50,7 +56,7 @@ export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
     kind,
   }
 
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       model: EntryInterface
     },
@@ -60,13 +66,15 @@ export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
   return {
     mutateModel: mutate,
     model: data ? data.model : undefined,
-    isModelLoading: !error && !data,
+    isModelLoading: isLoading,
     isModelError: error,
   }
 }
 
+const emptyRolesList = []
+
 export function useGetModelRoles(id?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       roles: Role[]
     },
@@ -75,14 +83,16 @@ export function useGetModelRoles(id?: string) {
 
   return {
     mutateModelRoles: mutate,
-    modelRoles: data ? data.roles : [],
-    isModelRolesLoading: !error && !data,
+    modelRoles: data ? data.roles : emptyRolesList,
+    isModelRolesLoading: isLoading,
     isModelRolesError: error,
   }
 }
 
+const emptyImageList = []
+
 export function useGetModelImages(id?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       images: ModelImage[]
     },
@@ -91,14 +101,16 @@ export function useGetModelImages(id?: string) {
 
   return {
     mutateModelImages: mutate,
-    modelImages: data ? data.images : [],
-    isModelImagesLoading: !error && !data,
+    modelImages: data ? data.images : emptyImageList,
+    isModelImagesLoading: isLoading,
     isModelImagesError: error,
   }
 }
 
+const emptyMyRolesList = []
+
 export function useGetModelRolesCurrentUser(id?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       roles: Role[]
     },
@@ -107,8 +119,8 @@ export function useGetModelRolesCurrentUser(id?: string) {
 
   return {
     mutateModelRolesCurrentUser: mutate,
-    modelRolesCurrentUser: data ? data.roles : [],
-    isModelRolesCurrentUserLoading: !error && !data,
+    modelRolesCurrentUser: data ? data.roles : emptyMyRolesList,
+    isModelRolesCurrentUserLoading: isLoading,
     isModelRolesCurrentUserError: error,
   }
 }

@@ -43,18 +43,20 @@ export default function TemplateSettings({ model }: TemplateSettingsProps) {
   return (
     <Stack spacing={2}>
       <Typography variant='h6' component='h2'>
-        Manage Template
+        Manage Templating
       </Typography>
-      <FormControlLabel
-        label='Allow users to make a template'
-        control={
-          <Checkbox
-            onChange={(event) => setAllowTemplating(event.target.checked)}
-            checked={allowTemplating}
-            size='small'
-          />
-        }
-      />
+      <div>
+        <FormControlLabel
+          label='Allow users to make a template'
+          control={
+            <Checkbox
+              onChange={(event) => setAllowTemplating(event.target.checked)}
+              checked={allowTemplating}
+              size='small'
+            />
+          }
+        />
+      </div>
       <Divider />
       <div>
         <LoadingButton

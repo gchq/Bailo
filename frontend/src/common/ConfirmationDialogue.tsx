@@ -4,6 +4,8 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Typography from '@mui/material/Typography'
+import { ReactNode } from 'react'
+import { Transition } from 'src/common/Transition'
 import MessageAlert from 'src/MessageAlert'
 
 type ConfirmationDialogProps = {
@@ -13,6 +15,7 @@ type ConfirmationDialogProps = {
   onConfirm: () => void
   dialogMessage?: string
   errorMessage?: string
+  children?: ReactNode
 }
 
 export default function ConfirmationDialogue({
@@ -22,13 +25,15 @@ export default function ConfirmationDialogue({
   onConfirm,
   errorMessage = '',
   dialogMessage = 'Are you sure you want to perform this action?',
+  children,
 }: ConfirmationDialogProps) {
   return (
-    <Dialog fullWidth open={open} onClose={onCancel}>
+    <Dialog fullWidth open={open} onClose={onCancel} TransitionComponent={Transition}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Typography>{dialogMessage}</Typography>
         <MessageAlert message={errorMessage} severity='error' />
+        {children}
       </DialogContent>
       <DialogActions>
         <Button color='secondary' variant='outlined' onClick={onCancel}>

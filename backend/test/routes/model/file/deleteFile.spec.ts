@@ -33,7 +33,7 @@ describe('routes > file > deleteFile', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onDeleteFile).toBeCalled()
-    expect(audit.onDeleteFile.mock.calls.at(0).at(1)).toMatchSnapshot()
-    expect(audit.onDeleteFile.mock.calls.at(0).at(2)).toMatchSnapshot()
+    expect(audit.onDeleteFile.mock.calls.at(0)?.at(1)).toMatchSnapshot()
+    expect(audit.onDeleteFile.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })
 })

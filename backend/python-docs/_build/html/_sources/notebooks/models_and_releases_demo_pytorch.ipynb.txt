@@ -79,7 +79,7 @@
     "\n",
     "# Instantiating the Bailo client\n",
     "\n",
-    "client = Client(\"http://127.0.0.1:8080\") # <- INSERT BAILO URL (if not hosting locally)\n"
+    "client = Client(\"http://127.0.0.1:8080\") # <- INSERT BAILO URL (if not hosting locally)"
    ]
   },
   {
@@ -336,7 +336,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "weights = torch.load(\"bailo_resnet50_weights.pth\")\n",
+    "weights = torch.load(\"downloads/resnet50_weights.pth\")\n",
     "torch_model = resnet50()\n",
     "torch_model.load_state_dict(weights)"
    ]
@@ -347,6 +347,47 @@
    "metadata": {},
    "source": [
     "If the message \"**All keys matched successfully**\" is displayed, we have successfully initated our model."
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Searching for models"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "In addition to fetching specific models, you can also use the `Model.search()` method to return a list of `Model()` objects that match your parameters. These parameters can be:\n",
+    "\n",
+    "* Task of the model (e.g. image classification).\n",
+    "* Libraries used for the model (e.g. PyTorch).\n",
+    "* Model card search (string to be found in model cards).\n",
+    "\n",
+    "In the below example, we'll just search for all models with no filters."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "models = Model.search(client=client)\n",
+    "\n",
+    "print(models)"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We should now have a list of `Model()` objects."
    ]
   }
  ],

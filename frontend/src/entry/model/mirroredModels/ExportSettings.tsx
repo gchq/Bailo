@@ -64,10 +64,10 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
         </AccordionSummary>
         <AccordionDetails>
           <Box component='form' onSubmit={handleSave}>
-            <Stack spacing={2}>
-              <LabelledInput label={'Destination modelId'} htmlFor={'destination-modelid'} required>
+            <Stack spacing={2} alignItems='flex-start'>
+              <LabelledInput label={'Destination Model ID'} htmlFor={'destination-model-id'} required>
                 <TextField
-                  id='destination-modelid'
+                  id='destination-model-id'
                   value={destinationModelId}
                   onChange={handleDestinationModelId}
                   size='small'
@@ -77,7 +77,9 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
               <ReleaseSelector
                 model={model}
                 selectedReleases={selectedReleases}
-                onUpdateSelectedReleases={setSelectedReleases}
+                onUpdateSelectedReleases={handleUpdateSelectedReleases}
+                isReadOnly={isReadOnly}
+                requiredRolesText={requiredRolesText}
               />
                */}
               <LoadingButton

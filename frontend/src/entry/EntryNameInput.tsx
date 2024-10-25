@@ -19,12 +19,14 @@ export default function EntryNameInput({ value, kind, onChange, autoFocus = fals
   }
 
   return (
-    <LabelledInput required label={`${toTitleCase(kind)} Name`} htmlFor={htmlId}>
+    <LabelledInput fullWidth required label={`${toTitleCase(kind)} Name`} htmlFor={htmlId}>
       <TextField
         required
+        fullWidth
         autoFocus={autoFocus}
         value={value}
         size='small'
+        id={htmlId}
         onChange={handleChange}
         data-test='entryNameInput'
       />

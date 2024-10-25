@@ -1,9 +1,11 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/material'
+import { useGetModel } from 'actions/model'
 import { useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
+import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -12,6 +14,8 @@ import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
+import { EntryKind } from 'types/types'
+import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 export default function Release() {
   const router = useRouter()
@@ -20,6 +24,8 @@ export default function Release() {
   const [isEdit, setIsEdit] = useState(false)
 
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
+  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,
     semver: semver || '',
@@ -29,24 +35,41 @@ export default function Release() {
     isReviewsLoading: isUserReviewsLoading,
     isReviewsError: isUserReviewsError,
   } = useGetReviewRequestsForUser()
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const userCanReview =
-    reviews.filter((review) =>
-      userReviews.some(
-        (userReview) =>
-          userReview.model.id === review.model.id && userReview.accessRequestId === review.accessRequestId,
-      ),
-    ).length > 0
+  const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
+
+  const userCanReview = useMemo(
+    () =>
+      hasRole(currentUserRoles, ['msro', 'mtr']) &&
+      reviews.filter((review) =>
+        userReviews.some(
+          (userReview) =>
+            userReview.model.id === review.model.id && userReview.accessRequestId === review.accessRequestId,
+        ),
+      ).length > 0,
+    [currentUserRoles, reviews, userReviews],
+  )
 
   const error = MultipleErrorWrapper('Unable to load release', {
     isReleaseError,
+    isModelError,
     isReviewsError,
     isUserReviewsError,
+    isCurrentUserError,
   })
 
   if (error) return error
 
-  if (!release || (isReleaseLoading && isReviewsLoading && isUserReviewsLoading)) {
+  if (
+    !release ||
+    !model ||
+    isReleaseLoading ||
+    isReviewsLoading ||
+    isUserReviewsLoading ||
+    isModelLoading ||
+    isCurrentUserLoading
+  ) {
     return <Loading />
   }
 
@@ -79,7 +102,15 @@ export default function Release() {
                   />
                 </Stack>
               </Stack>
-              {release && <EditableRelease release={release} isEdit={isEdit} onIsEditChange={setIsEdit} />}
+              {release && (
+                <EditableRelease
+                  release={release}
+                  currentUserRoles={currentUserRoles}
+                  isEdit={isEdit}
+                  onIsEditChange={setIsEdit}
+                  readOnly={!!model?.settings.mirror?.sourceModelId}
+                />
+              )}
               <ReviewComments release={release} isEdit={isEdit} />
             </Stack>
           </>

@@ -1,12 +1,14 @@
 import qs from 'querystring'
 import { UserInformation } from 'src/common/UserDisplay'
 import useSWR from 'swr'
-import { EntityObject, EntryInterface, TokenActionKeys, TokenInterface, TokenScopeKeys, User } from 'types/types'
+import { EntityObject, EntryInterface, TokenAction, TokenInterface, TokenScopeKeys, User } from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
+const emptyEntityList = []
+
 export function useListUsers(q: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       results: EntityObject[]
     },
@@ -22,8 +24,8 @@ export function useListUsers(q: string) {
 
   return {
     mutateUsers: mutate,
-    users: data ? data.results : [],
-    isUsersLoading: !error && !data,
+    users: data ? data.results : emptyEntityList,
+    isUsersLoading: isLoading,
     isUsersError: error,
   }
 }
@@ -33,12 +35,12 @@ interface UserResponse {
 }
 
 export function useGetCurrentUser() {
-  const { data, error, mutate } = useSWR<UserResponse, ErrorInfo>('/api/v2/entities/me', fetcher)
+  const { data, isLoading, error, mutate } = useSWR<UserResponse, ErrorInfo>('/api/v2/entities/me', fetcher)
 
   return {
     mutateCurrentUser: mutate,
     currentUser: data?.user || undefined,
-    isCurrentUserLoading: !error && !data,
+    isCurrentUserLoading: isLoading,
     isCurrentUserError: error,
   }
 }
@@ -48,12 +50,15 @@ interface UserInformationResponse {
 }
 
 export function useGetUserInformation(dn: string) {
-  const { data, error, mutate } = useSWR<UserInformationResponse, ErrorInfo>(`/api/v2/entity/${dn}/lookup`, fetcher)
+  const { data, isLoading, error, mutate } = useSWR<UserInformationResponse, ErrorInfo>(
+    `/api/v2/entity/${dn}/lookup`,
+    fetcher,
+  )
 
   return {
     mutateUserInformation: mutate,
     userInformation: data?.entity || undefined,
-    isUserInformationLoading: !error && !data,
+    isUserInformationLoading: isLoading,
     isUserInformationError: error,
   }
 }
@@ -62,13 +67,15 @@ interface GetUserTokensResponse {
   tokens: TokenInterface[]
 }
 
+const emptyTokenList = []
+
 export function useGetUserTokens() {
-  const { data, error, mutate } = useSWR<GetUserTokensResponse, ErrorInfo>('/api/v2/user/tokens', fetcher)
+  const { data, isLoading, error, mutate } = useSWR<GetUserTokensResponse, ErrorInfo>('/api/v2/user/tokens', fetcher)
 
   return {
     mutateTokens: mutate,
-    tokens: data?.tokens || [],
-    isTokensLoading: !error && !data,
+    tokens: data?.tokens || emptyTokenList,
+    isTokensLoading: isLoading,
     isTokensError: error,
   }
 }
@@ -77,7 +84,7 @@ export function postUserToken(
   description: string,
   scope: TokenScopeKeys,
   modelIds: EntryInterface['id'][],
-  actions: TokenActionKeys[],
+  actions: string[],
 ) {
   return fetch('/api/v2/user/tokens', {
     method: 'post',
@@ -90,4 +97,24 @@ export function deleteUserToken(accessKey: TokenInterface['accessKey']) {
   return fetch(`/api/v2/user/token/${accessKey}`, {
     method: 'delete',
   })
+}
+
+export interface GetUserTokenListResponse {
+  tokenActionMap: TokenAction[]
+}
+
+const emptyTokenActionList = []
+
+export function useGetUserTokenList() {
+  const { data, isLoading, error, mutate } = useSWR<GetUserTokenListResponse, ErrorInfo>(
+    '/api/v2/user/tokens/list',
+    fetcher,
+  )
+
+  return {
+    mutateTokenActions: mutate,
+    tokenActions: data?.tokenActionMap || emptyTokenActionList,
+    isTokenActionsLoading: isLoading,
+    isTokenActionsError: error,
+  }
 }

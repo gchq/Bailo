@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../src/connectors/audit/__mocks__/index.js'
+import { Decision } from '../../../src/models/Response.js'
 import { postAccessRequestReviewResponseSchema } from '../../../src/routes/v2/review/postAccessRequestReviewResponse.js'
 import { createFixture, testPost } from '../../testUtils/routes.js'
 import { testReviewResponse } from '../../testUtils/testModels.js'
@@ -39,7 +40,7 @@ describe('routes > review > postAccessRequestReviewResponse', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateReviewResponse).toBeCalled()
-    expect(audit.onCreateReviewResponse.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onCreateReviewResponse.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('missing review decision', async () => {
@@ -53,7 +54,8 @@ describe('routes > review > postAccessRequestReviewResponse', () => {
 
   test('successfully respond to a review without a comment', async () => {
     const fixture = createFixture(postAccessRequestReviewResponseSchema) as any
-    delete fixture.body.comment
+    fixture.body.comment = ''
+    fixture.body.decision = Decision.Approve
     const res = await testPost(`${endpoint}/model-id/access-Request/accessRequestId/review`, fixture)
 
     expect(res.statusCode).toBe(200)

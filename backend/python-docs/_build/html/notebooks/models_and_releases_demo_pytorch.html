@@ -85,6 +85,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#Loading-the-model-using-PyTorch">Loading the model using PyTorch</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#Searching-for-models">Searching for models</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="schemas_demo.html">Managing Schemas</a></li>
@@ -166,7 +167,7 @@
 <span class="c1"># Instantiating the Bailo client</span>
 
 <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="s2">&quot;http://127.0.0.1:8080&quot;</span><span class="p">)</span> <span class="c1"># &lt;- INSERT BAILO URL (if not hosting locally)</span>
-<br/></pre></div>
+</pre></div>
 </div>
 </div>
 </section>
@@ -325,7 +326,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;bailo_resnet50_weights.pth&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;downloads/resnet50_weights.pth&quot;</span><span class="p">)</span>
 <span class="n">torch_model</span> <span class="o">=</span> <span class="n">resnet50</span><span class="p">()</span>
 <span class="n">torch_model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
 </pre></div>
@@ -333,6 +334,27 @@
 </div>
 <p>If the message “<strong>All keys matched successfully</strong>” is displayed, we have successfully initated our model.</p>
 </section>
+</section>
+<section id="Searching-for-models">
+<h2>Searching for models<a class="headerlink" href="#Searching-for-models" title="Link to this heading"></a></h2>
+<p>In addition to fetching specific models, you can also use the <code class="docutils literal notranslate"><span class="pre">Model.search()</span></code> method to return a list of <code class="docutils literal notranslate"><span class="pre">Model()</span></code> objects that match your parameters. These parameters can be:</p>
+<ul class="simple">
+<li><p>Task of the model (e.g. image classification).</p></li>
+<li><p>Libraries used for the model (e.g. PyTorch).</p></li>
+<li><p>Model card search (string to be found in model cards).</p></li>
+</ul>
+<p>In the below example, we’ll just search for all models with no filters.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">models</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We should now have a list of <code class="docutils literal notranslate"><span class="pre">Model()</span></code> objects.</p>
 </section>
 </section>
 

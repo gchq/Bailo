@@ -1,4 +1,17 @@
-FROM node:18-alpine as installer
+# syntax=docker/dockerfile:1
+FROM python:3.13.0-bullseye AS sphinx-docs
+
+RUN apt update && apt install -y pandoc
+
+WORKDIR /app/docs
+
+COPY docs .
+
+RUN pip install bailo -r requirements.txt
+
+RUN make dirhtml
+
+FROM node:22.6.0-alpine AS installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -11,7 +24,7 @@ RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 COPY . .
 RUN npm run build
 
-FROM node:18-alpine as runner
+FROM node:22.6.0-alpine AS runner
 
 RUN apk update
 RUN apk add --no-cache libc6-compat ca-certificates
@@ -21,9 +34,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm install --omit=dev --cache=/cache/npm
 
-COPY python-docs python-docs
 COPY --from=installer /app/config config
 COPY --from=installer /app/dist .
+COPY --from=sphinx-docs /app/docs/python-docs python-docs
 
 ENV NODE_ENV production
 EXPOSE 3001

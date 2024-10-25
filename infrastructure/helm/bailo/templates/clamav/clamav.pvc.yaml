@@ -1,0 +1,17 @@
+{{- if .Values.clamav.enabled }}
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "bailo.fullname" . }}-clamav-pvc
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  {{- range .Values.clamav.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.clamav.size | quote }}
+{{- end }}

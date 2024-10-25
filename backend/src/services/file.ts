@@ -15,13 +15,7 @@ import { removeFileFromReleases } from './release.js'
 
 let av: NodeClam
 
-export async function uploadFile(
-  user: UserInterface,
-  modelId: string,
-  name: string,
-  mime: string,
-  stream: ReadableStream,
-) {
+export async function uploadFile(user: UserInterface, modelId: string, name: string, mime: string, stream: Readable) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {
     throw BadReq(`Cannot upload files to a mirrored model.`)
@@ -44,7 +38,7 @@ export async function uploadFile(
 
   await file.save()
 
-  if (config.avScanning.enabled) {
+  if (config.ui.avScanning.enabled) {
     if (!av) {
       try {
         av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })

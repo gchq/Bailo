@@ -15,8 +15,15 @@ export default function EntryDescriptionInput({ value, onChange }: EntryDescript
   }
 
   return (
-    <LabelledInput required label='Description' htmlFor={htmlId}>
-      <TextField id={htmlId} value={value} size='small' onChange={handleChange} data-test='entryDescriptionInput' />
+    <LabelledInput fullWidth required label='Description' htmlFor={htmlId}>
+      <TextField
+        fullWidth
+        id={htmlId}
+        value={value}
+        size='small'
+        onChange={handleChange}
+        data-test='entryDescriptionInput'
+      />
     </LabelledInput>
   )
 }

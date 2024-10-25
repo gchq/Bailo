@@ -86,17 +86,14 @@ describe('services > smtp > smtp', () => {
   const review = new Review({
     role: 'owner',
     responses: [{ decision: 'approve' }],
-    responseIds: ['664cc8d8b48545fe39c47ddf'],
   })
   const release = new Release({
     modelId: 'testmodel-123',
     semver: '1.2.3',
     createdBy: 'user:user',
-    commentIds: ['664cc8d8b48545fe39c47ddf'],
   })
   const access = new AccessRequest({
     metadata: { overview: { entities: ['user:user'] } },
-    commentIds: ['664cc8d8b48545fe39c47ddf'],
   })
 
   test('that a Release Review email is not sent when disabled in config', async () => {

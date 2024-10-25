@@ -12,7 +12,16 @@ type EntryAccessInputProps = {
   onUpdate: (list: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
   entryRoles: Role[]
-}
+} & (
+  | {
+      isReadOnly: boolean
+      requiredRolesText: string
+    }
+  | {
+      isReadOnly?: never
+      requiredRolesText?: never
+    }
+)
 
 export default function EntryAccessInput({ value, onUpdate, entryKind, entryRoles }: EntryAccessInputProps) {
   const [open, setOpen] = useState(false)

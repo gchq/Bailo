@@ -71,6 +71,13 @@ spec:
                   name: {{ include "bailo.fullname" . }}-apm
                   key: auth-token
             {{- end }}
+            {{- if .Values.inference.enabled }}
+            - name: INFERENCING_WRITE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "bailo.fullname" . }}-inference
+                  key: auth-token
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.backendPort }}
@@ -86,7 +93,7 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 20
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.resources.backend | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /app/config/production.cjs

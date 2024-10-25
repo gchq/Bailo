@@ -4,6 +4,8 @@ import { EntryCardInterface, EntryCardRevisionInterface } from 'types/types'
 import { handleAxiosError } from 'utils/axios'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
+const emptyModelCardRevisionsList = []
+
 export async function postFromSchema(modelId: string, schemaId: string) {
   try {
     const response = await axios({
@@ -16,6 +18,14 @@ export async function postFromSchema(modelId: string, schemaId: string) {
   } catch (error) {
     return handleAxiosError(error)
   }
+}
+
+export async function postFromTemplate(modelId: string, templateId: string) {
+  return fetch(`/api/v2/model/${modelId}/setup/from-template`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ templateId }),
+  })
 }
 
 export async function putModelCard(modelId: string, metadata: unknown) {
@@ -33,7 +43,7 @@ export async function putModelCard(modelId: string, metadata: unknown) {
 }
 
 export function useGetEntryCard(entryId?: string, entryCardVersion?: number) {
-  const { data, error } = useSWR<
+  const { data, isLoading, error } = useSWR<
     {
       modelCard: EntryCardInterface
     },
@@ -42,13 +52,13 @@ export function useGetEntryCard(entryId?: string, entryCardVersion?: number) {
 
   return {
     entryCard: data ? data.modelCard : undefined,
-    isEntryCardLoading: !error && !data,
+    isEntryCardLoading: isLoading,
     isEntryCardError: error,
   }
 }
 
 export function useGetModelCardRevisions(modelId: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       modelCardRevisions: EntryCardRevisionInterface[]
     },
@@ -57,8 +67,8 @@ export function useGetModelCardRevisions(modelId: string) {
 
   return {
     mutateModelCardRevisions: mutate,
-    modelCardRevisions: data ? data.modelCardRevisions : [],
-    isModelCardRevisionsLoading: !error && !data,
+    modelCardRevisions: data ? data.modelCardRevisions : emptyModelCardRevisionsList,
+    isModelCardRevisionsLoading: isLoading,
     isModelCardRevisionsError: error,
   }
 }

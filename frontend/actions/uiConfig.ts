@@ -4,7 +4,7 @@ import { UiConfig } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetUiConfig() {
-  const { data, error, mutate } = useSWRImmutable<
+  const { data, isLoading, error, mutate } = useSWRImmutable<
     {
       uiConfig: UiConfig
     },
@@ -14,7 +14,7 @@ export function useGetUiConfig() {
   return {
     mutateUiConfig: mutate,
     uiConfig: data?.uiConfig,
-    isUiConfigLoading: !error && !data,
+    isUiConfigLoading: isLoading,
     isUiConfigError: error,
   }
 }

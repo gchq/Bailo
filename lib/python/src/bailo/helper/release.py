@@ -6,7 +6,6 @@ import shutil
 from io import BytesIO
 from typing import Any
 import logging
-import warnings
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
@@ -100,7 +99,11 @@ class Release:
             minor,
             draft,
         )
-        logger.info(f"Release %s successfully created on server for model with ID %s.", str(version), model_id)
+        logger.info(
+            f"Release %s successfully created on server for model with ID %s.",
+            str(version),
+            model_id,
+        )
 
         return cls(
             client,
@@ -131,7 +134,11 @@ class Release:
         minor = res["minor"]
         draft = res["draft"]
 
-        logger.info(f"Release %s of model ID %s successfully retrieved from server.", str(version), model_id)
+        logger.info(
+            f"Release %s of model ID %s successfully retrieved from server.",
+            str(version),
+            model_id,
+        )
 
         return cls(
             client,
@@ -155,7 +162,12 @@ class Release:
         :return: A JSON response object
         """
         res = self.client.get_download_by_filename(self.model_id, str(self.version), filename)
-        logger.info(f"Downloading file %s from version %s of %s...", filename, str(self.version), self.model_id)
+        logger.info(
+            f"Downloading file %s from version %s of %s...",
+            filename,
+            str(self.version),
+            self.model_id,
+        )
 
         if write:
             if path is None:
@@ -183,12 +195,20 @@ class Release:
             logger.info(f"File written to %s", path)
 
         logger.info(
-            f"Downloading of file %s from version %s of %s completed.", filename, str(self.version), self.model_id
+            f"Downloading of file %s from version %s of %s completed.",
+            filename,
+            str(self.version),
+            self.model_id,
         )
 
         return res
 
-    def download_all(self, path: str = os.getcwd(), include: list | str = None, exclude: list | str = None):
+    def download_all(
+        self,
+        path: str = os.getcwd(),
+        include: list | str = "",
+        exclude: list | str = "",
+    ):
         """Writes all files to disk given a local directory.
 
         :param include: List or string of fnmatch statements for file names to include, defaults to None
@@ -228,30 +248,45 @@ class Release:
             file_path = os.path.join(path, file)
             self.download(filename=file, path=file_path)
 
-    def upload(self, path: str, data: BytesIO | None = None) -> str:
+    def upload(self, path: str, data: BytesIO | None = None) -> str:  # type: ignore
         """Upload a file to the release.
 
         :param path: The path, or name of file or directory to be uploaded
-        :param data: A BytesIO object if not loading from disk
+        :param data: A BytesIO object if not loading from disk, defaults to None
 
         :return: The unique file ID of the file uploaded
         ..note:: If path provided is a directory, it will be uploaded as a zip
         """
-        logger.info(f"Uploading file(s) to version %s of %s...", str(self.version), self.model_id)
-        name = os.path.split(path)[-1]
+        logger.info(
+            f"Uploading file(s) to version %s of %s...",
+            str(self.version),
+            self.model_id,
+        )
 
+        to_close = False
+        # If no datastream object provided
+        name = os.path.split(path)[-1]
         if data is None:
-            if is_zip := os.path.isdir(path):
-                logger.info(f"Given path (%s) is a directory. This will be converted to a zip file for upload.", path)
+            # If we havent passed in a file object, we must create one from the path.
+            # Check if file exists, if it does the zip required
+            zip_required = not os.path.isfile(path)
+
+            if zip_required:
+                logger.info(
+                    f"Given path (%s) is a directory. This will be converted to a zip file for upload.",
+                    path,
+                )
                 shutil.make_archive(name, "zip", path)
                 path = f"{name}.zip"
                 name = path
 
-            data = open(path, "rb")
+            data: BytesIO = open(path, "rb")  # type: ignore
+            to_close = True
 
-            if is_zip:
+            if zip_required:
                 os.remove(path)
 
+        # cache the current file position then move to the end and get the size before moving it back.
         old_file_position = data.tell()
         data.seek(0, os.SEEK_END)
         size = data.tell()
@@ -263,16 +298,27 @@ class Release:
             colour = "blue"
 
         with tqdm(
-            total=size, unit="B", unit_scale=True, unit_divisor=BLOCK_SIZE, postfix=f"uploading {name}", colour=colour
+            total=size,
+            unit="B",
+            unit_scale=True,
+            unit_divisor=BLOCK_SIZE,
+            postfix=f"uploading {name}",
+            colour=colour,
         ) as t:
-            wrapped_buffer = CallbackIOWrapper(t.update, data, "read")
-            res = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()
+            wrapped_buffer = CallbackIOWrapper(t.update, data, "read")  # type: ignore
+            res: dict[str, Any] = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()
 
         self.files.append(res["file"]["id"])
         self.update()
-        if not isinstance(data, BytesIO):
+        if to_close:
             data.close()
-        logger.info(f"Upload of file %s to version %s of %s complete.", name, str(self.version), self.model_id)
+        self.isUploaded = True
+        logger.info(
+            f"Upload of file %s to version %s of %s complete.",
+            name,
+            str(self.version),
+            self.model_id,
+        )
 
         return res["file"]["id"]
 

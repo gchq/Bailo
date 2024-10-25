@@ -2,7 +2,7 @@ import { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import { AnyZodObject, z } from 'zod'
 
 import { Decision, ResponseKind } from '../models/Response.js'
-import { TokenActions, TokenScope } from '../models/Token.js'
+import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 
 export const registry = new OpenAPIRegistry()
@@ -143,6 +143,7 @@ export const responseInterfaceSchema = z.object({
   role: z.string().optional().openapi({ example: 'mtr' }),
   decision: z.nativeEnum(Decision).optional().openapi({ example: Decision.Approve }),
   comment: z.string().optional().openapi({ example: 'Looks good!' }),
+  commentEditedAt: z.string().optional().openapi({ example: new Date().toISOString() }),
 
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
@@ -227,12 +228,44 @@ export const inferenceInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+export const permissionDetailSchema = z.discriminatedUnion('hasPermission', [
+  z.object({
+    hasPermission: z.literal(true),
+  }),
+  z.object({
+    hasPermission: z.literal(false),
+    info: z.string(),
+  }),
+])
+
+export const entryUserPermissionsSchema = z.object({
+  editEntry: permissionDetailSchema,
+  editEntryCard: permissionDetailSchema,
+
+  createRelease: permissionDetailSchema,
+  editRelease: permissionDetailSchema,
+  deleteRelease: permissionDetailSchema,
+
+  pushModelImage: permissionDetailSchema,
+
+  createInferenceService: permissionDetailSchema,
+  editInferenceService: permissionDetailSchema,
+  deleteInferenceService: permissionDetailSchema,
+
+  exportMirroredModel: permissionDetailSchema,
+})
+
+export const accessRequestUserPermissionsSchema = z.object({
+  editAccessRequest: permissionDetailSchema,
+  deleteAccessRequest: permissionDetailSchema,
+})
+
 export const userTokenSchema = z.object({
   description: z.string().openapi({ example: 'user token' }),
 
   scope: z.nativeEnum(TokenScope).openapi({ example: 'models' }),
   modelIds: z.array(z.string()).openapi({ example: ['yozlo-v4-abcdef'] }),
-  actions: z.array(z.nativeEnum(TokenActions)).openapi({ example: ['image:read', 'file:read'] }),
+  actions: z.array(z.string()).openapi({ example: ['image:read', 'file:read'] }),
 
   accessKey: z.string().openapi({ example: 'bailo-iot4hj3890tqaji' }),
   secretKey: z.string().openapi({ example: '987895347u89fj389agre' }),

@@ -1,7 +1,10 @@
+import qs from 'querystring'
 import useSWR from 'swr'
 
 import { SchemaInterface, SchemaKindKeys } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
+
+const emptySchemaList = []
 
 export interface PostSchemaParams {
   id: string
@@ -11,24 +14,29 @@ export interface PostSchemaParams {
   jsonSchema: any
 }
 
-export function useGetSchemas(kind?: SchemaKindKeys) {
-  const { data, error, mutate } = useSWR<
+export function useGetSchemas(kind: SchemaKindKeys, hidden?: boolean) {
+  const queryParams = {
+    kind,
+    ...(hidden != undefined && { hidden }),
+  }
+
+  const { data, isLoading, error, mutate } = useSWR<
     {
       schemas: SchemaInterface[]
     },
     ErrorInfo
-  >(kind ? `/api/v2/schemas?kind=${kind}` : '/api/v2/schemas/', fetcher)
+  >(`/api/v2/schemas?${qs.stringify(queryParams)}`, fetcher)
 
   return {
     mutateSchemas: mutate,
-    schemas: data ? data.schemas : [],
-    isSchemasLoading: !error && !data,
+    schemas: data ? data.schemas : emptySchemaList,
+    isSchemasLoading: isLoading,
     isSchemasError: error,
   }
 }
 
 export function useGetSchema(id: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       schema: SchemaInterface
     },
@@ -38,7 +46,7 @@ export function useGetSchema(id: string) {
   return {
     mutateSchema: mutate,
     schema: data ? data.schema : undefined,
-    isSchemaLoading: !error && !data,
+    isSchemaLoading: isLoading,
     isSchemaError: error,
   }
 }

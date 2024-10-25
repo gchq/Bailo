@@ -22,7 +22,7 @@ export default function ReviewItem({ review }: ReviewItemProps) {
     router.push(
       `/model/${review.model.id}/${
         review.kind === 'release' ? `release/${review.semver}` : `access-request/${review.accessRequestId}`
-      }/review`,
+      }/review?role=${review.role}`,
     )
   }
 

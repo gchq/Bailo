@@ -19,7 +19,7 @@ export type CreateWebhookParams = Pick<
   'name' | 'modelId' | 'uri' | 'token' | 'insecureSSL' | 'events' | 'active'
 >
 export async function createWebhook(user: UserInterface, webhookParams: CreateWebhookParams) {
-  //Check model exists and user has the permisson to update it
+  // Check model exists and user has the permission to update it
   const model = await getModelById(user, webhookParams.modelId)
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
@@ -37,7 +37,7 @@ export async function createWebhook(user: UserInterface, webhookParams: CreateWe
 }
 
 export async function updateWebhook(user: UserInterface, webhookId: string, webhookParams: CreateWebhookParams) {
-  //Check model exists and user has the permisson to update it
+  // Check model exists and user has the permission to update it
   const model = await getModelById(user, webhookParams.modelId)
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {

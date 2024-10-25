@@ -1,6 +1,18 @@
 import { Schema } from '@mui/icons-material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { Box, Button, Card, Container, Grid, Stack, Typography } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Container,
+  Grid,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
 import _ from 'lodash-es'
 import { useRouter } from 'next/router'
@@ -16,7 +28,7 @@ import { SchemaInterface, SchemaKind } from 'types/types'
 export default function AccessRequestSchema() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.ACCESS_REQUEST)
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(SchemaKind.ACCESS_REQUEST, false)
 
   const [loading, setLoading] = useState(false)
 
@@ -30,6 +42,13 @@ export default function AccessRequestSchema() {
     },
     [modelId, router],
   )
+
+  const accordionStyling = {
+    '&:before': {
+      display: 'none',
+    },
+    width: '100%',
+  } as const
 
   const activeSchemaButtons = useMemo(
     () =>
@@ -76,7 +95,7 @@ export default function AccessRequestSchema() {
       {isSchemasLoading && <Loading />}
       {schemas && !isSchemasLoading && (
         <Container maxWidth='md'>
-          <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
+          <Paper sx={{ mx: 'auto', my: 4, p: 4 }}>
             <Link href={`/model/${modelId}`}>
               <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />}>
                 Back to model
@@ -93,22 +112,34 @@ export default function AccessRequestSchema() {
               </Typography>
             </Stack>
             <Stack sx={{ mt: 2 }} spacing={2} alignItems='center'>
-              <Typography color='primary' component='h2' variant='h6'>
-                Active Schemas
-              </Typography>
-              <Box sx={{ m: 2 }}>
-                <Grid container spacing={2} justifyContent='center'>
-                  {modelId && activeSchemaButtons}
-                </Grid>
-              </Box>
-              <Typography color='primary' component='h2' variant='h6'>
-                Inactive Schemas
-              </Typography>
-              <Grid container spacing={2} justifyContent='center'>
-                {modelId && inactiveSchemaButtons}
-              </Grid>
+              <Accordion defaultExpanded sx={accordionStyling}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h2'>
+                    Active Schemas
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ m: 2 }}>
+                    <Grid container spacing={2} justifyContent='center'>
+                      {modelId && activeSchemaButtons}
+                    </Grid>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+              <Accordion sx={accordionStyling}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h2'>
+                    Inactive Schemas
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container spacing={2} justifyContent='center'>
+                    {modelId && inactiveSchemaButtons}
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
             </Stack>
-          </Card>
+          </Paper>
         </Container>
       )}
     </>

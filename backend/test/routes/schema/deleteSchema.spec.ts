@@ -36,6 +36,6 @@ describe('routes > schema > deleteSchema', async () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onDeleteSchema).toBeCalled()
-    expect(audit.onDeleteSchema.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onDeleteSchema.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

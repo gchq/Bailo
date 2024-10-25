@@ -34,6 +34,13 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
 
   const isFormValid = useMemo(() => team && name && description, [team, name, description])
 
+  const saveButtonTooltip = useMemo(() => {
+    if (!isFormValid) {
+      return 'Please make sure all required fields are filled out'
+    }
+    return ''
+  }, [isFormValid])
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setErrorMessage('')
@@ -129,13 +136,15 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
           </RadioGroup>
         </>
         <Divider />
-        <Tooltip title={!isFormValid ? 'Please make sure all required fields are filled out' : ''}>
-          <span>
-            <LoadingButton variant='contained' loading={isLoading} disabled={!isFormValid} type='submit'>
-              Save
-            </LoadingButton>
-          </span>
-        </Tooltip>
+        <div>
+          <Tooltip title={saveButtonTooltip}>
+            <span>
+              <LoadingButton variant='contained' loading={isLoading} disabled={!isFormValid} type='submit'>
+                Save
+              </LoadingButton>
+            </span>
+          </Tooltip>
+        </div>
         <MessageAlert message={errorMessage} severity='error' />
       </Stack>
     </Box>

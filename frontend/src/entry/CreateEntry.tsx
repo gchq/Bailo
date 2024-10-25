@@ -1,4 +1,4 @@
-import { ArrowBack, FileUpload, Lock, LockOpen } from '@mui/icons-material'
+import { ArrowBack, FileUpload, FolderCopy, Gavel, Lock, LockOpen } from '@mui/icons-material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import LoadingButton from '@mui/lab/LoadingButton'
 import {
@@ -7,12 +7,13 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Card,
   Divider,
   FormControlLabel,
+  Paper,
   Radio,
   RadioGroup,
   Stack,
+  Switch,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -24,10 +25,13 @@ import Loading from 'src/common/Loading'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
+import SourceModelInput from 'src/entry/SourceModelnput'
 import MessageAlert from 'src/MessageAlert'
 import TeamSelect from 'src/TeamSelect'
 import {
   CollaboratorEntry,
+  CreateEntryKind,
+  CreateEntryKindKeys,
   EntityKind,
   EntryForm,
   EntryKind,
@@ -40,26 +44,37 @@ import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
 
 type CreateEntryProps = {
-  kind: EntryKindKeys
+  createEntryKind: CreateEntryKindKeys
   onBackClick: () => void
 }
 
-export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
+export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntryProps) {
   const router = useRouter()
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const [team, setTeam] = useState<TeamInterface | undefined>()
   const [name, setName] = useState('')
+  const [sourceModelId, setSourceModelId] = useState('')
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
   )
+  const [ungovernedAccess, setungovernedAccess] = useState(false)
+  const [allowTemplating, setAllowTemplating] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const isFormValid = useMemo(() => name && description, [name, description])
+  const entryKind: EntryKindKeys = useMemo(
+    () => (createEntryKind === CreateEntryKind.MIRRORED_MODEL ? EntryKind.MODEL : createEntryKind),
+    [createEntryKind],
+  )
+
+  const isFormValid = useMemo(
+    () => name && description && (sourceModelId || createEntryKind !== CreateEntryKind.MIRRORED_MODEL),
+    [name, description, createEntryKind, sourceModelId],
+  )
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -69,10 +84,17 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
     const formData: EntryForm = {
       name,
       teamId: team?.id ?? 'Uncategorised',
-      kind,
+      kind: entryKind,
       description,
       visibility,
       collaborators,
+      settings: {
+        ungovernedAccess,
+        allowTemplating,
+        mirror: {
+          sourceModelId,
+        },
+      },
     }
     const response = await postModel(formData)
 
@@ -81,37 +103,65 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
       setLoading(false)
     } else {
       const data = await response.json()
-      router.push(`/${kind}/${data.model.id}`)
+      router.push(`/${entryKind}/${data.model.id}`)
     }
   }
 
-  const privateLabel = () => {
+  const privateLabel = useMemo(() => {
     return (
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <Lock />
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Private</Typography>
           <Typography variant='caption'>
-            {`Only named individuals will be able to view this ${EntryKindLabel[kind]}`}
+            {`Only named individuals will be able to view this ${EntryKindLabel[createEntryKind]}`}
           </Typography>
         </Stack>
       </Stack>
     )
-  }
+  }, [createEntryKind])
 
-  const publicLabel = () => {
+  const publicLabel = useMemo(() => {
     return (
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <LockOpen />
         <Stack sx={{ my: 1 }}>
           <Typography fontWeight='bold'>Public</Typography>
           <Typography variant='caption'>
-            {`Any authorised user will be able to see this ${EntryKindLabel[kind]}`}
+            {`Any authorised user will be able to see this ${EntryKindLabel[createEntryKind]}`}
           </Typography>
         </Stack>
       </Stack>
     )
-  }
+  }, [createEntryKind])
+
+  const allowTemplatingLabel = useMemo(() => {
+    return (
+      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+        <FolderCopy />
+        <Stack sx={{ my: 1 }}>
+          <Typography fontWeight='bold'>Templating</Typography>
+          <Typography variant='caption'>
+            {`Allow this to be used as a template for another ${EntryKindLabel[createEntryKind]}`}
+          </Typography>
+        </Stack>
+      </Stack>
+    )
+  }, [createEntryKind])
+
+  const ungovernedAccessLabel = useMemo(() => {
+    return (
+      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+        <Gavel />
+        <Stack sx={{ my: 1 }}>
+          <Typography fontWeight='bold'>Ungoverned Access Requests</Typography>
+          <Typography variant='caption'>
+            {`Allow users to request access without the need for authorisation from ${EntryKindLabel[createEntryKind]} owners`}
+          </Typography>
+        </Stack>
+      </Stack>
+    )
+  }, [createEntryKind])
 
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
@@ -120,17 +170,17 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
   return (
     <>
       {isCurrentUserLoading && <Loading />}
-      <Card sx={{ p: 4, mb: 4 }}>
+      <Paper sx={{ p: 4, mb: 4 }}>
         <Stack spacing={1}>
           <Button sx={{ width: 'fit-content' }} startIcon={<ArrowBack />} onClick={() => onBackClick()}>
             Back
           </Button>
           <Stack spacing={2} alignItems='center' justifyContent='center'>
             <Typography variant='h6' component='h1' color='primary'>
-              {`Create ${toTitleCase(kind)}`}
+              {`Create ${toTitleCase(createEntryKind)}`}
             </Typography>
             <FileUpload color='primary' fontSize='large' />
-            {kind === EntryKind.MODEL && (
+            {createEntryKind === CreateEntryKind.MODEL && (
               <Typography>
                 A model repository contains all files, history and information related to a model.
               </Typography>
@@ -145,7 +195,10 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
               </Typography>
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
                 <TeamSelect value={team} onChange={(value) => setTeam(value)} />
-                <EntryNameInput autoFocus value={name} kind={kind} onChange={(value) => setName(value)} />
+                <EntryNameInput autoFocus value={name} kind={entryKind} onChange={(value) => setName(value)} />
+                {createEntryKind === CreateEntryKind.MIRRORED_MODEL && (
+                  <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
+                )}
               </Stack>
               <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
             </>
@@ -162,13 +215,13 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
                 <FormControlLabel
                   value='public'
                   control={<Radio />}
-                  label={publicLabel()}
+                  label={publicLabel}
                   data-test='publicButtonSelector'
                 />
                 <FormControlLabel
                   value='private'
                   control={<Radio />}
-                  label={privateLabel()}
+                  label={privateLabel}
                   data-test='privateButtonSelector'
                 />
               </RadioGroup>
@@ -196,7 +249,7 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
                   <EntryAccessInput
                     value={collaborators}
                     onUpdate={(val) => setCollaborators(val)}
-                    entryKind={EntryKind.MODEL}
+                    entryKind={entryKind}
                     entryRoles={[
                       { id: 'owner', name: 'Owner' },
                       { id: 'contributor', name: 'Contributor' },
@@ -204,6 +257,31 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
                     ]}
                   />
                 </Box>
+                <Stack spacing={2}>
+                  <Typography variant='h6' component='h2'>
+                    Additional settings
+                  </Typography>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(e) => setungovernedAccess(e.target.checked)}
+                        checked={ungovernedAccess}
+                        size='small'
+                      />
+                    }
+                    label={ungovernedAccessLabel}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(event) => setAllowTemplating(event.target.checked)}
+                        checked={allowTemplating}
+                        size='small'
+                      />
+                    }
+                    label={allowTemplatingLabel}
+                  />
+                </Stack>
               </AccordionDetails>
             </Accordion>
             <Box sx={{ textAlign: 'right' }}>
@@ -216,7 +294,7 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
                     data-test='createEntryButton'
                     loading={loading}
                   >
-                    {`Create ${EntryKindLabel[kind]}`}
+                    {`Create ${EntryKindLabel[createEntryKind]}`}
                   </LoadingButton>
                 </span>
               </Tooltip>
@@ -224,7 +302,7 @@ export default function CreateEntry({ kind, onBackClick }: CreateEntryProps) {
             </Box>
           </Stack>
         </Box>
-      </Card>
+      </Paper>
     </>
   )
 }

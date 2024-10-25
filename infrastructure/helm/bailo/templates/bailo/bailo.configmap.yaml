@@ -62,6 +62,14 @@ data:
         insecure: {{ .Values.registry.insecure }},
       },
 
+      avScanning: {
+        enabled: {{ .Values.clamav.enabled }},
+        clamdscan: {
+          host: '{{ include "bailo.fullname" . }}-clamav',
+          port: {{ .Values.clamav.port }},
+        },
+      },
+
       smtp: {
         // Enable / disable all email sending
         enabled: true,
@@ -135,6 +143,13 @@ data:
           textColor: '{{ .Values.config.ui.banner.textColor}}'
         },
 
+        // Show announcement banner at the bottom of the screen
+        announcement: {
+          enabled: {{ .Values.config.ui.announcement.enabled }},
+          text: '{{ .Values.config.ui.announcement.text }}',
+          startTimestamp: '{{ .Values.config.ui.announcement.startTimestamp }}'
+        },
+
         // Contact details for the support team
         issues: {
           label: 'Bailo Support Team',
@@ -153,7 +168,17 @@ data:
             host: '{{ .Values.inference.host}}',
           },
           gpus: '{{ .Values.inference.gpus }}',
+          authorizationTokenName: '{{ .Values.inference.authorizationTokenName }}'
         },
+
+        modelMirror: {
+          enabled: {{ .Values.modelMirror.enabled }},
+          disclaimer: '{{ .Values.modelMirror.disclaimer }}'
+        },
+
+        "avScanning": {
+          enabled: {{ .Values.clamav.enabled }},
+        }
       },
 
       connectors: {
@@ -193,7 +218,6 @@ data:
       },
 
       modelMirror: {
-        enabled: {{ .Values.modelMirror.enabled }},
         export: {
           bucket: '{{ .Values.modelMirror.export.bucket }}',
           kmsSignature: {
@@ -220,6 +244,9 @@ data:
       },
       instrumentation: {
         authenticationToken: 'OTEL_EXPORTER_TOKEN',
+      },
+      inference: {
+        authorisationToken: 'INFERENCING_WRITE_TOKEN'
       },
       modelMirror: {
         export: {

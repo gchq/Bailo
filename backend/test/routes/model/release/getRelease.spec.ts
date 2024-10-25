@@ -42,6 +42,6 @@ describe('routes > release > getRelease', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewRelease).toBeCalled()
-    expect(audit.onViewRelease.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onViewRelease.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })

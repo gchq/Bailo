@@ -1,21 +1,10 @@
 import ClearIcon from '@mui/icons-material/Clear'
-import GroupsIcon from '@mui/icons-material/Groups'
-import PersonIcon from '@mui/icons-material/Person'
-import {
-  Autocomplete,
-  Chip,
-  IconButton,
-  Stack,
-  TableCell,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
 import _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
-import UserDisplay from 'src/common/UserDisplay'
-import { CollaboratorEntry, EntityKind, Role } from 'types/types'
+import EntityIcon from 'src/entry/EntityIcon'
+import EntityNameDisplay from 'src/entry/EntityNameDisplay'
+import { CollaboratorEntry, Role } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntityItemProps = {
@@ -51,15 +40,15 @@ export default function EntityItem({ entity, accessList, onAccessListChange, ent
     <TableRow>
       <TableCell>
         <Stack direction='row' alignItems='center' spacing={1}>
-          <EntityIcon entity={entity} />
-          <EntityNameDisplay entity={entity} />
+          <EntityIcon entryCollaborator={entity} />
+          <EntityNameDisplay entryCollaborator={entity} />
         </Stack>
       </TableCell>
       <TableCell>
         {entryRoles.length > 0 && (
           <Autocomplete
-            size='small'
             multiple
+            size='small'
             aria-label={`role selector input for entity ${entity.entity}`}
             value={entity.roles}
             data-test='accessListAutocomplete'
@@ -76,10 +65,10 @@ export default function EntityItem({ entity, accessList, onAccessListChange, ent
         )}
       </TableCell>
       <TableCell align='right'>
-        <Tooltip title='Remove user' arrow>
+        <Tooltip title='Remove user'>
           <IconButton
-            onClick={removeEntity}
             aria-label={`Remove user ${entity.entity} from ${toSentenceCase(entryKind)} access list`}
+            onClick={removeEntity}
             data-test='accessListRemoveUser'
           >
             <ClearIcon color='secondary' fontSize='inherit' />
@@ -87,27 +76,5 @@ export default function EntityItem({ entity, accessList, onAccessListChange, ent
         </Tooltip>
       </TableCell>
     </TableRow>
-  )
-}
-
-type EntityIconProps = {
-  entity: CollaboratorEntry
-}
-
-function EntityIcon({ entity }: EntityIconProps) {
-  const isUser = useMemo(() => entity.entity.startsWith('user:'), [entity])
-  return isUser ? <PersonIcon color='primary' /> : <GroupsIcon color='secondary' />
-}
-
-type EntityNameDisplayProps = {
-  entity: CollaboratorEntry
-}
-
-function EntityNameDisplay({ entity }: EntityNameDisplayProps) {
-  const [entityKind, entityName] = useMemo(() => entity.entity.split(':'), [entity])
-  return entityKind === EntityKind.USER || entityKind === EntityKind.GROUP ? (
-    <UserDisplay dn={entityName} />
-  ) : (
-    <Typography fontWeight='bold'>{entityName}</Typography>
   )
 }

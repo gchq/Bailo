@@ -5,7 +5,6 @@ export interface BailoError extends Error {
   id?: string
   documentationUrl?: string
 }
-
 export enum EntityKind {
   USER = 'user',
   GROUP = 'group',
@@ -43,12 +42,21 @@ export interface UiConfig {
     connection: {
       host: string
     }
-
+    authorizationTokenName: string
     gpus: { [key: string]: string }
   }
+
   modelMirror: {
     enabled: boolean
     disclaimer: string
+  }
+  announcement: {
+    enabled: boolean
+    text: string
+    startTimestamp: string
+  }
+  avScanning: {
+    enabled: boolean
   }
 }
 
@@ -65,9 +73,24 @@ export interface FileInterface {
 
   complete: boolean
 
+  // Older files may not have AV run against them
+  avScan?: {
+    state: ScanStateKeys
+    isInfected?: boolean
+    viruses?: Array<string>
+  }
+
   createdAt: Date
   updatedAt: Date
 }
+
+export const ScanState = {
+  NotScanned: 'notScanned',
+  InProgress: 'inProgress',
+  Complete: 'complete',
+  Error: 'error',
+} as const
+export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
 
 export const ResponseKind = {
   Review: 'review',
@@ -76,6 +99,7 @@ export const ResponseKind = {
 export type ResponseKindKeys = (typeof ResponseKind)[keyof typeof ResponseKind]
 
 export interface ResponseInterface {
+  _id: string
   entity: string
   kind: ResponseKindKeys
   parentId: string
@@ -83,10 +107,24 @@ export interface ResponseInterface {
   decision?: DecisionKeys
   comment?: string
   role?: string
+  reactions: ResponseReaction[]
+  commentEditedAt?: string
 
   createdAt: string
   updatedAt: string
 }
+
+export interface ResponseReaction {
+  kind: ReactionKindKeys
+  users: string[]
+}
+
+export const ReactionKind = {
+  LIKE: 'like',
+  DISLIKE: 'dislike',
+  CELEBRATE: 'celebrate',
+} as const
+export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 
 export type ReleaseInterface = {
   _id: string
@@ -193,6 +231,11 @@ export interface EntityObject {
   id: string
 }
 
+export interface TokenAction {
+  id: string
+  description: string
+}
+
 export const TokenScope = {
   All: 'all',
   Models: 'models',
@@ -206,31 +249,6 @@ export const TokenActionKind = {
 }
 
 export type TokenActionKindKeys = (typeof TokenActionKind)[keyof typeof TokenActionKind]
-
-export const TokenAction = {
-  MODEL_READ: 'model:read',
-  MODEL_WRITE: 'model:write',
-
-  RELEASE_READ: 'release:read',
-  RELEASE_WRITE: 'release:write',
-
-  ACCESS_REQUEST_READ: 'access_request:read',
-  ACCESS_REQUEST_WRITE: 'access_request:write',
-
-  FILE_READ: 'file:read',
-  FILE_WRITE: 'file:write',
-
-  IMAGE_READ: 'image:read',
-  IMAGE_WRITE: 'image:write',
-
-  SCHEMA_READ: 'schema:read',
-  SCHEMA_WRITE: 'schema:write',
-
-  TOKEN_READ: 'token:read',
-  TOKEN_WRITE: 'token:write',
-} as const
-
-export type TokenActionKeys = (typeof TokenAction)[keyof typeof TokenAction]
 
 export const TokenCategory = {
   PERSONAL_ACCESS: 'personal access',
@@ -248,7 +266,7 @@ export interface TokenInterface {
   description: string
   scope: TokenScopeKeys
   modelIds: Array<string>
-  actions: Array<TokenActionKeys>
+  actions: Array<string>
   accessKey: string
   secretKey: string
   deleted: boolean
@@ -361,6 +379,7 @@ export interface CollaboratorEntry {
 export const EntryKindLabel = {
   model: 'model',
   'data-card': 'data card',
+  'mirrored-model': 'mirrored model',
 } as const
 export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindLabel]
 
@@ -373,6 +392,12 @@ export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 export const isEntryKind = (value: unknown): value is EntryKindKeys => {
   return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD)
 }
+
+export const CreateEntryKind = {
+  ...EntryKind,
+  MIRRORED_MODEL: 'mirrored-model',
+} as const
+export type CreateEntryKindKeys = (typeof CreateEntryKind)[keyof typeof CreateEntryKind]
 
 export interface EntryInterface {
   id: string
@@ -402,9 +427,17 @@ export interface EntryForm {
   description: string
   visibility: EntryVisibilityKeys
   collaborators?: CollaboratorEntry[]
+  settings?: {
+    ungovernedAccess: boolean
+    allowTemplating: boolean
+    mirror?: {
+      sourceModelId?: string
+      destinationModelId?: string
+    }
+  }
 }
 
-export type UpdateEntryForm = Omit<EntryForm, 'kind'>
+export type UpdateEntryForm = Omit<EntryForm, 'kind' | 'collaborators'>
 
 export interface AccessRequestMetadata {
   overview: {

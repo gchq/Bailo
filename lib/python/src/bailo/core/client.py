@@ -35,15 +35,16 @@ class Client:
         :param visibility: Enum to define model visibility (e.g public or private)
         :return: JSON response object
         """
+        _visibility: str = "public"
         if visibility is not None:
-            visibility = str(visibility)
+            _visibility = str(visibility)
 
         filtered_json = filter_none(
             {
                 "name": name,
                 "kind": kind,
                 "description": description,
-                "visibility": visibility,
+                "visibility": _visibility,
                 "teamId": team_id,
             }
         )
@@ -63,8 +64,8 @@ class Client:
         """Find and returns a list of models based on provided search terms.
 
         :param task: Model task (e.g. image classification), defaults to None
-        :param libraries: Model library (e.g. TensorFlow), defaults to []
-        :param filters: Custom filters, defaults to []
+        :param libraries: Model library (e.g. TensorFlow), defaults to None
+        :param filters: Custom filters, defaults to None
         :param search: String to be located in model cards, defaults to ""
         :return: JSON response object
         """
@@ -114,7 +115,14 @@ class Client:
         :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
         :return: JSON response object
         """
-        filtered_json = filter_none({"name": name, "kind": kind, "description": description, "visibility": visibility})
+        filtered_json = filter_none(
+            {
+                "name": name,
+                "kind": kind,
+                "description": description,
+                "visibility": visibility,
+            }
+        )
 
         return self.agent.patch(f"{self.url}/v2/model/{model_id}", json=filtered_json).json()
 
@@ -168,6 +176,17 @@ class Client:
             json={
                 "schemaId": schema_id,
             },
+        ).json()
+
+    def model_card_from_template(self, model_id: str, template_id: str | None):
+        """Create a model card using a given template ID (previously created models, model ID)
+        :param model_id: Unique model ID
+        :param tempate_id Previous model's unique ID to be used as template for new model card
+        :return: JSON response object
+        """
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/setup/from-template",
+            json={"templateId": template_id},
         ).json()
 
     def post_release(
@@ -308,11 +327,15 @@ class Client:
         """
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
-                f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+                f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download",
+                stream=True,
+                timeout=10_000,
             )
         else:
             return self.agent.get(
-                f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+                f"{self.url}/v2/model/{model_id}/file/{file_id}/download",
+                stream=True,
+                timeout=10_000,
             )
 
     def get_download_by_filename(
@@ -336,7 +359,9 @@ class Client:
             )
         else:
             return self.agent.get(
-                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download", stream=True, timeout=10_000
+                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download",
+                stream=True,
+                timeout=10_000,
             )
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
@@ -452,12 +477,12 @@ class Client:
         :param version: Model version, defaults to None
         :return: JSON response object.
         """
-        active = str(active).lower()
+        _active = str(active).lower()
 
         return self.agent.get(
             f"{self.url}/v2/reviews",
             params={
-                "active": active,
+                "active": _active,
                 "modelId": model_id,
                 "semver": version,
             },

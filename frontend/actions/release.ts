@@ -4,8 +4,10 @@ import useSWR from 'swr'
 import { ReleaseInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
+const emptyReleaseList = []
+
 export function useGetReleasesForModelId(modelId?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       releases: ReleaseInterface[]
     },
@@ -14,14 +16,14 @@ export function useGetReleasesForModelId(modelId?: string) {
 
   return {
     mutateReleases: mutate,
-    releases: data ? data.releases : [],
-    isReleasesLoading: !error && !data,
+    releases: data ? data.releases : emptyReleaseList,
+    isReleasesLoading: isLoading,
     isReleasesError: error,
   }
 }
 
 export function useGetRelease(modelId?: string, semver?: string) {
-  const { data, error, mutate } = useSWR<{ release: ReleaseInterface }, ErrorInfo>(
+  const { data, isLoading, error, mutate } = useSWR<{ release: ReleaseInterface }, ErrorInfo>(
     modelId && semver ? `/api/v2/model/${modelId}/release/${semver}` : null,
     fetcher,
   )
@@ -29,7 +31,7 @@ export function useGetRelease(modelId?: string, semver?: string) {
   return {
     mutateRelease: mutate,
     release: data ? data.release : undefined,
-    isReleaseLoading: !error && !data,
+    isReleaseLoading: isLoading,
     isReleaseError: error,
   }
 }

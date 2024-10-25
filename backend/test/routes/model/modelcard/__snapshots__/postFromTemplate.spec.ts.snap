@@ -1,0 +1,40 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > postModel > template > 200 > ok 1`] = `
+{
+  "card": {
+    "_id": "test",
+  },
+}
+`;
+
+exports[`routes > model > postModel > template > 400 > no model template ID provided 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_type",
+          "expected": "string",
+          "message": "Must specify template id within the body",
+          "path": [
+            "body",
+            "templateId",
+          ],
+          "received": "undefined",
+        },
+      ],
+    },
+    "message": "Path: body.templateId - Message: Must specify template id within the body",
+    "name": "Bailo Error",
+  },
+}
+`;
+
+exports[`routes > model > postModel > template > audit > expected call 1`] = `"example"`;
+
+exports[`routes > model > postModel > template > audit > expected call 2`] = `
+{
+  "_id": "test",
+}
+`;

@@ -190,9 +190,9 @@
  ],
  "metadata": {
   "kernelspec": {
-   "display_name": "Python 3",
+   "display_name": ".venv",
    "language": "python",
-   "name": "python"
+   "name": "python3"
   },
   "language_info": {
    "codemirror_mode": {

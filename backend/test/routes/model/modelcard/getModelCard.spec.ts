@@ -35,8 +35,8 @@ describe('routes > model > getModel', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewModelCard).toBeCalled()
-    expect(audit.onViewModelCard.mock.calls.at(0).at(1)).toMatchSnapshot()
-    expect(audit.onViewModelCard.mock.calls.at(0).at(2)).toMatchSnapshot()
+    expect(audit.onViewModelCard.mock.calls.at(0)?.at(1)).toMatchSnapshot()
+    expect(audit.onViewModelCard.mock.calls.at(0)?.at(2)).toMatchSnapshot()
   })
 
   test('version > 200 > ok', async () => {

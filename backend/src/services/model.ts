@@ -2,18 +2,23 @@ import { Validator } from 'jsonschema'
 import _ from 'lodash'
 
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
+import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
-import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ModelCardRevisionModel, {
+  ModelCardRevisionDoc,
+  ModelCardRevisionInterface,
+} from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
+import { EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
-import { BadReq, Forbidden, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
-import { findSchemaById } from './schema.js'
+import { authResponseToUserPermission } from '../utils/permissions.js'
+import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
   if (model.settings.mirror.sourceModelId) {
@@ -108,6 +113,8 @@ export async function searchModels(
   filters: Array<GetModelFiltersKeys>,
   search: string,
   task?: string,
+  allowTemplating?: boolean,
+  schemaId?: string,
 ): Promise<Array<ModelInterface>> {
   const query: any = {}
 
@@ -129,6 +136,14 @@ export async function searchModels(
 
   if (search) {
     query.$text = { $search: search }
+  }
+
+  if (schemaId) {
+    query['card.schemaId'] = { $all: schemaId }
+  }
+
+  if (allowTemplating) {
+    query['settings.allowTemplating'] = true
   }
 
   for (const filter of filters) {
@@ -273,7 +288,7 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const schema = await findSchemaById(model.card.schemaId)
+  const schema = await getSchemaById(model.card.schemaId)
   try {
     new Validator().validate(metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
@@ -311,6 +326,12 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
 
   _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
+
+  // Re-check the authorisation after model has updated
+  const recheckAuth = await authorisation.model(user, model, ModelAction.Update)
+  if (!recheckAuth.success) {
+    throw Forbidden(recheckAuth.info, { userDn: user.dn })
+  }
   await model.save()
 
   return model
@@ -334,8 +355,151 @@ export async function createModelCardFromSchema(
   }
 
   // Ensure schema exists
-  await findSchemaById(schemaId)
+  const schema = await getSchemaById(schemaId)
+  if (schema.hidden) {
+    throw BadReq('Cannot create a new Card using a hidden schema.', { schemaId, kind: schema.kind })
+  }
 
   const revision = await _setModelCard(user, modelId, schemaId, 1, {})
   return revision
+}
+
+export async function createModelCardFromTemplate(
+  user: UserInterface,
+  modelId: string,
+  templateId: string,
+): Promise<ModelCardRevisionDoc> {
+  if (modelId === templateId) {
+    throw BadReq('The model and template ID must be different', { modelId, templateId })
+  }
+  const model = await getModelById(user, modelId)
+  if (model.card?.schemaId) {
+    throw BadReq('This model already has a model card.', { modelId })
+  }
+  checkModelRestriction(model)
+  const template = await getModelById(user, templateId)
+  // Check to make sure user can access the template. We already check for the model auth later on in _setModelCard
+  const templateAuth = await authorisation.model(user, template, ModelAction.View)
+  if (!templateAuth.success) {
+    throw Forbidden(templateAuth.info, { userDn: user.dn, templateId })
+  }
+
+  if (!template.card?.schemaId) {
+    throw BadReq('The template model is missing a model card', { modelId, templateId })
+  }
+  const revision = await _setModelCard(user, modelId, template.card.schemaId, 1, template.card.metadata)
+  return revision
+}
+
+export async function saveImportedModelCard(modelCard: ModelCardRevisionInterface, sourceModelId: string) {
+  const model = await Model.findOne({
+    id: modelCard.modelId,
+  })
+  if (!model) {
+    throw NotFound(`Cannot find model to import model card.`, { modelId: modelCard.modelId })
+  }
+  if (!model.settings.mirror.sourceModelId) {
+    throw InternalError('Cannot import model card to non mirrored model.')
+  }
+  if (model.settings.mirror.sourceModelId !== sourceModelId) {
+    throw InternalError('The source model ID of the mirrored model does not match the model Id of the imported model', {
+      sourceModelId: model.settings.mirror.sourceModelId,
+      importedModelId: sourceModelId,
+    })
+  }
+
+  const schema = await getSchemaById(modelCard.schemaId)
+  try {
+    new Validator().validate(modelCard.metadata, schema.jsonSchema, { throwAll: true, required: true })
+  } catch (error) {
+    if (isValidatorResultError(error)) {
+      throw BadReq('Model metadata could not be validated against the schema.', {
+        schemaId: modelCard.schemaId,
+        validationErrors: error.errors,
+      })
+    }
+    throw error
+  }
+
+  return await ModelCardRevisionModel.findOneAndUpdate(
+    { modelId: modelCard.modelId, version: modelCard.version },
+    modelCard,
+    {
+      upsert: true,
+    },
+  )
+}
+
+export async function setLatestImportedModelCard(modelId: string) {
+  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }, undefined, { sort: { version: -1 } })
+  if (!latestModelCard) {
+    throw NotFound('Cannot find latest model card.', { modelId })
+  }
+
+  const result = await ModelModel.findOneAndUpdate(
+    { id: modelId, 'settings.mirror.sourceModelId': { $exists: true, $ne: '' } },
+    { $set: { card: latestModelCard } },
+  )
+  if (!result) {
+    throw InternalError('Unable to set latest model card of mirrored model.', {
+      modelId,
+      version: latestModelCard.version,
+    })
+  }
+}
+
+export function isModelCardRevision(data: unknown): data is ModelCardRevisionInterface {
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+  // Hard to debug
+  if (
+    !('modelId' in data) ||
+    !('schemaId' in data) ||
+    !('version' in data) ||
+    !('createdBy' in data) ||
+    !('updatedAt' in data) ||
+    !('createdAt' in data)
+  ) {
+    return false
+  }
+  return true
+}
+
+export async function getCurrentUserPermissionsByModel(
+  user: UserInterface,
+  modelId: string,
+): Promise<EntryUserPermissions> {
+  const model = await getModelById(user, modelId)
+
+  const editEntryAuth = await authorisation.model(user, model, ModelAction.Update)
+  const editEntryCardAuth = await authorisation.model(user, model, ModelAction.Write)
+  const createReleaseAuth = await authorisation.release(user, model, ReleaseAction.Create)
+  const editReleaseAuth = await authorisation.release(user, model, ReleaseAction.Update)
+  const deleteReleaseAuth = await authorisation.release(user, model, ReleaseAction.Delete)
+  const pushModelImageAuth = await authorisation.image(user, model, {
+    type: 'repository',
+    name: modelId,
+    actions: ['push'],
+  })
+  // Inferencing uses model authorisation
+  const createInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Create)
+  const editInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Update)
+  const exportMirroredModelAuth = await authorisation.model(user, model, ModelAction.Update)
+
+  return {
+    editEntry: authResponseToUserPermission(editEntryAuth),
+    editEntryCard: authResponseToUserPermission(editEntryCardAuth),
+
+    createRelease: authResponseToUserPermission(createReleaseAuth),
+    editRelease: authResponseToUserPermission(editReleaseAuth),
+    deleteRelease: authResponseToUserPermission(deleteReleaseAuth),
+
+    pushModelImage: authResponseToUserPermission(pushModelImageAuth),
+
+    createInferenceService: authResponseToUserPermission(createInferenceServiceAuth),
+    editInferenceService: authResponseToUserPermission(editInferenceServiceAuth),
+
+    exportMirroredModel: authResponseToUserPermission(exportMirroredModelAuth),
+  }
 }

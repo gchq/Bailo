@@ -48,7 +48,13 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
                   Create from a template
                 </Typography>
                 <Typography>Create a model card using an existing model as a template.</Typography>
-                <Button sx={{ width: '100%' }} variant='contained' disabled>
+                <Button
+                  sx={{ width: '100%' }}
+                  variant='contained'
+                  href={`/${entry.kind}/${entry.id}/template`}
+                  LinkComponent={Link}
+                  disabled={!!entry.settings.mirror?.sourceModelId}
+                >
                   Create
                 </Button>
               </Stack>
@@ -73,6 +79,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
                 variant='contained'
                 sx={{ width: '100%' }}
                 data-test='createSchemaFromScratchButton'
+                disabled={!!entry.settings.mirror?.sourceModelId}
               >
                 Create
               </Button>

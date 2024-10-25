@@ -5,7 +5,7 @@ import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
 import { SchemaDoc } from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
-import { Access, Action } from '../../routes/v1/registryAuth.js'
+import { Access } from '../../routes/v1/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../services/accessRequest.js'
 import { checkAccessRequestsApproved } from '../../services/response.js'
 import { validateTokenForModel, validateTokenForUse } from '../../services/token.js'
@@ -60,8 +60,8 @@ export class BasicAuthorisationConnector {
     return (await this.schemas(user, [schema], action))[0]
   }
 
-  async release(user: UserInterface, model: ModelDoc, release: ReleaseDoc, action: ReleaseActionKeys) {
-    return (await this.releases(user, model, [release], action))[0]
+  async release(user: UserInterface, model: ModelDoc, action: ReleaseActionKeys, release?: ReleaseDoc) {
+    return (await this.releases(user, model, release ? [release] : [], action))[0]
   }
 
   async accessRequest(
@@ -105,9 +105,13 @@ export class BasicAuthorisationConnector {
 
         // Check a user has a role before allowing write actions
         if (
-          [ModelAction.Write, ModelAction.Update].some((a) => a === action) &&
-          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro']))
+          ModelAction.Write === action &&
+          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro', 'contributor']))
         ) {
+          return { id: model.id, success: false, info: 'You do not have permission to update a model card.' }
+        }
+
+        if (ModelAction.Update === action && (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro']))) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
         }
 
@@ -177,10 +181,10 @@ export class BasicAuthorisationConnector {
     // Is this a constrained user token.
     const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
     if (!tokenAuth.success) {
-      return releases.map(() => tokenAuth)
+      return releases.length ? releases.map(() => tokenAuth) : [tokenAuth]
     }
 
-    return new Array(releases.length).fill(await this.model(user, model, actionMap[action]))
+    return new Array(releases.length || 1).fill(await this.model(user, model, actionMap[action]))
   }
 
   async accessRequests(
@@ -242,7 +246,7 @@ export class BasicAuthorisationConnector {
         // If they are not listed on the model, don't let them upload or delete files.
         if (
           ([FileAction.Delete, FileAction.Upload] as FileActionKeys[]).includes(action) &&
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator']))
+          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor']))
         ) {
           return {
             success: false,
@@ -255,7 +259,7 @@ export class BasicAuthorisationConnector {
           ([FileAction.Download] as FileActionKeys[]).includes(action) &&
           !model.settings.ungovernedAccess &&
           !hasApprovedAccessRequest &&
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator', 'consumer']))
+          (await missingRequiredRole(user, model, ['owner', 'contributor', 'msro', 'mtr', 'consumer']))
         ) {
           return {
             success: false,
@@ -313,8 +317,8 @@ export class BasicAuthorisationConnector {
 
         // If they are not listed on the model, don't let them upload or delete images.
         if (
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator'])) &&
-          access.actions.includes(ImageAction.Push as Action)
+          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor'])) &&
+          actions.includes(ImageAction.Push)
         ) {
           return {
             success: false,
@@ -325,8 +329,8 @@ export class BasicAuthorisationConnector {
 
         if (
           !hasAccessRequest &&
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator', 'consumer'])) &&
-          access.actions.includes(ImageAction.Pull as Action) &&
+          (await missingRequiredRole(user, model, ['owner', 'contributor', 'msro', 'mtr', 'consumer'])) &&
+          actions.includes(ImageAction.Pull) &&
           !model.settings.ungovernedAccess
         ) {
           return {

@@ -29,7 +29,7 @@ describe('routes > release > postRelease', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onCreateRelease).toBeCalled()
-    expect(audit.onCreateRelease.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onCreateRelease.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('400 > no semver', async () => {

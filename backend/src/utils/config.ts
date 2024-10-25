@@ -122,11 +122,22 @@ export interface Config {
       connection: {
         host: string
       }
+      authorizationTokenName: string
       gpus: { [key: string]: string }
     }
     modelMirror: {
       enabled: boolean
       disclaimer: string
+    }
+
+    announcement: {
+      enabled: boolean
+      text: string
+      startTimestamp: string
+    }
+
+    avScanning: {
+      enabled: boolean
     }
   }
 
@@ -159,7 +170,6 @@ export interface Config {
   }
 
   avScanning: {
-    enabled: boolean
     clamdscan: {
       host: string
       port: number
@@ -167,7 +177,6 @@ export interface Config {
   }
 
   modelMirror: {
-    enabled: boolean
     export: {
       maxSize: number
       bucket: string
@@ -183,6 +192,10 @@ export interface Config {
         }
       }
     }
+  }
+
+  inference: {
+    authorisationToken: string
   }
 }
 

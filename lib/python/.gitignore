@@ -132,6 +132,5 @@ dmypy.json
 # VS Code
 .vscode/
 
-# MLFlow
-mlartifacts/
-mlruns/
+#resnet
+resnet50_weights.pth

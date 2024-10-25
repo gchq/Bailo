@@ -2,8 +2,10 @@ import useSWR from 'swr'
 import { AccessRequestInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
+const emptyAccessRequestList = []
+
 export function useGetAccessRequestsForModelId(modelId?: string) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       accessRequests: AccessRequestInterface[]
     },
@@ -12,14 +14,14 @@ export function useGetAccessRequestsForModelId(modelId?: string) {
 
   return {
     mutateAccessRequests: mutate,
-    accessRequests: data ? data.accessRequests : [],
-    isAccessRequestsLoading: !error && !data,
+    accessRequests: data ? data.accessRequests : emptyAccessRequestList,
+    isAccessRequestsLoading: isLoading,
     isAccessRequestsError: error,
   }
 }
 
 export function useGetAccessRequest(modelId: string | undefined, accessRequestId: string | undefined) {
-  const { data, error, mutate } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     {
       accessRequest: AccessRequestInterface
     },
@@ -29,7 +31,7 @@ export function useGetAccessRequest(modelId: string | undefined, accessRequestId
   return {
     mutateAccessRequest: mutate,
     accessRequest: data ? data.accessRequest : undefined,
-    isAccessRequestLoading: !error && !data,
+    isAccessRequestLoading: isLoading,
     isAccessRequestError: error,
   }
 }

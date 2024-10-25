@@ -32,7 +32,7 @@ describe('routes > model > patchModel', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onUpdateModel).toBeCalled()
-    expect(audit.onUpdateModel.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onUpdateModel.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('400 > bad visibility', async () => {

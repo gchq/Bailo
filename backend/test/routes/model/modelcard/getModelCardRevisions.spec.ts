@@ -36,7 +36,7 @@ describe('routes > model > modelcard > getModelCardRevisions', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onViewModelCardRevisions).toBeCalled()
-    expect(audit.onViewModelCardRevisions.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onViewModelCardRevisions.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 
   test('cannot find unknown modelId', async () => {

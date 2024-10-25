@@ -249,7 +249,19 @@
     "## Publishing results to Bailo\n",
     "\n",
     "Experiment runs can be published to the model card using the `Experiment.publish()` method, **one at a time**. This is because the intended use is only to publish the most successful run.\n",
-    "Therefore, you must specify the **run_id** to publish, as well as specify the location of the metrics in your schema (in this case *performance.performanceMetrics* as per the schema we defined earlier)."
+    "Therefore, you must specify the **run_id** to publish, or specify an order so the client can select the best result. As well as this, you must specify the location of the metrics in your schema (in this case *performance.performanceMetrics* as per the schema we defined earlier).\n",
+    "\n",
+    "Examples for both scenarios can be seen below."
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Publishing a specific run\n",
+    "\n",
+    "To publish a specific run, you must pass the `run_id` into the method. In this example, use one of the IDs we created in the previous steps."
    ]
   },
   {
@@ -266,7 +278,28 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "If successful, our metrics should now be under the **Performance** tab of your model card on the UI! Additionally, our artifact will have been published as a new release."
+    "### Publishing the best run\n",
+    "\n",
+    "To publish the best run, you must define what the best is for your use case. This can be done using the `select_by` parameter with a string e.g. `accuracy MIN|MAX`. Depending on the requirements, `accuracy` could be any metric you have defined in your experiment.\n",
+    "\n",
+    "In the below example, we will use `accuracy MAX` to publish the experiment run with the highest accuracy."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "experiment_mlflow.publish(mc_loc=\"performance.performanceMetrics\", select_by=\"accuracy MAX\")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If successful, our metrics should now be under the **Performance** tab of your model card on the UI! Additionally, our artifact will have been published as a new release (*this will have been done twice if you ran both the above steps*)."
    ]
   }
  ],

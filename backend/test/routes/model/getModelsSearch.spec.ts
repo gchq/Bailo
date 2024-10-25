@@ -29,6 +29,6 @@ describe('routes > model > getModelsSearch', () => {
 
     expect(res.statusCode).toBe(200)
     expect(audit.onSearchModel).toBeCalled()
-    expect(audit.onSearchModel.mock.calls.at(0).at(1)).toMatchSnapshot()
+    expect(audit.onSearchModel.mock.calls.at(0)?.at(1)).toMatchSnapshot()
   })
 })
