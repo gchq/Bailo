@@ -237,9 +237,11 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
 export async function getModelReleases(
   user: UserInterface,
   modelId: string,
+  q?: string,
 ): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
+  const query = getQuerySyntax(q, modelId)
   const results = await Release.aggregate()
-    .match({ modelId })
+    .match(query!)
     .sort({ updatedAt: -1 })
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
@@ -319,8 +321,14 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
   return release
 }
 
-function getQuerySyntax(semver: string, modelID: string) {
+function getQuerySyntax(semver: string | undefined, modelID: string) {
   //Currently contain test queries, to see if these work, then add logic and string manip
+  if (semver === undefined) {
+    return {
+      modelId: modelID,
+    }
+  }
+
   const isSemverValid = semVer.validRange(semver, { includePrerelease: true })
 
   if (!isSemverValid) {
@@ -460,7 +468,6 @@ function getQuerySyntax(semver: string, modelID: string) {
     if (semVer.valid(semver)) {
       return {
         modelId: modelID,
-        semver: semverObj,
       }
     } else {
       throw BadReq(`The version '${semver}' is not a valid semver value.`)
@@ -468,23 +475,23 @@ function getQuerySyntax(semver: string, modelID: string) {
   }
 }
 
-export async function getReleaseBySemverLatest(user: UserInterface, modelID: string, semver: string) {
-  const model = await getModelById(user, modelID)
+// export async function getReleaseBySemverLatest(user: UserInterface, modelID: string, semver: string) {
+//   const model = await getModelById(user, modelID)
 
-  const query = getQuerySyntax(semver, modelID)
-  const release = await Release.findOne(query)
+//   const query = getQuerySyntax(semver, modelID)
+//   const release = await Release.findOne(query)
 
-  if (!release) {
-    throw NotFound(`The requested release was not found.`, { modelID, semver })
-  }
+//   if (!release) {
+//     throw NotFound(`The requested release was not found.`, { modelID, semver })
+//   }
 
-  const auth = await authorisation.release(user, model, release, ReleaseAction.View)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
-  }
+//   const auth = await authorisation.release(user, model, release, ReleaseAction.View)
+//   if (!auth.success) {
+//     throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
+//   }
 
-  return release
-}
+//   return release
+// }
 
 export async function deleteRelease(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)

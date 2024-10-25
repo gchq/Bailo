@@ -7,7 +7,7 @@ import audit from '../../../connectors/audit/index.js'
 import { FileInterface } from '../../../models/File.js'
 import { ReleaseInterface } from '../../../models/Release.js'
 import { getFilesByIds } from '../../../services/file.js'
-import { getReleaseBySemverLatest } from '../../../services/release.js'
+import { getReleaseBySemver } from '../../../services/release.js'
 import { registerPath, releaseInterfaceSchema } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -50,7 +50,7 @@ export const getRelease = [
       params: { modelId, semver },
     } = parse(req, getReleaseSchema)
 
-    const release = await getReleaseBySemverLatest(req.user, modelId, semver)
+    const release = await getReleaseBySemver(req.user, modelId, semver)
     await audit.onViewRelease(req, release)
     const files = await getFilesByIds(req.user, modelId, release.fileIds)
     const releaseWithFiles = { ...release.toObject(), files }

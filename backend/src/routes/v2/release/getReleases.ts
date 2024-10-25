@@ -17,6 +17,9 @@ export const getReleasesSchema = z.object({
       required_error: 'Must specify model id as URL parameter',
     }),
   }),
+  query: z.object({
+    q: z.string().optional(),
+  }),
 })
 
 registerPath({
@@ -49,9 +52,10 @@ export const getReleases = [
     req.audit = AuditInfo.ViewReleases
     const {
       params: { modelId },
+      query: { q },
     } = parse(req, getReleasesSchema)
 
-    const releases = await getModelReleases(req.user, modelId)
+    const releases = await getModelReleases(req.user, modelId, q)
     await audit.onViewReleases(req, releases)
 
     return res.json({

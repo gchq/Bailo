@@ -131,7 +131,6 @@ server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 server.post('/api/v2/model/:modelId/releases', ...postRelease)
 server.get('/api/v2/model/:modelId/releases', ...getReleases)
 server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
-// server.get('/api/v2/model/:modelId/release/semver/:query', ...getReleaseBySemverQuery)
 server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
 // This is a temporary workaround to split out the URL to disable authorisation.
 server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
