@@ -55,7 +55,7 @@ yolo = Model.create(
     team_id="Uncategorised"
 )
 
-yolo.card_from_schema("minimal-general-v10-beta")
+yolo.card_from_schema("minimal-general-v10")
 
 # Create a new release
 my_release = yolo.create_release(version="0.1.0",
