@@ -3,7 +3,13 @@ import { describe, expect, test, vi } from 'vitest'
 import AccessRequest from '../../src/models/AccessRequest.js'
 import Model from '../../src/models/Model.js'
 import Release from '../../src/models/Release.js'
-import { createAccessRequestReviews, createReleaseReviews, findReviews } from '../../src/services/review.js'
+import {
+  createAccessRequestReviews,
+  createReleaseReviews,
+  findReviewForAccessRequest,
+  findReviews,
+  removeAccessRequestReview,
+} from '../../src/services/review.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
@@ -11,7 +17,7 @@ vi.mock('../../src/connectors/authentication/index.js', async () => ({
 }))
 
 const reviewModelMock = vi.hoisted(() => {
-  const obj: any = { kind: 'access', accessRequestId: 'Hello' }
+  const obj: any = { kind: 'access', accessRequestId: 'Hello', role: 'msro' }
 
   obj.aggregate = vi.fn(() => obj)
   obj.match = vi.fn(() => obj)
@@ -24,6 +30,7 @@ const reviewModelMock = vi.hoisted(() => {
   obj.findByIdAndUpdate = vi.fn(() => obj)
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
+  obj.delete = vi.fn(() => obj)
   obj.limit = vi.fn(() => obj)
   obj.unwind = vi.fn(() => obj)
   obj.at = vi.fn(() => obj)
@@ -84,6 +91,20 @@ describe('services > review', () => {
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
+  test('findReviewForAccessRequest > success', async () => {
+    await findReviewForAccessRequest(reviewModelMock.accessRequestId)
+
+    expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('findReviewForAccessRequest > failure', async () => {
+    reviewModelMock.findOne.mockResolvedValue(undefined)
+
+    expect(() => findReviewForAccessRequest('')).rejects.toThrowError(
+      /^The requested access request review was not found./,
+    )
+  })
+
   test('createReleaseReviews > No entities found for required roles', async () => {
     const result: Promise<void> = createReleaseReviews(new Model(), new Release())
 
@@ -110,5 +131,19 @@ describe('services > review', () => {
 
     expect(reviewModelMock.save).toBeCalled()
     expect(smtpMock.requestReviewForAccessRequest).toBeCalled()
+  })
+
+  test('removeAccessRequestReview > successful', async () => {
+    await removeAccessRequestReview(reviewModelMock.accessRequestId)
+
+    expect(reviewModelMock.delete).toBeCalled()
+  })
+
+  test('removeAccessRequestReview > failure', async () => {
+    reviewModelMock.findOne.mockResolvedValue(undefined)
+
+    expect(() => removeAccessRequestReview('')).rejects.toThrowError(
+      /^The requested access request review was not found./,
+    )
   })
 })

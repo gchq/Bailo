@@ -42,6 +42,7 @@ vi.mock('../../src/models/AccessRequest.js', () => ({ default: accessRequestMode
 const mockReviewService = vi.hoisted(() => {
   return {
     createAccessRequestReviews: vi.fn(),
+    removeAccessRequestReview: vi.fn(),
   }
 })
 vi.mock('../../src/services/review.js', () => mockReviewService)
