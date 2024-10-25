@@ -1,4 +1,4 @@
-import semVer from 'semver'
+import semver from 'semver'
 import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
@@ -22,7 +22,7 @@ import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
 async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
-  if (!semVer.valid(release.semver)) {
+  if (!semver.valid(release.semver)) {
     throw BadReq(`The version '${release.semver}' is not a valid semver value.`)
   }
 
@@ -321,31 +321,31 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
   return release
 }
 
-function getQuerySyntax(semver: string | undefined, modelID: string) {
+function getQuerySyntax(querySemver: string | undefined, modelID: string) {
   //Currently contain test queries, to see if these work, then add logic and string manip
-  if (semver === undefined) {
+  if (querySemver === undefined) {
     return {
       modelId: modelID,
     }
   }
 
-  const isSemverValid = semVer.validRange(semver, { includePrerelease: true })
+  const isSemverValid = semver.validRange(querySemver, { includePrerelease: true })
 
   if (!isSemverValid) {
-    throw BadReq(`Semver ('${semver}') is invalid `)
+    throw BadReq(`Semver ('${querySemver}') is invalid `)
   }
   let trimmedSemver
-  if (semver.charAt(0) === '^' || semver.charAt(0) === '~') {
-    trimmedSemver = semver.slice(1)
+  if (querySemver.charAt(0) === '^' || querySemver.charAt(0) === '~') {
+    trimmedSemver = querySemver.slice(1)
   } else {
-    trimmedSemver = semver
+    trimmedSemver = querySemver
   }
 
   const semverObj = semverStringToObject(trimmedSemver)
   //TODO INCLUDE CHECK THAT X IS ALWAYS AFTER A NUMBER, NEVER PRECEEDES OTHERWISE IT IS INCORRECT SYNTAX
 
-  if (semver.includes('x') || semver.includes('X') || semver.includes('*')) {
-    const newSemver = semver.replace('X', 'x').replace('*', 'x')
+  if (querySemver.includes('x') || querySemver.includes('X') || querySemver.includes('*')) {
+    const newSemver = querySemver.replace('X', 'x').replace('*', 'x')
     //return query for x range
     const splitSemver = newSemver.split('.')
     if (splitSemver[0].includes('x')) {
@@ -364,14 +364,14 @@ function getQuerySyntax(semver: string | undefined, modelID: string) {
         'semver.minor': semverObj.minor,
       }
     }
-  } else if (semver.includes('^')) {
+  } else if (querySemver.includes('^')) {
     //return query CARET RANGE
     const splitSemver = trimmedSemver.split('.')
     if (splitSemver[0] === '0') {
       if (splitSemver[1] === '0') {
         if (splitSemver[2] === '0') {
           //What to put here? Is it invalid?
-          throw BadReq(`The semver range '${semver}' is not valid. Must not contain all 0 values. `)
+          throw BadReq(`The semver range '${querySemver}' is not valid. Must not contain all 0 values. `)
         }
         return {
           modelId: modelID,
@@ -395,7 +395,7 @@ function getQuerySyntax(semver: string | undefined, modelID: string) {
       //     semver: semverObj, //Keep this or just remove, this would mean all releases would be returned if this is used in find()
       //   }
     }
-  } else if (semver.includes('~')) {
+  } else if (querySemver.includes('~')) {
     //return query TILDE RANGE
     const splitSemver = trimmedSemver.split('.') //THINK THIS COULD BE IMPROVED
     const count = splitSemver.length
@@ -425,7 +425,7 @@ function getQuerySyntax(semver: string | undefined, modelID: string) {
         break
       }
     }
-  } else if (semver.includes('-')) {
+  } else if (querySemver.includes('-')) {
     //return query HYPEN RANGE
     return {
       modelId: modelID,
@@ -465,12 +465,8 @@ function getQuerySyntax(semver: string | undefined, modelID: string) {
       ],
     }
   } else {
-    if (semVer.valid(semver)) {
-      return {
-        modelId: modelID,
-      }
-    } else {
-      throw BadReq(`The version '${semver}' is not a valid semver value.`)
+    return {
+      modelId: modelID,
     }
   }
 }
