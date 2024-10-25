@@ -152,8 +152,12 @@ export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
 export async function findReviewForAccessRequest(accessRequestId: string) {
   const review = await Review.findOne({ accessRequestId: accessRequestId })
 
-  if (!review || !requiredRoles.accessRequest.includes(review.role)) {
+  if (!review) {
     throw NotFound('The requested access request review was not found.', { accessRequestId })
+  }
+
+  if (!requiredRoles.accessRequest.includes(review.role)) {
+    log.warn('Permission error when sending getting review for Access Request.', { accessRequestId })
   }
 
   return review

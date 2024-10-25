@@ -17,7 +17,7 @@ import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
-import { createAccessRequestReviews } from './review.js'
+import { createAccessRequestReviews, removeAccessRequestReview } from './review.js'
 import { getSchemaById } from './schema.js'
 import { sendWebhooks } from './webhook.js'
 
@@ -90,6 +90,12 @@ export async function removeAccessRequest(user: UserInterface, accessRequestId: 
   }
 
   await accessRequest.delete()
+
+  try {
+    await removeAccessRequestReview(accessRequestId)
+  } catch (error) {
+    log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this Access Request')
+  }
 
   return { accessRequestId }
 }
