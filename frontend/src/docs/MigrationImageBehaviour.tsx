@@ -3,8 +3,8 @@
 
 import Image from 'next/image'
 
-function imageLoader() {
-  return undefined
+export function imageLoader({ src }: { src: string }) {
+  return src
 }
 
 function ResponsiveImage({ src, width = 1, height = 1, scaling = 50, alt }) {
@@ -18,7 +18,7 @@ function ResponsiveImage({ src, width = 1, height = 1, scaling = 50, alt }) {
         paddingBottom: `max(350px, ${(width / height) * scaling}%)`,
       }}
     >
-      <Image loader={imageLoader()} className='next-image' src={src} layout='fill' objectFit='contain' alt={alt} />
+      <Image loader={imageLoader} className='next-image' src={src} layout='fill' objectFit='contain' alt={alt} />
     </div>
   )
 }
