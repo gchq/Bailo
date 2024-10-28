@@ -84,9 +84,12 @@ export class Writer extends WritableStream {
     return typeof value === 'object' ? util.inspect(value) : String(value)
   }
 
-  static isRequestCompleted(data: any): data is RequestCompletedLog {
-    const keys = Object.keys(data)
-    return ['requestId', 'url', 'method'].every((k) => keys.includes(k)) && data.msg === 'Request completed'
+  static isRequestCompleted(data: unknown): data is RequestCompletedLog {
+    const keys = Object.keys(data as object)
+    return (
+      ['requestId', 'url', 'method'].every((k) => keys.includes(k)) &&
+      (data as RequestCompletedLog).msg === 'Request completed'
+    )
   }
 
   static getAttributes(data: any) {
