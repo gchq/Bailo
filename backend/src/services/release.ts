@@ -239,7 +239,7 @@ export async function getModelReleases(
   modelId: string,
   q?: string,
 ): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
-  const query = getQuerySyntax(q, modelId)
+  const query = q === undefined ? { modelId } : getQuerySyntax(q, modelId)
   const results = await Release.aggregate()
     .match(query!)
     .sort({ updatedAt: -1 })
@@ -301,6 +301,13 @@ export function semverObjectToString(semver: SemverObject) {
   return `${semver.major}.${semver.minor}.${semver.patch}${metadata}`
 }
 
+function getSemverVariations(querySemver: string) {
+  const semverObj = semverStringToObject(querySemver)
+  const trimmedSemver =
+    querySemver.charAt(0) === '^' || querySemver.charAt(0) === '~' ? querySemver.slice(1) : querySemver
+  return { semverObj, trimmedSemver }
+}
+
 export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
   const semverObj = semverStringToObject(semver)
@@ -322,7 +329,7 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
 }
 
 function getQuerySyntax(querySemver: string | undefined, modelID: string) {
-  //Currently contain test queries, to see if these work, then add logic and string manip
+  //NOTE if we are adding advanced query for range, we ignore metadata as they aren't currently supported by our range query functionality
   if (querySemver === undefined) {
     return {
       modelId: modelID,
@@ -334,15 +341,17 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
   if (!isSemverValid) {
     throw BadReq(`Semver ('${querySemver}') is invalid `)
   }
-  let trimmedSemver
-  if (querySemver.charAt(0) === '^' || querySemver.charAt(0) === '~') {
-    trimmedSemver = querySemver.slice(1)
-  } else {
-    trimmedSemver = querySemver
-  }
+  // let trimmedSemver
+  // if (querySemver.charAt(0) === '^' || querySemver.charAt(0) === '~') {
+  //   trimmedSemver = querySemver.slice(1)
+  // } else {
+  //   trimmedSemver = querySemver
+  // }
 
-  const semverObj = semverStringToObject(trimmedSemver)
+  // const semverObj = semverStringToObject(trimmedSemver)
   //TODO INCLUDE CHECK THAT X IS ALWAYS AFTER A NUMBER, NEVER PRECEEDES OTHERWISE IT IS INCORRECT SYNTAX
+
+  const { semverObj, trimmedSemver } = getSemverVariations(querySemver)
 
   if (querySemver.includes('x') || querySemver.includes('X') || querySemver.includes('*')) {
     const newSemver = querySemver.replace('X', 'x').replace('*', 'x')
@@ -426,6 +435,11 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
       }
     }
   } else if (querySemver.includes('-')) {
+    //get before hyphen
+    //get after hyphen
+    const [lowerSemver, upperSemver] = trimmedSemver.split('-')
+    const lowerSemverObj = semverStringToObject(lowerSemver)
+    const upperSemverObj = semverStringToObject(upperSemver)
     //return query HYPEN RANGE
     return {
       modelId: modelID,
@@ -433,41 +447,41 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
         {
           $or: [
             {
-              'semver.major': { $gte: semverObj.major },
-              'semver.minor': { $gte: semverObj.minor },
-              'semver.patch': { $gte: semverObj.patch },
+              'semver.major': { $gte: lowerSemverObj.major },
+              'semver.minor': { $gte: lowerSemverObj.minor },
+              'semver.patch': { $gte: lowerSemverObj.patch },
             },
             {
-              'semver.major': { $gt: semverObj.major },
+              'semver.major': { $gt: lowerSemverObj.major },
             },
             {
-              'semver.major': { $gte: semverObj.major },
-              'semver.minor': { $gt: semverObj.minor },
+              'semver.major': { $gte: lowerSemverObj.major },
+              'semver.minor': { $gt: lowerSemverObj.minor },
             },
           ],
         },
         {
           $or: [
             {
-              'semver.major': { $lte: semverObj.major },
-              'semver.minor': { $lte: semverObj.minor },
-              'semver.patch': { $lt: semverObj.patch },
+              'semver.major': { $lte: upperSemverObj.major },
+              'semver.minor': { $lte: upperSemverObj.minor },
+              'semver.patch': { $lt: upperSemverObj.patch },
             },
             {
-              'semver.major': { $lt: semverObj.major },
+              'semver.major': { $lt: upperSemverObj.major },
             },
             {
-              'semver.major': { $lte: semverObj.major },
-              'semver.minor': { $lt: semverObj.minor },
+              'semver.major': { $lte: upperSemverObj.major },
+              'semver.minor': { $lt: upperSemverObj.minor },
             },
           ],
         },
       ],
     }
   } else {
-    return {
-      modelId: modelID,
-    }
+    throw BadReq(
+      `The semver range '${querySemver}' is not valid. IF you were looking for specific releases then use the /release api endpoint.`,
+    )
   }
 }
 
