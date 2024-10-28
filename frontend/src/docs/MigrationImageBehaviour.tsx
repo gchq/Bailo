@@ -7,7 +7,7 @@ export function imageLoader({ src }: { src: string }) {
   return src
 }
 
-function ResponsiveImage({ src, width = 1, height = 1, scaling = 50, alt }) {
+function ResponsiveImage({ src, scaling = 50, alt }) {
   return (
     <div
       style={{
@@ -15,7 +15,7 @@ function ResponsiveImage({ src, width = 1, height = 1, scaling = 50, alt }) {
         width: 'auto',
         height: 'auto',
         marginLeft: 'auto',
-        paddingBottom: `max(350px, ${(width / height) * scaling}%)`,
+        paddingBottom: `max(350px, ${scaling}%)`,
       }}
     >
       <Image loader={imageLoader} className='next-image' src={src} layout='fill' objectFit='contain' alt={alt} />
