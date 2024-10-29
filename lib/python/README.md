@@ -72,6 +72,15 @@ Documenation is rendered with Sphinx and served [here](https://gchq.github.io/Ba
 
 ### Building locally
 
+#### prerequisites
+
+From within the `backend/docs` directory:
+
+```bash
+pip install bailo -r requirements.txt
+apt install -y pandoc
+```
+
 From the docs directory run either `make html` or `make.bat` on Windows. This will build it in the backend directory by
 default.
 
