@@ -302,9 +302,9 @@ export function semverObjectToString(semver: SemverObject) {
 }
 
 function getSemverVariations(querySemver: string) {
-  const semverObj = semverStringToObject(querySemver)
   const trimmedSemver =
     querySemver.charAt(0) === '^' || querySemver.charAt(0) === '~' ? querySemver.slice(1) : querySemver
+  const semverObj = semverStringToObject(trimmedSemver)
   return { semverObj, trimmedSemver }
 }
 
@@ -336,26 +336,17 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
     }
   }
 
-  const isSemverValid = semver.validRange(querySemver, { includePrerelease: true })
+  const isSemverValid = semver.validRange(querySemver, { includePrerelease: false })
 
   if (!isSemverValid) {
     throw BadReq(`Semver ('${querySemver}') is invalid `)
   }
-  // let trimmedSemver
-  // if (querySemver.charAt(0) === '^' || querySemver.charAt(0) === '~') {
-  //   trimmedSemver = querySemver.slice(1)
-  // } else {
-  //   trimmedSemver = querySemver
-  // }
-
-  // const semverObj = semverStringToObject(trimmedSemver)
-  //TODO INCLUDE CHECK THAT X IS ALWAYS AFTER A NUMBER, NEVER PRECEEDES OTHERWISE IT IS INCORRECT SYNTAX
 
   const { semverObj, trimmedSemver } = getSemverVariations(querySemver)
 
+  // X-RANGE
   if (querySemver.includes('x') || querySemver.includes('X') || querySemver.includes('*')) {
     const newSemver = querySemver.replace('X', 'x').replace('*', 'x')
-    //return query for x range
     const splitSemver = newSemver.split('.')
     if (splitSemver[0].includes('x')) {
       return {
@@ -373,18 +364,31 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
         'semver.minor': semverObj.minor,
       }
     }
+    // CARET-RANGE
   } else if (querySemver.includes('^')) {
-    //return query CARET RANGE
     const splitSemver = trimmedSemver.split('.')
+    if (splitSemver[1] === undefined) {
+      splitSemver[1] = '0'
+    }
+    if (splitSemver[2] === undefined) {
+      splitSemver[2] = '0'
+    }
     if (splitSemver[0] === '0') {
       if (splitSemver[1] === '0') {
         if (splitSemver[2] === '0') {
           //What to put here? Is it invalid?
-          throw BadReq(`The semver range '${querySemver}' is not valid. Must not contain all 0 values. `)
+          return {
+            modelId: modelID,
+            'semver.major': 0,
+            'semver.minor': 0,
+            'semver.patch': { $gte: 0 },
+          }
         }
         return {
           modelId: modelID,
-          semver: semverObj,
+          'semver.major': 0,
+          'semver.minor': 0,
+          'semver.patch': { $gte: semverObj.patch },
           // This is equivalent to grabbing one specific release
           //but it may have caveats in the future with the possible, future inclusion of pre-release identifiers etc
         }
@@ -396,14 +400,22 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
         'semver.patch': { $gte: semverObj.patch },
       }
     } else {
-      //normal
-      //Invalid?
-      //   //Check for all
-      //   return {
-      //     modelId: modelID,
-      //     semver: semverObj, //Keep this or just remove, this would mean all releases would be returned if this is used in find()
-      //   }
+      return {
+        modelId: modelID,
+        $or: [
+          {
+            'semver.major': semverObj.major,
+            'semver.minor': { $gte: semverObj.minor },
+            'semver.patch': { $gte: semverObj.patch },
+          },
+          {
+            'semver.major': semverObj.major,
+            'semver.minor': { $gt: semverObj.minor },
+          },
+        ],
+      }
     }
+    //TILDE RANGE
   } else if (querySemver.includes('~')) {
     //return query TILDE RANGE
     const splitSemver = trimmedSemver.split('.') //THINK THIS COULD BE IMPROVED
@@ -434,9 +446,8 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
         break
       }
     }
+    //HYPEN RANGE
   } else if (querySemver.includes('-')) {
-    //get before hyphen
-    //get after hyphen
     const [lowerSemver, upperSemver] = trimmedSemver.split('-')
     const lowerSemverObj = semverStringToObject(lowerSemver)
     const upperSemverObj = semverStringToObject(upperSemver)
