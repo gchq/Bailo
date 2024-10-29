@@ -17,7 +17,7 @@ interface NextLinkComposedProps
 
 export const NextLinkComposed = forwardRef<HTMLAnchorElement, NextLinkComposedProps>(
   function NextLinkComposed(props, ref) {
-    const { to, linkAs, replace, scroll, shallow, prefetch, legacyBehavior = true, locale, ...other } = props
+    const { to, linkAs, replace, scroll, shallow, prefetch, locale, ...other } = props
 
     return (
       <NextLink
@@ -29,9 +29,10 @@ export const NextLinkComposed = forwardRef<HTMLAnchorElement, NextLinkComposedPr
         shallow={shallow}
         passHref
         locale={locale}
-        legacyBehavior={legacyBehavior}
+        ref={ref}
+        {...other}
       >
-        <Anchor ref={ref} {...other} />
+        {props.children}
       </NextLink>
     )
   },
@@ -54,7 +55,6 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
     as,
     className: classNameProps,
     href,
-    legacyBehavior,
     linkAs: linkAsProp,
     locale,
     noLinkStyle,
@@ -90,7 +90,6 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
     scroll,
     shallow,
     prefetch,
-    legacyBehavior,
     locale,
   }
 
