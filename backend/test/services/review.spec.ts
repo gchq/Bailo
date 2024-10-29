@@ -97,11 +97,20 @@ describe('services > review', () => {
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  test('findReviewForAccessRequest > failure', async () => {
+  test('findReviewForAccessRequest > NotFound failure', async () => {
     reviewModelMock.findOne.mockResolvedValue(undefined)
 
     expect(() => findReviewForAccessRequest('')).rejects.toThrowError(
       /^The requested access request review was not found./,
+    )
+  })
+
+  test('findReviewForAccessRequest > Forbidden failure', async () => {
+    reviewModelMock.role = 'this-does-not-exist'
+    reviewModelMock.findOne.mockResolvedValue(reviewModelMock)
+
+    expect(() => findReviewForAccessRequest(reviewModelMock.accessRequestId)).rejects.toThrowError(
+      /^Permission error when sending getting review for Access Request./,
     )
   })
 
