@@ -91,11 +91,7 @@ export async function removeAccessRequest(user: UserInterface, accessRequestId: 
 
   await accessRequest.delete()
 
-  try {
-    await removeAccessRequestReview(accessRequestId)
-  } catch (error) {
-    log.warn(error, 'Error when creating Release Review Requests. Approval cannot be given to this Access Request')
-  }
+  await removeAccessRequestReview(accessRequestId)
 
   return { accessRequestId }
 }

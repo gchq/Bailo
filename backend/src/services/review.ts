@@ -7,7 +7,7 @@ import { ReleaseDoc } from '../models/Release.js'
 import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
-import { BadReq, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
@@ -157,7 +157,7 @@ export async function findReviewForAccessRequest(accessRequestId: string) {
   }
 
   if (!requiredRoles.accessRequest.includes(review.role)) {
-    log.warn('Permission error when sending getting review for Access Request.', { accessRequestId })
+    throw Forbidden('Permission error when sending getting review for Access Request.', { accessRequestId })
   }
 
   return review
