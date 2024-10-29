@@ -21,7 +21,7 @@ const config = {
       kind: 'basic',
     },
     fileScanners: {
-      kinds: ['clamAV'],
+      kinds: [],
     },
   },
   log: {
@@ -34,6 +34,11 @@ const config = {
   },
   instrumentation: {
     enabled: false,
+  },
+  ui: {
+    inference: {
+      enabled: true,
+    },
   },
 }
 

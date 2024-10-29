@@ -57,13 +57,12 @@ const fileScanResult: FileScanResult = {
   isInfected: false,
   toolName: 'Test',
 }
+
 const fileScanningMock = vi.hoisted(() => ({
-  default: vi.fn(() => ({
-    info: vi.fn(() => []),
-    scan: vi.fn(() => new Promise(() => fileScanResult)),
-  })),
+  info: vi.fn(() => []),
+  scan: vi.fn(() => new Promise(() => [fileScanResult])),
 }))
-vi.mock('../../src/connectors/fileScanning/index.js', async () => fileScanningMock)
+vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
@@ -114,7 +113,6 @@ describe('services > file', () => {
     const mime = 'text/plain'
     const stream = new Readable() as any
     fileModelMocks.save.mockResolvedValueOnce({ example: true })
-
     const result = await uploadFile(user, modelId, name, mime, stream)
 
     expect(s3Mocks.putObjectStream).toBeCalled()

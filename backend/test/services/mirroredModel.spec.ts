@@ -2,15 +2,21 @@ import { PassThrough } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { FileScanResult } from '../../src/connectors/fileScanning/Base.js'
 import { UserInterface } from '../../src/models/User.js'
 import { exportModel, importModel } from '../../src/services/mirroredModel.js'
 
+const fileScanResult: FileScanResult = {
+  state: 'complete',
+  isInfected: false,
+  toolName: 'Test',
+}
+
 const fileScanningMock = vi.hoisted(() => ({
-  default: vi.fn(() => ({
-    info: vi.fn(() => []),
-  })),
+  info: vi.fn(() => []),
+  scan: vi.fn(() => new Promise(() => [fileScanResult])),
 }))
-vi.mock('../../src/connectors/fileScanning/index.js', async () => fileScanningMock)
+vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
 
 const fflateMock = vi.hoisted(() => ({
   unzipSync: vi.fn(),
@@ -33,9 +39,6 @@ const authMock = vi.hoisted(() => ({
 vi.mock('../../src/connectors/authorisation/index.js', async () => ({
   default: authMock,
 }))
-
-// const fileScanConnectors: BaseFileScanningConnector[] = [new ClamAvFileScanningConnector()]
-// const wrapper = new FileScanningWrapper(fileScanConnectors)
 
 const configMock = vi.hoisted(
   () =>
