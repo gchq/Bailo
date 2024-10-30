@@ -12,6 +12,7 @@ import Title from 'src/common/Title'
 import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import { useGetPermissions } from 'src/hooks/useGetPermissions'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
 import { EntryKind } from 'types/types'
@@ -22,6 +23,8 @@ export default function AccessRequest() {
   const { modelId, accessRequestId }: { modelId?: string; accessRequestId?: string } = router.query
 
   const [isEdit, setIsEdit] = useState(false)
+
+  useGetPermissions(modelId, accessRequestId)
 
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({

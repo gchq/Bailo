@@ -1,9 +1,10 @@
 import { createContext } from 'react'
-import { defaultPermissions, UserPermissionsHook } from 'src/hooks/UserPermissionsHook'
+import { defaultUserPermissions, UserPermissionsHook } from 'src/hooks/UserPermissionsHook'
 
 const UserPermissionsContext = createContext<UserPermissionsHook>({
-  userPermissions: defaultPermissions,
+  userPermissions: defaultUserPermissions,
   setEntryId: () => undefined,
+  setAccessRequestId: () => undefined,
 })
 
 export default UserPermissionsContext

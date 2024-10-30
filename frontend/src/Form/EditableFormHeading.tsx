@@ -1,20 +1,22 @@
 import { LoadingButton } from '@mui/lab'
-import { Button, Stack, Tooltip } from '@mui/material'
+import { Button, Stack } from '@mui/material'
 import { ReactNode } from 'react'
+import Restricted from 'src/common/Restricted'
 import MessageAlert from 'src/MessageAlert'
+import { RestrictedActionKeys } from 'types/types'
 
 type EditableFormHeadingProps = {
   heading: ReactNode
   editButtonText: string
   isEdit: boolean
   isLoading: boolean
-  canUserEditOrDelete: boolean
-  actionButtonsTooltip: string
   onEdit: () => void
   onCancel: () => void
   onSubmit: () => void
   isRegistryError?: boolean
   onDelete?: () => void
+  editAction: RestrictedActionKeys
+  deleteAction?: RestrictedActionKeys
   errorMessage?: string
   deleteButtonText?: string
   showDeleteButton?: boolean
@@ -31,13 +33,13 @@ export default function EditableFormHeading({
   onCancel,
   onSubmit,
   onDelete,
+  editAction,
+  deleteAction,
   errorMessage = '',
   deleteButtonText = 'Delete',
   showDeleteButton = false,
   isRegistryError = false,
   readOnly = false,
-  canUserEditOrDelete = true,
-  actionButtonsTooltip = '',
   disableSaveButton = false,
 }: EditableFormHeadingProps) {
   return (
@@ -50,29 +52,26 @@ export default function EditableFormHeading({
       >
         {heading}
         {!isEdit && !readOnly && (
-          <Tooltip title={actionButtonsTooltip}>
-            <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
-              <Button
-                variant='outlined'
-                onClick={onEdit}
-                data-test='editFormButton'
-                disabled={isRegistryError || !canUserEditOrDelete}
-              >
+          <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
+            <Restricted action={editAction} fallback={<Button disabled>{editButtonText}</Button>}>
+              <Button variant='outlined' onClick={onEdit} data-test='editFormButton' disabled={isRegistryError}>
                 {editButtonText}
               </Button>
-              {showDeleteButton && (
+            </Restricted>
+            {showDeleteButton && deleteAction && (
+              <Restricted action={deleteAction} fallback={<Button disabled>{deleteButtonText}</Button>}>
                 <Button
                   variant='contained'
                   color='secondary'
                   onClick={onDelete}
                   data-test='deleteFormButton'
-                  disabled={isRegistryError || !canUserEditOrDelete}
+                  disabled={isRegistryError}
                 >
                   {deleteButtonText}
                 </Button>
-              )}
-            </Stack>
-          </Tooltip>
+              </Restricted>
+            )}
+          </Stack>
         )}
         {isEdit && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>

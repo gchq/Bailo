@@ -14,8 +14,9 @@ import Releases from 'src/entry/model/Releases'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import { useGetPermissions } from 'src/hooks/useGetPermissions'
 import { EntryKind } from 'types/types'
-import { getCurrentUserRoles, getRequiredRolesText, hasRole } from 'utils/roles'
+import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
   const router = useRouter()
@@ -24,15 +25,12 @@ export default function Model() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const { setEntryId } = useContext(UserPermissionsContext)
-  setEntryId(modelId || '')
+  useGetPermissions(modelId)
+  const { userPermissions } = useContext(UserPermissionsContext)
 
   const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
 
-  const [isReadOnly, requiredRolesText] = useMemo(() => {
-    const validRoles = ['owner']
-    return [!hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
-  }, [currentUserRoles])
+  const settingsPermission = useMemo(() => userPermissions['editEntry'], [userPermissions])
 
   const tabs: PageTab[] = useMemo(
     () =>
@@ -67,30 +65,24 @@ export default function Model() {
             {
               title: 'Registry',
               path: 'registry',
-              view: (
-                <ModelImages
-                  model={model}
-                  currentUserRoles={currentUserRoles}
-                  readOnly={!!model.settings.mirror?.sourceModelId}
-                />
-              ),
+              view: <ModelImages model={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
             },
             {
               title: 'Inferencing',
               path: 'inferencing',
-              view: <InferenceServices model={model} currentUserRoles={currentUserRoles} />,
+              view: <InferenceServices model={model} />,
               hidden: !uiConfig.inference.enabled,
             },
             {
               title: 'Settings',
               path: 'settings',
-              disabled: isReadOnly,
-              disabledText: requiredRolesText,
-              view: <Settings entry={model} currentUserRoles={currentUserRoles} />,
+              disabled: !settingsPermission.hasPermission,
+              disabledText: settingsPermission.info,
+              view: <Settings entry={model} />,
             },
           ]
         : [],
-    [model, uiConfig, currentUserRoles, isReadOnly, requiredRolesText],
+    [model, uiConfig, currentUserRoles, settingsPermission.hasPermission, settingsPermission.info],
   )
 
   function requestAccess() {

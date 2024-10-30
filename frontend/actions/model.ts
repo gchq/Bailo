@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { EntryForm, EntryInterface, EntryKindKeys, ModelImage, Role, UserPermissions } from '../types/types'
+import { EntryForm, EntryInterface, EntryKindKeys, EntryUserPermissions, ModelImage, Role } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyModelList = []
@@ -152,18 +152,18 @@ export async function postModelExportToS3(id: string, modelExport: ModelExportRe
   })
 }
 
-export function useGetCurrentUserPermissionsForEntry(entryId: string) {
+export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      permissions: UserPermissions
+      permissions: EntryUserPermissions
     },
     ErrorInfo
   >(entryId ? `/api/v2/model/${entryId}/permissions/mine` : null, fetcher)
 
   return {
-    mutateUserPermissions: mutate,
-    userPermissions: data ? data.permissions : undefined,
-    isUserPermissionsLoading: isLoading,
-    isUserPermissionsError: error,
+    mutateEntryUserPermissions: mutate,
+    entryUserPermissions: data ? data.permissions : undefined,
+    isEntryUserPermissionsLoading: isLoading,
+    isEntryUserPermissionsError: error,
   }
 }

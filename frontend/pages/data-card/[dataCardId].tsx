@@ -1,15 +1,15 @@
 import { useGetModel } from 'actions/model'
-import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
+import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import { useGetPermissions } from 'src/hooks/useGetPermissions'
 import { EntryKind } from 'types/types'
-import { getCurrentUserRoles, getRequiredRolesText, hasRole } from 'utils/roles'
 
 export default function DataCard() {
   const router = useRouter()
@@ -19,14 +19,11 @@ export default function DataCard() {
     isModelLoading: isDataCardLoading,
     isModelError: isDataCardError,
   } = useGetModel(dataCardId, EntryKind.DATA_CARD)
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const currentUserRoles = useMemo(() => getCurrentUserRoles(dataCard, currentUser), [dataCard, currentUser])
+  useGetPermissions(dataCardId)
+  const { userPermissions } = useContext(UserPermissionsContext)
 
-  const [isReadOnly, requiredRolesText] = useMemo(() => {
-    const validRoles = ['owner']
-    return [!hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
-  }, [currentUserRoles])
+  const settingsPermission = useMemo(() => userPermissions['editEntry'], [userPermissions])
 
   const tabs: PageTab[] = useMemo(
     () =>
@@ -35,30 +32,29 @@ export default function DataCard() {
             {
               title: 'Overview',
               path: 'overview',
-              view: <Overview entry={dataCard} currentUserRoles={currentUserRoles} />,
+              view: <Overview entry={dataCard} />,
             },
             {
               title: 'Settings',
               path: 'settings',
-              disabled: isReadOnly,
-              disabledText: requiredRolesText,
-              view: <Settings entry={dataCard} currentUserRoles={currentUserRoles} />,
+              disabled: !settingsPermission.hasPermission,
+              disabledText: settingsPermission.info,
+              view: <Settings entry={dataCard} />,
             },
           ]
         : [],
-    [currentUserRoles, dataCard, isReadOnly, requiredRolesText],
+    [dataCard, settingsPermission.hasPermission, settingsPermission.info],
   )
 
   const error = MultipleErrorWrapper(`Unable to load data card page`, {
     isDataCardError,
-    isCurrentUserError,
   })
   if (error) return error
 
   return (
     <>
       <Title text={dataCard ? dataCard.name : 'Loading...'} />
-      {(isDataCardLoading || isCurrentUserLoading) && <Loading />}
+      {isDataCardLoading && <Loading />}
       {dataCard && (
         <PageWithTabs
           title={dataCard.name}

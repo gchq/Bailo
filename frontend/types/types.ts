@@ -560,20 +560,23 @@ export type PermissionDetail =
       info: string
     }
 
-export interface UserPermissions {
+export type EntryUserPermissions = {
   editEntry: PermissionDetail
   editEntryCard: PermissionDetail
-  editAccessRequest: PermissionDetail
-  deleteAccessRequest: PermissionDetail
-  reviewAccessRequest: PermissionDetail
   createRelease: PermissionDetail
   editRelease: PermissionDetail
   deleteRelease: PermissionDetail
-  reviewRelease: PermissionDetail
   pushModelImage: PermissionDetail
   createInferenceService: PermissionDetail
   editInferenceService: PermissionDetail
   exportMirroredModel: PermissionDetail
 }
+
+export type AccessRequestUserPermissions = {
+  editAccessRequest: PermissionDetail
+  deleteAccessRequest: PermissionDetail
+}
+
+export type UserPermissions = EntryUserPermissions & AccessRequestUserPermissions
 
 export type RestrictedActionKeys = keyof UserPermissions
