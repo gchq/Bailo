@@ -1,6 +1,6 @@
 import AccessRequestModel from '../models/AccessRequest.js'
 import ReviewModel from '../models/Review.js'
-import { removeAccessRequestReview } from '../services/review.js'
+import { removeAccessRequestReviews } from '../services/review.js'
 
 export async function up() {
   const accessRequests = await AccessRequestModel.find({ deleted: false })
@@ -11,7 +11,7 @@ export async function up() {
       reviewAccessRequestId &&
       !accessRequests.some((accessRequest) => accessRequest.get('id') == reviewAccessRequestId)
     ) {
-      removeAccessRequestReview(reviewAccessRequestId)
+      removeAccessRequestReviews(reviewAccessRequestId)
     }
   }
 }

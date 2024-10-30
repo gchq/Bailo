@@ -1,3 +1,5 @@
+import { DeleteResult } from 'mongodb'
+
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
@@ -7,7 +9,7 @@ import { ReleaseDoc } from '../models/Release.js'
 import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
-import { BadReq, Forbidden, NotFound } from '../utils/error.js'
+import { BadReq, InternalError, NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
@@ -89,12 +91,16 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
-export async function removeAccessRequestReview(accessRequestId: string) {
-  const accessRequestReview = await findReviewForAccessRequest(accessRequestId)
+export async function removeAccessRequestReviews(accessRequestId: string): Promise<DeleteResult> {
+  const deletions = await Review.deleteMany({ accessRequestId: accessRequestId })
 
-  await accessRequestReview.delete()
+  if (deletions.deletedCount === 0) {
+    throw InternalError('The requested access request reviews could not be deleted.', {
+      accessRequestId,
+    })
+  }
 
-  return { accessRequestId }
+  return deletions
 }
 
 export async function findReviewForResponse(
@@ -147,20 +153,6 @@ export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
     accessRequestId: accessRequestIds,
   })
   return reviews.filter((review) => requiredRoles.accessRequest.includes(review.role))
-}
-
-export async function findReviewForAccessRequest(accessRequestId: string) {
-  const review = await Review.findOne({ accessRequestId: accessRequestId })
-
-  if (!review) {
-    throw NotFound('The requested access request review was not found.', { accessRequestId })
-  }
-
-  if (!requiredRoles.accessRequest.includes(review.role)) {
-    throw Forbidden('Permission error when sending getting review for Access Request.', { accessRequestId })
-  }
-
-  return review
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {

@@ -6,9 +6,9 @@ import Release from '../../src/models/Release.js'
 import {
   createAccessRequestReviews,
   createReleaseReviews,
-  findReviewForAccessRequest,
   findReviews,
-  removeAccessRequestReview,
+  findReviewsForAccessRequests,
+  removeAccessRequestReviews,
 } from '../../src/services/review.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -24,13 +24,14 @@ const reviewModelMock = vi.hoisted(() => {
   obj.sort = vi.fn(() => obj)
   obj.lookup = vi.fn(() => obj)
   obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
+  obj.find = vi.fn(() => [obj])
   obj.findOne = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
   obj.findByIdAndUpdate = vi.fn(() => obj)
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
+  obj.deleteMany = vi.fn(() => obj)
   obj.limit = vi.fn(() => obj)
   obj.unwind = vi.fn(() => obj)
   obj.at = vi.fn(() => obj)
@@ -91,27 +92,10 @@ describe('services > review', () => {
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
-  test('findReviewForAccessRequest > success', async () => {
-    await findReviewForAccessRequest(reviewModelMock.accessRequestId)
+  test('findReviewsForAccessRequests > success', async () => {
+    await findReviewsForAccessRequests([reviewModelMock.accessRequestId])
 
-    expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-  })
-
-  test('findReviewForAccessRequest > NotFound failure', async () => {
-    reviewModelMock.findOne.mockResolvedValue(undefined)
-
-    expect(() => findReviewForAccessRequest('')).rejects.toThrowError(
-      /^The requested access request review was not found./,
-    )
-  })
-
-  test('findReviewForAccessRequest > Forbidden failure', async () => {
-    reviewModelMock.role = 'this-does-not-exist'
-    reviewModelMock.findOne.mockResolvedValue(reviewModelMock)
-
-    expect(() => findReviewForAccessRequest(reviewModelMock.accessRequestId)).rejects.toThrowError(
-      /^Permission error when sending getting review for Access Request./,
-    )
+    expect(reviewModelMock.find.mock.calls.at(0)).toMatchSnapshot()
   })
 
   test('createReleaseReviews > No entities found for required roles', async () => {
@@ -142,17 +126,21 @@ describe('services > review', () => {
     expect(smtpMock.requestReviewForAccessRequest).toBeCalled()
   })
 
-  test('removeAccessRequestReview > successful', async () => {
-    await removeAccessRequestReview(reviewModelMock.accessRequestId)
+  test('removeAccessRequestReviews > successful', async () => {
+    const deleteResultsMock: any = { deletedCount: 1 }
+    reviewModelMock.deleteMany.mockResolvedValue(deleteResultsMock)
 
-    expect(reviewModelMock.delete).toBeCalled()
+    await removeAccessRequestReviews(reviewModelMock.accessRequestId)
+
+    expect(reviewModelMock.deleteMany).toBeCalled()
   })
 
-  test('removeAccessRequestReview > failure', async () => {
-    reviewModelMock.findOne.mockResolvedValue(undefined)
+  test('removeAccessRequestReviews > could not delete failure', async () => {
+    const deleteResultsMock: any = { deletedCount: 0 }
+    reviewModelMock.deleteMany.mockResolvedValue(deleteResultsMock)
 
-    expect(() => removeAccessRequestReview('')).rejects.toThrowError(
-      /^The requested access request review was not found./,
+    expect(() => removeAccessRequestReviews('')).rejects.toThrowError(
+      /^The requested access request reviews could not be deleted./,
     )
   })
 })
