@@ -194,7 +194,7 @@ data:
         },
 
         fileScanners: {
-          kinds: '{{ .Values.connectors.fileScanners.kinds }}',
+          kinds: {{ toJson .Values.connectors.fileScanners.kinds }}
         },
       },
 
