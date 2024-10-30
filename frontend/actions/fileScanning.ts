@@ -13,7 +13,7 @@ export function useGetFileScannerInfo() {
 
   return {
     scannersMutate: mutate,
-    scanners: data ? data : emptyScannerList,
+    scanners: data ? data.scanners : emptyScannerList,
     isScannersLoading: isLoading,
     isScannersError: error,
   }

@@ -136,7 +136,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
                   </Typography>
                 </Link>
               </Tooltip>
-              {scanners && avChip}
+              {scanners.length > 0 && avChip}
             </Stack>
           </Grid>
           <Grid item xs={1} textAlign='right'>
