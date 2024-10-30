@@ -1,5 +1,3 @@
-import { DeleteResult } from 'mongodb'
-
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
@@ -91,13 +89,21 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
-export async function removeAccessRequestReviews(accessRequestId: string): Promise<DeleteResult> {
-  const deletions = await Review.deleteMany({ accessRequestId: accessRequestId })
+export async function removeAccessRequestReviews(accessRequestId: string) {
+  // finding and then calling potentially multiple deletes is inefficient but the mongoose-softdelete
+  // plugin doesn't cover bulkDelete
+  const accessRequestReviews = await findReviewsForAccessRequests([accessRequestId])
 
-  if (deletions.acknowledged === false) {
-    throw InternalError('The requested access request reviews could not be deleted.', {
-      accessRequestId,
-    })
+  const deletions: ReviewDoc[] = []
+  for (const accessRequestReview of accessRequestReviews) {
+    try {
+      deletions.push(await accessRequestReview.delete())
+    } catch (error) {
+      throw InternalError('The requested access request review could not be deleted.', {
+        accessRequestId,
+        error,
+      })
+    }
   }
 
   return deletions
@@ -149,7 +155,7 @@ export async function findReviewForResponse(
 
 //TODO This won't work for response refactor
 export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
-  const reviews = await Review.find({
+  const reviews: ReviewDoc[] = await Review.find({
     accessRequestId: accessRequestIds,
   })
   return reviews.filter((review) => requiredRoles.accessRequest.includes(review.role))

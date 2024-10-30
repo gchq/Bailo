@@ -67,3 +67,13 @@ exports[`services > review > findReviewsForAccessRequests > success 1`] = `
   },
 ]
 `;
+
+exports[`services > review > removeAccessRequestReviews > successful 1`] = `
+[
+  {
+    "accessRequestId": [
+      "Hello",
+    ],
+  },
+]
+`;

@@ -31,7 +31,6 @@ const reviewModelMock = vi.hoisted(() => {
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
-  obj.deleteMany = vi.fn(() => obj)
   obj.limit = vi.fn(() => obj)
   obj.unwind = vi.fn(() => obj)
   obj.at = vi.fn(() => obj)
@@ -127,20 +126,19 @@ describe('services > review', () => {
   })
 
   test('removeAccessRequestReviews > successful', async () => {
-    const deleteResultsMock: any = { acknowledged: true }
-    reviewModelMock.deleteMany.mockResolvedValue(deleteResultsMock)
-
     await removeAccessRequestReviews(reviewModelMock.accessRequestId)
 
-    expect(reviewModelMock.deleteMany).toBeCalled()
+    expect(reviewModelMock.find.mock.calls.at(0)).toMatchSnapshot()
+    expect(reviewModelMock.delete).toBeCalled()
   })
 
   test('removeAccessRequestReviews > could not delete failure', async () => {
-    const deleteResultsMock: any = { acknowledged: false }
-    reviewModelMock.deleteMany.mockResolvedValue(deleteResultsMock)
+    reviewModelMock.delete.mockImplementationOnce(() => {
+      throw Error('Error deleting object')
+    })
 
     expect(() => removeAccessRequestReviews('')).rejects.toThrowError(
-      /^The requested access request reviews could not be deleted./,
+      /^The requested access request review could not be deleted./,
     )
   })
 })
