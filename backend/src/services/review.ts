@@ -94,7 +94,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
 export async function removeAccessRequestReviews(accessRequestId: string): Promise<DeleteResult> {
   const deletions = await Review.deleteMany({ accessRequestId: accessRequestId })
 
-  if (deletions.deletedCount === 0) {
+  if (deletions.acknowledged === false) {
     throw InternalError('The requested access request reviews could not be deleted.', {
       accessRequestId,
     })

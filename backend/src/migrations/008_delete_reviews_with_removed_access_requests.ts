@@ -11,7 +11,7 @@ export async function up() {
       reviewAccessRequestId &&
       !accessRequests.some((accessRequest) => accessRequest.get('id') == reviewAccessRequestId)
     ) {
-      removeAccessRequestReviews(reviewAccessRequestId)
+      await removeAccessRequestReviews(reviewAccessRequestId)
     }
   }
 }

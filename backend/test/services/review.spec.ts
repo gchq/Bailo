@@ -127,7 +127,7 @@ describe('services > review', () => {
   })
 
   test('removeAccessRequestReviews > successful', async () => {
-    const deleteResultsMock: any = { deletedCount: 1 }
+    const deleteResultsMock: any = { acknowledged: true }
     reviewModelMock.deleteMany.mockResolvedValue(deleteResultsMock)
 
     await removeAccessRequestReviews(reviewModelMock.accessRequestId)
@@ -136,7 +136,7 @@ describe('services > review', () => {
   })
 
   test('removeAccessRequestReviews > could not delete failure', async () => {
-    const deleteResultsMock: any = { deletedCount: 0 }
+    const deleteResultsMock: any = { acknowledged: false }
     reviewModelMock.deleteMany.mockResolvedValue(deleteResultsMock)
 
     expect(() => removeAccessRequestReviews('')).rejects.toThrowError(
