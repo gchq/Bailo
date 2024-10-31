@@ -55,8 +55,11 @@ const ReleaseSchema = new Schema<ReleaseInterface & { semver: string | SemverObj
       set: function (semver: string) {
         return semverStringToObject(semver)
       },
-      get: function (semver: SemverObject) {
-        return semverObjectToString(semver)
+      get: function (semver: SemverObject | string) {
+        //009 migration script logic needed
+        if (typeof semver === 'string') {
+          return semver
+        } else return semverObjectToString(semver)
       },
     },
 

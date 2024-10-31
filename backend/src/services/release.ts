@@ -373,8 +373,8 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
     if (splitSemver[2] === undefined) {
       splitSemver[2] = '0'
     }
-    //splitSemver[0] = major, splitSemver[1] = minor, splitSemver[2] = patch
     //LOGIC - https://docs.npmjs.com/cli/v6/using-npm/semver#caret-ranges-123-025-004
+    //splitSemver[0] = major, splitSemver[1] = minor, splitSemver[2] = patch
     //if the number checked is 0, and the next number (assuming there is one) is not a zero,
     //then the next number is left-most non-zero digit in the [major, minor, patch] tuple.
     //if not, then go along 1 to the next tuple member
