@@ -339,7 +339,7 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
   const isSemverValid = semver.validRange(querySemver, { includePrerelease: false })
 
   if (!isSemverValid) {
-    throw BadReq(`Semver ('${querySemver}') is invalid `)
+    throw BadReq(`Semver range, '${querySemver}' is invalid `)
   }
 
   const { semverObj, trimmedSemver } = getSemverVariations(querySemver)
@@ -373,10 +373,14 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
     if (splitSemver[2] === undefined) {
       splitSemver[2] = '0'
     }
+    //splitSemver[0] = major, splitSemver[1] = minor, splitSemver[2] = patch
+    //LOGIC - https://docs.npmjs.com/cli/v6/using-npm/semver#caret-ranges-123-025-004
+    //if the number checked is 0, and the next number (assuming there is one) is not a zero,
+    //then the next number is left-most non-zero digit in the [major, minor, patch] tuple.
+    //if not, then go along 1 to the next tuple member
     if (splitSemver[0] === '0') {
       if (splitSemver[1] === '0') {
         if (splitSemver[2] === '0') {
-          //What to put here? Is it invalid?
           return {
             modelId: modelID,
             'semver.major': 0,
@@ -417,7 +421,7 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
     }
     //TILDE RANGE
   } else if (querySemver.includes('~')) {
-    //return query TILDE RANGE
+    //https://docs.npmjs.com/cli/v6/using-npm/semver#tilde-ranges-123-12-1 - Same as x-range, but allows patch-level changes, if minor version is specified.
     const splitSemver = trimmedSemver.split('.') //THINK THIS COULD BE IMPROVED
     const count = splitSemver.length
     switch (count) {
@@ -448,6 +452,7 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
     }
     //HYPEN RANGE
   } else if (querySemver.includes('-')) {
+    //ALLOWS LOWER <= semver < HIGHER range checks
     const [lowerSemver, upperSemver] = trimmedSemver.split('-')
     const lowerSemverObj = semverStringToObject(lowerSemver)
     const upperSemverObj = semverStringToObject(upperSemver)
@@ -495,24 +500,6 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
     )
   }
 }
-
-// export async function getReleaseBySemverLatest(user: UserInterface, modelID: string, semver: string) {
-//   const model = await getModelById(user, modelID)
-
-//   const query = getQuerySyntax(semver, modelID)
-//   const release = await Release.findOne(query)
-
-//   if (!release) {
-//     throw NotFound(`The requested release was not found.`, { modelID, semver })
-//   }
-
-//   const auth = await authorisation.release(user, model, release, ReleaseAction.View)
-//   if (!auth.success) {
-//     throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
-//   }
-
-//   return release
-// }
 
 export async function deleteRelease(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
