@@ -31,8 +31,8 @@ export function useListModels(
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
-  currentPage?: number | string,
-  pageSize?: number | string,
+  currentPage?: number,
+  pageSize?: number,
 ) {
   const queryParams = {
     ...(kind && { kind }),

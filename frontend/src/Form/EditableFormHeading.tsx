@@ -8,8 +8,8 @@ type EditableFormHeadingProps = {
   editButtonText: string
   isEdit: boolean
   isLoading: boolean
-  canUserEditOrDelete: boolean
-  actionButtonsTooltip: string
+  canUserEditOrDelete?: boolean
+  actionButtonsTooltip?: string
   onEdit: () => void
   onCancel: () => void
   onSubmit: () => void

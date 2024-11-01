@@ -173,17 +173,14 @@ export async function searchModels(
     }
   }
 
-  const promise = Promise.all([
-    ModelModel.find(query)
-      .limit(pageSize)
-      .skip((currentPage - 1) * pageSize)
-      .sort(!search ? { updatedAt: -1 } : { score: { $meta: 'textScore' } }),
-    ModelModel.find(query).countDocuments(),
-  ])
-  const [results, count] = await promise
+  const results = await ModelModel.find(query).sort(!search ? { updatedAt: -1 } : { score: { $meta: 'textScore' } })
 
+  // As we need to authenticate which models the user has permission to, we need to fetch all models that
+  // match the query first, and then filter them based on pagination.
   const auths = await authorisation.models(user, results, ModelAction.View)
-  return { results: results.filter((_, i) => auths[i].success), totalEntries: count }
+  const authorisedResults = results.filter((_, i) => auths[i].success)
+  const paginatedResults = authorisedResults.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  return { results: paginatedResults, totalEntries: authorisedResults.length }
 }
 
 export async function getModelCard(

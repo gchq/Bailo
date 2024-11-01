@@ -9,51 +9,64 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 interface PaginationSelectorProps {
-  currentPage: number | string
-  currentPageOnChange: (newValue: number | string) => void
+  currentPage: number
+  onCurrentPageChange: (newValue: number) => void
   totalEntries: number
-  pageSize: number | string
-  pageSizeOnChange: (newValue: number | string) => void
+  pageSize: number
+  onPageSizeChange: (newValue: number) => void
 }
 
 export default function PaginationSelector({
   currentPage,
-  currentPageOnChange,
+  onCurrentPageChange,
   totalEntries,
   pageSize,
-  pageSizeOnChange,
+  onPageSizeChange,
 }: PaginationSelectorProps) {
   const lastPage = useMemo(() => {
-    return Math.ceil(totalEntries / parseInt(pageSize as string))
+    return Math.ceil(totalEntries / parseInt(pageSize.toString()))
   }, [pageSize, totalEntries])
+
+  useEffect(() => {
+    if (currentPage > lastPage) {
+      onCurrentPageChange(lastPage)
+    }
+  }, [currentPage, lastPage, onCurrentPageChange])
 
   const handleBackPage = useCallback(() => {
     if (currentPage > 1) {
-      currentPageOnChange(parseInt(currentPage as string) - 1)
+      onCurrentPageChange(currentPage - 1)
     }
-  }, [currentPage, currentPageOnChange])
+  }, [currentPage, onCurrentPageChange])
 
   const handleForwardPage = useCallback(() => {
     if (currentPage < lastPage) {
-      currentPageOnChange(parseInt(currentPage as string) + 1)
+      onCurrentPageChange(currentPage + 1)
     }
-  }, [currentPage, lastPage, currentPageOnChange])
+  }, [currentPage, lastPage, onCurrentPageChange])
 
   const handleManualPageChange = useCallback(
     (event: SelectChangeEvent) => {
-      currentPageOnChange(parseInt(event.target.value) || '')
+      onCurrentPageChange(parseInt(event.target.value))
     },
-    [currentPageOnChange],
+    [onCurrentPageChange],
   )
 
-  const menuItems = useMemo(() => {
-    return [...Array(lastPage | 0)].map((_, i) => {
+  const handlePageSizeChange = useCallback(
+    (event: SelectChangeEvent) => {
+      onPageSizeChange(parseInt(event.target.value))
+    },
+    [onPageSizeChange],
+  )
+
+  const pageNumberOptions = useMemo(() => {
+    return [...Array(lastPage | 0)].map((_, index) => {
       return (
-        <MenuItem key={i} value={i + 1}>
-          {i + 1}
+        <MenuItem key={index} value={index + 1}>
+          {index + 1}
         </MenuItem>
       )
     })
@@ -67,16 +80,16 @@ export default function PaginationSelector({
       <Typography>Page:</Typography>
       <Select
         size='small'
-        value={currentPage.toString()}
-        label='Age'
+        value={`${currentPage}`}
+        label='Page'
         onChange={handleManualPageChange}
         MenuProps={{
-          style: {
+          sx: {
             maxHeight: 400,
           },
         }}
       >
-        {menuItems}
+        {pageNumberOptions}
       </Select>
       <Typography>of {Math.round(lastPage)}</Typography>
       <FormControl sx={{ m: 1, minWidth: 100 }}>
@@ -85,8 +98,8 @@ export default function PaginationSelector({
           labelId='page-size-selector'
           label='Page size'
           size='small'
-          value={pageSize}
-          onChange={(event) => pageSizeOnChange(event.target.value)}
+          value={`${pageSize}`}
+          onChange={handlePageSizeChange}
         >
           <MenuItem value={10}>10</MenuItem>
           <MenuItem value={20}>20</MenuItem>

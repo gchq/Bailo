@@ -40,8 +40,8 @@ export default function Marketplace() {
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
-  const [currentPage, setCurrentPage] = useState<number | string>(1)
-  const [pageSize, setPageSize] = useState<number | string>(10)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, totalModels, isModelsError, isModelsLoading } = useListModels(
@@ -76,11 +76,19 @@ export default function Marketplace() {
   const theme = useTheme()
   const router = useRouter()
 
-  const { filter: filterFromQuery, task: taskFromQuery, libraries: librariesFromQuery } = router.query
+  const {
+    filter: filterFromQuery,
+    task: taskFromQuery,
+    libraries: librariesFromQuery,
+    currentPage: currentPageFromQuery,
+    pageSize: pageSizeFromQuery,
+  } = router.query
 
   useEffect(() => {
-    if (filterFromQuery) setFilter(filterFromQuery as string)
-    if (taskFromQuery) setSelectedTask(taskFromQuery as string)
+    if (filterFromQuery && typeof filterFromQuery === 'string') setFilter(filterFromQuery)
+    if (taskFromQuery && typeof taskFromQuery === 'string') setSelectedTask(taskFromQuery)
+    if (currentPageFromQuery && typeof currentPageFromQuery === 'string') setCurrentPage(parseInt(currentPageFromQuery))
+    if (pageSizeFromQuery && typeof pageSizeFromQuery === 'string') setPageSize(parseInt(pageSizeFromQuery))
     if (librariesFromQuery) {
       let librariesAsArray: string[] = []
       if (typeof librariesFromQuery === 'string') {
@@ -90,7 +98,7 @@ export default function Marketplace() {
       }
       setSelectedLibraries([...librariesAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery])
+  }, [filterFromQuery, taskFromQuery, librariesFromQuery, currentPageFromQuery, pageSizeFromQuery])
 
   const handleSelectedTypesOnChange = useCallback((selected: string[]) => {
     if (selected.length > 0) {
@@ -117,17 +125,17 @@ export default function Marketplace() {
   )
 
   const handleCurrentPageChange = useCallback(
-    (newPage: number | string) => {
+    (newPage: number) => {
       setCurrentPage(newPage)
-      updateQueryParams('currentPage', newPage as string)
+      updateQueryParams('currentPage', newPage.toString())
     },
     [updateQueryParams],
   )
 
   const handlePageSizeChange = useCallback(
-    (newValue: number | string) => {
+    (newValue: number) => {
       setPageSize(newValue)
-      updateQueryParams('pageSize', newValue as string)
+      updateQueryParams('pageSize', newValue.toString())
     },
     [updateQueryParams],
   )
@@ -266,15 +274,15 @@ export default function Marketplace() {
                   />
                 </Tabs>
               </Box>
-              {isModelsLoading && <Loading />}
               <Stack spacing={2}>
                 <PaginationSelector
                   currentPage={currentPage}
-                  currentPageOnChange={(newValue) => handleCurrentPageChange(newValue)}
+                  onCurrentPageChange={(newValue) => handleCurrentPageChange(newValue)}
                   totalEntries={totalModels}
                   pageSize={pageSize}
-                  pageSizeOnChange={(newValue) => handlePageSizeChange(newValue)}
+                  onPageSizeChange={(newValue) => handlePageSizeChange(newValue)}
                 />
+                {(isModelsLoading || isDataCardsLoading) && <Loading />}
                 {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                   <div data-test='modelListBox'>
                     <EntryList
@@ -297,10 +305,10 @@ export default function Marketplace() {
                 )}
                 <PaginationSelector
                   currentPage={currentPage}
-                  currentPageOnChange={(newValue) => handleCurrentPageChange(newValue)}
+                  onCurrentPageChange={(newValue) => handleCurrentPageChange(newValue)}
                   totalEntries={totalModels}
                   pageSize={pageSize}
-                  pageSizeOnChange={(newValue) => handlePageSizeChange(newValue)}
+                  onPageSizeChange={(newValue) => handlePageSizeChange(newValue)}
                 />
               </Stack>
             </Paper>
