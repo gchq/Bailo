@@ -37,7 +37,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            models: z.array(
+            results: z.array(
               z.object({
                 id: z.string().openapi({ example: 'yolo-abcdef' }),
                 name: z.string().openapi({ example: 'Yolo v4' }),
@@ -64,8 +64,8 @@ export interface ModelSearchResult {
   kind: EntryKindKeys
 }
 
-interface GetModelsResponse {
-  models: Array<ModelSearchResult>
+export interface GetModelsResponse {
+  results: Array<ModelSearchResult>
   totalEntries: number
 }
 
@@ -89,7 +89,7 @@ export const getModelsSearch = [
       currentPage,
       pageSize,
     )
-    const models = foundModels.results.map((model) => ({
+    const results = foundModels.results.map((model) => ({
       id: model.id,
       name: model.name,
       description: model.description,
@@ -97,8 +97,8 @@ export const getModelsSearch = [
       kind: model.kind,
     }))
 
-    await audit.onSearchModel(req, models)
+    await audit.onSearchModel(req, results)
 
-    return res.json({ models, totalEntries: foundModels.totalEntries })
+    return res.json({ results, totalEntries: foundModels.totalEntries })
   },
 ]
