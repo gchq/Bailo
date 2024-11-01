@@ -138,7 +138,23 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
             </Stack>
           </div>
           {!isEdit && (
-            <>
+            <Stack direction='row' spacing={1}>
+              {!readOnly && (
+                <Tooltip title={requiredRolesText}>
+                  <Button
+                    disabled={!canEdit}
+                    variant='outlined'
+                    onClick={() => {
+                      handleActionButtonClose()
+                      setIsEdit(!isEdit)
+                    }}
+                    data-test='editEntryCardButton'
+                    startIcon={<EditIcon fontSize='small' />}
+                  >
+                    {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                  </Button>
+                </Tooltip>
+              )}
               <Button data-test='openEntryOverviewActions' variant='contained' onClick={handleActionButtonClick}>
                 Actions
               </Button>
@@ -176,25 +192,8 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
                   </ListItemIcon>
                   <ListItemText>View History</ListItemText>
                 </MenuItem>
-                {!readOnly && (
-                  <Tooltip title={requiredRolesText}>
-                    <MenuItem
-                      disabled={!canEdit}
-                      onClick={() => {
-                        handleActionButtonClose()
-                        setIsEdit(!isEdit)
-                      }}
-                      data-test='editEntryCardButton'
-                    >
-                      <ListItemIcon>
-                        <EditIcon fontSize='small' />
-                      </ListItemIcon>
-                      <ListItemText>{`Edit ${EntryCardKindLabel[entry.kind]}`}</ListItemText>
-                    </MenuItem>
-                  </Tooltip>
-                )}
               </Menu>
-            </>
+            </Stack>
           )}
           {isEdit && (
             <SaveAndCancelButtons
