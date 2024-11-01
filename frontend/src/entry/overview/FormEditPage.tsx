@@ -1,3 +1,4 @@
+import { Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
 import PersonIcon from '@mui/icons-material/Person'
@@ -155,7 +156,12 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
                   </Button>
                 </Tooltip>
               )}
-              <Button data-test='openEntryOverviewActions' variant='contained' onClick={handleActionButtonClick}>
+              <Button
+                startIcon={<MenuIcon />}
+                data-test='openEntryOverviewActions'
+                variant='contained'
+                onClick={handleActionButtonClick}
+              >
                 Actions
               </Button>
               <Menu MenuListProps={{ dense: true }} anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
