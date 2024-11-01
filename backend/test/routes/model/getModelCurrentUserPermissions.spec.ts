@@ -3,9 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { getModelCurrentUserPermissionsSchema } from '../../../src/routes/v2/model/getModelCurrentUserPermissions.js'
 import { createFixture, testGet } from '../../testUtils/routes.js'
 
-vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
-vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/connectors/audit/index.js')
 
 describe('routes > model > getModelCurrentUserPermissions', () => {

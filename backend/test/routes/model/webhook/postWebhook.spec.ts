@@ -3,9 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { postWebhookSchema } from '../../../../src/routes/v2/model/webhook/postWebhook.js'
 import { createFixture, testPost } from '../../../testUtils/routes.js'
 
-vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/utils/user.js')
-vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/connectors/audit/index.js')
 vi.mock('../../../../src/connectors/authorisation/index.js')
 

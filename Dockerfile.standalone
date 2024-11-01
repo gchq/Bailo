@@ -81,6 +81,7 @@ COPY --from=frontend /app/.next/standalone ./
 COPY --from=frontend /app/.next/static ./.next/static
 COPY --from=frontend /app/public ./public
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV HOSTNAME 0.0.0.0
 
 COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 

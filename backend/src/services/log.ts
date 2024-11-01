@@ -15,6 +15,14 @@ interface BunyanLog {
   src: { file: string; line: number }
   msg: string
 }
+
+interface RequestCompletedLog extends BunyanLog {
+  method: string
+  url: string
+  status: number
+  'response-time': number
+}
+
 export function isBunyanLogGuard(data: unknown): data is BunyanLog {
   if (typeof data !== 'object' || data === null) {
     return false
@@ -63,7 +71,7 @@ export class Writer extends WritableStream {
   }
 
   getSrc(src: { file: string; line: any }) {
-    const line = src.file.replace(this.basepath, '')
+    const line = src.file.replace(this.basepath, '').replace('file://', '')
 
     if (line.startsWith('routes/middleware/expressLogger.ts')) {
       return 'express'
@@ -74,6 +82,19 @@ export class Writer extends WritableStream {
 
   static representValue(value: unknown) {
     return typeof value === 'object' ? util.inspect(value) : String(value)
+  }
+
+  static isRequestCompleted(data: unknown): data is RequestCompletedLog {
+    if (typeof data !== 'object' || data === null) {
+      return false
+    }
+
+    if (!('msg' in data) || typeof data.msg !== 'string') {
+      return false
+    }
+
+    const keys = Object.keys(data)
+    return ['requestId', 'url', 'method'].every((k) => keys.includes(k)) && data.msg === 'Request completed'
   }
 
   static getAttributes(data: any) {
@@ -92,9 +113,9 @@ export class Writer extends WritableStream {
     ])
     let keys = Object.keys(attributes)
 
-    if (['id', 'url', 'method', 'response-time', 'status'].every((k) => keys.includes(k))) {
+    if (Writer.isRequestCompleted(data)) {
       // this is probably a req object.
-      attributes = omit(attributes, ['id', 'url', 'method', 'response-time', 'status'])
+      attributes = omit(attributes, ['requestId', 'agent'])
       keys = Object.keys(attributes)
     }
 
@@ -121,9 +142,14 @@ export class Writer extends WritableStream {
     const level = Writer.getLevel(data.level)
     const src = data.src ? this.getSrc(data.src) : undefined
     const attributes = Writer.getAttributes(data)
-    const formattedAttributes = attributes.length ? ` (${attributes})` : ''
+    const formattedAttributes = attributes.length ? `${data.msg ? ' ' : ''}(${attributes})` : ''
 
-    const message = `${level} - (${src}): ${data.msg}${formattedAttributes}`
+    let message
+    if (Writer.isRequestCompleted(data)) {
+      message = `${level} - ${data.status} ${data.method} ${data.url} ${data['response-time']}ms`
+    } else {
+      message = `${level} - (${src}): ${data.msg}${formattedAttributes}`
+    }
 
     const pipe = data.level >= 40 ? 'stderr' : 'stdout'
     process[pipe].write(`${message}\n`)
@@ -145,7 +171,7 @@ if (process.env.NODE_ENV !== 'production') {
   const currentDirectory = getDirectory(import.meta.url)
 
   streams.push({
-    level: 'trace',
+    level: config.log.level,
     type: 'raw',
     stream: new Writer({
       basepath: join(currentDirectory, '..', '..'),
