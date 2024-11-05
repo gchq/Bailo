@@ -6,12 +6,10 @@ import {
   useGetAccessRequest,
   useGetAccessRequestsForModelId,
 } from 'actions/accessRequest'
-import { useGetModel } from 'actions/model'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
-import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
@@ -19,11 +17,9 @@ import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EditableFormHeading from 'src/Form/EditableFormHeading'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
-import { AccessRequestInterface, EntryKind, SplitSchemaNoRender } from 'types/types'
-import { entitiesIncludesCurrentUser } from 'utils/entityUtils'
+import { AccessRequestInterface, SplitSchemaNoRender } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema, validateForm } from 'utils/formUtils'
-import { getCurrentUserRoles, hasRole } from 'utils/roles'
 
 type EditableAccessRequestFormProps = {
   accessRequest: AccessRequestInterface
@@ -46,26 +42,10 @@ export default function EditableAccessRequestForm({
   const { isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(accessRequest.modelId)
   const { mutateReviews } = useGetReviewRequestsForUser()
-  const { model, isModelLoading, isModelError } = useGetModel(accessRequest.modelId, EntryKind.MODEL)
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+
   const router = useRouter()
-
-  const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
-
-  const [canUserEditOrDelete, actionButtonsTooltip] = useMemo(() => {
-    const isUserOwner = hasRole(currentUserRoles, ['owner'])
-    const isUserNamedInAccessRequest = entitiesIncludesCurrentUser(
-      accessRequest.metadata.overview.entities,
-      currentUser,
-    )
-    const actionButtonsTooltip = !(isUserOwner || isUserNamedInAccessRequest)
-      ? 'Only model owners or additional contacts can edit/delete an Access Request'
-      : ''
-
-    return [isUserOwner || isUserNamedInAccessRequest, actionButtonsTooltip]
-  }, [accessRequest.metadata.overview.entities, currentUser, currentUserRoles])
 
   const handleDeleteConfirm = useCallback(async () => {
     setDeleteErrorMessage('')
@@ -145,17 +125,9 @@ export default function EditableAccessRequestForm({
     return <MessageAlert message={isAccessRequestError.info.message} severity='error' />
   }
 
-  if (isModelError) {
-    return <MessageAlert message={isModelError.info.message} severity='error' />
-  }
-
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
-
   return (
     <>
-      {(isSchemaLoading || isModelLoading || isCurrentUserLoading) && <Loading />}
+      {isSchemaLoading && <Loading />}
       <Box sx={{ py: 1 }}>
         <EditableFormHeading
           heading={
@@ -171,10 +143,10 @@ export default function EditableAccessRequestForm({
               </Stack>
             </div>
           }
+          editAction='editAccessRequest'
+          deleteAction='deleteAccessRequest'
           editButtonText='Edit Access Request'
           deleteButtonText='Delete Request'
-          canUserEditOrDelete={canUserEditOrDelete}
-          actionButtonsTooltip={actionButtonsTooltip}
           isEdit={isEdit}
           isLoading={isLoading}
           onEdit={handleEdit}
@@ -182,7 +154,6 @@ export default function EditableAccessRequestForm({
           onSubmit={handleSubmit}
           onDelete={handleDelete}
           errorMessage={errorMessage}
-          showDeleteButton
         />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
         <ConfirmationDialogue
