@@ -1,6 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Box from '@mui/material/Box'
-import Image from 'next/image'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 
 import bailoUploadFile from 'public/docs/bailo_upload_new_release_file.png'
 import bailoUploadedFile from 'public/docs/bailo_created_release_upload_file.png'
@@ -17,17 +16,13 @@ the updated parameters or information. In this example we will be adding `yolov4
 
 <br />
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoUploadFile} />
-</Box>
+<MigrationImageBehaviour src={bailoUploadFile} />
 
 ## Adding files to an existing release
 
 Similarly, you can upload and delete a file to an existing release by editing an existing release.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoUploadedFile} />
-</Box>
+<MigrationImageBehaviour src={bailoUploadedFile} />
 
 ## Uploading files programatically
 

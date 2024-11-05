@@ -1,15 +1,12 @@
-import Image from 'next/image'
-import Box from '@mui/material/Box'
 import bailoMarketIcon from 'public/docs/bailo_market_icon.png'
 import DocsWrapper from 'src/docs/DocsWrapper'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 
 ## **Bailo Marketplace**
 
 The models added to Bailo are displayed in the Bailo Marketplace.
 
-<Box sx={{ margin: 'auto' }}>
-  <Image src={bailoMarketIcon} height={550} />
-</Box>
+<MigrationImageBehaviour src={bailoMarketIcon} />
 
 This enables the models to be discoverable to other users. There is an exception to this, where the models are marked as
 private. In these instances the model will not be displayed.
