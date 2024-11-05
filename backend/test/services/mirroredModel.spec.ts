@@ -2,8 +2,21 @@ import { PassThrough } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { FileScanResult } from '../../src/connectors/fileScanning/Base.js'
 import { UserInterface } from '../../src/models/User.js'
 import { exportModel, importModel } from '../../src/services/mirroredModel.js'
+
+const fileScanResult: FileScanResult = {
+  state: 'complete',
+  isInfected: false,
+  toolName: 'Test',
+}
+
+const fileScanningMock = vi.hoisted(() => ({
+  info: vi.fn(() => []),
+  scan: vi.fn(() => new Promise(() => [fileScanResult])),
+}))
+vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
 
 const fflateMock = vi.hoisted(() => ({
   unzipSync: vi.fn(),
@@ -32,9 +45,6 @@ const configMock = vi.hoisted(
     ({
       ui: {
         modelMirror: {
-          enabled: true,
-        },
-        avScanning: {
           enabled: true,
         },
       },
@@ -80,7 +90,7 @@ const releaseMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
 const fileMocks = vi.hoisted(() => ({
-  getFilesByIds: vi.fn(() => [{ _id: '123', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() }]),
+  getFilesByIds: vi.fn(() => [{ _id: '123', avScan: [{ state: 'complete', isInfected: false }], toJSON: vi.fn() }]),
   getTotalFileSize: vi.fn(() => 42),
   downloadFile: vi.fn(() => ({ Body: 'test' })),
 }))
@@ -218,8 +228,8 @@ describe('services > mirroredModel', () => {
 
   test('exportModel > export contains infected file', async () => {
     fileMocks.getFilesByIds.mockReturnValueOnce([
-      { _id: '123', avScan: { state: 'complete', isInfected: true }, toJSON: vi.fn() },
-      { _id: '321', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() },
+      { _id: '123', avScan: [{ state: 'complete', isInfected: true }], toJSON: vi.fn() },
+      { _id: '321', avScan: [{ state: 'complete', isInfected: false }], toJSON: vi.fn() },
     ])
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await expect(response).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
@@ -228,8 +238,8 @@ describe('services > mirroredModel', () => {
 
   test('exportModel > export contains incomplete file scan', async () => {
     fileMocks.getFilesByIds.mockReturnValueOnce([
-      { _id: '123', avScan: { state: 'inProgress' } as any, toJSON: vi.fn() },
-      { _id: '321', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() },
+      { _id: '123', avScan: [{ state: 'inProgress' }] as any, toJSON: vi.fn() },
+      { _id: '321', avScan: [{ state: 'complete', isInfected: false }], toJSON: vi.fn() },
     ])
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await expect(response).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
@@ -239,8 +249,8 @@ describe('services > mirroredModel', () => {
   test('exportModel > export missing file scan', async () => {
     fileMocks.getFilesByIds.mockReturnValueOnce([
       { _id: '123', toJSON: vi.fn() } as any,
-      { _id: '321', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() },
-      { _id: '321', avScan: { state: 'complete', isInfected: false }, toJSON: vi.fn() },
+      { _id: '321', avScan: [{ state: 'complete', isInfected: false }], toJSON: vi.fn() },
+      { _id: '321', avScan: [{ state: 'complete', isInfected: false }], toJSON: vi.fn() },
     ])
     const response = exportModel({} as UserInterface, 'testmod', true, ['1.2.3'])
     await expect(response).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')

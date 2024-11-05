@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { FileScanResult } from '../../src/connectors/fileScanning/Base.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   downloadFile,
@@ -14,6 +15,7 @@ import {
 } from '../../src/services/file.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
+vi.mock('../../src/connectors/fileScanning/index.js')
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -32,15 +34,15 @@ const configMock = vi.hoisted(
           port: 8080,
         },
       },
-      ui: {
-        avScanning: {
-          enabled: false,
-        },
-      },
       s3: {
         buckets: {
           uploads: 'uploads',
           registry: 'registry',
+        },
+      },
+      connectors: {
+        fileScanners: {
+          kinds: ['clamAV'],
         },
       },
     }) as any,
@@ -49,6 +51,18 @@ vi.mock('../../src/utils/config.js', () => ({
   __esModule: true,
   default: configMock,
 }))
+
+const fileScanResult: FileScanResult = {
+  state: 'complete',
+  isInfected: false,
+  toolName: 'Test',
+}
+
+const fileScanningMock = vi.hoisted(() => ({
+  info: vi.fn(() => []),
+  scan: vi.fn(() => new Promise(() => [fileScanResult])),
+}))
+vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
@@ -99,7 +113,6 @@ describe('services > file', () => {
     const mime = 'text/plain'
     const stream = new Readable() as any
     fileModelMocks.save.mockResolvedValueOnce({ example: true })
-
     const result = await uploadFile(user, modelId, name, mime, stream)
 
     expect(s3Mocks.putObjectStream).toBeCalled()
@@ -109,7 +122,11 @@ describe('services > file', () => {
 
   test('uploadFile > virus scan initialised', async () => {
     vi.spyOn(configMock, 'avScanning', 'get').mockReturnValue({ clamdscan: 'test' })
-    vi.spyOn(configMock, 'ui', 'get').mockReturnValue({ avScanning: { enabled: true } })
+    vi.spyOn(configMock, 'connectors', 'get').mockReturnValue({
+      fileScanners: {
+        kinds: ['clamAV'],
+      },
+    })
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const name = 'testFile'

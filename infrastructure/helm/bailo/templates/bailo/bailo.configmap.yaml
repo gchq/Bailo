@@ -63,7 +63,6 @@ data:
       },
 
       avScanning: {
-        enabled: {{ .Values.clamav.enabled }},
         clamdscan: {
           host: '{{ include "bailo.fullname" . }}-clamav',
           port: {{ .Values.clamav.port }},
@@ -192,6 +191,10 @@ data:
 
         audit: {
           kind: '{{ .Values.connectors.audit.kind }}',
+        },
+
+        fileScanners: {
+          kinds: {{ toJson .Values.connectors.fileScanners.kinds }}
         },
       },
 

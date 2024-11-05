@@ -6,6 +6,7 @@ import {
   useGetAccessRequest,
   useGetAccessRequestsForModelId,
 } from 'actions/accessRequest'
+import { useGetReviewRequestsForUser } from 'actions/review'
 import { useGetSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { useCallback, useContext, useEffect, useState } from 'react'
@@ -40,22 +41,24 @@ export default function EditableAccessRequestForm({
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(accessRequest.schemaId)
   const { isAccessRequestError, mutateAccessRequest } = useGetAccessRequest(accessRequest.modelId, accessRequest.id)
   const { mutateAccessRequests } = useGetAccessRequestsForModelId(accessRequest.modelId)
+  const { mutateReviews } = useGetReviewRequestsForUser()
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
   const router = useRouter()
 
   const handleDeleteConfirm = useCallback(async () => {
-    setErrorMessage('')
+    setDeleteErrorMessage('')
     const res = await deleteAccessRequest(accessRequest.modelId, accessRequest.id)
     if (!res.ok) {
       setDeleteErrorMessage(await getErrorMessage(res))
     } else {
       mutateAccessRequests()
+      mutateReviews()
       setOpen(false)
       router.push(`/model/${accessRequest.modelId}?tab=access`)
     }
-  }, [mutateAccessRequests, accessRequest, router])
+  }, [accessRequest.modelId, accessRequest.id, mutateAccessRequests, mutateReviews, router])
 
   async function handleSubmit() {
     if (schema) {
@@ -102,6 +105,10 @@ export default function EditableAccessRequestForm({
     resetForm()
   }
 
+  function handleDelete() {
+    setOpen(true)
+  }
+
   useEffect(() => {
     resetForm()
   }, [resetForm])
@@ -145,7 +152,7 @@ export default function EditableAccessRequestForm({
           onEdit={handleEdit}
           onCancel={handleCancel}
           onSubmit={handleSubmit}
-          onDelete={() => setOpen(true)}
+          onDelete={handleDelete}
           errorMessage={errorMessage}
         />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />

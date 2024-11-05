@@ -10,6 +10,7 @@ import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
+import { getFilescanningInfo } from './routes/v2/filescanning/getFilescanningInfo.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -216,6 +217,8 @@ server.get('/api/v2/user/tokens/list', ...getUserTokenList)
 server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
 server.get('/api/v2/specification', ...getSpecification)
+
+server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

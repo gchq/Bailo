@@ -61,19 +61,4 @@ exports[`services > file > removeFile > success 1`] = `
 }
 `;
 
-exports[`services > file > uploadFile > virus scan initialised 1`] = `
-[
-  [
-    "scan-complete",
-    [Function],
-  ],
-  [
-    "error",
-    [Function],
-  ],
-  [
-    "timeout",
-    [Function],
-  ],
-]
-`;
+exports[`services > file > uploadFile > virus scan initialised 1`] = `[]`;

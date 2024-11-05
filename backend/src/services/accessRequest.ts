@@ -17,7 +17,7 @@ import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
-import { createAccessRequestReviews } from './review.js'
+import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
 import { getSchemaById } from './schema.js'
 import { sendWebhooks } from './webhook.js'
 
@@ -90,6 +90,8 @@ export async function removeAccessRequest(user: UserInterface, accessRequestId: 
   }
 
   await accessRequest.delete()
+
+  await removeAccessRequestReviews(accessRequestId)
 
   return { accessRequestId }
 }

@@ -1,3 +1,15 @@
+FROM python:3.13.0-bullseye AS sphinx-docs
+
+RUN apt update && apt install -y pandoc
+
+WORKDIR /app/docs
+
+COPY docs .
+
+RUN pip install bailo -r requirements.txt
+
+RUN make dirhtml
+
 FROM node:22.6.0-alpine AS installer
 
 RUN apk add --no-cache libc6-compat ca-certificates
@@ -9,6 +21,7 @@ COPY package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 
 COPY . .
+COPY --from=sphinx-docs /app/docs/python-docs python-docs
 
 EXPOSE 3001
 EXPOSE 9229

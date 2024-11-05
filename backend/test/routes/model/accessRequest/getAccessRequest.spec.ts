@@ -7,7 +7,6 @@ import { createFixture, testGet } from '../../../testUtils/routes.js'
 import { testAccessRequest } from '../../../testUtils/testModels.js'
 
 vi.mock('../../../../src/utils/user.js')
-vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/connectors/audit/index.js')
 vi.mock('../../../../src/connectors/authorisation/index.js')
 

@@ -40,7 +40,7 @@ describe('middleware > defaultAuthentication', () => {
     const request = {
       user: 'test',
       log: {
-        debug: vi.fn(),
+        trace: vi.fn(),
       },
     } as Request
     const next = vi.fn()
