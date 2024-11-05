@@ -10,7 +10,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
 import { SnackbarProvider } from 'notistack'
 import { useEffect } from 'react'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
@@ -26,10 +25,7 @@ export default function MyApp(props: AppProps) {
   const { Component, pageProps } = props
   const themeModeValue = useThemeMode()
   const unsavedChangesValue = useUnsavedChanges()
-  const router = useRouter()
-  const { modelId, dataCardId, accessRequestId }: { modelId?: string; dataCardId?: string; accessRequestId?: string } =
-    router.query
-  const userPermissions = useUserPermissions(modelId || dataCardId, accessRequestId)
+  const userPermissions = useUserPermissions()
 
   // This is set so that 'react-markdown-editor' respects the theme set by MUI.
   useEffect(() => {

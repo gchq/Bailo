@@ -1,5 +1,6 @@
 import { useGetCurrentUserPermissionsForAccessRequest } from 'actions/accessRequest'
 import { useGetCurrentUserPermissionsForEntry } from 'actions/model'
+import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { AccessRequestUserPermissions, EntryUserPermissions, PermissionDetail, UserPermissions } from 'types/types'
 
@@ -31,7 +32,12 @@ const defaultEntryPermissions: EntryUserPermissions = {
 
 export const defaultUserPermissions = { ...defaultEntryPermissions, ...defaultAccessRequestPermissions }
 
-export default function useUserPermissions(entryId?: string, accessRequestId?: string): UserPermissionsHook {
+export default function useUserPermissions(): UserPermissionsHook {
+  const router = useRouter()
+  const { modelId, dataCardId, accessRequestId }: { modelId?: string; dataCardId?: string; accessRequestId?: string } =
+    router.query
+  const entryId = modelId || dataCardId
+
   const { entryUserPermissions } = useGetCurrentUserPermissionsForEntry(entryId)
   const { accessRequestUserPermissions } = useGetCurrentUserPermissionsForAccessRequest(entryId, accessRequestId)
 
