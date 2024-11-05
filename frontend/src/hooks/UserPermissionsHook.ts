@@ -10,7 +10,7 @@ export type UserPermissionsHook = {
 
 const defaultPermissionDetail: PermissionDetail = {
   hasPermission: false,
-  info: 'Permission not set.',
+  info: 'Fetching permissions...',
 }
 
 const defaultAccessRequestPermissions: AccessRequestUserPermissions = {
