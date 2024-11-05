@@ -18,7 +18,7 @@ function ResponsiveImage({ src, scaling = 50, alt }) {
         paddingBottom: `max(350px, ${scaling}%)`,
       }}
     >
-      <Image loader={imageLoader} className='next-image' src={src} layout='fill' objectFit='contain' alt={alt} />
+      <Image loader={imageLoader} className='next-image' src={src} fill style={{ objectFit: 'contain' }} alt={alt} />
     </div>
   )
 }
