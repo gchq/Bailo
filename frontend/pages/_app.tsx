@@ -25,7 +25,7 @@ export default function MyApp(props: AppProps) {
   const { Component, pageProps } = props
   const themeModeValue = useThemeMode()
   const unsavedChangesValue = useUnsavedChanges()
-  const userPermissions = useUserPermissions()
+  const userPermissionsValue = useUserPermissions()
 
   // This is set so that 'react-markdown-editor' respects the theme set by MUI.
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function MyApp(props: AppProps) {
       <ThemeProvider theme={themeModeValue.theme}>
         <UnsavedChangesContext.Provider value={unsavedChangesValue}>
           <ThemeModeContext.Provider value={themeModeValue}>
-            <UserPermissionsContext.Provider value={userPermissions}>
+            <UserPermissionsContext.Provider value={userPermissionsValue}>
               <SnackbarProvider>
                 <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
                   <CssBaseline />
