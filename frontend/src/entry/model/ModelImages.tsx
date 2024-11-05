@@ -53,12 +53,18 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
         <Stack spacing={4}>
           {!readOnly && (
             <>
-              <Box sx={{ textAlign: 'right' }}>
-                <Restricted action='pushModelImage' fallback={<Button disabled>Push Image</Button>}>
-                  <Button variant='outlined' onClick={() => setOpenUploadImageDialog(true)} data-test='pushImageButton'>
-                    Push Image
-                  </Button>
-                </Restricted>
+              <Box display='flex'>
+                <Box ml='auto'>
+                  <Restricted action='pushModelImage' fallback={<Button disabled>Push Image</Button>}>
+                    <Button
+                      variant='outlined'
+                      onClick={() => setOpenUploadImageDialog(true)}
+                      data-test='pushImageButton'
+                    >
+                      Push Image
+                    </Button>
+                  </Restricted>
+                </Box>
               </Box>
               <UploadModelImageDialog
                 open={openUploadImageDialog}

@@ -54,17 +54,19 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
         {!readOnly && (
-          <Box sx={{ textAlign: 'right' }}>
-            <Restricted action='createRelease' fallback={<Button disabled>Draft new Release</Button>}>
-              <Button
-                variant='outlined'
-                onClick={handleDraftNewRelease}
-                disabled={!model.card}
-                data-test='draftNewReleaseButton'
-              >
-                Draft new Release
-              </Button>
-            </Restricted>
+          <Box display='flex'>
+            <Box ml='auto'>
+              <Restricted action='createRelease' fallback={<Button disabled>Draft new Release</Button>}>
+                <Button
+                  variant='outlined'
+                  onClick={handleDraftNewRelease}
+                  disabled={!model.card}
+                  data-test='draftNewReleaseButton'
+                >
+                  Draft new Release
+                </Button>
+              </Restricted>
+            </Box>
           </Box>
         )}
         {isReleasesLoading && <Loading />}
