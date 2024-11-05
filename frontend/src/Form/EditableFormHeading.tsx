@@ -19,7 +19,6 @@ type EditableFormHeadingProps = {
   deleteAction?: RestrictedActionKeys
   errorMessage?: string
   deleteButtonText?: string
-  showDeleteButton?: boolean
   readOnly?: boolean
   disableSaveButton?: boolean
 }
@@ -37,7 +36,6 @@ export default function EditableFormHeading({
   deleteAction,
   errorMessage = '',
   deleteButtonText = 'Delete',
-  showDeleteButton = false,
   isRegistryError = false,
   readOnly = false,
   disableSaveButton = false,
@@ -58,7 +56,7 @@ export default function EditableFormHeading({
                 {editButtonText}
               </Button>
             </Restricted>
-            {showDeleteButton && deleteAction && (
+            {deleteAction && deleteButtonText && (
               <Restricted action={deleteAction} fallback={<Button disabled>{deleteButtonText}</Button>}>
                 <Button
                   variant='contained'

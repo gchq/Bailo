@@ -147,7 +147,6 @@ export default function EditableAccessRequestForm({
           onSubmit={handleSubmit}
           onDelete={() => setOpen(true)}
           errorMessage={errorMessage}
-          showDeleteButton
         />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
         <ConfirmationDialogue
