@@ -30,9 +30,28 @@ export function useGetAccessRequest(modelId: string | undefined, accessRequestId
 
   return {
     mutateAccessRequest: mutate,
-    accessRequest: data ? data.accessRequest : undefined,
+    accessRequest: data?.accessRequest,
     isAccessRequestLoading: isLoading,
     isAccessRequestError: error,
+  }
+}
+
+export function useGetCurrentUserPermissionsForAccessRequest(entryId?: string, accessRequestId?: string) {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      permissions: AccessRequestUserPermissions
+    },
+    ErrorInfo
+  >(
+    entryId && accessRequestId ? `/api/v2/model/${entryId}/access-request/${accessRequestId}/permissions/mine` : null,
+    fetcher,
+  )
+
+  return {
+    mutateAccessRequestUserPermissions: mutate,
+    accessRequestUserPermissions: data?.permissions,
+    isAccessRequestUserPermissionsLoading: isLoading,
+    isAccessRequestUserPermissionsError: error,
   }
 }
 
@@ -65,23 +84,4 @@ export function postAccessRequestComment(modelId: string, accessRequestId: strin
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ comment }),
   })
-}
-
-export function useGetCurrentUserPermissionsForAccessRequest(entryId?: string, accessRequestId?: string) {
-  const { data, isLoading, error, mutate } = useSWR<
-    {
-      permissions: AccessRequestUserPermissions
-    },
-    ErrorInfo
-  >(
-    entryId && accessRequestId ? `/api/v2/model/${entryId}/access-request/${accessRequestId}/permissions/mine` : null,
-    fetcher,
-  )
-
-  return {
-    mutateAccessRequestUserPermissions: mutate,
-    accessRequestUserPermissions: data ? data.permissions : undefined,
-    isAccessRequestUserPermissionsLoading: isLoading,
-    isAccessRequestUserPermissionsError: error,
-  }
 }

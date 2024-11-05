@@ -8,7 +8,6 @@ import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import { useGetPermissions } from 'src/hooks/useGetPermissions'
 import { EntryKind } from 'types/types'
 
 export default function DataCard() {
@@ -20,7 +19,6 @@ export default function DataCard() {
     isModelError: isDataCardError,
   } = useGetModel(dataCardId, EntryKind.DATA_CARD)
 
-  useGetPermissions(dataCardId)
   const { userPermissions } = useContext(UserPermissionsContext)
 
   const settingsPermission = useMemo(() => userPermissions['editEntry'], [userPermissions])

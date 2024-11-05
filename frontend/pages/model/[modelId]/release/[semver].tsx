@@ -12,7 +12,6 @@ import Title from 'src/common/Title'
 import EditableRelease from 'src/entry/model/releases/EditableRelease'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import { useGetPermissions } from 'src/hooks/useGetPermissions'
 import Link from 'src/Link'
 import ReviewComments from 'src/reviews/ReviewComments'
 import { EntryKind } from 'types/types'
@@ -26,8 +25,6 @@ export default function Release() {
 
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
-
-  useGetPermissions(modelId)
 
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForModel({
     modelId,

@@ -65,7 +65,7 @@ export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
 
   return {
     mutateModel: mutate,
-    model: data ? data.model : undefined,
+    model: data?.model,
     isModelLoading: isLoading,
     isModelError: error,
   }
@@ -125,6 +125,22 @@ export function useGetModelRolesCurrentUser(id?: string) {
   }
 }
 
+export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      permissions: EntryUserPermissions
+    },
+    ErrorInfo
+  >(entryId ? `/api/v2/model/${entryId}/permissions/mine` : null, fetcher)
+
+  return {
+    mutateEntryUserPermissions: mutate,
+    entryUserPermissions: data?.permissions,
+    isEntryUserPermissionsLoading: isLoading,
+    isEntryUserPermissionsError: error,
+  }
+}
+
 export async function postModel(form: EntryForm) {
   return fetch(`/api/v2/models`, {
     method: 'post',
@@ -150,20 +166,4 @@ export async function postModelExportToS3(id: string, modelExport: ModelExportRe
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(modelExport),
   })
-}
-
-export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
-  const { data, isLoading, error, mutate } = useSWR<
-    {
-      permissions: EntryUserPermissions
-    },
-    ErrorInfo
-  >(entryId ? `/api/v2/model/${entryId}/permissions/mine` : null, fetcher)
-
-  return {
-    mutateEntryUserPermissions: mutate,
-    entryUserPermissions: data ? data.permissions : undefined,
-    isEntryUserPermissionsLoading: isLoading,
-    isEntryUserPermissionsError: error,
-  }
 }
