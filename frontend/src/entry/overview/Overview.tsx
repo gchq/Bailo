@@ -31,7 +31,7 @@ export default function Overview({ entry, readOnly = false }: OverviewProps) {
   ) : (
     <Container sx={{ my: 2 }}>
       {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
-      {page === OverviewPage.FORM && <FormEditPage entry={entry} />}
+      {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} />}
     </Container>
   )
 }
