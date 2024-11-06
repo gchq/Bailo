@@ -1,6 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
-import Box from '@mui/material/Box'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 
 import bailoRequestDeployment from 'public/docs/bailo_request_deployment.png'
 import bailoMyDeployments from 'public/docs/bailo_my_deployments.png'
@@ -10,9 +9,7 @@ import bailoMyDeployments from 'public/docs/bailo_my_deployments.png'
 A deployment is required to use a model that has been uploaded to Bailo. To request a deployment, first go to the model
 page and select 'Request deployment' from the actions menu.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoRequestDeployment} />
-</Box>
+<MigrationImageBehaviour src={bailoRequestDeployment} />
 
 Fill out the deployment form. This can either be done by:
 
@@ -24,8 +21,6 @@ approve a model, follow [the approvals process](../approvals/model-approvals).
 
 After your model deployment has been approved, it will automatically be made available in the 'my deployments' tab.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoMyDeployments} />
-</Box>
+<MigrationImageBehaviour src={bailoMyDeployments} />
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

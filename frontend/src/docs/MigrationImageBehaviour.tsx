@@ -2,12 +2,15 @@
 //paddingBottom is controlled by a width to height ratio
 
 import Image from 'next/image'
+import { CSSProperties } from 'react'
 
 export function imageLoader({ src }: { src: string }) {
   return src
 }
 
-function ResponsiveImage({ src, scaling = 50, alt }) {
+const css: CSSProperties = { objectFit: 'contain' }
+
+function ResponsiveImage({ src, scaling = 50, alt, style = css }) {
   return (
     <div
       style={{
@@ -18,7 +21,7 @@ function ResponsiveImage({ src, scaling = 50, alt }) {
         paddingBottom: `max(350px, ${scaling}%)`,
       }}
     >
-      <Image loader={imageLoader} className='next-image' src={src} fill style={{ objectFit: 'contain' }} alt={alt} />
+      <Image loader={imageLoader} className='next-image' src={src} fill style={style} alt={alt} />
     </div>
   )
 }

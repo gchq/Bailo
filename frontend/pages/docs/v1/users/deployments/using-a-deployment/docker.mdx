@@ -1,6 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
-import Box from '@mui/material/Box'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 
 import bailoDockerDownloadCommands from 'public/docs/bailo_docker_download_commands.png'
 
@@ -17,9 +16,7 @@ store. This is compatible with a variety of Docker clients, including 'Kubernete
 Instructions and commands required to download and run a Docker image can be found by clicking "Show download commands"
 from the deployment page.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoDockerDownloadCommands} />
-</Box>
+<MigrationImageBehaviour src={bailoDockerDownloadCommands} />
 
 Within Kubernetes and OpenShift, you must first create a secret containing your docker authentication before you can
 pull images from Bailo. To do so, follow the

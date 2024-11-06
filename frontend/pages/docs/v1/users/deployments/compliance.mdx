@@ -1,6 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
-import Box from '@mui/material/Box'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 
 import bailoDeploymentCompliance from 'public/docs/bailo_deployment_compliance.png'
 
@@ -8,9 +7,7 @@ import bailoDeploymentCompliance from 'public/docs/bailo_deployment_compliance.p
 
 A deployment is unavailable until it has passed all compliance checks. These are outlined under the 'compliance' tab.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoDeploymentCompliance} />
-</Box>
+<MigrationImageBehaviour src={bailoDeploymentCompliance} />
 
 The colour of each step represents its current state:
 

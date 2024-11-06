@@ -1,7 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-
-import Image from 'next/legacy/image'
-import Box from '@mui/material/Box'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 
 import bailoMMDiagram from 'public/mm-diagram.png'
 
@@ -9,9 +7,7 @@ import bailoMMDiagram from 'public/mm-diagram.png'
 
 {/* TODO: fix to use improved theme when available */}
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }} backgroundColor='whitesmoke'>
-  <Image src={bailoMMDiagram} />
-</Box>
+<MigrationImageBehaviour src={bailoMMDiagram} style={{ objectFit: 'contain', backgroundColor: 'whitesmoke' }} />
 
 1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
    `pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
