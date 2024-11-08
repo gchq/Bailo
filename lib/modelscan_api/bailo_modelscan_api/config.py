@@ -1,3 +1,6 @@
+"""Configuration settings for FastAPI app.
+"""
+
 from typing import Any
 
 from modelscan.settings import DEFAULT_SETTINGS
@@ -11,7 +14,7 @@ class Settings(BaseSettings):
     """
 
     app_name: str = "Bailo ModelScan API"
-    download_dir: str = "."  # TODO: use this
+    download_dir: str = "."
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
     bailo_client_url: str = "http://localhost:8080/"
