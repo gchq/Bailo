@@ -6,15 +6,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from requests import Response
-
 logger = logging.getLogger(__name__)
-
-
-class ResponsePath:
-    def __init__(self, response: Response, path: Path) -> None:
-        self.response = response
-        self.path = path
 
 
 def parse_path(path: str | Path | None) -> Path:

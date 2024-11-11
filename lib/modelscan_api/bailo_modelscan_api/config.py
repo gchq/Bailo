@@ -19,11 +19,17 @@ class Settings(BaseSettings):
     """
 
     app_name: str = "Bailo ModelScan API"
+    app_summary: str = "REST API wrapper for ModelScan package for use with Bailo."
+    app_description: str = """
+    Bailo ModelScan API allows for easy programmatic interfacing with ProtectAI's ModelScan package to scan and detect potential threats within files stored in Bailo.
+
+    You can upload files and view modelscan's result."""
+    app_version: str = "1.0.0"
     download_dir: str = "."
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
-    bailo_client_url: str = "http://localhost:8080/"
 
+    # Load in a dotenv file to set/overwrite any properties with potentially sensitive values
     model_config = SettingsConfigDict(env_file=".env")
 
 
