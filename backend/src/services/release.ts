@@ -292,6 +292,9 @@ export function semverStringToObject(semver: string) {
 }
 
 export function semverObjectToString(semver: SemverObject) {
+  if (!semver) {
+    return ''
+  }
   let metadata: string
   if (semver.metadata != undefined) {
     metadata = `-${semver.metadata}`
@@ -301,12 +304,12 @@ export function semverObjectToString(semver: SemverObject) {
   return `${semver.major}.${semver.minor}.${semver.patch}${metadata}`
 }
 
-function getSemverVariations(querySemver: string) {
-  const trimmedSemver =
-    querySemver.charAt(0) === '^' || querySemver.charAt(0) === '~' ? querySemver.slice(1) : querySemver
-  const semverObj = semverStringToObject(trimmedSemver)
-  return { semverObj, trimmedSemver }
-}
+// function getSemverVariations(querySemver: string) {
+//   const trimmedSemver =
+//     querySemver.charAt(0) === '^' || querySemver.charAt(0) === '~' ? querySemver.slice(1) : querySemver
+//   const semverObj = semverStringToObject(trimmedSemver)
+//   return { semverObj, trimmedSemver }
+// }
 
 export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
@@ -336,13 +339,118 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
     }
   }
 
-  const isSemverValid = semver.validRange(querySemver, { includePrerelease: false })
+  const semverRangeStandardised = semver.validRange(querySemver, { includePrerelease: false })
 
-  if (!isSemverValid) {
+  //1. test if valid
+  //2. if so, split
+  //3. check for inclusivity
+  //4. create query
+
+  //1
+  if (!semverRangeStandardised) {
     throw BadReq(`Semver range, '${querySemver}' is invalid `)
   }
 
-  const { semverObj, trimmedSemver } = getSemverVariations(querySemver)
+  //2
+  const [lowerSemver, upperSemver] = semverRangeStandardised.split(' ')
+
+  //3
+  //inclusive
+  const lowerSemverTrimmed = lowerSemver.replace('<', '')
+  let upperSemverTrimmed, inclusivity
+  if (upperSemver.includes('=')) {
+    //remove and extract
+    upperSemverTrimmed = upperSemver.replace('<=', '')
+  } else {
+    //exclusive
+    //remain
+    upperSemverTrimmed = upperSemver.replace('<', '')
+  }
+
+  //4
+  const lowerSemverObj = semverStringToObject(lowerSemverTrimmed)
+  const upperSemverObj = semverStringToObject(upperSemverTrimmed)
+
+  if (inclusivity)
+    return {
+      modelId: modelID,
+      $and: [
+        {
+          $or: [
+            {
+              'semver.major': { $gte: lowerSemverObj.major },
+              'semver.minor': { $gte: lowerSemverObj.minor },
+              'semver.patch': { $gte: lowerSemverObj.patch },
+            },
+            {
+              'semver.major': { $gt: lowerSemverObj.major },
+            },
+            {
+              'semver.major': { $gte: lowerSemverObj.major },
+              'semver.minor': { $gt: lowerSemverObj.minor },
+            },
+          ],
+        },
+        {
+          $or: [
+            {
+              'semver.major': { $lte: upperSemverObj.major },
+              'semver.minor': { $lte: upperSemverObj.minor },
+              'semver.patch': { $lte: upperSemverObj.patch },
+            },
+            {
+              'semver.major': { $lt: upperSemverObj.major },
+            },
+            {
+              'semver.major': { $lte: upperSemverObj.major },
+              'semver.minor': { $lt: upperSemverObj.minor },
+            },
+          ],
+        },
+      ],
+    }
+  //EXCLUSIVE
+  else {
+    return {
+      modelId: modelID,
+      $and: [
+        {
+          $or: [
+            {
+              'semver.major': { $gte: lowerSemverObj.major },
+              'semver.minor': { $gte: lowerSemverObj.minor },
+              'semver.patch': { $gte: lowerSemverObj.patch },
+            },
+            {
+              'semver.major': { $gt: lowerSemverObj.major },
+            },
+            {
+              'semver.major': { $gte: lowerSemverObj.major },
+              'semver.minor': { $gt: lowerSemverObj.minor },
+            },
+          ],
+        },
+        {
+          $or: [
+            {
+              'semver.major': { $lte: upperSemverObj.major },
+              'semver.minor': { $lte: upperSemverObj.minor },
+              'semver.patch': { $lt: upperSemverObj.patch },
+            },
+            {
+              'semver.major': { $lt: upperSemverObj.major },
+            },
+            {
+              'semver.major': { $lte: upperSemverObj.major },
+              'semver.minor': { $lt: upperSemverObj.minor },
+            },
+          ],
+        },
+      ],
+    }
+  }
+
+  //const { semverObj, trimmedSemver } = getSemverVariations(querySemver)
 
   // X-RANGE
   if (querySemver.includes('x') || querySemver.includes('X') || querySemver.includes('*')) {
