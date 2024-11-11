@@ -31,10 +31,10 @@ Create and populate a `.env` file to override and set any variables, including s
 Run:
 
 ```bash
-fastapi dev bailo_modelscan_api/main.py
+fastapi run bailo_modelscan_api/main.py
 ```
 
-Connect via the local endpoint (development only): `http://127.0.0.1:8000`
+Connect via the local endpoint: `http://127.0.0.1:8000`
 
 View the swagger docs: `http://127.0.0.1:8000/docs`
 
@@ -47,4 +47,10 @@ If already working on Bailo you may be prompted to overwrite Husky. Follow the i
 ```bash
 pip install pre-commit
 pre-commit install
+```
+
+To run in dev mode:
+
+```bash
+fastapi dev bailo_modelscan_api/main.py
 ```

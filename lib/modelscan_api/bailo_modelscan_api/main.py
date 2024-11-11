@@ -43,7 +43,7 @@ modelscan = ModelScan(settings=get_settings().modelscan_settings)
 @app.post(
     "/scan/file",
     summary="Upload and scan a file",
-    description="Upload a file which is scanned by ModelScan and return the result",
+    description="Upload a file which is scanned by ModelScan and return the result of the scan",
     status_code=HTTPStatus.OK,
     response_description="The result from ModelScan",
 )
