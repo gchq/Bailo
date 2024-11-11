@@ -331,6 +331,13 @@ describe('services > mirroredModel', () => {
     expect(logMock.error).toBeCalledWith(expect.any(Object), 'Failed to retrieve stream from temporary S3 location.')
   })
 
+  test('importModel > not enabled', async () => {
+    vi.spyOn(configMock, 'ui', 'get').mockReturnValueOnce({ modelMirror: { import: { enabled: false } } })
+    const result = importModel({} as UserInterface, '', 'https://test.com')
+
+    await expect(result).rejects.toThrowError('Importing models has not been enabled.')
+  })
+
   test('importModel > mirrored model Id empty', async () => {
     const result = importModel({} as UserInterface, '', 'https://test.com')
 

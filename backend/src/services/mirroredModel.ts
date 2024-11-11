@@ -88,6 +88,10 @@ export async function exportModel(
 }
 
 export async function importModel(_user: UserInterface, mirroredModelId: string, payloadUrl: string) {
+  if (!config.ui.modelMirror.import.enabled) {
+    throw BadReq('Importing models has not been enabled.')
+  }
+
   if (mirroredModelId === '') {
     throw BadReq('Missing mirrored model ID.')
   }
