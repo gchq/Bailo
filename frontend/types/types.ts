@@ -47,8 +47,13 @@ export interface UiConfig {
   }
 
   modelMirror: {
-    enabled: boolean
-    disclaimer: string
+    import: {
+      enabled: boolean
+    }
+    export: {
+      enabled: boolean
+      disclaimer: string
+    }
   }
   announcement: {
     enabled: boolean

@@ -264,9 +264,11 @@ instrumentation:
   debug: false
 
 modelMirror:
-  enabled: false
-  disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting'
+  import:
+    enabled: false
   export:
+    enabled: false
+    disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting'
     kmsSignature:
       enabled: false
       keyId: '123'
