@@ -33,3 +33,18 @@ Run:
 ```bash
 fastapi dev bailo_modelscan_api/main.py
 ```
+
+Connect via the local endpoint (development only): `http://127.0.0.1:8000`
+
+View the swagger docs: `http://127.0.0.1:8000/docs`
+
+## Development
+
+### Install and add pre-commit
+
+If already working on Bailo you may be prompted to overwrite Husky. Follow the instructions given by Git CLI.
+
+```bash
+pip install pre-commit
+pre-commit install
+```
