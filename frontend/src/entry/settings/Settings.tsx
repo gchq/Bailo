@@ -40,7 +40,7 @@ function isSettingsCategory(
         value === SettingsCategory.DANGER ||
         (value === SettingsCategory.MIRRORED_MODELS &&
           !entry.settings.mirror?.sourceModelId &&
-          !!uiConfig?.modelMirror.enabled)
+          !!uiConfig?.modelMirror.export.enabled)
       )
     case EntryKind.DATA_CARD:
       return value === SettingsCategory.DETAILS || value === SettingsCategory.PERMISSIONS
@@ -121,7 +121,7 @@ export default function Settings({ entry }: SettingsProps) {
             >
               Templating
             </SimpleListItemButton>
-            {!entry.settings.mirror?.sourceModelId && uiConfig.modelMirror.enabled && (
+            {!entry.settings.mirror?.sourceModelId && uiConfig.modelMirror.export.enabled && (
               <SimpleListItemButton
                 selected={selectedCategory === SettingsCategory.MIRRORED_MODELS}
                 onClick={() => handleListItemClick(SettingsCategory.MIRRORED_MODELS)}

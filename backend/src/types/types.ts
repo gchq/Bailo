@@ -60,9 +60,24 @@ export interface UiConfig {
   registry: {
     host: string
   }
+
   modelMirror: {
+    import: {
+      enabled: boolean
+    }
+    export: {
+      enabled: boolean
+      disclaimer: string
+    }
+  }
+
+  inference: {
     enabled: boolean
-    disclaimer: string
+    connection: {
+      host: string
+    }
+    authorizationTokenName: string
+    gpus: { [key: string]: string }
   }
 
   announcement: {

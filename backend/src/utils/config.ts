@@ -7,6 +7,7 @@ import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
 import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
 import { DefaultSchema } from '../services/schema.js'
+import { UiConfig } from '../types/types.js'
 import { deepFreeze } from './object.js'
 
 export interface Config {
@@ -104,43 +105,7 @@ export interface Config {
     insecure: boolean
   }
 
-  ui: {
-    banner: {
-      enabled: boolean
-      text: string
-      colour: string
-      textColor: string
-    }
-
-    issues: {
-      label: string
-      supportHref: string
-      contactHref: string
-    }
-
-    registry: {
-      host: string
-    }
-
-    inference: {
-      enabled: boolean
-      connection: {
-        host: string
-      }
-      authorizationTokenName: string
-      gpus: { [key: string]: string }
-    }
-    modelMirror: {
-      enabled: boolean
-      disclaimer: string
-    }
-
-    announcement: {
-      enabled: boolean
-      text: string
-      startTimestamp: string
-    }
-  }
+  ui: UiConfig
 
   session: {
     secret: string
