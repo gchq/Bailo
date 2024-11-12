@@ -1,13 +1,11 @@
-import _ from 'lodash'
-
 import FileModel from '../models/File.js'
 
 export async function up() {
-  const files = await FileModel.find()
-  files.forEach(async (file) => {
-    const newAvScanResult = _.cloneDeep(file.avScan)
-    file.avScan = newAvScanResult
-    await file.save()
+  const results = await FileModel.find({ avScan: { $type: 'object' } }, null, { strict: false, lean: true })
+  results.forEach(async (result) => {
+    if (!Array.isArray(result.avScan)) {
+      await FileModel.findOneAndUpdate({ _id: result._id }, { $set: { avScan: [result.avScan] } })
+    }
   })
 }
 
