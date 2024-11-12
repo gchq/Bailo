@@ -57,7 +57,7 @@ def scan_file(in_file: UploadFile, background_tasks: BackgroundTasks) -> dict[st
     """
     logger.info("Called the API endpoint to scan an uploaded file")
     try:
-        if in_file.filename:
+        if in_file.filename and str(in_file.filename).strip():
             pathlib_path = Path.joinpath(parse_path(get_settings().download_dir), str(in_file.filename))
         else:
             raise HTTPException(
@@ -102,7 +102,8 @@ def scan_file(in_file: UploadFile, background_tasks: BackgroundTasks) -> dict[st
             # Clean up the downloaded file as a background task to allow returning sooner.
             logger.info("Cleaning up downloaded file.")
             background_tasks.add_task(Path.unlink, pathlib_path, missing_ok=True)
-        except Exception:
+        except UnboundLocalError:
+            # pathlib_path may not exist.
             logger.exception("An error occurred while trying to cleanup the downloaded file.")
 
 

@@ -1,7 +1,7 @@
 # ModelScan
 
 This directory provides all of the necessary functionality to interact with
-[modelscan](https://github.com/protectai/modelscan/tree/main) as an API.
+[modelscan](https://github.com/protectai/modelscan/tree/main) as a REST API.
 
 > ModelScan is an open source project from
 > [Protect AI](https://protectai.com/?utm_campaign=Homepage&utm_source=ModelScan%20GitHub%20Page&utm_medium=cta&utm_content=Open%20Source)
@@ -40,16 +40,26 @@ View the swagger docs: `http://127.0.0.1:8000/docs`
 
 ## Development
 
-### Install and add pre-commit
+### Install dev packages
 
 If already working on Bailo you may be prompted to overwrite Husky. Follow the instructions given by Git CLI.
 
 ```bash
-pip install pre-commit
+pip install -r requirements-dev.txt
 pre-commit install
 ```
 
-To run in dev mode:
+### Tests
+
+To run the tests:
+
+```bash
+pytest
+```
+
+### Running
+
+To run in [dev mode](https://fastapi.tiangolo.com/fastapi-cli/#fastapi-dev):
 
 ```bash
 fastapi dev bailo_modelscan_api/main.py
