@@ -47,7 +47,7 @@ jobs:
         run: |
           make html
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: python-docs
           path: ./backend/docs/python-docs/html
@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download Python Docs
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: python-docs
           path: ./backend/docs/python-docs/html
