@@ -12,7 +12,7 @@ from typing import Any
 import uvicorn
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.dependencies import parse_path
-from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
 
 
@@ -34,6 +34,7 @@ app = FastAPI(
     summary=get_settings().app_summary,
     description=get_settings().app_description,
     version=get_settings().app_version,
+    dependencies=[Depends(get_settings)],
 )
 
 # Instantiating ModelScan
