@@ -356,20 +356,27 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
 
   //3
   //inclusive
-  const lowerSemverTrimmed = lowerSemver.replace('<', '')
+  const lowerSemverTrimmed = lowerSemver.replace('>=', '')
   let upperSemverTrimmed, inclusivity
-  if (upperSemver.includes('=')) {
-    //remove and extract
-    upperSemverTrimmed = upperSemver.replace('<=', '')
-  } else {
-    //exclusive
-    //remain
-    upperSemverTrimmed = upperSemver.replace('<', '')
+  if (upperSemver) {
+    if (upperSemver.includes('=')) {
+      //remove and extract
+      upperSemverTrimmed = upperSemver.replace('<=', '')
+      inclusivity = true
+    } else {
+      //exclusive
+      //remain
+      upperSemverTrimmed = upperSemver.replace('<', '')
+      inclusivity = false
+    }
   }
 
   //4
   const lowerSemverObj = semverStringToObject(lowerSemverTrimmed)
-  const upperSemverObj = semverStringToObject(upperSemverTrimmed)
+  let upperSemverObj
+  if (upperSemverTrimmed) {
+    upperSemverObj = semverStringToObject(upperSemverTrimmed)
+  }
 
   if (inclusivity)
     return {
@@ -448,164 +455,6 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
         },
       ],
     }
-  }
-
-  //const { semverObj, trimmedSemver } = getSemverVariations(querySemver)
-
-  // X-RANGE
-  if (querySemver.includes('x') || querySemver.includes('X') || querySemver.includes('*')) {
-    const newSemver = querySemver.replace('X', 'x').replace('*', 'x')
-    const splitSemver = newSemver.split('.')
-    if (splitSemver[0].includes('x')) {
-      return {
-        modelId: modelID,
-      }
-    } else if (splitSemver[1].includes('x')) {
-      return {
-        modelId: modelID,
-        'semver.major': semverObj.major,
-      }
-    } else {
-      return {
-        modelId: modelID,
-        'semver.major': semverObj.major,
-        'semver.minor': semverObj.minor,
-      }
-    }
-    // CARET-RANGE
-  } else if (querySemver.includes('^')) {
-    const splitSemver = trimmedSemver.split('.')
-    if (splitSemver[1] === undefined) {
-      splitSemver[1] = '0'
-    }
-    if (splitSemver[2] === undefined) {
-      splitSemver[2] = '0'
-    }
-    //LOGIC - https://docs.npmjs.com/cli/v6/using-npm/semver#caret-ranges-123-025-004
-    //splitSemver[0] = major, splitSemver[1] = minor, splitSemver[2] = patch
-    //if the number checked is 0, and the next number (assuming there is one) is not a zero,
-    //then the next number is left-most non-zero digit in the [major, minor, patch] tuple.
-    //if not, then go along 1 to the next tuple member
-    if (splitSemver[0] === '0') {
-      if (splitSemver[1] === '0') {
-        if (splitSemver[2] === '0') {
-          return {
-            modelId: modelID,
-            'semver.major': 0,
-            'semver.minor': 0,
-            'semver.patch': { $gte: 0 },
-          }
-        }
-        return {
-          modelId: modelID,
-          'semver.major': 0,
-          'semver.minor': 0,
-          'semver.patch': { $gte: semverObj.patch },
-          // This is equivalent to grabbing one specific release
-          //but it may have caveats in the future with the possible, future inclusion of pre-release identifiers etc
-        }
-      }
-      return {
-        modelId: modelID,
-        'semver.major': 0,
-        'semver.minor': semverObj.minor,
-        'semver.patch': { $gte: semverObj.patch },
-      }
-    } else {
-      return {
-        modelId: modelID,
-        $or: [
-          {
-            'semver.major': semverObj.major,
-            'semver.minor': { $gte: semverObj.minor },
-            'semver.patch': { $gte: semverObj.patch },
-          },
-          {
-            'semver.major': semverObj.major,
-            'semver.minor': { $gt: semverObj.minor },
-          },
-        ],
-      }
-    }
-    //TILDE RANGE
-  } else if (querySemver.includes('~')) {
-    //https://docs.npmjs.com/cli/v6/using-npm/semver#tilde-ranges-123-12-1 - Same as x-range, but allows patch-level changes, if minor version is specified.
-    const splitSemver = trimmedSemver.split('.') //THINK THIS COULD BE IMPROVED
-    const count = splitSemver.length
-    switch (count) {
-      case 1: {
-        return {
-          modelId: modelID,
-          'semver.major': semverObj.major,
-        }
-        break
-      }
-      case 2: {
-        return {
-          modelId: modelID,
-          'semver.major': semverObj.major,
-          'semver.minor': semverObj.minor,
-        }
-        break
-      }
-      case 3: {
-        return {
-          modelId: modelID,
-          'semver.major': semverObj.major,
-          'semver.minor': semverObj.minor,
-          'semver.patch': { $gte: semverObj.patch },
-        }
-        break
-      }
-    }
-    //HYPEN RANGE
-  } else if (querySemver.includes('-')) {
-    //ALLOWS LOWER <= semver < HIGHER range checks
-    const [lowerSemver, upperSemver] = trimmedSemver.split('-')
-    const lowerSemverObj = semverStringToObject(lowerSemver)
-    const upperSemverObj = semverStringToObject(upperSemver)
-    //return query HYPEN RANGE
-    return {
-      modelId: modelID,
-      $and: [
-        {
-          $or: [
-            {
-              'semver.major': { $gte: lowerSemverObj.major },
-              'semver.minor': { $gte: lowerSemverObj.minor },
-              'semver.patch': { $gte: lowerSemverObj.patch },
-            },
-            {
-              'semver.major': { $gt: lowerSemverObj.major },
-            },
-            {
-              'semver.major': { $gte: lowerSemverObj.major },
-              'semver.minor': { $gt: lowerSemverObj.minor },
-            },
-          ],
-        },
-        {
-          $or: [
-            {
-              'semver.major': { $lte: upperSemverObj.major },
-              'semver.minor': { $lte: upperSemverObj.minor },
-              'semver.patch': { $lt: upperSemverObj.patch },
-            },
-            {
-              'semver.major': { $lt: upperSemverObj.major },
-            },
-            {
-              'semver.major': { $lte: upperSemverObj.major },
-              'semver.minor': { $lt: upperSemverObj.minor },
-            },
-          ],
-        },
-      ],
-    }
-  } else {
-    throw BadReq(
-      `The semver range '${querySemver}' is not valid. IF you were looking for specific releases then use the /release api endpoint.`,
-    )
   }
 }
 

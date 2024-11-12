@@ -507,6 +507,26 @@ describe('services > release', () => {
     const result = getFileByReleaseFileName(mockUser, modelId, semver, fileName)
     expect(result).rejects.toThrowError(/^The requested file name was not found on the release./)
   })
+  //HERE
+  test('getModelReleases > range not valid', async () => {
+    const mockUser: any = { dn: 'test' }
+    const modelId = 'example'
+    releaseModelMocks.lookup.mockResolvedValueOnce([])
+
+    const result = getModelReleases(mockUser, modelId, '^2.2.b')
+
+    expect(result).rejects.toThrowError("Semver range, '^2.2.b' is invalid ")
+  })
+
+  test('getModelReleases > no semver found', async () => {
+    const mockUser: any = { dn: 'test' }
+    const modelId = 'example'
+    releaseModelMocks.lookup.mockResolvedValue([])
+
+    const result = getModelReleases(mockUser, modelId, '^1.0.3434343')
+
+    expect(result).rejects.toThrowError(`Semver range, ^1.0.3434343 is invalid `)
+  })
 
   test('getReleasesForExport > release not found', async () => {
     const mockUser: any = { dn: 'test' }
