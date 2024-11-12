@@ -10,8 +10,10 @@ import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
+import { getFilescanningInfo } from './routes/v2/filescanning/getFilescanningInfo.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
+import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
@@ -23,6 +25,7 @@ import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMult
 import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
 import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
 import { getModel } from './routes/v2/model/getModel.js'
+import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
@@ -38,6 +41,7 @@ import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
+import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
@@ -92,6 +96,7 @@ server.get('/api/v2/model/:modelId', ...getModel)
 server.patch('/api/v2/model/:modelId', ...patchModel)
 
 server.post('/api/v2/model/:modelId/export/s3', ...postRequestExportToS3)
+server.post('/api/v2/model/import/s3', ...postRequestImportFromS3)
 
 server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
 server.get('/api/v2/model/:modelId/model-card/:version/html', ...getModelCardHtml)
@@ -119,6 +124,10 @@ server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...delet
 server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
+server.get(
+  '/api/v2/model/:modelId/access-request/:accessRequestId/permissions/mine',
+  ...getAccessRequestCurrentUserPermissions,
+)
 
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
@@ -128,15 +137,6 @@ server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
-server.post('/api/v2/model/:modelId/releases', ...postRelease)
-server.get('/api/v2/model/:modelId/releases', ...getReleases)
-server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
-server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
-// This is a temporary workaround to split out the URL to disable authorisation.
-server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
-server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
-server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
-server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
 
 server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
@@ -179,6 +179,7 @@ server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReac
 
 server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
 server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
+server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
 
 server.post('/api/v2/teams', ...postTeam)
 server.get('/api/v2/teams', ...getTeams)
@@ -208,9 +209,11 @@ server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
 server.get('/api/v2/specification', ...getSpecification)
 
+server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
+
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/_build/dirhtml')))
+server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)

@@ -17,7 +17,6 @@ describe('routes > inferencing > postInference', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(postInferenceSchema)
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/inference`, fixture)
-
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
   })

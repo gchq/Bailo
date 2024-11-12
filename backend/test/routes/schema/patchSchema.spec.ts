@@ -5,8 +5,6 @@ import { patchSchemaSchema } from '../../../src/routes/v2/schema/patchSchema.js'
 import { createFixture, testPatch } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/utils/user.js')
-vi.mock('../../../src/utils/config.js')
-vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/connectors/audit/index.js')
 vi.mock('../../../src/connectors/authorisation/index.js')
 
@@ -21,17 +19,18 @@ describe('routes > schema > putSchema', async () => {
   test('successfully updates the schema', async () => {
     const fixture = createFixture(patchSchemaSchema)
     mockSchemaService.updateSchema.mockResolvedValue(fixture.body)
-    const res = await testPatch('/api/v2/schema/my-schema', { body: { active: false } })
+    const res = await testPatch(`/api/v2/schema/${fixture.params.schemaId}`, { body: { active: false, hidden: false } })
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
     expect(res.body.schema.active).toBe(false)
+    expect(res.body.schema.hidden).toBe(false)
   })
 
   test('audit > expected call', async () => {
     const fixture = createFixture(patchSchemaSchema)
     mockSchemaService.updateSchema.mockResolvedValue(fixture.body)
-    const res = await testPatch('/api/v2/schema/my-schema', fixture)
+    const res = await testPatch(`/api/v2/schema/${fixture.params.schemaId}`, fixture)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onUpdateSchema).toBeCalled()

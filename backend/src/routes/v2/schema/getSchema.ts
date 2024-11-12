@@ -5,15 +5,13 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { SchemaInterface } from '../../../models/Schema.js'
-import { findSchemaById } from '../../../services/schema.js'
+import { getSchemaById } from '../../../services/schema.js'
 import { registerPath, schemaInterfaceSchema } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const getSchemaSchema = z.object({
   params: z.object({
-    schemaId: z.string({
-      required_error: 'Must specify schema id as URL parameter',
-    }),
+    schemaId: z.string(),
   }),
 })
 
@@ -47,7 +45,7 @@ export const getSchema = [
     req.audit = AuditInfo.ViewSchema
     const { params } = parse(req, getSchemaSchema)
 
-    const schema = await findSchemaById(params.schemaId)
+    const schema = await getSchemaById(params.schemaId)
     await audit.onViewSchema(req, schema)
 
     return res.json({

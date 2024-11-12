@@ -55,7 +55,7 @@ yolo = Model.create(
     team_id="Uncategorised"
 )
 
-yolo.card_from_schema("minimal-general-v10-beta")
+yolo.card_from_schema("minimal-general-v10")
 
 # Create a new release
 my_release = yolo.create_release(version="0.1.0",
@@ -71,6 +71,15 @@ with open("yolo.onnx") as f:
 Documenation is rendered with Sphinx and served [here](https://gchq.github.io/Bailo/docs/python/index.html).
 
 ### Building locally
+
+#### prerequisites
+
+From within the `backend/docs` directory:
+
+```bash
+pip install bailo -r requirements.txt
+apt install -y pandoc
+```
 
 From the docs directory run either `make html` or `make.bat` on Windows. This will build it in the backend directory by
 default.

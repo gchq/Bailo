@@ -62,6 +62,13 @@ data:
         insecure: {{ .Values.registry.insecure }},
       },
 
+      avScanning: {
+        clamdscan: {
+          host: '{{ include "bailo.fullname" . }}-clamav',
+          port: {{ .Values.clamav.port }},
+        },
+      },
+
       smtp: {
         // Enable / disable all email sending
         enabled: true,
@@ -164,8 +171,17 @@ data:
         },
 
         modelMirror: {
-          enabled: {{ .Values.modelMirror.enabled }},
-          disclaimer: '{{ .Values.modelMirror.disclaimer }}'
+          import: {
+            enabled: {{ .Values.modelMirror.import.enabled }},
+          }
+          export: {
+            enabled: {{ .Values.modelMirror.export.enabled }},
+            disclaimer: '{{ .Values.modelMirror.export.disclaimer }}'
+          }
+        },
+
+        "avScanning": {
+          enabled: {{ .Values.clamav.enabled }},
         }
       },
 
@@ -180,6 +196,10 @@ data:
 
         audit: {
           kind: '{{ .Values.connectors.audit.kind }}',
+        },
+
+        fileScanners: {
+          kinds: {{ toJson .Values.connectors.fileScanners.kinds }}
         },
       },
 

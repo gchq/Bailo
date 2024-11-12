@@ -59,7 +59,11 @@ class Datacard(Entry):
         :return: Datacard object
         """
         res = client.post_model(
-            name=name, kind=EntryKind.DATACARD, description=description, team_id=team_id, visibility=visibility
+            name=name,
+            kind=EntryKind.DATACARD,
+            description=description,
+            team_id=team_id,
+            visibility=visibility,
         )
         datacard_id = res["model"]["id"]
         logger.info(f"Datacard successfully created on server with ID %s.", datacard_id)

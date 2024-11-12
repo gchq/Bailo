@@ -1,0 +1,60 @@
+{{- if .Values.clamav.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bailo.fullname" . }}-clamav
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: clamav
+  template:
+    metadata:
+      labels:
+        name: clamav
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsUser: {{ .Values.clamav.runAsUser }}
+      containers:
+      - name: {{ include "bailo.fullname" . }}-clamav
+        ports:
+          - name: clamavport
+            containerPort: 3310
+            protocol: TCP
+        image: {{ .Values.clamav.image }}
+        command: ["/bin/sh", "-c"]
+        args: ["/init-unprivileged && chown -R 1002:1002 /var/lib/clamav"] # Runs ClamAV as non-root unprivileged user. https://docs.clamav.net/manual/Installing/Docker.html#running-clamd-using-non-root-user-using---user-and---entrypoint
+        resources:
+          requests:
+            memory: "100Mi"
+            ephemeral-storage: "100Mi"
+            cpu: "200m"
+          limits:
+            memory: "4Gi" # This is a memory requirement for ClamAV see here: https://docs.clamav.net/manual/Installing/Docker.html#memory-ram-requirements
+            ephemeral-storage: "300Mi"
+            cpu: "1"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: clamav-signatures
+          mountPath: /var/lib/clamav
+        - name: clamav-log
+          mountPath: /var/log/clamav
+        securityContext:
+          allowPrivilegeEscalation: false
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: clamav-log
+          emptyDir: {}
+        - name: clamav-signatures
+          persistentVolumeClaim:
+            claimName: {{ include "bailo.fullname" . }}-clamav-pvc
+{{- end }}

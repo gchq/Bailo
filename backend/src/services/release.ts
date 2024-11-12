@@ -137,7 +137,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
 
   await validateRelease(user, model, release)
 
-  const auth = await authorisation.release(user, model, release, ReleaseAction.Create)
+  const auth = await authorisation.release(user, model, ReleaseAction.Create, release)
   if (!auth.success) {
     throw Forbidden(auth.info, {
       userDn: user.dn,
@@ -188,7 +188,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   Object.assign(release, delta)
   await validateRelease(user, model, release)
 
-  const auth = await authorisation.release(user, model, release, ReleaseAction.Update)
+  const auth = await authorisation.release(user, model, ReleaseAction.Update, release)
   if (!auth.success) {
     throw Forbidden(auth.info, {
       userDn: user.dn,
@@ -323,7 +323,7 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
-  const auth = await authorisation.release(user, model, release, ReleaseAction.View) // TODO change this to .releases and then check change auth success to map over multiple releases
+  const auth = await authorisation.release(user, model, ReleaseAction.View, release)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }
@@ -465,7 +465,7 @@ export async function deleteRelease(user: UserInterface, modelId: string, semver
   }
   const release = await getReleaseBySemver(user, modelId, semver)
 
-  const auth = await authorisation.release(user, model, release, ReleaseAction.Delete)
+  const auth = await authorisation.release(user, model, ReleaseAction.Delete, release)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }

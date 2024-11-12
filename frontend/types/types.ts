@@ -47,8 +47,13 @@ export interface UiConfig {
   }
 
   modelMirror: {
-    enabled: boolean
-    disclaimer: string
+    import: {
+      enabled: boolean
+    }
+    export: {
+      enabled: boolean
+      disclaimer: string
+    }
   }
   announcement: {
     enabled: boolean
@@ -70,9 +75,27 @@ export interface FileInterface {
 
   complete: boolean
 
+  // Older files may not have AV run against them
+  avScan?: AvScanResult[]
+
   createdAt: Date
   updatedAt: Date
 }
+
+export interface AvScanResult {
+  state: ScanStateKeys
+  isInfected?: boolean
+  viruses?: Array<string>
+  toolName: string
+}
+
+export const ScanState = {
+  NotScanned: 'notScanned',
+  InProgress: 'inProgress',
+  Complete: 'complete',
+  Error: 'error',
+} as const
+export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
 
 export const ResponseKind = {
   Review: 'review',
@@ -410,6 +433,8 @@ export interface EntryForm {
   visibility: EntryVisibilityKeys
   collaborators?: CollaboratorEntry[]
   settings?: {
+    ungovernedAccess: boolean
+    allowTemplating: boolean
     mirror?: {
       sourceModelId?: string
       destinationModelId?: string
@@ -529,3 +554,34 @@ export interface SuccessfulFileUpload {
   fileName: string
   fileId: string
 }
+
+export type PermissionDetail =
+  | {
+      hasPermission: true
+      info?: never
+    }
+  | {
+      hasPermission: false
+      info: string
+    }
+
+export type EntryUserPermissions = {
+  editEntry: PermissionDetail
+  editEntryCard: PermissionDetail
+  createRelease: PermissionDetail
+  editRelease: PermissionDetail
+  deleteRelease: PermissionDetail
+  pushModelImage: PermissionDetail
+  createInferenceService: PermissionDetail
+  editInferenceService: PermissionDetail
+  exportMirroredModel: PermissionDetail
+}
+
+export type AccessRequestUserPermissions = {
+  editAccessRequest: PermissionDetail
+  deleteAccessRequest: PermissionDetail
+}
+
+export type UserPermissions = EntryUserPermissions & AccessRequestUserPermissions
+
+export type RestrictedActionKeys = keyof UserPermissions

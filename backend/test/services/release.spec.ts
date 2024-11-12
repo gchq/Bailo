@@ -394,7 +394,7 @@ describe('services > release', () => {
 
     releaseModelMocks.findOne.mockResolvedValue(mockRelease)
 
-    vi.mocked(authorisation.release).mockImplementation(async (_user, _model, _release, action) => {
+    vi.mocked(authorisation.release).mockImplementation(async (_user, _model, action, _release) => {
       if (action === ReleaseAction.View) return { success: true, id: '' }
       if (action === ReleaseAction.Delete)
         return { success: false, info: 'You do not have permission to delete this release.', id: '' }
@@ -413,7 +413,7 @@ describe('services > release', () => {
 
     releaseModelMocks.findOne.mockResolvedValue(mockRelease)
 
-    vi.mocked(authorisation.release).mockImplementation(async (_user, _model, _release, action) => {
+    vi.mocked(authorisation.release).mockImplementation(async (_user, _model, action, _release) => {
       if (action === ReleaseAction.View) return { success: true, id: '' }
       if (action === ReleaseAction.Delete)
         return { success: false, info: 'Cannot delete a file from a mirrored model.', id: '' }

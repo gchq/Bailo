@@ -62,7 +62,9 @@ describe('services > log', () => {
   test('Writer > getAttributes', () => {
     expect(Writer.getAttributes({ name: 'ignore', user: 'ignore' })).toBe('')
     expect(Writer.getAttributes({ name: 'ignore', user: 'ignore', example: 'hello' })).toBe('example=hello')
-    expect(Writer.getAttributes({ id: true, url: true, method: true, 'response-time': true, status: true })).toBe('')
+    expect(Writer.getAttributes({ id: true, url: true, method: true, 'response-time': true, status: true })).toBe(
+      'id=true url=true method=true response-time=true status=true',
+    )
     expect(Writer.getAttributes({ id: longId() })).toBe('')
   })
 

@@ -16,9 +16,8 @@ export const patchSchemaSchema = z.object({
     }),
   }),
   body: z.object({
-    active: z.boolean({
-      required_error: 'Must specify is schema is active or not',
-    }),
+    active: z.boolean().optional(),
+    hidden: z.boolean().optional(),
   }),
 })
 
