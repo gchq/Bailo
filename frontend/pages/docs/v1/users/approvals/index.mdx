@@ -1,6 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
-import Box from '@mui/material/Box'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 
 import bailoModelCompliance from 'public/docs/bailo_model_compliance.png'
 import bailoReviews from 'public/docs/bailo_reviews.png'
@@ -11,9 +10,7 @@ import bailoResetApprovals from 'public/docs/bailo_reset_approvals.png'
 When you [upload a model](../upload-a-model/why-upload-a-model) to Bailo, it does not immediately become available to
 deploy. Instead, it must first pass a series of compliance checks.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoModelCompliance} />
-</Box>
+<MigrationImageBehaviour src={bailoModelCompliance} />
 
 You can check the compliance state of any model by clicking on the 'Compliance' tab. Each item is coloured based on its
 current status; 'green' represents passed, 'orange' for in progress and 'red' for failed. Compliance checks are split
@@ -27,18 +24,14 @@ Manual reviews are split into two categories:
 It is expected that reviews are handled outside of Bailo, using your usual corporate tools. When the review is complete,
 the model can either be approved or declined from the [reviews](/review) page:
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoReviews} />
-</Box>
+<MigrationImageBehaviour src={bailoReviews} />
 
 Email notifications, if configured, will be sent out when you are requested to review a model. Notifications are also
 sent out to the model owner when a model has a review either approved or declined. If a review is declined, the model
 can be updated by either editing the existing version or uploading a new version. Uploading a new version automatically
 retriggers reviews. Reviews can be re-requested at any point using the 'Reset Approvals' model action:
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoResetApprovals} />
-</Box>
+<MigrationImageBehaviour src={bailoResetApprovals} />
 
 # Deployment Approvals
 

@@ -1,14 +1,11 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
-import Box from '@mui/material/Box'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 
 import bailoFlowChartBuild from 'public/docs/bailo_flowchart_build.png'
 
 # Building Models
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoFlowChartBuild} />
-</Box>
+<MigrationImageBehaviour src={bailoFlowChartBuild} />
 
 One of Bailo's responsibilities is turning a raw model into a packaged and productionised image for deployments. This
 process differs based on packaging method and build environment, but is always controlled by the `BuildHandler`.

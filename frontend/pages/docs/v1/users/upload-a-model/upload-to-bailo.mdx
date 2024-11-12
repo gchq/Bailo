@@ -1,6 +1,5 @@
 import DocsWrapper from 'src/docs/DocsWrapper'
-import Image from 'next/legacy/image'
-import Box from '@mui/material/Box'
+import MigrationImageBehaviour from 'src/docs/MigrationImageBehaviour'
 
 import bailoUpload from 'public/docs/bailo_upload.png'
 import bailoUploadSubmission from 'public/docs/bailo_upload_submission.png'
@@ -18,16 +17,12 @@ model. There is also:
 - A 'schema' dropdown, which lets you select different model schemas to follow.
 - An 'uploading existing' tab, which lets you upload premade JSON.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoUpload} />
-</Box>
+<MigrationImageBehaviour src={bailoUpload} />
 
 Each tab has a state, either 'in progress' or 'done'. Once all tabs are done, you can head to the 'submission' tab and
 upload your model.
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoUploadSubmission} />
-</Box>
+<MigrationImageBehaviour src={bailoUploadSubmission} />
 
 The submission tab enables you to export your data in both a human readable (HTML) format and a machine readable (JSON)
 format. After confirming your data is correct, you should press 'Submit' to upload your model to Bailo.
@@ -35,8 +30,6 @@ format. After confirming your data is correct, you should press 'Submit' to uplo
 After submitting your model, a progress bar will appear as the files and data are uploaded to Bailo. Upon completion,
 you will be redirected to your model:
 
-<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image src={bailoModelPage} />
-</Box>
+<MigrationImageBehaviour src={bailoModelPage} />
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
