@@ -173,16 +173,12 @@ data:
         modelMirror: {
           import: {
             enabled: {{ .Values.modelMirror.import.enabled }},
-          }
+          },
           export: {
             enabled: {{ .Values.modelMirror.export.enabled }},
             disclaimer: '{{ .Values.modelMirror.export.disclaimer }}'
           }
         },
-
-        "avScanning": {
-          enabled: {{ .Values.clamav.enabled }},
-        }
       },
 
       connectors: {
@@ -254,7 +250,7 @@ data:
         authenticationToken: 'OTEL_EXPORTER_TOKEN',
       },
       inference: {
-        authorisationToken: 'INFERENCING_WRITE_TOKEN'
+        authorisationToken: 'INFERENCING_WRITE_TOKEN',
       },
       modelMirror: {
         export: {
