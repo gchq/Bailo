@@ -20,7 +20,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.2.0",
     "@aws-sdk/client-cognito-identity-provider": "3.666.0",
-    "@aws-sdk/client-kms": "3.666.0",
+    "@aws-sdk/client-kms": "3.687.0",
     "@aws-sdk/client-s3": "3.666.0",
     "@aws-sdk/lib-storage": "3.666.0",
     "@opentelemetry/auto-instrumentations-node": "^0.50.0",
