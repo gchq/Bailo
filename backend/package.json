@@ -80,7 +80,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/bunyan": "^1.8.11",
     "@types/clamscan": "^2.0.8",
-    "@types/cls-hooked": "^4.3.8",
+    "@types/cls-hooked": "^4.3.9",
     "@types/config": "^3.3.4",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.7",
