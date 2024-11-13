@@ -66,10 +66,6 @@ import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'
 import { getSpecification } from './routes/v2/specification.js'
-import { patchTeam } from './routes/v2/team/getMyTeams.js'
-import { getTeam } from './routes/v2/team/getTeam.js'
-import { getTeams } from './routes/v2/team/getTeams.js'
-import { postTeam } from './routes/v2/team/postTeam.js'
 import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
@@ -180,20 +176,6 @@ server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReac
 server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
 server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
 server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
-
-server.post('/api/v2/teams', ...postTeam)
-server.get('/api/v2/teams', ...getTeams)
-server.get('/api/v2/teams/mine', ...getTeams)
-
-server.get('/api/v2/team/:teamId', ...getTeam)
-server.patch('/api/v2/team/:teamId', ...patchTeam)
-
-// server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
-// server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)
-// server.delete('/api/v2/teams/:teamId/members/:memberId', ...deleteTeamMember)
-// server.patch('/api/v2/teams/:teamId/members/:memberId', ...patchTeamMember)
-
-// server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
 
 server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
