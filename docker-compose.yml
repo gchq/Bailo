@@ -35,6 +35,13 @@ services:
       timeout: 10s
       retries: 5
 
+  modelscan:
+    build:
+      context: ./lib/modelscan_api
+      dockerfile: ./Dockerfile
+    ports:
+      - 3311:80
+
   mailcrab:
     image: marlonb/mailcrab:v1.2.0
     ports:
