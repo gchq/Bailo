@@ -33,6 +33,19 @@ services:
       timeout: 10s
       retries: 5
 
+  modelscan:
+    image: bailo_modelscan:latest
+    build:
+      context: ./lib/modelscan_api
+      dockerfile: ./Dockerfile
+    ports:
+      - 3311:80
+    healthcheck:
+      test: ['CMD-SHELL', 'curl --fail http://localhost:80/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   mailcrab:
     image: marlonb/mailcrab:v1.2.0
     ports:
@@ -93,6 +106,8 @@ services:
       - ./backend/config:/app/config
     depends_on:
       clamd:
+        condition: service_healthy
+      modelscan:
         condition: service_healthy
       minio:
         condition: service_started
