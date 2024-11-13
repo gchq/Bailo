@@ -181,8 +181,13 @@ module.exports = {
       gpus: {},
     },
     modelMirror: {
-      enabled: false,
-      disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+      import: {
+        enabled: false,
+      },
+      export: {
+        enabled: false,
+        disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+      },
     },
 
     announcement: {

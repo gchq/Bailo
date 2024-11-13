@@ -3,14 +3,15 @@ import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
 import PersonIcon from '@mui/icons-material/Person'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
-import React from 'react'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
+import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
@@ -22,13 +23,11 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryCardKindLabel, EntryInterface, SplitSchemaNoRender } from 'types/types'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
-import { getRequiredRolesText, hasRole } from 'utils/roles'
 type FormEditPageProps = {
   entry: EntryInterface
   readOnly?: boolean
-  currentUserRoles: string[]
 }
-export default function FormEditPage({ entry, currentUserRoles, readOnly = false }: FormEditPageProps) {
+export default function FormEditPage({ entry, readOnly = false }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
@@ -52,10 +51,6 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
 
   const sendNotification = useNotification()
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
-  const [canEdit, requiredRolesText] = useMemo(() => {
-    const validRoles = ['owner', 'mtr', 'msro', 'contributor']
-    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
-  }, [currentUserRoles])
   async function onSubmit() {
     if (schema) {
       setErrorMessage('')
@@ -111,6 +106,18 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
       })
     }
   }
+
+  const editMenuItemContent = useMemo(() => {
+    return (
+      <>
+        <ListItemIcon>
+          <EditIcon fontSize='small' />
+        </ListItemIcon>
+        <ListItemText>{`Edit ${EntryCardKindLabel[entry.kind]}`}</ListItemText>
+      </>
+    )
+  }, [entry.kind])
+
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
@@ -141,9 +148,8 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
           {!isEdit && (
             <Stack direction='row' spacing={1}>
               {!readOnly && (
-                <Tooltip title={requiredRolesText}>
+                <Restricted action='editEntryCard' fallback={<Button disabled>{editMenuItemContent}</Button>}>
                   <Button
-                    disabled={!canEdit}
                     variant='outlined'
                     onClick={() => {
                       handleActionButtonClose()
@@ -154,7 +160,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
                   >
                     {`Edit ${EntryCardKindLabel[entry.kind]}`}
                   </Button>
-                </Tooltip>
+                </Restricted>
               )}
               <Button
                 startIcon={<MenuIcon />}

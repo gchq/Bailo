@@ -10,6 +10,7 @@ describe('EditableFormHeading', () => {
         isEdit={false}
         heading='Test'
         isLoading={false}
+        editAction='editRelease'
         editButtonText='Edit Form'
         onEdit={() => undefined}
         onCancel={() => undefined}
@@ -30,6 +31,7 @@ describe('EditableFormHeading', () => {
         isEdit={true}
         heading='Test'
         isLoading={false}
+        editAction='editRelease'
         editButtonText='Edit Form'
         onEdit={() => undefined}
         onCancel={() => undefined}

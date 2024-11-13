@@ -28,12 +28,10 @@ export function checkModelRestriction(model: ModelInterface) {
 
 export type CreateModelParams = Pick<
   ModelInterface,
-  'name' | 'teamId' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
+  'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
 >
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
-
-  // TODO - Find team by teamId to check it's valid. Throw error if not found.
 
   let collaborators: CollaboratorEntry[] = []
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
@@ -305,7 +303,7 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'> & {
+export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility'> & {
   settings: Partial<ModelInterface['settings']>
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {

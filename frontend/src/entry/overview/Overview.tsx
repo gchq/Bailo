@@ -15,10 +15,9 @@ type OverviewPageKeys = (typeof OverviewPage)[keyof typeof OverviewPage]
 type OverviewProps = {
   entry: EntryInterface
   readOnly?: boolean
-  currentUserRoles: string[]
 }
 
-export default function Overview({ entry, currentUserRoles, readOnly = false }: OverviewProps) {
+export default function Overview({ entry, readOnly = false }: OverviewProps) {
   const page: OverviewPageKeys = useMemo(
     () => (entry.card && entry.card.schemaId ? OverviewPage.FORM : OverviewPage.TEMPLATE),
     [entry.card],
@@ -32,9 +31,7 @@ export default function Overview({ entry, currentUserRoles, readOnly = false }: 
   ) : (
     <Container sx={{ my: 2 }}>
       {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
-      {page === OverviewPage.FORM && (
-        <FormEditPage entry={entry} currentUserRoles={currentUserRoles} readOnly={readOnly} />
-      )}
+      {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} />}
     </Container>
   )
 }

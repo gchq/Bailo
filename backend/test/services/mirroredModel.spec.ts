@@ -45,7 +45,12 @@ const configMock = vi.hoisted(
     ({
       ui: {
         modelMirror: {
-          enabled: true,
+          import: {
+            enabled: true,
+          },
+          export: {
+            enabled: true,
+          },
         },
       },
       s3: { buckets: { uploads: 'test' } },
@@ -135,10 +140,10 @@ vi.mock('stream', () => streamMocks)
 
 describe('services > mirroredModel', () => {
   test('exportModel > not enabled', async () => {
-    vi.spyOn(configMock, 'ui', 'get').mockReturnValueOnce({ modelMirror: { enabled: false } })
+    vi.spyOn(configMock, 'ui', 'get').mockReturnValueOnce({ modelMirror: { export: { enabled: false } } })
     const response = exportModel({} as UserInterface, 'modelId', true)
 
-    await expect(response).rejects.toThrowError('Model mirroring has not been enabled.')
+    await expect(response).rejects.toThrowError('Exporting models has not been enabled.')
   })
 
   test('exportModel > bad authorisation', async () => {
@@ -324,6 +329,13 @@ describe('services > mirroredModel', () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
     expect(logMock.error).toBeCalledWith(expect.any(Object), 'Failed to retrieve stream from temporary S3 location.')
+  })
+
+  test('importModel > not enabled', async () => {
+    vi.spyOn(configMock, 'ui', 'get').mockReturnValueOnce({ modelMirror: { import: { enabled: false } } })
+    const result = importModel({} as UserInterface, '', 'https://test.com')
+
+    await expect(result).rejects.toThrowError('Importing models has not been enabled.')
   })
 
   test('importModel > mirrored model Id empty', async () => {

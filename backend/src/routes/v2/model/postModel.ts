@@ -13,7 +13,6 @@ export const postModelSchema = z.object({
   body: z.object({
     name: z.string().min(1, 'You must provide a model name'),
     kind: z.nativeEnum(EntryKind),
-    teamId: z.string(),
     description: z.string().min(1, 'You must provide a model description'),
     visibility: z.nativeEnum(EntryVisibility).optional().default(EntryVisibility.Public),
     collaborators: z

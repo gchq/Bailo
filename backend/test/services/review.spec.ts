@@ -3,7 +3,13 @@ import { describe, expect, test, vi } from 'vitest'
 import AccessRequest from '../../src/models/AccessRequest.js'
 import Model from '../../src/models/Model.js'
 import Release from '../../src/models/Release.js'
-import { createAccessRequestReviews, createReleaseReviews, findReviews } from '../../src/services/review.js'
+import {
+  createAccessRequestReviews,
+  createReleaseReviews,
+  findReviews,
+  findReviewsForAccessRequests,
+  removeAccessRequestReviews,
+} from '../../src/services/review.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
@@ -11,19 +17,20 @@ vi.mock('../../src/connectors/authentication/index.js', async () => ({
 }))
 
 const reviewModelMock = vi.hoisted(() => {
-  const obj: any = { kind: 'access', accessRequestId: 'Hello' }
+  const obj: any = { kind: 'access', accessRequestId: 'Hello', role: 'msro' }
 
   obj.aggregate = vi.fn(() => obj)
   obj.match = vi.fn(() => obj)
   obj.sort = vi.fn(() => obj)
   obj.lookup = vi.fn(() => obj)
   obj.append = vi.fn(() => obj)
-  obj.find = vi.fn(() => obj)
+  obj.find = vi.fn(() => [obj])
   obj.findOne = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
   obj.findByIdAndUpdate = vi.fn(() => obj)
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
+  obj.delete = vi.fn(() => obj)
   obj.limit = vi.fn(() => obj)
   obj.unwind = vi.fn(() => obj)
   obj.at = vi.fn(() => obj)
@@ -84,6 +91,12 @@ describe('services > review', () => {
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
+  test('findReviewsForAccessRequests > success', async () => {
+    await findReviewsForAccessRequests([reviewModelMock.accessRequestId])
+
+    expect(reviewModelMock.find.mock.calls.at(0)).toMatchSnapshot()
+  })
+
   test('createReleaseReviews > No entities found for required roles', async () => {
     const result: Promise<void> = createReleaseReviews(new Model(), new Release())
 
@@ -110,5 +123,22 @@ describe('services > review', () => {
 
     expect(reviewModelMock.save).toBeCalled()
     expect(smtpMock.requestReviewForAccessRequest).toBeCalled()
+  })
+
+  test('removeAccessRequestReviews > successful', async () => {
+    await removeAccessRequestReviews(reviewModelMock.accessRequestId)
+
+    expect(reviewModelMock.find.mock.calls.at(0)).toMatchSnapshot()
+    expect(reviewModelMock.delete).toBeCalled()
+  })
+
+  test('removeAccessRequestReviews > could not delete failure', async () => {
+    reviewModelMock.delete.mockImplementationOnce(() => {
+      throw Error('Error deleting object')
+    })
+
+    expect(() => removeAccessRequestReviews('')).rejects.toThrowError(
+      /^The requested access request review could not be deleted./,
+    )
   })
 })

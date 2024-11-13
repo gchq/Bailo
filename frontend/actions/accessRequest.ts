@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { AccessRequestInterface } from 'types/types'
+import { AccessRequestInterface, AccessRequestUserPermissions } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyAccessRequestList = []
@@ -30,9 +30,28 @@ export function useGetAccessRequest(modelId: string | undefined, accessRequestId
 
   return {
     mutateAccessRequest: mutate,
-    accessRequest: data ? data.accessRequest : undefined,
+    accessRequest: data?.accessRequest,
     isAccessRequestLoading: isLoading,
     isAccessRequestError: error,
+  }
+}
+
+export function useGetCurrentUserPermissionsForAccessRequest(entryId?: string, accessRequestId?: string) {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      permissions: AccessRequestUserPermissions
+    },
+    ErrorInfo
+  >(
+    entryId && accessRequestId ? `/api/v2/model/${entryId}/access-request/${accessRequestId}/permissions/mine` : null,
+    fetcher,
+  )
+
+  return {
+    mutateAccessRequestUserPermissions: mutate,
+    accessRequestUserPermissions: data?.permissions,
+    isAccessRequestUserPermissionsLoading: isLoading,
+    isAccessRequestUserPermissionsError: error,
   }
 }
 

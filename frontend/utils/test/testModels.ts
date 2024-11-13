@@ -90,7 +90,6 @@ export const testV2Model: EntryInterface = {
     ungovernedAccess: false,
     allowTemplating: false,
   },
-  teamId: 'test-team',
   card: testModelCard,
   createdAt: new Date(),
   createdBy: testEntity,
