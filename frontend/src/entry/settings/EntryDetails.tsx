@@ -92,7 +92,6 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
           <Typography variant='h6' component='h2'>
             {`${toTitleCase(EntryKindLabel[entry.kind])} Details`}
           </Typography>
-          =
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
         </>

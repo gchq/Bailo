@@ -7,7 +7,7 @@ import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typogra
 import { useGetModel } from 'actions/model'
 import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { useContext, useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
@@ -107,17 +107,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
     }
   }
 
-  const editMenuItemContent = useMemo(() => {
-    return (
-      <>
-        <ListItemIcon>
-          <EditIcon fontSize='small' />
-        </ListItemIcon>
-        <ListItemText>{`Edit ${EntryCardKindLabel[entry.kind]}`}</ListItemText>
-      </>
-    )
-  }, [entry.kind])
-
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
@@ -148,7 +137,10 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
           {!isEdit && (
             <Stack direction='row' spacing={1}>
               {!readOnly && (
-                <Restricted action='editEntryCard' fallback={<Button disabled>{editMenuItemContent}</Button>}>
+                <Restricted
+                  action='editEntryCard'
+                  fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
+                >
                   <Button
                     variant='outlined'
                     onClick={() => {
