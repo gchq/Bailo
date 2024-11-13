@@ -41,6 +41,15 @@ app = FastAPI(
 modelscan = ModelScan(settings=get_settings().modelscan_settings)
 
 
+@app.get("/health")
+def health_check() -> dict[str, str]:
+    """Minimal health check for the API endpoint.
+
+    :return: always `{"status": "healthy"}`
+    """
+    return {"status": "healthy"}
+
+
 @app.post(
     "/scan/file",
     summary="Upload and scan a file",

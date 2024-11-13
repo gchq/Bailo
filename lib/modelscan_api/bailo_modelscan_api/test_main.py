@@ -11,6 +11,13 @@ from .main import app, get_settings
 client = TestClient(app)
 
 
+def test_health():
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "healthy"}
+
+
 @patch("modelscan.modelscan.ModelScan.scan")
 def test_scan_file(mock_scan: Mock):
     mock_scan.return_value = {}
