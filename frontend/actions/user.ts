@@ -49,9 +49,9 @@ interface UserInformationResponse {
   entity: UserInformation
 }
 
-export function useGetUserInformation(dn: string) {
+export function useGetUserInformation(dn: string, kind?: string) {
   const { data, isLoading, error, mutate } = useSWR<UserInformationResponse, ErrorInfo>(
-    `/api/v2/entity/${dn}/lookup`,
+    `/api/v2/entity/${dn}/lookup${kind ? `?kind=${kind}` : ''}`,
     fetcher,
   )
 
@@ -61,6 +61,12 @@ export function useGetUserInformation(dn: string) {
     isUserInformationLoading: isLoading,
     isUserInformationError: error,
   }
+}
+
+export function getUserInformation(dn: string) {
+  return fetch(`/api/v2/entity/${dn}/lookup`, {
+    headers: { 'Content-Type': 'application/json' },
+  })
 }
 
 interface GetUserTokensResponse {
