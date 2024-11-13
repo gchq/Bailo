@@ -82,7 +82,7 @@
     "@types/clamscan": "^2.0.8",
     "@types/cls-hooked": "^4.3.9",
     "@types/config": "^3.3.4",
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/lodash-es": "^4.17.12",
     "@types/mjml": "^4.7.4",
