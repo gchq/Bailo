@@ -1,10 +1,29 @@
-import { Autocomplete, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Autocomplete,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import EntityItem from 'src/entry/settings/EntityItem'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntityObject, EntryKindKeys, Role } from 'types/types'
+import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, Role } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessInputProps = {
@@ -27,6 +46,8 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(value)
   const [userListQuery, setUserListQuery] = useState('')
+  const [manualEntityKind, setManualEntityKind] = useState<EntityKind>(EntityKind.USER)
+  const [manualEntityName, setManualEntityName] = useState('')
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
 
@@ -113,6 +134,43 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
           />
         )}
       />
+      <Accordion sx={{ borderTop: 'none' }}>
+        <AccordionSummary
+          sx={{ pl: 0, borderTop: 'none' }}
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls='manual-user-add-content'
+          id='manual-user-add-header'
+        >
+          <Typography component='caption'>Trouble finding user / group?</Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ p: 0 }}>
+          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
+            <FormControl sx={{ width: '150px' }}>
+              <InputLabel id='manual-entity-kind-select'>User or group</InputLabel>
+              <Select
+                id='manual-entity-kind-select'
+                value={manualEntityKind}
+                label='User or group'
+                size='small'
+                onChange={(e) => setManualEntityKind(e.target.value as EntityKind)}
+              >
+                <MenuItem value={'user'}>User</MenuItem>
+                <MenuItem value={'group'}>Group</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              id='manual-entity-name-select'
+              placeholder='Joe Bloggs'
+              size='small'
+              fullWidth
+              label='User or group name'
+              value={manualEntityName}
+              onChange={(e) => setManualEntityName(e.target.value)}
+            />
+            <Button variant='contained'>Add</Button>
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
       <Table>
         <TableHead>
           <TableRow>
