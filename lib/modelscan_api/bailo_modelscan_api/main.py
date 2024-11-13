@@ -41,7 +41,13 @@ app = FastAPI(
 modelscan = ModelScan(settings=get_settings().modelscan_settings)
 
 
-@app.get("/health")
+@app.get(
+    "/health",
+    summary="Simple health check endpoint",
+    description="Utility to check the operational status of the API.",
+    status_code=HTTPStatus.OK,
+    response_description='Always `{"status": "healthy"}`',
+)
 def health_check() -> dict[str, str]:
     """Minimal health check for the API endpoint.
 

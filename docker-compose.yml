@@ -38,7 +38,9 @@ services:
   modelscan:
     build:
       context: ./lib/modelscan_api
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.dev
+    volumes:
+      - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
     ports:
       - 3311:80
     healthcheck:
