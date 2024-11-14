@@ -1,26 +1,11 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Autocomplete,
-  Button,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-} from '@mui/material'
-import { getUserInformation, useListUsers } from 'actions/user'
+import { Autocomplete, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material'
+import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import EntityItem from 'src/entry/settings/EntityItem'
+import ManualEntryAccess from 'src/entry/settings/ManualEntryAccess'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, Role } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
+import { CollaboratorEntry, EntityObject, EntryKindKeys, Role } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessInputProps = {
@@ -43,8 +28,6 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(value)
   const [userListQuery, setUserListQuery] = useState('')
-  const [manualEntityName, setManualEntityName] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
 
@@ -93,23 +76,6 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
     handleInputChange(event, value)
   }, 500)
 
-  const handleAddEntityManuallyOnClick = useCallback(async () => {
-    setErrorMessage('')
-    if (manualEntityName !== undefined && manualEntityName !== '') {
-      if (accessList.find((collaborator) => collaborator.entity === `${EntityKind.USER}:${manualEntityName}`)) {
-        return setErrorMessage(`The requested user has already been added below.`)
-      }
-      const response = await getUserInformation(manualEntityName)
-      if (!response.ok) {
-        return setErrorMessage(await getErrorMessage(response))
-      }
-      const updatedAccessList = [...accessList]
-      const newAccess = { entity: `${EntityKind.USER}:${manualEntityName}`, roles: [] }
-      updatedAccessList.push(newAccess)
-      setAccessList(updatedAccessList)
-    }
-  }, [accessList, manualEntityName])
-
   const noOptionsText = useMemo(() => {
     if (userListQuery.length < 3) return 'Please enter at least three characters'
     if (isUsersError?.status === 413) return 'Too many results, please refine your search'
@@ -148,35 +114,7 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
           />
         )}
       />
-      <Accordion sx={{ borderTop: 'none' }}>
-        <AccordionSummary
-          sx={{ pl: 0, borderTop: 'none' }}
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls='manual-user-add-content'
-          id='manual-user-add-header'
-        >
-          <Typography sx={{ mr: 1 }} component='caption'>
-            Trouble finding a user? Click here to add them manually
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails sx={{ p: 0 }}>
-          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-            <TextField
-              id='manual-entity-name-select'
-              placeholder='Joe Bloggs'
-              size='small'
-              fullWidth
-              label='User'
-              value={manualEntityName}
-              onChange={(e) => setManualEntityName(e.target.value)}
-            />
-            <Button variant='contained' onClick={handleAddEntityManuallyOnClick}>
-              Add
-            </Button>
-          </Stack>
-          <MessageAlert message={errorMessage} severity='error' />
-        </AccordionDetails>
-      </Accordion>
+      <ManualEntryAccess accessList={accessList} setAccessList={setAccessList} />
       <Table>
         <TableHead>
           <TableRow>
