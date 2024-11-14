@@ -35,8 +35,8 @@ export async function exportModel(
   disclaimerAgreement: boolean,
   semvers?: Array<string>,
 ) {
-  if (!config.ui.modelMirror.enabled) {
-    throw BadReq('Model mirroring has not been enabled.')
+  if (!config.ui.modelMirror.export.enabled) {
+    throw BadReq('Exporting models has not been enabled.')
   }
   if (!disclaimerAgreement) {
     throw BadReq('You must agree to the disclaimer agreement before being able to export a model.')
@@ -88,6 +88,10 @@ export async function exportModel(
 }
 
 export async function importModel(_user: UserInterface, mirroredModelId: string, payloadUrl: string) {
+  if (!config.ui.modelMirror.import.enabled) {
+    throw BadReq('Importing models has not been enabled.')
+  }
+
   if (mirroredModelId === '') {
     throw BadReq('Missing mirrored model ID.')
   }

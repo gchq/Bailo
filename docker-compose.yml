@@ -91,6 +91,7 @@ services:
       dockerfile: ./Dockerfile.dev
     volumes:
       - ./backend/src:/app/src
+      - ./backend/config:/app/config
       - ./backend/certs:/certs
       - ./backend/certs:/usr/local/share/ca-certificates
     ports:

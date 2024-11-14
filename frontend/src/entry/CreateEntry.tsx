@@ -27,7 +27,6 @@ import EntryNameInput from 'src/entry/EntryNameInput'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import SourceModelInput from 'src/entry/SourceModelnput'
 import MessageAlert from 'src/MessageAlert'
-import TeamSelect from 'src/TeamSelect'
 import {
   CollaboratorEntry,
   CreateEntryKind,
@@ -38,7 +37,6 @@ import {
   EntryKindKeys,
   EntryKindLabel,
   EntryVisibility,
-  TeamInterface,
 } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
@@ -53,7 +51,6 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const [team, setTeam] = useState<TeamInterface | undefined>()
   const [name, setName] = useState('')
   const [sourceModelId, setSourceModelId] = useState('')
   const [description, setDescription] = useState('')
@@ -83,7 +80,6 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
     const formData: EntryForm = {
       name,
-      teamId: team?.id ?? 'Uncategorised',
       kind: entryKind,
       description,
       visibility,
@@ -194,7 +190,6 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 Overview
               </Typography>
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-                <TeamSelect value={team} onChange={(value) => setTeam(value)} />
                 <EntryNameInput autoFocus value={name} kind={entryKind} onChange={(value) => setName(value)} />
                 {createEntryKind === CreateEntryKind.MIRRORED_MODEL && (
                   <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
