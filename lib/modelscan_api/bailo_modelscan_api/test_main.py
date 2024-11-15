@@ -38,6 +38,26 @@ def test_scan_file(mock_scan: Mock):
 
 
 @patch("modelscan.modelscan.ModelScan.scan")
+def test_scan_file_escape_path(mock_scan: Mock):
+    mock_scan.return_value = {}
+    files = {"in_file": ("../foo.bar", rb"", "application/x-hdf5")}
+
+    response = client.post("/scan/file", files=files)
+
+    assert response.status_code == 200
+    mock_scan.assert_called_once()
+
+
+def test_scan_file_escape_path_error():
+    files = {"in_file": ("..", rb"", "text/plain")}
+
+    response = client.post("/scan/file", files=files)
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "An error occurred while processing the uploaded file's name."}
+
+
+@patch("modelscan.modelscan.ModelScan.scan")
 def test_scan_file_exception(mock_scan: Mock):
     mock_scan.side_effect = Exception("Mocked error!")
     files = {"in_file": ("foo.h5", rb"", "application/x-hdf5")}

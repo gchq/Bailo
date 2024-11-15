@@ -9,14 +9,14 @@ from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any
+from typing import Annotated, Any
 
 import uvicorn
-from bailo_modelscan_api.config import Settings
-from bailo_modelscan_api.dependencies import parse_path
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
 
+from bailo_modelscan_api.config import Settings
+from bailo_modelscan_api.dependencies import safe_join
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,9 @@ def health_check() -> dict[str, str]:
     status_code=HTTPStatus.OK,
     response_description="The result from ModelScan",
 )
-def scan_file(in_file: UploadFile, background_tasks: BackgroundTasks) -> dict[str, Any]:
+def scan_file(
+    in_file: UploadFile, background_tasks: BackgroundTasks, settings: Annotated[Settings, Depends(get_settings)]
+) -> dict[str, Any]:
     """API endpoint to upload and scan a file using modelscan.
 
     :param in_file: uploaded file to be scanned
@@ -76,11 +78,17 @@ def scan_file(in_file: UploadFile, background_tasks: BackgroundTasks) -> dict[st
     logger.info("Called the API endpoint to scan an uploaded file")
     try:
         # Use Setting's download_dir if defined else use a temporary directory.
-        with (
-            TemporaryDirectory() if not get_settings().download_dir else nullcontext(get_settings().download_dir)
-        ) as download_dir:
+        with TemporaryDirectory() if not settings.download_dir else nullcontext(settings.download_dir) as download_dir:
             if in_file.filename and str(in_file.filename).strip():
-                pathlib_path = Path.joinpath(parse_path(download_dir), str(in_file.filename))
+                # Prevent escaping to a parent dir
+                try:
+                    pathlib_path = safe_join(download_dir, in_file.filename)
+                except ValueError:
+                    logger.exception("Failed to safely join the filename to the path.")
+                    raise HTTPException(
+                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                        detail="An error occurred while processing the uploaded file's name.",
+                    )
             else:
                 raise HTTPException(
                     status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -92,7 +100,7 @@ def scan_file(in_file: UploadFile, background_tasks: BackgroundTasks) -> dict[st
             # doesn't currently support streaming.
             try:
                 with open(pathlib_path, "wb") as out_file:
-                    while content := in_file.file.read(get_settings().block_size):
+                    while content := in_file.file.read(settings.block_size):
                         out_file.write(content)
             except OSError as exception:
                 logger.exception("Failed writing the file to the disk.")
