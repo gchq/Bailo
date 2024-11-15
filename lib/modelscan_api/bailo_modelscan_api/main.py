@@ -3,10 +3,12 @@
 
 from __future__ import annotations
 
+from contextlib import nullcontext
 import logging
 from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 import uvicorn
@@ -73,33 +75,37 @@ def scan_file(in_file: UploadFile, background_tasks: BackgroundTasks) -> dict[st
     """
     logger.info("Called the API endpoint to scan an uploaded file")
     try:
-        if in_file.filename and str(in_file.filename).strip():
-            pathlib_path = Path.joinpath(parse_path(get_settings().download_dir), str(in_file.filename))
-        else:
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail="An error occurred while extracting the uploaded file's name.",
-            )
+        # Use Setting's download_dir if defined else use a temporary directory.
+        with (
+            TemporaryDirectory() if not get_settings().download_dir else nullcontext(get_settings().download_dir)
+        ) as download_dir:
+            if in_file.filename and str(in_file.filename).strip():
+                pathlib_path = Path.joinpath(parse_path(download_dir), str(in_file.filename))
+            else:
+                raise HTTPException(
+                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                    detail="An error occurred while extracting the uploaded file's name.",
+                )
 
-        # Write the streamed in_file to disk.
-        # This is a bit silly as modelscan will ultimately load this back into memory, but modelscan
-        # doesn't currently support streaming.
-        try:
-            with open(pathlib_path, "wb") as out_file:
-                while content := in_file.file.read(get_settings().block_size):
-                    out_file.write(content)
-        except OSError as exception:
-            logger.exception("Failed writing the file to the disk.")
-            raise HTTPException(
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                detail=f"An error occurred while trying to write the uploaded file to the disk: {exception}",
-            ) from exception
+            # Write the streamed in_file to disk.
+            # This is a bit silly as modelscan will ultimately load this back into memory, but modelscan
+            # doesn't currently support streaming.
+            try:
+                with open(pathlib_path, "wb") as out_file:
+                    while content := in_file.file.read(get_settings().block_size):
+                        out_file.write(content)
+            except OSError as exception:
+                logger.exception("Failed writing the file to the disk.")
+                raise HTTPException(
+                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                    detail=f"An error occurred while trying to write the uploaded file to the disk: {exception}",
+                ) from exception
 
-        # Scan the uploaded file.
-        result = modelscan.scan(pathlib_path)
+            # Scan the uploaded file.
+            result = modelscan.scan(pathlib_path)
 
-        # Finally, return the result.
-        return result
+            # Finally, return the result.
+            return result
 
     except HTTPException:
         # Re-raise HTTPExceptions.
@@ -116,6 +122,7 @@ def scan_file(in_file: UploadFile, background_tasks: BackgroundTasks) -> dict[st
     finally:
         try:
             # Clean up the downloaded file as a background task to allow returning sooner.
+            # If using a temporary dir then this would happen anyway, but if Settings' download_dir evaluates then this is required.
             logger.info("Cleaning up downloaded file.")
             background_tasks.add_task(Path.unlink, pathlib_path, missing_ok=True)
         except UnboundLocalError:

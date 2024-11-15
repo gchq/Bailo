@@ -5,10 +5,18 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 from fastapi.testclient import TestClient
 
+from .config import Settings
 from .dependencies import parse_path
 from .main import app, get_settings
 
 client = TestClient(app)
+
+
+def get_settings_override():
+    return Settings(download_dir=".")
+
+
+app.dependency_overrides[get_settings] = get_settings_override
 
 
 def test_health():
