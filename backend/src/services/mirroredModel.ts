@@ -59,7 +59,7 @@ export async function exportModel(
   const s3Stream = new PassThrough()
   zip.pipe(s3Stream)
 
-  uploadToS3(`${modelId}.zip`, s3Stream, user.dn, { modelId, semvers }, { modelId, mirroredModelId })
+  await uploadToS3(`${modelId}.zip`, s3Stream, user.dn, { modelId, semvers }, { modelId, mirroredModelId })
 
   try {
     await addModelCardRevisionsToZip(user, model, zip)
@@ -330,7 +330,7 @@ async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: Re
     zip.append(JSON.stringify(release.toJSON()), { name: `${baseUri}/releaseDocument.json` })
     for (const file of files) {
       zip.append(JSON.stringify(file.toJSON()), { name: `${baseUri}/files/${file._id}/fileDocument.json` })
-      uploadToS3(
+      await uploadToS3(
         `${baseUri}/files/${file._id}/fileContent`,
         (await downloadFile(user, file._id)).Body as stream.Readable,
         user.dn,
