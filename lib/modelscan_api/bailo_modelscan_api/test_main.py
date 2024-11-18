@@ -1,8 +1,13 @@
 """Test for the main.py file.
 """
 
+from __future__ import annotations
+
+from functools import lru_cache
 from pathlib import Path
 from unittest.mock import Mock, patch
+
+import modelscan
 from fastapi.testclient import TestClient
 
 from .config import Settings
@@ -12,6 +17,7 @@ from .main import app, get_settings
 client = TestClient(app)
 
 
+@lru_cache
 def get_settings_override():
     return Settings(download_dir=".")
 
@@ -19,11 +25,16 @@ def get_settings_override():
 app.dependency_overrides[get_settings] = get_settings_override
 
 
-def test_health():
-    response = client.get("/health")
+def test_info():
+    response = client.get("/info")
 
     assert response.status_code == 200
-    assert response.json() == {"status": "healthy"}
+    assert response.json() == {
+        "apiName": get_settings_override().app_name,
+        "apiVersion": get_settings_override().app_version,
+        "scannerName": modelscan.__name__,
+        "modelscanVersion": modelscan.__version__,
+    }
 
 
 @patch("modelscan.modelscan.ModelScan.scan")

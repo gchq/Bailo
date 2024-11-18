@@ -3,17 +3,19 @@
 
 from __future__ import annotations
 
-from contextlib import nullcontext
 import logging
+from contextlib import nullcontext
 from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Annotated, Any
 
+import modelscan
 import uvicorn
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
+from pydantic import BaseModel
 
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.dependencies import safe_join
@@ -40,22 +42,34 @@ app = FastAPI(
 )
 
 # Instantiating ModelScan
-modelscan = ModelScan(settings=get_settings().modelscan_settings)
+modelscan_model = ModelScan(settings=get_settings().modelscan_settings)
+
+
+class ApiInformation(BaseModel):
+    apiName: str
+    apiVersion: str
+    scannerName: str
+    modelscanVersion: str
 
 
 @app.get(
-    "/health",
-    summary="Simple health check endpoint",
-    description="Utility to check the operational status of the API.",
+    "/info",
+    summary="Simple information endpoint",
+    description="Utility to get the key information about the API.",
     status_code=HTTPStatus.OK,
-    response_description='Always `{"status": "healthy"}`',
+    response_description="A populated ApiInformation object",
 )
-def health_check() -> dict[str, str]:
-    """Minimal health check for the API endpoint.
+def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation:
+    """Information about the API.
 
-    :return: always `{"status": "healthy"}`
+    :return: a JSON representable object with keys from ApiInformation
     """
-    return {"status": "healthy"}
+    return ApiInformation(
+        apiName=settings.app_name,
+        apiVersion=settings.app_version,
+        scannerName=modelscan.__name__,
+        modelscanVersion=modelscan.__version__,
+    )
 
 
 @app.post(
@@ -110,7 +124,9 @@ def scan_file(
                 ) from exception
 
             # Scan the uploaded file.
-            result = modelscan.scan(pathlib_path)
+            logger.info("Initiating ModelScan scan of %s", pathlib_path)
+            result = modelscan_model.scan(pathlib_path)
+            logger.info("ModelScan result: %s", result)
 
             # Finally, return the result.
             return result
