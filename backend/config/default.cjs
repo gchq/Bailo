@@ -181,18 +181,19 @@ module.exports = {
       gpus: {},
     },
     modelMirror: {
-      enabled: false,
-      disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+      import: {
+        enabled: false,
+      },
+      export: {
+        enabled: false,
+        disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+      },
     },
 
     announcement: {
       enabled: false,
       text: '',
       startTimestamp: '',
-    },
-
-    avScanning: {
-      enabled: false,
     },
   },
 
@@ -207,6 +208,10 @@ module.exports = {
 
     audit: {
       kind: 'silly',
+    },
+
+    fileScanners: {
+      kinds: [],
     },
   },
 

@@ -63,7 +63,6 @@ data:
       },
 
       avScanning: {
-        enabled: {{ .Values.clamav.enabled }},
         clamdscan: {
           host: '{{ include "bailo.fullname" . }}-clamav',
           port: {{ .Values.clamav.port }},
@@ -172,13 +171,14 @@ data:
         },
 
         modelMirror: {
-          enabled: {{ .Values.modelMirror.enabled }},
-          disclaimer: '{{ .Values.modelMirror.disclaimer }}'
+          import: {
+            enabled: {{ .Values.modelMirror.import.enabled }},
+          },
+          export: {
+            enabled: {{ .Values.modelMirror.export.enabled }},
+            disclaimer: '{{ .Values.modelMirror.export.disclaimer }}'
+          }
         },
-
-        "avScanning": {
-          enabled: {{ .Values.clamav.enabled }},
-        }
       },
 
       connectors: {
@@ -192,6 +192,10 @@ data:
 
         audit: {
           kind: '{{ .Values.connectors.audit.kind }}',
+        },
+
+        fileScanners: {
+          kinds: {{ toJson .Values.connectors.fileScanners.kinds }}
         },
       },
 
@@ -246,7 +250,7 @@ data:
         authenticationToken: 'OTEL_EXPORTER_TOKEN',
       },
       inference: {
-        authorisationToken: 'INFERENCING_WRITE_TOKEN'
+        authorisationToken: 'INFERENCING_WRITE_TOKEN',
       },
       modelMirror: {
         export: {

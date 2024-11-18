@@ -6,9 +6,7 @@ import { getModelCardHtmlSchema } from '../../../../src/routes/v2/model/modelcar
 import { renderToHtml } from '../../../../src/services/modelCardExport.js'
 import { createFixture, testGet } from '../../../testUtils/routes.js'
 
-vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/utils/user.js')
-vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/connectors/audit/index.js')
 
 const mockModelCardExportService = vi.hoisted(() => {

@@ -11,10 +11,9 @@ import { parse } from '../../../utils/validate.js'
 
 export const postModelSchema = z.object({
   body: z.object({
-    name: z.string().min(1, 'You must provide a model name'),
-    kind: z.nativeEnum(EntryKind),
-    teamId: z.string(),
-    description: z.string().min(1, 'You must provide a model description'),
+    name: z.string().min(1, 'You must provide a model name').openapi({ example: 'Yolo v4' }),
+    kind: z.nativeEnum(EntryKind).openapi({ example: 'model' }),
+    description: z.string().min(1, 'You must provide a model description').openapi({ example: 'You only look once' }),
     visibility: z.nativeEnum(EntryVisibility).optional().default(EntryVisibility.Public),
     collaborators: z
       .array(

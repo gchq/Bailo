@@ -10,6 +10,7 @@ import { sign } from '../clients/kms.js'
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import scanners from '../connectors/fileScanning/index.js'
 import { FileInterfaceDoc, ScanState } from '../models/File.js'
 import { ModelDoc } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
@@ -34,8 +35,8 @@ export async function exportModel(
   disclaimerAgreement: boolean,
   semvers?: Array<string>,
 ) {
-  if (!config.ui.modelMirror.enabled) {
-    throw BadReq('Model mirroring has not been enabled.')
+  if (!config.ui.modelMirror.export.enabled) {
+    throw BadReq('Exporting models has not been enabled.')
   }
   if (!disclaimerAgreement) {
     throw BadReq('You must agree to the disclaimer agreement before being able to export a model.')
@@ -77,6 +78,10 @@ export async function exportModel(
 }
 
 export async function importModel(_user: UserInterface, mirroredModelId: string, payloadUrl: string) {
+  if (!config.ui.modelMirror.import.enabled) {
+    throw BadReq('Importing models has not been enabled.')
+  }
+
   if (mirroredModelId === '') {
     throw BadReq('Missing mirrored model ID.')
   }
@@ -363,7 +368,7 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     }
   }
 
-  if (config.ui.avScanning.enabled) {
+  if (scanners.info()) {
     const files: FileInterfaceDoc[] = await getFilesByIds(user, modelId, fileIds)
     const scanErrors: {
       missingScan: Array<{ name: string; id: string }>
@@ -373,9 +378,9 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     for (const file of files) {
       if (!file.avScan) {
         scanErrors.missingScan.push({ name: file.name, id: file.id })
-      } else if (file.avScan.state !== ScanState.Complete) {
+      } else if (file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
         scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-      } else if (file.avScan.isInfected) {
+      } else if (file.avScan.some((scanResult) => scanResult.isInfected)) {
         scanErrors.failedScan.push({ name: file.name, id: file.id })
       }
     }

@@ -4,9 +4,7 @@ import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { getModelCardSchema } from '../../../../src/routes/v2/model/modelcard/getModelCard.js'
 import { createFixture, testGet } from '../../../testUtils/routes.js'
 
-vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/utils/user.js')
-vi.mock('../../../../src/utils/config.js')
 vi.mock('../../../../src/connectors/audit/index.js')
 
 const modelMock = vi.hoisted(() => {

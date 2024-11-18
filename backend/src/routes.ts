@@ -10,6 +10,7 @@ import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
+import { getFilescanningInfo } from './routes/v2/filescanning/getFilescanningInfo.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -65,10 +66,6 @@ import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'
 import { getSpecification } from './routes/v2/specification.js'
-import { patchTeam } from './routes/v2/team/getMyTeams.js'
-import { getTeam } from './routes/v2/team/getTeam.js'
-import { getTeams } from './routes/v2/team/getTeams.js'
-import { postTeam } from './routes/v2/team/postTeam.js'
 import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
@@ -136,15 +133,6 @@ server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
-server.post('/api/v2/model/:modelId/releases', ...postRelease)
-server.get('/api/v2/model/:modelId/releases', ...getReleases)
-server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
-server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
-// This is a temporary workaround to split out the URL to disable authorisation.
-server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
-server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
-server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
-server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
 
 server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
@@ -189,20 +177,6 @@ server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
 server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
 server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
 
-server.post('/api/v2/teams', ...postTeam)
-server.get('/api/v2/teams', ...getTeams)
-server.get('/api/v2/teams/mine', ...getTeams)
-
-server.get('/api/v2/team/:teamId', ...getTeam)
-server.patch('/api/v2/team/:teamId', ...patchTeam)
-
-// server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
-// server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)
-// server.delete('/api/v2/teams/:teamId/members/:memberId', ...deleteTeamMember)
-// server.patch('/api/v2/teams/:teamId/members/:memberId', ...patchTeamMember)
-
-// server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
-
 server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
 server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
@@ -216,6 +190,8 @@ server.get('/api/v2/user/tokens/list', ...getUserTokenList)
 server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
 server.get('/api/v2/specification', ...getSpecification)
+
+server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

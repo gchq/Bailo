@@ -45,7 +45,6 @@ class Client:
                 "kind": kind,
                 "description": description,
                 "visibility": _visibility,
-                "teamId": team_id,
             }
         )
 
