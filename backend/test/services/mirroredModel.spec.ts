@@ -216,6 +216,7 @@ describe('services > mirroredModel', () => {
 
   test('exportModel > successful export if no files exist', async () => {
     releaseMocks.getAllFileIds.mockResolvedValueOnce([])
+    fileMocks.getFilesByIds.mockResolvedValueOnce([])
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '1.2.4'])
     // Allow for completion of asynchronous content
     await new Promise((r) => setTimeout(r))
@@ -314,7 +315,7 @@ describe('services > mirroredModel', () => {
   test('exportModel > export uploaded to S3 for model cards and releases', async () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '3.2.1'])
 
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(3)
   })
 
   test('exportModel > unable to upload to tmp S3 location', async () => {
