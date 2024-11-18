@@ -68,7 +68,7 @@ export async function exportModel(
   }
   try {
     if (semvers && semvers.length > 0) {
-      await addReleasesToZip(user, model, semvers, zip) // Adds releases to zip file
+      await addReleasesToZip(user, model, semvers, zip)
     }
   } catch (error) {
     throw InternalError('Error when adding the release(s) to the zip file.', { error })
