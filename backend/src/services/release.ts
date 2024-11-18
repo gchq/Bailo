@@ -304,13 +304,6 @@ export function semverObjectToString(semver: SemverObject) {
   return `${semver.major}.${semver.minor}.${semver.patch}${metadata}`
 }
 
-// function getSemverVariations(querySemver: string) {
-//   const trimmedSemver =
-//     querySemver.charAt(0) === '^' || querySemver.charAt(0) === '~' ? querySemver.slice(1) : querySemver
-//   const semverObj = semverStringToObject(trimmedSemver)
-//   return { semverObj, trimmedSemver }
-// }
-
 export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
   const semverObj = semverStringToObject(semver)
@@ -368,6 +361,25 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
       //remain
       upperSemverTrimmed = upperSemver.replace('<', '')
       inclusivity = false
+    }
+  } else {
+    const lowerSemverObj = semverStringToObject(lowerSemverTrimmed)
+    return {
+      modelId: modelID,
+      $or: [
+        {
+          'semver.major': { $gte: lowerSemverObj.major },
+          'semver.minor': { $gte: lowerSemverObj.minor },
+          'semver.patch': { $gte: lowerSemverObj.patch },
+        },
+        {
+          'semver.major': { $gt: lowerSemverObj.major },
+        },
+        {
+          'semver.major': { $gte: lowerSemverObj.major },
+          'semver.minor': { $gt: lowerSemverObj.minor },
+        },
+      ],
     }
   }
 
