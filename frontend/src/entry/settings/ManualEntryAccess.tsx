@@ -1,10 +1,8 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, TextField, Typography } from '@mui/material'
-import { getUserInformation } from 'actions/user'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntityKind } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
 
 interface ManualEntryAccessProps {
   accessList: CollaboratorEntry[]
@@ -21,14 +19,7 @@ export default function ManualEntryAccess({ accessList, setAccessList }: ManualE
       if (accessList.find((collaborator) => collaborator.entity === `${EntityKind.USER}:${manualEntityName}`)) {
         return setErrorMessage(`The requested user has already been added below.`)
       }
-      const response = await getUserInformation(manualEntityName)
-      if (!response.ok) {
-        return setErrorMessage(await getErrorMessage(response))
-      }
-      const updatedAccessList = [...accessList]
-      const newAccess = { entity: `${EntityKind.USER}:${manualEntityName}`, roles: [] }
-      updatedAccessList.push(newAccess)
-      setAccessList(updatedAccessList)
+      setAccessList([...accessList, { entity: `${EntityKind.USER}:${manualEntityName}`, roles: [] }])
       setManualEntityName('')
     }
   }
@@ -46,20 +37,22 @@ export default function ManualEntryAccess({ accessList, setAccessList }: ManualE
         </Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ p: 0 }}>
-        <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-          <TextField
-            id='manual-entity-name-select'
-            placeholder='Joe Bloggs'
-            size='small'
-            fullWidth
-            label='User'
-            value={manualEntityName}
-            onChange={(e) => setManualEntityName(e.target.value)}
-          />
-          <Button variant='contained' onClick={handleAddEntityManuallyOnClick} disabled={manualEntityName === ''}>
-            Add
-          </Button>
-        </Stack>
+        <Box component='form' onSubmit={handleAddEntityManuallyOnClick}>
+          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
+            <TextField
+              id='manual-entity-name-select'
+              placeholder='Joe Bloggs'
+              size='small'
+              fullWidth
+              label='User'
+              value={manualEntityName}
+              onChange={(e) => setManualEntityName(e.target.value)}
+            />
+            <Button variant='contained' type='submit' disabled={manualEntityName === ''}>
+              Add
+            </Button>
+          </Stack>
+        </Box>
         <MessageAlert message={errorMessage} severity='error' />
       </AccordionDetails>
     </Accordion>

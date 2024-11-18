@@ -52,7 +52,6 @@ export interface ModelInterface {
 
   name: string
   kind: EntryKindKeys
-  teamId?: string
   description: string
   card?: ModelCardInterface
 
@@ -74,7 +73,6 @@ export type ModelDoc = ModelInterface & Document<any, any, ModelInterface>
 const ModelSchema = new Schema<ModelInterface>(
   {
     id: { type: String, required: true, unique: true, index: true },
-    teamId: { type: String, required: true, index: true, default: 'Uncategorised' },
 
     name: { type: String, required: true },
     kind: { type: String, enum: Object.values(EntryKind) },

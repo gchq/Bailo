@@ -28,12 +28,10 @@ export function checkModelRestriction(model: ModelInterface) {
 
 export type CreateModelParams = Pick<
   ModelInterface,
-  'name' | 'teamId' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
+  'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
 >
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
-
-  // TODO - Find team by teamId to check it's valid. Throw error if not found.
 
   let collaborators: CollaboratorEntry[] = []
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
@@ -320,17 +318,19 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     throw BadReq('You cannot select both mirror settings simultaneously.')
   }
   if (modelDiff.collaborators) {
-    const invalidUsers = []
+    const invalidEntities: string[] = []
     await Promise.all(
       modelDiff.collaborators.map(async (collaborator) => {
         const userInformation = await authentication.getUserInformation(collaborator.entity)
         if (!userInformation) {
-          invalidUsers.push(userInformation)
+          invalidEntities.push(collaborator.entity)
         }
       }),
     )
-    if (invalidUsers.length > 0) {
-      throw BadReq('One or more user is invalid')
+    if (invalidEntities.length > 0) {
+      throw BadReq(
+        `Failed to update ${`model.kind`}. Invalid ${invalidEntities.length === 1 ? 'entity' : 'entities'}: ${invalidEntities.join(', ')}`,
+      )
     }
   }
 

@@ -257,7 +257,7 @@ connectors:
     kind: 'silly'
 
   fileScanners:
-    kinds: ['clamAV']
+    kinds: []
 
 instrumentation:
   enabled: false

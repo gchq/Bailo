@@ -1,3 +1,4 @@
+import { Menu as MenuIcon } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
 import PersonIcon from '@mui/icons-material/Person'
@@ -6,7 +7,7 @@ import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typogra
 import { useGetModel } from 'actions/model'
 import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
-import React, { useMemo } from 'react'
+import React from 'react'
 import { useContext, useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
@@ -106,17 +107,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
     }
   }
 
-  const editMenuItemContent = useMemo(() => {
-    return (
-      <>
-        <ListItemIcon>
-          <EditIcon fontSize='small' />
-        </ListItemIcon>
-        <ListItemText>{`Edit ${EntryCardKindLabel[entry.kind]}`}</ListItemText>
-      </>
-    )
-  }, [entry.kind])
-
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
@@ -145,8 +135,31 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
             </Stack>
           </div>
           {!isEdit && (
-            <>
-              <Button data-test='openEntryOverviewActions' variant='contained' onClick={handleActionButtonClick}>
+            <Stack direction='row' spacing={1}>
+              {!readOnly && (
+                <Restricted
+                  action='editEntryCard'
+                  fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
+                >
+                  <Button
+                    variant='outlined'
+                    onClick={() => {
+                      handleActionButtonClose()
+                      setIsEdit(!isEdit)
+                    }}
+                    data-test='editEntryCardButton'
+                    startIcon={<EditIcon fontSize='small' />}
+                  >
+                    {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                  </Button>
+                </Restricted>
+              )}
+              <Button
+                startIcon={<MenuIcon />}
+                data-test='openEntryOverviewActions'
+                variant='contained'
+                onClick={handleActionButtonClick}
+              >
                 Actions
               </Button>
               <Menu MenuListProps={{ dense: true }} anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
@@ -183,21 +196,8 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
                   </ListItemIcon>
                   <ListItemText>View History</ListItemText>
                 </MenuItem>
-                {!readOnly && (
-                  <Restricted action='editEntryCard' fallback={<MenuItem disabled>{editMenuItemContent}</MenuItem>}>
-                    <MenuItem
-                      onClick={() => {
-                        handleActionButtonClose()
-                        setIsEdit(!isEdit)
-                      }}
-                      data-test='editEntryCardButton'
-                    >
-                      {editMenuItemContent}
-                    </MenuItem>
-                  </Restricted>
-                )}
               </Menu>
-            </>
+            </Stack>
           )}
           {isEdit && (
             <SaveAndCancelButtons
