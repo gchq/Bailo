@@ -305,10 +305,7 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<
-  ModelInterface,
-  'name' | 'teamId' | 'description' | 'visibility' | 'collaborators'
-> & {
+export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility' | 'collaborators'> & {
   settings: Partial<ModelInterface['settings']>
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
@@ -324,12 +321,14 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
   if (modelDiff.collaborators) {
     const invalidUsers = []
-    modelDiff.collaborators.forEach(async (collaborator) => {
-      const userInformation = await authentication.getUserInformation(collaborator.entity)
-      if (!userInformation) {
-        invalidUsers.push(userInformation)
-      }
-    })
+    await Promise.all(
+      modelDiff.collaborators.map(async (collaborator) => {
+        const userInformation = await authentication.getUserInformation(collaborator.entity)
+        if (!userInformation) {
+          invalidUsers.push(userInformation)
+        }
+      }),
+    )
     if (invalidUsers.length > 0) {
       throw BadReq('One or more user is invalid')
     }
