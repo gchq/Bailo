@@ -179,6 +179,10 @@ data:
             disclaimer: '{{ .Values.modelMirror.export.disclaimer }}'
           }
         },
+
+        helpPopoverText: {
+          manualEntryAccess: {{ .Values.helpPopoverText.manualEntryAccess }}
+        }
       },
 
       connectors: {

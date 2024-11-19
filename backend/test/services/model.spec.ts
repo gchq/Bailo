@@ -86,6 +86,7 @@ vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
 
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
+  getUserInformation: vi.fn(() => ({ name: 'user', email: 'user@example.com' })),
 }))
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: authenticationMocks,

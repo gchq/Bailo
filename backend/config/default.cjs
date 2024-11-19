@@ -195,6 +195,10 @@ module.exports = {
       text: '',
       startTimestamp: '',
     },
+
+    helpPopoverText: {
+      manualEntryAccess: '',
+    },
   },
 
   connectors: {

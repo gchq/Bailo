@@ -318,20 +318,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     throw BadReq('You cannot select both mirror settings simultaneously.')
   }
   if (modelDiff.collaborators) {
-    const invalidEntities: string[] = []
-    await Promise.all(
-      modelDiff.collaborators.map(async (collaborator) => {
-        const userInformation = await authentication.getUserInformation(collaborator.entity)
-        if (!userInformation) {
-          invalidEntities.push(collaborator.entity)
-        }
-      }),
-    )
-    if (invalidEntities.length > 0) {
-      throw BadReq(
-        `Failed to update ${`model.kind`}. Invalid ${invalidEntities.length === 1 ? 'entity' : 'entities'}: ${invalidEntities.join(', ')}`,
-      )
-    }
+    await checkCollaboratorAuthorisation(modelDiff.collaborators)
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -349,6 +336,17 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   await model.save()
 
   return model
+}
+
+async function checkCollaboratorAuthorisation(collaborators: CollaboratorEntry[]) {
+  await Promise.all(
+    collaborators.map(async (collaborator) => {
+      const userInformation = await authentication.getUserInformation(collaborator.entity)
+      if (!userInformation) {
+        throw BadReq(`Unable to find user ${collaborator.entity}`)
+      }
+    }),
+  )
 }
 
 export async function createModelCardFromSchema(
