@@ -78,9 +78,53 @@ def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation
     description="Upload a file which is scanned by ModelScan and return the result of the scan",
     status_code=HTTPStatus.OK,
     response_description="The result from ModelScan",
+    response_model=dict[str, Any],
+    # Example response generated from https://github.com/protectai/modelscan/blob/main/notebooks/keras_fashion_mnist.ipynb
+    responses={
+        HTTPStatus.OK: {
+            "description": "modelscan returned results",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "summary": {
+                            "total_issues_by_severity": {"LOW": 0, "MEDIUM": 1, "HIGH": 0, "CRITICAL": 0},
+                            "total_issues": 1,
+                            "input_path": "/foo/bar/unsafe_model.h5",
+                            "absolute_path": "/foo/bar",
+                            "modelscan_version": "0.8.1",
+                            "timestamp": "2024-11-19T12:00:00.000000",
+                            "scanned": {"total_scanned": 1, "scanned_files": ["unsafe_model.h5"]},
+                            "skipped": {"total_skipped": 0, "skipped_files": []},
+                        },
+                        "issues": [
+                            {
+                                "description": "Use of unsafe operator 'Lambda' from module 'Keras'",
+                                "operator": "Lambda",
+                                "module": "Keras",
+                                "source": "unsafe_model.h5",
+                                "scanner": "modelscan.scanners.H5LambdaDetectScan",
+                                "severity": "MEDIUM",
+                            }
+                        ],
+                        "errors": [],
+                    }
+                }
+            },
+        },
+        HTTPStatus.INTERNAL_SERVER_ERROR: {
+            "description": "The server could not complete the request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "An error occurred while processing the uploaded file's name."}
+                }
+            },
+        },
+    },
 )
 def scan_file(
-    in_file: UploadFile, background_tasks: BackgroundTasks, settings: Annotated[Settings, Depends(get_settings)]
+    in_file: UploadFile,
+    background_tasks: BackgroundTasks,
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> dict[str, Any]:
     """API endpoint to upload and scan a file using modelscan.
 
