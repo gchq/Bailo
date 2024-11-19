@@ -11,6 +11,8 @@ This directory provides all of the necessary functionality to interact with
 
 ## Setup
 
+Note that **Python 3.9 to 3.12** is required.
+
 Create and activate a virtual environment
 
 ```bash
