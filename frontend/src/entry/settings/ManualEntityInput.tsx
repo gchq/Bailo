@@ -5,27 +5,21 @@ import { useState } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntityKind } from 'types/types'
 
-interface ManualEntryAccessProps {
-  accessList: CollaboratorEntry[]
-  setAccessList: (accessList: CollaboratorEntry[]) => void
+interface ManualEntityInputProps {
+  onAddEntityManually: (entityName: string) => void
+  errorMessage: string
 }
 
-export default function ManualEntryAccess({ accessList, setAccessList }: ManualEntryAccessProps) {
+export default function ManualEntityInput({ onAddEntityManually, errorMessage }: ManualEntityInputProps) {
   const [manualEntityName, setManualEntityName] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const handleAddEntityManuallyOnClick = async () => {
-    setErrorMessage('')
     if (manualEntityName !== undefined && manualEntityName !== '') {
-      if (accessList.find((collaborator) => collaborator.entity === `${EntityKind.USER}:${manualEntityName}`)) {
-        return setErrorMessage(`The requested user has already been added below.`)
-      }
-      setAccessList([...accessList, { entity: `${EntityKind.USER}:${manualEntityName}`, roles: [] }])
       setManualEntityName('')
+      onAddEntityManually(manualEntityName)
     }
   }
 
@@ -51,7 +45,6 @@ export default function ManualEntryAccess({ accessList, setAccessList }: ManualE
           <Box component='form' onSubmit={handleAddEntityManuallyOnClick}>
             <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} alignItems='center'>
               <TextField
-                id='manual-entity-name-select'
                 size='small'
                 fullWidth
                 label='User'

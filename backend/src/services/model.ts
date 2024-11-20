@@ -343,6 +343,17 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
 }
 
 async function checkCollaboratorAuthorisation(collaborators: CollaboratorEntry[]) {
+  const duplicateEntityNames: string[] = []
+  collaborators.forEach((collaborator) => {
+    if (collaborators[collaborator.entity]) {
+      duplicateEntityNames.push(collaborator.entity)
+    } else {
+      collaborators[collaborator.entity] = true
+    }
+  })
+  if (duplicateEntityNames.length > 0) {
+    throw BadReq(`The following duplicate collaborators have been found: ${duplicateEntityNames.join(', ')}`)
+  }
   await Promise.all(
     collaborators.map(async (collaborator) => {
       if (collaborator.entity === '') {
