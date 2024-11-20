@@ -33,6 +33,10 @@ export type CreateModelParams = Pick<
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
+  if (modelParams.collaborators) {
+    await checkCollaboratorAuthorisation(modelParams.collaborators)
+  }
+
   let collaborators: CollaboratorEntry[] = []
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
     const collaboratorListContainsOwner = modelParams.collaborators.some((collaborator) =>
@@ -341,9 +345,13 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
 async function checkCollaboratorAuthorisation(collaborators: CollaboratorEntry[]) {
   await Promise.all(
     collaborators.map(async (collaborator) => {
-      const userInformation = await authentication.getUserInformation(collaborator.entity)
-      if (!userInformation) {
-        throw BadReq(`Unable to find user ${collaborator.entity}`)
+      if (collaborator.entity === '') {
+        throw BadReq('Collaborator name must be a valid string')
+      }
+      try {
+        await authentication.getUserInformation(collaborator.entity)
+      } catch (err) {
+        throw InternalError(`Unable to find user ${collaborator.entity}`, { err })
       }
     }),
   )

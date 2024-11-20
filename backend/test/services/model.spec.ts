@@ -107,6 +107,15 @@ describe('services > model', () => {
     expect(modelMocks.save).not.toBeCalled()
   })
 
+  test('createModel > should throw an internal error if getUserInformation fails due to invalid user', async () => {
+    authenticationMocks.getUserInformation.mockImplementation(() => {
+      throw new Error('Could not find user')
+    })
+    expect(() =>
+      createModel({} as any, { collaborators: [{ entity: 'user:unknown_user', roles: [] }] } as any),
+    ).rejects.toThrowError(/^Unable to find user user:unknown_user/)
+  })
+
   test('createModel > bad request is thrown when attempting to set both source and destinationModelId simultaneously', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({
       info: 'You cannot select both settings simultaneously.',
@@ -325,6 +334,15 @@ describe('services > model', () => {
     expect(() =>
       updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '123', destinationModelId: '234' } } }),
     ).rejects.toThrowError(/^You cannot select both mirror settings simultaneously./)
+  })
+
+  test('updateModel > should throw an internal error if getUserInformation fails due to invalid user', async () => {
+    authenticationMocks.getUserInformation.mockImplementation(() => {
+      throw new Error('Could not find user')
+    })
+    expect(() =>
+      updateModel({} as any, '123', { collaborators: [{ entity: 'user:unknown_user', roles: [] }] }),
+    ).rejects.toThrowError(/^Unable to find user user:unknown_user/)
   })
 
   test('createModelcardFromSchema > should throw an error when attempting to change a model from mirrored to standard', async () => {
