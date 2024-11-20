@@ -181,7 +181,7 @@ data:
         },
 
         helpPopoverText: {
-          manualEntryAccess: {{ .Values.helpPopoverText.manualEntryAccess }}
+          manualEntryAccess: {{ .Values.config.ui.helpPopoverText.manualEntryAccess }}
         }
       },
 
