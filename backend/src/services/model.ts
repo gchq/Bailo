@@ -343,16 +343,23 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
 }
 
 async function checkCollaboratorAuthorisation(collaborators: CollaboratorEntry[]) {
-  const duplicateEntityNames: string[] = []
-  collaborators.forEach((collaborator) => {
-    if (collaborators[collaborator.entity]) {
-      duplicateEntityNames.push(collaborator.entity)
-    } else {
-      collaborators[collaborator.entity] = true
-    }
-  })
-  if (duplicateEntityNames.length > 0) {
-    throw BadReq(`The following duplicate collaborators have been found: ${duplicateEntityNames.join(', ')}`)
+  const duplicateEntities = collaborators.reduce<string[]>(
+    (duplicates, currentCollaborator, currentCollaboratorIndex) => {
+      if (
+        collaborators.find(
+          (collaborator, index) =>
+            index !== currentCollaboratorIndex && collaborator.entity === currentCollaborator.entity,
+        ) &&
+        !duplicates.includes(currentCollaborator.entity)
+      ) {
+        duplicates.push(currentCollaborator.entity)
+      }
+      return duplicates
+    },
+    [],
+  )
+  if (duplicateEntities.length > 0) {
+    throw BadReq(`The following duplicate collaborators have been found: ${duplicateEntities.join(', ')}`)
   }
   await Promise.all(
     collaborators.map(async (collaborator) => {
