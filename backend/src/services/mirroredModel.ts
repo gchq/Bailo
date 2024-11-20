@@ -330,16 +330,11 @@ async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: Re
     zip.append(JSON.stringify(release.toJSON()), { name: `${baseUri}/releaseDocument.json` })
     for (const file of files) {
       zip.append(JSON.stringify(file.toJSON()), { name: `${baseUri}/files/${file._id}/fileDocument.json` })
-      await uploadToS3(
-        `${baseUri}/files/${file._id}/fileContent`,
-        (await downloadFile(user, file._id)).Body as stream.Readable,
-        user.dn,
-        {
-          modelId: model.id,
-          releaseId: release.id,
-          fileId: file.id,
-        },
-      )
+      await uploadToS3(file.path, (await downloadFile(user, file._id)).Body as stream.Readable, user.dn, {
+        modelId: model.id,
+        releaseId: release.id,
+        fileId: file.id,
+      })
     }
   } catch (error: any) {
     throw InternalError('Error when generating the zip file.', { error })
