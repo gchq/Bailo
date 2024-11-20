@@ -325,11 +325,10 @@ async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: Re
   log.debug('Adding release to zip file of releases.', { user, modelId: model.id, semver: release.semver })
   const files: FileInterfaceDoc[] = await getFilesByIds(user, release.modelId, release.fileIds)
 
-  const baseUri = `releases/${release.semver}`
   try {
-    zip.append(JSON.stringify(release.toJSON()), { name: `${baseUri}/releaseDocument.json` })
+    zip.append(JSON.stringify(release.toJSON()), { name: `releases/${release.semver}.json` })
     for (const file of files) {
-      zip.append(JSON.stringify(file.toJSON()), { name: `${baseUri}/files/${file._id}/fileDocument.json` })
+      zip.append(JSON.stringify(file.toJSON()), { name: `files/${file._id}.json` })
       await uploadToS3(file.path, (await downloadFile(user, file._id)).Body as stream.Readable, user.dn, {
         modelId: model.id,
         releaseId: release.id,
