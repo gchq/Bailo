@@ -2,9 +2,6 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { getAuthorisationConnector } from '../../../src/connectors/authorisation/index.js'
 import { FileScanResult } from '../../../src/connectors/fileScanning/Base.js'
-// import config from '../../../src/utils/__mocks__/config.js'
-
-// vi.mock('../../../src/utils/config.js')
 
 vi.mock('../../../src/connectors/authentication/index.js', () => ({
   default: {
@@ -61,11 +58,9 @@ describe('connectors > authorisation', () => {
     const connector = getAuthorisationConnector(false)
     expect(connector.constructor.name).toBe('BasicAuthorisationConnector')
   })
-
   test('invalid', () => {
     const invalidConnector = 'invalid'
     configMock.connectors.authorisation.kind = invalidConnector
-
     expect(() => getAuthorisationConnector(false)).toThrowError(
       `'${invalidConnector}' is not a valid authorisation kind.`,
     )
