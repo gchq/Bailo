@@ -16,6 +16,4 @@ RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 COPY ./bailo_modelscan_api /app/bailo_modelscan_api
 
-EXPOSE 80
-
 CMD ["fastapi", "run", "bailo_modelscan_api/main.py", "--port", "80"]

@@ -148,6 +148,12 @@ module.exports = {
       host: '127.0.0.1',
       port: 3310,
     },
+
+    modelscan: {
+      protocol: 'http',
+      host: '127.0.0.1',
+      port: 80,
+    },
   },
 
   // These settings are PUBLIC and shared with the UI
