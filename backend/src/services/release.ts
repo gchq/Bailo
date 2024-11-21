@@ -359,14 +359,16 @@ function getSemverQueryBounds(querySemver: string) {
       lowerSemver = expressionA.replace('>=', '')
       lowerInclusivity = true
     } else {
-      expressionA.replace('>', '')
+      lowerSemver = expressionA.replace('>', '')
     }
     //do check for expressionB
-    if (expressionB.includes('=')) {
-      upperSemver = expressionB.replace('<=', '')
-      upperInclusivity = true
-    } else {
-      upperSemver = expressionB.replace('<', '')
+    if (expressionB) {
+      if (expressionB.includes('=')) {
+        upperSemver = expressionB.replace('<=', '')
+        upperInclusivity = true
+      } else {
+        upperSemver = expressionB.replace('<', '')
+      }
     }
   } else {
     //<
@@ -379,8 +381,14 @@ function getSemverQueryBounds(querySemver: string) {
     }
   }
 
-  const lowerSemverObj = semverStringToObject(lowerSemver)
-  const upperSemverObj = semverStringToObject(upperSemver)
+  let lowerSemverObj, upperSemverObj
+  if (lowerSemver) {
+    lowerSemverObj = semverStringToObject(lowerSemver)
+  }
+
+  if (upperSemver) {
+    upperSemverObj = semverStringToObject(upperSemver)
+  }
 
   return { lowerSemverObj, upperSemverObj, lowerInclusivity, upperInclusivity }
 }
@@ -407,49 +415,53 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
     upperComparator = '$lt'
   }
 
-  const lowerQuery = {
-    modelId: modelID,
-    $or: [
-      {
-        'semver.major': { $gte: lowerSemverObj.major },
-        'semver.minor': { $gte: lowerSemverObj.minor },
-        'semver.patch': { [lowerComparator]: lowerSemverObj.patch },
-      },
-      {
-        'semver.major': { $gt: lowerSemverObj.major },
-      },
-      {
-        'semver.major': { $gte: lowerSemverObj.major },
-        'semver.minor': { $gt: lowerSemverObj.minor },
-      },
-    ],
+  const and: any[] = []
+  if (lowerSemverObj) {
+    const lowerQuery = {
+      $or: [
+        {
+          'semver.major': { $gte: lowerSemverObj.major },
+          'semver.minor': { $gte: lowerSemverObj.minor },
+          'semver.patch': { [lowerComparator]: lowerSemverObj.patch },
+        },
+        {
+          'semver.major': { $gt: lowerSemverObj.major },
+        },
+        {
+          'semver.major': { $gte: lowerSemverObj.major },
+          'semver.minor': { $gt: lowerSemverObj.minor },
+        },
+      ],
+    }
+    and.push(lowerQuery)
   }
 
-  const upperQuery = {
-    modelId: modelID,
-    $or: [
-      {
-        'semver.major': { $lte: upperSemverObj.major },
-        'semver.minor': { $lte: upperSemverObj.minor },
-        'semver.patch': { [upperComparator]: upperSemverObj.patch },
-      },
-      {
-        'semver.major': { $lt: upperSemverObj.major },
-      },
-      {
-        'semver.major': { $lte: upperSemverObj.major },
-        'semver.minor': { $lt: upperSemverObj.minor },
-      },
-    ],
+  if (upperSemverObj) {
+    const upperQuery = {
+      $or: [
+        {
+          'semver.major': { $lte: upperSemverObj.major },
+          'semver.minor': { $lte: upperSemverObj.minor },
+          'semver.patch': { [upperComparator]: upperSemverObj.patch },
+        },
+        {
+          'semver.major': { $lt: upperSemverObj.major },
+        },
+        {
+          'semver.major': { $lte: upperSemverObj.major },
+          'semver.minor': { $lt: upperSemverObj.minor },
+        },
+      ],
+    }
+    and.push(upperQuery)
   }
 
-  //to be removed! just for commits sake
-  const query = { ...lowerQuery, ...upperQuery }
+  const combinedQuery = {
+    modelId: modelID,
+    $and: and,
+  }
 
-  //if(lowerSemver exists){add to query}
-  //if(upperSemver exists){add to query}
-
-  return query
+  return combinedQuery
 }
 
 export async function deleteRelease(user: UserInterface, modelId: string, semver: string) {
