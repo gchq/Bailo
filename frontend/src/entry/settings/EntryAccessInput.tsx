@@ -28,7 +28,7 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(value)
   const [userListQuery, setUserListQuery] = useState('')
-  const [manualEntityEntryErrorMessage, setManualEntityEntryErrorMessage] = useState('')
+  const [manualEntityInputErrorMessage, setManualEntityInputErrorMessage] = useState('')
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
 
@@ -73,17 +73,14 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
     setUserListQuery(value)
   }, [])
 
-  const handleNewManualEntityEntry = useCallback(
-    (manualEntityName: string) => {
-      setManualEntityEntryErrorMessage('')
-      if (accessList.find((collaborator) => collaborator.entity === `${EntityKind.USER}:${manualEntityName}`)) {
-        setManualEntityEntryErrorMessage('User has already been added below.')
-      } else {
-        setAccessList([...accessList, { entity: `${EntityKind.USER}:${manualEntityName}`, roles: [] }])
-      }
-    },
-    [accessList],
-  )
+  const handleAddEntityManually = (manualEntityName: string) => {
+    setManualEntityInputErrorMessage('')
+    if (accessList.find((collaborator) => collaborator.entity === `${EntityKind.USER}:${manualEntityName}`)) {
+      setManualEntityInputErrorMessage('User has already been added below.')
+    } else {
+      setAccessList([...accessList, { entity: `${EntityKind.USER}:${manualEntityName}`, roles: [] }])
+    }
+  }
 
   const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
     handleInputChange(event, value)
@@ -127,10 +124,7 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
           />
         )}
       />
-      <ManualEntityInput
-        onAddEntityManually={handleNewManualEntityEntry}
-        errorMessage={manualEntityEntryErrorMessage}
-      />
+      <ManualEntityInput onAddEntityManually={handleAddEntityManually} errorMessage={manualEntityInputErrorMessage} />
       <Table>
         <TableHead>
           <TableRow>

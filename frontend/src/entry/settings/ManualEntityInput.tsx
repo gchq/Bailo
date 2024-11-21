@@ -16,7 +16,7 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const handleAddEntityManuallyOnClick = async () => {
+  const handleAddEntityManuallyOnClick = () => {
     if (manualEntityName !== undefined && manualEntityName !== '') {
       setManualEntityName('')
       onAddEntityManually(manualEntityName)
