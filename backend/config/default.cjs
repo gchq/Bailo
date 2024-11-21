@@ -174,7 +174,7 @@ module.exports = {
 
     inference: {
       enabled: false,
-      conneciton: {
+      connection: {
         host: 'http://example.com',
       },
       authorizationTokenName: 'inferencing-token',
