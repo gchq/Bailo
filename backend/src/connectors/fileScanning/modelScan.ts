@@ -75,18 +75,21 @@ class NodeModelScanAPI {
     this.settings = options
     this.url = `${this.settings.protocol}://${this.settings.host}:${this.settings.port}`
 
+    // ping to check that the service is running
     return this._getInfo().then((_) => {
       this.initialised = true
       return this
     })
   }
 
-  async scanStream(stream: Readable, file_name: string): Promise<{ isInfected: boolean; viruses: string[] }> {
+  // TODO: try and convert this to work with a stream
+  async scanFile(file: Blob, file_name: string): Promise<{ isInfected: boolean; viruses: string[] }> {
     if (!this.initialised)
       throw ConfigurationError('NodeModelScanAPI has not been initialised.', { NodeModelScanAPI: this })
 
-    return this._postScanFile(stream, file_name).then((json) => {
-      const issues: number = json.summary.total_issues
+    return this._postScanFile(file, file_name).then((json) => {
+      // map modelscan result to our format
+      const issues = json.summary.total_issues
       const isInfected = issues > 0
       const viruses: string[] = []
       if (isInfected) {
@@ -99,6 +102,7 @@ class NodeModelScanAPI {
   }
 
   async _getInfo(): Promise<unknown> {
+    // hit the /info endpoint
     let res: Response
 
     try {
@@ -116,13 +120,13 @@ class NodeModelScanAPI {
     return (await res.json()) as ModelScanInfoResponse
   }
 
-  async _postScanFile(stream: Readable, file_name: string): Promise<ModelScanResponse> {
+  async _postScanFile(file: Blob, file_name: string): Promise<ModelScanResponse> {
+    // hit the /scan/file endpoint
     let res: Response
 
     try {
       const formData = new FormData()
-      const fileBlob = await new Response(stream).blob()
-      formData.append('in_file', fileBlob, file_name)
+      formData.append('in_file', file, file_name)
 
       res = await fetch(`${this.url}/scan/file`, {
         method: 'POST',
@@ -174,7 +178,9 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
     }
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     try {
-      const { isInfected, viruses } = await av.scanStream(s3Stream, file.name)
+      // TODO: see if it's possible to directly send the Readable stream rather than a blob
+      const fileBlob = await new Response(s3Stream).blob()
+      const { isInfected, viruses } = await av.scanFile(fileBlob, file.name)
       log.info(
         { modelId: file.modelId, fileId: file._id, name: file.name, result: { isInfected, viruses } },
         'Scan complete.',
