@@ -97,7 +97,7 @@ export async function sendWebhooks(
         agent: getHttpsAgent({
           rejectUnauthorized: webhook.insecureSSL,
         }),
-        headers: { 'Conent-Type': 'application/json', ...headers },
+        headers: { 'Content-Type': 'application/json', ...headers },
       })
       if (!response.ok) {
         log.error(

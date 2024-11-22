@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from modelscan.settings import DEFAULT_SETTINGS
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -25,13 +25,10 @@ class Settings(BaseSettings):
 
     You can upload files and view modelscan's result."""
     app_version: str = "1.0.0"
-    download_dir: str = "."
+    # download_dir is used if it evaluates, otherwise a temporary directory is used.
+    download_dir: Optional[str] = None
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
 
     # Load in a dotenv file to set/overwrite any properties with potentially sensitive values
     model_config = SettingsConfigDict(env_file=".env")
-
-
-logger.info("Instantiating settings.")
-settings = Settings()

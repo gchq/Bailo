@@ -38,8 +38,8 @@ export const postAccessRequestReviewResponseSchema = z.object({
 
 registerPath({
   method: 'post',
-  path: '/api/v2/model/{modelId}/access-request/{acessRequestId}/review',
-  tags: ['accessRequest', 'review'],
+  path: '/api/v2/model/{modelId}/access-request/{accessRequestId}/review',
+  tags: ['access-request', 'review'],
   description: 'Send a review for an access request.',
   schema: postAccessRequestReviewResponseSchema,
   responses: {
