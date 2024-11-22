@@ -11,6 +11,8 @@ import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { SnackbarProvider } from 'notistack'
 import { useEffect } from 'react'
+import UserPermissionsContext from 'src/contexts/userPermissionsContext'
+import useUserPermissions from 'src/hooks/UserPermissionsHook'
 import ThemeWrapper from 'src/ThemeWrapper'
 import Wrapper from 'src/Wrapper'
 
@@ -23,6 +25,7 @@ export default function MyApp(props: AppProps) {
   const { Component, pageProps } = props
   const themeModeValue = useThemeMode()
   const unsavedChangesValue = useUnsavedChanges()
+  const userPermissionsValue = useUserPermissions()
 
   // This is set so that 'react-markdown-editor' respects the theme set by MUI.
   useEffect(() => {
@@ -39,16 +42,18 @@ export default function MyApp(props: AppProps) {
       <ThemeModeContext.Provider value={themeModeValue}>
         <UnsavedChangesContext.Provider value={unsavedChangesValue}>
           <ThemeModeContext.Provider value={themeModeValue}>
-            <SnackbarProvider>
-              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
-                <ThemeWrapper>
-                  <CssBaseline />
-                  <Wrapper>
-                    <Component {...pageProps} />
-                  </Wrapper>
-                </ThemeWrapper>
-              </LocalizationProvider>
-            </SnackbarProvider>
+            <UserPermissionsContext.Provider value={userPermissionsValue}>
+              <SnackbarProvider>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='en-gb'>
+                  <ThemeWrapper>
+                    <CssBaseline />
+                    <Wrapper>
+                      <Component {...pageProps} />
+                    </Wrapper>
+                  </ThemeWrapper>
+                </LocalizationProvider>
+              </SnackbarProvider>
+            </UserPermissionsContext.Provider>
           </ThemeModeContext.Provider>
         </UnsavedChangesContext.Provider>
       </ThemeModeContext.Provider>

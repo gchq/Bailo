@@ -57,3 +57,23 @@ exports[`services > review > findReviews > all reviews for user 2`] = `
   },
 ]
 `;
+
+exports[`services > review > findReviewsForAccessRequests > success 1`] = `
+[
+  {
+    "accessRequestId": [
+      "Hello",
+    ],
+  },
+]
+`;
+
+exports[`services > review > removeAccessRequestReviews > successful 1`] = `
+[
+  {
+    "accessRequestId": [
+      "Hello",
+    ],
+  },
+]
+`;

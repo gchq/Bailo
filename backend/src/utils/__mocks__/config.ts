@@ -1,10 +1,22 @@
-const config = {
+import { PartialDeep } from '../../types/types.js'
+import { Config } from '../config.js'
+
+const config: PartialDeep<Config> = {
   app: {
     protocol: '',
     host: '',
     port: 3000,
   },
   s3: {
+    credentials: {
+      accessKeyId: '',
+      secretAccessKey: '',
+    },
+    endpoint: 'http://minio:9000',
+    region: 'ignored',
+    forcePathStyle: true,
+    rejectUnauthorized: true,
+    automaticallyCreateBuckets: true,
     buckets: {
       uploads: 'uploads',
       registry: 'registry',
@@ -20,6 +32,9 @@ const config = {
     authorisation: {
       kind: 'basic',
     },
+    fileScanners: {
+      kinds: [],
+    },
   },
   log: {
     level: 'debug',
@@ -32,8 +47,47 @@ const config = {
   instrumentation: {
     enabled: false,
   },
-  avScanning: {
-    enabled: false,
+  session: {
+    secret: '',
+  },
+  oauth: {
+    provider: 'cognito',
+    grant: {
+      defaults: {
+        origin: '',
+        prefix: 'api/connect',
+        transport: 'session',
+      },
+      cognito: {
+        key: '',
+        secret: '',
+        dynamic: ['scope'],
+        response: ['tokens', 'raw', 'jwt'],
+        callback: '/',
+        subdomain: '',
+      },
+    },
+    cognito: {
+      identityProviderClient: {
+        region: 'eu-west-1',
+        credentials: {
+          accessKeyId: '',
+          secretAccessKey: '',
+        },
+      },
+      userPoolId: '',
+      userIdAttribute: '',
+    },
+  },
+  mongo: {
+    uri: 'mongodb://localhost:27017/bailo?directConnection=true',
+    user: undefined,
+    pass: undefined,
+  },
+  ui: {
+    inference: {
+      enabled: true,
+    },
   },
 }
 

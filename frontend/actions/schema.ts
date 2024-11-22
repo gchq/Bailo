@@ -1,3 +1,4 @@
+import qs from 'querystring'
 import useSWR from 'swr'
 
 import { SchemaInterface, SchemaKindKeys } from '../types/types'
@@ -13,13 +14,18 @@ export interface PostSchemaParams {
   jsonSchema: any
 }
 
-export function useGetSchemas(kind?: SchemaKindKeys) {
+export function useGetSchemas(kind: SchemaKindKeys, hidden?: boolean) {
+  const queryParams = {
+    kind,
+    ...(hidden != undefined && { hidden }),
+  }
+
   const { data, isLoading, error, mutate } = useSWR<
     {
       schemas: SchemaInterface[]
     },
     ErrorInfo
-  >(kind ? `/api/v2/schemas?kind=${kind}` : '/api/v2/schemas/', fetcher)
+  >(`/api/v2/schemas?${qs.stringify(queryParams)}`, fetcher)
 
   return {
     mutateSchemas: mutate,

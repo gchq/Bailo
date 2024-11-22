@@ -11,6 +11,7 @@ import { parse } from '../../../../utils/validate.js'
 
 export const getAccessRequestSchema = z.object({
   params: z.object({
+    modelId: z.string(),
     accessRequestId: z.string(),
   }),
 })

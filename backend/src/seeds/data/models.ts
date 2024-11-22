@@ -6,7 +6,6 @@ export const model: ModelInterface = {
   // Basic model example
   id: 'basic-model-abcdef',
   kind: EntryKind.Model,
-  teamId: undefined,
 
   name: 'Basic Model',
   description:

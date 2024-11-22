@@ -1,4 +1,4 @@
-import { ArrowBack, FileUpload, Lock, LockOpen } from '@mui/icons-material'
+import { ArrowBack, FileUpload, FolderCopy, Gavel, Lock, LockOpen } from '@mui/icons-material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import LoadingButton from '@mui/lab/LoadingButton'
 import {
@@ -13,6 +13,7 @@ import {
   Radio,
   RadioGroup,
   Stack,
+  Switch,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -26,7 +27,6 @@ import EntryNameInput from 'src/entry/EntryNameInput'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import SourceModelInput from 'src/entry/SourceModelnput'
 import MessageAlert from 'src/MessageAlert'
-import TeamSelect from 'src/TeamSelect'
 import {
   CollaboratorEntry,
   CreateEntryKind,
@@ -37,7 +37,6 @@ import {
   EntryKindKeys,
   EntryKindLabel,
   EntryVisibility,
-  TeamInterface,
 } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
@@ -52,7 +51,6 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const [team, setTeam] = useState<TeamInterface | undefined>()
   const [name, setName] = useState('')
   const [sourceModelId, setSourceModelId] = useState('')
   const [description, setDescription] = useState('')
@@ -60,6 +58,8 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
   )
+  const [ungovernedAccess, setungovernedAccess] = useState(false)
+  const [allowTemplating, setAllowTemplating] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -80,12 +80,13 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
     const formData: EntryForm = {
       name,
-      teamId: team?.id ?? 'Uncategorised',
       kind: entryKind,
       description,
       visibility,
       collaborators,
       settings: {
+        ungovernedAccess,
+        allowTemplating,
         mirror: {
           sourceModelId,
         },
@@ -102,7 +103,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     }
   }
 
-  const privateLabel = () => {
+  const privateLabel = useMemo(() => {
     return (
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <Lock />
@@ -114,9 +115,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
         </Stack>
       </Stack>
     )
-  }
+  }, [createEntryKind])
 
-  const publicLabel = () => {
+  const publicLabel = useMemo(() => {
     return (
       <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
         <LockOpen />
@@ -128,7 +129,35 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
         </Stack>
       </Stack>
     )
-  }
+  }, [createEntryKind])
+
+  const allowTemplatingLabel = useMemo(() => {
+    return (
+      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+        <FolderCopy />
+        <Stack sx={{ my: 1 }}>
+          <Typography fontWeight='bold'>Templating</Typography>
+          <Typography variant='caption'>
+            {`Allow this to be used as a template for another ${EntryKindLabel[createEntryKind]}`}
+          </Typography>
+        </Stack>
+      </Stack>
+    )
+  }, [createEntryKind])
+
+  const ungovernedAccessLabel = useMemo(() => {
+    return (
+      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1}>
+        <Gavel />
+        <Stack sx={{ my: 1 }}>
+          <Typography fontWeight='bold'>Ungoverned Access Requests</Typography>
+          <Typography variant='caption'>
+            {`Allow users to request access without the need for authorisation from ${EntryKindLabel[createEntryKind]} owners`}
+          </Typography>
+        </Stack>
+      </Stack>
+    )
+  }, [createEntryKind])
 
   if (isCurrentUserError) {
     return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
@@ -161,7 +190,6 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 Overview
               </Typography>
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-                <TeamSelect value={team} onChange={(value) => setTeam(value)} />
                 <EntryNameInput autoFocus value={name} kind={entryKind} onChange={(value) => setName(value)} />
                 {createEntryKind === CreateEntryKind.MIRRORED_MODEL && (
                   <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
@@ -182,13 +210,13 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 <FormControlLabel
                   value='public'
                   control={<Radio />}
-                  label={publicLabel()}
+                  label={publicLabel}
                   data-test='publicButtonSelector'
                 />
                 <FormControlLabel
                   value='private'
                   control={<Radio />}
-                  label={privateLabel()}
+                  label={privateLabel}
                   data-test='privateButtonSelector'
                 />
               </RadioGroup>
@@ -224,6 +252,31 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                     ]}
                   />
                 </Box>
+                <Stack spacing={2}>
+                  <Typography variant='h6' component='h2'>
+                    Additional settings
+                  </Typography>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(e) => setungovernedAccess(e.target.checked)}
+                        checked={ungovernedAccess}
+                        size='small'
+                      />
+                    }
+                    label={ungovernedAccessLabel}
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        onChange={(event) => setAllowTemplating(event.target.checked)}
+                        checked={allowTemplating}
+                        size='small'
+                      />
+                    }
+                    label={allowTemplatingLabel}
+                  />
+                </Stack>
               </AccordionDetails>
             </Accordion>
             <Box sx={{ textAlign: 'right' }}>

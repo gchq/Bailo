@@ -30,7 +30,7 @@ jobs:
           outputs: type=docker,dest=/tmp/bailo_backend.tar
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bailo_backend
           path: /tmp/bailo_backend.tar
@@ -58,7 +58,7 @@ jobs:
           outputs: type=docker,dest=/tmp/bailo_frontend.tar
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bailo_frontend
           path: /tmp/bailo_frontend.tar
@@ -125,12 +125,12 @@ jobs:
 
       # Get Bailo Docker image
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bailo_frontend
           path: /tmp
@@ -242,13 +242,13 @@ jobs:
       # Run Cypress integration tests
       #- run: CYPRESS_BASE_URL=$(minikube service node-port --url) npm run cy:run
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots-k8s
           path: cypress/screenshots
 
-      # - uses: actions/upload-artifact@v3
+      # - uses: actions/upload-artifact@v4
       #   if: always()
       #   with:
       #     name: cypress-videos
@@ -278,12 +278,12 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bailo_frontend
           path: /tmp
@@ -353,13 +353,13 @@ jobs:
           install: false
           spec: cypress/e2e/bailo/**/*
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots-e2e
           path: frontend/cypress/screenshots
 
-      # - uses: actions/upload-artifact@v3
+      # - uses: actions/upload-artifact@v4
       #   if: always()
       #   with:
       #     name: cypress-videos
@@ -373,7 +373,7 @@ jobs:
         if: always()
         run: cat logs/stack.log
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: logs
@@ -398,12 +398,12 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bailo_frontend
           path: /tmp
@@ -492,8 +492,8 @@ jobs:
         if: always()
         run: cat logs/stack.log
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: logs
+          name: python-logs
           path: logs

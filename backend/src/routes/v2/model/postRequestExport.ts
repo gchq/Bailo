@@ -10,7 +10,7 @@ import { parse } from '../../../utils/validate.js'
 
 export const postRequestExportToS3Schema = z.object({
   params: z.object({
-    modelId: z.string(),
+    modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   }),
   body: z.object({
     disclaimerAgreement: z.boolean(),
@@ -19,7 +19,7 @@ export const postRequestExportToS3Schema = z.object({
 
 registerPath({
   method: 'post',
-  path: '/api/v2/model/:modelId/export/s3',
+  path: '/api/v2/model/{modelId}/export/s3',
   tags: ['model', 'mirror'],
   description:
     'Request for all current model card revisions to be exported to S3 as a Zip file. Can also include releases specified by semver in the body.',

@@ -4,16 +4,14 @@ import audit from '../../../src/connectors/audit/__mocks__/index.js'
 import { testGet } from '../../testUtils/routes.js'
 import { testDeploymentSchema, testModelSchema } from '../../testUtils/testModels.js'
 
-vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
-vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/connectors/audit/index.js')
 vi.mock('../../../src/connectors/authorisation/index.js')
 
 const mockSchemaService = vi.hoisted(() => {
   return {
     addDefaultSchemas: vi.fn(),
-    findSchemasByKind: vi.fn(() => [testDeploymentSchema, testModelSchema]),
+    searchSchemas: vi.fn(() => [testDeploymentSchema, testModelSchema]),
   }
 })
 vi.mock('../../../src/services/schema.js', () => mockSchemaService)
@@ -35,7 +33,7 @@ describe('routes > schema > getSchemas', () => {
   })
 
   test('returns only model schemas with the model parameter', async () => {
-    mockSchemaService.findSchemasByKind.mockReturnValueOnce([testModelSchema])
+    mockSchemaService.searchSchemas.mockReturnValueOnce([testModelSchema])
     const res = await testGet(`/api/v2/schemas?kind=model`)
 
     expect(res.statusCode).toBe(200)
@@ -43,7 +41,7 @@ describe('routes > schema > getSchemas', () => {
   })
 
   test('returns only deployment schemas with the accessRequest parameter', async () => {
-    mockSchemaService.findSchemasByKind.mockReturnValueOnce([testDeploymentSchema])
+    mockSchemaService.searchSchemas.mockReturnValueOnce([testDeploymentSchema])
     const res = await testGet(`/api/v2/schemas?kind=accessRequest`)
 
     expect(res.statusCode).toBe(200)
@@ -53,7 +51,7 @@ describe('routes > schema > getSchemas', () => {
   test('rejects unknown query parameter', async () => {
     const res = await testGet(`/api/v2/schemas?kind=notValid`)
 
-    expect(mockSchemaService.findSchemasByKind).not.toBeCalled()
+    expect(mockSchemaService.searchSchemas).not.toBeCalled()
     expect(res.statusCode).toBe(400)
     expect(res.body).matchSnapshot()
   })

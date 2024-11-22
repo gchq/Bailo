@@ -69,8 +69,8 @@ export default function Help() {
                     To find out more about Bailo please see our documentation pages.
                   </Typography>
                 </CardContent>
-                <CardActions>
-                  <Link passHref href='/docs' legacyBehavior>
+                <CardActions sx={{ justifyContent: 'center' }}>
+                  <Link passHref href='/docs'>
                     <Button variant='contained' sx={{ mx: 'auto', mb: 2, width: 200 }} data-test='documentationLink'>
                       View documentation
                     </Button>

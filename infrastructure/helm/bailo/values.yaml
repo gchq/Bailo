@@ -90,8 +90,6 @@ aws:
   pvcMinioStorage: 20Gi
   pvcMongoName: "bailo-mongodb"
   pvcMongoStorage: 10Gi
-  pvcClamAVName: "bailo-clamav"
-  pvcClamAVStorage: 5Gi
 
 # Pod resource
 resources:
@@ -258,14 +256,19 @@ connectors:
   audit:
     kind: 'silly'
 
+  fileScanners:
+    kinds: []
+
 instrumentation:
   enabled: false
   debug: false
 
 modelMirror:
-  enabled: false
-  disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting'
+  import:
+    enabled: false
   export:
+    enabled: false
+    disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting'
     kmsSignature:
       enabled: false
       keyId: '123'
@@ -287,5 +290,9 @@ backend:
 
 clamav:
   enabled: false
+  runAsUser: 1002
   image: clamav/clamav:latest_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
   port: 3310
+  accessModes:
+    - ReadWriteOnce
+  size: 10G

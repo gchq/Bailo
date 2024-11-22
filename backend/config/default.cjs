@@ -144,7 +144,6 @@ module.exports = {
   },
 
   avScanning: {
-    enabled: false,
     clamdscan: {
       host: '127.0.0.1',
       port: 3310,
@@ -175,15 +174,20 @@ module.exports = {
 
     inference: {
       enabled: false,
-      conneciton: {
+      connection: {
         host: 'http://example.com',
       },
       authorizationTokenName: 'inferencing-token',
       gpus: {},
     },
     modelMirror: {
-      enabled: false,
-      disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+      import: {
+        enabled: false,
+      },
+      export: {
+        enabled: false,
+        disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+      },
     },
 
     announcement: {
@@ -204,6 +208,10 @@ module.exports = {
 
     audit: {
       kind: 'silly',
+    },
+
+    fileScanners: {
+      kinds: [],
     },
   },
 

@@ -68,7 +68,7 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
           >
             <Stack spacing={2}>
               <Typography component='h3' variant='h6' color='primary'>
-                Create from scratch
+                Create from schema
               </Typography>
               <Typography>
                 Create a {`${EntryCardKindLabel[entry.kind]}`} from scratch using a predefined schema.

@@ -2,7 +2,7 @@ import { Validator } from 'jsonschema'
 import _ from 'lodash'
 
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
+import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
@@ -12,11 +12,13 @@ import ModelCardRevisionModel, {
 } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
+import { EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
-import { findSchemaById } from './schema.js'
+import { authResponseToUserPermission } from '../utils/permissions.js'
+import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
   if (model.settings.mirror.sourceModelId) {
@@ -26,12 +28,10 @@ export function checkModelRestriction(model: ModelInterface) {
 
 export type CreateModelParams = Pick<
   ModelInterface,
-  'name' | 'teamId' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
+  'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
 >
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
-
-  // TODO - Find team by teamId to check it's valid. Throw error if not found.
 
   let collaborators: CollaboratorEntry[] = []
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
@@ -286,7 +286,7 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const schema = await findSchemaById(model.card.schemaId)
+  const schema = await getSchemaById(model.card.schemaId)
   try {
     new Validator().validate(metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
@@ -303,7 +303,7 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'> & {
+export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility'> & {
   settings: Partial<ModelInterface['settings']>
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
@@ -324,6 +324,12 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
 
   _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
+
+  // Re-check the authorisation after model has updated
+  const recheckAuth = await authorisation.model(user, model, ModelAction.Update)
+  if (!recheckAuth.success) {
+    throw Forbidden(recheckAuth.info, { userDn: user.dn })
+  }
   await model.save()
 
   return model
@@ -347,7 +353,10 @@ export async function createModelCardFromSchema(
   }
 
   // Ensure schema exists
-  await findSchemaById(schemaId)
+  const schema = await getSchemaById(schemaId)
+  if (schema.hidden) {
+    throw BadReq('Cannot create a new Card using a hidden schema.', { schemaId, kind: schema.kind })
+  }
 
   const revision = await _setModelCard(user, modelId, schemaId, 1, {})
   return revision
@@ -397,7 +406,7 @@ export async function saveImportedModelCard(modelCard: ModelCardRevisionInterfac
     })
   }
 
-  const schema = await findSchemaById(modelCard.schemaId)
+  const schema = await getSchemaById(modelCard.schemaId)
   try {
     new Validator().validate(modelCard.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
@@ -453,4 +462,42 @@ export function isModelCardRevision(data: unknown): data is ModelCardRevisionInt
     return false
   }
   return true
+}
+
+export async function getCurrentUserPermissionsByModel(
+  user: UserInterface,
+  modelId: string,
+): Promise<EntryUserPermissions> {
+  const model = await getModelById(user, modelId)
+
+  const editEntryAuth = await authorisation.model(user, model, ModelAction.Update)
+  const editEntryCardAuth = await authorisation.model(user, model, ModelAction.Write)
+  const createReleaseAuth = await authorisation.release(user, model, ReleaseAction.Create)
+  const editReleaseAuth = await authorisation.release(user, model, ReleaseAction.Update)
+  const deleteReleaseAuth = await authorisation.release(user, model, ReleaseAction.Delete)
+  const pushModelImageAuth = await authorisation.image(user, model, {
+    type: 'repository',
+    name: modelId,
+    actions: ['push'],
+  })
+  // Inferencing uses model authorisation
+  const createInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Create)
+  const editInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Update)
+  const exportMirroredModelAuth = await authorisation.model(user, model, ModelAction.Update)
+
+  return {
+    editEntry: authResponseToUserPermission(editEntryAuth),
+    editEntryCard: authResponseToUserPermission(editEntryCardAuth),
+
+    createRelease: authResponseToUserPermission(createReleaseAuth),
+    editRelease: authResponseToUserPermission(editReleaseAuth),
+    deleteRelease: authResponseToUserPermission(deleteReleaseAuth),
+
+    pushModelImage: authResponseToUserPermission(pushModelImageAuth),
+
+    createInferenceService: authResponseToUserPermission(createInferenceServiceAuth),
+    editInferenceService: authResponseToUserPermission(editInferenceServiceAuth),
+
+    exportMirroredModel: authResponseToUserPermission(exportMirroredModelAuth),
+  }
 }

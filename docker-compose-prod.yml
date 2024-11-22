@@ -25,6 +25,27 @@ services:
     volumes:
       - minioVolume:/bitnami/minio
 
+  clamd:
+    image: clamav/clamav:1.3
+    healthcheck:
+      test: ['CMD-SHELL', "echo 'PING' | nc -w 5 localhost 3310"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  modelscan:
+    image: bailo_modelscan:latest
+    build:
+      context: ./lib/modelscan_api
+      dockerfile: ./Dockerfile
+    ports:
+      - 3311:80
+    healthcheck:
+      test: ['CMD-SHELL', 'curl --fail http://localhost:80/info || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   mailcrab:
     image: marlonb/mailcrab:v1.2.0
     ports:
@@ -84,8 +105,14 @@ services:
       - ./backend/certs:/usr/local/share/ca-certificates
       - ./backend/config:/app/config
     depends_on:
-      - mongo
-      - minio
+      clamd:
+        condition: service_healthy
+      modelscan:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      mongo:
+        condition: service_started
     security_opt:
       - seccomp:unconfined
       - apparmor:unconfined

@@ -1,7 +1,7 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { EntryForm, EntryInterface, EntryKindKeys, ModelImage, Role } from '../types/types'
+import { EntryForm, EntryInterface, EntryKindKeys, EntryUserPermissions, ModelImage, Role } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyModelList = []
@@ -65,7 +65,7 @@ export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
 
   return {
     mutateModel: mutate,
-    model: data ? data.model : undefined,
+    model: data?.model,
     isModelLoading: isLoading,
     isModelError: error,
   }
@@ -122,6 +122,22 @@ export function useGetModelRolesCurrentUser(id?: string) {
     modelRolesCurrentUser: data ? data.roles : emptyMyRolesList,
     isModelRolesCurrentUserLoading: isLoading,
     isModelRolesCurrentUserError: error,
+  }
+}
+
+export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      permissions: EntryUserPermissions
+    },
+    ErrorInfo
+  >(entryId ? `/api/v2/model/${entryId}/permissions/mine` : null, fetcher)
+
+  return {
+    mutateEntryUserPermissions: mutate,
+    entryUserPermissions: data?.permissions,
+    isEntryUserPermissionsLoading: isLoading,
+    isEntryUserPermissionsError: error,
   }
 }
 

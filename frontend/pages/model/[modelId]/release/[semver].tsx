@@ -105,7 +105,6 @@ export default function Release() {
               {release && (
                 <EditableRelease
                   release={release}
-                  currentUserRoles={currentUserRoles}
                   isEdit={isEdit}
                   onIsEditChange={setIsEdit}
                   readOnly={!!model?.settings.mirror?.sourceModelId}

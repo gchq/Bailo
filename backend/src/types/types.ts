@@ -1,3 +1,9 @@
+export type PartialDeep<T> = T extends object
+  ? {
+      [P in keyof T]?: PartialDeep<T[P]>
+    }
+  : T
+
 export const RoleKind = {
   ENTRY: 'entry',
   SCHEMA: 'schema',
@@ -11,6 +17,37 @@ export interface Role {
   kind: RoleKindKeys
   short?: string
   description?: string
+}
+
+export type PermissionDetail =
+  | {
+      hasPermission: true
+      info?: never
+    }
+  | {
+      hasPermission: false
+      info: string
+    }
+
+export interface EntryUserPermissions {
+  editEntry: PermissionDetail
+  editEntryCard: PermissionDetail
+
+  createRelease: PermissionDetail
+  editRelease: PermissionDetail
+  deleteRelease: PermissionDetail
+
+  pushModelImage: PermissionDetail
+
+  createInferenceService: PermissionDetail
+  editInferenceService: PermissionDetail
+
+  exportMirroredModel: PermissionDetail
+}
+
+export interface AccessRequestUserPermissions {
+  editAccessRequest: PermissionDetail
+  deleteAccessRequest: PermissionDetail
 }
 
 export interface UiConfig {
@@ -29,9 +66,24 @@ export interface UiConfig {
   registry: {
     host: string
   }
+
   modelMirror: {
+    import: {
+      enabled: boolean
+    }
+    export: {
+      enabled: boolean
+      disclaimer: string
+    }
+  }
+
+  inference: {
     enabled: boolean
-    disclaimer: string
+    connection: {
+      host: string
+    }
+    authorizationTokenName: string
+    gpus: { [key: string]: string }
   }
 
   announcement: {

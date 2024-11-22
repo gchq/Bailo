@@ -46,9 +46,15 @@ jobs:
       - name: Build docs
         run: |
           make html
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-docs
+          path: ./backend/docs/python-docs/html
 
   # Build job
   build:
+    needs: sphinx
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -57,6 +63,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Download Python Docs
+        uses: actions/download-artifact@v4
+        with:
+          name: python-docs
+          path: ./backend/docs/python-docs/html
 
       - name: Setup Node
         uses: actions/setup-node@v3

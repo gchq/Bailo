@@ -227,7 +227,10 @@ def test_import_model_files_no_run(integration_client, mlflow_model_no_run, requ
 def test_import_model_no_schema(integration_client, mlflow_model, request):
     with pytest.raises(BailoException):
         model = Model.from_mlflow(
-            client=integration_client, mlflow_uri=request.config.mlflow_uri, team_id="Uncategorised", name=mlflow_model
+            client=integration_client,
+            mlflow_uri=request.config.mlflow_uri,
+            team_id="Uncategorised",
+            name=mlflow_model,
         )
 
 
