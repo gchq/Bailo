@@ -1,3 +1,4 @@
+import { Document, Schema } from 'mongoose'
 import semver from 'semver'
 import { Optional } from 'utility-types'
 
@@ -55,7 +56,8 @@ async function validateRelease(user: UserInterface, model: ModelDoc, release: Re
     const fileNames: Array<string> = []
 
     for (const fileId of release.fileIds) {
-      let file
+      let file: Document<unknown, any, FileInterface> &
+        Omit<FileInterface & Required<{ _id: Schema.Types.ObjectId }>, never>
       try {
         file = await getFileById(user, fileId)
       } catch (e) {
@@ -350,8 +352,8 @@ function getSemverQueryBounds(querySemver: string) {
 
   //we need to work out if expressionA is a lower statement or higher statement
   //to work out if lowerSemver or upperSemver
-  let lowerSemver,
-    upperSemver,
+  let lowerSemver: string = '',
+    upperSemver: string = '',
     lowerInclusivity = false,
     upperInclusivity = false
   if (expressionA.includes('>')) {
@@ -381,7 +383,16 @@ function getSemverQueryBounds(querySemver: string) {
     }
   }
 
-  let lowerSemverObj, upperSemverObj
+  let lowerSemverObj: { metadata?: string | undefined; major: number; minor: number; patch: number } = {
+      major: NaN,
+      minor: NaN,
+      patch: NaN,
+    },
+    upperSemverObj: { metadata?: string | undefined; major: number; minor: number; patch: number } = {
+      major: NaN,
+      minor: NaN,
+      patch: NaN,
+    }
   if (lowerSemver) {
     lowerSemverObj = semverStringToObject(lowerSemver)
   }
@@ -402,27 +413,60 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
   }
 
   const { lowerSemverObj, upperSemverObj, lowerInclusivity, upperInclusivity } = getSemverQueryBounds(querySemver)
-
-  let lowerComparator, upperComparator
-  if (lowerInclusivity) {
-    lowerComparator = '$gte'
-  } else {
-    lowerComparator = '$gt'
+  interface QueryBoundInterface {
+    $or: (
+      | {
+          'semver.major':
+            | {
+                $lte: number
+              }
+            | {
+                $gte: number
+              }
+          'semver.minor':
+            | {
+                $lte: number
+              }
+            | { $gte: number }
+          'semver.patch':
+            | {
+                $gte: number
+              }
+            | { $gt: number }
+            | { $lte: number }
+            | { $lt: number }
+        }
+      | {
+          'semver.major':
+            | {
+                $gt: number
+              }
+            | { $lt: number }
+        }
+      | {
+          'semver.major':
+            | {
+                $gte: number
+              }
+            | { $lte: number }
+          'semver.minor':
+            | {
+                $gt: number
+              }
+            | { $lt: number }
+        }
+    )[]
   }
-  if (upperInclusivity) {
-    upperComparator = '$lte'
-  } else {
-    upperComparator = '$lt'
-  }
 
-  const and: any[] = []
+  const queryQueue: QueryBoundInterface[] = []
+
   if (lowerSemverObj) {
-    const lowerQuery = {
+    const lowerQuery: QueryBoundInterface = {
       $or: [
         {
           'semver.major': { $gte: lowerSemverObj.major },
           'semver.minor': { $gte: lowerSemverObj.minor },
-          'semver.patch': { [lowerComparator]: lowerSemverObj.patch },
+          'semver.patch': lowerInclusivity ? { $gte: lowerSemverObj.patch } : { $gt: lowerSemverObj.patch },
         },
         {
           'semver.major': { $gt: lowerSemverObj.major },
@@ -433,16 +477,16 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
         },
       ],
     }
-    and.push(lowerQuery)
+    queryQueue.push(lowerQuery)
   }
 
   if (upperSemverObj) {
-    const upperQuery = {
+    const upperQuery: QueryBoundInterface = {
       $or: [
         {
           'semver.major': { $lte: upperSemverObj.major },
           'semver.minor': { $lte: upperSemverObj.minor },
-          'semver.patch': { [upperComparator]: upperSemverObj.patch },
+          'semver.patch': upperInclusivity ? { $lte: upperSemverObj.patch } : { $lt: upperSemverObj.patch },
         },
         {
           'semver.major': { $lt: upperSemverObj.major },
@@ -453,12 +497,12 @@ function getQuerySyntax(querySemver: string | undefined, modelID: string) {
         },
       ],
     }
-    and.push(upperQuery)
+    queryQueue.push(upperQuery)
   }
 
   const combinedQuery = {
     modelId: modelID,
-    $and: and,
+    $and: queryQueue,
   }
 
   return combinedQuery
