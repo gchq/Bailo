@@ -1,7 +1,7 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { useState } from 'react'
+import { FormEvent, useState } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -16,7 +16,8 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const handleAddEntityManuallyOnClick = () => {
+  const handleAddEntityManuallyOnClick = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     if (manualEntityName !== undefined && manualEntityName !== '') {
       setManualEntityName('')
       onAddEntityManually(manualEntityName)

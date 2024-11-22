@@ -57,9 +57,9 @@ export async function runMigrations() {
 
       // run migration
       const migration = await import(join(base, file))
-      await migration.up()
+      const runMigration = await migration.up()
 
-      await markMigrationComplete(file)
+      await markMigrationComplete(file, runMigration)
 
       log.info({ file }, `Finished migration ${file}`)
     }

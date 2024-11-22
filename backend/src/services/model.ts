@@ -342,7 +342,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   return model
 }
 
-async function checkCollaboratorAuthorisation(collaborators: CollaboratorEntry[]) {
+export async function checkCollaboratorAuthorisation(collaborators: CollaboratorEntry[]) {
   const duplicateEntities = collaborators.reduce<string[]>(
     (duplicates, currentCollaborator, currentCollaboratorIndex) => {
       if (
