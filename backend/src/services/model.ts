@@ -389,12 +389,12 @@ export async function createModelCardFromTemplate(
   return revision
 }
 
-export async function saveImportedModelCard(modelCard: ModelCardRevisionInterface, sourceModelId: string) {
+export async function saveImportedModelCard(modelCardRevision: ModelCardRevisionInterface, sourceModelId: string) {
   const model = await Model.findOne({
-    id: modelCard.modelId,
+    id: modelCardRevision.modelId,
   })
   if (!model) {
-    throw NotFound(`Cannot find model to import model card.`, { modelId: modelCard.modelId })
+    throw NotFound(`Cannot find model to import model card.`, { modelId: modelCardRevision.modelId })
   }
   if (!model.settings.mirror.sourceModelId) {
     throw InternalError('Cannot import model card to non mirrored model.')
@@ -406,44 +406,57 @@ export async function saveImportedModelCard(modelCard: ModelCardRevisionInterfac
     })
   }
 
-  const schema = await getSchemaById(modelCard.schemaId)
+  const schema = await getSchemaById(modelCardRevision.schemaId)
   try {
-    new Validator().validate(modelCard.metadata, schema.jsonSchema, { throwAll: true, required: true })
+    new Validator().validate(modelCardRevision.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
     if (isValidatorResultError(error)) {
       throw BadReq('Model metadata could not be validated against the schema.', {
-        schemaId: modelCard.schemaId,
+        schemaId: modelCardRevision.schemaId,
         validationErrors: error.errors,
       })
     }
     throw error
   }
 
-  return await ModelCardRevisionModel.findOneAndUpdate(
-    { modelId: modelCard.modelId, version: modelCard.version },
-    modelCard,
+  const foundModelCardRevision = await ModelCardRevisionModel.findOneAndUpdate(
+    { modelId: modelCardRevision.modelId, version: modelCardRevision.version },
+    modelCardRevision,
     {
       upsert: true,
     },
   )
+
+  if (!foundModelCardRevision && modelCardRevision.version !== 1) {
+    // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
+    // Ignore model cards with a version number of 1 as these will always be blank.
+    return modelCardRevision
+  }
 }
 
+/**
+ * Note that we do not authorise that the user can access the model here.
+ * This function should only be used during the import model card process.
+ * Do not expose this functionality to users.
+ */
 export async function setLatestImportedModelCard(modelId: string) {
   const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }, undefined, { sort: { version: -1 } })
   if (!latestModelCard) {
     throw NotFound('Cannot find latest model card.', { modelId })
   }
 
-  const result = await ModelModel.findOneAndUpdate(
+  const updatedModel = await ModelModel.findOneAndUpdate(
     { id: modelId, 'settings.mirror.sourceModelId': { $exists: true, $ne: '' } },
     { $set: { card: latestModelCard } },
   )
-  if (!result) {
+  if (!updatedModel) {
     throw InternalError('Unable to set latest model card of mirrored model.', {
       modelId,
       version: latestModelCard.version,
     })
   }
+
+  return updatedModel
 }
 
 export function isModelCardRevision(data: unknown): data is ModelCardRevisionInterface {
