@@ -1,9 +1,8 @@
 import { outdent } from 'outdent'
 import showdown from 'showdown'
 
-import { UserInterface } from '../models/User.js'
-import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
-import { getModelById, getModelCard } from './model.js'
+import { ModelInterface } from '../models/Model.js'
+import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
 import { getSchemaById } from './schema.js'
 
 type Common = {
@@ -33,22 +32,12 @@ type Fragment = (
 ) &
   Common
 
-export async function renderToMarkdown(
-  user: UserInterface,
-  modelId: string,
-  version: number | GetModelCardVersionOptionsKeys,
-) {
-  const model = await getModelById(user, modelId)
-  if (!model || !model.card) {
+export async function renderToMarkdown(model: ModelInterface, modelCardRevision: ModelCardRevisionInterface) {
+  if (!model.card) {
     throw new Error('Trying to export model with no corresponding card')
   }
 
-  const card = await getModelCard(user, modelId, version)
-  if (!card) {
-    throw new Error('Could not find specified model card')
-  }
-
-  const schema = await getSchemaById(card.schemaId)
+  const schema = await getSchemaById(modelCardRevision.schemaId)
   if (!schema) {
     throw new Error('Trying to export model with no corresponding card')
   }
@@ -59,16 +48,12 @@ export async function renderToMarkdown(
   `
 
   // 'Fragment' is a more strictly typed version of 'JsonSchema'.
-  output = recursiveRender(card.metadata, schema.jsonSchema as Fragment, output)
-  return { markdown: output, card }
+  output = recursiveRender(modelCardRevision.metadata, schema.jsonSchema as Fragment, output)
+  return output
 }
 
-export async function renderToHtml(
-  user: UserInterface,
-  modelId: string,
-  version: number | GetModelCardVersionOptionsKeys,
-) {
-  const { markdown, card } = await renderToMarkdown(user, modelId, version)
+export async function renderToHtml(model: ModelInterface, modelCardRevision: ModelCardRevisionInterface) {
+  const markdown = await renderToMarkdown(model, modelCardRevision)
   const converter = new showdown.Converter()
   converter.setFlavor('github')
   const body = converter.makeHtml(markdown)
@@ -100,7 +85,7 @@ export async function renderToHtml(
     </html>
   `
 
-  return { html, card }
+  return html
 }
 
 function recursiveRender(obj: any, schema: Fragment, output = '', depth = 1) {

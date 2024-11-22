@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
+import { getModelById, getModelCard } from '../../../../services/model.js'
 import { renderToHtml } from '../../../../services/modelCardExport.js'
 import { registerPath } from '../../../../services/specification.js'
 import { GetModelCardVersionOptions } from '../../../../types/enums.js'
@@ -46,7 +47,9 @@ export const getModelCardHtml = [
       params: { modelId, version },
     } = parse(req, getModelCardHtmlSchema)
 
-    const { html, card } = await renderToHtml(req.user, modelId, version)
+    const model = await getModelById(req.user, modelId)
+    const modelCard = await getModelCard(req.user, modelId, version)
+    const html = await renderToHtml(model, { ...modelCard, modelId: model.id })
     await audit.onViewModelCard(req, modelId, card)
 
     return res.send(html)
