@@ -1,6 +1,5 @@
 import ClearIcon from '@mui/icons-material/Clear'
 import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
 import EntityIcon from 'src/entry/EntityIcon'
@@ -18,8 +17,6 @@ type EntityItemProps = {
 
 export default function EntityItem({ entity, accessList, onAccessListChange, entryKind, entryRoles }: EntityItemProps) {
   const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.id), [entryRoles])
-
-  const theme = useTheme()
 
   function onRoleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(accessList)
@@ -61,12 +58,7 @@ export default function EntityItem({ entity, accessList, onAccessListChange, ent
             renderInput={(params) => <TextField {...params} label='Select roles' />}
             renderTags={(value, getTagProps) =>
               value.map((option, index) => (
-                <Chip
-                  label={getRole(option).name}
-                  sx={{ backgroundColor: theme.palette.secondary.main }}
-                  {...getTagProps({ index })}
-                  key={option}
-                />
+                <Chip label={getRole(option).name} {...getTagProps({ index })} key={option} />
               ))
             }
           />

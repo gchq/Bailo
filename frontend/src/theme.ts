@@ -133,6 +133,14 @@ export const lightTheme = createTheme({
 export const darkTheme = createTheme({
   components: {
     ...defaultComponentOverrides,
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ccbbe2',
+          color: 'black',
+        },
+      },
+    },
   },
   palette: {
     mode: 'dark',
