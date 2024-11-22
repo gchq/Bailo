@@ -329,29 +329,12 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
 function getSemverQueryBounds(querySemver: string) {
   const semverRangeStandardised = semver.validRange(querySemver, { includePrerelease: false })
 
-  //1. test if valid
-  //2. if so, split
-  //3. check for inclusivity
-  //4. create query
-
-  //1
   if (!semverRangeStandardised) {
     throw BadReq(`Semver range, '${querySemver}' is invalid `)
   }
 
-  //1. split
-  //2. if one value then work out if upper or lower and if inclusive. Then trim accordingly
-  //3. if two then work out inclusivity, then trim accordingly
-  //4. return these
-  //5. check for 3 possible, seems most efficient approach to check for undefined twice rather than check
-  //once and store result
-  //WAIT if we know that expressionA is greater than and expressionB exists then we know that expressionB has to be less than
-
-  //2
   const [expressionA, expressionB] = semverRangeStandardised.split(' ')
 
-  //we need to work out if expressionA is a lower statement or higher statement
-  //to work out if lowerSemver or upperSemver
   let lowerSemver: string = '',
     upperSemver: string = '',
     lowerInclusivity = false,
@@ -373,8 +356,6 @@ function getSemverQueryBounds(querySemver: string) {
       }
     }
   } else {
-    //<
-    //can't be expressionB
     if (expressionA.includes('=')) {
       upperSemver = expressionA.replace('<=', '')
       upperInclusivity = true
@@ -405,7 +386,6 @@ function getSemverQueryBounds(querySemver: string) {
 }
 
 function getQuerySyntax(querySemver: string | undefined, modelID: string) {
-  //NOTE if we are adding advanced query for range, we ignore metadata as they aren't currently supported by our range query functionality
   if (querySemver === undefined) {
     return {
       modelId: modelID,
