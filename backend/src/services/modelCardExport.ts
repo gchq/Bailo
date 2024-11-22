@@ -57,6 +57,10 @@ export async function getModelCardHtml(
 }
 
 export async function renderToMarkdown(model: ModelInterface, modelCardRevision: ModelCardRevisionInterface) {
+  if (!model.card) {
+    throw new Error('Trying to export model with no corresponding card')
+  }
+
   const schema = await getSchemaById(modelCardRevision.schemaId)
   if (!schema) {
     throw new Error('Trying to export model with no corresponding card')

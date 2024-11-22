@@ -12,4 +12,8 @@ exports[`routes > model > postRequestImport > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > model > postRequestImport > audit > expected call 1`] = `"abc"`;
+exports[`routes > model > postRequestImport > audit > expected call 1`] = `
+{
+  "id": "abc",
+}
+`;
