@@ -322,7 +322,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     throw BadReq('You cannot select both mirror settings simultaneously.')
   }
   if (modelDiff.collaborators) {
-    await checkCollaboratorAuthorisation(modelDiff.collaborators)
+    await checkCollaboratorAuthorisation(modelDiff.collaborators, model.collaborators)
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -342,11 +342,15 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   return model
 }
 
-export async function checkCollaboratorAuthorisation(collaborators: CollaboratorEntry[]) {
-  const duplicateEntities = collaborators.reduce<string[]>(
+export async function checkCollaboratorAuthorisation(
+  updatedCollaborators: CollaboratorEntry[],
+  previousCollaborators: CollaboratorEntry[] = [],
+) {
+  const previousCollaboratorEntities: string[] = previousCollaborators.map((collaborator) => collaborator.entity)
+  const duplicates = updatedCollaborators.reduce<string[]>(
     (duplicates, currentCollaborator, currentCollaboratorIndex) => {
       if (
-        collaborators.find(
+        updatedCollaborators.find(
           (collaborator, index) =>
             index !== currentCollaboratorIndex && collaborator.entity === currentCollaborator.entity,
         ) &&
@@ -358,18 +362,24 @@ export async function checkCollaboratorAuthorisation(collaborators: Collaborator
     },
     [],
   )
-  if (duplicateEntities.length > 0) {
-    throw BadReq(`The following duplicate collaborators have been found: ${duplicateEntities.join(', ')}`)
+  if (duplicates.length > 0) {
+    throw BadReq(`The following duplicate collaborators have been found: ${duplicates.join(', ')}`)
   }
+  const newCollaborators = updatedCollaborators.reduce<string[]>((acc, currentCollaborator) => {
+    if (!previousCollaboratorEntities.includes(currentCollaborator.entity)) {
+      acc.push(currentCollaborator.entity)
+    }
+    return acc
+  }, [])
   await Promise.all(
-    collaborators.map(async (collaborator) => {
-      if (collaborator.entity === '') {
+    newCollaborators.map(async (collaborator) => {
+      if (collaborator === '') {
         throw BadReq('Collaborator name must be a valid string')
       }
       try {
-        await authentication.getUserInformation(collaborator.entity)
+        await authentication.getUserInformation(collaborator)
       } catch (err) {
-        throw InternalError(`Unable to find user ${collaborator.entity}`, { err })
+        throw InternalError(`Unable to find user ${collaborator}`, { err })
       }
     }),
   )
