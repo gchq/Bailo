@@ -34,7 +34,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   const modelId = convertStringToId(modelParams.name)
 
   if (modelParams.collaborators) {
-    await checkCollaboratorAuthorisation(modelParams.collaborators)
+    await validateCollaborators(modelParams.collaborators)
   }
 
   let collaborators: CollaboratorEntry[] = []
@@ -322,7 +322,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     throw BadReq('You cannot select both mirror settings simultaneously.')
   }
   if (modelDiff.collaborators) {
-    await checkCollaboratorAuthorisation(modelDiff.collaborators, model.collaborators)
+    await validateCollaborators(modelDiff.collaborators, model.collaborators)
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -342,7 +342,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   return model
 }
 
-export async function checkCollaboratorAuthorisation(
+async function validateCollaborators(
   updatedCollaborators: CollaboratorEntry[],
   previousCollaborators: CollaboratorEntry[] = [],
 ) {
