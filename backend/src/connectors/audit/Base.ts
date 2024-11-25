@@ -183,17 +183,18 @@ export abstract class BaseAuditConnector {
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[])
   abstract onCreateImport(
     req: Request,
-    mirroredModelId: string,
+    mirroredModel: ModelInterface,
     sourceModelId: string,
     modelCardVersions: number[],
     exporter: string,
+    newModelCards: ModelCardInterface[],
   )
 
   abstract onError(req: Request, error: BailoError)
 
   checkEventType(auditInfo: AuditInfoKeys, req: Request) {
     if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
-      throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but recieved '${JSON.stringify(req.audit)}'`)
+      throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but received '${JSON.stringify(req.audit)}'`)
     }
   }
 }

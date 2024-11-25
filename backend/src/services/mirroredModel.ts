@@ -77,7 +77,7 @@ export async function exportModel(
   log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
 }
 
-export async function importModel(_user: UserInterface, mirroredModelId: string, payloadUrl: string) {
+export async function importModel(mirroredModelId: string, payloadUrl: string) {
   if (!config.ui.modelMirror.import.enabled) {
     throw BadReq('Importing models has not been enabled.')
   }
@@ -85,7 +85,7 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
   if (mirroredModelId === '') {
     throw BadReq('Missing mirrored model ID.')
   }
-  let sourceModelId
+  let sourceModelId = ''
 
   log.info({ mirroredModelId, payloadUrl }, 'Received a request to import a model.')
 
@@ -135,14 +135,23 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
 
   log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
 
-  await Promise.all(modelCards.map((card) => saveImportedModelCard(card, sourceModelId)))
-  await setLatestImportedModelCard(mirroredModelId)
+  const newModelCards = (
+    await Promise.all(modelCards.map((card) => saveImportedModelCard(card, sourceModelId)))
+  ).filter((card): card is ModelCardRevisionInterface => !!card)
+
+  const mirroredModel = await setLatestImportedModelCard(mirroredModelId)
+
   log.info(
     { mirroredModelId, payloadUrl, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) },
     'Finished importing the collection of model cards.',
   )
 
-  return { mirroredModelId, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) }
+  return {
+    mirroredModel,
+    sourceModelId,
+    modelCardVersions: modelCards.map((modelCard) => modelCard.version),
+    newModelCards,
+  }
 }
 
 function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceModelId?: string) {
@@ -159,7 +168,7 @@ function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceMo
   if (sourceModelId !== modelId) {
     throw InternalError('Zip file contains model cards for multiple models.', { modelIds: [sourceModelId, modelId] })
   }
-  return { modelCard }
+  return { modelCard, sourceModelId }
 }
 
 async function uploadToS3(

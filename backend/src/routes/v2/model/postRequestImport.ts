@@ -52,15 +52,16 @@ export const postRequestImportFromS3 = [
       body: { payloadUrl, mirroredModelId, exporter },
     } = parse(req, postRequestImportFromS3Schema)
 
-    const importInfo = await importModel(req.user, mirroredModelId, payloadUrl)
-    await audit.onCreateImport(
-      req,
-      importInfo.mirroredModelId,
-      importInfo.sourceModelId,
-      importInfo.modelCardVersions,
-      exporter,
+    const { mirroredModel, sourceModelId, modelCardVersions, newModelCards } = await importModel(
+      mirroredModelId,
+      payloadUrl,
     )
+    await audit.onCreateImport(req, mirroredModel, sourceModelId, modelCardVersions, exporter, newModelCards)
 
-    return res.json(importInfo)
+    return res.json({
+      mirroredModelId: mirroredModel.id,
+      sourceModelId,
+      modelCardVersions,
+    })
   },
 ]

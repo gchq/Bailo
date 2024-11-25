@@ -1,6 +1,8 @@
 import { outdent } from 'outdent'
 import showdown from 'showdown'
 
+import { ModelInterface } from '../models/Model.js'
+import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { getModelById, getModelCard } from './model.js'
@@ -33,22 +35,33 @@ type Fragment = (
 ) &
   Common
 
-export async function renderToMarkdown(
+export async function getModelCardHtml(
   user: UserInterface,
-  modelId: string,
+  modelId: ModelInterface['id'],
   version: number | GetModelCardVersionOptionsKeys,
 ) {
   const model = await getModelById(user, modelId)
-  if (!model || !model.card) {
+  if (!model) {
+    throw new Error('Failed to export model card. Model not found.')
+  }
+
+  const modelCard = await getModelCard(user, modelId, version)
+  if (!modelCard) {
+    throw new Error('Failed to find model card to export.')
+  }
+
+  const modelCardRevision: ModelCardRevisionInterface = { ...modelCard, modelId }
+  const html = await renderToHtml(model, modelCardRevision)
+
+  return { html, modelCard }
+}
+
+export async function renderToMarkdown(model: ModelInterface, modelCardRevision: ModelCardRevisionInterface) {
+  if (!model.card) {
     throw new Error('Trying to export model with no corresponding card')
   }
 
-  const card = await getModelCard(user, modelId, version)
-  if (!card) {
-    throw new Error('Could not find specified model card')
-  }
-
-  const schema = await getSchemaById(card.schemaId)
+  const schema = await getSchemaById(modelCardRevision.schemaId)
   if (!schema) {
     throw new Error('Trying to export model with no corresponding card')
   }
@@ -59,16 +72,12 @@ export async function renderToMarkdown(
   `
 
   // 'Fragment' is a more strictly typed version of 'JsonSchema'.
-  output = recursiveRender(card.metadata, schema.jsonSchema as Fragment, output)
-  return { markdown: output, card }
+  output = recursiveRender(modelCardRevision.metadata, schema.jsonSchema as Fragment, output)
+  return output
 }
 
-export async function renderToHtml(
-  user: UserInterface,
-  modelId: string,
-  version: number | GetModelCardVersionOptionsKeys,
-) {
-  const { markdown, card } = await renderToMarkdown(user, modelId, version)
+export async function renderToHtml(model: ModelInterface, modelCardRevision: ModelCardRevisionInterface) {
+  const markdown = await renderToMarkdown(model, modelCardRevision)
   const converter = new showdown.Converter()
   converter.setFlavor('github')
   const body = converter.makeHtml(markdown)
@@ -100,7 +109,7 @@ export async function renderToHtml(
     </html>
   `
 
-  return { html, card }
+  return html
 }
 
 function recursiveRender(obj: any, schema: Fragment, output = '', depth = 1) {
