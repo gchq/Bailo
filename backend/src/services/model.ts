@@ -376,15 +376,7 @@ export async function checkCollaboratorAuthorisation(
       if (collaborator === '') {
         throw BadReq('Collaborator name must be a valid string')
       }
-      try {
-        await authentication.getUserInformation(collaborator)
-      } catch (err) {
-        if (err instanceof Error && err.name === 'Not Found') {
-          throw NotFound(`Unable to find user ${collaborator}`, { err })
-        } else {
-          throw err
-        }
-      }
+      await authentication.getUserInformation(collaborator)
     }),
   )
 }
