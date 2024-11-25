@@ -379,7 +379,11 @@ export async function checkCollaboratorAuthorisation(
       try {
         await authentication.getUserInformation(collaborator)
       } catch (err) {
-        throw InternalError(`Unable to find user ${collaborator}`, { err })
+        if (err instanceof Error && err.name === 'Registry Error') {
+          throw NotFound(`Unable to find user ${collaborator}`, { err })
+        } else {
+          throw err
+        }
       }
     }),
   )
