@@ -70,7 +70,7 @@ class NodeModelScanAPI {
   }
 
   async init(options: ModelScanOptions): Promise<this> {
-    if (this.initialised === true) return this
+    if (this.initialised) return this
 
     this.settings = options
     this.url = `${this.settings.protocol}://${this.settings.host}:${this.settings.port}`
