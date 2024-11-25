@@ -73,7 +73,7 @@ module.exports = {
 
   connectors: {
     fileScanners: {
-      kinds: [],
+      kinds: ['clamAV', 'modelScan'],
     },
   },
 }
