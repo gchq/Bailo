@@ -192,6 +192,7 @@ server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 server.get('/api/v2/specification', ...getSpecification)
 
 server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
+server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
