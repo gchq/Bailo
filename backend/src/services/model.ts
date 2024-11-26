@@ -376,7 +376,10 @@ async function validateCollaborators(
       if (collaborator === '') {
         throw BadReq('Collaborator name must be a valid string')
       }
-      await authentication.getUserInformation(collaborator)
+      // TODO we currently only check for users, we should consider how we want to handle groups
+      if (collaborator.startsWith('user:')) {
+        await authentication.getUserInformation(collaborator)
+      }
     }),
   )
 }
