@@ -12,9 +12,9 @@ import ModelCardRevisionModel, {
 } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
-import { EntryUserPermissions } from '../types/types.js'
+import { EntityKind, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
-import { toEntity } from '../utils/entity.js'
+import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
@@ -377,7 +377,8 @@ async function validateCollaborators(
         throw BadReq('Collaborator name must be a valid string')
       }
       // TODO we currently only check for users, we should consider how we want to handle groups
-      if (collaborator.startsWith('user:')) {
+      const { kind } = fromEntity(collaborator)
+      if (kind === EntityKind.USER) {
         await authentication.getUserInformation(collaborator)
       }
     }),
