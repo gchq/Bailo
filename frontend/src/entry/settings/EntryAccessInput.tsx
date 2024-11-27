@@ -3,8 +3,9 @@ import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import EntityItem from 'src/entry/settings/EntityItem'
+import ManualEntityInput from 'src/entry/settings/ManualEntityInput'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntityObject, EntryKindKeys, Role } from 'types/types'
+import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, Role } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessInputProps = {
@@ -27,6 +28,7 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
   const [open, setOpen] = useState(false)
   const [accessList, setAccessList] = useState<CollaboratorEntry[]>(value)
   const [userListQuery, setUserListQuery] = useState('')
+  const [manualEntityInputErrorMessage, setManualEntityInputErrorMessage] = useState('')
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
 
@@ -71,6 +73,15 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
     setUserListQuery(value)
   }, [])
 
+  const handleAddEntityManually = (manualEntityName: string) => {
+    setManualEntityInputErrorMessage('')
+    if (accessList.find((collaborator) => collaborator.entity === `${EntityKind.USER}:${manualEntityName}`)) {
+      setManualEntityInputErrorMessage('User has already been added below.')
+    } else {
+      setAccessList([...accessList, { entity: `${EntityKind.USER}:${manualEntityName}`, roles: [] }])
+    }
+  }
+
   const debounceOnInputChange = debounce((event: SyntheticEvent<Element, Event>, value: string) => {
     handleInputChange(event, value)
   }, 500)
@@ -113,6 +124,7 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
           />
         )}
       />
+      <ManualEntityInput onAddEntityManually={handleAddEntityManually} errorMessage={manualEntityInputErrorMessage} />
       <Table>
         <TableHead>
           <TableRow>

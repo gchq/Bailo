@@ -12,9 +12,9 @@ import ModelCardRevisionModel, {
 } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
-import { EntryUserPermissions } from '../types/types.js'
+import { EntityKind, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
-import { toEntity } from '../utils/entity.js'
+import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
@@ -32,6 +32,10 @@ export type CreateModelParams = Pick<
 >
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
+
+  if (modelParams.collaborators) {
+    await validateCollaborators(modelParams.collaborators)
+  }
 
   let collaborators: CollaboratorEntry[] = []
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
@@ -303,7 +307,7 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility'> & {
+export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility' | 'collaborators'> & {
   settings: Partial<ModelInterface['settings']>
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
@@ -316,6 +320,9 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
   if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
     throw BadReq('You cannot select both mirror settings simultaneously.')
+  }
+  if (modelDiff.collaborators) {
+    await validateCollaborators(modelDiff.collaborators, model.collaborators)
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -333,6 +340,49 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   await model.save()
 
   return model
+}
+
+async function validateCollaborators(
+  updatedCollaborators: CollaboratorEntry[],
+  previousCollaborators: CollaboratorEntry[] = [],
+) {
+  const previousCollaboratorEntities: string[] = previousCollaborators.map((collaborator) => collaborator.entity)
+  const duplicates = updatedCollaborators.reduce<string[]>(
+    (duplicates, currentCollaborator, currentCollaboratorIndex) => {
+      if (
+        updatedCollaborators.find(
+          (collaborator, index) =>
+            index !== currentCollaboratorIndex && collaborator.entity === currentCollaborator.entity,
+        ) &&
+        !duplicates.includes(currentCollaborator.entity)
+      ) {
+        duplicates.push(currentCollaborator.entity)
+      }
+      return duplicates
+    },
+    [],
+  )
+  if (duplicates.length > 0) {
+    throw BadReq(`The following duplicate collaborators have been found: ${duplicates.join(', ')}`)
+  }
+  const newCollaborators = updatedCollaborators.reduce<string[]>((acc, currentCollaborator) => {
+    if (!previousCollaboratorEntities.includes(currentCollaborator.entity)) {
+      acc.push(currentCollaborator.entity)
+    }
+    return acc
+  }, [])
+  await Promise.all(
+    newCollaborators.map(async (collaborator) => {
+      if (collaborator === '') {
+        throw BadReq('Collaborator name must be a valid string')
+      }
+      // TODO we currently only check for users, we should consider how we want to handle groups
+      const { kind } = fromEntity(collaborator)
+      if (kind === EntityKind.USER) {
+        await authentication.getUserInformation(collaborator)
+      }
+    }),
+  )
 }
 
 export async function createModelCardFromSchema(

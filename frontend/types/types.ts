@@ -60,6 +60,10 @@ export interface UiConfig {
     text: string
     startTimestamp: string
   }
+
+  helpPopoverText: {
+    manualEntryAccess: string
+  }
 }
 
 export interface FileInterface {
