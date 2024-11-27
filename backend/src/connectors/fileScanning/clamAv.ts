@@ -50,8 +50,10 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
         {
           toolName: clamAvToolName,
           state: ScanState.Complete,
+          scannerVersion: await av.getVersion(),
           isInfected,
           viruses,
+          lastRunAt: new Date(),
         },
       ]
     } catch (error) {
@@ -60,6 +62,8 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
         {
           toolName: clamAvToolName,
           state: ScanState.Error,
+          scannerVersion: await av.getVersion(),
+          lastRunAt: new Date(),
         },
       ]
     }

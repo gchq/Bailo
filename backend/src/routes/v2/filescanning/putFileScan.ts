@@ -2,9 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { getCurrentUserPermissionsByModel } from '../../../services/model.js'
-import { entryUserPermissionsSchema, registerPath } from '../../../services/specification.js'
-import { EntryUserPermissions } from '../../../types/types.js'
+import { rerunFileScan } from '../../../services/file.js'
+import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const putFileScanSchema = z.object({
@@ -25,28 +24,30 @@ registerPath({
       description: ``,
       content: {
         'application/json': {
-          status: z.string().openapi({ example: 'user:user' }),
+          schema: z.object({
+            status: z.string().openapi({ example: 'File scan started' }),
+          }),
         },
       },
     },
   },
 })
 
-interface GetModelCurrentUserPermissionsResponse {
-  permissions: EntryUserPermissions
+interface PutFileScanResponse {
+  status: string
 }
 
-export const getModelCurrentUserPermissions = [
+export const putFileScan = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetModelCurrentUserPermissionsResponse>) => {
+  async (req: Request, res: Response<PutFileScanResponse>) => {
     const {
-      params: { modelId },
-    } = parse(req, getModelCurrentUserPermissionsSchema)
+      params: { modelId, fileId },
+    } = parse(req, putFileScanSchema)
 
-    const permissions = await getCurrentUserPermissionsByModel(req.user, modelId)
+    await rerunFileScan(req.user, modelId, fileId)
 
     return res.json({
-      permissions,
+      status: 'Scan started',
     })
   },
 ]

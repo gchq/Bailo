@@ -2,7 +2,7 @@ import { Schema } from 'mongoose'
 import { Readable } from 'stream'
 
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
-import { FileAction } from '../connectors/authorisation/actions.js'
+import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
@@ -33,14 +33,18 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
   }
 
   const { fileSize } = await putObjectStream(bucket, path, stream)
+  if (fileSize === 0) {
+    throw BadReq(`Could not upload ${file.name} as it is an empty file.`, { file: file })
+  }
   file.size = fileSize
 
   await file.save()
 
-  if (scanners.info()) {
-    const resultsInprogress = scanners.info().map((scannerName) => ({
+  if (scanners.info() && fileSize > 0) {
+    const resultsInprogress: FileScanResult[] = scanners.info().map((scannerName) => ({
       toolName: scannerName,
       state: ScanState.InProgress,
+      lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
     scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
@@ -54,14 +58,14 @@ async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileSc
     const updateExistingResult = await FileModel.updateOne(
       { _id, 'avScan.toolName': result.toolName },
       {
-        $set: { 'avScan.$': result },
+        $set: { 'avScan.$': { lastRanAt: new Date(), ...result } },
       },
     )
     if (updateExistingResult.modifiedCount === 0) {
       await FileModel.updateOne(
         { _id },
         {
-          $set: { avScan: { toolName: result.toolName, state: result.state } },
+          $set: { avScan: { toolName: result.toolName, state: result.state, lastRanAt: new Date() } },
         },
       )
     }
@@ -151,4 +155,29 @@ export async function getTotalFileSize(fileIds: string[]) {
       totalSize: { $sum: '$size' },
     })
   return totalSize.at(0).totalSize
+}
+
+export async function rerunFileScan(user: UserInterface, modelId, fileId: string) {
+  const model = await getModelById(user, modelId)
+  if (!model) {
+    throw BadReq('Cannot find requested model', { modelId: modelId })
+  }
+  const file = await getFileById(user, fileId)
+  if (!file) {
+    throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
+  }
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn })
+  }
+  if (scanners.info()) {
+    const resultsInprogress = scanners.info().map((scannerName) => ({
+      toolName: scannerName,
+      state: ScanState.InProgress,
+      lastRunAt: new Date(),
+    }))
+    await updateFileWithResults(file._id, resultsInprogress)
+    scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
+  }
+  return `Scan started for ${file.name}`
 }

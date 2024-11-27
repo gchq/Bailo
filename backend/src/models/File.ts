@@ -52,9 +52,11 @@ const FileSchema = new Schema<FileInterface>(
     avScan: [
       {
         toolName: { type: String },
+        scannerVersion: { type: String },
         state: { type: String, enum: Object.values(ScanState) },
         isInfected: { type: Boolean },
         viruses: [{ type: String }],
+        lastRunAt: { type: Schema.Types.Date },
       },
     ],
 
