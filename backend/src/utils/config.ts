@@ -114,10 +114,16 @@ export interface Config {
   oauth: {
     provider: string
     grant: grant.GrantConfig | grant.GrantOptions
-    cognito: {
+    cognito?: {
       identityProviderClient: { region: string; credentials: { accessKeyId: string; secretAccessKey: string } }
       userPoolId: string
       userIdAttribute: string
+    }
+    keycloak?: {
+      realm: string
+      clientId: string
+      clientSecret: string
+      authServerUrl: string
     }
   }
 
@@ -172,4 +178,12 @@ export interface Config {
 }
 
 const config: Config = _config.util.toObject()
+
+if (config.oauth &&
+  !config.oauth.keycloak &&
+  !config.oauth.cognito
+) {
+  throw new Error('If OAuth is configured, either Keycloak or Cognito configuration must be provided.')
+}
+
 export default deepFreeze(config) as Config
