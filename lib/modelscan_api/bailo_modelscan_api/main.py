@@ -56,7 +56,7 @@ class ApiInformation(BaseModel):
     "/info",
     summary="Simple information endpoint",
     description="Utility to get the key information about the API.",
-    status_code=HTTPStatus.OK,
+    status_code=HTTPStatus.OK.value,
     response_description="A populated ApiInformation object",
 )
 def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation:
@@ -76,12 +76,12 @@ def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation
     "/scan/file",
     summary="Upload and scan a file",
     description="Upload a file which is scanned by ModelScan and return the result of the scan",
-    status_code=HTTPStatus.OK,
+    status_code=HTTPStatus.OK.value,
     response_description="The result from ModelScan",
     response_model=dict[str, Any],
     # Example response generated from https://github.com/protectai/modelscan/blob/main/notebooks/keras_fashion_mnist.ipynb
     responses={
-        HTTPStatus.OK: {
+        HTTPStatus.OK.value: {
             "description": "modelscan returned results",
             "content": {
                 "application/json": {
@@ -111,7 +111,7 @@ def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation
                 }
             },
         },
-        HTTPStatus.INTERNAL_SERVER_ERROR: {
+        HTTPStatus.INTERNAL_SERVER_ERROR.value: {
             "description": "The server could not complete the request",
             "content": {
                 "application/json": {
@@ -144,12 +144,12 @@ def scan_file(
                 except ValueError:
                     logger.exception("Failed to safely join the filename to the path.")
                     raise HTTPException(
-                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
                         detail="An error occurred while processing the uploaded file's name.",
                     )
             else:
                 raise HTTPException(
-                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
                     detail="An error occurred while extracting the uploaded file's name.",
                 )
 
@@ -163,7 +163,7 @@ def scan_file(
             except OSError as exception:
                 logger.exception("Failed writing the file to the disk.")
                 raise HTTPException(
-                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
                     detail=f"An error occurred while trying to write the uploaded file to the disk: {exception}",
                 ) from exception
 
@@ -183,7 +183,7 @@ def scan_file(
     except Exception as exception:
         logger.exception("An unexpected error occurred.")
         raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
             detail=f"An error occurred: {exception}",
         ) from exception
 

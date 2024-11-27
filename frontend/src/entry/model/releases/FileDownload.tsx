@@ -103,7 +103,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
                     {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
                     <Typography>
                       <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
-                      {scanResult.state === 'error' ? 'was not able to be run' : 'did not find any threats'}
+                      {scanResult.state === 'error' ? ' was not able to be run' : ' did not find any threats'}
                     </Typography>
                   </Stack>
                 )}
