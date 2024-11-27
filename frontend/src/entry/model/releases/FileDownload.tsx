@@ -1,11 +1,12 @@
-import { Done, Error, Warning } from '@mui/icons-material'
-import { Chip, Divider, Grid, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
-import { useGetFileScannerInfo } from 'actions/fileScanning'
+import { Done, Error, Refresh, Warning } from '@mui/icons-material'
+import { Chip, Divider, Grid, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
+import { formatDateString } from 'utils/dateUtils'
 import { plural } from 'utils/stringUtils'
 
 type FileDownloadProps = {
@@ -65,13 +66,20 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
     }
     return (
       <>
-        <Chip
-          color={chipDetails(file).colour}
-          icon={chipDetails(file).icon}
-          size='small'
-          onClick={(e) => setAnchorEl(e.currentTarget)}
-          label={chipDetails(file).label}
-        />
+        <Stack direction='row' alignItems='center'>
+          <Chip
+            color={chipDetails(file).colour}
+            icon={chipDetails(file).icon}
+            size='small'
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            label={chipDetails(file).label}
+          />
+          <Tooltip title='Rerun file scan'>
+            <IconButton onClick={() => rerunFileScan(modelId, file._id)}>
+              <Refresh />
+            </IconButton>
+          </Tooltip>
+        </Stack>
         <Popover
           open={open}
           anchorEl={anchorEl}
@@ -99,12 +107,18 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
                     <ul>{scanResult.viruses && scanResult.viruses.map((virus) => <li key={virus}>{virus}</li>)}</ul>
                   </>
                 ) : (
-                  <Stack spacing={1} direction='row'>
-                    {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
-                    <Typography>
-                      <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
-                      {scanResult.state === 'error' ? 'was not able to be run' : 'did not find any threats'}
-                    </Typography>
+                  <Stack spacing={2}>
+                    <Stack spacing={1} direction='row'>
+                      {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
+                      <Typography>
+                        <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
+                        {scanResult.state === 'error' ? ' was not able to be run' : ' did not find any threats'}
+                      </Typography>
+                    </Stack>
+                    {scanResult.scannerVersion && (
+                      <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
+                    )}
+                    <Typography>Last ran at: {formatDateString(scanResult.lastRunAt)}</Typography>
                   </Stack>
                 )}
               </Fragment>
@@ -113,7 +127,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
         </Popover>
       </>
     )
-  }, [anchorEl, chipDetails, file, open])
+  }, [anchorEl, chipDetails, file, modelId, open])
 
   if (isScannersError) {
     return <MessageAlert message={isScannersError.info.message} severity='error' />

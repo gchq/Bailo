@@ -228,6 +228,9 @@ config:
       text: ''
       startTimestamp: ''
 
+    helpPopoverText:
+      manualEntryAccess: ''
+
   smtp:
     #host: 'mail' #service name
     port: 1025

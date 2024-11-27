@@ -42,9 +42,9 @@ services:
     volumes:
       - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
     ports:
-      - 3311:80
+      - 3311:3311
     healthcheck:
-      test: ['CMD-SHELL', 'curl --fail http://localhost:80/info || exit 1']
+      test: ['CMD-SHELL', 'curl --fail http://localhost:3311/info || exit 1']
       interval: 30s
       timeout: 10s
       retries: 5

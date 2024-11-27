@@ -56,6 +56,7 @@ const fileScanResult: FileScanResult = {
   state: 'complete',
   isInfected: false,
   toolName: 'Test',
+  lastRunAt: new Date(),
 }
 
 const fileScanningMock = vi.hoisted(() => ({

@@ -25,7 +25,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
       av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
     } catch (error) {
       throw ConfigurationError('Could not scan file as Clam AV is not running.', {
-        clamAvConfig: config.avScanning,
+        clamAvConfig: config.avScanning.clamdscan,
       })
     }
   }
@@ -35,11 +35,13 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
       throw ConfigurationError(
         'Clam AV does not look like it is running. Check that it has been correctly initialised by calling the init function.',
         {
-          clamAvConfig: config.avScanning,
+          clamAvConfig: config.avScanning.clamdscan,
         },
       )
     }
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
+    const scannerVersion = await av.getVersion()
+    const modifiedVersion = scannerVersion.substring(scannerVersion.indexOf(' ') + 1, scannerVersion.indexOf('/'))
     try {
       const { isInfected, viruses } = await av.scanStream(s3Stream)
       log.info(
@@ -50,7 +52,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
         {
           toolName: clamAvToolName,
           state: ScanState.Complete,
-          scannerVersion: await av.getVersion(),
+          scannerVersion: modifiedVersion,
           isInfected,
           viruses,
           lastRunAt: new Date(),
@@ -62,7 +64,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
         {
           toolName: clamAvToolName,
           state: ScanState.Error,
-          scannerVersion: await av.getVersion(),
+          scannerVersion: modifiedVersion,
           lastRunAt: new Date(),
         },
       ]

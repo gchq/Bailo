@@ -22,7 +22,7 @@ export default function HelpDialog({ title, content }: HelpDialogProps) {
     <>
       <Tooltip title={title}>
         <IconButton size='small' onClick={handleOpen}>
-          <HelpOutlineIcon />
+          <HelpOutlineIcon color='primary' />
         </IconButton>
       </Tooltip>
       <Dialog open={open} onClose={handleClose} maxWidth='md' TransitionComponent={Transition}>
