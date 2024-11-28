@@ -20,6 +20,7 @@ import { useRouter } from 'next/router'
 import React, { ChangeEvent, Fragment, useCallback, useEffect, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import Loading from 'src/common/Loading'
+import PaginationSelector from 'src/common/PaginationSelector'
 import Title from 'src/common/Title'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
@@ -39,30 +40,55 @@ export default function Marketplace() {
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(10)
   const debouncedFilter = useDebounce(filter, 250)
 
-  const { models, isModelsError, isModelsLoading } = useListModels(
+  const { models, totalModels, isModelsError, isModelsLoading } = useListModels(
     EntryKind.MODEL,
     selectedTypes,
     selectedTask,
     selectedLibraries,
     debouncedFilter,
+    undefined,
+    undefined,
+    currentPage,
+    pageSize,
   )
 
   const {
     models: dataCards,
+    totalModels: totalDataCards,
     isModelsError: isDataCardsError,
     isModelsLoading: isDataCardsLoading,
-  } = useListModels(EntryKind.DATA_CARD, selectedTypes, selectedTask, selectedLibraries, debouncedFilter)
+  } = useListModels(
+    EntryKind.DATA_CARD,
+    selectedTypes,
+    selectedTask,
+    selectedLibraries,
+    debouncedFilter,
+    undefined,
+    undefined,
+    currentPage,
+    pageSize,
+  )
 
   const theme = useTheme()
   const router = useRouter()
 
-  const { filter: filterFromQuery, task: taskFromQuery, libraries: librariesFromQuery } = router.query
+  const {
+    filter: filterFromQuery,
+    task: taskFromQuery,
+    libraries: librariesFromQuery,
+    currentPage: currentPageFromQuery,
+    pageSize: pageSizeFromQuery,
+  } = router.query
 
   useEffect(() => {
-    if (filterFromQuery) setFilter(filterFromQuery as string)
-    if (taskFromQuery) setSelectedTask(taskFromQuery as string)
+    if (filterFromQuery && typeof filterFromQuery === 'string') setFilter(filterFromQuery)
+    if (taskFromQuery && typeof taskFromQuery === 'string') setSelectedTask(taskFromQuery)
+    if (currentPageFromQuery && typeof currentPageFromQuery === 'string') setCurrentPage(parseInt(currentPageFromQuery))
+    if (pageSizeFromQuery && typeof pageSizeFromQuery === 'string') setPageSize(parseInt(pageSizeFromQuery))
     if (librariesFromQuery) {
       let librariesAsArray: string[] = []
       if (typeof librariesFromQuery === 'string') {
@@ -72,7 +98,7 @@ export default function Marketplace() {
       }
       setSelectedLibraries([...librariesAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery])
+  }, [filterFromQuery, taskFromQuery, librariesFromQuery, currentPageFromQuery, pageSizeFromQuery])
 
   const handleSelectedTypesOnChange = useCallback((selected: string[]) => {
     if (selected.length > 0) {
@@ -96,6 +122,22 @@ export default function Marketplace() {
       })
     },
     [router],
+  )
+
+  const handleCurrentPageChange = useCallback(
+    (newPage: number) => {
+      setCurrentPage(newPage)
+      updateQueryParams('currentPage', newPage.toString())
+    },
+    [updateQueryParams],
+  )
+
+  const handlePageSizeChange = useCallback(
+    (newValue: number) => {
+      setPageSize(newValue)
+      updateQueryParams('pageSize', newValue.toString())
+    },
+    [updateQueryParams],
   )
 
   const handleFilterChange = useCallback(
@@ -221,38 +263,54 @@ export default function Marketplace() {
               <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
                 <Tabs value={selectedTab} indicatorColor='secondary'>
                   <Tab
-                    label={`Models ${models ? `(${models.length})` : ''}`}
+                    label={`Models ${totalModels ? `(${totalModels})` : ''}`}
                     value={EntryKind.MODEL}
                     onClick={() => setSelectedTab(EntryKind.MODEL)}
                   />
                   <Tab
-                    label={`Data Cards ${dataCards ? `(${dataCards.length})` : ''}`}
+                    label={`Data Cards ${totalDataCards ? `(${totalDataCards})` : ''}`}
                     value={EntryKind.DATA_CARD}
                     onClick={() => setSelectedTab(EntryKind.DATA_CARD)}
                   />
                 </Tabs>
               </Box>
-              {isModelsLoading && <Loading />}
-              {!isModelsLoading && selectedTab === EntryKind.MODEL && (
-                <div data-test='modelListBox'>
-                  <EntryList
-                    entries={models}
-                    entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
-                    selectedChips={selectedLibraries}
-                    onSelectedChipsChange={handleLibrariesOnChange}
-                  />
-                </div>
-              )}
-              {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
-                <div data-test='dataCardListBox'>
-                  <EntryList
-                    entries={dataCards}
-                    entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
-                    selectedChips={selectedLibraries}
-                    onSelectedChipsChange={handleLibrariesOnChange}
-                  />
-                </div>
-              )}
+              <Stack spacing={2}>
+                <PaginationSelector
+                  currentPage={currentPage}
+                  onCurrentPageChange={(newValue) => handleCurrentPageChange(newValue)}
+                  totalEntries={totalModels}
+                  pageSize={pageSize}
+                  onPageSizeChange={(newValue) => handlePageSizeChange(newValue)}
+                />
+                {(isModelsLoading || isDataCardsLoading) && <Loading />}
+                {!isModelsLoading && selectedTab === EntryKind.MODEL && (
+                  <div data-test='modelListBox'>
+                    <EntryList
+                      entries={models}
+                      entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
+                      selectedChips={selectedLibraries}
+                      onSelectedChipsChange={handleLibrariesOnChange}
+                    />
+                  </div>
+                )}
+                {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
+                  <div data-test='dataCardListBox'>
+                    <EntryList
+                      entries={dataCards}
+                      entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
+                      selectedChips={selectedLibraries}
+                      onSelectedChipsChange={handleLibrariesOnChange}
+                    />
+                  </div>
+                )}
+                <PaginationSelector
+                  currentPage={currentPage}
+                  onCurrentPageChange={(newValue) => handleCurrentPageChange(newValue)}
+                  totalEntries={totalModels}
+                  pageSize={pageSize}
+                  onPageSizeChange={(newValue) => handlePageSizeChange(newValue)}
+                />
+              </Stack>
             </Paper>
           </Box>
         </Stack>
