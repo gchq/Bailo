@@ -498,6 +498,7 @@ export async function setLatestImportedModelCard(modelId: string) {
   const updatedModel = await ModelModel.findOneAndUpdate(
     { id: modelId, 'settings.mirror.sourceModelId': { $exists: true, $ne: '' } },
     { $set: { card: latestModelCard } },
+    { returnOriginal: false },
   )
   if (!updatedModel) {
     throw InternalError('Unable to set latest model card of mirrored model.', {
