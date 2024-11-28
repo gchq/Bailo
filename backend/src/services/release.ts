@@ -197,7 +197,10 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
     })
   }
 
-  const updatedRelease = await Release.findOneAndUpdate({ modelId, semver }, { $set: release })
+  const updatedRelease = await Release.findOneAndUpdate(
+    { modelId, semver: semverStringToObject(semver) },
+    { $set: release },
+  )
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })

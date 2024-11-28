@@ -361,7 +361,6 @@ describe('services > release', () => {
     expect(releaseModelMocks.sort.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.lookup.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.append.mock.calls.at(0)).toMatchSnapshot()
-    // expect(releaseModelMocks.lookup.mock.calls.at(0)).toMatchSnapshot()
   })
 
   //test good - give good semver range with lower and upper bounds, returns valid query
