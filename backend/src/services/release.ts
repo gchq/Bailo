@@ -1,4 +1,4 @@
-import { Document, Schema } from 'mongoose'
+import { Schema } from 'mongoose'
 import semver from 'semver'
 import { Optional } from 'utility-types'
 
@@ -56,8 +56,7 @@ async function validateRelease(user: UserInterface, model: ModelDoc, release: Re
     const fileNames: Array<string> = []
 
     for (const fileId of release.fileIds) {
-      let file: Document<unknown, any, FileInterface> &
-        Omit<FileInterface & Required<{ _id: Schema.Types.ObjectId }>, never>
+      let file: FileInterface | (undefined & Omit<FileInterface & Required<{ _id: Schema.Types.ObjectId }>, never>)
       try {
         file = await getFileById(user, fileId)
       } catch (e) {
@@ -239,11 +238,11 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
 export async function getModelReleases(
   user: UserInterface,
   modelId: string,
-  q?: string,
+  querySemver?: string,
 ): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
-  const query = q === undefined ? { modelId } : getQuerySyntax(q, modelId)
+  const query = querySemver === undefined ? { modelId } : getQuerySyntax(querySemver, modelId)
   const results = await Release.aggregate()
-    .match(query!)
+    .match(query)
     .sort({ updatedAt: -1 })
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
@@ -252,9 +251,15 @@ export async function getModelReleases(
   const model = await getModelById(user, modelId)
 
   const auths = await authorisation.releases(user, model, results, ReleaseAction.View)
-  return results
-    .filter((_, i) => auths[i].success)
-    .map((result) => ({ ...result, semver: semverObjectToString(result.semver) }))
+  return results.reduce<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>>(
+    (updatedResults, result, index) => {
+      if (auths[index].success) {
+        updatedResults.push({ ...result, semver: semverObjectToString(result.semver) })
+      }
+      return updatedResults
+    },
+    [],
+  )
 }
 
 export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
@@ -282,7 +287,7 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
   return releases
 }
 
-export function semverStringToObject(semver: string) {
+export function semverStringToObject(semver: string): SemverObject {
   const vIdentifierIndex = semver.indexOf('v')
   const trimmedSemver = vIdentifierIndex === -1 ? semver : semver.slice(vIdentifierIndex + 1)
   const [version, metadata] = trimmedSemver.split('-')
@@ -293,7 +298,7 @@ export function semverStringToObject(semver: string) {
   return { major: majorNum, minor: minorNum, patch: patchNum, ...(metadata && { metadata }) }
 }
 
-export function semverObjectToString(semver: SemverObject) {
+export function semverObjectToString(semver: SemverObject): string {
   if (!semver) {
     return ''
   }
@@ -330,50 +335,29 @@ function getSemverQueryBounds(querySemver: string) {
   const semverRangeStandardised = semver.validRange(querySemver, { includePrerelease: false })
 
   if (!semverRangeStandardised) {
-    throw BadReq(`Semver range, '${querySemver}' is invalid `)
+    throw BadReq(`Semver range, '${querySemver}' is invalid.`)
   }
 
   const [expressionA, expressionB] = semverRangeStandardised.split(' ')
 
-  let lowerSemver: string = '',
-    upperSemver: string = '',
-    lowerInclusivity = false,
-    upperInclusivity = false
+  let lowerInclusivity, lowerSemver, upperInclusivity, upperSemver
+
+  //If lower semver
   if (expressionA.includes('>')) {
-    if (expressionA.includes('=')) {
-      lowerSemver = expressionA.replace('>=', '')
-      lowerInclusivity = true
-    } else {
-      lowerSemver = expressionA.replace('>', '')
-    }
-    //do check for expressionB
-    if (expressionB) {
-      if (expressionB.includes('=')) {
-        upperSemver = expressionB.replace('<=', '')
-        upperInclusivity = true
-      } else {
-        upperSemver = expressionB.replace('<', '')
-      }
-    }
+    lowerInclusivity = expressionA.includes('>=')
+    lowerSemver = expressionA.replace(/[<>=]/g, '')
   } else {
-    if (expressionA.includes('=')) {
-      upperSemver = expressionA.replace('<=', '')
-      upperInclusivity = true
-    } else {
-      upperSemver = expressionA.replace('<', '')
-    }
+    //upper semver
+    upperInclusivity = expressionA.includes('<=')
+    upperSemver = expressionA.replace(/[<=]/g, '')
   }
 
-  let lowerSemverObj: { metadata?: string | undefined; major: number; minor: number; patch: number } = {
-      major: NaN,
-      minor: NaN,
-      patch: NaN,
-    },
-    upperSemverObj: { metadata?: string | undefined; major: number; minor: number; patch: number } = {
-      major: NaN,
-      minor: NaN,
-      patch: NaN,
-    }
+  if (expressionB) {
+    upperInclusivity = expressionB.includes('<=')
+    upperSemver = expressionB.replace(/[<=]/g, '')
+  }
+
+  let lowerSemverObj, upperSemverObj
   if (lowerSemver) {
     lowerSemverObj = semverStringToObject(lowerSemver)
   }
@@ -385,58 +369,53 @@ function getSemverQueryBounds(querySemver: string) {
   return { lowerSemverObj, upperSemverObj, lowerInclusivity, upperInclusivity }
 }
 
-function getQuerySyntax(querySemver: string | undefined, modelID: string) {
-  if (querySemver === undefined) {
-    return {
-      modelId: modelID,
-    }
-  }
+interface QueryBoundInterface {
+  $or: (
+    | {
+        'semver.major':
+          | {
+              $lte: number
+            }
+          | {
+              $gte: number
+            }
+        'semver.minor':
+          | {
+              $lte: number
+            }
+          | { $gte: number }
+        'semver.patch':
+          | {
+              $gte: number
+            }
+          | { $gt: number }
+          | { $lte: number }
+          | { $lt: number }
+      }
+    | {
+        'semver.major':
+          | {
+              $gt: number
+            }
+          | { $lt: number }
+      }
+    | {
+        'semver.major':
+          | {
+              $gte: number
+            }
+          | { $lte: number }
+        'semver.minor':
+          | {
+              $gt: number
+            }
+          | { $lt: number }
+      }
+  )[]
+}
 
+export function getQuerySyntax(querySemver: string, modelID: string) {
   const { lowerSemverObj, upperSemverObj, lowerInclusivity, upperInclusivity } = getSemverQueryBounds(querySemver)
-  interface QueryBoundInterface {
-    $or: (
-      | {
-          'semver.major':
-            | {
-                $lte: number
-              }
-            | {
-                $gte: number
-              }
-          'semver.minor':
-            | {
-                $lte: number
-              }
-            | { $gte: number }
-          'semver.patch':
-            | {
-                $gte: number
-              }
-            | { $gt: number }
-            | { $lte: number }
-            | { $lt: number }
-        }
-      | {
-          'semver.major':
-            | {
-                $gt: number
-              }
-            | { $lt: number }
-        }
-      | {
-          'semver.major':
-            | {
-                $gte: number
-              }
-            | { $lte: number }
-          'semver.minor':
-            | {
-                $gt: number
-              }
-            | { $lt: number }
-        }
-    )[]
-  }
 
   const queryQueue: QueryBoundInterface[] = []
 

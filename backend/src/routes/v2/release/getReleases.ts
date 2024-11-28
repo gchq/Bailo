@@ -18,7 +18,9 @@ export const getReleasesSchema = z.object({
     }),
   }),
   query: z.object({
-    q: z.string().optional(),
+    querySemver: z.string().optional().openapi({ example: '>2.2.2' }).openapi({
+      description: 'Query for semver ranges, as described in https://docs.npmjs.com/cli/v6/using-npm/semver#ranges',
+    }),
   }),
 })
 
@@ -52,10 +54,10 @@ export const getReleases = [
     req.audit = AuditInfo.ViewReleases
     const {
       params: { modelId },
-      query: { q },
+      query: { querySemver },
     } = parse(req, getReleasesSchema)
 
-    const releases = await getModelReleases(req.user, modelId, q)
+    const releases = await getModelReleases(req.user, modelId, querySemver)
     await audit.onViewReleases(req, releases)
 
     return res.json({

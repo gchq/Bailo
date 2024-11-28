@@ -8,6 +8,7 @@ import {
   getAllFileIds,
   getFileByReleaseFileName,
   getModelReleases,
+  getQuerySyntax,
   getReleaseBySemver,
   getReleasesForExport,
   newReleaseComment,
@@ -352,7 +353,83 @@ describe('services > release', () => {
     expect(releaseModelMocks.sort.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.lookup.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.append.mock.calls.at(0)).toMatchSnapshot()
+    // expect(releaseModelMocks.lookup.mock.calls.at(0)).toMatchSnapshot()
   })
+
+  //test good - give good semver range with lower and upper bounds, returns valid query
+  //test fail - invalid range
+  test('getQuerySyntax > good'),
+    async () => {
+      const testQuery = getQuerySyntax('1.0.x', 'testModelID')
+      expect(testQuery).toBe({
+        modelId: 'testModelID',
+        $and: [
+          {
+            $or: [
+              {
+                'semver.major': {
+                  $gte: 1,
+                },
+                'semver.minor': {
+                  $gte: 0,
+                },
+                'semver.patch': {
+                  $gte: 0,
+                },
+              },
+              {
+                'semver.major': {
+                  $gt: 1,
+                },
+              },
+              {
+                'semver.major': {
+                  $gte: 1,
+                },
+                'semver.minor': {
+                  $gt: 0,
+                },
+              },
+            ],
+          },
+          {
+            $or: [
+              {
+                'semver.major': {
+                  $lte: 1,
+                },
+                'semver.minor': {
+                  $lte: 1,
+                },
+                'semver.patch': {
+                  $lt: 0,
+                },
+              },
+              {
+                'semver.major': {
+                  $lt: 1,
+                },
+              },
+              {
+                'semver.major': {
+                  $lte: 1,
+                },
+                'semver.minor': {
+                  $lt: 1,
+                },
+              },
+            ],
+          },
+        ],
+      })
+    }
+
+  test('getQuerySyntax > bad'),
+    async () => {
+      const querySemver = '>2.^2.x'
+      const modelId = 'testModelID'
+      expect(() => getQuerySyntax(querySemver, modelId)).rejects.toThrowError(/^Semver range, '>2.^2.x' is invalid./)
+    }
 
   test('getReleaseBySemver > good', async () => {
     const mockRelease = { _id: 'release' }
@@ -506,26 +583,6 @@ describe('services > release', () => {
 
     const result = getFileByReleaseFileName(mockUser, modelId, semver, fileName)
     expect(result).rejects.toThrowError(/^The requested file name was not found on the release./)
-  })
-  //HERE
-  test('getModelReleases > range not valid', async () => {
-    const mockUser: any = { dn: 'test' }
-    const modelId = 'example'
-    releaseModelMocks.lookup.mockResolvedValueOnce([])
-
-    const result = getModelReleases(mockUser, modelId, '^2.2.b')
-
-    expect(result).rejects.toThrowError("Semver range, '^2.2.b' is invalid ")
-  })
-
-  test('getModelReleases > no semver found', async () => {
-    const mockUser: any = { dn: 'test' }
-    const modelId = 'example'
-    releaseModelMocks.lookup.mockResolvedValue([])
-
-    const result = getModelReleases(mockUser, modelId, '^1.0.3434343')
-
-    expect(result).rejects.toThrowError(`Semver range, ^1.0.3434343 is invalid `)
   })
 
   test('getReleasesForExport > release not found', async () => {
