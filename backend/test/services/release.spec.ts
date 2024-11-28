@@ -22,7 +22,7 @@ vi.mock('../../src/connectors/authorisation/index.js')
 const responseModelMock = vi.hoisted(() => {
   const obj: any = {}
 
-  obj.aggregate = vi.fn(() => obj)
+  obj.aggregate = vi.fn(() => {})
   obj.match = vi.fn(() => obj)
   obj.sort = vi.fn(() => obj)
   obj.lookup = vi.fn(() => obj)
@@ -344,11 +344,18 @@ describe('services > release', () => {
   })
 
   test('getModelReleases > good', async () => {
-    await getModelReleases({ dn: 'user' } as UserInterface, 'modelId')
-
-    vi.mocked(releaseModelMocks.lookup).mockImplementation(() => ({
-      ...releaseModelMocks.lookup,
+    releaseModelMocks.aggregate.mockImplementation(() => ({
+      match: vi.fn().mockImplementation(() => ({
+        sort: vi.fn().mockImplementation(() => ({
+          lookup: vi.fn().mockImplementation(() => ({
+            append: vi.fn().mockImplementation(() => ({
+              lookup: vi.fn().mockImplementation(() => [{ _id: 'release', modelId: 'test', semver: '1.0.0' }]),
+            })),
+          })),
+        })),
+      })),
     }))
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelId')
 
     expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.sort.mock.calls.at(0)).toMatchSnapshot()

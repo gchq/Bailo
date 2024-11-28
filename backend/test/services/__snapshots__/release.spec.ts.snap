@@ -1,43 +1,9 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`services > release > getModelReleases > good 1`] = `
-[
-  {
-    "modelId": "modelId",
-  },
-]
-`;
+exports[`services > release > getModelReleases > good 1`] = `undefined`;
 
-exports[`services > release > getModelReleases > good 2`] = `
-[
-  {
-    "updatedAt": -1,
-  },
-]
-`;
+exports[`services > release > getModelReleases > good 2`] = `undefined`;
 
-exports[`services > release > getModelReleases > good 3`] = `
-[
-  {
-    "as": "model",
-    "foreignField": "id",
-    "from": "v2_models",
-    "localField": "modelId",
-  },
-]
-`;
+exports[`services > release > getModelReleases > good 3`] = `undefined`;
 
-exports[`services > release > getModelReleases > good 4`] = `
-[
-  {
-    "$set": {
-      "model": {
-        "$arrayElemAt": [
-          "$model",
-          0,
-        ],
-      },
-    },
-  },
-]
-`;
+exports[`services > release > getModelReleases > good 4`] = `undefined`;

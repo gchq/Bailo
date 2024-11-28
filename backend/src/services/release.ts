@@ -256,6 +256,7 @@ export async function getModelReleases(
       if (auths[index].success) {
         updatedResults.push({ ...result, semver: semverObjectToString(result.semver) })
       }
+
       return updatedResults
     },
     [],
