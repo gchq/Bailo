@@ -1,0 +1,17 @@
+{{- if .Values.modelscan.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bailo.fullname" . }}-modelscan
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.modelscan.port }}
+      targetPort: {{ .Values.modelscan.port }}
+      protocol: TCP
+      name: http
+  selector:
+    name: modelscan
+{{- end }}
