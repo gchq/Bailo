@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { UserInterface } from '../../src/models/User.js'
 import {
   createRelease,
   deleteRelease,
@@ -343,7 +344,7 @@ describe('services > release', () => {
   })
 
   test('getModelReleases > good', async () => {
-    await getModelReleases({} as any, 'modelId')
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelId')
 
     vi.mocked(releaseModelMocks.lookup).mockImplementation(() => ({
       ...releaseModelMocks.lookup,
