@@ -11,7 +11,7 @@ import {
 } from '../../../src/services/smtp/smtp.js'
 import config from '../../../src/utils/config.js'
 import { testReviewResponse } from '../../testUtils/testModels.js'
-
+// type AuthenticationKindKeys = (typeof AuthenticationKind)[keyof typeof AuthenticationKind]
 vi.mock('../../../src/utils/config.js', () => {
   return {
     __esModule: true,
@@ -22,6 +22,23 @@ vi.mock('../../../src/utils/config.js', () => {
         port: 3000,
       },
 
+      connectors: {
+        authorisation: {
+          kind: 'basic',
+        },
+        fileScanners: {
+          kinds: ['clamAV'],
+        },
+        audit: {
+          kind: 'silly',
+        },
+      },
+
+      registry: {
+        connection: {
+          insecure: true,
+        },
+      },
       smtp: {
         enabled: true,
 
