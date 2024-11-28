@@ -81,8 +81,8 @@ jobs:
           context: modelscan
           file: lib/modelscan_api/Dockerfile
           tags: bailo_modelscan:latest
-          cache-from: type=gha,scope=modelscan
-          cache-to: type=gha,mode=max,scope=modelscan
+          # cache-from: type=gha,scope=modelscan
+          # cache-to: type=gha,mode=max,scope=modelscan
           outputs: type=docker,dest=/tmp/bailo_modelscan.tar
 
       - name: Upload artifact
