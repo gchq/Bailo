@@ -62,7 +62,7 @@ export default function JsonSchemaForm({
                   <Typography
                     sx={{
                       wordBreak: 'break-word',
-                      color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.common.black,
+                      color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.text.primary,
                     }}
                     width='100%'
                   >

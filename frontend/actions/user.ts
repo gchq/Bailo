@@ -1,7 +1,15 @@
 import qs from 'querystring'
 import { UserInformation } from 'src/common/UserDisplay'
 import useSWR from 'swr'
-import { EntityObject, EntryInterface, TokenAction, TokenInterface, TokenScopeKeys, User } from 'types/types'
+import {
+  EntityObject,
+  EntryInterface,
+  TokenAction,
+  TokenInterface,
+  TokenScopeKeys,
+  User,
+  UserSettings,
+} from 'types/types'
 
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -99,6 +107,28 @@ export function deleteUserToken(accessKey: TokenInterface['accessKey']) {
   })
 }
 
+interface UserSettingsResponse {
+  settings: UserSettings
+}
+
+export function useGetCurrentUserSettings() {
+  const { data, error, mutate } = useSWR<UserSettingsResponse, ErrorInfo>('/api/v2/user/settings', fetcher)
+
+  return {
+    mutateUserSettings: mutate,
+    userSettings: data?.settings,
+    isUserSettingsLoading: !error && !data,
+    isUserSettingsError: error,
+  }
+}
+
+export function patchCurrentUserSettings(diff: Partial<UserSettings>) {
+  return fetch('/api/v2/user/settings', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(diff),
+  })
+}
 export interface GetUserTokenListResponse {
   tokenActionMap: TokenAction[]
 }
