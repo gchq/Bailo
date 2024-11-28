@@ -8,6 +8,8 @@ image:
   frontendTag: imageTag
   backendRepository: "backend-image-registry.location"
   backendTag: imageTag
+  modelscanRepository: "modelscan-image-registry.location"
+  modelscanTag: imageTag
   pullPolicy: IfNotPresent
 imagePullSecrets: []
 
@@ -299,7 +301,7 @@ clamav:
 
 modelscan:
   enabled: false
-  image: bailo-modelscan
+  protocol: http
   port: 3311
   accessModes:
     - ReadWriteOnce

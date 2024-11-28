@@ -28,7 +28,8 @@ spec:
           - name: modelscanport
             containerPort: 3311
             protocol: TCP
-        image: {{ .Values.modelscan.image }}
+        image: "{{ .Values.image.modelscanRepository }}:{{ .Values.image.modelscanTag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           requests:
             memory: "100Mi"

@@ -11,7 +11,7 @@ spec:
     - port: {{ .Values.modelscan.port }}
       targetPort: {{ .Values.modelscan.port }}
       protocol: TCP
-      name: http
+      name: {{ .Values.modelscan.protocol }}
   selector:
     name: modelscan
 {{- end }}
