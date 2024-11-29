@@ -60,6 +60,10 @@ export interface UiConfig {
     text: string
     startTimestamp: string
   }
+
+  helpPopoverText: {
+    manualEntryAccess: string
+  }
 }
 
 export interface FileInterface {
@@ -338,18 +342,6 @@ export interface StepNoRender {
   isComplete: (step: StepNoRender) => boolean
 }
 
-export interface TeamInterface {
-  id: string
-
-  name: string
-  description: string
-
-  deleted: boolean
-
-  createdAt: Date
-  updatedAt: Date
-}
-
 export const EntryVisibility = {
   Private: 'private',
   Public: 'public',
@@ -408,7 +400,6 @@ export interface EntryInterface {
   id: string
   name: string
   kind: EntryKindKeys
-  teamId: string
   description: string
   settings: {
     ungovernedAccess?: boolean
@@ -428,7 +419,6 @@ export interface EntryInterface {
 export interface EntryForm {
   name: string
   kind: EntryKindKeys
-  teamId: string
   description: string
   visibility: EntryVisibilityKeys
   collaborators?: CollaboratorEntry[]

@@ -228,6 +228,9 @@ config:
       text: ''
       startTimestamp: ''
 
+    helpPopoverText:
+      manualEntryAccess: ''
+
   smtp:
     #host: 'mail' #service name
     port: 1025
@@ -257,7 +260,7 @@ connectors:
     kind: 'silly'
 
   fileScanners:
-    kinds: ['clamAV']
+    kinds: []
 
 instrumentation:
   enabled: false

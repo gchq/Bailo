@@ -140,6 +140,12 @@ export interface Config {
       host: string
       port: number
     }
+
+    modelscan: {
+      protocol: string
+      host: string
+      port: number
+    }
   }
 
   modelMirror: {

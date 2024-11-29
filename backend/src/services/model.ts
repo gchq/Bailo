@@ -12,9 +12,9 @@ import ModelCardRevisionModel, {
 } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
-import { EntryUserPermissions } from '../types/types.js'
+import { EntityKind, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
-import { toEntity } from '../utils/entity.js'
+import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
@@ -28,12 +28,14 @@ export function checkModelRestriction(model: ModelInterface) {
 
 export type CreateModelParams = Pick<
   ModelInterface,
-  'name' | 'teamId' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
+  'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
 >
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
-  // TODO - Find team by teamId to check it's valid. Throw error if not found.
+  if (modelParams.collaborators) {
+    await validateCollaborators(modelParams.collaborators)
+  }
 
   let collaborators: CollaboratorEntry[] = []
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
@@ -305,7 +307,7 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'> & {
+export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility' | 'collaborators'> & {
   settings: Partial<ModelInterface['settings']>
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
@@ -318,6 +320,9 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
   if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
     throw BadReq('You cannot select both mirror settings simultaneously.')
+  }
+  if (modelDiff.collaborators) {
+    await validateCollaborators(modelDiff.collaborators, model.collaborators)
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
@@ -335,6 +340,49 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   await model.save()
 
   return model
+}
+
+async function validateCollaborators(
+  updatedCollaborators: CollaboratorEntry[],
+  previousCollaborators: CollaboratorEntry[] = [],
+) {
+  const previousCollaboratorEntities: string[] = previousCollaborators.map((collaborator) => collaborator.entity)
+  const duplicates = updatedCollaborators.reduce<string[]>(
+    (duplicates, currentCollaborator, currentCollaboratorIndex) => {
+      if (
+        updatedCollaborators.find(
+          (collaborator, index) =>
+            index !== currentCollaboratorIndex && collaborator.entity === currentCollaborator.entity,
+        ) &&
+        !duplicates.includes(currentCollaborator.entity)
+      ) {
+        duplicates.push(currentCollaborator.entity)
+      }
+      return duplicates
+    },
+    [],
+  )
+  if (duplicates.length > 0) {
+    throw BadReq(`The following duplicate collaborators have been found: ${duplicates.join(', ')}`)
+  }
+  const newCollaborators = updatedCollaborators.reduce<string[]>((acc, currentCollaborator) => {
+    if (!previousCollaboratorEntities.includes(currentCollaborator.entity)) {
+      acc.push(currentCollaborator.entity)
+    }
+    return acc
+  }, [])
+  await Promise.all(
+    newCollaborators.map(async (collaborator) => {
+      if (collaborator === '') {
+        throw BadReq('Collaborator name must be a valid string')
+      }
+      // TODO we currently only check for users, we should consider how we want to handle groups
+      const { kind } = fromEntity(collaborator)
+      if (kind === EntityKind.USER) {
+        await authentication.getUserInformation(collaborator)
+      }
+    }),
+  )
 }
 
 export async function createModelCardFromSchema(
@@ -391,12 +439,12 @@ export async function createModelCardFromTemplate(
   return revision
 }
 
-export async function saveImportedModelCard(modelCard: ModelCardRevisionInterface, sourceModelId: string) {
+export async function saveImportedModelCard(modelCardRevision: ModelCardRevisionInterface, sourceModelId: string) {
   const model = await Model.findOne({
-    id: modelCard.modelId,
+    id: modelCardRevision.modelId,
   })
   if (!model) {
-    throw NotFound(`Cannot find model to import model card.`, { modelId: modelCard.modelId })
+    throw NotFound(`Cannot find model to import model card.`, { modelId: modelCardRevision.modelId })
   }
   if (!model.settings.mirror.sourceModelId) {
     throw InternalError('Cannot import model card to non mirrored model.')
@@ -408,44 +456,58 @@ export async function saveImportedModelCard(modelCard: ModelCardRevisionInterfac
     })
   }
 
-  const schema = await getSchemaById(modelCard.schemaId)
+  const schema = await getSchemaById(modelCardRevision.schemaId)
   try {
-    new Validator().validate(modelCard.metadata, schema.jsonSchema, { throwAll: true, required: true })
+    new Validator().validate(modelCardRevision.metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
     if (isValidatorResultError(error)) {
       throw BadReq('Model metadata could not be validated against the schema.', {
-        schemaId: modelCard.schemaId,
+        schemaId: modelCardRevision.schemaId,
         validationErrors: error.errors,
       })
     }
     throw error
   }
 
-  return await ModelCardRevisionModel.findOneAndUpdate(
-    { modelId: modelCard.modelId, version: modelCard.version },
-    modelCard,
+  const foundModelCardRevision = await ModelCardRevisionModel.findOneAndUpdate(
+    { modelId: modelCardRevision.modelId, version: modelCardRevision.version },
+    modelCardRevision,
     {
       upsert: true,
     },
   )
+
+  if (!foundModelCardRevision && modelCardRevision.version !== 1) {
+    // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
+    // Ignore model cards with a version number of 1 as these will always be blank.
+    return modelCardRevision
+  }
 }
 
+/**
+ * Note that we do not authorise that the user can access the model here.
+ * This function should only be used during the import model card process.
+ * Do not expose this functionality to users.
+ */
 export async function setLatestImportedModelCard(modelId: string) {
   const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }, undefined, { sort: { version: -1 } })
   if (!latestModelCard) {
     throw NotFound('Cannot find latest model card.', { modelId })
   }
 
-  const result = await ModelModel.findOneAndUpdate(
+  const updatedModel = await ModelModel.findOneAndUpdate(
     { id: modelId, 'settings.mirror.sourceModelId': { $exists: true, $ne: '' } },
     { $set: { card: latestModelCard } },
+    { returnOriginal: false },
   )
-  if (!result) {
+  if (!updatedModel) {
     throw InternalError('Unable to set latest model card of mirrored model.', {
       modelId,
       version: latestModelCard.version,
     })
   }
+
+  return updatedModel
 }
 
 export function isModelCardRevision(data: unknown): data is ModelCardRevisionInterface {

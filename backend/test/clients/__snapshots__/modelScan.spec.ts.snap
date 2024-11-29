@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`clients > modelScan > getModelScanInfo > success 1`] = `
+[
+  [
+    "undefined://undefined:undefined/info",
+    {
+      "headers": {
+        "Content-Type": "application/json",
+      },
+      "method": "GET",
+    },
+  ],
+]
+`;
+
+exports[`clients > modelScan > scanFile > success 1`] = `
+[
+  [
+    "undefined://undefined:undefined/scan/file",
+    {
+      "body": FormData {
+        Symbol(state): [
+          {
+            "name": "in_file",
+            "value": File {
+              Symbol(kHandle): Blob {},
+              Symbol(kLength): 0,
+              Symbol(kType): "application/x-hdf5",
+            },
+          },
+        ],
+      },
+      "headers": {
+        "accept": "application/json",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;

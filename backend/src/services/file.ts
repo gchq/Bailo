@@ -59,9 +59,9 @@ async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileSc
     )
     if (updateExistingResult.modifiedCount === 0) {
       await FileModel.updateOne(
-        { _id },
+        { _id, avScan: { $exists: true } },
         {
-          $set: { avScan: { toolName: result.toolName, state: result.state } },
+          $push: { avScan: { toolName: result.toolName, state: result.state } },
         },
       )
     }

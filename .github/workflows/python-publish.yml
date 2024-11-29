@@ -42,7 +42,7 @@ jobs:
 
       # Upload Bailo artifact
       - name: Store the distribution packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: lib/python/dist/
@@ -64,7 +64,7 @@ jobs:
       # Retrieve Bailo artifact
       - name: Download all the dists
         if: needs.build.outputs.files-changed-output == 'true'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: python-package-distributions
           path: lib/python/dist/

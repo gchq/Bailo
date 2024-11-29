@@ -1,7 +1,18 @@
+export type PartialDeep<T> = T extends object
+  ? {
+      [P in keyof T]?: PartialDeep<T[P]>
+    }
+  : T
+
 export const RoleKind = {
   ENTRY: 'entry',
   SCHEMA: 'schema',
 } as const
+
+export enum EntityKind {
+  USER = 'user',
+  GROUP = 'group',
+}
 
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
@@ -84,5 +95,9 @@ export interface UiConfig {
     enabled: boolean
     text: string
     startTimestamp: string
+  }
+
+  helpPopoverText: {
+    manualEntryAccess: string
   }
 }

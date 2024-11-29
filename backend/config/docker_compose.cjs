@@ -65,11 +65,15 @@ module.exports = {
     clamdscan: {
       host: 'clamd',
     },
+
+    modelscan: {
+      host: 'modelscan',
+    },
   },
 
   connectors: {
     fileScanners: {
-      kinds: ['clamAV'],
+      kinds: ['clamAV', 'modelScan'],
     },
   },
 }

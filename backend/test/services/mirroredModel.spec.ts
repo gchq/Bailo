@@ -216,6 +216,7 @@ describe('services > mirroredModel', () => {
 
   test('exportModel > successful export if no files exist', async () => {
     releaseMocks.getAllFileIds.mockResolvedValueOnce([])
+    fileMocks.getFilesByIds.mockResolvedValueOnce([])
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '1.2.4'])
     // Allow for completion of asynchronous content
     await new Promise((r) => setTimeout(r))
@@ -314,7 +315,7 @@ describe('services > mirroredModel', () => {
   test('exportModel > export uploaded to S3 for model cards and releases', async () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '3.2.1'])
 
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(3)
   })
 
   test('exportModel > unable to upload to tmp S3 location', async () => {
@@ -333,34 +334,34 @@ describe('services > mirroredModel', () => {
 
   test('importModel > not enabled', async () => {
     vi.spyOn(configMock, 'ui', 'get').mockReturnValueOnce({ modelMirror: { import: { enabled: false } } })
-    const result = importModel({} as UserInterface, '', 'https://test.com')
+    const result = importModel('', 'https://test.com')
 
     await expect(result).rejects.toThrowError('Importing models has not been enabled.')
   })
 
   test('importModel > mirrored model Id empty', async () => {
-    const result = importModel({} as UserInterface, '', 'https://test.com')
+    const result = importModel('', 'https://test.com')
 
     await expect(result).rejects.toThrowError('Missing mirrored model ID.')
   })
 
   test('importModel > error when getting zip file', async () => {
     fetchMock.default.mockRejectedValueOnce('a')
-    const result = importModel({} as UserInterface, 'model-id', 'https://test.com')
+    const result = importModel('model-id', 'https://test.com')
 
     await expect(result).rejects.toThrowError('Unable to get the file.')
   })
 
   test('importModel > non 200 response when getting zip file', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: false, body: vi.fn(), text: vi.fn() })
-    const result = importModel({} as UserInterface, 'model-id', 'https://test.com')
+    const result = importModel('model-id', 'https://test.com')
 
     await expect(result).rejects.toThrowError('Unable to get zip file.')
   })
 
   test('importModel > file missing from body', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: true, text: vi.fn() } as any)
-    const result = importModel({} as UserInterface, 'model-id', 'https://test.com')
+    const result = importModel('model-id', 'https://test.com')
 
     await expect(result).rejects.toThrowError('Unable to get the file.')
   })
@@ -371,7 +372,7 @@ describe('services > mirroredModel', () => {
       file1: Buffer.from(JSON.stringify({ modelId: 'abc' })),
       file2: Buffer.from(JSON.stringify({ modelId: 'abc' })),
     })
-    await importModel({} as UserInterface, 'model-id', 'https://test.com')
+    await importModel('model-id', 'https://test.com')
 
     await expect(modelMocks.saveImportedModelCard.mock.calls.length).toBe(2)
   })
@@ -382,7 +383,7 @@ describe('services > mirroredModel', () => {
       file1: Buffer.from(JSON.stringify({})),
     })
     modelMocks.isModelCardRevision.mockReturnValueOnce(false)
-    const result = importModel({} as UserInterface, 'model-id', 'https://test.com')
+    const result = importModel('model-id', 'https://test.com')
 
     await expect(result).rejects.toThrowError(/^Data cannot be converted into a model card./)
   })
@@ -393,7 +394,7 @@ describe('services > mirroredModel', () => {
       file1: Buffer.from(JSON.stringify({ modelId: 'abc' })),
       file2: Buffer.from(JSON.stringify({ modelId: 'cba' })),
     })
-    const result = importModel({} as UserInterface, 'model-id', 'https://test.com')
+    const result = importModel('model-id', 'https://test.com')
 
     await expect(result).rejects.toThrowError(/^Zip file contains model cards for multiple models./)
   })
@@ -403,7 +404,7 @@ describe('services > mirroredModel', () => {
     fflateMock.unzipSync.mockImplementationOnce(() => {
       throw Error('Cannot import file.')
     })
-    const result = importModel({} as UserInterface, 'model-id', 'https://test.com')
+    const result = importModel('model-id', 'https://test.com')
 
     await expect(result).rejects.toThrowError(/^Unable to read zip file./)
   })

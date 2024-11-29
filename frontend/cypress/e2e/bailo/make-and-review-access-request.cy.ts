@@ -10,7 +10,6 @@ describe('Make and approve an access request', () => {
     cy.request('POST', 'http://localhost:8080/api/v2/models', {
       name: modelName,
       kind: 'model',
-      teamId: 'Uncategorised',
       description: 'This is a test',
       visibility: 'public',
     }).then((response) => {
