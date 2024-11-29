@@ -41,11 +41,13 @@ app = FastAPI(
     dependencies=[Depends(get_settings)],
 )
 
-# Instantiating ModelScan
-modelscan_model = ModelScan(settings=get_settings().modelscan_settings)
-
 
 class ApiInformation(BaseModel):
+    """Minimal typed information about the API endpoint.
+
+    :param BaseModel: Pydantic super class
+    """
+
     apiName: str
     apiVersion: str
     scannerName: str
@@ -59,7 +61,7 @@ class ApiInformation(BaseModel):
     status_code=HTTPStatus.OK.value,
     response_description="A populated ApiInformation object",
 )
-def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation:
+async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation:
     """Information about the API.
 
     :return: a JSON representable object with keys from ApiInformation
@@ -121,7 +123,7 @@ def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation
         },
     },
 )
-def scan_file(
+async def scan_file(
     in_file: UploadFile,
     background_tasks: BackgroundTasks,
     settings: Annotated[Settings, Depends(get_settings)],
@@ -135,6 +137,9 @@ def scan_file(
     """
     logger.info("Called the API endpoint to scan an uploaded file")
     try:
+        # Instantiate ModelScan
+        modelscan_model = ModelScan(settings=settings.modelscan_settings)
+
         # Use Setting's download_dir if defined else use a temporary directory.
         with TemporaryDirectory() if not settings.download_dir else nullcontext(settings.download_dir) as download_dir:
             if in_file.filename and str(in_file.filename).strip():
@@ -190,7 +195,8 @@ def scan_file(
     finally:
         try:
             # Clean up the downloaded file as a background task to allow returning sooner.
-            # If using a temporary dir then this would happen anyway, but if Settings' download_dir evaluates then this is required.
+            # If using a temporary dir then this would happen anyway, but if Settings' download_dir evaluates
+            # then this is required.
             logger.info("Cleaning up downloaded file.")
             background_tasks.add_task(Path.unlink, pathlib_path, missing_ok=True)
         except UnboundLocalError:
