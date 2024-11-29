@@ -79,6 +79,18 @@ const config: PartialDeep<Config> = {
       userIdAttribute: '',
     },
   },
+  avScanning: {
+    clamdscan: {
+      host: '127.0.0.1',
+      port: 3310,
+    },
+
+    modelscan: {
+      protocol: 'http',
+      host: '127.0.0.1',
+      port: 3311,
+    },
+  },
   mongo: {
     uri: 'mongodb://localhost:27017/bailo?directConnection=true',
     user: undefined,
