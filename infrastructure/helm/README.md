@@ -49,6 +49,8 @@ image:
   frontendTag: tag
   backendRepository: 'image-registry-openshift-imagestreams'
   backendTag: tag
+  modelscanRepository: 'image-registry-openshift-imagestreams'
+  modelscanTag: tag
 
 route:
   enabled: true
@@ -73,6 +75,8 @@ image:
   frontendTag: tag
   backendRepository: 'aws-elastic-container-registry'
   backendTag: tag
+  modelscanRepository: 'aws-elastic-container-registry'
+  modelscanTag: tag
 
 ingress:
   enabled: true
