@@ -34,6 +34,19 @@ vi.mock('../../../src/utils/config.js', () => {
         },
       },
 
+      avScanning: {
+        clamdscan: {
+          host: '',
+          port: 8080,
+        },
+      },
+      s3: {
+        buckets: {
+          uploads: 'uploads',
+          registry: 'registry',
+        },
+      },
+
       registry: {
         connection: {
           insecure: true,
