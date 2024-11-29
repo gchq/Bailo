@@ -37,13 +37,13 @@ vi.mock('../../../src/utils/config.js', () => {
       avScanning: {
         clamdscan: {
           host: '127.0.0.1',
-          port: 3310,
+          port: 8080,
         },
 
         modelscan: {
           protocol: 'http',
           host: '127.0.0.1',
-          port: 3311,
+          port: 8081,
         },
       },
       s3: {
