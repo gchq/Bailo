@@ -1,4 +1,5 @@
 stages:
+  - git_sync
   - os_build
   - aws_build
 
@@ -6,12 +7,29 @@ variables:
   AWS_TAG: latest
   OS_TAG: $CI_COMMIT_BRANCH-$CI_COMMIT_SHORT_SHA
 
-os-backend-build:
-  stage: os_build
+opensrc-bailols:
+  stage: git_sync
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: always
       allow_failure: true
+    - when: manual
+      allow_failure: true
+  image:
+    name: openjdk:latest
+  script:
+    - microdnf install -y git wget
+    - git clone --mirror "https://$OPENSRC_TOKEN_NAME:$OPENSRC_TOKEN@$OPENSRC_URL"
+    - wget https://repo1.maven.org/maven2/com/madgag/bfg/1.14.0/bfg-1.14.0.jar
+    - java -jar bfg-1.14.0.jar --strip-blobs-bigger-than 40M $OPENSRC_GIT_NAME
+    - cd $OPENSRC_GIT_NAME
+    - git reflog expire --expire=now --all && git gc --prune=now --aggressive
+    - git remote add $REPO_NAME "https://$LS_TOKEN_NAME:$LS_TOKEN@$LS_URL"
+    - git push -u $REPO_NAME main --force
+
+os-backend-build:
+  stage: os_build
+  rules:
     - when: manual
       allow_failure: true
   image:
@@ -35,9 +53,6 @@ os-backend-build:
 os-frontend-build:
   stage: os_build
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-      allow_failure: true
     - when: manual
       allow_failure: true
   image:
@@ -62,9 +77,6 @@ openshift-deploy:
   stage: os_build
   needs: ['os-frontend-build', 'os-backend-build']
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-      allow_failure: true
     - when: manual
       allow_failure: true
   image:
@@ -123,9 +135,6 @@ openshift-deploy:
 aws-backend-build:
   stage: aws_build
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-      allow_failure: true
     - when: manual
       allow_failure: true
   image:
@@ -155,9 +164,6 @@ aws-backend-build:
 aws-frontend-build:
   stage: aws_build
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-      allow_failure: true
     - when: manual
       allow_failure: true
   image:
