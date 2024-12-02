@@ -10,7 +10,7 @@ variables:
 opensrc-bailols:
   stage: git_sync
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $BFG == "true"'
       when: always
       allow_failure: true
     - when: manual
