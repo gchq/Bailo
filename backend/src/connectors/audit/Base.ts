@@ -10,6 +10,7 @@ import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
+import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 
 const AuditKind = {
@@ -185,9 +186,8 @@ export abstract class BaseAuditConnector {
     req: Request,
     mirroredModel: ModelInterface,
     sourceModelId: string,
-    modelCardVersions: number[],
     exporter: string,
-    newModelCards: ModelCardInterface[],
+    importResult: MongoDocumentImportInformation | FileImportInformation,
   )
 
   abstract onError(req: Request, error: BailoError)
