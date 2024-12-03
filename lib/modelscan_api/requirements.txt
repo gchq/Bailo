@@ -1,5 +1,5 @@
 fastapi[standard]>=0.115.0,<0.116.0
 modelscan[tensorflow,h5py]>=0.8.0,<0.9.0
 pydantic_settings>=2.6.1,<2.7.0
-python-multipart==0.0.17
+python-multipart==0.0.18
 uvicorn>=0.32.0,<0.33.0
