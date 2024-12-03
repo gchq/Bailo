@@ -1,5 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`services > release > convertSemverQueryToMongoQuery > good 1`] = `undefined`;
+
 exports[`services > release > getModelReleases > good 1`] = `undefined`;
 
 exports[`services > release > getModelReleases > good 2`] = `undefined`;

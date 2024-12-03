@@ -243,7 +243,7 @@ export async function getModelReleases(
   modelId: string,
   querySemver?: string,
 ): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
-  const query = querySemver === undefined ? { modelId } : getQuerySyntax(querySemver, modelId)
+  const query = querySemver === undefined ? { modelId } : convertSemverQueryToMongoQuery(querySemver, modelId)
   const results = await Release.aggregate()
     .match(query)
     .sort({ updatedAt: -1 })
@@ -335,39 +335,31 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
   return release
 }
 
-function getSemverQueryBounds(querySemver: string) {
+function parseSemverQuery(querySemver: string) {
   const semverRangeStandardised = semver.validRange(querySemver, { includePrerelease: false })
 
   if (!semverRangeStandardised) {
-    throw BadReq(`Semver range, '${querySemver}' is invalid.`)
+    throw BadReq('Semver range is invalid.', { semverQuery: querySemver })
   }
 
   const [expressionA, expressionB] = semverRangeStandardised.split(' ')
 
-  let lowerInclusivity, lowerSemver, upperInclusivity, upperSemver
+  let lowerInclusivity, upperInclusivity
+  let lowerSemverObj, upperSemverObj
 
-  //If lower semver
+  //LOWER SEMVER
   if (expressionA.includes('>')) {
     lowerInclusivity = expressionA.includes('>=')
-    lowerSemver = expressionA.replace(/[<>=]/g, '')
+    lowerSemverObj = semverStringToObject(expressionA.replace(/[<>=]/g, ''))
   } else {
     //upper semver
     upperInclusivity = expressionA.includes('<=')
-    upperSemver = expressionA.replace(/[<=]/g, '')
+    upperSemverObj = semverStringToObject(expressionA.replace(/[<=]/g, ''))
   }
 
   if (expressionB) {
     upperInclusivity = expressionB.includes('<=')
-    upperSemver = expressionB.replace(/[<=]/g, '')
-  }
-
-  let lowerSemverObj, upperSemverObj
-  if (lowerSemver) {
-    lowerSemverObj = semverStringToObject(lowerSemver)
-  }
-
-  if (upperSemver) {
-    upperSemverObj = semverStringToObject(upperSemver)
+    upperSemverObj = semverStringToObject(expressionB.replace(/[<=]/g, ''))
   }
 
   return { lowerSemverObj, upperSemverObj, lowerInclusivity, upperInclusivity }
@@ -418,8 +410,8 @@ interface QueryBoundInterface {
   )[]
 }
 
-export function getQuerySyntax(querySemver: string, modelID: string) {
-  const { lowerSemverObj, upperSemverObj, lowerInclusivity, upperInclusivity } = getSemverQueryBounds(querySemver)
+function convertSemverQueryToMongoQuery(querySemver: string, modelID: string) {
+  const { lowerSemverObj, upperSemverObj, lowerInclusivity, upperInclusivity } = parseSemverQuery(querySemver)
 
   const queryQueue: QueryBoundInterface[] = []
 

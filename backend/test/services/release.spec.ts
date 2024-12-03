@@ -9,7 +9,6 @@ import {
   getAllFileIds,
   getFileByReleaseFileName,
   getModelReleases,
-  getQuerySyntax,
   getReleaseBySemver,
   getReleasesForExport,
   newReleaseComment,
@@ -365,78 +364,29 @@ describe('services > release', () => {
 
   //test good - give good semver range with lower and upper bounds, returns valid query
   //test fail - invalid range
-  test('getQuerySyntax > good'),
-    async () => {
-      const testQuery = getQuerySyntax('1.0.x', 'testModelID')
-      expect(testQuery).toBe({
-        modelId: 'testModelID',
-        $and: [
-          {
-            $or: [
-              {
-                'semver.major': {
-                  $gte: 1,
-                },
-                'semver.minor': {
-                  $gte: 0,
-                },
-                'semver.patch': {
-                  $gte: 0,
-                },
-              },
-              {
-                'semver.major': {
-                  $gt: 1,
-                },
-              },
-              {
-                'semver.major': {
-                  $gte: 1,
-                },
-                'semver.minor': {
-                  $gt: 0,
-                },
-              },
-            ],
-          },
-          {
-            $or: [
-              {
-                'semver.major': {
-                  $lte: 1,
-                },
-                'semver.minor': {
-                  $lte: 1,
-                },
-                'semver.patch': {
-                  $lt: 0,
-                },
-              },
-              {
-                'semver.major': {
-                  $lt: 1,
-                },
-              },
-              {
-                'semver.major': {
-                  $lte: 1,
-                },
-                'semver.minor': {
-                  $lt: 1,
-                },
-              },
-            ],
-          },
-        ],
-      })
-    }
+  test('convertSemverQueryToMongoQuery > good', async () => {
+    releaseModelMocks.aggregate.mockImplementation(() => ({
+      match: vi.fn().mockImplementation(() => ({
+        sort: vi.fn().mockImplementation(() => ({
+          lookup: vi.fn().mockImplementation(() => ({
+            append: vi.fn().mockImplementation(() => ({
+              lookup: vi.fn().mockImplementation(() => [{ _id: 'release', modelId: 'test', semver: '1.0.0' }]),
+            })),
+          })),
+        })),
+      })),
+    }))
 
-  test('getQuerySyntax > bad'),
-    async () => {
-      const querySemver = '>2.^2.x'
-      const modelId = 'testModelID'
-      expect(() => getQuerySyntax(querySemver, modelId)).rejects.toThrowError(/^Semver range, '>2.^2.x' is invalid./)
-    }
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelId', '2.2.X')
+
+    expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('convertSemverQueryToMongoQuery > bad', async () => {
+    expect(async () => await getModelReleases({ dn: 'user' } as UserInterface, 'test', '^2.2v.x')).rejects.toThrowError(
+      /^Semver range is invalid./,
+    )
+  })
 
   test('getReleaseBySemver > good', async () => {
     const mockRelease = { _id: 'release' }
