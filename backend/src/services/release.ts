@@ -1,4 +1,3 @@
-import { Schema } from 'mongoose'
 import semver from 'semver'
 import { Optional } from 'utility-types'
 
@@ -56,7 +55,7 @@ async function validateRelease(user: UserInterface, model: ModelDoc, release: Re
     const fileNames: Array<string> = []
 
     for (const fileId of release.fileIds) {
-      let file: FileInterface | (undefined & Omit<FileInterface & Required<{ _id: Schema.Types.ObjectId }>, never>)
+      let file: FileInterfaceDoc | undefined
       try {
         file = await getFileById(user, fileId)
       } catch (e) {
@@ -306,7 +305,7 @@ export function semverObjectToString(semver: SemverObject): string {
   if (!semver) {
     return ''
   }
-  let metadata: string
+  let metadata = ''
   if (semver.metadata != undefined) {
     metadata = `-${semver.metadata}`
   } else {
@@ -344,8 +343,10 @@ function parseSemverQuery(querySemver: string) {
 
   const [expressionA, expressionB] = semverRangeStandardised.split(' ')
 
-  let lowerInclusivity, upperInclusivity
-  let lowerSemverObj, upperSemverObj
+  let lowerInclusivity: boolean = false
+  let upperInclusivity: boolean = false
+  let lowerSemverObj: SemverObject | undefined
+  let upperSemverObj: SemverObject | undefined
 
   //LOWER SEMVER
   if (expressionA.includes('>')) {

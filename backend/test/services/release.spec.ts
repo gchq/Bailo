@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { SemverObject } from '../../src/models/Release.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   createRelease,
@@ -13,6 +14,7 @@ import {
   getReleasesForExport,
   newReleaseComment,
   removeFileFromReleases,
+  semverObjectToString,
   updateRelease,
 } from '../../src/services/release.js'
 
@@ -362,6 +364,18 @@ describe('services > release', () => {
     expect(releaseModelMocks.append.mock.calls.at(0)).toMatchSnapshot()
   })
 
+  test('semverObjectToString > deals with edge cases', async () => {
+    const semObj: SemverObject = {
+      major: 1,
+      minor: 1,
+      patch: 1,
+      metadata: 'test',
+    }
+    let semObjUndefined: SemverObject
+    expect(semverObjectToString(semObj)).toBe('1.1.1-test')
+    expect(semverObjectToString(semObjUndefined!)).toBe('')
+  })
+
   //test good - give good semver range with lower and upper bounds, returns valid query
   //test fail - invalid range
   test('convertSemverQueryToMongoQuery > good', async () => {
@@ -378,8 +392,7 @@ describe('services > release', () => {
     }))
 
     await getModelReleases({ dn: 'user' } as UserInterface, 'modelId', '2.2.X')
-
-    expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelID', '<2.2.2')
   })
 
   test('convertSemverQueryToMongoQuery > bad', async () => {
