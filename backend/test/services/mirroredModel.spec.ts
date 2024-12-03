@@ -9,6 +9,7 @@ import { exportModel, importModel } from '../../src/services/mirroredModel.js'
 const fileScanResult: FileScanResult = {
   state: 'complete',
   isInfected: false,
+  lastRunAt: new Date(),
   toolName: 'Test',
 }
 

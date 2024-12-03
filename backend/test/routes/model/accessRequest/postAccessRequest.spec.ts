@@ -16,6 +16,7 @@ vi.mock('../../../../src/services/accessRequest.js', async () => ({
 const fileScanResult: FileScanResult = {
   state: 'complete',
   isInfected: false,
+  lastRunAt: new Date(),
   toolName: 'Test',
 }
 
