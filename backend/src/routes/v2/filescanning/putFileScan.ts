@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
 import { rerunFileScan } from '../../../services/file.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -11,6 +13,7 @@ export const putFileScanSchema = z.object({
     modelId: z.string(),
     fileId: z.string(),
   }),
+  body: z.object({}),
 })
 
 registerPath({
@@ -40,11 +43,14 @@ interface PutFileScanResponse {
 export const putFileScan = [
   bodyParser.json(),
   async (req: Request, res: Response<PutFileScanResponse>) => {
+    req.audit = AuditInfo.UpdateFile
     const {
       params: { modelId, fileId },
     } = parse(req, putFileScanSchema)
 
     await rerunFileScan(req.user, modelId, fileId)
+
+    await audit.onUpdateFile(req, modelId, fileId)
 
     return res.json({
       status: 'Scan started',
