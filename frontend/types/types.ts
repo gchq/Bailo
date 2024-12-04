@@ -88,9 +88,11 @@ export interface FileInterface {
 
 export interface AvScanResult {
   state: ScanStateKeys
+  scannerVersion?: string
   isInfected?: boolean
   viruses?: Array<string>
   toolName: string
+  lastRunAt: string
 }
 
 export const ScanState = {

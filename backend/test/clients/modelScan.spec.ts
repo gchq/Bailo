@@ -109,7 +109,7 @@ describe('clients > modelScan', () => {
   })
 
   test('scanFile > rejected', async () => {
-    fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
+    fetchMock.default.mockRejectedValueOnce('Unable to communicate with the ModelScan service.')
 
     expect(() => scanFile(new Blob([''], { type: 'application/x-hdf5' }), 'safe_model.h5')).rejects.toThrowError(
       /^Unable to communicate with the ModelScan service./,

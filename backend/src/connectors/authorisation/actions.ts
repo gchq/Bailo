@@ -37,6 +37,7 @@ export const FileAction = {
   // 'view' refers to the ability to see metadata about the file.  'download' lets the user view the file contents.
   View: 'file:view',
   Download: 'file:download',
+  Update: 'file:update',
 } as const
 export type FileActionKeys = (typeof FileAction)[keyof typeof FileAction]
 
@@ -80,6 +81,7 @@ export const ActionLookup = {
   [FileAction.Upload]: TokenActions.FileWrite.id,
   [FileAction.View]: TokenActions.FileRead.id,
   [FileAction.Download]: TokenActions.FileRead.id,
+  [FileAction.Update]: TokenActions.FileWrite.id,
 
   [ImageAction.Pull]: TokenActions.ImageRead.id,
   [ImageAction.Push]: TokenActions.ImageWrite.id,

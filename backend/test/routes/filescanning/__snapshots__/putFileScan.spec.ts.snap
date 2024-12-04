@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > filescanning > putFileScan > 200 > ok 1`] = `
+{
+  "status": "Scan started",
+}
+`;
+
+exports[`routes > filescanning > putFileScan > audit > expected call 1`] = `"vespillo"`;
+
+exports[`routes > filescanning > putFileScan > audit > expected call 2`] = `"$vespillo"`;

@@ -263,6 +263,7 @@ connectors:
 
   fileScanners:
     kinds: []
+    retryDelayInMinutes: 60
 
 instrumentation:
   enabled: false
