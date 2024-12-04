@@ -4,13 +4,14 @@ import { Readable } from 'stream'
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileScanResult } from '../connectors/fileScanning/Base.js'
+import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import FileModel, { ScanState } from '../models/File.js'
+import FileModel, { FileInterface } from '../models/File.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { longId } from '../utils/id.js'
+import { plural } from '../utils/string.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
 
@@ -157,6 +158,31 @@ export async function getTotalFileSize(fileIds: string[]) {
   return totalSize.at(0).totalSize
 }
 
+function fileScanDelay(file: FileInterface): number {
+  const delay = config.connectors.fileScanners.retryDelayInMinutes
+  if (delay === undefined) {
+    return 0
+  }
+  let minutesBeforeRetrying = 0
+  for (const scanResult of file.avScan) {
+    const delayInMilliseconds = delay * 60000
+    const scanTimeAtLimit = scanResult.lastRunAt.getTime() + delayInMilliseconds
+    if (scanTimeAtLimit > new Date().getTime()) {
+      minutesBeforeRetrying = scanTimeAtLimit - new Date().getTime()
+      break
+    }
+  }
+  return Math.round(minutesBeforeRetrying / 60000)
+}
+
+function checkIfScanInProgress(file: FileInterface) {
+  file.avScan.forEach((scanResult) => {
+    if (scanResult.state === ScanState.InProgress) {
+      throw BadReq('File scan is currently in progress, please wait before retrying')
+    }
+  })
+}
+
 export async function rerunFileScan(user: UserInterface, modelId, fileId: string) {
   const model = await getModelById(user, modelId)
   if (!model) {
@@ -165,6 +191,18 @@ export async function rerunFileScan(user: UserInterface, modelId, fileId: string
   const file = await getFileById(user, fileId)
   if (!file) {
     throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
+  }
+  const rerunFileScanAuth = await authorisation.file(user, modelId, file, FileAction.Update)
+  if (!rerunFileScanAuth.success) {
+    throw Forbidden(rerunFileScanAuth.info, { userDn: user.dn, modelId, file })
+  }
+  if (!file.size || file.size === 0) {
+    throw BadReq('Cannot run scan on an empty file')
+  }
+  checkIfScanInProgress(file)
+  const minutesBeforeRescanning = fileScanDelay(file)
+  if (minutesBeforeRescanning > 0) {
+    throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${file.name}`)
   }
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {

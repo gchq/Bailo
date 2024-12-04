@@ -3,11 +3,11 @@ import { Readable } from 'stream'
 
 import { getModelScanInfo, scanFile } from '../../clients/modelScan.js'
 import { getObjectStream } from '../../clients/s3.js'
-import { FileInterfaceDoc, ScanState } from '../../models/File.js'
+import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseFileScanningConnector, FileScanResult } from './Base.js'
+import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
 export const modelScanToolName = 'ModelScan'
 

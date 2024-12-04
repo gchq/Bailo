@@ -20,6 +20,16 @@ const fileScanResult: FileScanResult = {
   toolName: 'Test',
 }
 
+const baseScannerMock = vi.hoisted(() => ({
+  ScanState: {
+    NotScanned: 'notScanned',
+    InProgress: 'inProgress',
+    Complete: 'complete',
+    Error: 'error',
+  },
+}))
+vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
+
 const fileScanningMock = vi.hoisted(() => ({
   info: vi.fn(() => []),
   scan: vi.fn(() => new Promise(() => [fileScanResult])),
