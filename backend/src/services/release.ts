@@ -247,8 +247,8 @@ export async function getModelReleases(
     .match(query)
     .sort({ updatedAt: -1 })
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
-    .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
     .lookup({ from: 'v2_files', localField: 'fileIds', foreignField: '_id', as: 'files' })
+    .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
 
   const model = await getModelById(user, modelId)
 

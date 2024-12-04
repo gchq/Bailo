@@ -23,7 +23,7 @@ vi.mock('../../src/connectors/authorisation/index.js')
 const responseModelMock = vi.hoisted(() => {
   const obj: any = {}
 
-  obj.aggregate = vi.fn(() => {})
+  obj.aggregate = vi.fn(() => obj)
   obj.match = vi.fn(() => obj)
   obj.sort = vi.fn(() => obj)
   obj.lookup = vi.fn(() => obj)
@@ -345,17 +345,7 @@ describe('services > release', () => {
   })
 
   test('getModelReleases > good', async () => {
-    releaseModelMocks.aggregate.mockImplementation(() => ({
-      match: vi.fn().mockImplementation(() => ({
-        sort: vi.fn().mockImplementation(() => ({
-          lookup: vi.fn().mockImplementation(() => ({
-            append: vi.fn().mockImplementation(() => ({
-              lookup: vi.fn().mockImplementation(() => [{ _id: 'release', modelId: 'test', semver: '1.0.0' }]),
-            })),
-          })),
-        })),
-      })),
-    }))
+    vi.mocked(releaseModelMocks.append).mockReturnValueOnce([])
     await getModelReleases({ dn: 'user' } as UserInterface, 'modelId')
 
     expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
@@ -371,31 +361,29 @@ describe('services > release', () => {
       patch: 1,
       metadata: 'test',
     }
-    let semObjUndefined: SemverObject
+    const semObj2: SemverObject = {
+      major: 1,
+      minor: 1,
+      patch: 1,
+    }
     expect(semverObjectToString(semObj)).toBe('1.1.1-test')
-    expect(semverObjectToString(semObjUndefined!)).toBe('')
+    expect(semverObjectToString(undefined as any)).toBe('')
+    expect(semverObjectToString(semObj2)).toBe('1.1.1')
   })
 
-  //test good - give good semver range with lower and upper bounds, returns valid query
-  //test fail - invalid range
-  test('convertSemverQueryToMongoQuery > good', async () => {
-    releaseModelMocks.aggregate.mockImplementation(() => ({
-      match: vi.fn().mockImplementation(() => ({
-        sort: vi.fn().mockImplementation(() => ({
-          lookup: vi.fn().mockImplementation(() => ({
-            append: vi.fn().mockImplementation(() => ({
-              lookup: vi.fn().mockImplementation(() => [{ _id: 'release', modelId: 'test', semver: '1.0.0' }]),
-            })),
-          })),
-        })),
-      })),
-    }))
-
+  test('getModelReleases > convertSemverQueryToMongoQuery functions', async () => {
+    vi.mocked(releaseModelMocks.append).mockReturnValueOnce([])
     await getModelReleases({ dn: 'user' } as UserInterface, 'modelId', '2.2.X')
-    await getModelReleases({ dn: 'user' } as UserInterface, 'modelID', '<2.2.2')
+    expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
   })
 
-  test('convertSemverQueryToMongoQuery > bad', async () => {
+  test('getModelReleases > convertSemverQueryToMongoQuery functions with less than', async () => {
+    vi.mocked(releaseModelMocks.append).mockReturnValueOnce([])
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelID', '<2.2.2')
+    expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('convertSemverQueryToMongoQuery > convertSemverQueryToMongoQuery handles bad semver', async () => {
     expect(async () => await getModelReleases({ dn: 'user' } as UserInterface, 'test', '^2.2v.x')).rejects.toThrowError(
       /^Semver range is invalid./,
     )
