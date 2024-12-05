@@ -14,7 +14,7 @@ exports[`clients > modelScan > getModelScanInfo > success 1`] = `
 ]
 `;
 
-exports[`clients > modelScan > scanFile > success 1`] = `
+exports[`clients > modelScan > scanStream > success 1`] = `
 [
   [
     "undefined://undefined:undefined/scan/file",
@@ -23,10 +23,17 @@ exports[`clients > modelScan > scanFile > success 1`] = `
         Symbol(state): [
           {
             "name": "in_file",
-            "value": File {
-              Symbol(kHandle): Blob {},
-              Symbol(kLength): 0,
-              Symbol(kType): "application/x-hdf5",
+            "value": FileLike {
+              Symbol(state): {
+                "blobLike": {
+                  "size": 0,
+                  "stream": [Function],
+                  Symbol(Symbol.toStringTag): "File",
+                },
+                "lastModified": 0,
+                "name": "safe_model.h5",
+                "type": undefined,
+              },
             },
           },
         ],
