@@ -195,11 +195,8 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
       modelId: modelId,
     })
   }
-
-  const updatedRelease = await Release.findOneAndUpdate(
-    { modelId, semver: semverStringToObject(semver) },
-    { $set: release },
-  )
+  const semverObj = semverStringToObject(semver)
+  const updatedRelease = await Release.findOneAndUpdate({ modelId, semver: semverObj }, { $set: release })
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
@@ -214,7 +211,8 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
     throw BadReq(`Cannot create a new comment on a mirrored model.`)
   }
 
-  const release = await Release.findOne({ modelId, semver })
+  const semverObj = semverStringToObject(semver)
+  const release = await Release.findOne({ modelId, semver: semverObj })
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
@@ -267,9 +265,10 @@ export async function getModelReleases(
 
 export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
   const model = await getModelById(user, modelId)
+  const semverObjs = semvers.map((semver) => semverStringToObject(semver))
   const releases = await Release.find({
     modelId,
-    semver: semvers,
+    semver: semverObjs,
   })
 
   const missing = semvers.filter((x) => !releases.some((release) => release.semver === x))
@@ -527,8 +526,9 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
 }
 
 export async function getAllFileIds(modelId: string, semvers: string[]) {
+  const semverObjs = semvers.map((semver) => semverStringToObject(semver))
   const result = await Release.aggregate()
-    .match({ modelId, semver: { $in: semvers } })
+    .match({ modelId, semver: { $in: semverObjs } })
     .unwind({ path: '$fileIds' })
     .group({
       _id: null,
