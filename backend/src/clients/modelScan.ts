@@ -66,7 +66,7 @@ export async function getModelScanInfo() {
   return (await res.json()) as ModelScanInfoResponse
 }
 
-export async function scanStream(stream: Readable, file_name: string, file_size: number) {
+export async function scanStream(stream: Readable, fileName: string, fileSize: number) {
   const url = `${config.avScanning.modelscan.protocol}://${config.avScanning.modelscan.host}:${config.avScanning.modelscan.port}`
   let res: Response
 
@@ -76,10 +76,10 @@ export async function scanStream(stream: Readable, file_name: string, file_size:
       'in_file',
       {
         [Symbol.toStringTag]: 'File',
-        size: file_size,
+        size: fileSize,
         stream: () => stream,
       },
-      file_name,
+      fileName,
     )
 
     res = await fetch(`${url}/scan/file`, {
