@@ -1,6 +1,7 @@
+import { PassThrough } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
-import { getModelScanInfo, scanFile } from '../../src/clients/modelScan.js'
+import { getModelScanInfo, scanStream } from '../../src/clients/modelScan.js'
 
 const configMock = vi.hoisted(() => ({
   avScanning: {
@@ -59,7 +60,7 @@ describe('clients > modelScan', () => {
     expect(() => getModelScanInfo()).rejects.toThrowError(/^Unable to communicate with the ModelScan service./)
   })
 
-  test('scanFile > success', async () => {
+  test('scanStream > success', async () => {
     const expectedResponse = {
       summary: {
         total_issues: 0,
@@ -90,28 +91,32 @@ describe('clients > modelScan', () => {
       text: vi.fn(),
       json: vi.fn(() => expectedResponse),
     })
-    const response = await scanFile(new Blob([''], { type: 'application/x-hdf5' }), 'safe_model.h5')
+    // force lastModified to be 0
+    const date = new Date(1970, 0, 1, 0)
+    vi.setSystemTime(date)
+
+    const response = await scanStream(new PassThrough(), 'safe_model.h5', 0)
 
     expect(fetchMock.default).toBeCalled()
     expect(fetchMock.default.mock.calls).toMatchSnapshot()
     expect(response).toStrictEqual(expectedResponse)
   })
 
-  test('scanFile > bad response', async () => {
+  test('scanStream > bad response', async () => {
     fetchMock.default.mockResolvedValueOnce({
       ok: false,
       text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
     })
-    expect(() => scanFile(new Blob([''], { type: 'application/x-hdf5' }), 'safe_model.h5')).rejects.toThrowError(
+    expect(() => scanStream(new PassThrough(), 'safe_model.h5', 0)).rejects.toThrowError(
       /^Unrecognised response returned by the ModelScan service./,
     )
   })
 
-  test('scanFile > rejected', async () => {
+  test('scanStream > rejected', async () => {
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
 
-    expect(() => scanFile(new Blob([''], { type: 'application/x-hdf5' }), 'safe_model.h5')).rejects.toThrowError(
+    expect(() => scanStream(new PassThrough(), 'safe_model.h5', 0)).rejects.toThrowError(
       /^Unable to communicate with the ModelScan service./,
     )
   })
