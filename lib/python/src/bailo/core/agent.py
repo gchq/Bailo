@@ -64,21 +64,14 @@ class Agent:
 
 
 class PkiAgent(Agent):
-    def __init__(
-        self,
-        cert: str,
-        key: str,
-        auth: str,
-        *args,
-        **kwargs
-    ):
+    def __init__(self, cert: str, key: str, auth: str, **kwargs):
         """Initiate an agent for PKI authentication.
 
         :param cert: Path to cert file
         :param key: Path to key file
         :param auth: Path to certificate authority file
         """
-        super().__init__(verify=auth, *args, **kwargs)
+        super().__init__(verify=auth, **kwargs)
 
         self.cert = cert
         self.key = key
@@ -104,16 +97,14 @@ class TokenAgent(Agent):
         self,
         access_key: str | None = None,
         secret_key: str | None = None,
-        *args,
         **kwargs,
     ):
         """Initiate an agent for API token authentication.
 
         :param access_key: Access key
         :param secret_key: Secret key
-        :param verify: Path to certificate authority file, or bool for SSL verification.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
         if access_key is None:
             logger.info("Access key not provided. Trying other sources...")
