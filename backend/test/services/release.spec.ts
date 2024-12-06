@@ -2,6 +2,8 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { SemverObject } from '../../src/models/Release.js'
+import { UserInterface } from '../../src/models/User.js'
 import {
   createRelease,
   deleteRelease,
@@ -12,6 +14,7 @@ import {
   getReleasesForExport,
   newReleaseComment,
   removeFileFromReleases,
+  semverObjectToString,
   updateRelease,
 } from '../../src/services/release.js'
 
@@ -342,16 +345,48 @@ describe('services > release', () => {
   })
 
   test('getModelReleases > good', async () => {
-    await getModelReleases({} as any, 'modelId')
-
-    vi.mocked(releaseModelMocks.lookup).mockImplementation(() => ({
-      ...releaseModelMocks.lookup,
-    }))
+    vi.mocked(releaseModelMocks.append).mockReturnValueOnce([])
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelId')
 
     expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.sort.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.lookup.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.append.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('semverObjectToString > deals with edge cases', async () => {
+    const semObj: SemverObject = {
+      major: 1,
+      minor: 1,
+      patch: 1,
+      metadata: 'test',
+    }
+    const semObj2: SemverObject = {
+      major: 1,
+      minor: 1,
+      patch: 1,
+    }
+    expect(semverObjectToString(semObj)).toBe('1.1.1-test')
+    expect(semverObjectToString(undefined as any)).toBe('')
+    expect(semverObjectToString(semObj2)).toBe('1.1.1')
+  })
+
+  test('getModelReleases > convertSemverQueryToMongoQuery functions', async () => {
+    vi.mocked(releaseModelMocks.append).mockReturnValueOnce([])
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelId', '2.2.X')
+    expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('getModelReleases > convertSemverQueryToMongoQuery functions with less than', async () => {
+    vi.mocked(releaseModelMocks.append).mockReturnValueOnce([])
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelID', '<2.2.2')
+    expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('convertSemverQueryToMongoQuery > convertSemverQueryToMongoQuery handles bad semver', async () => {
+    expect(async () => await getModelReleases({ dn: 'user' } as UserInterface, 'test', '^2.2v.x')).rejects.toThrowError(
+      /^Semver range is invalid./,
+    )
   })
 
   test('getReleaseBySemver > good', async () => {
