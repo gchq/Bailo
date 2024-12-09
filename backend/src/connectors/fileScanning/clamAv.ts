@@ -10,6 +10,7 @@ import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
 let av: NodeClam
 export const clamAvToolName = 'Clam AV'
+const maxInitRetries = 5
 
 export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   constructor() {
@@ -20,24 +21,38 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     return [clamAvToolName]
   }
 
-  async init() {
-    try {
-      av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
-    } catch (error) {
-      throw ConfigurationError('Could not scan file as Clam AV is not running.', {
-        clamAvConfig: config.avScanning.clamdscan,
-      })
+  async init(retryCount: number = 1) {
+    log.info('Initialising Clam AV...')
+    if (retryCount <= maxInitRetries) {
+      setTimeout(async () => {
+        try {
+          av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
+          log.info('Clam AV initialised.')
+        } catch (error) {
+          log.warn(`Could not intialise Clam AV, retrying (attempt ${retryCount})...`)
+          this.init(retryCount++)
+        }
+      }, 10000)
+    } else {
+      throw ConfigurationError(
+        'Clam AV does not look like it is running. Check that the service configuration is correct.',
+        {
+          modelScanConfig: config.avScanning.modelscan,
+        },
+      )
     }
   }
 
   async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
     if (!av) {
-      throw ConfigurationError(
-        'Clam AV does not look like it is running. Check that it has been correctly initialised by calling the init function.',
+      return [
         {
-          clamAvConfig: config.avScanning.clamdscan,
+          toolName: clamAvToolName,
+          state: ScanState.Error,
+          scannerVersion: 'Unknown',
+          lastRunAt: new Date(),
         },
-      )
+      ]
     }
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     const scannerVersion = await av.getVersion()

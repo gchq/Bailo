@@ -175,14 +175,6 @@ function fileScanDelay(file: FileInterface): number {
   return Math.round(minutesBeforeRetrying / 60000)
 }
 
-function checkIfScanInProgress(file: FileInterface) {
-  file.avScan.forEach((scanResult) => {
-    if (scanResult.state === ScanState.InProgress) {
-      throw BadReq('File scan is currently in progress, please wait before retrying')
-    }
-  })
-}
-
 export async function rerunFileScan(user: UserInterface, modelId, fileId: string) {
   const model = await getModelById(user, modelId)
   if (!model) {
@@ -199,7 +191,6 @@ export async function rerunFileScan(user: UserInterface, modelId, fileId: string
   if (!file.size || file.size === 0) {
     throw BadReq('Cannot run scan on an empty file')
   }
-  checkIfScanInProgress(file)
   const minutesBeforeRescanning = fileScanDelay(file)
   if (minutesBeforeRescanning > 0) {
     throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${file.name}`)

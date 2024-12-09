@@ -74,6 +74,7 @@ module.exports = {
   connectors: {
     fileScanners: {
       kinds: ['clamAV', 'modelScan'],
+      retryDelayInMinutes: 60,
     },
   },
 }
