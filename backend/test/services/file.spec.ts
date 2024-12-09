@@ -45,6 +45,8 @@ const configMock = vi.hoisted(
         fileScanners: {
           kinds: ['clamAV'],
           retryDelayInMinutes: 5,
+          maxInitRetries: 5,
+          initRetryDelay: 5000,
         },
       },
     }) as any,

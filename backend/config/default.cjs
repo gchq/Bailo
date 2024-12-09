@@ -223,6 +223,8 @@ module.exports = {
     fileScanners: {
       kinds: [],
       retryDelayInMinutes: 60,
+      maxInitRetries: 5,
+      initRetryDelay: 5000,
     },
   },
 

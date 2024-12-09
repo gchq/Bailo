@@ -7,7 +7,7 @@ import Loading from 'src/common/Loading'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
-import { formatDateString } from 'utils/dateUtils'
+import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
@@ -143,7 +143,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
                     {scanResult.scannerVersion && (
                       <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
                     )}
-                    <Typography>Last ran at: {formatDateString(scanResult.lastRunAt)}</Typography>
+                    <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
                     <ul>{scanResult.viruses && scanResult.viruses.map((virus) => <li key={virus}>{virus}</li>)}</ul>
                   </Stack>
                 ) : (
@@ -158,7 +158,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
                     {scanResult.scannerVersion && (
                       <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
                     )}
-                    <Typography>Last ran at: {formatDateString(scanResult.lastRunAt)}</Typography>
+                    <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
                   </Stack>
                 )}
               </Fragment>

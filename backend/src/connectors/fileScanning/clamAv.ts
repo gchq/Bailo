@@ -10,7 +10,6 @@ import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
 let av: NodeClam
 export const clamAvToolName = 'Clam AV'
-const maxInitRetries = 5
 
 export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
   constructor() {
@@ -23,7 +22,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
 
   async init(retryCount: number = 1) {
     log.info('Initialising Clam AV...')
-    if (retryCount <= maxInitRetries) {
+    if (retryCount <= config.connectors.fileScanners.maxInitRetries) {
       setTimeout(async () => {
         try {
           av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
@@ -32,7 +31,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
           log.warn(`Could not initialise Clam AV, retrying (attempt ${retryCount})...`)
           this.init(retryCount++)
         }
-      }, 10000)
+      }, config.connectors.fileScanners.initRetryDelay)
     } else {
       throw ConfigurationError(
         'Clam AV does not look like it is running. Check that the service configuration is correct.',

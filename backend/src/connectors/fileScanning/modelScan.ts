@@ -9,7 +9,6 @@ import { ConfigurationError } from '../../utils/error.js'
 import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
 export const modelScanToolName = 'ModelScan'
-const maxInitRetries = 5
 
 export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
   constructor() {
@@ -22,7 +21,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
 
   async init(retryCount: number = 1) {
     log.info('Initialising ModelScan...')
-    if (retryCount <= maxInitRetries) {
+    if (retryCount <= config.connectors.fileScanners.maxInitRetries) {
       setTimeout(async () => {
         try {
           await getModelScanInfo()
@@ -31,7 +30,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
           log.warn(`Could not initialise ModelScan, retrying (attempt ${retryCount})...`)
           this.init(retryCount++)
         }
-      }, 10000)
+      }, config.connectors.fileScanners.initRetryDelay)
     } else {
       throw ConfigurationError(
         'ModelScan does not look like it is running. Check that the service configuration is correct.',
