@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     Bailo ModelScan API allows for easy programmatic interfacing with ProtectAI's ModelScan package to scan and detect potential threats within files stored in Bailo.
 
     You can upload files and view modelscan's result."""
+    # Update frontend/pages/docs/administration/helm/configuration.mdx if bumping this.
     app_version: str = "1.0.0"
     # download_dir is used if it evaluates, otherwise a temporary directory is used.
     download_dir: Optional[str] = None

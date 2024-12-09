@@ -1,7 +1,6 @@
-import { Response } from 'node-fetch'
 import { Readable } from 'stream'
 
-import { getModelScanInfo, scanFile } from '../../clients/modelScan.js'
+import { getModelScanInfo, scanStream } from '../../clients/modelScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
@@ -41,9 +40,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
 
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     try {
-      // TODO: see if it's possible to directly send the Readable stream rather than a blob
-      const fileBlob = await new Response(s3Stream).blob()
-      const scanResults = await scanFile(fileBlob, file.name)
+      const scanResults = await scanStream(s3Stream, file.name, file.size)
 
       const issues = scanResults.summary.total_issues
       const isInfected = issues > 0

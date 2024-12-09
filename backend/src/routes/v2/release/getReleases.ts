@@ -17,6 +17,11 @@ export const getReleasesSchema = z.object({
       required_error: 'Must specify model id as URL parameter',
     }),
   }),
+  query: z.object({
+    querySemver: z.string().optional().openapi({ example: '>2.2.2' }).openapi({
+      description: 'Query for semver ranges, as described in https://docs.npmjs.com/cli/v6/using-npm/semver#ranges',
+    }),
+  }),
 })
 
 registerPath({
@@ -49,9 +54,10 @@ export const getReleases = [
     req.audit = AuditInfo.ViewReleases
     const {
       params: { modelId },
+      query: { querySemver },
     } = parse(req, getReleasesSchema)
 
-    const releases = await getModelReleases(req.user, modelId)
+    const releases = await getModelReleases(req.user, modelId, querySemver)
     await audit.onViewReleases(req, releases)
 
     return res.json({
