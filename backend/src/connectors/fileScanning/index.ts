@@ -31,7 +31,7 @@ export function runFileScanners(cache = true) {
       case FileScanKind.ModelScan:
         try {
           const scanner = new ModelScanFileScanningConnector()
-          await scanner.ping()
+          await scanner.init()
           fileScanConnectors.push(scanner)
         } catch (error) {
           throw ConfigurationError('Could not configure or initialise ModelScan')

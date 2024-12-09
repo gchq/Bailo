@@ -11,6 +11,7 @@ vi.mock('../../../src/connectors/authentication/index.js', () => ({
 
 const fileScanResult: FileScanResult = {
   state: 'complete',
+  lastRunAt: new Date(),
   isInfected: false,
   toolName: 'Test',
 }

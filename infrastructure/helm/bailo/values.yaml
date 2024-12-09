@@ -263,6 +263,9 @@ connectors:
 
   fileScanners:
     kinds: []
+    retryDelayInMinutes: 60
+    maxInitRetries: 5
+    initRetryDelay: 5000
 
 instrumentation:
   enabled: false

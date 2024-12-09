@@ -2,11 +2,11 @@ import { Readable } from 'stream'
 
 import { getModelScanInfo, scanStream } from '../../clients/modelScan.js'
 import { getObjectStream } from '../../clients/s3.js'
-import { FileInterfaceDoc, ScanState } from '../../models/File.js'
+import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseFileScanningConnector, FileScanResult } from './Base.js'
+import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
 export const modelScanToolName = 'ModelScan'
 
@@ -19,11 +19,19 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
     return [modelScanToolName]
   }
 
-  async ping() {
-    try {
-      // discard the results as we only want to know if the endpoint is reachable
-      await getModelScanInfo()
-    } catch (error) {
+  async init(retryCount: number = 1) {
+    log.info('Initialising ModelScan...')
+    if (retryCount <= config.connectors.fileScanners.maxInitRetries) {
+      setTimeout(async () => {
+        try {
+          await getModelScanInfo()
+          log.info('ModelScan initialised.')
+        } catch (error) {
+          log.warn(`Could not initialise ModelScan, retrying (attempt ${retryCount})...`)
+          this.init(retryCount++)
+        }
+      }, config.connectors.fileScanners.initRetryDelay)
+    } else {
       throw ConfigurationError(
         'ModelScan does not look like it is running. Check that the service configuration is correct.',
         {
@@ -34,7 +42,22 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
   }
 
   async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
-    this.ping()
+    this.init()
+
+    let modelscanVersion: string | undefined = undefined
+    try {
+      modelscanVersion = (await getModelScanInfo()).modelscanVersion
+    } catch (error) {
+      log.error('Could not run ModelScan as it is not running', error)
+      return [
+        {
+          toolName: modelScanToolName,
+          scannerVersion: 'Unknown',
+          state: ScanState.Error,
+          lastRunAt: new Date(),
+        },
+      ]
+    }
 
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     try {
@@ -56,8 +79,10 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
         {
           toolName: modelScanToolName,
           state: ScanState.Complete,
+          scannerVersion: modelscanVersion,
           isInfected,
           viruses,
+          lastRunAt: new Date(),
         },
       ]
     } catch (error) {
@@ -66,6 +91,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
         {
           toolName: modelScanToolName,
           state: ScanState.Error,
+          lastRunAt: new Date(),
         },
       ]
     }
