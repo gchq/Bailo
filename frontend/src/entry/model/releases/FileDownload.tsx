@@ -41,10 +41,10 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
 
   const chipDetails = useCallback((file: FileInterface): ChipDetails => {
     if (file.avScan === undefined) {
-      return { label: 'Virus scan results could not be found.', colour: 'warning', icon: <Warning /> }
+      return { label: 'Virus scan results could not be found', colour: 'warning', icon: <Warning /> }
     }
     if (file.avScan.some((scan) => scan.state === ScanState.Error)) {
-      return { label: 'One or more virus scanning tools failed.', colour: 'warning', icon: <Warning /> }
+      return { label: 'One or more virus scanning tools failed', colour: 'warning', icon: <Warning /> }
     }
     if (threatsFound(file)) {
       return {
