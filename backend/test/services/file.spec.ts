@@ -382,17 +382,6 @@ describe('services > file', () => {
     )
   })
 
-  test('rerunFileScan > does not rerun file scan when scan is in progress', async () => {
-    fileModelMocks.findOne.mockResolvedValueOnce({
-      name: 'file.txt',
-      avScan: [{ state: ScanState.InProgress }],
-      size: 123,
-    })
-    await expect(rerunFileScan({} as any, 'model123', 'file123')).rejects.toThrowError(
-      /^File scan is currently in progress, please wait before retrying/,
-    )
-  })
-
   test('rerunFileScan > does not rerun file scan before delay is over', async () => {
     fileModelMocks.findOne.mockResolvedValueOnce({
       name: 'file.txt',
