@@ -20,13 +20,11 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      securityContext:
-        runAsUser: {{ .Values.modelscan.runAsUser }}
       containers:
       - name: {{ include "bailo.fullname" . }}-modelscan
         ports:
           - name: modelscanport
-            containerPort: 3311
+            containerPort: {{ .Values.modelscan.port }}
             protocol: TCP
         image: "{{ .Values.image.modelscanRepository }}:{{ .Values.image.modelscanTag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -36,7 +34,7 @@ spec:
             ephemeral-storage: "100Mi"
             cpu: "200m"
           limits:
-            memory: "2Gi"
+            memory: "1Gi"
             ephemeral-storage: "300Mi"
             cpu: "1"
         volumeMounts:
