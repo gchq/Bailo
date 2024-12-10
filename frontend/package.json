@@ -16,7 +16,7 @@
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.4",
     "@emotion/server": "^11.11.0",
-    "@emotion/styled": "^11.11.5",
+    "@emotion/styled": "^11.13.5",
     "@fontsource/pacifico": "^5.0.13",
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.0.1",
