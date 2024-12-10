@@ -1,6 +1,6 @@
 # Bailo Python Client Documentation
 
-The documentation for [a simple Python API Wrapper for Bailo](lib/python/README.md)
+The documentation for [a simple Python API Wrapper for Bailo](../../lib/python/README.md)
 
 <br />
 

@@ -81,7 +81,7 @@ Documentation is rendered with Sphinx and served [here](https://gchq.github.io/B
 
 ### Building locally
 
-Refer to [backend/docs/README.md](backend/docs/README.md) for local build steps.
+Refer to [backend/docs/README.md](../../backend/docs/README.md) for local build steps.
 
 ## Development
 
