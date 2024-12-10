@@ -304,3 +304,11 @@ export const UserInformationSchema = z.object({
   name: z.string().optional().openapi({ example: 'Joe Bloggs' }),
   organisation: z.string().optional().openapi({ example: 'Acme Corp' }),
 })
+
+export const UserInformationSchemaList = z
+  .object({
+    email: z.string().optional().openapi({ example: 'user@example.com' }),
+    name: z.string().optional().openapi({ example: 'Joe Bloggs' }),
+    organisation: z.string().optional().openapi({ example: 'Acme Corp' }),
+  })
+  .array()
