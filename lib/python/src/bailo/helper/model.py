@@ -1,14 +1,14 @@
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import tempfile
-from typing import Any
-import logging
 import warnings
+from typing import Any
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, ModelVisibility, MinimalSchema
+from bailo.core.enums import EntryKind, MinimalSchema, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 from bailo.helper.entry import Entry
@@ -222,13 +222,13 @@ class Model(Entry):
             run_id = sel_model.run_id
             if run_id is None:
                 raise BailoException(
-                    "MLFlow model does not have an assosciated run_id, therefore artifacts cannot be transfered."
+                    "MLFlow model does not have an associated run_id, therefore artifacts cannot be transferred."
                 )
 
             mlflow_run = mlflow_client.get_run(run_id)
             artifact_uri: str = str(mlflow_run.info.artifact_uri)
             if artifact_uri is None:
-                raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transfered.")
+                raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transferred.")
 
             if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:
                 temp_dir = os.path.join(tempfile.gettempdir(), "mlflow_model")
@@ -336,7 +336,7 @@ class Model(Entry):
         """
         res = self.client.get_all_images(model_id=self.model_id)
 
-        logger.info(f"Images for %s retreived successfully.", self.model_id)
+        logger.info(f"Images for %s retrieved successfully.", self.model_id)
 
         return res["images"]
 

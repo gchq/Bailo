@@ -179,7 +179,7 @@ class Client:
     def model_card_from_template(self, model_id: str, template_id: str | None):
         """Create a model card using a given template ID (previously created models, model ID)
         :param model_id: Unique model ID
-        :param tempate_id Previous model's unique ID to be used as template for new model card
+        :param template_id Previous model's unique ID to be used as template for new model card
         :return: JSON response object
         """
         return self.agent.post(

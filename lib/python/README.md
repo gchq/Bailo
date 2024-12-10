@@ -20,12 +20,7 @@ A simple Python API Wrapper for Bailo
         <li>
             <a href="#documentation">Documentation</a>
             <ul>
-                <li>
-                    <a href="#building-locally">Building Locally</a>
-                    <ul>
-                        <li><a href="#prerequisites">Prerequisites</a></li>
-                    </ul>
-                </li>
+                <li><a href="#building-locally">Building Locally</a></li>
             </ul>
         </li>
         <li>
@@ -47,8 +42,10 @@ A simple Python API Wrapper for Bailo
 
 ## Installing
 
+<!-- prettier-ignore-start -->
 > [!IMPORTANT]
 > Python 3.8.1 or higher is required
+<!-- prettier-ignore-end -->
 
 ```bash
 pip install bailo
@@ -84,17 +81,7 @@ Documentation is rendered with Sphinx and served [here](https://gchq.github.io/B
 
 ### Building locally
 
-#### prerequisites
-
-From within the `backend/docs` directory:
-
-```bash
-pip install bailo -r requirements.txt
-apt install -y pandoc
-```
-
-From the docs directory run either `make html` or `make.bat` on Windows. This will build it in the backend directory by
-default.
+Refer to [backend/docs/README.md](backend/docs/README.md) for local build steps.
 
 ## Development
 
