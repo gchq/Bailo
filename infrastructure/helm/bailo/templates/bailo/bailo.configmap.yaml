@@ -206,6 +206,9 @@ data:
 
         fileScanners: {
           kinds: {{ toJson .Values.connectors.fileScanners.kinds }}
+          retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes}}
+          maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries}}
+          initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay}}
         },
       },
 

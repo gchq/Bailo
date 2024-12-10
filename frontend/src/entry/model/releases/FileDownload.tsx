@@ -1,11 +1,14 @@
-import { Done, Error, Warning } from '@mui/icons-material'
-import { Chip, Divider, Grid, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
-import { useGetFileScannerInfo } from 'actions/fileScanning'
+import { Done, Error, Refresh, Warning } from '@mui/icons-material'
+import { Chip, Divider, Grid, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
+import { formatDateTimeString } from 'utils/dateUtils'
+import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
 type FileDownloadProps = {
@@ -22,6 +25,7 @@ interface ChipDetails {
 export default function FileDownload({ modelId, file }: FileDownloadProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
+  const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
 
   const open = Boolean(anchorEl)
@@ -37,10 +41,10 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
 
   const chipDetails = useCallback((file: FileInterface): ChipDetails => {
     if (file.avScan === undefined) {
-      return { label: 'Virus scan results could not be found.', colour: 'warning', icon: <Warning /> }
+      return { label: 'Virus scan results could not be found', colour: 'warning', icon: <Warning /> }
     }
     if (file.avScan.some((scan) => scan.state === ScanState.Error)) {
-      return { label: 'One or more virus scanning tools failed.', colour: 'warning', icon: <Warning /> }
+      return { label: 'One or more virus scanning tools failed', colour: 'warning', icon: <Warning /> }
     }
     if (threatsFound(file)) {
       return {
@@ -52,26 +56,66 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
     return { label: 'Virus scan passed', colour: 'success', icon: <Done /> }
   }, [])
 
+  const handleRerunFileScanOnClick = useCallback(async () => {
+    const res = await rerunFileScan(modelId, (file as FileInterface)._id)
+    if (!res.ok) {
+      sendNotification({
+        variant: 'error',
+        msg: await getErrorMessage(res),
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    } else {
+      sendNotification({
+        variant: 'success',
+        msg: `${file.name} is being rescanned`,
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    }
+  }, [file, modelId, sendNotification])
+
+  const rerunFileScanButton = useMemo(() => {
+    return (
+      <Tooltip title='Rerun file scan'>
+        <IconButton onClick={handleRerunFileScanOnClick}>
+          <Refresh />
+        </IconButton>
+      </Tooltip>
+    )
+  }, [handleRerunFileScanOnClick])
+
   const avChip = useMemo(() => {
     if (
       !isFileInterface(file) ||
       file.avScan === undefined ||
       file.avScan.every((scan) => scan.state === ScanState.NotScanned)
     ) {
-      return <Chip size='small' label='Virus scan results could not be found' />
+      return (
+        <Stack direction='row' alignItems='center'>
+          <Chip size='small' label='Virus scan results could not be found' />
+          {rerunFileScanButton}
+        </Stack>
+      )
     }
     if (file.avScan.some((scan) => scan.state === ScanState.InProgress)) {
-      return <Chip size='small' label='Virus scan in progress' />
+      return (
+        <Stack direction='row' alignItems='center'>
+          <Chip size='small' label='Virus scan in progress' />
+          {rerunFileScanButton}
+        </Stack>
+      )
     }
     return (
       <>
-        <Chip
-          color={chipDetails(file).colour}
-          icon={chipDetails(file).icon}
-          size='small'
-          onClick={(e) => setAnchorEl(e.currentTarget)}
-          label={chipDetails(file).label}
-        />
+        <Stack direction='row' alignItems='center'>
+          <Chip
+            color={chipDetails(file).colour}
+            icon={chipDetails(file).icon}
+            size='small'
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            label={chipDetails(file).label}
+          />
+          {rerunFileScanButton}
+        </Stack>
         <Popover
           open={open}
           anchorEl={anchorEl}
@@ -89,22 +133,32 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
             {file.avScan.map((scanResult) => (
               <Fragment key={scanResult.toolName}>
                 {scanResult.isInfected ? (
-                  <>
+                  <Stack spacing={2}>
                     <Stack spacing={1} direction='row'>
                       <Error color='error' />
                       <Typography>
                         <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span> found the following threats:
                       </Typography>
                     </Stack>
+                    {scanResult.scannerVersion && (
+                      <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
+                    )}
+                    <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
                     <ul>{scanResult.viruses && scanResult.viruses.map((virus) => <li key={virus}>{virus}</li>)}</ul>
-                  </>
+                  </Stack>
                 ) : (
-                  <Stack spacing={1} direction='row'>
-                    {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
-                    <Typography>
-                      <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
-                      {scanResult.state === 'error' ? ' was not able to be run' : ' did not find any threats'}
-                    </Typography>
+                  <Stack spacing={2}>
+                    <Stack spacing={1} direction='row'>
+                      {scanResult.state === 'error' ? <Warning color='warning' /> : <Done color='success' />}
+                      <Typography>
+                        <span style={{ fontWeight: 'bold' }}>{scanResult.toolName}</span>
+                        {scanResult.state === 'error' ? ' was not able to be run' : ' did not find any threats'}
+                      </Typography>
+                    </Stack>
+                    {scanResult.scannerVersion && (
+                      <Chip size='small' sx={{ width: 'fit-content' }} label={scanResult.scannerVersion} />
+                    )}
+                    <Typography>Last ran at: {formatDateTimeString(scanResult.lastRunAt)}</Typography>
                   </Stack>
                 )}
               </Fragment>
@@ -113,7 +167,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
         </Popover>
       </>
     )
-  }, [anchorEl, chipDetails, file, open])
+  }, [anchorEl, chipDetails, file, open, rerunFileScanButton])
 
   if (isScannersError) {
     return <MessageAlert message={isScannersError.info.message} severity='error' />

@@ -114,7 +114,7 @@ describe('clients > modelScan', () => {
   })
 
   test('scanStream > rejected', async () => {
-    fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
+    fetchMock.default.mockRejectedValueOnce('Unable to communicate with the ModelScan service.')
 
     expect(() => scanStream(new PassThrough(), 'safe_model.h5', 0)).rejects.toThrowError(
       /^Unable to communicate with the ModelScan service./,
