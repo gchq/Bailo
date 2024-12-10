@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-import os
 import fnmatch
+import logging
+import os
 import shutil
 from io import BytesIO
 from typing import Any
-import logging
-from tqdm import tqdm
-from tqdm.utils import CallbackIOWrapper
 
 from bailo.core.client import Client
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NO_COLOR
 from semantic_version import Version
+from tqdm import tqdm
+from tqdm.utils import CallbackIOWrapper
 
 BLOCK_SIZE = 1024
 logger = logging.getLogger(__name__)
@@ -62,7 +62,6 @@ class Release:
         self.files = files
         self.images = images
         self.draft = draft
-        self.files = files
 
     @classmethod
     def create(
@@ -267,7 +266,7 @@ class Release:
         # If no datastream object provided
         name = os.path.split(path)[-1]
         if data is None:
-            # If we havent passed in a file object, we must create one from the path.
+            # If we haven't passed in a file object, we must create one from the path.
             # Check if file exists, if it does the zip required
             zip_required = not os.path.isfile(path)
 

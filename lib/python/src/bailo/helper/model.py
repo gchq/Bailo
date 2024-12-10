@@ -1,14 +1,14 @@
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import tempfile
-from typing import Any
-import logging
 import warnings
+from typing import Any
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, ModelVisibility, MinimalSchema
+from bailo.core.enums import EntryKind, MinimalSchema, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 from bailo.helper.entry import Entry
@@ -60,7 +60,6 @@ class Model(Entry):
         client: Client,
         name: str,
         description: str,
-        team_id: str,
         visibility: ModelVisibility | None = None,
     ) -> Model:
         """Build a model from Bailo and upload it.
@@ -68,7 +67,6 @@ class Model(Entry):
         :param client: A client object used to interact with Bailo
         :param name: Name of model
         :param description: Description of model
-        :param team_id: A unique team ID
         :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
@@ -76,7 +74,6 @@ class Model(Entry):
             name=name,
             kind=EntryKind.MODEL,
             description=description,
-            team_id=team_id,
             visibility=visibility,
         )
         model_id = res["model"]["id"]
@@ -160,7 +157,6 @@ class Model(Entry):
         cls,
         client: Client,
         mlflow_uri: str,
-        team_id: str,
         name: str,
         schema_id: str = MinimalSchema.MODEL,
         version: str | None = None,
@@ -171,7 +167,6 @@ class Model(Entry):
 
         :param client: A client object used to interact with Bailo
         :param mlflow_uri: MLFlow server URI
-        :param team_id: A unique team ID
         :param name: Name of model (on MLFlow). Same name will be used on Bailo
         :param schema_id: A unique schema ID, only required when files is True, defaults to minimal-general-v10
         :param version: Specific MLFlow model version to import, defaults to None
@@ -207,7 +202,6 @@ class Model(Entry):
             name=name,
             kind=EntryKind.MODEL,
             description=description,
-            team_id=team_id,
             visibility=visibility,
         )
         model_id = bailo_res["model"]["id"]
@@ -228,13 +222,13 @@ class Model(Entry):
             run_id = sel_model.run_id
             if run_id is None:
                 raise BailoException(
-                    "MLFlow model does not have an assosciated run_id, therefore artifacts cannot be transfered."
+                    "MLFlow model does not have an associated run_id, therefore artifacts cannot be transferred."
                 )
 
             mlflow_run = mlflow_client.get_run(run_id)
             artifact_uri: str = str(mlflow_run.info.artifact_uri)
             if artifact_uri is None:
-                raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transfered.")
+                raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transferred.")
 
             if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:
                 temp_dir = os.path.join(tempfile.gettempdir(), "mlflow_model")
@@ -342,7 +336,7 @@ class Model(Entry):
         """
         res = self.client.get_all_images(model_id=self.model_id)
 
-        logger.info(f"Images for %s retreived successfully.", self.model_id)
+        logger.info(f"Images for %s retrieved successfully.", self.model_id)
 
         return res["images"]
 

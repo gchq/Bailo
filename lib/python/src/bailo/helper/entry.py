@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Any
 import logging
 import warnings
+from typing import Any
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, ModelVisibility, MinimalSchema
+from bailo.core.enums import EntryKind, MinimalSchema, ModelVisibility
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class Entry:
     :param id: A unique ID for the entry
     :param name: Name of the entry
     :param description: Description of the entry
-    :param visibility: Visibility of model, using ModelVisiblility enum (i.e. Public or Private), defaults to None
+    :param visibility: Visibility of model, using ModelVisibility enum (i.e. Public or Private), defaults to None
     :param kind: Represents whether entry type (i.e. Model or Datacard)
     """
 
@@ -55,7 +55,7 @@ class Entry:
 
         logger.info(f"ID %s updated locally and on server.", self.id)
 
-    def card_from_schema(self, schema_id: str) -> None:
+    def card_from_schema(self, schema_id: str | None = None) -> None:
         """Create a card using a schema on Bailo.
 
         :param schema_id: A unique schema ID, defaults to None. If None, either minimal-general-v10 or minimal-data-card-v10 is used
@@ -63,8 +63,10 @@ class Entry:
         if schema_id is None:
             if self.kind == EntryKind.MODEL:
                 schema_id = MinimalSchema.MODEL
-            if self.kind == EntryKind.DATACARD:
+            elif self.kind == EntryKind.DATACARD:
                 schema_id = MinimalSchema.DATACARD
+            else:
+                raise NotImplementedError(f"No default schema set for {self.kind=}")
 
         res = self.client.model_card_from_schema(model_id=self.id, schema_id=schema_id)
         self.__unpack_card(res["card"])

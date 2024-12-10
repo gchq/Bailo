@@ -46,7 +46,6 @@ class Datacard(Entry):
         client: Client,
         name: str,
         description: str,
-        team_id: str,
         visibility: ModelVisibility | None = None,
     ) -> Datacard:
         """Build a datacard from Bailo and upload it.
@@ -54,7 +53,6 @@ class Datacard(Entry):
         :param client: A client object used to interact with Bailo
         :param name: Name of datacard
         :param description: Description of datacard
-        :param team_id: A unique team ID
         :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Datacard object
         """
@@ -62,7 +60,6 @@ class Datacard(Entry):
             name=name,
             kind=EntryKind.DATACARD,
             description=description,
-            team_id=team_id,
             visibility=visibility,
         )
         datacard_id = res["model"]["id"]
