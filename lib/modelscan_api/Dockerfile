@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bullseye
+FROM python:3.12.8-slim-bullseye
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
