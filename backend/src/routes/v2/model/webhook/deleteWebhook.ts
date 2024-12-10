@@ -15,7 +15,7 @@ export const deleteWebhookSchema = z.object({
 
 registerPath({
   method: 'delete',
-  path: '/api/v2/model/{modelId}/webhooks/{webhookId}',
+  path: '/api/v2/model/{modelId}/webhook/{webhookId}',
   tags: ['webhook'],
   description: 'Delete a file from a model.',
   schema: deleteWebhookSchema,
