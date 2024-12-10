@@ -62,7 +62,6 @@ class Release:
         self.files = files
         self.images = images
         self.draft = draft
-        self.files = files
 
     @classmethod
     def create(

@@ -51,8 +51,7 @@ client = Client("http://localhost:8080")
 yolo = Model.create(
     client=client,
     name="YoloV4",
-    description="You only look once!",
-    team_id="Uncategorised"
+    description="You only look once!"
 )
 
 yolo.card_from_schema("minimal-general-v10-beta")
@@ -68,7 +67,7 @@ with open("yolo.onnx") as f:
 
 ## Documentation
 
-Documenation is rendered with Sphinx and served [here](https://gchq.github.io/Bailo/docs/python/index.html).
+Documentation is rendered with Sphinx and served [here](https://gchq.github.io/Bailo/docs/python/index.html).
 
 ### Building locally
 
