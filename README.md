@@ -134,11 +134,12 @@ something more secure.
 We expect the administrator to provide their own forms of authentication. By default all users authenticate using as
 'user'.
 
-You can test out your new deployment using the example models which can be found in `__tests__`
-[`minimal_binary.zip`](__tests__/example_models/minimal_binary.zip) and
-[`minimal_code.zip`](__tests__/example_models/minimal_code.zip). There are also example forms in the `scripts` folder
-[`minimal_upload_schema_examples.json`](backend/src/scripts/example_schemas/minimal_upload_schema_examples.json) and
-[`minimal_deployment_schema_examples.json`](backend/src/scripts/example_schemas/minimal_deployment_schema_examples.json).
+You can test out your new deployment using the example models which can be found in `frontend/cypress/fixtures`
+[`minimal_binary.zip`](frontend/cypress/fixtures/minimal_binary.zip) and
+[`minimal_code.zip`](frontend/cypress/fixtures/minimal_code.zip). There are also example forms in the `scripts` folder
+[`minimal_model_schema.json`](backend/src/scripts/example_schemas/minimal_model_schema.json),
+[`minimal_access_request_schema.json`](backend/src/scripts/example_schemas/minimal_access_request_schema.json) and
+[`minimal_access_request_schema.json`](backend/src/scripts/example_schemas/minimal_access_request_schema.json).
 
 <br />
 
