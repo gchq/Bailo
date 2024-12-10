@@ -35,7 +35,7 @@ export default function ReactionDisplay({ kind, icon, users, onReactionClick }: 
         variant='outlined'
         startIcon={icon}
       >
-        {users.length}
+        <Button>{'test'}</Button>
       </Button>
     </Tooltip>
   )
