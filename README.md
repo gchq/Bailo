@@ -138,7 +138,7 @@ You can test out your new deployment using the example models which can be found
 [`minimal_binary.zip`](frontend/cypress/fixtures/minimal_binary.zip) and
 [`minimal_code.zip`](frontend/cypress/fixtures/minimal_code.zip). There are also example forms in the `scripts` folder
 [`minimal_model_schema.json`](backend/src/scripts/example_schemas/minimal_model_schema.json),
-[`minimal_access_request_schema.json`](backend/src/scripts/example_schemas/minimal_access_request_schema.json) and
+[`minimal_data_card_schema.json`](backend/src/scripts/example_schemas/minimal_data_card_schema.json) and
 [`minimal_access_request_schema.json`](backend/src/scripts/example_schemas/minimal_access_request_schema.json).
 
 <br />
