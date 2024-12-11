@@ -1,5 +1,5 @@
 import EditIcon from '@mui/icons-material/Edit'
-import { Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
+import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useState } from 'react'
 
 interface EditableTextProps {
@@ -16,7 +16,19 @@ export default function EditableText({
   submitButtonText = 'Submit',
 }: EditableTextProps) {
   const [isEditMode, setIsEditMode] = useState(false)
-  const [newValue, setNewValue] = useState('')
+  const [newValue, setNewValue] = useState(value)
+
+  const previousText = value
+
+  function handleCancelOnClick() {
+    setIsEditMode(false)
+    setNewValue(previousText)
+  }
+
+  function handleSubmit() {
+    setIsEditMode(false)
+    onSubmit(newValue)
+  }
   return (
     <>
       {!isEditMode && (
@@ -30,15 +42,17 @@ export default function EditableText({
         </Stack>
       )}
       {isEditMode && (
-        <Stack direction='row' spacing={1} sx={{ p: 2 }}>
-          <TextField value={value} onChange={(event) => setNewValue(event.target.value)} size='small' />
-          <Button variant='outlined' onClick={() => setIsEditMode(false)} size='small'>
-            Cancel
-          </Button>
-          <Button variant='contained' onClick={() => onSubmit(newValue)} size='small'>
-            {submitButtonText}
-          </Button>
-        </Stack>
+        <Box component='form' onSubmit={handleSubmit}>
+          <Stack direction='row' spacing={1} sx={{ p: 2 }}>
+            <TextField value={newValue} onChange={(event) => setNewValue(event.target.value)} size='small' />
+            <Button variant='outlined' onClick={handleCancelOnClick} size='small'>
+              Cancel
+            </Button>
+            <Button variant='contained' type='submit' size='small'>
+              {submitButtonText}
+            </Button>
+          </Stack>
+        </Box>
       )}
     </>
   )

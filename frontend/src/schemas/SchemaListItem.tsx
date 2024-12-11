@@ -29,8 +29,18 @@ export default function SchemaListItem({
   return (
     <ListItem divider={index < schemasLength - 1} key={schema.id}>
       <ListItemText
-        primary={<EditableText value={schema.name} onSubmit={() => {}} />}
-        secondary={<EditableText value={schema.description} onSubmit={() => {}} />}
+        primary={
+          <EditableText
+            value={schema.name}
+            onSubmit={(newValue) => onPatchSchemaClick(schema.id, { name: newValue })}
+          />
+        }
+        secondary={
+          <EditableText
+            value={schema.description}
+            onSubmit={(newValue) => onPatchSchemaClick(schema.id, { description: newValue })}
+          />
+        }
       />
       <Stack spacing={1} direction={{ xs: 'column', md: 'row' }} alignItems='center'>
         <Chip
