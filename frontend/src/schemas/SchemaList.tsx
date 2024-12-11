@@ -78,7 +78,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     setOpenMenuSchemaId(null)
   }, [])
 
-  const handlePatchSchema = useCallback(
+  const handleEditSchema = useCallback(
     async (schemaId: SchemaInterface['id'], diff: Partial<SchemaInterface>) => {
       handleCloseMenu()
       setErrorMessage('')
@@ -130,11 +130,11 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
             onMenuClose={handleCloseMenu}
             onDeleteSchemaClick={handleDeleteSchema}
             onOpenMenuClick={handleOpenMenu}
-            onPatchSchemaClick={handlePatchSchema}
+            onEditSchemaClick={handleEditSchema}
           />
         )
       }),
-    [schemas, anchorEl, openMenuSchemaId, handleCloseMenu, handleDeleteSchema, handleOpenMenu, handlePatchSchema],
+    [schemas, anchorEl, openMenuSchemaId, handleCloseMenu, handleDeleteSchema, handleOpenMenu, handleEditSchema],
   )
 
   const objectsToDeleteList = useMemo(() => {

@@ -12,7 +12,7 @@ interface SchemaListItemProps {
   anchorEl: null | HTMLElement
   onMenuClose: () => void
   onOpenMenuClick: (event, schemaId: string) => void
-  onPatchSchemaClick: (schemaId: string, partialSchema: Partial<SchemaInterface>) => void
+  onEditSchemaClick: (schemaId: string, partialSchema: Partial<SchemaInterface>) => void
   onDeleteSchemaClick: (schemaId: string) => void
 }
 export default function SchemaListItem({
@@ -24,7 +24,7 @@ export default function SchemaListItem({
   onMenuClose,
   onDeleteSchemaClick,
   onOpenMenuClick,
-  onPatchSchemaClick,
+  onEditSchemaClick,
 }: SchemaListItemProps) {
   return (
     <ListItem divider={index < schemasLength - 1} key={schema.id}>
@@ -32,14 +32,14 @@ export default function SchemaListItem({
         primary={
           <EditableText
             value={schema.name}
-            onSubmit={(newValue) => onPatchSchemaClick(schema.id, { name: newValue })}
+            onSubmit={(newValue) => onEditSchemaClick(schema.id, { name: newValue })}
             tooltipText='Edit schema name'
           />
         }
         secondary={
           <EditableText
             value={schema.description}
-            onSubmit={(newValue) => onPatchSchemaClick(schema.id, { description: newValue })}
+            onSubmit={(newValue) => onEditSchemaClick(schema.id, { description: newValue })}
             tooltipText='Edit schema description'
             richText
           />
@@ -81,10 +81,10 @@ export default function SchemaListItem({
           }}
           onClose={onMenuClose}
         >
-          <MenuItem onClick={() => onPatchSchemaClick(schema.id, { active: !schema.active })}>
+          <MenuItem onClick={() => onEditSchemaClick(schema.id, { active: !schema.active })}>
             {schema.active ? 'Mark as inactive' : 'Mark as active'}
           </MenuItem>
-          <MenuItem onClick={() => onPatchSchemaClick(schema.id, { hidden: !schema.hidden })}>
+          <MenuItem onClick={() => onEditSchemaClick(schema.id, { hidden: !schema.hidden })}>
             {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
           </MenuItem>
           <MenuItem onClick={() => onDeleteSchemaClick(schema.id)}>Delete</MenuItem>

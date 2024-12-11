@@ -23,12 +23,10 @@ export default function EditableText({
   const [isEditMode, setIsEditMode] = useState(false)
   const [newValue, setNewValue] = useState(value)
 
-  const previousText = value
-
   const handleCancelOnClick = useCallback(() => {
     setIsEditMode(false)
-    setNewValue(previousText)
-  }, [previousText])
+    setNewValue(value)
+  }, [value])
 
   const handleSubmit = useCallback(() => {
     setIsEditMode(false)
