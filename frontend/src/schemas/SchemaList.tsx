@@ -1,18 +1,4 @@
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import {
-  Button,
-  Card,
-  Chip,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Card, List, ListItemButton, ListItemText, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { useGetReviewRequestsForUser } from 'actions/review'
@@ -23,6 +9,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
+import SchemaListItem from 'src/schemas/SchemaListItem'
 import { EntryKind, SchemaInterface, SchemaKind, SchemaKindKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { camelCaseToSentenceCase, camelCaseToTitleCase } from 'utils/stringUtils'
@@ -133,57 +120,21 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
       schemas.map((schema, index) => {
         const open = !!anchorEl && openMenuSchemaId === schema.id
         return (
-          <ListItem divider={index < schemas.length - 1} key={schema.id}>
-            <ListItemText>{schema.name}</ListItemText>
-            <Stack spacing={1} direction={{ xs: 'column', md: 'row' }} alignItems='center'>
-              <Chip
-                label={schema.active ? 'Active' : 'Inactive'}
-                size='small'
-                color={schema.active ? 'success' : 'warning'}
-              />
-              {schema.hidden && <Chip label='Hidden' size='small' color='error' />}
-              <Button
-                id={`schema-actions-button-${schema.id}`}
-                size='small'
-                variant='contained'
-                aria-controls={open ? `schema-actions-menu-${schema.id}` : undefined}
-                aria-haspopup='true'
-                aria-expanded={open ? 'true' : undefined}
-                endIcon={open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                onClick={(event) => handleOpenMenu(event, schema.id)}
-              >
-                Actions
-              </Button>
-              <Menu
-                id={`schema-actions-menu-${schema.id}`}
-                open={open}
-                anchorEl={anchorEl}
-                MenuListProps={{
-                  'aria-labelledby': `schema-actions-button-${schema.id}`,
-                }}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'center',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'center',
-                }}
-                onClose={handleCloseMenu}
-              >
-                <MenuItem onClick={() => handlePatchSchema(schema.id, { active: !schema.active })}>
-                  {schema.active ? 'Mark as inactive' : 'Mark as active'}
-                </MenuItem>
-                <MenuItem onClick={() => handlePatchSchema(schema.id, { hidden: !schema.hidden })}>
-                  {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
-                </MenuItem>
-                <MenuItem onClick={() => handleDeleteSchema(schema.id)}>Delete</MenuItem>
-              </Menu>
-            </Stack>
-          </ListItem>
+          <SchemaListItem
+            key={schema.id}
+            schema={schema}
+            index={index}
+            schemasLength={schemas.length}
+            open={open}
+            anchorEl={anchorEl}
+            onMenuClose={handleCloseMenu}
+            onDeleteSchemaClick={handleDeleteSchema}
+            onOpenMenuClick={handleOpenMenu}
+            onPatchSchemaClick={handlePatchSchema}
+          />
         )
       }),
-    [schemas, openMenuSchemaId, anchorEl, handleCloseMenu, handleOpenMenu, handlePatchSchema, handleDeleteSchema],
+    [schemas, anchorEl, openMenuSchemaId, handleCloseMenu, handleDeleteSchema, handleOpenMenu, handlePatchSchema],
   )
 
   const objectsToDeleteList = useMemo(() => {
