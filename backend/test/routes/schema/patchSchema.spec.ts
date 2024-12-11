@@ -15,16 +15,31 @@ const mockSchemaService = vi.hoisted(() => {
 })
 vi.mock('../../../src/services/schema.js', () => mockSchemaService)
 
-describe('routes > schema > putSchema', async () => {
+describe('routes > schema > patchSchema', async () => {
   test('successfully updates the schema', async () => {
     const fixture = createFixture(patchSchemaSchema)
     mockSchemaService.updateSchema.mockResolvedValue(fixture.body)
-    const res = await testPatch(`/api/v2/schema/${fixture.params.schemaId}`, { body: { active: false, hidden: false } })
+    const res = await testPatch(`/api/v2/schema/${fixture.params.schemaId}`, {
+      body: { active: false, hidden: false, name: fixture.body.name, description: fixture.body.description },
+    })
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
-    expect(res.body.schema.active).toBe(false)
-    expect(res.body.schema.hidden).toBe(false)
+    expect(res.body.schema.active).toBe(fixture.body.active)
+    expect(res.body.schema.hidden).toBe(fixture.body.hidden)
+    expect(res.body.schema.name).toBe(fixture.body.name)
+    expect(res.body.schema.description).toBe(fixture.body.description)
+  })
+
+  test('throws 400 when trying to update id property', async () => {
+    const fixture = createFixture(patchSchemaSchema)
+    mockSchemaService.updateSchema.mockResolvedValue(fixture.body)
+    const res = await testPatch(`/api/v2/schema/${fixture.params.schemaId}`, {
+      body: { id: 'new-id' },
+    })
+
+    expect(res.statusCode).toBe(400)
+    expect(res.body).matchSnapshot()
   })
 
   test('audit > expected call', async () => {
