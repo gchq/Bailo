@@ -1,6 +1,6 @@
 import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import RichTextEditor from 'src/common/RichTextEditor'
 
 interface EditableTextProps {
@@ -28,23 +28,23 @@ export default function EditableText({
     setNewValue(value)
   }, [value])
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     setIsEditMode(false)
     onSubmit(newValue)
-  }, [newValue, onSubmit])
+  }
 
-  const submitButtons = () => {
+  const submitButtons = useMemo(() => {
     return (
       <Stack direction='row' spacing={1} sx={{ py: 1 }} justifyContent='flex-end'>
         <Button variant='contained' type='submit' size='small'>
           {submitButtonText}
-        </Button>{' '}
+        </Button>
         <Button variant='outlined' onClick={handleCancelOnClick} size='small'>
           Cancel
         </Button>
       </Stack>
     )
-  }
+  }, [handleCancelOnClick, submitButtonText])
 
   return (
     <>
@@ -67,7 +67,7 @@ export default function EditableText({
                 onChange={(input) => setNewValue(input)}
                 aria-label='Schema description'
               />
-              {submitButtons()}
+              {submitButtons}
             </Stack>
           ) : (
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
@@ -78,7 +78,7 @@ export default function EditableText({
                 size='small'
                 multiline={multiline}
               />
-              {submitButtons()}
+              {submitButtons}
             </Stack>
           )}
         </Box>
