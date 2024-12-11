@@ -15,7 +15,7 @@ interface DateSelectorProps {
   readOnly?: boolean
   formContext?: any
   value: string
-  onChange: (newValue: string) => void
+  onChange: (newValue: string | undefined) => void
   InputProps?: any
 }
 
@@ -26,6 +26,8 @@ export default function DateSelector(props: DateSelectorProps) {
   const handleChange = (dateInput: Dayjs | null) => {
     if (dateInput && dateInput.isValid()) {
       onChange(dateInput.format('YYYY-MM-DD'))
+    } else {
+      onChange(undefined)
     }
   }
 
