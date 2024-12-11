@@ -33,16 +33,19 @@ export default function SchemaListItem({
           <EditableText
             value={schema.name}
             onSubmit={(newValue) => onPatchSchemaClick(schema.id, { name: newValue })}
+            tooltipText='Edit schema name'
           />
         }
         secondary={
           <EditableText
             value={schema.description}
             onSubmit={(newValue) => onPatchSchemaClick(schema.id, { description: newValue })}
+            tooltipText='Edit schema description'
+            richText
           />
         }
       />
-      <Stack spacing={1} direction={{ xs: 'column', md: 'row' }} alignItems='center'>
+      <Stack spacing={1} direction={{ xs: 'column', md: 'row' }} alignItems='center' sx={{ ml: 2 }}>
         <Chip
           label={schema.active ? 'Active' : 'Inactive'}
           size='small'
