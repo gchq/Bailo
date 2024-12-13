@@ -1,5 +1,5 @@
 import { Done, Error, Refresh, Warning } from '@mui/icons-material'
-import { Chip, Divider, Grid, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
@@ -167,33 +167,23 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
   return (
     <>
       {isFileInterface(file) && (
-        <Grid container alignItems='center' key={file.name}>
-          <Grid item xs={3}>
-            <Tooltip title={file.name}>
-              <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
-                <Typography noWrap textOverflow='ellipsis'>
-                  {file.name}
-                </Typography>
-              </Link>
-            </Tooltip>
-          </Grid>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
+          <Tooltip title={file.name}>
+            <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
+              <Typography noWrap overflow='hidden' whiteSpace='nowrap'>
+                {file.name}
+              </Typography>
+            </Link>
+          </Tooltip>
           {scanners.length > 0 && (
-            <>
-              <Grid item xs={3}>
-                {avChip}
-              </Grid>
-              <Grid item xs={1}>
-                {rerunFileScanButton}
-              </Grid>
-            </>
+            <Stack direction='row' alignItems='center'>
+              {avChip}
+              {rerunFileScanButton}
+            </Stack>
           )}
-          <Grid item xs={4}>
-            <></>
-          </Grid>
-          <Grid item xs={1} textAlign='right'>
-            <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-          </Grid>
-        </Grid>
+          <Box sx={{ backgroundColor: 'blue', width: '400px' }}>test</Box>
+          <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+        </Stack>
       )}
     </>
   )
