@@ -29,12 +29,12 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
           log.info('Clam AV initialised.')
         } catch (error) {
           log.warn(`Could not initialise Clam AV, retrying (attempt ${retryCount})...`)
-          this.init(retryCount++)
+          this.init(++retryCount)
         }
       }, config.connectors.fileScanners.initRetryDelay)
     } else {
       throw ConfigurationError(
-        'Clam AV does not look like it is running. Check that the service configuration is correct.',
+        `Could not initialise Clam AV after ${retryCount} attempts, make sure that it is setup and configured correctly.`,
         {
           modelScanConfig: config.avScanning.modelscan,
         },

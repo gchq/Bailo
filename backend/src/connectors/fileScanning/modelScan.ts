@@ -28,12 +28,12 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
           log.info('ModelScan initialised.')
         } catch (error) {
           log.warn(`Could not initialise ModelScan, retrying (attempt ${retryCount})...`)
-          this.init(retryCount++)
+          this.init(++retryCount)
         }
       }, config.connectors.fileScanners.initRetryDelay)
     } else {
       throw ConfigurationError(
-        'ModelScan does not look like it is running. Check that the service configuration is correct.',
+        `Could not initialise Model Scan after ${retryCount} attempts, make sure that it is setup and configured correctly.`,
         {
           modelScanConfig: config.avScanning.modelscan,
         },
