@@ -180,7 +180,7 @@ server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPerm
 server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
 server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
-server.get('/api/v2/entities/:dnList/lookup', getEntitiesLookup)
+server.get('/api/v2/entities/:dnList/lookup', ...getEntitiesLookup)
 
 server.get('/api/v2/config/ui', ...getUiConfig)
 

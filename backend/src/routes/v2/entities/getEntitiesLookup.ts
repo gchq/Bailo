@@ -42,8 +42,12 @@ export const getEntitiesLookup = [
     const {
       params: { dnList },
     } = parse(req, getEntitiesLookupSchema)
-
-    const informationList = await authentication.getUserInformationList(toEntity('user', dnList)) //TODO WORK OUT HOW THIS WORKS? WHAT IS THIS ACTUALLY RETURNING?
+    //TODO check that contains []
+    const dnListArray = dnList
+      .slice(1, -1)
+      .split(',')
+      .map((dnListMember) => toEntity('user', dnListMember))
+    const informationList = await authentication.getMultipleUsersInformation(dnListArray)
 
     return res.json({ entities: informationList })
   },

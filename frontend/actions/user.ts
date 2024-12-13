@@ -63,6 +63,25 @@ export function useGetUserInformation(dn: string) {
   }
 }
 
+interface MultipleUserInformationResponse {
+  userInformationList: UserInformation[]
+}
+
+export function useGetMultipleUserInformation(dnList: string[]) {
+  const dnListAsString = '[' + dnList.join(',') + ']'
+  const { data, isLoading, error, mutate } = useSWR<MultipleUserInformationResponse, ErrorInfo>(
+    `/api/v2/entities/${dnListAsString}/lookup`,
+    fetcher,
+  )
+
+  return {
+    mutateUserInformation: mutate,
+    userInformation: data?.userInformationList || undefined,
+    isUserInformationLoading: isLoading,
+    isUserInformationError: error,
+  }
+}
+
 interface GetUserTokensResponse {
   tokens: TokenInterface[]
 }
