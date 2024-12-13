@@ -148,6 +148,12 @@ module.exports = {
       host: '127.0.0.1',
       port: 3310,
     },
+
+    modelscan: {
+      protocol: 'http',
+      host: '127.0.0.1',
+      port: 3311,
+    },
   },
 
   // These settings are PUBLIC and shared with the UI
@@ -195,6 +201,10 @@ module.exports = {
       text: '',
       startTimestamp: '',
     },
+
+    helpPopoverText: {
+      manualEntryAccess: '',
+    },
   },
 
   connectors: {
@@ -212,6 +222,9 @@ module.exports = {
 
     fileScanners: {
       kinds: [],
+      retryDelayInMinutes: 60,
+      maxInitRetries: 5,
+      initRetryDelay: 5000,
     },
   },
 

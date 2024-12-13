@@ -41,6 +41,9 @@ export interface Config {
 
     fileScanners: {
       kinds: FileScanKindKeys[]
+      retryDelayInMinutes: number
+      maxInitRetries: number
+      initRetryDelay: number
     }
   }
 
@@ -137,6 +140,12 @@ export interface Config {
 
   avScanning: {
     clamdscan: {
+      host: string
+      port: number
+    }
+
+    modelscan: {
+      protocol: string
       host: string
       port: number
     }

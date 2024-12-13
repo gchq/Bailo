@@ -9,6 +9,11 @@ export const RoleKind = {
   SCHEMA: 'schema',
 } as const
 
+export enum EntityKind {
+  USER = 'user',
+  GROUP = 'group',
+}
+
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
 export interface Role {
@@ -90,5 +95,9 @@ export interface UiConfig {
     enabled: boolean
     text: string
     startTimestamp: string
+  }
+
+  helpPopoverText: {
+    manualEntryAccess: string
   }
 }

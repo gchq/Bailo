@@ -17,20 +17,10 @@ export interface PageTab {
   disabledText?: string
 }
 
-export default function PageWithTabs({
-  title,
-  subheading,
-  tabs,
-  actionButtonTitle = '',
-  displayActionButton = false,
-  actionButtonOnClick,
-  requiredUrlParams = {},
-  titleToCopy = '',
-  subheadingToCopy = '',
-  sourceModelId = '',
-}: {
+interface PageWithTabsProps {
   title: string
   subheading?: string
+  additionalInfo?: string
   tabs: PageTab[]
   actionButtonTitle?: string
   displayActionButton?: boolean
@@ -39,7 +29,21 @@ export default function PageWithTabs({
   titleToCopy?: string
   subheadingToCopy?: string
   sourceModelId?: string
-}) {
+}
+
+export default function PageWithTabs({
+  title,
+  subheading,
+  additionalInfo,
+  tabs,
+  actionButtonTitle = '',
+  displayActionButton = false,
+  actionButtonOnClick,
+  requiredUrlParams = {},
+  titleToCopy = '',
+  subheadingToCopy = '',
+  sourceModelId = '',
+}: PageWithTabsProps) {
   const router = useRouter()
   const { tab } = router.query
 
@@ -157,6 +161,7 @@ export default function PageWithTabs({
         )}
         {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
       </Stack>
+      <Typography sx={{ pl: 2, pb: 1 }}>{additionalInfo}</Typography>
       <Tabs
         value={currentTab || false}
         onChange={handleChange}

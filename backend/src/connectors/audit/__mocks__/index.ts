@@ -14,6 +14,7 @@ const audit = {
   onViewFiles: vi.fn(),
   onDeleteFile: vi.fn(),
   onCreateFile: vi.fn(),
+  onUpdateFile: vi.fn(),
 
   onCreateRelease: vi.fn(),
   onViewRelease: vi.fn(),

@@ -82,7 +82,7 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
   }
 }
 
-export type UpdateSchemaParams = Partial<Pick<SchemaInterface, 'active' | 'hidden'>>
+export type UpdateSchemaParams = Partial<Pick<SchemaInterface, 'active' | 'hidden' | 'name' | 'description'>>
 
 export async function updateSchema(user: UserInterface, schemaId: string, diff: UpdateSchemaParams) {
   const schema = await getSchemaById(schemaId)

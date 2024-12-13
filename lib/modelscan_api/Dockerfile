@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bullseye
+FROM python:3.12.8-slim-bullseye
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -16,6 +16,4 @@ RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 COPY ./bailo_modelscan_api /app/bailo_modelscan_api
 
-EXPOSE 80
-
-CMD ["fastapi", "run", "bailo_modelscan_api/main.py", "--port", "80"]
+CMD ["fastapi", "run", "bailo_modelscan_api/main.py", "--port", "3311"]
