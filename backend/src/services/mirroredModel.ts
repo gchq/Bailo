@@ -14,7 +14,7 @@ import scanners from '../connectors/fileScanning/index.js'
 import { FileInterfaceDoc, ScanState } from '../models/File.js'
 import { ModelDoc } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
-import { ReleaseDoc } from '../models/Release.js'
+import { ReleaseDoc, ReleaseInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
@@ -27,7 +27,7 @@ import {
   saveImportedModelCard,
   setLatestImportedModelCard,
 } from './model.js'
-import { getAllFileIds, getReleasesForExport } from './release.js'
+import { createRelease, getAllFileIds, getReleasesForExport, isRelease, validateRelease } from './release.js'
 
 export async function exportModel(
   user: UserInterface,
@@ -109,6 +109,8 @@ export async function importModel(mirroredModelId: string, payloadUrl: string) {
   log.info({ mirroredModelId, payloadUrl }, 'Obtained the file from the payload URL.')
 
   const modelCards: ModelCardRevisionInterface[] = []
+  // TODO - Use this releases array for auditing purposes
+  const releases: ReleaseInterface[] = []
   const zipData = new Uint8Array(await res.arrayBuffer())
   let zipContent
   try {
@@ -121,16 +123,35 @@ export async function importModel(mirroredModelId: string, payloadUrl: string) {
     log.error({ error }, 'Unable to read zip file.')
     throw InternalError('Unable to read zip file.', { mirroredModelId })
   }
-  Object.keys(zipContent).forEach(function (key) {
-    const { modelCard, sourceModelId: newSourceModelId } = parseModelCard(
-      Buffer.from(zipContent[key]).toString('utf8'),
-      mirroredModelId,
-      sourceModelId,
-    )
+
+  const modelCardJsonStrings: string[] = []
+  const releaseJsonStrings: string[] = []
+  Object.keys(zipContent).forEach(async function (key) {
+    // TODO - We may want to assign these regexes to readable variables (e.g. modelCardRegex, releaseRegex, fileRegex) to make this a bit more readable
+    if (/^[0-9]+\.json$/.test(key)) {
+      modelCardJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
+    } else if (/^releases\/(.*)\.json$/.test(key)) {
+      releaseJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
+    } else if (/^files\/(.*)\.json$/.test(key)) {
+      // TODO - Handle file parsing
+    } else {
+      // TODO - Is this how we want to handle unrecognised zip content?
+      throw InternalError('Failed to parse zip file - Unrecognised file contents.')
+    }
+  })
+
+  modelCardJsonStrings.forEach((modelCardJson) => {
+    const { modelCard, sourceModelId: newSourceModelId } = parseModelCard(modelCardJson, mirroredModelId, sourceModelId)
     if (!sourceModelId) {
       sourceModelId = newSourceModelId
     }
     modelCards.push(modelCard)
+  })
+
+  releaseJsonStrings.forEach(async (releaseJson) => {
+    // TODO - As this is a forEach loop it will not wait for this iteration to finish before handling the next. Check we are okay with this.
+    const release = await parseRelease(releaseJson, mirroredModelId)
+    releases.push(release)
   })
 
   log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
@@ -169,6 +190,26 @@ function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceMo
     throw InternalError('Zip file contains model cards for multiple models.', { modelIds: [sourceModelId, modelId] })
   }
   return { modelCard, sourceModelId }
+}
+
+async function parseRelease(releaseJson: string, mirroredModelId: string) {
+  const release = JSON.parse(releaseJson)
+  if (!isRelease(release)) {
+    throw InternalError('Data cannot be converted into a release.')
+  }
+
+  // TODO - I think we'll need to overwrite the imported release's modelId to be the mirroredModelId. Check this is correct.
+  release.modelId = mirroredModelId
+
+  // TODO - Split up release validation logic to avoid having to pass a user or model as a param during model importing
+  await validateRelease(release)
+
+  // TODO - The model and model card revision must already exist in the DB for this to work. Check that this is okay.
+  //        I've ensured we parse modelCards before releases for this reason.
+  // TODO - Split up createRelease logic to avoid having to pass a user as a param during model importing.
+  //        We may also want to avoid some of the checks that are in createRelease (e.g. checking that the release hasn't been
+  //        deleted HS, if we want the LS to be the source of truth)
+  return await createRelease(release)
 }
 
 async function uploadToS3(
