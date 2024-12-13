@@ -1,5 +1,5 @@
 import { Done, Error, Refresh, Warning } from '@mui/icons-material'
-import { Box, Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
@@ -181,7 +181,6 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
               {rerunFileScanButton}
             </Stack>
           )}
-          <Box sx={{ backgroundColor: 'blue', width: '400px' }}>test</Box>
           <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
         </Stack>
       )}
