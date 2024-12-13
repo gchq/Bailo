@@ -76,7 +76,7 @@ export default function Release() {
   return (
     <>
       <Title text={release ? release.semver : 'Loading...'} />
-      <Container maxWidth='md' sx={{ my: 4 }} data-test='releaseContainer'>
+      <Container maxWidth='lg' sx={{ my: 4 }} data-test='releaseContainer'>
         <Paper>
           <>
             {userCanReview && <ReviewBanner release={release} />}
