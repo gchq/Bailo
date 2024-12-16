@@ -12,6 +12,7 @@ import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntitiesLookup } from './routes/v2/entities/getEntitiesLookup.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
 import { getFilescanningInfo } from './routes/v2/filescanning/getFilescanningInfo.js'
+import { putFileScan } from './routes/v2/filescanning/putFileScan.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -193,6 +194,7 @@ server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 server.get('/api/v2/specification', ...getSpecification)
 
 server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
+server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

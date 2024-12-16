@@ -67,6 +67,12 @@ data:
           host: '{{ include "bailo.fullname" . }}-clamav',
           port: {{ .Values.clamav.port }},
         },
+
+        modelscan: {
+          host: '{{ include "bailo.fullname" . }}-modelscan',
+          port: {{ .Values.modelscan.port }},
+          protocol: '{{ .Values.modelscan.protocol }}',
+        },
       },
 
       smtp: {
@@ -181,8 +187,8 @@ data:
         },
 
         helpPopoverText: {
-          manualEntryAccess: {{ .Values.config.ui.helpPopoverText.manualEntryAccess }}
-        }
+          manualEntryAccess: '{{ .Values.config.ui.helpPopoverText.manualEntryAccess }}'
+        },
       },
 
       connectors: {
@@ -200,6 +206,9 @@ data:
 
         fileScanners: {
           kinds: {{ toJson .Values.connectors.fileScanners.kinds }}
+          retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes}}
+          maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries}}
+          initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay}}
         },
       },
 

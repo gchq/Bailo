@@ -18,3 +18,10 @@ export function useGetFileScannerInfo() {
     isScannersError: error,
   }
 }
+
+export function rerunFileScan(modelId: string, fileId: string) {
+  return fetch(`/api/v2/filescanning/model/${modelId}/file/${fileId}/scan`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+  })
+}

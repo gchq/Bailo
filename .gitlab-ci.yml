@@ -1,4 +1,5 @@
 stages:
+  - git_sync
   - os_build
   - aws_build
 
@@ -6,12 +7,29 @@ variables:
   AWS_TAG: latest
   OS_TAG: $CI_COMMIT_BRANCH-$CI_COMMIT_SHORT_SHA
 
+opensrc-bailols:
+  stage: git_sync
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $BFG == "true"'
+      when: always
+      allow_failure: true
+    - when: manual
+      allow_failure: true
+  image:
+    name: openjdk:latest
+  script:
+    - microdnf install -y git wget
+    - git clone --mirror "https://$OPENSRC_TOKEN_NAME:$OPENSRC_TOKEN@$OPENSRC_URL"
+    - wget https://repo1.maven.org/maven2/com/madgag/bfg/1.14.0/bfg-1.14.0.jar
+    - java -jar bfg-1.14.0.jar --strip-blobs-bigger-than 40M $OPENSRC_GIT_NAME
+    - cd $OPENSRC_GIT_NAME
+    - git reflog expire --expire=now --all && git gc --prune=now --aggressive
+    - git remote add $REPO_NAME "https://$LS_TOKEN_NAME:$LS_TOKEN@$LS_URL"
+    - git push -u $REPO_NAME main --force
+
 os-backend-build:
   stage: os_build
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-      allow_failure: true
     - when: manual
       allow_failure: true
   image:
@@ -35,9 +53,6 @@ os-backend-build:
 os-frontend-build:
   stage: os_build
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-      allow_failure: true
     - when: manual
       allow_failure: true
   image:
@@ -58,13 +73,33 @@ os-frontend-build:
     - docker tag frontend-ci:$OS_TAG $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/frontend-ci:$OS_TAG
     - docker push $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/frontend-ci:$OS_TAG
 
+os-modelscan-build:
+  stage: os_build
+  rules:
+    - when: manual
+      allow_failure: true
+  image:
+    name: docker:latest
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ''
+  services:
+    - name: docker:stable-dind
+      command:
+        - '--tls=false'
+        - '--host=tcp://0.0.0.0:2375'
+  before_script:
+    - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
+    - cd lib/modelscan_api
+  script:
+    - DOCKER_BUILDKIT=1 docker build -t modelscan-ci:$OS_TAG .
+    - docker tag modelscan-ci:$OS_TAG $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/modelscan-ci:$OS_TAG
+    - docker push $REGISTRY_URL/$OPENSHIFT_PROJECTNAME/modelscan-ci:$OS_TAG
+
 openshift-deploy:
   stage: os_build
-  needs: ['os-frontend-build', 'os-backend-build']
+  needs: ['os-frontend-build', 'os-backend-build', 'os-modelscan-build']
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-      allow_failure: true
     - when: manual
       allow_failure: true
   image:
@@ -99,6 +134,8 @@ openshift-deploy:
         frontendTag: $OS_TAG
         backendRepository: "$BACKEND_REPO"
         backendTag: $OS_TAG
+        modelscanRepository: "$BACKEND_REPO"
+        modelscanTag: $OS_TAG
       # Used for openshift
       route:
         enabled: true
@@ -123,9 +160,6 @@ openshift-deploy:
 aws-backend-build:
   stage: aws_build
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-      allow_failure: true
     - when: manual
       allow_failure: true
   image:
@@ -155,9 +189,6 @@ aws-backend-build:
 aws-frontend-build:
   stage: aws_build
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-      allow_failure: true
     - when: manual
       allow_failure: true
   image:
@@ -183,3 +214,32 @@ aws-frontend-build:
     - docker tag $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$AWS_TAG $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$OS_TAG
     - docker push $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$AWS_TAG
     - docker push $DOCKER_REGISTRY/$APP_NAME_FRONTEND:$OS_TAG
+
+aws-modelscan-build:
+  stage: aws_build
+  rules:
+    - when: manual
+      allow_failure: true
+  image:
+    name: docker:latest
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ''
+  services:
+    - name: docker:stable-dind
+      command:
+        - '--tls=false'
+        - '--host=tcp://0.0.0.0:2375'
+  before_script:
+    - apk add --no-cache curl jq python3 py3-pip
+    - pip install awscli --break-system-packages
+    - aws ecr get-login-password | docker login --username AWS --password-stdin $DOCKER_REGISTRY
+    - aws --version
+    - docker info
+    - docker --version
+    - cd lib/modelscan_api
+  script:
+    - DOCKER_BUILDKIT=1 docker build -t $DOCKER_REGISTRY/$APP_NAME_MODELSCAN:$AWS_TAG .
+    - docker tag $DOCKER_REGISTRY/$APP_NAME_MODELSCAN:$AWS_TAG $DOCKER_REGISTRY/$APP_NAME_MODELSCAN:$OS_TAG
+    - docker push $DOCKER_REGISTRY/$APP_NAME_MODELSCAN:$AWS_TAG
+    - docker push $DOCKER_REGISTRY/$APP_NAME_MODELSCAN:$OS_TAG
