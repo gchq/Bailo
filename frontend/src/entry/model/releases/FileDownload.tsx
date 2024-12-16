@@ -1,5 +1,5 @@
 import { Done, Error, Refresh, Warning } from '@mui/icons-material'
-import { Chip, Divider, Grid, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
@@ -89,33 +89,20 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
       file.avScan === undefined ||
       file.avScan.every((scan) => scan.state === ScanState.NotScanned)
     ) {
-      return (
-        <Stack direction='row' alignItems='center'>
-          <Chip size='small' label='Virus scan results could not be found' />
-          {rerunFileScanButton}
-        </Stack>
-      )
+      return <Chip size='small' label='Virus scan results could not be found' />
     }
     if (file.avScan.some((scan) => scan.state === ScanState.InProgress)) {
-      return (
-        <Stack direction='row' alignItems='center'>
-          <Chip size='small' label='Virus scan in progress' />
-          {rerunFileScanButton}
-        </Stack>
-      )
+      return <Chip size='small' label='Virus scan in progress' />
     }
     return (
       <>
-        <Stack direction='row' alignItems='center'>
-          <Chip
-            color={chipDetails(file).colour}
-            icon={chipDetails(file).icon}
-            size='small'
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-            label={chipDetails(file).label}
-          />
-          {rerunFileScanButton}
-        </Stack>
+        <Chip
+          color={chipDetails(file).colour}
+          icon={chipDetails(file).icon}
+          size='small'
+          onClick={(e) => setAnchorEl(e.currentTarget)}
+          label={chipDetails(file).label}
+        />
         <Popover
           open={open}
           anchorEl={anchorEl}
@@ -167,7 +154,7 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
         </Popover>
       </>
     )
-  }, [anchorEl, chipDetails, file, open, rerunFileScanButton])
+  }, [anchorEl, chipDetails, file, open])
 
   if (isScannersError) {
     return <MessageAlert message={isScannersError.info.message} severity='error' />
@@ -180,23 +167,22 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
   return (
     <>
       {isFileInterface(file) && (
-        <Grid container alignItems='center' key={file.name}>
-          <Grid item xs={11}>
-            <Stack direction='row' alignItems='center' spacing={2}>
-              <Tooltip title={file.name}>
-                <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
-                  <Typography noWrap textOverflow='ellipsis'>
-                    {file.name}
-                  </Typography>
-                </Link>
-              </Tooltip>
-              {scanners.length > 0 && avChip}
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
+          <Stack sx={{ minWidth: 0 }}>
+            <Tooltip title={file.name}>
+              <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
+                <Typography noWrap>{file.name}</Typography>
+              </Link>
+            </Tooltip>
+          </Stack>
+          {scanners.length > 0 && (
+            <Stack direction='row' alignItems='center'>
+              {avChip}
+              {rerunFileScanButton}
             </Stack>
-          </Grid>
-          <Grid item xs={1} textAlign='right'>
-            <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-          </Grid>
-        </Grid>
+          )}
+          <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+        </Stack>
       )}
     </>
   )
