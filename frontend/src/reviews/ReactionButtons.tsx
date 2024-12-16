@@ -1,4 +1,10 @@
-import { Celebration, InsertEmoticon, ThumbDown, ThumbUp } from '@mui/icons-material'
+import {
+  CelebrationTwoTone,
+  FavoriteTwoTone,
+  InsertEmoticon,
+  ThumbDownTwoTone,
+  ThumbUpTwoTone,
+} from '@mui/icons-material'
 import { IconButton, Popover, Stack } from '@mui/material'
 import { patchResponseReaction } from 'actions/response'
 import { useGetCurrentUser } from 'actions/user'
@@ -47,7 +53,7 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
                   activeReactions.push(
                     <ReactionDisplay
                       kind={ReactionKind.LIKE}
-                      icon={<ThumbUp fontSize='small' />}
+                      icon={<ThumbUpTwoTone fontSize='small' />}
                       users={reaction.users}
                       onReactionClick={handleReactionClick}
                     />,
@@ -57,7 +63,17 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
                   activeReactions.push(
                     <ReactionDisplay
                       kind={ReactionKind.DISLIKE}
-                      icon={<ThumbDown fontSize='small' />}
+                      icon={<ThumbDownTwoTone fontSize='small' />}
+                      users={reaction.users}
+                      onReactionClick={handleReactionClick}
+                    />,
+                  )
+                  break
+                case ReactionKind.HEART:
+                  activeReactions.push(
+                    <ReactionDisplay
+                      kind={ReactionKind.CELEBRATE}
+                      icon={<FavoriteTwoTone fontSize='small' />}
                       users={reaction.users}
                       onReactionClick={handleReactionClick}
                     />,
@@ -67,7 +83,7 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
                   activeReactions.push(
                     <ReactionDisplay
                       kind={ReactionKind.CELEBRATE}
-                      icon={<Celebration fontSize='small' />}
+                      icon={<CelebrationTwoTone fontSize='small' />}
                       users={reaction.users}
                       onReactionClick={handleReactionClick}
                     />,
@@ -91,7 +107,7 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
   return (
     <>
       {isCurrentUserLoading && <Loading />}
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
+      <Stack direction={{ xs: 'column', sm: 'row' }} alignItems='center'>
         <IconButton aria-label='Add reaction' color='primary' onClick={(event) => setAnchorEl(event.currentTarget)}>
           <InsertEmoticon fontSize='small' />
         </IconButton>
@@ -112,13 +128,19 @@ export default function ReactionButtons({ response, mutateResponses, onError }: 
       >
         <Stack direction='row' spacing={1} sx={{ p: 1 }}>
           <IconButton onClick={() => handleReactionClick(ReactionKind.LIKE)}>
-            <ThumbUp fontSize='small' color={isReactionActive(ReactionKind.LIKE) ? 'primary' : 'inherit'} />
+            <ThumbUpTwoTone fontSize='small' color={isReactionActive(ReactionKind.LIKE) ? 'primary' : 'inherit'} />
           </IconButton>
           <IconButton onClick={() => handleReactionClick(ReactionKind.DISLIKE)}>
-            <ThumbDown fontSize='small' color={isReactionActive(ReactionKind.DISLIKE) ? 'primary' : 'inherit'} />
+            <ThumbDownTwoTone fontSize='small' color={isReactionActive(ReactionKind.DISLIKE) ? 'primary' : 'inherit'} />
+          </IconButton>
+          <IconButton onClick={() => handleReactionClick(ReactionKind.HEART)}>
+            <FavoriteTwoTone fontSize='small' color={isReactionActive(ReactionKind.HEART) ? 'primary' : 'inherit'} />
           </IconButton>
           <IconButton onClick={() => handleReactionClick(ReactionKind.CELEBRATE)}>
-            <Celebration fontSize='small' color={isReactionActive(ReactionKind.CELEBRATE) ? 'primary' : 'inherit'} />
+            <CelebrationTwoTone
+              fontSize='small'
+              color={isReactionActive(ReactionKind.CELEBRATE) ? 'primary' : 'inherit'}
+            />
           </IconButton>
         </Stack>
       </Popover>
