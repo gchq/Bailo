@@ -64,19 +64,21 @@ export function useGetUserInformation(dn: string) {
 }
 
 interface MultipleUserInformationResponse {
-  userInformationList: UserInformation[]
+  entities: UserInformation[]
 }
 
 export function useGetMultipleUserInformation(dnList: string[]) {
-  const dnListAsString = '[' + dnList.join(',') + ']'
+  const queryParams = {
+    ...(dnList.length > 0 && { dnList }),
+  }
   const { data, isLoading, error, mutate } = useSWR<MultipleUserInformationResponse, ErrorInfo>(
-    `/api/v2/entities/${dnListAsString}/lookup`,
+    `/api/v2/entities/lookup?${qs.stringify(queryParams)}`,
     fetcher,
   )
 
   return {
     mutateUserInformation: mutate,
-    userInformation: data?.userInformationList || undefined,
+    userInformation: data?.entities || [],
     isUserInformationLoading: isLoading,
     isUserInformationError: error,
   }

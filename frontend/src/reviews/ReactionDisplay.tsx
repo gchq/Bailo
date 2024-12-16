@@ -16,30 +16,16 @@ export default function ReactionDisplay({ kind, icon, users, onReactionClick }: 
   const { userInformation, isUserInformationLoading } = useGetMultipleUserInformation(users)
   const title = useMemo(() => {
     let text = ''
-    if (userInformation) {
-      if (userInformation.length > 3) {
-        text = `${userInformation[0]}, ${userInformation[1]}, ${userInformation[2]} + ${userInformation.length - 3} more`
-      } else {
-        userInformation.forEach((user, index) => {
-          text += `${user}`
-          if (index !== users.length - 1) {
-            text += ', '
-          }
-        })
-      }
+    if (userInformation && userInformation.length > 3) {
+      text = `${userInformation
+        .slice(0, 3)
+        .map((user) => user.name)
+        .join(', ')}, and ${userInformation.length - 3} others`
+    } else {
+      text = `${userInformation.map((user) => user.name).join(', ')}`
     }
-    //   // if (userList.length > 3) {
-    //   //   text = `${userList[0]}, ${userList[1]}, ${userList[2]} + ${userList.length - 3} more`
-    //   // } else {
-    //   //   userList.forEach((user, index) => {
-    //   //     text += `${user}`
-    //   //     if (index !== users.length - 1) {
-    //   //       text += ', '
-    //   //     }
-    //   //   })
-    //   // }
     return text
-  }, [userInformation, users.length])
+  }, [userInformation])
   if (isUserInformationLoading) {
     return <Loading />
   }
@@ -49,9 +35,10 @@ export default function ReactionDisplay({ kind, icon, users, onReactionClick }: 
         size='small'
         aria-label={plural(users.length, kind)}
         onClick={() => onReactionClick(kind)}
-        variant='outlined'
         startIcon={icon}
-      ></Button>
+      >
+        {userInformation.length}
+      </Button>
     </Tooltip>
   )
 }
