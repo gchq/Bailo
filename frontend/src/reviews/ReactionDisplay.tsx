@@ -15,16 +15,12 @@ type ReactionDisplayProps = {
 export default function ReactionDisplay({ kind, icon, users, onReactionClick }: ReactionDisplayProps) {
   const { userInformation, isUserInformationLoading } = useGetMultipleUserInformation(users)
   const title = useMemo(() => {
-    let text = ''
-    if (userInformation && userInformation.length > 3) {
-      text = `${userInformation
-        .slice(0, 3)
-        .map((user) => user.name)
-        .join(', ')}, and ${userInformation.length - 3} others`
-    } else {
-      text = `${userInformation.map((user) => user.name).join(', ')}`
-    }
-    return text
+    return userInformation && userInformation.length > 3
+      ? `${userInformation
+          .slice(0, 3)
+          .map((user) => user.name)
+          .join(', ')}, and ${userInformation.length - 3} others`
+      : `${userInformation.map((user) => user.name).join(', ')}`
   }, [userInformation])
   if (isUserInformationLoading) {
     return <Loading />
