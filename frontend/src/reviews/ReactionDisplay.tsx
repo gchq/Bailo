@@ -2,6 +2,7 @@ import { Button, Tooltip } from '@mui/material'
 import { useGetMultipleUserInformation } from 'actions/user'
 import { ReactNode, useMemo } from 'react'
 import Loading from 'src/common/Loading'
+import MessageAlert from 'src/MessageAlert'
 import { ReactionKindKeys } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
@@ -13,7 +14,7 @@ type ReactionDisplayProps = {
 }
 
 export default function ReactionDisplay({ kind, icon, users, onReactionClick }: ReactionDisplayProps) {
-  const { userInformation, isUserInformationLoading } = useGetMultipleUserInformation(users)
+  const { userInformation, isUserInformationLoading, isUserInformationError } = useGetMultipleUserInformation(users)
   const title = useMemo(() => {
     return userInformation && userInformation.length > 3
       ? `${userInformation
@@ -22,6 +23,11 @@ export default function ReactionDisplay({ kind, icon, users, onReactionClick }: 
           .join(', ')}, and ${userInformation.length - 3} others`
       : `${userInformation.map((user) => user.name).join(', ')}`
   }, [userInformation])
+
+  if (isUserInformationError) {
+    return <MessageAlert message={isUserInformationError.info.message} severity='error' />
+  }
+
   if (isUserInformationLoading) {
     return <Loading />
   }
