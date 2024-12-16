@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from 'vitest'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { FileScanResult } from '../../src/connectors/fileScanning/Base.js'
 import { UserInterface } from '../../src/models/User.js'
-import { exportModel, importModel } from '../../src/services/mirroredModel.js'
+import { exportModel, ImportKind, importModel } from '../../src/services/mirroredModel.js'
 
 const fileScanResult: FileScanResult = {
   state: 'complete',
@@ -81,6 +81,7 @@ vi.mock('../../src/services/log.js', async () => ({
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } } })),
+  getMirroredModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } } })),
   getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(), version: 123 }]),
   setLatestImportedModelCard: vi.fn(),
   saveImportedModelCard: vi.fn(),
@@ -98,6 +99,7 @@ const fileMocks = vi.hoisted(() => ({
   getFilesByIds: vi.fn(() => [{ _id: '123', avScan: [{ state: 'complete', isInfected: false }], toJSON: vi.fn() }]),
   getTotalFileSize: vi.fn(() => 42),
   downloadFile: vi.fn(() => ({ Body: 'test' })),
+  markFileAsCompleteAfterImport: vi.fn(),
 }))
 vi.mock('../../src/services/file.js', () => fileMocks)
 
@@ -334,34 +336,34 @@ describe('services > mirroredModel', () => {
 
   test('importModel > not enabled', async () => {
     vi.spyOn(configMock, 'ui', 'get').mockReturnValueOnce({ modelMirror: { import: { enabled: false } } })
-    const result = importModel('', 'https://test.com')
+    const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
     await expect(result).rejects.toThrowError('Importing models has not been enabled.')
   })
 
   test('importModel > mirrored model Id empty', async () => {
-    const result = importModel('', 'https://test.com')
+    const result = importModel('', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
     await expect(result).rejects.toThrowError('Missing mirrored model ID.')
   })
 
   test('importModel > error when getting zip file', async () => {
     fetchMock.default.mockRejectedValueOnce('a')
-    const result = importModel('model-id', 'https://test.com')
+    const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
     await expect(result).rejects.toThrowError('Unable to get the file.')
   })
 
   test('importModel > non 200 response when getting zip file', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: false, body: vi.fn(), text: vi.fn() })
-    const result = importModel('model-id', 'https://test.com')
+    const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
-    await expect(result).rejects.toThrowError('Unable to get zip file.')
+    await expect(result).rejects.toThrowError('Unable to get the file.')
   })
 
   test('importModel > file missing from body', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: true, text: vi.fn() } as any)
-    const result = importModel('model-id', 'https://test.com')
+    const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
     await expect(result).rejects.toThrowError('Unable to get the file.')
   })
@@ -372,7 +374,7 @@ describe('services > mirroredModel', () => {
       file1: Buffer.from(JSON.stringify({ modelId: 'abc' })),
       file2: Buffer.from(JSON.stringify({ modelId: 'abc' })),
     })
-    await importModel('model-id', 'https://test.com')
+    await importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
     await expect(modelMocks.saveImportedModelCard.mock.calls.length).toBe(2)
   })
@@ -383,7 +385,7 @@ describe('services > mirroredModel', () => {
       file1: Buffer.from(JSON.stringify({})),
     })
     modelMocks.isModelCardRevision.mockReturnValueOnce(false)
-    const result = importModel('model-id', 'https://test.com')
+    const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
     await expect(result).rejects.toThrowError(/^Data cannot be converted into a model card./)
   })
@@ -394,7 +396,7 @@ describe('services > mirroredModel', () => {
       file1: Buffer.from(JSON.stringify({ modelId: 'abc' })),
       file2: Buffer.from(JSON.stringify({ modelId: 'cba' })),
     })
-    const result = importModel('model-id', 'https://test.com')
+    const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
     await expect(result).rejects.toThrowError(/^Zip file contains model cards for multiple models./)
   })
@@ -404,8 +406,19 @@ describe('services > mirroredModel', () => {
     fflateMock.unzipSync.mockImplementationOnce(() => {
       throw Error('Cannot import file.')
     })
-    const result = importModel('model-id', 'https://test.com')
+    const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
     await expect(result).rejects.toThrowError(/^Unable to read zip file./)
+  })
+
+  test('importModel > missing file path for file imports', async () => {
+    const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.File)
+
+    await expect(result).rejects.toThrowError(/^Missing File Path/)
+  })
+
+  test('importModel > uploads file to S3 on success', async () => {
+    await importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.File, '/s3/path/')
+    await expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
   })
 })

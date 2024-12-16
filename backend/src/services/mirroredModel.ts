@@ -89,8 +89,10 @@ export type MongoDocumentImportInformation = {
   newModelCards: ModelCardRevisionInterface[]
 }
 export type FileImportInformation = {
-  fileIds: string[]
+  sourcePath: string
+  newPath: string
 }
+
 export async function importModel(
   mirroredModelId: string,
   // Update model card import to use this
@@ -187,14 +189,14 @@ export async function importModel(
     }
     case ImportKind.File: {
       if (!filePath) {
-        throw BadReq('Missing File ID in the metadata', { mirroredModelId, sourceModelIdMeta })
+        throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta })
       }
-      await importModelFile(res, filePath, mirroredModelId, sourceModelIdMeta)
+      const result = await importModelFile(res, filePath, mirroredModelId, sourceModelIdMeta)
       const mirroredModel = await getMirroredModelById(mirroredModelId)
       return {
         mirroredModel,
         importResult: {
-          fileIds: [],
+          ...result,
         },
       }
     }
@@ -207,7 +209,9 @@ async function importModelFile(content: Response, importedPath: string, mirrored
   const bucket = config.s3.buckets.uploads
   const updatedPath = importedPath.replace(sourceModelId, mirroredModelId)
   await putObjectStream(bucket, updatedPath, content.body as Readable)
+  log.debug({ bucket, path: updatedPath }, 'Imported file successfully uploaded to S3.')
   await markFileAsCompleteAfterImport(updatedPath)
+  return { sourcePath: importedPath, newPath: updatedPath }
 }
 
 function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceModelId?: string) {
