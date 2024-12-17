@@ -1,8 +1,6 @@
 import { Button, Tooltip } from '@mui/material'
-import { useGetMultipleUserInformation } from 'actions/user'
-import { ReactNode, useMemo } from 'react'
-import Loading from 'src/common/Loading'
-import MessageAlert from 'src/MessageAlert'
+import { getUserInformation } from 'actions/user'
+import { ReactNode, useEffect, useState } from 'react'
 import { ReactionKindKeys } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
@@ -14,32 +12,37 @@ type ReactionDisplayProps = {
 }
 
 export default function ReactionDisplay({ kind, icon, users, onReactionClick }: ReactionDisplayProps) {
-  const { userInformation, isUserInformationLoading, isUserInformationError } = useGetMultipleUserInformation(users)
-  const title = useMemo(() => {
-    return userInformation && userInformation.length > 3
-      ? `${userInformation
-          .slice(0, 3)
-          .map((user) => user.name)
-          .join(', ')}, and ${userInformation.length - 3} others`
-      : `${userInformation.map((user) => user.name).join(', ')}`
-  }, [userInformation])
+  const [usersToDisplay, setUsersToDisplay] = useState('')
 
-  if (isUserInformationError) {
-    return <MessageAlert message={isUserInformationError.info.message} severity='error' />
-  }
+  useEffect(() => {
+    async function fetchData() {
+      if (!usersToDisplay) {
+        setUsersToDisplay(
+          `${users
+            .slice(0, 3)
+            .map(async (user) => {
+              const response = await getUserInformation(user)
+              if (response.ok) {
+                const responseBody = await response.json()
+                return responseBody.entity.name
+              }
+            })
+            .join(', ')} ${users.length > 3 ? ` and ${users.length - 3} others` : ''}`,
+        )
+      }
+    }
+    fetchData()
+  }, [users, usersToDisplay])
 
-  if (isUserInformationLoading) {
-    return <Loading />
-  }
   return (
-    <Tooltip title={title}>
+    <Tooltip title={usersToDisplay}>
       <Button
         size='small'
         aria-label={plural(users.length, kind)}
         onClick={() => onReactionClick(kind)}
         startIcon={icon}
       >
-        {userInformation.length}
+        {users.length}
       </Button>
     </Tooltip>
   )

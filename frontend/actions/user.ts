@@ -63,25 +63,8 @@ export function useGetUserInformation(dn: string) {
   }
 }
 
-interface MultipleUserInformationResponse {
-  entities: UserInformation[]
-}
-
-export function useGetMultipleUserInformation(dnList: string[]) {
-  const queryParams = {
-    ...(dnList.length > 0 && { dnList }),
-  }
-  const { data, isLoading, error, mutate } = useSWR<MultipleUserInformationResponse, ErrorInfo>(
-    `/api/v2/entities/lookup?${qs.stringify(queryParams)}`,
-    fetcher,
-  )
-
-  return {
-    mutateUserInformation: mutate,
-    userInformation: data?.entities || [],
-    isUserInformationLoading: isLoading,
-    isUserInformationError: error,
-  }
+export function getUserInformation(dn: string) {
+  return fetch(`/api/v2/entity/${dn}/lookup`, { method: 'get' })
 }
 
 interface GetUserTokensResponse {

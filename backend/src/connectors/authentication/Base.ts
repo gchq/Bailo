@@ -22,9 +22,6 @@ export abstract class BaseAuthenticationConnector {
   abstract getEntities(user: UserInterface): Promise<Array<string>>
   abstract getUserInformation(userEntity: string): Promise<UserInformation>
   abstract getEntityMembers(entity: string): Promise<Array<string>>
-  async getMultipleUsersInformation(entities: string[]): Promise<UserInformation[]> {
-    return Promise.all(entities.map(async (entity) => await this.getUserInformation(entity)))
-  }
 
   async getUserInformationList(entity: string): Promise<UserInformation[]> {
     const entities = await this.getEntityMembers(entity)

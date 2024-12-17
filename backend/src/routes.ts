@@ -9,7 +9,6 @@ import { requestId } from './routes/middleware/requestId.js'
 import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
-import { getEntitiesLookup } from './routes/v2/entities/getEntitiesLookup.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
 import { getFilescanningInfo } from './routes/v2/filescanning/getFilescanningInfo.js'
 import { putFileScan } from './routes/v2/filescanning/putFileScan.js'
@@ -181,7 +180,6 @@ server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPerm
 server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
 server.get('/api/v2/entity/:dn/lookup', ...getEntityLookup)
-server.get('/api/v2/entities/lookup', ...getEntitiesLookup)
 
 server.get('/api/v2/config/ui', ...getUiConfig)
 
