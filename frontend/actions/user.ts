@@ -63,6 +63,10 @@ export function useGetUserInformation(dn: string) {
   }
 }
 
+export function getUserInformation(dn: string) {
+  return fetch(`/api/v2/entity/${dn}/lookup`, { method: 'get' })
+}
+
 interface GetUserTokensResponse {
   tokens: TokenInterface[]
 }

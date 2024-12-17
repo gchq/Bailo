@@ -169,7 +169,6 @@ server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/reviews', ...getReviews)
-
 server.get('/api/v2/responses', ...getResponses)
 server.patch('/api/v2/response/:responseId', ...patchResponse)
 server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReaction)
