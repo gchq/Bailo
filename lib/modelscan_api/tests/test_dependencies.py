@@ -9,7 +9,7 @@ from typing import Any, Iterable
 
 import pytest
 
-from .dependencies import safe_join
+from bailo_modelscan_api.dependencies import safe_join
 
 # Helpers
 
