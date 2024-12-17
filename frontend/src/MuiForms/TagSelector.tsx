@@ -1,6 +1,7 @@
-import { Autocomplete, Box, Chip, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Chip, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FormContextType } from '@rjsf/utils'
+import { useState } from 'react'
 
 interface TagSelectorProps {
   onChange: (newValue: string[]) => void
@@ -11,58 +12,45 @@ interface TagSelectorProps {
   rawErrors?: string[]
 }
 
-export default function TagSelector({ onChange, value, label, formContext, required, rawErrors }: TagSelectorProps) {
+export default function TagSelector({ onChange, value, label, formContext, required }: TagSelectorProps) {
   const theme = useTheme()
 
-  const handleChange = (_event: React.SyntheticEvent<Element, Event>, newValues: string[]) => {
-    onChange([...newValues])
+  const [newTag, setNewTag] = useState('')
+
+  const handleNewTagSubmit = () => {
+    const updatedArray = value
+    updatedArray.push(newTag)
+    onChange(updatedArray)
+    setNewTag('')
+  }
+
+  const handleChipOnDelete = (tag: string) => {
+    const updatedArray = value.filter((e) => e !== tag)
+    onChange(updatedArray)
   }
 
   return (
     <>
       {formContext && formContext.editMode && (
-        <>
+        <Stack spacing={1}>
           <Typography fontWeight='bold'>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
-          <Autocomplete
-            multiple
-            freeSolo
-            isOptionEqualToValue={(option: string, optionValue: string) => option === optionValue}
-            value={value || ''}
-            onChange={handleChange}
-            options={[]}
-            renderTags={(tagValue: string[], getTagProps) =>
-              tagValue.map((option: string, index: number) => (
-                <Chip variant='outlined' label={option} {...getTagProps({ index })} key={option} />
-              ))
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                required
-                size='small'
-                variant='outlined'
-                error={rawErrors && rawErrors.length > 0}
-                sx={{
-                  input: {
-                    color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
-                  },
-                  label: {
-                    WebkitTextFillColor:
-                      theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
-                  },
-                  '& .MuiInputBase-input.Mui-disabled': {
-                    WebkitTextFillColor:
-                      theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
-                  },
-                  fontStyle: value ? 'unset' : 'italic',
-                }}
-              />
-            )}
-          />
-        </>
+          <Stack direction='row' spacing={2}>
+            <TextField size='small' value={newTag} onChange={(e) => setNewTag(e.target.value)} />
+            <Button size='small' onClick={handleNewTagSubmit}>
+              Add tag
+            </Button>
+          </Stack>
+          <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Stack spacing={1} direction='row'>
+              {value.map((tag) => (
+                <Chip label={tag} key={tag} sx={{ width: 'fit-content' }} onDelete={() => handleChipOnDelete(tag)} />
+              ))}
+            </Stack>
+          </Box>
+        </Stack>
       )}
       {formContext && !formContext.editMode && (
         <>
