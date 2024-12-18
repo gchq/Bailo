@@ -1,6 +1,5 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { LoadingButton } from '@mui/lab'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Stack, TextField, Typography } from '@mui/material'
+import { Box, Card, Container, Divider, Stack, TextField, Typography } from '@mui/material'
 import { patchModel } from 'actions/model'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
@@ -55,25 +54,23 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
 
   return (
     <>
-      <ExportModelAgreement modelId={model.id} />
-      <Accordion sx={{ borderTop: 'none' }}>
-        <AccordionSummary sx={{ pl: 0 }} expandIcon={<ExpandMoreIcon />}>
-          <Typography component='h3' variant='h6'>
-            Export Settings
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      <Container maxWidth='md'>
+        <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
           <Box component='form' onSubmit={handleSave}>
-            <Stack spacing={2} alignItems='flex-start'>
-              <LabelledInput label={'Destination Model ID'} htmlFor={'destination-model-id'} required>
-                <TextField
-                  id='destination-model-id'
-                  value={destinationModelId}
-                  onChange={handleDestinationModelId}
-                  size='small'
-                />
-              </LabelledInput>
-              {/*TODO - Add the ability to filter releases needed for export (This functionality is not available on the backend)
+            <Stack spacing={3} divider={<Divider flexItem />}>
+              <>
+                <Typography variant='h6' component='h1' color='primary' align='center'>
+                  Model Export Settings
+                </Typography>
+                <LabelledInput label={'Destination Model ID'} htmlFor={'destination-model-id'} required>
+                  <TextField
+                    id='destination-model-id'
+                    value={destinationModelId}
+                    onChange={handleDestinationModelId}
+                    size='small'
+                  />
+                </LabelledInput>
+                {/*TODO - Add the ability to filter releases needed for export (This functionality is not available on the backend)
               <ReleaseSelector
                 model={model}
                 selectedReleases={selectedReleases}
@@ -82,20 +79,22 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
                 requiredRolesText={requiredRolesText}
               />
                */}
-              <LoadingButton
-                sx={{ width: 'fit-content' }}
-                variant='contained'
-                data-test='createAccessRequestButton'
-                loading={loading}
-                type='submit'
-              >
-                Save
-              </LoadingButton>
-              <MessageAlert message={errorMessage} severity='error' />
+                <LoadingButton
+                  sx={{ width: 'fit-content' }}
+                  variant='contained'
+                  data-test='createAccessRequestButton'
+                  loading={loading}
+                  type='submit'
+                >
+                  Save
+                </LoadingButton>
+                <MessageAlert message={errorMessage} severity='error' />
+              </>
+              <ExportModelAgreement modelId={model.id} />
             </Stack>
           </Box>
-        </AccordionDetails>
-      </Accordion>
+        </Card>
+      </Container>
     </>
   )
 }

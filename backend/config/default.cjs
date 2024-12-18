@@ -191,7 +191,7 @@ module.exports = {
         enabled: false,
       },
       export: {
-        enabled: false,
+        enabled: true,
         disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
       },
     },
