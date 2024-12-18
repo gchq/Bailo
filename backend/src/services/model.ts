@@ -510,6 +510,19 @@ export async function setLatestImportedModelCard(modelId: string) {
   return updatedModel
 }
 
+export async function getMirroredModelById(mirroredModelId) {
+  const model = await Model.findOne({
+    id: mirroredModelId,
+    'settings.mirror.sourceModelId': { $ne: null },
+  })
+
+  if (!model) {
+    throw NotFound(`The requested entry was not found.`, { modelId: mirroredModelId })
+  }
+
+  return model
+}
+
 export function isModelCardRevision(data: unknown): data is ModelCardRevisionInterface {
   if (typeof data !== 'object' || data === null) {
     return false
