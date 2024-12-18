@@ -37,7 +37,6 @@ def example_model(integration_client, metrics_schema):
         client=integration_client,
         name="Yolo-v4",
         description="You only look once!",
-        team_id="team_id",
         visibility=ModelVisibility.PUBLIC,
     )
     model.card_from_schema(metrics_schema.schema_id)

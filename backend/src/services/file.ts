@@ -2,15 +2,16 @@ import { Schema } from 'mongoose'
 import { Readable } from 'stream'
 
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
-import { FileAction } from '../connectors/authorisation/actions.js'
+import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileScanResult } from '../connectors/fileScanning/Base.js'
+import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import FileModel, { ScanState } from '../models/File.js'
+import FileModel, { FileInterface } from '../models/File.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { longId } from '../utils/id.js'
+import { plural } from '../utils/string.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
@@ -34,14 +35,18 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
   }
 
   const { fileSize } = await putObjectStream(bucket, path, stream)
+  if (fileSize === 0) {
+    throw BadReq(`Could not upload ${file.name} as it is an empty file.`, { file: file })
+  }
   file.size = fileSize
 
   await file.save()
 
-  if (scanners.info()) {
-    const resultsInprogress = scanners.info().map((scannerName) => ({
+  if (scanners.info() && fileSize > 0) {
+    const resultsInprogress: FileScanResult[] = scanners.info().map((scannerName) => ({
       toolName: scannerName,
       state: ScanState.InProgress,
+      lastRunAt: new Date(),
     }))
     await updateFileWithResults(file._id, resultsInprogress)
     scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
@@ -55,14 +60,14 @@ async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileSc
     const updateExistingResult = await FileModel.updateOne(
       { _id, 'avScan.toolName': result.toolName },
       {
-        $set: { 'avScan.$': result },
+        $set: { 'avScan.$': { ...result } },
       },
     )
     if (updateExistingResult.modifiedCount === 0) {
       await FileModel.updateOne(
-        { _id },
+        { _id, avScan: { $exists: true } },
         {
-          $set: { avScan: { toolName: result.toolName, state: result.state } },
+          $push: { avScan: { toolName: result.toolName, state: result.state, lastRunAt: new Date() } },
         },
       )
     }
@@ -165,4 +170,57 @@ export async function markFileAsCompleteAfterImport(path: string) {
   if (!file) {
     log.debug({ path }, 'No file document yet exists for this imported file.')
   }
+}
+
+function fileScanDelay(file: FileInterface): number {
+  const delay = config.connectors.fileScanners.retryDelayInMinutes
+  if (delay === undefined) {
+    return 0
+  }
+  let minutesBeforeRetrying = 0
+  for (const scanResult of file.avScan) {
+    const delayInMilliseconds = delay * 60000
+    const scanTimeAtLimit = scanResult.lastRunAt.getTime() + delayInMilliseconds
+    if (scanTimeAtLimit > new Date().getTime()) {
+      minutesBeforeRetrying = scanTimeAtLimit - new Date().getTime()
+      break
+    }
+  }
+  return Math.round(minutesBeforeRetrying / 60000)
+}
+
+export async function rerunFileScan(user: UserInterface, modelId, fileId: string) {
+  const model = await getModelById(user, modelId)
+  if (!model) {
+    throw BadReq('Cannot find requested model', { modelId: modelId })
+  }
+  const file = await getFileById(user, fileId)
+  if (!file) {
+    throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
+  }
+  const rerunFileScanAuth = await authorisation.file(user, modelId, file, FileAction.Update)
+  if (!rerunFileScanAuth.success) {
+    throw Forbidden(rerunFileScanAuth.info, { userDn: user.dn, modelId, file })
+  }
+  if (!file.size || file.size === 0) {
+    throw BadReq('Cannot run scan on an empty file')
+  }
+  const minutesBeforeRescanning = fileScanDelay(file)
+  if (minutesBeforeRescanning > 0) {
+    throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${file.name}`)
+  }
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn })
+  }
+  if (scanners.info()) {
+    const resultsInprogress = scanners.info().map((scannerName) => ({
+      toolName: scannerName,
+      state: ScanState.InProgress,
+      lastRunAt: new Date(),
+    }))
+    await updateFileWithResults(file._id, resultsInprogress)
+    scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
+  }
+  return `Scan started for ${file.name}`
 }

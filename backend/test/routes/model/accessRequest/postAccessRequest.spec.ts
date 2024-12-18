@@ -16,8 +16,19 @@ vi.mock('../../../../src/services/accessRequest.js', async () => ({
 const fileScanResult: FileScanResult = {
   state: 'complete',
   isInfected: false,
+  lastRunAt: new Date(),
   toolName: 'Test',
 }
+
+const baseScannerMock = vi.hoisted(() => ({
+  ScanState: {
+    NotScanned: 'notScanned',
+    InProgress: 'inProgress',
+    Complete: 'complete',
+    Error: 'error',
+  },
+}))
+vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
 
 const fileScanningMock = vi.hoisted(() => ({
   info: vi.fn(() => []),

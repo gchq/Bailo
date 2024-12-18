@@ -9,6 +9,7 @@ frontend and one for the backend.
 # Bailo uses a monorepo, so images should be built from the root directory
 $ docker build -t "bailo-backend" -f ./backend/Dockerfile .
 $ docker build -t "bailo-frontend" -f ./frontend/Dockerfile .
+$ docker build -t "bailo-modelscan" -f ./lib/modelscan_api/Dockerfile .
 ```
 
 Ensure you do not use the development Dockerfiles (called `Dockerfile.dev`) as they expect the application to be mounted

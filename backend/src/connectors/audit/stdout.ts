@@ -101,6 +101,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  onUpdateFile(req: Request, modelId: string, fileId: string) {
+    this.checkEventType(AuditInfo.UpdateFile, req)
+    const event = this.generateEvent(req, { modelId, fileId })
+    req.log.info(event, req.audit.description)
+  }
+
   onCreateRelease(req: Request, release: ReleaseDoc) {
     this.checkEventType(AuditInfo.CreateRelease, req)
     const event = this.generateEvent(req, { modelId: release.modelId, semver: release.semver })

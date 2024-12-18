@@ -9,6 +9,7 @@ import { exportModel, ImportKind, importModel } from '../../src/services/mirrore
 const fileScanResult: FileScanResult = {
   state: 'complete',
   isInfected: false,
+  lastRunAt: new Date(),
   toolName: 'Test',
 }
 
@@ -22,6 +23,16 @@ const fflateMock = vi.hoisted(() => ({
   unzipSync: vi.fn(),
 }))
 vi.mock('fflate', async () => fflateMock)
+
+const baseScannerMock = vi.hoisted(() => ({
+  ScanState: {
+    NotScanned: 'notScanned',
+    InProgress: 'inProgress',
+    Complete: 'complete',
+    Error: 'error',
+  },
+}))
+vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
 
 const bufferMock = vi.hoisted(() => ({
   unzipSync: vi.fn(),

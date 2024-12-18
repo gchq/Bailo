@@ -37,6 +37,7 @@ export const ReactionKind = {
   LIKE: 'like',
   DISLIKE: 'dislike',
   CELEBRATE: 'celebrate',
+  HEART: 'heart',
 } as const
 export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 

@@ -3,12 +3,7 @@
 exports[`routes > model > postRequestImport > 200 > ok 1`] = `
 {
   "mirroredModelId": "abc",
-  "modelCardVersions": [
-    1,
-    2,
-    3,
-  ],
-  "sourceModelId": "cba",
+  "sourceModelId": "vespillo",
 }
 `;
 
