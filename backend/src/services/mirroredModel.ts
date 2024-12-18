@@ -61,7 +61,7 @@ export async function exportModel(
   const s3Stream = new PassThrough()
   zip.pipe(s3Stream)
 
-  await uploadToS3(`${modelId}.zip`, s3Stream, user.dn, { modelId, semvers }, { modelId, mirroredModelId })
+  await uploadToS3(`${modelId}.zip`, s3Stream, user.dn, modelId, mirroredModelId, { semvers })
 
   try {
     await addModelCardRevisionsToZip(user, model, zip)
@@ -284,19 +284,23 @@ async function uploadToS3(
   fileName: string,
   stream: Readable,
   exporter: string,
-  logData: Record<string, unknown>,
+  sourceModelId: string,
+  mirroredModelId: string,
+  logData?: Record<string, unknown>,
   metadata?: Record<string, string>,
 ) {
+  const s3Metadata = { sourceModelId, mirroredModelId, ...metadata }
+  const s3LogData = { ...s3Metadata, ...logData }
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug(logData, 'Using signatures. Uploading to temporary S3 location first.')
-    uploadToTemporaryS3Location(fileName, stream, logData).then(() =>
-      copyToExportBucketWithSignatures(fileName, exporter, logData, metadata).catch((error) =>
+    uploadToTemporaryS3Location(fileName, stream, s3LogData).then(() =>
+      copyToExportBucketWithSignatures(fileName, exporter, s3LogData, s3Metadata).catch((error) =>
         log.error({ error, ...logData }, 'Failed to upload export to export location with signatures'),
       ),
     )
   } else {
     log.debug(logData, 'Signatures not enabled. Uploading to export S3 location.')
-    uploadToExportS3Location(fileName, stream, logData, metadata)
+    uploadToExportS3Location(fileName, stream, s3LogData, s3Metadata)
   }
 }
 
@@ -465,14 +469,14 @@ async function addReleaseToZip(
         file.path,
         (await downloadFile(user, file._id)).Body as stream.Readable,
         user.dn,
+        model.id,
+        mirroredModelId,
         {
-          modelId: model.id,
           releaseId: release.id,
           fileId: file.id,
         },
         {
           filePath: file.path,
-          mirroredModelId,
         },
       )
     }
