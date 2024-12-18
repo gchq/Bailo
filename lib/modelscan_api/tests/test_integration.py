@@ -120,7 +120,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
         ),
         (
             "unsafe.pkl",
-            Path().cwd().joinpath("unsafe.pkl"),
+            Path().cwd().joinpath("tests/test_integration/unsafe.pkl"),
             OCTET_STREAM_TYPE,
             {
                 "summary": {
