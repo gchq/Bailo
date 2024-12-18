@@ -51,7 +51,7 @@ export const postRequestExportToS3 = [
       body: { disclaimerAgreement },
     } = parse(req, postRequestExportToS3Schema)
 
-    await exportModel(req.user, modelId, disclaimerAgreement, ['1.2.3'])
+    await exportModel(req.user, modelId, disclaimerAgreement)
     await audit.onCreateS3Export(req, modelId)
 
     return res.json({
