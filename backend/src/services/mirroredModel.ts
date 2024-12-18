@@ -12,15 +12,16 @@ import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import scanners from '../connectors/fileScanning/index.js'
 import { FileInterfaceDoc, ScanState } from '../models/File.js'
-import { ModelDoc } from '../models/Model.js'
+import { ModelDoc, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
-import { downloadFile, getFilesByIds, getTotalFileSize } from './file.js'
+import { downloadFile, getFilesByIds, getTotalFileSize, markFileAsCompleteAfterImport } from './file.js'
 import log from './log.js'
 import {
+  getMirroredModelById,
   getModelById,
   getModelCardRevisions,
   isModelCardRevision,
@@ -68,7 +69,7 @@ export async function exportModel(
   }
   try {
     if (semvers && semvers.length > 0) {
-      await addReleasesToZip(user, model, semvers, zip)
+      await addReleasesToZip(user, model, semvers, zip, mirroredModelId)
     }
   } catch (error) {
     throw InternalError('Error when adding the release(s) to the zip file.', { error })
@@ -77,7 +78,32 @@ export async function exportModel(
   log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
 }
 
-export async function importModel(mirroredModelId: string, payloadUrl: string) {
+export const ImportKind = {
+  Documents: 'documents',
+  File: 'file',
+} as const
+
+export type ImportKindKeys = (typeof ImportKind)[keyof typeof ImportKind]
+export type MongoDocumentImportInformation = {
+  modelCardVersions: number[]
+  newModelCards: ModelCardRevisionInterface[]
+}
+export type FileImportInformation = {
+  sourcePath: string
+  newPath: string
+}
+
+export async function importModel(
+  mirroredModelId: string,
+  // Update model card import to use this
+  sourceModelIdMeta: string,
+  payloadUrl: string,
+  importKind: ImportKindKeys,
+  filePath?: string,
+): Promise<{
+  mirroredModel: ModelInterface
+  importResult: MongoDocumentImportInformation | FileImportInformation
+}> {
   if (!config.ui.modelMirror.import.enabled) {
     throw BadReq('Importing models has not been enabled.')
   }
@@ -96,7 +122,7 @@ export async function importModel(mirroredModelId: string, payloadUrl: string) {
     throw InternalError('Unable to get the file.', { err, payloadUrl })
   }
   if (!res.ok) {
-    throw InternalError('Unable to get zip file.', {
+    throw InternalError('Unable to get the file.', {
       payloadUrl,
       response: { status: res.status, body: await res.text() },
     })
@@ -108,50 +134,84 @@ export async function importModel(mirroredModelId: string, payloadUrl: string) {
 
   log.info({ mirroredModelId, payloadUrl }, 'Obtained the file from the payload URL.')
 
-  const modelCards: ModelCardRevisionInterface[] = []
-  const zipData = new Uint8Array(await res.arrayBuffer())
-  let zipContent
-  try {
-    zipContent = fflate.unzipSync(zipData, {
-      filter(file) {
-        return /[0-9]+.json/.test(file.name)
-      },
-    })
-  } catch (error) {
-    log.error({ error }, 'Unable to read zip file.')
-    throw InternalError('Unable to read zip file.', { mirroredModelId })
-  }
-  Object.keys(zipContent).forEach(function (key) {
-    const { modelCard, sourceModelId: newSourceModelId } = parseModelCard(
-      Buffer.from(zipContent[key]).toString('utf8'),
-      mirroredModelId,
-      sourceModelId,
-    )
-    if (!sourceModelId) {
-      sourceModelId = newSourceModelId
+  switch (importKind) {
+    case ImportKind.Documents: {
+      const modelCards: ModelCardRevisionInterface[] = []
+      const zipData = new Uint8Array(await res.arrayBuffer())
+      let zipContent
+      try {
+        zipContent = fflate.unzipSync(zipData, {
+          filter(file) {
+            return /[0-9]+.json/.test(file.name)
+          },
+        })
+      } catch (error) {
+        log.error({ error }, 'Unable to read zip file.')
+        throw InternalError('Unable to read zip file.', { mirroredModelId })
+      }
+      Object.keys(zipContent).forEach(function (key) {
+        const { modelCard, sourceModelId: newSourceModelId } = parseModelCard(
+          Buffer.from(zipContent[key]).toString('utf8'),
+          mirroredModelId,
+          sourceModelId,
+        )
+        if (!sourceModelId) {
+          sourceModelId = newSourceModelId
+        }
+        modelCards.push(modelCard)
+      })
+
+      log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
+
+      const newModelCards = (
+        await Promise.all(modelCards.map((card) => saveImportedModelCard(card, sourceModelId)))
+      ).filter((card): card is ModelCardRevisionInterface => !!card)
+
+      const mirroredModel = await setLatestImportedModelCard(mirroredModelId)
+
+      log.info(
+        {
+          mirroredModelId,
+          payloadUrl,
+          sourceModelId,
+          modelCardVersions: modelCards.map((modelCard) => modelCard.version),
+        },
+        'Finished importing the collection of model cards.',
+      )
+
+      return {
+        mirroredModel,
+        importResult: {
+          modelCardVersions: modelCards.map((modelCard) => modelCard.version),
+          newModelCards,
+        },
+      }
     }
-    modelCards.push(modelCard)
-  })
-
-  log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
-
-  const newModelCards = (
-    await Promise.all(modelCards.map((card) => saveImportedModelCard(card, sourceModelId)))
-  ).filter((card): card is ModelCardRevisionInterface => !!card)
-
-  const mirroredModel = await setLatestImportedModelCard(mirroredModelId)
-
-  log.info(
-    { mirroredModelId, payloadUrl, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) },
-    'Finished importing the collection of model cards.',
-  )
-
-  return {
-    mirroredModel,
-    sourceModelId,
-    modelCardVersions: modelCards.map((modelCard) => modelCard.version),
-    newModelCards,
+    case ImportKind.File: {
+      if (!filePath) {
+        throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta })
+      }
+      const result = await importModelFile(res, filePath, mirroredModelId, sourceModelIdMeta)
+      const mirroredModel = await getMirroredModelById(mirroredModelId)
+      return {
+        mirroredModel,
+        importResult: {
+          ...result,
+        },
+      }
+    }
+    default:
+      throw BadReq('Unrecognised import kind', { importKind })
   }
+}
+
+async function importModelFile(content: Response, importedPath: string, mirroredModelId: string, sourceModelId) {
+  const bucket = config.s3.buckets.uploads
+  const updatedPath = importedPath.replace(sourceModelId, mirroredModelId)
+  await putObjectStream(bucket, updatedPath, content.body as Readable)
+  log.debug({ bucket, path: updatedPath }, 'Imported file successfully uploaded to S3.')
+  await markFileAsCompleteAfterImport(updatedPath)
+  return { sourcePath: importedPath, newPath: updatedPath }
 }
 
 function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceModelId?: string) {
@@ -316,13 +376,21 @@ async function addModelCardRevisionsToZip(user: UserInterface, model: ModelDoc, 
   log.debug({ user, modelId: model.id }, 'Finished generating zip file of model card revisions.')
 }
 
-async function addReleasesToZip(user: UserInterface, model: ModelDoc, semvers: string[], zip: archiver.Archiver) {
+async function addReleasesToZip(
+  user: UserInterface,
+  model: ModelDoc,
+  semvers: string[],
+  zip: archiver.Archiver,
+  mirroredModelId: string,
+) {
   log.debug({ user, modelId: model.id, semvers }, 'Adding releases to zip file')
   const releases = await getReleasesForExport(user, model.id, semvers)
 
   const errors: any[] = []
   // Using a .catch here to ensure all errors are returned, rather than just the first error.
-  await Promise.all(releases.map((release) => addReleaseToZip(user, model, release, zip).catch((e) => errors.push(e))))
+  await Promise.all(
+    releases.map((release) => addReleaseToZip(user, model, release, zip, mirroredModelId).catch((e) => errors.push(e))),
+  )
   if (errors.length > 0) {
     throw InternalError('Error when generating the release zip file.', { errors })
   }
@@ -330,7 +398,13 @@ async function addReleasesToZip(user: UserInterface, model: ModelDoc, semvers: s
   return zip
 }
 
-async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: ReleaseDoc, zip: archiver.Archiver) {
+async function addReleaseToZip(
+  user: UserInterface,
+  model: ModelDoc,
+  release: ReleaseDoc,
+  zip: archiver.Archiver,
+  mirroredModelId: string,
+) {
   log.debug('Adding release to zip file of releases.', { user, modelId: model.id, semver: release.semver })
   const files: FileInterfaceDoc[] = await getFilesByIds(user, release.modelId, release.fileIds)
 
@@ -338,11 +412,20 @@ async function addReleaseToZip(user: UserInterface, model: ModelDoc, release: Re
     zip.append(JSON.stringify(release.toJSON()), { name: `releases/${release.semver}.json` })
     for (const file of files) {
       zip.append(JSON.stringify(file.toJSON()), { name: `files/${file._id}.json` })
-      await uploadToS3(file.path, (await downloadFile(user, file._id)).Body as stream.Readable, user.dn, {
-        modelId: model.id,
-        releaseId: release.id,
-        fileId: file.id,
-      })
+      await uploadToS3(
+        file.path,
+        (await downloadFile(user, file._id)).Body as stream.Readable,
+        user.dn,
+        {
+          modelId: model.id,
+          releaseId: release.id,
+          fileId: file.id,
+        },
+        {
+          filePath: file.path,
+          mirroredModelId,
+        },
+      )
     }
   } catch (error: any) {
     throw InternalError('Error when generating the zip file.', { error })

@@ -11,6 +11,7 @@ import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { longId } from '../utils/id.js'
+import log from './log.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
 
@@ -151,4 +152,17 @@ export async function getTotalFileSize(fileIds: string[]) {
       totalSize: { $sum: '$size' },
     })
   return totalSize.at(0).totalSize
+}
+
+export async function markFileAsCompleteAfterImport(path: string) {
+  const file = await FileModel.findOneAndUpdate(
+    {
+      path,
+    },
+    { complete: true },
+  )
+
+  if (!file) {
+    log.debug({ path }, 'No file document yet exists for this imported file.')
+  }
 }
