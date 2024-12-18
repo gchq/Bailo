@@ -5,12 +5,11 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
 from unittest.mock import ANY
 
-from fastapi.testclient import TestClient
 import modelscan
 import pytest
+from fastapi.testclient import TestClient
 
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.main import app, get_settings
