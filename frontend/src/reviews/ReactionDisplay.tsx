@@ -1,5 +1,6 @@
 import { Button, Tooltip } from '@mui/material'
-import { ReactNode, useMemo } from 'react'
+import { getUserInformation } from 'actions/user'
+import { ReactNode, useEffect, useState } from 'react'
 import { ReactionKindKeys } from 'types/types'
 import { plural } from 'utils/stringUtils'
 
@@ -11,28 +12,34 @@ type ReactionDisplayProps = {
 }
 
 export default function ReactionDisplay({ kind, icon, users, onReactionClick }: ReactionDisplayProps) {
-  const title = useMemo(() => {
-    let text = ''
-    if (users.length > 3) {
-      text = `${users[0]}, ${users[1]}, ${users[2]} + ${users.length - 3} more`
-    } else {
-      users.forEach((user, index) => {
-        text += `${user}`
-        if (index !== users.length - 1) {
-          text += ', '
-        }
-      })
+  const [usersToDisplay, setUsersToDisplay] = useState('')
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!usersToDisplay) {
+        setUsersToDisplay(
+          `${users
+            .slice(0, 3)
+            .map(async (user) => {
+              const response = await getUserInformation(user)
+              if (response.ok) {
+                const responseBody = await response.json()
+                return responseBody.entity.name
+              }
+            })
+            .join(', ')} ${users.length > 3 ? ` and ${users.length - 3} others` : ''}`,
+        )
+      }
     }
-    return text
-  }, [users])
+    fetchData()
+  }, [users, usersToDisplay])
 
   return (
-    <Tooltip title={title}>
+    <Tooltip title={usersToDisplay}>
       <Button
         size='small'
         aria-label={plural(users.length, kind)}
         onClick={() => onReactionClick(kind)}
-        variant='outlined'
         startIcon={icon}
       >
         {users.length}
