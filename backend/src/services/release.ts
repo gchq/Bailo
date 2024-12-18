@@ -21,7 +21,7 @@ import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
-export function isRelease(data: unknown): data is ReleaseInterface {
+export function isRelease(data: unknown): data is ReleaseDoc {
   if (typeof data !== 'object' || data === null) {
     return false
   }
@@ -38,7 +38,8 @@ export function isRelease(data: unknown): data is ReleaseInterface {
     !('deleted' in data) ||
     !('createdBy' in data) ||
     !('createdAt' in data) ||
-    !('updatedAt' in data)
+    !('updatedAt' in data) ||
+    !('_id' in data)
   ) {
     return false
   }
@@ -564,4 +565,10 @@ export async function getAllFileIds(modelId: string, semvers: string[]) {
     return result.at(0).fileIds
   }
   return []
+}
+
+export async function saveImportedRelease(release: ReleaseInterface) {
+  return await Release.findOneAndUpdate({ modelId: release.modelId, semver: release.semver }, release, {
+    upsert: true,
+  })
 }
