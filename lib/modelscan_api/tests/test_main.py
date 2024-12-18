@@ -46,7 +46,11 @@ def test_info():
 @patch("modelscan.modelscan.ModelScan.scan")
 @pytest.mark.parametrize(
     ("file_name", "file_content", "file_mime_type"),
-    [("foo.h5", EMPTY_CONTENTS, H5_MIME_TYPE), ("../foo.h5", EMPTY_CONTENTS, H5_MIME_TYPE)],
+    [
+        ("foo.h5", EMPTY_CONTENTS, H5_MIME_TYPE),
+        ("../foo.h5", EMPTY_CONTENTS, H5_MIME_TYPE),
+        ("-", EMPTY_CONTENTS, H5_MIME_TYPE),
+    ],
 )
 def test_scan_file(mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str):
     mock_scan.return_value = {}
