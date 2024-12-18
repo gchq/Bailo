@@ -9,8 +9,8 @@ from typing import Any
 from unittest.mock import Mock, patch
 
 import modelscan
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
 
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.dependencies import parse_path
@@ -60,7 +60,7 @@ def test_scan_file(mock_scan: Mock, file_name: str, file_content: Any, file_mime
 
 @pytest.mark.parametrize(
     ("file_name", "file_content", "file_mime_type"),
-    [("..", EMPTY_CONTENTS, H5_MIME_TYPE), ("../", EMPTY_CONTENTS, H5_MIME_TYPE)],
+    [("..", EMPTY_CONTENTS, H5_MIME_TYPE)],
 )
 def test_scan_file_escape_path_error(file_name: str, file_content: Any, file_mime_type: str):
     files = {"in_file": (file_name, file_content, file_mime_type)}

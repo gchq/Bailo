@@ -9,7 +9,7 @@ from typing import Any, Iterable
 
 import pytest
 
-from bailo_modelscan_api.dependencies import safe_join
+from bailo_modelscan_api.dependencies import parse_path, safe_join, sanitise_unix_filename
 
 # Helpers
 
@@ -26,106 +26,99 @@ def type_matrix(data: Iterable[Any], types: Iterable[type]) -> itertools.product
     return itertools.product(*[[t(d) for t in types] for d in data])
 
 
-def string_path_matrix(path1: str | Path, path2: str | Path) -> itertools.product[tuple[str, Path]]:
-    """Wrap type_matrix for convenience with str and Path types.
-
-    :param path1: A path to process.
-    :param path2: Another path to process.
-    :return: The matrix of both paths with types str and Path.
-    """
-    return type_matrix([path1, path2], [str, Path])
+# Tests
 
 
-def helper_test_safe_join(path1: str | Path, path2: str | Path, output: Path) -> None:
-    """Helper method for testing that all str and Path representations of the two paths will match the given output when joined.
+@pytest.mark.parametrize(
+    ("path", "output"),
+    [
+        ("foo.bar", "foo.bar"),
+        (".foo.bar", ".foo.bar"),
+        ("/foo.bar", "-foo.bar"),
+        ("foo/./bar", "foo-.-bar"),
+        ("foo.-/bar", "foo.--bar"),
+        (".", "."),
+        ("..", ".."),
+        ("/", "-"),
+        ("/.", "-."),
+        ("./", ".-"),
+        ("\n", "-"),
+        ("\r", "-"),
+        ("~", "~"),
+        ("".join(['\\[/\\?%*:|"<>0x7F0x00-0x1F]', chr(0x1F) * 15]), "-[----------0x7F0x00-0x1F]---------------"),
+        ("ad\nbla'{-+\\)(ç?", "ad-bla'{-+-)(ç-"),  # type: ignore
+    ],
+)
+def test_sanitise_unix_filename(path: str, output: str) -> None:
+    assert sanitise_unix_filename(path) == output
+
+
+@pytest.mark.parametrize(
+    ("path", "output"),
+    [
+        (None, Path().cwd()),
+        ("", Path().cwd()),
+        (".", Path().cwd()),
+        ("/tmp", Path("/tmp")),
+        ("/foo/bar", Path("/foo/bar")),
+        ("/foo/../bar", Path("/foo/../bar")),
+        ("/foo/bar space/baz", Path("/foo/bar space/baz")),
+        ("/C:\\Program Files\\HAL 9000", Path("/C:\\Program Files\\HAL 9000")),
+        ("/ISO&Emulator", Path("/ISO&Emulator")),
+        ("/$HOME", Path("/$HOME")),
+        ("~", Path().cwd().joinpath("~")),
+    ],
+)
+def test_parse_path(path: str | Path | None, output: Path) -> None:
+    if path is None:
+        assert parse_path(path) == output
+    else:
+        for (test_path,) in type_matrix((path,), (str, Path)):
+            assert parse_path(test_path) == output
+
+
+@pytest.mark.parametrize(
+    ("path1", "path2", "output"),
+    [
+        ("", "foo.bar", Path.cwd().joinpath("foo.bar")),
+        (".", "foo.bar", Path.cwd().joinpath("foo.bar")),
+        ("/tmp", "foo.bar", Path("/tmp/foo.bar")),
+        ("/tmp/", "foo.bar", Path("/tmp/foo.bar")),
+        ("/tmp/", "/foo.bar", Path("/tmp/-foo.bar")),
+        ("/tmp", ".foo.bar", Path("/tmp/.foo.bar")),
+        ("/tmp", "/foo.bar", Path("/tmp/-foo.bar")),
+        ("/tmp", "//foo.bar", Path("/tmp/--foo.bar")),
+        ("/tmp", "./foo.bar", Path("/tmp/.-foo.bar")),
+        ("/tmp", "./.foo.bar", Path("/tmp/.-.foo.bar")),
+        ("/tmp", "..foo.bar", Path("/tmp/..foo.bar")),
+        ("/tmp", "../foo.bar", Path("/tmp/..-foo.bar")),
+        ("/tmp", "../.foo.bar", Path("/tmp/..-.foo.bar")),
+        ("/tmp", ".", Path("/tmp/.")),
+        ("/tmp", "/", Path("/tmp/-")),
+        ("/tmp", "//", Path("/tmp/--")),
+        ("/tmp", "~", Path("/tmp/~")),
+    ],
+)
+def test_safe_join(path1: str | Path, path2: str, output: Path) -> None:
+    """Test that all str and Path representations of the two paths will match the given output when joined.
 
     :param path1: Directory part of the final path.
     :param path2: Filename part of the final path.
     :param output: Expected final path value.
     """
-    for test_dir, test_file in string_path_matrix(path1, path2):
-        res = safe_join(test_dir, test_file)
+    for (test_dir,) in type_matrix((path1,), (str, Path)):
+        res = safe_join(test_dir, path2)
         assert res == output
 
 
-def helper_test_safe_join_catch(path1: str | Path, path2: str | Path) -> None:
-    """Helper method for testing that all str and Path representation of the two paths will throw an error when joined.
+@pytest.mark.parametrize(("path1", "path2"), [("/tmp", ""), ("/tmp", "..")])
+def test_safe_join_catch(path1: str | Path, path2: str) -> None:
+    """Test that all str and Path representation of the two paths will throw an error when joined.
 
     :param path1: Directory part of the final path.
     :param path2: Filename part of the final path.
     """
     # check error thrown given two inputs
-    for test_dir, test_file in string_path_matrix(path1, path2):
+    for (test_dir,) in type_matrix((path1,), (str, Path)):
         with pytest.raises(ValueError):
-            safe_join(test_dir, test_file)
-
-
-# Tests
-
-
-def test_safe_join_blank():
-    helper_test_safe_join("", "foo.bar", Path.cwd().joinpath("foo.bar"))
-
-
-def test_safe_join_local():
-    helper_test_safe_join(".", "foo.bar", Path.cwd().joinpath("foo.bar"))
-
-
-def test_safe_join_abs():
-    helper_test_safe_join("/tmp", "foo.bar", Path("/tmp").joinpath("foo.bar"))
-
-
-def test_safe_join_abs_trailing():
-    helper_test_safe_join("/tmp/", "foo.bar", Path("/tmp").joinpath("foo.bar"))
-
-
-def test_safe_join_abs_dot():
-    helper_test_safe_join("/tmp", ".foo.bar", Path("/tmp").joinpath(".foo.bar"))
-
-
-def test_safe_join_abs_slash():
-    helper_test_safe_join("/tmp", "/foo.bar", Path("/tmp").joinpath("foo.bar"))
-
-
-def test_safe_join_abs_double_slash():
-    helper_test_safe_join("/tmp", "//foo.bar", Path("/tmp").joinpath("foo.bar"))
-
-
-def test_safe_join_abs_dot_slash():
-    helper_test_safe_join("/tmp", "./foo.bar", Path("/tmp").joinpath("foo.bar"))
-
-
-def test_safe_join_abs_dot_slash_dot():
-    helper_test_safe_join("/tmp", "./.foo.bar", Path("/tmp").joinpath(".foo.bar"))
-
-
-def test_safe_join_abs_double_dot():
-    helper_test_safe_join("/tmp", "..foo.bar", Path("/tmp").joinpath("..foo.bar"))
-
-
-def test_safe_join_abs_double_dot_slash():
-    helper_test_safe_join("/tmp", "../foo.bar", Path("/tmp").joinpath("foo.bar"))
-
-
-def test_safe_join_abs_double_dot_slash_dot():
-    helper_test_safe_join("/tmp", "../.foo.bar", Path("/tmp").joinpath(".foo.bar"))
-
-
-def test_safe_join_fail_blank():
-    helper_test_safe_join_catch("/tmp", "")
-
-
-def test_safe_join_fail_dot():
-    helper_test_safe_join_catch("/tmp", ".")
-
-
-def test_safe_join_fail_double_dot():
-    helper_test_safe_join_catch("/tmp", "..")
-
-
-def test_safe_join_fail_slash():
-    helper_test_safe_join_catch("/tmp", "/")
-
-
-def test_safe_join_fail_double_slash():
-    helper_test_safe_join_catch("/tmp", "//")
+            safe_join(test_dir, path2)
