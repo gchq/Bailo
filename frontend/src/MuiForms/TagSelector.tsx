@@ -9,15 +9,20 @@ interface TagSelectorProps {
   label: string
   formContext?: FormContextType
   required?: boolean
-  rawErrors?: string[]
 }
 
 export default function TagSelector({ onChange, value, label, formContext, required }: TagSelectorProps) {
   const theme = useTheme()
 
   const [newTag, setNewTag] = useState('')
+  const [errorText, setErrorText] = useState('')
 
   const handleNewTagSubmit = () => {
+    setErrorText('')
+    if (value.includes(newTag)) {
+      setErrorText('You cannot add duplicate tags')
+      return
+    }
     const updatedArray = value
     updatedArray.push(newTag)
     onChange(updatedArray)
@@ -50,6 +55,9 @@ export default function TagSelector({ onChange, value, label, formContext, requi
               ))}
             </Stack>
           </Box>
+          <Typography variant='caption' color={theme.palette.error.main}>
+            {errorText}
+          </Typography>
         </Stack>
       )}
       {formContext && !formContext.editMode && (
