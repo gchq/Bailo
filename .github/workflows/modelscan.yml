@@ -31,3 +31,9 @@ jobs:
         run: |
           cd lib/modelscan_api
           python -m pytest
+
+      # Pytest -m integration
+      - name: Run integration testing
+        run: |
+          cd lib/modelscan_api
+          python -m pytest -m integration

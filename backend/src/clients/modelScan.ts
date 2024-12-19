@@ -33,18 +33,19 @@ interface ModelScanResponse {
       skipped_files: string[]
     }
   }
-  issues: [
-    {
-      description: string
-      operator: string
-      module: string
-      source: string
-      scanner: string
-      severity: string
-    },
-  ]
-  // TODO: currently unknown what this might look like
-  errors: object[]
+  issues: {
+    description: string
+    operator: string
+    module: string
+    source: string
+    scanner: string
+    severity: string
+  }[]
+  errors: {
+    category: string
+    description: string
+    source: string
+  }[]
 }
 
 export async function getModelScanInfo() {

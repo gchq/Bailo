@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,17 @@ def parse_path(path: str | Path | None) -> Path:
     return Path().cwd() if path == "." else Path(path).absolute()
 
 
-def safe_join(root_dir: str | Path | None, filename: str | Path) -> Path:
+def sanitise_unix_filename(filename: str) -> str:
+    """Safely convert an arbitrary string to a valid unix filename by only preserving explicitly allowed characters as per https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+    Note that this is not safe for Windows users as it doesn't check for reserved words e.g. CON and AUX.
+
+    :param filename: the untrusted filename to be sanitised
+    :return: a valid filename with trusted characters
+    """
+    return re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", "-", filename)
+
+
+def safe_join(root_dir: str | Path | None, filename: str) -> Path:
     """Combine a trusted directory path with an untrusted filename to get a full path.
 
     :param root_dir: Trusted path/directory.
@@ -33,13 +44,13 @@ def safe_join(root_dir: str | Path | None, filename: str | Path) -> Path:
     if not filename or not str(filename).strip():
         raise ValueError("filename must not be empty")
 
-    stripped_filename = Path(str(filename)).name.strip()
+    safe_filename = sanitise_unix_filename(filename).strip()
 
-    if not stripped_filename:
+    if not safe_filename:
         raise ValueError("filename must not be empty")
 
     parent_dir = parse_path(root_dir).resolve()
-    full_path = parent_dir.joinpath(stripped_filename).resolve()
+    full_path = parent_dir.joinpath(safe_filename).resolve()
     if not full_path.is_relative_to(parent_dir):
         raise ValueError("Could not safely join paths.")
 

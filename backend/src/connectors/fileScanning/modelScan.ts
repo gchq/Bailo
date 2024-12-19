@@ -63,6 +63,21 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
     try {
       const scanResults = await scanStream(s3Stream, file.name, file.size)
 
+      if (scanResults.errors.length !== 0) {
+        log.error(
+          { errors: scanResults.errors, modelId: file.modelId, fileId: file._id, name: file.name },
+          'Scan errored.',
+        )
+        return [
+          {
+            toolName: modelScanToolName,
+            state: ScanState.Error,
+            scannerVersion: modelscanVersion,
+            lastRunAt: new Date(),
+          },
+        ]
+      }
+
       const issues = scanResults.summary.total_issues
       const isInfected = issues > 0
       const viruses: string[] = []
@@ -91,6 +106,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
         {
           toolName: modelScanToolName,
           state: ScanState.Error,
+          scannerVersion: modelscanVersion,
           lastRunAt: new Date(),
         },
       ]
