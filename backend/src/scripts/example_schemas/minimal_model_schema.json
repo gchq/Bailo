@@ -84,7 +84,8 @@
             "questionThree": {
               "title": "Question three",
               "description": "This is number question",
-              "type": "number"
+              "type": "string",
+              "format": "date"
             },
             "questionFour": {
               "title": "Question four",
