@@ -69,7 +69,7 @@ export const putModelCard = [
 
     const modelCard = await updateModelCard(req.user, modelId, metadata)
 
-    await audit.onUpdateModelCard(req, modelId, modelCard)
+    await audit.onUpdateModelCard(req, modelId, modelCard.toObject())
 
     return res.json({
       card: modelCard,
