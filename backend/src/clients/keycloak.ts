@@ -1,3 +1,4 @@
+import c from 'config'
 import { UserInformation } from '../connectors/authentication/Base.js'
 import config from '../utils/config.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'
@@ -17,7 +18,7 @@ export async function listUsers(query: string, exactMatch = false) {
   const token = await getKeycloakToken()
 
   const filter = exactMatch ? `${query}` : `${query}*`
-  const url = `${config.oauth.keycloak.authServerUrl}/admin/realms/${realm}/users?search=${filter}`
+  const url = `${config.oauth.keycloak.serverUrl}/admin/realms/${realm}/users?search=${filter}`
 
   let results
   try {
@@ -30,14 +31,15 @@ export async function listUsers(query: string, exactMatch = false) {
   } catch (err) {
     throw InternalError('Error when querying Keycloak for users.', { err })
   }
-  const resultsData = await results.json() as { data: any[] }
-  if (!resultsData.data) {
+  const resultsData = await results.json() as any[]
+  console.log(resultsData)
+  if (!resultsData || resultsData.length === 0) {
     return []
   }
 
   const initialValue: Array<UserInformation & { dn: string }> = []
-  const users = resultsData.data.reduce((acc, keycloakUser) => {
-    const dn = keycloakUser[dnName]
+  const users = resultsData.reduce((acc, keycloakUser) => {
+    const dn = keycloakUser.id // Assuming 'id' is the dnName
     if (!dn) {
       return acc
     }
@@ -57,7 +59,7 @@ async function getKeycloakToken() {
   if (!config?.oauth?.keycloak) {
     throw ConfigurationError('OAuth Keycloak configuration is missing')
   }
-  const url = `${config.oauth.keycloak.authServerUrl}/realms/${config.oauth.keycloak.realm}/protocol/openid-connect/token`
+  const url = `${config.oauth.keycloak.serverUrl}/realms/${config.oauth.keycloak.realm}/protocol/openid-connect/token`
   const params = new URLSearchParams()
   params.append('client_id', config.oauth.keycloak.clientId)
   params.append('client_secret', config.oauth.keycloak.clientSecret)

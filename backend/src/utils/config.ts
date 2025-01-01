@@ -123,7 +123,7 @@ export interface Config {
       realm: string
       clientId: string
       clientSecret: string
-      authServerUrl: string
+      serverUrl: string
     }
   }
 
