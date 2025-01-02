@@ -3,13 +3,25 @@ import { NextFunction, Request, Response, Router } from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
-import { listUsers } from '../../clients/cognito.js'
+import { listUsers as listUsersCognito } from '../../clients/cognito.js'
+import { listUsers as listUsersKeycloak } from '../../clients/keycloak.js'
+
 import { UserInterface } from '../../models/User.js'
 import config from '../../utils/config.js'
 import { getConnectionURI } from '../../utils/database.js'
 import { fromEntity, toEntity } from '../../utils/entity.js'
 import { InternalError, NotFound } from '../../utils/error.js'
 import { BaseAuthenticationConnector, RoleKeys, UserInformation } from './Base.js'
+
+function listUsers(query: string, exactMatch = false) {
+  if (config.oauth.cognito) {
+    return listUsersCognito(query, exactMatch)
+  } else if (config.oauth.keycloak) {
+    return listUsersKeycloak(query, exactMatch)
+  } else {
+    throw InternalError('No oauth configuration found', { oauthConfiguration: config.oauth })
+  }
+}
 
 const OauthEntityKind = {
   User: 'user',
