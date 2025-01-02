@@ -2,8 +2,12 @@
 [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url]
 [![License][license-shield]][license-url]
 
-> **NOTE: `main` branch now tracks `v2` by default. To access the original Bailo, see the `v1` branch. `v1` is in the
-> process of being removed from this project, see [migration]() for more information.**
+<!-- prettier-ignore-start -->
+> [!NOTE]
+> `main` branch now tracks `v2` by default. To access the legacy Bailo, see the `v1` branch. `v1` has been removed
+> from this project - see [migrations](https://gchq.github.io/Bailo/docs/administration/migrations/bailo-2.0) for more
+> information.
+<!-- prettier-ignore-end -->
 
 <!-- PROJECT LOGO -->
 <br />
@@ -40,13 +44,16 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#requirements">Requirements</a></li>
         <li><a href="#installation">Installation</a></li>
+        <li><a href="#service-ports">Service Ports</a></li>
+        <li><a href="#logical-project-flow-overview">Logical Project Flow (Overview)</a></li>
+        <li><a href="#known-issues">Known Issues</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#breaking">Breaking Changes</a></li>
+    <li><a href="#breaking-changes">Breaking Changes</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
@@ -76,14 +83,14 @@ sharing.
 
 ## Getting Started
 
-### Requirements:
+### Requirements
 
 - Node v22
 - Docker / Docker Compose
 
 <br />
 
-### Installation:
+### Installation
 
 To run in standalone mode, not development mode (http://localhost:8080). Not for production use:
 
@@ -116,7 +123,7 @@ JWKS file for the public key referenced in the backend application configuration
 
 <br />
 
-### Service Ports:
+### Service Ports
 
 | Service    | Host  | Notes                 |
 | ---------- | ----- | --------------------- |
@@ -149,29 +156,26 @@ You can test out your new deployment using the example models which can be found
 
 1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
    `frontend/pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
-2. Data is loaded using [SWR](https://swr.vercel.app/). Data loaders are stored in `./frontend/data`. Each one exposes
+2. Data is loaded using [SWR](https://swr.vercel.app/). Data loaders are stored in `frontend/actions`. Each one exposes
    variables to specify if it is loading, errored, data, etc.
-3. Requests to the backend get routed through [express](https://expressjs.com/) within `backend/routes.ts`. Each route
-   is an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
-4. Routes interact with the database via `mongoose`, which stores models in `./backend/models`.
+3. Requests to the backend get routed through [express](https://expressjs.com/) within `backend/src/routes.ts`. Each
+   route is an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
+4. Routes interact with the database via `mongoose`, which stores models in `backend/src/models`.
 
 <br />
 
 ### Known Issues
 
-_Issue: Sometimes Docker struggles when you add a new dependency._
+- _Issue: Sometimes Docker struggles when you add a new dependency._ <br /> Fix: Run `docker compose down --rmi all`
+  followed by `docker compose up --build`.
 
-Fix: Run `docker compose down --rmi all` followed by `docker compose up --build`.
+- _Issue: Sometimes SWR fails to install its own binary and the project will refuse to start up (development only)_
+  <br /> Fix: Run `npm uninstall next && npm install next`. Some users report still having issues. If so, run:
+  `rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
 
-_Issue: Sometimes SWR fails to install its own binary and the project will refuse to start up (development only)_
-
-Fix: Run `npm uninstall next && npm install next`. Some users report still having issues. If so, run:
-`rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
-
-_Issue: Unable to authenticate to the Docker registry / compile binaries._
-
-Fix: Make sure that your authentication proxy is setup to allow the 'Authorisation' header. Make sure that your
-application is able to access the Docker registry internally as it will not provide user authentication.
+- _Issue: Unable to authenticate to the Docker registry / compile binaries._ <br /> Fix: Make sure that your
+  authentication proxy is setup to allow the 'Authorisation' header. Make sure that your application is able to access
+  the Docker registry internally as it will not provide user authentication.
 
 <br />
 
@@ -185,7 +189,20 @@ See [our user documentation](https://gchq.github.io/Bailo/docs)
 
 ## Contributing
 
-See [our contribution guide](https://gchq.github.io/Bailo/docs/developers/contributing)
+If you're looking for an existing issue to help with, check out the
+[help wanted tickets](https://github.com/gchq/bailo/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) on GitHub.
+If you see any that you’re interested in working on, comment on it to let everyone know you’re working on it. If there’s
+no ticket for what you want to contribute, start a [new issue](https://github.com/gchq/bailo/issues) to discuss whether
+it follows the aims of this project. We ask this even for bugs, as there may be multiple solutions to be considered.
+
+Prior to us accepting any work, you must sign the [GCHQ CLA Agreement](https://cla-assistant.io/gchq/Bailo). We follow a
+branching strategy for handling contributions:
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/new_thing`)
+3. Commit your Changes (`git commit -m 'Add a new thing'`)
+4. Push to the Branch (`git push origin feature/new_thing`)
+5. Open a Pull Request
 
 <br />
 
@@ -228,7 +245,3 @@ information.
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
 [license-url]: https://github.com/gchq/bailo/blob/main/public/LICENSE.txt
 [product-screenshot]: frontend/public/images/bailo-marketplace.png
-
-```
-
-```
