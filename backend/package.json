@@ -29,7 +29,7 @@
     "@opentelemetry/host-metrics": "^0.35.3",
     "@opentelemetry/sdk-metrics": "^1.30.0",
     "@smithy/node-http-handler": "^3.1.2",
-    "@types/express-session": "^1.18.0",
+    "@types/express-session": "^1.18.1",
     "app-root-path": "^3.1.0",
     "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
