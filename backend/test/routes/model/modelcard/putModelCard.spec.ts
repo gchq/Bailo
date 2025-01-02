@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
+import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../../../../src/models/ModelCardRevision.js'
 import { putModelCardSchema } from '../../../../src/routes/v2/model/modelcard/putModelCard.js'
 import { createFixture, testPut } from '../../../testUtils/routes.js'
 
@@ -8,19 +9,17 @@ vi.mock('../../../../src/connectors/authorisation/index.js')
 vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/audit/index.js')
 
-vi.mock('../../../../src/services/model.js', async () => {
-  const actual = (await vi.importActual('../../../../src/services/model.js')) as object
+const mockModelService = vi.hoisted(() => {
   return {
-    ...actual,
-    updateModelCard: vi.fn(() => ({ _id: 'test' })),
+    updateModelCard: vi.fn(() => new ModelCardRevisionModel({ _id: 'test' }) as ModelCardRevisionDoc),
   }
 })
+vi.mock('../../../../src/services/model.js', () => mockModelService)
 
-describe('routes > model > postModel', () => {
+describe('routes > model > putModelCardu', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(putModelCardSchema)
     const res = await testPut(`/api/v2/model/${fixture.params.modelId}/model-cards`, fixture)
-
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
   })
@@ -28,7 +27,6 @@ describe('routes > model > postModel', () => {
   test('audit > expected call', async () => {
     const fixture = createFixture(putModelCardSchema)
     const res = await testPut(`/api/v2/model/${fixture.params.modelId}/model-cards`, fixture)
-
     expect(res.statusCode).toBe(200)
     expect(audit.onUpdateModelCard).toBeCalled()
     expect(audit.onUpdateModelCard.mock.calls.at(0)?.at(1)).toMatchSnapshot()
