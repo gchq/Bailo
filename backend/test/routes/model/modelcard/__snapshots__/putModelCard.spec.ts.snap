@@ -1,18 +1,20 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > model > putModelCardu > 200 > ok 1`] = `
+exports[`routes > model > putModelCard > 200 > ok 1`] = `
 {
   "card": {
-    "_id": "67767e11a66dea3e55003da9",
-    "id": "67767e11a66dea3e55003da9",
+    "_id": "6776901b879d08e34b599d7e",
+    "id": "6776901b879d08e34b599d7e",
+    "modelId": "test",
   },
 }
 `;
 
-exports[`routes > model > putModelCardu > audit > expected call 1`] = `"vespillo"`;
+exports[`routes > model > putModelCard > audit > expected call 1`] = `"vespillo"`;
 
-exports[`routes > model > putModelCardu > audit > expected call 2`] = `
+exports[`routes > model > putModelCard > audit > expected call 2`] = `
 {
-  "_id": "67767e11a66dea3e55003daa",
+  "_id": "6776901b879d08e34b599d7e",
+  "modelId": "test",
 }
 `;
