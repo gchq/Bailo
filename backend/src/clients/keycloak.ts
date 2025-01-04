@@ -28,13 +28,15 @@ function isTokenResponse(resp: unknown): resp is TokenResponse {
 export async function listUsers(query: string, exactMatch = false) {
   let dnName: string
   let realm: string
+
+  if (!config.oauth?.keycloak) {
+    throw ConfigurationError('OAuth Keycloak configuration is missing')
+  }
+
   try {
-    if (!config?.oauth?.keycloak) {
-      throw ConfigurationError('OAuth Keycloak configuration is missing')
-    }
     realm = config.oauth.keycloak.realm
   } catch (e) {
-    throw ConfigurationError('Cannot find userIdAttribute in oauth configuration', { oauthConfiguration: config?.oauth })
+    throw ConfigurationError('Cannot find realm in Keycloak configuration', { config: config.oauth.keycloak })
   }
 
   const token = await getKeycloakToken()
@@ -80,7 +82,7 @@ export async function listUsers(query: string, exactMatch = false) {
 }
 
 async function getKeycloakToken() {
-  if (!config?.oauth?.keycloak) {
+  if (!config.oauth?.keycloak) {
     throw ConfigurationError('OAuth Keycloak configuration is missing')
   }
   const url = `${config.oauth.keycloak.serverUrl}/realms/${config.oauth.keycloak.realm}/protocol/openid-connect/token`
