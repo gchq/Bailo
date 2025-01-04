@@ -110,13 +110,13 @@ data:
             origin: '{{ .Values.oauth.origin }}',
           },
 
-          cognito: {
-            key: '{{ .Values.oauth.cognito.key }}',
-            secret: '{{ .Values.oauth.cognito.secret }}',
-            dynamic: {{ .Values.oauth.cognito.dynamic }},
-            response: {{ .Values.oauth.cognito.response }},
-            callback: '{{ .Values.oauth.cognito.callback }}',
-            subdomain: '{{ .Values.oauth.cognito.subdomain }}',
+          '{{ .Values.oauth.provider.name }}': {
+            key: '{{ .Values.oauth.provider.key }}',
+            secret: '{{ .Values.oauth.provider.secret }}',
+            dynamic: {{ .Values.oauth.provider.dynamic }},
+            response: {{ .Values.oauth.provider.response }},
+            callback: '{{ .Values.oauth.provider.callback }}',
+            subdomain: '{{ .Values.oauth.provider.subdomain }}',
           },
         },
         cognito: {
@@ -129,6 +129,13 @@ data:
           },
           userPoolId: '{{ .Values.oauth.identityProviderClient.userPoolId }}',
           userIdAttribute: '{{ .Values.oauth.identityProviderClient.userIdAttribute }}',
+        },
+
+        keycloak: {
+          realm: '{{ .Values.oauth.keycloak.realm }}',
+          clientId: '{{ .Values.oauth.keycloak.clientId }}',
+          clientSecret: '{{ .Values.oauth.keycloak.clientSecret }}',
+          serverUrl: '{{ .Values.oauth.keycloak.serverUrl }}',
         },
       },
 

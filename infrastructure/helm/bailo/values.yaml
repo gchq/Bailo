@@ -71,16 +71,22 @@ cookie:
 oauth:
   enabled: false
   origin: "bailo fqdn"
-  cognito:
-    key: "cognito app client id"
-    secret: "cognito app client secret"
+  provider:
+    name: "cognito" # cognito | keycloak
+    key: "app client id" 
+    secret: "app client secret"
     dynamic: [] # example 'scope'
     response: [] #example 'tokens', 'raw', 'jwt'
     callback: "" # exmaple /
-    subdomain: "cognito domain"
-  identityProviderClient:
+    subdomain: "domain"
+  identityProviderClient: # cognito
     userPoolId: "region_id"
     userIdAttribute: "name"
+  keycloak: # keycloak
+    realm: "realm"
+    clientId: "client_id"
+    clientSecret: "client_secret"
+    authServerUrl: "auth_server_url"
 
 # Used for aws storage
 aws:
