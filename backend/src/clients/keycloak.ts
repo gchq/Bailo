@@ -1,4 +1,3 @@
-import c from 'config'
 import config from '../utils/config.js'
 import fetch, { Response } from 'node-fetch'
 import { UserInformation } from '../connectors/authentication/Base.js'
