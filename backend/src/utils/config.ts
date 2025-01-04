@@ -9,6 +9,7 @@ import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
 import { DefaultSchema } from '../services/schema.js'
 import { UiConfig } from '../types/types.js'
 import { deepFreeze } from './object.js'
+import { ConfigurationError } from './error.js'
 
 export interface Config {
   api: {
@@ -183,7 +184,7 @@ if (config.oauth &&
   !config.oauth.keycloak &&
   !config.oauth.cognito
 ) {
-  throw new Error('If OAuth is configured, either Keycloak or Cognito configuration must be provided.')
+  throw ConfigurationError('If OAuth is configured, either Keycloak or Cognito configuration must be provided.', { oauthConfiguration: config.oauth })
 }
 
 export default deepFreeze(config) as Config
