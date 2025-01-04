@@ -3,6 +3,19 @@ import { UserInformation } from '../connectors/authentication/Base.js'
 import config from '../utils/config.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'
 
+type KeycloakUser = {
+  id: string;
+  email?: string;
+  firstName?: string;
+};
+
+function isKeycloakUserArray(resp: unknown): resp is KeycloakUser[] {
+  if (!Array.isArray(resp)) {
+    return false;
+  }
+  return resp.every(user => typeof user === 'object' && user !== null && 'id' in user);
+}
+
 export async function listUsers(query: string, exactMatch = false) {
   let dnName: string
   let realm: string
@@ -31,8 +44,10 @@ export async function listUsers(query: string, exactMatch = false) {
   } catch (err) {
     throw InternalError('Error when querying Keycloak for users.', { err })
   }
-  const resultsData = await results.json() as any[]
-  console.log(resultsData)
+  const resultsData = await results.json()
+  if (!isKeycloakUserArray(resultsData)) {
+    throw InternalError('Unrecognised response body when listing users.', { responseBody: resultsData });
+  }
   if (!resultsData || resultsData.length === 0) {
     return []
   }
