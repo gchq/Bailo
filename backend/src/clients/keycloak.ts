@@ -1,6 +1,7 @@
 import c from 'config'
-import { UserInformation } from '../connectors/authentication/Base.js'
 import config from '../utils/config.js'
+import fetch, { Response } from 'node-fetch'
+import { UserInformation } from '../connectors/authentication/Base.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'
 
 type KeycloakUser = {
@@ -41,7 +42,7 @@ export async function listUsers(query: string, exactMatch = false) {
   const filter = exactMatch ? `${query}` : `${query}*`
   const url = `${config.oauth.keycloak.serverUrl}/admin/realms/${realm}/users?search=${filter}`
 
-  let results
+  let results: Response
   try {
     results = await fetch(url, {
       method: 'GET',
@@ -89,7 +90,7 @@ async function getKeycloakToken() {
   params.append('grant_type', 'client_credentials')
 
   try {
-    const response = await fetch(url, {
+    const response: Response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
