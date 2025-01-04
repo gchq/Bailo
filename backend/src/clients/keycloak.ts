@@ -16,6 +16,14 @@ function isKeycloakUserArray(resp: unknown): resp is KeycloakUser[] {
   return resp.every(user => typeof user === 'object' && user !== null && 'id' in user);
 }
 
+type TokenResponse = {
+  access_token: string;
+};
+
+function isTokenResponse(resp: unknown): resp is TokenResponse {
+  return typeof resp === 'object' && resp !== null && 'access_token' in resp;
+}
+
 export async function listUsers(query: string, exactMatch = false) {
   let dnName: string
   let realm: string
@@ -88,7 +96,10 @@ async function getKeycloakToken() {
       },
       body: params
     })
-    const data = await response.json() as { access_token: string }
+    const data = await response.json();
+    if (!isTokenResponse(data)) {
+      throw InternalError('Unrecognised response body when obtaining Keycloak token.', { responseBody: data });
+    }
     if (!data.access_token) {
       throw InternalError('Access token is missing in the response', { response: data })
     }
