@@ -430,7 +430,7 @@ contextmanager-decorators=contextlib.contextmanager
 
 # List of members which are set dynamically and missed by pylint inference
 
-# system, and so shouldn't trigger E1101 when accessed. Python regular
+# system, and so should not trigger E1101 when accessed. Python regular
 
 # expressions are accepted.
 
