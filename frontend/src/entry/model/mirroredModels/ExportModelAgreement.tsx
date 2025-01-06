@@ -47,7 +47,7 @@ export default function ExportModelAgreement({ modelId }: ExportModelAgreementPr
 
   return (
     <>
-      <Typography variant='h6' component='h1' color='primary' align='center'>
+      <Typography variant='h6' component='h1' color='primary'>
         Model Export Agreement
       </Typography>
       <Box component='form' onSubmit={handleSubmit}>
