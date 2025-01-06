@@ -72,12 +72,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
           <Box component='form' onSubmit={handleSave}>
             <Stack spacing={3} divider={<Divider flexItem />}>
               <Accordion expanded={isSettingsOpen} onChange={() => setIsSettingsOpen(isSettingsOpen ? false : true)}>
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls='panel1-content'
-                  id='panel1-header'
-                  sx={{ px: 0 }}
-                >
+                <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0 }}>
                   <Typography variant='h6' component='h1' color='primary' align='center'>
                     Model Export Settings
                   </Typography>
