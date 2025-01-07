@@ -5,14 +5,16 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock, patch
 
 import modelscan
+import pytest
 from fastapi.testclient import TestClient
 
-from .config import Settings
-from .dependencies import parse_path
-from .main import app, get_settings
+from bailo_modelscan_api.config import Settings
+from bailo_modelscan_api.dependencies import parse_path
+from bailo_modelscan_api.main import app, get_settings
 
 client = TestClient(app)
 
@@ -23,6 +25,10 @@ def get_settings_override():
 
 
 app.dependency_overrides[get_settings] = get_settings_override
+
+
+EMPTY_CONTENTS = rb""
+H5_MIME_TYPE = "application/x-hdf5"
 
 
 def test_info():
@@ -38,9 +44,17 @@ def test_info():
 
 
 @patch("modelscan.modelscan.ModelScan.scan")
-def test_scan_file(mock_scan: Mock):
+@pytest.mark.parametrize(
+    ("file_name", "file_content", "file_mime_type"),
+    [
+        ("foo.h5", EMPTY_CONTENTS, H5_MIME_TYPE),
+        ("../foo.h5", EMPTY_CONTENTS, H5_MIME_TYPE),
+        ("-", EMPTY_CONTENTS, H5_MIME_TYPE),
+    ],
+)
+def test_scan_file(mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str):
     mock_scan.return_value = {}
-    files = {"in_file": ("foo.h5", rb"", "application/x-hdf5")}
+    files = {"in_file": (file_name, file_content, file_mime_type)}
 
     response = client.post("/scan/file", files=files)
 
@@ -48,19 +62,12 @@ def test_scan_file(mock_scan: Mock):
     mock_scan.assert_called_once()
 
 
-@patch("modelscan.modelscan.ModelScan.scan")
-def test_scan_file_escape_path(mock_scan: Mock):
-    mock_scan.return_value = {}
-    files = {"in_file": ("../foo.bar", rb"", "application/x-hdf5")}
-
-    response = client.post("/scan/file", files=files)
-
-    assert response.status_code == 200
-    mock_scan.assert_called_once()
-
-
-def test_scan_file_escape_path_error():
-    files = {"in_file": ("..", rb"", "text/plain")}
+@pytest.mark.parametrize(
+    ("file_name", "file_content", "file_mime_type"),
+    [("..", EMPTY_CONTENTS, H5_MIME_TYPE)],
+)
+def test_scan_file_escape_path_error(file_name: str, file_content: Any, file_mime_type: str):
+    files = {"in_file": (file_name, file_content, file_mime_type)}
 
     response = client.post("/scan/file", files=files)
 
@@ -69,9 +76,13 @@ def test_scan_file_escape_path_error():
 
 
 @patch("modelscan.modelscan.ModelScan.scan")
-def test_scan_file_exception(mock_scan: Mock):
+@pytest.mark.parametrize(
+    ("file_name", "file_content", "file_mime_type"),
+    [("foo.h5", EMPTY_CONTENTS, H5_MIME_TYPE)],
+)
+def test_scan_file_exception(mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str):
     mock_scan.side_effect = Exception("Mocked error!")
-    files = {"in_file": ("foo.h5", rb"", "application/x-hdf5")}
+    files = {"in_file": (file_name, file_content, file_mime_type)}
 
     response = client.post("/scan/file", files=files)
 
@@ -83,8 +94,12 @@ def test_scan_file_exception(mock_scan: Mock):
     Path.unlink(Path.joinpath(parse_path(get_settings().download_dir), "foo.h5"), missing_ok=True)
 
 
-def test_scan_file_filename_missing():
-    files = {"in_file": (" ", rb"", "application/x-hdf5")}
+@pytest.mark.parametrize(
+    ("file_name", "file_content", "file_mime_type"),
+    [(" ", EMPTY_CONTENTS, H5_MIME_TYPE)],
+)
+def test_scan_file_filename_missing(file_name: str, file_content: Any, file_mime_type: str):
+    files = {"in_file": (file_name, file_content, file_mime_type)}
 
     response = client.post("/scan/file", files=files)
 

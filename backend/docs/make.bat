@@ -19,7 +19,7 @@ if errorlevel 9009 (
 	echo.to the full path of the 'sphinx-build' executable. Alternatively you
 	echo.may add the Sphinx directory to PATH.
 	echo.
-	echo.If you don't have Sphinx installed, grab it from
+	echo.If you do not have Sphinx installed, grab it from
 	echo.https://www.sphinx-doc.org/
 	exit /b 1
 )
