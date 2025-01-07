@@ -144,17 +144,20 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
           <ListItemText
             primary={object.primary}
             secondary={object.secondary}
-            primaryTypographyProps={{
-              sx: {
-                fontWeight: 'bold',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                color: theme.palette.primary.main,
+            slotProps={{
+              primary: {
+                sx: {
+                  fontWeight: 'bold',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  color: theme.palette.primary.main,
+                },
               },
-            }}
-            secondaryTypographyProps={{
-              sx: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+
+              secondary: {
+                sx: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+              },
             }}
           />
         </ListItemButton>
