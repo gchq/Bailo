@@ -54,7 +54,7 @@
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.0",
     "semver": "^7.6.2",
-    "sharp": "^0.33.4",
+    "sharp": "^0.33.5",
     "swagger-ui-react": "^5.17.14",
     "swr": "^2.2.5",
     "typescript": "5.5.3",
