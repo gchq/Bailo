@@ -139,9 +139,9 @@ export default function SchemaSelect({ entry }: SchemaSelectProps) {
               </Typography>
             </Stack>
             <Stack sx={{ mt: 2 }} spacing={2} alignItems='center'>
-              <Accordion defaultExpanded sx={accordionStyling}>
+              <Accordion defaultExpanded sx={accordionStyling} slotProps={{ heading: { component: 'h2' } }}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h2'>
+                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6'>
                     Active Schemas
                   </Typography>
                 </AccordionSummary>
@@ -153,7 +153,7 @@ export default function SchemaSelect({ entry }: SchemaSelectProps) {
               </Accordion>
               <Accordion sx={accordionStyling}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h2'>
+                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6'>
                     Inactive Schemas
                   </Typography>
                 </AccordionSummary>

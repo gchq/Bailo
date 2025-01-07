@@ -185,17 +185,19 @@ interface TabPanelProps {
 
 function CustomTabPanel(props: TabPanelProps) {
   const { children, tabKey, currentTab, ...other } = props
-  const theme = useTheme()
 
   return (
     <div role='tabpanel' hidden={currentTab !== tabKey} {...other}>
       {currentTab === tabKey && (
         <Box
-          sx={{
-            backgroundColor: theme.palette.mode === 'light' ? 'white' : grey[800],
+          sx={(theme) => ({
+            backgroundColor: grey[800],
             p: 2,
             mb: 2,
-          }}
+            ...theme.applyStyles('light', {
+              backgroundColor: 'white',
+            }),
+          })}
         >
           {children}
         </Box>

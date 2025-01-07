@@ -1,5 +1,4 @@
 import Box from '@mui/material/Box'
-import { useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import { useGetUiConfig } from 'actions/uiConfig'
 import cookies from 'js-cookie'
@@ -21,7 +20,6 @@ export type WrapperProps = {
 }
 
 export default function Wrapper({ children }: WrapperProps): ReactElement {
-  const theme = useTheme()
   const [open, setOpen] = useState(false)
   const [pageTopStyling, setPageTopStyling] = useState({})
   const [contentTopStyling, setContentTopStyling] = useState({})
@@ -105,12 +103,15 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
         )}
         <Box
           component='main'
-          sx={{
-            backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
+          sx={(theme) => ({
+            backgroundColor: theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',
-          }}
+            ...theme.applyStyles('light', {
+              backgroundColor: theme.palette.grey[100],
+            }),
+          })}
         >
           <Toolbar />
           <Box sx={contentTopStyling}>

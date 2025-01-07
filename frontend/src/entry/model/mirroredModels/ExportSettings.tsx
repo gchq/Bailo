@@ -56,11 +56,9 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
   return (
     <>
       <ExportModelAgreement modelId={model.id} />
-      <Accordion sx={{ borderTop: 'none' }}>
+      <Accordion sx={{ borderTop: 'none' }} slotProps={{ heading: { component: 'h3' } }}>
         <AccordionSummary sx={{ pl: 0 }} expandIcon={<ExpandMoreIcon />}>
-          <Typography component='h3' variant='h6'>
-            Export Settings
-          </Typography>
+          <Typography variant='h6'>Export Settings</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Box component='form' onSubmit={handleSave}>

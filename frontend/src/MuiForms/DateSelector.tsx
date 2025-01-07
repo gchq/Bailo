@@ -46,10 +46,22 @@ export default function DateSelector(props: DateSelectorProps) {
       )}
       {!formContext.editMode && (
         <Typography
-          sx={{
-            fontStyle: value ? 'unset' : 'italic',
-            color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
-          }}
+          sx={[
+            value
+              ? {
+                  fontStyle: 'unset',
+                }
+              : {
+                  fontStyle: 'italic',
+                },
+            value
+              ? {
+                  color: theme.palette.common.black,
+                }
+              : {
+                  color: theme.palette.customTextInput.main,
+                },
+          ]}
         >
           {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
         </Typography>

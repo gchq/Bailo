@@ -18,7 +18,21 @@ export default function Forbidden({
 }: ForbiddenProps) {
   return (
     <Stack justifyContent='center' alignItems='center' sx={additionalStyling}>
-      <Box sx={{ m: noMargin ? 0 : 5, p: 2, width: 'fit-content' }}>
+      <Box
+        sx={[
+          {
+            p: 2,
+            width: 'fit-content',
+          },
+          noMargin
+            ? {
+                m: 0,
+              }
+            : {
+                m: 5,
+              },
+        ]}
+      >
         <Stack spacing={2} alignItems='center' sx={{ pt: 2 }}>
           <Stack direction='row' justifyContent='center' alignItems='center' spacing={2}>
             <GppBad color='secondary' sx={{ fontSize: 75 }} />
