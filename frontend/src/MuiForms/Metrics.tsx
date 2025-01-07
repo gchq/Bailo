@@ -96,6 +96,7 @@ export default function Metrics({ onChange, value, label, formContext, required 
       </TableRow>
     ))
   }, [value])
+
   return (
     <>
       {formContext && formContext.editMode && (

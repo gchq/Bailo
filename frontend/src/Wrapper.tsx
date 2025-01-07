@@ -104,6 +104,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
         <Box
           component='main'
           sx={(theme) => ({
+            // TODO Set this for dark mode only in the future
             backgroundColor: theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',

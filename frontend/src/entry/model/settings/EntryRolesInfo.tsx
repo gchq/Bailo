@@ -79,9 +79,11 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
       </TableRow>
     ))
   }, [])
+
   if (isEntryRolesError) {
     return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
+
   return (
     <>
       {isEntryRolesLoading && <Loading />}

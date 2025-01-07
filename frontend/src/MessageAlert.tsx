@@ -55,21 +55,9 @@ export default function MessageAlert({
       sx={[
         {
           my: 2,
+          maxHeight: slimView ? '70px' : 'none',
+          maxWidth: slimView ? '250px' : 'none',
         },
-        slimView
-          ? {
-              maxHeight: '70px',
-            }
-          : {
-              maxHeight: 'none',
-            },
-        slimView
-          ? {
-              maxWidth: '250px',
-            }
-          : {
-              maxWidth: 'none',
-            },
       ]}
       ref={alertRef}
       data-test={dataTest}

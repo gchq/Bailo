@@ -191,6 +191,7 @@ function CustomTabPanel(props: TabPanelProps) {
       {currentTab === tabKey && (
         <Box
           sx={(theme) => ({
+            // TODO - use "theme.applyStyles" when implementing dark mode
             backgroundColor: grey[800],
             p: 2,
             mb: 2,

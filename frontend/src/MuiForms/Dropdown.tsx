@@ -77,22 +77,10 @@ export default function Dropdown({ label, formContext, value, onChange, options,
       )}
       {!formContext.editMode && (
         <Typography
-          sx={[
-            value
-              ? {
-                  fontStyle: 'unset',
-                }
-              : {
-                  fontStyle: 'italic',
-                },
-            value
-              ? {
-                  color: theme.palette.common.black,
-                }
-              : {
-                  color: theme.palette.customTextInput.main,
-                },
-          ]}
+          sx={{
+            fontStyle: value ? 'unset' : 'italic',
+            color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
+          }}
         >
           {value ? value : 'Unanswered'}
         </Typography>

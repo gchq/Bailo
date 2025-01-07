@@ -105,6 +105,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
       sx={(theme) => ({
         ...pageTopStyling,
         top: 'unset',
+        // TODO - use "theme.applyStyles" when implementing dark mode
         background: '#242424',
         ...theme.applyStyles('light', {
           background: 'linear-gradient(276deg, rgba(214,37,96,1) 0%, rgba(84,39,142,1) 100%)',
