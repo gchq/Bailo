@@ -7,7 +7,7 @@ import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardActions from '@mui/material/CardActions'
 import CardContent from '@mui/material/CardContent'
-import Grid from '@mui/material/Grid'
+import Grid from '@mui/material/Grid2'
 import Typography from '@mui/material/Typography'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
@@ -35,7 +35,7 @@ export default function Help() {
             </Typography>
           </Box>
           <Grid container spacing={4}>
-            <Grid item xs={12} sm={12} md={12} lg={4}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <BugReportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
@@ -58,7 +58,7 @@ export default function Help() {
                 </CardActions>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={4}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ArticleIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
@@ -78,7 +78,7 @@ export default function Help() {
                 </CardActions>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={4}>
+            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
                 <CardContent sx={{ height: 320 }}>
                   <ContactSupportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />

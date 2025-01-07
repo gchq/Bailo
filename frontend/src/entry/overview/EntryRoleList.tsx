@@ -1,4 +1,4 @@
-import { Grid, Stack } from '@mui/material'
+import { Grid2 as Grid, Stack } from '@mui/material'
 import { Fragment, useMemo } from 'react'
 import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
@@ -14,13 +14,13 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
     () =>
       entry.collaborators.map((collaborator) => (
         <Fragment key={collaborator.entity}>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Stack direction='row' alignItems='center' spacing={1}>
               <EntityIcon entryCollaborator={collaborator} />
               <EntityNameDisplay entryCollaborator={collaborator} />
             </Stack>
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <EntryRolesChipSet entryCollaborator={collaborator} />
           </Grid>
         </Fragment>
@@ -30,12 +30,8 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={6}>
-        Entity
-      </Grid>
-      <Grid item xs={6}>
-        Roles
-      </Grid>
+      <Grid size={{ xs: 6 }}>Entity</Grid>
+      <Grid size={{ xs: 6 }}>Roles</Grid>
       {rows}
     </Grid>
   )

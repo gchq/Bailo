@@ -1,6 +1,6 @@
 import { Close } from '@mui/icons-material'
 import CampaignIcon from '@mui/icons-material/Campaign'
-import { Box, Button, Grid, IconButton, Stack, Typography } from '@mui/material'
+import { Box, Button, Grid2 as Grid, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useMemo, useState } from 'react'
 interface AnnoucementProps {
@@ -48,8 +48,8 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
     >
       <Stack spacing={1} alignItems='center'>
         <Grid container justifyContent='space-between' alignItems='center'>
-          <Grid item xs={1} />
-          <Grid item xs={10} sx={{ textAlign: 'center' }}>
+          <Grid size='grow' />
+          <Grid size={{ xs: 10 }} sx={{ textAlign: 'center' }}>
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
               spacing={2}
@@ -64,7 +64,7 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
               <CampaignIcon color='primary' />
             </Stack>
           </Grid>
-          <Grid item xs={1} sx={{ textAlign: 'right' }}>
+          <Grid size='grow' sx={{ textAlign: 'right' }}>
             <IconButton size='small' onClick={onClose}>
               <Close color='primary' />
             </IconButton>

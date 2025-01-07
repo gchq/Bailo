@@ -8,7 +8,7 @@ import {
   Box,
   Button,
   Container,
-  Grid,
+  Grid2 as Grid,
   Paper,
   Stack,
   Typography,

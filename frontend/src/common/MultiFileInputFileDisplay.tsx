@@ -1,4 +1,4 @@
-import { Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
+import { Chip, Grid2 as Grid, TextField, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useState } from 'react'
 import { FileInterface, FileWithMetadata } from 'types/types'
@@ -29,12 +29,12 @@ export default function MultiFileInputFileDisplay({
 
   return (
     <Grid container spacing={1} alignItems='center'>
-      <Grid item xs>
+      <Grid size='grow'>
         <Tooltip title={file.name}>
           <Chip color='primary' label={file.name} onDelete={readOnly ? undefined : handleDelete} />
         </Tooltip>
       </Grid>
-      <Grid item xs={7}>
+      <Grid size={{ xs: 7 }}>
         <TextField
           size='small'
           placeholder='Optional metadata'
@@ -43,7 +43,7 @@ export default function MultiFileInputFileDisplay({
           onChange={handleMetadataChange}
         />
       </Grid>
-      <Grid item xs={1} textAlign='right'>
+      <Grid size={{ xs: 1 }} textAlign='right'>
         <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
       </Grid>
     </Grid>

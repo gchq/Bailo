@@ -8,7 +8,7 @@ import {
   Button,
   Card,
   Container,
-  Grid,
+  Grid2 as Grid,
   Stack,
   Typography,
 } from '@mui/material'

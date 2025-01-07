@@ -1,5 +1,5 @@
 import ClearIcon from '@mui/icons-material/Clear'
-import { Checkbox, FormControlLabel, Grid, IconButton, Tooltip, Typography } from '@mui/material'
+import { Checkbox, FormControlLabel, Grid2 as Grid, IconButton, Tooltip, Typography } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -36,10 +36,10 @@ export default function ReleaseSelector({
   const selectedReleasesDisplay = useMemo(() => {
     return selectedReleases.map((release) => (
       <>
-        <Grid item xs={10}>
+        <Grid size={{ xs: 10 }}>
           <ReleaseDisplay key={release.semver} model={model} release={release} hideReviewBanner />
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <Tooltip title={'Remove'}>
             <IconButton onClick={() => handleRemoveRelease(release)}>
               <ClearIcon color={'error'} />

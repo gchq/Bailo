@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Card, CardActions, CardContent, Divider, Grid, Stack, Typography } from '@mui/material'
+import { Card, CardActions, CardContent, Divider, Grid2 as Grid, Stack, Typography } from '@mui/material'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import { SchemaInterface } from 'types/types'
 
@@ -11,7 +11,7 @@ interface SchemaButtonProps {
 
 export default function SchemaButton({ schema, onClick, loading = false }: SchemaButtonProps) {
   return (
-    <Grid item md={6} sm={12}>
+    <Grid size={{ md: 6, sm: 12 }}>
       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <CardContent>
           <Stack spacing={1}>

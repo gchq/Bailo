@@ -1,4 +1,4 @@
-import { Grid, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
+import { Grid2 as Grid, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
@@ -53,7 +53,7 @@ export default function JsonSchemaForm({
 
   return (
     <Grid container spacing={2} sx={{ mt: 1 }}>
-      <Grid item xs={12} md={2} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
+      <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
@@ -75,7 +75,7 @@ export default function JsonSchemaForm({
           </List>
         </Stepper>
       </Grid>
-      <Grid item xs={12} md={10}>
+      <Grid size={{ xs: 12, md: 10 }}>
         <Form
           schema={currentStep.schema}
           formData={currentStep.state}

@@ -1,5 +1,5 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material'
-import { Box, Grid, IconButton, Tooltip, Typography } from '@mui/material'
+import { Box, Grid2 as Grid, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -26,10 +26,10 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
   return (
     <>
       <Grid container spacing={1} alignItems='center'>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <Typography>Access Key</Typography>
         </Grid>
-        <Grid item xs={8}>
+        <Grid size={{ xs: 8 }}>
           <Box
             sx={{
               backgroundColor: theme.palette.container.main,
@@ -43,7 +43,7 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
             </Typography>
           </Box>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <CopyToClipboardButton
             textToCopy={token.accessKey}
             notificationText='Copied access key to clipboard'
@@ -60,10 +60,10 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
             </IconButton>
           </Tooltip>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <Typography>Secret Key</Typography>
         </Grid>
-        <Grid item xs={8}>
+        <Grid size={{ xs: 8 }}>
           <Box
             sx={{
               backgroundColor: theme.palette.container.main,
@@ -77,7 +77,7 @@ export default function PersonalAccessToken({ token }: PersonalAccessTokenProps)
             </Typography>
           </Box>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <CopyToClipboardButton
             textToCopy={token.secretKey}
             notificationText='Copied secret key to clipboard'
