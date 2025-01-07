@@ -59,16 +59,19 @@ export default function EntrySearch() {
               <ListItemText
                 primary={entry.name}
                 secondary={entry.description}
-                primaryTypographyProps={{
-                  style: {
-                    whiteSpace: 'nowrap',
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    color: theme.palette.primary.main,
+                slotProps={{
+                  primary: {
+                    style: {
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      color: theme.palette.primary.main,
+                    },
                   },
-                }}
-                secondaryTypographyProps={{
-                  style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+
+                  secondary: {
+                    style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+                  },
                 }}
               />
             </ListItemButton>

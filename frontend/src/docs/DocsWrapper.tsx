@@ -62,14 +62,21 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
         <Fragment key={doc.slug}>
           {doc.header && doc.slug ? (
             <ListItem dense sx={{ pl: paddingLeft }}>
-              <ListItemText primary={doc.title} primaryTypographyProps={{ fontWeight: 'bold' }} />
+              <ListItemText
+                primary={doc.title}
+                slotProps={{
+                  primary: { fontWeight: 'bold' },
+                }}
+              />
             </ListItem>
           ) : (
             <Link passHref href={path} style={{ textDecoration: 'none', color: 'inherit' }}>
               <ListItemButton dense selected={isSelected} sx={{ pl: paddingLeft }}>
                 <ListItemText
                   primary={doc.title}
-                  primaryTypographyProps={{ fontWeight: doc.slug ? 'normal' : 'bold' }}
+                  slotProps={{
+                    primary: { fontWeight: doc.slug ? 'normal' : 'bold' },
+                  }}
                 />
               </ListItemButton>
             </Link>

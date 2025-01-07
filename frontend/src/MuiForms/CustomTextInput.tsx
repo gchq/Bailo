@@ -74,10 +74,12 @@ export default function CustomTextInput(props: CustomTextInputProps) {
         required={formContext.editMode}
         value={value || (!formContext.editMode ? 'Unanswered' : '')}
         disabled={!formContext.editMode}
-        InputProps={{
-          ...props.InputProps,
-          ...(!formContext.editMode && { disableUnderline: true }),
-          'data-test': id,
+        slotProps={{
+          input: {
+            ...props.InputProps,
+            ...(!formContext.editMode && { disableUnderline: true }),
+            'data-test': id,
+          },
         }}
       />
     </Fragment>

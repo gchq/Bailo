@@ -209,7 +209,9 @@ export default function NewToken() {
                   value={description}
                   maxRows={8}
                   onChange={handleDescriptionChange}
-                  inputProps={{ 'data-test': 'tokenDescriptionTextField' }}
+                  slotProps={{
+                    htmlInput: { 'data-test': 'tokenDescriptionTextField' },
+                  }}
                 />
               </Stack>
               <Stack>
@@ -243,10 +245,12 @@ export default function NewToken() {
                     getOptionLabel={(option) => option.name}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     onChange={handleSelectedModelsChange}
-                    ChipProps={{ size: 'small' }}
                     renderInput={(params) => (
                       <TextField {...params} required size='small' placeholder={modelsAutocompletePlaceholder} />
                     )}
+                    slotProps={{
+                      chip: { size: 'small' },
+                    }}
                   />
                 </Stack>
               </Stack>
