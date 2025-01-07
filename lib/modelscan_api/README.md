@@ -56,11 +56,20 @@ pre-commit install
 
 ### Tests
 
-To run the tests:
+To run the unit tests:
 
 ```bash
 pytest
 ```
+
+To run the integration tests (does not require any externally running services):
+
+```bash
+pytest -m integration
+```
+
+Note that the integration tests use safe but technically "malicious" file(s) to check ModelScan's performance. Please
+refer to [test_integration](./tests/test_integration/README.md) for details.
 
 ### Running
 
