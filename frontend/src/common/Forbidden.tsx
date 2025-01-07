@@ -19,19 +19,11 @@ export default function Forbidden({
   return (
     <Stack justifyContent='center' alignItems='center' sx={additionalStyling}>
       <Box
-        sx={[
-          {
-            p: 2,
-            width: 'fit-content',
-          },
-          noMargin
-            ? {
-                m: 0,
-              }
-            : {
-                m: 5,
-              },
-        ]}
+        sx={{
+          p: 2,
+          width: 'fit-content',
+          m: noMargin ? 0 : 5,
+        }}
       >
         <Stack spacing={2} alignItems='center' sx={{ pt: 2 }}>
           <Stack direction='row' justifyContent='center' alignItems='center' spacing={2}>
