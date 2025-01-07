@@ -80,7 +80,7 @@ export default function MultiFileInput({
   )
 
   return (
-    <Box sx={[fullWidth ? { width: '100%' } : {}]}>
+    <Box sx={{ ...(fullWidth && { width: '100%' }) }}>
       {!readOnly && (
         <>
           <label htmlFor={htmlId}>
