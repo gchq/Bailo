@@ -71,9 +71,13 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
         <Card sx={{ mx: 'auto', my: 4, p: 4 }}>
           <Box component='form' onSubmit={handleSave}>
             <Stack spacing={3} divider={<Divider flexItem />}>
-              <Accordion expanded={isSettingsOpen} onChange={() => setIsSettingsOpen(isSettingsOpen ? false : true)}>
+              <Accordion
+                expanded={isSettingsOpen}
+                onChange={() => setIsSettingsOpen(isSettingsOpen ? false : true)}
+                slotProps={{ heading: { component: 'h3' } }}
+              >
                 <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0 }}>
-                  <Typography variant='h6' component='h1' color='primary' align='center'>
+                  <Typography sx={{ width: '100%' }} color='primary' variant='h6' component='div'>
                     Model Export Settings
                   </Typography>
                 </AccordionSummary>

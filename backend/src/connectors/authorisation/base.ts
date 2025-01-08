@@ -111,7 +111,11 @@ export class BasicAuthorisationConnector {
           return { id: model.id, success: false, info: 'You do not have permission to update a model card.' }
         }
 
-        if (ModelAction.Update === action && (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro']))) {
+        if (
+          ModelAction.Update === action &&
+          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro'])) &&
+          !(await authentication.hasRole(user, Roles.Admin))
+        ) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
         }
 
