@@ -17,6 +17,12 @@ const configMock = vi.hoisted(
           },
         },
       },
+      log: {
+        level: 'info',
+      },
+      instrumentation: {
+        enabled: false,
+      },
     }) as any,
 )
 vi.mock('../../src/utils/config.js', () => ({
