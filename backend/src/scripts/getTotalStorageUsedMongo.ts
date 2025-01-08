@@ -5,11 +5,13 @@ import log from '../services/log.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
 // Helper file for getTotalStorageUsed.sh
+// TS handles Mongoose connections more easily than just using a BASH script
 
 async function main() {
   await connectToMongoose()
 
   const existingResults = await FileModel.find({})
+  // mongoose-delete plugin doesn't have correct typing so cast to any
   const deletedResults = await (FileModel as any).findDeleted()
 
   await disconnectFromMongoose()
@@ -22,11 +24,14 @@ async function main() {
     deleted: totalDeletedBytes,
     total: totalExistingBytes + totalDeletedBytes,
   }
+  // Copy of totalBytes with human readable values
   const totalFormattedBytes = Object.fromEntries(
     Object.entries(totalBytes).map(([key, value]) => [key, prettyBytes(value)]),
   )
 
+  // Print results
   log.info(totalBytes, 'Storage used:')
   log.info(totalFormattedBytes, 'Formatted storage used:')
 }
+
 main()
