@@ -5,6 +5,7 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider'
 
 import { UserInformation } from '../connectors/authentication/Base.js'
+import log from '../services/log.js'
 import config from '../utils/config.js'
 import { ConfigurationError, InternalError } from '../utils/error.js'
 
@@ -14,7 +15,8 @@ export async function listUsers(query: string, exactMatch = false) {
   try {
     dnName = config.oauth.cognito.userIdAttribute
     userPoolId = config.oauth.cognito.userPoolId
-  } catch (e) {
+  } catch (err) {
+    log.error(err)
     throw ConfigurationError('Cannot find userIdAttribute in oauth configuration', { oauthConfiguration: config.oauth })
   }
 

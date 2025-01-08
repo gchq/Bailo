@@ -418,7 +418,7 @@ describe('services > model', () => {
   test('setLatestImportedModelCard > success', async () => {
     await setLatestImportedModelCard('abc')
 
-    expect(modelMocks.updateOne).toHaveBeenCalledOnce
+    expect(modelMocks.updateOne).toHaveBeenCalledOnce()
   })
 
   test('setLatestImportedModelCard > cannot find latest model card', async () => {

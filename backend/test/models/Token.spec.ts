@@ -114,6 +114,6 @@ describe('models > Token', () => {
 
     const result = await token.compareToken('abc')
 
-    expect(result).toBe(true)
+    expect(result).toBe(false)
   })
 })

@@ -1,6 +1,7 @@
 import authentication from '../connectors/authentication/index.js'
 import { MigrationMetadata } from '../models/Migration.js'
 import ModelModel from '../models/Model.js'
+import log from '../services/log.js'
 
 /**
  * As we now do backend validation for users being added to model access lists, we
@@ -21,6 +22,7 @@ export async function up() {
           try {
             await authentication.getUserInformation(collaborator.entity)
           } catch (err) {
+            log.error(err)
             invalidUsers.push(collaborator.entity)
           }
         }

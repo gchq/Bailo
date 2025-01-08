@@ -1,3 +1,4 @@
+import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
 import { BaseFileScanningConnector } from './Base.js'
@@ -25,6 +26,7 @@ export function runFileScanners(cache = true) {
           await scanner.init()
           fileScanConnectors.push(scanner)
         } catch (error) {
+          log.error(error)
           throw ConfigurationError('Could not configure or initialise Clam AV')
         }
         break
@@ -34,6 +36,7 @@ export function runFileScanners(cache = true) {
           await scanner.init()
           fileScanConnectors.push(scanner)
         } catch (error) {
+          log.error(error)
           throw ConfigurationError('Could not configure or initialise ModelScan')
         }
         break
