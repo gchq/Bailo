@@ -17,15 +17,15 @@ export default function ReviewDisplay({ reviewResponses, modelId }: ReviewDispla
   useEffect(() => {
     const updatedApprovals: ResponseInterface[] = []
     const updatedRequests: ResponseInterface[] = []
-    reviewResponses.forEach((reviewResponse) => {
+    for (const reviewResponse of reviewResponses) {
       if (reviewResponse.decision === Decision.Approve) {
         updatedApprovals.push({ ...reviewResponse, role: reviewResponse.role })
       }
       if (reviewResponse.decision === Decision.RequestChanges) {
         updatedRequests.push({ ...reviewResponse, role: reviewResponse.role })
       }
-    }),
-      setAcceptedReviewResponses(updatedApprovals)
+    }
+    setAcceptedReviewResponses(updatedApprovals)
     setChangesRequestedReviewResponses(updatedRequests)
   }, [reviewResponses])
 

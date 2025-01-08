@@ -143,9 +143,11 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     const successfulFiles: SuccessfulFileUpload[] = []
     const newFilesToUpload: File[] = []
     for (const file of files) {
-      isFileInterface(file)
-        ? successfulFiles.push({ fileName: file.name, fileId: file._id })
-        : newFilesToUpload.push(file)
+      if (isFileInterface(file)) {
+        successfulFiles.push({ fileName: file.name, fileId: file._id })
+      } else {
+        newFilesToUpload.push(file)
+      }
     }
 
     setFilesToUploadCount(newFilesToUpload.length)

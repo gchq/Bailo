@@ -98,10 +98,10 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
         }
         setSplitSchema({ reference: schema.id, steps })
       }
-    } catch (_e) {
+    } catch (err) {
       sendNotification({
         variant: 'error',
-        msg: 'Could not update form - please make sure to use valid JSON.',
+        msg: `Could not update form - please make sure to use valid JSON: ${err}`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }

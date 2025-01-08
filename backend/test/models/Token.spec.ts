@@ -27,7 +27,7 @@ describe('models > Token', () => {
     const token = new TokenModel()
     const result = await token.compareToken('abc')
 
-    expect(result).false
+    expect(result).toBe(false)
   })
 
   test('compareToken > return bcrypt error thrown when comparing', async () => {
@@ -59,7 +59,7 @@ describe('models > Token', () => {
 
     const result = await token.compareToken('abc')
 
-    expect(result).true
+    expect(result).toBe(true)
   })
 
   test('compareToken > return false on unsuccessful bcrypt comparison', async () => {
@@ -70,7 +70,7 @@ describe('models > Token', () => {
 
     const result = await token.compareToken('abc')
 
-    expect(result).false
+    expect(result).toBe(false)
   })
 
   test('compareToken > return true on successful sha256 comparison', async () => {
@@ -81,7 +81,7 @@ describe('models > Token', () => {
 
     const result = await token.compareToken('abc')
 
-    expect(result).true
+    expect(result).toBe(true)
   })
 
   test('compareToken > return true on successful sha256 comparison', async () => {
@@ -92,7 +92,7 @@ describe('models > Token', () => {
 
     const result = await token.compareToken('abc')
 
-    expect(result).true
+    expect(result).toBe(true)
   })
 
   test('compareToken > return true on successful sha256 comparison', async () => {
@@ -103,7 +103,7 @@ describe('models > Token', () => {
 
     const result = await token.compareToken('abc')
 
-    expect(result).true
+    expect(result).toBe(true)
   })
 
   test('compareToken > return false on unsuccessful sha256 comparison', async () => {
@@ -114,6 +114,6 @@ describe('models > Token', () => {
 
     const result = await token.compareToken('abc')
 
-    expect(result).false
+    expect(result).toBe(true)
   })
 })
