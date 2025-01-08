@@ -110,7 +110,7 @@ case "${_REPORTING_FORMAT}" in
     _NORMALISED_REPORTING_FORMAT=1
     ;;
   *)
-    _exit_1 printf "Unexpected --reporting-format option: %s\\nShould be one of ((c|console)|(j|json))\\n" "${_REPORTING_FORMAT}"
+    _exit_1 printf "Unexpected --reporting-format option: %s\\nShould be one of (c[onsole]|j[son])\\n" "${_REPORTING_FORMAT}"
     ;;
 esac
 
