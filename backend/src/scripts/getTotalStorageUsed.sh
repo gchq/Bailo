@@ -45,7 +45,7 @@ Options:
   -b, --bytes               Display the storage usage in bytes. If unset, values are formatted for human readability.
   -o, --output <filename>   Write the results to the specified file. If unset, results are printed to the terminal.
   -r, --reporting-format <format>
-                            Set the output format to one of ((c|console)|(j|json)). Defaults to console.
+                            Set the output format to one of ((c|console)|(j|json)). Defaults to console. When set as json, if <-b|--bytes> is passed then the values are numbers otherwise the values are strings.
 HEREDOC
 }
 
@@ -137,7 +137,11 @@ _get_storage() {
   # Format the result string
   if [ $_NORMALISED_REPORTING_FORMAT -eq 1 ]; then
     # Use jq to safely (escape key characters etc) create a JSON string
-    result_string=$(jq -n --arg eb "${existing_bytes}" --arg db "${deleted_bytes}" --arg tb "${total_bytes}" '{existing: $eb, deleted: $db, total: $tb}')
+    if ((_FORMAT_BYTES)); then
+      result_string=$(jq -n --arg eb "${existing_bytes}" --arg db "${deleted_bytes}" --arg tb "${total_bytes}" '{existing: $eb, deleted: $db, total: $tb}')
+    else
+      result_string=$(jq -n --arg eb "${existing_bytes}" --arg db "${deleted_bytes}" --arg tb "${total_bytes}" '{existing: ($eb)|tonumber, deleted: ($db)|tonumber, total: ($tb)|tonumber}')
+    fi
   elif [ $_NORMALISED_REPORTING_FORMAT -eq 0 ]; then
     result_string="existing: ${existing_bytes}\\ndeleted: ${deleted_bytes}\\ntotal: ${total_bytes}"
   else
