@@ -4,9 +4,6 @@ import FileModel from '../models/File.js'
 import log from '../services/log.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
-// Helper file for getTotalStorageUsed.sh
-// TS handles Mongoose connections more easily than just using a BASH script
-
 async function main() {
   await connectToMongoose()
 
@@ -14,7 +11,7 @@ async function main() {
   // mongoose-delete plugin doesn't have correct typing so cast to any
   const deletedResults = await (FileModel as any).findDeleted()
 
-  await disconnectFromMongoose()
+  setTimeout(disconnectFromMongoose, 50)
 
   const totalExistingBytes = existingResults.reduce((sum, fileModel) => sum + fileModel.size, 0)
   const totalDeletedBytes = deletedResults.reduce((sum, fileModel) => sum + fileModel.size, 0)
