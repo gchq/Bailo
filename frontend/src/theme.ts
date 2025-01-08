@@ -52,15 +52,6 @@ export const lightTheme = createTheme({
         },
       },
     },
-    MuiListItem: {
-      styleOverrides: {
-        button: {
-          '&:hover': {
-            backgroundColor: '#f5f5f5',
-          },
-        },
-      },
-    },
     MuiListItemButton: {
       styleOverrides: {
         root: {
@@ -171,15 +162,6 @@ export const darkTheme = createTheme({
     MuiMenuItem: {
       styleOverrides: {
         root: {
-          '&:hover': {
-            backgroundColor: '#5c5c5c',
-          },
-        },
-      },
-    },
-    MuiListItem: {
-      styleOverrides: {
-        button: {
           '&:hover': {
             backgroundColor: '#5c5c5c',
           },
