@@ -43,9 +43,9 @@ Example:
 Options:
   -h, --help                Show this screen.
   -b, --bytes               Display the storage usage in bytes. If unset, values are formatted for human readability.
-  -o, --output <filename>   Write the results to the specified file. If unset, results are printed to the terminal.
+  -o, --output <filename>   Write the results to the specified <filename>. If unset, results are printed to the terminal.
   -r, --reporting-format <format>
-                            Set the output format to one of ((c|console)|(j|json)). Defaults to console. When set as json, if <-b|--bytes> is passed then the values are numbers otherwise the values are strings.
+                            Set the output <format> to one of (c[onsole]|j[son]). Defaults to (console). When set as (json), if [-b|--bytes] is also passed then the values are numbers otherwise the values are strings.
 HEREDOC
 }
 
