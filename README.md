@@ -231,6 +231,7 @@ information.
 - [Img Shields](https://shields.io)
 - [Othneils's README Template](https://github.com/othneildrew/Best-README-Template)
 - [Mattermost's Code Contribution Guidelines](https://github.com/mattermost/mattermost-server/blob/master/CONTRIBUTING.md)
+- [xwmx's Bash Boilerplate](https://github.com/xwmx/bash-boilerplate)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
