@@ -1,7 +1,7 @@
 import shelljs from 'shelljs'
 
-import packageInfo from '../../package.json'
-import packageLock from '../../package-lock.json'
+import packageInfo from '../../package.json' with { type: 'json' }
+import packageLock from '../../package-lock.json' with { type: 'json' }
 
 const { exec } = shelljs
 
