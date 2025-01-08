@@ -1,8 +1,7 @@
-import { EmotionJSX } from '@emotion/react/types/jsx-namespace'
 import { Done } from '@mui/icons-material'
 import { Stack, Tooltip, Typography } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
-import { useMemo } from 'react'
+import { ReactElement, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { ResponseInterface } from 'types/types'
@@ -22,7 +21,7 @@ export default function ApprovalsDisplay({ modelId, acceptedReviewResponses }: A
 
   const roleApprovals = useMemo(
     () =>
-      dynamicRoles.reduce<EmotionJSX.Element[]>((approvals, dynamicRole) => {
+      dynamicRoles.reduce<ReactElement[]>((approvals, dynamicRole) => {
         const hasRoleApproved = !!acceptedReviewResponses.find(
           (acceptedResponse) => acceptedResponse.role === dynamicRole.id,
         )
