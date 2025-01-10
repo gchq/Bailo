@@ -123,8 +123,8 @@ export async function searchModels(
   task?: string,
   allowTemplating?: boolean,
   schemaId?: string,
-  currentPage: number = 0,
-  pageSize: number = 10,
+  currentPage?: number,
+  pageSize?: number,
 ): Promise<ModelSearchResult> {
   const query: any = {}
 
@@ -181,6 +181,9 @@ export async function searchModels(
   // match the query first, and then filter them based on pagination.
   const auths = await authorisation.models(user, results, ModelAction.View)
   const authorisedResults = results.filter((_, i) => auths[i].success)
+  if (!pageSize || !currentPage) {
+    return { results: authorisedResults, totalEntries: authorisedResults.length }
+  }
   const paginatedResults = authorisedResults.slice((currentPage - 1) * pageSize, currentPage * pageSize)
   return { results: paginatedResults, totalEntries: authorisedResults.length }
 }
