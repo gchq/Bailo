@@ -51,8 +51,8 @@ describe('Make and approve an access request', () => {
     cy.log('Creating the access request')
 
     cy.wrap({}).should(() => {
-      cy.get('body').contains('Select a different schema')
       expect(spy).not.to.be.called
+      cy.get('body').contains('Select a different schema')
     })
     cy.get('[data-test=entitySelector]').contains('Joe Bloggs')
     cy.get('#root_name-label').contains('What is the name of the access request?')
