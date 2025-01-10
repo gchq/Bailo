@@ -26,7 +26,7 @@ export const putWebhookSchema = z.object({
 
 registerPath({
   method: 'put',
-  path: '/api/v2/model/{modelId}/webhooks/{webhookId}',
+  path: '/api/v2/model/{modelId}/webhook/{webhookId}',
   tags: ['webhook'],
   description: 'Update a webhook instance.',
   schema: putWebhookSchema,

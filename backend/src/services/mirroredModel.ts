@@ -10,8 +10,9 @@ import { sign } from '../clients/kms.js'
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import { ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import { FileInterfaceDoc, ScanState } from '../models/File.js'
+import { FileInterfaceDoc } from '../models/File.js'
 import { ModelDoc } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../models/Release.js'
@@ -45,6 +46,9 @@ export async function exportModel(
   if (!model.settings.mirror.destinationModelId) {
     throw BadReq(`The 'Destination Model ID' has not been set on this model.`)
   }
+  if (!model.card || !model.card.schemaId) {
+    throw BadReq('You must select a schema for your model before you can start the export process.')
+  }
   const mirroredModelId = model.settings.mirror.destinationModelId
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
@@ -77,7 +81,7 @@ export async function exportModel(
   log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
 }
 
-export async function importModel(_user: UserInterface, mirroredModelId: string, payloadUrl: string) {
+export async function importModel(mirroredModelId: string, payloadUrl: string) {
   if (!config.ui.modelMirror.import.enabled) {
     throw BadReq('Importing models has not been enabled.')
   }
@@ -85,7 +89,7 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
   if (mirroredModelId === '') {
     throw BadReq('Missing mirrored model ID.')
   }
-  let sourceModelId
+  let sourceModelId = ''
 
   log.info({ mirroredModelId, payloadUrl }, 'Received a request to import a model.')
 
@@ -135,14 +139,23 @@ export async function importModel(_user: UserInterface, mirroredModelId: string,
 
   log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
 
-  await Promise.all(modelCards.map((card) => saveImportedModelCard(card, sourceModelId)))
-  await setLatestImportedModelCard(mirroredModelId)
+  const newModelCards = (
+    await Promise.all(modelCards.map((card) => saveImportedModelCard(card, sourceModelId)))
+  ).filter((card): card is ModelCardRevisionInterface => !!card)
+
+  const mirroredModel = await setLatestImportedModelCard(mirroredModelId)
+
   log.info(
     { mirroredModelId, payloadUrl, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) },
     'Finished importing the collection of model cards.',
   )
 
-  return { mirroredModelId, sourceModelId, modelCardVersions: modelCards.map((modelCard) => modelCard.version) }
+  return {
+    mirroredModel,
+    sourceModelId,
+    modelCardVersions: modelCards.map((modelCard) => modelCard.version),
+    newModelCards,
+  }
 }
 
 function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceModelId?: string) {
@@ -159,7 +172,7 @@ function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceMo
   if (sourceModelId !== modelId) {
     throw InternalError('Zip file contains model cards for multiple models.', { modelIds: [sourceModelId, modelId] })
   }
-  return { modelCard }
+  return { modelCard, sourceModelId }
 }
 
 async function uploadToS3(

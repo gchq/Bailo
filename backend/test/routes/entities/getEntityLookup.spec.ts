@@ -22,9 +22,6 @@ vi.mock('../../../src/utils/entity.js', async () => ({
 
 describe('routes > entities > getEntityLookup', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../src/services/model.js', () => ({
-      getModelById: vi.fn(() => ({ _id: 'test' })),
-    }))
     const res = await testGet(`/api/v2/entity/userdn/lookup`)
 
     expect(res.statusCode).toBe(200)

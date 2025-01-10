@@ -4,6 +4,7 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
+import { ModelCardRevisionInterface } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
@@ -96,6 +97,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   onDeleteFile(req: Request, modelId: string, fileId: string) {
     this.checkEventType(AuditInfo.DeleteFile, req)
+    const event = this.generateEvent(req, { modelId, fileId })
+    req.log.info(event, req.audit.description)
+  }
+
+  onUpdateFile(req: Request, modelId: string, fileId: string) {
+    this.checkEventType(AuditInfo.UpdateFile, req)
     const event = this.generateEvent(req, { modelId, fileId })
     req.log.info(event, req.audit.description)
   }
@@ -342,13 +349,14 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   onCreateImport(
     req: Request,
-    mirroredModelId: string,
+    mirroredModel: ModelInterface,
     sourceModelId: string,
     modelCardVersions: number[],
     exporter: string,
+    newModelCards: ModelCardRevisionInterface[],
   ) {
     this.checkEventType(AuditInfo.CreateImport, req)
-    const event = this.generateEvent(req, { mirroredModelId, sourceModelId, modelCardVersions, exporter })
+    const event = this.generateEvent(req, { mirroredModel, sourceModelId, modelCardVersions, exporter, newModelCards })
     req.log.info(event, req.audit.description)
   }
 }

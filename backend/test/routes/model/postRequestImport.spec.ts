@@ -10,7 +10,12 @@ vi.mock('../../../src/connectors/audit/index.js')
 describe('routes > model > postRequestImport', () => {
   test('200 > ok', async () => {
     vi.mock('../../../src/services/mirroredModel.js', () => ({
-      importModel: vi.fn(() => ({ mirroredModelId: 'abc', sourceModelId: 'cba', modelCardVersions: [1, 2, 3] })),
+      importModel: vi.fn(() => ({
+        mirroredModel: { id: 'abc' },
+        sourceModelId: 'cba',
+        modelCardVersions: [1, 2, 3],
+        newModelCards: [],
+      })),
     }))
 
     const fixture = createFixture(postRequestImportFromS3Schema)

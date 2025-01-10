@@ -11,6 +11,7 @@ import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
 import { getFilescanningInfo } from './routes/v2/filescanning/getFilescanningInfo.js'
+import { putFileScan } from './routes/v2/filescanning/putFileScan.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
 import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
@@ -168,7 +169,6 @@ server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/reviews', ...getReviews)
-
 server.get('/api/v2/responses', ...getResponses)
 server.patch('/api/v2/response/:responseId', ...patchResponse)
 server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReaction)
@@ -192,6 +192,7 @@ server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 server.get('/api/v2/specification', ...getSpecification)
 
 server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
+server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

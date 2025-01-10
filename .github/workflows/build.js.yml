@@ -63,6 +63,34 @@ jobs:
           name: bailo_frontend
           path: /tmp/bailo_frontend.tar
 
+  build_modelscan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # Clone repository
+      - uses: actions/checkout@v3
+
+      # Setup BuildX
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build modelscan image
+        uses: docker/build-push-action@v3
+        with:
+          context: lib/modelscan_api
+          file: lib/modelscan_api/Dockerfile
+          tags: bailo_modelscan:latest
+          cache-from: type=gha,scope=modelscan
+          cache-to: type=gha,mode=max,scope=modelscan
+          outputs: type=docker,dest=/tmp/bailo_modelscan.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bailo_modelscan
+          path: /tmp/bailo_modelscan.tar
+
   unit_testing:
     runs-on: ubuntu-latest
 
@@ -73,7 +101,7 @@ jobs:
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 18.17.1
+          node-version: 18.18.0
           cache: "npm"
 
       # Install dependencies
@@ -96,7 +124,7 @@ jobs:
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 18.17.1
+          node-version: 18.18.0
           cache: "npm"
 
       # Install dependencies
@@ -107,7 +135,7 @@ jobs:
       - run: npm run lint
 
   kubernetes:
-    needs: [build_backend, build_frontend]
+    needs: [build_backend, build_frontend, build_modelscan]
     runs-on: ubuntu-latest
 
     steps:
@@ -116,7 +144,7 @@ jobs:
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 18.17.1
+          node-version: 18.18.0
           cache: "npm"
 
       # Setup BuildX
@@ -134,6 +162,11 @@ jobs:
         with:
           name: bailo_frontend
           path: /tmp
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bailo_modelscan
+          path: /tmp
 
       - name: Start minikube
         uses: medyagh/setup-minikube@master
@@ -146,6 +179,7 @@ jobs:
           eval $(minikube -p minikube docker-env)
           docker load -i /tmp/bailo_backend.tar
           docker load -i /tmp/bailo_frontend.tar
+          docker load -i /tmp/bailo_modelscan.tar
 
       # Install dependencies
       - run: npm ci
@@ -193,6 +227,8 @@ jobs:
             frontendTag: latest
             backendRepository: "bailo_backend"
             backendTag: latest
+            modelscanRepository: "bailo_modelscan"
+            modelscanTag: latest
           # Used for k8s not openshift
           ingress:
             enabled: false
@@ -259,7 +295,7 @@ jobs:
         run: kubectl logs -l app.kubernetes.io/instance=bailo --tail=-1
 
   end_to_end:
-    needs: [build_backend, build_frontend]
+    needs: [build_backend, build_frontend, build_modelscan]
     runs-on: ubuntu-latest
 
     steps:
@@ -269,7 +305,7 @@ jobs:
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 18.17.1
+          node-version: 18.18.0
           cache: "npm"
 
       # Setup BuildX
@@ -287,14 +323,20 @@ jobs:
         with:
           name: bailo_frontend
           path: /tmp
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bailo_modelscan
+          path: /tmp
 
       - name: Load image
         run: |
           docker load --input /tmp/bailo_frontend.tar
           docker load --input /tmp/bailo_backend.tar
+          docker load --input /tmp/bailo_modelscan.tar
           docker image ls -a
 
-          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar
+          rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar /tmp/bailo_modelscan.tar
 
       # Create logs directory
       - run: mkdir logs
@@ -389,7 +431,7 @@ jobs:
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 18.17.1
+          node-version: 18.18.0
           cache: "npm"
 
       # Setup BuildX

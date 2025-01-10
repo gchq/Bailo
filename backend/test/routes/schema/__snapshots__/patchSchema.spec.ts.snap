@@ -1,17 +1,64 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > schema > putSchema > audit > expected call 1`] = `
+exports[`routes > schema > patchSchema > audit > expected call 1`] = `
 {
   "active": false,
+  "description": "vespillo",
   "hidden": false,
+  "name": "Jaime Hilll",
 }
 `;
 
-exports[`routes > schema > putSchema > successfully updates the schema 1`] = `
+exports[`routes > schema > patchSchema > patchSchema > audit > expected call 1`] = `
+{
+  "active": false,
+  "description": "vespillo",
+  "hidden": false,
+  "name": "Jaime Hilll",
+}
+`;
+
+exports[`routes > schema > patchSchema > patchSchema > successfully updates the schema 1`] = `
 {
   "schema": {
     "active": false,
+    "description": "vespillo",
     "hidden": false,
+    "name": "Jaime Hilll",
+  },
+}
+`;
+
+exports[`routes > schema > patchSchema > successfully updates the schema 1`] = `
+{
+  "schema": {
+    "active": false,
+    "description": "vespillo",
+    "hidden": false,
+    "name": "Jaime Hilll",
+  },
+}
+`;
+
+exports[`routes > schema > patchSchema > throws 400 when trying to update id property 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "unrecognized_keys",
+          "keys": [
+            "id",
+          ],
+          "message": "Unrecognized key(s) in object: 'id'",
+          "path": [
+            "body",
+          ],
+        },
+      ],
+    },
+    "message": "Path: body - Message: Unrecognized key(s) in object: 'id'",
+    "name": "Bailo Error",
   },
 }
 `;

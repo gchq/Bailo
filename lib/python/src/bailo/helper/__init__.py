@@ -17,6 +17,5 @@ To create a resource that will be automatically reflected in Bailo:
     client=client,
     name="YoloV4",
     description="You only look once!",
-    team_id="Uncategorised"
 )
 """
