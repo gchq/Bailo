@@ -7,7 +7,7 @@ import { ErrorInfo, fetcher } from '../utils/fetcher'
 const emptyModelList = []
 
 export interface EntrySearchResults {
-  models: EntrySearchResult[]
+  results: EntrySearchResult[]
   totalEntries: number
 }
 
@@ -52,7 +52,7 @@ export function useListModels(
 
   return {
     mutateModels: mutate,
-    models: data ? data.models : emptyModelList,
+    models: data ? data.results : emptyModelList,
     totalModels: data ? data.totalEntries : 0,
     isModelsLoading: isLoading,
     isModelsError: error,

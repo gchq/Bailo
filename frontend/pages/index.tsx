@@ -126,8 +126,10 @@ export default function Marketplace() {
 
   const handleCurrentPageChange = useCallback(
     (newPage: number) => {
-      setCurrentPage(newPage)
-      updateQueryParams('currentPage', newPage.toString())
+      if (newPage > 0) {
+        setCurrentPage(newPage)
+        updateQueryParams('currentPage', newPage.toString())
+      }
     },
     [updateQueryParams],
   )
@@ -275,13 +277,6 @@ export default function Marketplace() {
                 </Tabs>
               </Box>
               <Stack spacing={2}>
-                <PaginationSelector
-                  currentPage={currentPage}
-                  onCurrentPageChange={(newValue) => handleCurrentPageChange(newValue)}
-                  totalEntries={totalModels}
-                  pageSize={pageSize}
-                  onPageSizeChange={(newValue) => handlePageSizeChange(newValue)}
-                />
                 {(isModelsLoading || isDataCardsLoading) && <Loading />}
                 {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                   <div data-test='modelListBox'>

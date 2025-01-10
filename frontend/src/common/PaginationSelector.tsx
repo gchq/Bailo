@@ -73,7 +73,13 @@ export default function PaginationSelector({
   }, [lastPage])
 
   return (
-    <Stack spacing={2} direction='row' sx={{ width: '100%', p: 2 }} justifyContent='center' alignItems='center'>
+    <Stack
+      spacing={2}
+      direction={{ xs: 'column', sm: 'row' }}
+      sx={{ py: 2 }}
+      justifyContent='center'
+      alignItems='center'
+    >
       <IconButton size='small' color='primary' onClick={handleBackPage}>
         <ArrowBack />
       </IconButton>

@@ -74,7 +74,7 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>) => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, currentPage = 0, pageSize = 10 },
+      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, currentPage = 1, pageSize = 10 },
     } = parse(req, getModelsSearchSchema)
 
     const foundModels = await searchModels(
