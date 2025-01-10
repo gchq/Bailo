@@ -2,7 +2,7 @@
 
 exports[`routes > model > getModelsSearch > 200 > ok 1`] = `
 {
-  "results": [
+  "models": [
     {
       "description": "description",
       "id": "test",

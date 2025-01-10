@@ -21,7 +21,7 @@ const mockedModelResult: ModelSearchResult = {
   kind: EntryKind.Model,
 }
 const mockedResults: GetModelsResponse = {
-  results: [mockedModelResult],
+  models: [mockedModelResult],
   totalEntries: 1,
 }
 

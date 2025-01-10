@@ -32,7 +32,7 @@ export type CreateModelParams = Pick<
 >
 
 type ModelSearchResult = {
-  results: Array<ModelInterface>
+  models: Array<ModelInterface>
   totalEntries: number
 }
 
@@ -182,10 +182,10 @@ export async function searchModels(
   const auths = await authorisation.models(user, results, ModelAction.View)
   const authorisedResults = results.filter((_, i) => auths[i].success)
   if (!pageSize || !currentPage) {
-    return { results: authorisedResults, totalEntries: authorisedResults.length }
+    return { models: authorisedResults, totalEntries: authorisedResults.length }
   }
   const paginatedResults = authorisedResults.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-  return { results: paginatedResults, totalEntries: authorisedResults.length }
+  return { models: paginatedResults, totalEntries: authorisedResults.length }
 }
 
 export async function getModelCard(

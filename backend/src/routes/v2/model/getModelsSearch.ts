@@ -65,7 +65,7 @@ export interface ModelSearchResult {
 }
 
 export interface GetModelsResponse {
-  results: Array<ModelSearchResult>
+  models: Array<ModelSearchResult>
   totalEntries: number
 }
 
@@ -89,7 +89,7 @@ export const getModelsSearch = [
       currentPage,
       pageSize,
     )
-    const results = foundModels.results.map((model) => ({
+    const models = foundModels.models.map((model) => ({
       id: model.id,
       name: model.name,
       description: model.description,
@@ -97,8 +97,8 @@ export const getModelsSearch = [
       kind: model.kind,
     }))
 
-    await audit.onSearchModel(req, results)
+    await audit.onSearchModel(req, models)
 
-    return res.json({ results, totalEntries: foundModels.totalEntries })
+    return res.json({ models, totalEntries: foundModels.totalEntries })
   },
 ]
