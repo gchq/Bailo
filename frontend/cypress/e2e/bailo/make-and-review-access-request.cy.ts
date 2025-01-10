@@ -3,6 +3,11 @@ let accessRequestUuid = ''
 const modelName = 'Test Model'
 const schemaId = 'minimal-access-request-general-v10'
 const accessRequestName = 'Test access request'
+let spy
+
+Cypress.on('window:before:load', (win) => {
+  spy = cy.spy(win.console, 'error') // can be other methods - log, warn, etc
+})
 
 describe('Make and approve an access request', () => {
   before(() => {
@@ -44,7 +49,11 @@ describe('Make and approve an access request', () => {
     })
 
     cy.log('Creating the access request')
-    cy.get('body').contains('Select a different schema')
+
+    cy.wrap({}).should(() => {
+      cy.get('body').contains('Select a different schema')
+      expect(spy).not.to.be.called
+    })
     cy.get('[data-test=entitySelector]').contains('Joe Bloggs')
     cy.get('#root_name-label').contains('What is the name of the access request?')
     cy.get('#root_name').type(accessRequestName)
