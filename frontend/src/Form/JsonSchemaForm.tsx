@@ -1,5 +1,5 @@
-import { Grid, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
-//import { useTheme } from '@mui/material/styles'
+import { Grid2 as Grid, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
@@ -25,7 +25,7 @@ export default function JsonSchemaForm({
   defaultCurrentUserInEntityList?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
-  //const theme = useTheme()
+  const theme = useTheme()
 
   const currentStep = splitSchema.steps[activeStep]
 
@@ -44,12 +44,16 @@ export default function JsonSchemaForm({
   }
 
   function ErrorListTemplate() {
-    return <Typography sx={{ mb: 2 }}>Please make sure that all errors listed below have been resolved.</Typography>
+    return (
+      <Typography color={theme.palette.error.main} sx={{ mb: 2 }}>
+        Please make sure that all errors listed below have been resolved.
+      </Typography>
+    )
   }
 
   return (
     <Grid container spacing={2} sx={{ mt: 1 }}>
-      <Grid item xs={12} md={2} sx={{ borderRight: 1 }}>
+      <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
@@ -58,7 +62,7 @@ export default function JsonSchemaForm({
                   <Typography
                     sx={{
                       wordBreak: 'break-word',
-                      //color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.common.black,
+                      color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.common.black,
                     }}
                     width='100%'
                   >
@@ -71,7 +75,7 @@ export default function JsonSchemaForm({
           </List>
         </Stepper>
       </Grid>
-      <Grid item xs={12} sm={10}>
+      <Grid size={{ xs: 12, md: 10 }}>
         <Form
           schema={currentStep.schema}
           formData={currentStep.state}
