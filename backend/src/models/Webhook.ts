@@ -44,6 +44,7 @@ WebhookSchema.plugin(MongooseDelete, {
   overrideMethods: 'all',
   deletedBy: true,
   deletedByType: Schema.Types.ObjectId,
+  deletedAt: true,
 })
 
 const WebhookModel = model<WebhookInterface>('v2_Webhook', WebhookSchema)
