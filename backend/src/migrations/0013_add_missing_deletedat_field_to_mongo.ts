@@ -18,9 +18,13 @@ export async function up() {
     TokenModel,
     WebhookModel,
   ]
+  const currentDate = Date()
 
   for (const modelTypeToUpdate of modelTypesToUpdate) {
-    await (modelTypeToUpdate as any).updateManyDeleted({ deletedAt: { $exists: false } }, { $set: { deletedAt: null } })
+    await (modelTypeToUpdate as any).updateManyDeleted(
+      { deletedAt: { $exists: false } },
+      { $set: { deletedAt: { date: currentDate } } },
+    )
   }
 }
 
