@@ -1,6 +1,6 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
-import { Box, Button, Card, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Card, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { ArrayFieldTemplateProps, ObjectFieldTemplateProps } from '@rjsf/utils'
 
 export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
@@ -10,11 +10,11 @@ export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
         {props.title}
       </Typography>
       {props.items.map((element) => (
-        <Grid key={element.key} container spacing={2}>
-          <Grid item xs={11}>
+        <Grid2 key={element.key} container spacing={2}>
+          <Grid2 size={{ xs: 11 }}>
             <Box>{element.children}</Box>
-          </Grid>
-          <Grid item xs={1}>
+          </Grid2>
+          <Grid2 size={{ xs: 1 }}>
             {props.formContext.editMode && (
               <Tooltip title='Remove item'>
                 <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
@@ -22,8 +22,8 @@ export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
                 </IconButton>
               </Tooltip>
             )}
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       ))}
       {props.canAdd && props.formContext.editMode && (
         <Button size='small' type='button' onClick={props.onAddClick} startIcon={<AddIcon />}>

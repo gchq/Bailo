@@ -8,7 +8,7 @@ import {
   Button,
   Card,
   Container,
-  Grid,
+  Grid2,
   Stack,
   Typography,
 } from '@mui/material'
@@ -146,9 +146,9 @@ export default function SchemaSelect({ entry }: SchemaSelectProps) {
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Grid container spacing={2} justifyContent='center'>
+                  <Grid2 container spacing={2} justifyContent='center'>
                     {activeSchemaButtons}
-                  </Grid>
+                  </Grid2>
                 </AccordionDetails>
               </Accordion>
               <Accordion sx={accordionStyling} slotProps={{ heading: { component: 'h2' } }}>
@@ -158,9 +158,9 @@ export default function SchemaSelect({ entry }: SchemaSelectProps) {
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Grid container spacing={2} justifyContent='center'>
+                  <Grid2 container spacing={2} justifyContent='center'>
                     {inactiveSchemaButtons}
-                  </Grid>
+                  </Grid2>
                 </AccordionDetails>
               </Accordion>
               <MessageAlert message={errorMessage} severity='error' />
