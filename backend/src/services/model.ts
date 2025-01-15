@@ -514,7 +514,7 @@ export async function validateMirroredModel(mirroredModelId: string, sourceModel
   return model
 }
 
-export function isModelCardRevision(data: unknown): data is ModelCardRevisionDoc {
+export function isModelCardRevisionDoc(data: unknown): data is ModelCardRevisionDoc {
   if (typeof data !== 'object' || data === null) {
     return false
   }

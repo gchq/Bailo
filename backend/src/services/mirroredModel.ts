@@ -24,12 +24,12 @@ import log from './log.js'
 import {
   getModelById,
   getModelCardRevisions,
-  isModelCardRevision,
+  isModelCardRevisionDoc,
   saveImportedModelCard,
   setLatestImportedModelCard,
   validateMirroredModel,
 } from './model.js'
-import { getAllFileIds, getReleasesForExport, isRelease, saveImportedRelease } from './release.js'
+import { getAllFileIds, getReleasesForExport, isReleaseDoc, saveImportedRelease } from './release.js'
 
 export async function exportModel(
   user: UserInterface,
@@ -174,18 +174,20 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
     throw InternalError('Unable to read zip file.', { mirroredModelId })
   }
 
+  const modelCardRegex = /^[0-9]+\.json$/
+  const releaseRegex = /^releases\/(.*)\.json$/
+  const fileRegex = /^files\/(.*)\.json$/
+
   const modelCardJsonStrings: string[] = []
   const releaseJsonStrings: string[] = []
   Object.keys(zipContent).forEach(async function (key) {
-    // TODO - We may want to assign these regexes to readable variables (e.g. modelCardRegex, releaseRegex, fileRegex) to make this a bit more readable
-    if (/^[0-9]+\.json$/.test(key)) {
+    if (modelCardRegex.test(key)) {
       modelCardJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
-    } else if (/^releases\/(.*)\.json$/.test(key)) {
+    } else if (releaseRegex.test(key)) {
       releaseJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
-    } else if (/^files\/(.*)\.json$/.test(key)) {
+    } else if (fileRegex.test(key)) {
       // TODO - Handle file parsing
     } else {
-      // TODO - Is this how we want to handle unrecognised zip content?
       throw InternalError('Failed to parse zip file - Unrecognised file contents.')
     }
   })
@@ -200,7 +202,6 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
   )
 
   releaseJsonStrings.forEach((releaseJson) => {
-    // TODO - As this is a forEach loop it will not wait for this iteration to finish before handling the next. Check we are okay with this.
     const release = parseRelease(releaseJson, mirroredModelId, sourceModelId)
     releases.push(release)
   })
@@ -247,7 +248,7 @@ async function importModelFile(
 
 function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceModelId: string) {
   const modelCard = JSON.parse(modelCardJson)
-  if (!isModelCardRevision(modelCard)) {
+  if (!isModelCardRevisionDoc(modelCard)) {
     throw InternalError('Data cannot be converted into a model card.')
   }
   const modelId = modelCard.modelId
@@ -261,7 +262,7 @@ function parseModelCard(modelCardJson: string, mirroredModelId: string, sourceMo
 
 function parseRelease(releaseJson: string, mirroredModelId: string, sourceModelId: string) {
   const release = JSON.parse(releaseJson)
-  if (!isRelease(release)) {
+  if (!isReleaseDoc(release)) {
     throw InternalError('Data cannot be converted into a release.')
   }
 

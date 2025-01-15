@@ -21,7 +21,7 @@ import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
-export function isRelease(data: unknown): data is ReleaseDoc {
+export function isReleaseDoc(data: unknown): data is ReleaseDoc {
   if (typeof data !== 'object' || data === null) {
     return false
   }

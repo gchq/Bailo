@@ -12,7 +12,7 @@ import {
   getCurrentUserPermissionsByModel,
   getModelById,
   getModelCardRevision,
-  isModelCardRevision,
+  isModelCardRevisionDoc,
   saveImportedModelCard,
   searchModels,
   setLatestImportedModelCard,
@@ -435,8 +435,8 @@ describe('services > model', () => {
     await expect(result).rejects.toThrowError(/^Unable to set latest model card of mirrored model./)
   })
 
-  test('isModelCardRevision > success', async () => {
-    const result = isModelCardRevision({
+  test('isModelCardRevisionDoc > success', async () => {
+    const result = isModelCardRevisionDoc({
       modelId: '',
       schemaId: '',
       version: '',
@@ -448,8 +448,8 @@ describe('services > model', () => {
     expect(result).toBe(true)
   })
 
-  test('isModelCardRevision > missing property', async () => {
-    const result = isModelCardRevision({
+  test('isModelCardRevisionDoc > missing property', async () => {
+    const result = isModelCardRevisionDoc({
       schemaId: '',
       version: '',
       createdBy: '',
@@ -460,8 +460,8 @@ describe('services > model', () => {
     expect(result).toBe(false)
   })
 
-  test('isModelCardRevision > wrong type', async () => {
-    const result = isModelCardRevision(null)
+  test('isModelCardRevisionDoc > wrong type', async () => {
+    const result = isModelCardRevisionDoc(null)
 
     expect(result).toBe(false)
   })
