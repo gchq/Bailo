@@ -1,0 +1,19 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# Webhooks
+
+Bailo provides webhooks for programmatic, event-driven interactions with individual models for interfacing with external
+applications.
+
+## Events
+
+A Bailo model's webhook events are:
+
+- `createRelease`
+- `updateRelease`
+- `createReviewResponse`
+- `createAccessRequest`
+
+To view and configure webhooks for a given model, refer to the Webhook section of our [api docs](./open-api).
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
