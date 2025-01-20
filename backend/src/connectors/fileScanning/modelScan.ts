@@ -26,7 +26,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
         try {
           await getModelScanInfo()
           log.info('ModelScan initialised.')
-        } catch (error) {
+        } catch (_error) {
           log.warn(`Could not initialise ModelScan, retrying (attempt ${retryCount})...`)
           this.init(++retryCount)
         }

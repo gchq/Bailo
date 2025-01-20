@@ -14,7 +14,7 @@ export async function listUsers(query: string, exactMatch = false) {
   try {
     dnName = config.oauth.cognito.userIdAttribute
     userPoolId = config.oauth.cognito.userPoolId
-  } catch (e) {
+  } catch (_e) {
     throw ConfigurationError('Cannot find userIdAttribute in oauth configuration', { oauthConfiguration: config.oauth })
   }
 
