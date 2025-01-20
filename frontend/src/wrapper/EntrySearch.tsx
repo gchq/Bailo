@@ -1,12 +1,15 @@
 import SearchIcon from '@mui/icons-material/Search'
-import { Box, InputBase, List, ListItemText, Popover, Stack } from '@mui/material'
+import { Box, Chip, InputBase, List, ListItem, ListItemButton, ListItemText, Popover, Stack } from '@mui/material'
 import { alpha, styled, useTheme } from '@mui/material/styles'
-import { EntrySearchResult, useListModels } from 'actions/model'
+import { useListModels } from 'actions/model'
 import { ChangeEvent, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import useDebounce from 'src/hooks/useDebounce'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
+import { EntryKindLabel } from 'types/types'
+import { toTitleCase } from 'utils/stringUtils'
 
 const Search = styled('div')(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
@@ -49,56 +52,35 @@ export default function EntrySearch() {
     isModelsError: isEntriesError,
   } = useListModels(undefined, [], '', [], debouncedFilter)
 
-  interface KindGroupedEntry {
-    id: string
-    name: string
-    description: string
-    tags: Array<string>
-  }
-
-  function reducerFunction(accumulator: Array<KindGroupedEntry>, currentValue: EntrySearchResult) {
-    const { kind, ...rest } = currentValue
-
-    if (!accumulator[kind]) {
-      accumulator[kind] = []
-    }
-
-    accumulator[kind].push(rest)
-    // console.log(accumulator)
-    return accumulator
-  }
-
-  function groupEntriesByKind(resultArray: EntrySearchResult[]): Array<KindGroupedEntry> {
-    //console.log(resultArray)
-    const test = resultArray.reduce(reducerFunction, [])
-    // console.log(test)
-    return test
-  }
-
   const modelList = useMemo(
     () =>
-      groupEntriesByKind(entries).map((entry) => (
-        <Box key={entry.id} sx={{ maxWidth: '300px' }}>
-          <ListItemText primary={'test'} />
-          {/* <Link href={`/${entry[0]}`} noLinkStyle>
-            <ListItemButton>
-              <ListItemText
-                primary={`${entry[0].name}`}
-                secondary={entry[0].description}
-                primaryTypographyProps={{
-                  style: {
-                    whiteSpace: 'nowrap',
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    color: theme.palette.primary.main,
-                  },
-                }}
-                secondaryTypographyProps={{
-                  style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
-                }}
-              />
-            </ListItemButton>
-          </Link> */}
+      entries.map((entry) => (
+        <Box key={entry.id} sx={{ maxWidth: '400px' }}>
+          <Link href={`/${entry.kind}/${entry.id}`} noLinkStyle>
+            <ListItem secondaryAction={<Chip label={toTitleCase(EntryKindLabel[entry.kind])} size='small' />}>
+              <ListItemButton>
+                <ListItemText
+                  primary={entry.name}
+                  secondary={entry.description}
+                  slotProps={{
+                    primary: {
+                      style: {
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        overflow: 'hidden',
+                        color: theme.palette.primary.main,
+                        maxWidth: '300px',
+                      },
+                    },
+
+                    secondary: {
+                      style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '300px' },
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </Link>
         </Box>
       )),
     // eslint-disable-next-line react-hooks/exhaustive-deps
