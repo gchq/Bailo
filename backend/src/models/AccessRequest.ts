@@ -55,6 +55,7 @@ AccessRequestSchema.plugin(MongooseDelete, {
   overrideMethods: 'all',
   deletedBy: true,
   deletedByType: String,
+  deletedAt: true,
 })
 
 const AccessRequestModel = model<AccessRequestInterface>('v2_Access_Request', AccessRequestSchema)

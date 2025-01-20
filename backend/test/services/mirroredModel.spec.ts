@@ -9,6 +9,7 @@ import { exportModel, importModel } from '../../src/services/mirroredModel.js'
 const fileScanResult: FileScanResult = {
   state: 'complete',
   isInfected: false,
+  lastRunAt: new Date(),
   toolName: 'Test',
 }
 
@@ -22,6 +23,16 @@ const fflateMock = vi.hoisted(() => ({
   unzipSync: vi.fn(),
 }))
 vi.mock('fflate', async () => fflateMock)
+
+const baseScannerMock = vi.hoisted(() => ({
+  ScanState: {
+    NotScanned: 'notScanned',
+    InProgress: 'inProgress',
+    Complete: 'complete',
+    Error: 'error',
+  },
+}))
+vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
 
 const bufferMock = vi.hoisted(() => ({
   unzipSync: vi.fn(),
@@ -80,7 +91,7 @@ vi.mock('../../src/services/log.js', async () => ({
 }))
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } } })),
+  getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } }, card: { schemaId: 'test' } })),
   getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(), version: 123 }]),
   setLatestImportedModelCard: vi.fn(),
   saveImportedModelCard: vi.fn(),
@@ -226,6 +237,7 @@ describe('services > mirroredModel', () => {
   test('exportModel > missing mirrored model ID', async () => {
     modelMocks.getModelById.mockReturnValueOnce({
       settings: { mirror: { destinationModelId: '' } },
+      card: { schemaId: 'test' },
     })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await expect(response).rejects.toThrowError(/^The 'Destination Model ID' has not been set on this model./)

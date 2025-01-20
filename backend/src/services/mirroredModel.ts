@@ -10,8 +10,9 @@ import { sign } from '../clients/kms.js'
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import { ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import { FileInterfaceDoc, ScanState } from '../models/File.js'
+import { FileInterfaceDoc } from '../models/File.js'
 import { ModelDoc } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../models/Release.js'
@@ -44,6 +45,9 @@ export async function exportModel(
   const model = await getModelById(user, modelId)
   if (!model.settings.mirror.destinationModelId) {
     throw BadReq(`The 'Destination Model ID' has not been set on this model.`)
+  }
+  if (!model.card || !model.card.schemaId) {
+    throw BadReq('You must select a schema for your model before you can start the export process.')
   }
   const mirroredModelId = model.settings.mirror.destinationModelId
   const auth = await authorisation.model(user, model, ModelAction.Update)

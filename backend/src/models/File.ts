@@ -1,7 +1,7 @@
 import { Document, model, ObjectId, Schema } from 'mongoose'
 import MongooseDelete from 'mongoose-delete'
 
-import { FileScanResult } from '../connectors/fileScanning/Base.js'
+import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
@@ -25,14 +25,6 @@ export interface FileInterface {
   updatedAt: Date
 }
 
-export const ScanState = {
-  NotScanned: 'notScanned',
-  InProgress: 'inProgress',
-  Complete: 'complete',
-  Error: 'error',
-} as const
-export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
-
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
@@ -52,9 +44,11 @@ const FileSchema = new Schema<FileInterface>(
     avScan: [
       {
         toolName: { type: String },
+        scannerVersion: { type: String },
         state: { type: String, enum: Object.values(ScanState) },
         isInfected: { type: Boolean },
         viruses: [{ type: String }],
+        lastRunAt: { type: Schema.Types.Date },
       },
     ],
 
@@ -67,7 +61,12 @@ const FileSchema = new Schema<FileInterface>(
   },
 )
 
-FileSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
+FileSchema.plugin(MongooseDelete, {
+  overrideMethods: 'all',
+  deletedBy: true,
+  deletedByType: Schema.Types.ObjectId,
+  deletedAt: true,
+})
 
 const FileModel = model<FileInterface>('v2_File', FileSchema)
 

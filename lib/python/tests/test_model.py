@@ -18,16 +18,15 @@ def test_create_experiment_from_model(local_model):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "team_id", "visibility"),
+    ("name", "description", "visibility"),
     [
-        ("test-model", "test", "Uncategorised", ModelVisibility.PUBLIC),
-        ("test-model", "test", "Uncategorised", None),
+        ("test-model", "test", ModelVisibility.PUBLIC),
+        ("test-model", "test", None),
     ],
 )
 def test_create_get_from_id_and_update(
     name: str,
     description: str,
-    team_id: str,
     visibility: ModelVisibility | None,
     integration_client: Client,
 ):
@@ -36,7 +35,6 @@ def test_create_get_from_id_and_update(
         client=integration_client,
         name=name,
         description=description,
-        team_id=team_id,
         visibility=visibility,
     )
     model.card_from_schema("minimal-general-v10")
@@ -73,7 +71,6 @@ def test_get_and_update_latest_model_card(integration_client):
         client=integration_client,
         name="test-model",
         description="test",
-        team_id="Uncategorised",
         visibility=ModelVisibility.PUBLIC,
     )
 
@@ -90,7 +87,6 @@ def get_model_card_without_creation(integration_client):
         client=integration_client,
         name="test-model",
         description="test",
-        team_id="Uncategorised",
         visibility=ModelVisibility.PUBLIC,
     )
     model.card_from_schema("minimal-general-v10")
@@ -105,7 +101,6 @@ def test_get_releases(integration_client):
         client=integration_client,
         name="test-model",
         description="test",
-        team_id="Uncategorised",
         visibility=ModelVisibility.PUBLIC,
     )
     model.card_from_schema("minimal-general-v10")
@@ -128,7 +123,6 @@ def test_create_release_without_model_card(integration_client):
         client=integration_client,
         name="test-model",
         description="test",
-        team_id="Uncategorised",
         visibility=ModelVisibility.PUBLIC,
     )
 
@@ -142,7 +136,6 @@ def test_get_datacard_as_model(integration_client):
         client=integration_client,
         name="test-datacard",
         description="test",
-        team_id="Uncategorised",
         visibility=ModelVisibility.PUBLIC,
     )
 
@@ -190,7 +183,6 @@ def test_import_model_from_mlflow(integration_client, mlflow_model, request):
     model = Model.from_mlflow(
         client=integration_client,
         mlflow_uri=request.config.mlflow_uri,
-        team_id="Uncategorised",
         schema_id="minimal-general-v10",
         name=mlflow_model,
     )
@@ -205,7 +197,6 @@ def test_import_nonexistent_model_from_mlflow(integration_client, request):
         model = Model.from_mlflow(
             client=integration_client,
             mlflow_uri=request.config.mlflow_uri,
-            team_id="Uncategorised",
             schema_id="minimal-general-v10",
             name="fake-model-name",
         )
@@ -217,7 +208,6 @@ def test_import_model_files_no_run(integration_client, mlflow_model_no_run, requ
         model = Model.from_mlflow(
             client=integration_client,
             mlflow_uri=request.config.mlflow_uri,
-            team_id="Uncategorised",
             schema_id="minimal-general-v10",
             name=mlflow_model_no_run,
         )
@@ -229,7 +219,6 @@ def test_import_model_no_schema(integration_client, mlflow_model, request):
         model = Model.from_mlflow(
             client=integration_client,
             mlflow_uri=request.config.mlflow_uri,
-            team_id="Uncategorised",
             name=mlflow_model,
         )
 

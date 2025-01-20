@@ -2,26 +2,18 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Button from '@mui/material/Button'
-import Grid from '@mui/material/Grid'
+import Grid2 from '@mui/material/Grid2'
 import imageLoader from '../src/imageLoader'
 import Image from 'next/image'
 import localFont from '@next/font/local'
 import Link from '../src/Link'
 import { createRef } from 'react'
-import Tooltip from '@mui/material/Tooltip'
-import IconButton from '@mui/material/IconButton'
-import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import StarPurple500Icon from '@mui/icons-material/StarPurple500'
 import Slideshow from '../src/Slideshow'
 import React from 'react'
 
 import bailoLogo from '../public/vertical-white.png'
-import { Bellota_Text } from '@next/font/google'
-
-const nunitoSansFont = localFont({
-  src: '../public/fonts/NunitoSans-Black.ttf',
-})
 
 export default function Home() {
   const ref = createRef<HTMLDivElement>()
@@ -88,8 +80,8 @@ export default function Home() {
         }}
       />
       <Box sx={{ m: 'auto', my: 8 }} ref={ref}>
-        <Grid container alignItems='center' spacing={4}>
-          <Grid item lg={6}>
+        <Grid2 container alignItems='center' spacing={4}>
+          <Grid2 size={{ lg: 6 }}>
             <Box sx={{ px: 10, py: 4, textAlign: 'center', height: '100%' }}>
               <Stack
                 spacing={4}
@@ -114,13 +106,13 @@ export default function Home() {
                 </Typography>
               </Stack>
             </Box>
-          </Grid>
-          <Grid item lg={6} sx={{ width: '100%' }}>
+          </Grid2>
+          <Grid2 size={{ lg: 6 }} sx={{ width: '100%' }}>
             <Box sx={{ px: 3 }}>
               <Slideshow />
             </Box>
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       </Box>
     </>
   )

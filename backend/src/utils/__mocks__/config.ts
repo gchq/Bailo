@@ -36,6 +36,19 @@ const config: PartialDeep<Config> = {
       kinds: [],
     },
   },
+  smtp: {
+    enabled: true,
+    connection: {
+      host: 'localhost',
+      port: 1025,
+      secure: false,
+      auth: undefined,
+      tls: {
+        rejectUnauthorized: false,
+      },
+    },
+    from: '"Bailo 📝" <bailo@example.org>',
+  },
   log: {
     level: 'debug',
   },
@@ -77,6 +90,18 @@ const config: PartialDeep<Config> = {
       },
       userPoolId: '',
       userIdAttribute: '',
+    },
+  },
+  avScanning: {
+    clamdscan: {
+      host: '127.0.0.1',
+      port: 8080,
+    },
+
+    modelscan: {
+      protocol: 'http',
+      host: '127.0.0.1',
+      port: 8081,
     },
   },
   mongo: {

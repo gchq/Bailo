@@ -6,7 +6,7 @@ about: Create a report to help us improve Bailo
 <!--
 Thank you for reporting a possible bug in Bailo.  Below is a template of useful information you can provide to help us out.
 
-Sometimes the issue is obvious, feel free to remove any categories that don't apply.
+Sometimes the issue is obvious, feel free to remove any categories that do not apply.
 -->
 
 ### Subject of the issue

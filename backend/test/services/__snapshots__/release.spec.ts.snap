@@ -1,5 +1,109 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`services > release > getModelReleases > convertSemverQueryToMongoQuery functions 1`] = `
+[
+  {
+    "$and": [
+      {
+        "$or": [
+          {
+            "semver.major": {
+              "$gte": 2,
+            },
+            "semver.minor": {
+              "$gte": 2,
+            },
+            "semver.patch": {
+              "$gte": 0,
+            },
+          },
+          {
+            "semver.major": {
+              "$gt": 2,
+            },
+          },
+          {
+            "semver.major": {
+              "$gte": 2,
+            },
+            "semver.minor": {
+              "$gt": 2,
+            },
+          },
+        ],
+      },
+      {
+        "$or": [
+          {
+            "semver.major": {
+              "$lte": 2,
+            },
+            "semver.minor": {
+              "$lte": 3,
+            },
+            "semver.patch": {
+              "$lt": 0,
+            },
+          },
+          {
+            "semver.major": {
+              "$lt": 2,
+            },
+          },
+          {
+            "semver.major": {
+              "$lte": 2,
+            },
+            "semver.minor": {
+              "$lt": 3,
+            },
+          },
+        ],
+      },
+    ],
+    "modelId": "modelId",
+  },
+]
+`;
+
+exports[`services > release > getModelReleases > convertSemverQueryToMongoQuery functions with less than 1`] = `
+[
+  {
+    "$and": [
+      {
+        "$or": [
+          {
+            "semver.major": {
+              "$lte": 2,
+            },
+            "semver.minor": {
+              "$lte": 2,
+            },
+            "semver.patch": {
+              "$lt": 2,
+            },
+          },
+          {
+            "semver.major": {
+              "$lt": 2,
+            },
+          },
+          {
+            "semver.major": {
+              "$lte": 2,
+            },
+            "semver.minor": {
+              "$lt": 2,
+            },
+          },
+        ],
+      },
+    ],
+    "modelId": "modelID",
+  },
+]
+`;
+
 exports[`services > release > getModelReleases > good 1`] = `
 [
   {

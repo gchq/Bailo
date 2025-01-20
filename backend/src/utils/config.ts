@@ -42,6 +42,9 @@ export interface Config {
 
     fileScanners: {
       kinds: FileScanKindKeys[]
+      retryDelayInMinutes: number
+      maxInitRetries: number
+      initRetryDelay: number
     }
   }
 

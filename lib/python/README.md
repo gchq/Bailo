@@ -18,9 +18,16 @@ A simple Python API Wrapper for Bailo
             <a href="#getting-started">Getting Started</a>
         </li>
         <li>
+            <a href="#documentation">Documentation</a>
+            <ul>
+                <li><a href="#building-locally">Building Locally</a></li>
+            </ul>
+        </li>
+        <li>
             <a href="#development">Development</a>
             <ul>
-                <li><a href="#install-and-add-precommit">Precommits</a></li>
+                <li><a href="#install-and-add-precommit">Install and add precommit</a></li>
+                <li><a href="#install-the-package-locally">Install the package locally</a></li>
                 <li><a href="#testing">Testing</a></li>
             </ul>
         </li>
@@ -35,7 +42,10 @@ A simple Python API Wrapper for Bailo
 
 ## Installing
 
-**Python 3.8.1 or higher is required**
+<!-- prettier-ignore-start -->
+> [!IMPORTANT]
+> Python 3.8.1 or higher is required
+<!-- prettier-ignore-end -->
 
 ```bash
 pip install bailo
@@ -51,8 +61,7 @@ client = Client("http://localhost:8080")
 yolo = Model.create(
     client=client,
     name="YoloV4",
-    description="You only look once!",
-    team_id="Uncategorised"
+    description="You only look once!"
 )
 
 yolo.card_from_schema("minimal-general-v10")
@@ -68,21 +77,11 @@ with open("yolo.onnx") as f:
 
 ## Documentation
 
-Documenation is rendered with Sphinx and served [here](https://gchq.github.io/Bailo/docs/python/index.html).
+Documentation is rendered with Sphinx and served [here](https://gchq.github.io/Bailo/docs/python/index.html).
 
 ### Building locally
 
-#### prerequisites
-
-From within the `backend/docs` directory:
-
-```bash
-pip install bailo -r requirements.txt
-apt install -y pandoc
-```
-
-From the docs directory run either `make html` or `make.bat` on Windows. This will build it in the backend directory by
-default.
+Refer to [backend/docs/README.md](../../backend/docs/README.md) for local build steps.
 
 ## Development
 

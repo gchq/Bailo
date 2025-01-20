@@ -102,6 +102,7 @@ export default function Model() {
         <PageWithTabs
           title={model.name}
           subheading={`ID: ${model.id}`}
+          additionalInfo={model.description}
           tabs={tabs}
           displayActionButton={model.card !== undefined}
           actionButtonTitle='Request access'

@@ -1,4 +1,5 @@
 import fetch, { Response } from 'node-fetch'
+import { Readable } from 'stream'
 
 import config from '../utils/config.js'
 import { BadReq, InternalError } from '../utils/error.js'
@@ -32,18 +33,19 @@ interface ModelScanResponse {
       skipped_files: string[]
     }
   }
-  issues: [
-    {
-      description: string
-      operator: string
-      module: string
-      source: string
-      scanner: string
-      severity: string
-    },
-  ]
-  // TODO: currently unknown what this might look like
-  errors: object[]
+  issues: {
+    description: string
+    operator: string
+    module: string
+    source: string
+    scanner: string
+    severity: string
+  }[]
+  errors: {
+    category: string
+    description: string
+    source: string
+  }[]
 }
 
 export async function getModelScanInfo() {
@@ -65,13 +67,21 @@ export async function getModelScanInfo() {
   return (await res.json()) as ModelScanInfoResponse
 }
 
-export async function scanFile(file: Blob, file_name: string) {
+export async function scanStream(stream: Readable, fileName: string, fileSize: number) {
   const url = `${config.avScanning.modelscan.protocol}://${config.avScanning.modelscan.host}:${config.avScanning.modelscan.port}`
   let res: Response
 
   try {
     const formData = new FormData()
-    formData.append('in_file', file, file_name)
+    formData.append(
+      'in_file',
+      {
+        [Symbol.toStringTag]: 'File',
+        size: fileSize,
+        stream: () => stream,
+      },
+      fileName,
+    )
 
     res = await fetch(`${url}/scan/file`, {
       method: 'POST',
