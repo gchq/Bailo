@@ -104,7 +104,7 @@ jobs:
       - name: Run generator
         run: npm run generate
       - name: Build and export
-        run: npm run export
+        run: npm run build
         env:
           BASE_PATH: "/Bailo"
       - name: Upload artifact
