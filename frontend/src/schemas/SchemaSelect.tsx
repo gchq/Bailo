@@ -42,7 +42,6 @@ type SchemaSelectProps = {
 export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind, false)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
@@ -68,7 +67,6 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
     async (newSchema: SchemaInterface) => {
       if (currentUser && entry) {
         setLoading(true)
-        setErrorMessage('')
 
         const response = await postFromSchema(entry.id, newSchema.id)
 
@@ -76,7 +74,6 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
           await mutateEntry()
           router.push(`/${entry.kind}/${entry.id}`)
         } else {
-          setErrorMessage(response.data)
           setLoading(false)
         }
       }
