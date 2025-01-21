@@ -139,13 +139,15 @@ export default function NewSchema() {
                   Id <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <TextField
-                  inputProps={{ autoFocus: true }}
                   fullWidth
                   required
                   size='small'
                   value={schemaId}
                   aria-label='Schema ID'
                   onChange={(e) => setSchemaId(e.target.value)}
+                  slotProps={{
+                    htmlInput: { autoFocus: true },
+                  }}
                 />
                 <Typography variant='caption'>Please specify a unique ID for your schema</Typography>
               </Stack>

@@ -72,6 +72,7 @@ ResponseSchema.plugin(MongooseDelete, {
   overrideMethods: 'all',
   deletedBy: true,
   deletedByType: String,
+  deletedAt: true,
 })
 
 const ResponseModel = model<ResponseInterface>('v2_response', ResponseSchema)

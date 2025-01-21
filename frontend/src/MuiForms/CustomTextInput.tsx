@@ -43,28 +43,43 @@ export default function CustomTextInput(props: CustomTextInputProps) {
         size='small'
         id={id}
         error={rawErrors && rawErrors.length > 0}
-        sx={{
-          input: {
-            color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
-          },
-          label: {
-            WebkitTextFillColor:
-              theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
-          },
-          '& .MuiInputBase-input.Mui-disabled': {
-            WebkitTextFillColor: disabledWebkitTextFillColor,
-          },
-          fontStyle: value ? 'unset' : 'italic',
-        }}
+        sx={[
+          (theme) => ({
+            input: {
+              color: theme.palette.common.white,
+              ...theme.applyStyles('light', {
+                color: theme.palette.common.black,
+              }),
+            },
+            label: {
+              WebkitTextFillColor: theme.palette.common.white,
+              ...theme.applyStyles('light', {
+                WebkitTextFillColor: theme.palette.common.black,
+              }),
+            },
+            '& .MuiInputBase-input.Mui-disabled': {
+              WebkitTextFillColor: disabledWebkitTextFillColor,
+            },
+          }),
+          value
+            ? {
+                fontStyle: 'unset',
+              }
+            : {
+                fontStyle: 'italic',
+              },
+        ]}
         onChange={handleChange}
         variant={!formContext.editMode ? 'standard' : 'outlined'}
         required={formContext.editMode}
         value={value || (!formContext.editMode ? 'Unanswered' : '')}
         disabled={!formContext.editMode}
-        InputProps={{
-          ...props.InputProps,
-          ...(!formContext.editMode && { disableUnderline: true }),
-          'data-test': id,
+        slotProps={{
+          input: {
+            ...props.InputProps,
+            ...(!formContext.editMode && { disableUnderline: true }),
+            'data-test': id,
+          },
         }}
       />
     </Fragment>
