@@ -16,21 +16,78 @@ A Bailo model's webhook events are:
 
 To view and configure webhooks for a given model, refer to the Webhook section of our [api docs](./open-api).
 
-## Body
+## Request Format
 
-Webhooks have the following JSON structure:
+When a webhook is triggered, it will send a `POST` request to the webhook's URI.
+
+The webhook will include `"Authorization": "Bearer <token>"` in the request `headers` if the webhook has a token.
+
+The body of the webhook's request will vary depending on the type of hook.
+
+### createRelease & updateRelease
 
 ```json
 {
-  "name": "webhook",
-  "uri": "http://host:8080/webhook",
-  "token": "abcd",
-  "insecureSSL": false,
-  "events": ["createRelease", "updateRelease", "createReviewResponse", "createAccessRequest"],
-  "active": true
+  "event": "{createRelease|updateRelease}",
+  "description": "A release event happened",
+  "modelId": "abc123",
+  "modelCardVersion": 1,
+  "semver": "0.0.1",
+  "notes": "Initial release",
+  "minor": false,
+  "draft": false,
+  "fileIds": ["0123456789abcdef01234567"],
+  "images": [
+    {
+      "repository": "abc123",
+      "name": "some-docker-image",
+      "tag": "1.0.0"
+    }
+  ],
+  "deleted": false,
+  "createdBy": "user",
+  "createdAt": "2025-01-21T12:00:00.000Z",
+  "updatedAt": "2025-01-21T12:00:00.000Z"
 }
 ```
 
-`token`, `events` and `active` are all optional fields.
+### createReviewResponse
+
+```json
+{
+  "event": "createReviewResponse",
+  "description": "A review response was created",
+  "semver": "0.0.1",
+  "accessRequestId": "123456789abcdef012345678",
+  "modelId": "abc123",
+  "kind": "{release|access}"
+  "role": "mtr",
+  "createdAt": "2025-01-21T12:00:00.000Z",
+  "updatedAt": "2025-01-21T12:00:00.000Z"
+}
+```
+
+### createAccessRequest
+
+```json
+{
+  "event": "createAccessRequest",
+  "description": "An access request was created",
+  "id": "some-access-request-mno456",
+  "modelId": "abc123",
+  "schemaId": "minimal-access-request-general-v10",
+  "metadata": {
+    "overview": {
+      "name": "some access request",
+      "entities": ["user:user"],
+      "endDate": "2025-01-21"
+    }
+  },
+  "deleted": false,
+  "createdBy": "user",
+  "createdAt": "2025-01-21T12:00:00.000Z",
+  "updatedAt": "2025-01-21T12:00:00.000Z"
+}
+```
 
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
