@@ -86,8 +86,10 @@ export const ImportKind = {
 
 export type ImportKindKeys = (typeof ImportKind)[keyof typeof ImportKind]
 export type MongoDocumentImportInformation = {
-  modelCardVersions: number[]
+  modelCardVersions: ModelCardRevisionInterface['version'][]
   newModelCards: ModelCardRevisionInterface[]
+  releaseSemvers: ReleaseInterface['semver'][]
+  newReleases: ReleaseInterface[]
 }
 export type FileImportInformation = {
   sourcePath: string
@@ -137,8 +139,7 @@ export async function importModel(
 
   switch (importKind) {
     case ImportKind.Documents: {
-      const result = await importDocuments(res, mirroredModelId, sourceModelId, payloadUrl)
-      return result
+      return await importDocuments(res, mirroredModelId, sourceModelId, payloadUrl)
     }
     case ImportKind.File: {
       if (!filePath) {
@@ -159,7 +160,6 @@ export async function importModel(
 
 async function importDocuments(res: Response, mirroredModelId: string, sourceModelId: string, payloadUrl: string) {
   const modelCards: ModelCardRevisionInterface[] = []
-  // TODO - Use this releases array for auditing purposes
   const releases: ReleaseInterface[] = []
   const zipData = new Uint8Array(await res.arrayBuffer())
   let zipContent
@@ -188,7 +188,7 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
     } else if (fileRegex.test(key)) {
       // TODO - Handle file parsing
     } else {
-      throw InternalError('Failed to parse zip file - Unrecognised file contents.')
+      throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId })
     }
   })
 
@@ -206,19 +206,24 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
     releases.push(release)
   })
 
-  await Promise.all(releases.map((release) => saveImportedRelease(release)))
+  const newReleases: ReleaseInterface[] = (
+    await Promise.all(releases.map((release) => saveImportedRelease(release)))
+  ).filter((release): release is ReleaseInterface => !!release)
 
   log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
 
   const mirroredModel = await setLatestImportedModelCard(mirroredModelId)
+
+  const modelCardVersions = modelCards.map((modelCard) => modelCard.version)
+  const releaseSemvers = releases.map((release) => release.semver)
 
   log.info(
     {
       mirroredModelId,
       payloadUrl,
       sourceModelId,
-      modelCardVersions: modelCards.map((modelCard) => modelCard.version),
-      releaseSemvers: releases.map((release) => release.semver),
+      modelCardVersions,
+      releaseSemvers,
     },
     'Finished importing the collection of model documents.',
   )
@@ -226,8 +231,10 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
   return {
     mirroredModel,
     importResult: {
-      modelCardVersions: modelCards.map((modelCard) => modelCard.version),
+      modelCardVersions,
       newModelCards,
+      releaseSemvers,
+      newReleases,
     },
   }
 }
