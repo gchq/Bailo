@@ -11,7 +11,10 @@ This directory provides all of the necessary functionality to interact with
 
 ## Setup
 
-Note that **Python 3.9 to 3.12** is required.
+<!-- prettier-ignore-start -->
+> [!IMPORTANT]
+> Python 3.9 to 3.12 is required
+<!-- prettier-ignore-end -->
 
 Create and activate a virtual environment
 
@@ -53,11 +56,20 @@ pre-commit install
 
 ### Tests
 
-To run the tests:
+To run the unit tests:
 
 ```bash
 pytest
 ```
+
+To run the integration tests (does not require any externally running services):
+
+```bash
+pytest -m integration
+```
+
+Note that the integration tests use safe but technically "malicious" file(s) to check ModelScan's performance. Please
+refer to [test_integration](./tests/test_integration/README.md) for details.
 
 ### Running
 

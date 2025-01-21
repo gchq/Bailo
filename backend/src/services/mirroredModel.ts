@@ -47,6 +47,9 @@ export async function exportModel(
   if (!model.settings.mirror.destinationModelId) {
     throw BadReq(`The 'Destination Model ID' has not been set on this model.`)
   }
+  if (!model.card || !model.card.schemaId) {
+    throw BadReq('You must select a schema for your model before you can start the export process.')
+  }
   const mirroredModelId = model.settings.mirror.destinationModelId
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {

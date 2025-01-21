@@ -91,8 +91,7 @@ vi.mock('../../src/services/log.js', async () => ({
 }))
 
 const modelMocks = vi.hoisted(() => ({
-  getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } } })),
-  getMirroredModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } } })),
+  getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } }, card: { schemaId: 'test' } })),
   getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(), version: 123 }]),
   setLatestImportedModelCard: vi.fn(),
   saveImportedModelCard: vi.fn(),
@@ -239,6 +238,7 @@ describe('services > mirroredModel', () => {
   test('exportModel > missing mirrored model ID', async () => {
     modelMocks.getModelById.mockReturnValueOnce({
       settings: { mirror: { destinationModelId: '' } },
+      card: { schemaId: 'test' },
     })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await expect(response).rejects.toThrowError(/^The 'Destination Model ID' has not been set on this model./)

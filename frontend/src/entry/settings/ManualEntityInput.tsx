@@ -36,7 +36,7 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
         aria-controls='manual-user-add-content'
         id='manual-user-add-header'
       >
-        <Typography sx={{ mr: 1 }} component='caption'>
+        <Typography sx={{ mr: 1 }} variant='caption'>
           Trouble finding a user? Click here to add them manually
         </Typography>
       </AccordionSummary>
