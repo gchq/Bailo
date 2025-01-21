@@ -27,7 +27,7 @@ export default function ApprovalsDisplay({ modelId, acceptedReviewResponses }: A
         )
         if (hasRoleApproved) {
           approvals.push(
-            <Tooltip title={`${plural(acceptedReviewResponses.length, 'approval')}`} key={dynamicRole.id}>
+            <Tooltip title={`${plural(acceptedReviewResponses.length, 'review')}`} key={dynamicRole.id}>
               <Stack direction='row'>
                 <Done color='success' fontSize='small' />
                 <Typography variant='caption'>{`Approved by ${dynamicRole.name}`}</Typography>
