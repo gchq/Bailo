@@ -26,7 +26,7 @@
     "@opentelemetry/auto-instrumentations-node": "^0.52.0",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.57.0",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.56.0",
-    "@opentelemetry/host-metrics": "^0.35.3",
+    "@opentelemetry/host-metrics": "^0.35.5",
     "@opentelemetry/sdk-metrics": "^1.30.0",
     "@smithy/node-http-handler": "^3.1.2",
     "@types/express-session": "^1.18.1",

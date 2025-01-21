@@ -62,14 +62,21 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
         <Fragment key={doc.slug}>
           {doc.header && doc.slug ? (
             <ListItem dense sx={{ pl: paddingLeft }}>
-              <ListItemText primary={doc.title} primaryTypographyProps={{ fontWeight: 'bold' }} />
+              <ListItemText
+                primary={doc.title}
+                slotProps={{
+                  primary: { fontWeight: 'bold' },
+                }}
+              />
             </ListItem>
           ) : (
-            <Link passHref href={path} legacyBehavior>
+            <Link passHref href={path} style={{ textDecoration: 'none', color: 'inherit' }}>
               <ListItemButton dense selected={isSelected} sx={{ pl: paddingLeft }}>
                 <ListItemText
                   primary={doc.title}
-                  primaryTypographyProps={{ fontWeight: doc.slug ? 'normal' : 'bold' }}
+                  slotProps={{
+                    primary: { fontWeight: doc.slug ? 'normal' : 'bold' },
+                  }}
                 />
               </ListItemButton>
             </Link>
@@ -110,17 +117,17 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
 
   return (
     <>
-      {/* Banner height + Toolbar height = 96px */}
       <Title text='Documentation' />
+      {/* Banner height + Toolbar height = 96px */}
       <Box display='flex' width='100%' height='calc(100vh - 96px)'>
         <Box
-          sx={{
+          sx={(theme) => ({
             minWidth: 200,
             backgroundColor: theme.palette.background.paper,
             borderRight: `1px solid ${theme.palette.divider}`,
             overflow: 'auto',
             py: 2,
-          }}
+          })}
         >
           <StyledList>{createDocElement(directory)}</StyledList>
         </Box>
