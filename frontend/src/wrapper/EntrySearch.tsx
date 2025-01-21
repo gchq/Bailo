@@ -57,7 +57,10 @@ export default function EntrySearch() {
       entries.map((entry) => (
         <Box key={entry.id} sx={{ maxWidth: '400px' }}>
           <Link href={`/${entry.kind}/${entry.id}`} noLinkStyle>
-            <ListItem secondaryAction={<Chip label={toTitleCase(EntryKindLabel[entry.kind])} size='small' />}>
+            <ListItem
+              disablePadding
+              secondaryAction={<Chip label={toTitleCase(EntryKindLabel[entry.kind])} size='small' />}
+            >
               <ListItemButton>
                 <ListItemText
                   primary={entry.name}
@@ -69,12 +72,12 @@ export default function EntrySearch() {
                         textOverflow: 'ellipsis',
                         overflow: 'hidden',
                         color: theme.palette.primary.main,
-                        maxWidth: '300px',
+                        maxWidth: '400px',
                       },
                     },
 
                     secondary: {
-                      style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '300px' },
+                      style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '400px' },
                     },
                   }}
                 />
@@ -83,7 +86,6 @@ export default function EntrySearch() {
           </Link>
         </Box>
       )),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [entries, theme.palette.primary.main],
   )
   const searchMenuOpen = useMemo(() => !!anchorEl, [anchorEl])
