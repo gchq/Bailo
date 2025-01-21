@@ -16,4 +16,21 @@ A Bailo model's webhook events are:
 
 To view and configure webhooks for a given model, refer to the Webhook section of our [api docs](./open-api).
 
+## Body
+
+Webhooks have the following JSON structure:
+
+```json
+{
+  "name": "webhook",
+  "uri": "http://host:8080/webhook",
+  "token": "abcd",
+  "insecureSSL": false,
+  "events": ["createRelease", "updateRelease", "createReviewResponse", "createAccessRequest"],
+  "active": true
+}
+```
+
+`token`, `events` and `active` are all optional fields.
+
 export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>
