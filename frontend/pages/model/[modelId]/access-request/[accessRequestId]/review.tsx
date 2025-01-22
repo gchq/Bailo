@@ -51,7 +51,7 @@ export default function AccessRequestReview() {
     })
 
     if (!res.ok) {
-      setIsReviewButtonLoading(false)
+      setIsReviewButtonLoading(true)
       setErrorMessage(await getErrorMessage(res))
     } else {
       mutateReviews()
