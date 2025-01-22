@@ -178,7 +178,7 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
   try {
     zipContent = fflate.unzipSync(zipData, {
       filter(file) {
-        return /[0-9]+.json/.test(file.name)
+        return /.+\.json/.test(file.name)
       },
     })
   } catch (error) {
