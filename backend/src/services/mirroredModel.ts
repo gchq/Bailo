@@ -309,8 +309,6 @@ function parseRelease(releaseJson: string, mirroredModelId: string, sourceModelI
     throw InternalError('Zip file contains releases from an invalid model.', { modelIds: [sourceModelId, modelId] })
   }
 
-  // Remove Files until we add the functionality to import files
-  release.fileIds = []
   // Remove Docker Images until we add the functionality to import Docker images
   release.images = []
 
