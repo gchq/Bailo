@@ -3,6 +3,7 @@ import MongooseDelete from 'mongoose-delete'
 
 export const WebhookEvent = {
   CreateRelease: 'createRelease',
+  UpdateRelease: 'updateRelease',
   CreateReviewResponse: 'createReviewResponse',
   CreateAccessRequest: 'createAccessRequest',
 } as const

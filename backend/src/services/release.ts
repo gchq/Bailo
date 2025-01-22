@@ -227,6 +227,13 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
+  sendWebhooks(
+    release.modelId,
+    WebhookEvent.UpdateRelease,
+    `Release ${release.semver} has been updated for model ${release.modelId}`,
+    { release },
+  )
+
   return updatedRelease
 }
 
