@@ -95,7 +95,7 @@ const modelMocks = vi.hoisted(() => ({
   getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(), version: 123 }]),
   setLatestImportedModelCard: vi.fn(),
   saveImportedModelCard: vi.fn(),
-  isModelCardRevision: vi.fn(() => true),
+  isModelCardRevisionDoc: vi.fn(() => true),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
@@ -395,7 +395,7 @@ describe('services > mirroredModel', () => {
     fflateMock.unzipSync.mockReturnValueOnce({
       file1: Buffer.from(JSON.stringify({})),
     })
-    modelMocks.isModelCardRevision.mockReturnValueOnce(false)
+    modelMocks.isModelCardRevisionDoc.mockReturnValueOnce(false)
     const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
     await expect(result).rejects.toThrowError(/^Data cannot be converted into a model card./)

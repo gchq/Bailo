@@ -21,7 +21,32 @@ import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
-async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
+export function isReleaseDoc(data: unknown): data is ReleaseDoc {
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+
+  if (
+    !('modelId' in data) ||
+    !('modelCardVersion' in data) ||
+    !('semver' in data) ||
+    !('notes' in data) ||
+    !('minor' in data) ||
+    !('draft' in data) ||
+    !('fileIds' in data) ||
+    !('images' in data) ||
+    !('deleted' in data) ||
+    !('createdBy' in data) ||
+    !('createdAt' in data) ||
+    !('updatedAt' in data) ||
+    !('_id' in data)
+  ) {
+    return false
+  }
+  return true
+}
+
+export async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
   if (!semver.valid(release.semver)) {
     throw BadReq(`The version '${release.semver}' is not a valid semver value.`)
   }
@@ -547,4 +572,15 @@ export async function getAllFileIds(modelId: string, semvers: string[]) {
     return result.at(0).fileIds
   }
   return []
+}
+
+export async function saveImportedRelease(release: ReleaseInterface) {
+  const foundRelease = await Release.findOneAndUpdate({ modelId: release.modelId, semver: release.semver }, release, {
+    upsert: true,
+  })
+
+  if (!foundRelease) {
+    // This release did not already exist in Mongo, so it is a new release. Return it to be audited.
+    return release
+  }
 }

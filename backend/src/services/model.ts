@@ -439,23 +439,7 @@ export async function createModelCardFromTemplate(
   return revision
 }
 
-export async function saveImportedModelCard(modelCardRevision: ModelCardRevisionInterface, sourceModelId: string) {
-  const model = await Model.findOne({
-    id: modelCardRevision.modelId,
-  })
-  if (!model) {
-    throw NotFound(`Cannot find model to import model card.`, { modelId: modelCardRevision.modelId })
-  }
-  if (!model.settings.mirror.sourceModelId) {
-    throw InternalError('Cannot import model card to non mirrored model.')
-  }
-  if (model.settings.mirror.sourceModelId !== sourceModelId) {
-    throw InternalError('The source model ID of the mirrored model does not match the model Id of the imported model', {
-      sourceModelId: model.settings.mirror.sourceModelId,
-      importedModelId: sourceModelId,
-    })
-  }
-
+export async function saveImportedModelCard(modelCardRevision: ModelCardRevisionInterface) {
   const schema = await getSchemaById(modelCardRevision.schemaId)
   try {
     new Validator().validate(modelCardRevision.metadata, schema.jsonSchema, { throwAll: true, required: true })
@@ -510,20 +494,27 @@ export async function setLatestImportedModelCard(modelId: string) {
   return updatedModel
 }
 
-export async function getMirroredModelById(mirroredModelId) {
+export async function validateMirroredModel(mirroredModelId: string, sourceModelId: string) {
   const model = await Model.findOne({
     id: mirroredModelId,
     'settings.mirror.sourceModelId': { $ne: null },
   })
 
   if (!model) {
-    throw NotFound(`The requested entry was not found.`, { modelId: mirroredModelId })
+    throw NotFound(`The requested mirrored model entry was not found.`, { modelId: mirroredModelId })
+  }
+
+  if (model.settings.mirror.sourceModelId !== sourceModelId) {
+    throw InternalError('The source model ID of the mirrored model does not match the model Id of the imported model', {
+      sourceModelId: model.settings.mirror.sourceModelId,
+      importedModelId: sourceModelId,
+    })
   }
 
   return model
 }
 
-export function isModelCardRevision(data: unknown): data is ModelCardRevisionInterface {
+export function isModelCardRevisionDoc(data: unknown): data is ModelCardRevisionDoc {
   if (typeof data !== 'object' || data === null) {
     return false
   }
@@ -534,7 +525,8 @@ export function isModelCardRevision(data: unknown): data is ModelCardRevisionInt
     !('version' in data) ||
     !('createdBy' in data) ||
     !('updatedAt' in data) ||
-    !('createdAt' in data)
+    !('createdAt' in data) ||
+    !('_id' in data)
   ) {
     return false
   }
