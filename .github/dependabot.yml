@@ -46,7 +46,7 @@ updates:
     open-pull-requests-limit: 9
 
   # Enable version updates for python
-  - package-ecosystem: pip
+  - package-ecosystem: 'pip'
     # Look for a `requirements*` or `pyproject.toml` in these directories
     directories:
       - '/lib/python'
@@ -58,8 +58,8 @@ updates:
     open-pull-requests-limit: 6
 
   # Set update schedule for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "monthly"
+      interval: 'monthly'
     open-pull-requests-limit: 12
