@@ -6,8 +6,8 @@ import {
   HeadBucketCommand,
   HeadBucketRequest,
   HeadObjectRequest,
-  NoSuchKey,
   S3Client,
+  S3ServiceException,
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
@@ -106,7 +106,7 @@ export async function objectExists(bucket: string, key: string) {
     await headObject(bucket, key)
     return true
   } catch (error) {
-    if ((error as any)['$metadata'].httpStatusCode === 404) {
+    if (isS3ServiceException(error) && error.$metadata.httpStatusCode === 404) {
       log.info({ bucket, key }, `Failed to find ${key} in ${bucket}`)
       return false
     } else {
@@ -147,7 +147,7 @@ export async function ensureBucketExists(bucket: string) {
     await headBucket(bucket)
     log.info({ bucket }, `Bucket ${bucket} already exists`)
   } catch (error) {
-    if ((error as any)['$metadata'].httpStatusCode === 404) {
+    if (isS3ServiceException(error) && error.$metadata.httpStatusCode === 404) {
       log.info({ bucket }, `Bucket does not exist, creating ${bucket}`)
       return createBucket(bucket)
     }
@@ -155,6 +155,12 @@ export async function ensureBucketExists(bucket: string) {
   }
 }
 
-export function isNoSuchKeyException(err: any): err is NoSuchKey {
-  return err?.name === 'NoSuchKey'
+const isS3ServiceException = (value: unknown): value is S3ServiceException => {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+  if (!('name' in value) || !('message' in value) || !('$fault' in value) || !('$metadata' in value)) {
+    return false
+  }
+  return true
 }
