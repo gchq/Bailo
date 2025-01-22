@@ -47,7 +47,7 @@
     "express-session": "^1.18.1",
     "fflate": "^0.8.2",
     "grant": "^5.4.23",
-    "jsonschema": "^1.4.1",
+    "jsonschema": "^1.5.0",
     "jsonwebtoken": "^9.0.2",
     "jsrsasign": "^11.1.0",
     "lodash-es": "^4.17.21",
