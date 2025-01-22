@@ -96,6 +96,10 @@ const modelMocks = vi.hoisted(() => ({
   setLatestImportedModelCard: vi.fn(),
   saveImportedModelCard: vi.fn(),
   isModelCardRevisionDoc: vi.fn(() => true),
+  validateMirroredModel: vi.fn(() => ({
+    settings: { mirror: { destinationModelId: 'abc' } },
+    card: { schemaId: 'test' },
+  })),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
@@ -382,8 +386,8 @@ describe('services > mirroredModel', () => {
   test('importModel > save each imported model card', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
-      file1: Buffer.from(JSON.stringify({ modelId: 'abc' })),
-      file2: Buffer.from(JSON.stringify({ modelId: 'abc' })),
+      '1.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+      '2.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
     })
     await importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
@@ -393,7 +397,7 @@ describe('services > mirroredModel', () => {
   test('importModel > cannot parse into model card', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
-      file1: Buffer.from(JSON.stringify({})),
+      '1.json': Buffer.from(JSON.stringify({})),
     })
     modelMocks.isModelCardRevisionDoc.mockReturnValueOnce(false)
     const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
@@ -404,12 +408,12 @@ describe('services > mirroredModel', () => {
   test('importModel > different model IDs in zip files', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
-      file1: Buffer.from(JSON.stringify({ modelId: 'abc' })),
-      file2: Buffer.from(JSON.stringify({ modelId: 'cba' })),
+      '1.json': Buffer.from(JSON.stringify({ modelId: 'abc' })),
+      '2.json': Buffer.from(JSON.stringify({ modelId: 'cba' })),
     })
     const result = importModel('mirrored-model-id', 'source-model-id', 'https://test.com', ImportKind.Documents)
 
-    await expect(result).rejects.toThrowError(/^Zip file contains model cards for multiple models./)
+    await expect(result).rejects.toThrowError(/^Zip file contains model cards from an invalid model./)
   })
 
   test('importModel > invalid zip data', async () => {
