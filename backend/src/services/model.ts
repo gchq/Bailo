@@ -6,10 +6,7 @@ import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/autho
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
-import ModelCardRevisionModel, {
-  ModelCardRevisionDoc,
-  ModelCardRevisionInterface,
-} from '../models/ModelCardRevision.js'
+import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
 import { EntityKind, EntryUserPermissions } from '../types/types.js'
@@ -439,7 +436,7 @@ export async function createModelCardFromTemplate(
   return revision
 }
 
-export async function saveImportedModelCard(modelCardRevision: ModelCardRevisionInterface) {
+export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRevisionDoc, '_id'>) {
   const schema = await getSchemaById(modelCardRevision.schemaId)
   try {
     new Validator().validate(modelCardRevision.metadata, schema.jsonSchema, { throwAll: true, required: true })
