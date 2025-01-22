@@ -100,6 +100,21 @@ export async function headObject(bucket: string, key: string) {
   return response
 }
 
+export async function objectExists(bucket: string, key: string) {
+  try {
+    log.info({ bucket, key }, `Searching for ${key} in ${bucket}`)
+    await headObject(bucket, key)
+    return true
+  } catch (error) {
+    if ((error as any)['$metadata'].httpStatusCode === 404) {
+      log.info({ bucket, key }, `Failed to find ${key} in ${bucket}`)
+      return false
+    } else {
+      throw error
+    }
+  }
+}
+
 export async function headBucket(bucket: string) {
   const client = await getS3Client()
 

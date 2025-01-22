@@ -6,7 +6,7 @@ import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import FileModel, { FileInterface } from '../models/File.js'
+import FileModel, { FileInterface, FileInterfaceDoc } from '../models/File.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
@@ -15,6 +15,30 @@ import { plural } from '../utils/string.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeFileFromReleases } from './release.js'
+
+export function isFileInterfaceDoc(data: unknown): data is FileInterfaceDoc {
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+
+  if (
+    !('modelId' in data) ||
+    !('name' in data) ||
+    !('size' in data) ||
+    !('mime' in data) ||
+    !('bucket' in data) ||
+    !('path' in data) ||
+    !('complete' in data) ||
+    !('avScan' in data) ||
+    !('deleted' in data) ||
+    !('createdAt' in data) ||
+    !('updatedAt' in data) ||
+    !('_id' in data)
+  ) {
+    return false
+  }
+  return true
+}
 
 export async function uploadFile(user: UserInterface, modelId: string, name: string, mime: string, stream: Readable) {
   const model = await getModelById(user, modelId)
@@ -223,4 +247,10 @@ export async function rerunFileScan(user: UserInterface, modelId, fileId: string
     scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
   }
   return `Scan started for ${file.name}`
+}
+
+export async function saveImportedFile(file: FileInterface) {
+  await FileModel.findOneAndUpdate({ modelId: file.modelId, _id: file._id }, file, {
+    upsert: true,
+  })
 }

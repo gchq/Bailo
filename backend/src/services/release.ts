@@ -567,7 +567,7 @@ export async function getAllFileIds(modelId: string, semvers: string[]) {
   return []
 }
 
-export async function saveImportedRelease(release: ReleaseInterface) {
+export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
   const foundRelease = await Release.findOneAndUpdate({ modelId: release.modelId, semver: release.semver }, release, {
     upsert: true,
   })
