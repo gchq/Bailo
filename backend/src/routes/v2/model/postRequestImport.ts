@@ -4,12 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import {
-  //FileImportInformation,
-  ImportKind,
-  importModel,
-  //MongoDocumentImportInformation,
-} from '../../../services/mirroredModel.js'
+import { ImportKind, importModel } from '../../../services/mirroredModel.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -49,7 +44,6 @@ registerPath({
 interface PostRequestImportResponse {
   mirroredModelId: string
   sourceModelId: string
-  //importedContent: Omit<MongoDocumentImportInformation, 'newModelCards'> | FileImportInformation
 }
 
 export const postRequestImportFromS3 = [
@@ -72,8 +66,6 @@ export const postRequestImportFromS3 = [
     return res.json({
       mirroredModelId: mirroredModel.id,
       sourceModelId,
-      //...(importResult?.modelCardVersions && { importResult.modelCardVersions }),
-      //...(importResult?.fileIds && { importResult.fileIds }),
     })
   },
 ]
