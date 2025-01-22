@@ -10,7 +10,7 @@ RUN pip install bailo -r requirements.txt
 
 RUN make dirhtml
 
-FROM node:22.6.0-alpine AS installer
+FROM node:23.6.0-alpine AS installer
 
 RUN apk add --no-cache libc6-compat ca-certificates
 RUN apk update
