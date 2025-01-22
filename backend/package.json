@@ -24,7 +24,7 @@
     "@aws-sdk/client-s3": "3.666.0",
     "@aws-sdk/lib-storage": "3.666.0",
     "@opentelemetry/auto-instrumentations-node": "^0.52.0",
-    "@opentelemetry/exporter-logs-otlp-proto": "^0.57.0",
+    "@opentelemetry/exporter-logs-otlp-proto": "^0.57.1",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.56.0",
     "@opentelemetry/host-metrics": "^0.35.5",
     "@opentelemetry/sdk-metrics": "^1.30.0",
