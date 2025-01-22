@@ -53,6 +53,6 @@ updates:
       - '/lib/modelscan_api'
       - '/backend/docs'
     schedule:
-      interval: 'monthly'
+      interval: 'weekly'
     versioning-strategy: increase
     open-pull-requests-limit: 6
