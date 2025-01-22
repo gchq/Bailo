@@ -193,7 +193,7 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
   const modelCardJsonStrings: string[] = []
   const releaseJsonStrings: string[] = []
   const fileJsonStrings: string[] = []
-  Object.keys(zipContent).forEach(async function (key) {
+  Object.keys(zipContent).forEach(function (key) {
     if (modelCardRegex.test(key)) {
       modelCardJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
     } else if (releaseRegex.test(key)) {
@@ -306,7 +306,7 @@ function parseRelease(releaseJson: string, mirroredModelId: string, sourceModelI
   release.modelId = mirroredModelId
   delete release._id
   if (sourceModelId !== modelId) {
-    throw InternalError('Zip file contains releases from in invalid model.', { modelIds: [sourceModelId, modelId] })
+    throw InternalError('Zip file contains releases from an invalid model.', { modelIds: [sourceModelId, modelId] })
   }
 
   // Remove Files until we add the functionality to import files
@@ -326,14 +326,14 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
   try {
     file.complete = await objectExists(file.bucket, file.path)
   } catch (error) {
-    throw InternalError('Failed to check if file exists', { bucket: file.bucket, path: file.path })
+    throw InternalError('Failed to check if file exists.', { bucket: file.bucket, path: file.path })
   }
 
   const modelId = file.modelId
   file.modelId = mirroredModelId
   file.path = file.path.replace(modelId, mirroredModelId)
   if (sourceModelId !== modelId) {
-    throw InternalError('Zip file contains files from in invalid model.', { modelIds: [sourceModelId, modelId] })
+    throw InternalError('Zip file contains files from an invalid model.', { modelIds: [sourceModelId, modelId] })
   }
 
   return file
