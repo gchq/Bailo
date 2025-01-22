@@ -13,14 +13,14 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Setup BuildX
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Build backend image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: backend
           file: backend/Dockerfile
@@ -41,14 +41,14 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Setup BuildX
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Build frontend image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: frontend
           file: frontend/Dockerfile
@@ -69,14 +69,14 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Setup BuildX
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Build modelscan image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: lib/modelscan_api
           file: lib/modelscan_api/Dockerfile
@@ -96,12 +96,12 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 18.17.1
+          node-version: 18.18.0
           cache: "npm"
 
       # Install dependencies
@@ -119,12 +119,12 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 18.17.1
+          node-version: 18.18.0
           cache: "npm"
 
       # Install dependencies
@@ -140,11 +140,11 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 18.17.1
+          node-version: 18.18.0
           cache: "npm"
 
       # Setup BuildX
@@ -300,12 +300,12 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 18.17.1
+          node-version: 18.18.0
           cache: "npm"
 
       # Setup BuildX
@@ -427,11 +427,11 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
-          node-version: 18.17.1
+          node-version: 18.18.0
           cache: "npm"
 
       # Setup BuildX
@@ -508,7 +508,7 @@ jobs:
 
       # Setup python
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 

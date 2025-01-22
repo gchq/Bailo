@@ -1,5 +1,5 @@
 import { ArrowBack } from '@mui/icons-material'
-import { Button, Card, Container, Divider, Grid, Paper, Stack, Typography } from '@mui/material'
+import { Button, Card, Container, Divider, Grid2, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest, useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useGetModel } from 'actions/model'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
@@ -60,9 +60,9 @@ export default function AccessRequestReview() {
   const accessRequestEntities = useMemo(() => {
     if (accessRequest) {
       return accessRequest.metadata.overview.entities.map((entity) => (
-        <Grid item xs={3} key={entity}>
+        <Grid2 size={{ xs: 3 }} key={entity}>
           <UserDisplay dn={entity} />
-        </Grid>
+        </Grid2>
       ))
     }
   }, [accessRequest])
@@ -135,7 +135,7 @@ export default function AccessRequestReview() {
                 <Typography variant='subtitle2' component='h3' mb={1}>
                   Users
                 </Typography>
-                <Grid container>{accessRequestEntities}</Grid>
+                <Grid2 container>{accessRequestEntities}</Grid2>
               </Card>
             </Stack>
           </Stack>
