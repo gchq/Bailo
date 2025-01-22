@@ -2,4 +2,4 @@ myst_parser==2.0.0
 nbsphinx==0.9.6
 sphinx==7.2.6
 sphinx-copybutton
-sphinx-rtd-theme==2.0.0
+sphinx-rtd-theme==3.0.2
