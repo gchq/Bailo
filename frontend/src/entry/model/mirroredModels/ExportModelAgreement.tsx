@@ -1,7 +1,7 @@
 import { LoadingButton } from '@mui/lab'
 import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
 import { postModelExportToS3 } from 'actions/model'
-import { ChangeEvent, FormEvent, useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import ModelExportAgreementText from 'src/entry/model/mirroredModels/ModelExportAgreementText'
 import useNotification from 'src/hooks/useNotification'
@@ -18,26 +18,23 @@ export default function ExportModelAgreement({ modelId }: ExportModelAgreementPr
   const [loading, setLoading] = useState(false)
   const sendNotification = useNotification()
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    if (event) {
-      setErrorMessage('')
-      event.preventDefault()
-      setLoading(true)
-      const response = await postModelExportToS3(modelId, { disclaimerAgreement: checked })
+  const handleSubmit = async () => {
+    setErrorMessage('')
+    setLoading(true)
+    const response = await postModelExportToS3(modelId, { disclaimerAgreement: checked })
 
-      if (!response.ok) {
-        setLoading(false)
+    if (!response.ok) {
+      setLoading(false)
 
-        const error = await getErrorMessage(response)
-        return setErrorMessage(error)
-      } else {
-        setLoading(false)
-        sendNotification({
-          variant: 'success',
-          msg: 'Successfully started export upload.',
-          anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
-        })
-      }
+      const error = await getErrorMessage(response)
+      return setErrorMessage(error)
+    } else {
+      setLoading(false)
+      sendNotification({
+        variant: 'success',
+        msg: 'Successfully started export upload.',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
     }
   }
 
@@ -58,7 +55,7 @@ export default function ExportModelAgreement({ modelId }: ExportModelAgreementPr
             label='I agree to the terms and conditions of this model export agreement'
           />
           <Restricted action='exportMirroredModel' fallback={<Button disabled>Submit</Button>}>
-            <LoadingButton variant='contained' loading={loading} disabled={!checked} type='submit'>
+            <LoadingButton variant='contained' loading={loading} disabled={!checked} onClick={handleSubmit}>
               Submit
             </LoadingButton>
           </Restricted>

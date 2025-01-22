@@ -7,45 +7,59 @@ updates:
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `root` directory
     directory: '/'
-    # Check the npm registry for updates every day (weekdays)
+    # Check the npm registry for updates every month
     schedule:
       interval: 'monthly'
     versioning-strategy: increase
-    # Allow up to 1 open pull requests for node dependencies
+    # Allow up to 15 open pull requests for node dependencies
     open-pull-requests-limit: 15
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `root` directory
     directory: '/frontend'
-    # Check the npm registry for updates every day (weekdays)
+    # Check the npm registry for updates every month
     schedule:
       interval: 'monthly'
     versioning-strategy: increase
-    # Allow up to 1 open pull requests for node dependencies
+    # Allow up to 2 open pull requests for node dependencies
     open-pull-requests-limit: 2
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `root` directory
     directory: '/backend'
-    # Check the npm registry for updates every day (weekdays)
+    # Check the npm registry for updates every month
     schedule:
       interval: 'monthly'
     versioning-strategy: increase
-    # Allow up to 1 open pull requests for node dependencies
+    # Allow up to 15 open pull requests for node dependencies
     open-pull-requests-limit: 15
 
   # Enable version updates for Docker
   - package-ecosystem: 'docker'
-    # Look for a `Dockerfile` in the `root` directory
-    directory: '/frontend'
+    # Look for a `Dockerfile` in these directories
+    directories:
+      - '/'
+      - '/backend'
+      - '/frontend'
+      - '/lib/modelscan_api'
     # Check for updates once a week
     schedule:
       interval: 'weekly'
-    # Allow up to 3 open pull requests for docker dependencies
-    open-pull-requests-limit: 3
-  - package-ecosystem: 'docker'
-    # Look for a `Dockerfile` in the `root` directory
-    directory: '/backend'
-    # Check for updates once a week
+    open-pull-requests-limit: 9
+
+  # Enable version updates for python
+  - package-ecosystem: 'pip'
+    # Look for a `requirements*` or `pyproject.toml` in these directories
+    directories:
+      - '/lib/python'
+      - '/lib/modelscan_api'
+      - '/backend/docs'
     schedule:
       interval: 'weekly'
-    # Allow up to 3 open pull requests for docker dependencies
-    open-pull-requests-limit: 3
+    versioning-strategy: increase
+    open-pull-requests-limit: 6
+
+  # Set update schedule for GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+    open-pull-requests-limit: 12
