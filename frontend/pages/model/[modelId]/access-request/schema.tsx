@@ -8,7 +8,7 @@ import {
   Box,
   Button,
   Container,
-  Grid,
+  Grid2,
   Paper,
   Stack,
   Typography,
@@ -120,9 +120,9 @@ export default function AccessRequestSchema() {
                 </AccordionSummary>
                 <AccordionDetails>
                   <Box sx={{ m: 2 }}>
-                    <Grid container spacing={2} justifyContent='center'>
+                    <Grid2 container spacing={2} justifyContent='center'>
                       {modelId && activeSchemaButtons}
-                    </Grid>
+                    </Grid2>
                   </Box>
                 </AccordionDetails>
               </Accordion>
@@ -133,9 +133,9 @@ export default function AccessRequestSchema() {
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Grid container spacing={2} justifyContent='center'>
+                  <Grid2 container spacing={2} justifyContent='center'>
                     {modelId && inactiveSchemaButtons}
-                  </Grid>
+                  </Grid2>
                 </AccordionDetails>
               </Accordion>
             </Stack>

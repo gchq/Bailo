@@ -152,7 +152,7 @@ TokenSchema.methods.compareToken = function compareToken(candidateToken: string)
   })
 }
 
-TokenSchema.plugin(MongooseDelete, { overrideMethods: 'all' })
+TokenSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedAt: true })
 
 const TokenModel = model<TokenInterface>('v2_Token', TokenSchema)
 

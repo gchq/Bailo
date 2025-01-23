@@ -61,7 +61,12 @@ const FileSchema = new Schema<FileInterface>(
   },
 )
 
-FileSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
+FileSchema.plugin(MongooseDelete, {
+  overrideMethods: 'all',
+  deletedBy: true,
+  deletedByType: Schema.Types.ObjectId,
+  deletedAt: true,
+})
 
 const FileModel = model<FileInterface>('v2_File', FileSchema)
 

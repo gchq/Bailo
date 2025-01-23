@@ -3,6 +3,7 @@ import MongooseDelete from 'mongoose-delete'
 
 export const WebhookEvent = {
   CreateRelease: 'createRelease',
+  UpdateRelease: 'updateRelease',
   CreateReviewResponse: 'createReviewResponse',
   CreateAccessRequest: 'createAccessRequest',
 } as const
@@ -44,6 +45,7 @@ WebhookSchema.plugin(MongooseDelete, {
   overrideMethods: 'all',
   deletedBy: true,
   deletedByType: Schema.Types.ObjectId,
+  deletedAt: true,
 })
 
 const WebhookModel = model<WebhookInterface>('v2_Webhook', WebhookSchema)

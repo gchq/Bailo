@@ -64,6 +64,7 @@ ReviewSchema.plugin(MongooseDelete, {
   overrideMethods: 'all',
   deletedBy: true,
   deletedByType: String,
+  deletedAt: true,
 })
 
 const ReviewModel = model<ReviewInterface>('v2_Review', ReviewSchema)
