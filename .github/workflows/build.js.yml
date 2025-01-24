@@ -99,7 +99,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Use Node.js 22
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 22.6.0
           cache: "npm"
@@ -122,7 +122,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Use Node.js 22
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 22.6.0
           cache: "npm"
@@ -142,7 +142,7 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v4
       - name: Use Node.js 22
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 22.6.0
           cache: "npm"
@@ -303,7 +303,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Use Node.js 22
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 22.6.0
           cache: "npm"
@@ -429,7 +429,7 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v4
       - name: Use Node.js 22
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 22.6.0
           cache: "npm"
