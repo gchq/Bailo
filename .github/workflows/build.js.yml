@@ -17,7 +17,7 @@ jobs:
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build backend image
         uses: docker/build-push-action@v6
@@ -45,7 +45,7 @@ jobs:
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build frontend image
         uses: docker/build-push-action@v6
@@ -73,7 +73,7 @@ jobs:
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build modelscan image
         uses: docker/build-push-action@v6
@@ -149,7 +149,7 @@ jobs:
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       # Get Bailo Docker image
       - name: Download artifact
@@ -310,7 +310,7 @@ jobs:
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       # Get Bailo Docker images
       - name: Download artifact
@@ -436,7 +436,7 @@ jobs:
 
       # Setup BuildX
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       # Get Bailo Docker images
       - name: Download artifact
