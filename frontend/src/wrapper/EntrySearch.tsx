@@ -67,17 +67,17 @@ export default function EntrySearch() {
                   secondary={entry.description}
                   slotProps={{
                     primary: {
-                      style: {
+                      sx: {
                         whiteSpace: 'nowrap',
                         textOverflow: 'ellipsis',
                         overflow: 'hidden',
                         color: theme.palette.primary.main,
-                        maxWidth: '400px',
+                        mr: 6,
                       },
                     },
 
                     secondary: {
-                      style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '400px' },
+                      sx: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', mr: 6 },
                     },
                   }}
                 />
