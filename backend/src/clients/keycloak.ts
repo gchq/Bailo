@@ -64,7 +64,7 @@ export async function listUsers(query: string, exactMatch = false) {
 
   const initialValue: Array<UserInformation & { dn: string }> = []
   const users = resultsData.reduce((acc, keycloakUser) => {
-    const dn = keycloakUser.id // Assuming 'id' is the dnName
+    const dn = keycloakUser.email
     if (!dn) {
       return acc
     }
