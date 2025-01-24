@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 
 COPY . .
 
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 EXPOSE 3000
 CMD [ "npm", "run", "dev" ]
