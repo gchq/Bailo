@@ -14,7 +14,7 @@ WORKDIR /app
 COPY frontend/package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 COPY frontend .
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 FROM ubuntu:jammy
@@ -71,7 +71,7 @@ COPY backend/docs python-docs
 COPY --from=backend /app/config config
 COPY --from=backend /app/dist .
 COPY infrastructure/standalone/local.cjs config/local.cjs
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 # Frontend
 WORKDIR /app/frontend
@@ -80,8 +80,8 @@ COPY --from=frontend /app/package.json .
 COPY --from=frontend /app/.next/standalone ./
 COPY --from=frontend /app/.next/static ./.next/static
 COPY --from=frontend /app/public ./public
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV HOSTNAME 0.0.0.0
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME=0.0.0.0
 
 COPY infrastructure/standalone/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
