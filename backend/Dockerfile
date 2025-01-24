@@ -38,7 +38,7 @@ COPY --from=installer /app/config config
 COPY --from=installer /app/dist .
 COPY --from=sphinx-docs /app/docs/python-docs python-docs
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 EXPOSE 3001
 
 CMD ["node", "src/index.js"]
