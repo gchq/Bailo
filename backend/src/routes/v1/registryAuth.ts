@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { createHash, X509Certificate } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
-import jwt from 'jsonwebtoken'
+import jwt, { SignOptions } from 'jsonwebtoken'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../../connectors/audit/index.js'
@@ -16,6 +16,7 @@ import config from '../../utils/config.js'
 import { Forbidden, Unauthorised } from '../../utils/result.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
 import { bailoErrorGuard } from './../middleware/expressErrorHandler.js'
+import type { StringValue } from 'ms'
 
 let adminToken: string | undefined
 
@@ -86,7 +87,7 @@ export async function getKid() {
   return formatKid(hash)
 }
 
-async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn: string }) {
+async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn: StringValue }) {
   const privateKey = await getPrivateKey()
 
   return jwt.sign(
