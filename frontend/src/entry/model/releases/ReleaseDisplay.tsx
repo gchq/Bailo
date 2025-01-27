@@ -101,9 +101,10 @@ export default function ReleaseDisplay({
                 justifyContent='space-between'
                 alignItems='center'
                 spacing={1}
+                sx={{ minWidth: 0 }}
               >
-                <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`}>
-                  <Typography component='h2' variant='h6' color='primary'>
+                <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
+                  <Typography component='h2' variant='h6' color='primary' noWrap>
                     {model.name} - {release.semver}
                   </Typography>
                 </Link>
