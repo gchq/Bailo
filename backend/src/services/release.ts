@@ -575,9 +575,13 @@ export async function getAllFileIds(modelId: string, semvers: string[]) {
 }
 
 export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
-  const foundRelease = await Release.findOneAndUpdate({ modelId: release.modelId, semver: release.semver }, release, {
-    upsert: true,
-  })
+  const foundRelease = await Release.findOneAndUpdate(
+    { modelId: release.modelId, semver: semverStringToObject(release.semver) },
+    release,
+    {
+      upsert: true,
+    },
+  )
 
   if (!foundRelease) {
     // This release did not already exist in Mongo, so it is a new release. Return it to be audited.
