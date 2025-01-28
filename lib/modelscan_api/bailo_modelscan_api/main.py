@@ -17,6 +17,8 @@ from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
 from pydantic import BaseModel
 
+# isort: split
+
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.dependencies import safe_join
 
@@ -225,9 +227,7 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
             "description": "The server could not complete the request",
             "content": {
                 "application/json": {
-                    "example": {
-                        "detail": "An error occurred while processing the uploaded file's name."
-                    }
+                    "example": {"detail": "An error occurred while processing the uploaded file's name."}
                 }
             },
         },
@@ -251,11 +251,7 @@ async def scan_file(
         modelscan_model = ModelScan(settings=settings.modelscan_settings)
 
         # Use Setting's download_dir if defined else use a temporary directory.
-        with (
-            TemporaryDirectory()
-            if not settings.download_dir
-            else nullcontext(settings.download_dir)
-        ) as download_dir:
+        with TemporaryDirectory() if not settings.download_dir else nullcontext(settings.download_dir) as download_dir:
             if in_file.filename and str(in_file.filename).strip():
                 # Prevent escaping to a parent dir
                 try:
@@ -315,9 +311,7 @@ async def scan_file(
             background_tasks.add_task(Path.unlink, pathlib_path, missing_ok=True)
         except UnboundLocalError:
             # pathlib_path may not exist.
-            logger.exception(
-                "An error occurred while trying to cleanup the downloaded file."
-            )
+            logger.exception("An error occurred while trying to cleanup the downloaded file.")
 
 
 if __name__ == "__main__":

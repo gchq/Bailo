@@ -12,6 +12,8 @@ import modelscan
 import pytest
 from fastapi.testclient import TestClient
 
+# isort: split
+
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.dependencies import parse_path
 from bailo_modelscan_api.main import app, get_settings
@@ -52,9 +54,7 @@ def test_info():
         ("-", EMPTY_CONTENTS, H5_MIME_TYPE),
     ],
 )
-def test_scan_file(
-    mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str
-):
+def test_scan_file(mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str):
     mock_scan.return_value = {}
     files = {"in_file": (file_name, file_content, file_mime_type)}
 
@@ -68,17 +68,13 @@ def test_scan_file(
     ("file_name", "file_content", "file_mime_type"),
     [("..", EMPTY_CONTENTS, H5_MIME_TYPE)],
 )
-def test_scan_file_escape_path_error(
-    file_name: str, file_content: Any, file_mime_type: str
-):
+def test_scan_file_escape_path_error(file_name: str, file_content: Any, file_mime_type: str):
     files = {"in_file": (file_name, file_content, file_mime_type)}
 
     response = client.post("/scan/file", files=files)
 
     assert response.status_code == 500
-    assert response.json() == {
-        "detail": "An error occurred while processing the uploaded file's name."
-    }
+    assert response.json() == {"detail": "An error occurred while processing the uploaded file's name."}
 
 
 @patch("modelscan.modelscan.ModelScan.scan")
@@ -86,9 +82,7 @@ def test_scan_file_escape_path_error(
     ("file_name", "file_content", "file_mime_type"),
     [("foo.h5", EMPTY_CONTENTS, H5_MIME_TYPE)],
 )
-def test_scan_file_exception(
-    mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str
-):
+def test_scan_file_exception(mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str):
     mock_scan.side_effect = Exception("Mocked error!")
     files = {"in_file": (file_name, file_content, file_mime_type)}
 
@@ -109,14 +103,10 @@ def test_scan_file_exception(
     ("file_name", "file_content", "file_mime_type"),
     [(" ", EMPTY_CONTENTS, H5_MIME_TYPE)],
 )
-def test_scan_file_filename_missing(
-    file_name: str, file_content: Any, file_mime_type: str
-):
+def test_scan_file_filename_missing(file_name: str, file_content: Any, file_mime_type: str):
     files = {"in_file": (file_name, file_content, file_mime_type)}
 
     response = client.post("/scan/file", files=files)
 
     assert response.status_code == 500
-    assert response.json() == {
-        "detail": "An error occurred while extracting the uploaded file's name."
-    }
+    assert response.json() == {"detail": "An error occurred while extracting the uploaded file's name."}

@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     # Update frontend/pages/docs/administration/helm/configuration.mdx if bumping this.
     app_version: str = "1.0.0"
     # download_dir is used if it evaluates, otherwise a temporary directory is used.
-    download_dir: Optional[str] = None
+    download_dir: str | None = None
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
 
