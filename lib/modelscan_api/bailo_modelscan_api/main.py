@@ -91,13 +91,21 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                         "Normal": {
                             "value": {
                                 "summary": {
-                                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
                                     "total_issues": 0,
                                     "input_path": "/foo/bar/safe_model.pkl",
                                     "absolute_path": "/foo/bar",
                                     "modelscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
-                                    "scanned": {"total_scanned": 1, "scanned_files": ["safe_model.pkl"]},
+                                    "scanned": {
+                                        "total_scanned": 1,
+                                        "scanned_files": ["safe_model.pkl"],
+                                    },
                                     "skipped": {
                                         "total_skipped": 0,
                                         "skipped_files": [],
@@ -110,14 +118,25 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                         "Issue": {
                             "value": {
                                 "summary": {
-                                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 1, "HIGH": 0, "CRITICAL": 0},
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 1,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
                                     "total_issues": 1,
                                     "input_path": "/foo/bar/unsafe_model.h5",
                                     "absolute_path": "/foo/bar",
                                     "modelscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
-                                    "scanned": {"total_scanned": 1, "scanned_files": ["unsafe_model.h5"]},
-                                    "skipped": {"total_skipped": 0, "skipped_files": []},
+                                    "scanned": {
+                                        "total_scanned": 1,
+                                        "scanned_files": ["unsafe_model.h5"],
+                                    },
+                                    "skipped": {
+                                        "total_skipped": 0,
+                                        "skipped_files": [],
+                                    },
                                 },
                                 "issues": [
                                     {
@@ -153,14 +172,24 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                     },
                                     "timestamp": "2024-11-19T12:00:00.000000",
                                     "total_issues": 0,
-                                    "total_issues_by_severity": {"CRITICAL": 0, "HIGH": 0, "LOW": 0, "MEDIUM": 0},
+                                    "total_issues_by_severity": {
+                                        "CRITICAL": 0,
+                                        "HIGH": 0,
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                    },
                                 },
                             }
                         },
                         "Error": {
                             "value": {
                                 "summary": {
-                                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
                                     "total_issues": 0,
                                     "input_path": "/foo/bar/null.h5",
                                     "absolute_path": "/foo/bar",
@@ -196,7 +225,9 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
             "description": "The server could not complete the request",
             "content": {
                 "application/json": {
-                    "example": {"detail": "An error occurred while processing the uploaded file's name."}
+                    "example": {
+                        "detail": "An error occurred while processing the uploaded file's name."
+                    }
                 }
             },
         },
@@ -220,7 +251,11 @@ async def scan_file(
         modelscan_model = ModelScan(settings=settings.modelscan_settings)
 
         # Use Setting's download_dir if defined else use a temporary directory.
-        with TemporaryDirectory() if not settings.download_dir else nullcontext(settings.download_dir) as download_dir:
+        with (
+            TemporaryDirectory()
+            if not settings.download_dir
+            else nullcontext(settings.download_dir)
+        ) as download_dir:
             if in_file.filename and str(in_file.filename).strip():
                 # Prevent escaping to a parent dir
                 try:
@@ -280,7 +315,9 @@ async def scan_file(
             background_tasks.add_task(Path.unlink, pathlib_path, missing_ok=True)
         except UnboundLocalError:
             # pathlib_path may not exist.
-            logger.exception("An error occurred while trying to cleanup the downloaded file.")
+            logger.exception(
+                "An error occurred while trying to cleanup the downloaded file."
+            )
 
 
 if __name__ == "__main__":

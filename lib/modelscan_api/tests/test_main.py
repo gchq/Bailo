@@ -52,7 +52,9 @@ def test_info():
         ("-", EMPTY_CONTENTS, H5_MIME_TYPE),
     ],
 )
-def test_scan_file(mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str):
+def test_scan_file(
+    mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str
+):
     mock_scan.return_value = {}
     files = {"in_file": (file_name, file_content, file_mime_type)}
 
@@ -66,13 +68,17 @@ def test_scan_file(mock_scan: Mock, file_name: str, file_content: Any, file_mime
     ("file_name", "file_content", "file_mime_type"),
     [("..", EMPTY_CONTENTS, H5_MIME_TYPE)],
 )
-def test_scan_file_escape_path_error(file_name: str, file_content: Any, file_mime_type: str):
+def test_scan_file_escape_path_error(
+    file_name: str, file_content: Any, file_mime_type: str
+):
     files = {"in_file": (file_name, file_content, file_mime_type)}
 
     response = client.post("/scan/file", files=files)
 
     assert response.status_code == 500
-    assert response.json() == {"detail": "An error occurred while processing the uploaded file's name."}
+    assert response.json() == {
+        "detail": "An error occurred while processing the uploaded file's name."
+    }
 
 
 @patch("modelscan.modelscan.ModelScan.scan")
@@ -80,7 +86,9 @@ def test_scan_file_escape_path_error(file_name: str, file_content: Any, file_mim
     ("file_name", "file_content", "file_mime_type"),
     [("foo.h5", EMPTY_CONTENTS, H5_MIME_TYPE)],
 )
-def test_scan_file_exception(mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str):
+def test_scan_file_exception(
+    mock_scan: Mock, file_name: str, file_content: Any, file_mime_type: str
+):
     mock_scan.side_effect = Exception("Mocked error!")
     files = {"in_file": (file_name, file_content, file_mime_type)}
 
@@ -91,17 +99,24 @@ def test_scan_file_exception(mock_scan: Mock, file_name: str, file_content: Any,
     mock_scan.assert_called_once()
 
     # Manually cleanup as FastAPI won't trigger background_tasks on Exception due to using TestClient.
-    Path.unlink(Path.joinpath(parse_path(get_settings().download_dir), "foo.h5"), missing_ok=True)
+    Path.unlink(
+        Path.joinpath(parse_path(get_settings().download_dir), "foo.h5"),
+        missing_ok=True,
+    )
 
 
 @pytest.mark.parametrize(
     ("file_name", "file_content", "file_mime_type"),
     [(" ", EMPTY_CONTENTS, H5_MIME_TYPE)],
 )
-def test_scan_file_filename_missing(file_name: str, file_content: Any, file_mime_type: str):
+def test_scan_file_filename_missing(
+    file_name: str, file_content: Any, file_mime_type: str
+):
     files = {"in_file": (file_name, file_content, file_mime_type)}
 
     response = client.post("/scan/file", files=files)
 
     assert response.status_code == 500
-    assert response.json() == {"detail": "An error occurred while extracting the uploaded file's name."}
+    assert response.json() == {
+        "detail": "An error occurred while extracting the uploaded file's name."
+    }
