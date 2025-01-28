@@ -135,6 +135,7 @@ data:
           },
           userPoolId: '{{ .Values.oauth.identityProviderClient.userPoolId }}',
           userIdAttribute: '{{ .Values.oauth.identityProviderClient.userIdAttribute }}',
+          adminGroupName: '{{ .Values.oauth.cognito.adminGroupName }}'
         },
       },
 
@@ -205,10 +206,10 @@ data:
         },
 
         fileScanners: {
-          kinds: {{ toJson .Values.connectors.fileScanners.kinds }}
-          retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes}}
-          maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries}}
-          initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay}}
+          kinds: {{ toJson .Values.connectors.fileScanners.kinds }},
+          retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes }},
+          maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries }},
+          initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay }},
         },
       },
 
