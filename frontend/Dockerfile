@@ -8,9 +8,11 @@ RUN apk update
 WORKDIR /app
 
 COPY package*.json ./
-RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm --include=optional sharp
+RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 
 COPY . .
+
+RUN npm install sharp
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
