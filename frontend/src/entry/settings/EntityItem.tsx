@@ -1,6 +1,6 @@
 import ClearIcon from '@mui/icons-material/Clear'
 import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
-import _ from 'lodash-es'
+import * as _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
 import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
