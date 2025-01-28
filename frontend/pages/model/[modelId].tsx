@@ -97,21 +97,24 @@ export default function Model() {
   return (
     <>
       <Title text={model ? model.name : 'Loading...'} />
-      {(!model || isModelLoading || isCurrentUserLoading || isUiConfigLoading) && <Loading />}
-      {model && (
-        <PageWithTabs
-          title={model.name}
-          subheading={`ID: ${model.id}`}
-          additionalInfo={model.description}
-          tabs={tabs}
-          displayActionButton={model.card !== undefined}
-          actionButtonTitle='Request access'
-          actionButtonOnClick={requestAccess}
-          requiredUrlParams={{ modelId: model.id }}
-          titleToCopy={model.name}
-          subheadingToCopy={model.id}
-          sourceModelId={model.settings.mirror?.sourceModelId}
-        />
+      {!model || isModelLoading || isCurrentUserLoading || isUiConfigLoading ? (
+        <Loading />
+      ) : (
+        model && (
+          <PageWithTabs
+            title={model.name}
+            subheading={`ID: ${model.id}`}
+            additionalInfo={model.description}
+            tabs={tabs}
+            displayActionButton={model.card !== undefined}
+            actionButtonTitle='Request access'
+            actionButtonOnClick={requestAccess}
+            requiredUrlParams={{ modelId: model.id }}
+            titleToCopy={model.name}
+            subheadingToCopy={model.id}
+            sourceModelId={model.settings.mirror?.sourceModelId}
+          />
+        )
       )}
     </>
   )

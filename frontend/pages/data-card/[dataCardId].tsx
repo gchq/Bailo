@@ -56,16 +56,19 @@ export default function DataCard() {
   return (
     <>
       <Title text={dataCard ? dataCard.name : 'Loading...'} />
-      {(!dataCard || isDataCardLoading || isCurrentUserLoading || isUiConfigLoading) && <Loading />}
-      {dataCard && (
-        <PageWithTabs
-          title={dataCard.name}
-          subheading={`ID: ${dataCard.id}`}
-          tabs={tabs}
-          requiredUrlParams={{ dataCardId: dataCard.id }}
-          titleToCopy={dataCard.name}
-          subheadingToCopy={dataCard.id}
-        />
+      {!dataCard || isDataCardLoading || isCurrentUserLoading || isUiConfigLoading ? (
+        <Loading />
+      ) : (
+        dataCard && (
+          <PageWithTabs
+            title={dataCard.name}
+            subheading={`ID: ${dataCard.id}`}
+            tabs={tabs}
+            requiredUrlParams={{ dataCardId: dataCard.id }}
+            titleToCopy={dataCard.name}
+            subheadingToCopy={dataCard.id}
+          />
+        )
       )}
     </>
   )
