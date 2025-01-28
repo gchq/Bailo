@@ -29,7 +29,7 @@ repos:
     rev: v3.19.1
     hooks:
       - id: pyupgrade
-        args: [--py39-plus]
+        args: ['--py39-plus', '--keep-runtime-typing']
 
   - repo: https://github.com/hadialqattan/pycln
     rev: v2.5.0
