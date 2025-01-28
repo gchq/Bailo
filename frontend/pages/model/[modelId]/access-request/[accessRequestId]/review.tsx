@@ -41,7 +41,7 @@ export default function AccessRequestReview() {
       return setErrorMessage('Could not find access request ID')
     }
 
-    setIsReviewButtonLoading(false)
+    setIsReviewButtonLoading(true)
     const res = await postReviewResponse({
       modelId,
       role,
@@ -51,7 +51,7 @@ export default function AccessRequestReview() {
     })
 
     if (!res.ok) {
-      setIsReviewButtonLoading(true)
+      setIsReviewButtonLoading(false)
       setErrorMessage(await getErrorMessage(res))
     } else {
       mutateReviews()
