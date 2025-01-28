@@ -1,4 +1,6 @@
 import { useGetModel } from 'actions/model'
+import { useGetUiConfig } from 'actions/uiConfig'
+import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useContext, useMemo } from 'react'
 import Loading from 'src/common/Loading'
@@ -18,6 +20,8 @@ export default function DataCard() {
     isModelLoading: isDataCardLoading,
     isModelError: isDataCardError,
   } = useGetModel(dataCardId, EntryKind.DATA_CARD)
+  const { isCurrentUserLoading } = useGetCurrentUser()
+  const { isUiConfigLoading } = useGetUiConfig()
 
   const { userPermissions } = useContext(UserPermissionsContext)
 
@@ -52,7 +56,7 @@ export default function DataCard() {
   return (
     <>
       <Title text={dataCard ? dataCard.name : 'Loading...'} />
-      {isDataCardLoading && <Loading />}
+      {(!dataCard || isDataCardLoading || isCurrentUserLoading || isUiConfigLoading) && <Loading />}
       {dataCard && (
         <PageWithTabs
           title={dataCard.name}

@@ -97,7 +97,7 @@ export default function Model() {
   return (
     <>
       <Title text={model ? model.name : 'Loading...'} />
-      {(isModelLoading || isCurrentUserLoading || isUiConfigLoading) && <Loading />}
+      {(!model || isModelLoading || isCurrentUserLoading || isUiConfigLoading) && <Loading />}
       {model && (
         <PageWithTabs
           title={model.name}
