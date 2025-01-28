@@ -8,7 +8,7 @@ RUN apk update
 WORKDIR /app
 
 COPY package*.json ./
-RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
+RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm --include=optional sharp
 
 COPY . .
 
