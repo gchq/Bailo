@@ -16,8 +16,6 @@ import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
 import { User } from 'types/types'
 
-import { DRAWER_WIDTH } from '../../utils/constants'
-
 const StyledList = styled(List)(({ theme }) => ({
   paddingTop: 0,
   paddingBottom: 0,
@@ -35,7 +33,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   '& .MuiDrawer-paper': {
     position: 'relative',
     whiteSpace: 'nowrap',
-    width: DRAWER_WIDTH,
+    width: 'fit-content',
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
