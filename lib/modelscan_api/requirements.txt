@@ -1,5 +1,5 @@
-fastapi[standard]==0.115.6
+fastapi[standard]==0.115.7
 modelscan[tensorflow,h5py]==0.8.1
-pydantic_settings==2.6.1
-python-multipart==0.0.18
+pydantic_settings==2.7.1
+python-multipart==0.0.20
 uvicorn==0.34.0

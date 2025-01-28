@@ -44,6 +44,7 @@ export type LinkProps = {
   href: NextLinkProps['href']
   linkAs?: NextLinkProps['as'] // Useful when the as prop is shallow by styled().
   noLinkStyle?: boolean
+  noWrap?: boolean
 } & Omit<NextLinkComposedProps, 'to' | 'linkAs' | 'href'> &
   Omit<MuiLinkProps, 'href'>
 
@@ -58,6 +59,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
     linkAs: linkAsProp,
     locale,
     noLinkStyle,
+    noWrap = false,
     prefetch,
     replace,
     role: _role, // Link don't have roles.
@@ -100,12 +102,25 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
         ref={ref}
         {...nextjsProps}
         {...other}
-        style={{ textDecoration: 'none' }}
+        style={
+          noWrap
+            ? { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', textDecoration: 'none' }
+            : { textDecoration: 'none' }
+        }
       />
     )
   }
 
-  return <MuiLink component={NextLinkComposed} className={className} ref={ref} {...nextjsProps} {...other} />
+  return (
+    <MuiLink
+      component={NextLinkComposed}
+      className={className}
+      ref={ref}
+      style={noWrap ? { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' } : {}}
+      {...nextjsProps}
+      {...other}
+    />
+  )
 })
 
 export default Link

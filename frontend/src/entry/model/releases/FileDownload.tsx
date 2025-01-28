@@ -168,10 +168,12 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
     <>
       {isFileInterface(file) && (
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-          <Stack sx={{ minWidth: 0 }}>
+          <Stack sx={{ minWidth: 0, width: '100%' }}>
             <Tooltip title={file.name}>
               <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
-                <Typography noWrap>{file.name}</Typography>
+                <Typography noWrap textOverflow='ellipsis' overflow='hidden'>
+                  {file.name}
+                </Typography>
               </Link>
             </Tooltip>
           </Stack>

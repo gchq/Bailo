@@ -12,6 +12,7 @@ import {
   getModelReleases,
   getReleaseBySemver,
   getReleasesForExport,
+  isReleaseDoc,
   newReleaseComment,
   removeFileFromReleases,
   semverObjectToString,
@@ -609,5 +610,50 @@ describe('services > release', () => {
     const size = await getAllFileIds('example', ['1', '2', '3'])
 
     expect(size).toStrictEqual([])
+  })
+
+  test('isReleaseDoc > success', async () => {
+    const result = isReleaseDoc({
+      modelId: '',
+      modelCardVersion: 1,
+      semver: '',
+      notes: '',
+      minor: false,
+      draft: false,
+      fileIds: [],
+      images: [],
+      deleted: false,
+      createdBy: '',
+      createdAt: '',
+      updatedAt: '',
+      _id: '',
+    })
+
+    expect(result).toBe(true)
+  })
+
+  test('isReleaseDoc > missing property', async () => {
+    const result = isReleaseDoc({
+      modelId: '',
+      modelCardVersion: 1,
+      notes: '',
+      minor: false,
+      draft: false,
+      fileIds: [],
+      images: [],
+      deleted: false,
+      createdBy: '',
+      createdAt: '',
+      updatedAt: '',
+      _id: '',
+    })
+
+    expect(result).toBe(false)
+  })
+
+  test('isReleaseDoc > wrong type', async () => {
+    const result = isReleaseDoc(null)
+
+    expect(result).toBe(false)
   })
 })

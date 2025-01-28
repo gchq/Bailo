@@ -4,13 +4,13 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ModelCardRevisionInterface } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
+import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
@@ -351,12 +351,11 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req: Request,
     mirroredModel: ModelInterface,
     sourceModelId: string,
-    modelCardVersions: number[],
     exporter: string,
-    newModelCards: ModelCardRevisionInterface[],
+    importResult: MongoDocumentImportInformation | FileImportInformation,
   ) {
     this.checkEventType(AuditInfo.CreateImport, req)
-    const event = this.generateEvent(req, { mirroredModel, sourceModelId, modelCardVersions, exporter, newModelCards })
+    const event = this.generateEvent(req, { mirroredModel, sourceModelId, exporter, importResult })
     req.log.info(event, req.audit.description)
   }
 }
