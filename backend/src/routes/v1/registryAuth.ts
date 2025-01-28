@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { createHash, X509Certificate } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
-import jwt, { SignOptions } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../../connectors/audit/index.js'
@@ -24,9 +24,7 @@ export async function getAdminToken() {
   if (!adminToken) {
     const key = await getPrivateKey()
     const hash = createHash('sha256').update(key).digest().slice(0, 16)
-    // eslint-disable-next-line no-bitwise
     hash[6] = (hash[6] & 0x0f) | 0x40
-    // eslint-disable-next-line no-bitwise
     hash[8] = (hash[8] & 0x3f) | 0x80
 
     adminToken = uuidStringify(hash)
@@ -44,11 +42,9 @@ async function getPublicKey() {
 }
 
 function getBit(buffer: Buffer, index: number) {
-  // eslint-disable-next-line no-bitwise
   const byte = ~~(index / 8)
   const bit = index % 8
   const idByte = buffer[byte]
-  // eslint-disable-next-line no-bitwise
   return Number((idByte & (2 ** (7 - bit))) !== 0)
 }
 
@@ -64,7 +60,6 @@ function formatKid(keyBuffer: Buffer) {
   for (let i = 0; i < bitLength; i += 5) {
     let idx = 0
     for (let j = 0; j < 5; j += 1) {
-      // eslint-disable-next-line no-bitwise
       idx <<= 1
       idx += getBit(keyBuffer, i + j)
     }

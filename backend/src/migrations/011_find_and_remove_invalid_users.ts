@@ -20,7 +20,7 @@ export async function up() {
         if (collaborator.entity !== '') {
           try {
             await authentication.getUserInformation(collaborator.entity)
-          } catch (err) {
+          } catch (_err) {
             invalidUsers.push(collaborator.entity)
           }
         }

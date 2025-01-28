@@ -27,7 +27,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
         try {
           av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
           log.info('Clam AV initialised.')
-        } catch (error) {
+        } catch (_error) {
           log.warn(`Could not initialise Clam AV, retrying (attempt ${retryCount})...`)
           this.init(++retryCount)
         }

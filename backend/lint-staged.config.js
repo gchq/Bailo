@@ -1,3 +1,3 @@
 export default {
-  '*.ts': ['eslint --ext .ts --max-warnings=0', 'prettier --check'],
+  '*.ts': ["eslint . -c eslint.config.mjs '**/*.{ts,tsx}' --max-warnings=0", 'prettier --check'],
 }
