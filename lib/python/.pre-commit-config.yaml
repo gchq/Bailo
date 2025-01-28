@@ -2,6 +2,8 @@ ci:
   autoupdate_commit_msg: 'chore: update pre-commit hooks'
   autofix_commit_msg: 'style: pre-commit fixes'
 
+files: ^(backend/docs/|lib/python/)
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -27,7 +29,7 @@ repos:
     rev: v3.19.1
     hooks:
       - id: pyupgrade
-        args: [--py37-plus]
+        args: [--py39-plus]
 
   - repo: https://github.com/hadialqattan/pycln
     rev: v2.5.0
