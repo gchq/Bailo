@@ -104,9 +104,14 @@ export default function ReleaseDisplay({
                 sx={{ minWidth: 0 }}
               >
                 <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
-                  <Typography component='h2' variant='h6' color='primary' noWrap>
-                    {model.name} - {release.semver}
-                  </Typography>
+                  <Stack direction='row' alignItems='center' spacing={1} width='100%'>
+                    <Typography component='h2' variant='h6' color='primary' noWrap>
+                      {model.name} -
+                    </Typography>
+                    <Typography component='h2' variant='h6' color='primary'>
+                      {release.semver}
+                    </Typography>
+                  </Stack>
                 </Link>
                 <CopyToClipboardButton
                   textToCopy={`${model.name} - ${release.semver}`}
