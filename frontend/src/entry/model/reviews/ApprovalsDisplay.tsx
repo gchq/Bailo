@@ -10,11 +10,16 @@ import { plural } from 'utils/stringUtils'
 interface ApprovalsDisplayProps {
   modelId: string
   acceptedReviewResponses: ResponseInterface[]
+  showCurrentUserResponses?: boolean
 }
 
 const staticRoles = ['owner', 'contributor', 'consumer']
 
-export default function ApprovalsDisplay({ modelId, acceptedReviewResponses }: ApprovalsDisplayProps) {
+export default function ApprovalsDisplay({
+  modelId,
+  acceptedReviewResponses,
+  showCurrentUserResponses = false,
+}: ApprovalsDisplayProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
 
   const dynamicRoles = useMemo(() => modelRoles.filter((role) => !staticRoles.includes(role.id)), [modelRoles])
@@ -27,17 +32,21 @@ export default function ApprovalsDisplay({ modelId, acceptedReviewResponses }: A
         )
         if (hasRoleApproved) {
           approvals.push(
-            <Tooltip title={`${plural(acceptedReviewResponses.length, 'approval')}`} key={dynamicRole.id}>
+            <Tooltip title={`${plural(acceptedReviewResponses.length, 'review')}`} key={dynamicRole.id}>
               <Stack direction='row'>
                 <Done color='success' fontSize='small' />
-                <Typography variant='caption'>{`Approved by ${dynamicRole.name}`}</Typography>
+                <Typography variant='caption'>
+                  {showCurrentUserResponses
+                    ? `You have approved this as a ${dynamicRole.name}`
+                    : `Approved by ${dynamicRole.name}`}
+                </Typography>
               </Stack>
             </Tooltip>,
           )
         }
         return approvals
       }, []),
-    [acceptedReviewResponses, dynamicRoles],
+    [acceptedReviewResponses, dynamicRoles, showCurrentUserResponses],
   )
 
   if (isModelRolesError) {

@@ -26,6 +26,7 @@ export default function ReleaseReview() {
   const { modelId, semver }: { modelId?: string; semver?: string } = router.query
 
   const [errorMessage, setErrorMessage] = useState('')
+  const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
 
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
@@ -45,6 +46,7 @@ export default function ReleaseReview() {
       return setErrorMessage('Could not find release semver')
     }
 
+    setIsReviewButtonLoading(true)
     const res = await postReviewResponse({
       modelId,
       role,
@@ -54,6 +56,7 @@ export default function ReleaseReview() {
     })
 
     if (!res.ok) {
+      setIsReviewButtonLoading(false)
       setErrorMessage(await getErrorMessage(res))
     } else {
       mutateReviews()
@@ -130,7 +133,7 @@ export default function ReleaseReview() {
                 {model ? `Reviewing release ${semver} for model ${model.name}` : 'Loading...'}
               </Typography>
             </Stack>
-            <ReviewWithComment onSubmit={handleSubmit} release={release} />
+            <ReviewWithComment onSubmit={handleSubmit} release={release} loading={isReviewButtonLoading} />
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />
             <Typography variant='caption' sx={{ mb: 2 }}>
