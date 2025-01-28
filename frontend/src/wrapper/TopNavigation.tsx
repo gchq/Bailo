@@ -30,7 +30,6 @@ import EntrySearch from 'src/wrapper/EntrySearch'
 
 import bailoLogo from '../../public/logo-horizontal-light.png'
 import { User } from '../../types/types'
-import { DRAWER_WIDTH } from '../../utils/constants'
 import ExpandableButton from '../common/ExpandableButton'
 import ThemeModeContext from '../contexts/themeModeContext'
 import Link from '../Link'
@@ -57,8 +56,6 @@ const AppBar = styled(MuiAppBar, {
     {
       props: ({ open }) => open,
       style: {
-        marginLeft: DRAWER_WIDTH,
-        width: `calc(100% - ${DRAWER_WIDTH}px)`,
         transition: theme.transitions.create(['width', 'margin-left'], {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.enteringScreen,

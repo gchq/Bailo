@@ -10,6 +10,7 @@ vi.mock('../../../src/connectors/audit/index.js')
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
     vi.mock('../../../src/services/mirroredModel.js', () => ({
+      ImportKind: { Documents: 'documents', File: 'file' } as const,
       exportModel: vi.fn(),
     }))
 
@@ -17,6 +18,7 @@ describe('routes > model > postModel', () => {
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/export/s3`, fixture)
 
     expect(res.statusCode).toBe(200)
+
     expect(res.body).matchSnapshot()
   })
 

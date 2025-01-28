@@ -5,13 +5,13 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ModelCardRevisionInterface } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
+import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { BaseAuditConnector } from './Base.js'
 
@@ -63,9 +63,8 @@ export class SillyAuditConnector extends BaseAuditConnector {
     _req: Request,
     _mirroredModel: ModelInterface,
     _sourceModelId: string,
-    _modelCardVersions: number[],
     _exporter: string,
-    _newModelCards: ModelCardRevisionInterface[],
+    _importResult: MongoDocumentImportInformation | FileImportInformation,
   ) {}
   onError(_req: Request, _error: BailoError) {}
   onCreateCommentResponse(_req: Request, _responseInterface: ResponseInterface) {}

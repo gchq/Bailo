@@ -26,13 +26,20 @@ export default function EntryList({
     return entries.map((entry, index) => (
       <Fragment key={entry.id}>
         <Stack direction='row'>
-          <Link style={{ textDecoration: 'none' }} href={`${entry.kind}/${entry.id}`} passHref>
+          <Link
+            style={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
+            href={`${entry.kind}/${entry.id}`}
+            passHref
+          >
             <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}>
               {entry.name}
             </MuiLink>
           </Link>
         </Stack>
-        <Typography variant='body1' sx={{ marginBottom: 2 }}>
+        <Typography
+          variant='body1'
+          sx={{ marginBottom: 2, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
+        >
           {entry.description}
         </Typography>
         <ChipSelector
