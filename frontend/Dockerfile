@@ -12,7 +12,7 @@ RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 
 COPY . .
 
-RUN npm install sharp
+RUN npm install sharp@0.33.5
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
