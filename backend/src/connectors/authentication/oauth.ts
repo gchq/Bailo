@@ -28,7 +28,7 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
             secret: config.session.secret,
             resave: true,
             saveUninitialized: true,
-            cookie: { maxAge: 30 * 24 * 60 * 60000 }, // store for 30 days
+            cookie: { maxAge: 30 * 24 * 60 * 60000, secure: true, httpOnly: true }, // store for 30 days
             store: MongoStore.create({
               mongoUrl: getConnectionURI(),
             }),
