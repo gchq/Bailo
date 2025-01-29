@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import pytest
-from bailo import Client, Datacard, ModelVisibility, Model
+
+# isort: split
+
+from bailo import Client, Datacard, Model, ModelVisibility
 from bailo.core.exceptions import BailoException
 
 

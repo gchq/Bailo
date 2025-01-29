@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import getpass
+import logging
+import os
 from json import JSONDecodeError
 
 import requests
-import os
-import getpass
-import logging
 from requests.auth import HTTPBasicAuth
+
+# isort: split
+
 from bailo.core.exceptions import BailoException, ResponseException
 
 logger = logging.getLogger(__name__)

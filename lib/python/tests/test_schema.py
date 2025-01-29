@@ -4,8 +4,11 @@ import random
 import string
 
 import pytest
-from example_schemas import MINIMAL_JSON_SCHEMA
+
+# isort: split
+
 from bailo import Client, Schema, SchemaKind
+from example_schemas import MINIMAL_JSON_SCHEMA
 
 
 def random_generator(N=10):

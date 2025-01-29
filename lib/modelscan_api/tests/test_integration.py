@@ -11,6 +11,8 @@ import modelscan
 import pytest
 from fastapi.testclient import TestClient
 
+# isort: split
+
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.main import app, get_settings
 
@@ -57,7 +59,12 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                     },
                     "timestamp": ANY,
                     "total_issues": 0,
-                    "total_issues_by_severity": {"CRITICAL": 0, "HIGH": 0, "LOW": 0, "MEDIUM": 0},
+                    "total_issues_by_severity": {
+                        "CRITICAL": 0,
+                        "HIGH": 0,
+                        "LOW": 0,
+                        "MEDIUM": 0,
+                    },
                 },
             },
         ),
@@ -67,7 +74,12 @@ OCTET_STREAM_TYPE = "application/octet-stream"
             H5_MIME_TYPE,
             {
                 "summary": {
-                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+                    "total_issues_by_severity": {
+                        "LOW": 0,
+                        "MEDIUM": 0,
+                        "HIGH": 0,
+                        "CRITICAL": 0,
+                    },
                     "total_issues": 0,
                     "input_path": str(Path().cwd().absolute().joinpath("null.h5")),
                     "absolute_path": str(Path().cwd().absolute()),
@@ -101,7 +113,12 @@ OCTET_STREAM_TYPE = "application/octet-stream"
             OCTET_STREAM_TYPE,
             {
                 "summary": {
-                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+                    "total_issues_by_severity": {
+                        "LOW": 0,
+                        "MEDIUM": 0,
+                        "HIGH": 0,
+                        "CRITICAL": 0,
+                    },
                     "total_issues": 0,
                     "input_path": str(Path().cwd().absolute().joinpath("safe.pkl")),
                     "absolute_path": str(Path().cwd().absolute()),
@@ -123,7 +140,12 @@ OCTET_STREAM_TYPE = "application/octet-stream"
             OCTET_STREAM_TYPE,
             {
                 "summary": {
-                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 1},
+                    "total_issues_by_severity": {
+                        "LOW": 0,
+                        "MEDIUM": 0,
+                        "HIGH": 0,
+                        "CRITICAL": 1,
+                    },
                     "total_issues": 1,
                     "input_path": str(Path().cwd().absolute().joinpath("unsafe.pkl")),
                     "absolute_path": str(Path().cwd().absolute()),
@@ -150,7 +172,12 @@ OCTET_STREAM_TYPE = "application/octet-stream"
         ),
     ],
 )
-def test_scan_file(file_name: str, file_content: Path | bytes, file_mime_type: str, expected_response: dict) -> None:
+def test_scan_file(
+    file_name: str,
+    file_content: Path | bytes,
+    file_mime_type: str,
+    expected_response: dict,
+) -> None:
     # allow passing in a Path to read the file's contents for specific data types
     if isinstance(file_content, Path):
         with open(file_content, "rb") as f:
