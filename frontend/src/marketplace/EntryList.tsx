@@ -1,10 +1,10 @@
-import { Box, Link as MuiLink, Stack, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
-import Link from 'next/link'
 import { Fragment, useMemo } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 
 interface EntryListProps {
@@ -27,13 +27,15 @@ export default function EntryList({
       <Fragment key={entry.id}>
         <Stack direction='row'>
           <Link
-            style={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
+            sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
             href={`${entry.kind}/${entry.id}`}
-            passHref
           >
-            <MuiLink variant='h5' sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}>
+            <Typography
+              variant='h5'
+              sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
+            >
               {entry.name}
-            </MuiLink>
+            </Typography>
           </Link>
         </Stack>
         <Typography
