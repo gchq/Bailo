@@ -41,7 +41,7 @@ export async function getGroupMembership(group: string) {
   try {
     results = await client.send(command)
   } catch (err) {
-    throw InternalError('Error when querying Cognito for users.', { err })
+    throw InternalError('Error when querying Cognito for group membership.', { err })
   }
   if (!results.Users) {
     return []
