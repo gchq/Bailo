@@ -158,8 +158,8 @@ data:
         // Contact details for the support team
         issues: {
           label: 'Bailo Support Team',
-          supportHref: 'mailto:{{ .Values.config.supportEmail }}?subject=Bailo%20Support',
-          contactHref: 'mailto:{{ .Values.config.supportEmail }}?subject=Bailo%20Contact',
+          supportHref: '{{ .Values.config.issueLinks.support }}',
+          contactHref: '{{ .Values.config.issueLinks.contact }}',
         },
 
         // The publicly accessible location of the registry, including host and port
@@ -205,10 +205,10 @@ data:
         },
 
         fileScanners: {
-          kinds: {{ toJson .Values.connectors.fileScanners.kinds }}
-          retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes}}
-          maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries}}
-          initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay}}
+          kinds: {{ toJson .Values.connectors.fileScanners.kinds }},
+          retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes }},
+          maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries }},
+          initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay }},
         },
       },
 
