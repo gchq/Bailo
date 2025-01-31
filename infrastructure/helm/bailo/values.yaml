@@ -246,6 +246,10 @@ config:
     protocol: "https"
     port: 443
 
+  issueLinks:
+    support: "mailto:?subject=Bailo%20Contact"
+    contact: "mailto:?subject=Bailo%20Contact"
+
 # nginx.deployment registry.deployment
 nginxcert:
   cert: cert.pem #use san.cnf to create certs
