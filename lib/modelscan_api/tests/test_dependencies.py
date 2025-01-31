@@ -1,5 +1,4 @@
-"""Test for the dependencies.py file.
-"""
+"""Test for the dependencies.py file."""
 
 from __future__ import annotations
 

@@ -1,5 +1,4 @@
-"""Test for the main.py file.
-"""
+"""Test for the main.py file."""
 
 from __future__ import annotations
 
