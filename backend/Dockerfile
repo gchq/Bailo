@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM python:3.12.8-bullseye AS sphinx-docs
+FROM python:3.12.8-bookworm AS sphinx-docs
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
