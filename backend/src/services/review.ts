@@ -10,12 +10,13 @@ import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 import { BadReq, InternalError, NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
-import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
+import { requestReviewForAccessRequest, requestReviewForModel, requestReviewForRelease } from './smtp/smtp.js'
 
 // This should be replaced by using the dynamic schema
 const requiredRoles = {
   release: ['mtr', 'msro'],
   accessRequest: ['msro'],
+  model: ['msro'],
 }
 
 export async function findReviews(
@@ -47,6 +48,25 @@ export async function findReviews(
   )
 
   return reviews.filter((_, i) => auths[i].success)
+}
+
+export async function createModelReviews(model: ModelDoc) {
+  const roleEntities = getRoleEntities(requiredRoles.model, model.collaborators)
+
+  const createReviews = roleEntities.map((roleInfo) => {
+    const review = new Review({
+      modelId: model.id,
+      kind: ReviewKind.Model,
+      role: roleInfo.role,
+    })
+    roleInfo.entities.forEach((entity) =>
+      requestReviewForModel(entity, review, model).catch((error) =>
+        log.warn({ error }, 'Error when sending notifications requesting review for release.'),
+      ),
+    )
+    return review.save()
+  })
+  await Promise.all(createReviews)
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
