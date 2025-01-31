@@ -1,5 +1,4 @@
-"""Integration tests for working with ModelScan.
-"""
+"""Integration tests for working with ModelScan."""
 
 from __future__ import annotations
 
