@@ -3,6 +3,7 @@ import Mail from 'nodemailer/lib/mailer/index.js'
 
 import authentication from '../../connectors/authentication/index.js'
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
+import { ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewDoc } from '../../models/Review.js'
@@ -11,6 +12,7 @@ import { toEntity } from '../../utils/entity.js'
 import log from '../log.js'
 import { buildEmail, EmailContent } from './emailBuilder.js'
 
+const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
 let transporter: undefined | Transporter = undefined
 
 async function dispatchEmail(entity: string, emailContent: EmailContent) {
@@ -29,7 +31,25 @@ async function dispatchEmail(entity: string, emailContent: EmailContent) {
   await Promise.all(sendEmailResponses)
 }
 
-const appBaseUrl = `${config.app.protocol}://${config.app.host}:${config.app.port}`
+export async function requestReviewForModel(entity: string, review: ReviewDoc, model: ModelDoc) {
+  if (!config.smtp.enabled) {
+    log.info('Not sending email due to SMTP disabled')
+    return
+  }
+
+  const emailContent = buildEmail(
+    `Model ${model.id} is ready for your review`,
+    [
+      { title: 'Model ID', data: model.id },
+      { title: 'Your Role', data: review.role.toUpperCase() },
+    ],
+    [{ name: 'See Reviews', url: `${appBaseUrl}/review` }],
+    true,
+  )
+
+  await dispatchEmail(entity, emailContent)
+}
+
 export async function requestReviewForRelease(entity: string, review: ReviewDoc, release: ReleaseDoc) {
   if (!config.smtp.enabled) {
     log.info('Not sending email due to SMTP disabled')

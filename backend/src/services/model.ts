@@ -15,6 +15,7 @@ import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
+import { scheduleReview } from './scheduler.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -71,6 +72,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
 
   await model.save()
 
+  await scheduleReview(model.id)
   return model
 }
 
@@ -566,4 +568,17 @@ export async function getCurrentUserPermissionsByModel(
 
     exportMirroredModel: authResponseToUserPermission(exportMirroredModelAuth),
   }
+}
+
+export async function getModelByIdForReview(modelId: string, kind?: EntryKindKeys) {
+  const model = await Model.findOne({
+    id: modelId,
+    ...(kind && { kind }),
+  })
+
+  if (!model) {
+    throw NotFound(`The requested entry was not found.`, { modelId })
+  }
+
+  return model
 }
