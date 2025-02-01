@@ -73,7 +73,7 @@
     "zod-error": "^1.5.0"
   },
   "devDependencies": {
-    "@anatine/zod-mock": "^3.13.4",
+    "@anatine/zod-mock": "^3.13.5",
     "@faker-js/faker": "^8.4.1",
     "@swc/core": "^1.10.9",
     "@types/archiver": "^6.0.3",
