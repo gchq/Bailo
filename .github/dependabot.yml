@@ -30,6 +30,19 @@ updates:
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
+      rjsf:
+        patterns:
+          - "@rjsf/*"
+      mui:
+        patterns:
+          - "@mui/*"
+      emotion:
+        patterns:
+          - "@emotion/*"
+      mdx:
+        patterns:
+          - "@mdx-js/*"
+          - "@next/mdx"
 
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `/frontend` directory
@@ -54,6 +67,56 @@ updates:
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
+      rjsf:
+        patterns:
+          - "@rjsf/*"
+      mui:
+        patterns:
+          - "@mui/*"
+      emotion:
+        patterns:
+          - "@emotion/*"
+      mdx:
+        patterns:
+          - "@mdx-js/*"
+          - "@next/mdx"
+
+  - package-ecosystem: 'npm'
+    # Look for `package.json` and `lock` files in the `/lib/landing` directory
+    directory: '/lib/landing'
+    schedule:
+      interval: 'monthly'
+    versioning-strategy: increase
+    open-pull-requests-limit: 15
+    groups:
+      opentelemetry:
+        patterns:
+          - "@opentelemetry/*"
+      eslint:
+        patterns:
+          - "@typescript-eslint/*"
+          - "eslint-*"
+          - "eslint"
+      vitest:
+        patterns:
+          - "@vitest/*"
+          - "vitest"
+      aws-sdk:
+        patterns:
+          - "@aws-sdk/*"
+      rjsf:
+        patterns:
+          - "@rjsf/*"
+      mui:
+        patterns:
+          - "@mui/*"
+      emotion:
+        patterns:
+          - "@emotion/*"
+      mdx:
+        patterns:
+          - "@mdx-js/*"
+          - "@next/mdx"
 
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `/backend` directory
@@ -78,6 +141,19 @@ updates:
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
+      rjsf:
+        patterns:
+          - "@rjsf/*"
+      mui:
+        patterns:
+          - "@mui/*"
+      emotion:
+        patterns:
+          - "@emotion/*"
+      mdx:
+        patterns:
+          - "@mdx-js/*"
+          - "@next/mdx"
 
   # Enable version updates for Docker
   - package-ecosystem: 'docker'
