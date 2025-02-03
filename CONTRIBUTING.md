@@ -39,3 +39,4 @@ Here are some things you can do to make this all smoother:
 - Add unit/integration tests.
 - Write a [good commit message](http://chris.beams.io/posts/git-commit/).
 - If it is a new feature or a change to the user experience then make sure to update the relevant documentation.
+- Ensure that all code meets format and style standards enforced by Prettier and ESLint.
