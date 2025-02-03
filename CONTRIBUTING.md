@@ -38,6 +38,4 @@ Here are some things you can do to make this all smoother:
 - If you think it might be controversial then discuss it with us beforehand, via a GitHub issue.
 - Add unit/integration tests.
 - Write a [good commit message](http://chris.beams.io/posts/git-commit/).
-- Update the CHANGELOG using `log_change.sh`, see https://github.com/at055612/release-it for details. See
-  [CHANGELOG.md](https://github.com/gchq/stroom/blob/master/CHANGELOG.md) for examples of change entries.
 - If it is a new feature or a change to the user experience then make sure to update the relevant documentation.
