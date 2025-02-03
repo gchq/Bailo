@@ -26,7 +26,7 @@
     "@mui/material-nextjs": "6.3.1",
     "@mui/x-date-pickers": "7.23.3",
     "@next/mdx": "^14.2.4",
-    "@rjsf/core": "5.21.0",
+    "@rjsf/core": "5.24.2",
     "@rjsf/mui": "5.21.0",
     "@rjsf/utils": "5.21.0",
     "@rjsf/validator-ajv8": "5.21.0",
