@@ -33,7 +33,7 @@
     "@types/js-cookie": "^3.0.6",
     "@uiw/react-markdown-preview": "^5.1.2",
     "@uiw/react-md-editor": "^4.0.4",
-    "@vercel/otel": "^1.10.0",
+    "@vercel/otel": "^1.10.1",
     "axios": "^1.7.7",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.11",
