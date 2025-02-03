@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22.6.0-alpine AS installer
+FROM node:22.13.1-alpine AS installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -15,7 +15,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:22.6.0-alpine AS runner
+FROM node:22.13.1-alpine AS runner
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
