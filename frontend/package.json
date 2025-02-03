@@ -55,7 +55,7 @@
     "remark-gfm": "^4.0.0",
     "semver": "^7.6.2",
     "sharp": "^0.33.5",
-    "swagger-ui-react": "^5.17.14",
+    "swagger-ui-react": "^5.18.3",
     "swr": "^2.3.0",
     "typescript": "5.5.3",
     "uuid": "^11.0.5"
@@ -68,7 +68,7 @@
     "@types/node": "22.0.2",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
-    "@types/swagger-ui-react": "^4.18.3",
+    "@types/swagger-ui-react": "^5.18.0",
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
     "@vitejs/plugin-react": "^4.3.1",
