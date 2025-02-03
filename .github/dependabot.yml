@@ -30,6 +30,9 @@ updates:
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
+      rjsf:
+        patterns:
+          - "@rjsf/*"
 
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `/frontend` directory
@@ -54,6 +57,9 @@ updates:
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
+      rjsf:
+        patterns:
+          - "@rjsf/*"
 
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `/backend` directory
@@ -78,6 +84,9 @@ updates:
       aws-sdk:
         patterns:
           - "@aws-sdk/*"
+      rjsf:
+        patterns:
+          - "@rjsf/*"
 
   # Enable version updates for Docker
   - package-ecosystem: 'docker'
