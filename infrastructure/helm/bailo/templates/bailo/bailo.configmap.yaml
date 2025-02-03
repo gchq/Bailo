@@ -135,6 +135,7 @@ data:
           },
           userPoolId: '{{ .Values.oauth.identityProviderClient.userPoolId }}',
           userIdAttribute: '{{ .Values.oauth.identityProviderClient.userIdAttribute }}',
+          adminGroupName: '{{ .Values.oauth.cognito.adminGroupName }}'
         },
       },
 

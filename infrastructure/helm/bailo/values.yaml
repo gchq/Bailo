@@ -80,6 +80,7 @@ oauth:
     response: [] #example 'tokens', 'raw', 'jwt'
     callback: "" # example /
     subdomain: "cognito domain"
+    adminGroupName: ''
   identityProviderClient:
     userPoolId: "region_id"
     userIdAttribute: "name"

@@ -140,6 +140,7 @@ module.exports = {
       },
       userPoolId: '',
       userIdAttribute: '',
+      adminGroupName: '',
     },
   },
 
