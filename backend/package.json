@@ -58,7 +58,7 @@
     "morgan": "^1.10.0",
     "nanoid": "^5.0.9",
     "node-fetch": "^3.3.2",
-    "nodemailer": "^6.9.16",
+    "nodemailer": "^6.10.0",
     "outdent": "^0.8.0",
     "pretty-bytes": "^6.1.1",
     "qs": "^6.14.0",
