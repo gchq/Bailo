@@ -9,6 +9,7 @@ import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
 import { DefaultSchema } from '../services/schema.js'
 import { UiConfig } from '../types/types.js'
 import { deepFreeze } from './object.js'
+import { ConfigurationError } from './error.js'
 
 export interface Config {
   api: {
@@ -117,10 +118,16 @@ export interface Config {
   oauth: {
     provider: string
     grant: grant.GrantConfig | grant.GrantOptions
-    cognito: {
+    cognito?: {
       identityProviderClient: { region: string; credentials: { accessKeyId: string; secretAccessKey: string } }
       userPoolId: string
       userIdAttribute: string
+    }
+    keycloak?: {
+      realm: string
+      clientId: string
+      clientSecret: string
+      serverUrl: string
     }
   }
 
@@ -175,4 +182,12 @@ export interface Config {
 }
 
 const config: Config = _config.util.toObject()
+
+if (config.oauth &&
+  !config.oauth.keycloak &&
+  !config.oauth.cognito
+) {
+  throw ConfigurationError('If OAuth is configured, either Keycloak or Cognito configuration must be provided.', { oauthConfiguration: config.oauth })
+}
+
 export default deepFreeze(config) as Config
