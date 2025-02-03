@@ -25,7 +25,7 @@
     "@mui/material": "6.3.1",
     "@mui/material-nextjs": "6.3.1",
     "@mui/x-date-pickers": "7.23.3",
-    "@next/mdx": "^14.2.4",
+    "@next/mdx": "^15.1.6",
     "@rjsf/core": "5.21.0",
     "@rjsf/mui": "5.21.0",
     "@rjsf/utils": "5.21.0",
