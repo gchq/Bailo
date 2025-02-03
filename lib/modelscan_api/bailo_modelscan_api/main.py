@@ -1,5 +1,4 @@
-"""FastAPI app.
-"""
+"""FastAPI app."""
 
 from __future__ import annotations
 
@@ -16,6 +15,8 @@ import uvicorn
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
 from pydantic import BaseModel
+
+# isort: split
 
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.dependencies import safe_join
@@ -91,13 +92,21 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                         "Normal": {
                             "value": {
                                 "summary": {
-                                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
                                     "total_issues": 0,
                                     "input_path": "/foo/bar/safe_model.pkl",
                                     "absolute_path": "/foo/bar",
                                     "modelscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
-                                    "scanned": {"total_scanned": 1, "scanned_files": ["safe_model.pkl"]},
+                                    "scanned": {
+                                        "total_scanned": 1,
+                                        "scanned_files": ["safe_model.pkl"],
+                                    },
                                     "skipped": {
                                         "total_skipped": 0,
                                         "skipped_files": [],
@@ -110,14 +119,25 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                         "Issue": {
                             "value": {
                                 "summary": {
-                                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 1, "HIGH": 0, "CRITICAL": 0},
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 1,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
                                     "total_issues": 1,
                                     "input_path": "/foo/bar/unsafe_model.h5",
                                     "absolute_path": "/foo/bar",
                                     "modelscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
-                                    "scanned": {"total_scanned": 1, "scanned_files": ["unsafe_model.h5"]},
-                                    "skipped": {"total_skipped": 0, "skipped_files": []},
+                                    "scanned": {
+                                        "total_scanned": 1,
+                                        "scanned_files": ["unsafe_model.h5"],
+                                    },
+                                    "skipped": {
+                                        "total_skipped": 0,
+                                        "skipped_files": [],
+                                    },
                                 },
                                 "issues": [
                                     {
@@ -153,14 +173,24 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                     },
                                     "timestamp": "2024-11-19T12:00:00.000000",
                                     "total_issues": 0,
-                                    "total_issues_by_severity": {"CRITICAL": 0, "HIGH": 0, "LOW": 0, "MEDIUM": 0},
+                                    "total_issues_by_severity": {
+                                        "CRITICAL": 0,
+                                        "HIGH": 0,
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                    },
                                 },
                             }
                         },
                         "Error": {
                             "value": {
                                 "summary": {
-                                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
                                     "total_issues": 0,
                                     "input_path": "/foo/bar/null.h5",
                                     "absolute_path": "/foo/bar",

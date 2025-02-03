@@ -1,5 +1,4 @@
-"""Test for the main.py file.
-"""
+"""Test for the main.py file."""
 
 from __future__ import annotations
 
@@ -11,6 +10,8 @@ from unittest.mock import Mock, patch
 import modelscan
 import pytest
 from fastapi.testclient import TestClient
+
+# isort: split
 
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.dependencies import parse_path
@@ -91,7 +92,10 @@ def test_scan_file_exception(mock_scan: Mock, file_name: str, file_content: Any,
     mock_scan.assert_called_once()
 
     # Manually cleanup as FastAPI won't trigger background_tasks on Exception due to using TestClient.
-    Path.unlink(Path.joinpath(parse_path(get_settings().download_dir), "foo.h5"), missing_ok=True)
+    Path.unlink(
+        Path.joinpath(parse_path(get_settings().download_dir), "foo.h5"),
+        missing_ok=True,
+    )
 
 
 @pytest.mark.parametrize(

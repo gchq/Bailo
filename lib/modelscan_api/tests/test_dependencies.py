@@ -1,13 +1,15 @@
-"""Test for the dependencies.py file.
-"""
+"""Test for the dependencies.py file."""
 
 from __future__ import annotations
 
 import itertools
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import pytest
+
+# isort: split
 
 from bailo_modelscan_api.dependencies import parse_path, safe_join, sanitise_unix_filename
 
@@ -45,8 +47,11 @@ def type_matrix(data: Iterable[Any], types: Iterable[type]) -> itertools.product
         ("\n", "-"),
         ("\r", "-"),
         ("~", "~"),
-        ("".join(['\\[/\\?%*:|"<>0x7F0x00-0x1F]', chr(0x1F) * 15]), "-[----------0x7F0x00-0x1F]---------------"),
-        ("ad\nbla'{-+\\)(ç?", "ad-bla'{-+-)(ç-"),  # type: ignore
+        (
+            "".join(['\\[/\\?%*:|"<>0x7F0x00-0x1F]', chr(0x1F) * 15]),
+            "-[----------0x7F0x00-0x1F]---------------",
+        ),
+        ("ad\nbla'{-+\\)(ç?", "ad-bla'{-+-)(ç-"),
     ],
 )
 def test_sanitise_unix_filename(path: str, output: str) -> None:

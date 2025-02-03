@@ -20,26 +20,27 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
+    rev: 6.0.0
     hooks:
       - id: isort
-        args: ['-a', 'from __future__ import annotations']
+        args: ['-a', 'from __future__ import annotations', '-l', '120']
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.19.1
     hooks:
       - id: pyupgrade
-        args: [--py37-plus]
+        args: ['--py39-plus', '--keep-runtime-typing']
 
   - repo: https://github.com/hadialqattan/pycln
     rev: v2.5.0
     hooks:
       - id: pycln
-        args: [--config=pyproject.toml]
+        # use the same config as for /lib/python
+        args: [--config=../python/pyproject.toml]
         stages: [manual]
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.0
+    rev: v2.4.1
     hooks:
       - id: codespell
 
@@ -56,7 +57,7 @@ repos:
       - id: rst-inline-touching-normal
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 24.10.0
+    rev: 25.1.0
     hooks:
       - id: black
-        args: [--line-length=120]
+        args: ['--config', 'lib/python/pyproject.toml']
