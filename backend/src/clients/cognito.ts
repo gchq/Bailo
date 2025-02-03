@@ -50,10 +50,9 @@ export async function getGroupMembership(group: string) {
   const initialValue: Array<string> = []
   const users = results.Users.reduce((acc, cognitoUser) => {
     const dn = cognitoUser.Attributes?.find((attribute) => attribute.Name === dnName)?.Value
-    if (!dn) {
-      return acc
+    if (dn) {
+      acc.push(dn)
     }
-    acc.push(dn)
     return acc
   }, initialValue)
   return users
