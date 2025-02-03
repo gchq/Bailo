@@ -22,6 +22,7 @@ export default function AccessRequestReview() {
   const { modelId, accessRequestId }: { modelId?: string; accessRequestId?: string } = router.query
 
   const [errorMessage, setErrorMessage] = useState('')
+  const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
 
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
@@ -40,6 +41,7 @@ export default function AccessRequestReview() {
       return setErrorMessage('Could not find access request ID')
     }
 
+    setIsReviewButtonLoading(true)
     const res = await postReviewResponse({
       modelId,
       role,
@@ -49,6 +51,7 @@ export default function AccessRequestReview() {
     })
 
     if (!res.ok) {
+      setIsReviewButtonLoading(false)
       setErrorMessage(await getErrorMessage(res))
     } else {
       mutateReviews()
@@ -99,7 +102,7 @@ export default function AccessRequestReview() {
                   : 'Loading...'}
               </Typography>
             </Stack>
-            <ReviewWithComment onSubmit={handleSubmit} accessRequest={accessRequest} />
+            <ReviewWithComment onSubmit={handleSubmit} accessRequest={accessRequest} loading={isReviewButtonLoading} />
             <MessageAlert message={errorMessage} severity='error' />
             <Divider />
             <Stack spacing={1} direction='row' justifyContent='space-between' sx={{ mb: 2 }}>

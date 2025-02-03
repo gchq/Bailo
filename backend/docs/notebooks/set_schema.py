@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 json_schema = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",

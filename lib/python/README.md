@@ -44,7 +44,7 @@ A simple Python API Wrapper for Bailo
 
 <!-- prettier-ignore-start -->
 > [!IMPORTANT]
-> Python 3.8.1 or higher is required
+> Python 3.9 or higher is required
 <!-- prettier-ignore-end -->
 
 ```bash

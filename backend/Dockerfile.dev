@@ -1,12 +1,17 @@
-FROM python:3.13.1-bullseye AS sphinx-docs
+FROM python:3.12.8-bullseye AS sphinx-docs
 
-RUN apt update && apt install -y pandoc
+# Prevents Python from writing pyc files.
+ENV PYTHONDONTWRITEBYTECODE=1
+# Keeps Python from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y pandoc && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/docs
 
 COPY docs .
 
-RUN pip install bailo -r requirements.txt
+RUN pip install --no-cache-dir --upgrade bailo -r requirements.txt
 
 RUN make dirhtml
 

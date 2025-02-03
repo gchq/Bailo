@@ -84,9 +84,11 @@ export default function ReviewWithComment({
   }, [responses, reviewRequest])
 
   useEffect(() => {
-    router.replace({
-      query: { ...router.query, role: reviewRequest.role },
-    })
+    if (reviewRequest && !router.query.role) {
+      router.replace({
+        query: { ...router.query, role: reviewRequest.role },
+      })
+    }
   }, [router, reviewRequest])
 
   function submitForm(decision: DecisionKeys) {
