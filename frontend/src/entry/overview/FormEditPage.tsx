@@ -158,7 +158,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
                       setOldSchema((splitSchema) => {
                         return Object.assign(splitSchema)
                       })
-                      // console.log(oldSchema)
                     }}
                     data-test='editEntryCardButton'
                     startIcon={<EditIcon fontSize='small' />}
