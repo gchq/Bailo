@@ -33,7 +33,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rehype-highlight": "^6.0.0",
-    "remark-frontmatter": "^4.0.1",
+    "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^3.0.1",
     "shelljs": "^0.8.5",
     "styled-components": "^5.3.6",
