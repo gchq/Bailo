@@ -22,6 +22,7 @@ spec:
       {{- end }}
       securityContext:
         runAsUser: {{ .Values.clamav.runAsUser }}
+        fsGroup: {{ .Values.clamav.runAsUser }}
       containers:
       - name: {{ include "bailo.fullname" . }}-clamav
         ports:
