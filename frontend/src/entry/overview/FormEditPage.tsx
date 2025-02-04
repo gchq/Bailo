@@ -59,7 +59,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
       setLoading(true)
       const oldData = getStepsData(oldSchema, true)
       const data = getStepsData(splitSchema, true)
-      if (getChangedFields(oldData, data)) {
+      if (!getChangedFields(oldData, data)) {
         setIsEdit(false)
       } else {
         const res = await putModelCard(entry.id, data)
