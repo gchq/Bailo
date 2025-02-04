@@ -30,7 +30,7 @@
     "dedent-js": "^1.0.1",
     "gray-matter": "^4.0.3",
     "next": "15.1.6",
-    "react": "18.2.0",
+    "react": "19.0.0",
     "react-dom": "18.2.0",
     "rehype-highlight": "^6.0.0",
     "remark-frontmatter": "^5.0.0",
@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@types/node": "22.13.0",
-    "@types/react": "18.3.3",
+    "@types/react": "19.0.8",
     "@types/styled-components": "^5.1.26",
     "eslint": "8.27.0",
     "eslint-config-next": "13.0.2",
