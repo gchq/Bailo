@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { createHash, X509Certificate } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
-import jwt from 'jsonwebtoken'
+import jwt, { SignOptions } from 'jsonwebtoken'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../../connectors/audit/index.js'
@@ -102,7 +102,7 @@ async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn
         kid: await getKid(),
         alg: 'RS256',
       },
-    },
+    } as SignOptions,
   )
 }
 

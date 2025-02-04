@@ -11,28 +11,30 @@ type ReactionDisplayProps = {
   onReactionClick: (kind: ReactionKindKeys) => void
 }
 
+const USER_DISPLAY_LIMIT = 3
+
 export default function ReactionDisplay({ kind, icon, users, onReactionClick }: ReactionDisplayProps) {
   const [usersToDisplay, setUsersToDisplay] = useState('')
 
   useEffect(() => {
     async function fetchData() {
-      if (!usersToDisplay) {
-        setUsersToDisplay(
-          `${users
-            .slice(0, 3)
-            .map(async (user) => {
-              const response = await getUserInformation(user)
-              if (response.ok) {
-                const responseBody = await response.json()
-                return responseBody.entity.name
-              }
-            })
-            .join(', ')} ${users.length > 3 ? ` and ${users.length - 3} others` : ''}`,
-        )
-      }
+      const displayNames = await Promise.all(
+        users.slice(0, USER_DISPLAY_LIMIT).map(async (user) => {
+          const response = await getUserInformation(user)
+          if (response.ok) {
+            const responseBody = await response.json()
+            return responseBody.entity.name
+          }
+        }),
+      )
+      setUsersToDisplay(
+        users.length > USER_DISPLAY_LIMIT
+          ? `${displayNames.join(', ')}, and ${users.length - USER_DISPLAY_LIMIT} ${plural(users.length - USER_DISPLAY_LIMIT, 'other')}`
+          : displayNames.join(', '),
+      )
     }
     fetchData()
-  }, [users, usersToDisplay])
+  }, [users])
 
   return (
     <Tooltip title={usersToDisplay}>
