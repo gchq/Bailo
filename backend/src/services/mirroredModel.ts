@@ -100,7 +100,10 @@ export const ImportKind = {
   File: 'file',
 } as const
 
-export type ImportKindKeys = (typeof ImportKind)[keyof typeof ImportKind]
+export type ImportKindKeys<T extends keyof typeof ImportKind | void = void> = T extends keyof typeof ImportKind
+  ? (typeof ImportKind)[T]
+  : (typeof ImportKind)[keyof typeof ImportKind]
+
 export type MongoDocumentImportInformation = {
   modelCardVersions: ModelCardRevisionDoc['version'][]
   newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
@@ -346,8 +349,7 @@ type ExportMetadata = {
   sourceModelId: string
   mirroredModelId: string
   exporter: string
-  [x: string]: string
-} & ({ importKind: 'documents' } | { importKind: 'file'; filePath: string })
+} & ({ importKind: ImportKindKeys<'Documents'> } | { importKind: ImportKindKeys<'File'>; filePath: string })
 async function uploadToS3(
   fileName: string,
   stream: Readable,
