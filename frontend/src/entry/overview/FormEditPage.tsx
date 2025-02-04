@@ -4,6 +4,7 @@ import HistoryIcon from '@mui/icons-material/History'
 import PersonIcon from '@mui/icons-material/Person'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { getChangedFields } from '@rjsf/utils'
 import { useGetModel } from 'actions/model'
 import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
@@ -29,6 +30,7 @@ type FormEditPageProps = {
 }
 export default function FormEditPage({ entry, readOnly = false }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
+  const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
@@ -55,13 +57,19 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
     if (schema) {
       setErrorMessage('')
       setLoading(true)
+      const oldData = getStepsData(oldSchema, true)
       const data = getStepsData(splitSchema, true)
-      const res = await putModelCard(entry.id, data)
-      if (res.status && res.status < 400) {
+      if (getChangedFields(oldData, data)) {
         setIsEdit(false)
       } else {
-        setErrorMessage(res.data)
+        const res = await putModelCard(entry.id, data)
+        if (res.status && res.status < 400) {
+          setIsEdit(false)
+        } else {
+          setErrorMessage(res.data)
+        }
       }
+
       setLoading(false)
     }
   }
@@ -113,6 +121,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   if (isEntryError) {
     return <MessageAlert message={isEntryError.info.message} severity='error' />
   }
+
   return (
     <>
       {isSchemaLoading && <Loading />}
@@ -146,6 +155,10 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
                     onClick={() => {
                       handleActionButtonClose()
                       setIsEdit(!isEdit)
+                      setOldSchema((splitSchema) => {
+                        return Object.assign(splitSchema)
+                      })
+                      // console.log(oldSchema)
                     }}
                     data-test='editEntryCardButton'
                     startIcon={<EditIcon fontSize='small' />}
