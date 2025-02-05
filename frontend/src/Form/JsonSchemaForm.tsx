@@ -34,7 +34,6 @@ export default function JsonSchemaForm({
   }
 
   const onFormChange = (form: RJSFSchema) => {
-    //Maybe set change
     if (form.schema.title === currentStep.schema.title) {
       setStepState(splitSchema, setSplitSchema, currentStep, { ...currentStep.state, ...form.formData })
     }

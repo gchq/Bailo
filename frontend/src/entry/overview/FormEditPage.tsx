@@ -69,7 +69,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
           setErrorMessage(res.data)
         }
       }
-
       setLoading(false)
     }
   }
