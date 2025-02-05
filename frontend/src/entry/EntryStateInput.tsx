@@ -8,8 +8,8 @@ import MessageAlert from 'src/MessageAlert'
 const htmlId = 'entry-state-input'
 
 type EntryStateInputProps = {
-  value: string | undefined
-  onChange: (value: string | undefined) => void
+  value: string
+  onChange: (value: string) => void
 }
 
 export default function EntryStateInput({ value, onChange }: EntryStateInputProps) {
@@ -23,7 +23,7 @@ export default function EntryStateInput({ value, onChange }: EntryStateInputProp
     () =>
       uiConfig
         ? [
-            <MenuItem value={undefined} key='unset'>
+            <MenuItem value={''} key='unset'>
               <em>Unset</em>
             </MenuItem>,
             ...uiConfig.modelDetails.states.map((stateItem) => (
@@ -44,9 +44,13 @@ export default function EntryStateInput({ value, onChange }: EntryStateInputProp
     return <Loading />
   }
 
+  if (uiConfig.modelDetails.states.length === 0) {
+    return <></>
+  }
+
   return (
     <LabelledInput fullWidth label='State (optional)' htmlFor={htmlId}>
-      <Select size='small' required value={value} onChange={handleChange} id={htmlId}>
+      <Select size='small' value={value} onChange={handleChange} id={htmlId}>
         {stateOptions}
       </Select>
     </LabelledInput>

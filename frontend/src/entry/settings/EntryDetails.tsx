@@ -19,8 +19,8 @@ type EntryDetailsProps = {
 
 export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [name, setName] = useState(entry.name)
-  const [organisation, setOrganisation] = useState(entry.organisation || undefined)
-  const [state, setState] = useState(entry.state || undefined)
+  const [organisation, setOrganisation] = useState(entry.organisation || '')
+  const [state, setState] = useState(entry.state || '')
   const [description, setDescription] = useState(entry.description)
   const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
   const [isLoading, setIsLoading] = useState(false)
@@ -46,8 +46,8 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
       name,
       description,
       visibility,
-      organisation,
-      state,
+      organisation: organisation || '',
+      state: state || '',
     }
     const response = await patchModel(entry.id, formData)
 

@@ -8,8 +8,8 @@ import MessageAlert from 'src/MessageAlert'
 const htmlId = 'entry-organisation-input'
 
 type EntryOrganisationInputProps = {
-  value: string | undefined
-  onChange: (value: string | undefined) => void
+  value: string
+  onChange: (value: string) => void
 }
 
 export default function EntryOrganisationInput({ value, onChange }: EntryOrganisationInputProps) {
@@ -23,7 +23,7 @@ export default function EntryOrganisationInput({ value, onChange }: EntryOrganis
     () =>
       uiConfig
         ? [
-            <MenuItem value={undefined} key='unanswered'>
+            <MenuItem value={''} key='unanswered'>
               <em>No organisation</em>
             </MenuItem>,
             ...uiConfig.modelDetails.organisations.map((organisationItem) => (
@@ -44,9 +44,13 @@ export default function EntryOrganisationInput({ value, onChange }: EntryOrganis
     return <Loading />
   }
 
+  if (uiConfig.modelDetails.organisations.length === 0) {
+    return <></>
+  }
+
   return (
     <LabelledInput fullWidth label='Organisation (optional)' htmlFor={htmlId}>
-      <Select size='small' required value={value} onChange={handleChange} id={htmlId}>
+      <Select size='small' value={value} onChange={handleChange} id={htmlId}>
         {organisationOptions}
       </Select>
     </LabelledInput>

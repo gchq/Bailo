@@ -324,12 +324,6 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   if (modelDiff.collaborators) {
     await validateCollaborators(modelDiff.collaborators, model.collaborators)
   }
-  if (!modelDiff.organisation) {
-    model.organisation = undefined
-  }
-  if (!modelDiff.state) {
-    model.state = undefined
-  }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
