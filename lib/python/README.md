@@ -1,5 +1,8 @@
 # Bailo Python Client
 
+[![PyPI - Python Version][pypi-python-version-shield]][pypi-url] [![PyPI - Version][pypi-version-shield]][pypi-url]
+[![License][license-shield]][license-url] [![Contributor Covenant][code-of-conduct-shield]][code-of-conduct-url]
+
 A simple Python API Wrapper for Bailo
 
 <br />
@@ -116,3 +119,14 @@ Run all other tests:
 ```bash
 pytest
 ```
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
+[pypi-url]: https://pypi.org/project/modelscan/
+[pypi-version-shield]: https://img.shields.io/pypi/v/bailo?style=for-the-badge
+[pypi-python-version-shield]: https://img.shields.io/pypi/pyversions/bailo?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
+[license-url]: https://github.com/gchq/bailo/blob/main/public/LICENSE.txt
+[code-of-conduct-shield]: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=for-the-badge
+[code-of-conduct-url]: https://github.com/gchq/bailo/blob/main/public/CODE_OF_CONDUCT.md

@@ -1,6 +1,6 @@
 [![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url]
-[![License][license-shield]][license-url]
+[![License][license-shield]][license-url] [![Contributor Covenant][code-of-conduct-shield]][code-of-conduct-url]
 
 <!-- PROJECT LOGO -->
 <br />
@@ -228,4 +228,6 @@ information.
 [issues-url]: https://github.com/gchq/bailo/issues
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
 [license-url]: https://github.com/gchq/bailo/blob/main/public/LICENSE.txt
+[code-of-conduct-shield]: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=for-the-badge
+[code-of-conduct-url]: https://github.com/gchq/bailo/blob/main/public/CODE_OF_CONDUCT.md
 [product-screenshot]: frontend/public/images/bailo-marketplace.png
