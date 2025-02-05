@@ -304,7 +304,10 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility' | 'collaborators'> & {
+export type UpdateModelParams = Pick<
+  ModelInterface,
+  'name' | 'description' | 'visibility' | 'collaborators' | 'state' | 'organisation'
+> & {
   settings: Partial<ModelInterface['settings']>
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
@@ -320,6 +323,12 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
   if (modelDiff.collaborators) {
     await validateCollaborators(modelDiff.collaborators, model.collaborators)
+  }
+  if (!modelDiff.organisation) {
+    model.organisation = undefined
+  }
+  if (!modelDiff.state) {
+    model.state = undefined
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)

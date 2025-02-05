@@ -64,6 +64,11 @@ export interface UiConfig {
   helpPopoverText: {
     manualEntryAccess: string
   }
+
+  modelDetails: {
+    organisations: string[]
+    states: string[]
+  }
 }
 
 export interface FileInterface {
@@ -402,6 +407,8 @@ export type CreateEntryKindKeys = (typeof CreateEntryKind)[keyof typeof CreateEn
 export interface EntryInterface {
   id: string
   name: string
+  organisation?: string
+  state?: string
   kind: EntryKindKeys
   description: string
   settings: {
@@ -433,6 +440,8 @@ export interface EntryForm {
       destinationModelId?: string
     }
   }
+  organisation?: string
+  state?: string
 }
 
 export type UpdateEntryForm = Omit<EntryForm, 'kind' | 'collaborators'>

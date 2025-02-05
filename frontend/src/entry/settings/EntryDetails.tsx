@@ -5,6 +5,8 @@ import { patchModel } from 'actions/model'
 import { FormEvent, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
+import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
+import EntryStateInput from 'src/entry/EntryStateInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKindLabel, UpdateEntryForm } from 'types/types'
@@ -17,6 +19,8 @@ type EntryDetailsProps = {
 
 export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [name, setName] = useState(entry.name)
+  const [organisation, setOrganisation] = useState(entry.organisation || undefined)
+  const [state, setState] = useState(entry.state || undefined)
   const [description, setDescription] = useState(entry.description)
   const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
   const [isLoading, setIsLoading] = useState(false)
@@ -42,6 +46,8 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
       name,
       description,
       visibility,
+      organisation,
+      state,
     }
     const response = await patchModel(entry.id, formData)
 
@@ -93,7 +99,9 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
             {`${toTitleCase(EntryKindLabel[entry.kind])} Details`}
           </Typography>
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
+          <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
+          <EntryStateInput value={state} onChange={(value) => setState(value)} />
         </>
         <Divider />
         <>

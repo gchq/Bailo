@@ -190,6 +190,11 @@ data:
         helpPopoverText: {
           manualEntryAccess: '{{ .Values.config.ui.helpPopoverText.manualEntryAccess }}'
         },
+
+        modelDetails: {
+          organisations: {{ toJson .Values.config.ui.modelDetails.organisations }},
+          states: {{ toJson .Values.config.ui.modelDetails.states }},
+        },
       },
 
       connectors: {

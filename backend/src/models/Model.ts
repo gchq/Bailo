@@ -51,6 +51,8 @@ export interface ModelInterface {
   id: string
 
   name: string
+  organisation?: string
+  state?: string
   kind: EntryKindKeys
   description: string
   card?: ModelCardInterface
@@ -75,6 +77,8 @@ const ModelSchema = new Schema<ModelInterface>(
     id: { type: String, required: true, unique: true, index: true },
 
     name: { type: String, required: true },
+    organisation: { type: String },
+    state: { type: String },
     kind: { type: String, enum: Object.values(EntryKind) },
     description: { type: String, required: true },
     card: {
