@@ -72,7 +72,12 @@ export async function exportModel(
   const s3Stream = new PassThrough()
   zip.pipe(s3Stream)
 
-  await uploadToS3(`${modelId}.zip`, s3Stream, user.dn, modelId, mirroredModelId, { semvers })
+  await uploadToS3(
+    `${modelId}.zip`,
+    s3Stream,
+    { exporter: user.dn, sourceModelId: modelId, mirroredModelId, importKind: ImportKind.Documents },
+    { semvers },
+  )
 
   try {
     await addModelCardRevisionsToZip(user, model, zip)
@@ -95,7 +100,10 @@ export const ImportKind = {
   File: 'file',
 } as const
 
-export type ImportKindKeys = (typeof ImportKind)[keyof typeof ImportKind]
+export type ImportKindKeys<T extends keyof typeof ImportKind | void = void> = T extends keyof typeof ImportKind
+  ? (typeof ImportKind)[T]
+  : (typeof ImportKind)[keyof typeof ImportKind]
+
 export type MongoDocumentImportInformation = {
   modelCardVersions: ModelCardRevisionDoc['version'][]
   newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
@@ -337,35 +345,35 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
   return file
 }
 
+type ExportMetadata = {
+  sourceModelId: string
+  mirroredModelId: string
+  exporter: string
+} & ({ importKind: ImportKindKeys<'Documents'> } | { importKind: ImportKindKeys<'File'>; filePath: string })
 async function uploadToS3(
   fileName: string,
   stream: Readable,
-  exporter: string,
-  sourceModelId: string,
-  mirroredModelId: string,
+  metadata: ExportMetadata,
   logData?: Record<string, unknown>,
-  metadata?: Record<string, string>,
 ) {
-  const s3Metadata = { sourceModelId, mirroredModelId, ...metadata }
-  const s3LogData = { ...s3Metadata, ...logData }
+  const s3LogData = { ...metadata, ...logData }
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug(logData, 'Using signatures. Uploading to temporary S3 location first.')
     uploadToTemporaryS3Location(fileName, stream, s3LogData).then(() =>
-      copyToExportBucketWithSignatures(fileName, exporter, s3LogData, s3Metadata).catch((error) =>
+      copyToExportBucketWithSignatures(fileName, s3LogData, metadata).catch((error) =>
         log.error({ error, ...logData }, 'Failed to upload export to export location with signatures'),
       ),
     )
   } else {
     log.debug(logData, 'Signatures not enabled. Uploading to export S3 location.')
-    uploadToExportS3Location(fileName, stream, s3LogData, s3Metadata)
+    uploadToExportS3Location(fileName, stream, s3LogData, metadata)
   }
 }
 
 async function copyToExportBucketWithSignatures(
   fileName: string,
-  exporter: string,
   logData: Record<string, unknown>,
-  metadata?: Record<string, string>,
+  metadata: ExportMetadata,
 ) {
   let signatures = {}
   log.debug(logData, 'Getting stream from S3 to generate signatures.')
@@ -382,7 +390,6 @@ async function copyToExportBucketWithSignatures(
   log.debug(logData, 'Getting stream from S3 to upload to export location.')
   const streamToCopy = await getObjectFromTemporaryS3Location(fileName, logData)
   await uploadToExportS3Location(fileName, streamToCopy, logData, {
-    exporter,
     ...signatures,
     ...metadata,
   })
@@ -451,7 +458,7 @@ async function uploadToExportS3Location(
   object: string,
   stream: Readable,
   logData: Record<string, unknown>,
-  metadata?: Record<string, string>,
+  metadata?: ExportMetadata,
 ) {
   const bucket = config.modelMirror.export.bucket
   try {
@@ -525,15 +532,16 @@ async function addReleaseToZip(
       await uploadToS3(
         file.path,
         (await downloadFile(user, file._id)).Body as stream.Readable,
-        user.dn,
-        model.id,
-        mirroredModelId,
+        {
+          exporter: user.dn,
+          sourceModelId: model.id,
+          mirroredModelId,
+          filePath: file.path,
+          importKind: ImportKind.File,
+        },
         {
           releaseId: release.id,
           fileId: file.id,
-        },
-        {
-          filePath: file.path,
         },
       )
     }
