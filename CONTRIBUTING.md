@@ -13,9 +13,9 @@ We love pull requests and we want to make it as easy as possible to contribute c
   is this a comment or documentation change? Does an issue already exist? If you need an issue then describe it in as
   much detail as you can, e.g. step-by-step to reproduce.
 - Fork the repository on GitHub.
-- Clone the repo: `git clone https://github.com/gchq/stroom.git`
-- Create a feature branch for your change, branched off `master` or one of the release branches (`6.1`, `7.0`, etc.)
-  e.g. `git checkout -b gh-12345-my-contribution master`.
+- Clone the repo: `git clone https://github.com/gchq/Bailo.git`
+- Create a feature branch for your change, branched off `main` or one of the release tags (`tags/v2.3.0`, etc.) e.g.
+  `git checkout -b gh-12345-my-contribution main`.
 
 ## Making changes
 
