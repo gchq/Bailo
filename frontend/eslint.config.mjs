@@ -60,8 +60,6 @@ export default [
           prevent: true,
         },
       ],
-
-      'cypress/no-async-tests': 'off',
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
       'no-console': 'warn',
