@@ -54,7 +54,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
   const [name, setName] = useState('')
   const [sourceModelId, setSourceModelId] = useState('')
-  const [organisation, setOrganisation] = useState<string | undefined>(undefined)
+  const [organisation, setOrganisation] = useState<string>('')
   const [description, setDescription] = useState('')
   const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
@@ -75,7 +75,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     [name, description, createEntryKind, sourceModelId],
   )
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setLoading(true)
     setErrorMessage('')
