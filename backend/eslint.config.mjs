@@ -1,12 +1,13 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { FlatCompat } from '@eslint/eslintrc'
+import js from '@eslint/js'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
+import tsParser from '@typescript-eslint/parser'
 import prettier from 'eslint-plugin-prettier'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import globals from 'globals'
-import tsParser from '@typescript-eslint/parser'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import js from '@eslint/js'
-import { FlatCompat } from '@eslint/eslintrc'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -53,15 +54,7 @@ export default [
       'no-unused-vars': 'off',
       '@typescript-eslint/no-extra-semi': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/no-unused-expressions': [
-        'off',
-        {
-          allowTernary: true,
-        },
-      ],
-
-      'simple-import-sort/imports': 'off',
+      'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
       'no-console': 'warn',
     },

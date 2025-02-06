@@ -7,7 +7,7 @@
     "dev": "nodemon",
     "build": "tsc",
     "test": "vitest",
-    "lint": "eslint . -c eslint.config.mjs '**/*.{ts,tsx}' --max-warnings=0",
+    "lint": "eslint . -c eslint.config.mjs '**/*.ts' --max-warnings=0",
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "script": "tsx src/scripts/runScript.ts",

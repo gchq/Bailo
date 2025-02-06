@@ -3,6 +3,7 @@ import { createHash, X509Certificate } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
 import jwt, { SignOptions } from 'jsonwebtoken'
+import type { StringValue } from 'ms'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../../connectors/audit/index.js'
@@ -16,7 +17,6 @@ import config from '../../utils/config.js'
 import { Forbidden, Unauthorised } from '../../utils/result.js'
 import { getUserFromAuthHeader } from '../../utils/user.js'
 import { bailoErrorGuard } from './../middleware/expressErrorHandler.js'
-import type { StringValue } from 'ms'
 
 let adminToken: string | undefined
 

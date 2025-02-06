@@ -53,8 +53,6 @@ export default [
 
       '@typescript-eslint/no-extra-semi': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/no-unused-expressions': 'off',
 
       'react/jsx-newline': [
         1,
