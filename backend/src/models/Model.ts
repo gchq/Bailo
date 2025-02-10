@@ -81,12 +81,14 @@ const ModelSchema = new Schema<ModelInterface>(
       required: function () {
         return typeof this['organisation'] === 'string' ? false : true
       },
+      default: '',
     },
     state: {
       type: String,
       required: function () {
         return typeof this['state'] === 'string' ? false : true
       },
+      default: '',
     },
     kind: { type: String, enum: Object.values(EntryKind) },
     description: { type: String, required: true },

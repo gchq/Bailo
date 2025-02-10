@@ -32,6 +32,8 @@ class Model(Entry):
     :param model_id: A unique ID for the model
     :param name: Name of model
     :param description: Description of model
+    :param organisation: Organisation responsible for the model, defaults to None
+    :param state: Development readiness of the model, defaults to None
     :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -41,6 +43,8 @@ class Model(Entry):
         model_id: str,
         name: str,
         description: str,
+        organisation: str | None = None,
+        state: str | None = None,
         visibility: ModelVisibility | None = None,
     ) -> None:
         super().__init__(
@@ -49,6 +53,8 @@ class Model(Entry):
             name=name,
             description=description,
             kind=EntryKind.MODEL,
+            organisation=organisation,
+            state=state,
             visibility=visibility,
         )
 
@@ -60,6 +66,8 @@ class Model(Entry):
         client: Client,
         name: str,
         description: str,
+        organisation: str | None = None,
+        state: str | None = None,
         visibility: ModelVisibility | None = None,
     ) -> Model:
         """Build a model from Bailo and upload it.
@@ -67,6 +75,8 @@ class Model(Entry):
         :param client: A client object used to interact with Bailo
         :param name: Name of model
         :param description: Description of model
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
         :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
@@ -75,6 +85,8 @@ class Model(Entry):
             kind=EntryKind.MODEL,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
         model_id = res["model"]["id"]
         logger.info(f"Model successfully created on server with ID %s.", model_id)
@@ -85,6 +97,8 @@ class Model(Entry):
             name=name,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
 
         model._unpack(res["model"])
@@ -110,6 +124,8 @@ class Model(Entry):
             model_id=model_id,
             name=res["name"],
             description=res["description"],
+            organisation=res.get("organisation"),
+            state=res.get("state"),
         )
 
         model._unpack(res)
@@ -145,6 +161,8 @@ class Model(Entry):
                 model_id=model["id"],
                 name=model["name"],
                 description=model["description"],
+                organisation=res.get("organisation"),
+                state=res.get("state"),
             )
             model_obj._unpack(res_model)
             model_obj.get_card_latest()
@@ -158,6 +176,8 @@ class Model(Entry):
         client: Client,
         mlflow_uri: str,
         name: str,
+        organisation: str | None = None,
+        state: str | None = None,
         schema_id: str = MinimalSchema.MODEL,
         version: str | None = None,
         files: bool = True,
@@ -171,6 +191,8 @@ class Model(Entry):
         :param schema_id: A unique schema ID, only required when files is True, defaults to minimal-general-v10
         :param version: Specific MLFlow model version to import, defaults to None
         :param files: Import files?, defaults to True
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
         :param visibility: Visibility of model on Bailo, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: A model object
         """
@@ -203,6 +225,8 @@ class Model(Entry):
             kind=EntryKind.MODEL,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
         model_id = bailo_res["model"]["id"]
         logger.info(f"MLFlow model successfully imported to Bailo with ID %s", model_id)
@@ -213,6 +237,8 @@ class Model(Entry):
             name=name,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
         model._unpack(bailo_res["model"])
 

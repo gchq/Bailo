@@ -17,8 +17,10 @@ class Entry:
     :param id: A unique ID for the entry
     :param name: Name of the entry
     :param description: Description of the entry
-    :param visibility: Visibility of model, using ModelVisibility enum (i.e. Public or Private), defaults to None
     :param kind: Represents whether entry type (i.e. Model or Datacard)
+    :param organisation: Organisation responsible for the model, defaults to None
+    :param state: Development readiness of the model, defaults to None
+    :param visibility: Visibility of model, using ModelVisibility enum (i.e. Public or Private), defaults to None
     """
 
     def __init__(
@@ -28,6 +30,8 @@ class Entry:
         name: str,
         description: str,
         kind: EntryKind,
+        organisation: str | None = None,
+        state: str | None = None,
         visibility: ModelVisibility | None = None,
     ) -> None:
         self.client = client
@@ -36,6 +40,8 @@ class Entry:
         self.name = name
         self.description = description
         self.kind = kind
+        self.organisation = organisation
+        self.state = state
         self.visibility = visibility
 
         self._card = None
@@ -47,6 +53,8 @@ class Entry:
         res = self.client.patch_model(
             model_id=self.id,
             name=self.name,
+            organisation=self.organisation,
+            state=self.state,
             kind=self.kind,
             description=self.description,
             visibility=self.visibility,

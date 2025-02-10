@@ -24,6 +24,8 @@ class Client:
         name: str,
         kind: EntryKind,
         description: str,
+        organisation: str | None = None,
+        state: str | None = None,
         visibility: ModelVisibility | None = None,
     ):
         """Create a model.
@@ -31,7 +33,9 @@ class Client:
         :param name: Name of the model
         :param kind: Either a Model or a Datacard
         :param description: Description of the model
-        :param visibility: Enum to define model visibility (e.g public or private)
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
+        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :return: JSON response object
         """
         _visibility: str = "public"
@@ -41,6 +45,8 @@ class Client:
         filtered_json = filter_none(
             {
                 "name": name,
+                "organisation": organisation,
+                "state": state,
                 "kind": kind,
                 "description": description,
                 "visibility": _visibility,
@@ -100,6 +106,8 @@ class Client:
         self,
         model_id: str,
         name: str | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
         kind: str | None = None,
         description: str | None = None,
         visibility: str | None = None,
@@ -108,7 +116,9 @@ class Client:
 
         :param model_id: Unique model ID
         :param name: Name of the model, defaults to None
-        :param kind: Either a Model or a Datacard
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
+        :param kind: Either a Model or a Datacard, defaults to None
         :param description: Description of the model, defaults to None
         :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
         :return: JSON response object
@@ -116,6 +126,8 @@ class Client:
         filtered_json = filter_none(
             {
                 "name": name,
+                "organisation": organisation,
+                "state": state,
                 "kind": kind,
                 "description": description,
                 "visibility": visibility,

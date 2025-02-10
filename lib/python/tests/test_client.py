@@ -16,6 +16,8 @@ def test_post_model(requests_mock):
         name="test",
         kind=EntryKind.MODEL,
         description="test",
+        organisation="Example Organisation",
+        state="Development",
         visibility=ModelVisibility.PUBLIC,
     )
 
@@ -50,6 +52,8 @@ def test_patch_model(requests_mock):
     result = client.patch_model(
         model_id="test_id",
         name="test",
+        organisation="Example Organisation",
+        state="Development",
     )
 
     assert result == {"success": True}

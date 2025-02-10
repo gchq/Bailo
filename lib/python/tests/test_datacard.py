@@ -14,15 +14,18 @@ def test_datacard(local_datacard):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "visibility"),
+    ("name", "description", "organisation", "state", "visibility"),
     [
-        ("test-datacard", "test", ModelVisibility.PUBLIC),
-        ("test-datacard", "test", None),
+        ("test-datacard", "test", None, None, ModelVisibility.PUBLIC),
+        ("test-datacard", "test", None, None, None),
+        ("test-datacard", "test", "Example Organisation", "Development", None),
     ],
 )
 def test_create_get_from_id_and_update(
     name: str,
     description: str,
+    organisation: str | None,
+    state: str | None,
     visibility: ModelVisibility | None,
     integration_client: Client,
 ):
@@ -31,6 +34,8 @@ def test_create_get_from_id_and_update(
         client=integration_client,
         name=name,
         description=description,
+        organisation=organisation,
+        state=state,
         visibility=visibility,
     )
     datacard.card_from_schema("minimal-data-card-v10")
