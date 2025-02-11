@@ -7,6 +7,7 @@ import audit from '../../../connectors/audit/index.js'
 import { EntryKind, EntryVisibility, ModelInterface } from '../../../models/Model.js'
 import { updateModel } from '../../../services/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/specification.js'
+import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
 
 export const patchModelSchema = z.object({
@@ -14,8 +15,8 @@ export const patchModelSchema = z.object({
     name: z.string().optional().openapi({ example: 'Yolo v4' }),
 
     kind: z.nativeEnum(EntryKind).optional().openapi({ example: EntryKind.Model }),
-    organisation: z.string().optional().openapi({ example: 'My Organisation' }),
-    state: z.string().optional().openapi({ example: 'Development' }),
+    organisation: z.enum(config.ui.modelDetails.organisations as [string, ...string[]]).optional(),
+    state: z.enum(config.ui.modelDetails.states as [string, ...string[]]).optional(),
     description: z.string().optional().openapi({ example: 'You only look once' }),
     visibility: z.nativeEnum(EntryVisibility).optional().openapi({ example: 'private' }),
     settings: z
