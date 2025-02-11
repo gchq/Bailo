@@ -1,13 +1,14 @@
-import { fixupConfigRules, fixupPluginRules } from '@eslint/compat'
-import typescriptEslint from '@typescript-eslint/eslint-plugin'
-import prettier from 'eslint-plugin-prettier'
-import simpleImportSort from 'eslint-plugin-simple-import-sort'
-import cypress from 'eslint-plugin-cypress'
-import tsParser from '@typescript-eslint/parser'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import js from '@eslint/js'
+
+import { fixupConfigRules, fixupPluginRules } from '@eslint/compat'
 import { FlatCompat } from '@eslint/eslintrc'
+import js from '@eslint/js'
+import typescriptEslint from '@typescript-eslint/eslint-plugin'
+import tsParser from '@typescript-eslint/parser'
+import cypress from 'eslint-plugin-cypress'
+import prettier from 'eslint-plugin-prettier'
+import simpleImportSort from 'eslint-plugin-simple-import-sort'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -17,7 +18,7 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 })
 
-export default [
+const eslintConfig = [
   ...fixupConfigRules(
     compat.extends(
       'eslint:recommended',
@@ -29,12 +30,21 @@ export default [
       'next/core-web-vitals',
     ),
   ),
+  ...compat
+    .config({
+      extends: ['plugin:cypress/recommended'],
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        project: './cypress/tsconfig.json',
+      },
+    })
+    .map((config) => ({ ...config, files: ['cypress/**/*.cy.ts'] })),
   {
     plugins: {
       '@typescript-eslint': fixupPluginRules(typescriptEslint),
       prettier,
       'simple-import-sort': simpleImportSort,
-      cypress,
     },
 
     languageOptions: {
@@ -65,4 +75,20 @@ export default [
       'no-console': 'warn',
     },
   },
+  {
+    files: ['cypress/**/*.cy.ts'],
+    plugins: {
+      cypress,
+    },
+    languageOptions: {
+      globals: {
+        ...cypress.environments.globals.globals,
+      },
+    },
+    rules: {
+      'func-names': 'off',
+    },
+  },
 ]
+
+export default eslintConfig
