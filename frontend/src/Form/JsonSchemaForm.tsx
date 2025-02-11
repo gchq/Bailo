@@ -17,14 +17,19 @@ export default function JsonSchemaForm({
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
+  editedFields = [],
+  setEditedFields,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
+  editedFields?: Array<string>
+  setEditedFields?: Dispatch<SetStateAction<string[]>>
 }) {
   const [activeStep, setActiveStep] = useState(0)
+  // const [test, setTest] = useState<{ [key: string]: string }>({})
   const theme = useTheme()
 
   const currentStep = splitSchema.steps[activeStep]
@@ -33,7 +38,15 @@ export default function JsonSchemaForm({
     return null
   }
 
-  const onFormChange = (form: RJSFSchema) => {
+  const onFormChange = (form: RJSFSchema, id?: string) => {
+    if (id && currentStep && !!setEditedFields && !editedFields.includes(id)) {
+      //store section and use alongside the id, it will fix our dimensions issue
+      setTest((test, currentStep, id) => {
+        test[currentStep.section] = id
+      })
+      setEditedFields!([...editedFields, id])
+    }
+
     if (form.schema.title === currentStep.schema.title) {
       setStepState(splitSchema, setSplitSchema, currentStep, { ...currentStep.state, ...form.formData })
     }
@@ -79,7 +92,7 @@ export default function JsonSchemaForm({
         <Form
           schema={currentStep.schema}
           formData={currentStep.state}
-          onChange={onFormChange}
+          onChange={(data, id) => onFormChange(data, id)}
           validator={validator}
           widgets={widgets}
           uiSchema={currentStep.uiSchema}

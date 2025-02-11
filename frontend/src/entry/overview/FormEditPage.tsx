@@ -32,6 +32,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   const [isEdit, setIsEdit] = useState(false)
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [editedFields, setEditedFields] = useState<Array<string>>([])
   const [errorMessage, setErrorMessage] = useState('')
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
@@ -59,6 +60,11 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
       setLoading(true)
       const oldData = getStepsData(oldSchema, true)
       const data = getStepsData(splitSchema, true)
+      //FIX ME - olddata is not working now for some reason, investigate
+      // const dataFiltered = editedFields.reduce((accumulator, field) => {
+      //   return [{ ...accumulator, ...{ field: data[field] } }]
+      // }, {})
+
       if (!getChangedFields(oldData, data)) {
         setIsEdit(false)
       } else {
@@ -69,6 +75,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
           setErrorMessage(res.data)
         }
       }
+      setEditedFields([])
       setLoading(false)
     }
   }
@@ -81,6 +88,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
       }
       setSplitSchema({ reference: schema.id, steps })
       setIsEdit(false)
+      setEditedFields([])
     }
   }
   useEffect(() => {
@@ -222,7 +230,13 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
           )}
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
-        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
+        <JsonSchemaForm
+          splitSchema={splitSchema}
+          setSplitSchema={setSplitSchema}
+          canEdit={isEdit}
+          editedFields={editedFields}
+          setEditedFields={setEditedFields}
+        />
         {isEdit && (
           <SaveAndCancelButtons
             onCancel={onCancel}
