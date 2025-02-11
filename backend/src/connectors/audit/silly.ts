@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'

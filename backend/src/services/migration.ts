@@ -13,12 +13,14 @@ export async function doesMigrationExist(name: string) {
 }
 
 export async function markMigrationComplete(name: string, metadata: MigrationMetadata | undefined) {
-  metadata
-    ? await MigrationModel.create({
-        name,
-        metadata,
-      })
-    : await MigrationModel.create({
-        name,
-      })
+  if (metadata) {
+    await MigrationModel.create({
+      name,
+      metadata,
+    })
+  } else {
+    await MigrationModel.create({
+      name,
+    })
+  }
 }

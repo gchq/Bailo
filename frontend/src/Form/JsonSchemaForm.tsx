@@ -106,7 +106,6 @@ export default function JsonSchemaForm({
                 }
           }
         >
-          {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
           <></>
         </Form>
       </Grid2>

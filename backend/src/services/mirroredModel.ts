@@ -331,7 +331,7 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
 
   try {
     file.complete = await objectExists(file.bucket, file.path)
-  } catch (error) {
+  } catch (_error) {
     throw InternalError('Failed to check if file exists.', { bucket: file.bucket, path: file.path })
   }
 
