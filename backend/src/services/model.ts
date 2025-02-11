@@ -145,22 +145,34 @@ export async function searchModels(
     query['settings.allowTemplating'] = true
   }
 
-  for (const filter of filters) {
-    // This switch statement is here to ensure we always handle all filters in the 'GetModelFilterKeys'
-    // enum.  Eslint will throw an error if we are not exhaustively matching all the enum options,
-    // which makes it far harder to forget.
-    // The 'Unexpected filter' should never be reached, as we have guaranteed type consistency provided
-    // by TypeScript.
-    switch (filter) {
-      case 'mine':
-        query.collaborators = {
-          $elemMatch: {
-            entity: { $in: await authentication.getEntities(user) },
-          },
+  // Surely there's a nicer way to do this?
+  if (filters.length > 0) {
+    if (filters.includes('mine')) {
+      query.collaborators = {
+        $elemMatch: {
+          entity: { $in: await authentication.getEntities(user) },
+        },
+      }
+    } else {
+      const roles: string[] = []
+      for (const filter of filters) {
+        switch (filter) {
+          case 'msro':
+            roles.push('msro')
+            break
+          case 'mtr':
+            roles.push('mtr')
+            break
+          default:
+            throw BadReq('Unexpected filter', { filter })
         }
-        break
-      default:
-        throw BadReq('Unexpected filter', { filter })
+      }
+      query.collaborators = {
+        $elemMatch: {
+          entity: { $in: await authentication.getEntities(user) },
+          roles,
+        },
+      }
     }
   }
 

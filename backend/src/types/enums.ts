@@ -7,6 +7,9 @@ export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
 export const GetModelFilters = {
   Mine: 'mine',
+  // Make dynamic?
+  MTR: 'mtr',
+  MSRO: 'msro',
 } as const
 
 export type GetModelFiltersKeys = (typeof GetModelFilters)[keyof typeof GetModelFilters]
