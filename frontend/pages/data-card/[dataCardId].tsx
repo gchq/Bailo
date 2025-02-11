@@ -57,6 +57,7 @@ export default function DataCard() {
       ) : (
         <PageWithTabs
           title={dataCard.name}
+          additionalInfo={dataCard.description}
           subheading={`ID: ${dataCard.id}`}
           tabs={tabs}
           requiredUrlParams={{ dataCardId: dataCard.id }}
