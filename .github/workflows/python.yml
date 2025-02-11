@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  PYTEST_RUN_PATH: "$GITHUB_WORKSPACE/lib/python"
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,3 +43,5 @@ jobs:
         run: |
           cd lib/python
           python -m pytest
+        env:
+          PYTEST_RUN_PATH: "lib/python"
