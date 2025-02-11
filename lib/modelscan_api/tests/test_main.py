@@ -42,6 +42,7 @@ def test_info():
         "scannerName": modelscan.__name__,
         "modelscanVersion": modelscan.__version__,
     }
+    assert False
 
 
 @patch("modelscan.modelscan.ModelScan.scan")

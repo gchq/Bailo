@@ -20,6 +20,7 @@ def test_post_model(requests_mock):
     )
 
     assert result == {"success": True}
+    assert False
 
 
 def test_get_models(requests_mock):
