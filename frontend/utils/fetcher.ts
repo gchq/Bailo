@@ -45,7 +45,7 @@ const handleSWRError = async (res: Response) => {
       },
       status: res.status,
     }
-  } catch (e) {
+  } catch (_e) {
     error = {
       ...new Error('An error occurred while fetching the data.'),
       info: {

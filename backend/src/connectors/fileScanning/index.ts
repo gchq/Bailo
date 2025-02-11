@@ -24,7 +24,7 @@ export function runFileScanners(cache = true) {
           const scanner = new ClamAvFileScanningConnector()
           await scanner.init()
           fileScanConnectors.push(scanner)
-        } catch (error) {
+        } catch (_error) {
           throw ConfigurationError('Could not configure or initialise Clam AV')
         }
         break
@@ -33,7 +33,7 @@ export function runFileScanners(cache = true) {
           const scanner = new ModelScanFileScanningConnector()
           await scanner.init()
           fileScanConnectors.push(scanner)
-        } catch (error) {
+        } catch (_error) {
           throw ConfigurationError('Could not configure or initialise ModelScan')
         }
         break

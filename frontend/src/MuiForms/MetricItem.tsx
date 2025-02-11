@@ -1,7 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close'
 import { IconButton, Stack, TextField, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import _ from 'lodash-es'
+import * as _ from 'lodash-es'
 import { useCallback, useState } from 'react'
 import { MetricValueWithId } from 'src/MuiForms/Metrics'
 import { isValidNumber } from 'utils/stringUtils'

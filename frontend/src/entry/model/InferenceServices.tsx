@@ -34,7 +34,7 @@ export default function InferenceServices({ model }: InferenceProps) {
         if (!response.ok) {
           return setErrorMessage(await getErrorMessage(response))
         }
-      } catch (err) {
+      } catch (_err) {
         setHealthCheck(false)
         return setErrorMessage('Something went wrong requesting the inferencing service')
       }
@@ -82,7 +82,7 @@ export default function InferenceServices({ model }: InferenceProps) {
           } else {
             router.reload()
           }
-        } catch (err) {
+        } catch (_err) {
           return setErrorMessage('Something went wrong requesting the inferencing service')
         }
       }
