@@ -142,7 +142,7 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test.only('model > import model as owner', async () => {
+  test('model > import model as owner', async () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
 
@@ -181,7 +181,7 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test.only('model > export model as owner', async () => {
+  test('model > export model as owner', async () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
 
@@ -288,7 +288,7 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test.only('release > import model with a release as owner', async () => {
+  test('release > import model with a release as owner', async () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
 
@@ -327,7 +327,7 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test.only('release > export model with a release as owner', async () => {
+  test('release > export model with a release as owner', async () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
 
