@@ -23,8 +23,8 @@ export default function EntryOrganisationInput({ value, onChange }: EntryOrganis
     () =>
       uiConfig
         ? [
-            <MenuItem value={''} key='unanswered'>
-              <em>No organisation</em>
+            <MenuItem value={''} key='unset'>
+              <em>Unset</em>
             </MenuItem>,
             ...uiConfig.modelDetails.organisations.map((organisationItem) => (
               <MenuItem value={organisationItem} key={organisationItem}>
@@ -49,7 +49,7 @@ export default function EntryOrganisationInput({ value, onChange }: EntryOrganis
   }
 
   return (
-    <LabelledInput fullWidth label='Organisation (optional)' htmlFor={htmlId}>
+    <LabelledInput fullWidth label='Organisation' htmlFor={htmlId}>
       <Select size='small' value={value} onChange={handleChange} id={htmlId}>
         {organisationOptions}
       </Select>
