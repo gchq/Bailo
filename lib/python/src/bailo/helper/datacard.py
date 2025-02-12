@@ -29,9 +29,9 @@ class Datacard(Entry):
         datacard_id: str,
         name: str,
         description: str,
-        visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        visibility: ModelVisibility | None = None,
     ) -> None:
         super().__init__(
             client=client,
@@ -39,9 +39,9 @@ class Datacard(Entry):
             name=name,
             description=description,
             kind=EntryKind.DATACARD,
-            visibility=visibility,
             organisation=organisation,
-            state=state
+            state=state,
+            visibility=visibility,
         )
 
         self.datacard_id = datacard_id
@@ -52,9 +52,9 @@ class Datacard(Entry):
         client: Client,
         name: str,
         description: str,
-        visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        visibility: ModelVisibility | None = None,
     ) -> Datacard:
         """Build a datacard from Bailo and upload it.
 
@@ -64,7 +64,6 @@ class Datacard(Entry):
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
         :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
-
         :return: Datacard object
         """
         res = client.post_model(
@@ -74,7 +73,6 @@ class Datacard(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
-
         )
         datacard_id = res["model"]["id"]
         logger.info(f"Datacard successfully created on server with ID %s.", datacard_id)
@@ -84,9 +82,9 @@ class Datacard(Entry):
             datacard_id=datacard_id,
             name=name,
             description=description,
-            visibility=visibility,
             organisation=organisation,
             state=state,
+            visibility=visibility,
         )
 
         datacard._unpack(res["model"])
