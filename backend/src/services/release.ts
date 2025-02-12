@@ -308,12 +308,12 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
     throw NotFound('The following releases were not found.', { modelId, releases: missing })
   }
 
-  const auths = await authorisation.releases(user, model, releases, ReleaseAction.Update)
-  const noAuth = releases.filter((_, i) => !auths[i].success)
-  if (noAuth.length > 0) {
+  const authResponses = await authorisation.releases(user, model, releases, ReleaseAction.Export)
+  const failedReleases = releases.filter((_, i) => !authResponses[i].success)
+  if (failedReleases.length > 0) {
     throw Forbidden('You do not have the necessary permissions to export these releases.', {
       modelId,
-      releases: noAuth.map((release) => release.semver),
+      releases: failedReleases.map((release) => release.semver),
       user,
     })
   }
