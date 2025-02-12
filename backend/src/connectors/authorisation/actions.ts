@@ -5,6 +5,8 @@ export const ModelAction = {
   View: 'model:view',
   Update: 'model:update',
   Write: 'model:write',
+  Import: 'model:import',
+  Export: 'model:export',
 } as const
 export type ModelActionKeys = (typeof ModelAction)[keyof typeof ModelAction]
 
@@ -13,6 +15,8 @@ export const ReleaseAction = {
   View: 'release:view',
   Delete: 'release:delete',
   Update: 'release:update',
+  Import: 'release:import',
+  Export: 'release:export',
 } as const
 export type ReleaseActionKeys = (typeof ReleaseAction)[keyof typeof ReleaseAction]
 

@@ -9,7 +9,7 @@ import stream, { PassThrough, Readable } from 'stream'
 
 import { sign } from '../clients/kms.js'
 import { getObjectStream, objectExists, putObjectStream } from '../clients/s3.js'
-import { ModelAction } from '../connectors/authorisation/actions.js'
+import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
@@ -58,12 +58,14 @@ export async function exportModel(
   if (!model.card || !model.card.schemaId) {
     throw BadReq('You must select a schema for your model before you can start the export process.')
   }
-  const mirroredModelId = model.settings.mirror.destinationModelId
-  const auth = await authorisation.model(user, model, ModelAction.Update)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, model: model.id })
+  const modelAuth = await authorisation.model(user, model, ModelAction.Export)
+  if (!modelAuth.success) {
+    throw Forbidden(modelAuth.info, { userDn: user.dn, modelId })
   }
+  const mirroredModelId = model.settings.mirror.destinationModelId
+  const releases: ReleaseDoc[] = []
   if (semvers && semvers.length > 0) {
+    releases.push(...(await getReleasesForExport(user, model.id, semvers)))
     await checkReleaseFiles(user, model.id, semvers)
   }
   log.debug('Request checks complete')
@@ -85,8 +87,8 @@ export async function exportModel(
     throw InternalError('Error when adding the model card revision(s) to the zip file.', { error })
   }
   try {
-    if (semvers && semvers.length > 0) {
-      await addReleasesToZip(user, model, semvers, zip, mirroredModelId)
+    if (releases.length > 0) {
+      await addReleasesToZip(user, model, releases, zip, mirroredModelId)
     }
   } catch (error) {
     throw InternalError('Error when adding the release(s) to the zip file.', { error })
@@ -117,6 +119,7 @@ export type FileImportInformation = {
 }
 
 export async function importModel(
+  user: UserInterface,
   mirroredModelId: string,
   sourceModelId: string,
   payloadUrl: string,
@@ -136,6 +139,11 @@ export async function importModel(
 
   log.info({ mirroredModelId, payloadUrl }, 'Received a request to import a model.')
   const mirroredModel = await validateMirroredModel(mirroredModelId, sourceModelId)
+
+  const auth = await authorisation.model(user, mirroredModel, ModelAction.Export)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id })
+  }
 
   let res: Response
   try {
@@ -158,7 +166,7 @@ export async function importModel(
 
   switch (importKind) {
     case ImportKind.Documents: {
-      return await importDocuments(res, mirroredModelId, sourceModelId, payloadUrl)
+      return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl)
     }
     case ImportKind.File: {
       if (!filePath) {
@@ -177,7 +185,13 @@ export async function importModel(
   }
 }
 
-async function importDocuments(res: Response, mirroredModelId: string, sourceModelId: string, payloadUrl: string) {
+async function importDocuments(
+  user: UserInterface,
+  res: Response,
+  mirroredModelId: string,
+  sourceModelId: string,
+  payloadUrl: string,
+) {
   const modelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   const releases: Omit<ReleaseDoc, '_id'>[] = []
   const files: FileInterfaceDoc[] = []
@@ -213,23 +227,26 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
     }
   })
 
-  modelCardJsonStrings.forEach((modelCardJson) => {
-    const modelCard = parseModelCard(modelCardJson, mirroredModelId, sourceModelId)
-    modelCards.push(modelCard)
-  })
-
-  const newModelCards = (await Promise.all(modelCards.map((card) => saveImportedModelCard(card)))).filter(
-    (card): card is Omit<ModelCardRevisionDoc, '_id'> => !!card,
-  )
-
   releaseJsonStrings.forEach((releaseJson) => {
     const release = parseRelease(releaseJson, mirroredModelId, sourceModelId)
     releases.push(release)
   })
 
-  const newReleases = (await Promise.all(releases.map((release) => saveImportedRelease(release)))).filter(
-    (release): release is Omit<ReleaseDoc, '_id'> => !!release,
-  )
+  const mirroredModel = await getModelById(user, mirroredModelId)
+  const authResponses = await authorisation.releases(user, mirroredModel, releases, ReleaseAction.Import)
+  const failedReleases = releases.filter((_, i) => !authResponses[i].success)
+  if (failedReleases.length > 0) {
+    throw Forbidden('You do not have the necessary permissions to import these releases.', {
+      modelId: mirroredModelId,
+      releases: failedReleases.map((release) => release.semver),
+      user,
+    })
+  }
+
+  modelCardJsonStrings.forEach((modelCardJson) => {
+    const modelCard = parseModelCard(modelCardJson, mirroredModelId, sourceModelId)
+    modelCards.push(modelCard)
+  })
 
   await Promise.all(
     fileJsonStrings.map(async (fileJson) => {
@@ -238,11 +255,19 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
     }),
   )
 
+  const newModelCards = (await Promise.all(modelCards.map((card) => saveImportedModelCard(card)))).filter(
+    (card): card is Omit<ModelCardRevisionDoc, '_id'> => !!card,
+  )
+
+  const newReleases = (await Promise.all(releases.map((release) => saveImportedRelease(release)))).filter(
+    (release): release is Omit<ReleaseDoc, '_id'> => !!release,
+  )
+
   await Promise.all(files.map((file) => saveImportedFile(file)))
 
   log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
 
-  const mirroredModel = await setLatestImportedModelCard(mirroredModelId)
+  const updatedMirroredModel = await setLatestImportedModelCard(mirroredModelId)
 
   const modelCardVersions = modelCards.map((modelCard) => modelCard.version)
   const releaseSemvers = releases.map((release) => release.semver)
@@ -261,7 +286,7 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
   )
 
   return {
-    mirroredModel,
+    mirroredModel: updatedMirroredModel,
     importResult: {
       modelCardVersions,
       newModelCards,
@@ -496,12 +521,12 @@ async function addModelCardRevisionsToZip(user: UserInterface, model: ModelDoc, 
 async function addReleasesToZip(
   user: UserInterface,
   model: ModelDoc,
-  semvers: string[],
+  releases: ReleaseDoc[],
   zip: archiver.Archiver,
   mirroredModelId: string,
 ) {
+  const semvers = releases.map((release) => release.semver)
   log.debug({ user, modelId: model.id, semvers }, 'Adding releases to zip file')
-  const releases = await getReleasesForExport(user, model.id, semvers)
 
   const errors: any[] = []
   // Using a .catch here to ensure all errors are returned, rather than just the first error.
