@@ -31,9 +31,13 @@ jobs:
         run: |
           cd lib/modelscan_api
           python -m pytest
+        env:
+          PYTEST_RUN_PATH: "lib/modelscan_api"
 
       # Pytest -m integration
       - name: Run integration testing
         run: |
           cd lib/modelscan_api
           python -m pytest -m integration
+        env:
+          PYTEST_RUN_PATH: "lib/modelscan_api"
