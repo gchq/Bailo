@@ -1,5 +1,5 @@
-import { Document, model, ObjectId, Schema } from 'mongoose'
-import MongooseDelete from 'mongoose-delete'
+import { model, ObjectId, Schema } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 
@@ -28,9 +28,9 @@ export interface FileInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type FileInterfaceDoc = FileInterface & Document<any, any, FileInterface>
+export type FileInterfaceDoc = FileInterface & SoftDeleteDocument
 
-const FileSchema = new Schema<FileInterface>(
+const FileSchema = new Schema<FileInterfaceDoc>(
   {
     modelId: { type: String, required: true },
 
@@ -68,6 +68,6 @@ FileSchema.plugin(MongooseDelete, {
   deletedAt: true,
 })
 
-const FileModel = model<FileInterface>('v2_File', FileSchema)
+const FileModel = model<FileInterfaceDoc>('v2_File', FileSchema)
 
 export default FileModel

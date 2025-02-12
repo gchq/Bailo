@@ -63,7 +63,7 @@ export async function removeToken(user: UserInterface, accessKey: string) {
     throw Forbidden('Only the token owner can remove the token', { accessKey })
   }
 
-  await token.remove()
+  await token.delete()
 
   return { success: true }
 }
