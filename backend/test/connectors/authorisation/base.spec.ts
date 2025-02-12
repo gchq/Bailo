@@ -122,7 +122,28 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('model > import model as non-owner', async () => {
+  // Update model card tests
+
+  test('model > update model card as owner', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Write,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      success: true,
+    })
+  })
+
+  test('model > update model card as contributor', async () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
 
@@ -132,15 +153,173 @@ describe('connectors > authorisation > base', () => {
         id: 'testModel',
         visibility: 'public',
       } as ModelDoc,
-      ModelAction.Import,
+      ModelAction.Write,
     )
 
     expect(result).toStrictEqual({
       id: 'testModel',
-      info: 'You do not have permission to import a model.',
+      success: true,
+    })
+  })
+
+  test('model > update model card as consumer', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['consumer'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Write,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      info: 'You do not have permission to update a model card.',
       success: false,
     })
   })
+
+  test('model > update model card as mtr', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['mtr'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Write,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      success: true,
+    })
+  })
+
+  test('model > update model card as msro', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['msro'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Write,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      success: true,
+    })
+  })
+
+  // Update model tests
+
+  test('model > update model as owner', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Update,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      success: true,
+    })
+  })
+
+  test('model > update model as contributor', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Update,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      info: 'You do not have permission to update a model.',
+      success: false,
+    })
+  })
+
+  test('model > update model as consumer', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['consumer'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Update,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      info: 'You do not have permission to update a model.',
+      success: false,
+    })
+  })
+
+  test('model > update model as mtr', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['mtr'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Update,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      success: true,
+    })
+  })
+
+  test('model > update model as msro', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['msro'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Update,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      success: true,
+    })
+  })
+
+  // Import model tests
 
   test('model > import model as owner', async () => {
     const connector = new BasicAuthorisationConnector()
@@ -161,7 +340,108 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('model > export model as non-owner', async () => {
+  test('model > import model as contributor', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Import,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      info: 'You do not have permission to import a model.',
+      success: false,
+    })
+  })
+
+  test('model > import model as consumer', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['consumer'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Import,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      info: 'You do not have permission to import a model.',
+      success: false,
+    })
+  })
+
+  test('model > import model as mtr', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['mtr'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Import,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      info: 'You do not have permission to import a model.',
+      success: false,
+    })
+  })
+
+  test('model > import model as msro', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['msro'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Import,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      info: 'You do not have permission to import a model.',
+      success: false,
+    })
+  })
+
+  // Export model tests
+
+  test('model > export model as owner', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Export,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      success: true,
+    })
+  })
+
+  test('model > export model as contributor', async () => {
     const connector = new BasicAuthorisationConnector()
     mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
 
@@ -181,9 +461,9 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('model > export model as owner', async () => {
+  test('model > export model as consumer', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['consumer'])
 
     const result = await connector.model(
       user,
@@ -196,7 +476,48 @@ describe('connectors > authorisation > base', () => {
 
     expect(result).toStrictEqual({
       id: 'testModel',
-      success: true,
+      info: 'You do not have permission to export a model.',
+      success: false,
+    })
+  })
+
+  test('model > export model as mtr', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['mtr'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Export,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      info: 'You do not have permission to export a model.',
+      success: false,
+    })
+  })
+
+  test('model > export model as msro', async () => {
+    const connector = new BasicAuthorisationConnector()
+    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['msro'])
+
+    const result = await connector.model(
+      user,
+      {
+        id: 'testModel',
+        visibility: 'public',
+      } as ModelDoc,
+      ModelAction.Export,
+    )
+
+    expect(result).toStrictEqual({
+      id: 'testModel',
+      info: 'You do not have permission to export a model.',
+      success: false,
     })
   })
 
