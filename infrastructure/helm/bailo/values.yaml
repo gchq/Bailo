@@ -304,7 +304,7 @@ backend:
 clamav:
   enabled: false
   runAsUser: 1002
-  image: clamav/1.4.2_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
+  image: clamav/clamav:1.4.2_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
   port: 3310
   accessModes:
     - ReadWriteOnce
