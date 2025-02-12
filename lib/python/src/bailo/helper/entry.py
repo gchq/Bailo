@@ -18,6 +18,8 @@ class Entry:
     :param name: Name of the entry
     :param description: Description of the entry
     :param visibility: Visibility of model, using ModelVisibility enum (i.e. Public or Private), defaults to None
+    :param organisation: Organisation responsible for the model, defaults to None
+    :param state: Development readiness of the model, defaults to None
     :param kind: Represents whether entry type (i.e. Model or Datacard)
     """
 
@@ -29,6 +31,8 @@ class Entry:
         description: str,
         kind: EntryKind,
         visibility: ModelVisibility | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ) -> None:
         self.client = client
 
@@ -37,6 +41,8 @@ class Entry:
         self.description = description
         self.kind = kind
         self.visibility = visibility
+        self.organisation = organisation
+        self.state = state
 
         self._card = None
         self._card_version = None
@@ -50,6 +56,8 @@ class Entry:
             kind=self.kind,
             description=self.description,
             visibility=self.visibility,
+            organisation=self.organisation,
+            state=self.state,
         )
         self._unpack(res["model"])
 

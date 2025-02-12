@@ -304,7 +304,10 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'description' | 'visibility' | 'collaborators'> & {
+export type UpdateModelParams = Pick<
+  ModelInterface,
+  'name' | 'description' | 'visibility' | 'collaborators' | 'state' | 'organisation'
+> & {
   settings: Partial<ModelInterface['settings']>
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {

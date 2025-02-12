@@ -64,6 +64,11 @@ export interface UiConfig {
   helpPopoverText: {
     manualEntryAccess: string
   }
+
+  modelDetails: {
+    organisations: string[]
+    states: string[]
+  }
 }
 
 export interface FileInterface {
@@ -404,6 +409,8 @@ export interface EntryInterface {
   name: string
   kind: EntryKindKeys
   description: string
+  state?: string
+  organisation?: string
   settings: {
     ungovernedAccess?: boolean
     allowTemplating?: boolean
@@ -423,6 +430,8 @@ export interface EntryForm {
   name: string
   kind: EntryKindKeys
   description: string
+  state?: string
+  organisation?: string
   visibility: EntryVisibilityKeys
   collaborators?: CollaboratorEntry[]
   settings?: {
