@@ -119,11 +119,11 @@ export class BasicAuthorisationConnector {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
         }
 
-        if (ModelAction.Import && (await missingRequiredRole(user, model, ['owner']))) {
+        if (ModelAction.Import === action && (await missingRequiredRole(user, model, ['owner']))) {
           return { id: model.id, success: false, info: 'You do not have permission to import a model.' }
         }
 
-        if (ModelAction.Export && (await missingRequiredRole(user, model, ['owner']))) {
+        if (ModelAction.Export === action && (await missingRequiredRole(user, model, ['owner']))) {
           return { id: model.id, success: false, info: 'You do not have permission to export a model.' }
         }
 
