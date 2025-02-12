@@ -208,6 +208,11 @@ module.exports = {
     helpPopoverText: {
       manualEntryAccess: '',
     },
+
+    modelDetails: {
+      organisations: ['Example Organisation'],
+      states: ['Development', 'Review', 'Production'],
+    },
   },
 
   connectors: {

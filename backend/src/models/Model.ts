@@ -54,6 +54,8 @@ export interface ModelInterface {
   kind: EntryKindKeys
   description: string
   card?: ModelCardInterface
+  organisation: string
+  state: string
 
   collaborators: Array<CollaboratorEntry>
   settings: Settings
@@ -83,6 +85,20 @@ const ModelSchema = new Schema<ModelInterface>(
       createdBy: { type: String },
 
       metadata: { type: Schema.Types.Mixed },
+    },
+    organisation: {
+      type: String,
+      required: function () {
+        return typeof this['organisation'] === 'string' ? false : true
+      },
+      default: '',
+    },
+    state: {
+      type: String,
+      required: function () {
+        return typeof this['state'] === 'string' ? false : true
+      },
+      default: '',
     },
 
     collaborators: [

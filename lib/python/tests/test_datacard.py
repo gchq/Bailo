@@ -14,16 +14,19 @@ def test_datacard(local_datacard):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "visibility"),
+    ("name", "description", "organisation", "state", "visibility"),
     [
-        ("test-datacard", "test", ModelVisibility.PUBLIC),
-        ("test-datacard", "test", None),
+        ("test-datacard", "test", None, None, ModelVisibility.PUBLIC),
+        ("test-datacard", "test", None, None, None),
+        ("test-datacard", "test", "Example Organisation", "Development", None),
     ],
 )
 def test_create_get_from_id_and_update(
     name: str,
     description: str,
     visibility: ModelVisibility | None,
+    organisation: str | None,
+    state: str | None,
     integration_client: Client,
 ):
     # Create model
@@ -32,6 +35,8 @@ def test_create_get_from_id_and_update(
         name=name,
         description=description,
         visibility=visibility,
+        organisation=organisation,
+        state=state,
     )
     datacard.card_from_schema("minimal-data-card-v10")
     assert isinstance(datacard, Datacard)

@@ -234,6 +234,10 @@ config:
     helpPopoverText:
       manualEntryAccess: ''
 
+    modelDetails:
+      organisations: []
+      states: []
+
   smtp:
     #host: 'mail' #service name
     port: 1025

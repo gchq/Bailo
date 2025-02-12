@@ -21,16 +21,19 @@ def test_create_experiment_from_model(local_model):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "visibility"),
+    ("name", "description", "organisation", "state", "visibility"),
     [
-        ("test-model", "test", ModelVisibility.PUBLIC),
-        ("test-model", "test", None),
+        ("test-model", "test", None, None, ModelVisibility.PUBLIC),
+        ("test-model", "test", None, None, None),
+        ("test-model", "test", "Example Organisation", "Development", None),
     ],
 )
 def test_create_get_from_id_and_update(
     name: str,
     description: str,
     visibility: ModelVisibility | None,
+    organisation: str | None,
+    state: str | None,
     integration_client: Client,
 ):
     # Create model
@@ -39,6 +42,8 @@ def test_create_get_from_id_and_update(
         name=name,
         description=description,
         visibility=visibility,
+        organisation=organisation,
+        state=state,
     )
     model.card_from_schema("minimal-general-v10")
     assert isinstance(model, Model)
