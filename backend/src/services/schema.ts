@@ -54,7 +54,7 @@ export async function deleteSchemaById(user: UserInterface, schemaId: string): P
     })
   }
 
-  await schema.delete()
+  await schema.deleteOne()
 
   return schema.id
 }

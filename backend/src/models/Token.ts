@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { createHash } from 'crypto'
-import { Document, model, Schema } from 'mongoose'
-import MongooseDelete from 'mongoose-delete'
+import { model, Schema } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 export const TokenScope = {
   All: 'all',
@@ -73,9 +73,9 @@ export interface TokenInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type TokenDoc = TokenInterface & Document<any, any, TokenInterface>
+export type TokenDoc = TokenInterface & SoftDeleteDocument
 
-const TokenSchema = new Schema<TokenInterface>(
+const TokenSchema = new Schema<TokenDoc>(
   {
     user: { type: String, required: true },
     description: { type: String, required: true },
@@ -154,6 +154,6 @@ TokenSchema.methods.compareToken = function compareToken(candidateToken: string)
 
 TokenSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedAt: true })
 
-const TokenModel = model<TokenInterface>('v2_Token', TokenSchema)
+const TokenModel = model<TokenDoc>('v2_Token', TokenSchema)
 
 export default TokenModel

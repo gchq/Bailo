@@ -1,5 +1,5 @@
-import { Document, model, Schema } from 'mongoose'
-import MongooseDelete from 'mongoose-delete'
+import { model, Schema } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 export interface AccessRequestMetadata {
   overview: {
@@ -33,9 +33,10 @@ export interface AccessRequestInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type AccessRequestDoc = AccessRequestInterface & Document<any, any, AccessRequestInterface>
 
-const AccessRequestSchema = new Schema<AccessRequestInterface>(
+export type AccessRequestDoc = AccessRequestInterface & SoftDeleteDocument
+
+const AccessRequestSchema = new Schema<AccessRequestDoc>(
   {
     id: { type: String, unique: true, required: true },
     modelId: { type: String, required: true },
@@ -58,6 +59,6 @@ AccessRequestSchema.plugin(MongooseDelete, {
   deletedAt: true,
 })
 
-const AccessRequestModel = model<AccessRequestInterface>('v2_Access_Request', AccessRequestSchema)
+const AccessRequestModel = model<AccessRequestDoc>('v2_Access_Request', AccessRequestSchema)
 
 export default AccessRequestModel
