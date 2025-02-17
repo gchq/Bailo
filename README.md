@@ -5,7 +5,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/gchq/bailo">
+  <a href="https://github.com/gchq/Bailo">
     <h1>
       <!-- TODO: Fix #gh-dark-mode-only -->
       <img src="frontend/public/logo-vertical-dark-transparent.png" alt="Logo" width="170">
@@ -18,9 +18,9 @@
     <a href="https://gchq.github.io/Bailo/docs"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/gchq/bailo/issues">Report a Bug</a>
+    <a href="https://github.com/gchq/Bailo/issues">Report a Bug</a>
     ·
-    <a href="https://github.com/gchq/bailo/issues">Request a Feature</a>
+    <a href="https://github.com/gchq/Bailo/issues">Request a Feature</a>
   </p>
 </div>
 
@@ -58,7 +58,7 @@
 
 ## About The Project
 
-[![Product Screen Shot][product-screenshot]](https://github.com/gchq/bailo)
+[![Product Screen Shot][product-screenshot]](https://github.com/gchq/Bailo)
 
 Bailo helps you manage the lifecycle of machine learning to support scalability, impact, collaboration, compliance and
 sharing.
@@ -219,15 +219,15 @@ information.
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
 [contributors-shield]: https://img.shields.io/github/contributors/gchq/bailo.svg?style=for-the-badge
-[contributors-url]: https://github.com/gchq/bailo/graphs/contributors
+[contributors-url]: https://github.com/gchq/Bailo/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/gchq/bailo.svg?style=for-the-badge
-[forks-url]: https://github.com/gchq/bailo/network/members
+[forks-url]: https://github.com/gchq/Bailo/network/members
 [stars-shield]: https://img.shields.io/github/stars/gchq/bailo.svg?style=for-the-badge
-[stars-url]: https://github.com/gchq/bailo/stargazers
+[stars-url]: https://github.com/gchq/Bailo/stargazers
 [issues-shield]: https://img.shields.io/github/issues/gchq/bailo.svg?style=for-the-badge
-[issues-url]: https://github.com/gchq/bailo/issues
+[issues-url]: https://github.com/gchq/Bailo/issues
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
-[license-url]: https://github.com/gchq/bailo/blob/main/public/LICENSE.txt
+[license-url]: https://github.com/gchq/Bailo/blob/main/LICENSE.txt
 [code-of-conduct-shield]: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=for-the-badge
-[code-of-conduct-url]: https://github.com/gchq/bailo/blob/main/public/CODE_OF_CONDUCT.md
+[code-of-conduct-url]: https://github.com/gchq/Bailo/blob/main/CODE_OF_CONDUCT.md
 [product-screenshot]: frontend/public/images/bailo-marketplace.png
