@@ -6,7 +6,7 @@ We love pull requests and we want to make it as easy as possible to contribute c
 
 - Make sure you have a [GitHub account](https://github.com/).
 - If you are looking for an existing issue to help with, check out the
-  [help wanted tickets](https://github.com/gchq/bailo/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) on
+  [help wanted tickets](https://github.com/gchq/Bailo/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) on
   GitHub. If you see any that you are interested in working on, comment on it to let everyone know you are working on
   it.
 - If there is no ticket for what you want to contribute, create a [GitHub issue](https://github.com/gchq/Bailo/issues):

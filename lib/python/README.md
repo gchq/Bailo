@@ -127,6 +127,6 @@ pytest
 [pypi-version-shield]: https://img.shields.io/pypi/v/bailo?style=for-the-badge
 [pypi-python-version-shield]: https://img.shields.io/pypi/pyversions/bailo?style=for-the-badge
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
-[license-url]: https://github.com/gchq/bailo/blob/main/public/LICENSE.txt
+[license-url]: https://github.com/gchq/Bailo/blob/main/LICENSE.txt
 [code-of-conduct-shield]: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=for-the-badge
-[code-of-conduct-url]: https://github.com/gchq/bailo/blob/main/public/CODE_OF_CONDUCT.md
+[code-of-conduct-url]: https://github.com/gchq/Bailo/blob/main/CODE_OF_CONDUCT.md
