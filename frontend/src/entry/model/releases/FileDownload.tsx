@@ -1,5 +1,6 @@
 import { Done, Error, Refresh, Warning } from '@mui/icons-material'
-import { Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { Menu as MenuIcon } from '@mui/icons-material'
+import { Button, Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
@@ -187,25 +188,23 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
             )}
             <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
           </Stack>
-          <Stack
-            sx={{ minWidth: 0, width: '100%' }}
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            alignItems='center'
-            justifyContent='space-between'
-          >
-            <Stack direction='row' alignItems='center'>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
+            <Stack direction='row'>
               <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' sx={{ mb: 2 }}>
                 Added by {<UserDisplay dn={file.createdAt.toString()} />} on
                 <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' fontWeight='bold'>
                   {` ${formatDateString(file.createdAt.toString())}`}
                 </Typography>
               </Typography>
-              {/* <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' sx={{ mb: 2 }}>
-                {
-
-                }
-              </Typography> */}
+            </Stack>
+            <Stack direction='row'>
+              <Button
+                startIcon={<MenuIcon />}
+                variant='contained'
+                // onClick={handleActionButtonClick}
+              >
+                Associated Releases
+              </Button>
             </Stack>
           </Stack>
         </Stack>
