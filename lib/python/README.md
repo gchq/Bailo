@@ -123,7 +123,7 @@ pytest
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[pypi-url]: https://pypi.org/project/modelscan/
+[pypi-url]: https://pypi.org/project/bailo/
 [pypi-version-shield]: https://img.shields.io/pypi/v/bailo?style=for-the-badge
 [pypi-python-version-shield]: https://img.shields.io/pypi/pyversions/bailo?style=for-the-badge
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
