@@ -126,7 +126,7 @@ export default function PageWithTabs({
         spacing={{ xs: 1, sm: 2 }}
         sx={{ px: 2, pb: 2 }}
       >
-        <Stack sx={{ maxWidth: 'lg' }}>
+        <Stack sx={{ maxWidth: 'md' }}>
           <Stack direction='row'>
             <Tooltip title={title}>
               <Typography
