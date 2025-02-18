@@ -1,5 +1,9 @@
 # ModelScan REST API
 
+![Python](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue.svg?style=for-the-badge)
+![Python](https://img.shields.io/badge/version-1.0.0-orange.svg?style=for-the-badge)
+[![License][license-shield]][license-url] [![Contributor Covenant][code-of-conduct-shield]][code-of-conduct-url]
+
 This directory provides all of the necessary functionality to interact with
 [ModelScan](https://github.com/protectai/modelscan/tree/main) as a REST API.
 
@@ -8,6 +12,8 @@ This directory provides all of the necessary functionality to interact with
 > that scans models to determine if they contain unsafe code. It is the first model scanning tool to support multiple
 > model formats. ModelScan currently supports: H5, Pickle, and SavedModel formats. This protects you when using PyTorch,
 > TensorFlow, Keras, Sklearn, XGBoost, with more on the way.
+
+This API is used as a filescanner and is not published to PyPI.
 
 ## Docker
 
@@ -96,3 +102,11 @@ volume, so allows for real-time changes with FastAPI running in dev mode.
 docker build -t modelscan_rest_api:latest -f ./Dockerfile.dev .
 docker run -v ./bailo_modelscan_api:/app/bailo_modelscan_api -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
 ```
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
+[license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
+[license-url]: https://github.com/gchq/Bailo/blob/main/LICENSE.txt
+[code-of-conduct-shield]: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=for-the-badge
+[code-of-conduct-url]: https://github.com/gchq/Bailo/blob/main/CODE_OF_CONDUCT.md
