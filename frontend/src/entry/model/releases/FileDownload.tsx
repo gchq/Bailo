@@ -4,10 +4,11 @@ import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import UserDisplay from 'src/common/UserDisplay'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
-import { formatDateTimeString } from 'utils/dateUtils'
+import { formatDateString, formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
@@ -167,23 +168,46 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
   return (
     <>
       {isFileInterface(file) && (
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-          <Stack sx={{ minWidth: 0, width: '100%' }}>
-            <Tooltip title={file.name}>
-              <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
-                <Typography noWrap textOverflow='ellipsis' overflow='hidden'>
-                  {file.name}
-                </Typography>
-              </Link>
-            </Tooltip>
-          </Stack>
-          {scanners.length > 0 && (
-            <Stack direction='row' alignItems='center'>
-              {avChip}
-              {rerunFileScanButton}
+        <Stack>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
+            <Stack sx={{ minWidth: 0, width: '100%' }}>
+              <Tooltip title={file.name}>
+                <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
+                  <Typography noWrap textOverflow='ellipsis' overflow='hidden'>
+                    {file.name}
+                  </Typography>
+                </Link>
+              </Tooltip>
             </Stack>
-          )}
-          <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+            {scanners.length > 0 && (
+              <Stack direction='row' alignItems='center'>
+                {avChip}
+                {rerunFileScanButton}
+              </Stack>
+            )}
+            <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+          </Stack>
+          <Stack
+            sx={{ minWidth: 0, width: '100%' }}
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            alignItems='center'
+            justifyContent='space-between'
+          >
+            <Stack direction='row' alignItems='center'>
+              <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' sx={{ mb: 2 }}>
+                Added by {<UserDisplay dn={file.createdAt.toString()} />} on
+                <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' fontWeight='bold'>
+                  {` ${formatDateString(file.createdAt.toString())}`}
+                </Typography>
+              </Typography>
+              {/* <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' sx={{ mb: 2 }}>
+                {
+
+                }
+              </Typography> */}
+            </Stack>
+          </Stack>
         </Stack>
       )}
     </>
