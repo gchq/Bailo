@@ -1,7 +1,15 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { EntryForm, EntryInterface, EntryKindKeys, EntryUserPermissions, ModelImage, Role } from '../types/types'
+import {
+  EntryForm,
+  EntryInterface,
+  EntryKindKeys,
+  EntryUserPermissions,
+  FileInterface,
+  ModelImage,
+  Role,
+} from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyModelList = []
@@ -138,6 +146,22 @@ export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
     entryUserPermissions: data?.permissions,
     isEntryUserPermissionsLoading: isLoading,
     isEntryUserPermissionsError: error,
+  }
+}
+
+export function useGetModelFiles(id?: string) {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      files: Array<FileInterface>
+    },
+    ErrorInfo
+  >(id ? `/api/v2/model/${id}/files` : null, fetcher)
+
+  return {
+    mutateEntryFiles: mutate,
+    entryFiles: data ? data.files : [],
+    isEntryFilesLoading: isLoading,
+    isEntryFilesError: error,
   }
 }
 
