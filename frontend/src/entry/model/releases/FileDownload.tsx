@@ -4,6 +4,7 @@ import { Button, Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typog
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
+import AssociatedReleasesDialog from 'src/common/AssociatedReleasesDialog'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import useNotification from 'src/hooks/useNotification'
@@ -26,6 +27,7 @@ interface ChipDetails {
 
 export default function FileDownload({ modelId, file }: FileDownloadProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
 
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
@@ -198,17 +200,19 @@ export default function FileDownload({ modelId, file }: FileDownloadProps) {
               </Typography>
             </Stack>
             <Stack direction='row'>
-              <Button
-                startIcon={<MenuIcon />}
-                variant='contained'
-                // onClick={handleActionButtonClick}
-              >
+              <Button startIcon={<MenuIcon />} variant='contained' onClick={() => setAssociatedReleasesOpen(true)}>
                 Associated Releases
               </Button>
             </Stack>
           </Stack>
         </Stack>
       )}
+      <AssociatedReleasesDialog
+        modelId={modelId}
+        open={associatedReleasesOpen}
+        onClose={() => setAssociatedReleasesOpen(false)}
+        file={file}
+      ></AssociatedReleasesDialog>
     </>
   )
 }
