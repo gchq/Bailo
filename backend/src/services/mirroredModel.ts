@@ -17,6 +17,7 @@ import { FileInterfaceDoc } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../models/Release.js'
+import ScanModel from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
@@ -605,11 +606,12 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
       failedScan: Array<{ name: string; id: string }>
     } = { missingScan: [], incompleteScan: [], failedScan: [] }
     for (const file of files) {
-      if (!file.avScan) {
+      const fileAvScans = await ScanModel.find({ fileId: file._id })
+      if (!fileAvScans) {
         scanErrors.missingScan.push({ name: file.name, id: file.id })
-      } else if (file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
+      } else if (fileAvScans.some((scanResult) => scanResult.state !== ScanState.Complete)) {
         scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-      } else if (file.avScan.some((scanResult) => scanResult.isInfected)) {
+      } else if (fileAvScans.some((scanResult) => scanResult.isInfected)) {
         scanErrors.failedScan.push({ name: file.name, id: file.id })
       }
     }

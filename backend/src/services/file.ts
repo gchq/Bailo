@@ -7,6 +7,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
 import FileModel, { FileInterface, FileInterfaceDoc } from '../models/File.js'
+import ScanModel, { ArtefactType } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
@@ -29,7 +30,6 @@ export function isFileInterfaceDoc(data: unknown): data is FileInterfaceDoc {
     !('bucket' in data) ||
     !('path' in data) ||
     !('complete' in data) ||
-    !('avScan' in data) ||
     !('deleted' in data) ||
     !('createdAt' in data) ||
     !('updatedAt' in data) ||
@@ -81,19 +81,18 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 
 async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileScanResult[]) {
   for (const result of results) {
-    const updateExistingResult = await FileModel.updateOne(
-      { _id, 'avScan.toolName': result.toolName },
+    const updateExistingResult = await ScanModel.updateOne(
+      { fileId: _id, toolName: result.toolName },
       {
-        $set: { 'avScan.$': { ...result } },
+        $set: { ...result },
       },
     )
     if (updateExistingResult.modifiedCount === 0) {
-      await FileModel.updateOne(
-        { _id, avScan: { $exists: true } },
-        {
-          $push: { avScan: { toolName: result.toolName, state: result.state, lastRunAt: new Date() } },
-        },
-      )
+      await ScanModel.create({
+        artefactType: ArtefactType.File,
+        fileId: _id,
+        ...result,
+      })
     }
   }
 }
@@ -196,13 +195,14 @@ export async function markFileAsCompleteAfterImport(path: string) {
   }
 }
 
-function fileScanDelay(file: FileInterface): number {
+async function fileScanDelay(file: FileInterface): Promise<number> {
   const delay = config.connectors.fileScanners.retryDelayInMinutes
   if (delay === undefined) {
     return 0
   }
   let minutesBeforeRetrying = 0
-  for (const scanResult of file.avScan) {
+  const fileAvScans = await ScanModel.find({ fileId: file._id })
+  for (const scanResult of fileAvScans) {
     const delayInMilliseconds = delay * 60000
     const scanTimeAtLimit = scanResult.lastRunAt.getTime() + delayInMilliseconds
     if (scanTimeAtLimit > new Date().getTime()) {
@@ -229,7 +229,7 @@ export async function rerunFileScan(user: UserInterface, modelId, fileId: string
   if (!file.size || file.size === 0) {
     throw BadReq('Cannot run scan on an empty file')
   }
-  const minutesBeforeRescanning = fileScanDelay(file)
+  const minutesBeforeRescanning = await fileScanDelay(file)
   if (minutesBeforeRescanning > 0) {
     throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${file.name}`)
   }

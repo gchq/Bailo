@@ -41,16 +41,23 @@ const FileSchema = new Schema<FileInterfaceDoc>(
     bucket: { type: String, required: true },
     path: { type: String, required: true },
 
-    avScan: [
-      {
-        toolName: { type: String },
-        scannerVersion: { type: String },
-        state: { type: String, enum: Object.values(ScanState) },
-        isInfected: { type: Boolean },
-        viruses: [{ type: String }],
-        lastRunAt: { type: Schema.Types.Date },
+    avScan: {
+      type: [
+        {
+          toolName: { type: String },
+          scannerVersion: { type: String },
+          state: { type: String, enum: Object.values(ScanState) },
+          isInfected: { type: Boolean },
+          viruses: [{ type: String }],
+          lastRunAt: { type: Schema.Types.Date },
+        },
+      ],
+      required: false,
+      // prevent legacy field from being used
+      validate: function (val: any): boolean {
+        return val === undefined
       },
-    ],
+    },
 
     complete: { type: Boolean, default: false },
   },
