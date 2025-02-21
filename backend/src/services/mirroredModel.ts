@@ -17,12 +17,13 @@ import { FileInterfaceDoc } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../models/Release.js'
-import ScanModel from '../models/Scan.js'
+import { ScanInterfaceDoc } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import {
   downloadFile,
+  getFileAvScansByFileIds,
   getFilesByIds,
   getTotalFileSize,
   isFileInterfaceDoc,
@@ -600,14 +601,15 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
 
   if (scanners.info()) {
     const files: FileInterfaceDoc[] = await getFilesByIds(user, modelId, fileIds)
+    const filesAvScans: ScanInterfaceDoc[] = await getFileAvScansByFileIds(user, modelId, fileIds)
     const scanErrors: {
       missingScan: Array<{ name: string; id: string }>
       incompleteScan: Array<{ name: string; id: string }>
       failedScan: Array<{ name: string; id: string }>
     } = { missingScan: [], incompleteScan: [], failedScan: [] }
     for (const file of files) {
-      const fileAvScans = await ScanModel.find({ fileId: file._id })
-      if (!fileAvScans) {
+      const fileAvScans = filesAvScans.filter((scan, _) => scan.fileId === file._id)
+      if (!fileAvScans || fileAvScans.length === 0) {
         scanErrors.missingScan.push({ name: file.name, id: file.id })
       } else if (fileAvScans.some((scanResult) => scanResult.state !== ScanState.Complete)) {
         scanErrors.incompleteScan.push({ name: file.name, id: file.id })

@@ -151,6 +151,17 @@ export async function getFilesByIds(user: UserInterface, modelId: string, fileId
   return files.filter((_, i) => auths[i].success)
 }
 
+export async function getFileAvScansByFileIds(user: UserInterface, modelId: string, fileIds: string[]) {
+  if (fileIds.length === 0) {
+    return []
+  }
+  // filter using file access
+  const authorisedFileIds: string[] = (await getFilesByIds(user, modelId, fileIds)).map((file) => file._id)
+
+  const fileAvScans = await ScanModel.find({ fileId: { $in: authorisedFileIds } })
+  return fileAvScans
+}
+
 export async function removeFile(user: UserInterface, modelId: string, fileId: string) {
   const model = await getModelById(user, modelId)
   const file = await getFileById(user, fileId)
