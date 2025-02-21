@@ -105,6 +105,19 @@ const fileModelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/File.js', () => ({ default: fileModelMocks }))
 
+const scanModelMocks = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/Scan.js', () => ({ default: scanModelMocks }))
+
 const baseScannerMock = vi.hoisted(() => ({
   ScanState: {
     NotScanned: 'notScanned',
@@ -367,19 +380,28 @@ describe('services > file', () => {
     const createdAtTimeInMilliseconds = new Date().getTime() - 2000000
     fileModelMocks.findOne.mockResolvedValueOnce({
       name: 'file.txt',
-      avScan: [{ state: ScanState.Complete, lastRunAt: new Date(createdAtTimeInMilliseconds) }],
       size: 123,
     })
+    scanModelMocks.find.mockResolvedValueOnce([
+      {
+        state: ScanState.Complete,
+        lastRunAt: new Date(createdAtTimeInMilliseconds),
+      },
+    ])
     const scanStatus = await rerunFileScan({} as any, 'model123', 'file123')
     expect(scanStatus).toBe('Scan started for file.txt')
   })
 
-  test('rerunFileScan > throws bad request when attemtping to upload an empty file', async () => {
+  test('rerunFileScan > throws bad request when attempting to upload an empty file', async () => {
     fileModelMocks.findOne.mockResolvedValueOnce({
       name: 'file.txt',
-      avScan: [{ state: ScanState.Complete }],
       size: 0,
     })
+    scanModelMocks.find.mockResolvedValueOnce([
+      {
+        state: ScanState.Complete,
+      },
+    ])
     await expect(rerunFileScan({} as any, 'model123', 'file123')).rejects.toThrowError(
       /^Cannot run scan on an empty file/,
     )
@@ -388,9 +410,9 @@ describe('services > file', () => {
   test('rerunFileScan > does not rerun file scan before delay is over', async () => {
     fileModelMocks.findOne.mockResolvedValueOnce({
       name: 'file.txt',
-      avScan: [{ state: ScanState.Complete, lastRunAt: new Date() }],
       size: 123,
     })
+    scanModelMocks.find.mockResolvedValueOnce([{ state: ScanState.Complete, lastRunAt: new Date() }])
     await expect(rerunFileScan({} as any, 'model123', 'file123')).rejects.toThrowError(
       /^Please wait 5 minutes before attempting a rescan file.txt/,
     )
@@ -405,7 +427,6 @@ describe('services > file', () => {
       bucket: '',
       path: '',
       complete: true,
-      avScan: [],
       deleted: false,
       createdAt: '',
       updatedAt: '',
@@ -423,7 +444,6 @@ describe('services > file', () => {
       mime: '',
       path: '',
       complete: true,
-      avScan: [],
       deleted: false,
       createdAt: '',
       updatedAt: '',
