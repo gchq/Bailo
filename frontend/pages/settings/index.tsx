@@ -5,6 +5,7 @@ import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import AuthenticationTab from 'src/settings/authentication/AuthenticationTab'
+import DisplayTab from 'src/settings/display/DisplayTab'
 import ProfileTab from 'src/settings/ProfileTab'
 
 export default function Settings() {
@@ -16,6 +17,7 @@ export default function Settings() {
         ? [
             { title: 'Profile', path: 'profile', view: <ProfileTab user={currentUser} /> },
             { title: 'Authentication', path: 'authentication', view: <AuthenticationTab /> },
+            { title: 'Display', path: 'display', view: <DisplayTab /> },
           ]
         : [],
     [currentUser],

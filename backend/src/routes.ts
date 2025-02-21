@@ -69,8 +69,10 @@ import { postSchema } from './routes/v2/schema/postSchema.js'
 import { getSpecification } from './routes/v2/specification.js'
 import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
+import { getUserSettings } from './routes/v2/user/getUserSettings.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
+import { patchUserSettings } from './routes/v2/user/patchUserSettings.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
 import config from './utils/config.js'
 
@@ -189,6 +191,8 @@ server.get('/api/v2/user/tokens', ...getUserTokens)
 server.get('/api/v2/user/tokens/list', ...getUserTokenList)
 // server.get('/api/v2/user/:userId/token/:tokenId', ...getUserToken)
 server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
+server.get('/api/v2/user/settings', ...getUserSettings)
+server.patch('/api/v2/user/settings', ...patchUserSettings)
 
 server.get('/api/v2/specification', ...getSpecification)
 

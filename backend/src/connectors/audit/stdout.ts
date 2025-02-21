@@ -9,6 +9,7 @@ import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
+import { UserSettingsInterface } from '../../models/UserSettings.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
@@ -347,6 +348,21 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  onViewUserSettings(req: Request, userSettings: UserSettingsInterface) {
+    this.checkEventType(AuditInfo.ViewUserSettings, req)
+    const event = this.generateEvent(req, {
+      userSettings,
+    })
+    req.log.info(event, req.audit.description)
+  }
+
+  onUpdateUserSettings(req: Request, userSettings: UserSettingsInterface) {
+    this.checkEventType(AuditInfo.ViewUserSettings, req)
+    const event = this.generateEvent(req, {
+      userSettings,
+    })
+    req.log.info(event, req.audit.description)
+  }
   onCreateImport(
     req: Request,
     mirroredModel: ModelInterface,

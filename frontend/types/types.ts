@@ -557,6 +557,11 @@ export interface SuccessfulFileUpload {
   fileId: string
 }
 
+export interface UserSettings {
+  dn: string
+  themeKey: string
+}
+
 export type PermissionDetail =
   | {
       hasPermission: true
