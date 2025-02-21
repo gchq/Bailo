@@ -92,6 +92,13 @@ export interface FileInterface {
 }
 
 export interface AvScanResult {
+  artefactType: ArtefactTypeKeys
+  // file only
+  fileId?: string
+  // docker image only
+  repositoryName?: string
+  imageDigest?: string
+
   state: ScanStateKeys
   scannerVersion?: string
   isInfected?: boolean
@@ -107,6 +114,12 @@ export const ScanState = {
   Error: 'error',
 } as const
 export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
+
+export const ArtefactType = {
+  File: 'file',
+  Image: 'image',
+} as const
+export type ArtefactTypeKeys = (typeof ArtefactType)[keyof typeof ArtefactType]
 
 export const ResponseKind = {
   Review: 'review',

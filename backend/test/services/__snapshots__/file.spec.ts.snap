@@ -11,6 +11,33 @@ exports[`services > file > downloadFile > success 1`] = `
 exports[`services > file > getFilesByIds > success 1`] = `
 [
   {
+    "avScan": [],
+    "example": "file",
+  },
+]
+`;
+
+exports[`services > file > getFilesByIds > success with scans mapped 1`] = `
+[
+  {
+    "_id": "123",
+    "avScan": [
+      {
+        "fileId": "123",
+      },
+      {
+        "fileId": "123",
+      },
+    ],
+    "example": "file",
+  },
+  {
+    "_id": "321",
+    "avScan": [
+      {
+        "fileId": "321",
+      },
+    ],
     "example": "file",
   },
 ]

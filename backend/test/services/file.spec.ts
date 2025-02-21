@@ -289,10 +289,31 @@ describe('services > file', () => {
 
   test('getFilesByIds > success', async () => {
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+    scanModelMocks.find.mockResolvedValueOnce([])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
     const fileIds = ['testFileId']
+
+    const files = await getFilesByIds(user, modelId, fileIds)
+
+    expect(files).toMatchSnapshot()
+  })
+
+  test('getFilesByIds > success with scans mapped', async () => {
+    fileModelMocks.find.mockResolvedValueOnce([
+      { example: 'file', _id: '123' },
+      { example: 'file', _id: '321' },
+    ])
+    scanModelMocks.find.mockResolvedValueOnce([{ fileId: '123' }, { fileId: '123' }, { fileId: '321' }])
+    vi.mocked(authorisation.files).mockResolvedValue([
+      { success: true, id: '123' },
+      { success: true, id: '321' },
+    ])
+
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+    const fileIds = ['123', '321']
 
     const files = await getFilesByIds(user, modelId, fileIds)
 
@@ -332,6 +353,7 @@ describe('services > file', () => {
       },
     ])
     fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+    scanModelMocks.find.mockResolvedValueOnce([])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'

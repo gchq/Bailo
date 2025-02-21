@@ -13,11 +13,9 @@ vi.mock('../../../../src/services/release.js', () => ({
 }))
 
 const getFilesByIds = vi.hoisted(() => vi.fn(() => []))
-const getFileAvScansByFileIds = vi.hoisted(() => vi.fn(() => []))
 
 vi.mock('../../../../src/services/file.ts', () => ({
   getFilesByIds,
-  getFileAvScansByFileIds,
 }))
 
 const findResponsesById = vi.hoisted(() => vi.fn(() => []))
@@ -33,7 +31,6 @@ describe('routes > release > getRelease', () => {
 
     expect(res.statusCode).toBe(200)
     expect(getFilesByIds).toBeCalled()
-    expect(getFileAvScansByFileIds).toBeCalled()
     expect(res.body).matchSnapshot()
   })
 

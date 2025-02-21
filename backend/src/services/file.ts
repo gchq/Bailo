@@ -147,19 +147,15 @@ export async function getFilesByIds(user: UserInterface, modelId: string, fileId
     throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
   }
 
+  const fileAvScans = await ScanModel.find({ fileId: { $in: fileIds } })
+  const filesWithAvScans = files.map((file) => {
+    const relevantAvScans = fileAvScans.filter((scan, _) => scan.fileId === file._id)
+    file.avScan = (file.avScan || []).concat(relevantAvScans)
+    return file
+  })
+
   const auths = await authorisation.files(user, model, files, FileAction.View)
-  return files.filter((_, i) => auths[i].success)
-}
-
-export async function getFileAvScansByFileIds(user: UserInterface, modelId: string, fileIds: string[]) {
-  if (fileIds.length === 0) {
-    return []
-  }
-  // filter using file access
-  const authorisedFileIds: string[] = (await getFilesByIds(user, modelId, fileIds)).map((file) => file._id)
-
-  const fileAvScans = await ScanModel.find({ fileId: { $in: authorisedFileIds } })
-  return fileAvScans
+  return filesWithAvScans.filter((_, i) => auths[i].success)
 }
 
 export async function removeFile(user: UserInterface, modelId: string, fileId: string) {

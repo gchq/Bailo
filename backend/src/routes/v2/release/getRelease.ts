@@ -7,7 +7,7 @@ import audit from '../../../connectors/audit/index.js'
 import { FileInterface } from '../../../models/File.js'
 import { ReleaseInterface } from '../../../models/Release.js'
 import { ResponseKind } from '../../../models/Response.js'
-import { getFileAvScansByFileIds, getFilesByIds } from '../../../services/file.js'
+import { getFilesByIds } from '../../../services/file.js'
 import { getReleaseBySemver } from '../../../services/release.js'
 import { registerPath, releaseInterfaceSchema } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -54,8 +54,7 @@ export const getRelease = [
     const release = await getReleaseBySemver(req.user, modelId, semver)
     await audit.onViewRelease(req, release)
     const files = await getFilesByIds(req.user, modelId, release.fileIds)
-    const fileScanResults = getFileAvScansByFileIds(req.user, modelId, release.fileIds)
-    const releaseWithFiles = { ...release.toObject(), files, fileScanResults, kind: ResponseKind.Comment }
+    const releaseWithFiles = { ...release.toObject(), files, kind: ResponseKind.Comment }
 
     return res.json({
       release: releaseWithFiles,
