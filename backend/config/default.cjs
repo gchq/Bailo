@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 /** @type {import('../src/utils/config.js').Config} */
 module.exports = {
   api: {
@@ -140,6 +142,7 @@ module.exports = {
       },
       userPoolId: '',
       userIdAttribute: '',
+      adminGroupName: '',
     },
   },
 
@@ -147,6 +150,12 @@ module.exports = {
     clamdscan: {
       host: '127.0.0.1',
       port: 3310,
+    },
+
+    modelscan: {
+      protocol: 'http',
+      host: '127.0.0.1',
+      port: 3311,
     },
   },
 
@@ -195,6 +204,15 @@ module.exports = {
       text: '',
       startTimestamp: '',
     },
+
+    helpPopoverText: {
+      manualEntryAccess: '',
+    },
+
+    modelDetails: {
+      organisations: ['Example Organisation'],
+      states: ['Development', 'Review', 'Production'],
+    },
   },
 
   connectors: {
@@ -212,6 +230,9 @@ module.exports = {
 
     fileScanners: {
       kinds: [],
+      retryDelayInMinutes: 60,
+      maxInitRetries: 5,
+      initRetryDelay: 5000,
     },
   },
 

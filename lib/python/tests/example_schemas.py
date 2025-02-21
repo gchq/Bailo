@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 METRICS_JSON_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",

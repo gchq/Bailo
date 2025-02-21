@@ -60,6 +60,15 @@ export interface UiConfig {
     text: string
     startTimestamp: string
   }
+
+  helpPopoverText: {
+    manualEntryAccess: string
+  }
+
+  modelDetails: {
+    organisations: string[]
+    states: string[]
+  }
 }
 
 export interface FileInterface {
@@ -84,9 +93,11 @@ export interface FileInterface {
 
 export interface AvScanResult {
   state: ScanStateKeys
+  scannerVersion?: string
   isInfected?: boolean
   viruses?: Array<string>
   toolName: string
+  lastRunAt: string
 }
 
 export const ScanState = {
@@ -128,6 +139,7 @@ export const ReactionKind = {
   LIKE: 'like',
   DISLIKE: 'dislike',
   CELEBRATE: 'celebrate',
+  HEART: 'heart',
 } as const
 export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 
@@ -397,6 +409,8 @@ export interface EntryInterface {
   name: string
   kind: EntryKindKeys
   description: string
+  state?: string
+  organisation?: string
   settings: {
     ungovernedAccess?: boolean
     allowTemplating?: boolean
@@ -416,6 +430,8 @@ export interface EntryForm {
   name: string
   kind: EntryKindKeys
   description: string
+  state?: string
+  organisation?: string
   visibility: EntryVisibilityKeys
   collaborators?: CollaboratorEntry[]
   settings?: {

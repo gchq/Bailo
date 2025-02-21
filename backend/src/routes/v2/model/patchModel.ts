@@ -7,7 +7,11 @@ import audit from '../../../connectors/audit/index.js'
 import { EntryKind, EntryVisibility, ModelInterface } from '../../../models/Model.js'
 import { updateModel } from '../../../services/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/specification.js'
+import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
+
+const organisationsList = [...config.ui.modelDetails.organisations, '']
+const statesList = [...config.ui.modelDetails.states, '']
 
 export const patchModelSchema = z.object({
   body: z.object({
@@ -15,6 +19,8 @@ export const patchModelSchema = z.object({
     kind: z.nativeEnum(EntryKind).optional().openapi({ example: EntryKind.Model }),
     description: z.string().optional().openapi({ example: 'You only look once' }),
     visibility: z.nativeEnum(EntryVisibility).optional().openapi({ example: 'private' }),
+    organisation: z.enum(organisationsList as [string, ...string[]]).optional(),
+    state: z.enum(statesList as [string, ...string[]]).optional(),
     settings: z
       .object({
         ungovernedAccess: z.boolean().optional().openapi({ example: true }),

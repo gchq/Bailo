@@ -1,5 +1,6 @@
 import { Divider, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
+import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
@@ -16,6 +17,7 @@ type ReviewItemProps = {
 export default function ReviewItem({ review }: ReviewItemProps) {
   const router = useRouter()
 
+  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([review._id])
 
   function handleListItemClick() {
@@ -36,9 +38,15 @@ export default function ReviewItem({ review }: ReviewItemProps) {
     return <MessageAlert message={isResponsesError.info.message} severity='error' />
   }
 
+  if (isCurrentUserError) {
+    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
+  }
+
+  if (isCurrentUserLoading || isResponsesLoading) {
+    return <Loading />
+  }
   return (
     <>
-      {isResponsesLoading && <Loading />}
       <ListItem disablePadding>
         <ListItemButton onClick={handleListItemClick} aria-label={`Review model ${review.model} ${review.semver}`}>
           <Stack>
@@ -69,7 +77,14 @@ export default function ReviewItem({ review }: ReviewItemProps) {
               </Typography>
             </Stack>
             <ReviewRoleDisplay review={review} />
-            <ReviewDisplay modelId={review.model.id} reviewResponses={responses} />
+            {currentUser && (
+              <ReviewDisplay
+                modelId={review.model.id}
+                reviewResponses={responses}
+                showCurrentUserResponses
+                currentUserDn={currentUser.dn}
+              />
+            )}
           </Stack>
         </ListItemButton>
       </ListItem>

@@ -6,17 +6,17 @@ about: Suggest an idea for this project
 <!--
 Thank you for suggesting an idea to make Bailo better.
 
-Please fill in as much of the template below as you're able.
+Please fill in as much of the template below as you are able.
 -->
 
 ## Is your feature request related to a problem? Please describe.
 
 Please describe the problem you are trying to solve
 
-## Describe the solution you'd like
+## Describe the solution you would like
 
 Please describe the desired behaviour
 
-## Describe alternatives you've considered
+## Describe alternatives you have considered
 
 Please describe alternative solutions or features you have considered

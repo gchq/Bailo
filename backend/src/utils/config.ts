@@ -41,6 +41,9 @@ export interface Config {
 
     fileScanners: {
       kinds: FileScanKindKeys[]
+      retryDelayInMinutes: number
+      maxInitRetries: number
+      initRetryDelay: number
     }
   }
 
@@ -118,6 +121,7 @@ export interface Config {
       identityProviderClient: { region: string; credentials: { accessKeyId: string; secretAccessKey: string } }
       userPoolId: string
       userIdAttribute: string
+      adminGroupName: string
     }
   }
 
@@ -137,6 +141,12 @@ export interface Config {
 
   avScanning: {
     clamdscan: {
+      host: string
+      port: number
+    }
+
+    modelscan: {
+      protocol: string
       host: string
       port: number
     }

@@ -80,7 +80,7 @@ confidence=
 
 # file where it should appear only once). You can also use "--disable=all" to
 
-# disable everything first and then reenable specific checks. For example, if
+# disable everything first and then re-enable specific checks. For example, if
 
 # you want to run only the similarities checker, you can use "--disable=all
 
@@ -430,7 +430,7 @@ contextmanager-decorators=contextlib.contextmanager
 
 # List of members which are set dynamically and missed by pylint inference
 
-# system, and so shouldn't trigger E1101 when accessed. Python regular
+# system, and so should not trigger E1101 when accessed. Python regular
 
 # expressions are accepted.
 

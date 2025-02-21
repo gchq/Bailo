@@ -1,14 +1,14 @@
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import tempfile
-from typing import Any
-import logging
 import warnings
+from typing import Any
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, ModelVisibility, MinimalSchema
+from bailo.core.enums import EntryKind, MinimalSchema, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 from bailo.helper.entry import Entry
@@ -32,6 +32,8 @@ class Model(Entry):
     :param model_id: A unique ID for the model
     :param name: Name of model
     :param description: Description of model
+    :param organisation: Organisation responsible for the model, defaults to None
+    :param state: Development readiness of the model, defaults to None
     :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -41,6 +43,8 @@ class Model(Entry):
         model_id: str,
         name: str,
         description: str,
+        organisation: str | None = None,
+        state: str | None = None,
         visibility: ModelVisibility | None = None,
     ) -> None:
         super().__init__(
@@ -50,6 +54,8 @@ class Model(Entry):
             description=description,
             kind=EntryKind.MODEL,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
 
         self.model_id = model_id
@@ -60,7 +66,8 @@ class Model(Entry):
         client: Client,
         name: str,
         description: str,
-        team_id: str,
+        organisation: str | None = None,
+        state: str | None = None,
         visibility: ModelVisibility | None = None,
     ) -> Model:
         """Build a model from Bailo and upload it.
@@ -68,7 +75,8 @@ class Model(Entry):
         :param client: A client object used to interact with Bailo
         :param name: Name of model
         :param description: Description of model
-        :param team_id: A unique team ID
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
         :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
@@ -76,8 +84,9 @@ class Model(Entry):
             name=name,
             kind=EntryKind.MODEL,
             description=description,
-            team_id=team_id,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
         model_id = res["model"]["id"]
         logger.info(f"Model successfully created on server with ID %s.", model_id)
@@ -88,6 +97,8 @@ class Model(Entry):
             name=name,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
 
         model._unpack(res["model"])
@@ -113,6 +124,8 @@ class Model(Entry):
             model_id=model_id,
             name=res["name"],
             description=res["description"],
+            organisation=res.get("organisation"),
+            state=res.get("state"),
         )
 
         model._unpack(res)
@@ -148,6 +161,8 @@ class Model(Entry):
                 model_id=model["id"],
                 name=model["name"],
                 description=model["description"],
+                organisation=res.get("organisation"),
+                state=res.get("state"),
             )
             model_obj._unpack(res_model)
             model_obj.get_card_latest()
@@ -160,23 +175,25 @@ class Model(Entry):
         cls,
         client: Client,
         mlflow_uri: str,
-        team_id: str,
         name: str,
         schema_id: str = MinimalSchema.MODEL,
         version: str | None = None,
         files: bool = True,
         visibility: ModelVisibility | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ) -> Model:
         """Import an MLFlow Model into Bailo.
 
         :param client: A client object used to interact with Bailo
         :param mlflow_uri: MLFlow server URI
-        :param team_id: A unique team ID
         :param name: Name of model (on MLFlow). Same name will be used on Bailo
         :param schema_id: A unique schema ID, only required when files is True, defaults to minimal-general-v10
         :param version: Specific MLFlow model version to import, defaults to None
         :param files: Import files?, defaults to True
         :param visibility: Visibility of model on Bailo, using ModelVisibility enum (e.g Public or Private), defaults to None
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
         :return: A model object
         """
         if not ml_flow:
@@ -207,8 +224,9 @@ class Model(Entry):
             name=name,
             kind=EntryKind.MODEL,
             description=description,
-            team_id=team_id,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
         model_id = bailo_res["model"]["id"]
         logger.info(f"MLFlow model successfully imported to Bailo with ID %s", model_id)
@@ -219,6 +237,8 @@ class Model(Entry):
             name=name,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
         model._unpack(bailo_res["model"])
 
@@ -228,13 +248,13 @@ class Model(Entry):
             run_id = sel_model.run_id
             if run_id is None:
                 raise BailoException(
-                    "MLFlow model does not have an assosciated run_id, therefore artifacts cannot be transfered."
+                    "MLFlow model does not have an associated run_id, therefore artifacts cannot be transferred."
                 )
 
             mlflow_run = mlflow_client.get_run(run_id)
             artifact_uri: str = str(mlflow_run.info.artifact_uri)
             if artifact_uri is None:
-                raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transfered.")
+                raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transferred.")
 
             if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:
                 temp_dir = os.path.join(tempfile.gettempdir(), "mlflow_model")
@@ -342,7 +362,7 @@ class Model(Entry):
         """
         res = self.client.get_all_images(model_id=self.model_id)
 
-        logger.info(f"Images for %s retreived successfully.", self.model_id)
+        logger.info(f"Images for %s retrieved successfully.", self.model_id)
 
         return res["images"]
 

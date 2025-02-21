@@ -59,15 +59,6 @@ export const lightTheme = createTheme({
         },
       },
     },
-    MuiListItem: {
-      styleOverrides: {
-        button: {
-          '&:hover': {
-            backgroundColor: '#f5f5f5',
-          },
-        },
-      },
-    },
     MuiListItemButton: {
       styleOverrides: {
         root: {
@@ -131,17 +122,6 @@ export const lightTheme = createTheme({
 })
 
 export const darkTheme = createTheme({
-  components: {
-    ...defaultComponentOverrides,
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#ccbbe2',
-          color: 'black',
-        },
-      },
-    },
-  },
   palette: {
     mode: 'dark',
     navbarGradient: false,
@@ -183,6 +163,78 @@ export const darkTheme = createTheme({
     },
     topNavigation: {
       main: '#fff',
+    },
+  },
+  components: {
+    ...defaultComponentOverrides,
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+          },
+        },
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+            borderRight: 'solid',
+            borderWidth: '2px',
+            borderColor: '#f7a4c0',
+          },
+          '&.Mui-selected': {
+            borderRight: 'solid',
+            borderWidth: '2px',
+            borderColor: '#d62560',
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+          },
+        },
+      },
+    },
+    // MuiButton: {
+    //   styleOverrides: {
+    //     text: {
+    //       '&:hover': {
+    //         backgroundColor: '#5c5c5c',
+    //         color: 'white',
+    //       },
+    //     },
+    //   },
+    // },
+    MuiAccordionSummary: {
+      styleOverrides: {
+        root: {
+          color: '#fff',
+          '&:hover': {
+            backgroundColor: '#5c5c5c',
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ccbbe2',
+          color: 'black',
+        },
+        filled: {
+          color: 'black',
+        },
+        deleteIcon: {
+          color: '#3f3f3f',
+        },
+      },
     },
   },
 })

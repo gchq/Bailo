@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import os
 from io import BytesIO
 
 import pytest
+
+# isort: split
+
 from bailo.core.exceptions import BailoException
-import os
 
 
 @pytest.mark.integration

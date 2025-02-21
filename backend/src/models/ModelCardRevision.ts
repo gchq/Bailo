@@ -1,20 +1,12 @@
 import { Document, model, Schema } from 'mongoose'
 
-import { ModelMetadata } from './Model.js'
+import { ModelCardInterface } from './Model.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
-export interface ModelCardRevisionInterface {
+export interface ModelCardRevisionInterface extends ModelCardInterface {
   modelId: string
-  schemaId: string
-
-  version: number
-  metadata: ModelMetadata
-
-  createdBy: string
-  createdAt: Date
-  updatedAt: Date
 }
 
 // The doc type includes all values in the plain interface, as well as all the

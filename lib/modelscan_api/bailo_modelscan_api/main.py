@@ -1,5 +1,4 @@
-"""FastAPI app.
-"""
+"""FastAPI app."""
 
 from __future__ import annotations
 
@@ -16,6 +15,8 @@ import uvicorn
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
 from pydantic import BaseModel
+
+# isort: split
 
 from bailo_modelscan_api.config import Settings
 from bailo_modelscan_api.dependencies import safe_join
@@ -41,11 +42,13 @@ app = FastAPI(
     dependencies=[Depends(get_settings)],
 )
 
-# Instantiating ModelScan
-modelscan_model = ModelScan(settings=get_settings().modelscan_settings)
-
 
 class ApiInformation(BaseModel):
+    """Minimal typed information about the API endpoint.
+
+    :param BaseModel: Pydantic super class
+    """
+
     apiName: str
     apiVersion: str
     scannerName: str
@@ -56,10 +59,10 @@ class ApiInformation(BaseModel):
     "/info",
     summary="Simple information endpoint",
     description="Utility to get the key information about the API.",
-    status_code=HTTPStatus.OK,
+    status_code=HTTPStatus.OK.value,
     response_description="A populated ApiInformation object",
 )
-def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation:
+async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation:
     """Information about the API.
 
     :return: a JSON representable object with keys from ApiInformation
@@ -76,42 +79,150 @@ def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation
     "/scan/file",
     summary="Upload and scan a file",
     description="Upload a file which is scanned by ModelScan and return the result of the scan",
-    status_code=HTTPStatus.OK,
+    status_code=HTTPStatus.OK.value,
     response_description="The result from ModelScan",
     response_model=dict[str, Any],
     # Example response generated from https://github.com/protectai/modelscan/blob/main/notebooks/keras_fashion_mnist.ipynb
     responses={
-        HTTPStatus.OK: {
+        HTTPStatus.OK.value: {
             "description": "modelscan returned results",
             "content": {
                 "application/json": {
-                    "example": {
-                        "summary": {
-                            "total_issues_by_severity": {"LOW": 0, "MEDIUM": 1, "HIGH": 0, "CRITICAL": 0},
-                            "total_issues": 1,
-                            "input_path": "/foo/bar/unsafe_model.h5",
-                            "absolute_path": "/foo/bar",
-                            "modelscan_version": "0.8.1",
-                            "timestamp": "2024-11-19T12:00:00.000000",
-                            "scanned": {"total_scanned": 1, "scanned_files": ["unsafe_model.h5"]},
-                            "skipped": {"total_skipped": 0, "skipped_files": []},
-                        },
-                        "issues": [
-                            {
-                                "description": "Use of unsafe operator 'Lambda' from module 'Keras'",
-                                "operator": "Lambda",
-                                "module": "Keras",
-                                "source": "unsafe_model.h5",
-                                "scanner": "modelscan.scanners.H5LambdaDetectScan",
-                                "severity": "MEDIUM",
+                    "examples": {
+                        "Normal": {
+                            "value": {
+                                "summary": {
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
+                                    "total_issues": 0,
+                                    "input_path": "/foo/bar/safe_model.pkl",
+                                    "absolute_path": "/foo/bar",
+                                    "modelscan_version": "0.8.1",
+                                    "timestamp": "2024-11-19T12:00:00.000000",
+                                    "scanned": {
+                                        "total_scanned": 1,
+                                        "scanned_files": ["safe_model.pkl"],
+                                    },
+                                    "skipped": {
+                                        "total_skipped": 0,
+                                        "skipped_files": [],
+                                    },
+                                },
+                                "issues": [],
+                                "errors": [],
                             }
-                        ],
-                        "errors": [],
+                        },
+                        "Issue": {
+                            "value": {
+                                "summary": {
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 1,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
+                                    "total_issues": 1,
+                                    "input_path": "/foo/bar/unsafe_model.h5",
+                                    "absolute_path": "/foo/bar",
+                                    "modelscan_version": "0.8.1",
+                                    "timestamp": "2024-11-19T12:00:00.000000",
+                                    "scanned": {
+                                        "total_scanned": 1,
+                                        "scanned_files": ["unsafe_model.h5"],
+                                    },
+                                    "skipped": {
+                                        "total_skipped": 0,
+                                        "skipped_files": [],
+                                    },
+                                },
+                                "issues": [
+                                    {
+                                        "description": "Use of unsafe operator 'Lambda' from module 'Keras'",
+                                        "operator": "Lambda",
+                                        "module": "Keras",
+                                        "source": "unsafe_model.h5",
+                                        "scanner": "modelscan.scanners.H5LambdaDetectScan",
+                                        "severity": "MEDIUM",
+                                    }
+                                ],
+                                "errors": [],
+                            }
+                        },
+                        "Skipped": {
+                            "value": {
+                                "errors": [],
+                                "issues": [],
+                                "summary": {
+                                    "input_path": "/foo/bar/empty.txt",
+                                    "absolute_path": "/foo/bar",
+                                    "modelscan_version": "0.8.1",
+                                    "scanned": {"total_scanned": 0},
+                                    "skipped": {
+                                        "skipped_files": [
+                                            {
+                                                "category": "SCAN_NOT_SUPPORTED",
+                                                "description": "Model Scan did not scan file",
+                                                "source": "empty.txt",
+                                            }
+                                        ],
+                                        "total_skipped": 1,
+                                    },
+                                    "timestamp": "2024-11-19T12:00:00.000000",
+                                    "total_issues": 0,
+                                    "total_issues_by_severity": {
+                                        "CRITICAL": 0,
+                                        "HIGH": 0,
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                    },
+                                },
+                            }
+                        },
+                        "Error": {
+                            "value": {
+                                "summary": {
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
+                                    "total_issues": 0,
+                                    "input_path": "/foo/bar/null.h5",
+                                    "absolute_path": "/foo/bar",
+                                    "modelscan_version": "0.8.1",
+                                    "timestamp": "2024-11-19T12:00:00.000000",
+                                    "scanned": {"total_scanned": 0},
+                                    "skipped": {
+                                        "total_skipped": 1,
+                                        "skipped_files": [
+                                            {
+                                                "category": "SCAN_NOT_SUPPORTED",
+                                                "description": "Model Scan did not scan file",
+                                                "source": "null.h5",
+                                            }
+                                        ],
+                                    },
+                                },
+                                "issues": [],
+                                "errors": [
+                                    {
+                                        "category": "MODEL_SCAN",
+                                        "description": "Unable to synchronously open file (file signature not found)",
+                                        "source": "null.h5",
+                                    }
+                                ],
+                            }
+                        },
                     }
                 }
             },
         },
-        HTTPStatus.INTERNAL_SERVER_ERROR: {
+        HTTPStatus.INTERNAL_SERVER_ERROR.value: {
             "description": "The server could not complete the request",
             "content": {
                 "application/json": {
@@ -121,7 +232,7 @@ def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInformation
         },
     },
 )
-def scan_file(
+async def scan_file(
     in_file: UploadFile,
     background_tasks: BackgroundTasks,
     settings: Annotated[Settings, Depends(get_settings)],
@@ -135,6 +246,9 @@ def scan_file(
     """
     logger.info("Called the API endpoint to scan an uploaded file")
     try:
+        # Instantiate ModelScan
+        modelscan_model = ModelScan(settings=settings.modelscan_settings)
+
         # Use Setting's download_dir if defined else use a temporary directory.
         with TemporaryDirectory() if not settings.download_dir else nullcontext(settings.download_dir) as download_dir:
             if in_file.filename and str(in_file.filename).strip():
@@ -144,12 +258,12 @@ def scan_file(
                 except ValueError:
                     logger.exception("Failed to safely join the filename to the path.")
                     raise HTTPException(
-                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
                         detail="An error occurred while processing the uploaded file's name.",
                     )
             else:
                 raise HTTPException(
-                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
                     detail="An error occurred while extracting the uploaded file's name.",
                 )
 
@@ -163,7 +277,7 @@ def scan_file(
             except OSError as exception:
                 logger.exception("Failed writing the file to the disk.")
                 raise HTTPException(
-                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
                     detail=f"An error occurred while trying to write the uploaded file to the disk: {exception}",
                 ) from exception
 
@@ -183,14 +297,15 @@ def scan_file(
     except Exception as exception:
         logger.exception("An unexpected error occurred.")
         raise HTTPException(
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
             detail=f"An error occurred: {exception}",
         ) from exception
 
     finally:
         try:
             # Clean up the downloaded file as a background task to allow returning sooner.
-            # If using a temporary dir then this would happen anyway, but if Settings' download_dir evaluates then this is required.
+            # If using a temporary dir then this would happen anyway, but if Settings' download_dir evaluates
+            # then this is required.
             logger.info("Cleaning up downloaded file.")
             background_tasks.add_task(Path.unlink, pathlib_path, missing_ok=True)
         except UnboundLocalError:

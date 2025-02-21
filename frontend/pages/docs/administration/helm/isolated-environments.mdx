@@ -7,7 +7,7 @@ Bailo on a segregated environment you will need the following dependencies.
 
 ## Helm Charts
 
-We rely on the following Bitnami charts:
+We rely on the following [Bitnami charts](https://charts.bitnami.com/):
 
 - MinIO https://charts.bitnami.com/bitnami
 - MongoDB https://charts.bitnami.com/bitnami
@@ -16,16 +16,16 @@ We rely on the following Bitnami charts:
 
 We rely on the following images:
 
-- mongo:6.0.4
-- minio/minio:RELEASE.2023-01-31T02-24-19Z
-- marlonb/mailcrab:v0.10.0
-- nginx:1.21.6-alpine
-- registry:2.8.1
-- node:22-alpine
+- mongo:7.0.8
+- bitnami/minio:2024.4.6
+- marlonb/mailcrab:v1.2.0
+- nginx:1.25.4-alpine3.18
+- registry:2.8.3
+- node:22.6.0-alpine
 
-These will occassionally be updated. To retrieve the latest versions used, check `./docker-compose.yml` and
+These will occasionally be updated. To retrieve the latest versions used, check `./docker-compose.yml` and
 `./backend/Dockerfile`. These versions can be configured using the `tag` attribute for each image in `values.yaml` to
-override the defaults. In general, keeping to the same major version will maintain compatability with Bailo.
+override the defaults. In general, keeping to the same major version will maintain compatibility with Bailo.
 
 ## NPM
 

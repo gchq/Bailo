@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { importModel } from '../../../services/mirroredModel.js'
+import { ImportKind, importModel } from '../../../services/mirroredModel.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -12,7 +12,10 @@ export const postRequestImportFromS3Schema = z.object({
   body: z.object({
     payloadUrl: z.string(),
     mirroredModelId: z.string(),
+    sourceModelId: z.string(),
     exporter: z.string(),
+    importKind: z.nativeEnum(ImportKind),
+    filePath: z.string().optional(),
   }),
 })
 
@@ -41,7 +44,6 @@ registerPath({
 interface PostRequestImportResponse {
   mirroredModelId: string
   sourceModelId: string
-  modelCardVersions: number[]
 }
 
 export const postRequestImportFromS3 = [
@@ -49,18 +51,22 @@ export const postRequestImportFromS3 = [
   async (req: Request, res: Response<PostRequestImportResponse>) => {
     req.audit = AuditInfo.CreateImport
     const {
-      body: { payloadUrl, mirroredModelId, exporter },
+      body: { payloadUrl, sourceModelId, mirroredModelId, exporter, importKind, filePath },
     } = parse(req, postRequestImportFromS3Schema)
 
-    const importInfo = await importModel(req.user, mirroredModelId, payloadUrl)
-    await audit.onCreateImport(
-      req,
-      importInfo.mirroredModelId,
-      importInfo.sourceModelId,
-      importInfo.modelCardVersions,
-      exporter,
+    const { mirroredModel, importResult } = await importModel(
+      req.user,
+      mirroredModelId,
+      sourceModelId,
+      payloadUrl,
+      importKind,
+      filePath,
     )
+    await audit.onCreateImport(req, mirroredModel, sourceModelId, exporter, importResult)
 
-    return res.json(importInfo)
+    return res.json({
+      mirroredModelId: mirroredModel.id,
+      sourceModelId,
+    })
   },
 ]

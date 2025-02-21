@@ -36,6 +36,19 @@ const config: PartialDeep<Config> = {
       kinds: [],
     },
   },
+  smtp: {
+    enabled: true,
+    connection: {
+      host: 'localhost',
+      port: 1025,
+      secure: false,
+      auth: undefined,
+      tls: {
+        rejectUnauthorized: false,
+      },
+    },
+    from: '"Bailo 📝" <bailo@example.org>',
+  },
   log: {
     level: 'debug',
   },
@@ -79,6 +92,18 @@ const config: PartialDeep<Config> = {
       userIdAttribute: '',
     },
   },
+  avScanning: {
+    clamdscan: {
+      host: '127.0.0.1',
+      port: 8080,
+    },
+
+    modelscan: {
+      protocol: 'http',
+      host: '127.0.0.1',
+      port: 8081,
+    },
+  },
   mongo: {
     uri: 'mongodb://localhost:27017/bailo?directConnection=true',
     user: undefined,
@@ -87,6 +112,10 @@ const config: PartialDeep<Config> = {
   ui: {
     inference: {
       enabled: true,
+    },
+    modelDetails: {
+      organisations: ['My Organisation'],
+      states: ['Development', 'Review', 'Production'],
     },
   },
 }

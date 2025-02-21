@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
@@ -12,6 +11,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { UserSettingsInterface } from '../../models/UserSettings.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
+import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { BaseAuditConnector } from './Base.js'
 
@@ -32,6 +32,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onViewFile(_req: Request, _file: FileInterfaceDoc) {}
   onViewFiles(_req: Request, _modelId: string, _files: FileInterface[]) {}
   onDeleteFile(_req: Request, _modelId: string, _fileId: string) {}
+  onUpdateFile(_req: Request, _modelId: string, _fileId: string) {}
   onCreateRelease(_req: Request, _release: ReleaseDoc) {}
   onViewRelease(_req: Request, _release: ReleaseDoc) {}
   onUpdateRelease(_req: Request, _release: ReleaseDoc) {}
@@ -60,10 +61,10 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateS3Export(_req: Request, _modelId: string, _semvers?: string[]) {}
   onCreateImport(
     _req: Request,
-    _mirroredModelId: string,
+    _mirroredModel: ModelInterface,
     _sourceModelId: string,
-    _modelCardVersions: number[],
     _exporter: string,
+    _importResult: MongoDocumentImportInformation | FileImportInformation,
   ) {}
   onError(_req: Request, _error: BailoError) {}
   onCreateCommentResponse(_req: Request, _responseInterface: ResponseInterface) {}

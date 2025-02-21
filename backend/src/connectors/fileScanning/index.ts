@@ -2,10 +2,12 @@ import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
 import { BaseFileScanningConnector } from './Base.js'
 import { ClamAvFileScanningConnector } from './clamAv.js'
+import { ModelScanFileScanningConnector } from './modelScan.js'
 import { FileScanningWrapper } from './wrapper.js'
 
 export const FileScanKind = {
   ClamAv: 'clamAV',
+  ModelScan: 'modelScan',
 } as const
 export type FileScanKindKeys = (typeof FileScanKind)[keyof typeof FileScanKind]
 
@@ -22,8 +24,17 @@ export function runFileScanners(cache = true) {
           const scanner = new ClamAvFileScanningConnector()
           await scanner.init()
           fileScanConnectors.push(scanner)
-        } catch (error) {
+        } catch (_error) {
           throw ConfigurationError('Could not configure or initialise Clam AV')
+        }
+        break
+      case FileScanKind.ModelScan:
+        try {
+          const scanner = new ModelScanFileScanningConnector()
+          await scanner.init()
+          fileScanConnectors.push(scanner)
+        } catch (_error) {
+          throw ConfigurationError('Could not configure or initialise ModelScan')
         }
         break
       default:

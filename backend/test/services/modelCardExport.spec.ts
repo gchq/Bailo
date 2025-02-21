@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { getModelById, getModelCard } from '../../src/services/model.js'
+import { ModelInterface } from '../../src/models/Model.js'
+import { ModelCardRevisionInterface } from '../../src/models/ModelCardRevision.js'
+import { getModelById } from '../../src/services/model.js'
 import { renderToHtml, renderToMarkdown } from '../../src/services/modelCardExport.js'
 import { getSchemaById } from '../../src/services/schema.js'
 
@@ -8,54 +10,46 @@ vi.mock('../../src/services/model.js')
 vi.mock('../../src/services/schema.js')
 
 describe('services > export', () => {
-  const mockUser = { dn: 'testUser' } as any
-  const mockModelId = '123'
-  const mockVersion = 1
-  const mockModel = { name: 'Test Model', description: 'Test Description', card: true }
-  const mockCard = { schemaId: 'schema123', metadata: {} }
+  const mockModelId = 'model123'
+  const mockSchemaId = 'schema123'
+  const mockModel = { name: 'Test Model', description: 'Test Description', card: {} }
+  const mockModelCardRevision: ModelCardRevisionInterface = {
+    modelId: mockModelId,
+    schemaId: mockSchemaId,
+    version: 1,
+    createdBy: 'Joe Bloggs',
+    metadata: {},
+  }
   const mockSchema = { jsonSchema: { type: 'object', properties: {} } }
 
   beforeEach(() => {
     vi.mocked(getModelById).mockResolvedValue(mockModel as any)
-    vi.mocked(getModelCard).mockResolvedValue(mockCard as any)
     vi.mocked(getSchemaById).mockResolvedValue(mockSchema as any)
   })
 
-  test('renderToMarkdown > should throw error if model has no card', async () => {
-    vi.mocked(getModelById).mockResolvedValueOnce({ ...mockModel, card: false } as any)
+  test('renderToMarkdown > should return markdown', async () => {
+    const result = await renderToMarkdown(mockModel as ModelInterface, mockModelCardRevision)
 
-    await expect(renderToMarkdown(mockUser, mockModelId, mockVersion)).rejects.toThrow(
-      'Trying to export model with no corresponding card',
-    )
+    expect(result).toContain('> Test Description')
   })
 
-  test('renderToMarkdown > should throw error if card is not found', async () => {
-    vi.mocked(getModelCard).mockResolvedValueOnce(undefined as any)
-
-    await expect(renderToMarkdown(mockUser, mockModelId, mockVersion)).rejects.toThrow(
-      'Could not find specified model card',
-    )
+  test('renderToHtml > should throw error if model has no card', async () => {
+    await expect(
+      renderToHtml({ ...mockModel, card: undefined } as ModelInterface, mockModelCardRevision),
+    ).rejects.toThrow('Trying to export model with no corresponding card')
   })
 
-  test('renderToMarkdown > should throw error if schema is not found', async () => {
+  test('renderToHtml > should throw error if schema is not found', async () => {
     vi.mocked(getSchemaById).mockResolvedValueOnce(undefined as any)
 
-    await expect(renderToMarkdown(mockUser, mockModelId, mockVersion)).rejects.toThrow(
+    await expect(renderToHtml(mockModel as ModelInterface, mockModelCardRevision)).rejects.toThrow(
       'Trying to export model with no corresponding card',
     )
   })
 
-  test('renderToMarkdown > should return markdown and card', async () => {
-    const result = await renderToMarkdown(mockUser, mockModelId, mockVersion)
+  test('renderToHtml > should return html', async () => {
+    const result = await renderToHtml(mockModel as ModelInterface, mockModelCardRevision)
 
-    expect(result).toHaveProperty('markdown')
-    expect(result).toHaveProperty('card', mockCard)
-  })
-
-  test('renderToHtml > should return html and card', async () => {
-    const result = await renderToHtml(mockUser, mockModelId, mockVersion)
-
-    expect(result).toHaveProperty('html')
-    expect(result).toHaveProperty('card', mockCard)
+    expect(result).toContain('<p>Test Description</p>')
   })
 })

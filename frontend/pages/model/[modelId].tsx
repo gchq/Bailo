@@ -97,11 +97,13 @@ export default function Model() {
   return (
     <>
       <Title text={model ? model.name : 'Loading...'} />
-      {(isModelLoading || isCurrentUserLoading || isUiConfigLoading) && <Loading />}
-      {model && (
+      {!model || isModelLoading || isCurrentUserLoading || isUiConfigLoading ? (
+        <Loading />
+      ) : (
         <PageWithTabs
           title={model.name}
           subheading={`ID: ${model.id}`}
+          additionalInfo={model.description}
           tabs={tabs}
           displayActionButton={model.card !== undefined}
           actionButtonTitle='Request access'

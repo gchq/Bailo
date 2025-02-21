@@ -12,23 +12,23 @@ jobs:
       files-changed-output: ${{ steps.files-changed.outputs.any_changed }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       # Check for changed init file (for new version)
       - name: Get changed init files
         id: files-changed
-        uses: tj-actions/changed-files@v40
+        uses: tj-actions/changed-files@v45
         with:
           files: |
             lib/python/src/bailo/__init__.py
 
       # Setup Python
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       # Install build package
       - name: Install pypa/build

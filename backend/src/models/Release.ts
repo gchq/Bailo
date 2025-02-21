@@ -1,5 +1,7 @@
-import { Document, model, Schema } from 'mongoose'
-import MongooseDelete from 'mongoose-delete'
+import { model, Schema } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
+
+import { semverObjectToString, semverStringToObject } from '../services/release.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
@@ -33,14 +35,33 @@ export interface ImageRef {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ReleaseDoc = ReleaseInterface & Document<any, any, ReleaseInterface>
+export type ReleaseDoc = ReleaseInterface & SoftDeleteDocument
 
-const ReleaseSchema = new Schema<ReleaseInterface>(
+export interface SemverObject {
+  major: number
+  minor: number
+  patch: number
+  metadata?: string
+}
+
+const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>(
   {
     modelId: { type: String, required: true },
     modelCardVersion: { type: Number, required: true },
 
-    semver: { type: String, required: true },
+    semver: {
+      type: Schema.Types.Mixed,
+      required: true,
+      set: function (semver: string) {
+        return semverStringToObject(semver)
+      },
+      get: function (semver: SemverObject | string) {
+        if (typeof semver === 'string') {
+          return semver
+        } else return semverObjectToString(semver)
+      },
+    },
+
     notes: { type: String, required: true },
 
     minor: { type: Boolean, required: true },
@@ -60,12 +81,19 @@ const ReleaseSchema = new Schema<ReleaseInterface>(
   {
     timestamps: true,
     collection: 'v2_releases',
+    toJSON: { getters: true },
+    toObject: { getters: true },
   },
 )
 
-ReleaseSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedBy: true, deletedByType: Schema.Types.ObjectId })
+ReleaseSchema.plugin(MongooseDelete, {
+  overrideMethods: 'all',
+  deletedBy: true,
+  deletedByType: Schema.Types.ObjectId,
+  deletedAt: true,
+})
 ReleaseSchema.index({ modelId: 1, semver: 1 }, { unique: true })
 
-const ReleaseModel = model<ReleaseInterface>('v2_Release', ReleaseSchema)
+const ReleaseModel = model<ReleaseDoc>('v2_Release', ReleaseSchema)
 
 export default ReleaseModel

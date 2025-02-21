@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import getpass
+import logging
+import os
 from json import JSONDecodeError
 
 import requests
-import os
-import getpass
-import logging
 from requests.auth import HTTPBasicAuth
+
+# isort: split
+
 from bailo.core.exceptions import BailoException, ResponseException
 
 logger = logging.getLogger(__name__)
@@ -64,19 +67,14 @@ class Agent:
 
 
 class PkiAgent(Agent):
-    def __init__(
-        self,
-        cert: str,
-        key: str,
-        auth: str,
-    ):
+    def __init__(self, cert: str, key: str, auth: str, **kwargs):
         """Initiate an agent for PKI authentication.
 
         :param cert: Path to cert file
         :param key: Path to key file
         :param auth: Path to certificate authority file
         """
-        super().__init__(verify=auth)
+        super().__init__(verify=auth, **kwargs)
 
         self.cert = cert
         self.key = key
@@ -102,13 +100,14 @@ class TokenAgent(Agent):
         self,
         access_key: str | None = None,
         secret_key: str | None = None,
+        **kwargs,
     ):
         """Initiate an agent for API token authentication.
 
         :param access_key: Access key
         :param secret_key: Secret key
         """
-        super().__init__()
+        super().__init__(**kwargs)
 
         if access_key is None:
             logger.info("Access key not provided. Trying other sources...")

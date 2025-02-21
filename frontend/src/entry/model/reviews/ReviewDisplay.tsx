@@ -1,50 +1,55 @@
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import { Stack, Tooltip, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import ApprovalsDisplay from 'src/entry/model/reviews/ApprovalsDisplay'
 import { Decision, ResponseInterface } from 'types/types'
+import { sortByCreatedAtDescending } from 'utils/dateUtils'
+import { fromEntity } from 'utils/entityUtils'
 import { plural } from 'utils/stringUtils'
 
 export interface ReviewDisplayProps {
   modelId: string
   reviewResponses: ResponseInterface[]
+  showCurrentUserResponses?: boolean
+  currentUserDn?: string
 }
 
-export default function ReviewDisplay({ reviewResponses, modelId }: ReviewDisplayProps) {
-  const [acceptedReviewResponses, setAcceptedReviewResponses] = useState<ResponseInterface[]>([])
-  const [changesRequestedReviewResponses, setChangesRequestedReviewResponses] = useState<ResponseInterface[]>([])
-
-  useEffect(() => {
-    const updatedApprovals: ResponseInterface[] = []
-    const updatedRequests: ResponseInterface[] = []
-    reviewResponses.forEach((reviewResponse) => {
-      if (reviewResponse.decision === Decision.Approve) {
-        updatedApprovals.push({ ...reviewResponse, role: reviewResponse.role })
-      }
-      if (reviewResponse.decision === Decision.RequestChanges) {
-        updatedRequests.push({ ...reviewResponse, role: reviewResponse.role })
-      }
-    }),
-      setAcceptedReviewResponses(updatedApprovals)
-    setChangesRequestedReviewResponses(updatedRequests)
-  }, [reviewResponses])
+export default function ReviewDisplay({
+  reviewResponses,
+  modelId,
+  showCurrentUserResponses = false,
+  currentUserDn,
+}: ReviewDisplayProps) {
+  const orderedReviewResponses = useMemo(
+    () =>
+      reviewResponses.toSorted(sortByCreatedAtDescending).filter((response) => {
+        return currentUserDn !== undefined && showCurrentUserResponses
+          ? fromEntity(response.entity).value === currentUserDn
+          : response
+      }) || [],
+    [reviewResponses, currentUserDn, showCurrentUserResponses],
+  )
 
   return (
     <>
-      {changesRequestedReviewResponses.length === 0 && acceptedReviewResponses.length > 0 && (
-        <ApprovalsDisplay modelId={modelId} acceptedReviewResponses={acceptedReviewResponses} />
+      {orderedReviewResponses.length > 0 && orderedReviewResponses[0].decision === Decision.Approve && (
+        <ApprovalsDisplay
+          modelId={modelId}
+          acceptedReviewResponses={orderedReviewResponses}
+          showCurrentUserResponses={showCurrentUserResponses}
+        />
       )}
-      {changesRequestedReviewResponses.length > 0 && (
-        <Tooltip title={`${plural(changesRequestedReviewResponses.length, 'review')}`}>
+      {orderedReviewResponses.length > 0 && orderedReviewResponses[0].decision === Decision.RequestChanges && (
+        <Tooltip title={`${plural(orderedReviewResponses.length, 'review')}`}>
           <Stack direction='row'>
             <HourglassEmpty color='warning' fontSize='small' />
-            <Typography variant='caption'>Changes requested</Typography>
+            <Typography variant='caption'>
+              {showCurrentUserResponses ? 'You have requested changes' : 'Changes requested'}
+            </Typography>
           </Stack>
         </Tooltip>
       )}
-      {changesRequestedReviewResponses.length === 0 && acceptedReviewResponses.length === 0 && (
-        <Typography variant='caption'>Awaiting review</Typography>
-      )}
+      {reviewResponses.length === 0 && <Typography variant='caption'>Awaiting review</Typography>}
     </>
   )
 }

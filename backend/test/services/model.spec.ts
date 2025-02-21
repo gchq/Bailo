@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ModelAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { ModelCardRevisionInterface } from '../../src/models/ModelCardRevision.js'
+import { ModelCardRevisionDoc } from '../../src/models/ModelCardRevision.js'
 import {
   _setModelCard,
   canUserActionModelById,
@@ -12,7 +12,7 @@ import {
   getCurrentUserPermissionsByModel,
   getModelById,
   getModelCardRevision,
-  isModelCardRevision,
+  isModelCardRevisionDoc,
   saveImportedModelCard,
   searchModels,
   setLatestImportedModelCard,
@@ -86,6 +86,7 @@ vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
 
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
+  getUserInformation: vi.fn(() => ({ name: 'user', email: 'user@example.com' })),
 }))
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: authenticationMocks,
@@ -117,6 +118,15 @@ describe('services > model', () => {
       /^You cannot select both settings simultaneously./,
     )
     expect(modelMocks.save).not.toBeCalled()
+  })
+
+  test('createModel > should throw an internal error if getUserInformation fails due to invalid user', async () => {
+    authenticationMocks.getUserInformation.mockImplementation(() => {
+      throw new Error('Unable to find user user:unknown_user')
+    })
+    expect(() =>
+      createModel({} as any, { collaborators: [{ entity: 'user:unknown_user', roles: [] }] } as any),
+    ).rejects.toThrowError(/^Unable to find user user:unknown_user/)
   })
 
   test('getModelById > good', async () => {
@@ -326,7 +336,16 @@ describe('services > model', () => {
     ).rejects.toThrowError(/^You cannot select both mirror settings simultaneously./)
   })
 
-  test('createModelcardFromSchema > should throw an error when attempting to change a model from mirrored to standard', async () => {
+  test('updateModel > should throw an internal error if getUserInformation fails due to invalid user', async () => {
+    authenticationMocks.getUserInformation.mockImplementation(() => {
+      throw new Error('Unable to find user user:unknown_user')
+    })
+    expect(() =>
+      updateModel({} as any, '123', { collaborators: [{ entity: 'user:unknown_user', roles: [] }] }),
+    ).rejects.toThrowError(/^Unable to find user user:unknown_user/)
+  })
+
+  test('createModelCardFromSchema > should throw an error when attempting to change a model from mirrored to standard', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({
       info: 'Cannot alter a mirrored model.',
       success: false,
@@ -339,40 +358,6 @@ describe('services > model', () => {
     expect(modelMocks.save).not.toBeCalled()
   })
 
-  test('saveImportedModelCard > model does not exist', async () => {
-    modelMocks.findOne.mockResolvedValueOnce()
-    const result = saveImportedModelCard({} as ModelCardRevisionInterface, '')
-
-    expect(result).rejects.toThrowError(/^Cannot find model to import model card./)
-  })
-
-  test('saveImportedModelCard > model not mirrored model', async () => {
-    modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: '' } } })
-    const result = saveImportedModelCard({} as ModelCardRevisionInterface, '')
-
-    expect(result).rejects.toThrowError(/^Cannot import model card to non mirrored model./)
-  })
-
-  test('saveImportedModelCard > mirrored model ID incorrect', async () => {
-    modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
-    const result = saveImportedModelCard({} as ModelCardRevisionInterface, 'cba')
-
-    expect(result).rejects.toThrowError(
-      /^The source model ID of the mirrored model does not match the model Id of the imported model/,
-    )
-  })
-
-  test('saveImportedModelCard > unable to validate model card', async () => {
-    modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
-    validator.validate.mockImplementationOnce(() => {
-      throw Error('Unable to validate.')
-    })
-
-    const result = saveImportedModelCard({} as ModelCardRevisionInterface, 'abc')
-
-    expect(result).rejects.toThrowError(/^Model metadata could not be validated against the schema./)
-  })
-
   test('saveImportedModelCard > unknown error when trying to validate model card', async () => {
     modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
     validator.validate.mockImplementationOnce(() => {
@@ -380,14 +365,14 @@ describe('services > model', () => {
     })
     validatorType.isValidatorResultError.mockReturnValueOnce(false)
 
-    const result = saveImportedModelCard({} as ModelCardRevisionInterface, 'abc')
+    const result = saveImportedModelCard({} as Omit<ModelCardRevisionDoc, '_id'>)
 
     expect(result).rejects.toThrowError(/^Unable to validate./)
   })
 
   test('saveImportedModelCard > successfully saves model card', async () => {
     modelMocks.findOne.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: 'abc' } } })
-    await saveImportedModelCard({ modelId: 'id', version: 'version' } as any, 'abc')
+    await saveImportedModelCard({ modelId: 'id', version: 'version' } as any)
 
     expect(modelCardRevisionModel.findOneAndUpdate).toBeCalledWith(
       { modelId: 'id', version: 'version' },
@@ -399,7 +384,7 @@ describe('services > model', () => {
   test('setLatestImportedModelCard > success', async () => {
     await setLatestImportedModelCard('abc')
 
-    expect(modelMocks.updateOne).toHaveBeenCalledOnce
+    expect(modelMocks.findOneAndUpdate).toHaveBeenCalledOnce()
   })
 
   test('setLatestImportedModelCard > cannot find latest model card', async () => {
@@ -416,33 +401,35 @@ describe('services > model', () => {
     await expect(result).rejects.toThrowError(/^Unable to set latest model card of mirrored model./)
   })
 
-  test('isModelCardRevision > success', async () => {
-    const result = isModelCardRevision({
+  test('isModelCardRevisionDoc > success', async () => {
+    const result = isModelCardRevisionDoc({
       modelId: '',
       schemaId: '',
       version: '',
       createdBy: '',
       updatedAt: '',
       createdAt: '',
+      _id: '',
     })
 
     expect(result).toBe(true)
   })
 
-  test('isModelCardRevision > missing property', async () => {
-    const result = isModelCardRevision({
+  test('isModelCardRevisionDoc > missing property', async () => {
+    const result = isModelCardRevisionDoc({
       schemaId: '',
       version: '',
       createdBy: '',
       updatedAt: '',
       createdAt: '',
+      _id: '',
     })
 
     expect(result).toBe(false)
   })
 
-  test('isModelCardRevision > wrong type', async () => {
-    const result = isModelCardRevision(null)
+  test('isModelCardRevisionDoc > wrong type', async () => {
+    const result = isModelCardRevisionDoc(null)
 
     expect(result).toBe(false)
   })

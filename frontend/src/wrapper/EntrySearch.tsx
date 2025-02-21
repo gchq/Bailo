@@ -1,5 +1,5 @@
 import SearchIcon from '@mui/icons-material/Search'
-import { Box, InputBase, List, ListItemButton, ListItemText, Popover, Stack } from '@mui/material'
+import { Box, Chip, InputBase, List, ListItem, ListItemButton, ListItemText, Popover, Stack } from '@mui/material'
 import { alpha, styled, useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { ChangeEvent, useMemo, useState } from 'react'
@@ -8,6 +8,8 @@ import Loading from 'src/common/Loading'
 import useDebounce from 'src/hooks/useDebounce'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
+import { EntryKindLabel } from 'types/types'
+import { toTitleCase } from 'utils/stringUtils'
 
 const Search = styled('div')(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
@@ -53,25 +55,34 @@ export default function EntrySearch() {
   const modelList = useMemo(
     () =>
       entries.map((entry) => (
-        <Box key={entry.id} sx={{ maxWidth: '300px' }}>
+        <Box key={entry.id} sx={{ maxWidth: '400px' }}>
           <Link href={`/${entry.kind}/${entry.id}`} noLinkStyle>
-            <ListItemButton>
-              <ListItemText
-                primary={entry.name}
-                secondary={entry.description}
-                primaryTypographyProps={{
-                  style: {
-                    whiteSpace: 'nowrap',
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    color: theme.palette.primary.main,
-                  },
-                }}
-                secondaryTypographyProps={{
-                  style: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
-                }}
-              />
-            </ListItemButton>
+            <ListItem
+              disablePadding
+              secondaryAction={<Chip label={toTitleCase(EntryKindLabel[entry.kind])} size='small' />}
+            >
+              <ListItemButton>
+                <ListItemText
+                  primary={entry.name}
+                  secondary={entry.description}
+                  slotProps={{
+                    primary: {
+                      sx: {
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        overflow: 'hidden',
+                        color: theme.palette.primary.main,
+                        mr: 6,
+                      },
+                    },
+
+                    secondary: {
+                      sx: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', mr: 6 },
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
           </Link>
         </Box>
       )),

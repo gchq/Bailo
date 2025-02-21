@@ -24,15 +24,18 @@ class Client:
         name: str,
         kind: EntryKind,
         description: str,
-        team_id: str,
         visibility: ModelVisibility | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ):
         """Create a model.
 
         :param name: Name of the model
         :param kind: Either a Model or a Datacard
         :param description: Description of the model
-        :param visibility: Enum to define model visibility (e.g public or private)
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
+        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :return: JSON response object
         """
         _visibility: str = "public"
@@ -45,6 +48,8 @@ class Client:
                 "kind": kind,
                 "description": description,
                 "visibility": _visibility,
+                "organisation": organisation,
+                "state": state,
             }
         )
 
@@ -104,6 +109,8 @@ class Client:
         kind: str | None = None,
         description: str | None = None,
         visibility: str | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ):
         """Update a specific model using its unique ID.
 
@@ -111,12 +118,16 @@ class Client:
         :param name: Name of the model, defaults to None
         :param kind: Either a Model or a Datacard
         :param description: Description of the model, defaults to None
-        :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
+        :param kind: Either a Model or a Datacard, defaults to None
         :return: JSON response object
         """
         filtered_json = filter_none(
             {
                 "name": name,
+                "organisation": organisation,
+                "state": state,
                 "kind": kind,
                 "description": description,
                 "visibility": visibility,
@@ -180,7 +191,7 @@ class Client:
     def model_card_from_template(self, model_id: str, template_id: str | None):
         """Create a model card using a given template ID (previously created models, model ID)
         :param model_id: Unique model ID
-        :param tempate_id Previous model's unique ID to be used as template for new model card
+        :param template_id Previous model's unique ID to be used as template for new model card
         :return: JSON response object
         """
         return self.agent.post(
@@ -534,86 +545,6 @@ class Client:
         """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/roles/mine",
-        ).json()
-
-    def post_team(
-        self,
-        team_id: str,
-        name: str,
-        description: str,
-    ):
-        """
-        Create new team.
-
-        :param team_id: Unique team ID
-        :param name: Team name
-        :param description: Team description
-        :return: JSON response object
-        """
-        return self.agent.post(
-            f"{self.url}/v2/teams",
-            json={
-                "id": team_id,
-                "name": name,
-                "description": description,
-            },
-        ).json()
-
-    def get_all_teams(
-        self,
-    ):
-        """
-        Get all teams.
-
-        :return: JSON response object
-        """
-        return self.agent.get(
-            f"{self.url}/v2/teams",
-        ).json()
-
-    def get_user_teams(
-        self,
-    ):
-        """
-        Get user teams.
-
-        :return: JSON response object
-        """
-        return self.agent.get(
-            f"{self.url}/v2/teams/mine",
-        ).json()
-
-    def get_team(
-        self,
-        team_id: str,
-    ):
-        """Retrieve a specific team given its unique ID.
-
-        :param team_id: Unique team ID
-        :return: JSON response object
-        """
-        return self.agent.get(
-            f"{self.url}/v2/team/{team_id}",
-        ).json()
-
-    def patch_team(
-        self,
-        team_id: str,
-        name: str | None = None,
-        description: str | None = None,
-    ):
-        """Update a team given its unique ID.
-
-        :param team_id: Unique team ID
-        :param name: Name of team, defaults to None
-        :param description: Description of team, defaults to None
-        :return: JSON response object
-        """
-        filtered_json = filter_none({"name": name, "description": description})
-
-        return self.agent.patch(
-            f"{self.url}/v2/team/{team_id}",
-            json=filtered_json,
         ).json()
 
     def get_access_request(self, model_id: str, access_request_id: str):

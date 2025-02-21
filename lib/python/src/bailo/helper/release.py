@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-import os
 import fnmatch
+import logging
+import os
 import shutil
 from io import BytesIO
 from typing import Any
-import logging
-from tqdm import tqdm
-from tqdm.utils import CallbackIOWrapper
 
 from bailo.core.client import Client
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NO_COLOR
 from semantic_version import Version
+from tqdm import tqdm
+from tqdm.utils import CallbackIOWrapper
 
 BLOCK_SIZE = 1024
 logger = logging.getLogger(__name__)
@@ -62,7 +62,6 @@ class Release:
         self.files = files
         self.images = images
         self.draft = draft
-        self.files = files
 
     @classmethod
     def create(
@@ -248,7 +247,7 @@ class Release:
             file_path = os.path.join(path, file)
             self.download(filename=file, path=file_path)
 
-    def upload(self, path: str, data: BytesIO | None = None) -> str:  # type: ignore
+    def upload(self, path: str, data: BytesIO | None = None) -> str:  # type: ignore[reportRedeclaration]
         """Upload a file to the release.
 
         :param path: The path, or name of file or directory to be uploaded
@@ -267,7 +266,7 @@ class Release:
         # If no datastream object provided
         name = os.path.split(path)[-1]
         if data is None:
-            # If we havent passed in a file object, we must create one from the path.
+            # If we haven't passed in a file object, we must create one from the path.
             # Check if file exists, if it does the zip required
             zip_required = not os.path.isfile(path)
 
@@ -280,7 +279,7 @@ class Release:
                 path = f"{name}.zip"
                 name = path
 
-            data: BytesIO = open(path, "rb")  # type: ignore
+            data: BytesIO = open(path, "rb")  # type: ignore[reportAssignmentType]
             to_close = True
 
             if zip_required:
@@ -305,8 +304,8 @@ class Release:
             postfix=f"uploading {name}",
             colour=colour,
         ) as t:
-            wrapped_buffer = CallbackIOWrapper(t.update, data, "read")  # type: ignore
-            res: dict[str, Any] = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()
+            wrapped_buffer = CallbackIOWrapper(t.update, data, "read")
+            res: dict[str, Any] = self.client.simple_upload(self.model_id, name, wrapped_buffer).json()  # type: ignore[reportArgumentType]
 
         self.files.append(res["file"]["id"])
         self.update()

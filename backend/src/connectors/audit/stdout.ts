@@ -11,6 +11,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { UserSettingsInterface } from '../../models/UserSettings.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
+import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
@@ -97,6 +98,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   onDeleteFile(req: Request, modelId: string, fileId: string) {
     this.checkEventType(AuditInfo.DeleteFile, req)
+    const event = this.generateEvent(req, { modelId, fileId })
+    req.log.info(event, req.audit.description)
+  }
+
+  onUpdateFile(req: Request, modelId: string, fileId: string) {
+    this.checkEventType(AuditInfo.UpdateFile, req)
     const event = this.generateEvent(req, { modelId, fileId })
     req.log.info(event, req.audit.description)
   }
@@ -358,13 +365,13 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   }
   onCreateImport(
     req: Request,
-    mirroredModelId: string,
+    mirroredModel: ModelInterface,
     sourceModelId: string,
-    modelCardVersions: number[],
     exporter: string,
+    importResult: MongoDocumentImportInformation | FileImportInformation,
   ) {
     this.checkEventType(AuditInfo.CreateImport, req)
-    const event = this.generateEvent(req, { mirroredModelId, sourceModelId, modelCardVersions, exporter })
+    const event = this.generateEvent(req, { mirroredModel, sourceModelId, exporter, importResult })
     req.log.info(event, req.audit.description)
   }
 }

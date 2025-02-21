@@ -3,14 +3,16 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { FileAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
-import { FileScanResult } from '../../src/connectors/fileScanning/Base.js'
+import { FileScanResult, ScanState } from '../../src/connectors/fileScanning/Base.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   downloadFile,
   getFilesByIds,
   getFilesByModel,
   getTotalFileSize,
+  isFileInterfaceDoc,
   removeFile,
+  rerunFileScan,
   uploadFile,
 } from '../../src/services/file.js'
 
@@ -43,6 +45,9 @@ const configMock = vi.hoisted(
       connectors: {
         fileScanners: {
           kinds: ['clamAV'],
+          retryDelayInMinutes: 5,
+          maxInitRetries: 5,
+          initRetryDelay: 5000,
         },
       },
     }) as any,
@@ -56,6 +61,7 @@ const fileScanResult: FileScanResult = {
   state: 'complete',
   isInfected: false,
   toolName: 'Test',
+  lastRunAt: new Date(),
 }
 
 const fileScanningMock = vi.hoisted(() => ({
@@ -98,6 +104,16 @@ const fileModelMocks = vi.hoisted(() => {
   return model
 })
 vi.mock('../../src/models/File.js', () => ({ default: fileModelMocks }))
+
+const baseScannerMock = vi.hoisted(() => ({
+  ScanState: {
+    NotScanned: 'notScanned',
+    InProgress: 'inProgress',
+    Complete: 'complete',
+    Error: 'error',
+  },
+}))
+vi.mock('../../src/connectors/filescanning/Base.js', () => baseScannerMock)
 
 const clamscan = vi.hoisted(() => ({ on: vi.fn() }))
 vi.mock('clamscan', () => ({
@@ -345,5 +361,81 @@ describe('services > file', () => {
     const size = await getTotalFileSize(['1', '2', '3'])
 
     expect(size).toBe(42)
+  })
+
+  test('rerunFileScan > successfully reruns a file scan', async () => {
+    const createdAtTimeInMilliseconds = new Date().getTime() - 2000000
+    fileModelMocks.findOne.mockResolvedValueOnce({
+      name: 'file.txt',
+      avScan: [{ state: ScanState.Complete, lastRunAt: new Date(createdAtTimeInMilliseconds) }],
+      size: 123,
+    })
+    const scanStatus = await rerunFileScan({} as any, 'model123', 'file123')
+    expect(scanStatus).toBe('Scan started for file.txt')
+  })
+
+  test('rerunFileScan > throws bad request when attemtping to upload an empty file', async () => {
+    fileModelMocks.findOne.mockResolvedValueOnce({
+      name: 'file.txt',
+      avScan: [{ state: ScanState.Complete }],
+      size: 0,
+    })
+    await expect(rerunFileScan({} as any, 'model123', 'file123')).rejects.toThrowError(
+      /^Cannot run scan on an empty file/,
+    )
+  })
+
+  test('rerunFileScan > does not rerun file scan before delay is over', async () => {
+    fileModelMocks.findOne.mockResolvedValueOnce({
+      name: 'file.txt',
+      avScan: [{ state: ScanState.Complete, lastRunAt: new Date() }],
+      size: 123,
+    })
+    await expect(rerunFileScan({} as any, 'model123', 'file123')).rejects.toThrowError(
+      /^Please wait 5 minutes before attempting a rescan file.txt/,
+    )
+  })
+
+  test('isFileInterfaceDoc > success', async () => {
+    const result = isFileInterfaceDoc({
+      modelId: '',
+      name: '',
+      size: 1,
+      mime: '',
+      bucket: '',
+      path: '',
+      complete: true,
+      avScan: [],
+      deleted: false,
+      createdAt: '',
+      updatedAt: '',
+      _id: '',
+    })
+
+    expect(result).toBe(true)
+  })
+
+  test('isFileInterfaceDoc > missing property', async () => {
+    const result = isFileInterfaceDoc({
+      modelId: '',
+      name: '',
+      size: 1,
+      mime: '',
+      path: '',
+      complete: true,
+      avScan: [],
+      deleted: false,
+      createdAt: '',
+      updatedAt: '',
+      _id: '',
+    })
+
+    expect(result).toBe(false)
+  })
+
+  test('isFileInterfaceDoc > wrong type', async () => {
+    const result = isFileInterfaceDoc(null)
+
+    expect(result).toBe(false)
   })
 })

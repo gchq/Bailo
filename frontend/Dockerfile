@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22.6.0-alpine AS installer
+FROM node:22.14.0-alpine AS installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -12,10 +12,12 @@ RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 
 COPY . .
 
-ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm install sharp@0.33.5
+
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:22.6.0-alpine AS runner
+FROM node:22.14.0-alpine AS runner
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -39,9 +41,9 @@ RUN chmod -R g=u /app
 
 USER nextjs
 
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 EXPOSE 3000
-ENV PORT 3000
+ENV PORT=3000
 
 CMD ["node", "server.js"]

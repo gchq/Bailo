@@ -3,9 +3,9 @@ import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileInterface } from '../models/File.js'
+import { FileInterface, FileInterfaceDoc } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
-import Release, { ImageRef, ReleaseDoc, ReleaseInterface } from '../models/Release.js'
+import Release, { ImageRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
@@ -21,7 +21,32 @@ import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
-async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
+export function isReleaseDoc(data: unknown): data is ReleaseDoc {
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+
+  if (
+    !('modelId' in data) ||
+    !('modelCardVersion' in data) ||
+    !('semver' in data) ||
+    !('notes' in data) ||
+    !('minor' in data) ||
+    !('draft' in data) ||
+    !('fileIds' in data) ||
+    !('images' in data) ||
+    !('deleted' in data) ||
+    !('createdBy' in data) ||
+    !('createdAt' in data) ||
+    !('updatedAt' in data) ||
+    !('_id' in data)
+  ) {
+    return false
+  }
+  return true
+}
+
+export async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
   if (!semver.valid(release.semver)) {
     throw BadReq(`The version '${release.semver}' is not a valid semver value.`)
   }
@@ -55,7 +80,7 @@ async function validateRelease(user: UserInterface, model: ModelDoc, release: Re
     const fileNames: Array<string> = []
 
     for (const fileId of release.fileIds) {
-      let file
+      let file: FileInterfaceDoc | undefined
       try {
         file = await getFileById(user, fileId)
       } catch (e) {
@@ -195,12 +220,19 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
       modelId: modelId,
     })
   }
-
-  const updatedRelease = await Release.findOneAndUpdate({ modelId, semver }, { $set: release })
+  const semverObj = semverStringToObject(semver)
+  const updatedRelease = await Release.findOneAndUpdate({ modelId, semver: semverObj }, { $set: release })
 
   if (!updatedRelease) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
+
+  sendWebhooks(
+    release.modelId,
+    WebhookEvent.UpdateRelease,
+    `Release ${release.semver} has been updated for model ${release.modelId}`,
+    { release },
+  )
 
   return updatedRelease
 }
@@ -211,7 +243,8 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
     throw BadReq(`Cannot create a new comment on a mirrored model.`)
   }
 
-  const release = await Release.findOne({ modelId, semver })
+  const semverObj = semverStringToObject(semver)
+  const release = await Release.findOne({ modelId, semver: semverObj })
   if (!release) {
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
@@ -237,25 +270,37 @@ export async function newReleaseComment(user: UserInterface, modelId: string, se
 export async function getModelReleases(
   user: UserInterface,
   modelId: string,
+  querySemver?: string,
 ): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
+  const query = querySemver === undefined ? { modelId } : convertSemverQueryToMongoQuery(querySemver, modelId)
   const results = await Release.aggregate()
-    .match({ modelId })
+    .match(query)
     .sort({ updatedAt: -1 })
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
-    .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
     .lookup({ from: 'v2_files', localField: 'fileIds', foreignField: '_id', as: 'files' })
+    .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
 
   const model = await getModelById(user, modelId)
 
   const auths = await authorisation.releases(user, model, results, ReleaseAction.View)
-  return results.filter((_, i) => auths[i].success)
+  return results.reduce<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>>(
+    (updatedResults, result, index) => {
+      if (auths[index].success) {
+        updatedResults.push({ ...result, semver: semverObjectToString(result.semver) })
+      }
+
+      return updatedResults
+    },
+    [],
+  )
 }
 
 export async function getReleasesForExport(user: UserInterface, modelId: string, semvers: string[]) {
   const model = await getModelById(user, modelId)
+  const semverObjs = semvers.map((semver) => semverStringToObject(semver))
   const releases = await Release.find({
     modelId,
-    semver: semvers,
+    semver: semverObjs,
   })
 
   const missing = semvers.filter((x) => !releases.some((release) => release.semver === x))
@@ -263,12 +308,12 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
     throw NotFound('The following releases were not found.', { modelId, releases: missing })
   }
 
-  const auths = await authorisation.releases(user, model, releases, ReleaseAction.Update)
-  const noAuth = releases.filter((_, i) => !auths[i].success)
-  if (noAuth.length > 0) {
+  const authResponses = await authorisation.releases(user, model, releases, ReleaseAction.Export)
+  const failedReleases = releases.filter((_, i) => !authResponses[i].success)
+  if (failedReleases.length > 0) {
     throw Forbidden('You do not have the necessary permissions to export these releases.', {
       modelId,
-      releases: noAuth.map((release) => release.semver),
+      releases: failedReleases.map((release) => release.semver),
       user,
     })
   }
@@ -276,11 +321,36 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
   return releases
 }
 
+export function semverStringToObject(semver: string): SemverObject {
+  const vIdentifierIndex = semver.indexOf('v')
+  const trimmedSemver = vIdentifierIndex === -1 ? semver : semver.slice(vIdentifierIndex + 1)
+  const [version, metadata] = trimmedSemver.split('-')
+  const [major, minor, patch] = version.split('.')
+  const majorNum: number = Number(major)
+  const minorNum: number = Number(minor)
+  const patchNum: number = Number(patch)
+  return { major: majorNum, minor: minorNum, patch: patchNum, ...(metadata && { metadata }) }
+}
+
+export function semverObjectToString(semver: SemverObject): string {
+  if (!semver) {
+    return ''
+  }
+  let metadata = ''
+  if (semver.metadata != undefined) {
+    metadata = `-${semver.metadata}`
+  } else {
+    metadata = ``
+  }
+  return `${semver.major}.${semver.minor}.${semver.patch}${metadata}`
+}
+
 export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
+  const semverObj = semverStringToObject(semver)
   const release = await Release.findOne({
     modelId,
-    semver,
+    semver: semverObj,
   })
 
   if (!release) {
@@ -293,6 +363,136 @@ export async function getReleaseBySemver(user: UserInterface, modelId: string, s
   }
 
   return release
+}
+
+function parseSemverQuery(querySemver: string) {
+  const semverRangeStandardised = semver.validRange(querySemver, { includePrerelease: false })
+
+  if (!semverRangeStandardised) {
+    throw BadReq('Semver range is invalid.', { semverQuery: querySemver })
+  }
+
+  const [expressionA, expressionB] = semverRangeStandardised.split(' ')
+
+  let lowerInclusivity: boolean = false
+  let upperInclusivity: boolean = false
+  let lowerSemverObj: SemverObject | undefined
+  let upperSemverObj: SemverObject | undefined
+
+  //LOWER SEMVER
+  if (expressionA.includes('>')) {
+    lowerInclusivity = expressionA.includes('>=')
+    lowerSemverObj = semverStringToObject(expressionA.replace(/[<>=]/g, ''))
+  } else {
+    //upper semver
+    upperInclusivity = expressionA.includes('<=')
+    upperSemverObj = semverStringToObject(expressionA.replace(/[<=]/g, ''))
+  }
+
+  if (expressionB) {
+    upperInclusivity = expressionB.includes('<=')
+    upperSemverObj = semverStringToObject(expressionB.replace(/[<=]/g, ''))
+  }
+
+  return { lowerSemverObj, upperSemverObj, lowerInclusivity, upperInclusivity }
+}
+
+interface QueryBoundInterface {
+  $or: (
+    | {
+        'semver.major':
+          | {
+              $lte: number
+            }
+          | {
+              $gte: number
+            }
+        'semver.minor':
+          | {
+              $lte: number
+            }
+          | { $gte: number }
+        'semver.patch':
+          | {
+              $gte: number
+            }
+          | { $gt: number }
+          | { $lte: number }
+          | { $lt: number }
+      }
+    | {
+        'semver.major':
+          | {
+              $gt: number
+            }
+          | { $lt: number }
+      }
+    | {
+        'semver.major':
+          | {
+              $gte: number
+            }
+          | { $lte: number }
+        'semver.minor':
+          | {
+              $gt: number
+            }
+          | { $lt: number }
+      }
+  )[]
+}
+
+function convertSemverQueryToMongoQuery(querySemver: string, modelID: string) {
+  const { lowerSemverObj, upperSemverObj, lowerInclusivity, upperInclusivity } = parseSemverQuery(querySemver)
+
+  const queryQueue: QueryBoundInterface[] = []
+
+  if (lowerSemverObj) {
+    const lowerQuery: QueryBoundInterface = {
+      $or: [
+        {
+          'semver.major': { $gte: lowerSemverObj.major },
+          'semver.minor': { $gte: lowerSemverObj.minor },
+          'semver.patch': lowerInclusivity ? { $gte: lowerSemverObj.patch } : { $gt: lowerSemverObj.patch },
+        },
+        {
+          'semver.major': { $gt: lowerSemverObj.major },
+        },
+        {
+          'semver.major': { $gte: lowerSemverObj.major },
+          'semver.minor': { $gt: lowerSemverObj.minor },
+        },
+      ],
+    }
+    queryQueue.push(lowerQuery)
+  }
+
+  if (upperSemverObj) {
+    const upperQuery: QueryBoundInterface = {
+      $or: [
+        {
+          'semver.major': { $lte: upperSemverObj.major },
+          'semver.minor': { $lte: upperSemverObj.minor },
+          'semver.patch': upperInclusivity ? { $lte: upperSemverObj.patch } : { $lt: upperSemverObj.patch },
+        },
+        {
+          'semver.major': { $lt: upperSemverObj.major },
+        },
+        {
+          'semver.major': { $lte: upperSemverObj.major },
+          'semver.minor': { $lt: upperSemverObj.minor },
+        },
+      ],
+    }
+    queryQueue.push(upperQuery)
+  }
+
+  const combinedQuery = {
+    modelId: modelID,
+    $and: queryQueue,
+  }
+
+  return combinedQuery
 }
 
 export async function deleteRelease(user: UserInterface, modelId: string, semver: string) {
@@ -358,8 +558,9 @@ export async function getFileByReleaseFileName(user: UserInterface, modelId: str
 }
 
 export async function getAllFileIds(modelId: string, semvers: string[]) {
+  const semverObjs = semvers.map((semver) => semverStringToObject(semver))
   const result = await Release.aggregate()
-    .match({ modelId, semver: { $in: semvers } })
+    .match({ modelId, semver: { $in: semverObjs } })
     .unwind({ path: '$fileIds' })
     .group({
       _id: null,
@@ -371,4 +572,19 @@ export async function getAllFileIds(modelId: string, semvers: string[]) {
     return result.at(0).fileIds
   }
   return []
+}
+
+export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
+  const foundRelease = await Release.findOneAndUpdate(
+    { modelId: release.modelId, semver: semverStringToObject(release.semver) },
+    release,
+    {
+      upsert: true,
+    },
+  )
+
+  if (!foundRelease) {
+    // This release did not already exist in Mongo, so it is a new release. Return it to be audited.
+    return release
+  }
 }

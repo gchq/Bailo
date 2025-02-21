@@ -11,6 +11,7 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { UserSettingsInterface } from '../../models/UserSettings.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
+import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 
 const AuditKind = {
@@ -41,6 +42,7 @@ export const AuditInfo = {
   ViewFile: { typeId: 'ViewFile', description: 'File Downloaded', auditKind: AuditKind.View },
   ViewFiles: { typeId: 'ViewFiles', description: 'File Information Viewed', auditKind: AuditKind.View },
   DeleteFile: { typeId: 'DeleteFile', description: 'File Information Deleted', auditKind: AuditKind.Delete },
+  UpdateFile: { typeId: 'UpdateFile', description: 'File Information Updated', auditKind: AuditKind.Update },
 
   CreateRelease: { typeId: 'CreateRelease', description: 'Release Created', auditKind: AuditKind.Create },
   ViewRelease: { typeId: 'ViewRelease', description: 'Release Viewed', auditKind: AuditKind.View },
@@ -146,6 +148,7 @@ export abstract class BaseAuditConnector {
   abstract onViewFile(req: Request, file: FileInterfaceDoc)
   abstract onViewFiles(req: Request, modelId: string, files: FileInterface[])
   abstract onDeleteFile(req: Request, modelId: string, fileId: string)
+  abstract onUpdateFile(req: Request, modelId: string, fileId: string)
 
   abstract onCreateRelease(req: Request, release: ReleaseDoc)
   abstract onViewRelease(req: Request, release: ReleaseDoc)
@@ -194,17 +197,17 @@ export abstract class BaseAuditConnector {
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[])
   abstract onCreateImport(
     req: Request,
-    mirroredModelId: string,
+    mirroredModel: ModelInterface,
     sourceModelId: string,
-    modelCardVersions: number[],
     exporter: string,
+    importResult: MongoDocumentImportInformation | FileImportInformation,
   )
 
   abstract onError(req: Request, error: BailoError)
 
   checkEventType(auditInfo: AuditInfoKeys, req: Request) {
     if (auditInfo.typeId !== req.audit.typeId && auditInfo.description !== req.audit.description) {
-      throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but recieved '${JSON.stringify(req.audit)}'`)
+      throw new Error(`Audit: Expected type '${JSON.stringify(auditInfo)}' but received '${JSON.stringify(req.audit)}'`)
     }
   }
 }
