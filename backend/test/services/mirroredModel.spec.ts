@@ -278,7 +278,7 @@ describe('services > mirroredModel', () => {
       { _id: '321', toJSON: vi.fn() },
     ])
     fileMocks.getFileAvScansByFileIds.mockReturnValueOnce([
-      { artefactType: ArtefactType.File, fileId: '123', state: 'inProgress' },
+      { artefactType: ArtefactType.File, fileId: '123', state: 'inProgress' } as any,
       { artefactType: ArtefactType.File, fileId: '321', state: 'complete', isInfected: false },
     ])
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])

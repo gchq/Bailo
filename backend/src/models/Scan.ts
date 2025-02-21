@@ -52,7 +52,7 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
         if (this['artefactType'] === ArtefactType.File && val) {
           return true
         }
-        throw new Error(`Cannot provide an 'fileId' with '${JSON.stringify({ artefactType: this['artefactType'] })}'`)
+        throw new Error(`Cannot provide a 'fileId' with '${JSON.stringify({ artefactType: this['artefactType'] })}'`)
       },
     },
     imageDigest: {
