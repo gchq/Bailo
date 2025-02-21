@@ -1,5 +1,4 @@
-"""Common utilities used by the FastAPI app.
-"""
+"""Common utilities used by the FastAPI app."""
 
 from __future__ import annotations
 

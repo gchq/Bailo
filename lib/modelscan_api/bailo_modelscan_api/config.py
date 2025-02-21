@@ -1,5 +1,4 @@
-"""Configuration settings for FastAPI app.
-"""
+"""Configuration settings for FastAPI app."""
 
 from __future__ import annotations
 

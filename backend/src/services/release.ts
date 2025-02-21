@@ -21,7 +21,32 @@ import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
-async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
+export function isReleaseDoc(data: unknown): data is ReleaseDoc {
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+
+  if (
+    !('modelId' in data) ||
+    !('modelCardVersion' in data) ||
+    !('semver' in data) ||
+    !('notes' in data) ||
+    !('minor' in data) ||
+    !('draft' in data) ||
+    !('fileIds' in data) ||
+    !('images' in data) ||
+    !('deleted' in data) ||
+    !('createdBy' in data) ||
+    !('createdAt' in data) ||
+    !('updatedAt' in data) ||
+    !('_id' in data)
+  ) {
+    return false
+  }
+  return true
+}
+
+export async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
   if (!semver.valid(release.semver)) {
     throw BadReq(`The version '${release.semver}' is not a valid semver value.`)
   }
@@ -202,6 +227,13 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
     throw NotFound(`The requested release was not found.`, { modelId, semver })
   }
 
+  sendWebhooks(
+    release.modelId,
+    WebhookEvent.UpdateRelease,
+    `Release ${release.semver} has been updated for model ${release.modelId}`,
+    { release },
+  )
+
   return updatedRelease
 }
 
@@ -276,12 +308,12 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
     throw NotFound('The following releases were not found.', { modelId, releases: missing })
   }
 
-  const auths = await authorisation.releases(user, model, releases, ReleaseAction.Update)
-  const noAuth = releases.filter((_, i) => !auths[i].success)
-  if (noAuth.length > 0) {
+  const authResponses = await authorisation.releases(user, model, releases, ReleaseAction.Export)
+  const failedReleases = releases.filter((_, i) => !authResponses[i].success)
+  if (failedReleases.length > 0) {
     throw Forbidden('You do not have the necessary permissions to export these releases.', {
       modelId,
-      releases: noAuth.map((release) => release.semver),
+      releases: failedReleases.map((release) => release.semver),
       user,
     })
   }
@@ -540,4 +572,19 @@ export async function getAllFileIds(modelId: string, semvers: string[]) {
     return result.at(0).fileIds
   }
   return []
+}
+
+export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
+  const foundRelease = await Release.findOneAndUpdate(
+    { modelId: release.modelId, semver: semverStringToObject(release.semver) },
+    release,
+    {
+      upsert: true,
+    },
+  )
+
+  if (!foundRelease) {
+    // This release did not already exist in Mongo, so it is a new release. Return it to be audited.
+    return release
+  }
 }

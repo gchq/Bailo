@@ -10,6 +10,7 @@ import {
   getFilesByIds,
   getFilesByModel,
   getTotalFileSize,
+  isFileInterfaceDoc,
   removeFile,
   rerunFileScan,
   uploadFile,
@@ -393,5 +394,48 @@ describe('services > file', () => {
     await expect(rerunFileScan({} as any, 'model123', 'file123')).rejects.toThrowError(
       /^Please wait 5 minutes before attempting a rescan file.txt/,
     )
+  })
+
+  test('isFileInterfaceDoc > success', async () => {
+    const result = isFileInterfaceDoc({
+      modelId: '',
+      name: '',
+      size: 1,
+      mime: '',
+      bucket: '',
+      path: '',
+      complete: true,
+      avScan: [],
+      deleted: false,
+      createdAt: '',
+      updatedAt: '',
+      _id: '',
+    })
+
+    expect(result).toBe(true)
+  })
+
+  test('isFileInterfaceDoc > missing property', async () => {
+    const result = isFileInterfaceDoc({
+      modelId: '',
+      name: '',
+      size: 1,
+      mime: '',
+      path: '',
+      complete: true,
+      avScan: [],
+      deleted: false,
+      createdAt: '',
+      updatedAt: '',
+      _id: '',
+    })
+
+    expect(result).toBe(false)
+  })
+
+  test('isFileInterfaceDoc > wrong type', async () => {
+    const result = isFileInterfaceDoc(null)
+
+    expect(result).toBe(false)
   })
 })

@@ -1,5 +1,5 @@
-import { Document, model, Schema } from 'mongoose'
-import MongooseDelete from 'mongoose-delete'
+import { model, Schema } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 export const Decision = {
   RequestChanges: 'request_changes',
@@ -44,9 +44,9 @@ export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ResponseDoc = ResponseInterface & Document<any, any, ResponseInterface>
+export type ResponseDoc = ResponseInterface & SoftDeleteDocument
 
-const ResponseSchema = new Schema<ResponseInterface>(
+const ResponseSchema = new Schema<ResponseDoc>(
   {
     entity: { type: String, required: true },
     kind: { type: String, enum: Object.values(ResponseKind), required: true },
@@ -72,8 +72,9 @@ ResponseSchema.plugin(MongooseDelete, {
   overrideMethods: 'all',
   deletedBy: true,
   deletedByType: String,
+  deletedAt: true,
 })
 
-const ResponseModel = model<ResponseInterface>('v2_response', ResponseSchema)
+const ResponseModel = model<ResponseDoc>('v2_response', ResponseSchema)
 
 export default ResponseModel

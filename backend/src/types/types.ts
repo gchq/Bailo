@@ -100,4 +100,9 @@ export interface UiConfig {
   helpPopoverText: {
     manualEntryAccess: string
   }
+
+  modelDetails: {
+    organisations: string[]
+    states: string[]
+  }
 }

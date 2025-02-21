@@ -80,6 +80,7 @@ oauth:
     response: [] #example 'tokens', 'raw', 'jwt'
     callback: "" # example /
     subdomain: "cognito domain"
+    adminGroupName: ''
   identityProviderClient:
     userPoolId: "region_id"
     userIdAttribute: "name"
@@ -233,6 +234,10 @@ config:
     helpPopoverText:
       manualEntryAccess: ''
 
+    modelDetails:
+      organisations: []
+      states: []
+
   smtp:
     #host: 'mail' #service name
     port: 1025
@@ -245,6 +250,10 @@ config:
   app:
     protocol: "https"
     port: 443
+
+  issueLinks:
+    support: "mailto:?subject=Bailo%20Contact"
+    contact: "mailto:?subject=Bailo%20Contact"
 
 # nginx.deployment registry.deployment
 nginxcert:
@@ -299,7 +308,7 @@ backend:
 clamav:
   enabled: false
   runAsUser: 1002
-  image: clamav/clamav:latest_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
+  image: clamav/clamav:1.4.2_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
   port: 3310
   accessModes:
     - ReadWriteOnce

@@ -1,17 +1,22 @@
 # syntax=docker/dockerfile:1
-FROM python:3.13.1-bullseye AS sphinx-docs
+FROM python:3.13.2-bullseye AS sphinx-docs
 
-RUN apt update && apt install -y pandoc
+# Prevents Python from writing pyc files.
+ENV PYTHONDONTWRITEBYTECODE=1
+# Keeps Python from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y pandoc && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/docs
 
 COPY docs .
 
-RUN pip install bailo -r requirements.txt
+RUN pip install --no-cache-dir --upgrade bailo -r requirements.txt
 
 RUN make dirhtml
 
-FROM node:22.6.0-alpine AS installer
+FROM node:22.14.0-alpine AS installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -24,7 +29,7 @@ RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 COPY . .
 RUN npm run build
 
-FROM node:22.6.0-alpine AS runner
+FROM node:22.14.0-alpine AS runner
 
 RUN apk update
 RUN apk add --no-cache libc6-compat ca-certificates
@@ -38,7 +43,7 @@ COPY --from=installer /app/config config
 COPY --from=installer /app/dist .
 COPY --from=sphinx-docs /app/docs/python-docs python-docs
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 EXPOSE 3001
 
 CMD ["node", "src/index.js"]

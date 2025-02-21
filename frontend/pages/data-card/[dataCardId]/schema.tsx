@@ -1,5 +1,5 @@
 import { useGetModel } from 'actions/model'
-import _ from 'lodash-es'
+import * as _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'

@@ -14,15 +14,15 @@ class _Pickler(pickle._Pickler):
 
     def dump(self, obj):
         "Pickle data, inject object before or after"
-        if self.proto >= 2:  # type: ignore
-            self.write(pickle.PROTO + struct.pack("<B", self.proto))  # type: ignore
-        if self.proto >= 4:  # type: ignore
-            self.framer.start_framing()  # type: ignore
+        if self.proto >= 2:
+            self.write(pickle.PROTO + struct.pack("<B", self.proto))
+        if self.proto >= 4:
+            self.framer.start_framing()
         for inj_obj in self.inj_objs:
-            self.save(inj_obj)  # type: ignore
-        self.save(obj)  # type: ignore
-        self.write(pickle.STOP)  # type: ignore
-        self.framer.end_framing()  # type: ignore
+            self.save(inj_obj)
+        self.save(obj)
+        self.write(pickle.STOP)
+        self.framer.end_framing()
 
 
 class _PickleInject:

@@ -24,6 +24,7 @@ import { FormEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
+import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import SourceModelInput from 'src/entry/SourceModelnput'
 import MessageAlert from 'src/MessageAlert'
@@ -54,6 +55,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [name, setName] = useState('')
   const [sourceModelId, setSourceModelId] = useState('')
   const [description, setDescription] = useState('')
+  const [organisation, setOrganisation] = useState<string>('')
   const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
@@ -82,6 +84,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
       name,
       kind: entryKind,
       description,
+      organisation,
       visibility,
       collaborators,
       settings: {
@@ -191,6 +194,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               </Typography>
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
                 <EntryNameInput autoFocus value={name} kind={entryKind} onChange={(value) => setName(value)} />
+                <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
                 {createEntryKind === CreateEntryKind.MIRRORED_MODEL && (
                   <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
                 )}

@@ -1,5 +1,5 @@
-import { Document, model, Schema } from 'mongoose'
-import MongooseDelete from 'mongoose-delete'
+import { model, Schema } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 
@@ -21,9 +21,9 @@ export interface ReviewInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ReviewDoc = ReviewInterface & Document<any, any, ReviewInterface>
+export type ReviewDoc = ReviewInterface & SoftDeleteDocument
 
-const ReviewSchema = new Schema<ReviewInterface>(
+const ReviewSchema = new Schema<ReviewDoc>(
   {
     semver: {
       type: String,
@@ -64,8 +64,9 @@ ReviewSchema.plugin(MongooseDelete, {
   overrideMethods: 'all',
   deletedBy: true,
   deletedByType: String,
+  deletedAt: true,
 })
 
-const ReviewModel = model<ReviewInterface>('v2_Review', ReviewSchema)
+const ReviewModel = model<ReviewDoc>('v2_Review', ReviewSchema)
 
 export default ReviewModel

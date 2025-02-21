@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
 import logging
+from typing import Any
 
 from bailo.core.client import Client
 from bailo.core.enums import EntryKind, ModelVisibility
@@ -18,6 +18,8 @@ class Datacard(Entry):
     :param datacard_id: A unique ID for the datacard
     :param name: Name of datacard
     :param description: Description of datacard
+    :param organisation: Organisation responsible for the model, defaults to None
+    :param state: Development readiness of the model, defaults to None
     :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -27,6 +29,8 @@ class Datacard(Entry):
         datacard_id: str,
         name: str,
         description: str,
+        organisation: str | None = None,
+        state: str | None = None,
         visibility: ModelVisibility | None = None,
     ) -> None:
         super().__init__(
@@ -35,6 +39,8 @@ class Datacard(Entry):
             name=name,
             description=description,
             kind=EntryKind.DATACARD,
+            organisation=organisation,
+            state=state,
             visibility=visibility,
         )
 
@@ -46,6 +52,8 @@ class Datacard(Entry):
         client: Client,
         name: str,
         description: str,
+        organisation: str | None = None,
+        state: str | None = None,
         visibility: ModelVisibility | None = None,
     ) -> Datacard:
         """Build a datacard from Bailo and upload it.
@@ -53,6 +61,8 @@ class Datacard(Entry):
         :param client: A client object used to interact with Bailo
         :param name: Name of datacard
         :param description: Description of datacard
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
         :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Datacard object
         """
@@ -61,6 +71,8 @@ class Datacard(Entry):
             kind=EntryKind.DATACARD,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
         datacard_id = res["model"]["id"]
         logger.info(f"Datacard successfully created on server with ID %s.", datacard_id)
@@ -70,6 +82,8 @@ class Datacard(Entry):
             datacard_id=datacard_id,
             name=name,
             description=description,
+            organisation=organisation,
+            state=state,
             visibility=visibility,
         )
 
@@ -98,6 +112,8 @@ class Datacard(Entry):
             datacard_id=datacard_id,
             name=res["name"],
             description=res["description"],
+            organisation=res.get("organisation"),
+            state=res.get("state"),
         )
         datacard._unpack(res)
 

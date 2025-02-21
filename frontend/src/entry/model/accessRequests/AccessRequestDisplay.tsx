@@ -1,6 +1,6 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import { Card, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Card, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useEffect, useState } from 'react'
@@ -107,13 +107,13 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
                 <Typography variant='subtitle2' component='h3' mb={1}>
                   Users
                 </Typography>
-                <Grid container>
+                <Grid2 container>
                   {accessRequest.metadata.overview.entities.map((entity) => (
-                    <Grid item xs={3} key={entity}>
+                    <Grid2 size={{ xs: 3 }} key={entity}>
                       <UserDisplay dn={entity} />
-                    </Grid>
+                    </Grid2>
                   ))}
-                </Grid>
+                </Grid2>
               </Card>
             </Stack>
             <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2} sx={{ pt: 2 }}>

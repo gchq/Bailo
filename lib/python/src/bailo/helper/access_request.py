@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
 import logging
+from typing import Any
 
 from bailo.core.client import Client
 from bailo.core.enums import MinimalSchema

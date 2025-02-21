@@ -159,7 +159,12 @@ export async function postModel(form: EntryForm) {
 
 export async function patchModel(
   id: string,
-  delta: Partial<Pick<EntryInterface, 'name' | 'description' | 'collaborators' | 'visibility' | 'settings'>>,
+  delta: Partial<
+    Pick<
+      EntryInterface,
+      'name' | 'description' | 'collaborators' | 'visibility' | 'settings' | 'organisation' | 'state'
+    >
+  >,
 ) {
   return fetch(`/api/v2/model/${id}`, {
     method: 'PATCH',
