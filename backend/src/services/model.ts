@@ -27,6 +27,12 @@ export type CreateModelParams = Pick<
   ModelInterface,
   'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
 >
+
+type ModelSearchResult = {
+  models: Array<ModelInterface>
+  totalEntries: number
+}
+
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
@@ -114,7 +120,9 @@ export async function searchModels(
   task?: string,
   allowTemplating?: boolean,
   schemaId?: string,
-): Promise<Array<ModelInterface>> {
+  currentPage?: number,
+  pageSize?: number,
+): Promise<ModelSearchResult> {
   const query: any = {}
 
   if (kind) {
@@ -164,21 +172,17 @@ export async function searchModels(
     }
   }
 
-  let cursor = ModelModel
-    // Find only matching documents
-    .find(query)
+  const results = await ModelModel.find(query).sort(!search ? { updatedAt: -1 } : { score: { $meta: 'textScore' } })
 
-  if (!search) {
-    // Sort by last updated
-    cursor = cursor.sort({ updatedAt: -1 })
-  } else {
-    // Sort by text search
-    cursor = cursor.sort({ score: { $meta: 'textScore' } })
-  }
-
-  const results = await cursor
+  // As we need to authenticate which models the user has permission to, we need to fetch all models that
+  // match the query first, and then filter them based on pagination.
   const auths = await authorisation.models(user, results, ModelAction.View)
-  return results.filter((_, i) => auths[i].success)
+  const authorisedResults = results.filter((_, i) => auths[i].success)
+  if (!pageSize || !currentPage) {
+    return { models: authorisedResults, totalEntries: authorisedResults.length }
+  }
+  const paginatedResults = authorisedResults.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  return { models: paginatedResults, totalEntries: authorisedResults.length }
 }
 
 export async function getModelCard(
