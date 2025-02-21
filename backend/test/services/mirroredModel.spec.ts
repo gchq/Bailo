@@ -288,7 +288,7 @@ describe('services > mirroredModel', () => {
 
   test('exportModel > export missing file scan', async () => {
     fileMocks.getFilesByIds.mockReturnValueOnce([
-      { _id: '123', toJSON: vi.fn() } as any,
+      { _id: '123', toJSON: vi.fn() },
       { _id: '321', toJSON: vi.fn() },
       { _id: '321', toJSON: vi.fn() },
     ])
