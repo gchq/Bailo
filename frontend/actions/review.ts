@@ -71,14 +71,14 @@ export function useGetReviewRequestsForModel({ modelId, semver, accessRequestId 
 type PostReviewResponseParams = {
   modelId: string
   decision: DecisionKeys
-  comment: string
+  reviewForm: unknown
   role: string
 } & SemverOrAccessRequestId
 
 export async function postReviewResponse({
   modelId,
   role,
-  comment,
+  reviewForm,
   decision,
   semver,
   accessRequestId,
@@ -88,7 +88,7 @@ export async function postReviewResponse({
     {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ comment, decision, role }),
+      body: JSON.stringify({ reviewForm, decision, role }),
     },
   )
 }
