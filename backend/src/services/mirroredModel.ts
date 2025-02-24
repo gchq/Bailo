@@ -605,7 +605,7 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
       failedScan: Array<{ name: string; id: string }>
     } = { missingScan: [], incompleteScan: [], failedScan: [] }
     for (const file of files) {
-      if (!file.avScan) {
+      if (!file.avScan || file.avScan.length === 0) {
         scanErrors.missingScan.push({ name: file.name, id: file.id })
       } else if (file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
         scanErrors.incompleteScan.push({ name: file.name, id: file.id })
