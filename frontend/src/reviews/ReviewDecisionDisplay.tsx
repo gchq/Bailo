@@ -6,16 +6,20 @@ import { Box, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } fro
 import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
 import { patchResponse } from 'actions/response'
+import { useGetSchema } from 'actions/schema'
 import { useGetUserInformation } from 'actions/user'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
+import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import MessageAlert from 'src/MessageAlert'
 import EditableReviewComment from 'src/reviews/EditableReviewComment'
-import { Decision, EntityKind, ResponseInterface, User } from 'types/types'
+import ReactionButtons from 'src/reviews/ReactionButtons'
+import { Decision, EntityKind, ResponseInterface, SplitSchemaNoRender, User } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
+import { getStepsFromSchema } from 'utils/formUtils'
 import { getRoleDisplay } from 'utils/roles'
 
 type ReviewDecisionDisplayProps = {
@@ -38,17 +42,28 @@ export default function ReviewDecisionDisplay({
   const [isEditMode, setIsEditMode] = useState(false)
   const [comment, setComment] = useState(response.comment || '')
   const [errorMessage, setErrorMessage] = useState('')
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
 
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     response.entity.split(':')[1],
   )
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema('minimal_review_schema_v1')
 
   const [entityKind, username] = useMemo(() => response.entity.split(':'), [response.entity])
 
   const handleReactionsError = useCallback((message: string) => {
     setErrorMessage(message)
   }, [])
+
+  useEffect(() => {
+    if (!schema) return
+    const steps = getStepsFromSchema(schema, {}, [], response.reviewForm)
+    for (const step of steps) {
+      step.steps = steps
+    }
+    setSplitSchema({ reference: schema?.id, steps })
+  }, [schema])
 
   const handleReplyOnClick = (value: string | undefined) => {
     setAnchorEl(null)
@@ -60,28 +75,6 @@ export default function ReviewDecisionDisplay({
     }
   }
 
-  const handleEditOnClick = () => {
-    setAnchorEl(null)
-    setIsEditMode(true)
-  }
-
-  const handleEditOnCancel = () => {
-    setIsEditMode(false)
-    setErrorMessage('')
-    setComment(response.comment || '')
-  }
-
-  const handleEditOnSave = async () => {
-    setErrorMessage('')
-    const res = await patchResponse(response._id, comment)
-    if (!res.ok) {
-      setErrorMessage(await getErrorMessage(res))
-    } else {
-      mutateResponses()
-      setIsEditMode(false)
-    }
-  }
-
   if (isUserInformationError) {
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
   }
@@ -90,7 +83,15 @@ export default function ReviewDecisionDisplay({
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
+  if (isSchemaError) {
+    return <MessageAlert message={isSchemaError.info.message} severity='error' />
+  }
+
   if (isUserInformationLoading) {
+    return <Loading />
+  }
+
+  if (isSchemaLoading) {
     return <Loading />
   }
 
@@ -143,22 +144,13 @@ export default function ReviewDecisionDisplay({
             </Stack>
           </Stack>
           <Divider sx={{ mt: 1, mb: 2 }} />
-          <EditableReviewComment
-            comment={comment}
-            onCommentChange={setComment}
-            response={response}
-            isEditMode={isEditMode}
-            onSave={handleEditOnSave}
-            onCancel={handleEditOnCancel}
-            onReactionsError={handleReactionsError}
-            mutateResponses={mutateResponses}
-          />
+          <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={false} flatSchema />
           <MessageAlert message={errorMessage} severity='error' />
+          <ReactionButtons response={response} mutateResponses={mutateResponses} onError={handleReactionsError} />
         </Card>
       </Stack>
       <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
         <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>
-        {currentUser && currentUser.dn === username && <MenuItem onClick={handleEditOnClick}>Edit comment</MenuItem>}
       </Menu>
     </>
   )

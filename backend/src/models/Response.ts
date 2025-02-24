@@ -20,6 +20,7 @@ export interface ResponseInterface {
   role?: string
   decision?: DecisionKeys
   comment?: string
+  reviewForm?: unknown
   parentId: Schema.Types.ObjectId
   reactions: ResponseReaction[]
   commentEditedAt?: string
@@ -53,6 +54,7 @@ const ResponseSchema = new Schema<ResponseDoc>(
     role: { type: String },
     decision: { type: String, enum: Object.values(Decision) },
     comment: { type: String },
+    reviewForm: { type: Schema.Types.Mixed },
     parentId: { type: Schema.Types.ObjectId, required: true },
     reactions: [
       {

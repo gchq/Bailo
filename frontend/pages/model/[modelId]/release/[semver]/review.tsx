@@ -37,7 +37,7 @@ export default function ReleaseReview() {
     semver: `${semver}`,
   })
 
-  async function handleSubmit(decision: DecisionKeys, comment: string, role: string) {
+  async function handleSubmit(decision: DecisionKeys, reviewForm: unknown, role: string) {
     setErrorMessage('')
     if (!modelId) {
       return setErrorMessage('Could not find model ID')
@@ -50,7 +50,7 @@ export default function ReleaseReview() {
     const res = await postReviewResponse({
       modelId,
       role,
-      comment,
+      reviewForm,
       decision,
       semver,
     })

@@ -2,6 +2,7 @@ export const SchemaKind = {
   Model: 'model',
   AccessRequest: 'accessRequest',
   DataCard: 'dataCard',
+  Review: 'review',
 } as const
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 

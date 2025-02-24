@@ -14,10 +14,14 @@ import {
   DecisionKeys,
   ReleaseInterface,
   ReviewRequestInterface,
+  SplitSchemaNoRender,
 } from '../../types/types'
 import { getRoleDisplay } from '../../utils/roles'
 import MessageAlert from '../MessageAlert'
 import Loading from './Loading'
+import JsonSchemaForm from 'src/Form/JsonSchemaForm'
+import { useGetSchema } from 'actions/schema'
+import { validateForm, getStepsData, getStepsFromSchema } from 'utils/formUtils'
 
 type PartialReviewWithCommentProps =
   | {
@@ -44,6 +48,7 @@ export default function ReviewWithComment({
   const router = useRouter()
   const [reviewComment, setReviewComment] = useState('')
   const [errorText, setErrorText] = useState('')
+  const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [selectOpen, setSelectOpen] = useState(false)
   const [showUndoButton, setShowUndoButton] = useState(false)
 
@@ -60,11 +65,21 @@ export default function ReviewWithComment({
     ...semverOrAccessRequestIdObject,
   })
 
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema('minimal_review_schema_v1')
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
   const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface>(
     reviews.find((review) => review.role === router.query.role) || reviews[0],
   )
+
+  useEffect(() => {
+    if (!schema) return
+    const steps = getStepsFromSchema(schema, {}, [], {})
+    for (const step of steps) {
+      step.steps = steps
+    }
+    setSplitSchema({ reference: schema?.id, steps })
+  }, [schema])
 
   function invalidComment() {
     return reviewComment.trim() === '' ? true : false
@@ -93,6 +108,15 @@ export default function ReviewWithComment({
 
   function submitForm(decision: DecisionKeys) {
     setErrorText('')
+    if (schema) {
+      for (const step of splitSchema.steps) {
+        const isValid = validateForm(step)
+        if (!isValid) {
+          return
+        }
+      }
+    }
+    const data = getStepsData(splitSchema, true)
 
     if (invalidComment() && decision === Decision.RequestChanges) {
       setErrorText('You must submit a comment when requesting changes.')
@@ -100,7 +124,7 @@ export default function ReviewWithComment({
       setErrorText('Please select a role before submitting your review.')
     } else {
       setReviewComment('')
-      onSubmit(decision, reviewComment, reviewRequest.role)
+      onSubmit(decision, data, reviewRequest.role)
     }
   }
 
@@ -122,9 +146,13 @@ export default function ReviewWithComment({
     return <MessageAlert message={isResponsesError.info.message} severity='error' />
   }
 
+  if (isSchemaError) {
+    return <MessageAlert message={isSchemaError.info.message} severity='error' />
+  }
+
   return (
     <>
-      {(isReviewsLoading || isModelRolesLoading || isResponsesLoading) && <Loading />}
+      {(isReviewsLoading || isModelRolesLoading || isResponsesLoading || isSchemaLoading) && <Loading />}
       <div data-test='reviewWithCommentContent'>
         {modelRoles.length === 0 && (
           <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>
@@ -149,18 +177,7 @@ export default function ReviewWithComment({
               options={reviews}
               renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
             />
-            <TextField
-              size='small'
-              minRows={4}
-              maxRows={8}
-              multiline
-              placeholder='Leave a comment'
-              data-test='reviewWithCommentTextField'
-              value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              error={errorText.length > 0}
-              helperText={errorText}
-            />
+            <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit flatSchema />
             <Stack
               spacing={2}
               direction={{ sm: 'row', xs: 'column' }}
@@ -200,6 +217,9 @@ export default function ReviewWithComment({
                 </LoadingButton>
               </Stack>
             </Stack>
+            <Typography variant='caption' color={theme.palette.error.main}>
+              {errorText}
+            </Typography>
           </Stack>
         )}
       </div>

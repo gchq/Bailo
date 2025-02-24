@@ -87,7 +87,7 @@ export async function updateResponseReaction(user: UserInterface, responseId: st
   return response
 }
 
-export type ReviewResponseParams = Pick<ResponseInterface, 'comment' | 'decision'>
+export type ReviewResponseParams = Pick<ResponseInterface, 'comment' | 'decision' | 'reviewForm'>
 export async function respondToReview(
   user: UserInterface,
   modelId: string,
@@ -96,6 +96,7 @@ export async function respondToReview(
   kind: ReviewKindKeys,
   reviewId: string,
 ): Promise<ResponseInterface> {
+  console.log(response)
   const review = await findReviewForResponse(user, modelId, role, kind, reviewId)
 
   // Store the response

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "overview": {
+      "title": "Overview",
+      "description": "Summary of the model functionality.",
+      "type": "object",
+      "properties": {
+        "comment": {
+          "title": "Leave a comment",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 5000
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}
