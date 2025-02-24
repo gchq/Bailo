@@ -55,7 +55,7 @@ const FileSchema = new Schema<FileInterfaceDoc>(
       required: false,
       // prevent legacy field from being used
       validate: function (val: any): boolean {
-        return val === undefined
+        return val === undefined || val.length === 0
       },
     },
 

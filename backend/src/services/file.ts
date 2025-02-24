@@ -149,7 +149,7 @@ export async function getFilesByIds(user: UserInterface, modelId: string, fileId
 
   const fileAvScans = await ScanModel.find({ fileId: { $in: fileIds } })
   const filesWithAvScans = files.map((file) => {
-    const relevantAvScans = fileAvScans.filter((scan, _) => scan.fileId === file._id)
+    const relevantAvScans = fileAvScans.filter((scan, _) => scan.fileId === file._id.toString())
     file.avScan = (file.avScan || []).concat(relevantAvScans)
     return file
   })
