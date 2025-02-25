@@ -1,4 +1,4 @@
-import { UiSchema } from '@rjsf/utils'
+import { RJSFSchema, UiSchema } from '@rjsf/utils'
 import { Dispatch, SetStateAction } from 'react'
 
 export interface BailoError extends Error {
@@ -121,6 +121,7 @@ export interface ResponseInterface {
   parentId: string
   outdated?: boolean
   decision?: DecisionKeys
+  reviewForm?: unknown
   comment?: string
   role?: string
   reactions: ResponseReaction[]
@@ -171,7 +172,7 @@ export interface SchemaInterface {
   kind: SchemaKindKeys
   meta: unknown
   uiSchema: unknown
-  schema: unknown
+  jsonSchema: RJSFSchema
   createdAt: Date
   updatedAt: Date
 }
@@ -205,6 +206,7 @@ export const SchemaKind = {
   MODEL: 'model',
   ACCESS_REQUEST: 'accessRequest',
   DATA_CARD: 'dataCard',
+  REVIEW: 'review',
 } as const
 
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]

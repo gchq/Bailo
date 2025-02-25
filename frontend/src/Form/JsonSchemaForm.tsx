@@ -17,12 +17,14 @@ export default function JsonSchemaForm({
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
+  flatSchema = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
+  flatSchema?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const theme = useTheme()
@@ -53,28 +55,30 @@ export default function JsonSchemaForm({
 
   return (
     <Grid2 container spacing={2} sx={{ mt: 1 }}>
-      <Grid2 size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
-        <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
-          <List sx={{ width: { xs: '100%' } }}>
-            {splitSchema.steps.map((step, index) => (
-              <ListItem key={step.schema.title} disablePadding sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
-                  <Typography
-                    sx={{
-                      wordBreak: 'break-word',
-                      color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.common.black,
-                    }}
-                    width='100%'
-                  >
-                    {step.schema.title}
-                  </Typography>
-                  {displayLabelValidation && <ValidationErrorIcon step={step} />}
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Stepper>
-      </Grid2>
+      {!flatSchema && (
+        <Grid2 size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
+          <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
+            <List sx={{ width: { xs: '100%' } }}>
+              {splitSchema.steps.map((step, index) => (
+                <ListItem key={step.schema.title} disablePadding sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
+                    <Typography
+                      sx={{
+                        wordBreak: 'break-word',
+                        color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.common.black,
+                      }}
+                      width='100%'
+                    >
+                      {step.schema.title}
+                    </Typography>
+                    {displayLabelValidation && <ValidationErrorIcon step={step} />}
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Stepper>
+        </Grid2>
+      )}
       <Grid2 size={{ xs: 12, md: 10 }}>
         <Form
           schema={currentStep.schema}
