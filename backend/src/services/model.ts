@@ -8,13 +8,19 @@ import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
-import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
+import {
+  GetModelCardVersionOptions,
+  GetModelCardVersionOptionsKeys,
+  GetModelFilters,
+  GetModelFiltersKeys,
+} from '../types/enums.js'
 import { EntityKind, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
+import { allReviewRoles } from './review.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -152,10 +158,24 @@ export async function searchModels(
     // The 'Unexpected filter' should never be reached, as we have guaranteed type consistency provided
     // by TypeScript.
     switch (filter) {
-      case 'mine':
+      case GetModelFilters.Mine:
         query.collaborators = {
           $elemMatch: {
             entity: { $in: await authentication.getEntities(user) },
+          },
+        }
+        break
+      case GetModelFilters.Reviewing:
+        query.collaborators = {
+          $elemMatch: {
+            entity: { $in: await authentication.getEntities(user) },
+            $or: [
+              ...allReviewRoles.map((role) => {
+                return {
+                  roles: role,
+                }
+              }),
+            ],
           },
         }
         break

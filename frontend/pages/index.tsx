@@ -30,7 +30,10 @@ interface KeyAndLabel {
   label: string
 }
 
-const searchFilterTypeLabels: KeyAndLabel[] = [{ key: 'mine', label: 'Mine' }]
+const searchFilterTypeLabels: KeyAndLabel[] = [
+  { key: 'mine', label: 'Mine' },
+  { key: 'reviewing', label: 'Reviewing' },
+]
 
 export default function Marketplace() {
   // TODO - fetch model tags from API
