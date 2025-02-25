@@ -16,7 +16,9 @@ export default function Files({ model }: FilesProps) {
   const entryFilesList = useMemo(
     () =>
       entryFiles.length ? (
-        entryFiles.map((file) => <FileDownload key={file.name} file={file} modelId={model.id} />)
+        entryFiles.map((file) => (
+          <FileDownload key={file.name} file={file} modelId={model.id} showAssociatedReleases={true} />
+        ))
       ) : (
         <EmptyBlob text={`No files found for model ${model.name}`} />
       ),
