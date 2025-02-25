@@ -9,7 +9,7 @@ import stream, { PassThrough, Readable } from 'stream'
 
 import { sign } from '../clients/kms.js'
 import { getObjectStream, objectExists, putObjectStream } from '../clients/s3.js'
-import { ModelAction } from '../connectors/authorisation/actions.js'
+import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
@@ -58,12 +58,14 @@ export async function exportModel(
   if (!model.card || !model.card.schemaId) {
     throw BadReq('You must select a schema for your model before you can start the export process.')
   }
-  const mirroredModelId = model.settings.mirror.destinationModelId
-  const auth = await authorisation.model(user, model, ModelAction.Update)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, model: model.id })
+  const modelAuth = await authorisation.model(user, model, ModelAction.Export)
+  if (!modelAuth.success) {
+    throw Forbidden(modelAuth.info, { userDn: user.dn, modelId })
   }
+  const mirroredModelId = model.settings.mirror.destinationModelId
+  const releases: ReleaseDoc[] = []
   if (semvers && semvers.length > 0) {
+    releases.push(...(await getReleasesForExport(user, model.id, semvers)))
     await checkReleaseFiles(user, model.id, semvers)
   }
   log.debug('Request checks complete')
@@ -72,7 +74,12 @@ export async function exportModel(
   const s3Stream = new PassThrough()
   zip.pipe(s3Stream)
 
-  await uploadToS3(`${modelId}.zip`, s3Stream, user.dn, modelId, mirroredModelId, { semvers })
+  await uploadToS3(
+    `${modelId}.zip`,
+    s3Stream,
+    { exporter: user.dn, sourceModelId: modelId, mirroredModelId, importKind: ImportKind.Documents },
+    { semvers },
+  )
 
   try {
     await addModelCardRevisionsToZip(user, model, zip)
@@ -80,8 +87,8 @@ export async function exportModel(
     throw InternalError('Error when adding the model card revision(s) to the zip file.', { error })
   }
   try {
-    if (semvers && semvers.length > 0) {
-      await addReleasesToZip(user, model, semvers, zip, mirroredModelId)
+    if (releases.length > 0) {
+      await addReleasesToZip(user, model, releases, zip, mirroredModelId)
     }
   } catch (error) {
     throw InternalError('Error when adding the release(s) to the zip file.', { error })
@@ -95,7 +102,10 @@ export const ImportKind = {
   File: 'file',
 } as const
 
-export type ImportKindKeys = (typeof ImportKind)[keyof typeof ImportKind]
+export type ImportKindKeys<T extends keyof typeof ImportKind | void = void> = T extends keyof typeof ImportKind
+  ? (typeof ImportKind)[T]
+  : (typeof ImportKind)[keyof typeof ImportKind]
+
 export type MongoDocumentImportInformation = {
   modelCardVersions: ModelCardRevisionDoc['version'][]
   newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
@@ -109,6 +119,7 @@ export type FileImportInformation = {
 }
 
 export async function importModel(
+  user: UserInterface,
   mirroredModelId: string,
   sourceModelId: string,
   payloadUrl: string,
@@ -128,6 +139,11 @@ export async function importModel(
 
   log.info({ mirroredModelId, payloadUrl }, 'Received a request to import a model.')
   const mirroredModel = await validateMirroredModel(mirroredModelId, sourceModelId)
+
+  const auth = await authorisation.model(user, mirroredModel, ModelAction.Export)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id })
+  }
 
   let res: Response
   try {
@@ -150,7 +166,7 @@ export async function importModel(
 
   switch (importKind) {
     case ImportKind.Documents: {
-      return await importDocuments(res, mirroredModelId, sourceModelId, payloadUrl)
+      return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl)
     }
     case ImportKind.File: {
       if (!filePath) {
@@ -169,7 +185,13 @@ export async function importModel(
   }
 }
 
-async function importDocuments(res: Response, mirroredModelId: string, sourceModelId: string, payloadUrl: string) {
+async function importDocuments(
+  user: UserInterface,
+  res: Response,
+  mirroredModelId: string,
+  sourceModelId: string,
+  payloadUrl: string,
+) {
   const modelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   const releases: Omit<ReleaseDoc, '_id'>[] = []
   const files: FileInterfaceDoc[] = []
@@ -205,23 +227,26 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
     }
   })
 
-  modelCardJsonStrings.forEach((modelCardJson) => {
-    const modelCard = parseModelCard(modelCardJson, mirroredModelId, sourceModelId)
-    modelCards.push(modelCard)
-  })
-
-  const newModelCards = (await Promise.all(modelCards.map((card) => saveImportedModelCard(card)))).filter(
-    (card): card is Omit<ModelCardRevisionDoc, '_id'> => !!card,
-  )
-
   releaseJsonStrings.forEach((releaseJson) => {
     const release = parseRelease(releaseJson, mirroredModelId, sourceModelId)
     releases.push(release)
   })
 
-  const newReleases = (await Promise.all(releases.map((release) => saveImportedRelease(release)))).filter(
-    (release): release is Omit<ReleaseDoc, '_id'> => !!release,
-  )
+  const mirroredModel = await getModelById(user, mirroredModelId)
+  const authResponses = await authorisation.releases(user, mirroredModel, releases, ReleaseAction.Import)
+  const failedReleases = releases.filter((_, i) => !authResponses[i].success)
+  if (failedReleases.length > 0) {
+    throw Forbidden('You do not have the necessary permissions to import these releases.', {
+      modelId: mirroredModelId,
+      releases: failedReleases.map((release) => release.semver),
+      user,
+    })
+  }
+
+  modelCardJsonStrings.forEach((modelCardJson) => {
+    const modelCard = parseModelCard(modelCardJson, mirroredModelId, sourceModelId)
+    modelCards.push(modelCard)
+  })
 
   await Promise.all(
     fileJsonStrings.map(async (fileJson) => {
@@ -230,11 +255,19 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
     }),
   )
 
+  const newModelCards = (await Promise.all(modelCards.map((card) => saveImportedModelCard(card)))).filter(
+    (card): card is Omit<ModelCardRevisionDoc, '_id'> => !!card,
+  )
+
+  const newReleases = (await Promise.all(releases.map((release) => saveImportedRelease(release)))).filter(
+    (release): release is Omit<ReleaseDoc, '_id'> => !!release,
+  )
+
   await Promise.all(files.map((file) => saveImportedFile(file)))
 
   log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
 
-  const mirroredModel = await setLatestImportedModelCard(mirroredModelId)
+  const updatedMirroredModel = await setLatestImportedModelCard(mirroredModelId)
 
   const modelCardVersions = modelCards.map((modelCard) => modelCard.version)
   const releaseSemvers = releases.map((release) => release.semver)
@@ -253,7 +286,7 @@ async function importDocuments(res: Response, mirroredModelId: string, sourceMod
   )
 
   return {
-    mirroredModel,
+    mirroredModel: updatedMirroredModel,
     importResult: {
       modelCardVersions,
       newModelCards,
@@ -323,7 +356,7 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
 
   try {
     file.complete = await objectExists(file.bucket, file.path)
-  } catch (error) {
+  } catch (_error) {
     throw InternalError('Failed to check if file exists.', { bucket: file.bucket, path: file.path })
   }
 
@@ -337,35 +370,35 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
   return file
 }
 
+type ExportMetadata = {
+  sourceModelId: string
+  mirroredModelId: string
+  exporter: string
+} & ({ importKind: ImportKindKeys<'Documents'> } | { importKind: ImportKindKeys<'File'>; filePath: string })
 async function uploadToS3(
   fileName: string,
   stream: Readable,
-  exporter: string,
-  sourceModelId: string,
-  mirroredModelId: string,
+  metadata: ExportMetadata,
   logData?: Record<string, unknown>,
-  metadata?: Record<string, string>,
 ) {
-  const s3Metadata = { sourceModelId, mirroredModelId, ...metadata }
-  const s3LogData = { ...s3Metadata, ...logData }
+  const s3LogData = { ...metadata, ...logData }
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug(logData, 'Using signatures. Uploading to temporary S3 location first.')
     uploadToTemporaryS3Location(fileName, stream, s3LogData).then(() =>
-      copyToExportBucketWithSignatures(fileName, exporter, s3LogData, s3Metadata).catch((error) =>
+      copyToExportBucketWithSignatures(fileName, s3LogData, metadata).catch((error) =>
         log.error({ error, ...logData }, 'Failed to upload export to export location with signatures'),
       ),
     )
   } else {
     log.debug(logData, 'Signatures not enabled. Uploading to export S3 location.')
-    uploadToExportS3Location(fileName, stream, s3LogData, s3Metadata)
+    uploadToExportS3Location(fileName, stream, s3LogData, metadata)
   }
 }
 
 async function copyToExportBucketWithSignatures(
   fileName: string,
-  exporter: string,
   logData: Record<string, unknown>,
-  metadata?: Record<string, string>,
+  metadata: ExportMetadata,
 ) {
   let signatures = {}
   log.debug(logData, 'Getting stream from S3 to generate signatures.')
@@ -382,7 +415,6 @@ async function copyToExportBucketWithSignatures(
   log.debug(logData, 'Getting stream from S3 to upload to export location.')
   const streamToCopy = await getObjectFromTemporaryS3Location(fileName, logData)
   await uploadToExportS3Location(fileName, streamToCopy, logData, {
-    exporter,
     ...signatures,
     ...metadata,
   })
@@ -451,7 +483,7 @@ async function uploadToExportS3Location(
   object: string,
   stream: Readable,
   logData: Record<string, unknown>,
-  metadata?: Record<string, string>,
+  metadata?: ExportMetadata,
 ) {
   const bucket = config.modelMirror.export.bucket
   try {
@@ -489,12 +521,12 @@ async function addModelCardRevisionsToZip(user: UserInterface, model: ModelDoc, 
 async function addReleasesToZip(
   user: UserInterface,
   model: ModelDoc,
-  semvers: string[],
+  releases: ReleaseDoc[],
   zip: archiver.Archiver,
   mirroredModelId: string,
 ) {
+  const semvers = releases.map((release) => release.semver)
   log.debug({ user, modelId: model.id, semvers }, 'Adding releases to zip file')
-  const releases = await getReleasesForExport(user, model.id, semvers)
 
   const errors: any[] = []
   // Using a .catch here to ensure all errors are returned, rather than just the first error.
@@ -525,15 +557,16 @@ async function addReleaseToZip(
       await uploadToS3(
         file.path,
         (await downloadFile(user, file._id)).Body as stream.Readable,
-        user.dn,
-        model.id,
-        mirroredModelId,
+        {
+          exporter: user.dn,
+          sourceModelId: model.id,
+          mirroredModelId,
+          filePath: file.path,
+          importKind: ImportKind.File,
+        },
         {
           releaseId: release.id,
           fileId: file.id,
-        },
-        {
-          filePath: file.path,
         },
       )
     }

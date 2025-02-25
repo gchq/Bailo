@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 /** @type {import('../src/utils/config.js').Config} */
 module.exports = {
   api: {
@@ -205,6 +207,11 @@ module.exports = {
 
     helpPopoverText: {
       manualEntryAccess: '',
+    },
+
+    modelDetails: {
+      organisations: ['Example Organisation'],
+      states: ['Development', 'Review', 'Production'],
     },
   },
 

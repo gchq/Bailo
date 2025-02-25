@@ -1,18 +1,11 @@
 [![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url]
-[![License][license-shield]][license-url]
-
-<!-- prettier-ignore-start -->
-> [!NOTE]
-> `main` branch now tracks `v2` by default. To access the legacy Bailo, see the `v1` branch. `v1` has been removed
-> from this project - see [migrations](https://gchq.github.io/Bailo/docs/administration/migrations/bailo-2.0) for more
-> information.
-<!-- prettier-ignore-end -->
+[![License][license-shield]][license-url] [![Contributor Covenant][code-of-conduct-shield]][code-of-conduct-url]
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/gchq/bailo">
+  <a href="https://github.com/gchq/Bailo">
     <h1>
       <!-- TODO: Fix #gh-dark-mode-only -->
       <img src="frontend/public/logo-vertical-dark-transparent.png" alt="Logo" width="170">
@@ -25,9 +18,9 @@
     <a href="https://gchq.github.io/Bailo/docs"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/gchq/bailo/issues">Report a Bug</a>
+    <a href="https://github.com/gchq/Bailo/issues">Report a Bug</a>
     ·
-    <a href="https://github.com/gchq/bailo/issues">Request a Feature</a>
+    <a href="https://github.com/gchq/Bailo/issues">Request a Feature</a>
   </p>
 </div>
 
@@ -65,7 +58,7 @@
 
 ## About The Project
 
-[![Product Screen Shot][product-screenshot]](https://github.com/gchq/bailo)
+[![Product Screen Shot][product-screenshot]](https://github.com/gchq/Bailo)
 
 Bailo helps you manage the lifecycle of machine learning to support scalability, impact, collaboration, compliance and
 sharing.
@@ -185,33 +178,24 @@ See [our user documentation](https://gchq.github.io/Bailo/docs)
 
 <br />
 
+<!-- ROADMAP -->
+
+## Roadmap
+
+- [ ] Export/Import of Releases with Files.
+- [ ] Model LifeCycle State.
+- [ ] Model Organisation.
+- [ ] Improve Open Source Ways of Working.
+- [ ] Export/Import of Releases with Docker Images.
+
+<br />
+
 <!-- CONTRIBUTING -->
 
 ## Contributing
 
-If you are looking for an existing issue to help with, check out the
-[help wanted tickets](https://github.com/gchq/bailo/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) on GitHub.
-If you see any that you are interested in working on, comment on it to let everyone know you are working on it. If there
-is no ticket for what you want to contribute, start a [new issue](https://github.com/gchq/bailo/issues) to discuss
-whether it follows the aims of this project. We ask this even for bugs, as there may be multiple solutions to be
-considered.
-
-Prior to us accepting any work, you must sign the [GCHQ CLA Agreement](https://cla-assistant.io/gchq/Bailo). We follow a
-branching strategy for handling contributions:
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/new_thing`)
-3. Commit your Changes (`git commit -m 'Add a new thing'`)
-4. Push to the Branch (`git push origin feature/new_thing`)
-5. Open a Pull Request
-
-<br />
-
-<!-- BREAKING CHANGES -->
-
-## Breaking Changes
-
-**28-04-2022**: Changed 'schema' model to be stored as a string instead of an object. Delete & recreate your schemas.
+If you'd like to make a contribution then the details for doing all of that are in
+[CONTRIBUTING.md](https://github.com/gchq/Bailo/blob/main/CONTRIBUTING.md).
 
 <br />
 
@@ -219,8 +203,8 @@ branching strategy for handling contributions:
 
 ## License
 
-Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright. See `LICENSE.txt` for more
-information.
+Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright. See [LICENSE.txt][license-url] for
+more information.
 
 <br />
 
@@ -228,21 +212,22 @@ information.
 
 ## Acknowledgments
 
-- [Img Shields](https://shields.io)
 - [Othneils's README Template](https://github.com/othneildrew/Best-README-Template)
-- [Mattermost's Code Contribution Guidelines](https://github.com/mattermost/mattermost-server/blob/master/CONTRIBUTING.md)
+- [Stroom's Code Contribution Guidelines](https://github.com/gchq/stroom/blob/master/CONTRIBUTING.md)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
 [contributors-shield]: https://img.shields.io/github/contributors/gchq/bailo.svg?style=for-the-badge
-[contributors-url]: https://github.com/gchq/bailo/graphs/contributors
+[contributors-url]: https://github.com/gchq/Bailo/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/gchq/bailo.svg?style=for-the-badge
-[forks-url]: https://github.com/gchq/bailo/network/members
+[forks-url]: https://github.com/gchq/Bailo/network/members
 [stars-shield]: https://img.shields.io/github/stars/gchq/bailo.svg?style=for-the-badge
-[stars-url]: https://github.com/gchq/bailo/stargazers
+[stars-url]: https://github.com/gchq/Bailo/stargazers
 [issues-shield]: https://img.shields.io/github/issues/gchq/bailo.svg?style=for-the-badge
-[issues-url]: https://github.com/gchq/bailo/issues
+[issues-url]: https://github.com/gchq/Bailo/issues
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
-[license-url]: https://github.com/gchq/bailo/blob/main/public/LICENSE.txt
+[license-url]: https://github.com/gchq/Bailo/blob/main/LICENSE.txt
+[code-of-conduct-shield]: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=for-the-badge
+[code-of-conduct-url]: https://github.com/gchq/Bailo/blob/main/CODE_OF_CONDUCT.md
 [product-screenshot]: frontend/public/images/bailo-marketplace.png

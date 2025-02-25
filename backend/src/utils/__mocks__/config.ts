@@ -113,6 +113,10 @@ const config: PartialDeep<Config> = {
     inference: {
       enabled: true,
     },
+    modelDetails: {
+      organisations: ['My Organisation'],
+      states: ['Development', 'Review', 'Production'],
+    },
   },
 }
 

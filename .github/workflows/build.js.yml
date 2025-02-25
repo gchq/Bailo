@@ -75,7 +75,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build modelscan image
+      - name: Build ModelScan image
         uses: docker/build-push-action@v6
         with:
           context: lib/modelscan_api
@@ -507,10 +507,10 @@ jobs:
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
       # Setup python
-      - name: Set up Python 3.11
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       # Install dependencies
       - name: Install dependencies
@@ -525,6 +525,8 @@ jobs:
         run: |
           cd lib/python
           python -m pytest -m integration
+        env:
+          PYTEST_RUN_PATH: "lib/python"
 
       - name: Dump docker compose logs
         if: always()

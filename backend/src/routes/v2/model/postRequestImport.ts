@@ -55,6 +55,7 @@ export const postRequestImportFromS3 = [
     } = parse(req, postRequestImportFromS3Schema)
 
     const { mirroredModel, importResult } = await importModel(
+      req.user,
       mirroredModelId,
       sourceModelId,
       payloadUrl,

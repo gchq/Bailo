@@ -12,7 +12,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FormContextType } from '@rjsf/utils'
-import _ from 'lodash-es'
+import * as _ from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import MetricItem from 'src/MuiForms/MetricItem'
 import { isValidNumber } from 'utils/stringUtils'

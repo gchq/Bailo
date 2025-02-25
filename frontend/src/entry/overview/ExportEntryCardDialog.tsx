@@ -54,7 +54,6 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
           ObjectFieldTemplate,
         }}
       >
-        {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
         <></>
       </Form>
     ))

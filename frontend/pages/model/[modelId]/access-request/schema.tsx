@@ -14,7 +14,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
-import _ from 'lodash-es'
+import * as _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
