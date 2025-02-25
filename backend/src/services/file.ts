@@ -7,7 +7,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
 import FileModel, { FileInterface, FileInterfaceDoc } from '../models/File.js'
-import ScanModel, { ArtefactType } from '../models/Scan.js'
+import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
@@ -89,7 +89,7 @@ async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileSc
     )
     if (updateExistingResult.modifiedCount === 0) {
       await ScanModel.create({
-        artefactType: ArtefactType.File,
+        artefactKind: ArtefactKind.File,
         fileId: _id,
         ...result,
       })
@@ -140,22 +140,25 @@ export async function getFilesByIds(user: UserInterface, modelId: string, fileId
   if (fileIds.length === 0) {
     return []
   }
-  const files = await FileModel.find({ _id: { $in: fileIds } })
+  const files = await FileModel.aggregate([
+    { $match: { fileId: { $in: fileIds } } },
+    {
+      $lookup: {
+        from: 'v2_scans',
+        localField: 'id',
+        foreignField: 'fileId',
+        as: 'avScan',
+      },
+    },
+  ])
 
   if (files.length !== fileIds.length) {
     const notFoundFileIds = fileIds.filter((id) => files.some((file) => file._id.toString() === id))
     throw NotFound(`The requested files were not found.`, { fileIds: notFoundFileIds })
   }
 
-  const fileAvScans = await ScanModel.find({ fileId: { $in: fileIds } })
-  const filesWithAvScans = files.map((file) => {
-    const relevantAvScans = fileAvScans.filter((scan, _) => scan.fileId === file._id.toString())
-    file.avScan = (file.avScan || []).concat(relevantAvScans)
-    return file
-  })
-
   const auths = await authorisation.files(user, model, files, FileAction.View)
-  return filesWithAvScans.filter((_, i) => auths[i].success)
+  return files.filter((_, i) => auths[i].success)
 }
 
 export async function removeFile(user: UserInterface, modelId: string, fileId: string) {

@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { Response } from '../../src/connectors/authorisation/base.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { FileScanResult } from '../../src/connectors/fileScanning/Base.js'
-import { ArtefactType } from '../../src/models/Scan.js'
+import { ArtefactKind } from '../../src/models/Scan.js'
 import { UserInterface } from '../../src/models/User.js'
 import { exportModel, ImportKind, ImportKindKeys, importModel } from '../../src/services/mirroredModel.js'
 
@@ -117,7 +117,7 @@ const fileMocks = vi.hoisted(() => ({
   getFilesByIds: vi.fn(() => [
     {
       _id: '123',
-      avScan: [{ artefactType: ArtefactType.File, fileId: '123', state: 'complete', isInfected: false }],
+      avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '123', state: 'complete', isInfected: false }],
       toJSON: vi.fn(),
     },
   ]),
@@ -265,12 +265,12 @@ describe('services > mirroredModel', () => {
     fileMocks.getFilesByIds.mockReturnValueOnce([
       {
         _id: '123',
-        avScan: [{ artefactType: ArtefactType.File, fileId: '123', state: 'complete', isInfected: true }],
+        avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '123', state: 'complete', isInfected: true }],
         toJSON: vi.fn(),
       },
       {
         _id: '321',
-        avScan: [{ artefactType: ArtefactType.File, fileId: '321', state: 'complete', isInfected: false }],
+        avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '321', state: 'complete', isInfected: false }],
         toJSON: vi.fn(),
       },
     ])
@@ -283,12 +283,12 @@ describe('services > mirroredModel', () => {
     fileMocks.getFilesByIds.mockReturnValueOnce([
       {
         _id: '123',
-        avScan: [{ artefactType: ArtefactType.File, fileId: '123', state: 'inProgress' }],
+        avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '123', state: 'inProgress' }],
         toJSON: vi.fn(),
       } as any,
       {
         _id: '321',
-        avScan: [{ artefactType: ArtefactType.File, fileId: '321', state: 'complete', isInfected: false }],
+        avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '321', state: 'complete', isInfected: false }],
         toJSON: vi.fn(),
       },
     ])
@@ -302,12 +302,12 @@ describe('services > mirroredModel', () => {
       { _id: '123', toJSON: vi.fn() } as any,
       {
         _id: '321',
-        avScan: [{ artefactType: ArtefactType.File, fileId: '321', state: 'complete', isInfected: false }],
+        avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '321', state: 'complete', isInfected: false }],
         toJSON: vi.fn(),
       },
       {
         _id: '321',
-        avScan: [{ artefactType: ArtefactType.File, fileId: '321', state: 'complete', isInfected: false }],
+        avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '321', state: 'complete', isInfected: false }],
         toJSON: vi.fn(),
       },
     ])

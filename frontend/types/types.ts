@@ -92,7 +92,7 @@ export interface FileInterface {
 }
 
 export interface AvScanResult {
-  artefactType: ArtefactTypeKeys
+  artefactKind: ArtefactKindKeys
   // file only
   fileId?: string
   // docker image only
@@ -115,11 +115,11 @@ export const ScanState = {
 } as const
 export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
 
-export const ArtefactType = {
+export const ArtefactKind = {
   File: 'file',
   Image: 'image',
 } as const
-export type ArtefactTypeKeys = (typeof ArtefactType)[keyof typeof ArtefactType]
+export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
 
 export const ResponseKind = {
   Review: 'review',

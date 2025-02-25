@@ -288,8 +288,7 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > success', async () => {
-    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
-    scanModelMocks.find.mockResolvedValueOnce([])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file', avScan: [] }])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
@@ -301,11 +300,10 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > success with scans mapped', async () => {
-    fileModelMocks.find.mockResolvedValueOnce([
-      { example: 'file', _id: '123' },
-      { example: 'file', _id: '321' },
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { example: 'file', _id: '123', avScan: [{ fileId: '123' }, { fileId: '123' }] },
+      { example: 'file', _id: '321', avScan: [{ fileId: '321' }] },
     ])
-    scanModelMocks.find.mockResolvedValueOnce([{ fileId: '123' }, { fileId: '123' }, { fileId: '321' }])
     vi.mocked(authorisation.files).mockResolvedValue([
       { success: true, id: '123' },
       { success: true, id: '321' },
@@ -321,7 +319,7 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > no file ids', async () => {
-    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file' }])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
@@ -333,7 +331,7 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > files not found', async () => {
-    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => 'testFileId') } }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => 'testFileId') } }])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
@@ -352,8 +350,7 @@ describe('services > file', () => {
         id: '',
       },
     ])
-    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
-    scanModelMocks.find.mockResolvedValueOnce([])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file', avScan: [] }])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
