@@ -141,11 +141,12 @@ export async function getFilesByIds(user: UserInterface, modelId: string, fileId
     return []
   }
   const files = await FileModel.aggregate([
-    { $match: { fileId: { $in: fileIds } } },
+    { $match: { _id: { $in: fileIds } } },
+    { $addFields: { stringId: { $toString: '$_id' } } },
     {
       $lookup: {
         from: 'v2_scans',
-        localField: 'id',
+        localField: 'stringId',
         foreignField: 'fileId',
         as: 'avScan',
       },
