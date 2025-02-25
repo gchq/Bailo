@@ -9,26 +9,6 @@ exports[`routes > schema > patchSchema > audit > expected call 1`] = `
 }
 `;
 
-exports[`routes > schema > patchSchema > patchSchema > audit > expected call 1`] = `
-{
-  "active": false,
-  "description": "vespillo",
-  "hidden": false,
-  "name": "Jaime Hilll",
-}
-`;
-
-exports[`routes > schema > patchSchema > patchSchema > successfully updates the schema 1`] = `
-{
-  "schema": {
-    "active": false,
-    "description": "vespillo",
-    "hidden": false,
-    "name": "Jaime Hilll",
-  },
-}
-`;
-
 exports[`routes > schema > patchSchema > successfully updates the schema 1`] = `
 {
   "schema": {
