@@ -8,6 +8,7 @@ import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import AccessRequests from 'src/entry/model/AccessRequests'
+import Files from 'src/entry/model/Files'
 import InferenceServices from 'src/entry/model/InferenceServices'
 import ModelImages from 'src/entry/model/ModelImages'
 import Releases from 'src/entry/model/Releases'
@@ -64,6 +65,12 @@ export default function Model() {
               title: 'Registry',
               path: 'registry',
               view: <ModelImages model={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
+            },
+            {
+              title: 'Files',
+              path: 'files',
+              view: <Files model={model} />,
+              // hidden:
             },
             {
               title: 'Inferencing',
