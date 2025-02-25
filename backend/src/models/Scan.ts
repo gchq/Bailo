@@ -18,11 +18,11 @@ export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
 
 export type ArtefactDetails =
   | {
-      artefactKind: 'file'
+      artefactKind: typeof ArtefactKind.File
       fileId: string
     }
   | {
-      artefactKind: 'image'
+      artefactKind: typeof ArtefactKind.Image
       repositoryName: string
       // use Digest as image Tags can be overwritten but digests are immutable
       imageDigest: string

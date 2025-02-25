@@ -113,11 +113,11 @@ export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
 
 export type ArtefactDetails =
   | {
-      artefactKind: 'file'
+      artefactKind: typeof ArtefactKind.File
       fileId: string
     }
   | {
-      artefactKind: 'image'
+      artefactKind: typeof ArtefactKind.Image
       repositoryName: string
       imageDigest: string
       // TODO: ultimately use a mapped version of backend/src/models/Release.ts:ImageRef, but ImageRef needs converting to use Digest rather than Tag first
