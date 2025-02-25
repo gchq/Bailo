@@ -8,6 +8,7 @@ import { getChangedFields } from '@rjsf/utils'
 import { useGetModel } from 'actions/model'
 import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
+import * as _ from 'lodash-es'
 import React from 'react'
 import { useContext, useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -32,7 +33,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   const [isEdit, setIsEdit] = useState(false)
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const [editedFields, setEditedFields] = useState<Array<string>>([])
   const [errorMessage, setErrorMessage] = useState('')
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
@@ -65,7 +65,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
       //   return [{ ...accumulator, ...{ field: data[field] } }]
       // }, {})
 
-      if (!getChangedFields(oldData, data)) {
+      if (getChangedFields(oldData, data).length === 0) {
         setIsEdit(false)
       } else {
         const res = await putModelCard(entry.id, data)
@@ -75,7 +75,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
           setErrorMessage(res.data)
         }
       }
-      setEditedFields([])
       setLoading(false)
     }
   }
@@ -88,7 +87,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
       }
       setSplitSchema({ reference: schema.id, steps })
       setIsEdit(false)
-      setEditedFields([])
     }
   }
   useEffect(() => {
@@ -162,9 +160,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
                     onClick={() => {
                       handleActionButtonClose()
                       setIsEdit(!isEdit)
-                      setOldSchema((splitSchema) => {
-                        return Object.assign(splitSchema)
-                      })
+                      setOldSchema(_.cloneDeep(splitSchema))
                     }}
                     data-test='editEntryCardButton'
                     startIcon={<EditIcon fontSize='small' />}
@@ -230,13 +226,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
           )}
         </Stack>
         <MessageAlert message={errorMessage} severity='error' />
-        <JsonSchemaForm
-          splitSchema={splitSchema}
-          setSplitSchema={setSplitSchema}
-          canEdit={isEdit}
-          editedFields={editedFields}
-          setEditedFields={setEditedFields}
-        />
+        <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
         {isEdit && (
           <SaveAndCancelButtons
             onCancel={onCancel}
