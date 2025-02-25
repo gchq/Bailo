@@ -33,7 +33,7 @@ Documentation is rendered with Sphinx and served [here](https://gchq.github.io/B
 
 <!-- prettier-ignore-start -->
 > [!IMPORTANT]
-> Python 3.10 or higher is required
+> Python 3.11 or higher is required
 <!-- prettier-ignore-end -->
 
 #### Prerequisites

@@ -34,14 +34,14 @@ repos:
         # Pydantic fails check so ignore the one problematic file
         exclude: lib/modelscan_api/bailo_modelscan_api/config.py
       - id: pyupgrade
-        name: pyupgrade 3.9 (pedantic)
+        name: pyupgrade 3.9 (pydantic)
         args: ['--py39-plus', '--keep-runtime-typing']
-        # scan problematic separately with extra arg to workaround problem
+        # scan problematic file(s) separately with extra arg to workaround problem
         files: lib/modelscan_api/bailo_modelscan_api/config.py
       - id: pyupgrade
-        name: pyupgrade 3.10 (main)
-        args: ['--py310-plus']
-        # backend/docs/ has the minimum python version 3.10
+        name: pyupgrade 3.11 (main)
+        args: ['--py311-plus']
+        # backend/docs/ has the minimum python version 3.11
         files: backend/docs/
 
   - repo: https://github.com/hadialqattan/pycln
