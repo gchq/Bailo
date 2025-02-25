@@ -3,9 +3,6 @@ import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 
-// This interface stores information about the properties on the base object.
-// It should be used for plain object representations, e.g. for sending to the
-// client.
 export interface ScanInterface extends FileScanResult {
   _id: ObjectId
 
@@ -32,9 +29,6 @@ export type ArtefactDetails =
       // TODO: ultimately use backend/src/models/Release.ts:ImageRef, but ImageRef needs converting to use Digest rather than Tag first
     }
 
-// The doc type includes all values in the plain interface, as well as all the
-// properties and functions that Mongoose provides.  If a function takes in an
-// object from Mongoose it should use this interface
 export type ScanInterfaceDoc = ScanInterface & ArtefactDetails & SoftDeleteDocument
 
 const ScanSchema = new Schema<ScanInterfaceDoc>(

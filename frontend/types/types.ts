@@ -91,20 +91,16 @@ export interface FileInterface {
   updatedAt: Date
 }
 
-export interface AvScanResult {
-  artefactKind: ArtefactKindKeys
-  // file only
-  fileId?: string
-  // docker image only
-  repositoryName?: string
-  imageDigest?: string
-
+export interface ScanResultInterface {
   state: ScanStateKeys
   scannerVersion?: string
   isInfected?: boolean
   viruses?: Array<string>
   toolName: string
   lastRunAt: string
+
+  createdAt: Date
+  updatedAt: Date
 }
 
 export const ScanState = {
@@ -114,6 +110,20 @@ export const ScanState = {
   Error: 'error',
 } as const
 export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
+
+export type ArtefactDetails =
+  | {
+      artefactKind: 'file'
+      fileId: string
+    }
+  | {
+      artefactKind: 'image'
+      repositoryName: string
+      imageDigest: string
+      // TODO: ultimately use a mapped version of backend/src/models/Release.ts:ImageRef, but ImageRef needs converting to use Digest rather than Tag first
+    }
+
+export type AvScanResult = ScanResultInterface & ArtefactDetails
 
 export const ArtefactKind = {
   File: 'file',
