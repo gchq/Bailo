@@ -1,7 +1,15 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { EntryForm, EntryInterface, EntryKindKeys, EntryUserPermissions, ModelImage, Role } from '../types/types'
+import {
+  EntryForm,
+  EntryInterface,
+  EntryKindKeys,
+  EntryUserPermissions,
+  ModelImage,
+  ReleaseInterface,
+  Role,
+} from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyModelList = []
@@ -16,6 +24,7 @@ export interface EntrySearchResult {
 
 export interface ModelExportRequest {
   disclaimerAgreement: boolean
+  semvers?: ReleaseInterface['semver'][]
 }
 
 export function useListModels(
