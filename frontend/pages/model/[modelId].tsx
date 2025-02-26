@@ -101,12 +101,12 @@ export default function Model() {
   })
   if (error) return error
 
+  if (isModelLoading || isCurrentUserLoading || isUiConfigLoading) return <Loading />
+
   return (
     <>
       <Title text={model ? model.name : 'Loading...'} />
-      {!model || isModelLoading || isCurrentUserLoading || isUiConfigLoading ? (
-        <Loading />
-      ) : (
+      {model && (
         <PageWithTabs
           title={model.name}
           subheading={`ID: ${model.id}`}

@@ -17,7 +17,7 @@ import { plural } from 'utils/stringUtils'
 type FileDownloadProps = {
   modelId: string
   file: FileInterface | File
-  showAssociatedReleases?: boolean
+  hideAssociatedReleases?: boolean
 }
 
 interface ChipDetails {
@@ -26,7 +26,7 @@ interface ChipDetails {
   icon: ReactElement
 }
 
-export default function FileDownload({ modelId, file, showAssociatedReleases = false }: FileDownloadProps) {
+export default function FileDownload({ modelId, file, hideAssociatedReleases = true }: FileDownloadProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
 
@@ -200,7 +200,7 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
                 </Typography>
               </Typography>
             </Stack>
-            {showAssociatedReleases && (
+            {!hideAssociatedReleases && (
               <Stack direction='row'>
                 <Button startIcon={<MenuIcon />} variant='contained' onClick={() => setAssociatedReleasesOpen(true)}>
                   Associated Releases

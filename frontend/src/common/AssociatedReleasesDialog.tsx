@@ -31,6 +31,7 @@ export default function AssociatedReleasesDialog({ modelId, file, open, onClose 
           release={associatedRelease}
           latestRelease={latestRelease}
           hideReviewBanner={true}
+          hideFileDownloads={true}
         />
       )),
     [associatedReleases, latestRelease, model],

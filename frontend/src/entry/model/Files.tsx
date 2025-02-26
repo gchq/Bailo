@@ -17,7 +17,7 @@ export default function Files({ model }: FilesProps) {
     () =>
       entryFiles.length ? (
         entryFiles.map((file) => (
-          <FileDownload key={file.name} file={file} modelId={model.id} showAssociatedReleases={true} />
+          <FileDownload key={file.name} file={file} modelId={model.id} hideAssociatedReleases={false} />
         ))
       ) : (
         <EmptyBlob text={`No files found for model ${model.name}`} />
@@ -28,6 +28,8 @@ export default function Files({ model }: FilesProps) {
   if (isEntryFilesError) {
     return <MessageAlert message={isEntryFilesError.info.message} severity='error' />
   }
+
+  if (isEntryFilesLoading) return <Loading />
 
   return (
     <>
