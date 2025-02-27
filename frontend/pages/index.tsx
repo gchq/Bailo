@@ -31,7 +31,7 @@ interface KeyAndLabel {
   label: string
 }
 
-const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'I own' }]
+const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Mine' }]
 
 export default function Marketplace() {
   // TODO - fetch model tags from API
@@ -145,7 +145,7 @@ export default function Marketplace() {
       setRoleOptions([
         ...defaultRoleOptions,
         ...modelRoles.map((role) => {
-          return { key: role.id, label: `My ${role.short}` }
+          return { key: role.id, label: `Reviewing as ${role.short}` }
         }),
       ])
     }
