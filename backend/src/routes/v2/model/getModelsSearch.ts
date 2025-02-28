@@ -20,6 +20,8 @@ export const getModelsSearchSchema = z.object({
     search: z.string().optional().default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
+    currentPage: z.coerce.number().optional(),
+    pageSize: z.coerce.number().optional(),
   }),
 })
 
@@ -35,7 +37,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            models: z.array(
+            results: z.array(
               z.object({
                 id: z.string().openapi({ example: 'yolo-abcdef' }),
                 name: z.string().openapi({ example: 'Yolo v4' }),
@@ -46,6 +48,7 @@ registerPath({
                 schemaId: z.string().optional(),
               }),
             ),
+            totalEntries: z.number(),
           }),
         },
       },
@@ -61,8 +64,9 @@ export interface ModelSearchResult {
   kind: EntryKindKeys
 }
 
-interface GetModelsResponse {
+export interface GetModelsResponse {
   models: Array<ModelSearchResult>
+  totalEntries: number
 }
 
 export const getModelsSearch = [
@@ -70,7 +74,7 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>) => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId },
+      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, currentPage, pageSize },
     } = parse(req, getModelsSearchSchema)
 
     const foundModels = await searchModels(
@@ -82,8 +86,10 @@ export const getModelsSearch = [
       task,
       allowTemplating,
       schemaId,
+      currentPage,
+      pageSize,
     )
-    const models = foundModels.map((model) => ({
+    const models = foundModels.models.map((model) => ({
       id: model.id,
       name: model.name,
       description: model.description,
@@ -93,6 +99,6 @@ export const getModelsSearch = [
 
     await audit.onSearchModel(req, models)
 
-    return res.json({ models })
+    return res.json({ models, totalEntries: foundModels.totalEntries })
   },
 ]
