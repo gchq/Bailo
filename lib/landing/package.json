@@ -36,7 +36,7 @@
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^3.0.1",
     "shelljs": "^0.8.5",
-    "styled-components": "^5.3.6",
+    "styled-components": "^6.1.15",
     "swiper": "^8.4.5"
   },
   "devDependencies": {
