@@ -21,6 +21,7 @@ import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import {
+  createFilePath,
   downloadFile,
   getFilesByIds,
   getTotalFileSize,
@@ -172,7 +173,7 @@ export async function importModel(
       if (!filePath) {
         throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
-      const result = await importModelFile(res, filePath, mirroredModelId, sourceModelId)
+      const result = await importModelFile(res, filePath, mirroredModelId)
       return {
         mirroredModel,
         importResult: {
@@ -297,14 +298,9 @@ async function importDocuments(
   }
 }
 
-async function importModelFile(
-  content: Response,
-  importedPath: string,
-  mirroredModelId: string,
-  sourceModelId: string,
-) {
+async function importModelFile(content: Response, importedPath: string, mirroredModelId: string) {
   const bucket = config.s3.buckets.uploads
-  const updatedPath = importedPath.replace(sourceModelId, mirroredModelId)
+  const updatedPath = createFilePath(mirroredModelId, importedPath)
   await putObjectStream(bucket, updatedPath, content.body as Readable)
   log.debug({ bucket, path: updatedPath }, 'Imported file successfully uploaded to S3.')
   await markFileAsCompleteAfterImport(updatedPath)
@@ -561,7 +557,7 @@ async function addReleaseToZip(
           exporter: user.dn,
           sourceModelId: model.id,
           mirroredModelId,
-          filePath: file.path,
+          filePath: file.id,
           importKind: ImportKind.File,
         },
         {
