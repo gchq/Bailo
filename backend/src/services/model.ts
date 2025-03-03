@@ -8,7 +8,7 @@ import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
-import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
+import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { EntityKind, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
@@ -109,7 +109,7 @@ export async function searchModels(
   user: UserInterface,
   kind: EntryKindKeys,
   libraries: Array<string>,
-  filters: Array<GetModelFiltersKeys>,
+  filters: Array<string>,
   search: string,
   task?: string,
   allowTemplating?: boolean,
@@ -145,22 +145,19 @@ export async function searchModels(
     query['settings.allowTemplating'] = true
   }
 
-  for (const filter of filters) {
-    // This switch statement is here to ensure we always handle all filters in the 'GetModelFilterKeys'
-    // enum.  Eslint will throw an error if we are not exhaustively matching all the enum options,
-    // which makes it far harder to forget.
-    // The 'Unexpected filter' should never be reached, as we have guaranteed type consistency provided
-    // by TypeScript.
-    switch (filter) {
-      case 'mine':
-        query.collaborators = {
-          $elemMatch: {
-            entity: { $in: await authentication.getEntities(user) },
-          },
-        }
-        break
-      default:
-        throw BadReq('Unexpected filter', { filter })
+  if (filters.length > 0) {
+    if (filters.includes('mine')) {
+      query.collaborators = {
+        $elemMatch: {
+          entity: { $in: await authentication.getEntities(user) },
+        },
+      }
+    } else {
+      query.collaborators = {
+        $elemMatch: {
+          ...(filters.length > 0 && { roles: { $elemMatch: { $in: filters } } }),
+        },
+      }
     }
   }
 

@@ -18,6 +18,8 @@ const requiredRoles = {
   accessRequest: ['msro'],
 }
 
+export const allReviewRoles = [...new Set(requiredRoles.release.concat(requiredRoles.accessRequest))]
+
 export async function findReviews(
   user: UserInterface,
   mine: boolean,
