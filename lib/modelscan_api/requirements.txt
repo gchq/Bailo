@@ -1,4 +1,4 @@
-fastapi[standard]==0.115.8
+fastapi[standard]==0.115.11
 modelscan[tensorflow,h5py]==0.8.3
 pydantic_settings==2.8.1
 python-multipart==0.0.20
