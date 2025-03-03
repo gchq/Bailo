@@ -4,6 +4,7 @@ exports[`routes > model > putModelCard > 200 > ok 1`] = `
 {
   "card": {
     "_id": "6776901b879d08e34b599d7e",
+    "deleted": false,
     "id": "6776901b879d08e34b599d7e",
     "modelId": "test",
   },
@@ -15,6 +16,7 @@ exports[`routes > model > putModelCard > audit > expected call 1`] = `"vespillo"
 exports[`routes > model > putModelCard > audit > expected call 2`] = `
 {
   "_id": "6776901b879d08e34b599d7e",
+  "deleted": false,
   "modelId": "test",
 }
 `;

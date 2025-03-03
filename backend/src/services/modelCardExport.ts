@@ -50,7 +50,7 @@ export async function getModelCardHtml(
     throw new Error('Failed to find model card to export.')
   }
 
-  const modelCardRevision: ModelCardRevisionInterface = { ...modelCard, modelId }
+  const modelCardRevision: ModelCardRevisionInterface = { ...modelCard, modelId, deleted: model.deleted }
   const html = await renderToHtml(model, modelCardRevision)
 
   return { html, modelCard }
