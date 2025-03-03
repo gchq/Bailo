@@ -1,10 +1,12 @@
 import AccessRequestModel from '../models/AccessRequest.js'
 import FileModel from '../models/File.js'
+import InferenceModel from '../models/Inference.js'
 import ModelModel from '../models/Model.js'
 import ModelCardRevisionModel from '../models/ModelCardRevision.js'
 import ReleaseModel from '../models/Release.js'
 import ResponseModel from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
+import WebhookModel from '../models/Webhook.js'
 import log from '../services/log.js'
 import { connectToMongoose } from '../utils/database.js'
 
@@ -56,6 +58,18 @@ async function script() {
   log.info(`Deleting ${accesses.length} files`)
   for (const file of files) {
     await file.delete()
+  }
+
+  const webhooks = await WebhookModel.find({ modelId })
+  log.info(`Deleting ${webhooks.length} webhooks`)
+  for (const webhook of webhooks) {
+    await webhook.delete()
+  }
+
+  const inferences = await InferenceModel.find({ modelId })
+  log.info(`Deleting ${inferences.length} inferences`)
+  for (const inference of inferences) {
+    await inference.delete()
   }
 
   await model.delete()
