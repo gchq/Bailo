@@ -146,13 +146,18 @@ export async function searchModels(
   }
 
   if (filters.length > 0) {
-    const reviewFilters = filters.filter((role) => role !== 'mine')
-
-    query.collaborators = {
-      $elemMatch: {
-        entity: { $in: await authentication.getEntities(user) },
-        ...(reviewFilters.length > 0 && { roles: { $elemMatch: { $in: reviewFilters } } }),
-      },
+    if (filters.includes('mine')) {
+      query.collaborators = {
+        $elemMatch: {
+          entity: { $in: await authentication.getEntities(user) },
+        },
+      }
+    } else {
+      query.collaborators = {
+        $elemMatch: {
+          ...(filters.length > 0 && { roles: { $elemMatch: { $in: filters } } }),
+        },
+      }
     }
   }
 
