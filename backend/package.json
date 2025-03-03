@@ -32,7 +32,7 @@
     "@types/express-session": "^1.18.1",
     "app-root-path": "^3.1.0",
     "archiver": "^7.0.1",
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.2",
     "body-parser": "^1.20.3",
     "bunyan": "^1.8.15",
     "chalk": "^5.4.1",
