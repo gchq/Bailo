@@ -83,7 +83,7 @@
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
-    "jsdom": "^24.1.0",
+    "jsdom": "^26.0.0",
     "next-router-mock": "^0.9.13",
     "prettier": "^3.3.2",
     "vite-tsconfig-paths": "^4.3.2",
