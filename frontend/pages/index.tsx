@@ -31,7 +31,7 @@ interface KeyAndLabel {
   label: string
 }
 
-const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Mine' }]
+const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Any role' }]
 
 export default function Marketplace() {
   // TODO - fetch model tags from API
@@ -145,7 +145,7 @@ export default function Marketplace() {
       setRoleOptions([
         ...defaultRoleOptions,
         ...modelRoles.map((role) => {
-          return { key: role.id, label: `Reviewing as ${role.short}` }
+          return { key: role.id, label: `${role.short}` }
         }),
       ])
     }
@@ -230,7 +230,7 @@ export default function Marketplace() {
             </Box>
             <Box>
               <ChipSelector
-                label='Other'
+                label='My Roles'
                 multiple
                 options={roleOptions.map((role) => role.label)}
                 onChange={handleSelectedRolesOnChange}
