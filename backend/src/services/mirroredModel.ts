@@ -167,9 +167,11 @@ export async function importModel(
 
   switch (importKind) {
     case ImportKind.Documents: {
+      log.info({ mirroredModelId, payloadUrl }, 'Importing colection of documents.')
       return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl)
     }
     case ImportKind.File: {
+      log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
       if (!filePath) {
         throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
@@ -358,7 +360,7 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
 
   const modelId = file.modelId
   file.modelId = mirroredModelId
-  file.path = file.path.replace(modelId, mirroredModelId)
+  file.path = createFilePath(mirroredModelId, file.id)
   if (sourceModelId !== modelId) {
     throw InternalError('Zip file contains files from an invalid model.', { modelIds: [sourceModelId, modelId] })
   }
@@ -551,7 +553,7 @@ async function addReleaseToZip(
     for (const file of files) {
       zip.append(JSON.stringify(file.toJSON()), { name: `files/${file._id}.json` })
       await uploadToS3(
-        file.path,
+        file.id,
         (await downloadFile(user, file._id)).Body as stream.Readable,
         {
           exporter: user.dn,
