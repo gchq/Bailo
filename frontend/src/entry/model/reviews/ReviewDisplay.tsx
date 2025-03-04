@@ -24,7 +24,7 @@ export default function ReviewDisplay({
     () =>
       reviewResponses
         .filter((response) =>
-          currentUserDn && showCurrentUserResponses ? fromEntity(response.entity).value === currentUserDn : response,
+          currentUserDn && showCurrentUserResponses ? fromEntity(response.entity).value === currentUserDn : true,
         )
         .sort(sortByCreatedAtDescending) || [],
     [reviewResponses, currentUserDn, showCurrentUserResponses],
