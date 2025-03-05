@@ -136,6 +136,8 @@ vi.mock('clamscan', () => ({
   default: vi.fn(() => ({ init: vi.fn(() => ({ passthrough: vi.fn(() => clamscan) })) })),
 }))
 
+const testFileId = '73859F8D26679D2E52597326'
+
 describe('services > file', () => {
   test('uploadFile > success', async () => {
     const user = { dn: 'testUser' } as UserInterface
@@ -206,11 +208,10 @@ describe('services > file', () => {
   test('removeFile > success', async () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
-    const fileId = 'testFileId'
 
     fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel', delete: vi.fn() }])
 
-    const result = await removeFile(user, modelId, fileId)
+    const result = await removeFile(user, modelId, testFileId)
 
     expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
     expect(result).toMatchSnapshot()
@@ -219,13 +220,12 @@ describe('services > file', () => {
   test('removeFile > no release permission', async () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
-    const fileId = 'testFileId'
 
     fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
 
     releaseServiceMocks.removeFileFromReleases.mockRejectedValueOnce('Cannot update releases')
 
-    const result = removeFile(user, modelId, fileId)
+    const result = removeFile(user, modelId, testFileId)
 
     expect(result).rejects.toThrowError(/^Cannot update releases/)
     expect(fileModelMocks.delete).not.toBeCalled()
@@ -243,9 +243,8 @@ describe('services > file', () => {
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
-    const fileId = 'testFileId'
 
-    expect(() => removeFile(user, modelId, fileId)).rejects.toThrowError(
+    expect(() => removeFile(user, modelId, testFileId)).rejects.toThrowError(
       /^You do not have permission to delete a file from this model./,
     )
     expect(fileModelMocks.delete).not.toBeCalled()
@@ -254,7 +253,6 @@ describe('services > file', () => {
   test('removeFile > should throw an error when attempting to remove a file from a mirrored model', async () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
-    const fileId = 'testFileId'
 
     fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
     vi.mocked(authorisation.file).mockResolvedValue({
@@ -262,7 +260,9 @@ describe('services > file', () => {
       success: false,
       id: '',
     })
-    expect(() => removeFile(user, modelId, fileId)).rejects.toThrowError(/^Cannot remove file from a mirrored model./)
+    expect(() => removeFile(user, modelId, testFileId)).rejects.toThrowError(
+      /^Cannot remove file from a mirrored model./,
+    )
     expect(fileModelMocks.delete).not.toBeCalled()
   })
 
@@ -300,7 +300,7 @@ describe('services > file', () => {
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
-    const fileIds = ['testFileId']
+    const fileIds = ['73859F8D26679D2E52597326']
 
     const files = await getFilesByIds(user, modelId, fileIds)
 
@@ -339,11 +339,13 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > files not found', async () => {
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => 'testFileId') } }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { example: 'file', _id: { toString: vi.fn(() => '73859F8D26679D2E52597326') } },
+    ])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
-    const fileIds = ['testFileId', 'testFileId2']
+    const fileIds = ['73859F8D26679D2E52597326', '73859F8D26679D2E525973262']
 
     const files = getFilesByIds(user, modelId, fileIds)
 
@@ -362,7 +364,7 @@ describe('services > file', () => {
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
-    const fileIds = ['testFileId']
+    const fileIds = ['73859F8D26679D2E52597326']
 
     const files = await getFilesByIds(user, modelId, fileIds)
     expect(files).toStrictEqual([])
@@ -370,19 +372,17 @@ describe('services > file', () => {
 
   test('downloadFile > success', async () => {
     const user = { dn: 'testUser' } as UserInterface
-    const fileId = 'testFileId'
     const range = { start: 0, end: 50 }
 
     fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
 
-    const result = await downloadFile(user, fileId, range)
+    const result = await downloadFile(user, testFileId, range)
 
     expect(result).toMatchSnapshot()
   })
 
   test('downloadFile > no permission', async () => {
     const user = { dn: 'testUser' } as UserInterface
-    const fileId = 'testFileId'
     const range = { start: 0, end: 50 }
     fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
 
@@ -394,7 +394,7 @@ describe('services > file', () => {
       return { success: false, info: 'Unknown action.', id: '' }
     })
 
-    await expect(downloadFile(user, fileId, range)).rejects.toThrowError(
+    await expect(downloadFile(user, testFileId, range)).rejects.toThrowError(
       /^You do not have permission to download this model./,
     )
   })
@@ -420,7 +420,7 @@ describe('services > file', () => {
         lastRunAt: new Date(createdAtTimeInMilliseconds),
       },
     ])
-    const scanStatus = await rerunFileScan({} as any, 'model123', 'file123')
+    const scanStatus = await rerunFileScan({} as any, 'model123', testFileId)
     expect(scanStatus).toBe('Scan started for file.txt')
   })
 
@@ -436,7 +436,7 @@ describe('services > file', () => {
         state: ScanState.Complete,
       },
     ])
-    await expect(rerunFileScan({} as any, 'model123', 'file123')).rejects.toThrowError(
+    await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
       /^Cannot run scan on an empty file/,
     )
   })
@@ -449,7 +449,7 @@ describe('services > file', () => {
       },
     ])
     scanModelMocks.find.mockResolvedValueOnce([{ state: ScanState.Complete, lastRunAt: new Date() }])
-    await expect(rerunFileScan({} as any, 'model123', 'file123')).rejects.toThrowError(
+    await expect(rerunFileScan({} as any, 'model123', testFileId)).rejects.toThrowError(
       /^Please wait 5 minutes before attempting a rescan file.txt/,
     )
   })
