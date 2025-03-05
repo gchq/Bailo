@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose'
+import { Schema, Types } from 'mongoose'
 import { Readable } from 'stream'
 
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
@@ -111,7 +111,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
 
 export async function getFileById(user: UserInterface, fileId: string): Promise<FileWithScanResultsInterfaceDoc> {
   const files = await FileModel.aggregate([
-    { $match: { _id: fileId } },
+    { $match: { _id: new Types.ObjectId(fileId) } },
     { $limit: 1 },
     { $addFields: { stringId: { $toString: '$_id' } } },
     {
@@ -124,7 +124,7 @@ export async function getFileById(user: UserInterface, fileId: string): Promise<
     },
   ])
 
-  if (!files) {
+  if (!files || files.length === 0) {
     throw NotFound(`The requested file was not found.`, { fileId })
   }
   const file = files[0]
