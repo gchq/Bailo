@@ -28,7 +28,11 @@ export function bailoErrorGuard(err: unknown): err is BailoError {
 export async function expressErrorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
   if (bailoErrorGuard(err)) {
     const logger = err.logger || req.log
-    logger.warn(err.context, err.message)
+    if (err.context) {
+      logger.warn(err.context, err.message)
+    } else {
+      logger.warn(err.message)
+    }
 
     delete err.context?.internal
 
