@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from 'express'
+import { isNativeError } from 'util/types'
 
 import audit from '../../connectors/audit/index.js'
 import log from '../../services/log.js'
 import { BailoError } from '../../types/error.js'
+import { InternalError } from '../../utils/error.js'
 
 export function bailoErrorGuard(err: unknown): err is BailoError {
   if (typeof err !== 'object' || err === null) {
@@ -24,23 +26,38 @@ export function bailoErrorGuard(err: unknown): err is BailoError {
 }
 
 export async function expressErrorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
-  if (!bailoErrorGuard(err)) {
-    log.error({ err }, 'No error code was found, returning generic error to user.')
-    throw err
+  if (bailoErrorGuard(err)) {
+    const logger = err.logger || req.log
+    if (err.context) {
+      logger.warn(err.context, err.message)
+    } else {
+      logger.warn(err.message)
+    }
+
+    delete err.context?.internal
+
+    await audit.onError(req, err)
+
+    return res.status(err.code).json({
+      error: {
+        name: err.name,
+        message: err.message,
+        context: err.context,
+      },
+    })
+  } else if (isNativeError(err)) {
+    log.warn(
+      { err: { name: err.name, stack: err.stack } },
+      'Generic Javascript error found, returning generic error to user.',
+    )
+    await audit.onError(req, InternalError('Internal Server Error'))
+    return res.status(500).json({
+      error: {
+        name: 'Internal Server Error',
+        message: 'Unknown error - Please contact Bailo support',
+      },
+    })
   }
-
-  const logger = err.logger || req.log
-  logger.warn(err.context, err.message)
-
-  delete err.context?.internal
-
-  await audit.onError(req, err)
-
-  return res.status(err.code).json({
-    error: {
-      name: err.name,
-      message: err.message,
-      context: err.context,
-    },
-  })
+  log.error({ err }, 'Unknown error format was found, returning generic error to user.')
+  throw err
 }
