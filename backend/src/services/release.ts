@@ -3,7 +3,7 @@ import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileInterface, FileInterfaceDoc } from '../models/File.js'
+import { FileInterfaceDoc, FileWithScanResultsInterfaceDoc } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
@@ -271,19 +271,35 @@ export async function getModelReleases(
   user: UserInterface,
   modelId: string,
   querySemver?: string,
-): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
+): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileWithScanResultsInterfaceDoc[] }>> {
   const query = querySemver === undefined ? { modelId } : convertSemverQueryToMongoQuery(querySemver, modelId)
   const results = await Release.aggregate()
     .match(query)
     .sort({ updatedAt: -1 })
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
-    .lookup({ from: 'v2_files', localField: 'fileIds', foreignField: '_id', as: 'files' })
+    .lookup({
+      from: 'v2_files',
+      localField: 'fileIds',
+      foreignField: '_id',
+      as: 'files',
+      pipeline: [
+        { $addFields: { stringId: { $toString: '$_id' } } },
+        {
+          $lookup: {
+            from: 'v2_scans',
+            localField: 'stringId',
+            foreignField: 'fileId',
+            as: 'avScan',
+          },
+        },
+      ],
+    })
     .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
 
   const model = await getModelById(user, modelId)
 
   const auths = await authorisation.releases(user, model, results, ReleaseAction.View)
-  return results.reduce<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>>(
+  return results.reduce<Array<ReleaseDoc & { model: ModelInterface; files: FileWithScanResultsInterfaceDoc[] }>>(
     (updatedResults, result, index) => {
       if (auths[index].success) {
         updatedResults.push({ ...result, semver: semverObjectToString(result.semver) })

@@ -1,7 +1,7 @@
 import { model, ObjectId, Schema } from 'mongoose'
 import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
-import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
+import { ScanInterfaceDoc } from './Scan.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
@@ -19,8 +19,6 @@ export interface FileInterface {
 
   complete: boolean
 
-  avScan: Array<FileScanResult>
-
   createdAt: Date
   updatedAt: Date
 }
@@ -29,6 +27,7 @@ export interface FileInterface {
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
 export type FileInterfaceDoc = FileInterface & SoftDeleteDocument
+export type FileWithScanResultsInterfaceDoc = FileInterfaceDoc & { avScan: ScanInterfaceDoc[] }
 
 const FileSchema = new Schema<FileInterfaceDoc>(
   {
@@ -40,17 +39,6 @@ const FileSchema = new Schema<FileInterfaceDoc>(
 
     bucket: { type: String, required: true },
     path: { type: String, required: true },
-
-    avScan: [
-      {
-        toolName: { type: String },
-        scannerVersion: { type: String },
-        state: { type: String, enum: Object.values(ScanState) },
-        isInfected: { type: Boolean },
-        viruses: [{ type: String }],
-        lastRunAt: { type: Schema.Types.Date },
-      },
-    ],
 
     complete: { type: Boolean, default: false },
   },
