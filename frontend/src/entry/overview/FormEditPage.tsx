@@ -60,10 +60,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
       setLoading(true)
       const oldData = getStepsData(oldSchema, true)
       const data = getStepsData(splitSchema, true)
-      //FIX ME - olddata is not working now for some reason, investigate
-      // const dataFiltered = editedFields.reduce((accumulator, field) => {
-      //   return [{ ...accumulator, ...{ field: data[field] } }]
-      // }, {})
 
       if (getChangedFields(oldData, data).length === 0) {
         setIsEdit(false)
