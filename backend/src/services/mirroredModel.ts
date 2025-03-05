@@ -21,6 +21,7 @@ import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import {
+  createFilePath,
   downloadFile,
   getFilesByIds,
   getTotalFileSize,
@@ -166,13 +167,15 @@ export async function importModel(
 
   switch (importKind) {
     case ImportKind.Documents: {
+      log.info({ mirroredModelId, payloadUrl }, 'Importing colection of documents.')
       return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl)
     }
     case ImportKind.File: {
+      log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
       if (!filePath) {
         throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
-      const result = await importModelFile(res, filePath, mirroredModelId, sourceModelId)
+      const result = await importModelFile(res, filePath, mirroredModelId)
       return {
         mirroredModel,
         importResult: {
@@ -297,14 +300,9 @@ async function importDocuments(
   }
 }
 
-async function importModelFile(
-  content: Response,
-  importedPath: string,
-  mirroredModelId: string,
-  sourceModelId: string,
-) {
+async function importModelFile(content: Response, importedPath: string, mirroredModelId: string) {
   const bucket = config.s3.buckets.uploads
-  const updatedPath = importedPath.replace(sourceModelId, mirroredModelId)
+  const updatedPath = createFilePath(mirroredModelId, importedPath)
   await putObjectStream(bucket, updatedPath, content.body as Readable)
   log.debug({ bucket, path: updatedPath }, 'Imported file successfully uploaded to S3.')
   await markFileAsCompleteAfterImport(updatedPath)
@@ -362,7 +360,7 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
 
   const modelId = file.modelId
   file.modelId = mirroredModelId
-  file.path = file.path.replace(modelId, mirroredModelId)
+  file.path = createFilePath(mirroredModelId, file.id)
   if (sourceModelId !== modelId) {
     throw InternalError('Zip file contains files from an invalid model.', { modelIds: [sourceModelId, modelId] })
   }
@@ -555,13 +553,13 @@ async function addReleaseToZip(
     for (const file of files) {
       zip.append(JSON.stringify(file.toJSON()), { name: `files/${file._id}.json` })
       await uploadToS3(
-        file.path,
+        file.id,
         (await downloadFile(user, file._id)).Body as stream.Readable,
         {
           exporter: user.dn,
           sourceModelId: model.id,
           mirroredModelId,
-          filePath: file.path,
+          filePath: file.id,
           importKind: ImportKind.File,
         },
         {

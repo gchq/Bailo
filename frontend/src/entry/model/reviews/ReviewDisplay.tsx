@@ -22,11 +22,11 @@ export default function ReviewDisplay({
 }: ReviewDisplayProps) {
   const orderedReviewResponses = useMemo(
     () =>
-      reviewResponses.toSorted(sortByCreatedAtDescending).filter((response) => {
-        return currentUserDn !== undefined && showCurrentUserResponses
-          ? fromEntity(response.entity).value === currentUserDn
-          : response
-      }) || [],
+      reviewResponses
+        .filter((response) =>
+          currentUserDn && showCurrentUserResponses ? fromEntity(response.entity).value === currentUserDn : true,
+        )
+        .sort(sortByCreatedAtDescending) || [],
     [reviewResponses, currentUserDn, showCurrentUserResponses],
   )
 
