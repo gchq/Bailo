@@ -50,7 +50,9 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
 
-  if (isReleasesLoading) return <Loading />
+  if (isReleasesLoading) {
+    return <Loading />
+  }
 
   return (
     <Container sx={{ my: 2 }}>

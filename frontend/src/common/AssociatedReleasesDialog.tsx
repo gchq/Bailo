@@ -59,13 +59,17 @@ export default function AssociatedReleasesDialog({ modelId, file, open, onClose 
     }
   }, [model, releases])
 
-  if (isReleasesError) return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  if (isReleasesError) {
+    return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  }
 
-  if (isModelError) return <MessageAlert message={isModelError.info.message} severity='error' />
+  if (isModelError) {
+    return <MessageAlert message={isModelError.info.message} severity='error' />
+  }
 
-  if (isReleasesLoading) return <Loading />
-
-  if (isModelLoading) return <Loading />
+  if (isModelLoading || isReleasesLoading) {
+    return <Loading />
+  }
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='md'>

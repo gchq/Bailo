@@ -49,7 +49,9 @@ export default function Files({ model }: FilesProps) {
     return <MessageAlert message={isEntryFilesError.info.message} severity='error' />
   }
 
-  if (isEntryFilesLoading) return <Loading />
+  if (isEntryFilesLoading) {
+    return <Loading />
+  }
 
   return (
     <>
