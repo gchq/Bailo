@@ -6,7 +6,7 @@ import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import FileModel, { FileInterface, FileInterfaceDoc } from '../models/File.js'
+import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterfaceDoc } from '../models/File.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
@@ -109,14 +109,25 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
   return getObjectStream(file.bucket, file.path, range)
 }
 
-export async function getFileById(user: UserInterface, fileId: string) {
-  const file = await FileModel.findOne({
-    _id: fileId,
-  })
+export async function getFileById(user: UserInterface, fileId: string): Promise<FileWithScanResultsInterfaceDoc> {
+  const files = await FileModel.aggregate([
+    { $match: { _id: fileId } },
+    { $limit: 1 },
+    { $addFields: { stringId: { $toString: '$_id' } } },
+    {
+      $lookup: {
+        from: 'v2_scans',
+        localField: 'stringId',
+        foreignField: 'fileId',
+        as: 'avScan',
+      },
+    },
+  ])
 
-  if (!file) {
+  if (!files) {
     throw NotFound(`The requested file was not found.`, { fileId })
   }
+  const file = files[0]
 
   const model = await getModelById(user, file.modelId)
   const auth = await authorisation.file(user, model, file, FileAction.View)
@@ -135,7 +146,11 @@ export async function getFilesByModel(user: UserInterface, modelId: string) {
   return files.filter((_, i) => auths[i].success)
 }
 
-export async function getFilesByIds(user: UserInterface, modelId: string, fileIds: string[]) {
+export async function getFilesByIds(
+  user: UserInterface,
+  modelId: string,
+  fileIds: string[],
+): Promise<FileWithScanResultsInterfaceDoc[]> {
   const model = await getModelById(user, modelId)
   if (fileIds.length === 0) {
     return []

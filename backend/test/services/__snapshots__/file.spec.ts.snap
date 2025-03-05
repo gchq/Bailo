@@ -53,7 +53,6 @@ exports[`services > file > getFilesByModel > success 1`] = `
 
 exports[`services > file > removeFile > success 1`] = `
 {
-  "aggregate": [MockFunction spy],
   "delete": [MockFunction spy] {
     "calls": [
       [],
@@ -61,30 +60,11 @@ exports[`services > file > removeFile > success 1`] = `
     "results": [
       {
         "type": "return",
-        "value": [Circular],
+        "value": undefined,
       },
     ],
   },
-  "find": [MockFunction spy],
-  "findOne": [MockFunction spy] {
-    "calls": [
-      [
-        {
-          "_id": "testFileId",
-        },
-      ],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": [Circular],
-      },
-    ],
-  },
-  "group": [MockFunction spy],
-  "match": [MockFunction spy],
-  "save": [MockFunction spy],
-  "size": 100,
+  "modelId": "testModel",
 }
 `;
 

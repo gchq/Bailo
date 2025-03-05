@@ -1,6 +1,8 @@
 import { model, ObjectId, Schema } from 'mongoose'
 import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
+import { ScanInterfaceDoc } from './Scan.js'
+
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
@@ -25,6 +27,7 @@ export interface FileInterface {
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
 export type FileInterfaceDoc = FileInterface & SoftDeleteDocument
+export type FileWithScanResultsInterfaceDoc = FileInterfaceDoc & { avScan: ScanInterfaceDoc[] }
 
 const FileSchema = new Schema<FileInterfaceDoc>(
   {

@@ -1,22 +1,21 @@
 import { model, ObjectId, Schema } from 'mongoose'
 import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
-import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
+import { ScanState, ScanStateKeys } from '../connectors/fileScanning/Base.js'
 
-export interface ScanInterface extends FileScanResult {
+export type ScanInterface = {
   _id: ObjectId
+
+  toolName: string
+  scannerVersion?: string
+  state: ScanStateKeys
+  isInfected?: boolean
+  viruses?: string[]
+  lastRunAt: Date
 
   createdAt: Date
   updatedAt: Date
-}
-
-export const ArtefactKind = {
-  File: 'file',
-  Image: 'image',
-} as const
-export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
-
-export type ArtefactDetails =
+} & (
   | {
       artefactKind: typeof ArtefactKind.File
       fileId: string
@@ -28,8 +27,15 @@ export type ArtefactDetails =
       imageDigest: string
       // TODO: ultimately use backend/src/models/Release.ts:ImageRef, but ImageRef needs converting to use Digest rather than Tag first
     }
+)
 
-export type ScanInterfaceDoc = ScanInterface & ArtefactDetails & SoftDeleteDocument
+export const ArtefactKind = {
+  File: 'file',
+  Image: 'image',
+} as const
+export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
+
+export type ScanInterfaceDoc = ScanInterface & SoftDeleteDocument
 
 const ScanSchema = new Schema<ScanInterfaceDoc>(
   {

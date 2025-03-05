@@ -95,7 +95,6 @@ const fileModelMocks = vi.hoisted(() => {
 
   obj.save = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
-  obj.findOne = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
@@ -108,8 +107,11 @@ vi.mock('../../src/models/File.js', () => ({ default: fileModelMocks }))
 const scanModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
+  obj.aggregate = vi.fn(() => obj)
+
   obj.find = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
+  obj.delete = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -206,6 +208,8 @@ describe('services > file', () => {
     const modelId = 'testModelId'
     const fileId = 'testFileId'
 
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel', delete: vi.fn() }])
+
     const result = await removeFile(user, modelId, fileId)
 
     expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
@@ -217,6 +221,8 @@ describe('services > file', () => {
     const modelId = 'testModelId'
     const fileId = 'testFileId'
 
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
+
     releaseServiceMocks.removeFileFromReleases.mockRejectedValueOnce('Cannot update releases')
 
     const result = removeFile(user, modelId, fileId)
@@ -226,6 +232,7 @@ describe('services > file', () => {
   })
 
   test('removeFile > no file permission', async () => {
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
     vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
       if (action === FileAction.View) return { success: true, id: '' }
       if (action === FileAction.Delete)
@@ -249,6 +256,7 @@ describe('services > file', () => {
     const modelId = 'testModelId'
     const fileId = 'testFileId'
 
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
     vi.mocked(authorisation.file).mockResolvedValue({
       info: 'Cannot remove file from a mirrored model.',
       success: false,
@@ -365,6 +373,8 @@ describe('services > file', () => {
     const fileId = 'testFileId'
     const range = { start: 0, end: 50 }
 
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
+
     const result = await downloadFile(user, fileId, range)
 
     expect(result).toMatchSnapshot()
@@ -374,6 +384,7 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as UserInterface
     const fileId = 'testFileId'
     const range = { start: 0, end: 50 }
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
 
     vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
       if (action === FileAction.View) return { success: true, id: '' }
@@ -397,10 +408,12 @@ describe('services > file', () => {
 
   test('rerunFileScan > successfully reruns a file scan', async () => {
     const createdAtTimeInMilliseconds = new Date().getTime() - 2000000
-    fileModelMocks.findOne.mockResolvedValueOnce({
-      name: 'file.txt',
-      size: 123,
-    })
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        name: 'file.txt',
+        size: 123,
+      },
+    ])
     scanModelMocks.find.mockResolvedValueOnce([
       {
         state: ScanState.Complete,
@@ -412,10 +425,12 @@ describe('services > file', () => {
   })
 
   test('rerunFileScan > throws bad request when attempting to upload an empty file', async () => {
-    fileModelMocks.findOne.mockResolvedValueOnce({
-      name: 'file.txt',
-      size: 0,
-    })
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        name: 'file.txt',
+        size: 0,
+      },
+    ])
     scanModelMocks.find.mockResolvedValueOnce([
       {
         state: ScanState.Complete,
@@ -427,10 +442,12 @@ describe('services > file', () => {
   })
 
   test('rerunFileScan > does not rerun file scan before delay is over', async () => {
-    fileModelMocks.findOne.mockResolvedValueOnce({
-      name: 'file.txt',
-      size: 123,
-    })
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        name: 'file.txt',
+        size: 123,
+      },
+    ])
     scanModelMocks.find.mockResolvedValueOnce([{ state: ScanState.Complete, lastRunAt: new Date() }])
     await expect(rerunFileScan({} as any, 'model123', 'file123')).rejects.toThrowError(
       /^Please wait 5 minutes before attempting a rescan file.txt/,
