@@ -283,10 +283,11 @@ export async function getModelReleases(
       foreignField: '_id',
       as: 'files',
       pipeline: [
+        { $addFields: { fileStrId: { $toString: '$_id' } } },
         {
           $lookup: {
             from: 'v2_scans',
-            localField: 'id',
+            localField: 'fileStrId',
             foreignField: 'fileId',
             as: 'avScan',
           },

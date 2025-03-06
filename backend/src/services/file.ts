@@ -120,10 +120,11 @@ export async function getFileById(user: UserInterface, fileId: string): Promise<
   const files = await FileModel.aggregate([
     { $match: { _id: new Types.ObjectId(fileId) } },
     { $limit: 1 },
+    { $addFields: { fileStrId: { $toString: '$_id' } } },
     {
       $lookup: {
         from: 'v2_scans',
-        localField: 'id',
+        localField: 'fileStrId',
         foreignField: 'fileId',
         as: 'avScan',
       },
@@ -148,10 +149,11 @@ export async function getFilesByModel(user: UserInterface, modelId: string) {
   const model = await getModelById(user, modelId)
   const files = await FileModel.aggregate([
     { $match: { modelId } },
+    { $addFields: { fileStrId: { $toString: '$_id' } } },
     {
       $lookup: {
         from: 'v2_scans',
-        localField: 'id',
+        localField: 'fileStrId',
         foreignField: 'fileId',
         as: 'avScan',
       },
@@ -173,10 +175,11 @@ export async function getFilesByIds(
   }
   const files = await FileModel.aggregate([
     { $match: { _id: { $in: fileIds } } },
+    { $addFields: { fileStrId: { $toString: '$_id' } } },
     {
       $lookup: {
         from: 'v2_scans',
-        localField: 'id',
+        localField: 'fileStrId',
         foreignField: 'fileId',
         as: 'avScan',
       },
