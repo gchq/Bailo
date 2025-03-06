@@ -126,7 +126,7 @@ export default function PageWithTabs({
         spacing={{ xs: 1, sm: 2 }}
         sx={{ px: 2, pb: 2 }}
       >
-        <Stack sx={{ maxWidth: 'md' }}>
+        <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
           <Stack direction='row'>
             <Tooltip title={title}>
               <Typography
@@ -165,7 +165,7 @@ export default function PageWithTabs({
           )}
         </Stack>
         {displayActionButton && (
-          <Button variant='contained' onClick={actionButtonOnClick}>
+          <Button sx={{ minWidth: '154px' }} variant='contained' onClick={actionButtonOnClick}>
             {actionButtonTitle}
           </Button>
         )}
