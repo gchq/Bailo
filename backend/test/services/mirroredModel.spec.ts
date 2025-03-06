@@ -125,6 +125,7 @@ const fileMocks = vi.hoisted(() => ({
   downloadFile: vi.fn(() => ({ Body: 'test' })),
   markFileAsCompleteAfterImport: vi.fn(),
   isFileInterfaceDoc: vi.fn(() => true),
+  createFilePath: vi.fn(() => 'file/path'),
 }))
 vi.mock('../../src/services/file.js', () => fileMocks)
 

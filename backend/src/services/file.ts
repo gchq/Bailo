@@ -40,6 +40,10 @@ export function isFileInterfaceDoc(data: unknown): data is FileInterfaceDoc {
   return true
 }
 
+export const createFilePath = (modelId: string, fileId: string) => {
+  return `beta/model/${modelId}/files/${fileId}`
+}
+
 export async function uploadFile(user: UserInterface, modelId: string, name: string, mime: string, stream: Readable) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {
@@ -49,7 +53,7 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
   const fileId = longId()
 
   const bucket = config.s3.buckets.uploads
-  const path = `beta/model/${modelId}/files/${fileId}`
+  const path = createFilePath(modelId, fileId)
 
   const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, bucket, path, complete: true })
 
