@@ -173,25 +173,37 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
     <>
       {isFileInterface(file) && (
         <Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Stack sx={{ minWidth: 0, width: '100%' }}>
+          <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
+            <Stack alignItems={{ sm: 'center' }}>
               <Tooltip title={file.name}>
                 <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
-                  <Typography noWrap textOverflow='ellipsis' overflow='hidden'>
+                  <Typography textOverflow='ellipsis' overflow='hidden'>
                     {file.name}
                   </Typography>
                 </Link>
               </Tooltip>
             </Stack>
-            {scanners.length > 0 && (
-              <Stack direction='row' alignItems='center'>
-                {avChip}
-                {rerunFileScanButton}
-              </Stack>
-            )}
-            <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+            <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
+              {!hideAssociatedReleases && (
+                <Button
+                  size='small'
+                  startIcon={<MenuIcon />}
+                  variant='contained'
+                  onClick={() => setAssociatedReleasesOpen(true)}
+                >
+                  Associated Releases
+                </Button>
+              )}
+              {scanners.length > 0 && (
+                <Stack direction='row' alignItems='center'>
+                  {avChip}
+                  {rerunFileScanButton}
+                  <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+                </Stack>
+              )}
+            </Stack>
           </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
+          <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
             <Stack direction='row'>
               <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' sx={{ mb: 2 }}>
                 Added by {<UserDisplay dn={file.createdAt.toString()} />} on
@@ -200,13 +212,6 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
                 </Typography>
               </Typography>
             </Stack>
-            {!hideAssociatedReleases && (
-              <Stack direction='row'>
-                <Button startIcon={<MenuIcon />} variant='contained' onClick={() => setAssociatedReleasesOpen(true)}>
-                  Associated Releases
-                </Button>
-              </Stack>
-            )}
           </Stack>
         </Stack>
       )}
