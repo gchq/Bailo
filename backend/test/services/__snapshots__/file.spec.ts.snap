@@ -53,19 +53,97 @@ exports[`services > file > getFilesByModel > success 1`] = `
 
 exports[`services > file > removeFile > success 1`] = `
 {
-  "delete": [MockFunction spy] {
+  "id": undefined,
+  "modelId": "testModel",
+}
+`;
+
+exports[`services > file > uploadFile > success 1`] = `
+{
+  "aggregate": [MockFunction spy],
+  "avScan": {
+    "aggregate": [MockFunction spy],
+    "delete": [MockFunction spy],
+    "find": [MockFunction spy] {
+      "calls": [
+        [
+          {
+            "fileId": undefined,
+          },
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "findOne": [MockFunction spy],
+  },
+  "delete": [MockFunction spy],
+  "find": [MockFunction spy],
+  "findOneAndDelete": [MockFunction spy],
+  "group": [MockFunction spy],
+  "id": undefined,
+  "match": [MockFunction spy],
+  "save": [MockFunction spy] {
     "calls": [
       [],
     ],
     "results": [
       {
         "type": "return",
-        "value": undefined,
+        "value": Promise {},
       },
     ],
   },
-  "modelId": "testModel",
+  "size": 100,
 }
 `;
 
-exports[`services > file > uploadFile > virus scan initialised 1`] = `[]`;
+exports[`services > file > uploadFile > virus scan initialised 1`] = `
+{
+  "aggregate": [MockFunction spy],
+  "avScan": {
+    "aggregate": [MockFunction spy],
+    "delete": [MockFunction spy],
+    "find": [MockFunction spy] {
+      "calls": [
+        [
+          {
+            "fileId": undefined,
+          },
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "findOne": [MockFunction spy],
+  },
+  "delete": [MockFunction spy],
+  "find": [MockFunction spy],
+  "findOneAndDelete": [MockFunction spy],
+  "group": [MockFunction spy],
+  "id": undefined,
+  "match": [MockFunction spy],
+  "save": [MockFunction spy] {
+    "calls": [
+      [],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": Promise {},
+      },
+    ],
+  },
+  "size": 100,
+}
+`;
+
+exports[`services > file > uploadFile > virus scan initialised 2`] = `[]`;

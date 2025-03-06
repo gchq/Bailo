@@ -6,7 +6,7 @@ import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterfaceDoc } from '../models/File.js'
+import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
@@ -51,7 +51,7 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
   const bucket = config.s3.buckets.uploads
   const path = `beta/model/${modelId}/files/${fileId}`
 
-  const file = new FileModel({ modelId, name, mime, bucket, path, complete: true })
+  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, bucket, path, complete: true })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
@@ -76,7 +76,14 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
     scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
   }
 
-  return file
+  const avScan = await ScanModel.find({ fileId: file._id })
+  const ret: FileWithScanResultsInterface = {
+    ...file,
+    avScan,
+    id: file._id,
+  }
+
+  return ret
 }
 
 async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileScanResult[]) {
@@ -109,15 +116,14 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
   return getObjectStream(file.bucket, file.path, range)
 }
 
-export async function getFileById(user: UserInterface, fileId: string): Promise<FileWithScanResultsInterfaceDoc> {
+export async function getFileById(user: UserInterface, fileId: string): Promise<FileWithScanResultsInterface> {
   const files = await FileModel.aggregate([
     { $match: { _id: new Types.ObjectId(fileId) } },
     { $limit: 1 },
-    { $addFields: { stringId: { $toString: '$_id' } } },
     {
       $lookup: {
         from: 'v2_scans',
-        localField: 'stringId',
+        localField: 'id',
         foreignField: 'fileId',
         as: 'avScan',
       },
@@ -127,7 +133,7 @@ export async function getFileById(user: UserInterface, fileId: string): Promise<
   if (!files || files.length === 0) {
     throw NotFound(`The requested file was not found.`, { fileId })
   }
-  const file = files[0]
+  const file: FileWithScanResultsInterface = { ...files[0], id: files[0]._id }
 
   const model = await getModelById(user, file.modelId)
   const auth = await authorisation.file(user, model, file, FileAction.View)
@@ -140,7 +146,17 @@ export async function getFileById(user: UserInterface, fileId: string): Promise<
 
 export async function getFilesByModel(user: UserInterface, modelId: string) {
   const model = await getModelById(user, modelId)
-  const files = await FileModel.find({ modelId })
+  const files = await FileModel.aggregate([
+    { $match: { modelId } },
+    {
+      $lookup: {
+        from: 'v2_scans',
+        localField: 'id',
+        foreignField: 'fileId',
+        as: 'avScan',
+      },
+    },
+  ])
 
   const auths = await authorisation.files(user, model, files, FileAction.View)
   return files.filter((_, i) => auths[i].success)
@@ -150,18 +166,17 @@ export async function getFilesByIds(
   user: UserInterface,
   modelId: string,
   fileIds: string[],
-): Promise<FileWithScanResultsInterfaceDoc[]> {
+): Promise<FileWithScanResultsInterface[]> {
   const model = await getModelById(user, modelId)
   if (fileIds.length === 0) {
     return []
   }
   const files = await FileModel.aggregate([
     { $match: { _id: { $in: fileIds } } },
-    { $addFields: { stringId: { $toString: '$_id' } } },
     {
       $lookup: {
         from: 'v2_scans',
-        localField: 'stringId',
+        localField: 'id',
         foreignField: 'fileId',
         as: 'avScan',
       },
@@ -193,7 +208,7 @@ export async function removeFile(user: UserInterface, modelId: string, fileId: s
 
   // We don't actually remove the file from storage, we only hide all
   // references to it.  This makes the file not visible to the user.
-  await file.delete()
+  await FileModel.findOneAndDelete({ id: file._id })
 
   return file
 }

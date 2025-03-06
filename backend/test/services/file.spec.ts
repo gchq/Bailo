@@ -96,6 +96,7 @@ const fileModelMocks = vi.hoisted(() => {
   obj.save = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
+  obj.findOneAndDelete = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -150,7 +151,7 @@ describe('services > file', () => {
 
     expect(s3Mocks.putObjectStream).toBeCalled()
     expect(fileModelMocks.save).toBeCalled()
-    expect(result.save).toBe(fileModelMocks.save)
+    expect(result).toMatchSnapshot()
   })
 
   test('uploadFile > virus scan initialised', async () => {
@@ -171,7 +172,7 @@ describe('services > file', () => {
 
     expect(s3Mocks.putObjectStream).toBeCalled()
     expect(fileModelMocks.save).toBeCalled()
-    expect(result.save).toBe(fileModelMocks.save)
+    expect(result).toMatchSnapshot()
     expect(clamscan.on.mock.calls).toMatchSnapshot()
   })
 
@@ -209,7 +210,7 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel', delete: vi.fn() }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
 
     const result = await removeFile(user, modelId, testFileId)
 
@@ -267,7 +268,7 @@ describe('services > file', () => {
   })
 
   test('getFilesByModel > success', async () => {
-    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file' }])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
@@ -286,7 +287,7 @@ describe('services > file', () => {
       },
     ])
 
-    fileModelMocks.find.mockResolvedValueOnce([{ example: 'file' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file' }])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
