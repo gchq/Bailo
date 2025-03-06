@@ -190,6 +190,7 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
                   startIcon={<MenuIcon />}
                   variant='contained'
                   onClick={() => setAssociatedReleasesOpen(true)}
+                  sx={{ minWidth: '200px' }}
                 >
                   Associated Releases
                 </Button>
