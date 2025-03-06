@@ -1,5 +1,5 @@
 import { Validator } from 'jsonschema'
-import _ from 'lodash'
+import * as _ from 'lodash-es'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
