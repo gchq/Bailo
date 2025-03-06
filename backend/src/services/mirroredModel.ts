@@ -13,7 +13,7 @@ import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.
 import authorisation from '../connectors/authorisation/index.js'
 import { ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import { FileInterfaceDoc } from '../models/File.js'
+import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../models/Release.js'
@@ -548,15 +548,15 @@ async function addReleaseToZip(
   mirroredModelId: string,
 ) {
   log.debug('Adding release to zip file of releases.', { user, modelId: model.id, semver: release.semver })
-  const files: FileInterfaceDoc[] = await getFilesByIds(user, release.modelId, release.fileIds)
+  const files: FileWithScanResultsInterface[] = await getFilesByIds(user, release.modelId, release.fileIds)
 
   try {
     zip.append(JSON.stringify(release.toJSON()), { name: `releases/${release.semver}.json` })
     for (const file of files) {
-      zip.append(JSON.stringify(file.toJSON()), { name: `files/${file._id}.json` })
+      zip.append(JSON.stringify(file), { name: `files/${file._id}.json` })
       await uploadToS3(
         file.path,
-        (await downloadFile(user, file._id)).Body as stream.Readable,
+        (await downloadFile(user, file.id)).Body as stream.Readable,
         {
           exporter: user.dn,
           sourceModelId: model.id,
