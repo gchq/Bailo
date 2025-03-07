@@ -1,7 +1,8 @@
 import { Box, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
-import { Fragment, useMemo } from 'react'
+import { CSSProperties, memo } from 'react'
+import { FixedSizeList } from 'react-window'
 import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Link from 'src/Link'
@@ -22,49 +23,69 @@ export default function EntryList({
 }: EntryListProps) {
   const theme = useTheme()
 
-  const entriesDisplay = useMemo(() => {
-    return entries.map((entry, index) => (
-      <Fragment key={entry.id}>
-        <Stack direction='row'>
-          <Link
-            sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-            href={`${entry.kind}/${entry.id}`}
-          >
-            <Typography
-              variant='h5'
-              sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
+  const Row = memo(({ data, index, style }: { data: EntrySearchResult[]; index: number; style: CSSProperties }) => {
+    const entry = data[index]
+
+    return (
+      <Box
+        justifyContent='flex-start'
+        alignItems='center'
+        sx={{ backgroundColor: index % 2 ? theme.palette.container.main : 'none', p: 2, margin: 'auto', ...style }}
+        key={entry.id}
+      >
+        <Stack>
+          <Stack direction='row'>
+            <Link
+              sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
+              href={`${entry.kind}/${entry.id}`}
             >
-              {entry.name}
-            </Typography>
-          </Link>
+              <Typography
+                variant='h5'
+                sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
+              >
+                {entry.name}
+              </Typography>
+            </Link>
+          </Stack>
+          <Typography
+            variant='body1'
+            sx={{ marginBottom: 2, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
+          >
+            {entry.description}
+          </Typography>
+          <div>
+            <ChipSelector
+              chipTooltipTitle={'Filter by tag'}
+              options={entry.tags.slice(0, 10)}
+              expandThreshold={10}
+              multiple
+              selectedChips={selectedChips}
+              onChange={onSelectedChipsChange}
+              size='small'
+              ariaLabel='add tag to search filter'
+            />
+          </div>
         </Stack>
-        <Typography
-          variant='body1'
-          sx={{ marginBottom: 2, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-        >
-          {entry.description}
-        </Typography>
-        <ChipSelector
-          chipTooltipTitle={'Filter by tag'}
-          options={entry.tags.slice(0, 10)}
-          expandThreshold={10}
-          multiple
-          selectedChips={selectedChips}
-          onChange={onSelectedChipsChange}
-          size='small'
-          ariaLabel='add tag to search filter'
-        />
-        {index !== entries.length - 1 && <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }} />}
-      </Fragment>
-    ))
-  }, [entries, onSelectedChipsChange, selectedChips, theme.palette.primary.main])
+      </Box>
+    )
+  })
+
+  Row.displayName = 'row'
 
   if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
 
   return (
     <>
       {entries.length === 0 && <EmptyBlob data-test='emptyEntryListBlob' text='No entries here' />}
-      {entriesDisplay}
+      <FixedSizeList
+        height={window.innerHeight - 300}
+        itemCount={entries.length}
+        itemData={entries}
+        itemSize={130}
+        width='100%'
+      >
+        {Row}
+      </FixedSizeList>
     </>
   )
 }
