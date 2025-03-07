@@ -86,6 +86,8 @@ const releaseServiceMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/release.js', () => releaseServiceMocks)
 
+const testFileId = '73859F8D26679D2E52597326'
+
 const fileModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
@@ -97,6 +99,10 @@ const fileModelMocks = vi.hoisted(() => {
   obj.find = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
   obj.findOneAndDelete = vi.fn(() => obj)
+
+  obj.toObject = vi.fn(() => obj)
+
+  obj._id = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -136,8 +142,6 @@ vi.mock('clamscan', () => ({
   __esModule: true,
   default: vi.fn(() => ({ init: vi.fn(() => ({ passthrough: vi.fn(() => clamscan) })) })),
 }))
-
-const testFileId = '73859F8D26679D2E52597326'
 
 describe('services > file', () => {
   test('uploadFile > success', async () => {

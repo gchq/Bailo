@@ -1,4 +1,4 @@
-import { Schema, Types } from 'mongoose'
+import { ObjectId, Schema, Types } from 'mongoose'
 import { Readable } from 'stream'
 
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
@@ -82,9 +82,9 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 
   const avScan = await ScanModel.find({ fileId: file._id })
   const ret: FileWithScanResultsInterface = {
-    ...file,
+    ...file.toObject(),
     avScan,
-    id: file._id,
+    id: (file._id as ObjectId).toString(),
   }
 
   return ret
