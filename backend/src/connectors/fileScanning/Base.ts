@@ -1,12 +1,9 @@
 import { FileInterface } from '../../models/File.js'
-export interface FileScanResult {
-  toolName: string
-  scannerVersion?: string
-  state: ScanStateKeys
-  isInfected?: boolean
-  viruses?: string[]
-  lastRunAt: Date
-}
+import { ScanInterface } from '../../models/Scan.js'
+export type FileScanResult = Pick<
+  ScanInterface,
+  'toolName' | 'scannerVersion' | 'state' | 'isInfected' | 'viruses' | 'lastRunAt'
+>
 
 export const ScanState = {
   NotScanned: 'notScanned',

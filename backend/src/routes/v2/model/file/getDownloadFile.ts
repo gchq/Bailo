@@ -6,7 +6,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
-import { FileInterface, FileInterfaceDoc } from '../../../../models/File.js'
+import { FileInterface, FileWithScanResultsInterface } from '../../../../models/File.js'
 import { downloadFile, getFileById } from '../../../../services/file.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
 import { registerPath } from '../../../../services/specification.js'
@@ -92,7 +92,7 @@ export const getDownloadFile = [
   async (req: Request, res: Response<GetDownloadFileResponse>) => {
     req.audit = AuditInfo.ViewFile
     const { params } = parse(req, getDownloadFileSchema)
-    let file: FileInterfaceDoc
+    let file: FileWithScanResultsInterface
     if ('semver' in params) {
       file = await getFileByReleaseFileName(req.user, params.modelId, params.semver, params.fileName)
     } else {
@@ -107,7 +107,7 @@ export const getDownloadFile = [
     res.set('Content-Length', String(file.size))
     // TODO: support ranges
     // res.set('Accept-Ranges', 'bytes')
-    const stream = await downloadFile(req.user, file._id)
+    const stream = await downloadFile(req.user, file.id)
 
     if (!stream.Body) {
       throw InternalError('We were not able to retrieve the body of this file', { fileId: file._id })

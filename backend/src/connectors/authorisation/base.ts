@@ -1,5 +1,5 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterfaceDoc } from '../../models/File.js'
+import { FileInterface } from '../../models/File.js'
 import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
@@ -77,7 +77,7 @@ export class BasicAuthorisationConnector {
     return (await this.responses(user, [response], action))[0]
   }
 
-  async file(user: UserInterface, model: ModelDoc, file: FileInterfaceDoc, action: FileActionKeys) {
+  async file(user: UserInterface, model: ModelDoc, file: FileInterface, action: FileActionKeys) {
     return (await this.files(user, model, [file], action))[0]
   }
 
@@ -243,7 +243,7 @@ export class BasicAuthorisationConnector {
   async files(
     user: UserInterface,
     model: ModelDoc,
-    files: Array<FileInterfaceDoc>,
+    files: Array<FileInterface>,
     action: FileActionKeys,
   ): Promise<Array<Response>> {
     // Does the user have a valid access request for this model?
@@ -265,7 +265,7 @@ export class BasicAuthorisationConnector {
           return {
             success: false,
             info: 'You do not have permission to upload a file.',
-            id: file.id,
+            id: file._id.toString(),
           }
         }
 
@@ -278,11 +278,11 @@ export class BasicAuthorisationConnector {
           return {
             success: false,
             info: 'You need to have an approved access request or have permission to download a file.',
-            id: file.id,
+            id: file._id.toString(),
           }
         }
 
-        return { success: true, id: file.id }
+        return { success: true, id: file._id.toString() }
       }),
     )
   }
