@@ -69,7 +69,7 @@ export default function ChipSelector({
 
   return (
     <>
-      {label && <Typography component='h2' variant='h6'>{`${label}`}</Typography>}
+      {label && <Typography component='h2' variant='h6' marginBottom={1}>{`${label}`}</Typography>}
       {!expanded && allOptions.slice(0, expandThreshold)}
       {expanded && allOptions}
       {options.length > expandThreshold && (
