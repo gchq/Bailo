@@ -31,7 +31,9 @@ export default function EntryList({
         justifyContent='flex-start'
         alignItems='center'
         sx={{
-          backgroundColor: index % 2 ? theme.palette.container.main : theme.palette.background.paper,
+          borderBottomStyle: 'solid',
+          borderBottomWidth: 1,
+          borderBottomColor: theme.palette.divider,
           p: 2,
           margin: 'auto',
           ...style,
