@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
-import { FileInterface } from '../../../../models/File.js'
+import { FileWithScanResultsInterface } from '../../../../models/File.js'
 import { getFilesByModel } from '../../../../services/file.js'
 import { fileInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
@@ -38,7 +38,7 @@ registerPath({
 })
 
 interface GetFilesResponse {
-  files: Array<FileInterface>
+  files: Array<FileWithScanResultsInterface>
 }
 
 export const getFiles = [
