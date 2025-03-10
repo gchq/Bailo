@@ -203,8 +203,8 @@ If you'd like to make a contribution then the details for doing all of that are 
 
 ## License
 
-Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright. See `LICENSE.txt` for more
-information.
+Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright. See [LICENSE.txt][license-url] for
+more information.
 
 <br />
 

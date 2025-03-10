@@ -85,7 +85,11 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
         file = await getFileById(user, fileId)
       } catch (e) {
         if (isBailoError(e) && e.code === 404) {
-          throw BadReq('Unable to create release as the file cannot be found.', { fileId })
+          throw BadReq('Unable to create release as the file cannot be found.', {
+            fileId,
+            semver: release.semver,
+            modelId: release.modelId,
+          })
         }
         throw e
       }

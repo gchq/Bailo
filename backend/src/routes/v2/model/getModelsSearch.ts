@@ -7,7 +7,6 @@ import audit from '../../../connectors/audit/index.js'
 import { EntryKind, EntryKindKeys } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
-import { GetModelFilters } from '../../../types/enums.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
 
 export const getModelsSearchSchema = z.object({
@@ -16,7 +15,7 @@ export const getModelsSearchSchema = z.object({
     kind: z.string(z.nativeEnum(EntryKind)).optional(),
     task: z.string().optional(),
     libraries: coerceArray(z.array(z.string()).optional().default([])),
-    filters: coerceArray(z.array(z.nativeEnum(GetModelFilters)).optional().default([])),
+    filters: coerceArray(z.array(z.string()).optional().default([])),
     search: z.string().optional().default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),

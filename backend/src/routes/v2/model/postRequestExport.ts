@@ -14,6 +14,10 @@ export const postRequestExportToS3Schema = z.object({
   }),
   body: z.object({
     disclaimerAgreement: z.boolean(),
+    semvers: z
+      .array(z.string())
+      .openapi({ example: ['1.0.0'] })
+      .optional(),
   }),
 })
 
@@ -48,10 +52,10 @@ export const postRequestExportToS3 = [
     req.audit = AuditInfo.CreateExport
     const {
       params: { modelId },
-      body: { disclaimerAgreement },
+      body: { disclaimerAgreement, semvers },
     } = parse(req, postRequestExportToS3Schema)
 
-    await exportModel(req.user, modelId, disclaimerAgreement)
+    await exportModel(req.user, modelId, disclaimerAgreement, semvers)
     await audit.onCreateS3Export(req, modelId)
 
     return res.json({
