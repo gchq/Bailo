@@ -6,7 +6,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
-import { FileWithScanResultsInterface } from '../../../../models/File.js'
+import { FileInterface, FileWithScanResultsInterface } from '../../../../models/File.js'
 import { downloadFile, getFileById } from '../../../../services/file.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
 import { registerPath } from '../../../../services/specification.js'
@@ -84,7 +84,7 @@ registerPath({
 })
 
 interface GetDownloadFileResponse {
-  files: Array<FileWithScanResultsInterface>
+  files: Array<FileInterface>
 }
 
 export const getDownloadFile = [

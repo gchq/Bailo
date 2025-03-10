@@ -6,7 +6,7 @@ import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { FileWithScanResultsInterface } from '../../../../models/File.js'
 import { getFilesByModel } from '../../../../services/file.js'
-import { fileInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import { fileWithScanInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getFilesSchema = z.object({
@@ -29,7 +29,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            files: z.array(fileInterfaceSchema),
+            files: z.array(fileWithScanInterfaceSchema),
           }),
         },
       },
