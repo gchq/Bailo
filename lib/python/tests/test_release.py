@@ -80,6 +80,7 @@ def test_nonexistent_file_ids(integration_client, example_model):
             draft=True,
         )
 
+
 @pytest.mark.integration
 def test_incorrect_format_file_ids(integration_client, example_model):
     with pytest.raises(BailoException):
