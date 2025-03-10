@@ -126,11 +126,18 @@ export default function PageWithTabs({
         spacing={{ xs: 1, sm: 2 }}
         sx={{ px: 2, pb: 2 }}
       >
-        <Stack>
+        <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
           <Stack direction='row'>
-            <Typography component='h1' color='primary' variant='h6'>
-              {title}
-            </Typography>
+            <Tooltip title={title}>
+              <Typography
+                component='h1'
+                color='primary'
+                variant='h6'
+                sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }}
+              >
+                {title}
+              </Typography>
+            </Tooltip>
             {titleToCopy.length > 0 && (
               <CopyToClipboardButton
                 textToCopy={titleToCopy ? titleToCopy : title}
@@ -141,7 +148,10 @@ export default function PageWithTabs({
           </Stack>
           {subheading && (
             <Stack direction='row' alignItems='center'>
-              <Typography variant='caption' sx={{ color: darken(theme.palette.primary.main, 0.4) }}>
+              <Typography
+                variant='caption'
+                sx={{ color: darken(theme.palette.primary.main, 0.4), textOverflow: 'ellipsis', overflow: 'hidden' }}
+              >
                 {subheading}
               </Typography>
               {subheadingToCopy.length > 0 && (
@@ -155,13 +165,13 @@ export default function PageWithTabs({
           )}
         </Stack>
         {displayActionButton && (
-          <Button variant='contained' onClick={actionButtonOnClick}>
+          <Button sx={{ minWidth: '154px' }} variant='contained' onClick={actionButtonOnClick}>
             {actionButtonTitle}
           </Button>
         )}
         {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
       </Stack>
-      <Typography sx={{ pl: 2, pb: 1 }}>{additionalInfo}</Typography>
+      <Typography sx={{ pl: 2, pb: 1, textOverflow: 'ellipsis', overflow: 'hidden' }}>{additionalInfo}</Typography>
       <Tabs
         value={currentTab || false}
         onChange={handleChange}

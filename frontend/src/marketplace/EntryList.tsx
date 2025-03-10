@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
 import { Fragment, useMemo } from 'react'
@@ -26,17 +26,25 @@ export default function EntryList({
     return entries.map((entry, index) => (
       <Fragment key={entry.id}>
         <Stack direction='row'>
-          <Link
-            sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-            href={`${entry.kind}/${entry.id}`}
-          >
-            <Typography
-              variant='h5'
-              sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
+          <Tooltip enterDelay={400} title={entry.name}>
+            <Link
+              sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
+              href={`${entry.kind}/${entry.id}`}
             >
-              {entry.name}
-            </Typography>
-          </Link>
+              <Typography
+                variant='h5'
+                sx={{
+                  fontWeight: '500',
+                  textDecoration: 'none',
+                  color: theme.palette.primary.main,
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                }}
+              >
+                {entry.name}
+              </Typography>
+            </Link>
+          </Tooltip>
         </Stack>
         <Typography
           variant='body1'
