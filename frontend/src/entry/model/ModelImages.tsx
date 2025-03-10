@@ -27,7 +27,9 @@ export default function ModelImages({ model, readOnly = false }: AccessRequestsP
           <ModelImageDisplay modelImage={modelImage} key={`${modelImage.repository}-${modelImage.name}`} />
         ))
       ) : (
-        <EmptyBlob text={`No images found for model ${model.name}`} />
+        <Box sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
+          <EmptyBlob text={`No images found for model ${model.name}`} />
+        </Box>
       ),
     [modelImages, model.name],
   )
