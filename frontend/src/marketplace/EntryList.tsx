@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
-import { CSSProperties, memo } from 'react'
+import { CSSProperties } from 'react'
 import { FixedSizeList } from 'react-window'
 import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -23,14 +23,19 @@ export default function EntryList({
 }: EntryListProps) {
   const theme = useTheme()
 
-  const Row = memo(({ data, index, style }: { data: EntrySearchResult[]; index: number; style: CSSProperties }) => {
+  const rows = ({ data, index, style }: { data: EntrySearchResult[]; index: number; style: CSSProperties }) => {
     const entry = data[index]
 
     return (
       <Box
         justifyContent='flex-start'
         alignItems='center'
-        sx={{ backgroundColor: index % 2 ? theme.palette.container.main : 'none', p: 2, margin: 'auto', ...style }}
+        sx={{
+          backgroundColor: index % 2 ? theme.palette.container.main : theme.palette.background.paper,
+          p: 2,
+          margin: 'auto',
+          ...style,
+        }}
         key={entry.id}
       >
         <Stack>
@@ -68,9 +73,7 @@ export default function EntryList({
         </Stack>
       </Box>
     )
-  })
-
-  Row.displayName = 'row'
+  }
 
   if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
 
@@ -82,9 +85,10 @@ export default function EntryList({
         itemCount={entries.length}
         itemData={entries}
         itemSize={130}
+        overscanCount={5}
         width='100%'
       >
-        {Row}
+        {rows}
       </FixedSizeList>
     </>
   )
