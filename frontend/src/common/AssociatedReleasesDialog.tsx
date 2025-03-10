@@ -26,7 +26,7 @@ export default function AssociatedReleasesDialog({ modelId, file, open, onClose 
     [file, releases],
   )
 
-  const sortAssociatedReleases: Array<ReleaseInterface> = releases.sort((a, b) => {
+  const sortAssociatedReleases: Array<ReleaseInterface> = associatedReleases.sort((a, b) => {
     if (a.createdAt > b.createdAt) {
       return -1
     }
