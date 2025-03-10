@@ -102,7 +102,7 @@ const fileModelMocks = vi.hoisted(() => {
 
   obj.toObject = vi.fn(() => obj)
 
-  obj._id = vi.fn(() => obj)
+  obj._id = vi.fn()
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -150,7 +150,6 @@ describe('services > file', () => {
     const name = 'testFile'
     const mime = 'text/plain'
     const stream = new Readable() as any
-    fileModelMocks.save.mockResolvedValueOnce({ example: true })
     const result = await uploadFile(user, modelId, name, mime, stream)
 
     expect(s3Mocks.putObjectStream).toBeCalled()
@@ -170,7 +169,6 @@ describe('services > file', () => {
     const name = 'testFile'
     const mime = 'text/plain'
     const stream = new Readable() as any
-    fileModelMocks.save.mockResolvedValueOnce({ example: true })
 
     const result = await uploadFile(user, modelId, name, mime, stream)
 
@@ -214,7 +212,9 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
 
     const result = await removeFile(user, modelId, testFileId)
 
@@ -226,7 +226,9 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
 
     releaseServiceMocks.removeFileFromReleases.mockRejectedValueOnce('Cannot update releases')
 
@@ -237,7 +239,9 @@ describe('services > file', () => {
   })
 
   test('removeFile > no file permission', async () => {
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
     vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
       if (action === FileAction.View) return { success: true, id: '' }
       if (action === FileAction.Delete)
@@ -259,7 +263,9 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
     vi.mocked(authorisation.file).mockResolvedValue({
       info: 'Cannot remove file from a mirrored model.',
       success: false,
@@ -272,7 +278,7 @@ describe('services > file', () => {
   })
 
   test('getFilesByModel > success', async () => {
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => testFileId) } }])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
@@ -291,7 +297,7 @@ describe('services > file', () => {
       },
     ])
 
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => testFileId) } }])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
@@ -301,11 +307,13 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > success', async () => {
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file', avScan: [] }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { example: 'file', avScan: [], _id: { toString: vi.fn(() => testFileId) } },
+    ])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
-    const fileIds = ['73859F8D26679D2E52597326']
+    const fileIds = [testFileId]
 
     const files = await getFilesByIds(user, modelId, fileIds)
 
@@ -314,8 +322,16 @@ describe('services > file', () => {
 
   test('getFilesByIds > success with scans mapped', async () => {
     fileModelMocks.aggregate.mockResolvedValueOnce([
-      { example: 'file', _id: '123', avScan: [{ fileId: '123' }, { fileId: '123' }] },
-      { example: 'file', _id: '321', avScan: [{ fileId: '321' }] },
+      {
+        example: 'file',
+        _id: '123',
+        avScan: [{ fileId: '123' }, { fileId: '123' }],
+      },
+      {
+        example: 'file',
+        _id: '321',
+        avScan: [{ fileId: '321' }],
+      },
     ])
     vi.mocked(authorisation.files).mockResolvedValue([
       { success: true, id: '123' },
@@ -332,7 +348,7 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > no file ids', async () => {
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => testFileId) } }])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
@@ -344,13 +360,11 @@ describe('services > file', () => {
   })
 
   test('getFilesByIds > files not found', async () => {
-    fileModelMocks.aggregate.mockResolvedValueOnce([
-      { example: 'file', _id: { toString: vi.fn(() => '73859F8D26679D2E52597326') } },
-    ])
+    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file', _id: { toString: vi.fn(() => testFileId) } }])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
-    const fileIds = ['73859F8D26679D2E52597326', '73859F8D26679D2E525973262']
+    const fileIds = [testFileId, testFileId]
 
     const files = getFilesByIds(user, modelId, fileIds)
 
@@ -365,11 +379,13 @@ describe('services > file', () => {
         id: '',
       },
     ])
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ example: 'file', avScan: [] }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { example: 'file', avScan: [], _id: { toString: vi.fn(() => testFileId) } },
+    ])
 
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
-    const fileIds = ['73859F8D26679D2E52597326']
+    const fileIds = [testFileId]
 
     const files = await getFilesByIds(user, modelId, fileIds)
     expect(files).toStrictEqual([])
@@ -379,7 +395,9 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as UserInterface
     const range = { start: 0, end: 50 }
 
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
 
     const result = await downloadFile(user, testFileId, range)
 
@@ -389,7 +407,9 @@ describe('services > file', () => {
   test('downloadFile > no permission', async () => {
     const user = { dn: 'testUser' } as UserInterface
     const range = { start: 0, end: 50 }
-    fileModelMocks.aggregate.mockResolvedValueOnce([{ modelId: 'testModel' }])
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
 
     vi.mocked(authorisation.file).mockImplementation(async (_user, _model, _file, action) => {
       if (action === FileAction.View) return { success: true, id: '' }
@@ -417,6 +437,7 @@ describe('services > file', () => {
       {
         name: 'file.txt',
         size: 123,
+        _id: { toString: vi.fn(() => testFileId) },
       },
     ])
     scanModelMocks.find.mockResolvedValueOnce([
@@ -434,6 +455,7 @@ describe('services > file', () => {
       {
         name: 'file.txt',
         size: 0,
+        _id: { toString: vi.fn(() => testFileId) },
       },
     ])
     scanModelMocks.find.mockResolvedValueOnce([
@@ -451,6 +473,7 @@ describe('services > file', () => {
       {
         name: 'file.txt',
         size: 123,
+        _id: { toString: vi.fn(() => testFileId) },
       },
     ])
     scanModelMocks.find.mockResolvedValueOnce([{ state: ScanState.Complete, lastRunAt: new Date() }])

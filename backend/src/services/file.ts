@@ -1,4 +1,4 @@
-import { ObjectId, Schema, Types } from 'mongoose'
+import { Schema, Types } from 'mongoose'
 import { Readable } from 'stream'
 
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
@@ -84,7 +84,7 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
   const ret: FileWithScanResultsInterface = {
     ...file.toObject(),
     avScan,
-    id: (file._id as ObjectId).toString(),
+    id: file._id.toString(),
   }
 
   return ret
@@ -121,7 +121,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
 }
 
 export async function getFileById(user: UserInterface, fileId: string): Promise<FileWithScanResultsInterface> {
-  const files = await FileModel.aggregate([
+  const files: FileWithScanResultsInterface[] = await FileModel.aggregate([
     { $match: { _id: new Types.ObjectId(fileId) } },
     { $limit: 1 },
     { $addFields: { id: { $toString: '$_id' } } },
@@ -138,7 +138,7 @@ export async function getFileById(user: UserInterface, fileId: string): Promise<
   if (!files || files.length === 0) {
     throw NotFound(`The requested file was not found.`, { fileId })
   }
-  const file: FileWithScanResultsInterface = { ...files[0], id: files[0]._id }
+  const file: FileWithScanResultsInterface = { ...files[0], id: files[0]._id.toString() }
 
   const model = await getModelById(user, file.modelId)
   const auth = await authorisation.file(user, model, file, FileAction.View)
@@ -151,7 +151,7 @@ export async function getFileById(user: UserInterface, fileId: string): Promise<
 
 export async function getFilesByModel(user: UserInterface, modelId: string) {
   const model = await getModelById(user, modelId)
-  const files = await FileModel.aggregate([
+  const files: FileWithScanResultsInterface[] = await FileModel.aggregate([
     { $match: { modelId } },
     { $addFields: { id: { $toString: '$_id' } } },
     {
@@ -177,7 +177,7 @@ export async function getFilesByIds(
   if (fileIds.length === 0) {
     return []
   }
-  const files = await FileModel.aggregate([
+  const files: FileWithScanResultsInterface[] = await FileModel.aggregate([
     { $match: { _id: { $in: fileIds } } },
     { $addFields: { id: { $toString: '$_id' } } },
     {

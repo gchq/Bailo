@@ -11,6 +11,9 @@ exports[`services > file > downloadFile > success 1`] = `
 exports[`services > file > getFilesByIds > success 1`] = `
 [
   {
+    "_id": {
+      "toString": [MockFunction spy],
+    },
     "avScan": [],
     "example": "file",
   },
@@ -46,6 +49,9 @@ exports[`services > file > getFilesByIds > success with scans mapped 1`] = `
 exports[`services > file > getFilesByModel > success 1`] = `
 [
   {
+    "_id": {
+      "toString": [MockFunction spy],
+    },
     "example": "file",
   },
 ]
@@ -53,7 +59,20 @@ exports[`services > file > getFilesByModel > success 1`] = `
 
 exports[`services > file > removeFile > success 1`] = `
 {
-  "id": undefined,
+  "_id": {
+    "toString": [MockFunction spy] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+      ],
+    },
+  },
+  "id": "73859F8D26679D2E52597326",
   "modelId": "testModel",
 }
 `;
@@ -118,7 +137,38 @@ exports[`services > file > uploadFile > success 1`] = `
     "results": [
       {
         "type": "return",
-        "value": Promise {},
+        "value": {
+          "_id": [MockFunction spy],
+          "aggregate": [MockFunction spy],
+          "delete": [MockFunction spy],
+          "find": [MockFunction spy],
+          "findOneAndDelete": [MockFunction spy],
+          "group": [MockFunction spy],
+          "match": [MockFunction spy],
+          "save": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "size": 100,
+          "toObject": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+        },
       },
     ],
   },
@@ -145,7 +195,7 @@ exports[`services > file > uploadFile > success 1`] = `
             "results": [
               {
                 "type": "return",
-                "value": Promise {},
+                "value": [Circular],
               },
             ],
           },
@@ -228,7 +278,38 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
     "results": [
       {
         "type": "return",
-        "value": Promise {},
+        "value": {
+          "_id": [MockFunction spy],
+          "aggregate": [MockFunction spy],
+          "delete": [MockFunction spy],
+          "find": [MockFunction spy],
+          "findOneAndDelete": [MockFunction spy],
+          "group": [MockFunction spy],
+          "match": [MockFunction spy],
+          "save": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "size": 100,
+          "toObject": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+        },
       },
     ],
   },
@@ -255,7 +336,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
             "results": [
               {
                 "type": "return",
-                "value": Promise {},
+                "value": [Circular],
               },
             ],
           },
