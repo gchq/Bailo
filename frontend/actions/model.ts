@@ -6,6 +6,7 @@ import {
   EntryInterface,
   EntryKindKeys,
   EntryUserPermissions,
+  FileInterface,
   ModelImage,
   ReleaseInterface,
   Role,
@@ -147,6 +148,22 @@ export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
     entryUserPermissions: data?.permissions,
     isEntryUserPermissionsLoading: isLoading,
     isEntryUserPermissionsError: error,
+  }
+}
+
+export function useGetModelFiles(id?: string) {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      files: Array<FileInterface>
+    },
+    ErrorInfo
+  >(id ? `/api/v2/model/${id}/files` : null, fetcher)
+
+  return {
+    mutateEntryFiles: mutate,
+    entryFiles: data ? data.files : [],
+    isEntryFilesLoading: isLoading,
+    isEntryFilesError: error,
   }
 }
 

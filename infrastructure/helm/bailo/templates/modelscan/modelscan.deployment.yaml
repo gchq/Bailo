@@ -31,11 +31,9 @@ spec:
         resources:
           requests:
             memory: "100Mi"
-            ephemeral-storage: "100Mi"
             cpu: "200m"
           limits:
             memory: "1Gi"
-            ephemeral-storage: "300Mi"
             cpu: "1"
         volumeMounts:
         - name: tmp

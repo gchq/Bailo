@@ -25,6 +25,7 @@ export interface ReleaseDisplayProps {
   release: ReleaseInterface
   latestRelease?: string
   hideReviewBanner?: boolean
+  hideFileDownloads?: boolean
 }
 
 export default function ReleaseDisplay({
@@ -32,6 +33,7 @@ export default function ReleaseDisplay({
   release,
   latestRelease,
   hideReviewBanner = false,
+  hideFileDownloads = false,
 }: ReleaseDisplayProps) {
   const router = useRouter()
 
@@ -133,7 +135,7 @@ export default function ReleaseDisplay({
             <MarkdownDisplay>{release.notes}</MarkdownDisplay>
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
             <Stack spacing={1}>
-              {release.files.length > 0 && (
+              {!hideFileDownloads && release.files.length > 0 && (
                 <>
                   <Typography fontWeight='bold'>Files</Typography>
                   {release.files.map((file) => (
