@@ -1,12 +1,25 @@
-import { Dialog, DialogContent, DialogTitle, List, ListItem, ListItemText, Stack, Typography } from '@mui/material'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Typography,
+} from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { useGetReleasesForModelId } from 'actions/release'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
+import { Transition } from 'src/common/Transition'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { FileInterface, isFileInterface, ReleaseInterface } from 'types/types'
+import { FileInterface, isFileInterface } from 'types/types'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString } from 'utils/dateUtils'
 
 type AssociatedReleasesDialogProps = {
@@ -21,56 +34,55 @@ export default function AssociatedReleasesDialog({ modelId, file, open, onClose 
   const { model, isModelLoading, isModelError } = useGetModel(modelId, 'model')
   const [latestRelease, setLatestRelease] = useState('')
 
-  const associatedReleases: Array<ReleaseInterface> = useMemo(
-    () => releases.filter((release) => isFileInterface(file) && release.fileIds.includes(file._id)),
+  const sortedAssociatedReleases = useMemo(
+    () =>
+      releases
+        .filter((release) => isFileInterface(file) && release.fileIds.includes(file._id))
+        .sort(sortByCreatedAtDescending),
     [file, releases],
-  )
-
-  const sortAssociatedReleases: Array<ReleaseInterface> = associatedReleases.sort((a, b) => {
-    if (a.createdAt > b.createdAt) {
-      return -1
-    }
-    if (a.createdAt < b.createdAt) {
-      return 1
-    } else {
-      return 0
-    }
-  })
-
-  const isLatestRelease = useCallback(
-    (semver: string) => {
-      if (latestRelease === semver) {
-        return <Typography color='secondary'>(Latest)</Typography>
-      }
-    },
-    [latestRelease],
   )
 
   useEffect(() => {
     if (model && releases.length > 0) {
-      setLatestRelease(releases[0].semver)
+      setLatestRelease(sortedAssociatedReleases[0].semver)
     }
-  }, [model, releases])
+  }, [model, releases, sortedAssociatedReleases])
 
   const associatedReleasesDisplay = useMemo(
     () =>
-      model &&
-      isFileInterface(file) &&
-      sortAssociatedReleases.map((associatedRelease) => (
-        <Stack key={associatedRelease._id} spacing={2} p={2}>
-          <List>
-            <ListItem secondaryAction={isLatestRelease(associatedRelease.semver)}>
-              <Link noLinkStyle href={`/model/${model.id}/release/${associatedRelease.semver}`}>
-                <ListItemText
-                  primary={`${model.name} - ${associatedRelease.semver}`}
-                  secondary={` ${formatDateString(file.createdAt.toString())}`}
-                />
+      model && isFileInterface(file) && sortedAssociatedReleases.length > 0 ? (
+        <List disablePadding>
+          {sortedAssociatedReleases.map((associatedRelease) => (
+            <ListItem disablePadding key={associatedRelease._id}>
+              <Link
+                href={`/model/${model.id}/release/${associatedRelease.semver}`}
+                sx={{ textDecoration: 'none', width: '100%' }}
+              >
+                <ListItemButton dense>
+                  <ListItemText
+                    primary={
+                      <>
+                        <Typography color='primary' component='span'>
+                          {associatedRelease.semver}
+                        </Typography>
+                        {latestRelease === associatedRelease.semver && (
+                          <Typography color='secondary' component='span' pl={1}>
+                            (Latest)
+                          </Typography>
+                        )}
+                      </>
+                    }
+                    secondary={formatDateString(file.createdAt.toString())}
+                  />
+                </ListItemButton>
               </Link>
             </ListItem>
-          </List>
-        </Stack>
-      )),
-    [file, isLatestRelease, model, sortAssociatedReleases],
+          ))}
+        </List>
+      ) : (
+        <EmptyBlob text='No Associated Releases' />
+      ),
+    [file, latestRelease, model, sortedAssociatedReleases],
   )
 
   if (isReleasesError) {
@@ -81,16 +93,15 @@ export default function AssociatedReleasesDialog({ modelId, file, open, onClose 
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
 
-  if (isModelLoading || isReleasesLoading) {
-    return <Loading />
-  }
-
   return (
-    <Dialog open={open} onClose={onClose} maxWidth='md'>
-      <DialogTitle>Releases associated to {file.name}</DialogTitle>
-      <DialogContent>
-        {associatedReleases.length > 0 ? associatedReleasesDisplay : <EmptyBlob text='No Associated Releases' />}
-      </DialogContent>
+    <Dialog fullWidth open={open} onClose={onClose} maxWidth='sm' slots={{ transition: Transition }}>
+      <DialogTitle>Associated Releases</DialogTitle>
+      <DialogContent>{isModelLoading || isReleasesLoading ? <Loading /> : associatedReleasesDisplay}</DialogContent>
+      <DialogActions>
+        <Button variant='contained' onClick={onClose}>
+          Close
+        </Button>
+      </DialogActions>
     </Dialog>
   )
 }
