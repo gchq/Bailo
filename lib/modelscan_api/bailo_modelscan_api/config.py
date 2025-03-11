@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from modelscan.settings import DEFAULT_SETTINGS
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -24,11 +24,10 @@ class Settings(BaseSettings):
 
     You can upload files and view modelscan's result."""
     # Update frontend/pages/docs/administration/helm/configuration.mdx if bumping this.
-    app_version: str = "1.0.0"
-    # download_dir is used if it evaluates, otherwise a temporary directory is used.
-    download_dir: Optional[str] = None
+    app_version: str = "2.0.0"
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
+    maximum_filesize: int = 4 * 1024**3  # 4GB
 
     # Load in a dotenv file to set/overwrite any properties with potentially sensitive values
     model_config = SettingsConfigDict(env_file=".env")

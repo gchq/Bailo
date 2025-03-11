@@ -20,7 +20,7 @@ client = TestClient(app)
 
 @lru_cache
 def get_settings_override():
-    return Settings(download_dir=".")
+    return Settings()
 
 
 app.dependency_overrides[get_settings] = get_settings_override
@@ -42,8 +42,8 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                 "errors": [],
                 "issues": [],
                 "summary": {
-                    "absolute_path": str(Path().cwd().absolute()),
-                    "input_path": str(Path().cwd().absolute().joinpath("empty.txt")),
+                    "absolute_path": ANY,
+                    "input_path": ANY,
                     "modelscan_version": modelscan.__version__,
                     "scanned": {"total_scanned": 0},
                     "skipped": {
@@ -51,7 +51,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                             {
                                 "category": "SCAN_NOT_SUPPORTED",
                                 "description": "Model Scan did not scan file",
-                                "source": "empty.txt",
+                                "source": ANY,
                             }
                         ],
                         "total_skipped": 1,
@@ -80,8 +80,8 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                         "CRITICAL": 0,
                     },
                     "total_issues": 0,
-                    "input_path": str(Path().cwd().absolute().joinpath("null.h5")),
-                    "absolute_path": str(Path().cwd().absolute()),
+                    "input_path": ANY,
+                    "absolute_path": ANY,
                     "modelscan_version": modelscan.__version__,
                     "timestamp": ANY,
                     "scanned": {"total_scanned": 0},
@@ -91,7 +91,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                             {
                                 "category": "SCAN_NOT_SUPPORTED",
                                 "description": "Model Scan did not scan file",
-                                "source": "null.h5",
+                                "source": ANY,
                             }
                         ],
                     },
@@ -101,7 +101,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                     {
                         "category": "MODEL_SCAN",
                         "description": "Unable to synchronously open file (file signature not found)",
-                        "source": "null.h5",
+                        "source": ANY,
                     }
                 ],
             },
@@ -119,11 +119,11 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                         "CRITICAL": 0,
                     },
                     "total_issues": 0,
-                    "input_path": str(Path().cwd().absolute().joinpath("safe.pkl")),
-                    "absolute_path": str(Path().cwd().absolute()),
+                    "input_path": ANY,
+                    "absolute_path": ANY,
                     "modelscan_version": modelscan.__version__,
                     "timestamp": ANY,
-                    "scanned": {"total_scanned": 1, "scanned_files": ["safe.pkl"]},
+                    "scanned": {"total_scanned": 1, "scanned_files": [ANY]},
                     "skipped": {
                         "total_skipped": 0,
                         "skipped_files": [],
@@ -146,11 +146,11 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                         "CRITICAL": 1,
                     },
                     "total_issues": 1,
-                    "input_path": str(Path().cwd().absolute().joinpath("unsafe.pkl")),
-                    "absolute_path": str(Path().cwd().absolute()),
+                    "input_path": ANY,
+                    "absolute_path": ANY,
                     "modelscan_version": modelscan.__version__,
                     "timestamp": ANY,
-                    "scanned": {"total_scanned": 1, "scanned_files": ["unsafe.pkl"]},
+                    "scanned": {"total_scanned": 1, "scanned_files": [ANY]},
                     "skipped": {
                         "total_skipped": 0,
                         "skipped_files": [],
@@ -163,7 +163,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                         "operator": "system",
                         "scanner": "modelscan.scanners.PickleUnsafeOpScan",
                         "severity": "CRITICAL",
-                        "source": "unsafe.pkl",
+                        "source": ANY,
                     },
                 ],
                 "errors": [],

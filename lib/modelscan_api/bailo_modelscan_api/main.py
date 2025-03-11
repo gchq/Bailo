@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import logging
-from contextlib import nullcontext
 from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import NamedTemporaryFile
 from typing import Annotated, Any
 
 import modelscan
 import uvicorn
+from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
 from pydantic import BaseModel
@@ -19,9 +19,8 @@ from pydantic import BaseModel
 # isort: split
 
 from bailo_modelscan_api.config import Settings
-from bailo_modelscan_api.dependencies import safe_join
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("uvicorn.error")
 
 
 @lru_cache
@@ -41,6 +40,8 @@ app = FastAPI(
     version=get_settings().app_version,
     dependencies=[Depends(get_settings)],
 )
+# Limit the maximum filesize
+app.add_middleware(ContentSizeLimitMiddleware, max_content_size=get_settings().maximum_filesize)
 
 
 class ApiInformation(BaseModel):
@@ -249,31 +250,15 @@ async def scan_file(
         # Instantiate ModelScan
         modelscan_model = ModelScan(settings=settings.modelscan_settings)
 
-        # Use Setting's download_dir if defined else use a temporary directory.
-        with TemporaryDirectory() if not settings.download_dir else nullcontext(settings.download_dir) as download_dir:
-            if in_file.filename and str(in_file.filename).strip():
-                # Prevent escaping to a parent dir
-                try:
-                    pathlib_path = safe_join(download_dir, in_file.filename)
-                except ValueError:
-                    logger.exception("Failed to safely join the filename to the path.")
-                    raise HTTPException(
-                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                        detail="An error occurred while processing the uploaded file's name.",
-                    )
-            else:
-                raise HTTPException(
-                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                    detail="An error occurred while extracting the uploaded file's name.",
-                )
-
+        file_suffix = Path(str(in_file.filename).strip()).suffix
+        with NamedTemporaryFile("wb", suffix=file_suffix, delete=False) as out_file:
+            file_path = Path(out_file.name)
             # Write the streamed in_file to disk.
             # This is a bit silly as modelscan will ultimately load this back into memory, but modelscan
-            # doesn't currently support streaming.
+            # doesn't currently support streaming directly from memory.
             try:
-                with open(pathlib_path, "wb") as out_file:
-                    while content := in_file.file.read(settings.block_size):
-                        out_file.write(content)
+                while content := in_file.file.read(settings.block_size):
+                    out_file.write(content)
             except OSError as exception:
                 logger.exception("Failed writing the file to the disk.")
                 raise HTTPException(
@@ -281,13 +266,13 @@ async def scan_file(
                     detail=f"An error occurred while trying to write the uploaded file to the disk: {exception}",
                 ) from exception
 
-            # Scan the uploaded file.
-            logger.info("Initiating ModelScan scan of %s", pathlib_path)
-            result = modelscan_model.scan(pathlib_path)
-            logger.info("ModelScan result: %s", result)
+        # Scan the uploaded file.
+        logger.info("Initiating ModelScan scan of %s", file_path)
+        result = modelscan_model.scan(file_path)
+        logger.info("ModelScan result: %s", result)
 
-            # Finally, return the result.
-            return result
+        # Finally, return the result.
+        return result
 
     except HTTPException:
         # Re-raise HTTPExceptions.
@@ -304,12 +289,11 @@ async def scan_file(
     finally:
         try:
             # Clean up the downloaded file as a background task to allow returning sooner.
-            # If using a temporary dir then this would happen anyway, but if Settings' download_dir evaluates
-            # then this is required.
+            # The OS should handle this anyway, but it's safer to be explicit.
             logger.info("Cleaning up downloaded file.")
-            background_tasks.add_task(Path.unlink, pathlib_path, missing_ok=True)
+            background_tasks.add_task(Path.unlink, file_path, missing_ok=True)
         except UnboundLocalError:
-            # pathlib_path may not exist.
+            # file_path may not be defined.
             logger.exception("An error occurred while trying to cleanup the downloaded file.")
 
 
