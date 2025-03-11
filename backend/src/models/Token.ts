@@ -3,6 +3,8 @@ import { createHash } from 'crypto'
 import { model, Schema } from 'mongoose'
 import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
+import { BadReq } from '../utils/error.js'
+
 export const TokenScope = {
   All: 'all',
   Models: 'models',
@@ -105,13 +107,15 @@ TokenSchema.pre('save', function userPreSave(next) {
   }
 
   if (this.hashMethod === HashType.Bcrypt) {
-    bcrypt.hash(this.secretKey, 8, (err: Error | null, hash: string) => {
+    bcrypt.hash(this.secretKey, 8, (err: Error | null, result: string | undefined) => {
       if (err) {
         next(err)
         return
       }
-
-      this.secretKey = hash
+      if (!result) {
+        throw BadReq('Unable to create token')
+      }
+      this.secretKey = result
       next()
     })
   } else if (this.hashMethod === HashType.SHA256) {
@@ -131,12 +135,15 @@ TokenSchema.methods.compareToken = function compareToken(candidateToken: string)
     }
 
     if (this.hashMethod === HashType.Bcrypt) {
-      bcrypt.compare(candidateToken, this.secretKey, (err: Error | null, isMatch: boolean) => {
+      bcrypt.compare(candidateToken, this.secretKey, (err: Error | null, result: boolean | undefined) => {
         if (err) {
           reject(err)
           return
         }
-        resolve(isMatch)
+        if (!result) {
+          BadReq('Unable to compare token')
+        }
+        resolve(result)
       })
     } else if (this.hashMethod === HashType.SHA256) {
       const candidateHash = createHash('sha256').update(candidateToken).digest('hex')
