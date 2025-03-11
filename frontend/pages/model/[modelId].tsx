@@ -70,7 +70,6 @@ export default function Model() {
               title: 'Files',
               path: 'files',
               view: <Files model={model} />,
-              // hidden:
             },
             {
               title: 'Inferencing',
@@ -101,12 +100,12 @@ export default function Model() {
   })
   if (error) return error
 
-  if (isModelLoading || isCurrentUserLoading || isUiConfigLoading) return <Loading />
-
   return (
     <>
       <Title text={model ? model.name : 'Loading...'} />
-      {model && (
+      {!model || isModelLoading || isCurrentUserLoading || isUiConfigLoading ? (
+        <Loading />
+      ) : (
         <PageWithTabs
           title={model.name}
           subheading={`ID: ${model.id}`}

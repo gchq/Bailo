@@ -1,6 +1,5 @@
-import { Done, Error, Refresh, Warning } from '@mui/icons-material'
-import { Menu as MenuIcon } from '@mui/icons-material'
-import { Button, Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { Done, Error, InfoOutlined, Refresh, Warning } from '@mui/icons-material'
+import { Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
@@ -17,7 +16,7 @@ import { plural } from 'utils/stringUtils'
 type FileDownloadProps = {
   modelId: string
   file: FileInterface | File
-  hideAssociatedReleases?: boolean
+  showAssociatedReleases?: boolean
 }
 
 interface ChipDetails {
@@ -26,7 +25,7 @@ interface ChipDetails {
   icon: ReactElement
 }
 
-export default function FileDownload({ modelId, file, hideAssociatedReleases = true }: FileDownloadProps) {
+export default function FileDownload({ modelId, file, showAssociatedReleases = false }: FileDownloadProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
 
@@ -81,7 +80,7 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
   const rerunFileScanButton = useMemo(() => {
     return (
       <Tooltip title='Rerun file scan'>
-        <IconButton onClick={handleRerunFileScanOnClick}>
+        <IconButton color='primary' onClick={handleRerunFileScanOnClick}>
           <Refresh />
         </IconButton>
       </Tooltip>
@@ -184,16 +183,14 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
               </Tooltip>
             </Stack>
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
-              {!hideAssociatedReleases && (
-                <Button
+              {showAssociatedReleases && (
+                <Chip
+                  icon={<InfoOutlined />}
+                  color='primary'
                   size='small'
-                  startIcon={<MenuIcon />}
-                  variant='contained'
                   onClick={() => setAssociatedReleasesOpen(true)}
-                  sx={{ minWidth: '200px' }}
-                >
-                  Associated Releases
-                </Button>
+                  label='View Associated Releases'
+                />
               )}
               {scanners.length > 0 && (
                 <Stack direction='row' alignItems='center'>
@@ -221,7 +218,7 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
         open={associatedReleasesOpen}
         onClose={() => setAssociatedReleasesOpen(false)}
         file={file}
-      ></AssociatedReleasesDialog>
+      />
     </>
   )
 }

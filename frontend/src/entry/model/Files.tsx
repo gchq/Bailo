@@ -6,6 +6,7 @@ import Loading from 'src/common/Loading'
 import FileDownload from 'src/entry/model/releases/FileDownload'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, FileInterface } from 'types/types'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 
 type FilesProps = {
   model: EntryInterface
@@ -14,35 +15,25 @@ type FilesProps = {
 export default function Files({ model }: FilesProps) {
   const { entryFiles, isEntryFilesLoading, isEntryFilesError } = useGetModelFiles(model.id)
 
-  const sortEntryFiles: Array<FileInterface> = useMemo(
-    () =>
-      entryFiles.sort((a, b) => {
-        if (a.createdAt > b.createdAt) {
-          return -1
-        }
-        if (a.createdAt < b.createdAt) {
-          return 1
-        } else {
-          return 0
-        }
-      }),
+  const sortedEntryFiles: Array<FileInterface> = useMemo(
+    () => [...entryFiles].sort(sortByCreatedAtDescending),
     [entryFiles],
   )
 
   const entryFilesList = useMemo(
     () =>
       entryFiles.length ? (
-        sortEntryFiles.map((file) => (
+        sortedEntryFiles.map((file) => (
           <Card key={file._id} sx={{ width: '100%' }}>
             <Stack spacing={1} p={2}>
-              <FileDownload key={file.name} file={file} modelId={model.id} hideAssociatedReleases={false} />
+              <FileDownload showAssociatedReleases file={file} modelId={model.id} />
             </Stack>
           </Card>
         ))
       ) : (
         <EmptyBlob text={`No files found for model ${model.name}`} />
       ),
-    [entryFiles.length, model.id, model.name, sortEntryFiles],
+    [entryFiles.length, model.id, model.name, sortedEntryFiles],
   )
 
   if (isEntryFilesError) {
