@@ -50,6 +50,10 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
 
+  if (isReleasesLoading) {
+    return <Loading />
+  }
+
   return (
     <Container sx={{ my: 2 }}>
       <Stack spacing={4}>
@@ -69,7 +73,6 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
             </Box>
           </Box>
         )}
-        {isReleasesLoading && <Loading />}
         {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
         {releaseDisplays}
       </Stack>

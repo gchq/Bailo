@@ -39,7 +39,13 @@ export default function EntryListRow({ selectedChips, onSelectedChipsChange, dat
           >
             <Typography
               variant='h5'
-              sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
+              sx={{
+                fontWeight: '500',
+                textDecoration: 'none',
+                color: theme.palette.primary.main,
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+              }}
             >
               {entry.name}
             </Typography>

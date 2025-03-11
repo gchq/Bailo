@@ -35,11 +35,11 @@ spec:
         resources:
           requests:
             memory: "100Mi"
-            ephemeral-storage: "100Mi"
+            ephemeral-storage: "1000Mi"
             cpu: "200m"
           limits:
             memory: "4Gi" # This is a memory requirement for ClamAV see here: https://docs.clamav.net/manual/Installing/Docker.html#memory-ram-requirements
-            ephemeral-storage: "300Mi"
+            ephemeral-storage: "2000Mi"
             cpu: "1"
         volumeMounts:
         - name: tmp
