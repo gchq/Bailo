@@ -18,7 +18,7 @@ import { Transition } from 'src/common/Transition'
 import EntryCardRevision from 'src/entry/overview/EntryCardRevision'
 import MessageAlert from 'src/MessageAlert'
 import { EntryCardKindLabel, EntryInterface } from 'types/types'
-import { sortByCreatedAtDescending } from 'utils/dateUtils'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { toTitleCase } from 'utils/stringUtils'
 
 type EntryCardHistoryDialogProps = {
