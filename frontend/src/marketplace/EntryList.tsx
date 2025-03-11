@@ -43,7 +43,7 @@ export default function EntryList({
         height={window.innerHeight - 300}
         itemCount={entries.length}
         itemData={entries}
-        itemSize={130}
+        itemSize={120}
         overscanCount={5}
         width='100%'
       >

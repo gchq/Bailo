@@ -25,7 +25,8 @@ export default function EntryListRow({ selectedChips, onSelectedChipsChange, dat
         borderBottomStyle: 'solid',
         borderBottomWidth: 1,
         borderBottomColor: theme.palette.divider,
-        p: 2,
+        px: 3,
+        py: 1,
         margin: 'auto',
         ...style,
       }}
