@@ -15,6 +15,7 @@ import { useGetReleasesForModelId } from 'actions/release'
 import { useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
+import { Transition } from 'src/common/Transition'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { FileInterface, isFileInterface } from 'types/types'
@@ -61,10 +62,9 @@ export default function AssociatedReleasesDialog({ modelId, file, open, onClose 
                   <ListItemText
                     primary={
                       <>
-                        <Typography
-                          color='primary'
-                          component='span'
-                        >{`${model.name} - ${associatedRelease.semver}`}</Typography>
+                        <Typography color='primary' component='span'>
+                          {associatedRelease.semver}
+                        </Typography>
                         {latestRelease === associatedRelease.semver && (
                           <Typography color='secondary' component='span' pl={1}>
                             (Latest)
@@ -94,7 +94,7 @@ export default function AssociatedReleasesDialog({ modelId, file, open, onClose 
   }
 
   return (
-    <Dialog fullWidth open={open} onClose={onClose} maxWidth='md'>
+    <Dialog fullWidth open={open} onClose={onClose} maxWidth='sm' slots={{ transition: Transition }}>
       <DialogTitle>Associated Releases</DialogTitle>
       <DialogContent>{isModelLoading || isReleasesLoading ? <Loading /> : associatedReleasesDisplay}</DialogContent>
       <DialogActions>

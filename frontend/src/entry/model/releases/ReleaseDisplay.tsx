@@ -107,16 +107,13 @@ export default function ReleaseDisplay({
               >
                 <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
                   <Stack direction='row' alignItems='center' spacing={1} width='100%'>
-                    <Typography component='h2' variant='h6' color='primary' noWrap>
-                      {model.name} -
-                    </Typography>
                     <Typography component='h2' variant='h6' color='primary'>
                       {release.semver}
                     </Typography>
                   </Stack>
                 </Link>
                 <CopyToClipboardButton
-                  textToCopy={`${model.name} - ${release.semver}`}
+                  textToCopy={release.semver}
                   notificationText='Copied release semver to clipboard'
                   ariaLabel='copy release semver to clipboard'
                 />
