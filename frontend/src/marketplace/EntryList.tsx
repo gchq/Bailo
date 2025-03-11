@@ -1,11 +1,8 @@
-import { Box, Stack, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
 import { CSSProperties } from 'react'
 import { FixedSizeList } from 'react-window'
-import ChipSelector from 'src/common/ChipSelector'
 import EmptyBlob from 'src/common/EmptyBlob'
-import Link from 'src/Link'
+import EntryListRow from 'src/marketplace/EntryListRow'
 import MessageAlert from 'src/MessageAlert'
 
 interface EntryListProps {
@@ -15,69 +12,29 @@ interface EntryListProps {
   entriesErrorMessage?: string
 }
 
+interface RowProps {
+  data: EntrySearchResult[]
+  index: number
+  style: CSSProperties
+}
+
 export default function EntryList({
   entries,
   selectedChips,
   onSelectedChipsChange,
   entriesErrorMessage,
 }: EntryListProps) {
-  const theme = useTheme()
-
-  const rows = ({ data, index, style }: { data: EntrySearchResult[]; index: number; style: CSSProperties }) => {
-    const entry = data[index]
-
-    return (
-      <Box
-        justifyContent='flex-start'
-        alignItems='center'
-        sx={{
-          borderBottomStyle: 'solid',
-          borderBottomWidth: 1,
-          borderBottomColor: theme.palette.divider,
-          p: 2,
-          margin: 'auto',
-          ...style,
-        }}
-        key={entry.id}
-      >
-        <Stack>
-          <Stack direction='row'>
-            <Link
-              sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-              href={`${entry.kind}/${entry.id}`}
-            >
-              <Typography
-                variant='h5'
-                sx={{ fontWeight: '500', textDecoration: 'none', color: theme.palette.primary.main }}
-              >
-                {entry.name}
-              </Typography>
-            </Link>
-          </Stack>
-          <Typography
-            variant='body1'
-            sx={{ marginBottom: 2, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-          >
-            {entry.description}
-          </Typography>
-          <div>
-            <ChipSelector
-              chipTooltipTitle={'Filter by tag'}
-              options={entry.tags.slice(0, 10)}
-              expandThreshold={10}
-              multiple
-              selectedChips={selectedChips}
-              onChange={onSelectedChipsChange}
-              size='small'
-              ariaLabel='add tag to search filter'
-            />
-          </div>
-        </Stack>
-      </Box>
-    )
-  }
-
   if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
+
+  const Row = ({ data, index, style }: RowProps) => (
+    <EntryListRow
+      selectedChips={selectedChips}
+      onSelectedChipsChange={onSelectedChipsChange}
+      data={data}
+      index={index}
+      style={style}
+    />
+  )
 
   return (
     <>
@@ -90,7 +47,7 @@ export default function EntryList({
         overscanCount={5}
         width='100%'
       >
-        {rows}
+        {Row}
       </FixedSizeList>
     </>
   )
