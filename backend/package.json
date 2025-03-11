@@ -106,5 +106,10 @@
     "typescript": "^5.7.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.5"
+  },
+  "overrides": {
+    "@anatine/zod-mock": {
+      "@faker-js/faker": "$@faker-js/faker"
+    }
   }
 }
