@@ -2,22 +2,22 @@
 
 exports[`routes > schema > postSchema > audit > expected call 1`] = `
 {
-  "description": "vespillo",
-  "id": "vespillo",
+  "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
+  "id": "expedita",
   "jsonSchema": {},
   "kind": "accessRequest",
-  "name": "Jaime Hilll",
+  "name": "Dr. Garry Cummerata",
 }
 `;
 
 exports[`routes > schema > postSchema > successfully stores the schema 1`] = `
 {
   "schema": {
-    "description": "vespillo",
-    "id": "vespillo",
+    "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
+    "id": "expedita",
     "jsonSchema": {},
     "kind": "accessRequest",
-    "name": "Jaime Hilll",
+    "name": "Dr. Garry Cummerata",
   },
 }
 `;
