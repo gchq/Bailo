@@ -43,6 +43,9 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+    labels:
+      - 'npm dependencies'
+      - '/'
 
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `/frontend` directory
@@ -80,6 +83,9 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+    labels:
+      - 'npm dependencies'
+      - '/frontend'
 
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `/lib/landing` directory
@@ -117,6 +123,9 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+    labels:
+      - 'npm dependencies'
+      - '/lib/landing'
 
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `/backend` directory
@@ -154,6 +163,9 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+    labels:
+      - 'npm dependencies'
+      - '/backend'
 
   # Enable version updates for Docker
   - package-ecosystem: 'docker'
@@ -163,6 +175,16 @@ updates:
       - '/backend'
       - '/frontend'
       - '/lib/modelscan_api'
+    # Check for updates once a week
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+
+  # Enable version updates for Docker Compose
+  - package-ecosystem: 'docker-compose'
+    # Look for docker-compose in these directories
+    directories:
+      - '/'
     # Check for updates once a week
     schedule:
       interval: 'weekly'
