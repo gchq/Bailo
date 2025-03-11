@@ -5,7 +5,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import FileDownload from 'src/entry/model/releases/FileDownload'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FileInterface } from 'types/types'
+import { EntryInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 
 type FilesProps = {
@@ -15,10 +15,7 @@ type FilesProps = {
 export default function Files({ model }: FilesProps) {
   const { entryFiles, isEntryFilesLoading, isEntryFilesError } = useGetModelFiles(model.id)
 
-  const sortedEntryFiles: Array<FileInterface> = useMemo(
-    () => [...entryFiles].sort(sortByCreatedAtDescending),
-    [entryFiles],
-  )
+  const sortedEntryFiles = useMemo(() => [...entryFiles].sort(sortByCreatedAtDescending), [entryFiles])
 
   const entryFilesList = useMemo(
     () =>

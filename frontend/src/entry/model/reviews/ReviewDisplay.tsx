@@ -3,7 +3,7 @@ import { Stack, Tooltip, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import ApprovalsDisplay from 'src/entry/model/reviews/ApprovalsDisplay'
 import { Decision, ResponseInterface } from 'types/types'
-import { sortByCreatedAtDescending } from 'utils/dateUtils'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { fromEntity } from 'utils/entityUtils'
 import { plural } from 'utils/stringUtils'
 
