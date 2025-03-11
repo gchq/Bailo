@@ -173,12 +173,39 @@ updates:
     # Look for a `requirements*` or `pyproject.toml` in these directories
     directories:
       - '/lib/python'
+    schedule:
+      interval: 'weekly'
+    versioning-strategy: increase
+    open-pull-requests-limit: 10
+    labels:
+      - 'python dependencies'
+      - '/lib/python'
+
+  # Enable version updates for python
+  - package-ecosystem: 'pip'
+    # Look for a `requirements*` or `pyproject.toml` in these directories
+    directories:
       - '/lib/modelscan_api'
+    schedule:
+      interval: 'weekly'
+    versioning-strategy: increase
+    open-pull-requests-limit: 10
+    labels:
+      - 'python dependencies'
+      - '/lib/modelscan_api'
+
+  # Enable version updates for python
+  - package-ecosystem: 'pip'
+    # Look for a `requirements*` or `pyproject.toml` in these directories
+    directories:
       - '/backend/docs'
     schedule:
       interval: 'weekly'
     versioning-strategy: increase
     open-pull-requests-limit: 10
+    labels:
+      - 'python dependencies'
+      - '/backend/docs'
 
   # Set update schedule for GitHub Actions
   - package-ecosystem: 'github-actions'
