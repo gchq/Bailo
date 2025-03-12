@@ -10,10 +10,11 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
-import { ChangeEvent, useMemo } from 'react'
+import { ChangeEvent, useCallback, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
+import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
@@ -125,6 +126,35 @@ export default function ReleaseForm({
     )
   }
 
+  const handleExistingModelFilesOnChange = (newFiles: FileInterface[]) => {
+    const updatedFiles = [
+      ...formData.files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
+      ...newFiles,
+    ]
+    onFilesChange(updatedFiles)
+  }
+
+  const handleDeleteFile = (fileToDelete: File | FileInterface) => {
+    if (formData.files) {
+      const updatedFileList = formData.files.filter((file) => file.name !== fileToDelete.name)
+      onFilesChange(updatedFileList)
+    }
+  }
+
+  const handleMetadataChange = useCallback(
+    (fileWithMetadata: FileWithMetadata) => {
+      const tempFilesWithMetadata = [...filesMetadata]
+      const metadataIndex = filesMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
+      if (metadataIndex === -1) {
+        tempFilesWithMetadata.push(fileWithMetadata)
+      } else {
+        tempFilesWithMetadata[metadataIndex] = fileWithMetadata
+      }
+      onFilesMetadataChange(tempFilesWithMetadata)
+    },
+    [filesMetadata, onFilesMetadataChange],
+  )
+
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
@@ -207,8 +237,12 @@ export default function ReleaseForm({
         <Typography fontWeight='bold'>Files</Typography>
         {!isReadOnly && (
           <Stack spacing={2}>
-            <Stack spacing={2}>
-              <ExistingFileSelector model={model} onChange={onFilesChange} />
+            <Stack
+              spacing={2}
+              direction={{ xs: 'column', sm: 'row' }}
+              divider={<Divider flexItem orientation='vertical' />}
+            >
+              <ExistingFileSelector model={model} onChange={handleExistingModelFilesOnChange} />
               <MultiFileInput
                 fullWidth
                 label='Attach new files'
@@ -228,9 +262,23 @@ export default function ReleaseForm({
                 </>
               )}
             </Stack>
+            {formData.files.length > 0 && (
+              <Stack spacing={1} mt={1}>
+                {formData.files.map((file) => (
+                  <div key={file.name}>
+                    <MultiFileInputFileDisplay
+                      file={file}
+                      readOnly={isReadOnly}
+                      onDelete={handleDeleteFile}
+                      onMetadataChange={handleMetadataChange}
+                    />
+                  </div>
+                ))}
+              </Stack>
+            )}
           </Stack>
         )}
-        <Stack spacing={1}>
+        <Stack>
           {isReadOnly && formData.files.map((file) => <FileDownload key={file.name} file={file} modelId={model.id} />)}
         </Stack>
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
