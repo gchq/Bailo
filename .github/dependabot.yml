@@ -43,6 +43,9 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+      babel:
+        patterns:
+          - "@babel/*"
     labels:
       - 'npm dependencies'
       - '/'
@@ -83,6 +86,9 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+      babel:
+        patterns:
+          - "@babel/*"
     labels:
       - 'npm dependencies'
       - '/frontend'
@@ -123,6 +129,9 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+      babel:
+        patterns:
+          - "@babel/*"
     labels:
       - 'npm dependencies'
       - '/lib/landing'
@@ -163,6 +172,9 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+      babel:
+        patterns:
+          - "@babel/*"
     labels:
       - 'npm dependencies'
       - '/backend'
