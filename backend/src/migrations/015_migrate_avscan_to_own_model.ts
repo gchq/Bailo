@@ -3,10 +3,19 @@ import ScanModel, { ArtefactKind } from '../models/Scan.js'
 
 export async function up() {
   // toolName was originally not a required field so may not exist
-  await FileModel.updateMany(
-    { avScan: { $exists: true }, 'avScan.toolName': { $exists: false } },
-    { $set: { 'avScan.toolName': 'Unknown Scanner' } },
+  const filesMissingToolName = await FileModel.find(
+    { avScan: { $exists: true }, 'avScan.toolName': { $exists: false } }
   )
+  for (const file of filesMissingToolName) {
+    if (file.get('avScan') !== undefined) {
+      for (const avResult of file.get('avScan')) {
+        if (!('toolName' in avResult)) {
+          avResult.toolName = 'Unknown Scanner'
+        }
+      }
+      await file.save()
+    }
+  }
   // convert avScan from being stored in File to a new Scan Document
   const files = await FileModel.find({})
   for (const file of files) {
