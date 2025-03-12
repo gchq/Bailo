@@ -171,7 +171,7 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
   return (
     <>
       {isFileInterface(file) && (
-        <Stack>
+        <Stack spacing={2}>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
             <Stack alignItems={{ sm: 'center' }}>
               <Tooltip title={file.name}>
@@ -182,7 +182,12 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
                 </Link>
               </Tooltip>
             </Stack>
-            <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
+            <Stack
+              alignItems={{ sm: 'center' }}
+              direction={{ sm: 'column', md: 'row' }}
+              spacing={2}
+              divider={<Divider flexItem orientation='vertical' />}
+            >
               {showAssociatedReleases && (
                 <Chip
                   icon={<InfoOutlined />}
@@ -196,9 +201,9 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
                 <Stack direction='row' alignItems='center'>
                   {avChip}
                   {rerunFileScanButton}
-                  <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
                 </Stack>
               )}
+              <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
             </Stack>
           </Stack>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
