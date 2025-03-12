@@ -9,6 +9,7 @@ import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
+import { UserSettingsInterface } from '../../models/UserSettings.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
@@ -69,4 +70,6 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateCommentResponse(_req: Request, _responseInterface: ResponseInterface) {}
   onViewResponses(_req: Request, _responseInters: ResponseInterface[]) {}
   onUpdateResponse(_req: Request, _responseId: string) {}
+  onViewUserSettings(_req: Request) {}
+  onUpdateUserSettings(_req: Request, _userSettings: UserSettingsInterface) {}
 }

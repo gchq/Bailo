@@ -51,7 +51,26 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {value.map((tag) => (
-                <Chip label={tag} key={tag} sx={{ width: 'fit-content' }} onDelete={() => handleChipOnDelete(tag)} />
+                <Chip
+                  label={tag}
+                  key={tag}
+                  onDelete={() => handleChipOnDelete(tag)}
+                  sx={{
+                    width: 'fit-content',
+                    input: {
+                      color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+                    },
+                    label: {
+                      WebkitTextFillColor:
+                        theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+                    },
+                    '& .MuiInputBase-input.Mui-disabled': {
+                      WebkitTextFillColor:
+                        theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+                    },
+                    fontStyle: value ? 'unset' : 'italic',
+                  }}
+                />
               ))}
             </Stack>
           </Box>
@@ -67,7 +86,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             <Typography
               sx={{
                 fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
+                color: theme.palette.text.primary,
               }}
             >
               Unanswered
@@ -76,7 +95,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
               {value.map((tag) => (
-                <Chip label={tag} key={tag} sx={{ width: 'fit-content' }} />
+                <Chip label={tag} color='secondary' key={tag} sx={{ width: 'fit-content' }} />
               ))}
             </Stack>
           </Box>

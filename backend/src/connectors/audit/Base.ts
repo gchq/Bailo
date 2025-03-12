@@ -9,6 +9,7 @@ import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
+import { UserSettingsInterface } from '../../models/UserSettings.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
@@ -122,6 +123,13 @@ export const AuditInfo = {
     description: 'Updated a comment or review response',
     auditKind: AuditKind.Update,
   },
+
+  ViewUserSettings: { typeId: 'ViewUserSettings', description: 'View Settings Updated', auditKind: AuditKind.View },
+  UpdateUserSettings: {
+    typeId: 'UpdateUserSettings',
+    description: 'User Settings Updated',
+    auditKind: AuditKind.Update,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -182,6 +190,9 @@ export abstract class BaseAuditConnector {
     modelId: string,
     images: { repository: string; name: string; tags: string[] }[],
   )
+
+  abstract onViewUserSettings(req: Request, userSettings: UserSettingsInterface)
+  abstract onUpdateUserSettings(req: Request, userSettings: UserSettingsInterface)
 
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[])
   abstract onCreateImport(
