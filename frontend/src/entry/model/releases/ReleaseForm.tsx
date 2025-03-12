@@ -1,4 +1,13 @@
-import { Checkbox, FormControl, FormControlLabel, LinearProgress, Stack, TextField, Typography } from '@mui/material'
+import {
+  Checkbox,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  LinearProgress,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useMemo } from 'react'
@@ -7,6 +16,7 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ModelImageList from 'src/entry/model/ModelImageList'
+import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import MessageAlert from 'src/MessageAlert'
@@ -85,6 +95,10 @@ export default function ReleaseForm({
       Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
+
+  const handleExistingFileSelection = (fileId: string) => {
+    console.log(fileId)
+  }
 
   const fileProgressText = () => {
     if (!currentFileUploadProgress) {
@@ -193,24 +207,27 @@ export default function ReleaseForm({
         <Typography fontWeight='bold'>Files</Typography>
         {!isReadOnly && (
           <Stack spacing={2}>
-            <MultiFileInput
-              fullWidth
-              label='Attach files'
-              files={formData.files}
-              filesMetadata={filesMetadata}
-              readOnly={isReadOnly}
-              onFilesChange={onFilesChange}
-              onFilesMetadataChange={onFilesMetadataChange}
-            />
-            {currentFileUploadProgress && (
-              <>
-                <LinearProgress
-                  variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
-                  value={currentFileUploadProgress.uploadProgress}
-                />
-                {fileProgressText()}
-              </>
-            )}
+            <Stack spacing={2}>
+              <ExistingFileSelector model={model} onChange={onFilesChange} />
+              <MultiFileInput
+                fullWidth
+                label='Attach new files'
+                files={formData.files}
+                filesMetadata={filesMetadata}
+                readOnly={isReadOnly}
+                onFilesChange={onFilesChange}
+                onFilesMetadataChange={onFilesMetadataChange}
+              />
+              {currentFileUploadProgress && (
+                <>
+                  <LinearProgress
+                    variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
+                    value={currentFileUploadProgress.uploadProgress}
+                  />
+                  {fileProgressText()}
+                </>
+              )}
+            </Stack>
           </Stack>
         )}
         <Stack spacing={1}>
