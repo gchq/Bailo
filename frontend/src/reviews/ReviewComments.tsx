@@ -13,7 +13,7 @@ import MessageAlert from 'src/MessageAlert'
 import ReviewCommentDisplay from 'src/reviews/ReviewCommentDisplay'
 import ReviewDecisionDisplay from 'src/reviews/ReviewDecisionDisplay'
 import { AccessRequestInterface, ReleaseInterface, ResponseInterface, ResponseKind } from 'types/types'
-import { sortByCreatedAtAscending } from 'utils/dateUtils'
+import { sortByCreatedAtAscending } from 'utils/arrayUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { reviewResponsesForEachUser } from 'utils/reviewUtils'
 

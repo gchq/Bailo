@@ -14,13 +14,14 @@ import {
   Tabs,
 } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
-import { useListModels } from 'actions/model'
+import { useGetAllModelReviewRoles, useListModels } from 'actions/model'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { ChangeEvent, Fragment, useCallback, useEffect, useState } from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
+import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
 import { EntryKind, EntryKindKeys } from 'types/types'
@@ -30,20 +31,21 @@ interface KeyAndLabel {
   label: string
 }
 
-const searchFilterTypeLabels: KeyAndLabel[] = [{ key: 'mine', label: 'Mine' }]
+const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Any role' }]
 
 export default function Marketplace() {
   // TODO - fetch model tags from API
   const [filter, setFilter] = useState('')
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
   const [selectedTask, setSelectedTask] = useState('')
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const debouncedFilter = useDebounce(filter, 250)
 
   const { models, isModelsError, isModelsLoading } = useListModels(
     EntryKind.MODEL,
-    selectedTypes,
+    selectedRoles,
     selectedTask,
     selectedLibraries,
     debouncedFilter,
@@ -53,7 +55,9 @@ export default function Marketplace() {
     models: dataCards,
     isModelsError: isDataCardsError,
     isModelsLoading: isDataCardsLoading,
-  } = useListModels(EntryKind.DATA_CARD, selectedTypes, selectedTask, selectedLibraries, debouncedFilter)
+  } = useListModels(EntryKind.DATA_CARD, selectedRoles, selectedTask, selectedLibraries, debouncedFilter)
+
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetAllModelReviewRoles()
 
   const theme = useTheme()
   const router = useRouter()
@@ -74,20 +78,23 @@ export default function Marketplace() {
     }
   }, [filterFromQuery, taskFromQuery, librariesFromQuery])
 
-  const handleSelectedTypesOnChange = useCallback((selected: string[]) => {
-    if (selected.length > 0) {
-      const types: string[] = []
-      selected.forEach((value) => {
-        const typeToAdd = searchFilterTypeLabels.find((typeLabel) => typeLabel.label === value)
-        if (typeToAdd && typeToAdd.label) {
-          types.push(typeToAdd.key)
-        }
-      })
-      setSelectedTypes(types)
-    } else {
-      setSelectedTypes([])
-    }
-  }, [])
+  const handleSelectedRolesOnChange = useCallback(
+    (selectedFilters: string[]) => {
+      if (selectedFilters.length > 0) {
+        const filters: string[] = []
+        selectedFilters.forEach((selectedFilter) => {
+          const roleFilter = roleOptions.find((roleOption) => roleOption.label === selectedFilter)
+          if (roleFilter) {
+            filters.push(roleFilter.key)
+          }
+        })
+        setSelectedRoles(filters)
+      } else {
+        setSelectedRoles([])
+      }
+    },
+    [roleOptions],
+  )
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -131,6 +138,25 @@ export default function Marketplace() {
     setSelectedLibraries([])
     setFilter('')
     router.replace('/', undefined, { shallow: true })
+  }
+
+  useEffect(() => {
+    if (modelRoles) {
+      setRoleOptions([
+        ...defaultRoleOptions,
+        ...modelRoles.map((role) => {
+          return { key: role.id, label: `${role.short}` }
+        }),
+      ])
+    }
+  }, [modelRoles])
+
+  if (isModelRolesError) {
+    return <ErrorWrapper message={isModelRolesError.info.message} />
+  }
+
+  if (isModelRolesLoading) {
+    return <Loading />
   }
 
   return (
@@ -204,12 +230,12 @@ export default function Marketplace() {
             </Box>
             <Box>
               <ChipSelector
-                label='Other'
+                label='My Roles'
                 multiple
-                options={[...searchFilterTypeLabels.map((type) => type.label)]}
-                onChange={handleSelectedTypesOnChange}
-                selectedChips={searchFilterTypeLabels
-                  .filter((label) => selectedTypes.includes(label.key))
+                options={roleOptions.map((role) => role.label)}
+                onChange={handleSelectedRolesOnChange}
+                selectedChips={roleOptions
+                  .filter((label) => selectedRoles.includes(label.key))
                   .map((type) => type.label)}
                 size='small'
               />
@@ -217,8 +243,8 @@ export default function Marketplace() {
             <Button onClick={handleResetFilters}>Reset filters</Button>
           </Stack>
           <Box sx={{ overflow: 'hidden', width: '100%' }}>
-            <Paper sx={{ py: 2, px: 4 }}>
-              <Box sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
+            <Paper>
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
                 <Tabs value={selectedTab} indicatorColor='secondary'>
                   <Tab
                     label={`Models ${models ? `(${models.length})` : ''}`}

@@ -3,7 +3,7 @@ import { Stack, Tooltip, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import ApprovalsDisplay from 'src/entry/model/reviews/ApprovalsDisplay'
 import { Decision, ResponseInterface } from 'types/types'
-import { sortByCreatedAtDescending } from 'utils/dateUtils'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { fromEntity } from 'utils/entityUtils'
 import { plural } from 'utils/stringUtils'
 
@@ -22,11 +22,11 @@ export default function ReviewDisplay({
 }: ReviewDisplayProps) {
   const orderedReviewResponses = useMemo(
     () =>
-      reviewResponses.toSorted(sortByCreatedAtDescending).filter((response) => {
-        return currentUserDn !== undefined && showCurrentUserResponses
-          ? fromEntity(response.entity).value === currentUserDn
-          : response
-      }) || [],
+      reviewResponses
+        .filter((response) =>
+          currentUserDn && showCurrentUserResponses ? fromEntity(response.entity).value === currentUserDn : true,
+        )
+        .sort(sortByCreatedAtDescending) || [],
     [reviewResponses, currentUserDn, showCurrentUserResponses],
   )
 
