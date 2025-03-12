@@ -6,6 +6,6 @@ exports[`routes > filescanning > putFileScan > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > filescanning > putFileScan > audit > expected call 1`] = `"vespillo"`;
+exports[`routes > filescanning > putFileScan > audit > expected call 1`] = `"expedita"`;
 
-exports[`routes > filescanning > putFileScan > audit > expected call 2`] = `"$vespillo"`;
+exports[`routes > filescanning > putFileScan > audit > expected call 2`] = `"$expedita"`;
