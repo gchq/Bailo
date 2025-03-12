@@ -43,6 +43,12 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+      babel:
+        patterns:
+          - "@babel/*"
+    labels:
+      - 'npm dependencies'
+      - '/'
 
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `/frontend` directory
@@ -80,6 +86,12 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+      babel:
+        patterns:
+          - "@babel/*"
+    labels:
+      - 'npm dependencies'
+      - '/frontend'
 
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `/lib/landing` directory
@@ -117,6 +129,12 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+      babel:
+        patterns:
+          - "@babel/*"
+    labels:
+      - 'npm dependencies'
+      - '/lib/landing'
 
   - package-ecosystem: 'npm'
     # Look for `package.json` and `lock` files in the `/backend` directory
@@ -154,6 +172,12 @@ updates:
         patterns:
           - "@mdx-js/*"
           - "@next/mdx"
+      babel:
+        patterns:
+          - "@babel/*"
+    labels:
+      - 'npm dependencies'
+      - '/backend'
 
   # Enable version updates for Docker
   - package-ecosystem: 'docker'
@@ -168,17 +192,54 @@ updates:
       interval: 'weekly'
     open-pull-requests-limit: 10
 
+  # Enable version updates for Docker Compose
+  - package-ecosystem: 'docker-compose'
+    # Look for docker-compose in these directories
+    directories:
+      - '/'
+    # Check for updates once a week
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+
   # Enable version updates for python
   - package-ecosystem: 'pip'
     # Look for a `requirements*` or `pyproject.toml` in these directories
     directories:
       - '/lib/python'
+    schedule:
+      interval: 'weekly'
+    versioning-strategy: increase
+    open-pull-requests-limit: 10
+    labels:
+      - 'python dependencies'
+      - '/lib/python'
+
+  # Enable version updates for python
+  - package-ecosystem: 'pip'
+    # Look for a `requirements*` or `pyproject.toml` in these directories
+    directories:
       - '/lib/modelscan_api'
+    schedule:
+      interval: 'weekly'
+    versioning-strategy: increase
+    open-pull-requests-limit: 10
+    labels:
+      - 'python dependencies'
+      - '/lib/modelscan_api'
+
+  # Enable version updates for python
+  - package-ecosystem: 'pip'
+    # Look for a `requirements*` or `pyproject.toml` in these directories
+    directories:
       - '/backend/docs'
     schedule:
       interval: 'weekly'
     versioning-strategy: increase
     open-pull-requests-limit: 10
+    labels:
+      - 'python dependencies'
+      - '/backend/docs'
 
   # Set update schedule for GitHub Actions
   - package-ecosystem: 'github-actions'
