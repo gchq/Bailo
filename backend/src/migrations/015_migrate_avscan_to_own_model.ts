@@ -3,9 +3,10 @@ import ScanModel, { ArtefactKind } from '../models/Scan.js'
 
 export async function up() {
   // toolName was originally not a required field so may not exist
-  const filesMissingToolName = await FileModel.find(
-    { avScan: { $exists: true }, 'avScan.toolName': { $exists: false } }
-  )
+  const filesMissingToolName = await FileModel.find({
+    avScan: { $exists: true },
+    'avScan.toolName': { $exists: false },
+  })
   for (const file of filesMissingToolName) {
     if (file.get('avScan') !== undefined) {
       for (const avResult of file.get('avScan')) {
