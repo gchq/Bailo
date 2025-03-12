@@ -43,7 +43,7 @@ export default function AssociatedReleasesDialog({ modelId, file, open, onClose 
   )
 
   useEffect(() => {
-    if (model && releases.length > 0) {
+    if (model && releases.length > 0 && sortedAssociatedReleases.length > 0) {
       setLatestRelease(sortedAssociatedReleases[0].semver)
     }
   }, [model, releases, sortedAssociatedReleases])
