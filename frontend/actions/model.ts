@@ -165,6 +165,13 @@ export function useGetModelFiles(id?: string) {
   }
 }
 
+export function deleteModelFile(modelId?: string, fileId?: string) {
+  return fetch(`/api/v2/model/${modelId}/file/${fileId}`, {
+    method: `delete`,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
 export async function postModel(form: EntryForm) {
   return fetch(`/api/v2/models`, {
     method: 'post',

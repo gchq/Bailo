@@ -1,10 +1,23 @@
-import { Done, Error, Refresh, Warning } from '@mui/icons-material'
-import { Menu as MenuIcon } from '@mui/icons-material'
-import { Button, Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { Done, Error, MoreHoriz, Refresh, Warning } from '@mui/icons-material'
+import {
+  Button,
+  Chip,
+  Divider,
+  IconButton,
+  Link,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Popover,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
 import AssociatedReleasesDialog from 'src/common/AssociatedReleasesDialog'
+import DeleteFileDialog from 'src/common/DeleteFileDialog'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import useNotification from 'src/hooks/useNotification'
@@ -27,13 +40,24 @@ interface ChipDetails {
 }
 
 export default function FileDownload({ modelId, file, hideAssociatedReleases = true }: FileDownloadProps) {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
+  const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
+  const [deleteFileOpen, setDeleteFileOpen] = useState(false)
+
+  function handleFileMoreButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
+    setAnchorElMore(event.currentTarget)
+  }
+
+  const handleFileMoreButtonClose = () => {
+    setAnchorElMore(null)
+  }
 
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
 
-  const open = Boolean(anchorEl)
+  const openMore = Boolean(anchorElMore)
+  const openScan = Boolean(anchorElScan)
 
   const threatsFound = (file: FileInterface) => {
     if (file.avScan === undefined) {
@@ -105,13 +129,13 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
           color={chipDetails(file).colour}
           icon={chipDetails(file).icon}
           size='small'
-          onClick={(e) => setAnchorEl(e.currentTarget)}
+          onClick={(e) => setAnchorElScan(e.currentTarget)}
           label={chipDetails(file).label}
         />
         <Popover
-          open={open}
-          anchorEl={anchorEl}
-          onClose={() => setAnchorEl(null)}
+          open={openScan}
+          anchorEl={anchorElScan}
+          onClose={() => setAnchorElScan(null)}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'center',
@@ -159,7 +183,7 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
         </Popover>
       </>
     )
-  }, [anchorEl, chipDetails, file, open])
+  }, [anchorElScan, chipDetails, file, openScan])
 
   if (isScannersError) {
     return <MessageAlert message={isScannersError.info.message} severity='error' />
@@ -192,7 +216,7 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
             <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
           </Stack>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Stack direction='row'>
+            <Stack direction='row' sx={{ minWidth: 0, width: '100%' }}>
               <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' sx={{ mb: 2 }}>
                 Added by {<UserDisplay dn={file.createdAt.toString()} />} on
                 <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' fontWeight='bold'>
@@ -202,9 +226,32 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
             </Stack>
             {!hideAssociatedReleases && (
               <Stack direction='row'>
-                <Button startIcon={<MenuIcon />} variant='contained' onClick={() => setAssociatedReleasesOpen(true)}>
-                  Associated Releases
+                <Button startIcon={<MoreHoriz />} variant='contained' onClick={handleFileMoreButtonClick}>
+                  More
                 </Button>
+                <Menu
+                  MenuListProps={{ dense: true }}
+                  anchorEl={anchorElMore}
+                  open={openMore}
+                  onClose={handleFileMoreButtonClose}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleFileMoreButtonClose()
+                      setAssociatedReleasesOpen(true)
+                    }}
+                  >
+                    <ListItemText>Associated Releases</ListItemText>
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      handleFileMoreButtonClose()
+                      setDeleteFileOpen(true)
+                    }}
+                  >
+                    <ListItemText>Delete File</ListItemText>
+                  </MenuItem>
+                </Menu>
               </Stack>
             )}
           </Stack>
@@ -216,6 +263,12 @@ export default function FileDownload({ modelId, file, hideAssociatedReleases = t
         onClose={() => setAssociatedReleasesOpen(false)}
         file={file}
       ></AssociatedReleasesDialog>
+      <DeleteFileDialog
+        modelId={modelId}
+        file={file}
+        open={deleteFileOpen}
+        onClose={() => setDeleteFileOpen(false)}
+      ></DeleteFileDialog>
     </>
   )
 }
