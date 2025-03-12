@@ -4,28 +4,36 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 from unittest.mock import ANY
 
 import modelscan
 import pytest
+from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi.testclient import TestClient
 
 # isort: split
 
 from bailo_modelscan_api.config import Settings
-from bailo_modelscan_api.main import app, get_settings
-
-client = TestClient(app)
+from bailo_modelscan_api.main import CustomMiddlewareHTTPExceptionWrapper, app, get_settings
 
 
 @lru_cache
 def get_settings_override():
-    return Settings()
+    return Settings(maximum_filesize=1000)
 
 
 app.dependency_overrides[get_settings] = get_settings_override
+app.user_middleware.clear()
+app.add_middleware(
+    ContentSizeLimitMiddleware,
+    max_content_size=get_settings_override().maximum_filesize,
+    exception_cls=CustomMiddlewareHTTPExceptionWrapper,
+)
+client = TestClient(app)
 
 
+BIG_CONTENTS = b"\0" * 1024
 H5_MIME_TYPE = "application/x-hdf5"
 OCTET_STREAM_TYPE = "application/octet-stream"
 
@@ -188,3 +196,18 @@ def test_scan_file(
 
     assert response.status_code == 200
     assert response.json() == expected_response
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ("file_name", "file_content", "file_mime_type"),
+    [("foo.h5", BIG_CONTENTS, H5_MIME_TYPE)],
+)
+def test_scan_file_too_large(file_name: str, file_content: Any, file_mime_type: str):
+    files = {"in_file": (file_name, file_content, file_mime_type)}
+
+    response = client.post("/scan/file", files=files)
+    print(response.json())
+
+    assert response.status_code == 413
+    assert response.json() == {"detail": ANY}

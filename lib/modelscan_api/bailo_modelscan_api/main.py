@@ -32,6 +32,11 @@ def get_settings() -> Settings:
     return Settings()
 
 
+class CustomMiddlewareHTTPExceptionWrapper(HTTPException):
+    def __init__(self, detail):
+        super().__init__(status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE.value, detail=detail)
+
+
 # Instantiate FastAPI app with various dependencies.
 app = FastAPI(
     title=get_settings().app_name,
@@ -41,7 +46,11 @@ app = FastAPI(
     dependencies=[Depends(get_settings)],
 )
 # Limit the maximum filesize
-app.add_middleware(ContentSizeLimitMiddleware, max_content_size=get_settings().maximum_filesize)
+app.add_middleware(
+    ContentSizeLimitMiddleware,
+    max_content_size=get_settings().maximum_filesize,
+    exception_cls=CustomMiddlewareHTTPExceptionWrapper,
+)
 
 
 class ApiInformation(BaseModel):
