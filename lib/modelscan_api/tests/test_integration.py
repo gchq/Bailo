@@ -24,6 +24,7 @@ def get_settings_override():
 
 
 app.dependency_overrides[get_settings] = get_settings_override
+# Override maximum_filesize as middlewares aren't covered by FastAPI's TestClient
 app.user_middleware.clear()
 app.add_middleware(
     ContentSizeLimitMiddleware,

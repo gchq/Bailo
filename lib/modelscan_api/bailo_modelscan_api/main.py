@@ -1,4 +1,4 @@
-"""FastAPI app."""
+"""FastAPI app to provide a ModelScan REST API."""
 
 from __future__ import annotations
 
@@ -33,6 +33,8 @@ def get_settings() -> Settings:
 
 
 class CustomMiddlewareHTTPExceptionWrapper(HTTPException):
+    """Wrapper of HTTPException to make ContentSizeLimitMiddleware raise HTTPException status_code 413 which FastAPI can capture and return."""
+
     def __init__(self, detail):
         super().__init__(status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE.value, detail=detail)
 
@@ -236,7 +238,9 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
             "description": "The server could not complete the request",
             "content": {
                 "application/json": {
-                    "example": {"detail": "An error occurred while processing the uploaded file's name."}
+                    "example": {
+                        "detail": "The following error was raised during a pytorch scan:\nInvalid magic number for file: /tmp/tmpzlugzlrh.pt"
+                    }
                 }
             },
         },
