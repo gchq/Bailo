@@ -48,6 +48,7 @@ test = [
 Documentation = "https://github.com/gchq/bailo/tree/main#readme"
 Source = "https://github.com/gchq/bailo"
 Tracker = "https://github.com/gchq/bailo/issues"
+Changelog = "https://github.com/gchq/Bailo/blob/main/lib/python/CHANGELOG.md"
 
 [tool.flit.module]
 name = "bailo"
