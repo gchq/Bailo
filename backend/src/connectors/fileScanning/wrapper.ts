@@ -3,6 +3,7 @@ import log from '../../services/log.js'
 import { BaseFileScanningConnector, FileScanResult } from './Base.js'
 
 export class FileScanningWrapper extends BaseFileScanningConnector {
+  toolName = this.constructor.name
   scanners: BaseFileScanningConnector[] = []
 
   constructor(scanners: BaseFileScanningConnector[]) {
@@ -22,7 +23,7 @@ export class FileScanningWrapper extends BaseFileScanningConnector {
     const results: FileScanResult[] = []
     for (const scanner of this.scanners) {
       log.info(
-        { modelId: file.modelId, fileId: file._id, name: file.name, toolName: scanner.info().pop() },
+        { modelId: file.modelId, fileId: file._id.toString(), name: file.name, toolName: this.toolName },
         'Scan started.',
       )
       const scannerResults = await scanner.scan(file)

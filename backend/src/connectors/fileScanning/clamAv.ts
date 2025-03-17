@@ -9,15 +9,16 @@ import { ConfigurationError } from '../../utils/error.js'
 import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
 let av: NodeClam
-export const clamAvToolName = 'Clam AV'
 
 export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
+  toolName = 'Clam AV'
+
   constructor() {
     super()
   }
 
   info() {
-    return [clamAvToolName]
+    return [this.toolName]
   }
 
   async init(retryCount: number = 1) {
@@ -42,11 +43,18 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     }
   }
 
+  async getScannerVersion() {
+    if (!av) return
+    const scannerVersion = await av.getVersion()
+    const modifiedVersion = scannerVersion.substring(scannerVersion.indexOf(' ') + 1, scannerVersion.indexOf('/'))
+    return modifiedVersion
+  }
+
   async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
     if (!av) {
       return [
         {
-          toolName: clamAvToolName,
+          toolName: this.toolName,
           state: ScanState.Error,
           scannerVersion: 'Unknown',
           lastRunAt: new Date(),
@@ -54,34 +62,25 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
       ]
     }
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
-    const scannerVersion = await av.getVersion()
-    const modifiedVersion = scannerVersion.substring(scannerVersion.indexOf(' ') + 1, scannerVersion.indexOf('/'))
     try {
       const { isInfected, viruses } = await av.scanStream(s3Stream)
+      const scannerVersion = await this.getScannerVersion()
       log.info(
         { modelId: file.modelId, fileId: file._id, name: file.name, result: { isInfected, viruses } },
         'Scan complete.',
       )
       return [
         {
-          toolName: clamAvToolName,
+          toolName: this.toolName,
           state: ScanState.Complete,
-          scannerVersion: modifiedVersion,
+          ...(scannerVersion !== undefined ? { scannerVersion } : {}),
           isInfected,
           viruses,
           lastRunAt: new Date(),
         },
       ]
     } catch (error) {
-      log.error({ error, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan errored.')
-      return [
-        {
-          toolName: clamAvToolName,
-          state: ScanState.Error,
-          scannerVersion: modifiedVersion,
-          lastRunAt: new Date(),
-        },
-      ]
+      return this.scanError(error, file)
     }
   }
 }
