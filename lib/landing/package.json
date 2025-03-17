@@ -37,7 +37,7 @@
     "remark-gfm": "^3.0.1",
     "shelljs": "^0.8.5",
     "styled-components": "^5.3.6",
-    "swiper": "^8.4.5"
+    "swiper": "^11.2.5"
   },
   "devDependencies": {
     "@types/node": "22.13.10",
