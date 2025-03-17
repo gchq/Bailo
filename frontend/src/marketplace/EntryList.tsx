@@ -1,6 +1,6 @@
 import { EntrySearchResult } from 'actions/model'
-import { CSSProperties } from 'react'
-import { FixedSizeList } from 'react-window'
+import { CSSProperties, useLayoutEffect, useState } from 'react'
+import { VariableSizeList as List } from 'react-window'
 import EmptyBlob from 'src/common/EmptyBlob'
 import EntryListRow from 'src/marketplace/EntryListRow'
 import MessageAlert from 'src/MessageAlert'
@@ -24,6 +24,17 @@ export default function EntryList({
   onSelectedChipsChange,
   entriesErrorMessage,
 }: EntryListProps) {
+  const [windowHeight, setWindowHeight] = useState(0)
+
+  useLayoutEffect(() => {
+    function updateWindowHeight() {
+      setWindowHeight(window.innerHeight)
+    }
+    window.addEventListener('resize', updateWindowHeight)
+    updateWindowHeight()
+    return () => window.removeEventListener('resize', updateWindowHeight)
+  }, [])
+
   if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
 
   const Row = ({ data, index, style }: RowProps) => (
@@ -32,23 +43,36 @@ export default function EntryList({
       onSelectedChipsChange={onSelectedChipsChange}
       data={data}
       index={index}
-      style={style}
+      style={{ padding: '20px', ...style }}
     />
   )
 
+  const columnWidths = entries.map((entry) => (entry.tags.length === 0 ? 100 : 140))
+
+  const getItemSize = (index: number) => columnWidths[index]
+
+  if (entries.length === 0) {
+    return (
+      <EmptyBlob
+        data-test='emptyEntryListBlob'
+        text='No items here'
+        style={{ height: windowHeight - 230, paddingTop: 40 }}
+      />
+    )
+  }
+
   return (
     <>
-      {entries.length === 0 && <EmptyBlob data-test='emptyEntryListBlob' text='No entries here' />}
-      <FixedSizeList
-        height={window.innerHeight - 300}
+      <List
+        height={windowHeight - 230}
         itemCount={entries.length}
         itemData={entries}
-        itemSize={120}
+        itemSize={getItemSize}
         overscanCount={5}
         width='100%'
       >
         {Row}
-      </FixedSizeList>
+      </List>
     </>
   )
 }
