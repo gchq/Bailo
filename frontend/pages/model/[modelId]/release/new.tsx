@@ -62,6 +62,7 @@ export default function NewRelease() {
 
   const handleFileOnChange = (newFiles: (File | FileInterface)[]) => {
     // Filter out any deleted files from success list
+    console.log(newFiles)
     const filteredUploads = successfulFileUploads.filter((file) =>
       newFiles.some((newFile) => file.fileName !== newFile.name),
     )
@@ -70,6 +71,7 @@ export default function NewRelease() {
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    console.log('here?')
     event.preventDefault()
 
     setFailedFileUploads([])

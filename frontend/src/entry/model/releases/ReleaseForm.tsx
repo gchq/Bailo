@@ -10,7 +10,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
-import { ChangeEvent, useCallback, useMemo } from 'react'
+import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
@@ -21,7 +21,14 @@ import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FileInterface, FileUploadProgress, FileWithMetadata, FlattenedModelImage } from 'types/types'
+import {
+  EntryInterface,
+  FileInterface,
+  FileUploadProgress,
+  FileWithMetadata,
+  FlattenedModelImage,
+  isFileInterface,
+} from 'types/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -81,6 +88,8 @@ export default function ReleaseForm({
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
+  const [existingFiles, setExistingFiles] = useState<FileInterface[]>([])
+
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
   const handleSemverChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -96,10 +105,6 @@ export default function ReleaseForm({
       Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
-
-  const handleExistingFileSelection = (fileId: string) => {
-    console.log(fileId)
-  }
 
   const fileProgressText = () => {
     if (!currentFileUploadProgress) {
@@ -126,12 +131,10 @@ export default function ReleaseForm({
     )
   }
 
-  const handleExistingModelFilesOnChange = (newFiles: FileInterface[]) => {
-    const updatedFiles = [
-      ...formData.files.filter((file) => !newFiles.some((newFile) => newFile.name === file.name)),
-      ...newFiles,
-    ]
-    onFilesChange(updatedFiles)
+  const handleExistingModelFilesOnChange = (newFile: FileInterface) => {
+    console.log(formData.files)
+    const updatedFiles = [...formData.files.filter((file) => newFile.name !== file.name), newFile]
+    onFilesChange([...formData.files, newFile])
   }
 
   const handleDeleteFile = (fileToDelete: File | FileInterface) => {

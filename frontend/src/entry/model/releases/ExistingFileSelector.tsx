@@ -18,7 +18,7 @@ import { EntryInterface, FileInterface } from 'types/types'
 
 interface ExistingFileSelectorProps {
   model: EntryInterface
-  onChange: (file: FileInterface[]) => void
+  onChange: (file: FileInterface) => void
 }
 
 export default function ExistingFileSelector({ model, onChange }: ExistingFileSelectorProps) {
@@ -26,7 +26,7 @@ export default function ExistingFileSelector({ model, onChange }: ExistingFileSe
   const { files, isFilesLoading, isFilesError } = useGetFilesForModel(model.id)
 
   function handleFileOnClick(file: FileInterface) {
-    onChange([file])
+    onChange(file)
     setIsDialogOpen(false)
   }
 
