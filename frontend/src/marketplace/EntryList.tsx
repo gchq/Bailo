@@ -1,6 +1,7 @@
+import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
-import { CSSProperties, useLayoutEffect, useState } from 'react'
-import { VariableSizeList as List } from 'react-window'
+import { CSSProperties, useLayoutEffect, useMemo, useState } from 'react'
+import { VariableSizeList } from 'react-window'
 import EmptyBlob from 'src/common/EmptyBlob'
 import EntryListRow from 'src/marketplace/EntryListRow'
 import MessageAlert from 'src/MessageAlert'
@@ -26,6 +27,8 @@ export default function EntryList({
 }: EntryListProps) {
   const [windowHeight, setWindowHeight] = useState(0)
 
+  const theme = useTheme()
+
   useLayoutEffect(() => {
     function updateWindowHeight() {
       setWindowHeight(window.innerHeight)
@@ -35,6 +38,8 @@ export default function EntryList({
     return () => window.removeEventListener('resize', updateWindowHeight)
   }, [])
 
+  const columnWidths = useMemo(() => entries.map((entry) => (entry.tags.length === 0 ? 100 : 140)), [entries])
+
   if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
 
   const Row = ({ data, index, style }: RowProps) => (
@@ -43,11 +48,9 @@ export default function EntryList({
       onSelectedChipsChange={onSelectedChipsChange}
       data={data}
       index={index}
-      style={{ padding: '20px', ...style }}
+      style={{ padding: theme.spacing(2.5), ...style }}
     />
   )
-
-  const columnWidths = entries.map((entry) => (entry.tags.length === 0 ? 100 : 140))
 
   const getItemSize = (index: number) => columnWidths[index]
 
@@ -55,15 +58,15 @@ export default function EntryList({
     return (
       <EmptyBlob
         data-test='emptyEntryListBlob'
-        text='No items here'
-        style={{ height: windowHeight - 230, paddingTop: 40 }}
+        text='No items found'
+        style={{ height: windowHeight - 230, paddingTop: theme.spacing(5) }}
       />
     )
   }
 
   return (
     <>
-      <List
+      <VariableSizeList
         height={windowHeight - 230}
         itemCount={entries.length}
         itemData={entries}
@@ -72,7 +75,7 @@ export default function EntryList({
         width='100%'
       >
         {Row}
-      </List>
+      </VariableSizeList>
     </>
   )
 }
