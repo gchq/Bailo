@@ -5,12 +5,6 @@ export const SchemaKind = {
 } as const
 export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
-export const GetModelFilters = {
-  Mine: 'mine',
-} as const
-
-export type GetModelFiltersKeys = (typeof GetModelFilters)[keyof typeof GetModelFilters]
-
 export const ReviewKind = {
   Release: 'release',
   Access: 'access',

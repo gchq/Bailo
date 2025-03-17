@@ -19,6 +19,7 @@ describe('services > export', () => {
     version: 1,
     createdBy: 'Joe Bloggs',
     metadata: {},
+    deleted: false,
   }
   const mockSchema = { jsonSchema: { type: 'object', properties: {} } }
 

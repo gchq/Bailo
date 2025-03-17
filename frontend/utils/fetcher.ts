@@ -1,3 +1,4 @@
+import { getReasonPhrase } from 'http-status-codes'
 import { redirectToLoginPage } from 'utils/loginUtils'
 
 export type ErrorInfo = Error & {
@@ -26,7 +27,7 @@ export const fetcher = async (url: string) => {
 export const getErrorMessage = async (res: Response) => {
   const body = await res.json()
 
-  return getErrorMessageFromBody(body, res.statusText)
+  return getErrorMessageFromBody(body, res.status)
 }
 
 const handleSWRError = async (res: Response) => {
@@ -41,7 +42,7 @@ const handleSWRError = async (res: Response) => {
       ...new Error('An error occurred while fetching the data.'),
       info: {
         ...body,
-        message: getErrorMessageFromBody(body, res.statusText),
+        message: getErrorMessageFromBody(body, res.status),
       },
       status: res.status,
     }
@@ -62,9 +63,10 @@ const isErrorResponse = (value: unknown): value is ErrorResponse => {
   return !!(value && (value as ErrorResponse).error && (value as ErrorResponse).error.message)
 }
 
-const getErrorMessageFromBody = (body: unknown, statusText: string) => {
+const getErrorMessageFromBody = (body: unknown, status: number) => {
+  const reasonPhrase = getReasonPhrase(status)
   if (isErrorResponse(body)) {
-    return `${statusText}: ${body.error.message}`
+    return `${reasonPhrase}: ${body.error.message}`
   }
 
   // unable to identify error message, possibly a network failure
