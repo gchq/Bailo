@@ -11,26 +11,31 @@ import {
 } from '@mui/material'
 import { useGetFilesForModel } from 'actions/file'
 import prettyBytes from 'pretty-bytes'
-import { useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, FileInterface } from 'types/types'
 
 interface ExistingFileSelectorProps {
   model: EntryInterface
-  onChange: (file: FileInterface) => void
+  existingReleaseFiles: (File | FileInterface)[]
+  onChange: (value: (File | FileInterface)[]) => void
 }
 
-export default function ExistingFileSelector({ model, onChange }: ExistingFileSelectorProps) {
+export default function ExistingFileSelector({ model, existingReleaseFiles, onChange }: ExistingFileSelectorProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { files, isFilesLoading, isFilesError } = useGetFilesForModel(model.id)
 
-  function handleFileOnClick(file: FileInterface) {
-    onChange(file)
-    setIsDialogOpen(false)
-  }
+  const handleFileOnClick = useCallback(
+    (newFile: FileInterface) => {
+      const updatedFiles = [...existingReleaseFiles.filter((file) => newFile.name !== file.name), newFile]
+      onChange(updatedFiles)
+      setIsDialogOpen(false)
+    },
+    [existingReleaseFiles, onChange],
+  )
 
-  const fileList = useMemo(() => {
+  const fileList = () => {
     if (files) {
       return files.map((file) => (
         <ListItem key={file._id} disablePadding onClick={() => handleFileOnClick(file)}>
@@ -49,7 +54,7 @@ export default function ExistingFileSelector({ model, onChange }: ExistingFileSe
         </ListItem>
       ))
     }
-  }, [files])
+  }
 
   if (isFilesError) {
     return <MessageAlert message={isFilesError.info.message} severity='error' />
@@ -67,7 +72,7 @@ export default function ExistingFileSelector({ model, onChange }: ExistingFileSe
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
         <DialogTitle>Select an existing file for {model.name}</DialogTitle>
         <DialogContent>
-          <List>{fileList}</List>
+          <List>{fileList()}</List>
         </DialogContent>
       </Dialog>
     </>
