@@ -43,8 +43,8 @@
     "@types/node": "22.13.10",
     "@types/react": "18.3.3",
     "@types/styled-components": "^5.1.26",
-    "eslint": "8.27.0",
-    "eslint-config-next": "13.0.2",
+    "eslint": "9.22.0",
+    "eslint-config-next": "15.2.3",
     "typescript": "5.5.3"
   }
 }
