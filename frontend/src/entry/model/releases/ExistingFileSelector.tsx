@@ -66,7 +66,12 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
 
   return (
     <>
-      <Button variant='outlined' style={{ width: '100%' }} onClick={() => setIsDialogOpen(true)}>
+      <Button
+        disabled={existingReleaseFiles.length === 0}
+        variant='outlined'
+        style={{ width: '100%' }}
+        onClick={() => setIsDialogOpen(true)}
+      >
         Select existing file
       </Button>
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
