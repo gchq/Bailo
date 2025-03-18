@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > model > getModel > audit > expected call 1`] = `"vespillo"`;
+exports[`routes > model > getModel > audit > expected call 1`] = `"expedita"`;
 
 exports[`routes > model > getModel > audit > expected call 2`] = `
 {
