@@ -66,7 +66,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
       const { isInfected, viruses } = await av.scanStream(s3Stream)
       const scannerVersion = await this.getScannerVersion()
       log.info(
-        { modelId: file.modelId, fileId: file._id, name: file.name, result: { isInfected, viruses } },
+        { modelId: file.modelId, fileId: file._id.toString(), name: file.name, result: { isInfected, viruses } },
         'Scan complete.',
       )
       return [

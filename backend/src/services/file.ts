@@ -59,7 +59,7 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id.toString() })
   }
 
   const { fileSize } = await putObjectStream(bucket, path, stream)
@@ -80,7 +80,7 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
     scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
   }
 
-  const avScan = await ScanModel.find({ fileId: file._id })
+  const avScan = await ScanModel.find({ fileId: file._id.toString() })
   const ret: FileWithScanResultsInterface = {
     ...file.toObject(),
     avScan,
@@ -93,7 +93,7 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileScanResult[]) {
   for (const result of results) {
     const updateExistingResult = await ScanModel.updateOne(
-      { fileId: _id, toolName: result.toolName },
+      { fileId: _id.toString(), toolName: result.toolName },
       {
         $set: { ...result },
       },
@@ -101,7 +101,7 @@ async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileSc
     if (updateExistingResult.modifiedCount === 0) {
       await ScanModel.create({
         artefactKind: ArtefactKind.File,
-        fileId: _id,
+        fileId: _id.toString(),
         ...result,
       })
     }
@@ -249,7 +249,7 @@ async function fileScanDelay(file: FileInterface): Promise<number> {
     return 0
   }
   let minutesBeforeRetrying = 0
-  const fileAvScans = await ScanModel.find({ fileId: file._id })
+  const fileAvScans = await ScanModel.find({ fileId: file._id.toString() })
   for (const scanResult of fileAvScans) {
     const delayInMilliseconds = delay * 60000
     const scanTimeAtLimit = scanResult.lastRunAt.getTime() + delayInMilliseconds
