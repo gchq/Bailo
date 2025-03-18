@@ -1,14 +1,16 @@
 import { Done, Error, InfoOutlined, Refresh, Warning } from '@mui/icons-material'
 import { Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
+import { useGetReleasesForModelId } from 'actions/release'
 import prettyBytes from 'pretty-bytes'
-import { Fragment, ReactElement, useCallback, useMemo, useState } from 'react'
+import { Fragment, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString, formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
@@ -28,6 +30,22 @@ interface ChipDetails {
 export default function FileDownload({ modelId, file, showAssociatedReleases = false }: FileDownloadProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
+  const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(modelId)
+  const [latestRelease, setLatestRelease] = useState('')
+
+  const sortedAssociatedReleases = useMemo(
+    () =>
+      releases
+        .filter((release) => isFileInterface(file) && release.fileIds.includes(file._id))
+        .sort(sortByCreatedAtDescending),
+    [file, releases],
+  )
+
+  useEffect(() => {
+    if (releases.length > 0 && sortedAssociatedReleases.length > 0) {
+      setLatestRelease(releases[0].semver)
+    }
+  }, [releases, sortedAssociatedReleases])
 
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
@@ -164,7 +182,11 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
     return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
 
-  if (isScannersLoading) {
+  if (isReleasesError) {
+    return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  }
+
+  if (isScannersLoading || isReleasesLoading) {
     return <Loading />
   }
 
@@ -203,12 +225,15 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
           </Stack>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
             <Stack direction='row'>
-              <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' sx={{ mb: 2 }}>
-                Added by {<UserDisplay dn={file.createdAt.toString()} />} on
-                <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' fontWeight='bold'>
-                  {` ${formatDateString(file.createdAt.toString())}`}
+              {sortedAssociatedReleases.length > 0 && (
+                <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' sx={{ mb: 2 }}>
+                  Added by <UserDisplay dn={sortedAssociatedReleases[sortedAssociatedReleases.length - 1].createdBy} />{' '}
+                  on
+                  <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' fontWeight='bold'>
+                    {` ${formatDateString(file.createdAt.toString())}`}
+                  </Typography>
                 </Typography>
-              </Typography>
+              )}
             </Stack>
           </Stack>
         </Stack>
@@ -218,6 +243,8 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
         open={associatedReleasesOpen}
         onClose={() => setAssociatedReleasesOpen(false)}
         file={file}
+        latestRelease={latestRelease}
+        sortedAssociatedReleases={sortedAssociatedReleases}
       />
     </>
   )
