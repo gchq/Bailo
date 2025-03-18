@@ -13,7 +13,7 @@ export async function sign(hash: string) {
   const client = new KMSClient({
     ...(clientConfig.credentials?.accessKeyId &&
       clientConfig.credentials?.secretAccessKey && {
-        credentials: clientConfig.credentials,
+        credentials: { ...clientConfig.credentials },
         region: clientConfig.region,
       }),
   })

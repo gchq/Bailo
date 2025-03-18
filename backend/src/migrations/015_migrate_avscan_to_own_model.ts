@@ -7,6 +7,10 @@ export async function up() {
   for (const file of files) {
     if (file.get('avScan') !== undefined) {
       for (const avResult of file.get('avScan')) {
+        // toolName was originally not a required field so may not exist
+        if (!Object.prototype.hasOwnProperty.call(avResult, 'toolName')) {
+          avResult.toolName = 'Unknown Scanner'
+        }
         // create new Scan Document
         const newScan = new ScanModel({
           artefactKind: ArtefactKind.File,
@@ -20,7 +24,7 @@ export async function up() {
     }
   }
   // remove all old avScan fields
-  await FileModel.updateMany({ avScan: { $exists: true } }, { $unset: { avScan: 1 } })
+  await FileModel.updateMany({ avScan: { $exists: true } }, { $unset: { avScan: 1 } }, { strict: false })
 }
 
 export async function down() {
