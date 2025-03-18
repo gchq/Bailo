@@ -58,7 +58,7 @@
     "semver": "^7.6.2",
     "swagger-ui-react": "^5.20.0",
     "swr": "^2.3.0",
-    "typescript": "5.5.3",
+    "typescript": "5.8.2",
     "uuid": "^11.0.5"
   },
   "devDependencies": {
