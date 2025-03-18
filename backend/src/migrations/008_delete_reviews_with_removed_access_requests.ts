@@ -4,7 +4,7 @@ import { removeAccessRequestReviews } from '../services/review.js'
 export async function up() {
   const deletedAccessRequests = await (AccessRequestModel as any).findDeleted()
   for (const accessRequest of deletedAccessRequests) {
-    await removeAccessRequestReviews(accessRequest.get('id'))
+    await removeAccessRequestReviews(accessRequest['id'])
   }
 }
 

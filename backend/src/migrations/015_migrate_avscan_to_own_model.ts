@@ -5,8 +5,9 @@ export async function up() {
   // convert avScan from being stored in File to a new Scan Document
   const files = await FileModel.find({})
   for (const file of files) {
-    if (file.get('avScan') !== undefined) {
-      for (const avResult of file.get('avScan')) {
+    const avScan = file['avScan']
+    if (avScan !== undefined) {
+      for (const avResult of avScan) {
         // toolName was originally not a required field so may not exist
         if (!Object.prototype.hasOwnProperty.call(avResult, 'toolName')) {
           avResult.toolName = 'Unknown Scanner'

@@ -7,8 +7,8 @@ export async function up() {
   // Resolve release comments
   const releases = await ReleaseModel.find({})
   for (const release of releases) {
-    if (release.get('comments') !== undefined) {
-      for (const releaseComment of release.get('comments')) {
+    if (release['comments'] !== undefined) {
+      for (const releaseComment of release['comments']) {
         const username = releaseComment.user.includes(':') ? releaseComment.user : `user:${releaseComment.user}`
         const newComment = new ResponseModel({
           entity: username,
@@ -27,8 +27,8 @@ export async function up() {
   // Resolve access request comments
   const accessRequests = await AccessRequestModel.find({})
   for (const accessRequest of accessRequests) {
-    if (accessRequest.get('comments') !== undefined) {
-      for (const accessComment of accessRequest.get('comments')) {
+    if (accessRequest['comments'] !== undefined) {
+      for (const accessComment of accessRequest['comments']) {
         const username = accessComment.user.includes(':') ? accessComment.user : `user:${accessComment.user}`
         const newComment = new ResponseModel({
           entity: username,
@@ -47,8 +47,8 @@ export async function up() {
   // Resolve review comments
   const reviews = await ReviewModel.find({})
   for (const review of reviews) {
-    if (review.get('responses') !== undefined) {
-      for (const reviewResponse of review.get('responses')) {
+    if (review['responses'] !== undefined) {
+      for (const reviewResponse of review['responses']) {
         const username = reviewResponse.user.includes(':') ? reviewResponse.user : `user:${reviewResponse.user}`
         const newComment = new ResponseModel({
           entity: username,
