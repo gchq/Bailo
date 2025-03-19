@@ -89,8 +89,7 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }
-    updateChipDetails()
-  }, [file, modelId, sendNotification, updateChipDetails])
+  }, [file, modelId, sendNotification])
 
   const rerunFileScanButton = useMemo(() => {
     return (
