@@ -151,7 +151,11 @@ export default function ReleaseDisplay({
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
             <Stack spacing={1}>
               {!hideFileDownloads && release.files.length > 0 && (
-                <Accordion expanded={expanded === 'filesPanel'} onChange={handleAccordionChange('filesPanel')}>
+                <Accordion
+                  expanded={expanded === 'filesPanel'}
+                  onChange={handleAccordionChange('filesPanel')}
+                  data-test={`release-files-accordion-${release.semver}`}
+                >
                   <AccordionSummary sx={{ px: 0 }} expandIcon={<ArrowDropDown />}>
                     <Typography fontWeight='bold'>{`${expanded === 'filesPanel' ? 'Hide' : 'Show'} ${release.files.length} files`}</Typography>
                   </AccordionSummary>
