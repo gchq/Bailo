@@ -491,20 +491,21 @@ export async function setLatestImportedModelCard(modelId: string) {
   return updatedModel
 }
 
-export async function validateMirroredModel(mirroredModelId: string, sourceModelId: string) {
+export async function validateMirroredModel(mirroredModelId: string, sourceModelId: string, importId: string) {
   const model = await Model.findOne({
     id: mirroredModelId,
     'settings.mirror.sourceModelId': { $ne: null },
   })
 
   if (!model) {
-    throw NotFound(`The requested mirrored model entry was not found.`, { modelId: mirroredModelId })
+    throw NotFound(`The requested mirrored model entry was not found.`, { modelId: mirroredModelId, importId })
   }
 
   if (model.settings.mirror.sourceModelId !== sourceModelId) {
     throw InternalError('The source model ID of the mirrored model does not match the model Id of the imported model', {
       sourceModelId: model.settings.mirror.sourceModelId,
       importedModelId: sourceModelId,
+      importId,
     })
   }
 
