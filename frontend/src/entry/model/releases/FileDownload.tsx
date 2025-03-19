@@ -5,7 +5,6 @@ import { useGetReleasesForModelId } from 'actions/release'
 import prettyBytes from 'pretty-bytes'
 import { Fragment, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
-import UserDisplay from 'src/common/UserDisplay'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
@@ -223,18 +222,13 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
               )}
             </Stack>
           </Stack>
-          <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Stack direction='row'>
-              {sortedAssociatedReleases.length > 0 && (
-                <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' sx={{ mb: 2 }}>
-                  Added by <UserDisplay dn={sortedAssociatedReleases[sortedAssociatedReleases.length - 1].createdBy} />{' '}
-                  on
-                  <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' fontWeight='bold'>
-                    {` ${formatDateString(file.createdAt.toString())}`}
-                  </Typography>
-                </Typography>
-              )}
-            </Stack>
+          <Stack direction={{ sm: 'column', md: 'row' }} spacing={0.5} alignItems='center' justifyContent='flex-start'>
+            <Typography variant='caption' sx={{ mb: 2 }}>
+              Uploaded on
+            </Typography>
+            <Typography variant='caption' fontWeight='bold'>
+              {`${formatDateString(file.createdAt.toString())}`}
+            </Typography>
           </Stack>
         </Stack>
       )}
