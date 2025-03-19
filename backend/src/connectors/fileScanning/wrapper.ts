@@ -1,6 +1,6 @@
 import { FileInterface } from '../../models/File.js'
 import log from '../../services/log.js'
-import { BaseFileScanningConnector, FileScanResult } from './Base.js'
+import { BaseFileScanningConnector, FileScanningConnectorInfo, FileScanResult } from './Base.js'
 
 export class FileScanningWrapper extends BaseFileScanningConnector {
   toolName = this.constructor.name
@@ -11,12 +11,14 @@ export class FileScanningWrapper extends BaseFileScanningConnector {
     this.scanners = scanners
   }
 
-  info() {
-    const scannerNames: string[] = []
-    for (const scanner of this.scanners) {
-      scannerNames.push(...scanner.info())
-    }
-    return scannerNames
+  async info(): Promise<FileScanningConnectorInfo & { scannerNames: string[] }> {
+    const scannersInfo = await Promise.all(
+      this.scanners.map(async (scanner) => {
+        return await scanner.info()
+      }),
+    )
+    const scannerNames = scannersInfo.map((scannerInfo) => scannerInfo.toolName)
+    return { toolName: this.constructor.name, scannerNames: scannerNames }
   }
 
   async scan(file: FileInterface) {

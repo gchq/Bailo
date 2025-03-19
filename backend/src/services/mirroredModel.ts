@@ -595,7 +595,7 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     }
   }
 
-  if (scanners.info()) {
+  if (await scanners.info()) {
     const files = await getFilesByIds(user, modelId, fileIds)
     const scanErrors: {
       missingScan: Array<{ name: string; id: string }>

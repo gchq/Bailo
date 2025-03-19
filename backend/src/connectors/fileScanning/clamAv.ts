@@ -11,14 +11,12 @@ import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 let av: NodeClam
 
 export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
-  toolName = 'Clam AV'
-
   constructor() {
     super()
   }
 
-  info() {
-    return [this.toolName]
+  async info() {
+    return { toolName: 'Clam AV', scannerVersion: await this.getScannerVersion() }
   }
 
   async init(retryCount: number = 1) {
@@ -54,7 +52,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     if (!av) {
       return [
         {
-          toolName: this.toolName,
+          ...(await this.info()),
           state: ScanState.Error,
           scannerVersion: 'Unknown',
           lastRunAt: new Date(),
@@ -64,16 +62,14 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     try {
       const { isInfected, viruses } = await av.scanStream(s3Stream)
-      const scannerVersion = await this.getScannerVersion()
       log.info(
         { modelId: file.modelId, fileId: file._id.toString(), name: file.name, result: { isInfected, viruses } },
         'Scan complete.',
       )
       return [
         {
-          toolName: this.toolName,
+          ...(await this.info()),
           state: ScanState.Complete,
-          ...(scannerVersion !== undefined ? { scannerVersion } : {}),
           isInfected,
           viruses,
           lastRunAt: new Date(),

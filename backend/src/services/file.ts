@@ -70,8 +70,9 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 
   await file.save()
 
-  if (scanners.info() && fileSize > 0) {
-    const resultsInprogress: FileScanResult[] = scanners.info().map((scannerName) => ({
+  const scannersInfo = await scanners.info()
+  if (scannersInfo && scannersInfo.scannerNames && fileSize > 0) {
+    const resultsInprogress: FileScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
       state: ScanState.InProgress,
       lastRunAt: new Date(),
@@ -285,8 +286,9 @@ export async function rerunFileScan(user: UserInterface, modelId, fileId: string
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
   }
-  if (scanners.info()) {
-    const resultsInprogress = scanners.info().map((scannerName) => ({
+  const scannersInfo = await scanners.info()
+  if (scannersInfo && scannersInfo.scannerNames) {
+    const resultsInprogress = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
       state: ScanState.InProgress,
       lastRunAt: new Date(),

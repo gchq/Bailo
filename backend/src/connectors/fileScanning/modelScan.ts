@@ -9,13 +9,12 @@ import { ConfigurationError } from '../../utils/error.js'
 import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
 export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
-  toolName = 'ModelScan'
   constructor() {
     super()
   }
 
-  info() {
-    return [this.toolName]
+  async info() {
+    return { toolName: 'ModelScan', scannerVersion: await this.getScannerVersion() }
   }
 
   async getScannerVersion() {
@@ -47,16 +46,9 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
 
   async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
     this.init()
-    const scannerVersion = await this.getScannerVersion()
-    if (scannerVersion === undefined) {
-      log.error('Could not use ModelScan as it is not running')
-      return [
-        {
-          toolName: this.toolName,
-          state: ScanState.Error,
-          lastRunAt: new Date(),
-        },
-      ]
+    const scannerInfo = await this.info()
+    if (scannerInfo.scannerVersion === undefined) {
+      return await this.scanError(undefined, undefined, 'Could not use ModelScan as it is not running')
     }
 
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
@@ -81,9 +73,8 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
       )
       return [
         {
-          toolName: this.toolName,
+          ...scannerInfo,
           state: ScanState.Complete,
-          scannerVersion: scannerVersion,
           isInfected,
           viruses,
           lastRunAt: new Date(),
