@@ -50,14 +50,11 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
 
   async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
     if (!av) {
-      return [
-        {
-          ...(await this.info()),
-          state: ScanState.Error,
-          scannerVersion: 'Unknown',
-          lastRunAt: new Date(),
-        },
-      ]
+      return await this.scanError(
+        undefined,
+        undefined,
+        `Could not use ${(await this.info()).toolName} as it is not running`,
+      )
     }
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     try {
