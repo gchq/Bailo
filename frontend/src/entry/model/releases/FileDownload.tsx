@@ -160,6 +160,14 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
     )
   }, [anchorEl, chipDetails, file, open])
 
+  if (isFileInterface(file) && !file.complete) {
+    return (
+      <Typography>
+        <span style={{ fontWeight: 'bold' }}>{file.name}</span> is not currently available
+      </Typography>
+    )
+  }
+
   if (isScannersError) {
     return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
