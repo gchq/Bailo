@@ -360,6 +360,7 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
 
   const modelId = file.modelId
   file.modelId = mirroredModelId
+  file.bucket = config.s3.buckets.uploads
   file.path = createFilePath(mirroredModelId, file.id)
   if (sourceModelId !== modelId) {
     throw InternalError('Zip file contains files from an invalid model.', { modelIds: [sourceModelId, modelId] })
