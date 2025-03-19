@@ -57,7 +57,7 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
     if (chipDisplay === undefined) {
       updateChipDetails()
     }
-  }, [updateChipDetails, chipDisplay])
+  }, [updateChipDetails, chipDisplay, file])
 
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
@@ -75,7 +75,6 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
 
   const handleRerunFileScanOnClick = useCallback(async () => {
     const res = await rerunFileScan(modelId, (file as FileInterface)._id)
-    setChipDisplay({ label: 'File is being rescanned...', colour: 'warning', icon: <Warning /> })
     if (!res.ok) {
       sendNotification({
         variant: 'error',
@@ -88,6 +87,7 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
         msg: `${file.name} is being rescanned`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      setChipDisplay({ label: 'File is being rescanned...', colour: 'warning', icon: <Warning /> })
     }
   }, [file, modelId, sendNotification])
 
