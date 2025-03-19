@@ -135,9 +135,15 @@ export default function ReleaseDisplay({
               {!hideFileDownloads && release.files.length > 0 && (
                 <>
                   <Typography fontWeight='bold'>Files</Typography>
-                  {release.files.map((file) => (
-                    <FileDownload key={file.name} file={file} modelId={model.id} />
-                  ))}
+                  {release.files.map((file) => {
+                    return file.complete ? (
+                      <FileDownload key={file.name} file={file} modelId={model.id} />
+                    ) : (
+                      <Typography>
+                        <span style={{ fontWeight: 'bold' }}>{file.name}</span> is not currently available
+                      </Typography>
+                    )
+                  })}
                 </>
               )}
               {release.images.length > 0 && (
