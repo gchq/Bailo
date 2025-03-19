@@ -46,6 +46,36 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
     }
   }, [releases, sortedAssociatedReleases])
 
+  const [chipDisplay, setChipDisplay] = useState<ChipDetails | undefined>(undefined)
+
+  const updateChipDetails = useCallback(() => {
+    if (!isFileInterface(file) || file.avScan === undefined) {
+      setChipDisplay({ label: 'Virus scan results could not be found', colour: 'warning', icon: <Warning /> })
+    }
+    if (
+      isFileInterface(file) &&
+      file.avScan !== undefined &&
+      file.avScan.some((scan) => scan.state === ScanState.Error)
+    ) {
+      setChipDisplay({ label: 'One or more virus scanning tools failed', colour: 'warning', icon: <Warning /> })
+    }
+    if (threatsFound(file as FileInterface)) {
+      setChipDisplay({
+        label: `Virus scan failed: ${plural(threatsFound(file as FileInterface), 'threat')} found`,
+        colour: 'error',
+        icon: <Error />,
+      })
+    } else {
+      setChipDisplay({ label: 'Virus scan passed', colour: 'success', icon: <Done /> })
+    }
+  }, [file])
+
+  useEffect(() => {
+    if (chipDisplay === undefined) {
+      updateChipDetails()
+    }
+  }, [updateChipDetails, chipDisplay])
+
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
 
@@ -60,25 +90,9 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
     }, 0)
   }
 
-  const chipDetails = useCallback((file: FileInterface): ChipDetails => {
-    if (file.avScan === undefined) {
-      return { label: 'Virus scan results could not be found', colour: 'warning', icon: <Warning /> }
-    }
-    if (file.avScan.some((scan) => scan.state === ScanState.Error)) {
-      return { label: 'One or more virus scanning tools failed', colour: 'warning', icon: <Warning /> }
-    }
-    if (threatsFound(file)) {
-      return {
-        label: `Virus scan failed: ${plural(threatsFound(file), 'threat')} found`,
-        colour: 'error',
-        icon: <Error />,
-      }
-    }
-    return { label: 'Virus scan passed', colour: 'success', icon: <Done /> }
-  }, [])
-
   const handleRerunFileScanOnClick = useCallback(async () => {
     const res = await rerunFileScan(modelId, (file as FileInterface)._id)
+    setChipDisplay({ label: 'File is being rescanned...', colour: 'warning', icon: <Warning /> })
     if (!res.ok) {
       sendNotification({
         variant: 'error',
@@ -118,11 +132,11 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
     return (
       <>
         <Chip
-          color={chipDetails(file).colour}
-          icon={chipDetails(file).icon}
+          color={chipDisplay ? chipDisplay.colour : 'warning'}
+          icon={chipDisplay ? chipDisplay.icon : <Warning />}
           size='small'
           onClick={(e) => setAnchorEl(e.currentTarget)}
-          label={chipDetails(file).label}
+          label={chipDisplay ? chipDisplay.label : 'Virus scan results could not be found'}
         />
         <Popover
           open={open}
@@ -175,7 +189,7 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
         </Popover>
       </>
     )
-  }, [anchorEl, chipDetails, file, open])
+  }, [anchorEl, chipDisplay, file, open])
 
   if (isFileInterface(file) && !file.complete) {
     return (
