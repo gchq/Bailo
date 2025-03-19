@@ -7,6 +7,7 @@ export async function up() {
     const avScan = file.get('avScan')
     if (avScan !== undefined) {
       file.set('avScan', [avScan])
+      // avScan may be a Mixed SchemaType so explicitly tell mongoose to save the object
       file.markModified('avScan')
       await file.save()
     }
@@ -26,6 +27,7 @@ export async function up() {
       }
       if (isModified) {
         file.set('avScan', avScan)
+        // avScan may be a Mixed SchemaType so explicitly tell mongoose to save the object
         file.markModified('avScan')
         await file.save()
       }
