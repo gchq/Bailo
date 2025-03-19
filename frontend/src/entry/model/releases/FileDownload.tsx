@@ -222,14 +222,10 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
               )}
             </Stack>
           </Stack>
-          <Stack direction={{ sm: 'column', md: 'row' }} spacing={0.5} alignItems='center' justifyContent='flex-start'>
-            <Typography variant='caption' sx={{ mb: 2 }}>
-              Uploaded on
-            </Typography>
-            <Typography variant='caption' fontWeight='bold'>
-              {`${formatDateString(file.createdAt.toString())}`}
-            </Typography>
-          </Stack>
+          <Typography variant='caption' sx={{ mb: 2 }}>
+            Uploaded on
+            <span style={{ fontWeight: 'bold' }}>{` ${formatDateString(file.createdAt.toString())}`}</span>
+          </Typography>
         </Stack>
       )}
       <AssociatedReleasesDialog
