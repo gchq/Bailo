@@ -1,6 +1,6 @@
 import { LoadingButton } from '@mui/lab'
 import { Stack, Typography } from '@mui/material'
-import { patchModel, useGetModel, useGetModelRoles } from 'actions/model'
+import { patchModel, useGetCurrentUserPermissionsForEntry, useGetModel, useGetModelRoles } from 'actions/model'
 import { useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
@@ -28,6 +28,8 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
     isModelRolesError: isEntryRolesError,
   } = useGetModelRoles(entry.id)
 
+  const { mutateEntryUserPermissions } = useGetCurrentUserPermissionsForEntry(entry.id)
+
   const sendNotification = useNotification()
 
   async function updateAccessList() {
@@ -42,6 +44,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
       mutateEntry()
+      mutateEntryUserPermissions()
     }
     setLoading(false)
   }
