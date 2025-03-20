@@ -8,6 +8,7 @@ import Loading from 'src/common/Loading'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
+import { KeyedMutator } from 'swr'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateString, formatDateTimeString } from 'utils/dateUtils'
@@ -18,6 +19,7 @@ type FileDownloadProps = {
   modelId: string
   file: FileInterface | File
   showAssociatedReleases?: boolean
+  mutator?: KeyedMutator<any>
 }
 
 interface ChipDetails {
@@ -26,7 +28,12 @@ interface ChipDetails {
   icon: ReactElement
 }
 
-export default function FileDownload({ modelId, file, showAssociatedReleases = false }: FileDownloadProps) {
+export default function FileDownload({
+  modelId,
+  file,
+  showAssociatedReleases = false,
+  mutator = undefined,
+}: FileDownloadProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(modelId)
@@ -74,7 +81,7 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
     if (chipDisplay === undefined) {
       updateChipDetails()
     }
-  }, [updateChipDetails, chipDisplay])
+  }, [updateChipDetails, chipDisplay, file])
 
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
@@ -92,7 +99,6 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
 
   const handleRerunFileScanOnClick = useCallback(async () => {
     const res = await rerunFileScan(modelId, (file as FileInterface)._id)
-    setChipDisplay({ label: 'File is being rescanned...', colour: 'warning', icon: <Warning /> })
     if (!res.ok) {
       sendNotification({
         variant: 'error',
@@ -105,8 +111,11 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
         msg: `${file.name} is being rescanned`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      if (mutator) {
+        mutator()
+      }
     }
-  }, [file, modelId, sendNotification])
+  }, [file, modelId, sendNotification, mutator])
 
   const rerunFileScanButton = useMemo(() => {
     return (
