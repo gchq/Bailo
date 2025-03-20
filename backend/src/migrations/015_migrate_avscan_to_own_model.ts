@@ -2,16 +2,16 @@ import FileModel from '../models/File.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 
 export async function up() {
-  // toolName was originally not a required field so may not exist
-  await FileModel.updateMany(
-    { avScan: { $exists: true }, 'avScan.toolName': { $exists: false } },
-    { $set: { 'avScan.toolName': 'Unknown Scanner' } },
-  )
   // convert avScan from being stored in File to a new Scan Document
   const files = await FileModel.find({})
   for (const file of files) {
-    if (file.get('avScan') !== undefined) {
-      for (const avResult of file.get('avScan')) {
+    const avScan = file.get('avScan')
+    if (avScan !== undefined) {
+      for (const avResult of avScan) {
+        // toolName was originally not a required field so may not exist
+        if (!Object.prototype.hasOwnProperty.call(avResult, 'toolName')) {
+          avResult.toolName = 'Unknown Scanner'
+        }
         // create new Scan Document
         const newScan = new ScanModel({
           artefactKind: ArtefactKind.File,
@@ -25,7 +25,7 @@ export async function up() {
     }
   }
   // remove all old avScan fields
-  await FileModel.updateMany({ avScan: { $exists: true } }, { $unset: { avScan: 1 } })
+  await FileModel.updateMany({ avScan: { $exists: true } }, { $unset: { avScan: 1 } }, { strict: false })
 }
 
 export async function down() {
