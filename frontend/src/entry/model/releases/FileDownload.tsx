@@ -9,16 +9,24 @@ import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedRelease
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
-import { FileInterface, isFileInterface, ScanState } from 'types/types'
+import { FileInterface, isFileInterface, ReleaseInterface, ScanState } from 'types/types'
 import { formatDateString, formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
+
+type MutateReleases = KeyedMutator<{
+  releases: ReleaseInterface[]
+}>
+
+type MutateFiles = KeyedMutator<{
+  files: FileInterface[]
+}>
 
 type FileDownloadProps = {
   modelId: string
   file: FileInterface | File
   showAssociatedReleases?: boolean
-  mutator?: KeyedMutator<any>
+  mutator?: MutateReleases | MutateFiles
 }
 
 interface ChipDetails {
