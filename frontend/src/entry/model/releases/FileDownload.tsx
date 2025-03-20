@@ -8,6 +8,7 @@ import UserDisplay from 'src/common/UserDisplay'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
+import { KeyedMutator } from 'swr'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
 import { formatDateString, formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
@@ -17,6 +18,7 @@ type FileDownloadProps = {
   modelId: string
   file: FileInterface | File
   showAssociatedReleases?: boolean
+  mutator?: KeyedMutator<any>
 }
 
 interface ChipDetails {
@@ -25,7 +27,12 @@ interface ChipDetails {
   icon: ReactElement
 }
 
-export default function FileDownload({ modelId, file, showAssociatedReleases = false }: FileDownloadProps) {
+export default function FileDownload({
+  modelId,
+  file,
+  showAssociatedReleases = false,
+  mutator = undefined,
+}: FileDownloadProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
 
@@ -87,9 +94,11 @@ export default function FileDownload({ modelId, file, showAssociatedReleases = f
         msg: `${file.name} is being rescanned`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
-      setChipDisplay({ label: 'File is being rescanned...', colour: 'warning', icon: <Warning /> })
+      if (mutator) {
+        mutator()
+      }
     }
-  }, [file, modelId, sendNotification])
+  }, [file, modelId, sendNotification, mutator])
 
   const rerunFileScanButton = useMemo(() => {
     return (
