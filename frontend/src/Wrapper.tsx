@@ -33,7 +33,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   const page = useMemo(() => router.route.split('/')[1].replace('/', ''), [router])
 
   const dismissedTimestamp = cookies.get(DISMISSED_COOKIE_NAME)
-  const [annoucementBannerOpen, setAnnouncementBannerOpen] = useState(false)
+  const [announcementBannerOpen, setAnnouncementBannerOpen] = useState(false)
 
   useEffect(() => {
     if (!isUiConfigLoading) {
@@ -123,12 +123,12 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
                 {isCurrentUserLoading && <Loading />}
                 <MessageAlert message={errorMessage} severity='error' />
                 {children}
-                <Copyright sx={{ mb: 2 }} />
+                <Copyright sx={{ m: 2 }} />
               </>
             )}
           </Box>
           {isUiConfigLoading && <Loading />}
-          {uiConfig && annoucementBannerOpen && (
+          {uiConfig && announcementBannerOpen && (
             <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
           )}
         </Box>
