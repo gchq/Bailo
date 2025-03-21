@@ -1,20 +1,23 @@
 import {
   Button,
+  Checkbox,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   List,
   ListItem,
   ListItemButton,
+  ListItemIcon,
   ListItemText,
   Typography,
 } from '@mui/material'
 import { useGetFilesForModel } from 'actions/file'
 import prettyBytes from 'pretty-bytes'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FileInterface } from 'types/types'
+import { EntryInterface, FileInterface, isFileInterface } from 'types/types'
 
 interface ExistingFileSelectorProps {
   model: EntryInterface
@@ -25,21 +28,61 @@ interface ExistingFileSelectorProps {
 export default function ExistingFileSelector({ model, existingReleaseFiles, onChange }: ExistingFileSelectorProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { files, isFilesLoading, isFilesError } = useGetFilesForModel(model.id)
+  const [checkedFiles, setCheckedFiles] = useState<FileInterface[]>([])
 
-  const handleFileOnClick = useCallback(
-    (newFile: FileInterface) => {
-      const updatedFiles = [...existingReleaseFiles.filter((file) => newFile.name !== file.name), newFile]
+  const handleAddFilesOnClick = () => {
+    if (existingReleaseFiles) {
+      const updatedFiles = [
+        ...existingReleaseFiles.filter((existingFile) =>
+          checkedFiles.some((checkedFile) => isFileInterface(existingFile) && checkedFile._id !== existingFile._id),
+        ),
+        ...checkedFiles,
+      ]
       onChange(updatedFiles)
-      setIsDialogOpen(false)
-    },
-    [existingReleaseFiles, onChange],
-  )
+    } else {
+      onChange(checkedFiles)
+    }
+    setIsDialogOpen(false)
+  }
+
+  const handleToggle = (file: FileInterface) => () => {
+    const currentIndex = checkedFiles.indexOf(file)
+    const newCheckedFiles = checkedFiles.filter((checkedFile) => file.name !== checkedFile.name)
+
+    if (currentIndex === -1) {
+      newCheckedFiles.push(file)
+    } else {
+      newCheckedFiles.splice(currentIndex, 1)
+    }
+    setCheckedFiles(newCheckedFiles)
+  }
 
   const fileList = () => {
     if (files) {
       return files.map((file) => (
-        <ListItem key={file._id} disablePadding onClick={() => handleFileOnClick(file)}>
-          <ListItemButton dense>
+        <ListItem key={file._id} disablePadding>
+          <ListItemButton
+            dense
+            onClick={handleToggle(file)}
+            disabled={
+              existingReleaseFiles.find(
+                (existingFile) => isFileInterface(existingFile) && existingFile._id === file._id,
+              ) !== undefined
+            }
+          >
+            <ListItemIcon>
+              <Checkbox
+                edge='start'
+                checked={
+                  checkedFiles.find((checkedFile) => checkedFile._id === file._id) !== undefined ||
+                  existingReleaseFiles.find(
+                    (existingFile) => isFileInterface(existingFile) && existingFile._id === file._id,
+                  ) !== undefined
+                }
+                tabIndex={-1}
+                disableRipple
+              />
+            </ListItemIcon>
             <ListItemText
               primary={
                 <>
@@ -67,7 +110,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
   return (
     <>
       <Button
-        disabled={existingReleaseFiles.length === 0}
+        disabled={!files || files.length === 0}
         variant='outlined'
         style={{ width: '100%' }}
         onClick={() => setIsDialogOpen(true)}
@@ -79,6 +122,9 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
         <DialogContent>
           <List>{fileList()}</List>
         </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAddFilesOnClick}>Add files</Button>
+        </DialogActions>
       </Dialog>
     </>
   )

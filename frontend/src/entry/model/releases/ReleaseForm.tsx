@@ -240,16 +240,16 @@ export default function ReleaseForm({
                 onFilesChange={onFilesChange}
                 onFilesMetadataChange={onFilesMetadataChange}
               />
-              {currentFileUploadProgress && (
-                <>
-                  <LinearProgress
-                    variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
-                    value={currentFileUploadProgress.uploadProgress}
-                  />
-                  {fileProgressText()}
-                </>
-              )}
             </Stack>
+            {currentFileUploadProgress && (
+              <>
+                <LinearProgress
+                  variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
+                  value={currentFileUploadProgress.uploadProgress}
+                />
+                {fileProgressText()}
+              </>
+            )}
             {formData.files.length > 0 && (
               <Stack spacing={1} mt={1}>
                 {formData.files.map((file) => (
