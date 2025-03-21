@@ -173,7 +173,12 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
               >
                 More
               </Button>
-              <Menu MenuListProps={{ dense: true }} anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
+              <Menu
+                slotProps={{ list: { dense: true } }}
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleActionButtonClose}
+              >
                 <MenuItem
                   onClick={() => {
                     handleActionButtonClose()
