@@ -283,10 +283,16 @@ export async function getModelReleases(
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
     .lookup({
       from: 'v2_files',
-      localField: 'fileIds',
-      foreignField: '_id',
       as: 'files',
+      // Backwards compatibility for MongoDB <=4.4 "$lookup with 'pipeline' may not specify 'localField' or 'foreignField'".
+      // `let` & `pipeline[].$match.$expr` provide equivalent functionality to `localField: 'fileIds', foreignField: '_id',`
+      let: { fileIds: '$fileIds' },
       pipeline: [
+        {
+          $match: {
+            $expr: { $in: ['$_id', { $ifNull: ['$$fileIds', []] }] },
+          },
+        },
         { $addFields: { id: { $toString: '$_id' } } },
         {
           $lookup: {
