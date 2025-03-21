@@ -18,6 +18,7 @@ import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, FileInterface, isFileInterface } from 'types/types'
+import { formatDateString } from 'utils/dateUtils'
 
 interface ExistingFileSelectorProps {
   model: EntryInterface
@@ -43,18 +44,18 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
       onChange(checkedFiles)
     }
     setIsDialogOpen(false)
+    setCheckedFiles([])
   }
 
   const handleToggle = (file: FileInterface) => () => {
     const currentIndex = checkedFiles.indexOf(file)
-    const newCheckedFiles = checkedFiles.filter((checkedFile) => file.name !== checkedFile.name)
-
+    const newCheckedFiles = checkedFiles.filter((checkedFile) => file._id !== checkedFile._id)
     if (currentIndex === -1) {
       newCheckedFiles.push(file)
+      setCheckedFiles(newCheckedFiles)
     } else {
-      newCheckedFiles.splice(currentIndex, 1)
+      setCheckedFiles(newCheckedFiles)
     }
-    setCheckedFiles(newCheckedFiles)
   }
 
   const fileList = () => {
@@ -91,7 +92,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
                   </Typography>
                 </>
               }
-              secondary={prettyBytes(file.size)}
+              secondary={`Added on ${formatDateString(file.createdAt.toString())} - ${prettyBytes(file.size)}`}
             />
           </ListItemButton>
         </ListItem>

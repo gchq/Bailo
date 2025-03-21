@@ -253,7 +253,7 @@ export default function ReleaseForm({
             {formData.files.length > 0 && (
               <Stack spacing={1} mt={1}>
                 {formData.files.map((file) => (
-                  <div key={file.name}>
+                  <div key={`${file.name}-${file.size}`}>
                     <MultiFileInputFileDisplay
                       file={file}
                       readOnly={isReadOnly}
