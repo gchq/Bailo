@@ -101,7 +101,7 @@ export const getDownloadFile = [
 
     if (req.headers.range) {
       // TODO: support ranges
-      throw BadReq('Ranges are not supported', { fileId: file._id })
+      throw BadReq('Ranges are not supported', { fileId: file._id.toString() })
     }
 
     res.set('Content-Length', String(file.size))
@@ -110,7 +110,7 @@ export const getDownloadFile = [
     const stream = await downloadFile(req.user, file.id)
 
     if (!stream.Body) {
-      throw InternalError('We were not able to retrieve the body of this file', { fileId: file._id })
+      throw InternalError('We were not able to retrieve the body of this file', { fileId: file._id.toString() })
     }
 
     await audit.onViewFile(req, file)

@@ -12,7 +12,7 @@ export const FileScanKind = {
 export type FileScanKindKeys = (typeof FileScanKind)[keyof typeof FileScanKind]
 
 const fileScanConnectors: BaseFileScanningConnector[] = []
-let scannerWrapper: undefined | BaseFileScanningConnector = undefined
+let scannerWrapper: undefined | FileScanningWrapper = undefined
 export function runFileScanners(cache = true) {
   if (scannerWrapper && cache) {
     return scannerWrapper
