@@ -91,7 +91,10 @@ export interface FileInterface {
   updatedAt: Date
 }
 
+export type FileWithScanResultsInterface = FileInterface & { avScan: ScanResultInterface[]; id: string }
+
 export interface ScanResultInterface {
+  _id: string
   state: ScanStateKeys
   scannerVersion?: string
   isInfected?: boolean
