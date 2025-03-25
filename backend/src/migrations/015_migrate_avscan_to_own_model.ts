@@ -8,6 +8,9 @@ export async function up() {
     const avScan = file.get('avScan')
     if (avScan !== undefined) {
       for (const avResult of avScan) {
+        if (avResult['state'] === 'notScanned') {
+          continue
+        }
         // toolName was originally not a required field so may not exist
         if (!Object.prototype.hasOwnProperty.call(avResult, 'toolName')) {
           avResult.toolName = 'Unknown Scanner'
