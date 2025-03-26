@@ -167,7 +167,7 @@ export function useGetModelFiles(id?: string) {
   }
 }
 
-export function deleteModelFile(modelId?: string, fileId?: string) {
+export function deleteModelFile(modelId: string, fileId: string) {
   return fetch(`/api/v2/model/${modelId}/file/${fileId}`, {
     method: `delete`,
     headers: { 'Content-Type': 'application/json' },

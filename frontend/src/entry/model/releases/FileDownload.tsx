@@ -18,7 +18,7 @@ import { deleteModelFile, useGetModelFiles } from 'actions/model'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { Fragment, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
@@ -89,7 +89,7 @@ export default function FileDownload({
     }
   }, [file, modelId, router, mutateEntryFiles])
 
-  function handleFileMoreButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
+  function handleFileMoreButtonClick(event: MouseEvent<HTMLButtonElement>) {
     setAnchorElMore(event.currentTarget)
   }
 
