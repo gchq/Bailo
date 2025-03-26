@@ -18,7 +18,7 @@ export async function up() {
         // create new Scan Document
         const newScan = new ScanModel({
           artefactKind: ArtefactKind.File,
-          fileId: file._id,
+          fileId: file._id.toString(),
           ...avResult,
           createdAt: file.createdAt,
           updatedAt: file.updatedAt,
