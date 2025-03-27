@@ -360,11 +360,6 @@ describe('services > release', () => {
     )
   })
 
-  //New test
-  //First, mock functionality
-  //use mocked data and execute the function
-  //see if expected result
-
   test('validateRelease > should not call listModelImages', async () => {
     registryMocks.listModelImages.mockResolvedValueOnce([{ repository: 'mockRep', name: 'image', tags: ['latest'] }])
 
