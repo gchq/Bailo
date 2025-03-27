@@ -26,7 +26,7 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { FileInterface, isFileInterface, ScanState } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
-import { formatDateString, formatDateTimeString } from 'utils/dateUtils'
+import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
@@ -329,7 +329,7 @@ export default function FileDownload({
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
             <Typography variant='caption'>
               Uploaded on
-              <span style={{ fontWeight: 'bold' }}>{` ${formatDateString(file.createdAt.toString())}`}</span>
+              <span style={{ fontWeight: 'bold' }}>{` ${formatDateTimeString(file.createdAt.toString())}`}</span>
             </Typography>
           </Stack>
         </Stack>
