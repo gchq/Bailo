@@ -366,8 +366,7 @@ describe('services > release', () => {
   //see if expected result
 
   test('validateRelease > should not call listModelImages', async () => {
-    // const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
-    // registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
+    registryMocks.listModelImages.mockResolvedValueOnce([{ repository: 'mockRep', name: 'image', tags: ['latest'] }])
 
     await validateRelease({ dn: 'dn' }, {} as any, { semver: '1.1.1', images: [], modelId: 'test-modelId' } as any)
 
