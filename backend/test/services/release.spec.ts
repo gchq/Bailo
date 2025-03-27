@@ -4,6 +4,7 @@ import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { SemverObject } from '../../src/models/Release.js'
 import { UserInterface } from '../../src/models/User.js'
+import { listModelImages } from '../../src/services/registry.js'
 import {
   createRelease,
   deleteRelease,
@@ -17,6 +18,7 @@ import {
   removeFileFromReleases,
   semverObjectToString,
   updateRelease,
+  validateRelease,
 } from '../../src/services/release.js'
 import { NotFound } from '../../src/utils/error.js'
 
@@ -356,6 +358,20 @@ describe('services > release', () => {
     expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrowError(
       /^Cannot update a release on a mirrored model./,
     )
+  })
+
+  //New test
+  //First, mock functionality
+  //use mocked data and execute the function
+  //see if expected result
+
+  test('validateRelease > should not call listModelImages', async () => {
+    // const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
+    // registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
+
+    await validateRelease({ dn: 'dn' }, {} as any, { semver: '1.1.1', images: [], modelId: 'test-modelId' } as any)
+
+    expect(listModelImages).not.toHaveBeenCalled()
   })
 
   test('newReleaseComment > success', async () => {
