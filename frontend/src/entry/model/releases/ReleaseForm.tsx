@@ -214,7 +214,10 @@ export default function ReleaseForm({
           </Stack>
         )}
         <Stack spacing={1}>
-          {isReadOnly && formData.files.map((file) => <FileDownload key={file.name} file={file} modelId={model.id} />)}
+          {isReadOnly &&
+            formData.files.map((file) => (
+              <FileDownload key={file.name} file={file} modelId={model.id} showMenuItems={{ rescanFile: true }} />
+            ))}
         </Stack>
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>

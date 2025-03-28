@@ -216,7 +216,7 @@ export async function removeFile(user: UserInterface, modelId: string, fileId: s
 
   // We don't actually remove the file from storage, we only hide all
   // references to it.  This makes the file not visible to the user.
-  await FileModel.findOneAndDelete({ id: file._id })
+  await FileModel.findOneAndDelete({ _id: file._id })
 
   return file
 }
