@@ -136,7 +136,7 @@ export default function ReleaseDisplay({
                 <>
                   <Typography fontWeight='bold'>Files</Typography>
                   {release.files.map((file) => (
-                    <FileDownload key={file.name} file={file} modelId={model.id} />
+                    <FileDownload showMenuItems={{ rescanFile: true }} key={file.name} file={file} modelId={model.id} />
                   ))}
                 </>
               )}
