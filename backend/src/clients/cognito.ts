@@ -25,7 +25,7 @@ async function setupCognitoClient() {
     config.oauth.cognito.identityProviderClient.credentials.accessKeyId &&
     config.oauth.cognito.identityProviderClient.credentials.secretAccessKey
   ) {
-    client = new CognitoIdentityProviderClient(config.oauth.cognito.identityProviderClient)
+    client = new CognitoIdentityProviderClient({ ...config.oauth.cognito.identityProviderClient })
   } else {
     client = new CognitoIdentityProviderClient()
   }

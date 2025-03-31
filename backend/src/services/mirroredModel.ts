@@ -551,7 +551,7 @@ async function addReleaseToZip(
   try {
     zip.append(JSON.stringify(release.toJSON()), { name: `releases/${release.semver}.json` })
     for (const file of files) {
-      zip.append(JSON.stringify(file), { name: `files/${file._id}.json` })
+      zip.append(JSON.stringify(file), { name: `files/${file._id.toString()}.json` })
       await uploadToS3(
         file.id,
         (await downloadFile(user, file.id)).Body as stream.Readable,
@@ -595,7 +595,7 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     }
   }
 
-  if (scanners.info()) {
+  if (await scanners.info()) {
     const files = await getFilesByIds(user, modelId, fileIds)
     const scanErrors: {
       missingScan: Array<{ name: string; id: string }>
