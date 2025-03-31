@@ -264,7 +264,7 @@ export default function Marketplace() {
                   <EntryList
                     entries={models}
                     entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
-                    selectedChips={[...selectedLibraries, ...selectedRoles, ...selectedTask]}
+                    selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
                   />
                 </div>
