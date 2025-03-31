@@ -39,7 +39,11 @@ export default function Files({ model }: FilesProps) {
         sortedEntryFiles.sort(sortByGenericValueDescending).map((file) => (
           <Card key={file._id} sx={{ width: '100%' }}>
             <Stack spacing={1} p={2}>
-              <FileDownload showAssociatedReleases file={file} modelId={model.id} />
+              <FileDownload
+                showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
+                file={file}
+                modelId={model.id}
+              />
             </Stack>
           </Card>
         ))

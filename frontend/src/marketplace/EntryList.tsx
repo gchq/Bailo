@@ -19,6 +19,12 @@ interface RowProps {
   style: CSSProperties
 }
 
+interface RowProps {
+  data: EntrySearchResult[]
+  index: number
+  style: CSSProperties
+}
+
 export default function EntryList({
   entries,
   selectedChips,

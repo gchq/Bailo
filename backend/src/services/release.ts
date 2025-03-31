@@ -51,7 +51,7 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
     throw BadReq(`The version '${release.semver}' is not a valid semver value.`)
   }
 
-  if (release.images) {
+  if (release.images && release.images.length > 0) {
     const registryImages = await listModelImages(user, release.modelId)
 
     const initialValue: ImageRef[] = []
