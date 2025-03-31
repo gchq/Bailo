@@ -35,7 +35,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
     if (existingReleaseFiles) {
       const updatedFiles = [
         ...existingReleaseFiles.filter((existingFile) =>
-          checkedFiles.some((checkedFile) => isFileInterface(existingFile) && checkedFile._id !== existingFile._id),
+          checkedFiles.some((checkedFile) => checkedFile.name !== existingFile.name),
         ),
         ...checkedFiles,
       ]
