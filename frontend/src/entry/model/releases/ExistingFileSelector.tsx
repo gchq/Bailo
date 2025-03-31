@@ -116,7 +116,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
         style={{ width: '100%' }}
         onClick={() => setIsDialogOpen(true)}
       >
-        Select existing file
+        Select existing files
       </Button>
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
         <DialogTitle>Select an existing file for {model.name}</DialogTitle>

@@ -32,6 +32,7 @@ import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
+import { plural } from 'utils/stringUtils'
 
 export interface ReleaseDisplayProps {
   model: EntryInterface
@@ -157,7 +158,7 @@ export default function ReleaseDisplay({
                   data-test={`release-files-accordion-${release.semver}`}
                 >
                   <AccordionSummary sx={{ px: 0 }} expandIcon={<ArrowDropDown />}>
-                    <Typography fontWeight='bold'>{`${expanded === 'filesPanel' ? 'Hide' : 'Show'} ${release.files.length} files`}</Typography>
+                    <Typography fontWeight='bold'>{`${expanded === 'filesPanel' ? 'Hide' : 'Show'} ${plural(release.files.length, 'file')}`}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     {release.files.map((file) => (
@@ -169,7 +170,7 @@ export default function ReleaseDisplay({
               {release.images.length > 0 && (
                 <Accordion expanded={expanded === 'imagesPanel'} onChange={handleAccordionChange('imagesPanel')}>
                   <AccordionSummary sx={{ px: 0 }} expandIcon={<ArrowDropDown />}>
-                    <Typography fontWeight='bold'>{`${expanded === 'imagesPanel' ? 'Hide' : 'Show'} ${release.files.length} Docker images`}</Typography>
+                    <Typography fontWeight='bold'>{`${expanded === 'imagesPanel' ? 'Hide' : 'Show'} ${plural(release.images.length, 'Docker image')}`}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     {release.images.map((image) => (
