@@ -44,7 +44,7 @@ export default function EntryList({
   }, [])
 
   useEffect(() => {
-    if (entries && ref && ref.current) {
+    if (entries && ref) {
       ref.current?.resetAfterIndex(0)
     }
   }, [entries, ref])
