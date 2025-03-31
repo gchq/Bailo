@@ -1,11 +1,12 @@
-import { Card, Container, Stack } from '@mui/material'
+import { ExpandLess, ExpandMore } from '@mui/icons-material'
+import { Box, Button, Card, Container, Menu, Stack } from '@mui/material'
 import { useGetModelFiles } from 'actions/model'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import FileDownload from 'src/entry/model/releases/FileDownload'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { EntryInterface, FileInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 
 type FilesProps = {
@@ -14,13 +15,28 @@ type FilesProps = {
 
 export default function Files({ model }: FilesProps) {
   const { entryFiles, isEntryFilesLoading, isEntryFilesError } = useGetModelFiles(model.id)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const menuOpen = Boolean(anchorEl)
+  const orderByValue = 'name'
+
+  const sortByGenericValueDescending = (a: FileInterface, b: FileInterface) => {
+    return a[orderByValue] < b[orderByValue] ? -1 : 1
+  }
+
+  function handleMenuButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuButtonClose = () => {
+    setAnchorEl(null)
+  }
 
   const sortedEntryFiles = useMemo(() => [...entryFiles].sort(sortByCreatedAtDescending), [entryFiles])
 
   const entryFilesList = useMemo(
     () =>
       entryFiles.length ? (
-        sortedEntryFiles.map((file) => (
+        sortedEntryFiles.sort(sortByGenericValueDescending).map((file) => (
           <Card key={file._id} sx={{ width: '100%' }}>
             <Stack spacing={1} p={2}>
               <FileDownload showAssociatedReleases file={file} modelId={model.id} />
@@ -44,8 +60,29 @@ export default function Files({ model }: FilesProps) {
   return (
     <>
       <Container sx={{ my: 2 }}>
-        <Stack direction={{ xs: 'column' }} spacing={2} justifyContent='center' alignItems='center'>
-          {entryFilesList}
+        <Stack spacing={2}>
+          <Box display='flex'>
+            <Box ml='auto'>
+              <Button
+                endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+                data-test='openEntryOverviewActions'
+                variant='text'
+                onClick={handleMenuButtonClick}
+              >
+                Order By
+              </Button>
+              <Menu
+                open={menuOpen}
+                anchorEl={anchorEl}
+                onClick={() => {
+                  handleMenuButtonClose()
+                }}
+              ></Menu>
+            </Box>
+          </Box>
+          <Stack direction={{ xs: 'column' }} spacing={2} justifyContent='center' alignItems='center'>
+            {entryFilesList}
+          </Stack>
         </Stack>
       </Container>
     </>
