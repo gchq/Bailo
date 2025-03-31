@@ -63,9 +63,7 @@ export default function EntryList({
     />
   )
 
-  const getItemSize = (index: number) => {
-    return columnWidths[index]
-  }
+  const getItemSize = (index: number) => columnWidths[index]
 
   if (entries.length === 0) {
     return (
