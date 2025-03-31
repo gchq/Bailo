@@ -1,6 +1,6 @@
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
-import { CSSProperties, useLayoutEffect, useMemo, useState } from 'react'
+import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { VariableSizeList } from 'react-window'
 import EmptyBlob from 'src/common/EmptyBlob'
 import EntryListRow from 'src/marketplace/EntryListRow'
@@ -19,10 +19,8 @@ interface RowProps {
   style: CSSProperties
 }
 
-interface RowProps {
-  data: EntrySearchResult[]
-  index: number
-  style: CSSProperties
+type ListRef = {
+  resetAfterIndex: (index: number, shouldForceUpdate?: boolean) => void
 }
 
 export default function EntryList({
@@ -34,6 +32,7 @@ export default function EntryList({
   const [windowHeight, setWindowHeight] = useState(0)
 
   const theme = useTheme()
+  const ref = useRef<ListRef>(null)
 
   useLayoutEffect(() => {
     function updateWindowHeight() {
@@ -43,6 +42,12 @@ export default function EntryList({
     updateWindowHeight()
     return () => window.removeEventListener('resize', updateWindowHeight)
   }, [])
+
+  useEffect(() => {
+    if (entries && ref) {
+      ref.current?.resetAfterIndex(0)
+    }
+  }, [entries, ref])
 
   const columnWidths = useMemo(() => entries.map((entry) => (entry.tags.length === 0 ? 100 : 140)), [entries])
 
@@ -73,6 +78,7 @@ export default function EntryList({
   return (
     <>
       <VariableSizeList
+        ref={ref}
         height={windowHeight - 230}
         itemCount={entries.length}
         itemData={entries}
