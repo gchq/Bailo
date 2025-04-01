@@ -1,5 +1,5 @@
-import { ExpandLess, ExpandMore } from '@mui/icons-material'
-import { Box, Button, Card, Container, Menu, Stack } from '@mui/material'
+import { Abc, ArrowDownward, ArrowUpward, CalendarMonth, ExpandLess, ExpandMore } from '@mui/icons-material'
+import { Box, Button, Card, Container, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
 import { useGetModelFiles } from 'actions/model'
 import { useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -17,11 +17,19 @@ export default function Files({ model }: FilesProps) {
   const { entryFiles, isEntryFilesLoading, isEntryFilesError } = useGetModelFiles(model.id)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
-  const orderByValue = 'name'
+  const [orderByValue, setOrderByValue] = useState('createdAt')
+  const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
+  const [ASCorDESC, setASCorDESC] = useState('DESC')
 
-  const sortByGenericValueDescending = (a: FileInterface, b: FileInterface) => {
-    return a[orderByValue] < b[orderByValue] ? -1 : 1
-  }
+  const sortFilesByValue = useMemo(
+    () => (a: FileInterface, b: FileInterface) => {
+      if (ASCorDESC === 'DESC') {
+        return a[orderByValue] > b[orderByValue] ? -1 : 1
+      }
+      return a[orderByValue] < b[orderByValue] ? -1 : 1
+    },
+    [ASCorDESC, orderByValue],
+  )
 
   function handleMenuButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
@@ -36,7 +44,7 @@ export default function Files({ model }: FilesProps) {
   const entryFilesList = useMemo(
     () =>
       entryFiles.length ? (
-        sortedEntryFiles.sort(sortByGenericValueDescending).map((file) => (
+        sortedEntryFiles.sort(sortFilesByValue).map((file) => (
           <Card key={file._id} sx={{ width: '100%' }}>
             <Stack spacing={1} p={2}>
               <FileDownload
@@ -50,7 +58,7 @@ export default function Files({ model }: FilesProps) {
       ) : (
         <EmptyBlob text={`No files found for model ${model.name}`} />
       ),
-    [entryFiles.length, model.id, model.name, sortedEntryFiles],
+    [entryFiles.length, model.id, model.name, sortFilesByValue, sortedEntryFiles],
   )
 
   if (isEntryFilesError) {
@@ -67,21 +75,64 @@ export default function Files({ model }: FilesProps) {
         <Stack spacing={2}>
           <Box display='flex'>
             <Box ml='auto'>
-              <Button
-                endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
-                data-test='openEntryOverviewActions'
-                variant='text'
-                onClick={handleMenuButtonClick}
-              >
-                Order By
-              </Button>
+              <Stack direction={'row'} divider={<Divider orientation='vertical' />}>
+                <Button
+                  sx={{ minWidth: '160px' }}
+                  variant='text'
+                  onClick={handleMenuButtonClick}
+                  endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+                >
+                  {orderByButtonTitle}
+                </Button>
+                <Button
+                  sx={{ padding: 0.5, minWidth: '72px' }}
+                  variant='outlined'
+                  onClick={() => setASCorDESC(ASCorDESC === 'DESC' ? 'ASC' : 'DESC')}
+                >
+                  {ASCorDESC === 'ASC' ? <ArrowUpward /> : <ArrowDownward />}
+                  {ASCorDESC}
+                </Button>
+              </Stack>
               <Menu
                 open={menuOpen}
+                slotProps={{ list: { dense: true } }}
                 anchorEl={anchorEl}
-                onClick={() => {
-                  handleMenuButtonClose()
-                }}
-              ></Menu>
+                onClose={handleMenuButtonClose}
+              >
+                <MenuItem
+                  onClick={() => {
+                    setOrderByValue('name')
+                    setOrderByButtonTitle('Alphabetical')
+                  }}
+                >
+                  <ListItemIcon>
+                    <Abc color='primary' />
+                  </ListItemIcon>
+                  <ListItemText>Alphabetical</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setOrderByValue('createdAt')
+                    setOrderByButtonTitle('Date uploaded')
+                  }}
+                >
+                  <ListItemIcon>
+                    <CalendarMonth color='primary' />
+                  </ListItemIcon>
+                  <ListItemText>Date uploaded</ListItemText>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setOrderByValue('updatedAt')
+                    setOrderByButtonTitle('Date updated')
+                  }}
+                >
+                  <ListItemIcon>
+                    <CalendarMonth color='primary' />
+                  </ListItemIcon>
+                  <ListItemText>Date updated</ListItemText>
+                </MenuItem>
+              </Menu>
             </Box>
           </Box>
           <Stack direction={{ xs: 'column' }} spacing={2} justifyContent='center' alignItems='center'>
