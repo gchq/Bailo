@@ -34,7 +34,7 @@
     "@uiw/react-markdown-preview": "^5.1.2",
     "@uiw/react-md-editor": "^4.0.4",
     "@vercel/otel": "^1.10.4",
-    "axios": "^1.8.3",
+    "axios": "^1.8.4",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "http-status-codes": "^2.3.0",
