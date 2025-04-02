@@ -1,8 +1,9 @@
 import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
+import { postFileForModelId } from 'actions/file'
 import { useGetModel } from 'actions/model'
-import { CreateReleaseParams, postRelease, postSimpleFileForRelease } from 'actions/release'
+import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
@@ -108,7 +109,7 @@ export default function NewRelease() {
         }
 
         try {
-          const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
+          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata)
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
