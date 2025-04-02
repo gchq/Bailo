@@ -84,6 +84,12 @@ class Release:
         :param client: A client object used to interact with Bailo
         :param model_id: A Unique Model ID
         :param version: A semantic version of a model release
+        :param notes: Notes on release
+        :param model_card_version: Model card version, defaults to None
+        :param files: Files for release, defaults to None
+        :param images: Images for release, defaults to None
+        :param minor: Signifies a minor release, defaults to False
+        :param draft: Signifies a draft release, defaults to False
         """
         if files is None:
             files = []
@@ -213,9 +219,9 @@ class Release:
     ):
         """Writes all files to disk given a local directory.
 
+        :param path: Local directory to write files to
         :param include: List or string of fnmatch statements for file names to include, defaults to None
         :param exclude: List or string of fnmatch statements for file names to exclude, defaults to None
-        :param path: Local directory to write files to
         :raises BailoException: If the release has no files assigned to it
         ..note:: Fnmatch statements support Unix shell-style wildcards.
         """
