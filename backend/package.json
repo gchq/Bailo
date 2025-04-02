@@ -33,7 +33,7 @@
     "app-root-path": "^3.1.0",
     "archiver": "^7.0.1",
     "bcryptjs": "^3.0.2",
-    "body-parser": "^1.20.3",
+    "body-parser": "^2.2.0",
     "bunyan": "^1.8.15",
     "chalk": "^5.4.1",
     "clamscan": "^2.4.0",
