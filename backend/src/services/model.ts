@@ -155,10 +155,8 @@ export async function searchModels(
     } else {
       query.collaborators = {
         $elemMatch: {
-          ...(filters.length > 0 && {
-            roles: { $elemMatch: { $in: filters } },
-            entity: toEntity(EntityKind.USER, user.dn),
-          }),
+          roles: { $elemMatch: { $in: filters } },
+          entity: { $in: await authentication.getEntities(user) },
         },
       }
     }
