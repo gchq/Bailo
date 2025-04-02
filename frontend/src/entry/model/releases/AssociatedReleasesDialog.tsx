@@ -11,42 +11,33 @@ import {
   Typography,
 } from '@mui/material'
 import { useGetModel } from 'actions/model'
-import { useGetReleasesForModelId } from 'actions/release'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { FileInterface, isFileInterface } from 'types/types'
-import { sortByCreatedAtDescending } from 'utils/arrayUtils'
+import { FileInterface, isFileInterface, ReleaseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 
 type AssociatedReleasesDialogProps = {
   modelId: string
   file: FileInterface | File
+  sortedAssociatedReleases: Array<ReleaseInterface>
+  latestRelease: string
   open: boolean
   onClose: () => void
 }
 
-export default function AssociatedReleasesDialog({ modelId, file, open, onClose }: AssociatedReleasesDialogProps) {
-  const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(modelId)
+export default function AssociatedReleasesDialog({
+  modelId,
+  file,
+  sortedAssociatedReleases,
+  latestRelease,
+  open,
+  onClose,
+}: AssociatedReleasesDialogProps) {
   const { model, isModelLoading, isModelError } = useGetModel(modelId, 'model')
-  const [latestRelease, setLatestRelease] = useState('')
-
-  const sortedAssociatedReleases = useMemo(
-    () =>
-      releases
-        .filter((release) => isFileInterface(file) && release.fileIds.includes(file._id))
-        .sort(sortByCreatedAtDescending),
-    [file, releases],
-  )
-
-  useEffect(() => {
-    if (model && releases.length > 0 && sortedAssociatedReleases.length > 0) {
-      setLatestRelease(sortedAssociatedReleases[0].semver)
-    }
-  }, [model, releases, sortedAssociatedReleases])
 
   const associatedReleasesDisplay = useMemo(
     () =>
@@ -85,10 +76,6 @@ export default function AssociatedReleasesDialog({ modelId, file, open, onClose 
     [file, latestRelease, model, sortedAssociatedReleases],
   )
 
-  if (isReleasesError) {
-    return <MessageAlert message={isReleasesError.info.message} severity='error' />
-  }
-
   if (isModelError) {
     return <MessageAlert message={isModelError.info.message} severity='error' />
   }
@@ -96,7 +83,7 @@ export default function AssociatedReleasesDialog({ modelId, file, open, onClose 
   return (
     <Dialog fullWidth open={open} onClose={onClose} maxWidth='sm' slots={{ transition: Transition }}>
       <DialogTitle>Associated Releases</DialogTitle>
-      <DialogContent>{isModelLoading || isReleasesLoading ? <Loading /> : associatedReleasesDisplay}</DialogContent>
+      <DialogContent>{isModelLoading ? <Loading /> : associatedReleasesDisplay}</DialogContent>
       <DialogActions>
         <Button variant='contained' onClick={onClose}>
           Close

@@ -23,7 +23,12 @@ export default function Files({ model }: FilesProps) {
         sortedEntryFiles.map((file) => (
           <Card key={file._id} sx={{ width: '100%' }}>
             <Stack spacing={1} p={2}>
-              <FileDownload showAssociatedReleases file={file} modelId={model.id} mutator={mutateEntryFiles} />
+              <FileDownload
+                showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
+                file={file}
+                modelId={model.id}
+                mutator={mutateEntryFiles}
+              />
             </Stack>
           </Card>
         ))

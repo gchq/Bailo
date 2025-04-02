@@ -59,6 +59,13 @@ Connect via the local endpoint: `http://127.0.0.1:8000`
 
 View the swagger docs: `http://127.0.0.1:8000/docs`
 
+Alternatively, build and run [Dockerfile](./Dockerfile).
+
+```bash
+docker build -t modelscan_rest_api:latest -f ./Dockerfile .
+docker run -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
+```
+
 ## Development
 
 ### Install dev packages

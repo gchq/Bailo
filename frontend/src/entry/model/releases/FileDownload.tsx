@@ -1,16 +1,33 @@
-import { Done, Error, InfoOutlined, Refresh, Warning } from '@mui/icons-material'
-import { Chip, Divider, IconButton, Link, Popover, Stack, Tooltip, Typography } from '@mui/material'
+import { Delete, Done, Error, Info, MoreVert, Refresh, Warning } from '@mui/icons-material'
+import {
+  Chip,
+  Divider,
+  IconButton,
+  Link,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Popover,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
+import { deleteModelFile, useGetModelFiles } from 'actions/model'
+import { useGetReleasesForModelId } from 'actions/release'
+import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { Fragment, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
-import UserDisplay from 'src/common/UserDisplay'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
 import { FileInterface, isFileInterface, ReleaseInterface, ScanState } from 'types/types'
-import { formatDateString, formatDateTimeString } from 'utils/dateUtils'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
+import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
@@ -25,7 +42,11 @@ type MutateFiles = KeyedMutator<{
 type FileDownloadProps = {
   modelId: string
   file: FileInterface | File
-  showAssociatedReleases?: boolean
+  showMenuItems?: {
+    associatedReleases?: boolean
+    deleteFile?: boolean
+    rescanFile?: boolean
+  }
   mutator?: MutateReleases | MutateFiles
 }
 
@@ -38,11 +59,54 @@ interface ChipDetails {
 export default function FileDownload({
   modelId,
   file,
-  showAssociatedReleases = false,
+  showMenuItems = { associatedReleases: false, deleteFile: false, rescanFile: false },
   mutator = undefined,
 }: FileDownloadProps) {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
+  const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
+  const [deleteFileOpen, setDeleteFileOpen] = useState(false)
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
+  const { mutateEntryFiles } = useGetModelFiles(modelId)
+  const router = useRouter()
+
+  const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(modelId)
+  const [latestRelease, setLatestRelease] = useState('')
+
+  const sortedAssociatedReleases = useMemo(
+    () =>
+      releases
+        .filter((release) => isFileInterface(file) && release.fileIds.includes(file._id))
+        .sort(sortByCreatedAtDescending),
+    [file, releases],
+  )
+
+  useEffect(() => {
+    if (releases.length > 0 && sortedAssociatedReleases.length > 0) {
+      setLatestRelease(releases[0].semver)
+    }
+  }, [releases, setLatestRelease, sortedAssociatedReleases])
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (isFileInterface(file)) {
+      const res = await deleteModelFile(modelId, file._id)
+      if (!res.ok) {
+        setDeleteErrorMessage(await getErrorMessage(res))
+      } else {
+        mutateEntryFiles()
+        setDeleteFileOpen(false)
+        router.push(`/model/${modelId}?tab=files`)
+      }
+    }
+  }, [file, modelId, router, mutateEntryFiles])
+
+  function handleFileMoreButtonClick(event: MouseEvent<HTMLButtonElement>) {
+    setAnchorElMore(event.currentTarget)
+  }
+
+  const handleFileMoreButtonClose = () => {
+    setAnchorElMore(null)
+  }
 
   const [chipDisplay, setChipDisplay] = useState<ChipDetails | undefined>(undefined)
 
@@ -77,7 +141,8 @@ export default function FileDownload({
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
 
-  const open = Boolean(anchorEl)
+  const openMore = Boolean(anchorElMore)
+  const openScan = Boolean(anchorElScan)
 
   const threatsFound = (file: FileInterface) => {
     if (file.avScan === undefined) {
@@ -110,13 +175,14 @@ export default function FileDownload({
 
   const rerunFileScanButton = useMemo(() => {
     return (
-      <Tooltip title='Rerun file scan'>
-        <IconButton color='primary' onClick={handleRerunFileScanOnClick}>
-          <Refresh />
-        </IconButton>
-      </Tooltip>
+      <MenuItem hidden={!showMenuItems.rescanFile} onClick={handleRerunFileScanOnClick}>
+        <ListItemIcon>
+          <Refresh color='primary' fontSize='small' />
+        </ListItemIcon>
+        <ListItemText>Rerun File Scan</ListItemText>
+      </MenuItem>
     )
-  }, [handleRerunFileScanOnClick])
+  }, [handleRerunFileScanOnClick, showMenuItems.rescanFile])
 
   const avChip = useMemo(() => {
     if (
@@ -135,13 +201,13 @@ export default function FileDownload({
           color={chipDisplay ? chipDisplay.colour : 'warning'}
           icon={chipDisplay ? chipDisplay.icon : <Warning />}
           size='small'
-          onClick={(e) => setAnchorEl(e.currentTarget)}
+          onClick={(e) => setAnchorElScan(e.currentTarget)}
           label={chipDisplay ? chipDisplay.label : 'Virus scan results could not be found'}
         />
         <Popover
-          open={open}
-          anchorEl={anchorEl}
-          onClose={() => setAnchorEl(null)}
+          open={openScan}
+          anchorEl={anchorElScan}
+          onClose={() => setAnchorElScan(null)}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'center',
@@ -189,13 +255,25 @@ export default function FileDownload({
         </Popover>
       </>
     )
-  }, [anchorEl, chipDisplay, file, open])
+  }, [anchorElScan, chipDisplay, file, openScan])
+
+  if (isFileInterface(file) && !file.complete) {
+    return (
+      <Typography>
+        <span style={{ fontWeight: 'bold' }}>{file.name}</span> is not currently available
+      </Typography>
+    )
+  }
 
   if (isScannersError) {
     return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
 
-  if (isScannersLoading) {
+  if (isReleasesError) {
+    return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  }
+
+  if (isScannersLoading || isReleasesLoading) {
     return <Loading />
   }
 
@@ -204,7 +282,7 @@ export default function FileDownload({
       {isFileInterface(file) && (
         <Stack>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Stack alignItems={{ sm: 'center' }}>
+            <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems={{ sm: 'center', md: 'flex-end' }}>
               <Tooltip title={file.name}>
                 <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
                   <Typography textOverflow='ellipsis' overflow='hidden'>
@@ -212,35 +290,60 @@ export default function FileDownload({
                   </Typography>
                 </Link>
               </Tooltip>
+              <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
             </Stack>
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
-              {showAssociatedReleases && (
-                <Chip
-                  icon={<InfoOutlined />}
-                  color='primary'
-                  size='small'
-                  onClick={() => setAssociatedReleasesOpen(true)}
-                  label='View Associated Releases'
-                />
-              )}
               {scanners.length > 0 && (
-                <Stack direction='row' alignItems='center'>
+                <Stack direction='row' spacing={1} alignItems='center'>
                   {avChip}
-                  {rerunFileScanButton}
-                  <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
                 </Stack>
               )}
+              <Stack>
+                <IconButton onClick={handleFileMoreButtonClick}>
+                  <MoreVert color='primary' />
+                </IconButton>
+                <Menu
+                  slotProps={{ list: { dense: true } }}
+                  anchorEl={anchorElMore}
+                  open={openMore}
+                  onClose={handleFileMoreButtonClose}
+                >
+                  {showMenuItems.associatedReleases && (
+                    <MenuItem
+                      onClick={() => {
+                        handleFileMoreButtonClose()
+                        setAssociatedReleasesOpen(true)
+                      }}
+                    >
+                      <ListItemIcon>
+                        <Info color='primary' fontSize='small' />
+                      </ListItemIcon>
+                      <ListItemText>Associated Releases</ListItemText>
+                    </MenuItem>
+                  )}
+                  {showMenuItems.deleteFile && (
+                    <MenuItem
+                      onClick={() => {
+                        handleFileMoreButtonClose()
+                        setDeleteFileOpen(true)
+                      }}
+                    >
+                      <ListItemIcon>
+                        <Delete color='primary' fontSize='small' />
+                      </ListItemIcon>
+                      <ListItemText>Delete File</ListItemText>
+                    </MenuItem>
+                  )}
+                  {showMenuItems.rescanFile && rerunFileScanButton}
+                </Menu>
+              </Stack>
             </Stack>
           </Stack>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Stack direction='row'>
-              <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' sx={{ mb: 2 }}>
-                Added by {<UserDisplay dn={file.createdAt.toString()} />} on
-                <Typography textOverflow='ellipsis' overflow='hidden' variant='caption' fontWeight='bold'>
-                  {` ${formatDateString(file.createdAt.toString())}`}
-                </Typography>
-              </Typography>
-            </Stack>
+            <Typography variant='caption'>
+              Uploaded on
+              <span style={{ fontWeight: 'bold' }}>{` ${formatDateTimeString(file.createdAt.toString())}`}</span>
+            </Typography>
           </Stack>
         </Stack>
       )}
@@ -249,6 +352,16 @@ export default function FileDownload({
         open={associatedReleasesOpen}
         onClose={() => setAssociatedReleasesOpen(false)}
         file={file}
+        latestRelease={latestRelease}
+        sortedAssociatedReleases={sortedAssociatedReleases}
+      />
+      <ConfirmationDialogue
+        open={deleteFileOpen}
+        title='Delete Release'
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteFileOpen(false)}
+        errorMessage={deleteErrorMessage}
+        dialogMessage={'Are you sure you want to delete this file?'}
       />
     </>
   )

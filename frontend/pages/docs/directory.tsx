@@ -69,6 +69,7 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Migrations', slug: 'administration/migrations', header: true },
   { title: 'Bailo v0.4', slug: 'administration/migrations/bailo-0.4' },
   { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
+  { title: 'DataBase Scripts', slug: 'administration/migrations/scripts' },
 ]
 
 export interface DirectoryTree {

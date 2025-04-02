@@ -88,7 +88,30 @@ exports[`services > file > uploadFile > success 1`] = `
       "calls": [
         [
           {
-            "fileId": [MockFunction spy],
+            "fileId": "function(...s) {
+    let r = T(t);
+    r.called = !0, r.callCount++, r.calls.push(s);
+    let S = r.next.shift();
+    if (S) {
+      r.results.push(S);
+      let [o, g] = S;
+      if (o === "ok")
+        return g;
+      throw g;
+    }
+    let p, c = "ok", a = r.results.length;
+    if (r.impl)
+      try {
+        new.target ? p = Reflect.construct(r.impl, s, new.target) : p = r.impl.apply(this, s), c = "ok";
+      } catch (o) {
+        throw p = o, c = "error", r.results.push([c, o]), o;
+      }
+    let R = [c, p];
+    return w(p) && p.then(
+      (o) => r.resolves[a] = ["ok", o],
+      (o) => r.resolves[a] = ["error", o]
+    ), r.results.push(R), p;
+  }",
           },
         ],
       ],
@@ -229,7 +252,30 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
       "calls": [
         [
           {
-            "fileId": [MockFunction spy],
+            "fileId": "function(...s) {
+    let r = T(t);
+    r.called = !0, r.callCount++, r.calls.push(s);
+    let S = r.next.shift();
+    if (S) {
+      r.results.push(S);
+      let [o, g] = S;
+      if (o === "ok")
+        return g;
+      throw g;
+    }
+    let p, c = "ok", a = r.results.length;
+    if (r.impl)
+      try {
+        new.target ? p = Reflect.construct(r.impl, s, new.target) : p = r.impl.apply(this, s), c = "ok";
+      } catch (o) {
+        throw p = o, c = "error", r.results.push([c, o]), o;
+      }
+    let R = [c, p];
+    return w(p) && p.then(
+      (o) => r.resolves[a] = ["ok", o],
+      (o) => r.resolves[a] = ["error", o]
+    ), r.results.push(R), p;
+  }",
           },
         ],
       ],

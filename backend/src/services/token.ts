@@ -91,7 +91,7 @@ export async function findTokenByAccessKey(accessKey: string, opts?: GetTokenOpt
 }
 
 export async function getTokenFromAuthHeader(header: string) {
-  // NOTE: This is a security function.  Care should be taking when editting this function.
+  // NOTE: This is a security function. Care should be taking when editing this function.
   // Any pull requests that alter this MUST be checked out by at least two other people
   // familiar with the codebase.
   const [method, code] = header.split(' ')
