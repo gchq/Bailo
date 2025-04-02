@@ -79,7 +79,7 @@ export default function ReleaseForm({
 
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
-  const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
+  const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
@@ -266,8 +266,17 @@ export default function ReleaseForm({
             )}
           </Stack>
         )}
-        <Stack>
-          {isReadOnly && formData.files.map((file) => <FileDownload key={file.name} file={file} modelId={model.id} />)}
+        <Stack spacing={1}>
+          {isReadOnly &&
+            formData.files.map((file) => (
+              <FileDownload
+                key={file.name}
+                file={file}
+                modelId={model.id}
+                showMenuItems={{ rescanFile: true }}
+                mutator={mutateReleases}
+              />
+            ))}
         </Stack>
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>

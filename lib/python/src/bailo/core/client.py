@@ -405,7 +405,7 @@ class Client:
         :return: JSON response object
         """
         return self.agent.delete(
-            f"{self.url}/v2/model/{model_id}/files/{file_id}",
+            f"{self.url}/v2/model/{model_id}/file/{file_id}",
         ).json()
 
     def get_all_images(

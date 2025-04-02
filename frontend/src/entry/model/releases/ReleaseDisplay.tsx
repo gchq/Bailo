@@ -14,6 +14,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { useGetReleasesForModelId } from 'actions/release'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -55,6 +56,8 @@ export default function ReleaseDisplay({
     modelId: model.id,
     semver: release.semver,
   })
+
+  const { mutateReleases } = useGetReleasesForModelId(model.id)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const {
@@ -162,7 +165,13 @@ export default function ReleaseDisplay({
                   </AccordionSummary>
                   <AccordionDetails>
                     {release.files.map((file) => (
-                      <FileDownload key={file.name} file={file} modelId={model.id} />
+                      <FileDownload
+                        showMenuItems={{ rescanFile: true }}
+                        key={file.name}
+                        file={file}
+                        modelId={model.id}
+                        mutator={mutateReleases}
+                      />
                     ))}
                   </AccordionDetails>
                 </Accordion>
