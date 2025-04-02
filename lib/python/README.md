@@ -42,6 +42,16 @@ A simple Python API Wrapper for Bailo
 ## Key Features
 
 - Uploading and downloading model binaries
+- Managing Models and Releases
+- Managing Datacards
+- Managing Schemas
+- Managing Access Requests
+
+The Bailo Python client aims to programmatically cover Bailo's core functionality by interacting with the endpoints in
+the backend. The functionality covered is that which a Data Scientist, Software Engineer or other similarly technical
+role might be expected to utilise, meaning that it does _not_ have complete coverage of all endpoints, such as those
+relating to the discussion & approval of reviews & access requests. For these interactions, the web frontend is expected
+to be used.
 
 ## Installing
 
@@ -71,7 +81,7 @@ yolo.card_from_schema("minimal-general-v10")
 
 # Create a new release
 my_release = yolo.create_release(version="0.1.0",
-                              notes="Beta")
+                                 notes="Beta")
 
 # Upload a file to the release
 with open("yolo.onnx") as f:
