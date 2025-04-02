@@ -124,6 +124,13 @@ In order to run integration tests make sure Bailo is running on `https://localho
 pytest -m integration
 ```
 
+To run the mlflow tests, make sure that Bailo is running as above and mlflow is running on port 5050 e.g.
+`mlflow server --host 127.0.0.1 --port 5050`:
+
+```bash
+pytest -m mlflow
+```
+
 Run all other tests:
 
 ```bash

@@ -7,12 +7,15 @@ import shutil
 from io import BytesIO
 from typing import Any
 
-from bailo.core.client import Client
-from bailo.core.exceptions import BailoException
-from bailo.core.utils import NO_COLOR
 from semantic_version import Version
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
+
+# isort: split
+
+from bailo.core.client import Client
+from bailo.core.exceptions import BailoException
+from bailo.core.utils import NO_COLOR
 
 BLOCK_SIZE = 1024
 logger = logging.getLogger(__name__)
@@ -311,7 +314,6 @@ class Release:
         self.update()
         if to_close:
             data.close()
-        self.isUploaded = True
         logger.info(
             f"Upload of file %s to version %s of %s complete.",
             name,

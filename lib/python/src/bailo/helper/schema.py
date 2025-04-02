@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, List
+from typing import Any
 
 from bailo.core.client import Client
 from bailo.core.enums import SchemaKind
