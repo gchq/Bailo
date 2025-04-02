@@ -17,10 +17,10 @@ class Entry:
     :param id: A unique ID for the entry
     :param name: Name of the entry
     :param description: Description of the entry
+    :param kind: Represents whether entry type (i.e. Model or Datacard)
     :param visibility: Visibility of model, using ModelVisibility enum (i.e. Public or Private), defaults to None
     :param organisation: Organisation responsible for the model, defaults to None
     :param state: Development readiness of the model, defaults to None
-    :param kind: Represents whether entry type (i.e. Model or Datacard)
     """
 
     def __init__(

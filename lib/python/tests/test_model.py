@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from bailo.core.enums import MinimalSchema
 
 # isort: split
 
@@ -223,12 +224,13 @@ def test_import_model_files_no_run(integration_client, mlflow_model_no_run, requ
 
 @pytest.mark.mlflow
 def test_import_model_no_schema(integration_client, mlflow_model, request):
-    with pytest.raises(BailoException):
-        model = Model.from_mlflow(
-            client=integration_client,
-            mlflow_uri=request.config.mlflow_uri,
-            name=mlflow_model,
-        )
+    model = Model.from_mlflow(
+        client=integration_client,
+        mlflow_uri=request.config.mlflow_uri,
+        name=mlflow_model,
+    )
+
+    assert model.model_card_schema == MinimalSchema.MODEL
 
 
 @pytest.mark.mlflow
