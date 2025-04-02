@@ -2,7 +2,7 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.0.0 - <DATE>
+## 3.0.0 - 02/04/2025
 
 ### Breaking Changes
 
@@ -24,6 +24,7 @@ All dates are formatted dd/mm/yyyy.
   `__init__`, `create` & `from_mlflow`, and `Entry`'s `__init__` & `update` methods.
 - Propagate `team_id` param removal from `Datacard`'s `create`, and `Model`'s `create` & `from_mlflow` methods.
 - Propagate optional `organisation` & `state` returned keys to `Datacard`'s `from_id`, and `Model`'s `from_id` methods.
+- Fix `Client.delete_file` endpoint.
 
 ---
 
