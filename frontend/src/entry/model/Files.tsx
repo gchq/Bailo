@@ -13,7 +13,7 @@ type FilesProps = {
 }
 
 export default function Files({ model }: FilesProps) {
-  const { entryFiles, isEntryFilesLoading, isEntryFilesError } = useGetModelFiles(model.id)
+  const { entryFiles, isEntryFilesLoading, isEntryFilesError, mutateEntryFiles } = useGetModelFiles(model.id)
 
   const sortedEntryFiles = useMemo(() => [...entryFiles].sort(sortByCreatedAtDescending), [entryFiles])
 
@@ -27,6 +27,7 @@ export default function Files({ model }: FilesProps) {
                 showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
                 file={file}
                 modelId={model.id}
+                mutator={mutateEntryFiles}
               />
             </Stack>
           </Card>
@@ -34,7 +35,7 @@ export default function Files({ model }: FilesProps) {
       ) : (
         <EmptyBlob text={`No files found for model ${model.name}`} />
       ),
-    [entryFiles.length, model.id, model.name, sortedEntryFiles],
+    [entryFiles.length, model.id, model.name, sortedEntryFiles, mutateEntryFiles],
   )
 
   if (isEntryFilesError) {
