@@ -7,8 +7,6 @@ import tempfile
 import warnings
 from typing import Any
 
-from mlflow.artifacts import download_artifacts, list_artifacts
-from mlflow.tracking import MlflowClient
 from semantic_version import Version
 
 # isort: split
@@ -204,7 +202,7 @@ class Model(Entry):
         if not ML_FLOW:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
-        mlflow_client = MlflowClient(tracking_uri=mlflow_uri)
+        mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)  # type: ignore[reportPrivateImportUsage]
         mlflow.set_tracking_uri(mlflow_uri)
         filter_string = f"name = '{name}'"
 
@@ -261,10 +259,10 @@ class Model(Entry):
             if artifact_uri is None:
                 raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transferred.")
 
-            if list_artifacts(artifact_uri=artifact_uri) is not None:
+            if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:  # type: ignore[reportPrivateImportUsage]
                 temp_dir = os.path.join(tempfile.gettempdir(), "mlflow_model")
                 mlflow_dir = os.path.join(temp_dir, f"mlflow_{run_id}")
-                download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
+                mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)  # type: ignore[reportPrivateImportUsage]
                 release.upload(mlflow_dir)
         return model
 
@@ -511,7 +509,7 @@ class Experiment:
         if not ML_FLOW:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
-        client = MlflowClient(tracking_uri=tracking_uri)
+        client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)  # type: ignore[reportPrivateImportUsage]
         runs = client.search_runs([experiment_id])
         if len(runs):
             logger.info(
@@ -540,9 +538,9 @@ class Experiment:
             if status != "FINISHED":
                 continue
 
-            if list_artifacts(artifact_uri=artifact_uri) is not None:
+            if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:  # type: ignore[reportPrivateImportUsage]
                 mlflow_dir = os.path.join(self.temp_dir, f"mlflow_{run_id}")
-                download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
+                mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)  # type: ignore[reportPrivateImportUsage]
                 artifacts.append(mlflow_dir)
                 logger.info(
                     f"Successfully downloaded artifacts for MLFlow experiment %s to %s.",
