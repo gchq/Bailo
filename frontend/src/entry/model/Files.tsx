@@ -43,6 +43,17 @@ export default function Files({ model }: FilesProps) {
     [orderByValue],
   )
 
+  const selectedMenuOption = useCallback(
+    (menuOption: string) => {
+      if (menuOption === orderByValue) {
+        return true
+      } else {
+        return false
+      }
+    },
+    [orderByValue],
+  )
+
   function handleMenuButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
   }
@@ -89,7 +100,6 @@ export default function Files({ model }: FilesProps) {
             <Box ml='auto'>
               <Stack direction={'row'}>
                 <Button
-                  //
                   variant='text'
                   onClick={handleMenuButtonClick}
                   endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
@@ -117,6 +127,7 @@ export default function Files({ model }: FilesProps) {
                     setOrderByButtonTitle('Alphabetical')
                   }}
                   sx={{ paddingX: '8px' }}
+                  selected={selectedMenuOption('name')}
                 >
                   <Grid2 container sx={{ minWidth: '200px' }}>
                     <Grid2 size={3}>{checkMenuOption('name')}</Grid2>
@@ -136,6 +147,7 @@ export default function Files({ model }: FilesProps) {
                     setOrderByButtonTitle('Date Uploaded')
                   }}
                   sx={{ paddingX: '8px' }}
+                  selected={selectedMenuOption('createdAt')}
                 >
                   <Grid2 container sx={{ minWidth: '200px' }}>
                     <Grid2 size={3}>{checkMenuOption('createdAt')}</Grid2>
@@ -155,6 +167,7 @@ export default function Files({ model }: FilesProps) {
                     setOrderByButtonTitle('Date updated')
                   }}
                   sx={{ paddingX: '8px' }}
+                  selected={selectedMenuOption('updatedAt')}
                 >
                   <Grid2 container sx={{ minWidth: '200px' }}>
                     <Grid2 size={3}>{checkMenuOption('updatedAt')}</Grid2>
@@ -174,6 +187,7 @@ export default function Files({ model }: FilesProps) {
                     setASCorDESC('ASC')
                   }}
                   sx={{ paddingX: '8px' }}
+                  selected={ASCorDESC === 'ASC'}
                 >
                   <Grid2 container sx={{ minWidth: '200px' }}>
                     <Grid2 size={3}>
@@ -198,6 +212,7 @@ export default function Files({ model }: FilesProps) {
                     setASCorDESC('DESC')
                   }}
                   sx={{ paddingX: '8px' }}
+                  selected={ASCorDESC === 'DESC'}
                 >
                   <Grid2 container sx={{ minWidth: '200px' }}>
                     <Grid2 size={3}>
