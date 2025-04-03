@@ -7,6 +7,7 @@ import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -15,9 +16,7 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
   EntryKind,
-  FailedFileUpload,
   FileInterface,
-  FileUploadProgress,
   FileWithMetadata,
   FlattenedModelImage,
   isFileInterface,
@@ -90,7 +89,6 @@ export default function NewRelease() {
     setErrorMessage('')
     setLoading(true)
 
-    const failedFiles: FailedFileUpload[] = []
     const successfulFiles: SuccessfulFileUpload[] = []
     for (const file of files) {
       if (isFileInterface(file)) {
@@ -119,7 +117,7 @@ export default function NewRelease() {
           }
         } catch (e) {
           if (e instanceof Error) {
-            failedFiles.push({ fileName: file.name, error: e.message })
+            setFailedFileUploads([...failedFileUploads, { fileName: file.name, error: e.message }])
             setCurrentFileUploadProgress(undefined)
           }
         }
@@ -136,11 +134,6 @@ export default function NewRelease() {
       [...successfulFileUploads],
     )
     setSuccessfulFileUploads(updatedSuccessfulFiles)
-
-    if (failedFiles.length > 0) {
-      setFailedFileUploads(failedFiles)
-      return
-    }
 
     const release: CreateReleaseParams = {
       modelId: model.id,

@@ -11,6 +11,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useCallback, useMemo } from 'react'
+import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
@@ -21,7 +22,7 @@ import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FileInterface, FileUploadProgress, FileWithMetadata, FlattenedModelImage } from 'types/types'
+import { EntryInterface, FileInterface, FileWithMetadata, FlattenedModelImage } from 'types/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -96,31 +97,6 @@ export default function ReleaseForm({
       Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
-
-  const fileProgressText = () => {
-    if (!currentFileUploadProgress) {
-      return <Typography>Could not determine file progress</Typography>
-    }
-    if (uploadedFiles && uploadedFiles.length === filesToUploadCount) {
-      return <Typography>All files uploaded successfully.</Typography>
-    }
-    return currentFileUploadProgress.uploadProgress < 100 ? (
-      <Stack direction='row' spacing={1}>
-        <Typography fontWeight='bold'>
-          [File {uploadedFiles ? uploadedFiles.length + 1 : '1'} / {filesToUploadCount}] -
-        </Typography>
-        <Typography fontWeight='bold'>{currentFileUploadProgress.fileName}</Typography>
-        <Typography>uploading {currentFileUploadProgress.uploadProgress}%</Typography>
-      </Stack>
-    ) : (
-      <Stack direction='row' spacing={1}>
-        <Typography fontWeight='bold'>
-          File {uploadedFiles && uploadedFiles.length + 1} / {filesToUploadCount} -{currentFileUploadProgress.fileName}
-        </Typography>
-        <Typography>received - waiting for response from server...</Typography>
-      </Stack>
-    )
-  }
 
   const handleDeleteFile = (fileToDelete: File | FileInterface) => {
     if (formData.files) {
@@ -247,7 +223,11 @@ export default function ReleaseForm({
                   variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
                   value={currentFileUploadProgress.uploadProgress}
                 />
-                {fileProgressText()}
+                <FileUploadProgressDisplay
+                  currentFileUploadProgress={currentFileUploadProgress}
+                  uploadedFiles={uploadedFiles.length}
+                  totalFilesToUpload={filesToUploadCount}
+                />
               </>
             )}
             {formData.files.length > 0 && (
