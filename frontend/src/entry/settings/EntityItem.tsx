@@ -9,24 +9,30 @@ import { toSentenceCase } from 'utils/stringUtils'
 
 type EntityItemProps = {
   entity: CollaboratorEntry
-  accessList: CollaboratorEntry[]
-  onAccessListChange: (value: CollaboratorEntry[]) => void
+  collaborators: CollaboratorEntry[]
+  onCollaboratorsChange: (value: CollaboratorEntry[]) => void
   entryKind: string
   entryRoles: Role[]
 }
 
-export default function EntityItem({ entity, accessList, onAccessListChange, entryKind, entryRoles }: EntityItemProps) {
+export default function EntityItem({
+  entity,
+  collaborators,
+  onCollaboratorsChange,
+  entryKind,
+  entryRoles,
+}: EntityItemProps) {
   const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.id), [entryRoles])
 
   function onRoleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
-    const updatedAccessList = _.cloneDeep(accessList)
+    const updatedAccessList = _.cloneDeep(collaborators)
     const index = updatedAccessList.findIndex((access) => access.entity === entity.entity)
     updatedAccessList[index].roles = newValues
-    onAccessListChange(updatedAccessList)
+    onCollaboratorsChange(updatedAccessList)
   }
 
   function removeEntity() {
-    onAccessListChange(accessList.filter((access) => access.entity !== entity.entity))
+    onCollaboratorsChange(collaborators.filter((access) => access.entity !== entity.entity))
   }
 
   function getRole(roleId: string) {

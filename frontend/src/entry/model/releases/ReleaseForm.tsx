@@ -1,12 +1,23 @@
-import { Checkbox, FormControl, FormControlLabel, LinearProgress, Stack, TextField, Typography } from '@mui/material'
+import {
+  Checkbox,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  LinearProgress,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetReleasesForModelId } from 'actions/release'
-import { ChangeEvent, useMemo } from 'react'
+import { ChangeEvent, useCallback, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
+import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
 import ModelImageList from 'src/entry/model/ModelImageList'
+import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import MessageAlert from 'src/MessageAlert'
@@ -68,7 +79,7 @@ export default function ReleaseForm({
 
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
-  const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
+  const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
@@ -110,6 +121,27 @@ export default function ReleaseForm({
       </Stack>
     )
   }
+
+  const handleDeleteFile = (fileToDelete: File | FileInterface) => {
+    if (formData.files) {
+      const updatedFileList = formData.files.filter((file) => file.name !== fileToDelete.name)
+      onFilesChange(updatedFileList)
+    }
+  }
+
+  const handleMetadataChange = useCallback(
+    (fileWithMetadata: FileWithMetadata) => {
+      const tempFilesWithMetadata = [...filesMetadata]
+      const metadataIndex = filesMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
+      if (metadataIndex === -1) {
+        tempFilesWithMetadata.push(fileWithMetadata)
+      } else {
+        tempFilesWithMetadata[metadataIndex] = fileWithMetadata
+      }
+      onFilesMetadataChange(tempFilesWithMetadata)
+    },
+    [filesMetadata, onFilesMetadataChange],
+  )
 
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
@@ -193,15 +225,22 @@ export default function ReleaseForm({
         <Typography fontWeight='bold'>Files</Typography>
         {!isReadOnly && (
           <Stack spacing={2}>
-            <MultiFileInput
-              fullWidth
-              label='Attach files'
-              files={formData.files}
-              filesMetadata={filesMetadata}
-              readOnly={isReadOnly}
-              onFilesChange={onFilesChange}
-              onFilesMetadataChange={onFilesMetadataChange}
-            />
+            <Stack
+              spacing={2}
+              direction={{ xs: 'column', sm: 'row' }}
+              divider={<Divider flexItem orientation='vertical' />}
+            >
+              <ExistingFileSelector model={model} onChange={onFilesChange} existingReleaseFiles={formData.files} />
+              <MultiFileInput
+                fullWidth
+                label='Attach new files'
+                files={formData.files}
+                filesMetadata={filesMetadata}
+                readOnly={isReadOnly}
+                onFilesChange={onFilesChange}
+                onFilesMetadataChange={onFilesMetadataChange}
+              />
+            </Stack>
             {currentFileUploadProgress && (
               <>
                 <LinearProgress
@@ -211,12 +250,32 @@ export default function ReleaseForm({
                 {fileProgressText()}
               </>
             )}
+            {formData.files.length > 0 && (
+              <Stack spacing={1} mt={1}>
+                {formData.files.map((file) => (
+                  <div key={`${file.name}-${file.size}`}>
+                    <MultiFileInputFileDisplay
+                      file={file}
+                      readOnly={isReadOnly}
+                      onDelete={handleDeleteFile}
+                      onMetadataChange={handleMetadataChange}
+                    />
+                  </div>
+                ))}
+              </Stack>
+            )}
           </Stack>
         )}
         <Stack spacing={1}>
           {isReadOnly &&
             formData.files.map((file) => (
-              <FileDownload key={file.name} file={file} modelId={model.id} showMenuItems={{ rescanFile: true }} />
+              <FileDownload
+                key={file.name}
+                file={file}
+                modelId={model.id}
+                showMenuItems={{ rescanFile: true }}
+                mutator={mutateReleases}
+              />
             ))}
         </Stack>
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}

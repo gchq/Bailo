@@ -131,7 +131,7 @@ export abstract class BaseAuditConnector {
   abstract onUpdateModel(req: Request, model: ModelDoc)
   abstract onSearchModel(req: Request, models: ModelSearchResult[])
 
-  abstract onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
+  abstract onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface)
   abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[])

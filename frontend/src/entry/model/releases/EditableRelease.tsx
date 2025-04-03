@@ -1,8 +1,8 @@
 import { Alert, Box, Divider, Stack, Typography } from '@mui/material'
+import { postFileForModelId } from 'actions/file'
 import { useGetModel } from 'actions/model'
 import {
   deleteRelease,
-  postSimpleFileForRelease,
   putRelease,
   UpdateReleaseParams,
   useGetRelease,
@@ -168,7 +168,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         }
 
         try {
-          const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
+          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata)
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])

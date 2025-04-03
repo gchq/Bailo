@@ -10,7 +10,7 @@ import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessInputProps = {
   value: CollaboratorEntry[]
-  onUpdate: (list: CollaboratorEntry[]) => void
+  onChange: (value: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
   entryRoles: Role[]
 } & (
@@ -24,49 +24,49 @@ type EntryAccessInputProps = {
     }
 )
 
-export default function EntryAccessInput({ value, onUpdate, entryKind, entryRoles }: EntryAccessInputProps) {
+export default function EntryAccessInput({ value, onChange, entryKind, entryRoles }: EntryAccessInputProps) {
   const [open, setOpen] = useState(false)
-  const [accessList, setAccessList] = useState<CollaboratorEntry[]>(value)
+  const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(value)
   const [userListQuery, setUserListQuery] = useState('')
   const [manualEntityInputErrorMessage, setManualEntityInputErrorMessage] = useState('')
 
   const { users, isUsersLoading, isUsersError } = useListUsers(userListQuery)
 
-  const accessListEntities = useMemo(
+  const collaboratorList = useMemo(
     () =>
-      accessList.map((entity) => (
+      collaborators.map((entity) => (
         <EntityItem
           key={entity.entity}
           entity={entity}
-          accessList={accessList}
-          onAccessListChange={setAccessList}
+          collaborators={collaborators}
+          onCollaboratorsChange={setCollaborators}
           entryRoles={entryRoles}
           entryKind={entryKind}
         />
       )),
-    [accessList, entryKind, entryRoles],
+    [collaborators, entryKind, entryRoles],
   )
 
   useEffect(() => {
     if (value) {
-      setAccessList(value)
+      setCollaborators(value)
     }
   }, [value])
 
   useEffect(() => {
-    onUpdate(accessList)
-  }, [accessList, onUpdate])
+    onChange(collaborators)
+  }, [collaborators, onChange])
 
   const onUserChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValue: EntityObject | null) => {
-      if (newValue && !accessList.find(({ entity }) => entity === `${newValue.kind}:${newValue.id}`)) {
-        const updatedAccessList = [...accessList]
-        const newAccess = { entity: `${newValue.kind}:${newValue.id}`, roles: [] }
-        updatedAccessList.push(newAccess)
-        setAccessList(updatedAccessList)
+      if (newValue && !collaborators.find(({ entity }) => entity === `${newValue.kind}:${newValue.id}`)) {
+        const updatedCollaborators = [...collaborators]
+        const newCollaborator = { entity: `${newValue.kind}:${newValue.id}`, roles: [] }
+        updatedCollaborators.push(newCollaborator)
+        setCollaborators(updatedCollaborators)
       }
     },
-    [accessList],
+    [collaborators],
   )
 
   const handleInputChange = useCallback((_event: SyntheticEvent<Element, Event>, value: string) => {
@@ -75,10 +75,10 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
 
   const handleAddEntityManually = (manualEntityName: string) => {
     setManualEntityInputErrorMessage('')
-    if (accessList.find((collaborator) => collaborator.entity === `${EntityKind.USER}:${manualEntityName}`)) {
+    if (collaborators.find((collaborator) => collaborator.entity === `${EntityKind.USER}:${manualEntityName}`)) {
       setManualEntityInputErrorMessage('User has already been added below.')
     } else {
-      setAccessList([...accessList, { entity: `${EntityKind.USER}:${manualEntityName}`, roles: [] }])
+      setCollaborators([...collaborators, { entity: `${EntityKind.USER}:${manualEntityName}`, roles: [] }])
     }
   }
 
@@ -112,7 +112,7 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
         options={users}
         filterOptions={(options) =>
           options.filter(
-            (option) => !accessList.find((collaborator) => collaborator.entity === `${option.kind}:${option.id}`),
+            (option) => !collaborators.find((collaborator) => collaborator.entity === `${option.kind}:${option.id}`),
           )
         }
         loading={isUsersLoading && userListQuery.length >= 3}
@@ -133,7 +133,7 @@ export default function EntryAccessInput({ value, onUpdate, entryKind, entryRole
             <TableCell align='right'>Actions</TableCell>
           </TableRow>
         </TableHead>
-        <TableBody>{accessListEntities}</TableBody>
+        <TableBody>{collaboratorList}</TableBody>
       </Table>
     </Stack>
   )

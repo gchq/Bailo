@@ -29,7 +29,8 @@ class NestedDict(dict):
     def __setitem__(self, keytuple, item):
         # if key is not a tuple then access as normal
         if not isinstance(keytuple, tuple):
-            return super().__setitem__(keytuple, item)
+            super().__setitem__(keytuple, item)
+            return
         d = self
         for index, key in enumerate(keytuple):
             if index != len(keytuple) - 1:
