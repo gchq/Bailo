@@ -1,7 +1,8 @@
-import { Abc, ArrowDownward, ArrowUpward, CalendarMonth, ExpandLess, ExpandMore } from '@mui/icons-material'
+import { CalendarMonth, Check, ExpandLess, ExpandMore, Sort, SortByAlpha } from '@mui/icons-material'
 import { Box, Button, Card, Container, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
+import Grid2 from '@mui/material/Grid2'
 import { useGetModelFiles } from 'actions/model'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import FileDownload from 'src/entry/model/releases/FileDownload'
@@ -24,11 +25,22 @@ export default function Files({ model }: FilesProps) {
   const sortFilesByValue = useMemo(
     () => (a: FileInterface, b: FileInterface) => {
       if (ASCorDESC === 'DESC') {
-        return a[orderByValue] > b[orderByValue] ? -1 : 1
+        return a[orderByValue] < b[orderByValue] ? -1 : 1
       }
-      return a[orderByValue] < b[orderByValue] ? -1 : 1
+      return a[orderByValue] > b[orderByValue] ? -1 : 1
     },
     [ASCorDESC, orderByValue],
+  )
+
+  const checkMenuOption = useCallback(
+    (menuOption: string) => {
+      if (menuOption === orderByValue) {
+        return <Check sx={{ width: '100%' }} color='primary' />
+      } else {
+        return <Check sx={{ width: '100%' }} color='primary' opacity={0} />
+      }
+    },
+    [orderByValue],
   )
 
   function handleMenuButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -75,22 +87,21 @@ export default function Files({ model }: FilesProps) {
         <Stack spacing={2}>
           <Box display='flex'>
             <Box ml='auto'>
-              <Stack direction={'row'} divider={<Divider orientation='vertical' />}>
+              <Stack direction={'row'}>
                 <Button
-                  sx={{ minWidth: '160px' }}
+                  //
                   variant='text'
                   onClick={handleMenuButtonClick}
                   endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
                 >
-                  {orderByButtonTitle}
-                </Button>
-                <Button
-                  sx={{ padding: 0.5, minWidth: '72px' }}
-                  variant='outlined'
-                  onClick={() => setASCorDESC(ASCorDESC === 'DESC' ? 'ASC' : 'DESC')}
-                >
-                  {ASCorDESC === 'ASC' ? <ArrowUpward /> : <ArrowDownward />}
-                  {ASCorDESC}
+                  <Stack sx={{ minWidth: '150px' }} direction={'row'} spacing={2} justifyContent={'space-evenly'}>
+                    {ASCorDESC === 'ASC' ? (
+                      <Sort color='primary' />
+                    ) : (
+                      <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
+                    )}
+                    {orderByButtonTitle}
+                  </Stack>
                 </Button>
               </Stack>
               <Menu
@@ -98,39 +109,113 @@ export default function Files({ model }: FilesProps) {
                 slotProps={{ list: { dense: true } }}
                 anchorEl={anchorEl}
                 onClose={handleMenuButtonClose}
+                sx={{ minWidth: '200px' }}
               >
                 <MenuItem
                   onClick={() => {
                     setOrderByValue('name')
                     setOrderByButtonTitle('Alphabetical')
                   }}
+                  sx={{ paddingX: '8px' }}
                 >
-                  <ListItemIcon>
-                    <Abc color='primary' />
-                  </ListItemIcon>
-                  <ListItemText>Alphabetical</ListItemText>
+                  <Grid2 container sx={{ minWidth: '200px' }}>
+                    <Grid2 size={3}>{checkMenuOption('name')}</Grid2>
+                    <Grid2 size={3}>
+                      <ListItemIcon>
+                        <SortByAlpha color='primary' />
+                      </ListItemIcon>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <ListItemText>Alphabetical</ListItemText>
+                    </Grid2>
+                  </Grid2>
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
                     setOrderByValue('createdAt')
-                    setOrderByButtonTitle('Date uploaded')
+                    setOrderByButtonTitle('Date Uploaded')
                   }}
+                  sx={{ paddingX: '8px' }}
                 >
-                  <ListItemIcon>
-                    <CalendarMonth color='primary' />
-                  </ListItemIcon>
-                  <ListItemText>Date uploaded</ListItemText>
+                  <Grid2 container sx={{ minWidth: '200px' }}>
+                    <Grid2 size={3}>{checkMenuOption('createdAt')}</Grid2>
+                    <Grid2 size={3}>
+                      <ListItemIcon>
+                        <CalendarMonth color='primary' />
+                      </ListItemIcon>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <ListItemText>Date uploaded</ListItemText>
+                    </Grid2>
+                  </Grid2>
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
                     setOrderByValue('updatedAt')
                     setOrderByButtonTitle('Date updated')
                   }}
+                  sx={{ paddingX: '8px' }}
                 >
-                  <ListItemIcon>
-                    <CalendarMonth color='primary' />
-                  </ListItemIcon>
-                  <ListItemText>Date updated</ListItemText>
+                  <Grid2 container sx={{ minWidth: '200px' }}>
+                    <Grid2 size={3}>{checkMenuOption('updatedAt')}</Grid2>
+                    <Grid2 size={3}>
+                      <ListItemIcon>
+                        <CalendarMonth color='primary' />
+                      </ListItemIcon>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <ListItemText>Date updated</ListItemText>
+                    </Grid2>
+                  </Grid2>
+                </MenuItem>
+                <Divider />
+                <MenuItem
+                  onClick={() => {
+                    setASCorDESC('ASC')
+                  }}
+                  sx={{ paddingX: '8px' }}
+                >
+                  <Grid2 container sx={{ minWidth: '200px' }}>
+                    <Grid2 size={3}>
+                      {ASCorDESC === 'ASC' ? (
+                        <Check sx={{ width: '100%' }} color='primary' />
+                      ) : (
+                        <Check sx={{ width: '100%' }} color='primary' opacity={0} />
+                      )}
+                    </Grid2>
+                    <Grid2 size={3}>
+                      <ListItemIcon>
+                        <Sort color='primary' />
+                      </ListItemIcon>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <ListItemText>Ascending</ListItemText>
+                    </Grid2>
+                  </Grid2>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setASCorDESC('DESC')
+                  }}
+                  sx={{ paddingX: '8px' }}
+                >
+                  <Grid2 container sx={{ minWidth: '200px' }}>
+                    <Grid2 size={3}>
+                      {ASCorDESC === 'DESC' ? (
+                        <Check sx={{ width: '100%' }} color='primary' />
+                      ) : (
+                        <Check sx={{ width: '100%' }} color='primary' opacity={0} />
+                      )}
+                    </Grid2>
+                    <Grid2 size={3}>
+                      <ListItemIcon>
+                        <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
+                      </ListItemIcon>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <ListItemText>Descending</ListItemText>
+                    </Grid2>
+                  </Grid2>
                 </MenuItem>
               </Menu>
             </Box>
