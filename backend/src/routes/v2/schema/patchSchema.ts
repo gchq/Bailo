@@ -15,11 +15,14 @@ export const patchSchemaSchema = z.object({
       required_error: 'Must specify schema id as URL parameter',
     }),
   }),
-  body: z.object({
-    active: z.boolean({
-      required_error: 'Must specify is schema is active or not',
-    }),
-  }),
+  body: z
+    .object({
+      active: z.boolean().openapi({ example: true }).optional(),
+      hidden: z.boolean().openapi({ example: false }).optional(),
+      name: z.string().openapi({ example: 'Test Schema v1' }).optional(),
+      description: z.string().openapi({ example: 'This is an example of schema description' }).optional(),
+    })
+    .strict(),
 })
 
 registerPath({

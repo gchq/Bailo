@@ -1,0 +1,14 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > postRequestImport > 200 > ok 1`] = `
+{
+  "mirroredModelId": "abc",
+  "sourceModelId": "vespillo",
+}
+`;
+
+exports[`routes > model > postRequestImport > audit > expected call 1`] = `
+{
+  "id": "abc",
+}
+`;

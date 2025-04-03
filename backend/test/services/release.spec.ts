@@ -2,6 +2,9 @@ import { describe, expect, test, vi } from 'vitest'
 
 import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
+import { SemverObject } from '../../src/models/Release.js'
+import { UserInterface } from '../../src/models/User.js'
+import { listModelImages } from '../../src/services/registry.js'
 import {
   createRelease,
   deleteRelease,
@@ -10,10 +13,14 @@ import {
   getModelReleases,
   getReleaseBySemver,
   getReleasesForExport,
+  isReleaseDoc,
   newReleaseComment,
   removeFileFromReleases,
+  semverObjectToString,
   updateRelease,
+  validateRelease,
 } from '../../src/services/release.js'
+import { NotFound } from '../../src/utils/error.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -192,6 +199,42 @@ describe('services > release', () => {
     expect(releaseModelMocks.save).not.toBeCalled()
   })
 
+  test('createRelease > release with bailo error', async () => {
+    fileMocks.getFileById.mockRejectedValueOnce(NotFound('File not found.'))
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+
+    expect(() =>
+      createRelease(
+        {} as any,
+        {
+          semver: 'v1.0.0',
+          modelCardVersion: 999,
+          fileIds: ['test'],
+        } as any,
+      ),
+    ).rejects.toThrowError(/^Unable to create release as the file cannot be found./)
+
+    expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
+  test('createRelease > release with generic error', async () => {
+    fileMocks.getFileById.mockRejectedValueOnce(Error('File not found.'))
+    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+
+    expect(() =>
+      createRelease(
+        {} as any,
+        {
+          semver: 'v1.0.0',
+          modelCardVersion: 999,
+          fileIds: ['test'],
+        } as any,
+      ),
+    ).rejects.toThrowError(/^File not found./)
+
+    expect(releaseModelMocks.save).not.toBeCalled()
+  })
+
   test('createRelease > release with duplicate file names', async () => {
     fileMocks.getFileById.mockResolvedValue({ modelId: 'test_model_id', name: 'test_file.png' })
     modelMocks.getModelById.mockResolvedValue({
@@ -268,12 +311,12 @@ describe('services > release', () => {
   })
 
   test('createRelease > should throw Bad Req if the user tries to alter a mirrored model card', async () => {
-    vi.mocked(authorisation.release).mockResolvedValueOnce({
-      info: 'Cannot create a release from a mirrored model',
-      success: false,
-      id: '',
+    modelMocks.getModelById.mockResolvedValueOnce({
+      id: 'test_model_id',
+      card: { version: 1 },
+      settings: { mirror: { sourceModelId: '123' } },
     })
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+
     expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
       /^Cannot create a release from a mirrored model/,
     )
@@ -306,14 +349,23 @@ describe('services > release', () => {
   })
 
   test('updateRelease > should throw Bad Req when attempting to update a release on a mirrored model ', async () => {
-    vi.mocked(authorisation.release).mockResolvedValue({
-      info: 'Cannot update a release on a mirrored model.',
-      success: false,
-      id: '',
+    modelMocks.getModelById.mockResolvedValueOnce({
+      id: 'test_model_id',
+      card: { version: 1 },
+      settings: { mirror: { sourceModelId: '123' } },
     })
+
     expect(() => updateRelease({} as any, 'model-id', 'v1.0.0', {} as any)).rejects.toThrowError(
       /^Cannot update a release on a mirrored model./,
     )
+  })
+
+  test('validateRelease > should not call listModelImages', async () => {
+    registryMocks.listModelImages.mockResolvedValueOnce([{ repository: 'mockRep', name: 'image', tags: ['latest'] }])
+
+    await validateRelease({ dn: 'dn' }, {} as any, { semver: '1.1.1', images: [], modelId: 'test-modelId' } as any)
+
+    expect(listModelImages).not.toHaveBeenCalled()
   })
 
   test('newReleaseComment > success', async () => {
@@ -325,16 +377,12 @@ describe('services > release', () => {
   })
 
   test('newReleaseComment > should throw bad request when attempting to create a release comment on a mirrored model', async () => {
-    vi.mocked(authorisation.release).mockResolvedValue({
-      info: 'Cannot create a new comment on a mirrored model.',
-      success: false,
-      id: '',
-    })
     modelMocks.getModelById.mockResolvedValueOnce({
       id: 'test_model_id',
       card: { version: 1 },
       settings: { mirror: { sourceModelId: '123' } },
     })
+
     expect(() => newReleaseComment({} as any, 'model', '1.0.0', 'This is a new comment')).rejects.toThrowError(
       /^Cannot create a new comment on a mirrored model./,
     )
@@ -342,16 +390,48 @@ describe('services > release', () => {
   })
 
   test('getModelReleases > good', async () => {
-    await getModelReleases({} as any, 'modelId')
-
-    vi.mocked(releaseModelMocks.lookup).mockImplementation(() => ({
-      ...releaseModelMocks.lookup,
-    }))
+    vi.mocked(releaseModelMocks.append).mockReturnValueOnce([])
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelId')
 
     expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.sort.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.lookup.mock.calls.at(0)).toMatchSnapshot()
     expect(releaseModelMocks.append.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('semverObjectToString > deals with edge cases', async () => {
+    const semObj: SemverObject = {
+      major: 1,
+      minor: 1,
+      patch: 1,
+      metadata: 'test',
+    }
+    const semObj2: SemverObject = {
+      major: 1,
+      minor: 1,
+      patch: 1,
+    }
+    expect(semverObjectToString(semObj)).toBe('1.1.1-test')
+    expect(semverObjectToString(undefined as any)).toBe('')
+    expect(semverObjectToString(semObj2)).toBe('1.1.1')
+  })
+
+  test('getModelReleases > convertSemverQueryToMongoQuery functions', async () => {
+    vi.mocked(releaseModelMocks.append).mockReturnValueOnce([])
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelId', '2.2.X')
+    expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('getModelReleases > convertSemverQueryToMongoQuery functions with less than', async () => {
+    vi.mocked(releaseModelMocks.append).mockReturnValueOnce([])
+    await getModelReleases({ dn: 'user' } as UserInterface, 'modelID', '<2.2.2')
+    expect(releaseModelMocks.match.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('convertSemverQueryToMongoQuery > convertSemverQueryToMongoQuery handles bad semver', async () => {
+    expect(async () => await getModelReleases({ dn: 'user' } as UserInterface, 'test', '^2.2v.x')).rejects.toThrowError(
+      /^Semver range is invalid./,
+    )
   })
 
   test('getReleaseBySemver > good', async () => {
@@ -394,7 +474,7 @@ describe('services > release', () => {
 
     releaseModelMocks.findOne.mockResolvedValue(mockRelease)
 
-    vi.mocked(authorisation.release).mockImplementation(async (_user, _model, _release, action) => {
+    vi.mocked(authorisation.release).mockImplementation(async (_user, _model, action, _release) => {
       if (action === ReleaseAction.View) return { success: true, id: '' }
       if (action === ReleaseAction.Delete)
         return { success: false, info: 'You do not have permission to delete this release.', id: '' }
@@ -408,21 +488,15 @@ describe('services > release', () => {
     expect(releaseModelMocks.save).not.toBeCalled()
   })
 
-  test('deleteRelease > should throw a bad req when attempting to delete a release from a mirrored model', async () => {
-    const mockRelease = { _id: 'release' }
-
-    releaseModelMocks.findOne.mockResolvedValue(mockRelease)
-
-    vi.mocked(authorisation.release).mockImplementation(async (_user, _model, _release, action) => {
-      if (action === ReleaseAction.View) return { success: true, id: '' }
-      if (action === ReleaseAction.Delete)
-        return { success: false, info: 'Cannot delete a file from a mirrored model.', id: '' }
-
-      return { success: false, info: 'Unknown action.', id: '' }
+  test('deleteRelease > should throw a bad req when attempting to delete a release on a mirrored model', async () => {
+    modelMocks.getModelById.mockResolvedValueOnce({
+      id: 'test_model_id',
+      card: { version: 1 },
+      settings: { mirror: { sourceModelId: '123' } },
     })
 
     expect(() => deleteRelease({} as any, 'test', 'test')).rejects.toThrowError(
-      /^Cannot delete a file from a mirrored model./,
+      /^Cannot delete a release on a mirrored model./,
     )
     expect(releaseModelMocks.save).not.toBeCalled()
   })
@@ -465,17 +539,6 @@ describe('services > release', () => {
   test('removeFileFromReleases > should throw a bad req when attempting to remove a file from a mirrored model', async () => {
     const mockUser: any = { dn: 'test' }
     const mockModel: any = { id: 'test', settings: { mirror: { sourceModelId: '123' } } }
-    const mockRelease = { _id: 'release' }
-
-    vi.mocked(authorisation.releases).mockResolvedValue([
-      {
-        success: false,
-        info: 'Cannot remove a file from a mirrored model.',
-        id: '',
-      },
-    ])
-
-    releaseModelMocks.find.mockResolvedValueOnce([mockRelease, mockRelease])
 
     expect(() => removeFileFromReleases(mockUser, mockModel, '123')).rejects.toThrowError(
       /^Cannot remove a file from a mirrored model./,
@@ -557,5 +620,50 @@ describe('services > release', () => {
     const size = await getAllFileIds('example', ['1', '2', '3'])
 
     expect(size).toStrictEqual([])
+  })
+
+  test('isReleaseDoc > success', async () => {
+    const result = isReleaseDoc({
+      modelId: '',
+      modelCardVersion: 1,
+      semver: '',
+      notes: '',
+      minor: false,
+      draft: false,
+      fileIds: [],
+      images: [],
+      deleted: false,
+      createdBy: '',
+      createdAt: '',
+      updatedAt: '',
+      _id: '',
+    })
+
+    expect(result).toBe(true)
+  })
+
+  test('isReleaseDoc > missing property', async () => {
+    const result = isReleaseDoc({
+      modelId: '',
+      modelCardVersion: 1,
+      notes: '',
+      minor: false,
+      draft: false,
+      fileIds: [],
+      images: [],
+      deleted: false,
+      createdBy: '',
+      createdAt: '',
+      updatedAt: '',
+      _id: '',
+    })
+
+    expect(result).toBe(false)
+  })
+
+  test('isReleaseDoc > wrong type', async () => {
+    const result = isReleaseDoc(null)
+
+    expect(result).toBe(false)
   })
 })

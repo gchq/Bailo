@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
-import { createSchema, findSchemaById, findSchemasByKind } from '../../src/services/schema.js'
+import { createSchema, getSchemaById, searchSchemas } from '../../src/services/schema.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -43,7 +43,7 @@ describe('services > schema', () => {
   const testUser = { dn: 'user' } as UserInterface
 
   test('that all schemas can be retrieved', async () => {
-    const result = await findSchemasByKind('model')
+    const result = await searchSchemas('model')
     expect(result).toEqual(['schema-1', 'schema-2'])
   })
 
@@ -93,11 +93,11 @@ describe('services > schema', () => {
 
   test('that a schema can be retrieved by ID', async () => {
     mockSchema.findOne.mockResolvedValueOnce(testModelSchema)
-    const result = await findSchemaById(testModelSchema.id)
+    const result = await getSchemaById(testModelSchema.id)
     expect(result).toEqual(testModelSchema)
   })
 
   test('that a schema cannot be retrieved by ID when schema does not exist', async () => {
-    expect(() => findSchemaById(testModelSchema.id)).rejects.toThrowError(/^The requested schema was not found/)
+    expect(() => getSchemaById(testModelSchema.id)).rejects.toThrowError(/^The requested schema was not found/)
   })
 })

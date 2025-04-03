@@ -1,7 +1,16 @@
 import qs from 'querystring'
 import useSWR from 'swr'
 
-import { EntryForm, EntryInterface, EntryKindKeys, ModelImage, Role } from '../types/types'
+import {
+  EntryForm,
+  EntryInterface,
+  EntryKindKeys,
+  EntryUserPermissions,
+  FileInterface,
+  ModelImage,
+  ReleaseInterface,
+  Role,
+} from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyModelList = []
@@ -16,6 +25,7 @@ export interface EntrySearchResult {
 
 export interface ModelExportRequest {
   disclaimerAgreement: boolean
+  semvers?: ReleaseInterface['semver'][]
 }
 
 export function useListModels(
@@ -65,7 +75,7 @@ export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
 
   return {
     mutateModel: mutate,
-    model: data ? data.model : undefined,
+    model: data?.model,
     isModelLoading: isLoading,
     isModelError: error,
   }
@@ -125,6 +135,45 @@ export function useGetModelRolesCurrentUser(id?: string) {
   }
 }
 
+export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      permissions: EntryUserPermissions
+    },
+    ErrorInfo
+  >(entryId ? `/api/v2/model/${entryId}/permissions/mine` : null, fetcher)
+
+  return {
+    mutateEntryUserPermissions: mutate,
+    entryUserPermissions: data?.permissions,
+    isEntryUserPermissionsLoading: isLoading,
+    isEntryUserPermissionsError: error,
+  }
+}
+
+export function useGetModelFiles(id?: string) {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      files: Array<FileInterface>
+    },
+    ErrorInfo
+  >(id ? `/api/v2/model/${id}/files` : null, fetcher)
+
+  return {
+    mutateEntryFiles: mutate,
+    entryFiles: data ? data.files : [],
+    isEntryFilesLoading: isLoading,
+    isEntryFilesError: error,
+  }
+}
+
+export function deleteModelFile(modelId: string, fileId: string) {
+  return fetch(`/api/v2/model/${modelId}/file/${fileId}`, {
+    method: `delete`,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
 export async function postModel(form: EntryForm) {
   return fetch(`/api/v2/models`, {
     method: 'post',
@@ -135,7 +184,12 @@ export async function postModel(form: EntryForm) {
 
 export async function patchModel(
   id: string,
-  delta: Partial<Pick<EntryInterface, 'name' | 'description' | 'collaborators' | 'visibility' | 'settings'>>,
+  delta: Partial<
+    Pick<
+      EntryInterface,
+      'name' | 'description' | 'collaborators' | 'visibility' | 'settings' | 'organisation' | 'state'
+    >
+  >,
 ) {
   return fetch(`/api/v2/model/${id}`, {
     method: 'PATCH',
@@ -150,4 +204,20 @@ export async function postModelExportToS3(id: string, modelExport: ModelExportRe
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(modelExport),
   })
+}
+
+export function useGetAllModelReviewRoles() {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      roles: Role[]
+    },
+    ErrorInfo
+  >('/api/v2/roles/review', fetcher)
+
+  return {
+    mutateModelRoles: mutate,
+    modelRoles: data ? data.roles : emptyRolesList,
+    isModelRolesLoading: isLoading,
+    isModelRolesError: error,
+  }
 }

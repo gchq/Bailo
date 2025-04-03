@@ -14,6 +14,7 @@ const audit = {
   onViewFiles: vi.fn(),
   onDeleteFile: vi.fn(),
   onCreateFile: vi.fn(),
+  onUpdateFile: vi.fn(),
 
   onCreateRelease: vi.fn(),
   onViewRelease: vi.fn(),
@@ -44,6 +45,7 @@ const audit = {
   onViewModelImages: vi.fn(),
 
   onCreateS3Export: vi.fn(),
+  onCreateImport: vi.fn(),
 
   onCreateCommentResponse: vi.fn(),
   onViewResponses: vi.fn(),

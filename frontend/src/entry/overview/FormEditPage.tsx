@@ -1,15 +1,19 @@
+import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
 import PersonIcon from '@mui/icons-material/Person'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
-import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { getChangedFields } from '@rjsf/utils'
 import { useGetModel } from 'actions/model'
-import { putModelCard, useGetModelCardRevisions } from 'actions/modelCard'
+import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
+import * as _ from 'lodash-es'
 import React from 'react'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
+import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
@@ -21,19 +25,17 @@ import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryCardKindLabel, EntryInterface, SplitSchemaNoRender } from 'types/types'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
-import { getRequiredRolesText, hasRole } from 'utils/roles'
 type FormEditPageProps = {
   entry: EntryInterface
   readOnly?: boolean
-  currentUserRoles: string[]
 }
-export default function FormEditPage({ entry, currentUserRoles, readOnly = false }: FormEditPageProps) {
+export default function FormEditPage({ entry, readOnly = false }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
+  const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
-  const { mutateModelCardRevisions: mutateEntryCardRevisions } = useGetModelCardRevisions(entry.id)
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
@@ -52,21 +54,22 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
 
   const sendNotification = useNotification()
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
-  const [canEdit, requiredRolesText] = useMemo(() => {
-    const validRoles = ['owner', 'contributor']
-    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
-  }, [currentUserRoles])
   async function onSubmit() {
     if (schema) {
       setErrorMessage('')
       setLoading(true)
+      const oldData = getStepsData(oldSchema, true)
       const data = getStepsData(splitSchema, true)
-      const res = await putModelCard(entry.id, data)
-      if (res.status && res.status < 400) {
+
+      if (getChangedFields(oldData, data).length === 0) {
         setIsEdit(false)
-        mutateEntryCardRevisions()
       } else {
-        setErrorMessage(res.data)
+        const res = await putModelCard(entry.id, data)
+        if (res.status && res.status < 400) {
+          setIsEdit(false)
+        } else {
+          setErrorMessage(res.data)
+        }
       }
       setLoading(false)
     }
@@ -112,12 +115,14 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
       })
     }
   }
+
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
   if (isEntryError) {
     return <MessageAlert message={isEntryError.info.message} severity='error' />
   }
+
   return (
     <>
       {isSchemaLoading && <Loading />}
@@ -140,70 +145,75 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
             </Stack>
           </div>
           {!isEdit && (
-            <>
-              <Button data-test='openEntryOverviewActions' variant='contained' onClick={handleActionButtonClick}>
-                Actions
+            <Stack direction='row' spacing={1}>
+              {!readOnly && (
+                <Restricted
+                  action='editEntryCard'
+                  fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
+                >
+                  <Button
+                    variant='outlined'
+                    onClick={() => {
+                      handleActionButtonClose()
+                      setIsEdit(!isEdit)
+                      setOldSchema(_.cloneDeep(splitSchema))
+                    }}
+                    data-test='editEntryCardButton'
+                    startIcon={<EditIcon fontSize='small' />}
+                  >
+                    {`Edit ${EntryCardKindLabel[entry.kind]}`}
+                  </Button>
+                </Restricted>
+              )}
+              <Button
+                endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+                data-test='openEntryOverviewActions'
+                variant='contained'
+                onClick={handleActionButtonClick}
+              >
+                More
               </Button>
-              <Menu MenuListProps={{ dense: true }} anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
-                <MenuItem>
+              <Menu
+                slotProps={{ list: { dense: true } }}
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleActionButtonClose}
+              >
+                <MenuItem
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setExportDialogOpen(true)
+                  }}
+                >
                   <ListItemIcon>
                     <PictureAsPdfIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setExportDialogOpen(true)
-                    }}
-                  >
-                    Export as PDF
-                  </ListItemText>
+                  <ListItemText>Export as PDF</ListItemText>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setRolesDialogOpen(true)
+                  }}
+                >
                   <ListItemIcon>
                     <PersonIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setRolesDialogOpen(true)
-                    }}
-                  >
-                    View Roles
-                  </ListItemText>
+                  <ListItemText>View Roles</ListItemText>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    handleActionButtonClose()
+                    setHistoryDialogOpen(true)
+                  }}
+                >
                   <ListItemIcon>
                     <HistoryIcon fontSize='small' />
                   </ListItemIcon>
-                  <ListItemText
-                    onClick={() => {
-                      handleActionButtonClose()
-                      setHistoryDialogOpen(true)
-                    }}
-                  >
-                    View History
-                  </ListItemText>
+                  <ListItemText>View History</ListItemText>
                 </MenuItem>
-                {!readOnly && (
-                  <Tooltip title={requiredRolesText}>
-                    <MenuItem disabled={!canEdit}>
-                      <ListItemIcon>
-                        <EditIcon fontSize='small' />
-                      </ListItemIcon>
-                      <ListItemText
-                        onClick={() => {
-                          handleActionButtonClose()
-                          setIsEdit(!isEdit)
-                        }}
-                        data-test='editEntryCardButton'
-                      >
-                        {`Edit ${EntryCardKindLabel[entry.kind]}`}
-                      </ListItemText>
-                    </MenuItem>
-                  </Tooltip>
-                )}
               </Menu>
-            </>
+            </Stack>
           )}
           {isEdit && (
             <SaveAndCancelButtons
@@ -227,7 +237,7 @@ export default function FormEditPage({ entry, currentUserRoles, readOnly = false
           />
         )}
       </Box>
-      <EntryCardHistoryDialog entry={entry} open={historyDialogOpen} setOpen={setHistoryDialogOpen} />
+      {historyDialogOpen && <EntryCardHistoryDialog entry={entry} setOpen={setHistoryDialogOpen} />}
       <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
       <TextInputDialog
         open={jsonUploadDialogOpen}

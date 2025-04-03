@@ -12,7 +12,6 @@ import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKind, UiConfig } from 'types/types'
-import { hasRole } from 'utils/roles'
 import { toTitleCase } from 'utils/stringUtils'
 
 export const SettingsCategory = {
@@ -41,7 +40,7 @@ function isSettingsCategory(
         value === SettingsCategory.DANGER ||
         (value === SettingsCategory.MIRRORED_MODELS &&
           !entry.settings.mirror?.sourceModelId &&
-          !!uiConfig?.modelMirror.enabled)
+          !!uiConfig?.modelMirror.export.enabled)
       )
     case EntryKind.DATA_CARD:
       return value === SettingsCategory.DETAILS || value === SettingsCategory.PERMISSIONS
@@ -52,10 +51,9 @@ function isSettingsCategory(
 
 type SettingsProps = {
   entry: EntryInterface
-  currentUserRoles: string[]
 }
 
-export default function Settings({ entry, currentUserRoles }: SettingsProps) {
+export default function Settings({ entry }: SettingsProps) {
   const router = useRouter()
 
   const { category } = router.query
@@ -63,16 +61,6 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
-
-  useEffect(() => {
-    const validRoles = ['owner']
-    if (!hasRole(currentUserRoles, validRoles)) {
-      const { category: _category, ...filteredQuery } = router.query
-      router.replace({
-        query: { ...filteredQuery, tab: 'overview' },
-      })
-    }
-  }, [currentUserRoles, router])
 
   useEffect(() => {
     if (isSettingsCategory(category, entry, uiConfig)) {
@@ -133,7 +121,7 @@ export default function Settings({ entry, currentUserRoles }: SettingsProps) {
             >
               Templating
             </SimpleListItemButton>
-            {!entry.settings.mirror?.sourceModelId && uiConfig.modelMirror.enabled && (
+            {!entry.settings.mirror?.sourceModelId && uiConfig.modelMirror.export.enabled && (
               <SimpleListItemButton
                 selected={selectedCategory === SettingsCategory.MIRRORED_MODELS}
                 onClick={() => handleListItemClick(SettingsCategory.MIRRORED_MODELS)}

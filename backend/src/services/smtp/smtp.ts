@@ -37,11 +37,11 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
   }
 
   const emailContent = buildEmail(
-    `Release ${release.semver} has been created for model ${release.modelId}`,
+    `Release ${release.semver} for model ${release.modelId} is ready for your review`,
     [
       { title: 'Model ID', data: release.modelId },
-      { title: 'Your Role', data: review.role.toUpperCase() },
       { title: 'Semver', data: release.semver },
+      { title: 'Your Role', data: review.role.toUpperCase() },
       {
         title: 'Created By',
         data: (await authentication.getUserInformation(toEntity('user', release.createdBy))).name || release.createdBy,
@@ -57,6 +57,10 @@ export async function requestReviewForRelease(entity: string, review: ReviewDoc,
   await dispatchEmail(entity, emailContent)
 }
 
+const requestingEntitiesText = (value: number) => {
+  return `${value} ${value === 1 ? `user/group is` : `users/groups are`}`
+}
+
 export async function requestReviewForAccessRequest(
   entity: string,
   review: ReviewDoc,
@@ -68,11 +72,10 @@ export async function requestReviewForAccessRequest(
   }
 
   const emailContent = buildEmail(
-    `Request for Entities '${accessRequest.metadata.overview.entities}' access to the model '${accessRequest.modelId}'`,
+    `${requestingEntitiesText(accessRequest.metadata.overview.entities.length)} requesting access to model ${accessRequest.modelId}`,
     [
       { title: 'Model ID', data: accessRequest.modelId },
       { title: 'Your Role', data: review.role.toUpperCase() },
-      { title: 'Entities Requesting Access', data: accessRequest.metadata.overview.entities.toString() },
       {
         title: 'Created By',
         data:
@@ -188,9 +191,9 @@ async function sendEmail(email: Mail.Options) {
       ...email,
     })
     log.info({ messageId: info.messageId }, 'Email sent')
-  } catch (err) {
+  } catch (error) {
     const content = { to: email.to, subject: email.subject, text: email.text }
-    log.warn(content, `Unable to send email`)
+    log.warn({ content, error }, `Unable to send email`)
     return Promise.reject(`Unable to send email: ${JSON.stringify(content)}`)
   }
 }

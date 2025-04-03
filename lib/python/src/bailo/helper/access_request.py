@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
 import logging
+from typing import Any
 
 from bailo.core.client import Client
 from bailo.core.enums import MinimalSchema
@@ -57,7 +57,11 @@ class AccessRequest:
 
         schema_id = json_access_request["schemaId"]
 
-        logger.info(f"Access request %s for model %s successfully retrieved from server.", access_request_id, model_id)
+        logger.info(
+            f"Access request %s for model %s successfully retrieved from server.",
+            access_request_id,
+            model_id,
+        )
 
         return cls(
             client,
@@ -71,7 +75,11 @@ class AccessRequest:
 
     @classmethod
     def create(
-        cls, client: Client, model_id: str, metadata: Any, schema_id: str = MinimalSchema.ACCESS_REQUEST
+        cls,
+        client: Client,
+        model_id: str,
+        metadata: Any,
+        schema_id: str = MinimalSchema.ACCESS_REQUEST,
     ) -> AccessRequest:
         """Make an access request for the model.
 
@@ -91,7 +99,9 @@ class AccessRequest:
         created_by = access_request_json["createdBy"]
 
         logger.info(
-            f"Access request successfully created on server with ID %s for model %s.", access_request_id, model_id
+            f"Access request successfully created on server with ID %s for model %s.",
+            access_request_id,
+            model_id,
         )
 
         return cls(

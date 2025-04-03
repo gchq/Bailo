@@ -10,6 +10,7 @@ import { ReviewInterface } from '../../models/Review.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
+import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
@@ -54,7 +55,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface) {
     this.checkEventType(AuditInfo.CreateModelCard, req)
-    const event = this.generateEvent(req, { model, version: modelCard.version })
+    const event = this.generateEvent(req, { modelId: model.id, version: modelCard.version })
     req.log.info(event, req.audit.description)
   }
 
@@ -78,7 +79,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   onCreateFile(req: Request, file: FileInterfaceDoc) {
     this.checkEventType(AuditInfo.CreateFile, req)
-    const event = this.generateEvent(req, { id: file._id, modelId: file.modelId })
+    const event = this.generateEvent(req, { id: file._id.toString(), modelId: file.modelId })
     req.log.info(event, req.audit.description)
   }
 
@@ -90,12 +91,18 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   onViewFiles(req: Request, modelId: string, files: FileInterface[]) {
     this.checkEventType(AuditInfo.ViewFiles, req)
-    const event = this.generateEvent(req, { modelId, results: files.map((file) => file._id) })
+    const event = this.generateEvent(req, { modelId, results: files.map((file) => file._id.toString()) })
     req.log.info(event, req.audit.description)
   }
 
   onDeleteFile(req: Request, modelId: string, fileId: string) {
     this.checkEventType(AuditInfo.DeleteFile, req)
+    const event = this.generateEvent(req, { modelId, fileId })
+    req.log.info(event, req.audit.description)
+  }
+
+  onUpdateFile(req: Request, modelId: string, fileId: string) {
+    this.checkEventType(AuditInfo.UpdateFile, req)
     const event = this.generateEvent(req, { modelId, fileId })
     req.log.info(event, req.audit.description)
   }
@@ -337,6 +344,18 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   onCreateS3Export(req: Request, modelId: string, semvers?: string[]) {
     this.checkEventType(AuditInfo.CreateExport, req)
     const event = this.generateEvent(req, { modelId: modelId, semvers })
+    req.log.info(event, req.audit.description)
+  }
+
+  onCreateImport(
+    req: Request,
+    mirroredModel: ModelInterface,
+    sourceModelId: string,
+    exporter: string,
+    importResult: MongoDocumentImportInformation | FileImportInformation,
+  ) {
+    this.checkEventType(AuditInfo.CreateImport, req)
+    const event = this.generateEvent(req, { mirroredModel, sourceModelId, exporter, importResult })
     req.log.info(event, req.audit.description)
   }
 }

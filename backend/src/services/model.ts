@@ -1,19 +1,21 @@
 import { Validator } from 'jsonschema'
+import * as _ from 'lodash-es'
 
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction, ModelActionKeys } from '../connectors/authorisation/actions.js'
+import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
-import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys, GetModelFiltersKeys } from '../types/enums.js'
+import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
+import { EntityKind, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
-import { toEntity } from '../utils/entity.js'
-import { BadReq, Forbidden, NotFound } from '../utils/error.js'
+import { fromEntity, toEntity } from '../utils/entity.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
-import { NotImplemented } from '../utils/result.js'
-import { findSchemaById } from './schema.js'
+import { authResponseToUserPermission } from '../utils/permissions.js'
+import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
   if (model.settings.mirror.sourceModelId) {
@@ -23,12 +25,14 @@ export function checkModelRestriction(model: ModelInterface) {
 
 export type CreateModelParams = Pick<
   ModelInterface,
-  'name' | 'teamId' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
+  'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
 >
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
-  // TODO - Find team by teamId to check it's valid. Throw error if not found.
+  if (modelParams.collaborators) {
+    await validateCollaborators(modelParams.collaborators)
+  }
 
   let collaborators: CollaboratorEntry[] = []
   if (modelParams.collaborators && modelParams.collaborators.length > 0) {
@@ -105,7 +109,7 @@ export async function searchModels(
   user: UserInterface,
   kind: EntryKindKeys,
   libraries: Array<string>,
-  filters: Array<GetModelFiltersKeys>,
+  filters: Array<string>,
   search: string,
   task?: string,
   allowTemplating?: boolean,
@@ -141,22 +145,20 @@ export async function searchModels(
     query['settings.allowTemplating'] = true
   }
 
-  for (const filter of filters) {
-    // This switch statement is here to ensure we always handle all filters in the 'GetModelFilterKeys'
-    // enum.  Eslint will throw an error if we are not exhaustively matching all the enum options,
-    // which makes it far harder to forget.
-    // The 'Unexpected filter' should never be reached, as we have guaranteed type consistency provided
-    // by TypeScript.
-    switch (filter) {
-      case 'mine':
-        query.collaborators = {
-          $elemMatch: {
-            entity: { $in: await authentication.getEntities(user) },
-          },
-        }
-        break
-      default:
-        throw BadReq('Unexpected filter', { filter })
+  if (filters.length > 0) {
+    if (filters.includes('mine')) {
+      query.collaborators = {
+        $elemMatch: {
+          entity: { $in: await authentication.getEntities(user) },
+        },
+      }
+    } else {
+      query.collaborators = {
+        $elemMatch: {
+          roles: { $elemMatch: { $in: filters } },
+          entity: { $in: await authentication.getEntities(user) },
+        },
+      }
     }
   }
 
@@ -283,7 +285,7 @@ export async function updateModelCard(
     throw BadReq(`This model must first be instantiated before it can be `, { modelId })
   }
 
-  const schema = await findSchemaById(model.card.schemaId)
+  const schema = await getSchemaById(model.card.schemaId)
   try {
     new Validator().validate(metadata, schema.jsonSchema, { throwAll: true, required: true })
   } catch (error) {
@@ -300,7 +302,10 @@ export async function updateModelCard(
   return revision
 }
 
-export type UpdateModelParams = Pick<ModelInterface, 'name' | 'teamId' | 'description' | 'visibility'> & {
+export type UpdateModelParams = Pick<
+  ModelInterface,
+  'name' | 'description' | 'visibility' | 'collaborators' | 'state' | 'organisation'
+> & {
   settings: Partial<ModelInterface['settings']>
 }
 export async function updateModel(user: UserInterface, modelId: string, modelDiff: Partial<UpdateModelParams>) {
@@ -314,16 +319,68 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   if (modelDiff.settings?.mirror?.destinationModelId && modelDiff.settings?.mirror?.sourceModelId) {
     throw BadReq('You cannot select both mirror settings simultaneously.')
   }
+  if (modelDiff.collaborators) {
+    await validateCollaborators(modelDiff.collaborators, model.collaborators)
+  }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
   }
 
-  Object.assign(model, modelDiff)
+  _.mergeWith(model, modelDiff, (a, b) => (_.isArray(b) ? b : undefined))
+
+  // Re-check the authorisation after model has updated
+  const recheckAuth = await authorisation.model(user, model, ModelAction.Update)
+  if (!recheckAuth.success) {
+    throw Forbidden(recheckAuth.info, { userDn: user.dn })
+  }
   await model.save()
 
   return model
+}
+
+async function validateCollaborators(
+  updatedCollaborators: CollaboratorEntry[],
+  previousCollaborators: CollaboratorEntry[] = [],
+) {
+  const previousCollaboratorEntities: string[] = previousCollaborators.map((collaborator) => collaborator.entity)
+  const duplicates = updatedCollaborators.reduce<string[]>(
+    (duplicates, currentCollaborator, currentCollaboratorIndex) => {
+      if (
+        updatedCollaborators.find(
+          (collaborator, index) =>
+            index !== currentCollaboratorIndex && collaborator.entity === currentCollaborator.entity,
+        ) &&
+        !duplicates.includes(currentCollaborator.entity)
+      ) {
+        duplicates.push(currentCollaborator.entity)
+      }
+      return duplicates
+    },
+    [],
+  )
+  if (duplicates.length > 0) {
+    throw BadReq(`The following duplicate collaborators have been found: ${duplicates.join(', ')}`)
+  }
+  const newCollaborators = updatedCollaborators.reduce<string[]>((acc, currentCollaborator) => {
+    if (!previousCollaboratorEntities.includes(currentCollaborator.entity)) {
+      acc.push(currentCollaborator.entity)
+    }
+    return acc
+  }, [])
+  await Promise.all(
+    newCollaborators.map(async (collaborator) => {
+      if (collaborator === '') {
+        throw BadReq('Collaborator name must be a valid string')
+      }
+      // TODO we currently only check for users, we should consider how we want to handle groups
+      const { kind } = fromEntity(collaborator)
+      if (kind === EntityKind.USER) {
+        await authentication.getUserInformation(collaborator)
+      }
+    }),
+  )
 }
 
 export async function createModelCardFromSchema(
@@ -344,16 +401,170 @@ export async function createModelCardFromSchema(
   }
 
   // Ensure schema exists
-  await findSchemaById(schemaId)
+  const schema = await getSchemaById(schemaId)
+  if (schema.hidden) {
+    throw BadReq('Cannot create a new Card using a hidden schema.', { schemaId, kind: schema.kind })
+  }
 
   const revision = await _setModelCard(user, modelId, schemaId, 1, {})
   return revision
 }
 
 export async function createModelCardFromTemplate(
-  _user: UserInterface,
-  _modelId: string,
-  _schemaId: string,
+  user: UserInterface,
+  modelId: string,
+  templateId: string,
 ): Promise<ModelCardRevisionDoc> {
-  throw NotImplemented({}, 'This feature is not yet implemented')
+  if (modelId === templateId) {
+    throw BadReq('The model and template ID must be different', { modelId, templateId })
+  }
+  const model = await getModelById(user, modelId)
+  if (model.card?.schemaId) {
+    throw BadReq('This model already has a model card.', { modelId })
+  }
+  checkModelRestriction(model)
+  const template = await getModelById(user, templateId)
+  // Check to make sure user can access the template. We already check for the model auth later on in _setModelCard
+  const templateAuth = await authorisation.model(user, template, ModelAction.View)
+  if (!templateAuth.success) {
+    throw Forbidden(templateAuth.info, { userDn: user.dn, templateId })
+  }
+
+  if (!template.card?.schemaId) {
+    throw BadReq('The template model is missing a model card', { modelId, templateId })
+  }
+  const revision = await _setModelCard(user, modelId, template.card.schemaId, 1, template.card.metadata)
+  return revision
+}
+
+export async function saveImportedModelCard(modelCardRevision: Omit<ModelCardRevisionDoc, '_id'>) {
+  const schema = await getSchemaById(modelCardRevision.schemaId)
+  try {
+    new Validator().validate(modelCardRevision.metadata, schema.jsonSchema, { throwAll: true, required: true })
+  } catch (error) {
+    if (isValidatorResultError(error)) {
+      throw BadReq('Model metadata could not be validated against the schema.', {
+        schemaId: modelCardRevision.schemaId,
+        validationErrors: error.errors,
+      })
+    }
+    throw error
+  }
+
+  const foundModelCardRevision = await ModelCardRevisionModel.findOneAndUpdate(
+    { modelId: modelCardRevision.modelId, version: modelCardRevision.version },
+    modelCardRevision,
+    {
+      upsert: true,
+    },
+  )
+
+  if (!foundModelCardRevision && modelCardRevision.version !== 1) {
+    // This model card did not already exist in Mongo, so it is a new model card. Return it to be audited.
+    // Ignore model cards with a version number of 1 as these will always be blank.
+    return modelCardRevision
+  }
+}
+
+/**
+ * Note that we do not authorise that the user can access the model here.
+ * This function should only be used during the import model card process.
+ * Do not expose this functionality to users.
+ */
+export async function setLatestImportedModelCard(modelId: string) {
+  const latestModelCard = await ModelCardRevisionModel.findOne({ modelId }, undefined, { sort: { version: -1 } })
+  if (!latestModelCard) {
+    throw NotFound('Cannot find latest model card.', { modelId })
+  }
+
+  const updatedModel = await ModelModel.findOneAndUpdate(
+    { id: modelId, 'settings.mirror.sourceModelId': { $exists: true, $ne: '' } },
+    { $set: { card: latestModelCard } },
+    { returnOriginal: false },
+  )
+  if (!updatedModel) {
+    throw InternalError('Unable to set latest model card of mirrored model.', {
+      modelId,
+      version: latestModelCard.version,
+    })
+  }
+
+  return updatedModel
+}
+
+export async function validateMirroredModel(mirroredModelId: string, sourceModelId: string) {
+  const model = await Model.findOne({
+    id: mirroredModelId,
+    'settings.mirror.sourceModelId': { $ne: null },
+  })
+
+  if (!model) {
+    throw NotFound(`The requested mirrored model entry was not found.`, { modelId: mirroredModelId })
+  }
+
+  if (model.settings.mirror.sourceModelId !== sourceModelId) {
+    throw InternalError('The source model ID of the mirrored model does not match the model Id of the imported model', {
+      sourceModelId: model.settings.mirror.sourceModelId,
+      importedModelId: sourceModelId,
+    })
+  }
+
+  return model
+}
+
+export function isModelCardRevisionDoc(data: unknown): data is ModelCardRevisionDoc {
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+  // Hard to debug
+  if (
+    !('modelId' in data) ||
+    !('schemaId' in data) ||
+    !('version' in data) ||
+    !('createdBy' in data) ||
+    !('updatedAt' in data) ||
+    !('createdAt' in data) ||
+    !('_id' in data)
+  ) {
+    return false
+  }
+  return true
+}
+
+export async function getCurrentUserPermissionsByModel(
+  user: UserInterface,
+  modelId: string,
+): Promise<EntryUserPermissions> {
+  const model = await getModelById(user, modelId)
+
+  const editEntryAuth = await authorisation.model(user, model, ModelAction.Update)
+  const editEntryCardAuth = await authorisation.model(user, model, ModelAction.Write)
+  const createReleaseAuth = await authorisation.release(user, model, ReleaseAction.Create)
+  const editReleaseAuth = await authorisation.release(user, model, ReleaseAction.Update)
+  const deleteReleaseAuth = await authorisation.release(user, model, ReleaseAction.Delete)
+  const pushModelImageAuth = await authorisation.image(user, model, {
+    type: 'repository',
+    name: modelId,
+    actions: ['push'],
+  })
+  // Inferencing uses model authorisation
+  const createInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Create)
+  const editInferenceServiceAuth = await authorisation.model(user, model, ModelAction.Update)
+  const exportMirroredModelAuth = await authorisation.model(user, model, ModelAction.Update)
+
+  return {
+    editEntry: authResponseToUserPermission(editEntryAuth),
+    editEntryCard: authResponseToUserPermission(editEntryCardAuth),
+
+    createRelease: authResponseToUserPermission(createReleaseAuth),
+    editRelease: authResponseToUserPermission(editReleaseAuth),
+    deleteRelease: authResponseToUserPermission(deleteReleaseAuth),
+
+    pushModelImage: authResponseToUserPermission(pushModelImageAuth),
+
+    createInferenceService: authResponseToUserPermission(createInferenceServiceAuth),
+    editInferenceService: authResponseToUserPermission(editInferenceServiceAuth),
+
+    exportMirroredModel: authResponseToUserPermission(exportMirroredModelAuth),
+  }
 }

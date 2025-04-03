@@ -7,7 +7,7 @@ import AccessRequestDisplay from 'src/entry/model/accessRequests/AccessRequestDi
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
-import { sortByCreatedAtDescending } from 'utils/dateUtils'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { hasRole } from 'utils/roles'
 
 type AccessRequestsProps = {

@@ -17,7 +17,8 @@ def test_post_model(requests_mock):
         kind=EntryKind.MODEL,
         description="test",
         visibility=ModelVisibility.PUBLIC,
-        team_id="uncategorised",
+        organisation="Example Organisation",
+        state="Development",
     )
 
     assert result == {"success": True}
@@ -51,6 +52,8 @@ def test_patch_model(requests_mock):
     result = client.patch_model(
         model_id="test_id",
         name="test",
+        organisation="Example Organisation",
+        state="Development",
     )
 
     assert result == {"success": True}
@@ -86,6 +89,17 @@ def test_model_card_from_schema(requests_mock):
     client = Client("https://example.com")
     result = client.model_card_from_schema(model_id="test_id", schema_id="test_id")
 
+    assert result == {"success": True}
+
+
+def test_model_card_from_template(requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_id/setup/from-template",
+        json={"success": True},
+    )
+
+    client = Client("https://example.com")
+    result = client.model_card_from_template(model_id="test_id", template_id="test_id")
     assert result == {"success": True}
 
 
@@ -228,60 +242,6 @@ def test_get_model_user_roles(requests_mock):
     client = Client("https://example.com")
     result = client.get_model_user_roles(
         model_id="test_id",
-    )
-
-    assert result == {"success": True}
-
-
-def test_post_team(requests_mock):
-    requests_mock.post("https://example.com/api/v2/teams", json={"success": True})
-
-    client = Client("https://example.com")
-    result = client.post_team(
-        team_id="test_id",
-        name="test",
-        description="test",
-    )
-
-    assert result == {"success": True}
-
-
-def test_get_all_teams(requests_mock):
-    requests_mock.get("https://example.com/api/v2/teams", json={"success": True})
-
-    client = Client("https://example.com")
-    result = client.get_all_teams()
-
-    assert result == {"success": True}
-
-
-def test_get_user_teams(requests_mock):
-    requests_mock.get("https://example.com/api/v2/teams/mine", json={"success": True})
-
-    client = Client("https://example.com")
-    result = client.get_user_teams()
-
-    assert result == {"success": True}
-
-
-def test_get_team(requests_mock):
-    requests_mock.get("https://example.com/api/v2/team/test_id", json={"success": True})
-
-    client = Client("https://example.com")
-    result = client.get_team(
-        team_id="test_id",
-    )
-
-    assert result == {"success": True}
-
-
-def test_patch_team(requests_mock):
-    requests_mock.patch("https://example.com/api/v2/team/test_id", json={"success": True})
-
-    client = Client("https://example.com")
-    result = client.patch_team(
-        team_id="test_id",
-        name="name",
     )
 
     assert result == {"success": True}

@@ -24,27 +24,32 @@ class Client:
         name: str,
         kind: EntryKind,
         description: str,
-        team_id: str,
         visibility: ModelVisibility | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ):
         """Create a model.
 
         :param name: Name of the model
         :param kind: Either a Model or a Datacard
         :param description: Description of the model
-        :param visibility: Enum to define model visibility (e.g public or private)
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
+        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :return: JSON response object
         """
+        _visibility: str = "public"
         if visibility is not None:
-            visibility = str(visibility)
+            _visibility = str(visibility)
 
         filtered_json = filter_none(
             {
                 "name": name,
                 "kind": kind,
                 "description": description,
-                "visibility": visibility,
-                "teamId": team_id,
+                "visibility": _visibility,
+                "organisation": organisation,
+                "state": state,
             }
         )
 
@@ -55,7 +60,6 @@ class Client:
 
     def get_models(
         self,
-        kind: EntryKind = EntryKind.MODEL,
         task: str | None = None,
         libraries: list[str] | None = None,
         filters: list[str] | None = None,
@@ -63,7 +67,6 @@ class Client:
     ):
         """Find and returns a list of models based on provided search terms.
 
-        :param kind: Either a Model or a Datacard
         :param task: Model task (e.g. image classification), defaults to None
         :param libraries: Model library (e.g. TensorFlow), defaults to None
         :param filters: Custom filters, defaults to None
@@ -106,6 +109,8 @@ class Client:
         kind: str | None = None,
         description: str | None = None,
         visibility: str | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ):
         """Update a specific model using its unique ID.
 
@@ -113,10 +118,21 @@ class Client:
         :param name: Name of the model, defaults to None
         :param kind: Either a Model or a Datacard
         :param description: Description of the model, defaults to None
-        :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
+        :param kind: Either a Model or a Datacard, defaults to None
         :return: JSON response object
         """
-        filtered_json = filter_none({"name": name, "kind": kind, "description": description, "visibility": visibility})
+        filtered_json = filter_none(
+            {
+                "name": name,
+                "organisation": organisation,
+                "state": state,
+                "kind": kind,
+                "description": description,
+                "visibility": visibility,
+            }
+        )
 
         return self.agent.patch(f"{self.url}/v2/model/{model_id}", json=filtered_json).json()
 
@@ -170,6 +186,17 @@ class Client:
             json={
                 "schemaId": schema_id,
             },
+        ).json()
+
+    def model_card_from_template(self, model_id: str, template_id: str | None):
+        """Create a model card using a given template ID (previously created models, model ID)
+        :param model_id: Unique model ID
+        :param template_id Previous model's unique ID to be used as template for new model card
+        :return: JSON response object
+        """
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/setup/from-template",
+            json={"templateId": template_id},
         ).json()
 
     def post_release(
@@ -310,11 +337,15 @@ class Client:
         """
         if isinstance(self.agent, TokenAgent):
             return self.agent.get(
-                f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+                f"{self.url}/v2/token/model/{model_id}/file/{file_id}/download",
+                stream=True,
+                timeout=10_000,
             )
         else:
             return self.agent.get(
-                f"{self.url}/v2/model/{model_id}/file/{file_id}/download", stream=True, timeout=10_000
+                f"{self.url}/v2/model/{model_id}/file/{file_id}/download",
+                stream=True,
+                timeout=10_000,
             )
 
     def get_download_by_filename(
@@ -338,7 +369,9 @@ class Client:
             )
         else:
             return self.agent.get(
-                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download", stream=True, timeout=10_000
+                f"{self.url}/v2/model/{model_id}/release/{semver}/file/{filename}/download",
+                stream=True,
+                timeout=10_000,
             )
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
@@ -372,7 +405,7 @@ class Client:
         :return: JSON response object
         """
         return self.agent.delete(
-            f"{self.url}/v2/model/{model_id}/files/{file_id}",
+            f"{self.url}/v2/model/{model_id}/file/{file_id}",
         ).json()
 
     def get_all_images(
@@ -454,12 +487,12 @@ class Client:
         :param version: Model version, defaults to None
         :return: JSON response object.
         """
-        active = str(active).lower()
+        _active = str(active).lower()
 
         return self.agent.get(
             f"{self.url}/v2/reviews",
             params={
-                "active": active,
+                "active": _active,
                 "modelId": model_id,
                 "semver": version,
             },
@@ -512,86 +545,6 @@ class Client:
         """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/roles/mine",
-        ).json()
-
-    def post_team(
-        self,
-        team_id: str,
-        name: str,
-        description: str,
-    ):
-        """
-        Create new team.
-
-        :param team_id: Unique team ID
-        :param name: Team name
-        :param description: Team description
-        :return: JSON response object
-        """
-        return self.agent.post(
-            f"{self.url}/v2/teams",
-            json={
-                "id": team_id,
-                "name": name,
-                "description": description,
-            },
-        ).json()
-
-    def get_all_teams(
-        self,
-    ):
-        """
-        Get all teams.
-
-        :return: JSON response object
-        """
-        return self.agent.get(
-            f"{self.url}/v2/teams",
-        ).json()
-
-    def get_user_teams(
-        self,
-    ):
-        """
-        Get user teams.
-
-        :return: JSON response object
-        """
-        return self.agent.get(
-            f"{self.url}/v2/teams/mine",
-        ).json()
-
-    def get_team(
-        self,
-        team_id: str,
-    ):
-        """Retrieve a specific team given its unique ID.
-
-        :param team_id: Unique team ID
-        :return: JSON response object
-        """
-        return self.agent.get(
-            f"{self.url}/v2/team/{team_id}",
-        ).json()
-
-    def patch_team(
-        self,
-        team_id: str,
-        name: str | None = None,
-        description: str | None = None,
-    ):
-        """Update a team given its unique ID.
-
-        :param team_id: Unique team ID
-        :param name: Name of team, defaults to None
-        :param description: Description of team, defaults to None
-        :return: JSON response object
-        """
-        filtered_json = filter_none({"name": name, "description": description})
-
-        return self.agent.patch(
-            f"{self.url}/v2/team/{team_id}",
-            json=filtered_json,
         ).json()
 
     def get_access_request(self, model_id: str, access_request_id: str):

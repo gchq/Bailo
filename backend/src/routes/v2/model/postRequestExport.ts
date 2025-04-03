@@ -10,16 +10,20 @@ import { parse } from '../../../utils/validate.js'
 
 export const postRequestExportToS3Schema = z.object({
   params: z.object({
-    modelId: z.string(),
+    modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   }),
   body: z.object({
     disclaimerAgreement: z.boolean(),
+    semvers: z
+      .array(z.string())
+      .openapi({ example: ['1.0.0'] })
+      .optional(),
   }),
 })
 
 registerPath({
   method: 'post',
-  path: '/api/v2/model/:modelId/export/s3',
+  path: '/api/v2/model/{modelId}/export/s3',
   tags: ['model', 'mirror'],
   description:
     'Request for all current model card revisions to be exported to S3 as a Zip file. Can also include releases specified by semver in the body.',
@@ -48,10 +52,10 @@ export const postRequestExportToS3 = [
     req.audit = AuditInfo.CreateExport
     const {
       params: { modelId },
-      body: { disclaimerAgreement },
+      body: { disclaimerAgreement, semvers },
     } = parse(req, postRequestExportToS3Schema)
 
-    await exportModel(req.user, modelId, disclaimerAgreement)
+    await exportModel(req.user, modelId, disclaimerAgreement, semvers)
     await audit.onCreateS3Export(req, modelId)
 
     return res.json({

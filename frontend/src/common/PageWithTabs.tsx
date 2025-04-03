@@ -17,20 +17,10 @@ export interface PageTab {
   disabledText?: string
 }
 
-export default function PageWithTabs({
-  title,
-  subheading,
-  tabs,
-  actionButtonTitle = '',
-  displayActionButton = false,
-  actionButtonOnClick,
-  requiredUrlParams = {},
-  titleToCopy = '',
-  subheadingToCopy = '',
-  sourceModelId = '',
-}: {
+interface PageWithTabsProps {
   title: string
   subheading?: string
+  additionalInfo?: string
   tabs: PageTab[]
   actionButtonTitle?: string
   displayActionButton?: boolean
@@ -39,7 +29,21 @@ export default function PageWithTabs({
   titleToCopy?: string
   subheadingToCopy?: string
   sourceModelId?: string
-}) {
+}
+
+export default function PageWithTabs({
+  title,
+  subheading,
+  additionalInfo,
+  tabs,
+  actionButtonTitle = '',
+  displayActionButton = false,
+  actionButtonOnClick,
+  requiredUrlParams = {},
+  titleToCopy = '',
+  subheadingToCopy = '',
+  sourceModelId = '',
+}: PageWithTabsProps) {
   const router = useRouter()
   const { tab } = router.query
 
@@ -122,11 +126,18 @@ export default function PageWithTabs({
         spacing={{ xs: 1, sm: 2 }}
         sx={{ px: 2, pb: 2 }}
       >
-        <Stack>
+        <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
           <Stack direction='row'>
-            <Typography component='h1' color='primary' variant='h6'>
-              {title}
-            </Typography>
+            <Tooltip title={title}>
+              <Typography
+                component='h1'
+                color='primary'
+                variant='h6'
+                sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }}
+              >
+                {title}
+              </Typography>
+            </Tooltip>
             {titleToCopy.length > 0 && (
               <CopyToClipboardButton
                 textToCopy={titleToCopy ? titleToCopy : title}
@@ -137,7 +148,10 @@ export default function PageWithTabs({
           </Stack>
           {subheading && (
             <Stack direction='row' alignItems='center'>
-              <Typography variant='caption' sx={{ color: darken(theme.palette.primary.main, 0.4) }}>
+              <Typography
+                variant='caption'
+                sx={{ color: darken(theme.palette.primary.main, 0.4), textOverflow: 'ellipsis', overflow: 'hidden' }}
+              >
                 {subheading}
               </Typography>
               {subheadingToCopy.length > 0 && (
@@ -151,12 +165,13 @@ export default function PageWithTabs({
           )}
         </Stack>
         {displayActionButton && (
-          <Button variant='contained' onClick={actionButtonOnClick}>
+          <Button sx={{ minWidth: '154px' }} variant='contained' onClick={actionButtonOnClick}>
             {actionButtonTitle}
           </Button>
         )}
         {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
       </Stack>
+      <Typography sx={{ pl: 2, pb: 1, textOverflow: 'ellipsis', overflow: 'hidden' }}>{additionalInfo}</Typography>
       <Tabs
         value={currentTab || false}
         onChange={handleChange}
@@ -180,17 +195,20 @@ interface TabPanelProps {
 
 function CustomTabPanel(props: TabPanelProps) {
   const { children, tabKey, currentTab, ...other } = props
-  const theme = useTheme()
 
   return (
     <div role='tabpanel' hidden={currentTab !== tabKey} {...other}>
       {currentTab === tabKey && (
         <Box
-          sx={{
-            backgroundColor: theme.palette.mode === 'light' ? 'white' : grey[800],
+          sx={(theme) => ({
+            // TODO - use "theme.applyStyles" when implementing dark mode
+            backgroundColor: grey[800],
             p: 2,
             mb: 2,
-          }}
+            ...theme.applyStyles('light', {
+              backgroundColor: 'white',
+            }),
+          })}
         >
           {children}
         </Box>

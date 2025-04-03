@@ -23,7 +23,7 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
   const theme = useTheme()
   const modelCardContentRef = useRef<HTMLDivElement>(null)
   const exportModelCard = useReactToPrint({
-    content: () => modelCardContentRef.current,
+    contentRef: modelCardContentRef,
     documentTitle: entry.name.replace(' ', '_'),
   })
 
@@ -54,7 +54,6 @@ export default function ExportEntryCardDialog({ entry, splitSchema, open, setOpe
           ObjectFieldTemplate,
         }}
       >
-        {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
         <></>
       </Form>
     ))

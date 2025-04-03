@@ -29,6 +29,7 @@ function HelpPopover({ anchorOrigin, transformOrigin, children }: Props) {
         onMouseEnter={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
         data-test='helpIcon'
+        color='primary'
       />
       <Popover
         id='help-popover'

@@ -17,12 +17,15 @@ export interface DefaultSchema {
   jsonSchema: JsonSchema
 }
 
-export async function findSchemasByKind(kind?: SchemaKindKeys): Promise<SchemaInterface[]> {
-  const baseSchemas = await Schema.find({ ...(kind && { kind }) }).sort({ createdAt: -1 })
-  return baseSchemas
+export async function searchSchemas(kind?: SchemaKindKeys, hidden?: boolean): Promise<SchemaInterface[]> {
+  const schemas = await Schema.find({
+    ...(kind && { kind }),
+    ...(hidden != undefined && { hidden }),
+  }).sort({ createdAt: -1 })
+  return schemas
 }
 
-export async function findSchemaById(schemaId: string) {
+export async function getSchemaById(schemaId: string) {
   const schema = await Schema.findOne({
     id: schemaId,
   })
@@ -51,7 +54,7 @@ export async function deleteSchemaById(user: UserInterface, schemaId: string): P
     })
   }
 
-  await schema.delete()
+  await schema.deleteOne()
 
   return schema.id
 }
@@ -79,10 +82,10 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
   }
 }
 
-export type UpdateSchemaParams = Pick<SchemaInterface, 'active'>
+export type UpdateSchemaParams = Partial<Pick<SchemaInterface, 'active' | 'hidden' | 'name' | 'description'>>
 
-export async function updateSchema(user: UserInterface, schemaId: string, diff: Partial<UpdateSchemaParams>) {
-  const schema = await findSchemaById(schemaId)
+export async function updateSchema(user: UserInterface, schemaId: string, diff: UpdateSchemaParams) {
+  const schema = await getSchemaById(schemaId)
 
   const auth = await authorisation.schema(user, schema, SchemaAction.Update)
   if (!auth.success) {

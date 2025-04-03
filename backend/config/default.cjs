@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 /** @type {import('../src/utils/config.js').Config} */
 module.exports = {
   api: {
@@ -140,14 +142,20 @@ module.exports = {
       },
       userPoolId: '',
       userIdAttribute: '',
+      adminGroupName: '',
     },
   },
 
   avScanning: {
-    enabled: false,
     clamdscan: {
       host: '127.0.0.1',
       port: 3310,
+    },
+
+    modelscan: {
+      protocol: 'http',
+      host: '127.0.0.1',
+      port: 3311,
     },
   },
 
@@ -175,21 +183,35 @@ module.exports = {
 
     inference: {
       enabled: false,
-      conneciton: {
+      connection: {
         host: 'http://example.com',
       },
       authorizationTokenName: 'inferencing-token',
       gpus: {},
     },
     modelMirror: {
-      enabled: false,
-      disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+      import: {
+        enabled: false,
+      },
+      export: {
+        enabled: false,
+        disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+      },
     },
 
     announcement: {
       enabled: false,
       text: '',
       startTimestamp: '',
+    },
+
+    helpPopoverText: {
+      manualEntryAccess: '',
+    },
+
+    modelDetails: {
+      organisations: ['Example Organisation'],
+      states: ['Development', 'Review', 'Production'],
     },
   },
 
@@ -204,6 +226,13 @@ module.exports = {
 
     audit: {
       kind: 'silly',
+    },
+
+    fileScanners: {
+      kinds: [],
+      retryDelayInMinutes: 60,
+      maxInitRetries: 5,
+      initRetryDelay: 5000,
     },
   },
 

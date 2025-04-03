@@ -44,18 +44,23 @@ export default function Dropdown({ label, formContext, value, onChange, options,
         <Autocomplete
           size='small'
           options={dropdownOptions}
-          sx={{
+          sx={(theme) => ({
             input: {
-              color: theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+              color: theme.palette.common.white,
+              ...theme.applyStyles('light', {
+                color: theme.palette.common.black,
+              }),
             },
             label: {
-              WebkitTextFillColor:
-                theme.palette.mode === 'light' ? theme.palette.common.black : theme.palette.common.white,
+              WebkitTextFillColor: theme.palette.common.white,
+              ...theme.applyStyles('light', {
+                WebkitTextFillColor: theme.palette.common.black,
+              }),
             },
             '& .MuiInputBase-input.Mui-disabled': {
               WebkitTextFillColor: disabledWebkitTextFillColor,
             },
-          }}
+          })}
           onChange={handleChange}
           value={value || ''}
           disabled={!formContext.editMode}

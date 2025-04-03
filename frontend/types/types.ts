@@ -47,13 +47,27 @@ export interface UiConfig {
   }
 
   modelMirror: {
-    enabled: boolean
-    disclaimer: string
+    import: {
+      enabled: boolean
+    }
+    export: {
+      enabled: boolean
+      disclaimer: string
+    }
   }
   announcement: {
     enabled: boolean
     text: string
     startTimestamp: string
+  }
+
+  helpPopoverText: {
+    manualEntryAccess: string
+  }
+
+  modelDetails: {
+    organisations: string[]
+    states: string[]
   }
 }
 
@@ -70,9 +84,52 @@ export interface FileInterface {
 
   complete: boolean
 
+  // Older files may not have AV run against them
+  avScan?: AvScanResult[]
+
   createdAt: Date
   updatedAt: Date
 }
+
+export interface ScanResultInterface {
+  state: ScanStateKeys
+  scannerVersion?: string
+  isInfected?: boolean
+  viruses?: Array<string>
+  toolName: string
+  lastRunAt: string
+
+  createdAt: Date
+  updatedAt: Date
+}
+
+export const ScanState = {
+  NotScanned: 'notScanned',
+  InProgress: 'inProgress',
+  Complete: 'complete',
+  Error: 'error',
+} as const
+export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
+
+export type AvScanResult = ScanResultInterface &
+  (
+    | {
+        artefactKind: typeof ArtefactKind.File
+        fileId: string
+      }
+    | {
+        artefactKind: typeof ArtefactKind.Image
+        repositoryName: string
+        imageDigest: string
+        // TODO: ultimately use a mapped version of backend/src/models/Release.ts:ImageRef, but ImageRef needs converting to use Digest rather than Tag first
+      }
+  )
+
+export const ArtefactKind = {
+  File: 'file',
+  Image: 'image',
+} as const
+export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
 
 export const ResponseKind = {
   Review: 'review',
@@ -105,6 +162,7 @@ export const ReactionKind = {
   LIKE: 'like',
   DISLIKE: 'dislike',
   CELEBRATE: 'celebrate',
+  HEART: 'heart',
 } as const
 export type ReactionKindKeys = (typeof ReactionKind)[keyof typeof ReactionKind]
 
@@ -315,18 +373,6 @@ export interface StepNoRender {
   isComplete: (step: StepNoRender) => boolean
 }
 
-export interface TeamInterface {
-  id: string
-
-  name: string
-  description: string
-
-  deleted: boolean
-
-  createdAt: Date
-  updatedAt: Date
-}
-
 export const EntryVisibility = {
   Private: 'private',
   Public: 'public',
@@ -385,8 +431,9 @@ export interface EntryInterface {
   id: string
   name: string
   kind: EntryKindKeys
-  teamId: string
   description: string
+  state?: string
+  organisation?: string
   settings: {
     ungovernedAccess?: boolean
     allowTemplating?: boolean
@@ -405,11 +452,14 @@ export interface EntryInterface {
 export interface EntryForm {
   name: string
   kind: EntryKindKeys
-  teamId: string
   description: string
+  state?: string
+  organisation?: string
   visibility: EntryVisibilityKeys
   collaborators?: CollaboratorEntry[]
   settings?: {
+    ungovernedAccess: boolean
+    allowTemplating: boolean
     mirror?: {
       sourceModelId?: string
       destinationModelId?: string
@@ -529,3 +579,34 @@ export interface SuccessfulFileUpload {
   fileName: string
   fileId: string
 }
+
+export type PermissionDetail =
+  | {
+      hasPermission: true
+      info?: never
+    }
+  | {
+      hasPermission: false
+      info: string
+    }
+
+export type EntryUserPermissions = {
+  editEntry: PermissionDetail
+  editEntryCard: PermissionDetail
+  createRelease: PermissionDetail
+  editRelease: PermissionDetail
+  deleteRelease: PermissionDetail
+  pushModelImage: PermissionDetail
+  createInferenceService: PermissionDetail
+  editInferenceService: PermissionDetail
+  exportMirroredModel: PermissionDetail
+}
+
+export type AccessRequestUserPermissions = {
+  editAccessRequest: PermissionDetail
+  deleteAccessRequest: PermissionDetail
+}
+
+export type UserPermissions = EntryUserPermissions & AccessRequestUserPermissions
+
+export type RestrictedActionKeys = keyof UserPermissions

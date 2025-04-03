@@ -1,4 +1,4 @@
-import { Box, Button, Container, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Container, Stack, Typography } from '@mui/material'
 import { sendTokenToService, useGetInferencesForModelId } from 'actions/inferencing'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { deleteUserToken, postUserToken, useGetUserTokens } from 'actions/user'
@@ -6,18 +6,17 @@ import { useRouter } from 'next/router'
 import { useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
+import Restricted from 'src/common/Restricted'
 import InferenceDisplay from 'src/entry/model/inferencing/InferenceDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
-import { getRequiredRolesText, hasRole } from 'utils/roles'
 
 type InferenceProps = {
   model: EntryInterface
-  currentUserRoles: string[]
 }
 
-export default function InferenceServices({ model, currentUserRoles }: InferenceProps) {
+export default function InferenceServices({ model }: InferenceProps) {
   const router = useRouter()
   const { inferences, isInferencesLoading, isInferencesError } = useGetInferencesForModelId(model.id)
   const [errorMessage, setErrorMessage] = useState('')
@@ -35,18 +34,13 @@ export default function InferenceServices({ model, currentUserRoles }: Inference
         if (!response.ok) {
           return setErrorMessage(await getErrorMessage(response))
         }
-      } catch (err) {
+      } catch (_err) {
         setHealthCheck(false)
         return setErrorMessage('Something went wrong requesting the inferencing service')
       }
     }
     checkAuthentication()
   }, [uiConfig])
-
-  const [canCreateService, requiredRolesText] = useMemo(() => {
-    const validRoles = ['owner', 'contributor']
-    return [hasRole(currentUserRoles, validRoles), getRequiredRolesText(currentUserRoles, validRoles)]
-  }, [currentUserRoles])
 
   const inferenceDisplays = useMemo(
     () =>
@@ -88,7 +82,7 @@ export default function InferenceServices({ model, currentUserRoles }: Inference
           } else {
             router.reload()
           }
-        } catch (err) {
+        } catch (_err) {
           return setErrorMessage('Something went wrong requesting the inferencing service')
         }
       }
@@ -120,14 +114,14 @@ export default function InferenceServices({ model, currentUserRoles }: Inference
     <Container sx={{ my: 2 }}>
       {healthCheck ? (
         <Stack spacing={4}>
-          <Box sx={{ textAlign: 'right' }}>
-            <Tooltip title={requiredRolesText}>
-              <span>
-                <Button variant='outlined' disabled={!canCreateService} onClick={handleCreateNewInferenceService}>
+          <Box display='flex'>
+            <Box ml='auto'>
+              <Restricted action='createInferenceService' fallback={<Button disabled>Create Service</Button>}>
+                <Button variant='outlined' onClick={handleCreateNewInferenceService}>
                   Create Service
                 </Button>
-              </span>
-            </Tooltip>
+              </Restricted>
+            </Box>
           </Box>
           {isInferencesLoading && <Loading />}
           {inferenceDisplays}

@@ -1,8 +1,9 @@
-import { Document, model, Schema } from 'mongoose'
-import MongooseDelete from 'mongoose-delete'
+import { model, Schema } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 export const WebhookEvent = {
   CreateRelease: 'createRelease',
+  UpdateRelease: 'updateRelease',
   CreateReviewResponse: 'createReviewResponse',
   CreateAccessRequest: 'createAccessRequest',
 } as const
@@ -19,9 +20,9 @@ export interface WebhookInterface {
   active?: boolean
 }
 
-export type WebhookDoc = WebhookInterface & Document<any, any, WebhookInterface>
+export type WebhookDoc = WebhookInterface & SoftDeleteDocument
 
-const WebhookSchema = new Schema<WebhookInterface>(
+const WebhookSchema = new Schema<WebhookDoc>(
   {
     id: { type: String, required: true, unique: true, index: true },
     modelId: { type: String, required: true },
@@ -44,8 +45,9 @@ WebhookSchema.plugin(MongooseDelete, {
   overrideMethods: 'all',
   deletedBy: true,
   deletedByType: Schema.Types.ObjectId,
+  deletedAt: true,
 })
 
-const WebhookModel = model<WebhookInterface>('v2_Webhook', WebhookSchema)
+const WebhookModel = model<WebhookDoc>('v3_Webhook', WebhookSchema)
 
 export default WebhookModel

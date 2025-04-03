@@ -1,4 +1,21 @@
-FROM node:22-alpine AS installer
+FROM python:3.13.2-bullseye AS sphinx-docs
+
+# Prevents Python from writing pyc files.
+ENV PYTHONDONTWRITEBYTECODE=1
+# Keeps Python from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y pandoc && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app/docs
+
+COPY docs .
+
+RUN pip install --no-cache-dir --upgrade bailo -r requirements.txt
+
+RUN make dirhtml
+
+FROM node:22.14.0-alpine AS installer
 
 RUN apk add --no-cache libc6-compat ca-certificates
 RUN apk update
@@ -9,6 +26,7 @@ COPY package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 
 COPY . .
+COPY --from=sphinx-docs /app/docs/python-docs python-docs
 
 EXPOSE 3001
 EXPOSE 9229

@@ -12,35 +12,6 @@ import {
 import config from '../../../src/utils/config.js'
 import { testReviewResponse } from '../../testUtils/testModels.js'
 
-vi.mock('../../../src/utils/config.js', () => {
-  return {
-    __esModule: true,
-    default: {
-      app: {
-        protocol: '',
-        host: '',
-        port: 3000,
-      },
-
-      smtp: {
-        enabled: true,
-
-        connection: {
-          host: 'localhost',
-          port: 1025,
-          secure: false,
-          auth: undefined,
-          tls: {
-            rejectUnauthorized: false,
-          },
-        },
-
-        from: '"Bailo 📝" <bailo@example.org>',
-      },
-    },
-  }
-})
-
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
   warn: vi.fn(),

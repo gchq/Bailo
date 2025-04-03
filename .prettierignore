@@ -3,13 +3,11 @@
 .vscode
 backend/dist
 backend/node_modules
-backend/python-docs
+backend/docs
 frontend/.next
 frontend/dist
 frontend/node_modules
 infrastructure
-lib/python/docs/pylint.md
 node_modules
 .dockerignore
-lib/python/docs/_build
 backend/coverage

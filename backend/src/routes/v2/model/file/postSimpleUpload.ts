@@ -4,9 +4,9 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
-import { FileInterface } from '../../../../models/File.js'
+import { FileWithScanResultsInterface } from '../../../../models/File.js'
 import { uploadFile } from '../../../../services/file.js'
-import { fileInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import { fileWithScanInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const postSimpleUploadSchema = z.object({
@@ -31,7 +31,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            file: fileInterfaceSchema,
+            file: fileWithScanInterfaceSchema,
           }),
         },
       },
@@ -40,7 +40,7 @@ registerPath({
 })
 
 interface PostSimpleUpload {
-  file: FileInterface
+  file: FileWithScanResultsInterface
 }
 
 export const postSimpleUpload = [

@@ -1,28 +1,22 @@
-import { Document, model, Schema } from 'mongoose'
+import { model, Schema } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
-import { ModelMetadata } from './Model.js'
+import { ModelCardInterface } from './Model.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
 // client.
-export interface ModelCardRevisionInterface {
+export interface ModelCardRevisionInterface extends ModelCardInterface {
   modelId: string
-  schemaId: string
-
-  version: number
-  metadata: ModelMetadata
-
-  createdBy: string
-  createdAt: Date
-  updatedAt: Date
+  deleted: boolean
 }
 
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ModelCardRevisionDoc = ModelCardRevisionInterface & Document<any, any, ModelCardRevisionInterface>
+export type ModelCardRevisionDoc = ModelCardRevisionInterface & SoftDeleteDocument
 
-const ModelCardRevisionSchema = new Schema<ModelCardRevisionInterface>(
+const ModelCardRevisionSchema = new Schema<ModelCardRevisionDoc>(
   {
     modelId: { type: String, required: true },
     schemaId: { type: String, required: true },
@@ -44,6 +38,13 @@ const ModelCardRevisionSchema = new Schema<ModelCardRevisionInterface>(
 // to learn more.
 ModelCardRevisionSchema.index({ modelId: 1, version: 1 }, { unique: true })
 
-const ModelCardRevisionModel = model<ModelCardRevisionInterface>('v2_Model_Card_Revision', ModelCardRevisionSchema)
+ModelCardRevisionSchema.plugin(MongooseDelete, {
+  overrideMethods: 'all',
+  deletedBy: true,
+  deletedByType: String,
+  deletedAt: true,
+})
+
+const ModelCardRevisionModel = model<ModelCardRevisionDoc>('v2_Model_Card_Revision', ModelCardRevisionSchema)
 
 export default ModelCardRevisionModel

@@ -1,6 +1,7 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import { Box, Button, Card, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { useGetReleasesForModelId } from 'actions/release'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -25,6 +26,7 @@ export interface ReleaseDisplayProps {
   release: ReleaseInterface
   latestRelease?: string
   hideReviewBanner?: boolean
+  hideFileDownloads?: boolean
 }
 
 export default function ReleaseDisplay({
@@ -32,6 +34,7 @@ export default function ReleaseDisplay({
   release,
   latestRelease,
   hideReviewBanner = false,
+  hideFileDownloads = false,
 }: ReleaseDisplayProps) {
   const router = useRouter()
 
@@ -39,6 +42,8 @@ export default function ReleaseDisplay({
     modelId: model.id,
     semver: release.semver,
   })
+
+  const { mutateReleases } = useGetReleasesForModelId(model.id)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const {
@@ -101,14 +106,17 @@ export default function ReleaseDisplay({
                 justifyContent='space-between'
                 alignItems='center'
                 spacing={1}
+                sx={{ minWidth: 0 }}
               >
-                <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`}>
-                  <Typography component='h2' variant='h6' color='primary'>
-                    {model.name} - {release.semver}
-                  </Typography>
+                <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
+                  <Stack direction='row' alignItems='center' spacing={1} width='100%'>
+                    <Typography component='h2' variant='h6' color='primary'>
+                      {release.semver}
+                    </Typography>
+                  </Stack>
                 </Link>
                 <CopyToClipboardButton
-                  textToCopy={`${model.name} - ${release.semver}`}
+                  textToCopy={release.semver}
                   notificationText='Copied release semver to clipboard'
                   ariaLabel='copy release semver to clipboard'
                 />
@@ -127,11 +135,17 @@ export default function ReleaseDisplay({
             <MarkdownDisplay>{release.notes}</MarkdownDisplay>
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
             <Stack spacing={1}>
-              {release.files.length > 0 && (
+              {!hideFileDownloads && release.files.length > 0 && (
                 <>
                   <Typography fontWeight='bold'>Files</Typography>
                   {release.files.map((file) => (
-                    <FileDownload key={file.name} file={file} modelId={model.id} />
+                    <FileDownload
+                      showMenuItems={{ rescanFile: true }}
+                      key={file.name}
+                      file={file}
+                      modelId={model.id}
+                      mutator={mutateReleases}
+                    />
                   ))}
                 </>
               )}

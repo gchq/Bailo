@@ -21,8 +21,40 @@ permissions:
   id-token: write
 
 jobs:
+  sphinx:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/docs
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pandoc
+        run: sudo apt install pandoc
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt bailo
+
+      - name: Build docs
+        run: |
+          make html
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-docs
+          path: ./backend/docs/python-docs/html
+
   # Build job
   build:
+    needs: sphinx
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -30,16 +62,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Download Python Docs
+        uses: actions/download-artifact@v4
+        with:
+          name: python-docs
+          path: ./backend/docs/python-docs/html
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: npm
+          node-version: 22.6.0
+          cache: "npm"
 
       - name: Setup Pages
-        uses: actions/configure-pages@v2
+        uses: actions/configure-pages@v5
         with:
           # Automatically inject basePath in your Next.js configuration file and disable
           # server side image optimization (https://nextjs.org/docs/api-reference/next/image#unoptimized).
@@ -48,7 +86,7 @@ jobs:
           static_site_generator: next
 
       - name: Restore cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.npm
@@ -66,11 +104,11 @@ jobs:
       - name: Run generator
         run: npm run generate
       - name: Build and export
-        run: npm run export
+        run: npm run build
         env:
           BASE_PATH: "/Bailo"
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./lib/landing/out
 
@@ -90,4 +128,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4

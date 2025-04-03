@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, List
+from typing import Any
 
 from bailo.core.client import Client
 from bailo.core.enums import SchemaKind
@@ -65,7 +65,11 @@ class Schema:
             json_schema=json_schema,
         )
         res = client.post_schema(
-            schema_id=schema_id, name=name, description=description, kind=kind, json_schema=json_schema
+            schema_id=schema_id,
+            name=name,
+            description=description,
+            kind=kind,
+            json_schema=json_schema,
         )
         logger.info(f"Schema successfully created on server with ID %s.", schema_id)
         schema.__unpack(res["schema"])

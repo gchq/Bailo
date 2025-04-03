@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { FileInterface } from '../../../models/File.js'
+import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelInterface } from '../../../models/Model.js'
 import { ReleaseInterface } from '../../../models/Release.js'
 import { getModelReleases } from '../../../services/release.js'
@@ -15,6 +15,11 @@ export const getReleasesSchema = z.object({
   params: z.object({
     modelId: z.string({
       required_error: 'Must specify model id as URL parameter',
+    }),
+  }),
+  query: z.object({
+    querySemver: z.string().optional().openapi({ example: '>2.2.2' }).openapi({
+      description: 'Query for semver ranges, as described in https://docs.npmjs.com/cli/v6/using-npm/semver#ranges',
     }),
   }),
 })
@@ -40,7 +45,7 @@ registerPath({
 })
 
 interface getReleasesResponse {
-  releases: Array<ReleaseInterface & { model: ModelInterface; files: FileInterface[] }>
+  releases: Array<ReleaseInterface & { model: ModelInterface; files: FileWithScanResultsInterface[] }>
 }
 
 export const getReleases = [
@@ -49,9 +54,10 @@ export const getReleases = [
     req.audit = AuditInfo.ViewReleases
     const {
       params: { modelId },
+      query: { querySemver },
     } = parse(req, getReleasesSchema)
 
-    const releases = await getModelReleases(req.user, modelId)
+    const releases = await getModelReleases(req.user, modelId, querySemver)
     await audit.onViewReleases(req, releases)
 
     return res.json({

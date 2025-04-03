@@ -6,11 +6,12 @@ export const model: ModelInterface = {
   // Basic model example
   id: 'basic-model-abcdef',
   kind: EntryKind.Model,
-  teamId: undefined,
 
   name: 'Basic Model',
   description:
     'This model has standard permissions and settings.  Use this model for testing generic new features and services.',
+  organisation: 'Example',
+  state: 'Development',
   collaborators: [
     {
       entity: 'user:user',

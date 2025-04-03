@@ -11,9 +11,12 @@ export async function getTokenFromAuthHeader(req: Request, _res: Response, next:
     return next()
   }
 
-  const token = await getTokenFromAuthHeaderService(authorization)
-
-  req.user = { dn: token.user, token }
+  try {
+    const token = await getTokenFromAuthHeaderService(authorization)
+    req.user = { dn: token.user, token }
+  } catch (error) {
+    throw Unauthorized('Failed to get token from auth header', { error, url: req.url })
+  }
 
   return next()
 }
@@ -22,7 +25,7 @@ export function checkAuthentication(req, res, next) {
   if (!req.user) {
     throw Unauthorized('No valid authentication provided.')
   }
-  req.log.debug(
+  req.log.trace(
     {
       user: req.user,
     },

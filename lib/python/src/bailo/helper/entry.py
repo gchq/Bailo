@@ -1,17 +1,28 @@
 from __future__ import annotations
 
-from typing import Any
 import logging
 import warnings
+from typing import Any
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, ModelVisibility, MinimalSchema
-from bailo.core.exceptions import BailoException
+from bailo.core.enums import EntryKind, MinimalSchema, ModelVisibility
 
 logger = logging.getLogger(__name__)
 
 
 class Entry:
+    """Represent an entry in Bailo
+
+    :param client: A client object used to interact with Bailo
+    :param id: A unique ID for the entry
+    :param name: Name of the entry
+    :param description: Description of the entry
+    :param kind: Represents whether entry type (i.e. Model or Datacard)
+    :param visibility: Visibility of model, using ModelVisibility enum (i.e. Public or Private), defaults to None
+    :param organisation: Organisation responsible for the model, defaults to None
+    :param state: Development readiness of the model, defaults to None
+    """
+
     def __init__(
         self,
         client: Client,
@@ -20,6 +31,8 @@ class Entry:
         description: str,
         kind: EntryKind,
         visibility: ModelVisibility | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ) -> None:
         self.client = client
 
@@ -28,6 +41,8 @@ class Entry:
         self.description = description
         self.kind = kind
         self.visibility = visibility
+        self.organisation = organisation
+        self.state = state
 
         self._card = None
         self._card_version = None
@@ -41,6 +56,8 @@ class Entry:
             kind=self.kind,
             description=self.description,
             visibility=self.visibility,
+            organisation=self.organisation,
+            state=self.state,
         )
         self._unpack(res["model"])
 
@@ -54,27 +71,29 @@ class Entry:
         if schema_id is None:
             if self.kind == EntryKind.MODEL:
                 schema_id = MinimalSchema.MODEL
-            if self.kind == EntryKind.DATACARD:
+            elif self.kind == EntryKind.DATACARD:
                 schema_id = MinimalSchema.DATACARD
+            else:
+                raise NotImplementedError(f"No default schema set for {self.kind=}")
 
         res = self.client.model_card_from_schema(model_id=self.id, schema_id=schema_id)
         self.__unpack_card(res["card"])
 
         logger.info(f"Card for ID %s successfully created using schema ID %s.", self.id, schema_id)
 
-    def card_from_template(self):
-        """Create a card using a template (not yet implemented).
+    def card_from_template(self, template_id: str) -> None:
+        """Create a card using a template (not yet implemented)."""
+        res = self.client.model_card_from_template(model_id=self.id, template_id=template_id)
+        self.__unpack_card(res["card"])
 
-        :raises NotImplementedError: Not implemented error
-        """
-        raise NotImplementedError
+        logger.info(f"Card for ID %s successfully created using template ID %s", self.id, template_id)
 
     def get_card_latest(self) -> None:
         """Get the latest card from Bailo."""
         res = self.client.get_model(model_id=self.id)
         if "card" in res["model"]:
             self.__unpack_card(res["model"]["card"])
-            logger.info(f"Latest card for ID %s successfully retrieved.", self.id)
+            logger.info("Latest card for ID %s successfully retrieved.", self.id)
         else:
             warnings.warn(
                 f"ID {self.id} does not have any associated cards. If needed, create a card with the .card_from_schema() method."

@@ -62,6 +62,19 @@ data:
         insecure: {{ .Values.registry.insecure }},
       },
 
+      avScanning: {
+        clamdscan: {
+          host: '{{ include "bailo.fullname" . }}-clamav',
+          port: {{ .Values.clamav.port }},
+        },
+
+        modelscan: {
+          host: '{{ include "bailo.fullname" . }}-modelscan',
+          port: {{ .Values.modelscan.port }},
+          protocol: '{{ .Values.modelscan.protocol }}',
+        },
+      },
+
       smtp: {
         // Enable / disable all email sending
         enabled: true,
@@ -122,6 +135,7 @@ data:
           },
           userPoolId: '{{ .Values.oauth.identityProviderClient.userPoolId }}',
           userIdAttribute: '{{ .Values.oauth.identityProviderClient.userIdAttribute }}',
+          adminGroupName: '{{ .Values.oauth.cognito.adminGroupName }}'
         },
       },
 
@@ -145,8 +159,8 @@ data:
         // Contact details for the support team
         issues: {
           label: 'Bailo Support Team',
-          supportHref: 'mailto:{{ .Values.config.supportEmail }}?subject=Bailo%20Support',
-          contactHref: 'mailto:{{ .Values.config.supportEmail }}?subject=Bailo%20Contact',
+          supportHref: '{{ .Values.config.issueLinks.support }}',
+          contactHref: '{{ .Values.config.issueLinks.contact }}',
         },
 
         // The publicly accessible location of the registry, including host and port
@@ -164,9 +178,23 @@ data:
         },
 
         modelMirror: {
-          enabled: '{{ .Values.modelMirror.enabled }}',
-          disclaimer: '{{ .Values.modelMirror.disclaimer }}'
-        }
+          import: {
+            enabled: {{ .Values.modelMirror.import.enabled }},
+          },
+          export: {
+            enabled: {{ .Values.modelMirror.export.enabled }},
+            disclaimer: '{{ .Values.modelMirror.export.disclaimer }}'
+          }
+        },
+
+        helpPopoverText: {
+          manualEntryAccess: '{{ .Values.config.ui.helpPopoverText.manualEntryAccess }}'
+        },
+
+        modelDetails: {
+          organisations: {{ toJson .Values.config.ui.modelDetails.organisations }},
+          states: {{ toJson .Values.config.ui.modelDetails.states }},
+        },
       },
 
       connectors: {
@@ -180,6 +208,13 @@ data:
 
         audit: {
           kind: '{{ .Values.connectors.audit.kind }}',
+        },
+
+        fileScanners: {
+          kinds: {{ toJson .Values.connectors.fileScanners.kinds }},
+          retryDelayInMinutes: {{ .Values.connectors.fileScanners.retryDelayInMinutes }},
+          maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries }},
+          initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay }},
         },
       },
 
@@ -234,7 +269,7 @@ data:
         authenticationToken: 'OTEL_EXPORTER_TOKEN',
       },
       inference: {
-        authorisationToken: 'INFERENCING_WRITE_TOKEN'
+        authorisationToken: 'INFERENCING_WRITE_TOKEN',
       },
       modelMirror: {
         export: {

@@ -8,18 +8,32 @@ import { Decision, ResponseInterface } from '../../../models/Response.js'
 import { respondToReview } from '../../../services/response.js'
 import { registerPath, reviewInterfaceSchema } from '../../../services/specification.js'
 import { ReviewKind } from '../../../types/enums.js'
+import { getEnumValues } from '../../../utils/enum.js'
 import { parse } from '../../../utils/validate.js'
+
+const staticProperties = z.object({
+  role: z.string(),
+})
+
+const optionalComment = z.object({
+  comment: z.string().optional(),
+  decision: z.enum(getEnumValues(Decision)).exclude([Decision.RequestChanges]),
+})
+
+const mandatoryComment = z.object({
+  comment: z.string().min(1, 'A comment must be supplied when requesting changes'),
+  decision: z.literal(Decision.RequestChanges),
+})
 
 export const postReleaseReviewResponseSchema = z.object({
   params: z.object({
     modelId: z.string(),
     semver: z.string(),
   }),
-  body: z.object({
-    role: z.string(),
-    comment: z.string().optional(),
-    decision: z.nativeEnum(Decision),
-  }),
+  body: z.discriminatedUnion('decision', [
+    staticProperties.merge(optionalComment),
+    staticProperties.merge(mandatoryComment),
+  ]),
 })
 
 registerPath({

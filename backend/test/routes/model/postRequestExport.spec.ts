@@ -4,14 +4,13 @@ import audit from '../../../src/connectors/audit/__mocks__/index.js'
 import { postRequestExportToS3Schema } from '../../../src/routes/v2/model/postRequestExport.js'
 import { createFixture, testPost } from '../../testUtils/routes.js'
 
-vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/utils/user.js')
-vi.mock('../../../src/utils/config.js')
 vi.mock('../../../src/connectors/audit/index.js')
 
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
     vi.mock('../../../src/services/mirroredModel.js', () => ({
+      ImportKind: { Documents: 'documents', File: 'file' } as const,
       exportModel: vi.fn(),
     }))
 
@@ -19,6 +18,7 @@ describe('routes > model > postModel', () => {
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/export/s3`, fixture)
 
     expect(res.statusCode).toBe(200)
+
     expect(res.body).matchSnapshot()
   })
 

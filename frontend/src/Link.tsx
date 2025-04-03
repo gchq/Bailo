@@ -17,7 +17,7 @@ interface NextLinkComposedProps
 
 export const NextLinkComposed = forwardRef<HTMLAnchorElement, NextLinkComposedProps>(
   function NextLinkComposed(props, ref) {
-    const { to, linkAs, replace, scroll, shallow, prefetch, legacyBehavior = true, locale, ...other } = props
+    const { to, linkAs, replace, scroll, shallow, prefetch, locale, ...other } = props
 
     return (
       <NextLink
@@ -29,9 +29,10 @@ export const NextLinkComposed = forwardRef<HTMLAnchorElement, NextLinkComposedPr
         shallow={shallow}
         passHref
         locale={locale}
-        legacyBehavior={legacyBehavior}
+        ref={ref}
+        {...other}
       >
-        <Anchor ref={ref} {...other} />
+        {props.children}
       </NextLink>
     )
   },
@@ -43,6 +44,7 @@ export type LinkProps = {
   href: NextLinkProps['href']
   linkAs?: NextLinkProps['as'] // Useful when the as prop is shallow by styled().
   noLinkStyle?: boolean
+  noWrap?: boolean
 } & Omit<NextLinkComposedProps, 'to' | 'linkAs' | 'href'> &
   Omit<MuiLinkProps, 'href'>
 
@@ -54,10 +56,10 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
     as,
     className: classNameProps,
     href,
-    legacyBehavior,
     linkAs: linkAsProp,
     locale,
     noLinkStyle,
+    noWrap = false,
     prefetch,
     replace,
     role: _role, // Link don't have roles.
@@ -90,7 +92,6 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
     scroll,
     shallow,
     prefetch,
-    legacyBehavior,
     locale,
   }
 
@@ -101,12 +102,25 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
         ref={ref}
         {...nextjsProps}
         {...other}
-        style={{ textDecoration: 'none' }}
+        style={
+          noWrap
+            ? { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', textDecoration: 'none' }
+            : { textDecoration: 'none' }
+        }
       />
     )
   }
 
-  return <MuiLink component={NextLinkComposed} className={className} ref={ref} {...nextjsProps} {...other} />
+  return (
+    <MuiLink
+      component={NextLinkComposed}
+      className={className}
+      ref={ref}
+      style={noWrap ? { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' } : {}}
+      {...nextjsProps}
+      {...other}
+    />
+  )
 })
 
 export default Link

@@ -1,5 +1,4 @@
 import Box from '@mui/material/Box'
-import { useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import { useGetUiConfig } from 'actions/uiConfig'
 import cookies from 'js-cookie'
@@ -21,7 +20,6 @@ export type WrapperProps = {
 }
 
 export default function Wrapper({ children }: WrapperProps): ReactElement {
-  const theme = useTheme()
   const [open, setOpen] = useState(false)
   const [pageTopStyling, setPageTopStyling] = useState({})
   const [contentTopStyling, setContentTopStyling] = useState({})
@@ -35,7 +33,7 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
   const page = useMemo(() => router.route.split('/')[1].replace('/', ''), [router])
 
   const dismissedTimestamp = cookies.get(DISMISSED_COOKIE_NAME)
-  const [annoucementBannerOpen, setAnnouncementBannerOpen] = useState(false)
+  const [announcementBannerOpen, setAnnouncementBannerOpen] = useState(false)
 
   useEffect(() => {
     if (!isUiConfigLoading) {
@@ -105,12 +103,16 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
         )}
         <Box
           component='main'
-          sx={{
-            backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
+          sx={(theme) => ({
+            // TODO Set this for dark mode only in the future
+            backgroundColor: theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',
-          }}
+            ...theme.applyStyles('light', {
+              backgroundColor: theme.palette.grey[100],
+            }),
+          })}
         >
           <Toolbar />
           <Box sx={contentTopStyling}>
@@ -121,12 +123,12 @@ export default function Wrapper({ children }: WrapperProps): ReactElement {
                 {isCurrentUserLoading && <Loading />}
                 <MessageAlert message={errorMessage} severity='error' />
                 {children}
-                <Copyright sx={{ mb: 2 }} />
+                <Copyright sx={{ m: 2 }} />
               </>
             )}
           </Box>
           {isUiConfigLoading && <Loading />}
-          {uiConfig && annoucementBannerOpen && (
+          {uiConfig && announcementBannerOpen && (
             <Announcement message={uiConfig.announcement.text} onClose={handleAnnouncementOnClose} />
           )}
         </Box>

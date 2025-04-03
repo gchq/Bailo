@@ -1,0 +1,48 @@
+{{- if .Values.modelscan.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bailo.fullname" . }}-modelscan
+  labels:
+    {{- include "bailo.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: modelscan
+  template:
+    metadata:
+      labels:
+        name: modelscan
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ include "bailo.fullname" . }}-modelscan
+        ports:
+          - name: modelscanport
+            containerPort: {{ .Values.modelscan.port }}
+            protocol: TCP
+        image: "{{ .Values.image.modelscanRepository }}:{{ .Values.image.modelscanTag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        securityContext:
+          allowPrivilegeEscalation: false
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: modelscan-log
+          emptyDir: {}
+{{- end }}

@@ -9,7 +9,7 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 > `infrastructure/helm/bailo/templates/bailo/bailo.configmap.yaml`
 
 Bailo uses [`node-config`](https://github.com/node-config/node-config#readme) for application configuration.
-`node-config` organizes hierarchical configurations, allowing the user to set a series of overides over a base
+`node-config` organizes hierarchical configurations, allowing the user to set a series of overrides over a base
 configuration.
 
 The default set of configuration can be found in `config/default.js`, with overrides for other environments included in
@@ -39,7 +39,7 @@ The result is:
   a: 5, // no overrides
   b: 10, // overridden in production.cjs
   c: {
-    d: 999, // overriden in production.cjs, then again in local.js
+    d: 999, // overridden in production.cjs, then again in local.js
     e: 25 // not overwritten, objects are merged together.
   }
 }

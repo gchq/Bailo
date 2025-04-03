@@ -1,5 +1,5 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterfaceDoc } from '../../models/File.js'
+import { FileInterface } from '../../models/File.js'
 import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
@@ -60,8 +60,8 @@ export class BasicAuthorisationConnector {
     return (await this.schemas(user, [schema], action))[0]
   }
 
-  async release(user: UserInterface, model: ModelDoc, release: ReleaseDoc, action: ReleaseActionKeys) {
-    return (await this.releases(user, model, [release], action))[0]
+  async release(user: UserInterface, model: ModelDoc, action: ReleaseActionKeys, release?: ReleaseDoc) {
+    return (await this.releases(user, model, release ? [release] : [], action))[0]
   }
 
   async accessRequest(
@@ -77,7 +77,7 @@ export class BasicAuthorisationConnector {
     return (await this.responses(user, [response], action))[0]
   }
 
-  async file(user: UserInterface, model: ModelDoc, file: FileInterfaceDoc, action: FileActionKeys) {
+  async file(user: UserInterface, model: ModelDoc, file: FileInterface, action: FileActionKeys) {
     return (await this.files(user, model, [file], action))[0]
   }
 
@@ -105,10 +105,26 @@ export class BasicAuthorisationConnector {
 
         // Check a user has a role before allowing write actions
         if (
-          [ModelAction.Write, ModelAction.Update].some((a) => a === action) &&
-          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro']))
+          ModelAction.Write === action &&
+          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro', 'contributor']))
+        ) {
+          return { id: model.id, success: false, info: 'You do not have permission to update a model card.' }
+        }
+
+        if (
+          ModelAction.Update === action &&
+          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro'])) &&
+          !(await authentication.hasRole(user, Roles.Admin))
         ) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
+        }
+
+        if (ModelAction.Import === action && (await missingRequiredRole(user, model, ['owner']))) {
+          return { id: model.id, success: false, info: 'You do not have permission to import a model.' }
+        }
+
+        if (ModelAction.Export === action && (await missingRequiredRole(user, model, ['owner']))) {
+          return { id: model.id, success: false, info: 'You do not have permission to export a model.' }
         }
 
         return { id: model.id, success: true }
@@ -172,15 +188,17 @@ export class BasicAuthorisationConnector {
       [ReleaseAction.Delete]: ModelAction.Write,
       [ReleaseAction.Update]: ModelAction.Update,
       [ReleaseAction.View]: ModelAction.View,
+      [ReleaseAction.Import]: ModelAction.Import,
+      [ReleaseAction.Export]: ModelAction.Export,
     }
 
     // Is this a constrained user token.
     const tokenAuth = await validateTokenForModel(user.token, model.id, ActionLookup[action])
     if (!tokenAuth.success) {
-      return releases.map(() => tokenAuth)
+      return releases.length ? releases.map(() => tokenAuth) : [tokenAuth]
     }
 
-    return new Array(releases.length).fill(await this.model(user, model, actionMap[action]))
+    return new Array(releases.length || 1).fill(await this.model(user, model, actionMap[action]))
   }
 
   async accessRequests(
@@ -225,7 +243,7 @@ export class BasicAuthorisationConnector {
   async files(
     user: UserInterface,
     model: ModelDoc,
-    files: Array<FileInterfaceDoc>,
+    files: Array<FileInterface>,
     action: FileActionKeys,
   ): Promise<Array<Response>> {
     // Does the user have a valid access request for this model?
@@ -242,12 +260,12 @@ export class BasicAuthorisationConnector {
         // If they are not listed on the model, don't let them upload or delete files.
         if (
           ([FileAction.Delete, FileAction.Upload] as FileActionKeys[]).includes(action) &&
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator']))
+          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor']))
         ) {
           return {
             success: false,
             info: 'You do not have permission to upload a file.',
-            id: file.id,
+            id: file._id.toString(),
           }
         }
 
@@ -255,16 +273,16 @@ export class BasicAuthorisationConnector {
           ([FileAction.Download] as FileActionKeys[]).includes(action) &&
           !model.settings.ungovernedAccess &&
           !hasApprovedAccessRequest &&
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator', 'consumer']))
+          (await missingRequiredRole(user, model, ['owner', 'contributor', 'msro', 'mtr', 'consumer']))
         ) {
           return {
             success: false,
             info: 'You need to have an approved access request or have permission to download a file.',
-            id: file.id,
+            id: file._id.toString(),
           }
         }
 
-        return { success: true, id: file.id }
+        return { success: true, id: file._id.toString() }
       }),
     )
   }
@@ -313,7 +331,7 @@ export class BasicAuthorisationConnector {
 
         // If they are not listed on the model, don't let them upload or delete images.
         if (
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator'])) &&
+          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor'])) &&
           actions.includes(ImageAction.Push)
         ) {
           return {
@@ -325,7 +343,7 @@ export class BasicAuthorisationConnector {
 
         if (
           !hasAccessRequest &&
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'collaborator', 'consumer'])) &&
+          (await missingRequiredRole(user, model, ['owner', 'contributor', 'msro', 'mtr', 'consumer'])) &&
           actions.includes(ImageAction.Pull) &&
           !model.settings.ungovernedAccess
         ) {

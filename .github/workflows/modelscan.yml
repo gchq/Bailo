@@ -1,0 +1,43 @@
+name: ModelScan Python REST API Unit Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+          cd lib/modelscan_api
+          python -m pip install -r requirements-dev.txt
+
+      # Pytest
+      - name: Run basic testing
+        run: |
+          cd lib/modelscan_api
+          python -m pytest
+        env:
+          PYTEST_RUN_PATH: "lib/modelscan_api"
+
+      # Pytest -m integration
+      - name: Run integration testing
+        run: |
+          cd lib/modelscan_api
+          python -m pytest -m integration
+        env:
+          PYTEST_RUN_PATH: "lib/modelscan_api"

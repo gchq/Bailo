@@ -1,14 +1,11 @@
 [![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url]
-[![License][license-shield]][license-url]
-
-> **NOTE: `main` branch now tracks `v2` by default. To access the original Bailo, see the `v1` branch. `v1` is in the
-> process of being removed from this project, see [migration]() for more information.**
+[![License][license-shield]][license-url] [![Contributor Covenant][code-of-conduct-shield]][code-of-conduct-url]
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/gchq/bailo">
+  <a href="https://github.com/gchq/Bailo">
     <h1>
       <!-- TODO: Fix #gh-dark-mode-only -->
       <img src="frontend/public/logo-vertical-dark-transparent.png" alt="Logo" width="170">
@@ -21,9 +18,9 @@
     <a href="https://gchq.github.io/Bailo/docs"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/gchq/bailo/issues">Report a Bug</a>
+    <a href="https://github.com/gchq/Bailo/issues">Report a Bug</a>
     ·
-    <a href="https://github.com/gchq/bailo/issues">Request a Feature</a>
+    <a href="https://github.com/gchq/Bailo/issues">Request a Feature</a>
   </p>
 </div>
 
@@ -40,14 +37,16 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#requirements">Requirements</a></li>
         <li><a href="#installation">Installation</a></li>
+        <li><a href="#service-ports">Service Ports</a></li>
+        <li><a href="#logical-project-flow-overview">Logical Project Flow (Overview)</a></li>
+        <li><a href="#known-issues">Known Issues</a></li>
       </ul>
     </li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#breaking">Breaking Changes</a></li>
+    <li><a href="#breaking-changes">Breaking Changes</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
@@ -59,7 +58,7 @@
 
 ## About The Project
 
-[![Product Screen Shot][product-screenshot]](https://github.com/gchq/bailo)
+[![Product Screen Shot][product-screenshot]](https://github.com/gchq/Bailo)
 
 Bailo helps you manage the lifecycle of machine learning to support scalability, impact, collaboration, compliance and
 sharing.
@@ -77,21 +76,21 @@ sharing.
 
 ## Getting Started
 
-### Requirements:
+### Requirements
 
-- Node v18
+- Node v22
 - Docker / Docker Compose
 
 <br />
 
-### Installation:
+### Installation
 
 To run in standalone mode, not development mode (http://localhost:8080). Not for production use:
 
-````bash
+```bash
 docker build -t "bailo:standalone" -f ./Dockerfile.standalone .
 docker run --name bailo -p 8080:8080 -d bailo:standalone
-```bash
+```
 
 To run in development mode (modified files on your host machine will be reloaded into the running application):
 
@@ -105,7 +104,7 @@ docker compose build --parallel
 
 # Then run the development instance of Bailo.
 docker compose up -d
-````
+```
 
 On first run, it may take a while (up to 30 seconds) to start up. It needs to build several hundred TypeScript modules.
 These are cached however, so future starts only require a few seconds. You should access the site via
@@ -117,22 +116,7 @@ JWKS file for the public key referenced in the backend application configuration
 
 <br />
 
-### Setup:
-
-Some example schemas are installed by default. More schemas can be added by altering and running the
-`addDeploymentSchema.ts` and `addUploadSchema.ts` files.
-
-```bash
-npm run script -- addDeploymentSchema
-npm run script -- addUploadSchema
-```
-
-> NOTE: Scripts are also written in Typescript. In production, run them using `node`, in development, run them using
-> `tsx` or `npm run script`.
-
-<br />
-
-### Service Ports:
+### Service Ports
 
 | Service    | Host  | Notes                 |
 | ---------- | ----- | --------------------- |
@@ -150,11 +134,12 @@ something more secure.
 We expect the administrator to provide their own forms of authentication. By default all users authenticate using as
 'user'.
 
-You can test out your new deployment using the example models which can be found in `__tests__`
-[`minimal_binary.zip`](__tests__/example_models/minimal_binary.zip) and
-[`minimal_code.zip`](__tests__/example_models/minimal_code.zip). There are also example forms in the `scripts` folder
-[`minimal_upload_schema_examples.json`](backend/src/scripts/example_schemas/minimal_upload_schema_examples.json) and
-[`minimal_deployment_schema_examples.json`](backend/src/scripts/example_schemas/minimal_deployment_schema_examples.json).
+You can test out your new deployment using the example models which can be found in `frontend/cypress/fixtures`
+[`minimal_binary.zip`](frontend/cypress/fixtures/minimal_binary.zip) and
+[`minimal_code.zip`](frontend/cypress/fixtures/minimal_code.zip). There are also example forms in the `scripts` folder
+[`minimal_model_schema.json`](backend/src/scripts/example_schemas/minimal_model_schema.json),
+[`minimal_data_card_schema.json`](backend/src/scripts/example_schemas/minimal_data_card_schema.json) and
+[`minimal_access_request_schema.json`](backend/src/scripts/example_schemas/minimal_access_request_schema.json).
 
 <br />
 
@@ -164,50 +149,44 @@ You can test out your new deployment using the example models which can be found
 
 1. A user accesses a URL. We use [NextJS routing](https://nextjs.org/docs/routing/introduction) to point it to a file in
    `frontend/pages`. `[xxx].tsx` files accept any route, `xxx.tsx` files allow only that specific route.
-2. Data is loaded using [SWR](https://swr.vercel.app/). Data loaders are stored in `./frontend/data`. Each one exposes
+2. Data is loaded using [SWR](https://swr.vercel.app/). Data loaders are stored in `frontend/actions`. Each one exposes
    variables to specify if it is loading, errored, data, etc.
-3. Requests to the backend get routed through [express](https://expressjs.com/) within `backend/routes.ts`. Each route
-   is an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
-4. Routes interact with the database via `mongoose`, which stores models in `./backend/models`.
-
-Some processing is done away from the main thread, when it is expected to take longer than a few milliseconds. These are
-posted to a `mongodb` queue and processed by handlers in the `backend/processors` folder. Mongodb queues are handled
-invisibly by `p-mongo-queue` (`backend/utils/queues.ts`).
+3. Requests to the backend get routed through [express](https://expressjs.com/) within `backend/src/routes.ts`. Each
+   route is an array with all items being middleware except the last, which is the handler (`[...middleware, handler]`).
+4. Routes interact with the database via `mongoose`, which stores models in `backend/src/models`.
 
 <br />
 
 ### Known Issues
 
-_Issue: Sometimes Docker struggles when you add a new dependency._
+- _Issue: Sometimes Docker struggles when you add a new dependency._ <br /> Fix: Run `docker compose down --rmi all`
+  followed by `docker compose up --build`.
 
-Fix: Run `docker compose down --rmi all` followed by `docker compose up --build`.
+- _Issue: Sometimes SWR fails to install its own binary and the project will refuse to start up (development only)_
+  <br /> Fix: Run `npm uninstall next && npm install next`. Some users report still having issues. If so, run:
+  `rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
 
-_Issue: Sometimes SWR fails to install its own binary and the project will refuse to start up (development only)_
-
-Fix: Run `npm uninstall next && npm install next`. Some users report still having issues. If so, run:
-`rm -rf node_modules && rm -rf package-lock.json && npm cache clean -f && npm i`.
-
-_Issue: Unable to authenticate to the Docker registry / compile binaries._
-
-Fix: Make sure that your authentication proxy is setup to allow the 'Authorisation' header. Make sure that your
-application is able to access the Docker registry internally as it will not provide user authentication.
+- _Issue: Unable to authenticate to the Docker registry / compile binaries._ <br /> Fix: Make sure that your
+  authentication proxy is setup to allow the 'Authorisation' header. Make sure that your application is able to access
+  the Docker registry internally as it will not provide user authentication.
 
 <br />
-
-### Roadmap
-
-List of near term goals:
-
-- Model metrication
-- Instance federation
-
-<br />
-
-<!-- USAGE EXAMPLES -->
 
 ## Usage
 
-See [our user documentation](https://gchq.github.io/Bailo/docs/users/upload-a-model/why-upload-a-model)
+See [our user documentation](https://gchq.github.io/Bailo/docs)
+
+<br />
+
+<!-- ROADMAP -->
+
+## Roadmap
+
+- [ ] Export/Import of Releases with Files.
+- [ ] Model LifeCycle State.
+- [ ] Model Organisation.
+- [ ] Improve Open Source Ways of Working.
+- [ ] Export/Import of Releases with Docker Images.
 
 <br />
 
@@ -215,15 +194,8 @@ See [our user documentation](https://gchq.github.io/Bailo/docs/users/upload-a-mo
 
 ## Contributing
 
-See [our contribution guide](https://gchq.github.io/Bailo/docs/developers/contributing)
-
-<br />
-
-<!-- BREAKING CHANGES -->
-
-## Breaking Changes
-
-**28-04-2022**: Changed 'schema' model to be stored as a string instead of an object. Delete & recreate your schemas.
+If you'd like to make a contribution then the details for doing all of that are in
+[CONTRIBUTING.md](https://github.com/gchq/Bailo/blob/main/CONTRIBUTING.md).
 
 <br />
 
@@ -231,8 +203,8 @@ See [our contribution guide](https://gchq.github.io/Bailo/docs/developers/contri
 
 ## License
 
-Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright. See `LICENSE.txt` for more
-information.
+Bailo is released under the Apache 2.0 Licence and is covered by Crown Copyright. See [LICENSE.txt][license-url] for
+more information.
 
 <br />
 
@@ -240,25 +212,22 @@ information.
 
 ## Acknowledgments
 
-- [Img Shields](https://shields.io)
 - [Othneils's README Template](https://github.com/othneildrew/Best-README-Template)
-- [Mattermost's Code Contribution Guidelines](https://github.com/mattermost/mattermost-server/blob/master/CONTRIBUTING.md)
+- [Stroom's Code Contribution Guidelines](https://github.com/gchq/stroom/blob/master/CONTRIBUTING.md)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
 [contributors-shield]: https://img.shields.io/github/contributors/gchq/bailo.svg?style=for-the-badge
-[contributors-url]: https://github.com/gchq/bailo/graphs/contributors
+[contributors-url]: https://github.com/gchq/Bailo/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/gchq/bailo.svg?style=for-the-badge
-[forks-url]: https://github.com/gchq/bailo/network/members
+[forks-url]: https://github.com/gchq/Bailo/network/members
 [stars-shield]: https://img.shields.io/github/stars/gchq/bailo.svg?style=for-the-badge
-[stars-url]: https://github.com/gchq/bailo/stargazers
+[stars-url]: https://github.com/gchq/Bailo/stargazers
 [issues-shield]: https://img.shields.io/github/issues/gchq/bailo.svg?style=for-the-badge
-[issues-url]: https://github.com/gchq/bailo/issues
+[issues-url]: https://github.com/gchq/Bailo/issues
 [license-shield]: https://img.shields.io/github/license/gchq/bailo.svg?style=for-the-badge
-[license-url]: https://github.com/gchq/bailo/blob/main/public/LICENSE.txt
+[license-url]: https://github.com/gchq/Bailo/blob/main/LICENSE.txt
+[code-of-conduct-shield]: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=for-the-badge
+[code-of-conduct-url]: https://github.com/gchq/Bailo/blob/main/CODE_OF_CONDUCT.md
 [product-screenshot]: frontend/public/images/bailo-marketplace.png
-
-```
-
-```

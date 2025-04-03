@@ -5,6 +5,8 @@ export const ModelAction = {
   View: 'model:view',
   Update: 'model:update',
   Write: 'model:write',
+  Import: 'model:import',
+  Export: 'model:export',
 } as const
 export type ModelActionKeys = (typeof ModelAction)[keyof typeof ModelAction]
 
@@ -13,6 +15,8 @@ export const ReleaseAction = {
   View: 'release:view',
   Delete: 'release:delete',
   Update: 'release:update',
+  Import: 'release:import',
+  Export: 'release:export',
 } as const
 export type ReleaseActionKeys = (typeof ReleaseAction)[keyof typeof ReleaseAction]
 
@@ -37,6 +41,7 @@ export const FileAction = {
   // 'view' refers to the ability to see metadata about the file.  'download' lets the user view the file contents.
   View: 'file:view',
   Download: 'file:download',
+  Update: 'file:update',
 } as const
 export type FileActionKeys = (typeof FileAction)[keyof typeof FileAction]
 
@@ -80,6 +85,7 @@ export const ActionLookup = {
   [FileAction.Upload]: TokenActions.FileWrite.id,
   [FileAction.View]: TokenActions.FileRead.id,
   [FileAction.Download]: TokenActions.FileRead.id,
+  [FileAction.Update]: TokenActions.FileWrite.id,
 
   [ImageAction.Pull]: TokenActions.ImageRead.id,
   [ImageAction.Push]: TokenActions.ImageWrite.id,

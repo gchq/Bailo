@@ -2,14 +2,14 @@ import { Lock, LockOpen } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
 import { patchModel } from 'actions/model'
-import { useGetTeam } from 'actions/team'
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
+import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
+import EntryStateInput from 'src/entry/EntryStateInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import TeamSelect from 'src/TeamSelect'
-import { EntryInterface, EntryKindLabel, TeamInterface, UpdateEntryForm } from 'types/types'
+import { EntryInterface, EntryKindLabel, UpdateEntryForm } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toSentenceCase, toTitleCase } from 'utils/stringUtils'
 
@@ -18,21 +18,17 @@ type EntryDetailsProps = {
 }
 
 export default function EntryDetails({ entry }: EntryDetailsProps) {
-  const [team, setTeam] = useState<TeamInterface | undefined>()
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description)
+  const [organisation, setOrganisation] = useState(entry.organisation || '')
+  const [state, setState] = useState(entry.state || '')
   const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   const sendNotification = useNotification()
-  const { team: entryTeam, isTeamLoading, isTeamError } = useGetTeam(entry.teamId)
 
-  useEffect(() => {
-    setTeam(entryTeam)
-  }, [entryTeam])
-
-  const isFormValid = useMemo(() => team && name && description, [team, name, description])
+  const isFormValid = useMemo(() => name && description, [name, description])
 
   const saveButtonTooltip = useMemo(() => {
     if (!isFormValid) {
@@ -48,9 +44,10 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
 
     const formData: UpdateEntryForm = {
       name,
-      teamId: team?.id ?? 'Uncategorised',
       description,
       visibility,
+      organisation: organisation || '',
+      state: state || '',
     }
     const response = await patchModel(entry.id, formData)
 
@@ -94,10 +91,6 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
     )
   }
 
-  if (isTeamError) {
-    return <MessageAlert message={isTeamError.info.message} severity='error' />
-  }
-
   return (
     <Box component='form' onSubmit={onSubmit}>
       <Stack divider={<Divider orientation='vertical' flexItem />} spacing={2}>
@@ -105,11 +98,10 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
           <Typography variant='h6' component='h2'>
             {`${toTitleCase(EntryKindLabel[entry.kind])} Details`}
           </Typography>
-          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-            <TeamSelect value={team} loading={isTeamLoading} onChange={(value) => setTeam(value)} />
-            <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
-          </Stack>
+          <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
+          <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
+          <EntryStateInput value={state} onChange={(value) => setState(value)} />
         </>
         <Divider />
         <>

@@ -7,7 +7,6 @@ import ListAltIcon from '@mui/icons-material/ListAlt'
 import SchemaIcon from '@mui/icons-material/Schema'
 import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
-import { useTheme } from '@mui/material/styles'
 import { styled } from '@mui/material/styles'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForUser } from 'actions/review'
@@ -16,8 +15,6 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { NavMenuItem } from 'src/wrapper/NavMenuItem'
 import { User } from 'types/types'
-
-import { DRAWER_WIDTH } from '../../utils/constants'
 
 const StyledList = styled(List)(({ theme }) => ({
   paddingTop: 0,
@@ -32,28 +29,35 @@ const StyledList = styled(List)(({ theme }) => ({
   },
 }))
 
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme }) => ({
   '& .MuiDrawer-paper': {
     position: 'relative',
     whiteSpace: 'nowrap',
-    width: DRAWER_WIDTH,
+    width: 'fit-content',
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
     boxSizing: 'border-box',
-    ...(!open && {
-      overflowX: 'hidden',
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      width: theme.spacing(7),
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9),
-      },
-    }),
   },
+  variants: [
+    {
+      props: ({ open }) => !open,
+      style: {
+        '& .MuiDrawer-paper': {
+          overflowX: 'hidden',
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
+          width: theme.spacing(7),
+          [theme.breakpoints.up('sm')]: {
+            width: theme.spacing(9),
+          },
+        },
+      },
+    },
+  ],
 }))
 
 export interface SideNavigationProps {
@@ -77,8 +81,6 @@ export default function SideNavigation({
   const [reviewCount, setReviewCount] = useState(0)
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses(reviews.map((review) => review._id))
-
-  const theme = useTheme()
 
   useEffect(() => {
     async function fetchReviewCount() {
@@ -109,12 +111,12 @@ export default function SideNavigation({
     <Drawer sx={pageTopStyling} variant='permanent' open={drawerOpen}>
       {(isReviewsLoading || isResponsesLoading) && <Loading />}
       <Toolbar
-        sx={{
+        sx={(theme) => ({
           alignItems: 'center',
           justifyContent: 'flex-end',
           px: [1],
           borderBottom: `1px solid ${theme.palette.divider}`,
-        }}
+        })}
       />
       {drawerOpen !== undefined && (
         <Stack sx={{ height: '100%' }} justifyContent='space-between'>

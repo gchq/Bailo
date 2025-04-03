@@ -7,7 +7,7 @@ import { ReleaseDoc } from '../models/Release.js'
 import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
-import { BadReq, NotFound } from '../utils/error.js'
+import { BadReq, InternalError, NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
@@ -17,6 +17,8 @@ const requiredRoles = {
   release: ['mtr', 'msro'],
   accessRequest: ['msro'],
 }
+
+export const allReviewRoles = [...new Set(requiredRoles.release.concat(requiredRoles.accessRequest))]
 
 export async function findReviews(
   user: UserInterface,
@@ -89,6 +91,26 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
+export async function removeAccessRequestReviews(accessRequestId: string) {
+  // finding and then calling potentially multiple deletes is inefficient but the mongoose-softdelete
+  // plugin doesn't cover bulkDelete
+  const accessRequestReviews = await findReviewsForAccessRequests([accessRequestId])
+
+  const deletions: ReviewDoc[] = []
+  for (const accessRequestReview of accessRequestReviews) {
+    try {
+      deletions.push(await accessRequestReview.delete())
+    } catch (error) {
+      throw InternalError('The requested access request review could not be deleted.', {
+        accessRequestId,
+        error,
+      })
+    }
+  }
+
+  return deletions
+}
+
 export async function findReviewForResponse(
   user: UserInterface,
   modelId: string,
@@ -135,7 +157,7 @@ export async function findReviewForResponse(
 
 //TODO This won't work for response refactor
 export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
-  const reviews = await Review.find({
+  const reviews: ReviewDoc[] = await Review.find({
     accessRequestId: accessRequestIds,
   })
   return reviews.filter((review) => requiredRoles.accessRequest.includes(review.role))

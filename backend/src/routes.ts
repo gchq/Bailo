@@ -10,8 +10,11 @@ import { getDockerRegistryAuth } from './routes/v1/registryAuth.js'
 import { getCurrentUser } from './routes/v2/entities/getCurrentUser.js'
 import { getEntities } from './routes/v2/entities/getEntities.js'
 import { getEntityLookup } from './routes/v2/entities/getEntityLookup.js'
+import { getFilescanningInfo } from './routes/v2/filescanning/getFilescanningInfo.js'
+import { putFileScan } from './routes/v2/filescanning/putFileScan.js'
 import { deleteAccessRequest } from './routes/v2/model/accessRequest/deleteAccessRequest.js'
 import { getAccessRequest } from './routes/v2/model/accessRequest/getAccessRequest.js'
+import { getAccessRequestCurrentUserPermissions } from './routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
 import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModelAccessRequests.js'
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
@@ -23,6 +26,7 @@ import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMult
 import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
 import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
 import { getModel } from './routes/v2/model/getModel.js'
+import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
@@ -38,6 +42,8 @@ import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
+import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
+import { getAllModelReviewRoles } from './routes/v2/model/roles/getAllModelReviewRoles.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
@@ -62,10 +68,6 @@ import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'
 import { getSpecification } from './routes/v2/specification.js'
-import { patchTeam } from './routes/v2/team/getMyTeams.js'
-import { getTeam } from './routes/v2/team/getTeam.js'
-import { getTeams } from './routes/v2/team/getTeams.js'
-import { postTeam } from './routes/v2/team/postTeam.js'
 import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
@@ -92,6 +94,7 @@ server.get('/api/v2/model/:modelId', ...getModel)
 server.patch('/api/v2/model/:modelId', ...patchModel)
 
 server.post('/api/v2/model/:modelId/export/s3', ...postRequestExportToS3)
+server.post('/api/v2/model/import/s3', ...postRequestImportFromS3)
 
 server.get('/api/v2/model/:modelId/model-card/:version', ...getModelCard)
 server.get('/api/v2/model/:modelId/model-card/:version/html', ...getModelCardHtml)
@@ -119,6 +122,10 @@ server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...delet
 server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/comment', ...postAccessRequestComment)
 server.post('/api/v2/model/:modelId/access-request/:accessRequestId/review', ...postAccessRequestReviewResponse)
+server.get(
+  '/api/v2/model/:modelId/access-request/:accessRequestId/permissions/mine',
+  ...getAccessRequestCurrentUserPermissions,
+)
 
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
@@ -128,15 +135,6 @@ server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
-server.post('/api/v2/model/:modelId/releases', ...postRelease)
-server.get('/api/v2/model/:modelId/releases', ...getReleases)
-server.get('/api/v2/model/:modelId/release/:semver', ...getRelease)
-server.get('/api/v2/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
-// This is a temporary workaround to split out the URL to disable authorisation.
-server.get('/api/v2/token/model/:modelId/release/:semver/file/:fileName/download', ...getDownloadFile)
-server.put('/api/v2/model/:modelId/release/:semver', ...putRelease)
-server.post('/api/v2/model/:modelId/release/:semver/comment', ...postReleaseComment)
-server.delete('/api/v2/model/:modelId/release/:semver', ...deleteRelease)
 
 server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
@@ -162,6 +160,7 @@ if (!config.ui?.inference || config.ui.inference?.enabled) {
   server.post('/api/v2/model/:modelId/inference', ...postInference)
   server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
 }
+
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
@@ -172,27 +171,15 @@ server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/reviews', ...getReviews)
-
 server.get('/api/v2/responses', ...getResponses)
 server.patch('/api/v2/response/:responseId', ...patchResponse)
 server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReaction)
 
 server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
 server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
+server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
 
-server.post('/api/v2/teams', ...postTeam)
-server.get('/api/v2/teams', ...getTeams)
-server.get('/api/v2/teams/mine', ...getTeams)
-
-server.get('/api/v2/team/:teamId', ...getTeam)
-server.patch('/api/v2/team/:teamId', ...patchTeam)
-
-// server.post('/api/v2/teams/:teamId/members', ...postTeamMember)
-// server.get('/api/v2/teams/:teamId/members', ...getTeamMembers)
-// server.delete('/api/v2/teams/:teamId/members/:memberId', ...deleteTeamMember)
-// server.patch('/api/v2/teams/:teamId/members/:memberId', ...patchTeamMember)
-
-// server.get('/api/v2/teams/:teamId/roles/:memberId', ...getTeamMemberRoles)
+server.get('/api/v2/roles/review', ...getAllModelReviewRoles)
 
 server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
@@ -208,9 +195,12 @@ server.delete('/api/v2/user/token/:accessKey', ...deleteUserToken)
 
 server.get('/api/v2/specification', ...getSpecification)
 
+server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
+server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
+
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/_build/dirhtml')))
+server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
 
 server.use('/api/v2', expressErrorHandler)

@@ -62,9 +62,21 @@ module.exports = {
   },
 
   avScanning: {
-    enabled: true,
     clamdscan: {
       host: 'clamd',
+    },
+
+    modelscan: {
+      host: 'modelscan',
+    },
+  },
+
+  connectors: {
+    fileScanners: {
+      kinds: ['clamAV', 'modelScan'],
+      retryDelayInMinutes: 60,
+      maxInitRetries: 5,
+      initRetryDelay: 5000,
     },
   },
 }

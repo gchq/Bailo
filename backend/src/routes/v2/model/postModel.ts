@@ -7,14 +7,19 @@ import audit from '../../../connectors/audit/index.js'
 import { EntryKind, EntryVisibility, ModelInterface } from '../../../models/Model.js'
 import { createModel } from '../../../services/model.js'
 import { modelInterfaceSchema, registerPath } from '../../../services/specification.js'
+import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
+
+const organisationsList = [...config.ui.modelDetails.organisations, '']
+const statesList = [...config.ui.modelDetails.states, '']
 
 export const postModelSchema = z.object({
   body: z.object({
-    name: z.string(),
-    kind: z.nativeEnum(EntryKind),
-    teamId: z.string(),
-    description: z.string(),
+    name: z.string().min(1, 'You must provide a model name').openapi({ example: 'Yolo v4' }),
+    kind: z.nativeEnum(EntryKind).openapi({ example: 'model' }),
+    organisation: z.enum(organisationsList as [string, ...string[]]).optional(),
+    state: z.enum(statesList as [string, ...string[], '']).optional(),
+    description: z.string().min(1, 'You must provide a model description').openapi({ example: 'You only look once' }),
     visibility: z.nativeEnum(EntryVisibility).optional().default(EntryVisibility.Public),
     collaborators: z
       .array(
