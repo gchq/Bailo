@@ -33,6 +33,10 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
   const [checkedFiles, setCheckedFiles] = useState<FileInterface[]>([])
 
   const handleAddFilesOnClick = () => {
+    if (checkedFiles.length === 0) {
+      setIsDialogOpen(false)
+      return
+    }
     if (existingReleaseFiles) {
       const updatedFiles = [
         ...existingReleaseFiles.filter((existingFile) =>
@@ -128,7 +132,10 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
         <DialogTitle>Select an existing file for {model.name}</DialogTitle>
         <DialogContent>{fileList}</DialogContent>
         <DialogActions>
-          <Button onClick={handleAddFilesOnClick}>Add files</Button>
+          <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
+          <Button onClick={handleAddFilesOnClick} disabled={checkedFiles.length === 0}>
+            Add files
+          </Button>
         </DialogActions>
       </Dialog>
     </>
