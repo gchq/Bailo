@@ -24,11 +24,20 @@ import Loading from 'src/common/Loading'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { FileInterface, isFileInterface, ScanState } from 'types/types'
+import { KeyedMutator } from 'swr'
+import { FileInterface, isFileInterface, ReleaseInterface, ScanState } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
+
+type MutateReleases = KeyedMutator<{
+  releases: ReleaseInterface[]
+}>
+
+type MutateFiles = KeyedMutator<{
+  files: FileInterface[]
+}>
 
 type FileDownloadProps = {
   modelId: string
@@ -38,6 +47,7 @@ type FileDownloadProps = {
     deleteFile?: boolean
     rescanFile?: boolean
   }
+  mutator?: MutateReleases | MutateFiles
 }
 
 interface ChipDetails {
@@ -50,6 +60,7 @@ export default function FileDownload({
   modelId,
   file,
   showMenuItems = { associatedReleases: false, deleteFile: false, rescanFile: false },
+  mutator = undefined,
 }: FileDownloadProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
@@ -125,7 +136,7 @@ export default function FileDownload({
     if (chipDisplay === undefined) {
       updateChipDetails()
     }
-  }, [updateChipDetails, chipDisplay])
+  }, [updateChipDetails, chipDisplay, file])
 
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
@@ -144,7 +155,6 @@ export default function FileDownload({
 
   const handleRerunFileScanOnClick = useCallback(async () => {
     const res = await rerunFileScan(modelId, (file as FileInterface)._id)
-    setChipDisplay({ label: 'File is being rescanned...', colour: 'warning', icon: <Warning /> })
     if (!res.ok) {
       sendNotification({
         variant: 'error',
@@ -157,8 +167,11 @@ export default function FileDownload({
         msg: `${file.name} is being rescanned`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      if (mutator) {
+        mutator()
+      }
     }
-  }, [file, modelId, sendNotification])
+  }, [file, modelId, sendNotification, mutator])
 
   const rerunFileScanButton = useMemo(() => {
     return (
