@@ -506,11 +506,6 @@ jobs:
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
-      # wait for mlflow to start
-      - run: |
-          chmod +x ./backend/src/scripts/waitForIt.sh
-          ./backend/src/scripts/waitForIt.sh localhost:5050 -t 10
-
       # Setup python
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
@@ -526,8 +521,14 @@ jobs:
           python -m pip install -e .[test]
 
       # start mlflow server
-      - run: |
+      - name: Start MLFlow
+        run: |
           mlflow server --host 127.0.0.1 --port 5050 & MLFLOW_PID=$!
+
+      # wait for mlflow to start
+      - run: |
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:5050 -t 10
 
       # Run tests
       - name: Test with pytest
@@ -539,7 +540,8 @@ jobs:
           PYTEST_RUN_PATH: "lib/python"
 
       # stop mlflow server
-      - run: |
+      - name: Stop MLFlow
+        run: |
           kill -9 ${MLFLOW_PID}
 
       - name: Dump docker compose logs
