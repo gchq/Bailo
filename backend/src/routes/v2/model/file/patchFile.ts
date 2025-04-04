@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
 import { FileInterface } from '../../../../models/File.js'
 import { updateFile } from '../../../../services/file.js'
 import { fileWithScanInterfaceSchema, registerPath } from '../../../../services/specification.js'
@@ -48,7 +50,7 @@ interface PostModelResponse {
 export const patchFile = [
   bodyParser.json(),
   async (req: Request, res: Response<PostModelResponse>) => {
-    //req.audit = AuditInfo.PatchFile
+    req.audit = AuditInfo.UpdateFile
     const {
       params: { modelId, fileId },
       body: { metadata },
@@ -56,7 +58,7 @@ export const patchFile = [
 
     const file = await updateFile(req.user, modelId, fileId, metadata)
 
-    //await audit.on(req, model)
+    await audit.onUpdateFile(req, modelId, fileId)
 
     return res.json({ file })
   },

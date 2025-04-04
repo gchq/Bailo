@@ -19,7 +19,7 @@ export interface FileInterface {
 
   complete: boolean
 
-  tags?: string[]
+  tags: string[]
 
   createdAt: Date
   updatedAt: Date

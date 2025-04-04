@@ -309,7 +309,7 @@ export async function updateFile(
   user: UserInterface,
   modelId: string,
   fileId: string,
-  metadata: Pick<FileInterface, 'tags'>,
+  metadata: Partial<FileInterface>,
 ) {
   const file = await getFileById(user, fileId)
   if (!file) {
@@ -324,7 +324,9 @@ export async function updateFile(
     throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
   }
 
-  const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: metadata.tags } })
+  if (metadata.tags) {
+    await FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: metadata.tags } })
+  }
 
-  return updatedFile
+  return file
 }
