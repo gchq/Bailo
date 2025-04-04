@@ -306,7 +306,7 @@ export default function FileDownload({
               <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
               <Typography variant='caption'>
                 Uploaded on
-                <span style={{ fontWeight: 'bold' }}>{` ${formatDateTimeString(file.createdAt.toString())}`}</span>
+                <span style={{ fontWeight: 'bold' }}>{`${formatDateTimeString(file.createdAt.toString())}`}</span>
               </Typography>
             </Stack>
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>

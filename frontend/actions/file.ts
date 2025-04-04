@@ -56,7 +56,7 @@ export async function postFileForModelId(
   return fileResponse
 }
 
-export async function patchFile(modelId: string, fileId: string, metadata: Partial<FileInterface>) {
+export async function patchFile(modelId: string, fileId: string, metadata: Pick<FileInterface, 'tags'>) {
   try {
     const response = await axios({
       method: 'patch',

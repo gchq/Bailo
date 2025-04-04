@@ -20,7 +20,7 @@ export default function FileTagSelector({ anchorEl, setAnchorEl, onChange, tags 
       }}
     >
       <Box sx={{ p: 2 }}>
-        <TagSelector value={tags} onChange={onChange} label={''} formContext={{ editMode: true }} />{' '}
+        <TagSelector value={tags} onChange={onChange} label={''} formContext={{ editMode: true }} />
       </Box>
     </Popover>
   )
