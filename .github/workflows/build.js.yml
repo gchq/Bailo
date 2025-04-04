@@ -542,7 +542,7 @@ jobs:
       # stop mlflow server
       - name: Stop MLFlow
         run: |
-          kill -9 ${MLFLOW_PID}
+          kill -n 9 ${MLFLOW_PID}
 
       - name: Dump docker compose logs
         if: always()
