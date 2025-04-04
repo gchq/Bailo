@@ -12,6 +12,7 @@ import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
+import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -19,9 +20,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import MessageAlert from 'src/MessageAlert'
 import {
   EntryKind,
-  FailedFileUpload,
   FileInterface,
-  FileUploadProgress,
   FileWithMetadata,
   FlattenedModelImage,
   isFileInterface,

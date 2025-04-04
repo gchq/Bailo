@@ -73,6 +73,7 @@ export default function NewRelease() {
     event.preventDefault()
 
     setFailedFileUploads([])
+    const failedFiles: FailedFileUpload[] = []
 
     if (!model) {
       return setErrorMessage('Please wait for the model to finish loading before trying to make a release.')
@@ -117,12 +118,13 @@ export default function NewRelease() {
           }
         } catch (e) {
           if (e instanceof Error) {
-            setFailedFileUploads([...failedFileUploads, { fileName: file.name, error: e.message }])
+            failedFiles.push({ fileName: file.name, error: e.message })
             setCurrentFileUploadProgress(undefined)
           }
         }
       }
     }
+    setFailedFileUploads(failedFiles)
 
     const updatedSuccessfulFiles = successfulFiles.reduce(
       (updatedFiles, file) => {

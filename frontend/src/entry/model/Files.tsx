@@ -57,6 +57,8 @@ export default function Files({ model }: FilesProps) {
   const handleAddNewFiles = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       setIsFilesUploading(true)
+      setFailedFileUploads([])
+      const failedFiles: FailedFileUpload[] = []
       const files = event.target.files ? Array.from(event.target.files) : []
       setTotalFilesToUpload(files.length)
       for (const file of files) {
@@ -78,12 +80,14 @@ export default function Files({ model }: FilesProps) {
           }
         } catch (e) {
           if (e instanceof Error) {
+            failedFiles.push({ fileName: file.name, error: e.message })
             setFailedFileUploads([...failedFileUploads, { fileName: file.name, error: e.message }])
             setCurrentFileUploadProgress(undefined)
           }
         }
       }
       setUploadedFiles([])
+      setFailedFileUploads(failedFiles)
       setTotalFilesToUpload(0)
       setIsFilesUploading(false)
     },
