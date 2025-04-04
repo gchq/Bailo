@@ -506,6 +506,15 @@ jobs:
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
+      # start mlflow server
+      - run: |
+          mlflow server --host 127.0.0.1 --port 5050 & MLFLOW_PID=$!
+
+      # wait for mlflow to start
+      - run: |
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:5050 -t 10
+
       # Setup python
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
@@ -525,6 +534,7 @@ jobs:
         run: |
           cd lib/python
           python -m pytest -m integration
+          python -m pytest -m mlflow
         env:
           PYTEST_RUN_PATH: "lib/python"
 
