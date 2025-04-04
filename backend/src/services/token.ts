@@ -127,7 +127,7 @@ export async function validateTokenForUse(token: TokenDoc | undefined, action: T
 
   if (token.scope === TokenScope.Models) {
     return {
-      id: token._id,
+      id: token._id.toString(),
       success: false,
       info: 'This token must not have model restrictions for this endpoint',
     }
@@ -135,14 +135,14 @@ export async function validateTokenForUse(token: TokenDoc | undefined, action: T
 
   if (token.actions && !token.actions.includes(action)) {
     return {
-      id: token._id,
+      id: token._id.toString(),
       success: false,
       info: 'This token may not be used for this action',
     }
   }
 
   return {
-    id: token._id,
+    id: token._id.toString(),
     success: true,
   }
 }

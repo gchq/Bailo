@@ -178,7 +178,7 @@ export class BasicAuthorisationConnector {
   async releases(
     user: UserInterface,
     model: ModelDoc,
-    releases: Array<ReleaseDoc>,
+    releases: Array<ReleaseDoc | Omit<ReleaseDoc, '_id'>>,
     action: ReleaseActionKeys,
   ): Promise<Array<Response>> {
     // We don't have any specific roles dedicated to releases, so we pass it through to the model authorisation checker.
