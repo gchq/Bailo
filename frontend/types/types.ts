@@ -87,6 +87,8 @@ export interface FileInterface {
   // Older files may not have AV run against them
   avScan?: AvScanResult[]
 
+  tags?: string[]
+
   createdAt: Date
   updatedAt: Date
 }

@@ -304,3 +304,27 @@ export async function saveImportedFile(file: FileInterface) {
     upsert: true,
   })
 }
+
+export async function updateFile(
+  user: UserInterface,
+  modelId: string,
+  fileId: string,
+  metadata: Pick<FileInterface, 'tags'>,
+) {
+  const file = await getFileById(user, fileId)
+  if (!file) {
+    throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
+  }
+  const model = await getModelById(user, modelId)
+  if (!model) {
+    throw BadReq('Cannot find requested model', { modelId: modelId })
+  }
+  const patchFileAuth = await authorisation.file(user, model, file, FileAction.Update)
+  if (!patchFileAuth.success) {
+    throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
+  }
+
+  const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: metadata.tags } })
+
+  return updatedFile
+}

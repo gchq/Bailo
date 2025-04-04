@@ -1,7 +1,8 @@
 import axios, { AxiosProgressEvent } from 'axios'
 import qs from 'querystring'
 import useSWR from 'swr'
-import { FileWithScanResultsInterface } from 'types/types'
+import { FileInterface, FileWithScanResultsInterface } from 'types/types'
+import { handleAxiosError } from 'utils/axios'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyFilesList = []
@@ -53,4 +54,18 @@ export async function postFileForModelId(
       }
     })
   return fileResponse
+}
+
+export async function patchFile(modelId: string, fileId: string, metadata: Partial<FileInterface>) {
+  try {
+    const response = await axios({
+      method: 'patch',
+      url: `/api/v2/model/${modelId}/file/${fileId}`,
+      headers: { 'Content-Type': 'application/json' },
+      data: { metadata: metadata },
+    })
+    return { status: response.status, data: response.data }
+  } catch (error) {
+    return handleAxiosError(error)
+  }
 }

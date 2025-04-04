@@ -1,5 +1,6 @@
-import { Delete, Done, Error, Info, MoreVert, Refresh, Warning } from '@mui/icons-material'
+import { Delete, Done, Error, Info, LocalOffer, MoreVert, Refresh, Warning } from '@mui/icons-material'
 import {
+  Button,
   Chip,
   Divider,
   IconButton,
@@ -13,6 +14,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { patchFile } from 'actions/file'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import { deleteModelFile, useGetModelFiles } from 'actions/model'
 import { useGetReleasesForModelId } from 'actions/release'
@@ -22,6 +24,7 @@ import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, us
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
+import FileTagSelector from 'src/entry/model/releases/FileTagSelector'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
@@ -41,7 +44,7 @@ type MutateFiles = KeyedMutator<{
 
 type FileDownloadProps = {
   modelId: string
-  file: FileInterface | File
+  file: FileInterface
   showMenuItems?: {
     associatedReleases?: boolean
     deleteFile?: boolean
@@ -64,9 +67,11 @@ export default function FileDownload({
 }: FileDownloadProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
+  const [anchorElFileTag, setAnchorElFileTag] = useState<HTMLButtonElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
   const [deleteFileOpen, setDeleteFileOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
+
   const { mutateEntryFiles } = useGetModelFiles(modelId)
   const router = useRouter()
 
@@ -257,6 +262,14 @@ export default function FileDownload({
     )
   }, [anchorElScan, chipDisplay, file, openScan])
 
+  const handleFileTagSelectorOnChange = useCallback(
+    (newTags: string[]) => {
+      patchFile(modelId, file._id, { tags: newTags })
+      mutateEntryFiles()
+    },
+    [file, mutateEntryFiles, modelId],
+  )
+
   if (isFileInterface(file) && !file.complete) {
     return (
       <Typography>
@@ -280,17 +293,21 @@ export default function FileDownload({
   return (
     <>
       {isFileInterface(file) && (
-        <Stack>
+        <Stack spacing={2} divider={<Divider />}>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems={{ sm: 'center', md: 'flex-end' }}>
+            <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center'>
               <Tooltip title={file.name}>
                 <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
-                  <Typography textOverflow='ellipsis' overflow='hidden'>
+                  <Typography textOverflow='ellipsis' overflow='hidden' variant='h6'>
                     {file.name}
                   </Typography>
                 </Link>
               </Tooltip>
               <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+              <Typography variant='caption'>
+                Uploaded on
+                <span style={{ fontWeight: 'bold' }}>{` ${formatDateTimeString(file.createdAt.toString())}`}</span>
+              </Typography>
             </Stack>
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
               {scanners.length > 0 && (
@@ -339,11 +356,31 @@ export default function FileDownload({
               </Stack>
             </Stack>
           </Stack>
-          <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Typography variant='caption'>
-              Uploaded on
-              <span style={{ fontWeight: 'bold' }}>{` ${formatDateTimeString(file.createdAt.toString())}`}</span>
-            </Typography>
+          <Stack spacing={1}>
+            <Button
+              sx={{ width: 'fit-content' }}
+              size='small'
+              startIcon={<LocalOffer />}
+              onClick={(event) => setAnchorElFileTag(event.currentTarget)}
+            >
+              Apply file tags
+            </Button>
+            {(!file.tags || file.tags.length === 0) && <Typography variant='caption'>None applied</Typography>}
+            {file.tags && (
+              <>
+                <Stack direction='row' spacing={1}>
+                  {file.tags.map((fileTag) => {
+                    return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content' }} />
+                  })}
+                </Stack>
+                <FileTagSelector
+                  anchorEl={anchorElFileTag}
+                  setAnchorEl={setAnchorElFileTag}
+                  onChange={handleFileTagSelectorOnChange}
+                  tags={file.tags || []}
+                />
+              </>
+            )}
           </Stack>
         </Stack>
       )}

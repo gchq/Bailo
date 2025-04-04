@@ -21,7 +21,14 @@ import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FileInterface, FileUploadProgress, FileWithMetadata, FlattenedModelImage } from 'types/types'
+import {
+  EntryInterface,
+  FileInterface,
+  FileUploadProgress,
+  FileWithMetadata,
+  FlattenedModelImage,
+  isFileInterface,
+} from 'types/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -268,15 +275,18 @@ export default function ReleaseForm({
         )}
         <Stack spacing={1}>
           {isReadOnly &&
-            formData.files.map((file) => (
-              <FileDownload
-                key={file.name}
-                file={file}
-                modelId={model.id}
-                showMenuItems={{ rescanFile: true }}
-                mutator={mutateReleases}
-              />
-            ))}
+            formData.files.map(
+              (file) =>
+                isFileInterface(file) && (
+                  <FileDownload
+                    key={file.name}
+                    file={file}
+                    modelId={model.id}
+                    showMenuItems={{ rescanFile: true }}
+                    mutator={mutateReleases}
+                  />
+                ),
+            )}
         </Stack>
         {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
       </Stack>

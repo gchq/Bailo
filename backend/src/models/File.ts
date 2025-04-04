@@ -19,6 +19,8 @@ export interface FileInterface {
 
   complete: boolean
 
+  tags?: string[]
+
   createdAt: Date
   updatedAt: Date
 }
@@ -40,6 +42,8 @@ const FileSchema = new Schema<FileInterfaceDoc>(
 
     bucket: { type: String, required: true },
     path: { type: String, required: true },
+
+    tags: [{ type: String }],
 
     complete: { type: Boolean, default: false },
   },
