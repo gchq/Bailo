@@ -264,7 +264,7 @@ export default function FileDownload({
 
   const handleFileTagSelectorOnChange = useCallback(
     (newTags: string[]) => {
-      patchFile(modelId, file._id, { tags: newTags })
+      patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
       mutateEntryFiles()
     },
     [file, mutateEntryFiles, modelId],
