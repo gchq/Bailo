@@ -7,6 +7,7 @@ import audit from '../../../../connectors/audit/index.js'
 import { FileInterface } from '../../../../models/File.js'
 import { updateFile } from '../../../../services/file.js'
 import { fileWithScanInterfaceSchema, registerPath } from '../../../../services/specification.js'
+import { BadReq } from '../../../../utils/error.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const patchFileSchema = z.object({
@@ -57,6 +58,10 @@ export const patchFile = [
     } = parse(req, patchFileSchema)
 
     const file = await updateFile(req.user, modelId, fileId, metadata)
+
+    if (!file) {
+      throw BadReq('There was a problem updating this file')
+    }
 
     await audit.onUpdateFile(req, modelId, fileId)
 

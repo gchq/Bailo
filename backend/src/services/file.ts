@@ -324,9 +324,10 @@ export async function updateFile(
     throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
   }
 
-  if (metadata.tags) {
-    await FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: metadata.tags } })
-  }
+  const updatedFile = FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: metadata.tags } })
 
-  return file
+  if (!updatedFile) {
+    throw BadReq('There was a problem updating the file', { modelId: modelId, fileId: fileId })
+  }
+  return updatedFile
 }
