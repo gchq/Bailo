@@ -365,22 +365,20 @@ export default function FileDownload({
             >
               Apply file tags
             </Button>
-            {(!file.tags || file.tags.length === 0) && <Typography variant='caption'>None applied</Typography>}
-            {file.tags && (
-              <>
-                <Stack direction='row' spacing={1}>
-                  {file.tags.map((fileTag) => {
-                    return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content' }} />
-                  })}
-                </Stack>
-                <FileTagSelector
-                  anchorEl={anchorElFileTag}
-                  setAnchorEl={setAnchorElFileTag}
-                  onChange={handleFileTagSelectorOnChange}
-                  tags={file.tags || []}
-                />
-              </>
-            )}
+            {file.tags.length === 0 && <Typography variant='caption'>None applied</Typography>}
+            <>
+              <Stack direction='row' spacing={1}>
+                {file.tags.map((fileTag) => {
+                  return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content' }} />
+                })}
+              </Stack>
+              <FileTagSelector
+                anchorEl={anchorElFileTag}
+                setAnchorEl={setAnchorElFileTag}
+                onChange={handleFileTagSelectorOnChange}
+                tags={file.tags || []}
+              />
+            </>
           </Stack>
         </Stack>
       )}
