@@ -71,6 +71,8 @@ import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'
 import { getSpecification } from './routes/v2/specification.js'
+import { getPeerStatus } from './routes/v2/system/peers.js'
+import { getSystemStatus } from './routes/v2/system/status.js'
 import { getUiConfig } from './routes/v2/uiConfig/getUiConfig.js'
 import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
@@ -88,6 +90,9 @@ for (const middlewareConf of middlewareConfigs) {
 }
 
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
+
+server.get('/api/v2/system/status', ...getSystemStatus)
+server.get('/api/v2/system/peers', ...getPeerStatus)
 
 server.post('/api/v2/models', ...postModel)
 server.get('/api/v2/models/search', ...getModelsSearch)
