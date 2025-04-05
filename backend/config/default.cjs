@@ -53,6 +53,10 @@ module.exports = {
     insecure: true,
   },
 
+  federation: {
+    state: 'disabled',
+  },
+
   smtp: {
     // Enable / disable all email sending
     enabled: true,
