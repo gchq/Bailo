@@ -55,6 +55,21 @@ export interface AccessRequestUserPermissions {
   deleteAccessRequest: PermissionDetail
 }
 
+export const FederationState = {
+  DISABLED: 'disabled',
+  READ_ONLY: 'readOnly',
+  ENABLED: 'enabled',
+} as const
+
+export type FederationStateKeys = (typeof FederationState)[keyof typeof FederationState]
+
+export interface RemoteFederationConfig {
+  id: string
+  state: FederationStateKeys
+  baseUrl: string
+  label: string
+}
+
 export interface UiConfig {
   banner: {
     enabled: boolean

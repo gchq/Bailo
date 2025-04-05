@@ -7,6 +7,7 @@ import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
+import { FederationState } from '../types/types.js'
 
 export const registry = new OpenAPIRegistry()
 
@@ -46,6 +47,15 @@ export const errorSchemaContent = {
     }),
   },
 }
+
+export const systemStatusSchema = z.object({
+  code: z.number().openapi({ example: 200 }),
+  ping: z.string().openapi({ example: 'pong' }),
+  federation: z.object({
+    id: z.string().openapi({ example: 'my-bailo' }),
+    state: z.nativeEnum(FederationState).openapi({ example: 'readOnly' }),
+  }),
+})
 
 export const modelCardInterfaceSchema = z.object({
   schemaId: z.string().openapi({ example: 'minimal-general-v10-beta' }),
