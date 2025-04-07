@@ -32,7 +32,7 @@ export default function Files({ model }: FilesProps) {
     [ASCorDESC, orderByValue],
   )
 
-  const checkMenuOption = useCallback(
+  const checkmarkMenuOption = useCallback(
     (menuOption: string) => {
       if (menuOption === orderByValue) {
         return <Check sx={{ width: '100%' }} color='primary' />
@@ -61,6 +61,32 @@ export default function Files({ model }: FilesProps) {
   const handleMenuButtonClose = () => {
     setAnchorEl(null)
   }
+
+  const orderByMenuListItems = useCallback(
+    (value, title) => (
+      <MenuItem
+        onClick={() => {
+          setOrderByValue(value)
+          setOrderByButtonTitle(title)
+        }}
+        sx={{ paddingX: '8px' }}
+        selected={selectedMenuOption(value)}
+      >
+        <Grid2 container sx={{ minWidth: '200px' }}>
+          <Grid2 size={2}>{checkmarkMenuOption(value)}</Grid2>
+          <Grid2 size={2}>
+            <ListItemIcon>
+              {value === 'name' ? <SortByAlpha color='primary' /> : <CalendarMonth color='primary' />}
+            </ListItemIcon>
+          </Grid2>
+          <Grid2 size={8}>
+            <ListItemText>{title}</ListItemText>
+          </Grid2>
+        </Grid2>
+      </MenuItem>
+    ),
+    [checkmarkMenuOption, selectedMenuOption],
+  )
 
   const sortedEntryFiles = useMemo(() => [...entryFiles].sort(sortByCreatedAtDescending), [entryFiles])
 
@@ -103,6 +129,7 @@ export default function Files({ model }: FilesProps) {
                   variant='text'
                   onClick={handleMenuButtonClick}
                   endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+                  sx={{ width: '170px' }}
                 >
                   <Stack sx={{ minWidth: '150px' }} direction={'row'} spacing={2} justifyContent={'space-evenly'}>
                     {ASCorDESC === 'ASC' ? (
@@ -121,66 +148,9 @@ export default function Files({ model }: FilesProps) {
                 onClose={handleMenuButtonClose}
                 sx={{ minWidth: '200px' }}
               >
-                <MenuItem
-                  onClick={() => {
-                    setOrderByValue('name')
-                    setOrderByButtonTitle('Alphabetical')
-                  }}
-                  sx={{ paddingX: '8px' }}
-                  selected={selectedMenuOption('name')}
-                >
-                  <Grid2 container sx={{ minWidth: '200px' }}>
-                    <Grid2 size={3}>{checkMenuOption('name')}</Grid2>
-                    <Grid2 size={3}>
-                      <ListItemIcon>
-                        <SortByAlpha color='primary' />
-                      </ListItemIcon>
-                    </Grid2>
-                    <Grid2 size={6}>
-                      <ListItemText>Alphabetical</ListItemText>
-                    </Grid2>
-                  </Grid2>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setOrderByValue('createdAt')
-                    setOrderByButtonTitle('Date Uploaded')
-                  }}
-                  sx={{ paddingX: '8px' }}
-                  selected={selectedMenuOption('createdAt')}
-                >
-                  <Grid2 container sx={{ minWidth: '200px' }}>
-                    <Grid2 size={3}>{checkMenuOption('createdAt')}</Grid2>
-                    <Grid2 size={3}>
-                      <ListItemIcon>
-                        <CalendarMonth color='primary' />
-                      </ListItemIcon>
-                    </Grid2>
-                    <Grid2 size={6}>
-                      <ListItemText>Date uploaded</ListItemText>
-                    </Grid2>
-                  </Grid2>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setOrderByValue('updatedAt')
-                    setOrderByButtonTitle('Date updated')
-                  }}
-                  sx={{ paddingX: '8px' }}
-                  selected={selectedMenuOption('updatedAt')}
-                >
-                  <Grid2 container sx={{ minWidth: '200px' }}>
-                    <Grid2 size={3}>{checkMenuOption('updatedAt')}</Grid2>
-                    <Grid2 size={3}>
-                      <ListItemIcon>
-                        <CalendarMonth color='primary' />
-                      </ListItemIcon>
-                    </Grid2>
-                    <Grid2 size={6}>
-                      <ListItemText>Date updated</ListItemText>
-                    </Grid2>
-                  </Grid2>
-                </MenuItem>
+                {orderByMenuListItems('name', 'Name')}
+                {orderByMenuListItems('createdAt', 'Date uploaded')}
+                {orderByMenuListItems('updatedAt', 'Date updated')}
                 <Divider />
                 <MenuItem
                   onClick={() => {
@@ -190,19 +160,19 @@ export default function Files({ model }: FilesProps) {
                   selected={ASCorDESC === 'ASC'}
                 >
                   <Grid2 container sx={{ minWidth: '200px' }}>
-                    <Grid2 size={3}>
+                    <Grid2 size={2}>
                       {ASCorDESC === 'ASC' ? (
                         <Check sx={{ width: '100%' }} color='primary' />
                       ) : (
                         <Check sx={{ width: '100%' }} color='primary' opacity={0} />
                       )}
                     </Grid2>
-                    <Grid2 size={3}>
+                    <Grid2 size={2}>
                       <ListItemIcon>
                         <Sort color='primary' />
                       </ListItemIcon>
                     </Grid2>
-                    <Grid2 size={6}>
+                    <Grid2 size={8}>
                       <ListItemText>Ascending</ListItemText>
                     </Grid2>
                   </Grid2>
@@ -215,19 +185,19 @@ export default function Files({ model }: FilesProps) {
                   selected={ASCorDESC === 'DESC'}
                 >
                   <Grid2 container sx={{ minWidth: '200px' }}>
-                    <Grid2 size={3}>
+                    <Grid2 size={2}>
                       {ASCorDESC === 'DESC' ? (
                         <Check sx={{ width: '100%' }} color='primary' />
                       ) : (
                         <Check sx={{ width: '100%' }} color='primary' opacity={0} />
                       )}
                     </Grid2>
-                    <Grid2 size={3}>
+                    <Grid2 size={2}>
                       <ListItemIcon>
                         <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
                       </ListItemIcon>
                     </Grid2>
-                    <Grid2 size={6}>
+                    <Grid2 size={8}>
                       <ListItemText>Descending</ListItemText>
                     </Grid2>
                   </Grid2>
