@@ -12,7 +12,7 @@ type FilesProps = {
   model: EntryInterface
 }
 
-export default function Files({ model }: FilesProps) {
+export default function ModelFileManagement({ model }: FilesProps) {
   const { entryFiles, isEntryFilesLoading, isEntryFilesError, mutateEntryFiles } = useGetModelFiles(model.id)
 
   const sortedEntryFiles = useMemo(() => [...entryFiles].sort(sortByCreatedAtDescending), [entryFiles])

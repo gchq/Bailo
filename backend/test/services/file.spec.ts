@@ -13,6 +13,7 @@ import {
   isFileInterfaceDoc,
   removeFile,
   rerunFileScan,
+  updateFile,
   uploadFile,
 } from '../../src/services/file.js'
 
@@ -99,6 +100,7 @@ const fileModelMocks = vi.hoisted(() => {
   obj.find = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
   obj.findOneAndDelete = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
 
   obj.toObject = vi.fn(() => obj)
 
@@ -521,5 +523,37 @@ describe('services > file', () => {
     const result = isFileInterfaceDoc(null)
 
     expect(result).toBe(false)
+  })
+
+  test('updateFile > success', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
+
+    const result = await updateFile(user, modelId, testFileId, { tags: ['test1'] })
+
+    expect(result).toMatchSnapshot()
+  })
+
+  test('updateFile > does not updated unchangable property name', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+
+    fileModelMocks.findOneAndUpdate.mockResolvedValueOnce({
+      modelId: 'testModel',
+      _id: { toString: vi.fn(() => testFileId) },
+      name: 'my-file.txt',
+    })
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) }, name: 'my-file.txt' },
+    ])
+
+    const result = await updateFile(user, modelId, testFileId, { name: 'test1' })
+    expect(result?.name).toBe('my-file.txt')
+
+    expect(result).toMatchSnapshot()
   })
 })
