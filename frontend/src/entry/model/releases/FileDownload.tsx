@@ -290,7 +290,9 @@ export default function FileDownload({
                   </Typography>
                 </Link>
               </Tooltip>
-              <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+              <Typography variant='caption' sx={{ width: 'max-content' }}>
+                {prettyBytes(file.size)}
+              </Typography>
             </Stack>
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
               {scanners.length > 0 && (
