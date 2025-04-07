@@ -501,22 +501,22 @@ class Client:
     def post_review(
         self,
         model_id: str,
+        access_request_id: str,
         role: str,
         decision: str,
-        version: str | None = None,
         comment: str | None = None,
     ):
         """Create a review for a release.
 
         :param model_id: A unique model ID
-        :param version: A semantic version for a release
+        :param access_request_id: Unique access request ID
         :param role: The role of the user making the review
         :param decision: Either approve or request changes
         :param comment: A comment to go with the review
         """
         filtered_json = filter_none({"role": role, "decision": decision, "comment": comment})
         return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/release/{version}/review",
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}/review",
             json=filtered_json,
         ).json()
 
