@@ -2,6 +2,12 @@
 
 All dates are formatted dd/mm/yyyy.
 
+## 3.1.0 - 07/04/2025
+
+### Changes
+
+- Fix broken `Client.post_review` endpoint.
+
 ## 3.0.0 - 02/04/2025
 
 ### Breaking Changes
