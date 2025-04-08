@@ -388,6 +388,11 @@ jobs:
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
+      # wait for registry to start
+      - run: |
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:5000 -t 30
+
       - uses: cypress-io/github-action@v6
         with:
           wait-on: 'http://localhost:8080/api/v2/config/ui'
@@ -505,6 +510,11 @@ jobs:
       - run: |
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
+
+      # wait for registry to start
+      - run: |
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:5000 -t 30
 
       # Setup python
       - name: Set up Python 3.13
