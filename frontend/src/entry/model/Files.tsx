@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Card, Container, LinearProgress, Stack } from '@mui/material'
+import { Box, Button, Card, Container, LinearProgress, Stack, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { postFileForModelId } from 'actions/file'
 import { useGetModelFiles } from 'actions/model'
@@ -118,7 +118,12 @@ export default function Files({ model }: FilesProps) {
   return (
     <>
       <Container sx={{ my: 2 }}>
-        <Stack direction={{ xs: 'column' }} spacing={4}>
+        <Stack direction={{ xs: 'column' }} spacing={2} justifyContent='center' alignItems='center'>
+          <Typography>
+            Files uploaded to a model can be managed here. For each file you can view associated releases, delete files
+            that are no longer needed, and also manually retrigger anti-virus scanning (if anti-virus scanning is
+            enabled).
+          </Typography>
           <Box display='flex'>
             <Box ml='auto'>
               <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>

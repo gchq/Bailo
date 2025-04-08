@@ -1,5 +1,6 @@
 import { Delete, Done, Error, Info, MoreVert, Refresh, Warning } from '@mui/icons-material'
 import {
+  Box,
   Chip,
   Divider,
   IconButton,
@@ -22,6 +23,7 @@ import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, us
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
+import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
@@ -359,12 +361,25 @@ export default function FileDownload({
       />
       <ConfirmationDialogue
         open={deleteFileOpen}
-        title='Delete Release'
+        title='Delete File'
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteFileOpen(false)}
         errorMessage={deleteErrorMessage}
-        dialogMessage={'Are you sure you want to delete this file?'}
-      />
+        dialogMessage={
+          sortedAssociatedReleases.length > 0
+            ? 'Deleting this file will affect the following releases:'
+            : 'Deleting this file will not affect any existing releases'
+        }
+      >
+        <Box sx={{ pt: 2 }}>
+          <AssociatedReleasesList
+            modelId={modelId}
+            file={file}
+            latestRelease={latestRelease}
+            releases={sortedAssociatedReleases}
+          />
+        </Box>
+      </ConfirmationDialogue>
     </>
   )
 }
