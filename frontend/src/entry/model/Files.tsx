@@ -115,7 +115,7 @@ export default function Files({ model }: FilesProps) {
 
   const checkAscOrDesc = useCallback(
     (value: string) => {
-      return value === ASCorDESC ? true : false
+      return value === ASCorDESC
     },
     [ASCorDESC],
   )
