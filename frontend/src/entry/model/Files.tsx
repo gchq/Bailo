@@ -2,7 +2,7 @@ import { CalendarMonth, Check, ExpandLess, ExpandMore, Sort, SortByAlpha } from 
 import { Box, Button, Card, Container, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
 import Grid2 from '@mui/material/Grid2'
 import { useGetModelFiles } from 'actions/model'
-import { useCallback, useMemo, useState } from 'react'
+import { MouseEvent, useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import FileDownload from 'src/entry/model/releases/FileDownload'
@@ -14,22 +14,29 @@ type FilesProps = {
   model: EntryInterface
 }
 
+export const SortingDirection = {
+  ASC: 'Ascending',
+  DESC: 'Descending',
+} as const
+
+export type SortingDirectionKeys = (typeof SortingDirection)[keyof typeof SortingDirection]
+
 export default function Files({ model }: FilesProps) {
   const { entryFiles, isEntryFilesLoading, isEntryFilesError } = useGetModelFiles(model.id)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
   const [orderByValue, setOrderByValue] = useState('createdAt')
   const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
-  const [ASCorDESC, setASCorDESC] = useState('DESC')
+  const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(SortingDirection.DESC)
 
   const sortFilesByValue = useMemo(
     () => (a: FileInterface, b: FileInterface) => {
-      if (ASCorDESC === 'DESC') {
+      if (ascOrDesc === SortingDirection.DESC) {
         return a[orderByValue] < b[orderByValue] ? -1 : 1
       }
       return a[orderByValue] > b[orderByValue] ? -1 : 1
     },
-    [ASCorDESC, orderByValue],
+    [ascOrDesc, orderByValue],
   )
 
   const checkmarkMenuOption = useCallback(
@@ -54,7 +61,7 @@ export default function Files({ model }: FilesProps) {
     [orderByValue],
   )
 
-  function handleMenuButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
+  function handleMenuButtonClick(event: MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
   }
 
@@ -85,17 +92,17 @@ export default function Files({ model }: FilesProps) {
     </MenuItem>
   )
 
-  const ascOrDescMenuListItems = (option, title) => (
+  const ascOrDescMenuListItems = (direction) => (
     <MenuItem
       onClick={() => {
-        setASCorDESC(option)
+        setAscOrDesc(direction)
       }}
       sx={{ paddingX: '8px' }}
-      selected={checkAscOrDesc(option)}
+      selected={checkAscOrDesc(direction)}
     >
       <Grid2 container sx={{ minWidth: '200px' }}>
         <Grid2 size={2}>
-          {checkAscOrDesc(option) ? (
+          {checkAscOrDesc(direction) ? (
             <Check sx={{ width: '100%' }} color='primary' />
           ) : (
             <Check sx={{ width: '100%' }} color='primary' opacity={0} />
@@ -103,11 +110,15 @@ export default function Files({ model }: FilesProps) {
         </Grid2>
         <Grid2 size={2}>
           <ListItemIcon>
-            {option === 'ASC' ? <Sort color='primary' /> : <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />}
+            {direction === SortingDirection.ASC ? (
+              <Sort color='primary' />
+            ) : (
+              <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
+            )}
           </ListItemIcon>
         </Grid2>
         <Grid2 size={8}>
-          <ListItemText>{title}</ListItemText>
+          <ListItemText>{direction}</ListItemText>
         </Grid2>
       </Grid2>
     </MenuItem>
@@ -115,9 +126,9 @@ export default function Files({ model }: FilesProps) {
 
   const checkAscOrDesc = useCallback(
     (value: string) => {
-      return value === ASCorDESC
+      return value === ascOrDesc
     },
-    [ASCorDESC],
+    [ascOrDesc],
   )
 
   const sortedEntryFiles = useMemo(() => [...entryFiles].sort(sortByCreatedAtDescending), [entryFiles])
@@ -158,13 +169,12 @@ export default function Files({ model }: FilesProps) {
             <Box ml='auto'>
               <Stack direction={'row'}>
                 <Button
-                  variant='text'
                   onClick={handleMenuButtonClick}
                   endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
                   sx={{ width: '170px' }}
                 >
                   <Stack sx={{ minWidth: '150px' }} direction={'row'} spacing={2} justifyContent={'space-evenly'}>
-                    {checkAscOrDesc('ASC') ? (
+                    {checkAscOrDesc(SortingDirection.ASC) ? (
                       <Sort color='primary' />
                     ) : (
                       <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
@@ -184,8 +194,8 @@ export default function Files({ model }: FilesProps) {
                 {orderByMenuListItems('createdAt', 'Date uploaded')}
                 {orderByMenuListItems('updatedAt', 'Date updated')}
                 <Divider />
-                {ascOrDescMenuListItems('ASC', 'Ascending')}
-                {ascOrDescMenuListItems('DESC', 'Descending')}
+                {ascOrDescMenuListItems(SortingDirection.ASC)}
+                {ascOrDescMenuListItems(SortingDirection.DESC)}
               </Menu>
             </Box>
           </Box>
