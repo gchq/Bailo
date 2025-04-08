@@ -51,7 +51,7 @@ export default function Files({ model }: FilesProps) {
       <Container sx={{ my: 2 }}>
         <Stack direction={{ xs: 'column' }} spacing={2} justifyContent='center' alignItems='center'>
           <Typography>
-            Files uploaded to releases can be managed here. For each file you can view associated releases, delete files
+            Files uploaded to a model can be managed here. For each file you can view associated releases, delete files
             that are no longer needed, and also manually retrigger anti-virus scanning (if anti-virus scanning is
             enabled).
           </Typography>
