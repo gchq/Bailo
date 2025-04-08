@@ -10,8 +10,10 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Stack,
   Typography,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetFilesForModel } from 'actions/file'
 import prettyBytes from 'pretty-bytes'
 import { useCallback, useMemo, useState } from 'react'
@@ -31,6 +33,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { files, isFilesLoading, isFilesError } = useGetFilesForModel(model.id)
   const [checkedFiles, setCheckedFiles] = useState<FileInterface[]>([])
+  const theme = useTheme()
 
   const handleAddFilesOnClick = () => {
     if (checkedFiles.length === 0) {
@@ -66,6 +69,23 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
     [checkedFiles],
   )
 
+  const isFileDisabled = useCallback(
+    (file: FileInterface) => {
+      return (
+        existingReleaseFiles.find(
+          (existingFile) => isFileInterface(existingFile) && existingFile.name === file.name,
+        ) !== undefined ||
+        (checkedFiles.find(
+          (existingCheckedFile) => isFileInterface(existingCheckedFile) && existingCheckedFile.name === file.name,
+        ) !== undefined &&
+          checkedFiles.find(
+            (existingCheckedFile) => isFileInterface(existingCheckedFile) && existingCheckedFile._id === file._id,
+          ) === undefined)
+      )
+    },
+    [existingReleaseFiles, checkedFiles],
+  )
+
   const fileList = useMemo(() => {
     if (!files || files.length === 0) {
       return <EmptyBlob text='No existing files available' />
@@ -75,15 +95,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
         <List>
           {files.map((file) => (
             <ListItem key={file._id} disablePadding>
-              <ListItemButton
-                dense
-                onClick={handleToggle(file)}
-                disabled={
-                  existingReleaseFiles.find(
-                    (existingFile) => isFileInterface(existingFile) && existingFile._id === file._id,
-                  ) !== undefined
-                }
-              >
+              <ListItemButton dense onClick={handleToggle(file)} disabled={isFileDisabled(file)}>
                 <ListItemIcon>
                   <Checkbox
                     edge='start'
@@ -99,11 +111,16 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
                 </ListItemIcon>
                 <ListItemText
                   primary={
-                    <>
+                    <Stack>
                       <Typography color='primary' component='span'>
                         {file.name}
                       </Typography>
-                    </>
+                      {isFileDisabled(file) && (
+                        <Typography variant='caption' color={theme.palette.error.main}>
+                          A file with this name has either been selected, or is already on this release
+                        </Typography>
+                      )}
+                    </Stack>
                   }
                   secondary={`Added on ${formatDateString(file.createdAt.toString())} - ${prettyBytes(file.size)}`}
                 />
@@ -113,7 +130,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
         </List>
       )
     }
-  }, [checkedFiles, existingReleaseFiles, files, handleToggle])
+  }, [checkedFiles, existingReleaseFiles, files, handleToggle, isFileDisabled, theme.palette.error.main])
 
   if (isFilesError) {
     return <MessageAlert message={isFilesError.info.message} severity='error' />
