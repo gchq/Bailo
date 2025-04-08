@@ -21,6 +21,8 @@ export const SortingDirection = {
 
 export type SortingDirectionKeys = (typeof SortingDirection)[keyof typeof SortingDirection]
 
+export const menuItemDetails = {}
+
 export default function Files({ model }: FilesProps) {
   const { entryFiles, isEntryFilesLoading, isEntryFilesError } = useGetModelFiles(model.id)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -39,18 +41,7 @@ export default function Files({ model }: FilesProps) {
     [ascOrDesc, orderByValue],
   )
 
-  const checkmarkMenuOption = useCallback(
-    (menuOption: string) => {
-      if (menuOption === orderByValue) {
-        return <Check sx={{ width: '100%' }} color='primary' />
-      } else {
-        return <Check sx={{ width: '100%' }} color='primary' opacity={0} />
-      }
-    },
-    [orderByValue],
-  )
-
-  const selectedMenuOption = useCallback(
+  const checkMenuOption = useCallback(
     (menuOption: string) => {
       if (menuOption === orderByValue) {
         return true
@@ -76,10 +67,16 @@ export default function Files({ model }: FilesProps) {
         setOrderByButtonTitle(title)
       }}
       sx={{ paddingX: '8px' }}
-      selected={selectedMenuOption(value)}
+      selected={checkMenuOption(value)}
     >
       <Grid2 container sx={{ minWidth: '200px' }}>
-        <Grid2 size={2}>{checkmarkMenuOption(value)}</Grid2>
+        <Grid2 size={2}>
+          {checkMenuOption(value) ? (
+            <Check sx={{ width: '100%' }} color='primary' />
+          ) : (
+            <Check sx={{ width: '100%' }} color='primary' opacity={0} />
+          )}
+        </Grid2>
         <Grid2 size={2}>
           <ListItemIcon>
             {value === 'name' ? <SortByAlpha color='primary' /> : <CalendarMonth color='primary' />}
@@ -124,12 +121,9 @@ export default function Files({ model }: FilesProps) {
     </MenuItem>
   )
 
-  const checkAscOrDesc = useCallback(
-    (value: string) => {
-      return value === ascOrDesc
-    },
-    [ascOrDesc],
-  )
+  const checkAscOrDesc = (value: string) => {
+    return value === ascOrDesc
+  }
 
   const sortedEntryFiles = useMemo(() => [...entryFiles].sort(sortByCreatedAtDescending), [entryFiles])
 
