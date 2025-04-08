@@ -62,30 +62,62 @@ export default function Files({ model }: FilesProps) {
     setAnchorEl(null)
   }
 
-  const orderByMenuListItems = useCallback(
-    (value, title) => (
-      <MenuItem
-        onClick={() => {
-          setOrderByValue(value)
-          setOrderByButtonTitle(title)
-        }}
-        sx={{ paddingX: '8px' }}
-        selected={selectedMenuOption(value)}
-      >
-        <Grid2 container sx={{ minWidth: '200px' }}>
-          <Grid2 size={2}>{checkmarkMenuOption(value)}</Grid2>
-          <Grid2 size={2}>
-            <ListItemIcon>
-              {value === 'name' ? <SortByAlpha color='primary' /> : <CalendarMonth color='primary' />}
-            </ListItemIcon>
-          </Grid2>
-          <Grid2 size={8}>
-            <ListItemText>{title}</ListItemText>
-          </Grid2>
+  const orderByMenuListItems = (value, title) => (
+    <MenuItem
+      onClick={() => {
+        setOrderByValue(value)
+        setOrderByButtonTitle(title)
+      }}
+      sx={{ paddingX: '8px' }}
+      selected={selectedMenuOption(value)}
+    >
+      <Grid2 container sx={{ minWidth: '200px' }}>
+        <Grid2 size={2}>{checkmarkMenuOption(value)}</Grid2>
+        <Grid2 size={2}>
+          <ListItemIcon>
+            {value === 'name' ? <SortByAlpha color='primary' /> : <CalendarMonth color='primary' />}
+          </ListItemIcon>
         </Grid2>
-      </MenuItem>
-    ),
-    [checkmarkMenuOption, selectedMenuOption],
+        <Grid2 size={8}>
+          <ListItemText>{title}</ListItemText>
+        </Grid2>
+      </Grid2>
+    </MenuItem>
+  )
+
+  const ascOrDescMenuListItems = (option, title) => (
+    <MenuItem
+      onClick={() => {
+        setASCorDESC(option)
+      }}
+      sx={{ paddingX: '8px' }}
+      selected={checkAscOrDesc(option)}
+    >
+      <Grid2 container sx={{ minWidth: '200px' }}>
+        <Grid2 size={2}>
+          {checkAscOrDesc(option) ? (
+            <Check sx={{ width: '100%' }} color='primary' />
+          ) : (
+            <Check sx={{ width: '100%' }} color='primary' opacity={0} />
+          )}
+        </Grid2>
+        <Grid2 size={2}>
+          <ListItemIcon>
+            {option === 'ASC' ? <Sort color='primary' /> : <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />}
+          </ListItemIcon>
+        </Grid2>
+        <Grid2 size={8}>
+          <ListItemText>{title}</ListItemText>
+        </Grid2>
+      </Grid2>
+    </MenuItem>
+  )
+
+  const checkAscOrDesc = useCallback(
+    (value: string) => {
+      return value === ASCorDESC ? true : false
+    },
+    [ASCorDESC],
   )
 
   const sortedEntryFiles = useMemo(() => [...entryFiles].sort(sortByCreatedAtDescending), [entryFiles])
@@ -132,7 +164,7 @@ export default function Files({ model }: FilesProps) {
                   sx={{ width: '170px' }}
                 >
                   <Stack sx={{ minWidth: '150px' }} direction={'row'} spacing={2} justifyContent={'space-evenly'}>
-                    {ASCorDESC === 'ASC' ? (
+                    {checkAscOrDesc('ASC') ? (
                       <Sort color='primary' />
                     ) : (
                       <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
@@ -152,56 +184,8 @@ export default function Files({ model }: FilesProps) {
                 {orderByMenuListItems('createdAt', 'Date uploaded')}
                 {orderByMenuListItems('updatedAt', 'Date updated')}
                 <Divider />
-                <MenuItem
-                  onClick={() => {
-                    setASCorDESC('ASC')
-                  }}
-                  sx={{ paddingX: '8px' }}
-                  selected={ASCorDESC === 'ASC'}
-                >
-                  <Grid2 container sx={{ minWidth: '200px' }}>
-                    <Grid2 size={2}>
-                      {ASCorDESC === 'ASC' ? (
-                        <Check sx={{ width: '100%' }} color='primary' />
-                      ) : (
-                        <Check sx={{ width: '100%' }} color='primary' opacity={0} />
-                      )}
-                    </Grid2>
-                    <Grid2 size={2}>
-                      <ListItemIcon>
-                        <Sort color='primary' />
-                      </ListItemIcon>
-                    </Grid2>
-                    <Grid2 size={8}>
-                      <ListItemText>Ascending</ListItemText>
-                    </Grid2>
-                  </Grid2>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setASCorDESC('DESC')
-                  }}
-                  sx={{ paddingX: '8px' }}
-                  selected={ASCorDESC === 'DESC'}
-                >
-                  <Grid2 container sx={{ minWidth: '200px' }}>
-                    <Grid2 size={2}>
-                      {ASCorDESC === 'DESC' ? (
-                        <Check sx={{ width: '100%' }} color='primary' />
-                      ) : (
-                        <Check sx={{ width: '100%' }} color='primary' opacity={0} />
-                      )}
-                    </Grid2>
-                    <Grid2 size={2}>
-                      <ListItemIcon>
-                        <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
-                      </ListItemIcon>
-                    </Grid2>
-                    <Grid2 size={8}>
-                      <ListItemText>Descending</ListItemText>
-                    </Grid2>
-                  </Grid2>
-                </MenuItem>
+                {ascOrDescMenuListItems('ASC', 'Ascending')}
+                {ascOrDescMenuListItems('DESC', 'Descending')}
               </Menu>
             </Box>
           </Box>
