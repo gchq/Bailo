@@ -80,7 +80,7 @@ services:
       REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
     volumes:
-      - ./backend/config/registry.conf:/etc/docker/registry/config.yml
+      - ./backend/config/registry.conf:/distribution/config.yml
       - ./backend/certs:/certs
 
   frontend:
