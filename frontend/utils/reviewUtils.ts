@@ -1,6 +1,6 @@
 import { groupBy } from 'lodash-es'
 import { ResponseInterface, ReviewRequestInterface } from 'types/types'
-import { sortByCreatedAtAscending } from 'utils/dateUtils'
+import { sortByCreatedAtAscending } from 'utils/arrayUtils'
 
 interface GroupedReviewResponse {
   [user: string]: ResponseInterface[]
@@ -29,7 +29,11 @@ export function reviewResponsesForEachUser(reviews: ReviewRequestInterface[], re
       const sortedResponses = groupedResponses[user].sort(sortByCreatedAtAscending)
       sortedResponses.forEach((response, index) => {
         response.role = review.role
-        index !== sortedResponses.length - 1 ? (response.outdated = true) : (response.outdated = false)
+        if (index !== sortedResponses.length - 1) {
+          response.outdated = true
+        } else {
+          response.outdated = false
+        }
       })
       allResponses.push(...sortedResponses)
     })

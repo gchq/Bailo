@@ -15,7 +15,7 @@ services:
       start_period: 30s
 
   minio:
-    image: bitnami/minio:2024.4.6
+    image: bitnami/minio:2025.4.3
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -28,7 +28,7 @@ services:
       - minioVolume:/bitnami/minio
 
   clamd:
-    image: clamav/clamav:1.3
+    image: clamav/clamav:1.4.2_base
     healthcheck:
       test: ['CMD-SHELL', "echo 'PING' | nc -w 5 localhost 3310"]
       interval: 30s
@@ -50,7 +50,7 @@ services:
       retries: 5
 
   mailcrab:
-    image: marlonb/mailcrab:v1.2.0
+    image: marlonb/mailcrab:v1.5.0
     ports:
       - 1080:1080
       - 1025:1025

@@ -4,21 +4,21 @@ import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-proto'
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
 import { HostMetrics } from '@opentelemetry/host-metrics'
-import { Resource } from '@opentelemetry/resources'
+import { resourceFromAttributes } from '@opentelemetry/resources'
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
 import { logs, NodeSDK } from '@opentelemetry/sdk-node'
-import { SEMRESATTRS_HOST_NAME, SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
 import os from 'os'
 
+import { ATTR_SERVICE_NAME, ATTRS_HOST_NAME } from './semconv.js'
 import config from './utils/config.js'
 
 if (config.instrumentation.enabled) {
   if (config.instrumentation.debug) {
     diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG)
   }
-  const resource = new Resource({
-    [SEMRESATTRS_SERVICE_NAME]: `${config.instrumentation.serviceName}`,
-    [SEMRESATTRS_HOST_NAME]: `${os.hostname}`,
+  const resource = resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: `${config.instrumentation.serviceName}`,
+    [ATTRS_HOST_NAME]: `${os.hostname}`,
   })
   const sdk = new NodeSDK({
     traceExporter: new OTLPTraceExporter({

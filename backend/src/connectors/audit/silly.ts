@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
@@ -24,7 +23,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onViewModel(_req: Request, _model: ModelDoc) {}
   onUpdateModel(_req: Request, _model: ModelDoc) {}
   onSearchModel(_req: Request, _models: ModelSearchResult[]) {}
-  onCreateModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
+  onCreateModelCard(_req: Request, _model: ModelDoc, _modelCard: ModelCardInterface) {}
   onViewModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
   onUpdateModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
   onViewModelCardRevisions(_req: Request, _modelId: string, _modelCards: ModelCardInterface[]) {}

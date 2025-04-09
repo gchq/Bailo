@@ -43,6 +43,7 @@ import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
 import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
+import { getAllModelReviewRoles } from './routes/v2/model/roles/getAllModelReviewRoles.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
@@ -159,6 +160,7 @@ if (!config.ui?.inference || config.ui.inference?.enabled) {
   server.post('/api/v2/model/:modelId/inference', ...postInference)
   server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
 }
+
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)
 
@@ -176,6 +178,8 @@ server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReac
 server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
 server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
 server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
+
+server.get('/api/v2/roles/review', ...getAllModelReviewRoles)
 
 server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)

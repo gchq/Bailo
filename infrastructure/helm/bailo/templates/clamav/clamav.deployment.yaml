@@ -22,6 +22,7 @@ spec:
       {{- end }}
       securityContext:
         runAsUser: {{ .Values.clamav.runAsUser }}
+        fsGroup: {{ .Values.clamav.runAsUser }}
       containers:
       - name: {{ include "bailo.fullname" . }}-clamav
         ports:
@@ -34,11 +35,11 @@ spec:
         resources:
           requests:
             memory: "100Mi"
-            ephemeral-storage: "100Mi"
+            ephemeral-storage: "2000Mi"
             cpu: "200m"
           limits:
             memory: "4Gi" # This is a memory requirement for ClamAV see here: https://docs.clamav.net/manual/Installing/Docker.html#memory-ram-requirements
-            ephemeral-storage: "300Mi"
+            ephemeral-storage: "2500Mi"
             cpu: "1"
         volumeMounts:
         - name: tmp
@@ -47,6 +48,9 @@ spec:
           mountPath: /var/lib/clamav
         - name: clamav-log
           mountPath: /var/log/clamav
+        - name: config-map-vol
+          mountPath: /etc/clamav/clamd.conf
+          subPath: clamd.conf
         securityContext:
           allowPrivilegeEscalation: false
       volumes:
@@ -54,6 +58,12 @@ spec:
           emptyDir: {}
         - name: clamav-log
           emptyDir: {}
+        - name: config-map-vol
+          configMap:
+            name: {{ include "bailo.fullname" . }}-clamav
+            items:
+            - key: clamd.conf
+              path: clamd.conf
         - name: clamav-signatures
           persistentVolumeClaim:
             claimName: {{ include "bailo.fullname" . }}-clamav-pvc

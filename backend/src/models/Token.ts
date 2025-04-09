@@ -1,7 +1,9 @@
 import bcrypt from 'bcryptjs'
 import { createHash } from 'crypto'
-import { Document, model, Schema } from 'mongoose'
-import MongooseDelete from 'mongoose-delete'
+import { model, Schema } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
+
+import { BadReq } from '../utils/error.js'
 
 export const TokenScope = {
   All: 'all',
@@ -73,9 +75,9 @@ export interface TokenInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type TokenDoc = TokenInterface & Document<any, any, TokenInterface>
+export type TokenDoc = TokenInterface & SoftDeleteDocument
 
-const TokenSchema = new Schema<TokenInterface>(
+const TokenSchema = new Schema<TokenDoc>(
   {
     user: { type: String, required: true },
     description: { type: String, required: true },
@@ -105,13 +107,15 @@ TokenSchema.pre('save', function userPreSave(next) {
   }
 
   if (this.hashMethod === HashType.Bcrypt) {
-    bcrypt.hash(this.secretKey, 8, (err: Error | null, hash: string) => {
+    bcrypt.hash(this.secretKey, 8, (err: Error | null, result: string | undefined) => {
       if (err) {
         next(err)
         return
       }
-
-      this.secretKey = hash
+      if (!result) {
+        throw BadReq('Unable to create token')
+      }
+      this.secretKey = result
       next()
     })
   } else if (this.hashMethod === HashType.SHA256) {
@@ -131,12 +135,15 @@ TokenSchema.methods.compareToken = function compareToken(candidateToken: string)
     }
 
     if (this.hashMethod === HashType.Bcrypt) {
-      bcrypt.compare(candidateToken, this.secretKey, (err: Error | null, isMatch: boolean) => {
+      bcrypt.compare(candidateToken, this.secretKey, (err: Error | null, result: boolean | undefined) => {
         if (err) {
           reject(err)
           return
         }
-        resolve(isMatch)
+        if (!result) {
+          BadReq('Unable to compare token')
+        }
+        resolve(result)
       })
     } else if (this.hashMethod === HashType.SHA256) {
       const candidateHash = createHash('sha256').update(candidateToken).digest('hex')
@@ -154,6 +161,6 @@ TokenSchema.methods.compareToken = function compareToken(candidateToken: string)
 
 TokenSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedAt: true })
 
-const TokenModel = model<TokenInterface>('v2_Token', TokenSchema)
+const TokenModel = model<TokenDoc>('v2_Token', TokenSchema)
 
 export default TokenModel

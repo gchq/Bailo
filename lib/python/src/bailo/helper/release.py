@@ -7,12 +7,15 @@ import shutil
 from io import BytesIO
 from typing import Any
 
-from bailo.core.client import Client
-from bailo.core.exceptions import BailoException
-from bailo.core.utils import NO_COLOR
 from semantic_version import Version
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
+
+# isort: split
+
+from bailo.core.client import Client
+from bailo.core.exceptions import BailoException
+from bailo.core.utils import NO_COLOR
 
 BLOCK_SIZE = 1024
 logger = logging.getLogger(__name__)
@@ -81,6 +84,12 @@ class Release:
         :param client: A client object used to interact with Bailo
         :param model_id: A Unique Model ID
         :param version: A semantic version of a model release
+        :param notes: Notes on release
+        :param model_card_version: Model card version, defaults to None
+        :param files: Files for release, defaults to None
+        :param images: Images for release, defaults to None
+        :param minor: Signifies a minor release, defaults to False
+        :param draft: Signifies a draft release, defaults to False
         """
         if files is None:
             files = []
@@ -210,9 +219,9 @@ class Release:
     ):
         """Writes all files to disk given a local directory.
 
+        :param path: Local directory to write files to
         :param include: List or string of fnmatch statements for file names to include, defaults to None
         :param exclude: List or string of fnmatch statements for file names to exclude, defaults to None
-        :param path: Local directory to write files to
         :raises BailoException: If the release has no files assigned to it
         ..note:: Fnmatch statements support Unix shell-style wildcards.
         """
@@ -311,7 +320,6 @@ class Release:
         self.update()
         if to_close:
             data.close()
-        self.isUploaded = True
         logger.info(
             f"Upload of file %s to version %s of %s complete.",
             name,

@@ -25,13 +25,17 @@ class Client:
         kind: EntryKind,
         description: str,
         visibility: ModelVisibility | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ):
         """Create a model.
 
         :param name: Name of the model
         :param kind: Either a Model or a Datacard
         :param description: Description of the model
-        :param visibility: Enum to define model visibility (e.g public or private)
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
+        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :return: JSON response object
         """
         _visibility: str = "public"
@@ -44,6 +48,8 @@ class Client:
                 "kind": kind,
                 "description": description,
                 "visibility": _visibility,
+                "organisation": organisation,
+                "state": state,
             }
         )
 
@@ -103,6 +109,8 @@ class Client:
         kind: str | None = None,
         description: str | None = None,
         visibility: str | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ):
         """Update a specific model using its unique ID.
 
@@ -110,12 +118,16 @@ class Client:
         :param name: Name of the model, defaults to None
         :param kind: Either a Model or a Datacard
         :param description: Description of the model, defaults to None
-        :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
+        :param kind: Either a Model or a Datacard, defaults to None
         :return: JSON response object
         """
         filtered_json = filter_none(
             {
                 "name": name,
+                "organisation": organisation,
+                "state": state,
                 "kind": kind,
                 "description": description,
                 "visibility": visibility,
@@ -393,7 +405,7 @@ class Client:
         :return: JSON response object
         """
         return self.agent.delete(
-            f"{self.url}/v2/model/{model_id}/files/{file_id}",
+            f"{self.url}/v2/model/{model_id}/file/{file_id}",
         ).json()
 
     def get_all_images(

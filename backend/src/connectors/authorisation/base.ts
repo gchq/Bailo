@@ -1,5 +1,5 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterfaceDoc } from '../../models/File.js'
+import { FileInterface } from '../../models/File.js'
 import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
@@ -77,7 +77,7 @@ export class BasicAuthorisationConnector {
     return (await this.responses(user, [response], action))[0]
   }
 
-  async file(user: UserInterface, model: ModelDoc, file: FileInterfaceDoc, action: FileActionKeys) {
+  async file(user: UserInterface, model: ModelDoc, file: FileInterface, action: FileActionKeys) {
     return (await this.files(user, model, [file], action))[0]
   }
 
@@ -117,6 +117,14 @@ export class BasicAuthorisationConnector {
           !(await authentication.hasRole(user, Roles.Admin))
         ) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
+        }
+
+        if (ModelAction.Import === action && (await missingRequiredRole(user, model, ['owner']))) {
+          return { id: model.id, success: false, info: 'You do not have permission to import a model.' }
+        }
+
+        if (ModelAction.Export === action && (await missingRequiredRole(user, model, ['owner']))) {
+          return { id: model.id, success: false, info: 'You do not have permission to export a model.' }
         }
 
         return { id: model.id, success: true }
@@ -180,6 +188,8 @@ export class BasicAuthorisationConnector {
       [ReleaseAction.Delete]: ModelAction.Write,
       [ReleaseAction.Update]: ModelAction.Update,
       [ReleaseAction.View]: ModelAction.View,
+      [ReleaseAction.Import]: ModelAction.Import,
+      [ReleaseAction.Export]: ModelAction.Export,
     }
 
     // Is this a constrained user token.
@@ -233,7 +243,7 @@ export class BasicAuthorisationConnector {
   async files(
     user: UserInterface,
     model: ModelDoc,
-    files: Array<FileInterfaceDoc>,
+    files: Array<FileInterface>,
     action: FileActionKeys,
   ): Promise<Array<Response>> {
     // Does the user have a valid access request for this model?
@@ -255,7 +265,7 @@ export class BasicAuthorisationConnector {
           return {
             success: false,
             info: 'You do not have permission to upload a file.',
-            id: file.id,
+            id: file._id.toString(),
           }
         }
 
@@ -268,11 +278,11 @@ export class BasicAuthorisationConnector {
           return {
             success: false,
             info: 'You need to have an approved access request or have permission to download a file.',
-            id: file.id,
+            id: file._id.toString(),
           }
         }
 
-        return { success: true, id: file.id }
+        return { success: true, id: file._id.toString() }
       }),
     )
   }

@@ -1,7 +1,7 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
+import { FileInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
@@ -131,13 +131,13 @@ export abstract class BaseAuditConnector {
   abstract onUpdateModel(req: Request, model: ModelDoc)
   abstract onSearchModel(req: Request, models: ModelSearchResult[])
 
-  abstract onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
+  abstract onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface)
   abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[])
 
-  abstract onCreateFile(req: Request, file: FileInterfaceDoc)
-  abstract onViewFile(req: Request, file: FileInterfaceDoc)
+  abstract onCreateFile(req: Request, file: FileInterface)
+  abstract onViewFile(req: Request, file: FileInterface)
   abstract onViewFiles(req: Request, modelId: string, files: FileInterface[])
   abstract onDeleteFile(req: Request, modelId: string, fileId: string)
   abstract onUpdateFile(req: Request, modelId: string, fileId: string)

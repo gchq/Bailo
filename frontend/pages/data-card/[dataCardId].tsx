@@ -52,10 +52,12 @@ export default function DataCard() {
   return (
     <>
       <Title text={dataCard ? dataCard.name : 'Loading...'} />
-      {isDataCardLoading && <Loading />}
-      {dataCard && (
+      {!dataCard || isDataCardLoading ? (
+        <Loading />
+      ) : (
         <PageWithTabs
           title={dataCard.name}
+          additionalInfo={dataCard.description}
           subheading={`ID: ${dataCard.id}`}
           tabs={tabs}
           requiredUrlParams={{ dataCardId: dataCard.id }}

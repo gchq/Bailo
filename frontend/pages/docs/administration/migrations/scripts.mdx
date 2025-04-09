@@ -1,0 +1,62 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+## Bailo DataBase Migration Scripts
+
+As Bailo develops, the requirements for storing data also change. Sometimes this will simply be adding a new property or
+Document to MongoDB, and other times it will require migrating a collection of properties to a new object and
+transforming them. This may mean updating the current data in MongoDB to match the new format, a process that requires a
+migration script.
+
+Bailo's migration scripts are stored in
+[the backend migration directory](https://github.com/gchq/Bailo/tree/main/backend/src/migrations). Upon completion, a
+script's name is stored as a Document in MongoDB under `bailo/migrations/`. This prevents any migration script being run
+more than once.
+
+Migrations that have been run by the backend can be viewed in the logs, for example:
+
+```
+...
+backend-1  | info  - (src/clients/s3.ts:1): Ensuring uploads exists (bucket=uploads)
+backend-1  | info  - (src/clients/s3.ts:1): Ensuring registry exists (bucket=registry)
+backend-1  | info  - (src/utils/database.ts:1): Connected to Mongoose
+backend-1  | info  - (src/clients/s3.ts:1): Bucket does not exist, creating uploads (bucket=uploads)
+backend-1  | info  - (src/clients/s3.ts:1): Bucket does not exist, creating registry (bucket=registry)
+backend-1  | info  - (src/utils/database.ts:1): Running migration 001_example.ts (file=001_example.ts)
+backend-1  | info  - (src/utils/database.ts:1): Finished migration 001_example.ts (file=001_example.ts)
+backend-1  | info  - (src/utils/database.ts:1): Running migration 002_update_model_kinds.ts (file=002_update_model_kinds.ts)
+backend-1  | info  - (src/utils/database.ts:1): Finished migration 002_update_model_kinds.ts (file=002_update_model_kinds.ts)
+backend-1  | info  - (src/utils/database.ts:1): Finished running all migrations
+backend-1  | info  - (src/services/schema.ts:1): Ensuring schema minimal-general-v10 exists (reference=minimal-general-v10)
+backend-1  | info  - (src/services/schema.ts:1): Ensuring schema minimal-data-card-v10 exists (reference=minimal-data-card-v10)
+backend-1  | info  - (src/services/schema.ts:1): Ensuring schema minimal-access-request-general-v10 exists (reference=minimal-access-request-general-v10)
+backend-1  | info  - (src/index.ts:1): Listening on port 3001
+...
+```
+
+### Writing a migration script
+
+Using [001_example.ts](https://github.com/gchq/Bailo/blob/main/backend/src/migrations/001_example.ts) as a template,
+changes are typically made to the `up` function which is executed when the `backend` image is instantiated. Using
+various Mongoose methods, the data in MongoDB is manipulated from some prior to state to match the new format.
+
+### Updating previous migration scripts
+
+Sometimes it is required to update an existing migration script, for example when a property is removed from a Model.
+Care must be taken to update the existing migrations to work with the updated data structure(s) as well as the historic
+data.
+
+### Common gotchas
+
+- Using `{lean: true}` in a `find` query returns POJOs (not Mongoose Documents) as per
+  [the docs](<https://mongoosejs.com/docs/7.x/docs/api/query.html#Query.prototype.lean()>). The POJO does not have some
+  commonly needed such as `save`, not getters/setters which are commonly used in migration scripts when working with
+  properties that have been removed from a Document.
+- Using `async forEach` loops in scripts is best avoided as the script will exit before the async function(s) have
+  completed, resulting in the script being logged as succeeding when it has not yet finished, or potentially even failed
+  due to an error. Instead, it is recommended to use a `for ... of` loop as recommended in
+  [this StackOverflow answer](https://stackoverflow.com/a/37576787).
+- Mongoose `Mixed` SchemaType requires an explicit `markModified` call as per
+  [the docs](https://mongoosejs.com/docs/7.x/docs/schematypes.html#mixed) before calling `save`, otherwise changes to
+  the `Mixed` property will not be saved.
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

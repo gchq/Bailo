@@ -8,15 +8,18 @@ import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
 import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
-export const modelScanToolName = 'ModelScan'
-
 export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
   constructor() {
     super()
   }
 
-  info() {
-    return [modelScanToolName]
+  async info() {
+    return { toolName: 'ModelScan', scannerVersion: await this.getScannerVersion() }
+  }
+
+  async getScannerVersion() {
+    const modelScanInfo = await getModelScanInfo()
+    return modelScanInfo.modelscanVersion
   }
 
   async init(retryCount: number = 1) {
@@ -26,7 +29,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
         try {
           await getModelScanInfo()
           log.info('ModelScan initialised.')
-        } catch (error) {
+        } catch (_error) {
           log.warn(`Could not initialise ModelScan, retrying (attempt ${retryCount})...`)
           this.init(++retryCount)
         }
@@ -43,20 +46,9 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
 
   async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
     this.init()
-
-    let modelscanVersion: string | undefined = undefined
-    try {
-      modelscanVersion = (await getModelScanInfo()).modelscanVersion
-    } catch (error) {
-      log.error('Could not run ModelScan as it is not running', error)
-      return [
-        {
-          toolName: modelScanToolName,
-          scannerVersion: 'Unknown',
-          state: ScanState.Error,
-          lastRunAt: new Date(),
-        },
-      ]
+    const scannerInfo = await this.info()
+    if (scannerInfo.scannerVersion === undefined) {
+      return await this.scanError(undefined, undefined, 'Could not use ModelScan as it is not running')
     }
 
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
@@ -64,18 +56,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
       const scanResults = await scanStream(s3Stream, file.name, file.size)
 
       if (scanResults.errors.length !== 0) {
-        log.error(
-          { errors: scanResults.errors, modelId: file.modelId, fileId: file._id, name: file.name },
-          'Scan errored.',
-        )
-        return [
-          {
-            toolName: modelScanToolName,
-            state: ScanState.Error,
-            scannerVersion: modelscanVersion,
-            lastRunAt: new Date(),
-          },
-        ]
+        return this.scanError(scanResults.errors, file)
       }
 
       const issues = scanResults.summary.total_issues
@@ -87,29 +68,20 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
         }
       }
       log.info(
-        { modelId: file.modelId, fileId: file._id, name: file.name, result: { isInfected, viruses } },
+        { modelId: file.modelId, fileId: file._id.toString(), name: file.name, result: { isInfected, viruses } },
         'Scan complete.',
       )
       return [
         {
-          toolName: modelScanToolName,
+          ...scannerInfo,
           state: ScanState.Complete,
-          scannerVersion: modelscanVersion,
           isInfected,
           viruses,
           lastRunAt: new Date(),
         },
       ]
     } catch (error) {
-      log.error({ error, modelId: file.modelId, fileId: file._id, name: file.name }, 'Scan errored.')
-      return [
-        {
-          toolName: modelScanToolName,
-          state: ScanState.Error,
-          scannerVersion: modelscanVersion,
-          lastRunAt: new Date(),
-        },
-      ]
+      return this.scanError(error, file)
     }
   }
 }

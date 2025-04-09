@@ -8,7 +8,7 @@ import {
 import { IconButton, Popover, Stack } from '@mui/material'
 import { patchResponseReaction } from 'actions/response'
 import { useGetCurrentUser } from 'actions/user'
-import _ from 'lodash-es'
+import * as _ from 'lodash-es'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ReactionDisplay from 'src/reviews/ReactionDisplay'

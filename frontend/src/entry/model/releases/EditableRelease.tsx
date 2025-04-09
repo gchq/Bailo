@@ -1,8 +1,8 @@
 import { Alert, Box, Divider, Stack, Typography } from '@mui/material'
+import { postFileForModelId } from 'actions/file'
 import { useGetModel } from 'actions/model'
 import {
   deleteRelease,
-  postSimpleFileForRelease,
   putRelease,
   UpdateReleaseParams,
   useGetRelease,
@@ -12,6 +12,7 @@ import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
+import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -19,9 +20,7 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import MessageAlert from 'src/MessageAlert'
 import {
   EntryKind,
-  FailedFileUpload,
   FileInterface,
-  FileUploadProgress,
   FileWithMetadata,
   FlattenedModelImage,
   isFileInterface,
@@ -143,9 +142,11 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     const successfulFiles: SuccessfulFileUpload[] = []
     const newFilesToUpload: File[] = []
     for (const file of files) {
-      isFileInterface(file)
-        ? successfulFiles.push({ fileName: file.name, fileId: file._id })
-        : newFilesToUpload.push(file)
+      if (isFileInterface(file)) {
+        successfulFiles.push({ fileName: file.name, fileId: file._id })
+      } else {
+        newFilesToUpload.push(file)
+      }
     }
 
     setFilesToUploadCount(newFilesToUpload.length)
@@ -166,7 +167,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         }
 
         try {
-          const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
+          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata)
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])

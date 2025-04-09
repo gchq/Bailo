@@ -21,7 +21,7 @@ jobs:
       # Check for changed init file (for new version)
       - name: Get changed init files
         id: files-changed
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v46
         with:
           files: |
             lib/python/src/bailo/__init__.py
@@ -30,7 +30,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       # Install build package
       - name: Install pypa/build

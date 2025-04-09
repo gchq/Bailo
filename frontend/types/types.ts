@@ -64,6 +64,11 @@ export interface UiConfig {
   helpPopoverText: {
     manualEntryAccess: string
   }
+
+  modelDetails: {
+    organisations: string[]
+    states: string[]
+  }
 }
 
 export interface FileInterface {
@@ -86,13 +91,19 @@ export interface FileInterface {
   updatedAt: Date
 }
 
-export interface AvScanResult {
+export type FileWithScanResultsInterface = FileInterface & { avScan: ScanResultInterface[]; id: string }
+
+export interface ScanResultInterface {
+  _id: string
   state: ScanStateKeys
   scannerVersion?: string
   isInfected?: boolean
   viruses?: Array<string>
   toolName: string
   lastRunAt: string
+
+  createdAt: Date
+  updatedAt: Date
 }
 
 export const ScanState = {
@@ -102,6 +113,26 @@ export const ScanState = {
   Error: 'error',
 } as const
 export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
+
+export type AvScanResult = ScanResultInterface &
+  (
+    | {
+        artefactKind: typeof ArtefactKind.File
+        fileId: string
+      }
+    | {
+        artefactKind: typeof ArtefactKind.Image
+        repositoryName: string
+        imageDigest: string
+        // TODO: ultimately use a mapped version of backend/src/models/Release.ts:ImageRef, but ImageRef needs converting to use Digest rather than Tag first
+      }
+  )
+
+export const ArtefactKind = {
+  File: 'file',
+  Image: 'image',
+} as const
+export type ArtefactKindKeys = (typeof ArtefactKind)[keyof typeof ArtefactKind]
 
 export const ResponseKind = {
   Review: 'review',
@@ -404,6 +435,8 @@ export interface EntryInterface {
   name: string
   kind: EntryKindKeys
   description: string
+  state?: string
+  organisation?: string
   settings: {
     ungovernedAccess?: boolean
     allowTemplating?: boolean
@@ -423,6 +456,8 @@ export interface EntryForm {
   name: string
   kind: EntryKindKeys
   description: string
+  state?: string
+  organisation?: string
   visibility: EntryVisibilityKeys
   collaborators?: CollaboratorEntry[]
   settings?: {
@@ -508,11 +543,6 @@ export type ReviewRequestInterface = {
   updatedAt: string
 } & PartialReviewRequestInterface
 
-export interface FileUploadProgress {
-  fileName: string
-  uploadProgress: number
-}
-
 export interface InferenceInterface {
   modelId: string
   image: string
@@ -536,11 +566,6 @@ export type ReviewListStatusKeys = (typeof ReviewListStatus)[keyof typeof Review
 
 export function isReviewKind(value: unknown): value is ReviewKindKeys {
   return value === ReviewKind.RELEASE || value === ReviewKind.ACCESS
-}
-
-export interface FailedFileUpload {
-  fileName: string
-  error: string
 }
 
 export interface SuccessfulFileUpload {

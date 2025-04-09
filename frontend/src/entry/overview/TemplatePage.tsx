@@ -36,6 +36,31 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
           alignItems='center'
           divider={<Divider orientation='vertical' flexItem />}
         >
+          <Card
+            sx={{
+              width: '300px',
+              p: 2,
+            }}
+          >
+            <Stack spacing={2}>
+              <Typography component='h3' variant='h6' color='primary'>
+                Create from schema
+              </Typography>
+              <Typography>
+                Create a {`${EntryCardKindLabel[entry.kind]}`} from scratch using a predefined schema.
+              </Typography>
+              <Button
+                href={`/${entry.kind}/${entry.id}/schema`}
+                LinkComponent={Link}
+                variant='contained'
+                sx={{ width: '100%' }}
+                data-test='createSchemaFromScratchButton'
+                disabled={!!entry.settings.mirror?.sourceModelId}
+              >
+                Create
+              </Button>
+            </Stack>
+          </Card>
           {entry.kind === EntryKind.MODEL && (
             <Card
               sx={{
@@ -45,17 +70,14 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
             >
               <Stack spacing={2}>
                 <Typography component='h3' variant='h6' color='primary'>
-                  Create from schema
+                  Create from a template
                 </Typography>
-                <Typography>
-                  Create a {`${EntryCardKindLabel[entry.kind]}`} from scratch using a predefined schema.
-                </Typography>
+                <Typography>Create a model card using an existing model as a template.</Typography>
                 <Button
-                  href={`/${entry.kind}/${entry.id}/schema`}
-                  LinkComponent={Link}
-                  variant='contained'
                   sx={{ width: '100%' }}
-                  data-test='createSchemaFromScratchButton'
+                  variant='contained'
+                  href={`/${entry.kind}/${entry.id}/template`}
+                  LinkComponent={Link}
                   disabled={!!entry.settings.mirror?.sourceModelId}
                 >
                   Create
@@ -63,28 +85,6 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
               </Stack>
             </Card>
           )}
-          <Card
-            sx={{
-              width: '300px',
-              p: 2,
-            }}
-          >
-            <Stack spacing={2}>
-              <Typography component='h3' variant='h6' color='primary'>
-                Create from a template
-              </Typography>
-              <Typography>Create a model card using an existing model as a template.</Typography>
-              <Button
-                sx={{ width: '100%' }}
-                variant='contained'
-                href={`/${entry.kind}/${entry.id}/template`}
-                LinkComponent={Link}
-                disabled={!!entry.settings.mirror?.sourceModelId}
-              >
-                Create
-              </Button>
-            </Stack>
-          </Card>
         </Stack>
       </Stack>
     </Box>

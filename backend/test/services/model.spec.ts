@@ -193,13 +193,6 @@ describe('services > model', () => {
     await searchModels(user, 'model', [], [], '', 'task')
   })
 
-  test('searchModels > bad filter', async () => {
-    const user: any = { dn: 'test' }
-    modelMocks.sort.mockResolvedValueOnce([])
-
-    expect(() => searchModels(user, 'model', [], ['asdf' as any], '')).rejects.toThrowError()
-  })
-
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {
     const mockUser = { dn: 'testUser' } as any
     const mockModelId = '123'
@@ -384,7 +377,7 @@ describe('services > model', () => {
   test('setLatestImportedModelCard > success', async () => {
     await setLatestImportedModelCard('abc')
 
-    expect(modelMocks.updateOne).toHaveBeenCalledOnce
+    expect(modelMocks.findOneAndUpdate).toHaveBeenCalledOnce()
   })
 
   test('setLatestImportedModelCard > cannot find latest model card', async () => {

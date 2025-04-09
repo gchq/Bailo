@@ -13,6 +13,7 @@ vi.mock('../../../../src/services/model.js', async () => {
   return {
     ...actual,
     createModelCardFromSchema: vi.fn(() => ({ _id: 'test' })),
+    getModelById: vi.fn(() => ({ settings: { mirror: { sourceModelId: '' } } })),
   }
 })
 

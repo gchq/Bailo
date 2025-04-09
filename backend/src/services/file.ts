@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose'
+import { Schema, Types } from 'mongoose'
 import { Readable } from 'stream'
 
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
@@ -6,7 +6,8 @@ import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import FileModel, { FileInterface, FileInterfaceDoc } from '../models/File.js'
+import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
@@ -29,7 +30,6 @@ export function isFileInterfaceDoc(data: unknown): data is FileInterfaceDoc {
     !('bucket' in data) ||
     !('path' in data) ||
     !('complete' in data) ||
-    !('avScan' in data) ||
     !('deleted' in data) ||
     !('createdAt' in data) ||
     !('updatedAt' in data) ||
@@ -38,6 +38,10 @@ export function isFileInterfaceDoc(data: unknown): data is FileInterfaceDoc {
     return false
   }
   return true
+}
+
+export const createFilePath = (modelId: string, fileId: string) => {
+  return `beta/model/${modelId}/files/${fileId}`
 }
 
 export async function uploadFile(user: UserInterface, modelId: string, name: string, mime: string, stream: Readable) {
@@ -49,13 +53,13 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
   const fileId = longId()
 
   const bucket = config.s3.buckets.uploads
-  const path = `beta/model/${modelId}/files/${fileId}`
+  const path = createFilePath(modelId, fileId)
 
-  const file = new FileModel({ modelId, name, mime, bucket, path, complete: true })
+  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, bucket, path, complete: true })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id })
+    throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id.toString() })
   }
 
   const { fileSize } = await putObjectStream(bucket, path, stream)
@@ -66,8 +70,9 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 
   await file.save()
 
-  if (scanners.info() && fileSize > 0) {
-    const resultsInprogress: FileScanResult[] = scanners.info().map((scannerName) => ({
+  const scannersInfo = await scanners.info()
+  if (scannersInfo && scannersInfo.scannerNames && fileSize > 0) {
+    const resultsInprogress: FileScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
       state: ScanState.InProgress,
       lastRunAt: new Date(),
@@ -76,24 +81,30 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
     scanners.scan(file).then((resultsArray) => updateFileWithResults(file._id, resultsArray))
   }
 
-  return file
+  const avScan = await ScanModel.find({ fileId: file._id.toString() })
+  const ret: FileWithScanResultsInterface = {
+    ...file.toObject(),
+    avScan,
+    id: file._id.toString(),
+  }
+
+  return ret
 }
 
 async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileScanResult[]) {
   for (const result of results) {
-    const updateExistingResult = await FileModel.updateOne(
-      { _id, 'avScan.toolName': result.toolName },
+    const updateExistingResult = await ScanModel.updateOne(
+      { fileId: _id.toString(), toolName: result.toolName },
       {
-        $set: { 'avScan.$': { ...result } },
+        $set: { ...result },
       },
     )
     if (updateExistingResult.modifiedCount === 0) {
-      await FileModel.updateOne(
-        { _id, avScan: { $exists: true } },
-        {
-          $push: { avScan: { toolName: result.toolName, state: result.state, lastRunAt: new Date() } },
-        },
-      )
+      await ScanModel.create({
+        artefactKind: ArtefactKind.File,
+        fileId: _id.toString(),
+        ...result,
+      })
     }
   }
 }
@@ -110,14 +121,25 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
   return getObjectStream(file.bucket, file.path, range)
 }
 
-export async function getFileById(user: UserInterface, fileId: string) {
-  const file = await FileModel.findOne({
-    _id: fileId,
-  })
+export async function getFileById(user: UserInterface, fileId: string): Promise<FileWithScanResultsInterface> {
+  const files: FileWithScanResultsInterface[] = await FileModel.aggregate([
+    { $match: { _id: new Types.ObjectId(fileId) } },
+    { $limit: 1 },
+    { $addFields: { id: { $toString: '$_id' } } },
+    {
+      $lookup: {
+        from: 'v2_scans',
+        localField: 'id',
+        foreignField: 'fileId',
+        as: 'avScan',
+      },
+    },
+  ])
 
-  if (!file) {
+  if (!files || files.length === 0) {
     throw NotFound(`The requested file was not found.`, { fileId })
   }
+  const file: FileWithScanResultsInterface = { ...files[0], id: files[0]._id.toString() }
 
   const model = await getModelById(user, file.modelId)
   const auth = await authorisation.file(user, model, file, FileAction.View)
@@ -130,18 +152,44 @@ export async function getFileById(user: UserInterface, fileId: string) {
 
 export async function getFilesByModel(user: UserInterface, modelId: string) {
   const model = await getModelById(user, modelId)
-  const files = await FileModel.find({ modelId })
+  const files: FileWithScanResultsInterface[] = await FileModel.aggregate([
+    { $match: { modelId } },
+    { $addFields: { id: { $toString: '$_id' } } },
+    {
+      $lookup: {
+        from: 'v2_scans',
+        localField: 'id',
+        foreignField: 'fileId',
+        as: 'avScan',
+      },
+    },
+  ])
 
   const auths = await authorisation.files(user, model, files, FileAction.View)
   return files.filter((_, i) => auths[i].success)
 }
 
-export async function getFilesByIds(user: UserInterface, modelId: string, fileIds: string[]) {
+export async function getFilesByIds(
+  user: UserInterface,
+  modelId: string,
+  fileIds: string[],
+): Promise<FileWithScanResultsInterface[]> {
   const model = await getModelById(user, modelId)
   if (fileIds.length === 0) {
     return []
   }
-  const files = await FileModel.find({ _id: { $in: fileIds } })
+  const files: FileWithScanResultsInterface[] = await FileModel.aggregate([
+    { $match: { _id: { $in: fileIds } } },
+    { $addFields: { id: { $toString: '$_id' } } },
+    {
+      $lookup: {
+        from: 'v2_scans',
+        localField: 'id',
+        foreignField: 'fileId',
+        as: 'avScan',
+      },
+    },
+  ])
 
   if (files.length !== fileIds.length) {
     const notFoundFileIds = fileIds.filter((id) => files.some((file) => file._id.toString() === id))
@@ -168,7 +216,7 @@ export async function removeFile(user: UserInterface, modelId: string, fileId: s
 
   // We don't actually remove the file from storage, we only hide all
   // references to it.  This makes the file not visible to the user.
-  await file.delete()
+  await FileModel.findOneAndDelete({ _id: file._id })
 
   return file
 }
@@ -196,13 +244,14 @@ export async function markFileAsCompleteAfterImport(path: string) {
   }
 }
 
-function fileScanDelay(file: FileInterface): number {
+async function fileScanDelay(file: FileInterface): Promise<number> {
   const delay = config.connectors.fileScanners.retryDelayInMinutes
   if (delay === undefined) {
     return 0
   }
   let minutesBeforeRetrying = 0
-  for (const scanResult of file.avScan) {
+  const fileAvScans = await ScanModel.find({ fileId: file._id.toString() })
+  for (const scanResult of fileAvScans) {
     const delayInMilliseconds = delay * 60000
     const scanTimeAtLimit = scanResult.lastRunAt.getTime() + delayInMilliseconds
     if (scanTimeAtLimit > new Date().getTime()) {
@@ -229,7 +278,7 @@ export async function rerunFileScan(user: UserInterface, modelId, fileId: string
   if (!file.size || file.size === 0) {
     throw BadReq('Cannot run scan on an empty file')
   }
-  const minutesBeforeRescanning = fileScanDelay(file)
+  const minutesBeforeRescanning = await fileScanDelay(file)
   if (minutesBeforeRescanning > 0) {
     throw BadReq(`Please wait ${plural(minutesBeforeRescanning, 'minute')} before attempting a rescan ${file.name}`)
   }
@@ -237,8 +286,9 @@ export async function rerunFileScan(user: UserInterface, modelId, fileId: string
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn })
   }
-  if (scanners.info()) {
-    const resultsInprogress = scanners.info().map((scannerName) => ({
+  const scannersInfo = await scanners.info()
+  if (scannersInfo && scannersInfo.scannerNames) {
+    const resultsInprogress = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
       state: ScanState.InProgress,
       lastRunAt: new Date(),

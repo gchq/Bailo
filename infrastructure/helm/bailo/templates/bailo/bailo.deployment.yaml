@@ -93,7 +93,7 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 20
           resources:
-            {{- toYaml .Values.resources.backend | nindent 12 }}
+            {{- toYaml .Values.resourcesBackend | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /app/config/production.cjs
@@ -213,7 +213,7 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 20
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.resourcesFrontend | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

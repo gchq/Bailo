@@ -8,6 +8,7 @@ import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import AccessRequests from 'src/entry/model/AccessRequests'
+import Files from 'src/entry/model/Files'
 import InferenceServices from 'src/entry/model/InferenceServices'
 import ModelImages from 'src/entry/model/ModelImages'
 import Releases from 'src/entry/model/Releases'
@@ -66,6 +67,11 @@ export default function Model() {
               view: <ModelImages model={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
             },
             {
+              title: 'File Management',
+              path: 'files',
+              view: <Files model={model} />,
+            },
+            {
               title: 'Inferencing',
               path: 'inferencing',
               view: <InferenceServices model={model} />,
@@ -97,8 +103,9 @@ export default function Model() {
   return (
     <>
       <Title text={model ? model.name : 'Loading...'} />
-      {(isModelLoading || isCurrentUserLoading || isUiConfigLoading) && <Loading />}
-      {model && (
+      {!model || isModelLoading || isCurrentUserLoading || isUiConfigLoading ? (
+        <Loading />
+      ) : (
         <PageWithTabs
           title={model.name}
           subheading={`ID: ${model.id}`}

@@ -1,6 +1,20 @@
+import { ArrowDropDown } from '@mui/icons-material'
 import CommentIcon from '@mui/icons-material/ChatBubble'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import { Box, Button, Card, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Card,
+  Divider,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
+import { useGetReleasesForModelId } from 'actions/release'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -19,12 +33,14 @@ import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
+import { plural } from 'utils/stringUtils'
 
 export interface ReleaseDisplayProps {
   model: EntryInterface
   release: ReleaseInterface
   latestRelease?: string
   hideReviewBanner?: boolean
+  hideFileDownloads?: boolean
 }
 
 export default function ReleaseDisplay({
@@ -32,6 +48,7 @@ export default function ReleaseDisplay({
   release,
   latestRelease,
   hideReviewBanner = false,
+  hideFileDownloads = false,
 }: ReleaseDisplayProps) {
   const router = useRouter()
 
@@ -39,6 +56,8 @@ export default function ReleaseDisplay({
     modelId: model.id,
     semver: release.semver,
   })
+
+  const { mutateReleases } = useGetReleasesForModelId(model.id)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const {
@@ -53,6 +72,7 @@ export default function ReleaseDisplay({
   } = useGetResponses([...reviews.map((review) => review._id)])
 
   const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ResponseInterface[]>([])
+  const [expanded, setExpanded] = useState<string | false>(false)
 
   function latestVersionAdornment() {
     if (release.semver === latestRelease) {
@@ -66,6 +86,10 @@ export default function ReleaseDisplay({
       setReviewsWithLatestResponses(latestReviews)
     }
   }, [reviews, isReviewsLoading, reviewResponses])
+
+  const handleAccordionChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpanded(isExpanded ? panel : false)
+  }
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
@@ -105,16 +129,13 @@ export default function ReleaseDisplay({
               >
                 <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
                   <Stack direction='row' alignItems='center' spacing={1} width='100%'>
-                    <Typography component='h2' variant='h6' color='primary' noWrap>
-                      {model.name} -
-                    </Typography>
                     <Typography component='h2' variant='h6' color='primary'>
                       {release.semver}
                     </Typography>
                   </Stack>
                 </Link>
                 <CopyToClipboardButton
-                  textToCopy={`${model.name} - ${release.semver}`}
+                  textToCopy={release.semver}
                   notificationText='Copied release semver to clipboard'
                   ariaLabel='copy release semver to clipboard'
                 />
@@ -133,31 +154,49 @@ export default function ReleaseDisplay({
             <MarkdownDisplay>{release.notes}</MarkdownDisplay>
             <Box>{(release.files.length > 0 || release.images.length > 0) && <Divider />}</Box>
             <Stack spacing={1}>
-              {release.files.length > 0 && (
-                <>
-                  <Typography fontWeight='bold'>Files</Typography>
-                  {release.files.map((file) => (
-                    <FileDownload key={file.name} file={file} modelId={model.id} />
-                  ))}
-                </>
+              {!hideFileDownloads && release.files.length > 0 && (
+                <Accordion
+                  expanded={expanded === 'filesPanel'}
+                  onChange={handleAccordionChange('filesPanel')}
+                  data-test={`release-files-accordion-${release.semver}`}
+                >
+                  <AccordionSummary sx={{ px: 0 }} expandIcon={<ArrowDropDown />}>
+                    <Typography fontWeight='bold'>{`${expanded === 'filesPanel' ? 'Hide' : 'Show'} ${plural(release.files.length, 'file')}`}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    {release.files.map((file) => (
+                      <FileDownload
+                        showMenuItems={{ rescanFile: true }}
+                        key={file.name}
+                        file={file}
+                        modelId={model.id}
+                        mutator={mutateReleases}
+                      />
+                    ))}
+                  </AccordionDetails>
+                </Accordion>
               )}
               {release.images.length > 0 && (
-                <>
-                  <Typography fontWeight='bold'>Docker images</Typography>
-                  {release.images.map((image) => (
-                    <Stack
-                      key={`${image.repository}-${image.name}-${image.tag}`}
-                      direction={{ sm: 'row', xs: 'column' }}
-                      justifyContent='space-between'
-                      alignItems='center'
-                      spacing={1}
-                    >
-                      {uiConfig && (
-                        <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />
-                      )}
-                    </Stack>
-                  ))}
-                </>
+                <Accordion expanded={expanded === 'imagesPanel'} onChange={handleAccordionChange('imagesPanel')}>
+                  <AccordionSummary sx={{ px: 0 }} expandIcon={<ArrowDropDown />}>
+                    <Typography fontWeight='bold'>{`${expanded === 'imagesPanel' ? 'Hide' : 'Show'} ${plural(release.images.length, 'Docker image')}`}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    {release.images.map((image) => (
+                      <Stack
+                        key={`${image.repository}-${image.name}-${image.tag}`}
+                        direction={{ sm: 'row', xs: 'column' }}
+                        justifyContent='space-between'
+                        alignItems='center'
+                        spacing={1}
+                      >
+                        {uiConfig && (
+                          <CodeLine line={`${uiConfig.registry.host}/${model.id}/${image.name}:${image.tag}`} />
+                        )}
+                      </Stack>
+                    ))}
+                  </AccordionDetails>
+                </Accordion>
               )}
               <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2}>
                 <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />
