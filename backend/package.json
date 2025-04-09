@@ -77,7 +77,6 @@
     "@faker-js/faker": "^8.4.1",
     "@swc/core": "^1.11.15",
     "@types/archiver": "^6.0.3",
-    "@types/bcryptjs": "^3.0.0",
     "@types/bunyan": "^1.8.11",
     "@types/clamscan": "^2.4.0",
     "@types/cls-hooked": "^4.3.9",
@@ -106,5 +105,8 @@
     "typescript": "^5.7.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.5"
+  },
+  "overrides": {
+    "mv": "npm:dry-uninstall"
   }
 }

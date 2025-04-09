@@ -64,6 +64,13 @@ to be used.
 pip install bailo
 ```
 
+The Bailo Python client also (optionally) supports integration with [MLFlow](https://mlflow.org/) with the extra
+functionality included in `bailo`'s `mlflow` optional-dependency.
+
+```bash
+pip install bailo[mlflow]
+```
+
 ## Getting Started
 
 ```python
@@ -110,7 +117,7 @@ pre-commit install
 ### Install the package locally
 
 ```bash
-pip install -e .
+pip install -e .[test]
 ```
 
 ### Testing

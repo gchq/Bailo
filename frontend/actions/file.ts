@@ -32,7 +32,7 @@ export async function postFileForModelId(
   const fileResponse = await axios
     .post(
       metadata
-        ? `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}?${qs.stringify({
+        ? `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}&${qs.stringify({
             metadata,
           })}`
         : `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}`,
