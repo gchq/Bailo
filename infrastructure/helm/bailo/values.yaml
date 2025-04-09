@@ -102,14 +102,27 @@ resources:
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   limits:
     cpu: 400m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+resourcesFrontend:
+  limits:
+    cpu: 400m
     memory: 800Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-  backend:
+  requests:
+    cpu: 400m
+    memory: 800Mi
+
+resourcesBackend:
     limits:
+      cpu: 800m
+      memory: 2Gi
+    requests:
       cpu: 400m
-      memory: 800Mi
+      memory: 1Gi
+
 
 # Pod placement
 nodeSelector: {}
@@ -210,6 +223,7 @@ nginxAuth:
 # Mail
 mail:
   enabled: true
+  image: marlonb/mailcrab:latest
 
 # Openshift specific configuration
 openshift:

@@ -67,7 +67,7 @@ export default function Model() {
               view: <ModelImages model={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
             },
             {
-              title: 'Files',
+              title: 'File Management',
               path: 'files',
               view: <Files model={model} />,
             },

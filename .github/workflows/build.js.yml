@@ -520,11 +520,22 @@ jobs:
           cd lib/python
           python -m pip install -e .[test]
 
+      # start mlflow server
+      - name: Start MLFlow
+        run: |
+          mlflow server --host 127.0.0.1 --port 5050 &
+
+      # wait for mlflow to start
+      - run: |
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:5050 -t 10
+
       # Run tests
       - name: Test with pytest
         run: |
           cd lib/python
           python -m pytest -m integration
+          python -m pytest -m mlflow
         env:
           PYTEST_RUN_PATH: "lib/python"
 

@@ -1,11 +1,13 @@
 import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
+import { postFileForModelId } from 'actions/file'
 import { useGetModel } from 'actions/model'
-import { CreateReleaseParams, postRelease, postSimpleFileForRelease } from 'actions/release'
+import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -14,9 +16,7 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
   EntryKind,
-  FailedFileUpload,
   FileInterface,
-  FileUploadProgress,
   FileWithMetadata,
   FlattenedModelImage,
   isFileInterface,
@@ -73,6 +73,7 @@ export default function NewRelease() {
     event.preventDefault()
 
     setFailedFileUploads([])
+    const failedFiles: FailedFileUpload[] = []
 
     if (!model) {
       return setErrorMessage('Please wait for the model to finish loading before trying to make a release.')
@@ -89,7 +90,6 @@ export default function NewRelease() {
     setErrorMessage('')
     setLoading(true)
 
-    const failedFiles: FailedFileUpload[] = []
     const successfulFiles: SuccessfulFileUpload[] = []
     for (const file of files) {
       if (isFileInterface(file)) {
@@ -108,7 +108,7 @@ export default function NewRelease() {
         }
 
         try {
-          const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
+          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata)
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
@@ -124,6 +124,7 @@ export default function NewRelease() {
         }
       }
     }
+    setFailedFileUploads(failedFiles)
 
     const updatedSuccessfulFiles = successfulFiles.reduce(
       (updatedFiles, file) => {
@@ -135,11 +136,6 @@ export default function NewRelease() {
       [...successfulFileUploads],
     )
     setSuccessfulFileUploads(updatedSuccessfulFiles)
-
-    if (failedFiles.length > 0) {
-      setFailedFileUploads(failedFiles)
-      return
-    }
 
     const release: CreateReleaseParams = {
       modelId: model.id,

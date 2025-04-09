@@ -91,7 +91,10 @@ export interface FileInterface {
   updatedAt: Date
 }
 
+export type FileWithScanResultsInterface = FileInterface & { avScan: ScanResultInterface[]; id: string }
+
 export interface ScanResultInterface {
+  _id: string
   state: ScanStateKeys
   scannerVersion?: string
   isInfected?: boolean
@@ -540,11 +543,6 @@ export type ReviewRequestInterface = {
   updatedAt: string
 } & PartialReviewRequestInterface
 
-export interface FileUploadProgress {
-  fileName: string
-  uploadProgress: number
-}
-
 export interface InferenceInterface {
   modelId: string
   image: string
@@ -568,11 +566,6 @@ export type ReviewListStatusKeys = (typeof ReviewListStatus)[keyof typeof Review
 
 export function isReviewKind(value: unknown): value is ReviewKindKeys {
   return value === ReviewKind.RELEASE || value === ReviewKind.ACCESS
-}
-
-export interface FailedFileUpload {
-  fileName: string
-  error: string
 }
 
 export interface SuccessfulFileUpload {

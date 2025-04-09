@@ -53,6 +53,11 @@ export function useGetUserInformation(dn: string) {
   const { data, isLoading, error, mutate } = useSWR<UserInformationResponse, ErrorInfo>(
     `/api/v2/entity/${dn}/lookup`,
     fetcher,
+    {
+      onErrorRetry: (error) => {
+        if (error.status === 404) return
+      },
+    },
   )
 
   return {
