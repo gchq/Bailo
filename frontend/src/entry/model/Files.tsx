@@ -66,7 +66,7 @@ export default function Files({ model }: FilesProps) {
         setOrderByValue(value)
         setOrderByButtonTitle(title)
       }}
-      sx={{ paddingX: '8px' }}
+      sx={{ px: 2.5 }}
       selected={checkMenuOption(value)}
     >
       <Grid2 container sx={{ minWidth: '200px' }}>
@@ -94,7 +94,7 @@ export default function Files({ model }: FilesProps) {
       onClick={() => {
         setAscOrDesc(direction)
       }}
-      sx={{ paddingX: '8px' }}
+      sx={{ px: 2.5 }}
       selected={checkAscOrDesc(direction)}
     >
       <Grid2 container sx={{ minWidth: '200px' }}>
