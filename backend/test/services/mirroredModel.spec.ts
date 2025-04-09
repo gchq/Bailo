@@ -508,7 +508,9 @@ describe('services > mirroredModel', () => {
       ImportKind.Documents,
     )
 
-    await expect(result).rejects.toThrowError(/^Zip file contains model cards from an invalid model./)
+    await expect(result).rejects.toThrowError(
+      /^Zip file contains model cards that have a model ID that does not match the source model Id./,
+    )
   })
 
   test('importModel > cannot parse into a release', async () => {
@@ -541,7 +543,9 @@ describe('services > mirroredModel', () => {
       ImportKind.Documents,
     )
 
-    await expect(result).rejects.toThrowError('Zip file contains releases from an invalid model.')
+    await expect(result).rejects.toThrowError(
+      'Zip file contains releases that have a model ID that does not match the source model Id.',
+    )
   })
 
   test('importModel > cannot parse into a file', async () => {
@@ -591,7 +595,9 @@ describe('services > mirroredModel', () => {
       ImportKind.Documents,
     )
 
-    await expect(result).rejects.toThrowError('Zip file contains files from an invalid model.')
+    await expect(result).rejects.toThrowError(
+      'Zip file contains files that have a model ID that does not match the source model Id.',
+    )
   })
 
   test('importModel > invalid zip data', async () => {
