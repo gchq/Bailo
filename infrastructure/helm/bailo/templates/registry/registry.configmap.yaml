@@ -22,6 +22,7 @@ data:
         bucket: {{ .Values.minio.registryBucket }}
         secure: {{ .Values.minio.useSSL }}
         region: {{ .Values.minio.region }}
+        forcepathstyle: true
       redirect:
         disable: true
       delete:
