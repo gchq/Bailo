@@ -74,8 +74,10 @@ function formatKid(keyBuffer: Buffer) {
   return match.join(':')
 }
 
-export async function getKid() {
-  const cert = new X509Certificate(await getPublicKey())
+export async function getKid(cert?: X509Certificate) {
+  if (!cert) {
+    cert = new X509Certificate(await getPublicKey())
+  }
   const der = cert.publicKey.export({ format: 'der', type: 'spki' })
   const hash = createHash('sha256').update(der).digest().slice(0, 30)
 
@@ -84,6 +86,7 @@ export async function getKid() {
 
 async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn: StringValue }) {
   const privateKey = await getPrivateKey()
+  const cert = new X509Certificate(await getPublicKey())
 
   return jwt.sign(
     {
@@ -99,8 +102,10 @@ async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn
       issuer: config.registry.issuer,
 
       header: {
-        kid: await getKid(),
+        kid: await getKid(cert),
         alg: 'RS256',
+        // The registry >=3.0.0-beta.1 image requires the (typically optional) x5c header
+        x5c: [cert.raw.toString('base64')],
       },
     } as SignOptions,
   )

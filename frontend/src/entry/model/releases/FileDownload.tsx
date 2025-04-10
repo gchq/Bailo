@@ -1,5 +1,6 @@
 import { Delete, Done, Error, Info, MoreVert, Refresh, Warning } from '@mui/icons-material'
 import {
+  Box,
   Chip,
   Divider,
   IconButton,
@@ -22,13 +23,23 @@ import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, us
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
+import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { FileInterface, isFileInterface, ScanState } from 'types/types'
+import { KeyedMutator } from 'swr'
+import { FileInterface, isFileInterface, ReleaseInterface, ScanState } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
+
+type MutateReleases = KeyedMutator<{
+  releases: ReleaseInterface[]
+}>
+
+type MutateFiles = KeyedMutator<{
+  files: FileInterface[]
+}>
 
 type FileDownloadProps = {
   modelId: string
@@ -38,6 +49,7 @@ type FileDownloadProps = {
     deleteFile?: boolean
     rescanFile?: boolean
   }
+  mutator?: MutateReleases | MutateFiles
 }
 
 interface ChipDetails {
@@ -50,6 +62,7 @@ export default function FileDownload({
   modelId,
   file,
   showMenuItems = { associatedReleases: false, deleteFile: false, rescanFile: false },
+  mutator = undefined,
 }: FileDownloadProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
@@ -125,7 +138,7 @@ export default function FileDownload({
     if (chipDisplay === undefined) {
       updateChipDetails()
     }
-  }, [updateChipDetails, chipDisplay])
+  }, [updateChipDetails, chipDisplay, file])
 
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
@@ -144,7 +157,6 @@ export default function FileDownload({
 
   const handleRerunFileScanOnClick = useCallback(async () => {
     const res = await rerunFileScan(modelId, (file as FileInterface)._id)
-    setChipDisplay({ label: 'File is being rescanned...', colour: 'warning', icon: <Warning /> })
     if (!res.ok) {
       sendNotification({
         variant: 'error',
@@ -157,8 +169,11 @@ export default function FileDownload({
         msg: `${file.name} is being rescanned`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      if (mutator) {
+        mutator()
+      }
     }
-  }, [file, modelId, sendNotification])
+  }, [file, modelId, sendNotification, mutator])
 
   const rerunFileScanButton = useMemo(() => {
     return (
@@ -277,7 +292,9 @@ export default function FileDownload({
                   </Typography>
                 </Link>
               </Tooltip>
-              <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+              <Typography variant='caption' sx={{ width: 'max-content' }}>
+                {prettyBytes(file.size)}
+              </Typography>
             </Stack>
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
               {scanners.length > 0 && (
@@ -344,12 +361,25 @@ export default function FileDownload({
       />
       <ConfirmationDialogue
         open={deleteFileOpen}
-        title='Delete Release'
+        title='Delete File'
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteFileOpen(false)}
         errorMessage={deleteErrorMessage}
-        dialogMessage={'Are you sure you want to delete this file?'}
-      />
+        dialogMessage={
+          sortedAssociatedReleases.length > 0
+            ? 'Deleting this file will affect the following releases:'
+            : 'Deleting this file will not affect any existing releases'
+        }
+      >
+        <Box sx={{ pt: 2 }}>
+          <AssociatedReleasesList
+            modelId={modelId}
+            file={file}
+            latestRelease={latestRelease}
+            releases={sortedAssociatedReleases}
+          />
+        </Box>
+      </ConfirmationDialogue>
     </>
   )
 }
