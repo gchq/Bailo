@@ -498,10 +498,10 @@ class Client:
             },
         ).json()
 
-    def post_review(
+    def post_release_review(
         self,
         model_id: str,
-        access_request_id: str,
+        version: str,
         role: str,
         decision: str,
         comment: str | None = None,
@@ -509,6 +509,7 @@ class Client:
         """Create a review for a release.
 
         :param model_id: A unique model ID
+        :param version: Semver of the release
         :param access_request_id: Unique access request ID
         :param role: The role of the user making the review
         :param decision: Either approve or request changes
@@ -516,7 +517,7 @@ class Client:
         """
         filtered_json = filter_none({"role": role, "decision": decision, "comment": comment})
         return self.agent.post(
-            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}/review",
+            f"{self.url}/v2/model/{model_id}/release/{version}/review",
             json=filtered_json,
         ).json()
 
@@ -613,5 +614,27 @@ class Client:
         filtered_json = filter_none({"schemaId": schema_id, "metadata": metadata})
         return self.agent.patch(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+            json=filtered_json,
+        ).json()
+
+    def post_access_request_review(
+        self,
+        model_id: str,
+        access_request_id: str,
+        role: str,
+        decision: str,
+        comment: str | None = None,
+    ):
+        """Create a review for a release.
+
+        :param model_id: A unique model ID
+        :param access_request_id: Unique access request ID
+        :param role: The role of the user making the review
+        :param decision: Either approve or request changes
+        :param comment: A comment to go with the review
+        """
+        filtered_json = filter_none({"role": role, "decision": decision, "comment": comment})
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}/review",
             json=filtered_json,
         ).json()
