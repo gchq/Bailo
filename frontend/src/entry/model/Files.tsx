@@ -246,56 +246,52 @@ export default function Files({ model }: FilesProps) {
             that are no longer needed, and also manually retrigger anti-virus scanning (if anti-virus scanning is
             enabled).
           </Typography>
-          <Box display='flex'>
-            <Box ml='auto'>
-              <Stack direction={'row'} justifyContent={'right'}>
-                <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
-                  <>
-                    <label htmlFor='add-files-button'>
-                      <LoadingButton loading={isFilesUploading} fullWidth component='span' variant='outlined'>
-                        Add new files
-                      </LoadingButton>
-                    </label>
-                    <Input
-                      multiple
-                      id={'add-files-button'}
-                      type='file'
-                      onInput={handleAddNewFiles}
-                      data-test='uploadFileButton'
-                    />
-                  </>
-                </Restricted>
-                <Button
-                  onClick={handleMenuButtonClick}
-                  endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
-                  sx={{ width: '170px' }}
-                >
-                  <Stack sx={{ minWidth: '150px' }} direction={'row'} spacing={2} justifyContent={'space-evenly'}>
-                    {checkAscOrDesc(SortingDirection.ASC) ? (
-                      <Sort color='primary' />
-                    ) : (
-                      <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
-                    )}
-                    {orderByButtonTitle}
-                  </Stack>
-                </Button>
+          <Stack width={'100%'} direction={'row'} justifyContent={'space-between'} sx={{ px: 0.5 }}>
+            <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
+              <>
+                <label htmlFor='add-files-button'>
+                  <LoadingButton loading={isFilesUploading} fullWidth component='span' variant='outlined'>
+                    Add new files
+                  </LoadingButton>
+                </label>
+                <Input
+                  multiple
+                  id={'add-files-button'}
+                  type='file'
+                  onInput={handleAddNewFiles}
+                  data-test='uploadFileButton'
+                />
+              </>
+            </Restricted>
+            <Button
+              onClick={handleMenuButtonClick}
+              endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+              sx={{ width: '170px' }}
+            >
+              <Stack sx={{ minWidth: '150px' }} direction={'row'} spacing={2} justifyContent={'space-evenly'}>
+                {checkAscOrDesc(SortingDirection.ASC) ? (
+                  <Sort color='primary' />
+                ) : (
+                  <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
+                )}
+                {orderByButtonTitle}
               </Stack>
-              <Menu
-                open={menuOpen}
-                slotProps={{ list: { dense: true } }}
-                anchorEl={anchorEl}
-                onClose={handleMenuButtonClose}
-                sx={{ minWidth: '200px' }}
-              >
-                {orderByMenuListItems('name', 'Name')}
-                {orderByMenuListItems('createdAt', 'Date uploaded')}
-                {orderByMenuListItems('updatedAt', 'Date updated')}
-                <Divider />
-                {ascOrDescMenuListItems(SortingDirection.ASC)}
-                {ascOrDescMenuListItems(SortingDirection.DESC)}
-              </Menu>
-            </Box>
-          </Box>
+            </Button>
+          </Stack>
+          <Menu
+            open={menuOpen}
+            slotProps={{ list: { dense: true } }}
+            anchorEl={anchorEl}
+            onClose={handleMenuButtonClose}
+            sx={{ minWidth: '200px' }}
+          >
+            {orderByMenuListItems('name', 'Name')}
+            {orderByMenuListItems('createdAt', 'Date uploaded')}
+            {orderByMenuListItems('updatedAt', 'Date updated')}
+            <Divider />
+            {ascOrDescMenuListItems(SortingDirection.ASC)}
+            {ascOrDescMenuListItems(SortingDirection.DESC)}
+          </Menu>
           {currentFileUploadProgress && (
             <>
               <LinearProgress
