@@ -510,7 +510,6 @@ class Client:
 
         :param model_id: A unique model ID
         :param version: Semver of the release
-        :param access_request_id: Unique access request ID
         :param role: The role of the user making the review
         :param decision: Either approve or request changes
         :param comment: A comment to go with the review
