@@ -64,7 +64,7 @@ services:
 
   registry:
     restart: always
-    image: registry:2.8.3
+    image: registry:3.0.0
     ports:
       - 5000:5000
     environment:
@@ -80,7 +80,7 @@ services:
       REGISTRY_AUTH_TOKEN_ISSUER: RegistryIssuer
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
     volumes:
-      - ./backend/config/registry.conf:/etc/docker/registry/config.yml
+      - ./backend/config/registry.conf:/etc/distribution/config.yml
       - ./backend/certs:/certs
 
   frontend:
