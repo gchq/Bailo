@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { registerPath, systemStatusSchema } from '../../../services/specification.js'
-import { FederationStateKeys } from '../../../types/types.js'
+import { SystemStatus } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -27,20 +27,9 @@ registerPath({
   },
 })
 
-interface GetSystemStatusResponse {
-  status: {
-    code: number
-    ping: string
-    federation: {
-      state: FederationStateKeys
-      id?: string
-    }
-  }
-}
-
 export const getSystemStatus = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetSystemStatusResponse>) => {
+  async (req: Request, res: Response<SystemStatus>) => {
     const _ = parse(req, getSystemStatusSchema)
 
     const federation = {
@@ -49,11 +38,9 @@ export const getSystemStatus = [
     }
 
     return res.json({
-      status: {
-        code: 200,
-        ping: 'pong',
-        federation,
-      },
+      code: 200,
+      ping: 'pong',
+      federation,
     })
   },
 ]

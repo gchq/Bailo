@@ -50,7 +50,7 @@ export interface Config {
   federation: {
     state: FederationStateKeys
     id: string
-    peers: Array<RemoteFederationConfig>
+    peers: Map<string, RemoteFederationConfig>
   }
 
   smtp: {
