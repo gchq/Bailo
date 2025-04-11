@@ -25,17 +25,21 @@ export default function SearchInfo() {
       <List sx={{ listStyleType: 'disc', px: 3 }}>
         <ListItem sx={{ display: 'list-item' }}>
           <Typography>
-            Searches across all entry kinds ({listEntryKinds(' or ', false)}), but a user can only see the results based
-            on the tab they are currenly on (either {listEntryKinds(' or ', true)})
+            The search input is used for filtering the marketplace for the current selected tab (
+            {listEntryKinds(' or ', false)})
           </Typography>
         </ListItem>
         <ListItem sx={{ display: 'list-item' }}>
           <Typography>Allows for additional granularity via specifying any of the following:</Typography>
           <ListItem sx={{ display: 'list-item', listStyleType: 'circle' }}>
-            <Typography>Filters (e.g. only show models that I have created)</Typography>
+            <Typography>
+              &quot;My Roles&quot; will only display results whereby you hold the selected role for that item. It also
+              contains an &quot;Any role&quot; option that will return results that you have been added to as a
+              collaborator with any role.
+            </Typography>
           </ListItem>
           <ListItem sx={{ display: 'list-item', listStyleType: 'circle' }}>
-            <Typography>Task (this searches for specific tags on {listEntryKinds('/', true)})</Typography>
+            <Typography>Task (this searches for specific tags on {listEntryKinds(' / ', true)})</Typography>
           </ListItem>
           <ListItem sx={{ display: 'list-item', listStyleType: 'circle' }}>
             <Typography>Libraries</Typography>
@@ -47,7 +51,9 @@ export default function SearchInfo() {
       </Typography>
       <List sx={{ listStyleType: 'disc', px: 3 }}>
         <ListItem sx={{ display: 'list-item' }}>
-          <Typography>Searches across all entry kinds ({listEntryKinds(' and ', true)})</Typography>
+          <Typography>
+            Returns results of any type ({listEntryKinds(' and ', true)}) based on your search query
+          </Typography>
         </ListItem>
         <ListItem sx={{ display: 'list-item' }}>
           <Typography>No additional granularity</Typography>
