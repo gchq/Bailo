@@ -14,13 +14,16 @@ import random
 
 import mlflow
 import pytest
+from example_schemas import METRICS_JSON_SCHEMA
+from mlflow.tracking import MlflowClient
+
+# isort: split
+
 from bailo.core.client import Client
 from bailo.core.enums import ModelVisibility, SchemaKind
 from bailo.helper.datacard import Datacard
 from bailo.helper.model import Model
 from bailo.helper.schema import Schema
-from example_schemas import METRICS_JSON_SCHEMA
-from mlflow.tracking import MlflowClient
 
 
 def pytest_configure(config):

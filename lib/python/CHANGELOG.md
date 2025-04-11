@@ -2,6 +2,13 @@
 
 All dates are formatted dd/mm/yyyy.
 
+## 3.1.0 - [DATE]
+
+### Changes
+
+- Rename `Client.post_review` -> `Client.post_release_review` endpoint.
+- Add `Client.post_access_request_review` endpoint.
+
 ## 3.0.0 - 02/04/2025
 
 ### Breaking Changes
