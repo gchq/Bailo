@@ -235,12 +235,12 @@ def test_get_reviews(requests_mock):
 
 @pytest.mark.parametrize(("comment"), [(None, "test_comment")])
 def test_post_release_review(comment, requests_mock):
-    requests_mock.post("https://example.com/api/v2/model/test_id/release/v1.0.0/review", json={"success": True})
+    requests_mock.post("https://example.com/api/v2/model/test_id/release/1.0.0/review", json={"success": True})
 
     client = Client("https://example.com")
     result = client.post_release_review(
         model_id="test_id",
-        version="v1.0.0",
+        version="1.0.0",
         role="test_role",
         decision="test_decision",
         comment=comment,
