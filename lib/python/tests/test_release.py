@@ -20,20 +20,54 @@ def test_release():
     assert isinstance(release, Release)
 
 
+@pytest.mark.parametrize(
+    ("model_card_version", "files", "images", "minor", "draft"),
+    [
+        (1, [], [], False, True),
+        (None, None, None, True, False),
+    ],
+)
+def test_create_release(
+    model_card_version: int | None,
+    files: list[str] | None,
+    images: list[str] | None,
+    minor: bool,
+    draft: bool,
+    requests_mock,
+):
+    requests_mock.post("https://example.com/api/v2/model/test_id/releases", json={"success": True})
+
+    client = Client("https://example.com")
+
+    release = Release.create(
+        client=client,
+        model_id="test_id",
+        version="1.0.0",
+        notes="lgtm",
+        model_card_version=model_card_version,
+        files=files,
+        images=images,
+        minor=minor,
+        draft=draft,
+    )
+
+    assert isinstance(release, Release)
+
+
 @pytest.mark.integration
 @pytest.mark.parametrize(
     ("version", "model_card_version", "notes", "files", "images", "minor", "draft"),
     [
         ("1.0.0", 1, "test", [], [], False, True),
-        ("1.0.1", None, "test", [], [], True, False),
+        ("1.0.1", None, "test", None, None, True, False),
     ],
 )
 def test_create_get_from_version_update_and_delete_release(
     version: Version | str,
     model_card_version: int,
     notes: str,
-    files: list[str],
-    images: list[str],
+    files: list[str] | None,
+    images: list[str] | None,
     minor: bool,
     draft: bool,
     integration_client,
@@ -47,6 +81,7 @@ def test_create_get_from_version_update_and_delete_release(
         model_card_version=model_card_version,
         notes=notes,
         files=files,
+        images=images,
         minor=minor,
         draft=draft,
     )
