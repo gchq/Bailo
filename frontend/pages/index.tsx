@@ -170,13 +170,13 @@ export default function Marketplace() {
             <Button component={Link} href='/entry/new' variant='contained'>
               Create
             </Button>
-            <Stack direction={'row'} spacing={0.5}>
+            <Stack direction='row' spacing={0.5}>
               <FormControl
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
                   maxWidth: '400px',
-                  marginBottom: 3,
+                  mb: 3,
                 }}
                 variant='filled'
                 onSubmit={onFilterSubmit}
@@ -190,14 +190,14 @@ export default function Marketplace() {
                   onChange={handleFilterChange}
                   endAdornment={
                     <InputAdornment position='end'>
-                      <IconButton color='secondary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
+                      <IconButton color='secondary' type='submit' sx={{ p: 2 }} aria-label='filter'>
                         <SearchIcon />
                       </IconButton>
                     </InputAdornment>
                   }
                 />
               </FormControl>
-              <HelpDialog title={'Search Info'} content={<SearchInfo />} />
+              <HelpDialog title='Search Info' content={<SearchInfo />} />
             </Stack>
             <Box>
               <ChipSelector
