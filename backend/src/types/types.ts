@@ -64,10 +64,23 @@ export const FederationState = {
 export type FederationStateKeys = (typeof FederationState)[keyof typeof FederationState]
 
 export interface RemoteFederationConfig {
-  id: string
   state: FederationStateKeys
   baseUrl: string
   label: string
+}
+
+export type SystemStatus = {
+  code: number
+  ping: string
+  federation: {
+    state: FederationStateKeys
+    id?: string
+  }
+}
+
+export type PeerConfigStatus = {
+  config: RemoteFederationConfig
+  status: SystemStatus
 }
 
 export interface UiConfig {

@@ -57,6 +57,21 @@ export const systemStatusSchema = z.object({
   }),
 })
 
+export const remoteFederationConfigSchema = z.object({
+  state: z.nativeEnum(FederationState).openapi({ example: 'readOnly' }),
+  baseUrl: z.string().openapi({ example: 'https://example.com' }),
+  label: z.string().openapi({ example: 'My Bailo' }),
+})
+
+export const peerConfigStatusSchema = z.object({
+  config: remoteFederationConfigSchema,
+  status: systemStatusSchema,
+})
+
+export const peersConfigStatusSchema = z.object({
+  peers: z.map(z.string(), peerConfigStatusSchema),
+})
+
 export const modelCardInterfaceSchema = z.object({
   schemaId: z.string().openapi({ example: 'minimal-general-v10-beta' }),
   version: z.number().openapi({ example: 5 }),
