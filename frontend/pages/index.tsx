@@ -19,7 +19,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
+import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
+import SearchInfo from 'src/common/SearchInfo'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
@@ -168,32 +170,35 @@ export default function Marketplace() {
             <Button component={Link} href='/entry/new' variant='contained'>
               Create
             </Button>
-            <FormControl
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                maxWidth: '400px',
-                marginBottom: 3,
-              }}
-              variant='filled'
-              onSubmit={onFilterSubmit}
-            >
-              <InputLabel htmlFor='entry-filter-input'>Search</InputLabel>
-              <FilledInput
-                sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2 }}
-                id='entry-filter-input'
-                value={filter}
-                disableUnderline
-                onChange={handleFilterChange}
-                endAdornment={
-                  <InputAdornment position='end'>
-                    <IconButton color='secondary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
+            <Stack direction='row' spacing={0.5}>
+              <FormControl
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  maxWidth: '400px',
+                  mb: 3,
+                }}
+                variant='filled'
+                onSubmit={onFilterSubmit}
+              >
+                <InputLabel htmlFor='entry-filter-input'>Search</InputLabel>
+                <FilledInput
+                  sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2 }}
+                  id='entry-filter-input'
+                  value={filter}
+                  disableUnderline
+                  onChange={handleFilterChange}
+                  endAdornment={
+                    <InputAdornment position='end'>
+                      <IconButton color='secondary' type='submit' sx={{ p: 2 }} aria-label='filter'>
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+              </FormControl>
+              <HelpDialog title='Search Info' content={<SearchInfo />} />
+            </Stack>
             <Box>
               <ChipSelector
                 label='Tasks'
