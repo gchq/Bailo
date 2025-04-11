@@ -1,6 +1,6 @@
+import peer from '../connectors/peer/index.js'
 import { FederationState, PeerConfigStatus, RemoteFederationConfig } from '../types/types.js'
 import config from '../utils/config.js'
-import log from './log.js'
 
 function ensureFederationIsNotDisabled() {
   if (FederationState.DISABLED == config.federation.state) {
@@ -29,19 +29,9 @@ export async function getAllPeerStatus(): Promise<Map<string, PeerConfigStatus>>
 }
 
 async function getPeerStatus(config: RemoteFederationConfig): Promise<PeerConfigStatus> {
-  // call remote with config
-  log.debug(`Placeholder remote call to ${config.baseUrl}`)
-
   return Promise.resolve({
     config,
-    status: {
-      code: 200,
-      ping: 'pong',
-      federation: {
-        id: 'remote',
-        state: 'enabled',
-      },
-    },
+    status: await peer(config).ping(),
   })
 }
 

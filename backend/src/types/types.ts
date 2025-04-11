@@ -1,3 +1,5 @@
+import { PeerKindKeys } from '../connectors/peer/index.js'
+
 export type PartialDeep<T> = T extends object
   ? {
       [P in keyof T]?: PartialDeep<T[P]>
@@ -67,6 +69,7 @@ export interface RemoteFederationConfig {
   state: FederationStateKeys
   baseUrl: string
   label: string
+  kind: PeerKindKeys
 }
 
 export type SystemStatus = {
