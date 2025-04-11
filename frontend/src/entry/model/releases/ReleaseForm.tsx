@@ -1,18 +1,24 @@
 import {
+  Button,
   Checkbox,
   Divider,
   FormControl,
   FormControlLabel,
   LinearProgress,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
   Stack,
   TextField,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import { ChangeEvent, useCallback, useMemo } from 'react'
 import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
+import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
 import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
@@ -21,8 +27,10 @@ import ModelImageList from 'src/entry/model/ModelImageList'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, FileInterface, FileWithMetadata, FlattenedModelImage } from 'types/types'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -31,6 +39,7 @@ type ReleaseFormData = {
   isMinorRelease: boolean
   files: (File | FileInterface)[]
   imageList: FlattenedModelImage[]
+  modelCardVersion: number
 }
 
 type EditableReleaseFormProps =
@@ -50,6 +59,7 @@ type ReleaseFormProps = {
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
   onFilesChange: (value: (File | FileInterface)[]) => void
+  onModelCardVersionChange: (value: number) => void
   filesMetadata: FileWithMetadata[]
   onFilesMetadataChange: (value: FileWithMetadata[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
@@ -66,6 +76,7 @@ export default function ReleaseForm({
   onReleaseNotesChange,
   onMinorReleaseChange,
   onFilesChange,
+  onModelCardVersionChange,
   filesMetadata,
   onFilesMetadataChange,
   onImageListChange,
@@ -81,6 +92,9 @@ export default function ReleaseForm({
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
+  const { modelCardRevisions, isModelCardRevisionsLoading, isModelCardRevisionsError } = useGetModelCardRevisions(
+    model.id,
+  )
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
@@ -92,11 +106,27 @@ export default function ReleaseForm({
     onMinorReleaseChange(checked)
   }
 
+  const handleModelCardVersionChange = useCallback(
+    (event: SelectChangeEvent) => {
+      const newModelCardVersion = parseInt(event.target.value)
+      onModelCardVersionChange(newModelCardVersion)
+    },
+    [onModelCardVersionChange],
+  )
+
   const releaseNotesLabel = (
     <Typography component='label' fontWeight='bold' htmlFor={'new-model-description'}>
-      Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
+      Release notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
+
+  const modelCardVersionList = useMemo(() => {
+    return modelCardRevisions.sort(sortByCreatedAtDescending).map((revision) => (
+      <MenuItem key={revision.version} value={revision.version}>
+        {revision.version}
+      </MenuItem>
+    ))
+  }, [modelCardRevisions])
 
   const handleDeleteFile = (fileToDelete: File | FileInterface) => {
     if (formData.files) {
@@ -123,13 +153,17 @@ export default function ReleaseForm({
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
 
+  if (isModelCardRevisionsError) {
+    return <MessageAlert message={isModelCardRevisionsError.info.message} severity='error' />
+  }
+
   return (
     <Stack spacing={2}>
-      {!editable && (
+      {isReadOnly && (
         <Stack sx={{ width: '100%' }} justifyContent='center'>
-          <Stack direction='row'>
+          <Stack direction='row' spacing={1}>
             <Typography fontWeight='bold'>Release name</Typography>
-            {!editable && (
+            {isReadOnly && (
               <HelpPopover>
                 The release name is automatically generated using the model name and release semantic version
               </HelpPopover>
@@ -138,7 +172,7 @@ export default function ReleaseForm({
           <Typography>{`${model.name} - ${formData.semver}`}</Typography>
         </Stack>
       )}
-      {!editable && (
+      {isReadOnly && (
         <Stack>
           <Typography fontWeight='bold'>Latest version</Typography>
           <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
@@ -163,6 +197,37 @@ export default function ReleaseForm({
               htmlInput: { 'data-test': 'releaseSemanticVersionTextField' },
             }}
           />
+        )}
+      </Stack>
+      <Stack>
+        <Stack direction='row' spacing={1}>
+          <Typography fontWeight='bold'>
+            Model card version {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
+          </Typography>
+          {!isReadOnly && <HelpPopover>Leave this as default if you want the latest available version</HelpPopover>}
+        </Stack>
+        {isReadOnly ? (
+          <Typography>
+            {formData.modelCardVersion} -{' '}
+            <Link href={`${model.kind}/${model.id}/history/${formData.modelCardVersion}`}>
+              <Button size='small'>View Model card</Button>
+            </Link>
+          </Typography>
+        ) : (
+          <>
+            {isModelCardRevisionsLoading && <Loading />}
+            {!isModelCardRevisionsLoading && (
+              <>
+                <Select
+                  size='small'
+                  value={formData.modelCardVersion.toString()}
+                  onChange={handleModelCardVersionChange}
+                >
+                  {modelCardVersionList}
+                </Select>
+              </>
+            )}
+          </>
         )}
       </Stack>
       <Stack>
