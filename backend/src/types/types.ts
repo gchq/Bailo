@@ -1,3 +1,5 @@
+import { ProxyAgentOptions } from 'proxy-agent'
+
 import { PeerKindKeys } from '../connectors/peer/index.js'
 
 export type PartialDeep<T> = T extends object
@@ -70,6 +72,8 @@ export interface RemoteFederationConfig {
   baseUrl: string
   label: string
   kind: PeerKindKeys
+  proxy: string
+  httpConfig: ProxyAgentOptions
 }
 
 export type SystemStatus = {
