@@ -51,6 +51,7 @@ export interface Config {
     state: FederationStateKeys
     id: string
     peers: Map<string, RemoteFederationConfig>
+    defaultProxy: string
   }
 
   smtp: {
