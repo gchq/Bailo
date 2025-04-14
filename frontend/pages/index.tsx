@@ -12,6 +12,7 @@ import {
   Stack,
   Tab,
   Tabs,
+  Typography,
 } from '@mui/material/'
 import { useTheme } from '@mui/material/styles'
 import { useGetAllModelReviewRoles, useListModels } from 'actions/model'
@@ -166,17 +167,24 @@ export default function Marketplace() {
       <Title text='Marketplace' />
       <Container maxWidth='xl'>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <Stack spacing={2} sx={{ maxWidth: '250px' }}>
+          <Stack spacing={2} sx={{ maxWidth: '300px' }}>
             <Button component={Link} href='/entry/new' variant='contained'>
               Create
             </Button>
-            <Stack direction='row' spacing={0.5}>
+            <Container sx={{ backgroundColor: 'lightgray', py: 2, borderRadius: '8px' }}>
+              <Stack direction='row' spacing={0.5} marginBottom='10px' justifyContent={'center'}>
+                <Typography variant='h5' fontWeight='bold'>
+                  Filters
+                </Typography>
+                <HelpDialog title='Search Info' content={<SearchInfo />} />
+              </Stack>
               <FormControl
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
                   maxWidth: '400px',
                   mb: 3,
+                  marginY: '10px',
                 }}
                 variant='filled'
                 onSubmit={onFilterSubmit}
@@ -197,55 +205,54 @@ export default function Marketplace() {
                   }
                 />
               </FormControl>
-              <HelpDialog title='Search Info' content={<SearchInfo />} />
-            </Stack>
-            <Box>
-              <ChipSelector
-                label='Tasks'
-                chipTooltipTitle={'Filter by task'}
-                // TODO fetch all model tags
-                options={[
-                  'Translation',
-                  'Image Classification',
-                  'Summarization',
-                  'Tokenisation',
-                  'Text to Speech',
-                  'Tabular Regression',
-                ]}
-                expandThreshold={10}
-                selectedChips={selectedTask}
-                onChange={handleTaskOnChange}
-                size='small'
-                ariaLabel='add task to search filter'
-              />
-            </Box>
-            <Box>
-              <ChipSelector
-                label='Libraries'
-                chipTooltipTitle={'Filter by library'}
-                // TODO fetch all model libraries
-                options={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
-                expandThreshold={10}
-                multiple
-                selectedChips={selectedLibraries}
-                onChange={handleLibrariesOnChange}
-                size='small'
-                ariaLabel='add library to search filter'
-              />
-            </Box>
-            <Box>
-              <ChipSelector
-                label='My Roles'
-                multiple
-                options={roleOptions.map((role) => role.label)}
-                onChange={handleSelectedRolesOnChange}
-                selectedChips={roleOptions
-                  .filter((label) => selectedRoles.includes(label.key))
-                  .map((type) => type.label)}
-                size='small'
-              />
-            </Box>
-            <Button onClick={handleResetFilters}>Reset filters</Button>
+              <Box>
+                <ChipSelector
+                  label='Tasks'
+                  chipTooltipTitle={'Filter by task'}
+                  // TODO fetch all model tags
+                  options={[
+                    'Translation',
+                    'Image Classification',
+                    'Summarization',
+                    'Tokenisation',
+                    'Text to Speech',
+                    'Tabular Regression',
+                  ]}
+                  expandThreshold={10}
+                  selectedChips={selectedTask}
+                  onChange={handleTaskOnChange}
+                  size='small'
+                  ariaLabel='add task to search filter'
+                />
+              </Box>
+              <Box>
+                <ChipSelector
+                  label='Libraries'
+                  chipTooltipTitle={'Filter by library'}
+                  // TODO fetch all model libraries
+                  options={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
+                  expandThreshold={10}
+                  multiple
+                  selectedChips={selectedLibraries}
+                  onChange={handleLibrariesOnChange}
+                  size='small'
+                  ariaLabel='add library to search filter'
+                />
+              </Box>
+              <Box>
+                <ChipSelector
+                  label='My Roles'
+                  multiple
+                  options={roleOptions.map((role) => role.label)}
+                  onChange={handleSelectedRolesOnChange}
+                  selectedChips={roleOptions
+                    .filter((label) => selectedRoles.includes(label.key))
+                    .map((type) => type.label)}
+                  size='small'
+                />
+              </Box>
+              <Button onClick={handleResetFilters}>Reset filters</Button>
+            </Container>
           </Stack>
           <Box sx={{ overflow: 'hidden', width: '100%' }}>
             <Paper>
