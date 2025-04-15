@@ -360,7 +360,7 @@ export default function FileDownload({
               </Stack>
             </Stack>
           </Stack>
-          <Stack spacing={1} direction='row'>
+          <Stack spacing={1} direction='row' alignItems='center'>
             <Button
               sx={{ width: 'fit-content' }}
               size='small'

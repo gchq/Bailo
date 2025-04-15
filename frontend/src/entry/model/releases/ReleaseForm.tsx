@@ -246,7 +246,7 @@ export default function ReleaseForm({
             )}
           </Stack>
         )}
-        <Stack spacing={1}>
+        <Stack spacing={1} divider={<Divider />}>
           {isReadOnly &&
             formData.files.map(
               (file) =>
