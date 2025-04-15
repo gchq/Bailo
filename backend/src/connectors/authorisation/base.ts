@@ -1,7 +1,7 @@
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface } from '../../models/File.js'
 import { EntryVisibility, ModelDoc } from '../../models/Model.js'
-import { ReleaseDoc } from '../../models/Release.js'
+import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
 import { SchemaDoc } from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
@@ -178,7 +178,7 @@ export class BasicAuthorisationConnector {
   async releases(
     user: UserInterface,
     model: ModelDoc,
-    releases: Array<ReleaseDoc>,
+    releases: Array<ReleaseDoc | ReleaseInterface>,
     action: ReleaseActionKeys,
   ): Promise<Array<Response>> {
     // We don't have any specific roles dedicated to releases, so we pass it through to the model authorisation checker.

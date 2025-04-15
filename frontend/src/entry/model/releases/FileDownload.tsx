@@ -1,5 +1,6 @@
 import { Delete, Done, Error, Info, LocalOffer, MoreVert, Refresh, Warning } from '@mui/icons-material'
 import {
+  Box,
   Button,
   Chip,
   Divider,
@@ -24,6 +25,7 @@ import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, us
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
+import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import FileTagSelector from 'src/entry/model/releases/FileTagSelector'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
@@ -293,7 +295,7 @@ export default function FileDownload({
   return (
     <>
       {isFileInterface(file) && (
-        <Stack spacing={2} divider={<Divider />}>
+        <Stack spacing={2}>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
             <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center'>
               <Tooltip title={file.name}>
@@ -303,7 +305,9 @@ export default function FileDownload({
                   </Typography>
                 </Link>
               </Tooltip>
-              <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
+              <Typography variant='caption' sx={{ width: 'max-content' }}>
+                {prettyBytes(file.size)}
+              </Typography>
               <Typography variant='caption'>
                 Uploaded on
                 <span style={{ fontWeight: 'bold' }}>{`${formatDateTimeString(file.createdAt.toString())}`}</span>
@@ -356,7 +360,7 @@ export default function FileDownload({
               </Stack>
             </Stack>
           </Stack>
-          <Stack spacing={1}>
+          <Stack spacing={1} direction='row'>
             <Button
               sx={{ width: 'fit-content' }}
               size='small'
@@ -367,11 +371,9 @@ export default function FileDownload({
             </Button>
             {file.tags.length === 0 && <Typography variant='caption'>None applied</Typography>}
             <>
-              <Stack direction='row' spacing={1}>
-                {file.tags.map((fileTag) => {
-                  return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content' }} />
-                })}
-              </Stack>
+              {file.tags.map((fileTag) => {
+                return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content' }} />
+              })}
               <FileTagSelector
                 anchorEl={anchorElFileTag}
                 setAnchorEl={setAnchorElFileTag}
@@ -392,12 +394,25 @@ export default function FileDownload({
       />
       <ConfirmationDialogue
         open={deleteFileOpen}
-        title='Delete Release'
+        title='Delete File'
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteFileOpen(false)}
         errorMessage={deleteErrorMessage}
-        dialogMessage={'Are you sure you want to delete this file?'}
-      />
+        dialogMessage={
+          sortedAssociatedReleases.length > 0
+            ? 'Deleting this file will affect the following releases:'
+            : 'Deleting this file will not affect any existing releases'
+        }
+      >
+        <Box sx={{ pt: 2 }}>
+          <AssociatedReleasesList
+            modelId={modelId}
+            file={file}
+            latestRelease={latestRelease}
+            releases={sortedAssociatedReleases}
+          />
+        </Box>
+      </ConfirmationDialogue>
     </>
   )
 }
