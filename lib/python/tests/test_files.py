@@ -98,7 +98,7 @@ def test_file_delete(example_model: Model):
     byte_obj = b"Test Binary"
     file = BytesIO(byte_obj)
 
-    example_release = example_model.create_release("0.1.0", "test")
+    example_release = example_model.create_release("0.1.0", "test", 1)
 
     with file as file:
         example_release.upload("test", file)
