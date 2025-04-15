@@ -224,10 +224,10 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     <Stack spacing={2}>
       <EditableFormHeading
         heading={
-          <div>
+          <Stack direction={'column'} sx={{ overflow: 'hidden' }}>
             <Typography fontWeight='bold'>Release name</Typography>
-            <Typography>{`${model.name} - ${release.semver}`}</Typography>
-          </div>
+            <Typography noWrap>{`${model.name} - ${release.semver}`}</Typography>
+          </Stack>
         }
         editAction='editRelease'
         deleteAction='deleteRelease'

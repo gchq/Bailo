@@ -1,4 +1,4 @@
-import { Divider, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -52,20 +52,21 @@ export default function ReviewItem({ review }: ReviewItemProps) {
           <Stack>
             <Stack
               spacing={1}
-              direction='row'
+              direction='column'
               justifyContent='flex-start'
-              alignItems='center'
-              divider={<Divider flexItem />}
+              alignItems='flex-start'
+              // divider={<Divider flexItem />}
+              sx={{ textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '100vw', paddingRight: '200px' }}
             >
-              <Typography color='primary' variant='h6' component='h2' fontWeight='bold'>
+              <Typography noWrap color='primary' variant='h6' component='h2' fontWeight='bold'>
                 {review.model.name}
               </Typography>
               {review.accessRequestId && (
-                <Typography>
+                <Typography noWrap>
                   {toTitleCase(review.accessRequestId.substring(0, review.accessRequestId.lastIndexOf('-')))}
                 </Typography>
               )}
-              {review.semver && <Typography>{review.semver}</Typography>}
+              {review.semver && <Typography noWrap>{review.semver}</Typography>}
             </Stack>
             <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
               <Typography variant='caption'>{`Created ${timeDifference(

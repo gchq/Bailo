@@ -127,14 +127,9 @@ export default function PageWithTabs({
         sx={{ px: 2, pb: 2 }}
       >
         <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
-          <Stack direction='row'>
+          <Stack direction='row' sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
             <Tooltip title={title}>
-              <Typography
-                component='h1'
-                color='primary'
-                variant='h6'
-                sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }}
-              >
+              <Typography component='h1' color='primary' variant='h6' noWrap>
                 {title}
               </Typography>
             </Tooltip>

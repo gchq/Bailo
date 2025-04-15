@@ -135,7 +135,7 @@ export default function ReleaseForm({
               </HelpPopover>
             )}
           </Stack>
-          <Typography>{`${model.name} - ${formData.semver}`}</Typography>
+          <Typography noWrap>{`${model.name} - ${formData.semver}`}</Typography>
         </Stack>
       )}
       {!editable && (

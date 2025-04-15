@@ -129,7 +129,7 @@ export default function ReleaseDisplay({
               >
                 <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
                   <Stack direction='row' alignItems='center' spacing={1} width='100%'>
-                    <Typography component='h2' variant='h6' color='primary'>
+                    <Typography component='h2' variant='h6' color='primary' noWrap>
                       {release.semver}
                     </Typography>
                   </Stack>
