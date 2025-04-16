@@ -29,6 +29,7 @@ import {
   markFileAsCompleteAfterImport,
   saveImportedFile,
 } from './file.js'
+import { getHttpsAgent } from './http.js'
 import log from './log.js'
 import {
   getModelById,
@@ -141,14 +142,16 @@ export async function importModel(
   log.info({ mirroredModelId, payloadUrl }, 'Received a request to import a model.')
   const mirroredModel = await validateMirroredModel(mirroredModelId, sourceModelId)
 
-  const auth = await authorisation.model(user, mirroredModel, ModelAction.Export)
+  const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id })
   }
 
   let res: Response
   try {
-    res = await fetch(payloadUrl)
+    res = await fetch(payloadUrl, {
+      agent: getHttpsAgent(),
+    })
   } catch (err) {
     throw InternalError('Unable to get the file.', { err, payloadUrl })
   }
