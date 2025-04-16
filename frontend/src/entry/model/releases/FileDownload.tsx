@@ -282,9 +282,11 @@ export default function FileDownload({
     )
   }, [anchorElScan, chipDisplay, file, openScan])
 
-  const handleFileTagSelectorOnChange = (newTags: string[]) => {
-    patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
-    mutateEntryFiles()
+  const handleFileTagSelectorOnChange = async (newTags: string[]) => {
+    const res = await patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
+    if (res.status === 200) {
+      mutateEntryFiles()
+    }
   }
 
   const handleFileTagOnClick = (fileTag: string) => {
