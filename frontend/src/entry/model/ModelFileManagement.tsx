@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   Checkbox,
+  Chip,
   Container,
   Divider,
   FormControl,
@@ -62,6 +63,7 @@ export default function Files({ model }: FilesProps) {
   const [isFilesUploading, setIsFilesUploading] = useState(false)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
   const [hideTags, setHideTags] = useState(false)
+  const [activeFileTag, setActiveFileTag] = useState('')
 
   const sortFilesByValue = useMemo(
     () => (a: FileInterface, b: FileInterface) => {
@@ -162,23 +164,38 @@ export default function Files({ model }: FilesProps) {
   const entryFilesList = useMemo(
     () =>
       entryFiles.length ? (
-        sortedEntryFiles.sort(sortFilesByValue).map((file) => (
-          <Card key={file._id} sx={{ width: '100%' }}>
-            <Stack spacing={1} p={2}>
-              <FileDownload
-                showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
-                file={file}
-                modelId={model.id}
-                mutator={mutateEntryFiles}
-                hideTags={hideTags}
-              />
-            </Stack>
-          </Card>
-        ))
+        sortedEntryFiles
+          .sort(sortFilesByValue)
+          .filter((filteredFile) => (activeFileTag !== '' ? filteredFile.tags.includes(activeFileTag) : filteredFile))
+          .map((file) => (
+            <Card key={file._id} sx={{ width: '100%' }}>
+              <Stack spacing={1} p={2}>
+                <FileDownload
+                  showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
+                  file={file}
+                  modelId={model.id}
+                  mutator={mutateEntryFiles}
+                  hideTags={hideTags}
+                  isClickable
+                  activeFileTag={activeFileTag}
+                  activeFileTagOnChange={(newTag) => setActiveFileTag(newTag)}
+                />
+              </Stack>
+            </Card>
+          ))
       ) : (
         <EmptyBlob text={`No files found for model ${model.name}`} />
       ),
-    [entryFiles.length, sortedEntryFiles, sortFilesByValue, model.name, model.id, mutateEntryFiles, hideTags],
+    [
+      entryFiles.length,
+      sortedEntryFiles,
+      sortFilesByValue,
+      model.name,
+      model.id,
+      mutateEntryFiles,
+      hideTags,
+      activeFileTag,
+    ],
   )
 
   const handleAddNewFiles = useCallback(
@@ -234,6 +251,16 @@ export default function Files({ model }: FilesProps) {
     [failedFileUploads],
   )
 
+  const handleHideTagsOnChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setHideTags(event.target.checked)
+      if (event.target.checked) {
+        setActiveFileTag('')
+      }
+    },
+    [setActiveFileTag, setHideTags],
+  )
+
   if (isEntryFilesError) {
     return <MessageAlert message={isEntryFilesError.info.message} severity='error' />
   }
@@ -271,7 +298,7 @@ export default function Files({ model }: FilesProps) {
             <div>
               <FormControl>
                 <FormControlLabel
-                  control={<Checkbox checked={hideTags} onChange={(e) => setHideTags(e.target.checked)} />}
+                  control={<Checkbox checked={hideTags} onChange={(e) => handleHideTagsOnChange(e)} />}
                   label='Hide tags'
                 />
               </FormControl>
@@ -317,6 +344,12 @@ export default function Files({ model }: FilesProps) {
                 totalFilesToUpload={totalFilesToUpload}
               />
             </>
+          )}
+          {activeFileTag !== '' && (
+            <Stack sx={{ width: '100%' }} direction='row' justifyContent='flex-start' alignItems='center' spacing={1}>
+              <Typography>Active filter:</Typography>
+              <Chip label={activeFileTag} onDelete={() => setActiveFileTag('')} />
+            </Stack>
           )}
           {failedFileList}
           {entryFilesList}

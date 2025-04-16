@@ -45,6 +45,18 @@ type MutateFiles = KeyedMutator<{
   files: FileInterface[]
 }>
 
+type ClickableFileDownloadProps =
+  | {
+      isClickable: true
+      activeFileTag: string
+      activeFileTagOnChange: (newFileTag: string) => void
+    }
+  | {
+      isClickable?: false
+      activeFileTag?: string
+      activeFileTagOnChange?: (newFileTag: string) => void
+    }
+
 type FileDownloadProps = {
   modelId: string
   file: FileInterface
@@ -55,7 +67,7 @@ type FileDownloadProps = {
   }
   mutator?: MutateReleases | MutateFiles
   hideTags?: boolean
-}
+} & ClickableFileDownloadProps
 
 interface ChipDetails {
   label: string
@@ -69,6 +81,9 @@ export default function FileDownload({
   showMenuItems = { associatedReleases: false, deleteFile: false, rescanFile: false },
   mutator = undefined,
   hideTags = false,
+  isClickable = false,
+  activeFileTag = '',
+  activeFileTagOnChange,
 }: FileDownloadProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
@@ -272,6 +287,16 @@ export default function FileDownload({
     mutateEntryFiles()
   }
 
+  const handleFileTagOnClick = (fileTag: string) => {
+    if (activeFileTagOnChange) {
+      if (fileTag === activeFileTag) {
+        activeFileTagOnChange('')
+      } else {
+        activeFileTagOnChange(fileTag)
+      }
+    }
+  }
+
   if (isFileInterface(file) && !file.complete) {
     return (
       <Typography>
@@ -360,7 +385,7 @@ export default function FileDownload({
               </Stack>
             </Stack>
           </Stack>
-          <Stack spacing={1} direction='row' alignItems='center'>
+          <Stack spacing={2} direction='row' alignItems='center'>
             {!hideTags && (
               <>
                 <Restricted action='editEntry' fallback={<></>}>
@@ -374,9 +399,23 @@ export default function FileDownload({
                   </Button>
                 </Restricted>
                 {file.tags.length === 0 && <Typography variant='caption'>No tags applied</Typography>}
-                {file.tags.map((fileTag) => {
-                  return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content' }} />
-                })}
+                <Box sx={{ whiteSpace: 'pre-wrap' }}>
+                  {file.tags.map((fileTag) => {
+                    if (isClickable) {
+                      return (
+                        <Chip
+                          key={fileTag}
+                          label={fileTag}
+                          sx={{ width: 'fit-content', m: 0.5 }}
+                          onClick={() => handleFileTagOnClick(fileTag)}
+                          color={activeFileTag === fileTag ? 'secondary' : undefined}
+                        />
+                      )
+                    } else {
+                      return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content' }} />
+                    }
+                  })}
+                </Box>
                 <FileTagSelector
                   anchorEl={anchorElFileTag}
                   setAnchorEl={setAnchorElFileTag}
