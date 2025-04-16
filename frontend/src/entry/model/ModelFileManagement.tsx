@@ -4,8 +4,11 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
   Container,
   Divider,
+  FormControl,
+  FormControlLabel,
   LinearProgress,
   ListItemIcon,
   ListItemText,
@@ -58,6 +61,7 @@ export default function Files({ model }: FilesProps) {
   const [totalFilesToUpload, setTotalFilesToUpload] = useState(0)
   const [isFilesUploading, setIsFilesUploading] = useState(false)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
+  const [hideTags, setHideTags] = useState(false)
 
   const sortFilesByValue = useMemo(
     () => (a: FileInterface, b: FileInterface) => {
@@ -166,6 +170,7 @@ export default function Files({ model }: FilesProps) {
                 file={file}
                 modelId={model.id}
                 mutator={mutateEntryFiles}
+                hideTags={hideTags}
               />
             </Stack>
           </Card>
@@ -173,7 +178,7 @@ export default function Files({ model }: FilesProps) {
       ) : (
         <EmptyBlob text={`No files found for model ${model.name}`} />
       ),
-    [entryFiles.length, sortedEntryFiles, sortFilesByValue, model.name, model.id, mutateEntryFiles],
+    [entryFiles.length, sortedEntryFiles, sortFilesByValue, model.name, model.id, mutateEntryFiles, hideTags],
   )
 
   const handleAddNewFiles = useCallback(
@@ -263,20 +268,28 @@ export default function Files({ model }: FilesProps) {
                 />
               </>
             </Restricted>
-            <Button
-              onClick={handleMenuButtonClick}
-              endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
-              sx={{ width: '170px' }}
-            >
-              <Stack sx={{ minWidth: '150px' }} direction='row' spacing={2} justifyContent='space-evenly'>
-                {checkAscOrDesc(SortingDirection.ASC) ? (
-                  <Sort color='primary' />
-                ) : (
-                  <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
-                )}
-                {orderByButtonTitle}
-              </Stack>
-            </Button>
+            <div>
+              <FormControl>
+                <FormControlLabel
+                  control={<Checkbox checked={hideTags} onChange={(e) => setHideTags(e.target.checked)} />}
+                  label='Hide tags'
+                />
+              </FormControl>
+              <Button
+                onClick={handleMenuButtonClick}
+                endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+                sx={{ width: '170px' }}
+              >
+                <Stack sx={{ minWidth: '150px' }} direction='row' spacing={2} justifyContent='space-evenly'>
+                  {checkAscOrDesc(SortingDirection.ASC) ? (
+                    <Sort color='primary' />
+                  ) : (
+                    <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
+                  )}
+                  {orderByButtonTitle}
+                </Stack>
+              </Button>
+            </div>
           </Stack>
           <Menu
             open={menuOpen}

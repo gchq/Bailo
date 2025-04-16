@@ -24,6 +24,7 @@ import prettyBytes from 'pretty-bytes'
 import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
+import Restricted from 'src/common/Restricted'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
 import FileTagSelector from 'src/entry/model/releases/FileTagSelector'
@@ -53,6 +54,7 @@ type FileDownloadProps = {
     rescanFile?: boolean
   }
   mutator?: MutateReleases | MutateFiles
+  hideTags?: boolean
 }
 
 interface ChipDetails {
@@ -66,6 +68,7 @@ export default function FileDownload({
   file,
   showMenuItems = { associatedReleases: false, deleteFile: false, rescanFile: false },
   mutator = undefined,
+  hideTags = false,
 }: FileDownloadProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
@@ -264,13 +267,10 @@ export default function FileDownload({
     )
   }, [anchorElScan, chipDisplay, file, openScan])
 
-  const handleFileTagSelectorOnChange = useCallback(
-    (newTags: string[]) => {
-      patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
-      mutateEntryFiles()
-    },
-    [file, mutateEntryFiles, modelId],
-  )
+  const handleFileTagSelectorOnChange = (newTags: string[]) => {
+    patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
+    mutateEntryFiles()
+  }
 
   if (isFileInterface(file) && !file.complete) {
     return (
@@ -310,7 +310,7 @@ export default function FileDownload({
               </Typography>
               <Typography variant='caption'>
                 Uploaded on
-                <span style={{ fontWeight: 'bold' }}>{`${formatDateTimeString(file.createdAt.toString())}`}</span>
+                <span style={{ fontWeight: 'bold' }}>{` ${formatDateTimeString(file.createdAt.toString())}`}</span>
               </Typography>
             </Stack>
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
@@ -361,26 +361,30 @@ export default function FileDownload({
             </Stack>
           </Stack>
           <Stack spacing={1} direction='row' alignItems='center'>
-            <Button
-              sx={{ width: 'fit-content' }}
-              size='small'
-              startIcon={<LocalOffer />}
-              onClick={(event) => setAnchorElFileTag(event.currentTarget)}
-            >
-              Apply file tags
-            </Button>
-            {file.tags.length === 0 && <Typography variant='caption'>None applied</Typography>}
-            <>
-              {file.tags.map((fileTag) => {
-                return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content' }} />
-              })}
-              <FileTagSelector
-                anchorEl={anchorElFileTag}
-                setAnchorEl={setAnchorElFileTag}
-                onChange={handleFileTagSelectorOnChange}
-                tags={file.tags || []}
-              />
-            </>
+            {!hideTags && (
+              <>
+                <Restricted action='editEntry' fallback={<></>}>
+                  <Button
+                    sx={{ width: 'fit-content' }}
+                    size='small'
+                    startIcon={<LocalOffer />}
+                    onClick={(event) => setAnchorElFileTag(event.currentTarget)}
+                  >
+                    Apply file tags
+                  </Button>
+                </Restricted>
+                {file.tags.length === 0 && <Typography variant='caption'>No tags applied</Typography>}
+                {file.tags.map((fileTag) => {
+                  return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content' }} />
+                })}
+                <FileTagSelector
+                  anchorEl={anchorElFileTag}
+                  setAnchorEl={setAnchorElFileTag}
+                  onChange={handleFileTagSelectorOnChange}
+                  tags={file.tags || []}
+                />
+              </>
+            )}
           </Stack>
         </Stack>
       )}
