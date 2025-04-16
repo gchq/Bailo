@@ -141,7 +141,7 @@ export async function importModel(
   log.info({ mirroredModelId, payloadUrl }, 'Received a request to import a model.')
   const mirroredModel = await validateMirroredModel(mirroredModelId, sourceModelId)
 
-  const auth = await authorisation.model(user, mirroredModel, ModelAction.Export)
+  const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id })
   }
