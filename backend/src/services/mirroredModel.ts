@@ -29,6 +29,7 @@ import {
   markFileAsCompleteAfterImport,
   saveImportedFile,
 } from './file.js'
+import { getHttpsAgent } from './http.js'
 import log from './log.js'
 import {
   getModelById,
@@ -148,7 +149,9 @@ export async function importModel(
 
   let res: Response
   try {
-    res = await fetch(payloadUrl)
+    res = await fetch(payloadUrl, {
+      agent: getHttpsAgent(),
+    })
   } catch (err) {
     throw InternalError('Unable to get the file.', { err, payloadUrl })
   }
