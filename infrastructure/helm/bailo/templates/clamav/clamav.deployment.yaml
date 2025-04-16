@@ -34,7 +34,7 @@ spec:
         args: ["/init-unprivileged && chown -R 1002:1002 /var/lib/clamav"] # Runs ClamAV as non-root unprivileged user. https://docs.clamav.net/manual/Installing/Docker.html#running-clamd-using-non-root-user-using---user-and---entrypoint
         resources:
           requests:
-            memory: "100Mi"
+            memory: "1Gi"
             cpu: "200m"
           limits:
             memory: "5Gi" # This is a memory requirement for ClamAV see here: https://docs.clamav.net/manual/Installing/Docker.html#memory-ram-requirements
