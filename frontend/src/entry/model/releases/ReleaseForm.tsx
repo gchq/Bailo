@@ -178,57 +178,59 @@ export default function ReleaseForm({
           <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
         </Stack>
       )}
-      <Stack>
-        <Typography fontWeight='bold'>
-          Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
-        </Typography>
-        {isReadOnly || isEdit ? (
-          <ReadOnlyAnswer value={formData.semver} />
-        ) : (
-          <TextField
-            required
-            size='small'
-            autoFocus={!isEdit}
-            error={formData.semver !== '' && !isValidSemver(formData.semver)}
-            helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
-            value={formData.semver}
-            onChange={handleSemverChange}
-            slotProps={{
-              htmlInput: { 'data-test': 'releaseSemanticVersionTextField' },
-            }}
-          />
-        )}
-      </Stack>
-      <Stack>
-        <Stack direction='row' spacing={1}>
+      <Stack direction='row' spacing={2}>
+        <Stack sx={{ width: '100%' }}>
           <Typography fontWeight='bold'>
-            Model card version {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
+            Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
           </Typography>
-          {!isReadOnly && <HelpPopover>Leave this as default if you want the latest available version</HelpPopover>}
+          {isReadOnly || isEdit ? (
+            <ReadOnlyAnswer value={formData.semver} />
+          ) : (
+            <TextField
+              required
+              size='small'
+              autoFocus={!isEdit}
+              error={formData.semver !== '' && !isValidSemver(formData.semver)}
+              helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
+              value={formData.semver}
+              onChange={handleSemverChange}
+              slotProps={{
+                htmlInput: { 'data-test': 'releaseSemanticVersionTextField' },
+              }}
+            />
+          )}
         </Stack>
-        {isReadOnly ? (
-          <Typography>
-            {formData.modelCardVersion} -{' '}
-            <Link href={`${model.kind}/${model.id}/history/${formData.modelCardVersion}`}>
-              <Button size='small'>View Model card</Button>
-            </Link>
-          </Typography>
-        ) : (
-          <>
-            {isModelCardRevisionsLoading && <Loading />}
-            {!isModelCardRevisionsLoading && (
-              <>
-                <Select
-                  size='small'
-                  value={formData.modelCardVersion.toString()}
-                  onChange={handleModelCardVersionChange}
-                >
-                  {modelCardVersionList}
-                </Select>
-              </>
-            )}
-          </>
-        )}
+        <Stack sx={{ width: '100%' }}>
+          <Stack direction='row' spacing={1}>
+            <Typography fontWeight='bold'>
+              Model card version {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
+            </Typography>
+            {!isReadOnly && <HelpPopover>Leave this as default if you want the latest available version</HelpPopover>}
+          </Stack>
+          {isReadOnly ? (
+            <Typography>
+              {formData.modelCardVersion} -{' '}
+              <Link href={`/${model.kind}/${model.id}/history/${formData.modelCardVersion}`}>
+                <Button size='small'>View Model card</Button>
+              </Link>
+            </Typography>
+          ) : (
+            <>
+              {isModelCardRevisionsLoading && <Loading />}
+              {!isModelCardRevisionsLoading && (
+                <>
+                  <Select
+                    size='small'
+                    value={formData.modelCardVersion.toString()}
+                    onChange={handleModelCardVersionChange}
+                  >
+                    {modelCardVersionList}
+                  </Select>
+                </>
+              )}
+            </>
+          )}
+        </Stack>
       </Stack>
       <Stack>
         {isReadOnly ? (
