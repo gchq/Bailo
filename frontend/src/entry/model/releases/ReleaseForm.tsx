@@ -178,7 +178,7 @@ export default function ReleaseForm({
           <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
         </Stack>
       )}
-      <Stack direction='row' spacing={2}>
+      <Stack direction={isReadOnly ? 'column' : 'row'} spacing={2}>
         <Stack sx={{ width: '100%' }}>
           <Typography fontWeight='bold'>
             Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
