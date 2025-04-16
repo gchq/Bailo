@@ -1,3 +1,7 @@
+import { ProxyAgentOptions } from 'proxy-agent'
+
+import { PeerKindKeys } from '../connectors/peer/index.js'
+
 export type PartialDeep<T> = T extends object
   ? {
       [P in keyof T]?: PartialDeep<T[P]>
@@ -53,6 +57,37 @@ export interface EntryUserPermissions {
 export interface AccessRequestUserPermissions {
   editAccessRequest: PermissionDetail
   deleteAccessRequest: PermissionDetail
+}
+
+export const FederationState = {
+  DISABLED: 'disabled',
+  READ_ONLY: 'readOnly',
+  ENABLED: 'enabled',
+} as const
+
+export type FederationStateKeys = (typeof FederationState)[keyof typeof FederationState]
+
+export interface RemoteFederationConfig {
+  state: FederationStateKeys
+  baseUrl: string
+  label: string
+  kind: PeerKindKeys
+  proxy: string
+  httpConfig: ProxyAgentOptions
+}
+
+export type SystemStatus = {
+  code: number
+  ping: string
+  federation: {
+    state: FederationStateKeys
+    id?: string
+  }
+}
+
+export type PeerConfigStatus = {
+  config: RemoteFederationConfig
+  status: SystemStatus
 }
 
 export interface UiConfig {
