@@ -239,6 +239,7 @@ class Client:
     def put_release(
         self,
         model_id: str,
+        model_card_version: int,
         release_version: str,
         notes: str,
         draft: bool,
@@ -265,6 +266,7 @@ class Client:
                 "draft": draft,
                 "fileIds": file_ids,
                 "images": images,
+                "modelCardVersion": model_card_version,
             },
         ).json()
 

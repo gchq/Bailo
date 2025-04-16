@@ -27,7 +27,7 @@ class Release:
         client: Client,
         model_id: str,
         version: Version | str,
-        model_card_version: int | None = None,
+        model_card_version: int,
         notes: str = "",
         files: list[str] | None = None,
         images: list[str] | None = None,
@@ -73,7 +73,7 @@ class Release:
         model_id: str,
         version: Version | str,
         notes: str,
-        model_card_version: int | None = None,
+        model_card_version: int,
         files: list[str] | None = None,
         images: list[str] | None = None,
         minor: bool = False,
@@ -85,7 +85,7 @@ class Release:
         :param model_id: A Unique Model ID
         :param version: A semantic version of a model release
         :param notes: Notes on release
-        :param model_card_version: Model card version, defaults to None
+        :param model_card_version: Model card version
         :param files: Files for release, defaults to None
         :param images: Images for release, defaults to None
         :param minor: Signifies a minor release, defaults to False
@@ -336,6 +336,7 @@ class Release:
         """
         return self.client.put_release(
             self.model_id,
+            self.model_card_version,
             str(self.__version_raw),
             self.notes,
             self.draft,
