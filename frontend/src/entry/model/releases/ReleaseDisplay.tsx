@@ -164,15 +164,17 @@ export default function ReleaseDisplay({
                     <Typography fontWeight='bold'>{`${expanded === 'filesPanel' ? 'Hide' : 'Show'} ${plural(release.files.length, 'file')}`}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    {release.files.map((file) => (
-                      <FileDownload
-                        showMenuItems={{ rescanFile: true }}
-                        key={file.name}
-                        file={file}
-                        modelId={model.id}
-                        mutator={mutateReleases}
-                      />
-                    ))}
+                    <Stack divider={<Divider />} spacing={2}>
+                      {release.files.map((file) => (
+                        <FileDownload
+                          showMenuItems={{ rescanFile: true }}
+                          key={file.name}
+                          file={file}
+                          modelId={model.id}
+                          mutator={mutateReleases}
+                        />
+                      ))}
+                    </Stack>
                   </AccordionDetails>
                 </Accordion>
               )}

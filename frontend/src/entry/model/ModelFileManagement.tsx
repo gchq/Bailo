@@ -4,8 +4,12 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
+  Chip,
   Container,
   Divider,
+  FormControl,
+  FormControlLabel,
   LinearProgress,
   ListItemIcon,
   ListItemText,
@@ -58,6 +62,8 @@ export default function Files({ model }: FilesProps) {
   const [totalFilesToUpload, setTotalFilesToUpload] = useState(0)
   const [isFilesUploading, setIsFilesUploading] = useState(false)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
+  const [hideTags, setHideTags] = useState(false)
+  const [activeFileTag, setActiveFileTag] = useState('')
 
   const sortFilesByValue = useMemo(
     () => (a: FileInterface, b: FileInterface) => {
@@ -158,22 +164,38 @@ export default function Files({ model }: FilesProps) {
   const entryFilesList = useMemo(
     () =>
       entryFiles.length ? (
-        sortedEntryFiles.sort(sortFilesByValue).map((file) => (
-          <Card key={file._id} sx={{ width: '100%' }}>
-            <Stack spacing={1} p={2}>
-              <FileDownload
-                showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
-                file={file}
-                modelId={model.id}
-                mutator={mutateEntryFiles}
-              />
-            </Stack>
-          </Card>
-        ))
+        sortedEntryFiles
+          .sort(sortFilesByValue)
+          .filter((filteredFile) => (activeFileTag !== '' ? filteredFile.tags.includes(activeFileTag) : filteredFile))
+          .map((file) => (
+            <Card key={file._id} sx={{ width: '100%' }}>
+              <Stack spacing={1} p={2}>
+                <FileDownload
+                  showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
+                  file={file}
+                  modelId={model.id}
+                  mutator={mutateEntryFiles}
+                  hideTags={hideTags}
+                  isClickable
+                  activeFileTag={activeFileTag}
+                  activeFileTagOnChange={(newTag) => setActiveFileTag(newTag)}
+                />
+              </Stack>
+            </Card>
+          ))
       ) : (
         <EmptyBlob text={`No files found for model ${model.name}`} />
       ),
-    [entryFiles.length, sortedEntryFiles, sortFilesByValue, model.name, model.id, mutateEntryFiles],
+    [
+      entryFiles.length,
+      sortedEntryFiles,
+      sortFilesByValue,
+      model.name,
+      model.id,
+      mutateEntryFiles,
+      hideTags,
+      activeFileTag,
+    ],
   )
 
   const handleAddNewFiles = useCallback(
@@ -229,6 +251,16 @@ export default function Files({ model }: FilesProps) {
     [failedFileUploads],
   )
 
+  const handleHideTagsOnChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setHideTags(event.target.checked)
+      if (event.target.checked) {
+        setActiveFileTag('')
+      }
+    },
+    [setActiveFileTag, setHideTags],
+  )
+
   if (isEntryFilesError) {
     return <MessageAlert message={isEntryFilesError.info.message} severity='error' />
   }
@@ -240,17 +272,17 @@ export default function Files({ model }: FilesProps) {
   return (
     <>
       <Container sx={{ my: 2 }}>
-        <Stack direction={{ xs: 'column' }} spacing={2} justifyContent='center' alignItems='center'>
+        <Stack spacing={2} justifyContent='center' alignItems='center'>
           <Typography>
             Files uploaded to a model can be managed here. For each file you can view associated releases, delete files
             that are no longer needed, and also manually retrigger anti-virus scanning (if anti-virus scanning is
             enabled).
           </Typography>
-          <Stack width='100%' direction='row' justifyContent='space-between' sx={{ px: 0.5 }}>
+          <Stack width='100%' direction={{ sm: 'column', md: 'row' }} justifyContent='space-between' sx={{ px: 0.5 }}>
             <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
               <>
                 <label htmlFor='add-files-button'>
-                  <LoadingButton loading={isFilesUploading} fullWidth component='span' variant='outlined'>
+                  <LoadingButton loading={isFilesUploading} component='span' variant='outlined'>
                     Add new files
                   </LoadingButton>
                 </label>
@@ -263,20 +295,28 @@ export default function Files({ model }: FilesProps) {
                 />
               </>
             </Restricted>
-            <Button
-              onClick={handleMenuButtonClick}
-              endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
-              sx={{ width: '170px' }}
-            >
-              <Stack sx={{ minWidth: '150px' }} direction='row' spacing={2} justifyContent='space-evenly'>
-                {checkAscOrDesc(SortingDirection.ASC) ? (
-                  <Sort color='primary' />
-                ) : (
-                  <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
-                )}
-                {orderByButtonTitle}
-              </Stack>
-            </Button>
+            <div>
+              <FormControl>
+                <FormControlLabel
+                  control={<Checkbox checked={hideTags} onChange={(e) => handleHideTagsOnChange(e)} />}
+                  label='Hide tags'
+                />
+              </FormControl>
+              <Button
+                onClick={handleMenuButtonClick}
+                endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
+                sx={{ width: '170px' }}
+              >
+                <Stack sx={{ minWidth: '150px' }} direction='row' spacing={2} justifyContent='space-evenly'>
+                  {checkAscOrDesc(SortingDirection.ASC) ? (
+                    <Sort color='primary' />
+                  ) : (
+                    <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
+                  )}
+                  {orderByButtonTitle}
+                </Stack>
+              </Button>
+            </div>
           </Stack>
           <Menu
             open={menuOpen}
@@ -304,6 +344,12 @@ export default function Files({ model }: FilesProps) {
                 totalFilesToUpload={totalFilesToUpload}
               />
             </>
+          )}
+          {activeFileTag !== '' && (
+            <Stack sx={{ width: '100%' }} direction='row' justifyContent='flex-start' alignItems='center' spacing={1}>
+              <Typography>Active filter:</Typography>
+              <Chip label={activeFileTag} onDelete={() => setActiveFileTag('')} />
+            </Stack>
           )}
           {failedFileList}
           {entryFilesList}
