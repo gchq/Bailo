@@ -1,3 +1,5 @@
+name: bailo
+
 services:
   mongo:
     networks:
@@ -21,9 +23,6 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_BROWSER_REDIRECT_URL: http://localhost:8080/minio/ui/
-      MINIO_SERVER_URL: http://minio:9000
-      MINIO_SKIP_CLIENT: yes
     volumes:
       - minioVolume:/bitnami/minio
 
@@ -40,9 +39,9 @@ services:
   modelscan:
     networks:
       internal:
+    image: bailo_modelscan:${INSTANCE_NAME}
     build:
       context: ./lib/modelscan_api
-      target: dev
     volumes:
       - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
     healthcheck:
@@ -50,14 +49,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-
-  mailcrab:
-    networks:
-      debug:
-    image: marlonb/mailcrab:v1.6.2
-    ports:
-      - 1080:1080
-      - 1025:1025
 
   nginx:
     networks:
@@ -71,7 +62,6 @@ services:
     depends_on:
       - frontend
       - backend
-      - registry
 
   registry:
     networks:
@@ -81,8 +71,10 @@ services:
     environment:
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.pem
       REGISTRY_HTTP_TLS_KEY: /certs/key.pem
+
       REGISTRY_STORAGE_S3_ACCESSKEY: minioadmin
       REGISTRY_STORAGE_S3_SECRETKEY: minioadmin
+
       REGISTRY_AUTH: token
       REGISTRY_AUTH_TOKEN_REALM: http://backend:3001/api/v1/registry_auth
       REGISTRY_AUTH_TOKEN_SERVICE: RegistryAuth
@@ -96,29 +88,24 @@ services:
   frontend:
     networks:
       internal:
+    image: bailo_frontend:${INSTANCE_NAME}
     build:
       context: ./frontend/
-      target: dev
-    volumes:
-      - ./frontend:/app
     depends_on:
       - backend
 
   backend:
     networks:
       internal:
+    image: bailo_backend:${INSTANCE_NAME}
     build:
       context: ./backend/
       additional_contexts:
         python: ./lib/python
-      target: dev
     volumes:
-      - ./backend/src:/app/src
-      - ./backend/config:/app/config
       - ./backend/certs:/certs
       - ./backend/certs:/usr/local/share/ca-certificates
-    ports:
-      - 9229:9229
+      - ./backend/config:/app/config
     depends_on:
       clamd:
         condition: service_healthy
@@ -135,12 +122,6 @@ services:
       - apparmor:unconfined
     environment:
       - NODE_CONFIG_ENV=${INSTANCE_NAME}_docker_compose
-  webhook-tester:
-    networks:
-      debug:
-    image: tarampampam/webhook-tester
-    command: serve --port 8082 --create-session 00000000-0000-0000-0000-000000000000
-    ports: ['8082:8082/tcp'] # Open <http://127.0.0.1:8080/#/00000000-0000-0000-0000-000000000000>
 
 volumes:
   minioVolume:
@@ -149,8 +130,6 @@ volumes:
     name: ${INSTANCE_NAME}_mongoVolume
 
 networks:
-  debug:
-    name: ${INSTANCE_NAME}_debug
   default:
     name: ${INSTANCE_NAME}_default
   internal:
