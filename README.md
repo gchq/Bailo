@@ -103,6 +103,9 @@ docker compose build --parallel
 
 # Then run the development instance of Bailo.
 docker compose up -d
+
+# or, to run a production instance:
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file prod.env up -d
 ```
 
 On first run, it may take a while (up to 30 seconds) to start up. It needs to build several hundred TypeScript modules.
