@@ -3,6 +3,7 @@ import https from 'node:https'
 
 import { ProxyAgent } from 'proxy-agent'
 
+import { FederationState } from '../types/types.js'
 import config from '../utils/config.js'
 import { InternalError } from '../utils/error.js'
 
@@ -15,30 +16,20 @@ export function getHttpsAgent(config?: https.AgentOptions) {
   })
 }
 
-function getProxyForUrl(url: string, req: http.ClientRequest): Promise<string> {
-  let peerId = req.getHeader('x-bailo-peer-id')
-  if (!peerId) {
-    const fmt = new URL(url)
-    const baseUrl = fmt.protocol + '://' + fmt.host
-    config.federation.peers.forEach((p) => p.baseUrl == baseUrl)
-    for (const [id, value] of config.federation.peers) {
-      if (baseUrl == value.baseUrl) {
-        peerId = id
-        break
-      }
-    }
+async function getProxyForUrl(url: string, req: http.ClientRequest): Promise<string> {
+  if (config.federation.state === FederationState.DISABLED) {
+    return config.federation.defaultProxy || ''
   }
+
+  const peerId = req.getHeader('x-bailo-peer-id')
   if (typeof peerId !== 'string') {
     throw InternalError('Unexpected peer ID found')
   }
-  let proxy = config.federation.defaultProxy
-  const fedCfg = config.federation.peers.get(peerId)
-  if (!fedCfg) {
-    throw Error('Configuration not found')
-  }
-  if (fedCfg.proxy) {
-    proxy = fedCfg.proxy
+
+  const peerConfig = config.federation.peers?.get(peerId)
+  if (peerConfig?.proxy) {
+    return peerConfig.proxy
   }
 
-  return Promise.resolve(proxy)
+  throw new Error('Configuration not found')
 }
