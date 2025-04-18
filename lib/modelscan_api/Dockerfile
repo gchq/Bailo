@@ -21,8 +21,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=${PYTHONPATH}
 # Cache packages with run cache, set up nonroot user
 # Update system packages, install python3
-RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
-    rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean && \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
     groupadd -g 65532 nonroot && \
     useradd nonroot -u 65532 -g 65532 -M && \
     apt-get update && \
