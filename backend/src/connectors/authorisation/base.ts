@@ -248,7 +248,6 @@ export class BasicAuthorisationConnector {
   ): Promise<Array<Response>> {
     // Does the user have a valid access request for this model?
     const hasApprovedAccessRequest = await this.hasApprovedAccessRequest(user, model)
-
     return Promise.all(
       files.map(async (file) => {
         // Is this a constrained user token.
@@ -278,6 +277,17 @@ export class BasicAuthorisationConnector {
           return {
             success: false,
             info: 'You need to have an approved access request or have permission to download a file.',
+            id: file._id.toString(),
+          }
+        }
+
+        if (
+          ([FileAction.Update] as FileActionKeys[]).includes(action) &&
+          (await missingRequiredRole(user, model, ['owner', 'contributor', 'msro', 'mtr', 'consumer']))
+        ) {
+          return {
+            success: false,
+            info: 'You are missing the required roles in order to update tags on this file.',
             id: file._id.toString(),
           }
         }

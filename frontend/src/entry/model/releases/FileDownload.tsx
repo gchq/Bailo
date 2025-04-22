@@ -91,6 +91,7 @@ export default function FileDownload({
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
   const [deleteFileOpen, setDeleteFileOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
+  const [fileTagErrorMessage, setFileTagErrorMessage] = useState('')
 
   const { mutateEntryFiles } = useGetModelFiles(modelId)
   const router = useRouter()
@@ -283,9 +284,11 @@ export default function FileDownload({
   }, [anchorElScan, chipDisplay, file, openScan])
 
   const handleFileTagSelectorOnChange = async (newTags: string[]) => {
+    setFileTagErrorMessage('')
     const res = await patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
-    if (res.status === 200) {
-      mutateEntryFiles()
+    mutateEntryFiles()
+    if (res.status !== 200) {
+      setFileTagErrorMessage('You lack the required authorisation in order to add tags to a file.')
     }
   }
 
@@ -423,6 +426,7 @@ export default function FileDownload({
                   setAnchorEl={setAnchorElFileTag}
                   onChange={handleFileTagSelectorOnChange}
                   tags={file.tags || []}
+                  errorText={fileTagErrorMessage}
                 />
               </>
             )}

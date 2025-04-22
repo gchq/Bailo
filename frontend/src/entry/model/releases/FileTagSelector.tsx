@@ -1,4 +1,5 @@
-import { Box, Popover } from '@mui/material'
+import { Popover, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import TagSelector from 'src/MuiForms/TagSelector'
 
 interface FileTagSelectorProps {
@@ -6,9 +7,18 @@ interface FileTagSelectorProps {
   setAnchorEl: (anchorEl: HTMLButtonElement | null) => void
   onChange: (newTag: string[]) => void
   tags: string[]
+  errorText?: string
 }
 
-export default function FileTagSelector({ anchorEl, setAnchorEl, onChange, tags }: FileTagSelectorProps) {
+export default function FileTagSelector({
+  anchorEl,
+  setAnchorEl,
+  onChange,
+  tags,
+  errorText = '',
+}: FileTagSelectorProps) {
+  const theme = useTheme()
+
   return (
     <Popover
       open={Boolean(anchorEl)}
@@ -19,9 +29,12 @@ export default function FileTagSelector({ anchorEl, setAnchorEl, onChange, tags 
         horizontal: 'left',
       }}
     >
-      <Box sx={{ p: 2 }}>
+      <Stack sx={{ p: 2 }}>
         <TagSelector value={tags} onChange={onChange} label={''} formContext={{ editMode: true }} />
-      </Box>
+        <Typography variant='caption' color={theme.palette.error.main}>
+          {errorText}
+        </Typography>
+      </Stack>
     </Popover>
   )
 }
