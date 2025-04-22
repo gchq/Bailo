@@ -22,7 +22,13 @@ import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FileInterface, FileWithMetadata, FlattenedModelImage, isFileInterface } from 'types/types'
+import {
+  EntryInterface,
+  FileInterface,
+  FileWithMetadataAndTags,
+  FlattenedModelImage,
+  isFileInterface,
+} from 'types/types'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -50,8 +56,8 @@ type ReleaseFormProps = {
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
   onFilesChange: (value: (File | FileInterface)[]) => void
-  filesMetadata: FileWithMetadata[]
-  onFilesMetadataChange: (value: FileWithMetadata[]) => void
+  filesMetadata: FileWithMetadataAndTags[]
+  onFilesMetadataChange: (value: FileWithMetadataAndTags[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
   onRegistryError: (value: boolean) => void
   currentFileUploadProgress?: FileUploadProgress
@@ -106,7 +112,7 @@ export default function ReleaseForm({
   }
 
   const handleMetadataChange = useCallback(
-    (fileWithMetadata: FileWithMetadata) => {
+    (fileWithMetadata: FileWithMetadataAndTags) => {
       const tempFilesWithMetadata = [...filesMetadata]
       const metadataIndex = filesMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
       if (metadataIndex === -1) {

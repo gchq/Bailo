@@ -44,7 +44,14 @@ export const createFilePath = (modelId: string, fileId: string) => {
   return `beta/model/${modelId}/files/${fileId}`
 }
 
-export async function uploadFile(user: UserInterface, modelId: string, name: string, mime: string, stream: Readable) {
+export async function uploadFile(
+  user: UserInterface,
+  modelId: string,
+  name: string,
+  mime: string,
+  stream: Readable,
+  tags?: string[],
+) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {
     throw BadReq(`Cannot upload files to a mirrored model.`)
@@ -67,6 +74,10 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
     throw BadReq(`Could not upload ${file.name} as it is an empty file.`, { file: file })
   }
   file.size = fileSize
+
+  if (tags) {
+    file.tags = tags
+  }
 
   await file.save()
 
@@ -305,12 +316,7 @@ export async function saveImportedFile(file: FileInterface) {
   })
 }
 
-export async function updateFile(
-  user: UserInterface,
-  modelId: string,
-  fileId: string,
-  metadata: Partial<FileInterface>,
-) {
+export async function updateFile(user: UserInterface, modelId: string, fileId: string, tags?: string[]) {
   const file = await getFileById(user, fileId)
   if (!file) {
     throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
@@ -324,10 +330,12 @@ export async function updateFile(
     throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
   }
 
-  const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: metadata.tags } })
-
-  if (!updatedFile) {
-    throw BadReq('There was a problem updating the file', { modelId: modelId, fileId: fileId })
+  if (tags) {
+    const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: tags } })
+    if (!updatedFile) {
+      throw BadReq('There was a problem updating the file', { modelId: modelId, fileId: fileId })
+    }
+    return updatedFile
   }
-  return updatedFile
+  return file
 }

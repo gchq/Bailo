@@ -508,9 +508,10 @@ export interface FlattenedModelImage {
   tag: string
 }
 
-export interface FileWithMetadata {
+export interface FileWithMetadataAndTags {
   fileName: string
   metadata?: string
+  tags?: string[]
 }
 
 export const Decision = {

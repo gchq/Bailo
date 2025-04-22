@@ -28,15 +28,17 @@ export async function postFileForModelId(
   file: File,
   onUploadProgress: (progress: AxiosProgressEvent) => void,
   metadata?: string,
+  tags: string[] = [],
 ) {
   const mime = file.type || 'application/octet-stream'
+
+  const queryParams = {
+    ...(metadata && { metadata }),
+    ...(tags.length > 0 && { tags }),
+  }
   const fileResponse = await axios
     .post(
-      metadata
-        ? `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}&${qs.stringify({
-            metadata,
-          })}`
-        : `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}`,
+      `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}&${qs.stringify(queryParams)}}`,
       file,
       {
         onUploadProgress,
