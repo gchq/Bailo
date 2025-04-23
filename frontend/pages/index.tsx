@@ -253,7 +253,9 @@ export default function Marketplace() {
                   size='small'
                 />
               </Box>
-              <Button onClick={handleResetFilters}>Reset filters</Button>
+              <Box justifySelf='center' marginTop={1}>
+                <Button onClick={handleResetFilters}>Reset filters</Button>
+              </Box>
             </Container>
           </Stack>
           <Box sx={{ overflow: 'hidden', width: '100%' }}>
