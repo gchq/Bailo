@@ -36,6 +36,15 @@ export const TokenActions = {
     id: 'schema:write',
     description: 'Grants permissions to upload and modify schemas for administrators.',
   },
+
+  ReviewRoleWrite: {
+    id: 'reviewRole:write',
+    description: 'Grants permission to upload and modify review roles',
+  },
+  ReviewRoleRead: {
+    id: 'reviewRole:read',
+    description: 'Grants permission to view review roles',
+  },
 } as const
 
 export const tokenActionIds = Object.values(TokenActions).map((tokenAction) => tokenAction.id)

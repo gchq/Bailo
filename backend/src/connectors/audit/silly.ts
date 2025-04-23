@@ -7,6 +7,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
+import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
@@ -69,4 +70,8 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateCommentResponse(_req: Request, _responseInterface: ResponseInterface) {}
   onViewResponses(_req: Request, _responseInters: ResponseInterface[]) {}
   onUpdateResponse(_req: Request, _responseId: string) {}
+  onCreateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
+  onViewReviewRole(_req: Request) {}
+  onViewReviewRoles(_req: Request) {}
+  onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
 }
