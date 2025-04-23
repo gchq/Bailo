@@ -48,7 +48,10 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
         },
       ]
     } catch (error) {
-      return this.scanError(`Unable to scan file. ${this.toolName} errored.`, { error, file })
+      return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
+        error,
+        file,
+      })
     }
   }
 }
