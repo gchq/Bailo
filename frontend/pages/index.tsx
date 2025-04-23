@@ -171,8 +171,8 @@ export default function Marketplace() {
             <Button component={Link} href='/entry/new' variant='contained'>
               Create
             </Button>
-            <Container sx={{ backgroundColor: 'lightgray', py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} marginBottom='10px' justifyContent={'center'}>
+            <Container sx={{ backgroundColor: '#e0e0e0', py: 2, borderRadius: '8px' }}>
+              <Stack direction='row' spacing={0.5} marginBottom='10px' justifyContent='left'>
                 <Typography variant='h5' fontWeight='bold'>
                   Filters
                 </Typography>
@@ -223,6 +223,7 @@ export default function Marketplace() {
                   onChange={handleTaskOnChange}
                   size='small'
                   ariaLabel='add task to search filter'
+                  accordion={true}
                 />
               </Box>
               <Box>
@@ -237,6 +238,7 @@ export default function Marketplace() {
                   onChange={handleLibrariesOnChange}
                   size='small'
                   ariaLabel='add library to search filter'
+                  accordion={true}
                 />
               </Box>
               <Box>
