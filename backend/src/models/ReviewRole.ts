@@ -9,9 +9,9 @@ export interface ReviewRoleInterface {
   name: string
   short: string
   kind: RoleKindKeys
-  description: string
-  defaultEntities: string[]
-  lockEntities: boolean
+  description?: string
+  defaultEntities?: string[]
+  lockEntities?: boolean
   collaboratorRole?: CollaboratorRolesKeys
 }
 
@@ -24,8 +24,8 @@ const ReviewRoleSchema = new Schema<ReviewRoleDoc>(
     short: { type: String, required: true, unique: true, index: true },
     kind: { type: String, required: true },
     description: { type: String },
-    defaultEntities: [{ type: String, required: true, unique: true, index: true }],
-    lockEntities: { type: Boolean, required: true },
+    defaultEntities: [{ type: String }],
+    lockEntities: { type: Boolean, default: false },
   },
   {
     timestamps: true,

@@ -6,10 +6,12 @@ import Release from '../../src/models/Release.js'
 import {
   createAccessRequestReviews,
   createReleaseReviews,
+  findReviewRoles,
   findReviews,
   findReviewsForAccessRequests,
   removeAccessRequestReviews,
 } from '../../src/services/review.js'
+import ReviewRoleModel from '../../src/models/ReviewRole.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
@@ -46,6 +48,38 @@ const reviewModelMock = vi.hoisted(() => {
 vi.mock('../../src/models/Review.js', async () => ({
   ...((await vi.importActual('../../src/models/Review.js')) as object),
   default: reviewModelMock,
+}))
+
+const reviewRoleModelMock = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => [obj])
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.delete = vi.fn(() => obj)
+  obj.limit = vi.fn(() => obj)
+  obj.unwind = vi.fn(() => obj)
+  obj.at = vi.fn(() => obj)
+  obj.map = vi.fn(() => [])
+  obj.filter = vi.fn(() => [])
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+
+vi.mock('../../src/models/ReviewRole.js', async () => ({
+  ...((await vi.importActual('../../src/models/ReviewRole.js')) as object),
+  default: reviewRoleModelMock,
 }))
 
 const smtpMock = vi.hoisted(() => ({
@@ -141,4 +175,13 @@ describe('services > review', () => {
       /^The requested access request review could not be deleted./,
     )
   })
+
+  test('getReviewRoles > returns array of review roles', async () => {
+    await findReviewRoles()
+
+    expect(reviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(reviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+  })
+
+  // post test
 })

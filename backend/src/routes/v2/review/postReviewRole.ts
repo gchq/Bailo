@@ -18,9 +18,12 @@ export const postReviewRoleSchema = z.object({
     name: z.string().openapi({ example: 'Reviewer' }),
     short: z.string().openapi({ example: 'reviewer' }),
     kind: z.enum(getEnumValues(RoleKind)).exclude([RoleKind.ENTRY]).openapi({ example: RoleKind.SCHEMA }),
-    description: z.string().openapi({ example: 'This is an example review role' }),
-    defaultEntities: z.array(z.string()).openapi({ example: ['user:user'] }),
-    lockEntities: z.boolean().openapi({ example: false }),
+    description: z.string().optional().openapi({ example: 'This is an example review role' }),
+    defaultEntities: z
+      .array(z.string())
+      .optional()
+      .openapi({ example: ['user:user'] }),
+    lockEntities: z.boolean().optional().openapi({ example: false }),
     CollaboratorRoles: z.string().optional().openapi({ example: CollaboratorRoles.Owner }),
   }),
 })
@@ -57,6 +60,7 @@ export const postReviewRole = [
     const { body } = parse(req, postReviewRoleSchema)
 
     const reviewRole = await createReviewRole(req.user, body)
+    console.log(reviewRole)
     await audit.onCreateReviewRole(req, reviewRole.id)
 
     return res.json({ reviewRole })
