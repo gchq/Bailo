@@ -417,7 +417,7 @@ export default function FileDownload({
                         />
                       )
                     } else {
-                      return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content' }} />
+                      return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content', m: 0.5 }} />
                     }
                   })}
                 </Box>

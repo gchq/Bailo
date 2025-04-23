@@ -25,6 +25,7 @@ export default function MultiFileInputFileDisplay({
   const [anchorElFileTag, setAnchorElFileTag] = useState<HTMLButtonElement | null>(null)
   const [fileTagErrorMessage, setFileTagErrorMessage] = useState('')
   const [newFileTags, setNewFileTags] = useState<string[]>([])
+  const [fileTagCount, setFileTagCount] = useState(isFileInterface(file) ? file.tags.length : newFileTags.length)
 
   const { mutateEntryFiles } = useGetModelFiles(isFileInterface(file) ? file.modelId : '')
 
@@ -38,6 +39,7 @@ export default function MultiFileInputFileDisplay({
   }
 
   const handleFileTagSelectorOnChange = async (newTags: string[]) => {
+    setFileTagCount(newTags.length)
     if (isFileInterface(file)) {
       setFileTagErrorMessage('')
       const res = await patchFile(file.modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
@@ -69,7 +71,7 @@ export default function MultiFileInputFileDisplay({
             startIcon={<LocalOffer />}
             onClick={(event) => setAnchorElFileTag(event.currentTarget)}
           >
-            Edit file tags
+            {`Edit file tags ${fileTagCount > 0 ? `(${fileTagCount})` : ''}`}
           </Button>
         </Restricted>
         <FileTagSelector

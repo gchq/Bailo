@@ -64,7 +64,7 @@ export async function patchFile(modelId: string, fileId: string, metadata: Pick<
       method: 'patch',
       url: `/api/v2/model/${modelId}/file/${fileId}`,
       headers: { 'Content-Type': 'application/json' },
-      data: { metadata: metadata },
+      data: { tags: metadata.tags },
     })
     return { status: response.status, data: response.data }
   } catch (error) {
