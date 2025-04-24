@@ -14,7 +14,8 @@ registerPath({
   method: 'get',
   path: '/api/v2/review/roles',
   tags: ['review'],
-  description: 'Fetch all review roles',
+  description:
+    'Fetch all review roles. Note - dynamic review roles are currently WIP and might not be fully functional.',
   schema: getReviewRolesSchema,
   responses: {
     200: {

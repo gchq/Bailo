@@ -203,8 +203,6 @@ server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileSc
 server.get('/api/v2/review/roles', ...getReviewRoles)
 server.post('/api/v2/review/role', ...postReviewRole)
 
-// Review roles are currently WIP
-
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
