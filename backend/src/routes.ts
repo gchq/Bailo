@@ -201,6 +201,6 @@ server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileSc
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/dirhtml')))
+server.use('/docs/python', express.static(path.join(__dirname, '../python-docs/html')))
 
 server.use('/api/v2', expressErrorHandler)
