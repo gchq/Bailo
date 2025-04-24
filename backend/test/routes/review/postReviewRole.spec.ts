@@ -1,9 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../src/connectors/audit/__mocks__/index.js'
+import { postReviewRoleSchema } from '../../../src/routes/v2/review/postReviewRole.js'
 import { createFixture, testPost } from '../../testUtils/routes.js'
 import { testReviewRole } from '../../testUtils/testModels.js'
-import { postReviewRoleSchema } from '../../../src/routes/v2/review/postReviewRole.js'
 
 vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/connectors/audit/index.js')

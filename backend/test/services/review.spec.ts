@@ -6,14 +6,23 @@ import Release from '../../src/models/Release.js'
 import {
   createAccessRequestReviews,
   createReleaseReviews,
+  createReviewRole,
   findReviewRoles,
   findReviews,
   findReviewsForAccessRequests,
   removeAccessRequestReviews,
 } from '../../src/services/review.js'
-import ReviewRoleModel from '../../src/models/ReviewRole.js'
 
-vi.mock('../../src/connectors/authorisation/index.js')
+vi.mock('../../src/connectors/authorisation/index.js', async () => ({
+  default: {
+    reviewRole: vi.fn(() => {
+      return { id: '', success: true }
+    }),
+    models: vi.fn(() => {
+      return { id: '', success: true }
+    }),
+  },
+}))
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: { getEntities: vi.fn(() => ['user:test']) },
 }))
@@ -183,5 +192,15 @@ describe('services > review', () => {
     expect(reviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
-  // post test
+  test('createReviewRole > successful', async () => {
+    await createReviewRole(user, {
+      id: 'test',
+      name: 'reviewer',
+      short: 'reviewer',
+      kind: 'schema',
+    })
+
+    expect(reviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+    expect(reviewRoleModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+  })
 })
