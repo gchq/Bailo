@@ -172,8 +172,8 @@ export default function Marketplace() {
               Create
             </Button>
             <Container sx={{ backgroundColor: '#e0e0e0', py: 2, borderRadius: '8px' }}>
-              <Stack direction='row' spacing={0.5} marginBottom='10px' justifyContent='left'>
-                <Typography variant='h5' fontWeight='bold'>
+              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left'>
+                <Typography component='h2' variant='h5' fontWeight='bold'>
                   Filters
                 </Typography>
                 <HelpDialog title='Search Info' content={<SearchInfo />} />
@@ -184,7 +184,7 @@ export default function Marketplace() {
                   alignItems: 'center',
                   maxWidth: '400px',
                   mb: 3,
-                  marginY: '10px',
+                  my: 2,
                 }}
                 variant='filled'
                 onSubmit={onFilterSubmit}
@@ -223,7 +223,7 @@ export default function Marketplace() {
                   onChange={handleTaskOnChange}
                   size='small'
                   ariaLabel='add task to search filter'
-                  accordion={true}
+                  accordion
                 />
               </Box>
               <Box>
@@ -238,7 +238,7 @@ export default function Marketplace() {
                   onChange={handleLibrariesOnChange}
                   size='small'
                   ariaLabel='add library to search filter'
-                  accordion={true}
+                  accordion
                 />
               </Box>
               <Box>

@@ -70,7 +70,7 @@ export default function ChipSelector({
     />
   ))
 
-  if (accordion === true) {
+  if (accordion) {
     return (
       <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
         <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
