@@ -120,14 +120,14 @@ export default function PageWithTabs({
   return (
     <>
       <Stack
-        direction={{ xs: 'column', sm: 'row' }}
+        direction='row'
         divider={<Divider flexItem orientation='vertical' />}
         alignItems='center'
         spacing={{ xs: 1, sm: 2 }}
         sx={{ px: 2, pb: 2 }}
       >
         <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
-          <Stack direction='row' sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }}>
+          <Stack textOverflow='ellipsis' overflow='hidden' direction='row'>
             <Tooltip title={title}>
               <Typography component='h1' color='primary' variant='h6' noWrap>
                 {title}

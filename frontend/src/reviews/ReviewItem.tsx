@@ -55,18 +55,29 @@ export default function ReviewItem({ review }: ReviewItemProps) {
               direction='column'
               justifyContent='flex-start'
               alignItems='flex-start'
-              // divider={<Divider flexItem />}
-              sx={{ textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '100vw', paddingRight: '200px' }}
+              overflow='hidden'
+              sx={{ maxWidth: '100vw', paddingRight: '200px' }}
             >
-              <Typography noWrap color='primary' variant='h6' component='h2' fontWeight='bold'>
+              <Typography
+                overflow='hidden'
+                textOverflow='ellipsis'
+                color='primary'
+                variant='h6'
+                component='h2'
+                fontWeight='bold'
+              >
                 {review.model.name}
               </Typography>
               {review.accessRequestId && (
-                <Typography noWrap>
+                <Typography overflow='hidden' textOverflow='ellipsis'>
                   {toTitleCase(review.accessRequestId.substring(0, review.accessRequestId.lastIndexOf('-')))}
                 </Typography>
               )}
-              {review.semver && <Typography noWrap>{review.semver}</Typography>}
+              {review.semver && (
+                <Typography overflow='hidden' textOverflow='ellipsis'>
+                  {review.semver}
+                </Typography>
+              )}
             </Stack>
             <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
               <Typography variant='caption'>{`Created ${timeDifference(

@@ -144,7 +144,7 @@ export default function ReleaseForm({
           <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
         </Stack>
       )}
-      <Stack>
+      <Stack overflow='hidden'>
         <Typography fontWeight='bold'>
           Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
         </Typography>

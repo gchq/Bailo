@@ -42,12 +42,7 @@ export default function EditableFormHeading({
 }: EditableFormHeadingProps) {
   return (
     <Stack sx={{ pb: 2 }}>
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        justifyContent={{ xs: 'center', sm: 'space-between' }}
-        alignItems='center'
-        spacing={2}
-      >
+      <Stack direction='row' justifyContent={{ xs: 'center', sm: 'space-between' }} alignItems='center' spacing={2}>
         {heading}
         {!isEdit && !readOnly && (
           <Stack direction='row' spacing={1} justifyContent='flex-end' alignItems='center' sx={{ mb: { xs: 2 } }}>
