@@ -73,6 +73,7 @@ class PkiAgent(Agent):
         :param cert: Path to cert file
         :param key: Path to key file
         :param auth: Path to certificate authority file
+        :param **kwargs: Kwargs passed to the super `Agent` class `__init__`
         """
         super().__init__(verify=auth, **kwargs)
 
@@ -106,6 +107,7 @@ class TokenAgent(Agent):
 
         :param access_key: Access key
         :param secret_key: Secret key
+        :param **kwargs: Kwargs passed to the super `Agent` class `__init__`
         """
         super().__init__(**kwargs)
 
