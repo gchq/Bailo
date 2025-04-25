@@ -92,7 +92,7 @@ class Model(Entry):
             state=state,
         )
         model_id = res["model"]["id"]
-        logger.info(f"Model successfully created on server with ID %s.", model_id)
+        logger.info("Model successfully created on server with ID %s.", model_id)
 
         model = cls(
             client=client,
@@ -120,7 +120,7 @@ class Model(Entry):
         if res["kind"] != "model":
             raise BailoException(f"ID {model_id} does not belong to a model. Did you mean to use Datacard.from_id()?")
 
-        logger.info(f"Model %s successfully retrieved from server.", model_id)
+        logger.info("Model %s successfully retrieved from server.", model_id)
 
         model = cls(
             client=client,
@@ -232,7 +232,7 @@ class Model(Entry):
             state=state,
         )
         model_id = bailo_res["model"]["id"]
-        logger.info(f"MLFlow model successfully imported to Bailo with ID %s", model_id)
+        logger.info("MLFlow model successfully imported to Bailo with ID %s", model_id)
 
         model = cls(
             client=client,
@@ -328,7 +328,7 @@ class Model(Entry):
         for release in res["releases"]:
             releases.append(self.get_release(version=release["semver"]))
 
-        logger.info(f"Successfully retrieved all releases for model %s.", self.model_id)
+        logger.info("Successfully retrieved all releases for model %s.", self.model_id)
 
         return releases
 
@@ -365,7 +365,7 @@ class Model(Entry):
         """
         res = self.client.get_all_images(model_id=self.model_id)
 
-        logger.info(f"Images for %s retrieved successfully.", self.model_id)
+        logger.info("Images for %s retrieved successfully.", self.model_id)
 
         return res["images"]
 
@@ -469,7 +469,7 @@ class Experiment:
         self.raw.append(self.run_data)
 
         if not is_mlflow:
-            logger.info(f"Bailo tracking run %s.", self.run)
+            logger.info("Bailo tracking run %s.", self.run)
 
     def log_params(self, params: dict[str, Any]):
         """Logs parameters to the current run.
@@ -555,7 +555,7 @@ class Experiment:
             self.log_dataset("".join(datasets_str))
             self.run_data["run"] = info.run_id
 
-        logger.info(f"Successfully imported MLFlow experiment %s.", experiment_id)
+        logger.info("Successfully imported MLFlow experiment %s.", experiment_id)
 
     def publish(
         self,

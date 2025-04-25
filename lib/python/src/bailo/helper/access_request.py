@@ -121,7 +121,7 @@ class AccessRequest:
         """
         self.client.delete_access_request(self.model_id, self.access_request_id)
 
-        logger.info(f"Access request %s successfully deleted on server.", self.access_request_id)
+        logger.info("Access request %s successfully deleted on server.", self.access_request_id)
 
         return True
 
@@ -129,7 +129,7 @@ class AccessRequest:
         """Update the current state of the access request to Bailo."""
         self.client.patch_access_request(self.model_id, self.access_request_id, metadata=self.metadata)
 
-        logger.info(f"Access request %s successfully updated on server.", self.access_request_id)
+        logger.info("Access request %s successfully updated on server.", self.access_request_id)
 
     def __str__(self) -> str:
         return f"Access Request: {self.metadata['overview']['name']} - {self.model_id}"
