@@ -12,7 +12,7 @@ WORKDIR /app/docs
 
 COPY docs .
 
-RUN pip install --no-cache-dir --upgrade bailo -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade bailo -r requirements.txt
 
 RUN make dirhtml
 

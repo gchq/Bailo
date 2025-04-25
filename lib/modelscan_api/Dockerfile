@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 COPY ./requirements.txt /app/requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade -r /app/requirements.txt
 
 COPY ./bailo_modelscan_api /app/bailo_modelscan_api
 
