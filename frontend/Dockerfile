@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22.14.0-alpine AS installer
+FROM node:22.15.0-alpine AS installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -17,7 +17,7 @@ RUN npm install sharp@0.33.5
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:22.14.0-alpine AS runner
+FROM node:22.15.0-alpine AS runner
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
