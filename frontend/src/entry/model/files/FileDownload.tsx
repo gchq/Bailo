@@ -19,7 +19,7 @@ import { deleteModelFile, useGetModelFiles } from 'actions/model'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { CSSProperties, Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
@@ -33,11 +33,11 @@ import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
-type MutateReleases = KeyedMutator<{
+export type MutateReleases = KeyedMutator<{
   releases: ReleaseInterface[]
 }>
 
-type MutateFiles = KeyedMutator<{
+export type MutateFiles = KeyedMutator<{
   files: FileInterface[]
 }>
 
@@ -50,6 +50,8 @@ type FileDownloadProps = {
     rescanFile?: boolean
   }
   mutator?: MutateReleases | MutateFiles
+  style?: CSSProperties
+  key?: string | number
 }
 
 interface ChipDetails {
@@ -63,6 +65,8 @@ export default function FileDownload({
   file,
   showMenuItems = { associatedReleases: false, deleteFile: false, rescanFile: false },
   mutator = undefined,
+  style = {},
+  key = '',
 }: FileDownloadProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
@@ -280,9 +284,9 @@ export default function FileDownload({
   }
 
   return (
-    <>
+    <Box sx={style} key={key}>
       {isFileInterface(file) && (
-        <Stack>
+        <Stack justifyContent='center'>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
             <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems={{ sm: 'center', md: 'flex-end' }}>
               <Tooltip title={file.name}>
@@ -380,6 +384,6 @@ export default function FileDownload({
           />
         </Box>
       </ConfirmationDialogue>
-    </>
+    </Box>
   )
 }

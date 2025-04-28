@@ -11,6 +11,7 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Pagination,
   Stack,
   Typography,
 } from '@mui/material'
@@ -23,8 +24,9 @@ import { ChangeEvent, MouseEvent, useCallback, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
+import Paginate from 'src/common/Paginate'
 import Restricted from 'src/common/Restricted'
-import FileDownload from 'src/entry/model/releases/FileDownload'
+import FileDownload from 'src/entry/model/files/FileDownload'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, FileInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
@@ -88,7 +90,7 @@ export default function Files({ model }: FilesProps) {
     setAnchorEl(null)
   }
 
-  const orderByMenuListItems = (value, title) => (
+  const orderByMenuListItems = (value: string, title: string) => (
     <MenuItem
       onClick={() => {
         setOrderByValue(value)
@@ -117,7 +119,7 @@ export default function Files({ model }: FilesProps) {
     </MenuItem>
   )
 
-  const ascOrDescMenuListItems = (direction) => (
+  const ascOrDescMenuListItems = (direction: SortingDirectionKeys) => (
     <MenuItem
       onClick={() => {
         setAscOrDesc(direction)
@@ -157,23 +159,32 @@ export default function Files({ model }: FilesProps) {
 
   const entryFilesList = useMemo(
     () =>
-      entryFiles.length ? (
-        sortedEntryFiles.sort(sortFilesByValue).map((file) => (
-          <Card key={file._id} sx={{ width: '100%' }}>
-            <Stack spacing={1} p={2}>
-              <FileDownload
-                showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
-                file={file}
-                modelId={model.id}
-                mutator={mutateEntryFiles}
-              />
-            </Stack>
-          </Card>
-        ))
-      ) : (
-        <EmptyBlob text={`No files found for model ${model.name}`} />
-      ),
+      sortedEntryFiles.sort(sortFilesByValue).map((file) => (
+        <Card key={file._id} sx={{ width: '100%' }}>
+          <Stack spacing={1} p={2}>
+            <FileDownload
+              showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
+              file={file}
+              modelId={model.id}
+              mutator={mutateEntryFiles}
+            />
+          </Stack>
+        </Card>
+      )),
     [entryFiles.length, sortedEntryFiles, sortFilesByValue, model.name, model.id, mutateEntryFiles],
+  )
+
+  const EntryListItem = ({ data, index }) => (
+    <Card key={data[index]._id} sx={{ width: '100%' }}>
+      <Stack spacing={1} p={2}>
+        <FileDownload
+          showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
+          file={data[index]}
+          modelId={model.id}
+          mutator={mutateEntryFiles}
+        />
+      </Stack>
+    </Card>
   )
 
   const handleAddNewFiles = useCallback(
@@ -306,7 +317,9 @@ export default function Files({ model }: FilesProps) {
             </>
           )}
           {failedFileList}
-          {entryFilesList}
+          <Paginate list={entryFiles} emptyListText={`No files found for model ${model.name}`}>
+            {EntryListItem}
+          </Paginate>
         </Stack>
       </Container>
     </>
