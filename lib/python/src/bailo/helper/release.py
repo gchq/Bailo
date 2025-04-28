@@ -200,7 +200,7 @@ class Release:
                         t.update(len(data))
                         f.write(data)
 
-            logger.info(f"File written to %s", path)
+            logger.info("File written to %s", path)
 
         logger.info(
             f"Downloading of file %s from version %s of %s completed.",
@@ -350,7 +350,7 @@ class Release:
         :return: JSON Response object
         """
         self.client.delete_release(self.model_id, str(self.version))
-        logger.info(f"Release %s of %s successfully deleted.", str(self.version), self.model_id)
+        logger.info("Release %s of %s successfully deleted.", str(self.version), self.model_id)
 
         return True
 
