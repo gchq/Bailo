@@ -133,6 +133,16 @@ export const AuditInfo = {
     description: 'Viewed a list of review roles',
     auditKind: AuditKind.View,
   },
+  ViewReviewRoles: {
+    typeId: 'ViewReviewRole',
+    description: 'Viewed a list of review roles',
+    auditKind: AuditKind.View,
+  },
+  UpdateReviewRole: {
+    typeId: 'UpdateReviewRole',
+    description: 'Updated an existing review role',
+    auditKind: AuditKind.Create,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 

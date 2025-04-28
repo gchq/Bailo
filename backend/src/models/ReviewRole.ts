@@ -29,7 +29,7 @@ const ReviewRoleSchema = new Schema<ReviewRoleDoc>(
   },
   {
     timestamps: true,
-    collection: 'v2_webhooks',
+    collection: 'v2_review_roles',
   },
 )
 
