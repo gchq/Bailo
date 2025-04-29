@@ -22,7 +22,7 @@ const agent = getHttpsAgent({
   rejectUnauthorized: !config.registry.connection.insecure,
 })
 
-export async function registryRequest(token: string, endpoint: string) {
+async function registryRequest(token: string, endpoint: string) {
   let res
   try {
     res = await fetch(`${registry}/v2/${endpoint}`, {
@@ -54,7 +54,7 @@ export async function registryRequest(token: string, endpoint: string) {
   return body
 }
 
-export async function registryRequestStream(token: string, endpoint: string) {
+async function registryRequestStream(token: string, endpoint: string) {
   let res: Response
   try {
     res = await fetch(`${registry}/v2/${endpoint}`, {
@@ -144,4 +144,35 @@ function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
     return false
   }
   return true
+}
+
+export async function getImageTagManifest(token: string, imageRef: RepoRef, imageTag: string) {
+  const responseBody = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`)
+  if (responseBody === null) {
+    throw InternalError('Unrecognised response body when getting image tag manifest.', {
+      responseBody,
+      namespace: imageRef.namespace,
+      image: imageRef.image,
+      imageTag,
+    })
+  }
+  return responseBody
+}
+
+export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
+  const responseBody = await registryRequestStream(
+    token,
+    `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
+  )
+
+  if (responseBody === null || !responseBody.ok || responseBody.body === null) {
+    throw InternalError('Unrecognised response body when getting image layer blob.', {
+      responseBody,
+      namespace: imageRef.namespace,
+      image: imageRef.image,
+      layerDigest,
+    })
+  }
+
+  return responseBody
 }

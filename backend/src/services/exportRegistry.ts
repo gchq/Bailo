@@ -1,39 +1,41 @@
 import { PassThrough } from 'node:stream'
+import zlib from 'node:zlib'
 
-import { registryRequest, registryRequestStream } from '../clients/registry.js'
+import { getImageTagManifest, getRegistryLayerStream } from '../clients/registry.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { InternalError } from '../utils/error.js'
 import { ExportMetadata, uploadToExportS3Location } from './mirroredModel.js'
 
-async function exportRegistryLayer(
-  modelId: string,
-  imageName: string,
-  layerDigest: string,
-  token: string,
-  logData: Record<string, unknown>,
-  metadata?: ExportMetadata,
-) {
-  const path = `beta/registry/${modelId}/${imageName}/blobs/${layerDigest}`
-
-  const responseBody = await registryRequestStream(token, `${modelId}/${imageName}/blobs/${layerDigest}`)
-
-  if (responseBody === null || !responseBody.ok || responseBody.body === null) {
-    throw InternalError('Unrecognised response body when getting image layer blob.', {
-      responseBody,
-      modelId,
-      imageName,
-      layerDigest,
-      ...logData,
-    })
-  }
-
-  const passThroughStream = new PassThrough()
-  responseBody.body.pipe(passThroughStream)
-
-  uploadToExportS3Location(path, passThroughStream, logData, metadata)
+// Functionally similar to `buffer.write(stream)` but forces a wait until the buffer has finished draining.
+// This is useful when handling large buffers e.g. multi-gigabyte docker layers
+function writeAndWait(stream: PassThrough, buffer: Buffer) {
+  return new Promise<void>((resolve, _reject) => {
+    if (!stream.write(buffer)) {
+      // wait for drain event before continuing
+      stream.once('drain', resolve)
+    } else {
+      // if the write was successfully then immediately resolve
+      resolve()
+    }
+  })
 }
 
-export async function exportRegistryImage(
+async function compressBuffers(streamBuffers: Buffer<ArrayBufferLike>[]) {
+  // setup gzip
+  const passThroughStream = new PassThrough()
+  const gzipStream = zlib.createGzip()
+  passThroughStream.pipe(gzipStream)
+
+  // add each buffer to the gzip stream one at a time (this must be synchronous)
+  for (const streamBuffer of streamBuffers) {
+    await writeAndWait(passThroughStream, streamBuffer)
+  }
+  passThroughStream.end()
+
+  return gzipStream
+}
+
+export async function exportCompressedRegistryImage(
   modelId: string,
   imageName: string,
   imageTag: string,
@@ -44,25 +46,26 @@ export async function exportRegistryImage(
     { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['*'] },
   ])
 
-  const responseBody = await registryRequest(token, `${modelId}/${imageName}/manifests/${imageTag}`)
-  if (responseBody === null) {
-    throw InternalError('Unrecognised response body when getting image tag manifest.', {
-      responseBody,
-      modelId,
-      imageName,
-      imageTag,
-      ...logData,
-    })
-  }
+  const responseBody = await getImageTagManifest(token, { namespace: modelId, image: imageName }, imageTag)
 
-  await Promise.all(
+  // download all layers and extract buffers from their streamed response
+  const layerStreamBuffers = await Promise.all(
     responseBody['layers'].map(async (layer: object) => {
       const layerDigest = layer['digest']
       if (!layerDigest || layerDigest.length === 0) {
         throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
       }
 
-      await exportRegistryLayer(modelId, imageName, layerDigest, token, logData, metadata)
+      const responseBody = await getRegistryLayerStream(token, { namespace: modelId, image: imageName }, layerDigest)
+
+      // use deprecated buffer as per https://github.com/nodejs/node/issues/43433
+      return await responseBody.buffer()
     }),
   )
+
+  const gzipStream = await compressBuffers(layerStreamBuffers)
+
+  // upload the gzip stream to S3
+  const path = `beta/registry/${modelId}/${imageName}/blobs/compressed/${imageTag}.tar.gz`
+  await uploadToExportS3Location(path, gzipStream, logData, metadata)
 }
