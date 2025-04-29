@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import fetch, { Response } from 'node-fetch'
 
 import { getHttpsAgent } from '../services/http.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -22,7 +22,7 @@ const agent = getHttpsAgent({
   rejectUnauthorized: !config.registry.connection.insecure,
 })
 
-async function registryRequest(token: string, endpoint: string) {
+export async function registryRequest(token: string, endpoint: string) {
   let res
   try {
     res = await fetch(`${registry}/v2/${endpoint}`, {
@@ -52,6 +52,33 @@ async function registryRequest(token: string, endpoint: string) {
   }
 
   return body
+}
+
+export async function registryRequestStream(token: string, endpoint: string) {
+  let res: Response
+  try {
+    res = await fetch(`${registry}/v2/${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      agent,
+    })
+  } catch (err) {
+    throw InternalError('Unable to communicate with the registry.', { err })
+  }
+
+  if (!res.ok || res.body === null) {
+    const context = {
+      url: res.url,
+      status: res.status,
+      statusText: res.statusText,
+    }
+    throw InternalError('Unrecognised response returned by the registry.', {
+      ...context,
+    })
+  }
+
+  return res
 }
 
 // Currently limited to a maximum 100 image names

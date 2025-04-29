@@ -430,7 +430,7 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
   return file
 }
 
-type ExportMetadata = {
+export type ExportMetadata = {
   sourceModelId: string
   mirroredModelId: string
   exporter: string
@@ -539,7 +539,7 @@ async function getObjectFromTemporaryS3Location(fileName: string, logData: Recor
   }
 }
 
-async function uploadToExportS3Location(
+export async function uploadToExportS3Location(
   object: string,
   stream: Readable,
   logData: Record<string, unknown>,
