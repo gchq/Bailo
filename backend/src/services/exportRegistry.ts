@@ -23,6 +23,7 @@ async function exportRegistryLayer(
       modelId,
       imageName,
       layerDigest,
+      ...logData,
     })
   }
 
@@ -44,12 +45,13 @@ export async function exportRegistryImage(
   ])
 
   const responseBody = await registryRequest(token, `${modelId}/${imageName}/manifests/${imageTag}`)
-  if (responseBody === null || !responseBody.ok) {
+  if (responseBody === null) {
     throw InternalError('Unrecognised response body when getting image tag manifest.', {
       responseBody,
       modelId,
       imageName,
       imageTag,
+      ...logData,
     })
   }
 
@@ -57,7 +59,7 @@ export async function exportRegistryImage(
     responseBody['layers'].map(async (layer: object) => {
       const layerDigest = layer['digest']
       if (!layerDigest || layerDigest.length === 0) {
-        throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag })
+        throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
       }
 
       await exportRegistryLayer(modelId, imageName, layerDigest, token, logData, metadata)
