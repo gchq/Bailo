@@ -1,39 +1,10 @@
-import { PassThrough } from 'node:stream'
 import zlib from 'node:zlib'
 
 import { getImageTagManifest, getRegistryLayerStream } from '../clients/registry.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { InternalError } from '../utils/error.js'
+import log from './log.js'
 import { ExportMetadata, uploadToExportS3Location } from './mirroredModel.js'
-
-// Functionally similar to `buffer.write(stream)` but forces a wait until the buffer has finished draining.
-// This is useful when handling large buffers e.g. multi-gigabyte docker layers
-function writeAndWait(stream: PassThrough, buffer: Buffer) {
-  return new Promise<void>((resolve, _reject) => {
-    if (!stream.write(buffer)) {
-      // wait for drain event before continuing
-      stream.once('drain', resolve)
-    } else {
-      // if the write was successfully then immediately resolve
-      resolve()
-    }
-  })
-}
-
-async function compressBuffers(streamBuffers: Buffer<ArrayBufferLike>[]) {
-  // setup gzip
-  const passThroughStream = new PassThrough()
-  const gzipStream = zlib.createGzip()
-  passThroughStream.pipe(gzipStream)
-
-  // add each buffer to the gzip stream one at a time (this must be synchronous)
-  for (const streamBuffer of streamBuffers) {
-    await writeAndWait(passThroughStream, streamBuffer)
-  }
-  passThroughStream.end()
-
-  return gzipStream
-}
 
 export async function exportCompressedRegistryImage(
   modelId: string,
@@ -46,26 +17,78 @@ export async function exportCompressedRegistryImage(
     { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['*'] },
   ])
 
+  // get the required layers
   const responseBody = await getImageTagManifest(token, { namespace: modelId, image: imageName }, imageTag)
-
-  // download all layers and extract buffers from their streamed response
-  const layerStreamBuffers = await Promise.all(
-    responseBody['layers'].map(async (layer: object) => {
-      const layerDigest = layer['digest']
-      if (!layerDigest || layerDigest.length === 0) {
-        throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
-      }
-
-      const responseBody = await getRegistryLayerStream(token, { namespace: modelId, image: imageName }, layerDigest)
-
-      // use deprecated buffer as per https://github.com/nodejs/node/issues/43433
-      return await responseBody.buffer()
+  const layers = responseBody['layers']
+  log.debug('Got image manifest', {
+    modelId,
+    imageName,
+    imageTag,
+    layersLength: layers.length,
+    layers: layers.map((layer: { [x: string]: any }) => {
+      return { size: layer['size'], digest: layer['digest'] }
     }),
-  )
+    ...logData,
+  })
 
-  const gzipStream = await compressBuffers(layerStreamBuffers)
+  // setup gzip
+  const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
+  // one error emitter per layer
+  gzipStream.setMaxListeners(layers.length)
 
-  // upload the gzip stream to S3
+  // start uploading the gzip stream to S3
   const path = `beta/registry/${modelId}/${imageName}/blobs/compressed/${imageTag}.tar.gz`
-  await uploadToExportS3Location(path, gzipStream, logData, metadata)
+  const s3Upload = uploadToExportS3Location(path, gzipStream, logData, metadata)
+
+  // fetch and compress one layer at a time to manage RAM usage
+  // also, gzip can only handle one pipe at a time
+  for (const layer of layers) {
+    const layerDigest = layer['digest']
+    if (!layerDigest || layerDigest.length === 0) {
+      throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
+    }
+
+    log.debug('Fetching image layer', {
+      modelId,
+      imageName,
+      imageTag,
+      layerDigest,
+      ...logData,
+    })
+    const responseBody = await getRegistryLayerStream(token, { namespace: modelId, image: imageName }, layerDigest)
+
+    if (responseBody === null || !responseBody.ok || responseBody.body === null) {
+      throw InternalError('Unrecognised response body when getting image layer blob.', {
+        responseBody,
+        modelId,
+        imageName,
+        imageTag,
+        layerDigest,
+        ...logData,
+      })
+    }
+
+    // pipe the body to gzip using streams
+    await new Promise<void>((resolve, reject) => {
+      responseBody.body
+        ?.on('error', (err) => {
+          reject(InternalError('Error while fetching layer stream', { layerDigest, error: err }))
+        })
+        .on('end', () => {
+          log.debug('Finished fetching layer stream', { layerDigest })
+          // call `resolve()` otherwise the pipe will get stuck
+          resolve()
+        })
+        // pipe to gzip but indicate more data is coming
+        .pipe(gzipStream, { end: false })
+        .on('error', (err) => {
+          reject(InternalError('Error while compressing layer stream', { layerDigest, error: err }))
+        })
+    })
+  }
+  // no more data to write
+  gzipStream.end()
+
+  // wait for the upload to complete
+  await s3Upload
 }
