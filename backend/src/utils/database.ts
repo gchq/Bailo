@@ -31,7 +31,7 @@ export async function connectToMongoose() {
   }
 }
 
-export async function isReplicaSet(): Promise<boolean> {
+export function isReplicaSet(): boolean {
   const options = mongoose.connection.getClient().options
   return Object.prototype.hasOwnProperty.call(options, 'replicaSet') && options.replicaSet.length > 0
 }
