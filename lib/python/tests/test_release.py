@@ -59,7 +59,7 @@ def test_create_release(
     ("version", "model_card_version", "notes", "files", "images", "minor", "draft"),
     [
         ("1.0.0", 1, "test", [], [], False, True),
-        ("1.0.1", None, "test", None, None, True, False),
+        ("1.0.1", 1, "test", None, None, True, False),
     ],
 )
 def test_create_get_from_version_update_and_delete_release(
