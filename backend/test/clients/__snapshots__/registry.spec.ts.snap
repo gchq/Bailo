@@ -1,5 +1,19 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`clients > registry > getImageTagManifest > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag1",
+    {
+      "agent": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+    },
+  ],
+]
+`;
+
 exports[`clients > registry > listImageTags > success 1`] = `
 [
   [

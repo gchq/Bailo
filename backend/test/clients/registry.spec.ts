@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { listImageTags, listModelRepos } from '../../src/clients/registry.js'
+import { getImageTagManifest, listImageTags, listModelRepos } from '../../src/clients/registry.js'
 
 const mockHttpService = vi.hoisted(() => {
   return {
@@ -15,6 +15,112 @@ const fetchMock = vi.hoisted(() => ({
 vi.mock('node-fetch', async () => fetchMock)
 
 describe('clients > registry', () => {
+  test('getImageTagManifest > success', async () => {
+    const mockManifest = {
+      schemaVersion: 2,
+      mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+      config: {
+        mediaType: 'application/vnd.docker.container.image.v1+json',
+        size: 1,
+        digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+      },
+      layers: [],
+    }
+
+    fetchMock.default.mockReturnValueOnce({
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(() => mockManifest),
+    })
+
+    const response = await getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
+
+    expect(fetchMock.default).toBeCalled()
+    expect(fetchMock.default.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual(mockManifest)
+  })
+
+  test('getImageTagManifest > cannot reach registry', async () => {
+    fetchMock.default.mockRejectedValueOnce('Error')
+    const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
+
+    expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+  })
+
+  test('getImageTagManifest > unrecognised error response', async () => {
+    fetchMock.default.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(() => 'Unrecognised response'),
+      json: vi.fn(),
+    })
+    const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
+
+    expect(response).rejects.toThrowError('Unrecognised response returned by the registry.')
+  })
+
+  test('getImageTagManifest > unrecognised error response', async () => {
+    fetchMock.default.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(() => 'Unrecognised response'),
+      json: vi.fn(() => ({
+        errors: [
+          {
+            code: 'NAME_UNKNOWN',
+            message: 'repository name not known to registry',
+            detail: [Object],
+          },
+        ],
+      })),
+    })
+    const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
+
+    expect(response).rejects.toThrowError('Error response received from registry.')
+  })
+
+  test('getImageTagManifest > malformed response', async () => {
+    fetchMock.default.mockReturnValueOnce({
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(() => 'wrong'),
+    })
+
+    const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
+
+    expect(response).rejects.toThrowError('Unrecognised response body when getting image tag manifest.')
+  })
+
+  test('getImageTagManifest > missing repositories in response', async () => {
+    fetchMock.default.mockReturnValueOnce({
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(() => ({ fake: 'info' })),
+    })
+
+    const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
+
+    expect(response).rejects.toThrowError('Unrecognised response body when getting image tag manifest.')
+  })
+
+  test('getImageTagManifest > throw all errors apart from unknown name', async () => {
+    fetchMock.default.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(),
+      json: vi.fn(() => ({
+        errors: [
+          {
+            code: 'UNAUTHORIZED',
+            message: 'You are not authorized.',
+            detail: {},
+          },
+        ],
+      })),
+    })
+
+    const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
+
+    expect(response).rejects.toThrowError('Error response received from registry.')
+  })
+
   test('listModelRepos > only returns model repos', async () => {
     const modelId = 'modelId'
     fetchMock.default.mockReturnValueOnce({

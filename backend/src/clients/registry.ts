@@ -1,4 +1,4 @@
-import fetch, { Response } from 'node-fetch'
+import fetch from 'node-fetch'
 
 import { getHttpsAgent } from '../services/http.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -22,7 +22,7 @@ const agent = getHttpsAgent({
   rejectUnauthorized: !config.registry.connection.insecure,
 })
 
-async function registryRequest(token: string, endpoint: string) {
+async function registryRequest(token: string, endpoint: string, returnStream: boolean = false) {
   let res
   try {
     res = await fetch(`${registry}/v2/${endpoint}`, {
@@ -34,7 +34,11 @@ async function registryRequest(token: string, endpoint: string) {
   } catch (err) {
     throw InternalError('Unable to communicate with the registry.', { err })
   }
-  const body = await res.json()
+  let body
+  // don't get the json if the response is a stream and is ok
+  if (!returnStream || !res.ok) {
+    body = await res.json()
+  }
   if (!res.ok) {
     const context = {
       url: res.url,
@@ -51,34 +55,11 @@ async function registryRequest(token: string, endpoint: string) {
     }
   }
 
-  return body
-}
-
-async function registryRequestStream(token: string, endpoint: string) {
-  let res: Response
-  try {
-    res = await fetch(`${registry}/v2/${endpoint}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      agent,
-    })
-  } catch (err) {
-    throw InternalError('Unable to communicate with the registry.', { err })
+  if (returnStream) {
+    return res
+  } else {
+    return body
   }
-
-  if (!res.ok || res.body === null) {
-    const context = {
-      url: res.url,
-      status: res.status,
-      statusText: res.statusText,
-    }
-    throw InternalError('Unrecognised response returned by the registry.', {
-      ...context,
-    })
-  }
-
-  return res
 }
 
 // Currently limited to a maximum 100 image names
@@ -146,9 +127,15 @@ function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
   return true
 }
 
+type GetImageTagManifestResponse = {
+  schemaVersion: number
+  mediaType: string
+  config: { mediaType: string; size: number; digest: string }
+  layers: { mediaType: string; size: number; digest: string }[]
+}
 export async function getImageTagManifest(token: string, imageRef: RepoRef, imageTag: string) {
   const responseBody = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`)
-  if (responseBody === null) {
+  if (!isGetImageTagManifestResponse(responseBody)) {
     throw InternalError('Unrecognised response body when getting image tag manifest.', {
       responseBody,
       namespace: imageRef.namespace,
@@ -159,10 +146,54 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
   return responseBody
 }
 
+function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManifestResponse {
+  if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
+    return false
+  }
+  if (!('schemaVersion' in resp) || !Number.isInteger(resp.schemaVersion)) {
+    return false
+  }
+  if (!('mediaType' in resp) || !(typeof resp.mediaType === 'string')) {
+    return false
+  }
+  if (!('config' in resp) || typeof resp.config !== 'object' || Array.isArray(resp.config) || resp.config === null) {
+    return false
+  }
+  if (!('mediaType' in resp.config) || !(typeof resp.config.mediaType === 'string')) {
+    return false
+  }
+  if (!('size' in resp.config) || !Number.isInteger(resp.config.size)) {
+    return false
+  }
+  if (!('digest' in resp.config) || !(typeof resp.config.digest === 'string')) {
+    return false
+  }
+  if (!('layers' in resp) || !Array.isArray(resp.layers)) {
+    return false
+  }
+  for (const layerIndex in resp.layers) {
+    const layer = resp.layers[layerIndex]
+    if (typeof layer !== 'object' || Array.isArray(layer) || layer === null) {
+      return false
+    }
+    if (!('mediaType' in layer) || !(typeof layer['mediaType'] === 'string')) {
+      return false
+    }
+    if (!('size' in layer) || !Number.isInteger(layer['size'])) {
+      return false
+    }
+    if (!('digest' in layer) || !(typeof layer['digest'] === 'string')) {
+      return false
+    }
+  }
+  return true
+}
+
 export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
-  const responseBody = await registryRequestStream(
+  const responseBody = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
+    true,
   )
 
   if (responseBody === null || !responseBody.ok || responseBody.body === null) {
