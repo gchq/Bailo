@@ -10,6 +10,7 @@ import {
   Menu,
   MenuItem,
   Popover,
+  Skeleton,
   Stack,
   Tooltip,
   Typography,
@@ -201,15 +202,20 @@ export default function FileDownload({
     if (file.avScan.some((scan) => scan.state === ScanState.InProgress)) {
       return <Chip size='small' label='Virus scan in progress' />
     }
+    if (!chipDisplay) {
+      return <Skeleton variant='text' sx={{ fontSize: '1rem', width: '150px' }} />
+    }
     return (
       <>
-        <Chip
-          color={chipDisplay ? chipDisplay.colour : 'warning'}
-          icon={chipDisplay ? chipDisplay.icon : <Warning />}
-          size='small'
-          onClick={(e) => setAnchorElScan(e.currentTarget)}
-          label={chipDisplay ? chipDisplay.label : 'Virus scan results could not be found'}
-        />
+        {chipDisplay && (
+          <Chip
+            color={chipDisplay.colour}
+            icon={chipDisplay.icon}
+            size='small'
+            onClick={(e) => setAnchorElScan(e.currentTarget)}
+            label={chipDisplay.label}
+          />
+        )}
         <Popover
           open={openScan}
           anchorEl={anchorElScan}
@@ -289,7 +295,7 @@ export default function FileDownload({
         <Stack justifyContent='center'>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
             <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems={{ sm: 'center', md: 'flex-end' }}>
-              <Tooltip title={file.name}>
+              <Tooltip title={`Download ${file.name}`}>
                 <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
                   <Typography textOverflow='ellipsis' overflow='hidden'>
                     {file.name}
