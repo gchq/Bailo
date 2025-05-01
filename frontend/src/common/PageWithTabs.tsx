@@ -29,6 +29,7 @@ interface PageWithTabsProps {
   titleToCopy?: string
   subheadingToCopy?: string
   sourceModelId?: string
+  additionalHeaderDisplay?: ReactElement
 }
 
 export default function PageWithTabs({
@@ -43,6 +44,7 @@ export default function PageWithTabs({
   titleToCopy = '',
   subheadingToCopy = '',
   sourceModelId = '',
+  additionalHeaderDisplay,
 }: PageWithTabsProps) {
   const router = useRouter()
   const { tab } = router.query
@@ -170,6 +172,7 @@ export default function PageWithTabs({
           </Button>
         )}
         {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
+        {additionalHeaderDisplay}
       </Stack>
       <Typography sx={{ pl: 2, pb: 1, textOverflow: 'ellipsis', overflow: 'hidden' }}>{additionalInfo}</Typography>
       <Tabs

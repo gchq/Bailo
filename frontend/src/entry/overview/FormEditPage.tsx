@@ -36,7 +36,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   const [errorMessage, setErrorMessage] = useState('')
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
-  const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
@@ -193,17 +192,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
                 <MenuItem
                   onClick={() => {
                     handleActionButtonClose()
-                    setRolesDialogOpen(true)
-                  }}
-                >
-                  <ListItemIcon>
-                    <PersonIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>View Roles</ListItemText>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    handleActionButtonClose()
                     setHistoryDialogOpen(true)
                   }}
                 >
@@ -238,7 +226,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
         )}
       </Box>
       {historyDialogOpen && <EntryCardHistoryDialog entry={entry} setOpen={setHistoryDialogOpen} />}
-      <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
       <TextInputDialog
         open={jsonUploadDialogOpen}
         onClose={() => setJsonUploadDialogOpen(false)}
