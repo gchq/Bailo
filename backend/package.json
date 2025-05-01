@@ -52,7 +52,7 @@
     "jsrsasign": "^11.1.0",
     "lodash-es": "^4.17.21",
     "mjml": "5.0.0-alpha.6",
-    "mongodb": "^6.15.0",
+    "mongodb": "^6.16.0",
     "mongoose": "8.13.1",
     "mongoose-delete": "^1.0.2",
     "morgan": "^1.10.0",
