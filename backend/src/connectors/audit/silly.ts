@@ -71,7 +71,5 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onViewResponses(_req: Request, _responseInters: ResponseInterface[]) {}
   onUpdateResponse(_req: Request, _responseId: string) {}
   onCreateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
-  onViewReviewRole(_req: Request) {}
   onViewReviewRoles(_req: Request) {}
-  onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
 }

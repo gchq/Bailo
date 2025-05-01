@@ -128,20 +128,10 @@ export const AuditInfo = {
     description: 'Created a new review role',
     auditKind: AuditKind.Create,
   },
-  ViewReviewRole: {
-    typeId: 'ViewReviewRole',
-    description: 'Viewed a list of review roles',
-    auditKind: AuditKind.View,
-  },
   ViewReviewRoles: {
     typeId: 'ViewReviewRole',
     description: 'Viewed a list of review roles',
     auditKind: AuditKind.View,
-  },
-  UpdateReviewRole: {
-    typeId: 'UpdateReviewRole',
-    description: 'Updated an existing review role',
-    auditKind: AuditKind.Create,
   },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
@@ -214,8 +204,6 @@ export abstract class BaseAuditConnector {
   )
 
   abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
-  abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
-  abstract onViewReviewRole(req: Request, reviewRoles: ReviewRoleInterface)
   abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[])
 
   abstract onError(req: Request, error: BailoError)

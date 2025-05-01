@@ -379,7 +379,7 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (action === ReviewRoleAction.Create || action === ReviewRoleAction.Delete || ReviewRoleAction.Update) {
+        if (action === ReviewRoleAction.Create) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {
