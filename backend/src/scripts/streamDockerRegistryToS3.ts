@@ -1,6 +1,6 @@
 import { ensureBucketExists } from '../clients/s3.js'
-import { exportCompressedRegistryImage } from '../services/exportRegistry.js'
 import log from '../services/log.js'
+import { exportCompressedRegistryImage } from '../services/mirroredModel.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
@@ -21,7 +21,7 @@ async function script() {
   ensureBucketExists(config.modelMirror.export.bucket)
 
   // main functionality
-  await exportCompressedRegistryImage(imageModel, imageName, imageTag, {})
+  await exportCompressedRegistryImage({ dn: 'user' }, imageModel, imageName, imageTag, {})
 
   // cleanup
   setTimeout(disconnectFromMongoose, 50)
