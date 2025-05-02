@@ -6,7 +6,7 @@ import { useGetModel } from 'actions/model'
 import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
@@ -28,6 +28,7 @@ import { isValidSemver, plural } from 'utils/stringUtils'
 export default function NewRelease() {
   const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
+  const [modelCardVersion, setModelCardVersion] = useState(0)
   const [isMinorRelease, setIsMinorRelease] = useState(false)
   const [files, setFiles] = useState<(File | FileInterface)[]>([])
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
@@ -44,6 +45,12 @@ export default function NewRelease() {
 
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+
+  useEffect(() => {
+    if (model && modelCardVersion === 0) {
+      setModelCardVersion(model.card.version)
+    }
+  }, [model, setModelCardVersion, modelCardVersion])
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
@@ -141,11 +148,11 @@ export default function NewRelease() {
     const release: CreateReleaseParams = {
       modelId: model.id,
       semver,
-      modelCardVersion: model.card.version,
       notes: releaseNotes,
       minor: isMinorRelease,
       fileIds: successfulFiles.map((file) => file.fileId),
       images: imageList,
+      modelCardVersion: modelCardVersion,
     }
 
     const response = await postRelease(release)
@@ -198,11 +205,13 @@ export default function NewRelease() {
                     isMinorRelease,
                     files,
                     imageList,
+                    modelCardVersion,
                   }}
                   onSemverChange={(value) => setSemver(value)}
                   onReleaseNotesChange={(value) => setReleaseNotes(value)}
                   onMinorReleaseChange={(value) => setIsMinorRelease(value)}
                   onFilesChange={(value) => handleFileOnChange(value)}
+                  onModelCardVersionChange={(value) => setModelCardVersion(value)}
                   filesMetadata={filesMetadata}
                   onFilesMetadataChange={(value) => setFilesMetadata(value)}
                   onImageListChange={(value) => setImageList(value)}

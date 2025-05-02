@@ -16,7 +16,7 @@ export const postReleaseSchema = z.object({
     }),
   }),
   body: z.object({
-    modelCardVersion: z.coerce.number().optional(),
+    modelCardVersion: z.coerce.number().optional().openapi({ example: 1 }),
 
     semver: z.string(),
     notes: z.string().min(1, 'Please provide release notes.'),

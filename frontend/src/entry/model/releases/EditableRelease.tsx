@@ -44,6 +44,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   const [files, setFiles] = useState<(File | FileInterface)[]>(release.files)
   const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
+  const [modelCardVersion, setModelCardVersion] = useState(release.modelCardVersion)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isRegistryError, setIsRegistryError] = useState(false)
@@ -267,6 +268,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
           isMinorRelease,
           files,
           imageList,
+          modelCardVersion,
         }}
         filesMetadata={filesMetadata}
         onSemverChange={(value) => setSemver(value)}
@@ -274,6 +276,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         onMinorReleaseChange={(value) => setIsMinorRelease(value)}
         onFilesChange={(value) => handleFileOnChange(value)}
         onFilesMetadataChange={(value) => setFilesMetadata(value)}
+        onModelCardVersionChange={(value) => setModelCardVersion(value)}
         onImageListChange={(value) => setImageList(value)}
         onRegistryError={handleRegistryError}
         currentFileUploadProgress={currentFileUploadProgress}

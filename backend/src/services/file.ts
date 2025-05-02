@@ -81,7 +81,7 @@ export async function uploadFile(
 
   await file.save()
 
-  const scannersInfo = await scanners.info()
+  const scannersInfo = scanners.info()
   if (scannersInfo && scannersInfo.scannerNames && fileSize > 0) {
     const resultsInprogress: FileScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
