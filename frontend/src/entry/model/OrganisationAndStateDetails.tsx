@@ -1,10 +1,8 @@
-import { Person } from '@mui/icons-material'
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
 import { useMemo, useState } from 'react'
-import UserAvatar from 'src/common/UserAvatar'
 import UserDisplay from 'src/common/UserDisplay'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
-import { EntityKind, EntryInterface } from 'types/types'
+import { EntryInterface } from 'types/types'
 
 interface OrganisationAndStateDetailsProps {
   entry: EntryInterface
@@ -14,9 +12,14 @@ export default function OrganisationAndStateDetails({ entry }: OrganisationAndSt
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
 
   const collaboratorList = useMemo(() => {
-    return entry.collaborators.map((collaborator) => {
-      return <UserDisplay dn={collaborator.entity} displayAsAvatar />
-    })
+    return (
+      <Stack direction='row' alignItems='center' spacing={1}>
+        {entry.collaborators.slice(0, 5).map((collaborator) => {
+          return <UserDisplay key={collaborator.entity} dn={collaborator.entity} displayAsAvatar smallAvatars />
+        })}
+        {entry.collaborators.length > 5 && <Typography>...and {entry.collaborators.length - 5} more</Typography>}
+      </Stack>
+    )
   }, [entry])
 
   return (
@@ -46,10 +49,12 @@ export default function OrganisationAndStateDetails({ entry }: OrganisationAndSt
             </Box>
           )}
         </Stack>
-        <Box>
-          <Typography fontWeight='bold'>Collaborators</Typography>
+        <Stack spacing={1}>
+          <Button size='small' onClick={() => setRolesDialogOpen(true)} sx={{ width: 'max-content' }}>
+            View collaborators
+          </Button>
           {collaboratorList}
-        </Box>
+        </Stack>
         <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
       </Stack>
     </Box>

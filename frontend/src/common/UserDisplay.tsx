@@ -22,9 +22,15 @@ export type UserDisplayProps = {
   dn: string
   hidePopover?: boolean
   displayAsAvatar?: boolean
+  smallAvatars?: boolean
 }
 
-export default function UserDisplay({ dn, hidePopover = false, displayAsAvatar = false }: UserDisplayProps) {
+export default function UserDisplay({
+  dn,
+  hidePopover = false,
+  displayAsAvatar = false,
+  smallAvatars = false,
+}: UserDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = useMemo(() => !!anchorEl, [anchorEl])
   const ref = useRef<HTMLDivElement>(null)
@@ -55,13 +61,14 @@ export default function UserDisplay({ dn, hidePopover = false, displayAsAvatar =
         data-test='userDisplayName'
         aria-owns={open ? 'user-popover' : undefined}
         aria-haspopup='true'
-        sx={{ fontWeight: 'bold' }}
+        fontWeight='bold'
         onMouseEnter={(e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
         onMouseLeave={() => setAnchorEl(null)}
       >
         {displayAsAvatar ? (
           <UserAvatar
             entity={{ kind: (dn.split(':')[0] as EntityKind) || EntityKind.USER, id: dn.split(':')[1] || dn }}
+            size={smallAvatars ? 'chip' : undefined}
           />
         ) : (
           <div>{userInformation ? userInformation.name : dn.charAt(0).toUpperCase() + dn.slice(1)}</div>
@@ -73,7 +80,9 @@ export default function UserDisplay({ dn, hidePopover = false, displayAsAvatar =
           sx={{
             pointerEvents: 'none',
           }}
-          PaperProps={{ onMouseEnter: popoverEnter, onMouseLeave: popoverLeave, sx: { pointerEvents: 'auto' } }}
+          slotProps={{
+            paper: { onMouseEnter: popoverEnter, onMouseLeave: popoverLeave, sx: { pointerEvents: 'auto' } },
+          }}
           open={open}
           anchorEl={anchorEl}
           anchorOrigin={{
