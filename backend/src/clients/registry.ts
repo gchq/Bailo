@@ -171,8 +171,7 @@ function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManife
   if (!('layers' in resp) || !Array.isArray(resp.layers)) {
     return false
   }
-  for (const layerIndex in resp.layers) {
-    const layer = resp.layers[layerIndex]
+  for (const layer of resp.layers) {
     if (typeof layer !== 'object' || Array.isArray(layer) || layer === null) {
       return false
     }
@@ -189,6 +188,18 @@ function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManife
   return true
 }
 
+type GetRegistryLayerStreamResponse = {
+  ok: boolean
+  body: {
+    on: any
+    _events: object
+    _readableState: object
+    _writableState: object
+    allowHalfOpen: boolean
+    _maxListeners: unknown
+    _eventsCount: number
+  }
+}
 export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
   const responseBody = await registryRequest(
     token,
@@ -196,7 +207,7 @@ export async function getRegistryLayerStream(token: string, imageRef: RepoRef, l
     true,
   )
 
-  if (responseBody === null || !responseBody.ok || responseBody.body === null) {
+  if (!isGetRegistryLayerStream(responseBody)) {
     throw InternalError('Unrecognised response body when getting image layer blob.', {
       responseBody,
       namespace: imageRef.namespace,
@@ -206,4 +217,33 @@ export async function getRegistryLayerStream(token: string, imageRef: RepoRef, l
   }
 
   return responseBody
+}
+
+function isGetRegistryLayerStream(resp: unknown): resp is GetRegistryLayerStreamResponse {
+  if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
+    return false
+  }
+  if (!('body' in resp) || typeof resp.body !== 'object' || Array.isArray(resp.body) || resp.body === null) {
+    return false
+  }
+  for (const objectKey of ['_events', '_readableState', '_writableState']) {
+    if (
+      !(objectKey in resp.body) ||
+      typeof resp.body[objectKey] !== 'object' ||
+      Array.isArray(resp.body[objectKey]) ||
+      resp.body[objectKey] === null
+    ) {
+      return false
+    }
+  }
+  if (!('allowHalfOpen' in resp.body) || typeof resp.body.allowHalfOpen !== 'boolean') {
+    return false
+  }
+  if (!('_maxListeners' in resp.body)) {
+    return false
+  }
+  if (!('_eventsCount' in resp.body) || !Number.isInteger(resp.body._eventsCount)) {
+    return false
+  }
+  return true
 }

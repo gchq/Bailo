@@ -1,6 +1,13 @@
+import { PassThrough } from 'node:stream'
+
 import { describe, expect, test, vi } from 'vitest'
 
-import { getImageTagManifest, listImageTags, listModelRepos } from '../../src/clients/registry.js'
+import {
+  getImageTagManifest,
+  getRegistryLayerStream,
+  listImageTags,
+  listModelRepos,
+} from '../../src/clients/registry.js'
 
 const mockHttpService = vi.hoisted(() => {
   return {
@@ -10,7 +17,7 @@ const mockHttpService = vi.hoisted(() => {
 vi.mock('../../src/services/http.js', () => mockHttpService)
 
 const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(() => ({ ok: true, text: vi.fn(), json: vi.fn() })),
+  default: vi.fn(() => ({ ok: true, body: new PassThrough(), text: vi.fn(), json: vi.fn() })),
 }))
 vi.mock('node-fetch', async () => fetchMock)
 
@@ -31,6 +38,7 @@ describe('clients > registry', () => {
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => mockManifest),
+      body: new PassThrough(),
     })
 
     const response = await getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
@@ -52,6 +60,7 @@ describe('clients > registry', () => {
       ok: false,
       text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
+      body: new PassThrough(),
     })
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
@@ -71,6 +80,7 @@ describe('clients > registry', () => {
           },
         ],
       })),
+      body: new PassThrough(),
     })
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
@@ -82,6 +92,7 @@ describe('clients > registry', () => {
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => 'wrong'),
+      body: new PassThrough(),
     })
 
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
@@ -94,6 +105,7 @@ describe('clients > registry', () => {
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => ({ fake: 'info' })),
+      body: new PassThrough(),
     })
 
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
@@ -114,11 +126,63 @@ describe('clients > registry', () => {
           },
         ],
       })),
+      body: new PassThrough(),
     })
 
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
     expect(response).rejects.toThrowError('Error response received from registry.')
+  })
+
+  test('getRegistryLayerStream > success', async () => {
+    const mockedStream = new PassThrough()
+
+    fetchMock.default.mockReturnValueOnce({
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(),
+      body: mockedStream,
+    })
+
+    const response = await getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
+
+    expect(fetchMock.default).toBeCalled()
+    expect(fetchMock.default.mock.calls).toMatchSnapshot()
+    expect(response.body).toStrictEqual(mockedStream)
+  })
+
+  test('getRegistryLayerStream > cannot reach registry', async () => {
+    fetchMock.default.mockRejectedValueOnce('Error')
+    const response = getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
+
+    expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+  })
+
+  test('getRegistryLayerStream > unrecognised error response', async () => {
+    fetchMock.default.mockReturnValueOnce({
+      ok: false,
+      text: vi.fn(() => 'Unrecognised response'),
+      json: vi.fn(),
+      body: new PassThrough(),
+    })
+    const response = getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
+
+    expect(response).rejects.toThrowError('Unrecognised response returned by the registry.')
+  })
+
+  test('getRegistryLayerStream > malformed response', async () => {
+    const mockPassThrough = new PassThrough()
+    mockPassThrough['_events'] = undefined
+    fetchMock.default.mockReturnValueOnce({
+      ok: true,
+      text: vi.fn(),
+      json: vi.fn(),
+      body: mockPassThrough,
+    })
+
+    const response = getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
+
+    expect(response).rejects.toThrowError('Unrecognised response body when getting image layer blob.')
   })
 
   test('listModelRepos > only returns model repos', async () => {
@@ -127,6 +191,7 @@ describe('clients > registry', () => {
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => ({ repositories: [`${modelId}/repo`, 'wrong/repo'] })),
+      body: new PassThrough(),
     })
     const response = await listModelRepos('token', modelId)
 
@@ -147,6 +212,7 @@ describe('clients > registry', () => {
       ok: false,
       text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
+      body: new PassThrough(),
     })
     const response = listModelRepos('token', 'modelId')
 
@@ -166,6 +232,7 @@ describe('clients > registry', () => {
           },
         ],
       })),
+      body: new PassThrough(),
     })
     const response = listModelRepos('token', 'modelId')
 
@@ -177,6 +244,7 @@ describe('clients > registry', () => {
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => 'wrong'),
+      body: new PassThrough(),
     })
     const response = listModelRepos('token', 'modelId')
 
@@ -188,6 +256,7 @@ describe('clients > registry', () => {
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => ({ fake: 'info' })),
+      body: new PassThrough(),
     })
     const response = listModelRepos('token', 'modelId')
 
@@ -200,6 +269,7 @@ describe('clients > registry', () => {
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => ({ tags })),
+      body: new PassThrough(),
     })
 
     const response = await listImageTags('token', { namespace: 'modelId', image: 'image' })
@@ -214,6 +284,7 @@ describe('clients > registry', () => {
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => 'wrong'),
+      body: new PassThrough(),
     })
 
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
@@ -226,6 +297,7 @@ describe('clients > registry', () => {
       ok: true,
       text: vi.fn(),
       json: vi.fn(() => ({ fake: 'info' })),
+      body: new PassThrough(),
     })
 
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
@@ -246,6 +318,7 @@ describe('clients > registry', () => {
           },
         ],
       })),
+      body: new PassThrough(),
     })
 
     const response = await listImageTags('token', { namespace: 'modelId', image: 'image' })
@@ -266,6 +339,7 @@ describe('clients > registry', () => {
           },
         ],
       })),
+      body: new PassThrough(),
     })
 
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
