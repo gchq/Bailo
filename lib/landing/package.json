@@ -45,6 +45,6 @@
     "@types/styled-components": "^5.1.26",
     "eslint": "9.25.1",
     "eslint-config-next": "15.3.1",
-    "typescript": "5.5.3"
+    "typescript": "5.8.3"
   }
 }
