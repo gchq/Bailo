@@ -31,11 +31,6 @@ export async function connectToMongoose() {
   }
 }
 
-export function isReplicaSet(): boolean {
-  const options = mongoose.connection.getClient().options
-  return Object.prototype.hasOwnProperty.call(options, 'replicaSet') && options.replicaSet.length > 0
-}
-
 export async function disconnectFromMongoose() {
   await mongoose.disconnect()
   log.info({ log: false }, 'Disconnected from Mongoose')
@@ -75,4 +70,24 @@ export async function runMigrations() {
 
 export function isObjectId(value: unknown): value is Types.ObjectId {
   return value instanceof Types.ObjectId
+}
+
+/**
+ * Check if a replica set name is configured in the current connection, and assume
+ * replica sets are enabled if so
+ *
+ * @returns true if a replica set name is available, otherwise false
+ */
+export function isReplicaSet(): boolean {
+  const options = mongoose.connection.getClient().options
+  return Object.prototype.hasOwnProperty.call(options, 'replicaSet') && options.replicaSet.length > 0
+}
+
+/**
+ * Check if a replica set is configured AND app configuration allows the use of transactions
+ *
+ * @returns true if we're in replica set mode and configuration allows transactions, otherwise false
+ */
+export function useTransactions(): boolean {
+  return isReplicaSet() && config.mongo.transactions
 }

@@ -1,6 +1,5 @@
 import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
-import mongoose from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
@@ -12,12 +11,11 @@ import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { EntityKind, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
-import { isReplicaSet } from '../utils/database.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
-import log from './log.js'
+import { useTransaction } from '../utils/transactions.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -270,22 +268,12 @@ export async function _setModelCard(
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
 
-  if (!isReplicaSet()) {
-    throw InternalError('Database is not in replica set mode, cannot use transactions')
-  }
+  const [savedRevision, _updatedModel] = await useTransaction([
+    (session) => revision.save({ session }),
+    (session) => ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session: session }),
+  ])
 
-  await mongoose.connection
-    .transaction(async function executeUpdate(session) {
-      await revision.save({ session })
-      await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session: session })
-    })
-    .catch((error) => {
-      const message = 'Unable to save model card revision'
-      log.error('Error when updating model card/revision. Transaction rolled back.', error)
-      throw InternalError(message, { modelId })
-    })
-
-  return revision
+  return savedRevision
 }
 
 export async function updateModelCard(
