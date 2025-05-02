@@ -152,6 +152,7 @@ export default function Files({ model }: FilesProps) {
               { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
               { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
             ]}
+            searchPlaceholderText='Search by file name'
           >
             {EntryListItem}
           </Paginate>

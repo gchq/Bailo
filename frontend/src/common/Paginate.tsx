@@ -1,7 +1,18 @@
 import { CalendarMonth, Check, ExpandLess, ExpandMore, Sort, SortByAlpha } from '@mui/icons-material'
-import { Button, Divider, Grid2, ListItemIcon, ListItemText, Menu, MenuItem, Pagination, Stack } from '@mui/material'
+import {
+  Button,
+  Divider,
+  Grid2,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Pagination,
+  Stack,
+  TextField,
+} from '@mui/material'
 import { isArray } from 'lodash-es'
-import { MouseEvent, ReactElement, useCallback, useMemo, useState } from 'react'
+import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import { FileInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
@@ -11,6 +22,8 @@ interface PaginateProps {
   pageSize?: number
   emptyListText?: string
   sortingProperties?: SortingProperty[]
+  searchFilterProperty?: string
+  searchPlaceholderText?: string
   children: ({ data, index }: { data: any; index: any }) => ReactElement
 }
 
@@ -31,8 +44,10 @@ export default function Paginate({
   list,
   pageSize = 10,
   emptyListText = 'No items found',
-  children,
   sortingProperties = [{ value: 'name', title: 'Name', iconKind: 'text' }],
+  searchFilterProperty = 'name',
+  searchPlaceholderText = 'Search...',
+  children,
 }: PaginateProps) {
   const [page, setPage] = useState(1)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -40,8 +55,17 @@ export default function Paginate({
   const [orderByValue, setOrderByValue] = useState('createdAt')
   const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
   const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(SortingDirection.DESC)
+  const [searchFilter, setSearchFilter] = useState('')
+  const [filteredList, setFilteredList] = useState(list.sort(sortByCreatedAtDescending))
 
-  const pageCount = useMemo(() => (isArray(list) ? Math.ceil(list.length / pageSize) : 10), [list, pageSize])
+  useEffect(() => {
+    setFilteredList(list.filter((item) => item[searchFilterProperty].includes(searchFilter)))
+  }, [setFilteredList, list, searchFilter, searchFilterProperty])
+
+  const pageCount = useMemo(
+    () => (isArray(filteredList) ? Math.ceil(filteredList.length / pageSize) : 10),
+    [filteredList, pageSize],
+  )
 
   const handlePageOnChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value)
@@ -83,7 +107,7 @@ export default function Paginate({
       case 'date':
         return <CalendarMonth color='primary' />
       default:
-        ;<SortByAlpha color='primary' />
+        return <SortByAlpha color='primary' />
     }
   }
 
@@ -161,18 +185,16 @@ export default function Paginate({
     })
   }, [sortingProperties, orderByMenuListItems])
 
-  const defaultSortedList = useMemo(() => [...list].sort(sortByCreatedAtDescending), [list])
-
   const listDisplay = useMemo(() => {
-    const sortedList = defaultSortedList.sort(sortFilesByValue).slice((page - 1) * pageSize, page * pageSize)
-    if (isArray(list)) {
+    const sortedList = filteredList.sort(sortFilesByValue).slice((page - 1) * pageSize, page * pageSize)
+    if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
         <div key={item} style={{ width: '100%' }}>
           {children({ data: sortedList, index })}
         </div>
       ))
     }
-  }, [pageSize, page, list, sortFilesByValue, children, defaultSortedList])
+  }, [pageSize, page, sortFilesByValue, children, filteredList])
 
   if (list.length === 0) {
     return <EmptyBlob text={emptyListText} />
@@ -180,12 +202,20 @@ export default function Paginate({
 
   return (
     <>
-      <Stack direction='row'>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent='space-between' sx={{ width: '100%' }}>
+        <TextField
+          size='small'
+          placeholder={searchPlaceholderText}
+          value={searchFilter}
+          onChange={(e) => setSearchFilter(e.target.value)}
+          sx={{ maxWidth: '200px' }}
+        />
         <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
         <Button
           onClick={handleMenuButtonClick}
           endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
-          sx={{ width: '170px' }}
+          sx={{ maxWidth: '200px' }}
+          fullWidth
         >
           <Stack sx={{ minWidth: '150px' }} direction='row' spacing={2} justifyContent='space-evenly'>
             {checkAscOrDesc(SortingDirection.ASC) ? (
