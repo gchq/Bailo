@@ -351,7 +351,7 @@ class Model(Entry):
 
         latest_release = max(releases)
         logger.info(
-            f"latest_release (%s) for %s retrieved successfully.",
+            "latest_release (%s) for %s retrieved successfully.",
             str(latest_release.version),
             self.model_id,
         )
@@ -513,7 +513,7 @@ class Experiment:
         runs = client.search_runs([experiment_id])
         if len(runs):
             logger.info(
-                f"Successfully retrieved MLFlow experiment %s from tracking server. %d were found.",
+                "Successfully retrieved MLFlow experiment %s from tracking server. %d were found.",
                 experiment_id,
                 len(runs),
             )
@@ -543,7 +543,7 @@ class Experiment:
                 mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)  # type: ignore[reportPrivateImportUsage]
                 artifacts.append(mlflow_dir)
                 logger.info(
-                    f"Successfully downloaded artifacts for MLFlow experiment %s to %s.",
+                    "Successfully downloaded artifacts for MLFlow experiment %s to %s.",
                     experiment_id,
                     mlflow_dir,
                 )
@@ -631,7 +631,7 @@ class Experiment:
             release_new = self.model.create_release(version=release_new_version, minor=True, notes=notes)
 
             logger.info(
-                f"Uploading %d artifacts to version %s of model %s.",
+                "Uploading %d artifacts to version %s of model %s.",
                 len(artifacts),
                 str(release_new_version),
                 self.model.model_id,
@@ -644,7 +644,7 @@ class Experiment:
                 shutil.rmtree(self.temp_dir)
 
         logger.info(
-            f"Successfully published experiment run %s to model %s.",
+            "Successfully published experiment run %s to model %s.",
             str(run_id),
             self.model.model_id,
         )
