@@ -76,6 +76,16 @@ const configMock = vi.hoisted(
           },
         },
       },
+      registry: {
+        connection: {
+          internal: 'https://localhost:5000',
+        },
+      },
+      connectors: {
+        audit: {
+          kind: 'silly',
+        },
+      },
     }) as any,
 )
 vi.mock('../../src/utils/config.js', () => ({
