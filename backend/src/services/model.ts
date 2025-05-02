@@ -270,7 +270,7 @@ export async function _setModelCard(
 
   const [savedRevision, _updatedModel] = await useTransaction([
     (session) => revision.save({ session }),
-    (session) => ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session: session }),
+    (session) => ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session }),
   ])
 
   return savedRevision
