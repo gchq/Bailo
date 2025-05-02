@@ -316,7 +316,12 @@ export async function saveImportedFile(file: FileInterface) {
   })
 }
 
-export async function updateFile(user: UserInterface, modelId: string, fileId: string, tags?: string[]) {
+export async function updateFile(
+  user: UserInterface,
+  modelId: string,
+  fileId: string,
+  patchFileParams: Partial<Pick<FileInterface, 'tags' | 'name' | 'mime'>>,
+) {
   const file = await getFileById(user, fileId)
   if (!file) {
     throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
@@ -330,8 +335,8 @@ export async function updateFile(user: UserInterface, modelId: string, fileId: s
     throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
   }
 
-  if (tags) {
-    const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: tags } })
+  if (patchFileParams.tags) {
+    const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: patchFileParams.tags } })
     if (!updatedFile) {
       throw BadReq('There was a problem updating the file', { modelId: modelId, fileId: fileId })
     }

@@ -20,6 +20,9 @@ export const patchFileSchema = z.object({
   }),
   body: z.object({
     tags: z.array(z.string()).optional(),
+    metadata: z.object({}).optional(),
+    name: z.string(),
+    mime: z.string().optional().default('application/octet-stream'),
   }),
 })
 
@@ -51,10 +54,10 @@ export const patchFile = [
     req.audit = AuditInfo.UpdateFile
     const {
       params: { modelId, fileId },
-      body: { tags },
+      body,
     } = parse(req, patchFileSchema)
 
-    const file = await updateFile(req.user, modelId, fileId, tags)
+    const file = await updateFile(req.user, modelId, fileId, body)
 
     await audit.onUpdateFile(req, modelId, fileId)
 
