@@ -31,6 +31,21 @@ def test_schema():
     assert isinstance(schema, Schema)
 
 
+def test_get_all_schema_ids(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/schemas?kind=model",
+        json={"success": True, "schemas": [{"id": f"schema{i}"} for i in range(3)]},
+    )
+
+    client = Client("https://example.com")
+    kind = SchemaKind.MODEL
+
+    all_schemas = Schema.get_all_schema_ids(client, kind)
+
+    assert len(all_schemas) == 3
+    assert all_schemas == ["schema0", "schema1", "schema2"]
+
+
 @pytest.mark.integration
 @pytest.mark.parametrize(
     ("name", "description", "kind", "json_schema"),

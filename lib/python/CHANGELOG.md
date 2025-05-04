@@ -4,10 +4,16 @@ All dates are formatted dd/mm/yyyy.
 
 ## 3.1.0 - [DATE]
 
-### Changes
+### Breaking Changes
 
 - Rename `Client.post_review` -> `Client.post_release_review` endpoint.
+- Add `mlflow` optional-dependency which replaces part of the `test` optional-dependency.
+
+### Changes
+
 - Add `Client.post_access_request_review` endpoint.
+- Increase test coverage.
+- Update package dependencies.
 
 ## 3.0.0 - 02/04/2025
 
