@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import fetch, { Response } from 'node-fetch'
 
 import { getHttpsAgent } from '../services/http.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -23,7 +23,7 @@ const agent = getHttpsAgent({
 })
 
 async function registryRequest(token: string, endpoint: string, returnStream: boolean = false) {
-  let res
+  let res: Response
   try {
     res = await fetch(`${registry}/v2/${endpoint}`, {
       headers: {
