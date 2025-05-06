@@ -100,8 +100,6 @@ openshift-deploy:
   image:
     name: openshift/origin-cli
   before_script:
-    # - curl -L https://mirror.openshift.com/pub/openshift-v4/clients/helm/latest/helm-linux-amd64 -o /usr/local/bin/helm
-    # - chmod +x /usr/local/bin/helm
     - curl -L https://mirror.openshift.com/pub/openshift-v4/clients/helm/3.11.1/helm-linux-amd64 -o /usr/local/bin/helm
     - chmod +x /usr/local/bin/helm
     - helm version
