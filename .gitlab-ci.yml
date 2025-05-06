@@ -39,10 +39,6 @@ os-backend-build:
     DOCKER_TLS_CERTDIR: ''
   services:
     - name: docker:20.10-dind
-      #name: docker:stable-dind
-      #command:
-        #- '--tls=false'
-        #- '--host=tcp://0.0.0.0:2375'
   before_script:
     - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
     - cd backend
