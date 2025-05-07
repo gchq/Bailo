@@ -25,12 +25,14 @@ type EditableAccessRequestFormProps = {
   accessRequest: AccessRequestInterface
   isEdit: boolean
   onIsEditChange: (value: boolean) => void
+  readOnly?: boolean
 }
 
 export default function EditableAccessRequestForm({
   accessRequest,
   isEdit,
   onIsEditChange,
+  readOnly = false,
 }: EditableAccessRequestFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
@@ -154,6 +156,7 @@ export default function EditableAccessRequestForm({
           onSubmit={handleSubmit}
           onDelete={handleDelete}
           errorMessage={errorMessage}
+          readOnly={readOnly}
         />
         <JsonSchemaForm splitSchema={splitSchema} setSplitSchema={setSplitSchema} canEdit={isEdit} />
         <ConfirmationDialogue
