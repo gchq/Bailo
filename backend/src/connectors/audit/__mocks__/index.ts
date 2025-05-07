@@ -51,6 +51,9 @@ const audit = {
   onViewResponses: vi.fn(),
   onUpdateResponse: vi.fn(),
 
+  onCreateReviewRole: vi.fn(),
+  onViewReviewRoles: vi.fn(),
+
   onError: vi.fn(),
 }
 export default audit

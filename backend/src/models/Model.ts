@@ -15,9 +15,17 @@ export const EntryKind = {
 
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
+export const CollaboratorRoles = {
+  Owner: 'owner',
+  Contributor: 'contributor',
+  Consumer: 'consumer',
+} as const
+
+export type CollaboratorRolesKeys = (typeof CollaboratorRoles)[keyof typeof CollaboratorRoles]
+
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<'owner' | 'contributor' | 'consumer' | string>
+  roles: Array<CollaboratorRolesKeys | string>
 }
 
 export interface ModelMetadata {

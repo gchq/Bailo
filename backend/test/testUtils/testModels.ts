@@ -107,3 +107,9 @@ export const testResponse = {
   createdAt: '2024-05-17T06:13:41.690Z',
   _id: '6646f5953391b094ca4f55ee',
 }
+
+export const testReviewRole = {
+  id: 'my-role-125',
+  name: 'Reviewer',
+  short: 'reviewer',
+}
