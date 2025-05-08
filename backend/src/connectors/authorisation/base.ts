@@ -271,7 +271,10 @@ export class BasicAuthorisationConnector {
         ) {
           return {
             success: false,
-            info: 'You do not have permission to upload a file.',
+            info:
+              action === FileAction.Delete
+                ? 'You do not have permission to delete a file.'
+                : 'You do not have permission to upload a file.',
             id: file._id.toString(),
           }
         }
