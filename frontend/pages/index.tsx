@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   FilledInput,
   FormControl,
   IconButton,
@@ -14,6 +15,7 @@ import {
   Tabs,
   Typography,
 } from '@mui/material/'
+import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useGetAllModelReviewRoles, useListModels } from 'actions/model'
 import Link from 'next/link'
@@ -171,7 +173,7 @@ export default function Marketplace() {
             <Button component={Link} href='/entry/new' variant='contained'>
               Create
             </Button>
-            <Container sx={{ backgroundColor: '#e0e0e0', py: 2, borderRadius: '8px' }}>
+            <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
               <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left'>
                 <Typography component='h2' variant='h5' fontWeight='bold'>
                   Filters
@@ -205,54 +207,56 @@ export default function Marketplace() {
                   }
                 />
               </FormControl>
-              <Box>
-                <ChipSelector
-                  label='Tasks'
-                  chipTooltipTitle={'Filter by task'}
-                  // TODO fetch all model tags
-                  options={[
-                    'Translation',
-                    'Image Classification',
-                    'Summarization',
-                    'Tokenisation',
-                    'Text to Speech',
-                    'Tabular Regression',
-                  ]}
-                  expandThreshold={10}
-                  selectedChips={selectedTask}
-                  onChange={handleTaskOnChange}
-                  size='small'
-                  ariaLabel='add task to search filter'
-                  accordion
-                />
-              </Box>
-              <Box>
-                <ChipSelector
-                  label='Libraries'
-                  chipTooltipTitle={'Filter by library'}
-                  // TODO fetch all model libraries
-                  options={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
-                  expandThreshold={10}
-                  multiple
-                  selectedChips={selectedLibraries}
-                  onChange={handleLibrariesOnChange}
-                  size='small'
-                  ariaLabel='add library to search filter'
-                  accordion
-                />
-              </Box>
-              <Box>
-                <ChipSelector
-                  label='My Roles'
-                  multiple
-                  options={roleOptions.map((role) => role.label)}
-                  onChange={handleSelectedRolesOnChange}
-                  selectedChips={roleOptions
-                    .filter((label) => selectedRoles.includes(label.key))
-                    .map((type) => type.label)}
-                  size='small'
-                />
-              </Box>
+              <Stack divider={<Divider flexItem />}>
+                <Box>
+                  <ChipSelector
+                    label='Tasks'
+                    chipTooltipTitle={'Filter by task'}
+                    // TODO fetch all model tags
+                    options={[
+                      'Translation',
+                      'Image Classification',
+                      'Summarization',
+                      'Tokenisation',
+                      'Text to Speech',
+                      'Tabular Regression',
+                    ]}
+                    expandThreshold={10}
+                    selectedChips={selectedTask}
+                    onChange={handleTaskOnChange}
+                    size='small'
+                    ariaLabel='add task to search filter'
+                    accordion
+                  />
+                </Box>
+                <Box>
+                  <ChipSelector
+                    label='Libraries'
+                    chipTooltipTitle={'Filter by library'}
+                    // TODO fetch all model libraries
+                    options={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
+                    expandThreshold={10}
+                    multiple
+                    selectedChips={selectedLibraries}
+                    onChange={handleLibrariesOnChange}
+                    size='small'
+                    ariaLabel='add library to search filter'
+                    accordion
+                  />
+                </Box>
+                <Box>
+                  <ChipSelector
+                    label='My Roles'
+                    multiple
+                    options={roleOptions.map((role) => role.label)}
+                    onChange={handleSelectedRolesOnChange}
+                    selectedChips={roleOptions
+                      .filter((label) => selectedRoles.includes(label.key))
+                      .map((type) => type.label)}
+                    size='small'
+                  />
+                </Box>
+              </Stack>
               <Box justifySelf='center' marginTop={1}>
                 <Button onClick={handleResetFilters}>Reset filters</Button>
               </Box>
