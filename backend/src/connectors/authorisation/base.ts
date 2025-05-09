@@ -269,12 +269,23 @@ export class BasicAuthorisationConnector {
           ([FileAction.Delete, FileAction.Upload] as FileActionKeys[]).includes(action) &&
           (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor']))
         ) {
+          let errorInfo: string
+          switch (action) {
+            case FileAction.Delete: {
+              errorInfo = 'You do not have permission to delete a file.'
+              break
+            }
+            case FileAction.Upload: {
+              errorInfo = 'You do not have permission to upload a file.'
+              break
+            }
+            default: {
+              errorInfo = 'You not have permission to perform this action'
+            }
+          }
           return {
             success: false,
-            info:
-              action === FileAction.Delete
-                ? 'You do not have permission to delete a file.'
-                : 'You do not have permission to upload a file.',
+            info: errorInfo,
             id: file._id.toString(),
           }
         }
