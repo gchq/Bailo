@@ -149,12 +149,14 @@ export default function Files({ model }: FilesProps) {
               return { key: entryFile._id, ...entryFile }
             })}
             emptyListText={`No files found for model ${model.name}`}
+            searchFilterProperty='name'
             sortingProperties={[
               { value: 'name', title: 'Name', iconKind: 'text' },
               { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
               { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
             ]}
             searchPlaceholderText='Search by file name'
+            defaultSortProperty='name'
           >
             {EntryListItem}
           </Paginate>

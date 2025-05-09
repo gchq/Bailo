@@ -15,19 +15,15 @@ import { isArray } from 'lodash-es'
 import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 
-type ListItem = {
-  [key: string]: any
-}
-
-interface PaginateProps<> {
-  list: ListItem[]
+interface PaginateProps<T> {
+  list: Array<T>
   pageSize?: number
   emptyListText?: string
-  sortingProperties?: SortingProperty[]
-  searchFilterProperty?: keyof ListItem extends string ? keyof ListItem : string
+  sortingProperties: SortingProperty<T>[]
+  searchFilterProperty: keyof T
   searchPlaceholderText?: string
-  defaultSortProperty?: string
-  children: ({ data, index }: { data: ListItem[]; index: any }) => ReactElement
+  defaultSortProperty: keyof T
+  children: ({ data, index }: { data: T[]; index: number }) => ReactElement
 }
 
 export const SortingDirection = {
@@ -37,26 +33,26 @@ export const SortingDirection = {
 
 export type SortingDirectionKeys = (typeof SortingDirection)[keyof typeof SortingDirection]
 
-export interface SortingProperty {
-  value: keyof ListItem extends string ? keyof ListItem : string
+export interface SortingProperty<T> {
+  value: keyof T
   title: string
   iconKind: 'text' | 'date'
 }
 
-export default function Paginate({
+export default function Paginate<T>({
   list,
   pageSize = 10,
   emptyListText = 'No items found',
-  sortingProperties = [{ value: 'name', title: 'Name', iconKind: 'text' }],
-  searchFilterProperty = 'name',
+  sortingProperties,
+  searchFilterProperty,
   searchPlaceholderText = 'Search...',
-  defaultSortProperty = 'name',
+  defaultSortProperty,
   children,
-}: PaginateProps) {
+}: PaginateProps<T>) {
   const [page, setPage] = useState(1)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
-  const [orderByValue, setOrderByValue] = useState(defaultSortProperty)
+  const [orderByValue, setOrderByValue] = useState<keyof T>(defaultSortProperty)
   const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
   const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(SortingDirection.DESC)
   const [searchFilter, setSearchFilter] = useState('')
@@ -64,7 +60,7 @@ export default function Paginate({
 
   useEffect(() => {
     setFilteredList(
-      list.filter((item: ListItem) => item[searchFilterProperty].toLowerCase().includes(searchFilter.toLowerCase())),
+      list.filter((item: T) => item[searchFilterProperty as string].toLowerCase().includes(searchFilter.toLowerCase())),
     )
   }, [setFilteredList, list, searchFilter, searchFilterProperty])
 
@@ -78,7 +74,7 @@ export default function Paginate({
   }
 
   const sortByValue = useMemo(
-    () => (a: ListItem, b: ListItem) => {
+    () => (a: T, b: T) => {
       if (ascOrDesc === SortingDirection.ASC) {
         return a[orderByValue] < b[orderByValue] ? -1 : 1
       }
@@ -102,7 +98,7 @@ export default function Paginate({
     setAnchorEl(null)
   }
 
-  const displaySortingKindIcon = (sortingKind: SortingProperty['iconKind']) => {
+  const displaySortingKindIcon = useCallback((sortingKind: SortingProperty<T>['iconKind']) => {
     switch (sortingKind) {
       case 'text':
         return <SortByAlpha color='primary' />
@@ -111,14 +107,14 @@ export default function Paginate({
       default:
         return <SortByAlpha color='primary' />
     }
-  }
+  }, [])
 
   const orderByMenuListItems = useCallback(
-    (sortingProperty: SortingProperty) => {
+    (sortingProperty: SortingProperty<T>) => {
       return (
         <MenuItem
           onClick={() => {
-            setOrderByValue(sortingProperty.value.toString())
+            setOrderByValue(sortingProperty.value)
             setOrderByButtonTitle(sortingProperty.title)
           }}
           sx={{ px: 2.5 }}
@@ -142,7 +138,7 @@ export default function Paginate({
         </MenuItem>
       )
     },
-    [checkMenuOption],
+    [checkMenuOption, displaySortingKindIcon],
   )
 
   const ascOrDescMenuListItems = (direction: SortingDirectionKeys) => (
