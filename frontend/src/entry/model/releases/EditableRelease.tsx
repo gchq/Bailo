@@ -13,6 +13,7 @@ import { useRouter } from 'next/router'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -226,10 +227,15 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     <Stack spacing={2}>
       <EditableFormHeading
         heading={
-          <div>
-            <Typography fontWeight='bold'>Release name</Typography>
+          <Stack justifyContent='center'>
+            <Stack direction='row' spacing={1}>
+              <Typography fontWeight='bold'>Release name</Typography>
+              <HelpPopover>
+                The release name is automatically generated using the model name and release semantic version
+              </HelpPopover>
+            </Stack>
             <Typography>{`${model.name} - ${release.semver}`}</Typography>
-          </div>
+          </Stack>
         }
         editAction='editRelease'
         deleteAction='deleteRelease'

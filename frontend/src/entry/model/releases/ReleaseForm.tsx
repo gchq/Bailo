@@ -171,19 +171,6 @@ export default function ReleaseForm({
   return (
     <Stack spacing={2}>
       {isReadOnly && (
-        <Stack sx={{ width: '100%' }} justifyContent='center'>
-          <Stack direction='row' spacing={1}>
-            <Typography fontWeight='bold'>Release name</Typography>
-            {isReadOnly && (
-              <HelpPopover>
-                The release name is automatically generated using the model name and release semantic version
-              </HelpPopover>
-            )}
-          </Stack>
-          <Typography>{`${model.name} - ${formData.semver}`}</Typography>
-        </Stack>
-      )}
-      {isReadOnly && (
         <Stack>
           <Typography fontWeight='bold'>Latest version</Typography>
           <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
