@@ -227,14 +227,14 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     <Stack spacing={2}>
       <EditableFormHeading
         heading={
-          <Stack justifyContent='center'>
+          <Stack overflow='hidden' justifyContent='center'>
             <Stack direction='row' spacing={1}>
               <Typography fontWeight='bold'>Release name</Typography>
               <HelpPopover>
                 The release name is automatically generated using the model name and release semantic version
               </HelpPopover>
             </Stack>
-            <Typography>{`${model.name} - ${release.semver}`}</Typography>
+            <Typography noWrap>{`${model.name} - ${release.semver}`}</Typography>
           </Stack>
         }
         editAction='editRelease'

@@ -173,10 +173,10 @@ export default function ReleaseForm({
       {isReadOnly && (
         <Stack>
           <Typography fontWeight='bold'>Latest version</Typography>
-          <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
+          <Typography noWrap>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
         </Stack>
       )}
-      <Stack direction={isReadOnly ? 'column' : 'row'} spacing={2}>
+      <Stack overflow={'hidden'} spacing={2}>
         <Stack sx={{ width: '100%' }}>
           <Typography fontWeight='bold'>
             Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
