@@ -206,7 +206,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
   return release
 }
 
-export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'fileIds' | 'images'>
+export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'modelCardVersion' | 'fileIds' | 'images'>
 export async function updateRelease(user: UserInterface, modelId: string, semver: string, delta: UpdateReleaseParams) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {

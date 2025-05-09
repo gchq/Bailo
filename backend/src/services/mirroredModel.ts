@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import zlib from 'node:zlib'
 
 import archiver from 'archiver'
 import * as fflate from 'fflate'
@@ -20,6 +21,7 @@ import { ReleaseDoc } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
+import { shortId } from '../utils/id.js'
 import {
   createFilePath,
   downloadFile,
@@ -29,6 +31,7 @@ import {
   markFileAsCompleteAfterImport,
   saveImportedFile,
 } from './file.js'
+import { getHttpsAgent } from './http.js'
 import log from './log.js'
 import {
   getModelById,
@@ -38,6 +41,7 @@ import {
   setLatestImportedModelCard,
   validateMirroredModel,
 } from './model.js'
+import { getImageBlob, listImageTagLayers } from './registry.js'
 import { getAllFileIds, getReleasesForExport, isReleaseDoc, saveImportedRelease } from './release.js'
 
 export async function exportModel(
@@ -98,6 +102,78 @@ export async function exportModel(
   log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
 }
 
+export async function exportCompressedRegistryImage(
+  user: UserInterface,
+  modelId: string,
+  imageName: string,
+  imageTag: string,
+  logData: Record<string, unknown>,
+  metadata?: ExportMetadata,
+) {
+  // get which layers exist for the model
+  const layers = await listImageTagLayers(user, modelId, imageName, imageTag)
+  log.debug('Got image tag manifest', {
+    modelId,
+    imageName,
+    imageTag,
+    layersLength: layers.length,
+    layers: layers.map((layer: { [x: string]: any }) => {
+      return { size: layer['size'], digest: layer['digest'] }
+    }),
+    ...logData,
+  })
+
+  // setup gzip
+  const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
+  // default `['close', 'error', 'prefinish', 'finish', 'end', 'readable']` plus one `'error'` emitter per layer
+  gzipStream.setMaxListeners(6 + layers.length)
+
+  // start uploading the gzip stream to S3
+  const path = `beta/registry/${modelId}/${imageName}/blobs/compressed/${imageTag}.tar.gz`
+  const s3Upload = uploadToExportS3Location(path, gzipStream, logData, metadata)
+
+  // fetch and compress one layer at a time to manage RAM usage
+  // also, gzip can only handle one pipe at a time
+  for (const layer of layers) {
+    const layerDigest = layer['digest']
+    if (!layerDigest || layerDigest.length === 0) {
+      throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
+    }
+
+    log.debug('Fetching image layer', {
+      modelId,
+      imageName,
+      imageTag,
+      layerDigest,
+      ...logData,
+    })
+    const responseBody = await getImageBlob(user, modelId, imageName, layerDigest)
+
+    // pipe the body to gzip using streams
+    await new Promise<void>((resolve, reject) => {
+      responseBody.body
+        .on('error', (err) => {
+          reject(InternalError('Error while fetching layer stream', { layerDigest, error: err }))
+        })
+        .on('end', () => {
+          log.debug('Finished fetching layer stream', { layerDigest })
+          // call `resolve()` otherwise the pipe will get stuck
+          resolve()
+        })
+        // pipe to gzip but indicate more data is coming
+        .pipe(gzipStream, { end: false })
+        .on('error', (err) => {
+          reject(InternalError('Error while compressing layer stream', { layerDigest, error: err }))
+        })
+    })
+  }
+  // no more data to write
+  gzipStream.end()
+
+  // wait for the upload to complete
+  await s3Upload
+}
+
 export const ImportKind = {
   Documents: 'documents',
   File: 'file',
@@ -138,44 +214,48 @@ export async function importModel(
     throw BadReq('Missing mirrored model ID.')
   }
 
-  log.info({ mirroredModelId, payloadUrl }, 'Received a request to import a model.')
-  const mirroredModel = await validateMirroredModel(mirroredModelId, sourceModelId)
+  const importId = shortId()
+  log.info({ importId, mirroredModelId, payloadUrl }, 'Received a request to import a model.')
+  const mirroredModel = await validateMirroredModel(mirroredModelId, sourceModelId, importId)
 
-  const auth = await authorisation.model(user, mirroredModel, ModelAction.Export)
+  const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id })
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, importId })
   }
 
   let res: Response
   try {
-    res = await fetch(payloadUrl)
+    res = await fetch(payloadUrl, {
+      agent: getHttpsAgent(),
+    })
   } catch (err) {
-    throw InternalError('Unable to get the file.', { err, payloadUrl })
+    throw InternalError('Unable to get the file.', { err, payloadUrl, importId })
   }
   if (!res.ok) {
     throw InternalError('Unable to get the file.', {
       payloadUrl,
       response: { status: res.status, body: await res.text() },
+      importId,
     })
   }
 
   if (!res.body) {
-    throw InternalError('Unable to get the file.', { payloadUrl })
+    throw InternalError('Unable to get the file.', { payloadUrl, importId })
   }
 
-  log.info({ mirroredModelId, payloadUrl }, 'Obtained the file from the payload URL.')
+  log.info({ mirroredModelId, payloadUrl, importId }, 'Obtained the file from the payload URL.')
 
   switch (importKind) {
     case ImportKind.Documents: {
-      log.info({ mirroredModelId, payloadUrl }, 'Importing colection of documents.')
-      return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl)
+      log.info({ mirroredModelId, payloadUrl, importId }, 'Importing colection of documents.')
+      return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl, importId)
     }
     case ImportKind.File: {
       log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
       if (!filePath) {
         throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
-      const result = await importModelFile(res, filePath, mirroredModelId)
+      const result = await importModelFile(res, filePath, mirroredModelId, importId)
       return {
         mirroredModel,
         importResult: {
@@ -184,7 +264,7 @@ export async function importModel(
       }
     }
     default:
-      throw BadReq('Unrecognised import kind', { importKind })
+      throw BadReq('Unrecognised import kind', { importKind, importId })
   }
 }
 
@@ -194,6 +274,7 @@ async function importDocuments(
   mirroredModelId: string,
   sourceModelId: string,
   payloadUrl: string,
+  importId: string,
 ) {
   const modelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   const releases: Omit<ReleaseDoc, '_id'>[] = []
@@ -208,7 +289,7 @@ async function importDocuments(
     })
   } catch (error) {
     log.error({ error }, 'Unable to read zip file.')
-    throw InternalError('Unable to read zip file.', { mirroredModelId })
+    throw InternalError('Unable to read zip file.', { mirroredModelId, importId })
   }
 
   const modelCardRegex = /^[0-9]+\.json$/
@@ -226,12 +307,14 @@ async function importDocuments(
     } else if (fileRegex.test(key)) {
       fileJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
     } else {
-      throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId })
+      throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId, importId })
     }
   })
 
+  // Parse release documents.
+
   releaseJsonStrings.forEach((releaseJson) => {
-    const release = parseRelease(releaseJson, mirroredModelId, sourceModelId)
+    const release = parseRelease(releaseJson, mirroredModelId, sourceModelId, importId)
     releases.push(release)
   })
 
@@ -243,32 +326,49 @@ async function importDocuments(
       modelId: mirroredModelId,
       releases: failedReleases.map((release) => release.semver),
       user,
+      importId,
     })
   }
 
+  // Parse model card documents.
+
   modelCardJsonStrings.forEach((modelCardJson) => {
-    const modelCard = parseModelCard(modelCardJson, mirroredModelId, sourceModelId)
+    const modelCard = parseModelCard(modelCardJson, mirroredModelId, sourceModelId, importId)
     modelCards.push(modelCard)
   })
 
+  // Parse file documents.
+
   await Promise.all(
     fileJsonStrings.map(async (fileJson) => {
-      const file = await parseFile(fileJson, mirroredModelId, sourceModelId)
+      const file = await parseFile(fileJson, mirroredModelId, sourceModelId, importId)
       files.push(file)
     }),
   )
 
+  log.info(
+    {
+      mirroredModelId,
+      payloadUrl,
+      sourceModelId,
+      importId,
+      numberOfDocuments: { modelCards: modelCards.length, releases: releases.length, files: files.length },
+    },
+    'Finished parsing the collection of model documents.',
+  )
+
+  // Save model card documents
   const newModelCards = (await Promise.all(modelCards.map((card) => saveImportedModelCard(card)))).filter(
     (card): card is Omit<ModelCardRevisionDoc, '_id'> => !!card,
   )
 
+  // Save release documents
   const newReleases = (await Promise.all(releases.map((release) => saveImportedRelease(release)))).filter(
     (release): release is Omit<ReleaseDoc, '_id'> => !!release,
   )
 
+  // Save file documents
   await Promise.all(files.map((file) => saveImportedFile(file)))
-
-  log.info({ mirroredModelId, payloadUrl, sourceModelId }, 'Finished parsing the collection of model cards.')
 
   const updatedMirroredModel = await setLatestImportedModelCard(mirroredModelId)
 
@@ -284,6 +384,7 @@ async function importDocuments(
       modelCardVersions,
       releaseSemvers,
       fileIds,
+      importId,
     },
     'Finished importing the collection of model documents.',
   )
@@ -300,11 +401,11 @@ async function importDocuments(
   }
 }
 
-async function importModelFile(content: Response, importedPath: string, mirroredModelId: string) {
+async function importModelFile(content: Response, importedPath: string, mirroredModelId: string, importId: string) {
   const bucket = config.s3.buckets.uploads
   const updatedPath = createFilePath(mirroredModelId, importedPath)
   await putObjectStream(bucket, updatedPath, content.body as Readable)
-  log.debug({ bucket, path: updatedPath }, 'Imported file successfully uploaded to S3.')
+  log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
   await markFileAsCompleteAfterImport(updatedPath)
   return { sourcePath: importedPath, newPath: updatedPath }
 }
@@ -313,56 +414,94 @@ function parseModelCard(
   modelCardJson: string,
   mirroredModelId: string,
   sourceModelId: string,
+  importId: string,
 ): Omit<ModelCardRevisionDoc, '_id'> {
   const modelCard = JSON.parse(modelCardJson)
   if (!isModelCardRevisionDoc(modelCard)) {
-    throw InternalError('Data cannot be converted into a model card.')
+    throw InternalError('Data cannot be converted into a model card.', {
+      modelCard,
+      mirroredModelId,
+      sourceModelId,
+      importId,
+    })
   }
   const modelId = modelCard.modelId
   modelCard.modelId = mirroredModelId
   delete modelCard._id
   if (sourceModelId !== modelId) {
-    throw InternalError('Zip file contains model cards from an invalid model.', { modelIds: [sourceModelId, modelId] })
+    throw InternalError('Zip file contains model cards that have a model ID that does not match the source model Id.', {
+      modelId,
+      sourceModelId,
+      importId,
+    })
   }
   return modelCard
 }
 
-function parseRelease(releaseJson: string, mirroredModelId: string, sourceModelId: string): Omit<ReleaseDoc, '_id'> {
+function parseRelease(
+  releaseJson: string,
+  mirroredModelId: string,
+  sourceModelId: string,
+  importId: string,
+): Omit<ReleaseDoc, '_id'> {
   const release = JSON.parse(releaseJson)
   if (!isReleaseDoc(release)) {
-    throw InternalError('Data cannot be converted into a release.')
+    throw InternalError('Data cannot be converted into a release.', {
+      release,
+      mirroredModelId,
+      sourceModelId,
+      importId,
+    })
   }
 
   const modelId = release.modelId
   release.modelId = mirroredModelId
   delete release._id
-  if (sourceModelId !== modelId) {
-    throw InternalError('Zip file contains releases from an invalid model.', { modelIds: [sourceModelId, modelId] })
-  }
-
   // Remove Docker Images until we add the functionality to import Docker images
   release.images = []
+  if (sourceModelId !== modelId) {
+    throw InternalError('Zip file contains releases that have a model ID that does not match the source model Id.', {
+      release,
+      mirroredModelId,
+      sourceModelId,
+      importId,
+    })
+  }
 
   return release
 }
 
-async function parseFile(fileJson: string, mirroredModelId: string, sourceModelId: string) {
+async function parseFile(fileJson: string, mirroredModelId: string, sourceModelId: string, importId: string) {
   const file = JSON.parse(fileJson)
   if (!isFileInterfaceDoc(file)) {
-    throw InternalError('Data cannot be converted into a file.')
+    throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, importId })
   }
+
+  file.modelId = mirroredModelId
+  file.bucket = config.s3.buckets.uploads
+  file.path = createFilePath(mirroredModelId, file.id)
 
   try {
     file.complete = await objectExists(file.bucket, file.path)
-  } catch (_error) {
-    throw InternalError('Failed to check if file exists.', { bucket: file.bucket, path: file.path })
+  } catch (error) {
+    throw InternalError('Failed to check if file exists.', {
+      bucket: file.bucket,
+      path: file.path,
+      mirroredModelId,
+      sourceModelId,
+      error,
+      importId,
+    })
   }
 
   const modelId = file.modelId
-  file.modelId = mirroredModelId
-  file.path = createFilePath(mirroredModelId, file.id)
   if (sourceModelId !== modelId) {
-    throw InternalError('Zip file contains files from an invalid model.', { modelIds: [sourceModelId, modelId] })
+    throw InternalError('Zip file contains files that have a model ID that does not match the source model Id.', {
+      file,
+      mirroredModelId,
+      sourceModelId,
+      importId,
+    })
   }
 
   return file

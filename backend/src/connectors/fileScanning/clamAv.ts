@@ -5,60 +5,35 @@ import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { ConfigurationError } from '../../utils/error.js'
 import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
-let av: NodeClam
-
 export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
+  toolName = 'Clam AV'
+  version: string | undefined = undefined
+  av: NodeClam | undefined = undefined
+
   constructor() {
     super()
   }
 
-  async info() {
-    return { toolName: 'Clam AV', scannerVersion: await this.getScannerVersion() }
+  async init() {
+    this.av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
+    const scannerVersion = await this.av.getVersion()
+    this.version = scannerVersion.substring(scannerVersion.indexOf(' ') + 1, scannerVersion.indexOf('/'))
+    return this
   }
 
-  async init(retryCount: number = 1) {
-    log.info('Initialising Clam AV...')
-    if (retryCount <= config.connectors.fileScanners.maxInitRetries) {
-      setTimeout(async () => {
-        try {
-          av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
-          log.info('Clam AV initialised.')
-        } catch (_error) {
-          log.warn(`Could not initialise Clam AV, retrying (attempt ${retryCount})...`)
-          this.init(++retryCount)
-        }
-      }, config.connectors.fileScanners.initRetryDelay)
-    } else {
-      throw ConfigurationError(
-        `Could not initialise Clam AV after ${retryCount} attempts, make sure that it is setup and configured correctly.`,
-        {
-          modelScanConfig: config.avScanning.modelscan,
-        },
-      )
-    }
-  }
-
-  async getScannerVersion() {
-    if (!av) return
-    const scannerVersion = await av.getVersion()
-    const modifiedVersion = scannerVersion.substring(scannerVersion.indexOf(' ') + 1, scannerVersion.indexOf('/'))
-    return modifiedVersion
+  getScannerVersion() {
+    return this.version
   }
 
   async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
-    if (!av) {
-      return await this.scanError(
-        undefined,
-        undefined,
-        `Could not use ${(await this.info()).toolName} as it is not running`,
-      )
+    if (!this.av) {
+      return await this.scanError(`Could not use ${this.toolName} as it is not been correctly initialised.`)
     }
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     try {
-      const { isInfected, viruses } = await av.scanStream(s3Stream)
+      const { isInfected, viruses } = await this.av.scanStream(s3Stream)
       log.info(
         { modelId: file.modelId, fileId: file._id.toString(), name: file.name, result: { isInfected, viruses } },
         'Scan complete.',
@@ -73,7 +48,10 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
         },
       ]
     } catch (error) {
-      return this.scanError(error, file)
+      return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
+        error,
+        file,
+      })
     }
   }
 }

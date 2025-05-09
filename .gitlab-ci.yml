@@ -33,15 +33,12 @@ os-backend-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:latest
+    name: docker:20.10
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:stable-dind
-      command:
-        - '--tls=false'
-        - '--host=tcp://0.0.0.0:2375'
+    - name: docker:20.10-dind
   before_script:
     - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
     - cd backend
@@ -56,15 +53,12 @@ os-frontend-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:latest
+    name: docker:20.10
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:stable-dind
-      command:
-        - '--tls=false'
-        - '--host=tcp://0.0.0.0:2375'
+    - name: docker:20.10-dind
   before_script:
     - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
     - cd frontend
@@ -79,15 +73,12 @@ os-modelscan-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:latest
+    name: docker:20.10
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:stable-dind
-      command:
-        - '--tls=false'
-        - '--host=tcp://0.0.0.0:2375'
+    - name: docker:20.10-dind
   before_script:
     - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
     - cd lib/modelscan_api
@@ -105,8 +96,6 @@ openshift-deploy:
   image:
     name: openshift/origin-cli
   before_script:
-    # - curl -L https://mirror.openshift.com/pub/openshift-v4/clients/helm/latest/helm-linux-amd64 -o /usr/local/bin/helm
-    # - chmod +x /usr/local/bin/helm
     - curl -L https://mirror.openshift.com/pub/openshift-v4/clients/helm/3.11.1/helm-linux-amd64 -o /usr/local/bin/helm
     - chmod +x /usr/local/bin/helm
     - helm version
@@ -114,6 +103,7 @@ openshift-deploy:
     - echo "login to Openshift"
     - echo -e $K8S_SECRET_CERT > backend/certs/cert.pem
     - echo -e $K8S_SECRET_KEY > backend/certs/key.pem
+    - echo -e $K8S_JWKS_KEY > backend/certs/jwks.json
     - oc login --token=$OPENSHIFT_TOKEN --server=$OPENSHIFT_SERVER
     - oc project $OPENSHIFT_PROJECTNAME
     - echo "Run Helm for Openshift Bailo-Dev"
@@ -134,7 +124,7 @@ openshift-deploy:
         frontendTag: $OS_TAG
         backendRepository: "$BACKEND_REPO"
         backendTag: $OS_TAG
-        modelscanRepository: "$BACKEND_REPO"
+        modelscanRepository: "$MODELSCAN_REPO"
         modelscanTag: $OS_TAG
       # Used for openshift
       route:
@@ -152,6 +142,10 @@ openshift-deploy:
             - $MONGO_USR
       openshift:
         namespace: $OPENSHIFT_PROJECTNAME
+      clamav:
+        enabled: true
+      modelscan:
+        enabled: true
       EOF
     - cat ci-dev.yaml
     - helm dependency update
@@ -163,15 +157,12 @@ aws-backend-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:latest
+    name: docker:20.10
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:stable-dind
-      command:
-        - '--tls=false'
-        - '--host=tcp://0.0.0.0:2375'
+    - name: docker:20.10-dind
   before_script:
     - apk add --no-cache curl jq python3 py3-pip
     - pip install awscli --break-system-packages
@@ -192,15 +183,12 @@ aws-frontend-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:latest
+    name: docker:20.10
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:stable-dind
-      command:
-        - '--tls=false'
-        - '--host=tcp://0.0.0.0:2375'
+    - name: docker:20.10-dind
   before_script:
     - apk add --no-cache curl jq python3 py3-pip
     - pip install awscli --break-system-packages
@@ -221,15 +209,12 @@ aws-modelscan-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:latest
+    name: docker:20.10
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:stable-dind
-      command:
-        - '--tls=false'
-        - '--host=tcp://0.0.0.0:2375'
+    - name: docker:20.10-dind
   before_script:
     - apk add --no-cache curl jq python3 py3-pip
     - pip install awscli --break-system-packages

@@ -17,25 +17,19 @@ export type ScanStateKeys = (typeof ScanState)[keyof typeof ScanState]
 export type FileScanningConnectorInfo = Pick<FileScanResult, 'toolName' | 'scannerVersion'>
 
 export abstract class BaseFileScanningConnector {
-  abstract info(): Promise<FileScanningConnectorInfo>
+  abstract toolName: string
+  abstract version: string | undefined
+
+  abstract init()
   abstract scan(file: FileInterface): Promise<FileScanResult[]>
 
-  async scanError(
-    error: unknown | undefined = undefined,
-    file: FileInterface | undefined = undefined,
-    errorMessage: string = 'Scan errored.',
-    extraErrorObj: object = {},
-  ): Promise<FileScanResult[]> {
+  info(): FileScanningConnectorInfo {
+    return { toolName: this.toolName, scannerVersion: this.version }
+  }
+
+  async scanError(message: string, context?: object): Promise<FileScanResult[]> {
     const scannerInfo = await this.info()
-    log.error(
-      {
-        // conditional spreading operator so that objects are only used if they exist
-        ...(error !== undefined ? { error } : {}),
-        ...(file !== undefined ? { modelId: file.modelId, fileId: file._id.toString(), name: file.name } : {}),
-        ...extraErrorObj,
-      },
-      errorMessage,
-    )
+    log.error({ ...context, ...scannerInfo }, message)
     return [
       {
         ...scannerInfo,
