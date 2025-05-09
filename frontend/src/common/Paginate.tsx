@@ -14,11 +14,13 @@ import {
 import { isArray } from 'lodash-es'
 import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
-import { FileInterface } from 'types/types'
-import { sortByCreatedAtDescending } from 'utils/arrayUtils'
+
+type ListItem = {
+  [key: string]: any
+}
 
 interface PaginateProps {
-  list: any[]
+  list: ListItem[]
   pageSize?: number
   emptyListText?: string
   sortingProperties?: SortingProperty[]
@@ -56,10 +58,12 @@ export default function Paginate({
   const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
   const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(SortingDirection.DESC)
   const [searchFilter, setSearchFilter] = useState('')
-  const [filteredList, setFilteredList] = useState(list.sort(sortByCreatedAtDescending))
+  const [filteredList, setFilteredList] = useState(list)
 
   useEffect(() => {
-    setFilteredList(list.filter((item) => item[searchFilterProperty].includes(searchFilter)))
+    setFilteredList(
+      list.filter((item) => item[searchFilterProperty].toLowerCase().includes(searchFilter.toLowerCase())),
+    )
   }, [setFilteredList, list, searchFilter, searchFilterProperty])
 
   const pageCount = useMemo(
@@ -71,9 +75,9 @@ export default function Paginate({
     setPage(value)
   }
 
-  const sortFilesByValue = useMemo(
-    () => (a: FileInterface, b: FileInterface) => {
-      if (ascOrDesc === SortingDirection.DESC) {
+  const sortByValue = useMemo(
+    () => (a: ListItem, b: ListItem) => {
+      if (ascOrDesc === SortingDirection.ASC) {
         return a[orderByValue] < b[orderByValue] ? -1 : 1
       }
       return a[orderByValue] > b[orderByValue] ? -1 : 1
@@ -83,11 +87,7 @@ export default function Paginate({
 
   const checkMenuOption = useCallback(
     (menuOption: string) => {
-      if (menuOption === orderByValue) {
-        return true
-      } else {
-        return false
-      }
+      return menuOption === orderByValue
     },
     [orderByValue],
   )
@@ -186,15 +186,15 @@ export default function Paginate({
   }, [sortingProperties, orderByMenuListItems])
 
   const listDisplay = useMemo(() => {
-    const sortedList = filteredList.sort(sortFilesByValue).slice((page - 1) * pageSize, page * pageSize)
+    const sortedList = filteredList.sort(sortByValue).slice((page - 1) * pageSize, page * pageSize)
     if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
-        <div key={item} style={{ width: '100%' }}>
+        <div key={item['key']} style={{ width: '100%' }}>
           {children({ data: sortedList, index })}
         </div>
       ))
     }
-  }, [pageSize, page, sortFilesByValue, children, filteredList])
+  }, [pageSize, page, sortByValue, children, filteredList])
 
   if (list.length === 0) {
     return <EmptyBlob text={emptyListText} />

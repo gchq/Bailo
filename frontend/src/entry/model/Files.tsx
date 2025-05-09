@@ -145,7 +145,9 @@ export default function Files({ model }: FilesProps) {
           )}
           {failedFileList}
           <Paginate
-            list={entryFiles}
+            list={entryFiles.map((entryFile) => {
+              return { key: entryFile._id, ...entryFile }
+            })}
             emptyListText={`No files found for model ${model.name}`}
             sortingProperties={[
               { value: 'name', title: 'Name', iconKind: 'text' },
