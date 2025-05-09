@@ -11,6 +11,7 @@ import {
   Menu,
   MenuItem,
   Popover,
+  Skeleton,
   Stack,
   Tooltip,
   Typography,
@@ -21,7 +22,7 @@ import { deleteModelFile, useGetModelFiles } from 'actions/model'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { CSSProperties, Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
@@ -37,11 +38,11 @@ import { formatDateTimeString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 import { plural } from 'utils/stringUtils'
 
-type MutateReleases = KeyedMutator<{
+export type MutateReleases = KeyedMutator<{
   releases: ReleaseInterface[]
 }>
 
-type MutateFiles = KeyedMutator<{
+export type MutateFiles = KeyedMutator<{
   files: FileInterface[]
 }>
 
@@ -57,7 +58,7 @@ type ClickableFileDownloadProps =
       activeFileTagOnChange?: (newFileTag: string) => void
     }
 
-type FileDownloadProps = {
+type FileDisplayProps = {
   modelId: string
   file: FileInterface
   showMenuItems?: {
@@ -67,6 +68,8 @@ type FileDownloadProps = {
   }
   mutator?: MutateReleases | MutateFiles
   hideTags?: boolean
+  style?: CSSProperties
+  key?: string
 } & ClickableFileDownloadProps
 
 interface ChipDetails {
@@ -75,7 +78,7 @@ interface ChipDetails {
   icon: ReactElement
 }
 
-export default function FileDownload({
+export default function FileDisplay({
   modelId,
   file,
   showMenuItems = { associatedReleases: false, deleteFile: false, rescanFile: false },
@@ -84,7 +87,9 @@ export default function FileDownload({
   isClickable = false,
   activeFileTag = '',
   activeFileTagOnChange,
-}: FileDownloadProps) {
+  style = {},
+  key = '',
+}: FileDisplayProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
   const [anchorElFileTag, setAnchorElFileTag] = useState<HTMLButtonElement | null>(null)
@@ -221,15 +226,20 @@ export default function FileDownload({
     if (file.avScan.some((scan) => scan.state === ScanState.InProgress)) {
       return <Chip size='small' label='Virus scan in progress' />
     }
+    if (!chipDisplay) {
+      return <Skeleton variant='text' sx={{ fontSize: '1rem', width: '150px' }} />
+    }
     return (
       <>
-        <Chip
-          color={chipDisplay ? chipDisplay.colour : 'warning'}
-          icon={chipDisplay ? chipDisplay.icon : <Warning />}
-          size='small'
-          onClick={(e) => setAnchorElScan(e.currentTarget)}
-          label={chipDisplay ? chipDisplay.label : 'Virus scan results could not be found'}
-        />
+        {chipDisplay && (
+          <Chip
+            color={chipDisplay.colour}
+            icon={chipDisplay.icon}
+            size='small'
+            onClick={(e) => setAnchorElScan(e.currentTarget)}
+            label={chipDisplay.label}
+          />
+        )}
         <Popover
           open={openScan}
           anchorEl={anchorElScan}
@@ -323,7 +333,7 @@ export default function FileDownload({
   }
 
   return (
-    <>
+    <Box sx={style} key={key}>
       {isFileInterface(file) && (
         <Stack spacing={2}>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
@@ -462,6 +472,6 @@ export default function FileDownload({
           />
         </Box>
       </ConfirmationDialogue>
-    </>
+    </Box>
   )
 }
