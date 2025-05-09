@@ -80,8 +80,19 @@ exports[`services > file > removeFile > success 1`] = `
 exports[`services > file > updateFile > does not updated unchangable property name 1`] = `
 {
   "_id": {
-    "toString": [MockFunction spy],
+    "toString": [MockFunction spy] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+      ],
+    },
   },
+  "id": "73859F8D26679D2E52597326",
   "modelId": "testModel",
   "name": "my-file.txt",
 }
@@ -157,16 +168,6 @@ exports[`services > file > updateFile > success 1`] = `
   "save": [MockFunction spy],
   "size": 100,
   "toObject": [MockFunction spy],
-}
-`;
-
-exports[`services > file > updateFile > success 2`] = `
-{
-  "_id": {
-    "toString": [MockFunction spy],
-  },
-  "modelId": "testModel",
-  "name": "my-file.txt",
 }
 `;
 
