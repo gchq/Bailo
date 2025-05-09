@@ -1,4 +1,5 @@
 import { Box, Button, Divider, Stack, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
@@ -10,6 +11,8 @@ interface OrganisationAndStateDetailsProps {
 
 export default function OrganisationAndStateDetails({ entry }: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
+
+  const theme = useTheme()
 
   const collaboratorList = useMemo(() => {
     return (
@@ -31,11 +34,11 @@ export default function OrganisationAndStateDetails({ entry }: OrganisationAndSt
         sx={{ mr: 0 }}
         divider={<Divider flexItem />}
       >
-        <Stack>
+        <Stack spacing={1}>
           {entry.organisation && (
             <Box>
               <Typography>
-                <span style={{ fontWeight: 'bold' }}>Organisation: </span>
+                <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Organisation: </span>
                 {entry.organisation}
               </Typography>
             </Box>
@@ -43,8 +46,8 @@ export default function OrganisationAndStateDetails({ entry }: OrganisationAndSt
           {entry.state && (
             <Box>
               <Typography>
-                <span style={{ fontWeight: 'bold' }}>State: </span>
-                {entry.state}
+                <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>State: </span>
+                <span>{entry.state}</span>
               </Typography>
             </Box>
           )}
