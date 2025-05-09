@@ -19,14 +19,15 @@ type ListItem = {
   [key: string]: any
 }
 
-interface PaginateProps {
+interface PaginateProps<> {
   list: ListItem[]
   pageSize?: number
   emptyListText?: string
   sortingProperties?: SortingProperty[]
-  searchFilterProperty?: string
+  searchFilterProperty?: keyof ListItem extends string ? keyof ListItem : string
   searchPlaceholderText?: string
-  children: ({ data, index }: { data: any; index: any }) => ReactElement
+  defaultSortProperty?: string
+  children: ({ data, index }: { data: ListItem[]; index: any }) => ReactElement
 }
 
 export const SortingDirection = {
@@ -37,7 +38,7 @@ export const SortingDirection = {
 export type SortingDirectionKeys = (typeof SortingDirection)[keyof typeof SortingDirection]
 
 export interface SortingProperty {
-  value: string
+  value: keyof ListItem extends string ? keyof ListItem : string
   title: string
   iconKind: 'text' | 'date'
 }
@@ -49,12 +50,13 @@ export default function Paginate({
   sortingProperties = [{ value: 'name', title: 'Name', iconKind: 'text' }],
   searchFilterProperty = 'name',
   searchPlaceholderText = 'Search...',
+  defaultSortProperty = 'name',
   children,
 }: PaginateProps) {
   const [page, setPage] = useState(1)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const menuOpen = Boolean(anchorEl)
-  const [orderByValue, setOrderByValue] = useState('createdAt')
+  const [orderByValue, setOrderByValue] = useState(defaultSortProperty)
   const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
   const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(SortingDirection.DESC)
   const [searchFilter, setSearchFilter] = useState('')
@@ -62,7 +64,7 @@ export default function Paginate({
 
   useEffect(() => {
     setFilteredList(
-      list.filter((item) => item[searchFilterProperty].toLowerCase().includes(searchFilter.toLowerCase())),
+      list.filter((item: ListItem) => item[searchFilterProperty].toLowerCase().includes(searchFilter.toLowerCase())),
     )
   }, [setFilteredList, list, searchFilter, searchFilterProperty])
 
@@ -116,15 +118,15 @@ export default function Paginate({
       return (
         <MenuItem
           onClick={() => {
-            setOrderByValue(sortingProperty.value)
+            setOrderByValue(sortingProperty.value.toString())
             setOrderByButtonTitle(sortingProperty.title)
           }}
           sx={{ px: 2.5 }}
-          selected={checkMenuOption(sortingProperty.value)}
+          selected={checkMenuOption(sortingProperty.value.toString())}
         >
           <Grid2 container sx={{ minWidth: '200px' }}>
             <Grid2 size={2}>
-              {checkMenuOption(sortingProperty.value) ? (
+              {checkMenuOption(sortingProperty.value.toString()) ? (
                 <Check sx={{ width: '100%' }} color='primary' />
               ) : (
                 <Check sx={{ width: '100%' }} color='primary' opacity={0} />
@@ -240,6 +242,7 @@ export default function Paginate({
         </Menu>
       </Stack>
       {listDisplay}
+      <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
     </>
   )
 }

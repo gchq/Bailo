@@ -24,7 +24,7 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserDisplay from 'src/common/UserDisplay'
-import FileDownload from 'src/entry/model/files/FileDownload'
+import FileDisplay from 'src/entry/model/files/FileDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
@@ -165,7 +165,7 @@ export default function ReleaseDisplay({
                   </AccordionSummary>
                   <AccordionDetails>
                     {release.files.map((file) => (
-                      <FileDownload
+                      <FileDisplay
                         showMenuItems={{ rescanFile: true }}
                         key={file.name}
                         file={file}

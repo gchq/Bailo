@@ -23,7 +23,7 @@ import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
 import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
-import FileDownload from 'src/entry/model/files/FileDownload'
+import FileDisplay from 'src/entry/model/files/FileDisplay'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
@@ -316,7 +316,7 @@ export default function ReleaseForm({
         <Stack spacing={1}>
           {isReadOnly &&
             formData.files.map((file) => (
-              <FileDownload
+              <FileDisplay
                 key={file.name}
                 file={file}
                 modelId={model.id}

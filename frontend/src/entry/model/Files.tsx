@@ -9,7 +9,7 @@ import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import Restricted from 'src/common/Restricted'
-import FileDownload from 'src/entry/model/files/FileDownload'
+import FileDisplay from 'src/entry/model/files/FileDisplay'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
 
@@ -32,7 +32,7 @@ export default function Files({ model }: FilesProps) {
   const EntryListItem = ({ data, index }) => (
     <Card key={data[index]._id} sx={{ width: '100%' }}>
       <Stack spacing={1} p={2}>
-        <FileDownload
+        <FileDisplay
           showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
           file={data[index]}
           modelId={model.id}
