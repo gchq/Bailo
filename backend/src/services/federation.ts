@@ -1,10 +1,11 @@
 import peer from '../connectors/peer/index.js'
 import { FederationState, PeerConfigStatus, RemoteFederationConfig } from '../types/types.js'
 import config from '../utils/config.js'
+import { InternalError } from '../utils/error.js'
 
 function ensureFederationIsNotDisabled() {
   if (FederationState.DISABLED == config.federation.state) {
-    throw Error('Federation is globally disabled')
+    throw InternalError('Federation is globally disabled')
   }
 }
 
