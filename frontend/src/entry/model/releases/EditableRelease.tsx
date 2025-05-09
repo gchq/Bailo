@@ -22,7 +22,7 @@ import MessageAlert from 'src/MessageAlert'
 import {
   EntryKind,
   FileInterface,
-  FileWithMetadata,
+  FileWithMetadataAndTags,
   FlattenedModelImage,
   isFileInterface,
   ReleaseInterface,
@@ -43,7 +43,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
   const [files, setFiles] = useState<(File | FileInterface)[]>(release.files)
-  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadata[]>([])
+  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
   const [modelCardVersion, setModelCardVersion] = useState(release.modelCardVersion)
   const [errorMessage, setErrorMessage] = useState('')
@@ -160,6 +160,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
 
       if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
         const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+        const tags = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.tags
 
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
@@ -169,7 +170,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         }
 
         try {
-          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata)
+          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata, tags)
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])

@@ -44,7 +44,14 @@ export const createFilePath = (modelId: string, fileId: string) => {
   return `beta/model/${modelId}/files/${fileId}`
 }
 
-export async function uploadFile(user: UserInterface, modelId: string, name: string, mime: string, stream: Readable) {
+export async function uploadFile(
+  user: UserInterface,
+  modelId: string,
+  name: string,
+  mime: string,
+  stream: Readable,
+  tags?: string[],
+) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {
     throw BadReq(`Cannot upload files to a mirrored model.`)
@@ -67,6 +74,10 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
     throw BadReq(`Could not upload ${file.name} as it is an empty file.`, { file: file })
   }
   file.size = fileSize
+
+  if (tags) {
+    file.tags = tags
+  }
 
   await file.save()
 
@@ -303,4 +314,33 @@ export async function saveImportedFile(file: FileInterface) {
   await FileModel.findOneAndUpdate({ modelId: file.modelId, _id: file._id }, file, {
     upsert: true,
   })
+}
+
+export async function updateFile(
+  user: UserInterface,
+  modelId: string,
+  fileId: string,
+  patchFileParams: Partial<Pick<FileInterface, 'tags' | 'name' | 'mime'>>,
+) {
+  const file = await getFileById(user, fileId)
+  if (!file) {
+    throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
+  }
+  const model = await getModelById(user, modelId)
+  if (!model) {
+    throw BadReq('Cannot find requested model', { modelId: modelId })
+  }
+  const patchFileAuth = await authorisation.file(user, model, file, FileAction.Update)
+  if (!patchFileAuth.success) {
+    throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
+  }
+
+  if (patchFileParams.tags) {
+    const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: patchFileParams.tags } })
+    if (!updatedFile) {
+      throw BadReq('There was a problem updating the file', { modelId: modelId, fileId: fileId })
+    }
+    return updatedFile
+  }
+  return file
 }

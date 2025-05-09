@@ -1,6 +1,7 @@
-import { Delete, Done, Error, Info, MoreVert, Refresh, Warning } from '@mui/icons-material'
+import { Delete, Done, Error, Info, LocalOffer, MoreVert, Refresh, Warning } from '@mui/icons-material'
 import {
   Box,
+  Button,
   Chip,
   Divider,
   IconButton,
@@ -14,6 +15,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { patchFile } from 'actions/file'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import { deleteModelFile, useGetModelFiles } from 'actions/model'
 import { useGetReleasesForModelId } from 'actions/release'
@@ -22,8 +24,10 @@ import prettyBytes from 'pretty-bytes'
 import { Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
+import Restricted from 'src/common/Restricted'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
+import FileTagSelector from 'src/entry/model/releases/FileTagSelector'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
@@ -41,16 +45,29 @@ type MutateFiles = KeyedMutator<{
   files: FileInterface[]
 }>
 
+type ClickableFileDownloadProps =
+  | {
+      isClickable: true
+      activeFileTag: string
+      activeFileTagOnChange: (newFileTag: string) => void
+    }
+  | {
+      isClickable?: false
+      activeFileTag?: string
+      activeFileTagOnChange?: (newFileTag: string) => void
+    }
+
 type FileDownloadProps = {
   modelId: string
-  file: FileInterface | File
+  file: FileInterface
   showMenuItems?: {
     associatedReleases?: boolean
     deleteFile?: boolean
     rescanFile?: boolean
   }
   mutator?: MutateReleases | MutateFiles
-}
+  hideTags?: boolean
+} & ClickableFileDownloadProps
 
 interface ChipDetails {
   label: string
@@ -63,12 +80,19 @@ export default function FileDownload({
   file,
   showMenuItems = { associatedReleases: false, deleteFile: false, rescanFile: false },
   mutator = undefined,
+  hideTags = false,
+  isClickable = false,
+  activeFileTag = '',
+  activeFileTagOnChange,
 }: FileDownloadProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
+  const [anchorElFileTag, setAnchorElFileTag] = useState<HTMLButtonElement | null>(null)
   const [associatedReleasesOpen, setAssociatedReleasesOpen] = useState(false)
   const [deleteFileOpen, setDeleteFileOpen] = useState(false)
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('')
+  const [fileTagErrorMessage, setFileTagErrorMessage] = useState('')
+
   const { mutateEntryFiles } = useGetModelFiles(modelId)
   const router = useRouter()
 
@@ -259,6 +283,25 @@ export default function FileDownload({
     )
   }, [anchorElScan, chipDisplay, file, openScan])
 
+  const handleFileTagSelectorOnChange = async (newTags: string[]) => {
+    setFileTagErrorMessage('')
+    const res = await patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
+    mutateEntryFiles()
+    if (res.status !== 200) {
+      setFileTagErrorMessage('You lack the required authorisation in order to add tags to a file.')
+    }
+  }
+
+  const handleFileTagOnClick = (fileTag: string) => {
+    if (activeFileTagOnChange) {
+      if (fileTag === activeFileTag) {
+        activeFileTagOnChange('')
+      } else {
+        activeFileTagOnChange(fileTag)
+      }
+    }
+  }
+
   if (isFileInterface(file) && !file.complete) {
     return (
       <Typography>
@@ -282,18 +325,22 @@ export default function FileDownload({
   return (
     <>
       {isFileInterface(file) && (
-        <Stack>
+        <Stack spacing={2}>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems={{ sm: 'center', md: 'flex-end' }}>
+            <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center'>
               <Tooltip title={file.name}>
                 <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
-                  <Typography textOverflow='ellipsis' overflow='hidden'>
+                  <Typography textOverflow='ellipsis' overflow='hidden' variant='h6'>
                     {file.name}
                   </Typography>
                 </Link>
               </Tooltip>
               <Typography variant='caption' sx={{ width: 'max-content' }}>
                 {prettyBytes(file.size)}
+              </Typography>
+              <Typography variant='caption'>
+                Uploaded on
+                <span style={{ fontWeight: 'bold' }}>{` ${formatDateTimeString(file.createdAt.toString())}`}</span>
               </Typography>
             </Stack>
             <Stack alignItems={{ sm: 'center' }} direction={{ sm: 'column', md: 'row' }} spacing={2}>
@@ -343,11 +390,46 @@ export default function FileDownload({
               </Stack>
             </Stack>
           </Stack>
-          <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Typography variant='caption'>
-              Uploaded on
-              <span style={{ fontWeight: 'bold' }}>{` ${formatDateTimeString(file.createdAt.toString())}`}</span>
-            </Typography>
+          <Stack spacing={2} direction='row' alignItems='center'>
+            {!hideTags && (
+              <>
+                <Restricted action='editEntry' fallback={<></>}>
+                  <Button
+                    sx={{ width: 'fit-content' }}
+                    size='small'
+                    startIcon={<LocalOffer />}
+                    onClick={(event) => setAnchorElFileTag(event.currentTarget)}
+                  >
+                    Apply file tags
+                  </Button>
+                </Restricted>
+                {file.tags.length === 0 && <Typography variant='caption'>No tags applied</Typography>}
+                <Box sx={{ whiteSpace: 'pre-wrap' }}>
+                  {file.tags.map((fileTag) => {
+                    if (isClickable) {
+                      return (
+                        <Chip
+                          key={fileTag}
+                          label={fileTag}
+                          sx={{ width: 'fit-content', m: 0.5 }}
+                          onClick={() => handleFileTagOnClick(fileTag)}
+                          color={activeFileTag === fileTag ? 'secondary' : undefined}
+                        />
+                      )
+                    } else {
+                      return <Chip key={fileTag} label={fileTag} sx={{ width: 'fit-content', m: 0.5 }} />
+                    }
+                  })}
+                </Box>
+                <FileTagSelector
+                  anchorEl={anchorElFileTag}
+                  setAnchorEl={setAnchorElFileTag}
+                  onChange={handleFileTagSelectorOnChange}
+                  tags={file.tags || []}
+                  errorText={fileTagErrorMessage}
+                />
+              </>
+            )}
           </Stack>
         </Stack>
       )}

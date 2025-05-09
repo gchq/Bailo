@@ -255,7 +255,6 @@ export class BasicAuthorisationConnector {
   ): Promise<Array<Response>> {
     // Does the user have a valid access request for this model?
     const hasApprovedAccessRequest = await this.hasApprovedAccessRequest(user, model)
-
     return Promise.all(
       files.map(async (file) => {
         // Is this a constrained user token.
@@ -267,7 +266,7 @@ export class BasicAuthorisationConnector {
         // If they are not listed on the model, don't let them upload or delete files.
         if (
           ([FileAction.Delete, FileAction.Upload] as FileActionKeys[]).includes(action) &&
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor']))
+          (await missingRequiredRole(user, model, ['owner', 'contributor']))
         ) {
           return {
             success: false,
@@ -280,11 +279,22 @@ export class BasicAuthorisationConnector {
           ([FileAction.Download] as FileActionKeys[]).includes(action) &&
           !model.settings.ungovernedAccess &&
           !hasApprovedAccessRequest &&
-          (await missingRequiredRole(user, model, ['owner', 'contributor', 'msro', 'mtr', 'consumer']))
+          (await missingRequiredRole(user, model, ['owner', 'contributor', 'consumer']))
         ) {
           return {
             success: false,
             info: 'You need to have an approved access request or have permission to download a file.',
+            id: file._id.toString(),
+          }
+        }
+
+        if (
+          ([FileAction.Update] as FileActionKeys[]).includes(action) &&
+          (await missingRequiredRole(user, model, ['owner', 'contributor']))
+        ) {
+          return {
+            success: false,
+            info: 'You are missing the required roles in order to update tags on this file.',
             id: file._id.toString(),
           }
         }

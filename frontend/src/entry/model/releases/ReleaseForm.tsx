@@ -1,4 +1,9 @@
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
   Button,
   Checkbox,
   Divider,
@@ -29,7 +34,13 @@ import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FileInterface, FileWithMetadata, FlattenedModelImage } from 'types/types'
+import {
+  EntryInterface,
+  FileInterface,
+  FileWithMetadataAndTags,
+  FlattenedModelImage,
+  isFileInterface,
+} from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
@@ -60,8 +71,8 @@ type ReleaseFormProps = {
   onMinorReleaseChange: (value: boolean) => void
   onFilesChange: (value: (File | FileInterface)[]) => void
   onModelCardVersionChange: (value: number) => void
-  filesMetadata: FileWithMetadata[]
-  onFilesMetadataChange: (value: FileWithMetadata[]) => void
+  filesMetadata: FileWithMetadataAndTags[]
+  onFilesMetadataChange: (value: FileWithMetadataAndTags[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
   onRegistryError: (value: boolean) => void
   currentFileUploadProgress?: FileUploadProgress
@@ -136,7 +147,7 @@ export default function ReleaseForm({
   }
 
   const handleMetadataChange = useCallback(
-    (fileWithMetadata: FileWithMetadata) => {
+    (fileWithMetadata: FileWithMetadataAndTags) => {
       const tempFilesWithMetadata = [...filesMetadata]
       const metadataIndex = filesMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
       if (metadataIndex === -1) {
@@ -252,80 +263,102 @@ export default function ReleaseForm({
         )}
       </Stack>
       <Stack>
-        <Typography fontWeight='bold'>Files</Typography>
-        {!isReadOnly && (
-          <Stack spacing={2}>
-            <Stack
-              spacing={2}
-              direction={{ xs: 'column', sm: 'row' }}
-              divider={<Divider flexItem orientation='vertical' />}
-            >
-              <ExistingFileSelector model={model} onChange={onFilesChange} existingReleaseFiles={formData.files} />
-              <MultiFileInput
-                fullWidth
-                label='Attach new files'
-                files={formData.files}
-                filesMetadata={filesMetadata}
-                readOnly={isReadOnly}
-                onFilesChange={onFilesChange}
-                onFilesMetadataChange={onFilesMetadataChange}
-              />
-            </Stack>
-            {currentFileUploadProgress && (
-              <>
-                <LinearProgress
-                  variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
-                  value={currentFileUploadProgress.uploadProgress}
-                />
-                <FileUploadProgressDisplay
-                  currentFileUploadProgress={currentFileUploadProgress}
-                  uploadedFiles={uploadedFiles.length}
-                  totalFilesToUpload={filesToUploadCount}
-                />
-              </>
-            )}
-            {formData.files.length > 0 && (
-              <Stack spacing={1} mt={1}>
-                {formData.files.map((file, index) => (
-                  <div key={`${file.name}-${file.size}-${index}`}>
-                    <MultiFileInputFileDisplay
-                      file={file}
-                      readOnly={isReadOnly}
-                      onDelete={handleDeleteFile}
-                      onMetadataChange={handleMetadataChange}
+        <Accordion defaultExpanded sx={{ p: 0 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
+            <Typography fontWeight='bold'>{`Files (${formData.files.length})`}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <>
+              {!isReadOnly && (
+                <Stack spacing={2}>
+                  <Stack
+                    spacing={2}
+                    direction={{ xs: 'column', sm: 'row' }}
+                    divider={<Divider flexItem orientation='vertical' />}
+                  >
+                    <ExistingFileSelector
+                      model={model}
+                      onChange={onFilesChange}
+                      existingReleaseFiles={formData.files}
                     />
-                  </div>
-                ))}
+                    <MultiFileInput
+                      fullWidth
+                      label='Attach new files'
+                      files={formData.files}
+                      filesMetadata={filesMetadata}
+                      readOnly={isReadOnly}
+                      onFilesChange={onFilesChange}
+                      onFilesMetadataChange={onFilesMetadataChange}
+                    />
+                  </Stack>
+                  {currentFileUploadProgress && (
+                    <>
+                      <LinearProgress
+                        variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
+                        value={currentFileUploadProgress.uploadProgress}
+                      />
+                      <FileUploadProgressDisplay
+                        currentFileUploadProgress={currentFileUploadProgress}
+                        uploadedFiles={uploadedFiles.length}
+                        totalFilesToUpload={filesToUploadCount}
+                      />
+                    </>
+                  )}
+                  {formData.files.length > 0 && (
+                    <Stack spacing={1} mt={1}>
+                      {formData.files.map((file, index) => (
+                        <div key={`${file.name}-${file.size}-${index}`}>
+                          <MultiFileInputFileDisplay
+                            file={file}
+                            readOnly={isReadOnly}
+                            onDelete={handleDeleteFile}
+                            onMetadataChange={handleMetadataChange}
+                          />
+                        </div>
+                      ))}
+                    </Stack>
+                  )}
+                </Stack>
+              )}
+              <Stack spacing={1} divider={<Divider />}>
+                {isReadOnly &&
+                  formData.files.map(
+                    (file) =>
+                      isFileInterface(file) && (
+                        <FileDownload
+                          key={file.name}
+                          file={file}
+                          modelId={model.id}
+                          showMenuItems={{ rescanFile: true }}
+                          mutator={mutateReleases}
+                        />
+                      ),
+                  )}
               </Stack>
-            )}
-          </Stack>
-        )}
-        <Stack spacing={1}>
-          {isReadOnly &&
-            formData.files.map((file) => (
-              <FileDownload
-                key={file.name}
-                file={file}
-                modelId={model.id}
-                showMenuItems={{ rescanFile: true }}
-                mutator={mutateReleases}
-              />
-            ))}
-        </Stack>
-        {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
+              {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
+            </>
+            test
+          </AccordionDetails>
+        </Accordion>
       </Stack>
-      <Stack>
-        <Typography fontWeight='bold'>Images</Typography>
-        <ModelImageList
-          multiple
-          model={model}
-          value={formData.imageList}
-          readOnly={isReadOnly}
-          onChange={onImageListChange}
-          onRegistryError={onRegistryError}
-        />
-        {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
-      </Stack>
+      <Box>
+        <Accordion defaultExpanded sx={{ p: 0 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
+            <Typography fontWeight='bold'>{`Images (${formData.imageList.length})`}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <ModelImageList
+              multiple
+              model={model}
+              value={formData.imageList}
+              readOnly={isReadOnly}
+              onChange={onImageListChange}
+              onRegistryError={onRegistryError}
+            />
+            {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Stack>
   )
 }

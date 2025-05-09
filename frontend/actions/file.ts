@@ -1,7 +1,8 @@
 import axios, { AxiosProgressEvent } from 'axios'
 import qs from 'querystring'
 import useSWR from 'swr'
-import { FileWithScanResultsInterface } from 'types/types'
+import { FileInterface, FileWithScanResultsInterface } from 'types/types'
+import { handleAxiosError } from 'utils/axios'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyFilesList = []
@@ -27,15 +28,17 @@ export async function postFileForModelId(
   file: File,
   onUploadProgress: (progress: AxiosProgressEvent) => void,
   metadata?: string,
+  tags: string[] = [],
 ) {
   const mime = file.type || 'application/octet-stream'
+
+  const queryParams = {
+    ...(metadata && { metadata }),
+    ...(tags.length > 0 && { tags }),
+  }
   const fileResponse = await axios
     .post(
-      metadata
-        ? `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}&${qs.stringify({
-            metadata,
-          })}`
-        : `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}`,
+      `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}&${qs.stringify(queryParams)}}`,
       file,
       {
         onUploadProgress,
@@ -53,4 +56,18 @@ export async function postFileForModelId(
       }
     })
   return fileResponse
+}
+
+export async function patchFile(modelId: string, fileId: string, metadata: Pick<FileInterface, 'tags'>) {
+  try {
+    const response = await axios({
+      method: 'patch',
+      url: `/api/v2/model/${modelId}/file/${fileId}`,
+      headers: { 'Content-Type': 'application/json' },
+      data: { tags: metadata.tags },
+    })
+    return { status: response.status, data: response.data }
+  } catch (error) {
+    return handleAxiosError(error)
+  }
 }
