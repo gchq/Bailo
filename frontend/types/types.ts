@@ -87,6 +87,8 @@ export interface FileInterface {
   // Older files may not have AV run against them
   avScan?: AvScanResult[]
 
+  tags: string[]
+
   createdAt: Date
   updatedAt: Date
 }
@@ -506,9 +508,10 @@ export interface FlattenedModelImage {
   tag: string
 }
 
-export interface FileWithMetadata {
+export interface FileWithMetadataAndTags {
   fileName: string
   metadata?: string
+  tags?: string[]
 }
 
 export const Decision = {

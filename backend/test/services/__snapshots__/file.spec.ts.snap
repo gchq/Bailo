@@ -77,6 +77,100 @@ exports[`services > file > removeFile > success 1`] = `
 }
 `;
 
+exports[`services > file > updateFile > does not updated unchangable property name 1`] = `
+{
+  "_id": {
+    "toString": [MockFunction spy] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+      ],
+    },
+  },
+  "id": "73859F8D26679D2E52597326",
+  "modelId": "testModel",
+  "name": "my-file.txt",
+}
+`;
+
+exports[`services > file > updateFile > success 1`] = `
+{
+  "_id": [MockFunction spy],
+  "aggregate": [MockFunction spy] {
+    "calls": [
+      [
+        [
+          {
+            "$match": {
+              "_id": "73859f8d26679d2e52597326",
+            },
+          },
+          {
+            "$limit": 1,
+          },
+          {
+            "$addFields": {
+              "id": {
+                "$toString": "$_id",
+              },
+            },
+          },
+          {
+            "$lookup": {
+              "as": "avScan",
+              "foreignField": "fileId",
+              "from": "v2_scans",
+              "localField": "id",
+            },
+          },
+        ],
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": Promise {},
+      },
+    ],
+  },
+  "delete": [MockFunction spy],
+  "find": [MockFunction spy],
+  "findOneAndDelete": [MockFunction spy],
+  "findOneAndUpdate": [MockFunction spy] {
+    "calls": [
+      [
+        {
+          "_id": "73859F8D26679D2E52597326",
+        },
+        {
+          "$set": {
+            "tags": [
+              "test1",
+            ],
+          },
+        },
+      ],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": [Circular],
+      },
+    ],
+  },
+  "group": [MockFunction spy],
+  "match": [MockFunction spy],
+  "save": [MockFunction spy],
+  "size": 100,
+  "toObject": [MockFunction spy],
+}
+`;
+
 exports[`services > file > uploadFile > success 1`] = `
 {
   "_id": [MockFunction spy],
@@ -127,6 +221,7 @@ exports[`services > file > uploadFile > success 1`] = `
   "delete": [MockFunction spy],
   "find": [MockFunction spy],
   "findOneAndDelete": [MockFunction spy],
+  "findOneAndUpdate": [MockFunction spy],
   "group": [MockFunction spy],
   "id": "function(...s) {
     let r = T(t);
@@ -166,6 +261,7 @@ exports[`services > file > uploadFile > success 1`] = `
           "delete": [MockFunction spy],
           "find": [MockFunction spy],
           "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
           "group": [MockFunction spy],
           "match": [MockFunction spy],
           "save": [MockFunction spy] {
@@ -209,6 +305,7 @@ exports[`services > file > uploadFile > success 1`] = `
           "delete": [MockFunction spy],
           "find": [MockFunction spy],
           "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
           "group": [MockFunction spy],
           "match": [MockFunction spy],
           "save": [MockFunction spy] {
@@ -291,6 +388,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
   "delete": [MockFunction spy],
   "find": [MockFunction spy],
   "findOneAndDelete": [MockFunction spy],
+  "findOneAndUpdate": [MockFunction spy],
   "group": [MockFunction spy],
   "id": "function(...s) {
     let r = T(t);
@@ -330,6 +428,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
           "delete": [MockFunction spy],
           "find": [MockFunction spy],
           "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
           "group": [MockFunction spy],
           "match": [MockFunction spy],
           "save": [MockFunction spy] {
@@ -373,6 +472,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
           "delete": [MockFunction spy],
           "find": [MockFunction spy],
           "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
           "group": [MockFunction spy],
           "match": [MockFunction spy],
           "save": [MockFunction spy] {

@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > review > postReviewRole > audit > expected call 1`] = `"my-role-125"`;
+
+exports[`routes > review > postReviewRole > creates and returns new review role 1`] = `
+{
+  "reviewRole": {
+    "id": "my-role-125",
+    "name": "Reviewer",
+    "short": "reviewer",
+  },
+}
+`;

@@ -7,6 +7,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
+import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
@@ -122,6 +123,16 @@ export const AuditInfo = {
     description: 'Updated a comment or review response',
     auditKind: AuditKind.Update,
   },
+  CreateReviewRole: {
+    typeId: 'CreateReviewRole',
+    description: 'Created a new review role',
+    auditKind: AuditKind.Create,
+  },
+  ViewReviewRoles: {
+    typeId: 'ViewReviewRole',
+    description: 'Viewed a list of review roles',
+    auditKind: AuditKind.View,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -191,6 +202,9 @@ export abstract class BaseAuditConnector {
     exporter: string,
     importResult: MongoDocumentImportInformation | FileImportInformation,
   )
+
+  abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
+  abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[])
 
   abstract onError(req: Request, error: BailoError)
 

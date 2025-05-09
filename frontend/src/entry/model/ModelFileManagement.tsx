@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Card, Container, LinearProgress, Stack, Typography } from '@mui/material'
+import { Box, Button, Card, Chip, Container, LinearProgress, Stack, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { postFileForModelId } from 'actions/file'
 import { useGetModelFiles } from 'actions/model'
@@ -28,6 +28,7 @@ export default function Files({ model }: FilesProps) {
   const [totalFilesToUpload, setTotalFilesToUpload] = useState(0)
   const [isFilesUploading, setIsFilesUploading] = useState(false)
   const [failedFileUploads, setFailedFileUploads] = useState<FailedFileUpload[]>([])
+  const [activeFileTag, setActiveFileTag] = useState('')
 
   const EntryListItem = ({ data, index }) => (
     <Card key={data[index]._id} sx={{ width: '100%' }}>
@@ -106,17 +107,17 @@ export default function Files({ model }: FilesProps) {
   return (
     <>
       <Container sx={{ my: 2 }}>
-        <Stack direction={{ xs: 'column' }} spacing={2} justifyContent='center' alignItems='center'>
+        <Stack spacing={2} justifyContent='center' alignItems='center'>
           <Typography>
             Files uploaded to a model can be managed here. For each file you can view associated releases, delete files
             that are no longer needed, and also manually retrigger anti-virus scanning (if anti-virus scanning is
             enabled).
           </Typography>
-          <Stack width='100%' direction='row' justifyContent='flex-end' sx={{ px: 0.5 }}>
+          <Stack width='100%' direction={{ sm: 'column', md: 'row' }} justifyContent='space-between' sx={{ px: 0.5 }}>
             <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
               <>
                 <label htmlFor='add-files-button'>
-                  <LoadingButton loading={isFilesUploading} fullWidth component='span' variant='outlined'>
+                  <LoadingButton loading={isFilesUploading} component='span' variant='outlined'>
                     Add new files
                   </LoadingButton>
                 </label>
@@ -142,6 +143,12 @@ export default function Files({ model }: FilesProps) {
                 totalFilesToUpload={totalFilesToUpload}
               />
             </>
+          )}
+          {activeFileTag !== '' && (
+            <Stack sx={{ width: '100%' }} direction='row' justifyContent='flex-start' alignItems='center' spacing={1}>
+              <Typography>Active filter:</Typography>
+              <Chip label={activeFileTag} onDelete={() => setActiveFileTag('')} />
+            </Stack>
           )}
           {failedFileList}
           <Paginate

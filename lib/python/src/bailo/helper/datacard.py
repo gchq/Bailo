@@ -75,7 +75,7 @@ class Datacard(Entry):
             state=state,
         )
         datacard_id = res["model"]["id"]
-        logger.info(f"Datacard successfully created on server with ID %s.", datacard_id)
+        logger.info("Datacard successfully created on server with ID %s.", datacard_id)
 
         datacard = cls(
             client=client,
@@ -105,7 +105,7 @@ class Datacard(Entry):
                 f"ID {datacard_id} does not belong to a datacard. Did you mean to use Model.from_id()?"
             )
 
-        logger.info(f"Datacard %s successfully retrieved from server.", datacard_id)
+        logger.info("Datacard %s successfully retrieved from server.", datacard_id)
 
         datacard = cls(
             client=client,

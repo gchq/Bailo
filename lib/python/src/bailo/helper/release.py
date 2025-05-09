@@ -108,7 +108,7 @@ class Release:
             draft,
         )
         logger.info(
-            f"Release %s successfully created on server for model with ID %s.",
+            "Release %s successfully created on server for model with ID %s.",
             str(version),
             model_id,
         )
@@ -143,7 +143,7 @@ class Release:
         draft = res["draft"]
 
         logger.info(
-            f"Release %s of model ID %s successfully retrieved from server.",
+            "Release %s of model ID %s successfully retrieved from server.",
             str(version),
             model_id,
         )
@@ -171,7 +171,7 @@ class Release:
         """
         res = self.client.get_download_by_filename(self.model_id, str(self.version), filename)
         logger.info(
-            f"Downloading file %s from version %s of %s...",
+            "Downloading file %s from version %s of %s...",
             filename,
             str(self.version),
             self.model_id,
@@ -200,10 +200,10 @@ class Release:
                         t.update(len(data))
                         f.write(data)
 
-            logger.info(f"File written to %s", path)
+            logger.info("File written to %s", path)
 
         logger.info(
-            f"Downloading of file %s from version %s of %s completed.",
+            "Downloading of file %s from version %s of %s completed.",
             filename,
             str(self.version),
             self.model_id,
@@ -245,7 +245,7 @@ class Release:
             ]
 
         logger.info(
-            f"Downloading %d of %%d files for version %s of %s...",
+            "Downloading %d of %%d files for version %s of %s...",
             len(file_names),
             len(orig_file_names),
             str(self.version),
@@ -266,7 +266,7 @@ class Release:
         ..note:: If path provided is a directory, it will be uploaded as a zip
         """
         logger.info(
-            f"Uploading file(s) to version %s of %s...",
+            "Uploading file(s) to version %s of %s...",
             str(self.version),
             self.model_id,
         )
@@ -281,7 +281,7 @@ class Release:
 
             if zip_required:
                 logger.info(
-                    f"Given path (%s) is a directory. This will be converted to a zip file for upload.",
+                    "Given path (%s) is a directory. This will be converted to a zip file for upload.",
                     path,
                 )
                 shutil.make_archive(name, "zip", path)
@@ -321,7 +321,7 @@ class Release:
         if to_close:
             data.close()
         logger.info(
-            f"Upload of file %s to version %s of %s complete.",
+            "Upload of file %s to version %s of %s complete.",
             name,
             str(self.version),
             self.model_id,
@@ -350,7 +350,7 @@ class Release:
         :return: JSON Response object
         """
         self.client.delete_release(self.model_id, str(self.version))
-        logger.info(f"Release %s of %s successfully deleted.", str(self.version), self.model_id)
+        logger.info("Release %s of %s successfully deleted.", str(self.version), self.model_id)
 
         return True
 

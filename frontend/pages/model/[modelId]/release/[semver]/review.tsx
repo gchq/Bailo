@@ -1,5 +1,17 @@
 import { ArrowBack } from '@mui/icons-material'
-import { Box, Button, Container, Divider, Grid2, Paper, Stack, Tooltip, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Container,
+  Dialog,
+  DialogContent,
+  Divider,
+  Grid2,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useGetModel } from 'actions/model'
 import { useGetRelease, useGetReleasesForModelId } from 'actions/release'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
@@ -13,6 +25,7 @@ import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
+import EditableRelease from 'src/entry/model/releases/EditableRelease'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -27,6 +40,7 @@ export default function ReleaseReview() {
 
   const [errorMessage, setErrorMessage] = useState('')
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
+  const [isReleaseDialogOpen, setIsReleaseDialogOpen] = useState(false)
 
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { release, isReleaseLoading, isReleaseError } = useGetRelease(modelId, semver)
@@ -132,6 +146,7 @@ export default function ReleaseReview() {
               <Typography variant='h6' component='h1' color='primary'>
                 {model ? `Reviewing release ${semver} for model ${model.name}` : 'Loading...'}
               </Typography>
+              <Button onClick={() => setIsReleaseDialogOpen(true)}>View full release</Button>
             </Stack>
             <ReviewWithComment onSubmit={handleSubmit} release={release} loading={isReviewButtonLoading} />
             <MessageAlert message={errorMessage} severity='error' />
@@ -159,6 +174,11 @@ export default function ReleaseReview() {
               )}
             </Stack>
           </Stack>
+          <Dialog open={isReleaseDialogOpen} onClose={() => setIsReleaseDialogOpen(false)} maxWidth='md' fullWidth>
+            <DialogContent sx={{ p: 4 }}>
+              <EditableRelease release={release} isEdit={false} onIsEditChange={() => {}} readOnly={true} />
+            </DialogContent>
+          </Dialog>
         </Paper>
       </Container>
     </>

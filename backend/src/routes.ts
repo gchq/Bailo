@@ -22,6 +22,7 @@ import { postAccessRequestComment } from './routes/v2/model/accessRequest/postAc
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getDownloadFile } from './routes/v2/model/file/getDownloadFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
+import { patchFile } from './routes/v2/model/file/patchFile.js'
 import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
 import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
 import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
@@ -59,9 +60,11 @@ import { putRelease } from './routes/v2/release/putRelease.js'
 import { getResponses } from './routes/v2/response/getResponses.js'
 import { patchResponse } from './routes/v2/response/patchResponse.js'
 import { patchResponseReaction } from './routes/v2/response/patchResponseReaction.js'
+import { getReviewRoles } from './routes/v2/review/getReviewRoles.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
+import { postReviewRole } from './routes/v2/review/postReviewRole.js'
 import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
 import { getSchema } from './routes/v2/schema/getSchema.js'
 import { getSchemas } from './routes/v2/schema/getSchemas.js'
@@ -135,6 +138,7 @@ server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
+server.patch('/api/v2/model/:modelId/file/:fileId', ...patchFile)
 
 server.post('/api/v2/model/:modelId/webhooks', ...postWebhook)
 server.get('/api/v2/model/:modelId/webhooks', ...getWebhooks)
@@ -197,6 +201,9 @@ server.get('/api/v2/specification', ...getSpecification)
 
 server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
 server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
+
+server.get('/api/v2/review/roles', ...getReviewRoles)
+server.post('/api/v2/review/role', ...postReviewRole)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
