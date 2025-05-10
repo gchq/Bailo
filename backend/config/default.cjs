@@ -22,6 +22,13 @@ module.exports = {
     jwks: './certs/jwks.json',
   },
 
+  httpClient: {
+    // Default proxy to use for all requests
+    proxy: '',
+    // Don't use a proxy for any address in this list
+    noProxy: ['localhost', '127.0.0.1'],
+  },
+
   mongo: {
     // A mongo connection URI, can contain replica set information, etc.
     // See: https://www.mongodb.com/docs/manual/reference/connection-string/

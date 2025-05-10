@@ -1,52 +1,45 @@
-import peer from '../connectors/peer/index.js'
-import { FederationState, PeerConfigStatus, RemoteFederationConfig } from '../types/types.js'
+import { BasePeerConnector } from '../connectors/peer/base.js'
+import getPeerConnector from '../connectors/peer/index.js'
+import peer, { getPeerIds } from '../connectors/peer/index.js'
+import { FederationState, PeerConfigStatus } from '../types/types.js'
 import config from '../utils/config.js'
-import { InternalError } from '../utils/error.js'
+import { ConfigurationError, InternalError } from '../utils/error.js'
 
-function ensureFederationIsNotDisabled() {
+function ensureFederationNotGloballyDisabled() {
   if (FederationState.DISABLED == config.federation.state) {
     throw InternalError('Federation is globally disabled')
   }
 }
 
+function ensureFederationNotDisabled(connector: BasePeerConnector) {
+  if (FederationState.DISABLED == connector.getConfiguredState()) {
+    throw ConfigurationError(`Federation is currently disabled; will not fetch peer ${connector.getId()} status`)
+  }
+}
+
 export async function getAllPeerStatus(): Promise<Map<string, PeerConfigStatus>> {
-  ensureFederationIsNotDisabled()
-  const peers = new Map(Object.entries(config.federation.peers))
-  if (peers && peers.size > 0) {
-    const peerStatus = new Map<string, PeerConfigStatus>()
-    const promises: Array<Promise<any>> = []
-    for (const [id, cfg] of peers) {
-      promises.push(
-        getPeerStatus(cfg).then((r) => {
-          peerStatus.set(id, r)
-        }),
-      )
-    }
-    await Promise.all(promises)
-    return peerStatus
-  } else {
-    return Promise.resolve(new Map<string, PeerConfigStatus>())
+  ensureFederationNotGloballyDisabled()
+  const peerStatus = new Map<string, PeerConfigStatus>()
+  const promises: Array<Promise<any>> = []
+
+  for (const id of getPeerIds()) {
+    promises.push(
+      getPeerStatus(id).then((r) => {
+        peerStatus.set(id, r)
+      }),
+    )
   }
+  await Promise.all(promises)
+  return peerStatus
 }
 
-async function getPeerStatus(config: RemoteFederationConfig): Promise<PeerConfigStatus> {
+export async function getPeerStatus(id: string): Promise<PeerConfigStatus> {
+  ensureFederationNotGloballyDisabled()
+  const connector = getPeerConnector(id)
+  ensureFederationNotDisabled(connector)
+
   return Promise.resolve({
-    config,
-    status: await peer(config).ping(),
+    config: connector.getConfig(),
+    status: await peer(id).getPeerStatus(),
   })
-}
-
-export async function getPeerStatusById(id: string): Promise<PeerConfigStatus> {
-  ensureFederationIsNotDisabled()
-  const peerCfg = config.federation.peers.get(id)
-
-  if (peerCfg === undefined) {
-    throw Error(`No configuration found for ${id}`)
-  }
-
-  if (FederationState.DISABLED == peerCfg.state) {
-    throw Error(`Federation is currently disabled; will not fetch peer ${id} status`)
-  }
-
-  return getPeerStatus(peerCfg)
 }

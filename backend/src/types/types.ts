@@ -1,6 +1,7 @@
 import { ProxyAgentOptions } from 'proxy-agent'
 
 import { PeerKindKeys } from '../connectors/peer/index.js'
+import { BailoError } from './error.js'
 
 export type PartialDeep<T> = T extends object
   ? {
@@ -78,11 +79,12 @@ export interface RemoteFederationConfig {
 
 export type SystemStatus = {
   code: number
-  ping: string
-  federation: {
+  ping?: string
+  federation?: {
     state: FederationStateKeys
     id?: string
   }
+  error?: BailoError
 }
 
 export type PeerConfigStatus = {

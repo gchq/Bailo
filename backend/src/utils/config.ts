@@ -1,3 +1,5 @@
+import { AgentOptions } from 'node:https'
+
 import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
@@ -24,6 +26,12 @@ export interface Config {
     privateKey: string
     publicKey: string
     jwks: string
+  }
+
+  httpClient: {
+    proxy: string
+    noProxy: string[]
+    defaultOpts: AgentOptions
   }
 
   connectors: {

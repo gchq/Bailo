@@ -1,38 +1,73 @@
 import fetch from 'node-fetch'
 
+import { getHttpsAgent } from '../../services/http.js'
 import log from '../../services/log.js'
-import { RemoteFederationConfig, SystemStatus } from '../../types/types.js'
+import { isBailoError } from '../../types/error.js'
+import { FederationStateKeys, RemoteFederationConfig, SystemStatus } from '../../types/types.js'
+import config from '../../utils/config.js'
+import { InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
 export class BailoPeerConnector extends BasePeerConnector {
+  id: string
   config: RemoteFederationConfig
-  constructor(config: RemoteFederationConfig) {
+  constructor(id: string, config: RemoteFederationConfig) {
     super()
+    this.id = id
     this.config = config
   }
 
-  async ping(): Promise<SystemStatus> {
-    return this.request<SystemStatus>('/api/v2/system/status')
+  getId(): string {
+    return this.id
+  }
+
+  getConfig(): RemoteFederationConfig {
+    return Object.freeze(this.config)
+  }
+
+  getConfiguredState(): FederationStateKeys {
+    return this.config.state
+  }
+
+  async getPeerStatus(): Promise<SystemStatus> {
+    return this.request<SystemStatus>('/api/v2/system/status').catch((err) => {
+      if (isBailoError(err)) {
+        return {
+          code: err.code,
+          error: err,
+        }
+      }
+      throw err
+    })
   }
 
   async request<T>(path: string) {
     let res
     const requestUrl = this.config.baseUrl.concat(path)
     try {
-      res = await fetch(requestUrl)
-    } catch (_err) {
-      throw Error('Unable to communicate with peer.')
+      res = await fetch(requestUrl, {
+        agent: getHttpsAgent(),
+        headers: {
+          'x-bailo-id': config.federation.id,
+          'x-bailo-remote-id': this.id,
+        },
+      })
+    } catch (err) {
+      throw InternalError('Unable to communicate with peer.', {
+        err,
+      })
     }
-    const body = (await res.json()) as T
+
     if (!res.ok) {
       const context = {
         url: res.url,
         status: res.status,
         statusText: res.statusText,
       }
-      log.error(JSON.stringify(context))
-      throw Error('Unrecognised response returned by the peer.')
+      log.error('Non-200 response from remote', context)
+      throw InternalError('Unrecognised response returned by the peer.', context)
     }
+    const body = (await res.json()) as T
 
     return body
   }
