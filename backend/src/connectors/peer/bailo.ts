@@ -1,0 +1,54 @@
+import fetch from 'node-fetch'
+
+import { getHttpsAgent } from '../../services/http.js'
+import log from '../../services/log.js'
+import { isBailoError } from '../../types/error.js'
+import { SystemStatus } from '../../types/types.js'
+import config from '../../utils/config.js'
+import { InternalError } from '../../utils/error.js'
+import { BasePeerConnector } from './base.js'
+
+export class BailoPeerConnector extends BasePeerConnector {
+  async getPeerStatus(): Promise<SystemStatus> {
+    return this.request<SystemStatus>('/api/v2/system/status').catch((err) => {
+      if (isBailoError(err)) {
+        return {
+          code: err.code,
+          error: err,
+        }
+      }
+      throw err
+    })
+  }
+
+  async request<T>(path: string) {
+    let res
+    const requestUrl = this.config.baseUrl.concat(path)
+    try {
+      res = await fetch(requestUrl, {
+        agent: getHttpsAgent(),
+        headers: {
+          'x-bailo-id': config.federation.id,
+          'x-bailo-remote-id': this.id,
+        },
+      })
+    } catch (err) {
+      throw InternalError('Unable to communicate with peer.', {
+        err,
+      })
+    }
+
+    if (!res.ok) {
+      const context = {
+        url: res.url,
+        status: res.status,
+        statusText: res.statusText,
+      }
+      log.error('Non-200 response from remote', context)
+      throw InternalError('Unrecognised response returned by the peer.', context)
+    }
+    const body = (await res.json()) as T
+
+    return body
+  }
+}
