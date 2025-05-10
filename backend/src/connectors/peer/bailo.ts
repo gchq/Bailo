@@ -3,32 +3,12 @@ import fetch from 'node-fetch'
 import { getHttpsAgent } from '../../services/http.js'
 import log from '../../services/log.js'
 import { isBailoError } from '../../types/error.js'
-import { FederationStateKeys, RemoteFederationConfig, SystemStatus } from '../../types/types.js'
+import { SystemStatus } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
 export class BailoPeerConnector extends BasePeerConnector {
-  id: string
-  config: RemoteFederationConfig
-  constructor(id: string, config: RemoteFederationConfig) {
-    super()
-    this.id = id
-    this.config = config
-  }
-
-  getId(): string {
-    return this.id
-  }
-
-  getConfig(): RemoteFederationConfig {
-    return Object.freeze(this.config)
-  }
-
-  getConfiguredState(): FederationStateKeys {
-    return this.config.state
-  }
-
   async getPeerStatus(): Promise<SystemStatus> {
     return this.request<SystemStatus>('/api/v2/system/status').catch((err) => {
       if (isBailoError(err)) {
