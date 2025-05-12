@@ -7,6 +7,7 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
+import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
@@ -356,6 +357,18 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   ) {
     this.checkEventType(AuditInfo.CreateImport, req)
     const event = this.generateEvent(req, { mirroredModel, sourceModelId, exporter, importResult })
+    req.log.info(event, req.audit.description)
+  }
+
+  onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+    this.checkEventType(AuditInfo.CreateReviewRole, req)
+    const event = this.generateEvent(req, { reviewRoleId: reviewRole.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  onViewReviewRoles(req: Request) {
+    this.checkEventType(AuditInfo.ViewReviewRoles, req)
+    const event = this.generateEvent(req, {})
     req.log.info(event, req.audit.description)
   }
 }

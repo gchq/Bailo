@@ -1,4 +1,5 @@
-import { Tooltip } from '@mui/material'
+import { ExpandMore } from '@mui/icons-material'
+import { Accordion, AccordionDetails, AccordionSummary, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
@@ -24,6 +25,7 @@ type ChipSelectorProps = {
   expandThreshold?: number
   chipTooltipTitle?: string
   ariaLabel?: string
+  accordion?: boolean
 } & PartialChipSelectorProps
 
 export default function ChipSelector({
@@ -36,6 +38,7 @@ export default function ChipSelector({
   expandThreshold = 5,
   chipTooltipTitle = '',
   ariaLabel = '',
+  accordion = false,
 }: ChipSelectorProps): ReactElement {
   const [expanded, setExpanded] = useState(false)
 
@@ -67,9 +70,30 @@ export default function ChipSelector({
     />
   ))
 
+  if (accordion) {
+    return (
+      <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
+        <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
+          <Typography component='h2' variant='h6'>{`${label}`}</Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ p: 0 }}>
+          <>
+            {!expanded && allOptions.slice(0, expandThreshold)}
+            {expanded && allOptions}
+            {options.length > expandThreshold && (
+              <Button onClick={toggleExpansion}>{expanded ? 'Show less' : 'Show more...'}</Button>
+            )}
+          </>
+        </AccordionDetails>
+      </Accordion>
+    )
+  }
+
   return (
     <>
-      {label && <Typography component='h2' variant='h6' marginBottom={1}>{`${label}`}</Typography>}
+      {label && (
+        <Typography component='h2' variant='h6' alignContent='center' sx={{ height: '56px' }}>{`${label}`}</Typography>
+      )}
       {!expanded && allOptions.slice(0, expandThreshold)}
       {expanded && allOptions}
       {options.length > expandThreshold && (

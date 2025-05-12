@@ -24,8 +24,8 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserDisplay from 'src/common/UserDisplay'
+import FileDisplay from 'src/entry/model/files/FileDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
-import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import Link from 'src/Link'
@@ -129,7 +129,7 @@ export default function ReleaseDisplay({
               >
                 <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
                   <Stack direction='row' alignItems='center' spacing={1} width='100%'>
-                    <Typography component='h2' variant='h6' color='primary'>
+                    <Typography component='h2' variant='h6' color='primary' noWrap>
                       {release.semver}
                     </Typography>
                   </Stack>
@@ -164,15 +164,17 @@ export default function ReleaseDisplay({
                     <Typography fontWeight='bold'>{`${expanded === 'filesPanel' ? 'Hide' : 'Show'} ${plural(release.files.length, 'file')}`}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    {release.files.map((file) => (
-                      <FileDownload
-                        showMenuItems={{ rescanFile: true }}
-                        key={file.name}
-                        file={file}
-                        modelId={model.id}
-                        mutator={mutateReleases}
-                      />
-                    ))}
+                    <Stack divider={<Divider />} spacing={2}>
+                      {release.files.map((file) => (
+                        <FileDisplay
+                          showMenuItems={{ rescanFile: true }}
+                          key={file.name}
+                          file={file}
+                          modelId={model.id}
+                          mutator={mutateReleases}
+                        />
+                      ))}
+                    </Stack>
                   </AccordionDetails>
                 </Accordion>
               )}
