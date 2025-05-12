@@ -25,8 +25,8 @@ import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import UserDisplay from 'src/common/UserDisplay'
+import FileDisplay from 'src/entry/model/files/FileDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
-import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import Link from 'src/Link'
@@ -176,7 +176,7 @@ export default function ReleaseDisplay({
                   <AccordionDetails>
                     <Stack divider={<Divider />} spacing={2}>
                       {release.files.map((file) => (
-                        <FileDownload
+                        <FileDisplay
                           showMenuItems={{ rescanFile: scanners.length > 0 }}
                           key={file.name}
                           file={file}
