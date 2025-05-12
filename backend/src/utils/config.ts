@@ -94,6 +94,8 @@ export interface Config {
 
     user: string
     pass: string
+
+    transactions: boolean
   }
 
   registry: {
