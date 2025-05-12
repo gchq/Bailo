@@ -31,6 +31,7 @@ export default function OrganisationAndStateDetails({ entry }: OrganisationAndSt
         direction={{ md: 'column', lg: 'row' }}
         spacing={2}
         justifyContent='center'
+        alignItems='center'
         sx={{ mr: 0 }}
         divider={<Divider flexItem />}
       >
