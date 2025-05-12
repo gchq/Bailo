@@ -117,7 +117,7 @@ export default function Files({ model }: FilesProps) {
             <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
               <>
                 <label htmlFor='add-files-button'>
-                  <LoadingButton loading={isFilesUploading} component='span' variant='outlined'>
+                  <LoadingButton loading={isFilesUploading} component='span' variant='outlined' sx={{ float: 'right' }}>
                     Add new files
                   </LoadingButton>
                 </label>

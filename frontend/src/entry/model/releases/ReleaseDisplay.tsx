@@ -14,6 +14,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { useGetFileScannerInfo } from 'actions/fileScanning'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
@@ -59,6 +60,7 @@ export default function ReleaseDisplay({
 
   const { mutateReleases } = useGetReleasesForModelId(model.id)
 
+  const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const {
     responses: commentResponses,
@@ -95,6 +97,10 @@ export default function ReleaseDisplay({
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
+  if (isScannersError) {
+    return <MessageAlert message={isScannersError.info.message} severity='error' />
+  }
+
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
@@ -109,7 +115,11 @@ export default function ReleaseDisplay({
 
   return (
     <>
-      {(isReviewsLoading || isUiConfigLoading || isCommentResponsesLoading || isReviewResponsesLoading) && <Loading />}
+      {(isReviewsLoading ||
+        isUiConfigLoading ||
+        isCommentResponsesLoading ||
+        isReviewResponsesLoading ||
+        isScannersLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
         <Card sx={{ width: '100%' }}>
           {reviews.length > 0 && !hideReviewBanner && <ReviewBanner release={release} />}
@@ -167,7 +177,7 @@ export default function ReleaseDisplay({
                     <Stack divider={<Divider />} spacing={2}>
                       {release.files.map((file) => (
                         <FileDisplay
-                          showMenuItems={{ rescanFile: true }}
+                          showMenuItems={{ rescanFile: scanners.length > 0 }}
                           key={file.name}
                           file={file}
                           modelId={model.id}
