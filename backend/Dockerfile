@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade bailo -r re
 
 RUN make dirhtml
 
-FROM node:22.15.0-alpine AS installer
+FROM node:24.0.1-alpine AS installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 COPY . .
 RUN npm run build
 
-FROM node:22.15.0-alpine AS runner
+FROM node:24.0.1-alpine AS runner
 
 RUN apk update
 RUN apk add --no-cache libc6-compat ca-certificates
