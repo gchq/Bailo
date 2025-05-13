@@ -140,6 +140,17 @@ export default function SideNavigation({
               icon={<ListAltIcon />}
               badgeCount={reviewCount}
             />
+            {/* <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
+              <NavMenuItem
+                href='/reviewRoles'
+                selectedPage={page}
+                primaryText='Review Roles'
+                drawerOpen={drawerOpen}
+                menuPage='reviewRoles'
+                title='Review Roles'
+                icon={<BabyChangingStation />}
+              />
+            </Restricted> */}
             <Divider />
             <NavMenuItem
               href='/docs/api'
