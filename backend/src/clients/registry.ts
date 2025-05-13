@@ -1,4 +1,4 @@
-import fetch, { Response } from 'node-fetch'
+import fetch, { Headers, Response } from 'node-fetch'
 
 import { getHttpsAgent } from '../services/http.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -295,33 +295,36 @@ function isInitialiseUploadResponse(resp: unknown): resp is InitialiseUploadResp
   if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
     return false
   }
-  // type guard `Headers.get(<key>)`
+  // type guard `Headers`
   if (!('get' in resp) || !(resp['get'] instanceof Function)) {
     return false
   }
-  // type guard expected headers
-  if (!resp.get('connection') || !(typeof resp.get('connection') === 'string')) {
+  if (!('has' in resp) || !(resp['has'] instanceof Function)) {
     return false
   }
-  if (!resp.get('content-length') || !(typeof resp.get('content-length') === 'string')) {
+  // type guard expected header keys
+  if (!resp.has('connection') || !(typeof resp.get('connection') === 'string')) {
     return false
   }
-  if (!resp.get('date') || !(typeof resp.get('date') === 'string')) {
+  if (!resp.has('content-length') || !(typeof resp.get('content-length') === 'string')) {
+    return false
+  }
+  if (!resp.has('date') || !(typeof resp.get('date') === 'string')) {
     return false
   }
   if (
-    !resp.get('docker-distribution-api-version') ||
+    !resp.has('docker-distribution-api-version') ||
     !(typeof resp.get('docker-distribution-api-version') === 'string')
   ) {
     return false
   }
-  if (!resp.get('docker-upload-uuid') || !(typeof resp.get('docker-upload-uuid') === 'string')) {
+  if (!resp.has('docker-upload-uuid') || !(typeof resp.get('docker-upload-uuid') === 'string')) {
     return false
   }
-  if (!resp.get('location') || !(typeof resp.get('location') === 'string')) {
+  if (!resp.has('location') || !(typeof resp.get('location') === 'string')) {
     return false
   }
-  if (!resp.get('range') || !(typeof resp.get('range') === 'string')) {
+  if (!resp.has('range') || !(typeof resp.get('range') === 'string')) {
     return false
   }
   return true
