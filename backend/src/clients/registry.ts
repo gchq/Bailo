@@ -22,7 +22,12 @@ const agent = getHttpsAgent({
   rejectUnauthorized: !config.registry.connection.insecure,
 })
 
-async function registryRequest(token: string, endpoint: string, returnStream: boolean = false) {
+async function registryRequest(
+  token: string,
+  endpoint: string,
+  returnStream: boolean = false,
+  extraFetchOptions: { [key: string]: string } = {},
+) {
   let res: Response
   try {
     res = await fetch(`${registry}/v2/${endpoint}`, {
@@ -30,14 +35,24 @@ async function registryRequest(token: string, endpoint: string, returnStream: bo
         Authorization: `Bearer ${token}`,
       },
       agent,
+      ...extraFetchOptions,
     })
   } catch (err) {
     throw InternalError('Unable to communicate with the registry.', { err })
   }
   let body
+  const headers = res.headers
   // don't get the json if the response is a stream and is ok
   if (!returnStream || !res.ok) {
-    body = await res.json()
+    try {
+      body = await res.json()
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        // pass
+      } else {
+        throw InternalError('Unable to parse response body JSON.', { err })
+      }
+    }
   }
   if (!res.ok) {
     const context = {
@@ -58,14 +73,14 @@ async function registryRequest(token: string, endpoint: string, returnStream: bo
   if (returnStream) {
     return res
   } else {
-    return body
+    return { body, headers }
   }
 }
 
 // Currently limited to a maximum 100 image names
 type ListModelReposResponse = { repositories: Array<string> }
 export async function listModelRepos(token: string, modelId: string) {
-  const responseBody = await registryRequest(token, `_catalog?n=100&last=${modelId}`)
+  const responseBody = (await registryRequest(token, `_catalog?n=100&last=${modelId}`)).body
   if (!isListModelReposResponse(responseBody)) {
     throw InternalError('Unrecognised response body when listing model repositories.', { responseBody: responseBody })
   }
@@ -90,7 +105,7 @@ export async function listImageTags(token: string, imageRef: RepoRef) {
 
   let responseBody
   try {
-    responseBody = await registryRequest(token, `${repo}/tags/list`)
+    responseBody = (await registryRequest(token, `${repo}/tags/list`)).body
   } catch (error) {
     if (isRegistryError(error) && error.errors.length === 1 && error.errors.at(0)?.code === 'NAME_UNKNOWN') {
       return []
@@ -134,7 +149,8 @@ type GetImageTagManifestResponse = {
   layers: { mediaType: string; size: number; digest: string }[]
 }
 export async function getImageTagManifest(token: string, imageRef: RepoRef, imageTag: string) {
-  const responseBody = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`)
+  const responseBody = (await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`))
+    .body
   if (!isGetImageTagManifestResponse(responseBody)) {
     throw InternalError('Unrecognised response body when getting image tag manifest.', {
       responseBody,
@@ -201,22 +217,22 @@ type GetRegistryLayerStreamResponse = {
   }
 }
 export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
-  const responseBody = await registryRequest(
+  const responseStream = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
     true,
   )
 
-  if (!isGetRegistryLayerStream(responseBody)) {
-    throw InternalError('Unrecognised response body when getting image layer blob.', {
-      responseBody,
+  if (!isGetRegistryLayerStream(responseStream)) {
+    throw InternalError('Unrecognised response stream when getting image layer blob.', {
+      responseStream,
       namespace: imageRef.namespace,
       image: imageRef.image,
       layerDigest,
     })
   }
 
-  return responseBody
+  return responseStream
 }
 
 function isGetRegistryLayerStream(resp: unknown): resp is GetRegistryLayerStreamResponse {
@@ -243,6 +259,69 @@ function isGetRegistryLayerStream(resp: unknown): resp is GetRegistryLayerStream
     return false
   }
   if (!('_eventsCount' in resp.body) || !Number.isInteger(resp.body._eventsCount)) {
+    return false
+  }
+  return true
+}
+
+type InitialiseUploadResponse = Headers & {
+  connection: string
+  'content-length': string
+  date: string
+  'docker-distribution-api-version': string
+  'docker-upload-uuid': string
+  location: string
+  range: string
+}
+export async function initialiseUpload(token: string, imageRef: RepoRef) {
+  const responseHeaders = (
+    await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`, false, {
+      method: 'POST',
+    })
+  ).headers
+
+  if (!isInitialiseUploadResponse(responseHeaders)) {
+    throw InternalError('Unrecognised response headers when posting initialise image upload.', {
+      responseHeaders: responseHeaders,
+      namespace: imageRef.namespace,
+      image: imageRef.image,
+    })
+  }
+
+  return responseHeaders
+}
+
+function isInitialiseUploadResponse(resp: unknown): resp is InitialiseUploadResponse {
+  if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
+    return false
+  }
+  // type guard `Headers.get(<key>)`
+  if (!('get' in resp) || !(resp['get'] instanceof Function)) {
+    return false
+  }
+  // type guard expected headers
+  if (!resp.get('connection') || !(typeof resp.get('connection') === 'string')) {
+    return false
+  }
+  if (!resp.get('content-length') || !(typeof resp.get('content-length') === 'string')) {
+    return false
+  }
+  if (!resp.get('date') || !(typeof resp.get('date') === 'string')) {
+    return false
+  }
+  if (
+    !resp.get('docker-distribution-api-version') ||
+    !(typeof resp.get('docker-distribution-api-version') === 'string')
+  ) {
+    return false
+  }
+  if (!resp.get('docker-upload-uuid') || !(typeof resp.get('docker-upload-uuid') === 'string')) {
+    return false
+  }
+  if (!resp.get('location') || !(typeof resp.get('location') === 'string')) {
+    return false
+  }
+  if (!resp.get('range') || !(typeof resp.get('range') === 'string')) {
     return false
   }
   return true
