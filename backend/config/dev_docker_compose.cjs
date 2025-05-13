@@ -17,6 +17,13 @@ module.exports = {
     publicKey: '/certs/cert.pem',
   },
 
+  httpClient: {
+    noProxy: ['localhost', '127.0.0.1', 'registry', 'minio'],
+    defaultOpts: {
+      rejectUnauthorized: false,
+    },
+  },
+
   s3: {
     credentials: {
       accessKeyId: 'minioadmin',
@@ -39,9 +46,7 @@ module.exports = {
   registry: {
     connection: {
       internal: 'https://registry:5000',
-      host: 'registry:5000',
-      port: 5000,
-      protocol: 'https',
+      insecure: true,
     },
   },
 
