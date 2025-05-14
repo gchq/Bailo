@@ -22,6 +22,7 @@ interface PaginateProps<T> {
   sortingProperties: SortingProperty<T>[]
   searchFilterProperty: keyof T
   searchPlaceholderText?: string
+  hideSearchInput?: boolean
   defaultSortProperty: keyof T
   children: ({ data, index }: { data: T[]; index: number }) => ReactElement
 }
@@ -46,6 +47,7 @@ export default function Paginate<T>({
   sortingProperties,
   searchFilterProperty,
   searchPlaceholderText = 'Search...',
+  hideSearchInput = false,
   defaultSortProperty,
   children,
 }: PaginateProps<T>) {
@@ -200,14 +202,22 @@ export default function Paginate<T>({
 
   return (
     <>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent='space-between' sx={{ width: '100%' }}>
-        <TextField
-          size='small'
-          placeholder={searchPlaceholderText}
-          value={searchFilter}
-          onChange={(e) => setSearchFilter(e.target.value)}
-          sx={{ maxWidth: '200px' }}
-        />
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        sx={{ pt: 1, pb: 2, width: '100%', px: 2 }}
+        spacing={1}
+        justifyContent='space-between'
+      >
+        {!hideSearchInput && (
+          <TextField
+            size='small'
+            placeholder={searchPlaceholderText}
+            value={searchFilter}
+            onChange={(e) => setSearchFilter(e.target.value)}
+            sx={{ maxWidth: '200px' }}
+          />
+        )}
+        {hideSearchInput && <div style={{ maxWidth: '200px', width: '100%' }}></div>}
         <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
         <Button
           onClick={handleMenuButtonClick}
@@ -237,8 +247,11 @@ export default function Paginate<T>({
           {ascOrDescMenuListItems(SortingDirection.DESC)}
         </Menu>
       </Stack>
+      <Divider />
       {listDisplay}
-      <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
+      <Stack sx={{ width: '100%', pt: 3, pb: 1 }} alignItems='center'>
+        <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
+      </Stack>
     </>
   )
 }
