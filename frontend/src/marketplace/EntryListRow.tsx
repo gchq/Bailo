@@ -1,5 +1,5 @@
 import { CorporateFare } from '@mui/icons-material'
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
 import { CSSProperties } from 'react'
@@ -64,8 +64,8 @@ export default function EntryListRow({
         <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
           {entry.description}
         </Typography>
-        {entry.organisation && (
-          <div>
+        <Stack direction='row' spacing={1} divider={<Divider flexItem orientation='vertical' />} alignItems='center'>
+          {entry.organisation && (
             <ChipSelector
               chipTooltipTitle={'Filter by organisation'}
               options={[entry.organisation]}
@@ -79,9 +79,7 @@ export default function EntryListRow({
               icon={<CorporateFare />}
               style={{ padding: 1 }}
             />
-          </div>
-        )}
-        <div>
+          )}
           <ChipSelector
             chipTooltipTitle={'Filter by tag'}
             options={entry.tags.slice(0, 10)}
@@ -92,7 +90,7 @@ export default function EntryListRow({
             size='small'
             ariaLabel='add tag to search filter'
           />
-        </div>
+        </Stack>
       </Stack>
     </Box>
   )
