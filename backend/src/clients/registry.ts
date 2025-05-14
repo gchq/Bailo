@@ -1,4 +1,4 @@
-import fetch, { Headers, Response } from 'node-fetch'
+import fetch, { Response } from 'node-fetch'
 
 import { getHttpsAgent } from '../services/http.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -27,12 +27,14 @@ async function registryRequest(
   endpoint: string,
   returnStream: boolean = false,
   extraFetchOptions: { [key: string]: string } = {},
+  extraHeaders: { [key: string]: string } = {},
 ) {
   let res: Response
   try {
     res = await fetch(`${registry}/v2/${endpoint}`, {
       headers: {
         Authorization: `Bearer ${token}`,
+        ...extraHeaders,
       },
       agent,
       ...extraFetchOptions,
@@ -71,7 +73,7 @@ async function registryRequest(
   }
 
   if (returnStream) {
-    return res
+    return { res, headers }
   } else {
     return { body, headers }
   }
@@ -217,11 +219,9 @@ type GetRegistryLayerStreamResponse = {
   }
 }
 export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
-  const responseStream = await registryRequest(
-    token,
-    `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
-    true,
-  )
+  const responseStream = (
+    await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`, true)
+  ).res
 
   if (!isGetRegistryLayerStream(responseStream)) {
     throw InternalError('Unrecognised response stream when getting image layer blob.', {
@@ -264,7 +264,7 @@ function isGetRegistryLayerStream(resp: unknown): resp is GetRegistryLayerStream
   return true
 }
 
-type InitialiseUploadResponse = Headers & {
+type InitialiseUploadResponse = {
   connection: string
   'content-length': string
   date: string
@@ -279,8 +279,9 @@ export async function initialiseUpload(token: string, imageRef: RepoRef) {
       method: 'POST',
     })
   ).headers
+  const headersObject = Object.fromEntries(responseHeaders)
 
-  if (!isInitialiseUploadResponse(responseHeaders)) {
+  if (!isInitialiseUploadObjectResponse(headersObject)) {
     throw InternalError('Unrecognised response headers when posting initialise image upload.', {
       responseHeaders: responseHeaders,
       namespace: imageRef.namespace,
@@ -288,44 +289,82 @@ export async function initialiseUpload(token: string, imageRef: RepoRef) {
     })
   }
 
-  return responseHeaders
+  return headersObject
 }
 
-function isInitialiseUploadResponse(resp: unknown): resp is InitialiseUploadResponse {
+function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUploadResponse {
   if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
     return false
   }
-  // type guard `Headers`
-  if (!('get' in resp) || !(resp['get'] instanceof Function)) {
-    return false
-  }
-  if (!('has' in resp) || !(resp['has'] instanceof Function)) {
-    return false
-  }
   // type guard expected header keys
-  if (!resp.has('connection') || !(typeof resp.get('connection') === 'string')) {
+  if (!('connection' in resp) || !(typeof resp['connection'] === 'string')) {
     return false
   }
-  if (!resp.has('content-length') || !(typeof resp.get('content-length') === 'string')) {
+  if (!('content-length' in resp) || !(typeof resp['content-length'] === 'string')) {
     return false
   }
-  if (!resp.has('date') || !(typeof resp.get('date') === 'string')) {
+  if (!('date' in resp) || !(typeof resp['date'] === 'string')) {
     return false
   }
-  if (
-    !resp.has('docker-distribution-api-version') ||
-    !(typeof resp.get('docker-distribution-api-version') === 'string')
-  ) {
+  if (!('docker-distribution-api-version' in resp) || !(typeof resp['docker-distribution-api-version'] === 'string')) {
     return false
   }
-  if (!resp.has('docker-upload-uuid') || !(typeof resp.get('docker-upload-uuid') === 'string')) {
+  if (!('docker-upload-uuid' in resp) || !(typeof resp['docker-upload-uuid'] === 'string')) {
     return false
   }
-  if (!resp.has('location') || !(typeof resp.get('location') === 'string')) {
+  if (!('location' in resp) || !(typeof resp['location'] === 'string')) {
     return false
   }
-  if (!resp.has('range') || !(typeof resp.get('range') === 'string')) {
+  if (!('range' in resp) || !(typeof resp['range'] === 'string')) {
     return false
   }
   return true
+}
+
+export async function uploadLayerMonolithic(token: string, uploadURL: string, digest: string, blob: any, size: string) {
+  const responseHeaders = (
+    await registryRequest(
+      token,
+      `${uploadURL}?digest=${digest}`.replace(/^(\/v2)/, ''),
+      false,
+      {
+        method: 'POST',
+        body: blob,
+      },
+      { 'Content-Length': size, 'Content-Type': 'application/octet-stream' },
+    )
+  ).headers
+
+  // TODO: type guard
+
+  return responseHeaders
+}
+
+export async function uploadLayerChunk(
+  token: string,
+  uploadURL: string,
+  chunk: any,
+  size: string,
+  startOffset: number,
+) {
+  const responseHeaders = (
+    await registryRequest(
+      token,
+      `${uploadURL}`.replace(/^(\/v2)/, ''),
+      false,
+      {
+        method: 'PATCH',
+        body: chunk,
+      },
+      {
+        'Content-Length': size,
+        'Content-Range': `${startOffset}-${startOffset + Number.parseInt(size)}`,
+        'Content-Type': 'application/octet-stream',
+      },
+    )
+  ).headers
+
+  // TODO: type guard
+
+  return responseHeaders
 }
