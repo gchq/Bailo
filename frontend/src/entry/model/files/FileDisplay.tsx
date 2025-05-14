@@ -413,7 +413,6 @@ export default function FileDisplay({
                     Apply file tags
                   </Button>
                 </Restricted>
-                {file.tags.length === 0 && <Typography variant='caption'>No tags applied</Typography>}
                 <Box sx={{ whiteSpace: 'pre-wrap' }}>
                   {file.tags.map((fileTag) => {
                     if (isClickable) {

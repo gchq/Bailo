@@ -211,7 +211,7 @@ export default function ReleaseDisplay({
                 </Accordion>
               )}
               <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2}>
-                <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />
+                {!release.minor && <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />}
                 <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>
                   <Stack direction='row' spacing={2}>
                     {reviewResponses.length > 0 && (
