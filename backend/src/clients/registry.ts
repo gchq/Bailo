@@ -151,8 +151,10 @@ type GetImageTagManifestResponse = {
   layers: { mediaType: string; size: number; digest: string }[]
 }
 export async function getImageTagManifest(token: string, imageRef: RepoRef, imageTag: string) {
-  const responseBody = (await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`))
-    .body
+  const { body: responseBody, headers: responseHeaders } = await registryRequest(
+    token,
+    `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
+  )
   if (!isGetImageTagManifestResponse(responseBody)) {
     throw InternalError('Unrecognised response body when getting image tag manifest.', {
       responseBody,
@@ -161,7 +163,7 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
       imageTag,
     })
   }
-  return responseBody
+  return { responseBody, responseHeaders }
 }
 
 function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManifestResponse {
@@ -220,7 +222,13 @@ type GetRegistryLayerStreamResponse = {
 }
 export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
   const responseStream = (
-    await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`, true)
+    await registryRequest(
+      token,
+      `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
+      true,
+      {},
+      { Accept: 'application/vnd.docker.distribution.manifest.v2+json' },
+    )
   ).res
 
   if (!isGetRegistryLayerStream(responseStream)) {
@@ -321,14 +329,39 @@ function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUplo
   return true
 }
 
+export async function putImageManifest(
+  token: string,
+  imageRef: RepoRef,
+  imageTag: string,
+  manifest: any,
+  contentType: string,
+) {
+  const responseHeaders = (
+    await registryRequest(
+      token,
+      `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
+      false,
+      {
+        method: 'PUT',
+        body: manifest,
+      },
+      { 'Content-Type': contentType, name: `${imageRef.namespace}/${imageRef.image}`, reference: imageTag },
+    )
+  ).headers
+
+  // TODO: type guard
+
+  return responseHeaders
+}
+
 export async function uploadLayerMonolithic(token: string, uploadURL: string, digest: string, blob: any, size: string) {
   const responseHeaders = (
     await registryRequest(
       token,
-      `${uploadURL}?digest=${digest}`.replace(/^(\/v2)/, ''),
+      `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''),
       false,
       {
-        method: 'POST',
+        method: 'PUT',
         body: blob,
       },
       { 'Content-Length': size, 'Content-Type': 'application/octet-stream' },

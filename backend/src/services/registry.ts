@@ -51,7 +51,8 @@ export async function listImageTagLayers(user: UserInterface, modelId: string, i
   ])
 
   // get which layers exist for the model
-  const manifest = await getImageTagManifest(repositoryToken, { namespace: modelId, image: imageName }, imageTag)
+  const manifest = (await getImageTagManifest(repositoryToken, { namespace: modelId, image: imageName }, imageTag))
+    .responseBody
 
   return manifest.layers
 }
