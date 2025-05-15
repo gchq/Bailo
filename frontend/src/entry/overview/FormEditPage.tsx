@@ -1,12 +1,13 @@
-import { Menu as MenuIcon } from '@mui/icons-material'
+import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
-import PersonIcon from '@mui/icons-material/Person'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { getChangedFields } from '@rjsf/utils'
 import { useGetModel } from 'actions/model'
 import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
+import * as _ from 'lodash-es'
 import React from 'react'
 import { useContext, useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -15,7 +16,6 @@ import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
-import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -29,11 +29,11 @@ type FormEditPageProps = {
 }
 export default function FormEditPage({ entry, readOnly = false }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
+  const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
-  const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
@@ -55,12 +55,18 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
     if (schema) {
       setErrorMessage('')
       setLoading(true)
+      const oldData = getStepsData(oldSchema, true)
       const data = getStepsData(splitSchema, true)
-      const res = await putModelCard(entry.id, data)
-      if (res.status && res.status < 400) {
+
+      if (getChangedFields(oldData, data).length === 0) {
         setIsEdit(false)
       } else {
-        setErrorMessage(res.data)
+        const res = await putModelCard(entry.id, data)
+        if (res.status && res.status < 400) {
+          setIsEdit(false)
+        } else {
+          setErrorMessage(res.data)
+        }
       }
       setLoading(false)
     }
@@ -113,6 +119,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   if (isEntryError) {
     return <MessageAlert message={isEntryError.info.message} severity='error' />
   }
+
   return (
     <>
       {isSchemaLoading && <Loading />}
@@ -146,6 +153,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
                     onClick={() => {
                       handleActionButtonClose()
                       setIsEdit(!isEdit)
+                      setOldSchema(_.cloneDeep(splitSchema))
                     }}
                     data-test='editEntryCardButton'
                     startIcon={<EditIcon fontSize='small' />}
@@ -155,14 +163,19 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
                 </Restricted>
               )}
               <Button
-                startIcon={<MenuIcon />}
+                endIcon={anchorEl ? <ExpandLess /> : <ExpandMore />}
                 data-test='openEntryOverviewActions'
                 variant='contained'
                 onClick={handleActionButtonClick}
               >
-                Actions
+                More
               </Button>
-              <Menu MenuListProps={{ dense: true }} anchorEl={anchorEl} open={open} onClose={handleActionButtonClose}>
+              <Menu
+                slotProps={{ list: { dense: true } }}
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleActionButtonClose}
+              >
                 <MenuItem
                   onClick={() => {
                     handleActionButtonClose()
@@ -173,17 +186,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
                     <PictureAsPdfIcon fontSize='small' />
                   </ListItemIcon>
                   <ListItemText>Export as PDF</ListItemText>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    handleActionButtonClose()
-                    setRolesDialogOpen(true)
-                  }}
-                >
-                  <ListItemIcon>
-                    <PersonIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>View Roles</ListItemText>
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
@@ -222,7 +224,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
         )}
       </Box>
       {historyDialogOpen && <EntryCardHistoryDialog entry={entry} setOpen={setHistoryDialogOpen} />}
-      <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
       <TextInputDialog
         open={jsonUploadDialogOpen}
         onClose={() => setJsonUploadDialogOpen(false)}

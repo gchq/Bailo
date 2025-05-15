@@ -9,7 +9,9 @@ import Title from 'src/common/Title'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import AccessRequests from 'src/entry/model/AccessRequests'
 import InferenceServices from 'src/entry/model/InferenceServices'
+import ModelFileManagement from 'src/entry/model/ModelFileManagement'
 import ModelImages from 'src/entry/model/ModelImages'
+import OrganisationAndStateDetails from 'src/entry/model/OrganisationAndStateDetails'
 import Releases from 'src/entry/model/Releases'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
@@ -66,6 +68,11 @@ export default function Model() {
               view: <ModelImages model={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
             },
             {
+              title: 'File Management',
+              path: 'files',
+              view: <ModelFileManagement model={model} />,
+            },
+            {
               title: 'Inferencing',
               path: 'inferencing',
               view: <InferenceServices model={model} />,
@@ -97,8 +104,9 @@ export default function Model() {
   return (
     <>
       <Title text={model ? model.name : 'Loading...'} />
-      {(isModelLoading || isCurrentUserLoading || isUiConfigLoading) && <Loading />}
-      {model && (
+      {!model || isModelLoading || isCurrentUserLoading || isUiConfigLoading ? (
+        <Loading />
+      ) : (
         <PageWithTabs
           title={model.name}
           subheading={`ID: ${model.id}`}
@@ -111,6 +119,7 @@ export default function Model() {
           titleToCopy={model.name}
           subheadingToCopy={model.id}
           sourceModelId={model.settings.mirror?.sourceModelId}
+          additionalHeaderDisplay={<OrganisationAndStateDetails entry={model} />}
         />
       )}
     </>

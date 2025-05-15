@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
 import logging
+from typing import Any
 
 from bailo.core.client import Client
 from bailo.core.enums import MinimalSchema
@@ -58,7 +58,7 @@ class AccessRequest:
         schema_id = json_access_request["schemaId"]
 
         logger.info(
-            f"Access request %s for model %s successfully retrieved from server.",
+            "Access request %s for model %s successfully retrieved from server.",
             access_request_id,
             model_id,
         )
@@ -99,7 +99,7 @@ class AccessRequest:
         created_by = access_request_json["createdBy"]
 
         logger.info(
-            f"Access request successfully created on server with ID %s for model %s.",
+            "Access request successfully created on server with ID %s for model %s.",
             access_request_id,
             model_id,
         )
@@ -121,7 +121,7 @@ class AccessRequest:
         """
         self.client.delete_access_request(self.model_id, self.access_request_id)
 
-        logger.info(f"Access request %s successfully deleted on server.", self.access_request_id)
+        logger.info("Access request %s successfully deleted on server.", self.access_request_id)
 
         return True
 
@@ -129,7 +129,7 @@ class AccessRequest:
         """Update the current state of the access request to Bailo."""
         self.client.patch_access_request(self.model_id, self.access_request_id, metadata=self.metadata)
 
-        logger.info(f"Access request %s successfully updated on server.", self.access_request_id)
+        logger.info("Access request %s successfully updated on server.", self.access_request_id)
 
     def __str__(self) -> str:
         return f"Access Request: {self.metadata['overview']['name']} - {self.model_id}"

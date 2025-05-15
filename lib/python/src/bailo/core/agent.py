@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import getpass
+import logging
+import os
 from json import JSONDecodeError
 
 import requests
-import os
-import getpass
-import logging
 from requests.auth import HTTPBasicAuth
+
+# isort: split
+
 from bailo.core.exceptions import BailoException, ResponseException
 
 logger = logging.getLogger(__name__)
@@ -70,6 +73,7 @@ class PkiAgent(Agent):
         :param cert: Path to cert file
         :param key: Path to key file
         :param auth: Path to certificate authority file
+        :param **kwargs: Kwargs passed to the super `Agent` class `__init__`
         """
         super().__init__(verify=auth, **kwargs)
 
@@ -103,6 +107,7 @@ class TokenAgent(Agent):
 
         :param access_key: Access key
         :param secret_key: Secret key
+        :param **kwargs: Kwargs passed to the super `Agent` class `__init__`
         """
         super().__init__(**kwargs)
 

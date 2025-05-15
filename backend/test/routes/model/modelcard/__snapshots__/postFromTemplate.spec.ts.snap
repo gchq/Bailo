@@ -31,7 +31,15 @@ exports[`routes > model > postModel > template > 400 > no model template ID prov
 }
 `;
 
-exports[`routes > model > postModel > template > audit > expected call 1`] = `"example"`;
+exports[`routes > model > postModel > template > audit > expected call 1`] = `
+{
+  "settings": {
+    "mirror": {
+      "sourceModelId": "",
+    },
+  },
+}
+`;
 
 exports[`routes > model > postModel > template > audit > expected call 2`] = `
 {

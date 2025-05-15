@@ -25,13 +25,17 @@ class Client:
         kind: EntryKind,
         description: str,
         visibility: ModelVisibility | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ):
         """Create a model.
 
         :param name: Name of the model
         :param kind: Either a Model or a Datacard
         :param description: Description of the model
-        :param visibility: Enum to define model visibility (e.g public or private)
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
+        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :return: JSON response object
         """
         _visibility: str = "public"
@@ -44,6 +48,8 @@ class Client:
                 "kind": kind,
                 "description": description,
                 "visibility": _visibility,
+                "organisation": organisation,
+                "state": state,
             }
         )
 
@@ -103,6 +109,8 @@ class Client:
         kind: str | None = None,
         description: str | None = None,
         visibility: str | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ):
         """Update a specific model using its unique ID.
 
@@ -110,12 +118,16 @@ class Client:
         :param name: Name of the model, defaults to None
         :param kind: Either a Model or a Datacard
         :param description: Description of the model, defaults to None
-        :param visibility: Enum to define model visibility (e.g. public or private), defaults to None
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
+        :param kind: Either a Model or a Datacard, defaults to None
         :return: JSON response object
         """
         filtered_json = filter_none(
             {
                 "name": name,
+                "organisation": organisation,
+                "state": state,
                 "kind": kind,
                 "description": description,
                 "visibility": visibility,
@@ -227,6 +239,7 @@ class Client:
     def put_release(
         self,
         model_id: str,
+        model_card_version: int,
         release_version: str,
         notes: str,
         draft: bool,
@@ -253,6 +266,7 @@ class Client:
                 "draft": draft,
                 "fileIds": file_ids,
                 "images": images,
+                "modelCardVersion": model_card_version,
             },
         ).json()
 
@@ -393,7 +407,7 @@ class Client:
         :return: JSON response object
         """
         return self.agent.delete(
-            f"{self.url}/v2/model/{model_id}/files/{file_id}",
+            f"{self.url}/v2/model/{model_id}/file/{file_id}",
         ).json()
 
     def get_all_images(
@@ -486,18 +500,18 @@ class Client:
             },
         ).json()
 
-    def post_review(
+    def post_release_review(
         self,
         model_id: str,
+        version: str,
         role: str,
         decision: str,
-        version: str | None = None,
         comment: str | None = None,
     ):
         """Create a review for a release.
 
         :param model_id: A unique model ID
-        :param version: A semantic version for a release
+        :param version: Semver of the release
         :param role: The role of the user making the review
         :param decision: Either approve or request changes
         :param comment: A comment to go with the review
@@ -601,5 +615,27 @@ class Client:
         filtered_json = filter_none({"schemaId": schema_id, "metadata": metadata})
         return self.agent.patch(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
+            json=filtered_json,
+        ).json()
+
+    def post_access_request_review(
+        self,
+        model_id: str,
+        access_request_id: str,
+        role: str,
+        decision: str,
+        comment: str | None = None,
+    ):
+        """Create a review for a release.
+
+        :param model_id: A unique model ID
+        :param access_request_id: Unique access request ID
+        :param role: The role of the user making the review
+        :param decision: Either approve or request changes
+        :param comment: A comment to go with the review
+        """
+        filtered_json = filter_none({"role": role, "decision": decision, "comment": comment})
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}/review",
             json=filtered_json,
         ).json()

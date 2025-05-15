@@ -80,8 +80,9 @@ oauth:
     dynamic: [] # example 'scope'
     response: [] #example 'tokens', 'raw', 'jwt'
     callback: "" # example /
-    subdomain: "domain"
-  identityProviderClient: # cognito
+    subdomain: "cognito domain"
+    adminGroupName: ''
+  identityProviderClient:
     userPoolId: "region_id"
     userIdAttribute: "name"
   keycloak: # keycloak
@@ -107,14 +108,27 @@ resources:
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   limits:
     cpu: 400m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+resourcesFrontend:
+  limits:
+    cpu: 400m
     memory: 800Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-  backend:
+  requests:
+    cpu: 400m
+    memory: 800Mi
+
+resourcesBackend:
     limits:
+      cpu: 800m
+      memory: 2Gi
+    requests:
       cpu: 400m
-      memory: 800Mi
+      memory: 1Gi
+
 
 # Pod placement
 nodeSelector: {}
@@ -152,7 +166,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnami/mongodb
-    tag: 7.0.8-debian-12-r2
+    tag: 7.0.15-debian-12-r2
 
 # MinIO Dependencies
 minio:
@@ -190,7 +204,7 @@ minio:
 # Registry Dependencies
 registry:
   repository: registry
-  tag: 3.0.0-alpha.1
+  tag: 3.0.0
   enabled: true
   protocol: "https"
   #host: "bailo-registry" # service name
@@ -215,6 +229,7 @@ nginxAuth:
 # Mail
 mail:
   enabled: true
+  image: marlonb/mailcrab:latest
 
 # Openshift specific configuration
 openshift:
@@ -239,6 +254,10 @@ config:
     helpPopoverText:
       manualEntryAccess: ''
 
+    modelDetails:
+      organisations: []
+      states: []
+
   smtp:
     #host: 'mail' #service name
     port: 1025
@@ -251,6 +270,10 @@ config:
   app:
     protocol: "https"
     port: 443
+
+  issueLinks:
+    support: "mailto:?subject=Bailo%20Contact"
+    contact: "mailto:?subject=Bailo%20Contact"
 
 # nginx.deployment registry.deployment
 nginxcert:
@@ -305,7 +328,7 @@ backend:
 clamav:
   enabled: false
   runAsUser: 1002
-  image: clamav/clamav:latest_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
+  image: clamav/clamav:1.4.2_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
   port: 3310
   accessModes:
     - ReadWriteOnce

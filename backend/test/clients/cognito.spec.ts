@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { listUsers } from '../../src/clients/cognito.js'
+import { getGroupMembership, listUsers } from '../../src/clients/cognito.js'
 
 const configMock = vi.hoisted(
   () =>
@@ -31,6 +31,7 @@ const cognitoMock = vi.hoisted(() => {
     send,
     ListUsersCommand: vi.fn(() => ({})),
     CognitoIdentityProviderClient: vi.fn(() => ({ send })),
+    ListUsersInGroupCommand: vi.fn(() => ({})),
   }
 })
 vi.mock('@aws-sdk/client-cognito-identity-provider', () => cognitoMock)
@@ -99,5 +100,32 @@ describe('clients > cognito', () => {
       UserPoolId: 'email',
       Filter: `"email"="dn"`,
     })
+  })
+
+  test('getGroupMembership > success', async () => {
+    cognitoMock.send.mockResolvedValueOnce({ Users: [{ Attributes: [{ Name: 'email', Value: 'email@test.com' }] }] })
+
+    await getGroupMembership('group1')
+
+    expect(cognitoMock.ListUsersInGroupCommand).toBeCalledWith({
+      UserPoolId: 'email',
+      GroupName: 'group1',
+    })
+  })
+
+  test('getGroupMembership > error when querying cognito for group memberships', async () => {
+    cognitoMock.send.mockRejectedValueOnce('Error')
+
+    const response = getGroupMembership('group1')
+
+    expect(response).rejects.toThrowError('Error when querying Cognito for group membership')
+  })
+
+  test('getGroupMembership > no users', async () => {
+    cognitoMock.send.mockResolvedValueOnce({})
+
+    const results = await getGroupMembership('group1')
+
+    expect(results).toStrictEqual([])
   })
 })

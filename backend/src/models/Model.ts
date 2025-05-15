@@ -1,5 +1,5 @@
-import { Document, model, Schema } from 'mongoose'
-import MongooseDelete from 'mongoose-delete'
+import { model, Schema } from 'mongoose'
+import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 export const EntryVisibility = {
   Private: 'private',
@@ -15,9 +15,17 @@ export const EntryKind = {
 
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
+export const CollaboratorRoles = {
+  Owner: 'owner',
+  Contributor: 'contributor',
+  Consumer: 'consumer',
+} as const
+
+export type CollaboratorRolesKeys = (typeof CollaboratorRoles)[keyof typeof CollaboratorRoles]
+
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<'owner' | 'contributor' | 'consumer' | string>
+  roles: Array<CollaboratorRolesKeys | string>
 }
 
 export interface ModelMetadata {
@@ -54,6 +62,8 @@ export interface ModelInterface {
   kind: EntryKindKeys
   description: string
   card?: ModelCardInterface
+  organisation: string
+  state: string
 
   collaborators: Array<CollaboratorEntry>
   settings: Settings
@@ -68,9 +78,9 @@ export interface ModelInterface {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ModelDoc = ModelInterface & Document<any, any, ModelInterface>
+export type ModelDoc = ModelInterface & SoftDeleteDocument
 
-const ModelSchema = new Schema<ModelInterface>(
+const ModelSchema = new Schema<ModelDoc>(
   {
     id: { type: String, required: true, unique: true, index: true },
 
@@ -83,6 +93,20 @@ const ModelSchema = new Schema<ModelInterface>(
       createdBy: { type: String },
 
       metadata: { type: Schema.Types.Mixed },
+    },
+    organisation: {
+      type: String,
+      required: function () {
+        return typeof this['organisation'] === 'string' ? false : true
+      },
+      default: '',
+    },
+    state: {
+      type: String,
+      required: function () {
+        return typeof this['state'] === 'string' ? false : true
+      },
+      default: '',
     },
 
     collaborators: [
@@ -113,6 +137,6 @@ ModelSchema.plugin(MongooseDelete, {
 })
 ModelSchema.index({ '$**': 'text' }, { weights: { name: 10, description: 5 } })
 
-const ModelModel = model<ModelInterface>('v2_Model', ModelSchema)
+const ModelModel = model<ModelDoc>('v2_Model', ModelSchema)
 
 export default ModelModel

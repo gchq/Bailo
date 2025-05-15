@@ -20,12 +20,13 @@ import {
 import { postModel } from 'actions/model'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import { FormEvent, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
+import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
-import SourceModelInput from 'src/entry/SourceModelnput'
+import SourceModelInput from 'src/entry/SourceModelInput'
 import MessageAlert from 'src/MessageAlert'
 import {
   CollaboratorEntry,
@@ -54,11 +55,12 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [name, setName] = useState('')
   const [sourceModelId, setSourceModelId] = useState('')
   const [description, setDescription] = useState('')
+  const [organisation, setOrganisation] = useState<string>('')
   const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
   )
-  const [ungovernedAccess, setungovernedAccess] = useState(false)
+  const [ungovernedAccess, setUngovernedAccess] = useState(false)
   const [allowTemplating, setAllowTemplating] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -73,6 +75,11 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     [name, description, createEntryKind, sourceModelId],
   )
 
+  const handleCollaboratorsChange = useCallback(
+    (updatedCollaborators: CollaboratorEntry[]) => setCollaborators(updatedCollaborators),
+    [],
+  )
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setLoading(true)
@@ -82,6 +89,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
       name,
       kind: entryKind,
       description,
+      organisation,
       visibility,
       collaborators,
       settings: {
@@ -191,6 +199,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               </Typography>
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
                 <EntryNameInput autoFocus value={name} kind={entryKind} onChange={(value) => setName(value)} />
+                <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
                 {createEntryKind === CreateEntryKind.MIRRORED_MODEL && (
                   <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
                 )}
@@ -243,7 +252,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 <Box sx={{ marginTop: 1 }}>
                   <EntryAccessInput
                     value={collaborators}
-                    onUpdate={(val) => setCollaborators(val)}
+                    onChange={handleCollaboratorsChange}
                     entryKind={entryKind}
                     entryRoles={[
                       { id: 'owner', name: 'Owner' },
@@ -259,7 +268,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                   <FormControlLabel
                     control={
                       <Switch
-                        onChange={(e) => setungovernedAccess(e.target.checked)}
+                        onChange={(e) => setUngovernedAccess(e.target.checked)}
                         checked={ungovernedAccess}
                         size='small'
                       />

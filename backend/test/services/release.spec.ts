@@ -4,6 +4,7 @@ import { ReleaseAction } from '../../src/connectors/authorisation/actions.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { SemverObject } from '../../src/models/Release.js'
 import { UserInterface } from '../../src/models/User.js'
+import { listModelImages } from '../../src/services/registry.js'
 import {
   createRelease,
   deleteRelease,
@@ -12,10 +13,12 @@ import {
   getModelReleases,
   getReleaseBySemver,
   getReleasesForExport,
+  isReleaseDoc,
   newReleaseComment,
   removeFileFromReleases,
   semverObjectToString,
   updateRelease,
+  validateRelease,
 } from '../../src/services/release.js'
 import { NotFound } from '../../src/utils/error.js'
 
@@ -357,6 +360,14 @@ describe('services > release', () => {
     )
   })
 
+  test('validateRelease > should not call listModelImages', async () => {
+    registryMocks.listModelImages.mockResolvedValueOnce([{ repository: 'mockRep', name: 'image', tags: ['latest'] }])
+
+    await validateRelease({ dn: 'dn' }, {} as any, { semver: '1.1.1', images: [], modelId: 'test-modelId' } as any)
+
+    expect(listModelImages).not.toHaveBeenCalled()
+  })
+
   test('newReleaseComment > success', async () => {
     releaseModelMocks.findOneAndUpdate.mockResolvedValue({})
 
@@ -609,5 +620,50 @@ describe('services > release', () => {
     const size = await getAllFileIds('example', ['1', '2', '3'])
 
     expect(size).toStrictEqual([])
+  })
+
+  test('isReleaseDoc > success', async () => {
+    const result = isReleaseDoc({
+      modelId: '',
+      modelCardVersion: 1,
+      semver: '',
+      notes: '',
+      minor: false,
+      draft: false,
+      fileIds: [],
+      images: [],
+      deleted: false,
+      createdBy: '',
+      createdAt: '',
+      updatedAt: '',
+      _id: '',
+    })
+
+    expect(result).toBe(true)
+  })
+
+  test('isReleaseDoc > missing property', async () => {
+    const result = isReleaseDoc({
+      modelId: '',
+      modelCardVersion: 1,
+      notes: '',
+      minor: false,
+      draft: false,
+      fileIds: [],
+      images: [],
+      deleted: false,
+      createdBy: '',
+      createdAt: '',
+      updatedAt: '',
+      _id: '',
+    })
+
+    expect(result).toBe(false)
+  })
+
+  test('isReleaseDoc > wrong type', async () => {
+    const result = isReleaseDoc(null)
+
+    expect(result).toBe(false)
   })
 })

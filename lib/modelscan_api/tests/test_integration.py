@@ -1,30 +1,40 @@
-"""Integration tests for working with ModelScan.
-"""
+"""Integration tests for working with ModelScan."""
 
 from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 from unittest.mock import ANY
 
 import modelscan
 import pytest
+from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi.testclient import TestClient
 
-from bailo_modelscan_api.config import Settings
-from bailo_modelscan_api.main import app, get_settings
+# isort: split
 
-client = TestClient(app)
+from bailo_modelscan_api.config import Settings
+from bailo_modelscan_api.main import CustomMiddlewareHTTPExceptionWrapper, app, get_settings
 
 
 @lru_cache
 def get_settings_override():
-    return Settings(download_dir=".")
+    return Settings(maximum_filesize=1000)
 
 
 app.dependency_overrides[get_settings] = get_settings_override
+# Override maximum_filesize as middlewares aren't covered by FastAPI's TestClient
+app.user_middleware.clear()
+app.add_middleware(
+    ContentSizeLimitMiddleware,
+    max_content_size=get_settings_override().maximum_filesize,
+    exception_cls=CustomMiddlewareHTTPExceptionWrapper,
+)
+client = TestClient(app)
 
 
+BIG_CONTENTS = b"\0" * 1024
 H5_MIME_TYPE = "application/x-hdf5"
 OCTET_STREAM_TYPE = "application/octet-stream"
 
@@ -41,8 +51,8 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                 "errors": [],
                 "issues": [],
                 "summary": {
-                    "absolute_path": str(Path().cwd().absolute()),
-                    "input_path": str(Path().cwd().absolute().joinpath("empty.txt")),
+                    "absolute_path": ANY,
+                    "input_path": ANY,
                     "modelscan_version": modelscan.__version__,
                     "scanned": {"total_scanned": 0},
                     "skipped": {
@@ -50,14 +60,19 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                             {
                                 "category": "SCAN_NOT_SUPPORTED",
                                 "description": "Model Scan did not scan file",
-                                "source": "empty.txt",
+                                "source": ANY,
                             }
                         ],
                         "total_skipped": 1,
                     },
                     "timestamp": ANY,
                     "total_issues": 0,
-                    "total_issues_by_severity": {"CRITICAL": 0, "HIGH": 0, "LOW": 0, "MEDIUM": 0},
+                    "total_issues_by_severity": {
+                        "CRITICAL": 0,
+                        "HIGH": 0,
+                        "LOW": 0,
+                        "MEDIUM": 0,
+                    },
                 },
             },
         ),
@@ -67,10 +82,15 @@ OCTET_STREAM_TYPE = "application/octet-stream"
             H5_MIME_TYPE,
             {
                 "summary": {
-                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+                    "total_issues_by_severity": {
+                        "LOW": 0,
+                        "MEDIUM": 0,
+                        "HIGH": 0,
+                        "CRITICAL": 0,
+                    },
                     "total_issues": 0,
-                    "input_path": str(Path().cwd().absolute().joinpath("null.h5")),
-                    "absolute_path": str(Path().cwd().absolute()),
+                    "input_path": ANY,
+                    "absolute_path": ANY,
                     "modelscan_version": modelscan.__version__,
                     "timestamp": ANY,
                     "scanned": {"total_scanned": 0},
@@ -80,7 +100,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                             {
                                 "category": "SCAN_NOT_SUPPORTED",
                                 "description": "Model Scan did not scan file",
-                                "source": "null.h5",
+                                "source": ANY,
                             }
                         ],
                     },
@@ -90,7 +110,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                     {
                         "category": "MODEL_SCAN",
                         "description": "Unable to synchronously open file (file signature not found)",
-                        "source": "null.h5",
+                        "source": ANY,
                     }
                 ],
             },
@@ -101,13 +121,18 @@ OCTET_STREAM_TYPE = "application/octet-stream"
             OCTET_STREAM_TYPE,
             {
                 "summary": {
-                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+                    "total_issues_by_severity": {
+                        "LOW": 0,
+                        "MEDIUM": 0,
+                        "HIGH": 0,
+                        "CRITICAL": 0,
+                    },
                     "total_issues": 0,
-                    "input_path": str(Path().cwd().absolute().joinpath("safe.pkl")),
-                    "absolute_path": str(Path().cwd().absolute()),
+                    "input_path": ANY,
+                    "absolute_path": ANY,
                     "modelscan_version": modelscan.__version__,
                     "timestamp": ANY,
-                    "scanned": {"total_scanned": 1, "scanned_files": ["safe.pkl"]},
+                    "scanned": {"total_scanned": 1, "scanned_files": [ANY]},
                     "skipped": {
                         "total_skipped": 0,
                         "skipped_files": [],
@@ -123,13 +148,18 @@ OCTET_STREAM_TYPE = "application/octet-stream"
             OCTET_STREAM_TYPE,
             {
                 "summary": {
-                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 1},
+                    "total_issues_by_severity": {
+                        "LOW": 0,
+                        "MEDIUM": 0,
+                        "HIGH": 0,
+                        "CRITICAL": 1,
+                    },
                     "total_issues": 1,
-                    "input_path": str(Path().cwd().absolute().joinpath("unsafe.pkl")),
-                    "absolute_path": str(Path().cwd().absolute()),
+                    "input_path": ANY,
+                    "absolute_path": ANY,
                     "modelscan_version": modelscan.__version__,
                     "timestamp": ANY,
-                    "scanned": {"total_scanned": 1, "scanned_files": ["unsafe.pkl"]},
+                    "scanned": {"total_scanned": 1, "scanned_files": [ANY]},
                     "skipped": {
                         "total_skipped": 0,
                         "skipped_files": [],
@@ -142,7 +172,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                         "operator": "system",
                         "scanner": "modelscan.scanners.PickleUnsafeOpScan",
                         "severity": "CRITICAL",
-                        "source": "unsafe.pkl",
+                        "source": ANY,
                     },
                 ],
                 "errors": [],
@@ -150,7 +180,12 @@ OCTET_STREAM_TYPE = "application/octet-stream"
         ),
     ],
 )
-def test_scan_file(file_name: str, file_content: Path | bytes, file_mime_type: str, expected_response: dict) -> None:
+def test_scan_file(
+    file_name: str,
+    file_content: Path | bytes,
+    file_mime_type: str,
+    expected_response: dict,
+) -> None:
     # allow passing in a Path to read the file's contents for specific data types
     if isinstance(file_content, Path):
         with open(file_content, "rb") as f:
@@ -162,3 +197,18 @@ def test_scan_file(file_name: str, file_content: Path | bytes, file_mime_type: s
 
     assert response.status_code == 200
     assert response.json() == expected_response
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ("file_name", "file_content", "file_mime_type"),
+    [("foo.h5", BIG_CONTENTS, H5_MIME_TYPE)],
+)
+def test_scan_file_too_large(file_name: str, file_content: Any, file_mime_type: str):
+    files = {"in_file": (file_name, file_content, file_mime_type)}
+
+    response = client.post("/scan/file", files=files)
+    print(response.json())
+
+    assert response.status_code == 413
+    assert response.json() == {"detail": ANY}

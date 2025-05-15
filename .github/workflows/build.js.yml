@@ -75,7 +75,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build modelscan image
+      - name: Build ModelScan image
         uses: docker/build-push-action@v6
         with:
           context: lib/modelscan_api
@@ -101,7 +101,7 @@ jobs:
       - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22.6.0
+          node-version: 22.14.0
           cache: "npm"
 
       # Install dependencies
@@ -124,7 +124,7 @@ jobs:
       - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22.6.0
+          node-version: 22.14.0
           cache: "npm"
 
       # Install dependencies
@@ -144,7 +144,7 @@ jobs:
       - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22.6.0
+          node-version: 22.14.0
           cache: "npm"
 
       # Setup BuildX
@@ -305,7 +305,7 @@ jobs:
       - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22.6.0
+          node-version: 22.14.0
           cache: "npm"
 
       # Setup BuildX
@@ -431,7 +431,7 @@ jobs:
       - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22.6.0
+          node-version: 22.14.0
           cache: "npm"
 
       # Setup BuildX
@@ -507,10 +507,10 @@ jobs:
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
       # Setup python
-      - name: Set up Python 3.11
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       # Install dependencies
       - name: Install dependencies
@@ -520,11 +520,24 @@ jobs:
           cd lib/python
           python -m pip install -e .[test]
 
+      # start mlflow server
+      - name: Start MLFlow
+        run: |
+          mlflow server --host 127.0.0.1 --port 5050 &
+
+      # wait for mlflow to start
+      - run: |
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:5050 -t 10
+
       # Run tests
       - name: Test with pytest
         run: |
           cd lib/python
           python -m pytest -m integration
+          python -m pytest -m mlflow
+        env:
+          PYTEST_RUN_PATH: "lib/python"
 
       - name: Dump docker compose logs
         if: always()

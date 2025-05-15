@@ -73,7 +73,7 @@ spec:
               key: http-secret
         volumeMounts:
         - name: config-map-vol
-          mountPath: /etc/docker/registry/config.yml
+          mountPath: /etc/distribution/config.yml
           subPath: config.yml
         - name: certs
           mountPath: {{ .Values.registry.certDir }}

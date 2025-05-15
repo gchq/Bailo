@@ -29,6 +29,7 @@ interface PageWithTabsProps {
   titleToCopy?: string
   subheadingToCopy?: string
   sourceModelId?: string
+  additionalHeaderDisplay?: ReactElement
 }
 
 export default function PageWithTabs({
@@ -43,6 +44,7 @@ export default function PageWithTabs({
   titleToCopy = '',
   subheadingToCopy = '',
   sourceModelId = '',
+  additionalHeaderDisplay,
 }: PageWithTabsProps) {
   const router = useRouter()
   const { tab } = router.query
@@ -120,17 +122,19 @@ export default function PageWithTabs({
   return (
     <>
       <Stack
-        direction={{ xs: 'column', sm: 'row' }}
+        direction='row'
         divider={<Divider flexItem orientation='vertical' />}
         alignItems='center'
         spacing={{ xs: 1, sm: 2 }}
         sx={{ px: 2, pb: 2 }}
       >
-        <Stack>
-          <Stack direction='row'>
-            <Typography component='h1' color='primary' variant='h6'>
-              {title}
-            </Typography>
+        <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
+          <Stack textOverflow='ellipsis' overflow='hidden' direction='row'>
+            <Tooltip title={title}>
+              <Typography component='h1' color='primary' variant='h6' noWrap>
+                {title}
+              </Typography>
+            </Tooltip>
             {titleToCopy.length > 0 && (
               <CopyToClipboardButton
                 textToCopy={titleToCopy ? titleToCopy : title}
@@ -141,7 +145,10 @@ export default function PageWithTabs({
           </Stack>
           {subheading && (
             <Stack direction='row' alignItems='center'>
-              <Typography variant='caption' sx={{ color: darken(theme.palette.primary.main, 0.4) }}>
+              <Typography
+                variant='caption'
+                sx={{ color: darken(theme.palette.primary.main, 0.4), textOverflow: 'ellipsis', overflow: 'hidden' }}
+              >
                 {subheading}
               </Typography>
               {subheadingToCopy.length > 0 && (
@@ -155,13 +162,14 @@ export default function PageWithTabs({
           )}
         </Stack>
         {displayActionButton && (
-          <Button variant='contained' onClick={actionButtonOnClick}>
+          <Button sx={{ minWidth: '154px' }} variant='contained' onClick={actionButtonOnClick}>
             {actionButtonTitle}
           </Button>
         )}
         {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
+        {additionalHeaderDisplay}
       </Stack>
-      <Typography sx={{ pl: 2, pb: 1 }}>{additionalInfo}</Typography>
+      <Typography sx={{ pl: 2, pb: 1, textOverflow: 'ellipsis', overflow: 'hidden' }}>{additionalInfo}</Typography>
       <Tabs
         value={currentTab || false}
         onChange={handleChange}

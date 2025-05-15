@@ -1,8 +1,8 @@
 import { Alert, Box, Divider, Stack, Typography } from '@mui/material'
+import { postFileForModelId } from 'actions/file'
 import { useGetModel } from 'actions/model'
 import {
   deleteRelease,
-  postSimpleFileForRelease,
   putRelease,
   UpdateReleaseParams,
   useGetRelease,
@@ -12,6 +12,8 @@ import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
+import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
+import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -19,10 +21,8 @@ import EditableFormHeading from 'src/Form/EditableFormHeading'
 import MessageAlert from 'src/MessageAlert'
 import {
   EntryKind,
-  FailedFileUpload,
   FileInterface,
-  FileUploadProgress,
-  FileWithMetadata,
+  FileWithMetadataAndTags,
   FlattenedModelImage,
   isFileInterface,
   ReleaseInterface,
@@ -43,8 +43,9 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   const [releaseNotes, setReleaseNotes] = useState(release.notes)
   const [isMinorRelease, setIsMinorRelease] = useState(!!release.minor)
   const [files, setFiles] = useState<(File | FileInterface)[]>(release.files)
-  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadata[]>([])
+  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>(release.images)
+  const [modelCardVersion, setModelCardVersion] = useState(release.modelCardVersion)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isRegistryError, setIsRegistryError] = useState(false)
@@ -143,9 +144,11 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     const successfulFiles: SuccessfulFileUpload[] = []
     const newFilesToUpload: File[] = []
     for (const file of files) {
-      isFileInterface(file)
-        ? successfulFiles.push({ fileName: file.name, fileId: file._id })
-        : newFilesToUpload.push(file)
+      if (isFileInterface(file)) {
+        successfulFiles.push({ fileName: file.name, fileId: file._id })
+      } else {
+        newFilesToUpload.push(file)
+      }
     }
 
     setFilesToUploadCount(newFilesToUpload.length)
@@ -157,6 +160,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
 
       if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
         const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+        const tags = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.tags
 
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
@@ -166,7 +170,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         }
 
         try {
-          const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
+          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata, tags)
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
@@ -223,10 +227,15 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     <Stack spacing={2}>
       <EditableFormHeading
         heading={
-          <div>
-            <Typography fontWeight='bold'>Release name</Typography>
-            <Typography>{`${model.name} - ${release.semver}`}</Typography>
-          </div>
+          <Stack overflow='hidden' justifyContent='center'>
+            <Stack direction='row' spacing={1}>
+              <Typography fontWeight='bold'>Release name</Typography>
+              <HelpPopover>
+                The release name is automatically generated using the model name and release semantic version
+              </HelpPopover>
+            </Stack>
+            <Typography noWrap>{`${model.name} - ${release.semver}`}</Typography>
+          </Stack>
         }
         editAction='editRelease'
         deleteAction='deleteRelease'
@@ -265,6 +274,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
           isMinorRelease,
           files,
           imageList,
+          modelCardVersion,
         }}
         filesMetadata={filesMetadata}
         onSemverChange={(value) => setSemver(value)}
@@ -272,6 +282,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         onMinorReleaseChange={(value) => setIsMinorRelease(value)}
         onFilesChange={(value) => handleFileOnChange(value)}
         onFilesMetadataChange={(value) => setFilesMetadata(value)}
+        onModelCardVersionChange={(value) => setModelCardVersion(value)}
         onImageListChange={(value) => setImageList(value)}
         onRegistryError={handleRegistryError}
         currentFileUploadProgress={currentFileUploadProgress}

@@ -63,7 +63,7 @@ export async function removeToken(user: UserInterface, accessKey: string) {
     throw Forbidden('Only the token owner can remove the token', { accessKey })
   }
 
-  await token.remove()
+  await token.delete()
 
   return { success: true }
 }
@@ -91,7 +91,7 @@ export async function findTokenByAccessKey(accessKey: string, opts?: GetTokenOpt
 }
 
 export async function getTokenFromAuthHeader(header: string) {
-  // NOTE: This is a security function.  Care should be taking when editting this function.
+  // NOTE: This is a security function. Care should be taking when editing this function.
   // Any pull requests that alter this MUST be checked out by at least two other people
   // familiar with the codebase.
   const [method, code] = header.split(' ')
@@ -127,7 +127,7 @@ export async function validateTokenForUse(token: TokenDoc | undefined, action: T
 
   if (token.scope === TokenScope.Models) {
     return {
-      id: token._id,
+      id: token._id.toString(),
       success: false,
       info: 'This token must not have model restrictions for this endpoint',
     }
@@ -135,14 +135,14 @@ export async function validateTokenForUse(token: TokenDoc | undefined, action: T
 
   if (token.actions && !token.actions.includes(action)) {
     return {
-      id: token._id,
+      id: token._id.toString(),
       success: false,
       info: 'This token may not be used for this action',
     }
   }
 
   return {
-    id: token._id,
+    id: token._id.toString(),
     success: true,
   }
 }

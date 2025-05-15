@@ -50,8 +50,9 @@ export const flatDirectory: Array<DirectoryEntry> = [
   // Administration
   { title: 'Administration', slug: 'administration', header: true },
 
+  /// Getting Started
   { title: 'Getting Started', slug: 'administration/getting-started', header: true },
-  { title: 'Building The Bailo Image', slug: 'administration/getting-started/building-the-bailo-image' },
+  { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
 
   /// Helm
   { title: 'Helm', slug: 'administration/helm', header: true },
@@ -64,13 +65,11 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Create a Schema', slug: 'administration/schemas/create-a-schema' },
   { title: 'Upload a Schema', slug: 'administration/schemas/upload-a-schema' },
 
-  { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
-
+  /// Migrations
   { title: 'Migrations', slug: 'administration/migrations', header: true },
   { title: 'Bailo v0.4', slug: 'administration/migrations/bailo-0.4' },
   { title: 'Bailo v2.0', slug: 'administration/migrations/bailo-2.0' },
-
-  { title: 'Managing Bailo', slug: 'administration/managing-bailo', header: true },
+  { title: 'DataBase Scripts', slug: 'administration/migrations/scripts' },
 ]
 
 export interface DirectoryTree {

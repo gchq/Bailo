@@ -80,7 +80,7 @@ confidence=
 
 # file where it should appear only once). You can also use "--disable=all" to
 
-# disable everything first and then reenable specific checks. For example, if
+# disable everything first and then re-enable specific checks. For example, if
 
 # you want to run only the similarities checker, you can use "--disable=all
 

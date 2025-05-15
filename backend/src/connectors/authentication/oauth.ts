@@ -3,15 +3,14 @@ import { NextFunction, Request, Response, Router } from 'express'
 import session from 'express-session'
 import grant from 'grant'
 
-import { listUsers as listUsersCognito } from '../../clients/cognito.js'
+import { getGroupMembership, listUsers as listUsersCognito } from '../../clients/cognito.js'
 import { listUsers as listUsersKeycloak } from '../../clients/keycloak.js'
-
 import { UserInterface } from '../../models/User.js'
 import config from '../../utils/config.js'
 import { getConnectionURI } from '../../utils/database.js'
 import { fromEntity, toEntity } from '../../utils/entity.js'
 import { InternalError, NotFound } from '../../utils/error.js'
-import { BaseAuthenticationConnector, RoleKeys, UserInformation } from './Base.js'
+import { BaseAuthenticationConnector, RoleKeys, Roles, UserInformation } from './Base.js'
 
 function listUsers(query: string, exactMatch = false) {
   if (config.oauth.cognito) {
@@ -25,6 +24,7 @@ function listUsers(query: string, exactMatch = false) {
 
 const OauthEntityKind = {
   User: 'user',
+  Group: 'group',
 } as const
 
 export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
@@ -84,7 +84,12 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
     return router
   }
 
-  async hasRole(_user: UserInterface, _role: RoleKeys) {
+  async hasRole(user: UserInterface, role: RoleKeys) {
+    if (role === Roles.Admin) {
+      const adminGroup = config.oauth.cognito.adminGroupName
+      const admins = await this.getEntityMembers(toEntity(OauthEntityKind.Group, adminGroup))
+      return admins.includes(user.dn)
+    }
     return false
   }
 
@@ -116,10 +121,12 @@ export class OauthAuthenticationConnector extends BaseAuthenticationConnector {
   }
 
   async getEntityMembers(entity: string): Promise<string[]> {
-    const { kind } = fromEntity(entity)
+    const { kind, value } = fromEntity(entity)
     switch (kind) {
       case OauthEntityKind.User:
         return [entity]
+      case OauthEntityKind.Group:
+        return await getGroupMembership(value)
       default:
         throw new Error(`Unable to get members, entity kind not recognised: ${entity}`)
     }

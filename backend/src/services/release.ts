@@ -3,7 +3,7 @@ import { Optional } from 'utility-types'
 
 import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { FileInterface, FileInterfaceDoc } from '../models/File.js'
+import { FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import Release, { ImageRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
@@ -21,12 +21,37 @@ import { listModelImages } from './registry.js'
 import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
-async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
+export function isReleaseDoc(data: unknown): data is ReleaseDoc {
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+
+  if (
+    !('modelId' in data) ||
+    !('modelCardVersion' in data) ||
+    !('semver' in data) ||
+    !('notes' in data) ||
+    !('minor' in data) ||
+    !('draft' in data) ||
+    !('fileIds' in data) ||
+    !('images' in data) ||
+    !('deleted' in data) ||
+    !('createdBy' in data) ||
+    !('createdAt' in data) ||
+    !('updatedAt' in data) ||
+    !('_id' in data)
+  ) {
+    return false
+  }
+  return true
+}
+
+export async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
   if (!semver.valid(release.semver)) {
     throw BadReq(`The version '${release.semver}' is not a valid semver value.`)
   }
 
-  if (release.images) {
+  if (release.images && release.images.length > 0) {
     const registryImages = await listModelImages(user, release.modelId)
 
     const initialValue: ImageRef[] = []
@@ -55,12 +80,16 @@ async function validateRelease(user: UserInterface, model: ModelDoc, release: Re
     const fileNames: Array<string> = []
 
     for (const fileId of release.fileIds) {
-      let file: FileInterfaceDoc | undefined
+      let file: FileWithScanResultsInterface | undefined
       try {
         file = await getFileById(user, fileId)
       } catch (e) {
         if (isBailoError(e) && e.code === 404) {
-          throw BadReq('Unable to create release as the file cannot be found.', { fileId })
+          throw BadReq('Unable to create release as the file cannot be found.', {
+            fileId,
+            semver: release.semver,
+            modelId: release.modelId,
+          })
         }
         throw e
       }
@@ -177,7 +206,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
   return release
 }
 
-export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'fileIds' | 'images'>
+export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'modelCardVersion' | 'fileIds' | 'images'>
 export async function updateRelease(user: UserInterface, modelId: string, semver: string, delta: UpdateReleaseParams) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {
@@ -246,19 +275,41 @@ export async function getModelReleases(
   user: UserInterface,
   modelId: string,
   querySemver?: string,
-): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>> {
+): Promise<Array<ReleaseDoc & { model: ModelInterface; files: FileWithScanResultsInterface[] }>> {
   const query = querySemver === undefined ? { modelId } : convertSemverQueryToMongoQuery(querySemver, modelId)
   const results = await Release.aggregate()
     .match(query)
     .sort({ updatedAt: -1 })
     .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
-    .lookup({ from: 'v2_files', localField: 'fileIds', foreignField: '_id', as: 'files' })
+    .lookup({
+      from: 'v2_files',
+      as: 'files',
+      // Backwards compatibility for MongoDB <=4.4 "$lookup with 'pipeline' may not specify 'localField' or 'foreignField'".
+      // `let` & `pipeline[].$match.$expr` provide equivalent functionality to `localField: 'fileIds', foreignField: '_id',`
+      let: { fileIds: '$fileIds' },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $in: ['$_id', { $ifNull: ['$$fileIds', []] }] },
+          },
+        },
+        { $addFields: { id: { $toString: '$_id' } } },
+        {
+          $lookup: {
+            from: 'v2_scans',
+            localField: 'id',
+            foreignField: 'fileId',
+            as: 'avScan',
+          },
+        },
+      ],
+    })
     .append({ $set: { model: { $arrayElemAt: ['$model', 0] } } })
 
   const model = await getModelById(user, modelId)
 
   const auths = await authorisation.releases(user, model, results, ReleaseAction.View)
-  return results.reduce<Array<ReleaseDoc & { model: ModelInterface; files: FileInterface[] }>>(
+  return results.reduce<Array<ReleaseDoc & { model: ModelInterface; files: FileWithScanResultsInterface[] }>>(
     (updatedResults, result, index) => {
       if (auths[index].success) {
         updatedResults.push({ ...result, semver: semverObjectToString(result.semver) })
@@ -283,12 +334,12 @@ export async function getReleasesForExport(user: UserInterface, modelId: string,
     throw NotFound('The following releases were not found.', { modelId, releases: missing })
   }
 
-  const auths = await authorisation.releases(user, model, releases, ReleaseAction.Update)
-  const noAuth = releases.filter((_, i) => !auths[i].success)
-  if (noAuth.length > 0) {
+  const authResponses = await authorisation.releases(user, model, releases, ReleaseAction.Export)
+  const failedReleases = releases.filter((_, i) => !authResponses[i].success)
+  if (failedReleases.length > 0) {
     throw Forbidden('You do not have the necessary permissions to export these releases.', {
       modelId,
-      releases: noAuth.map((release) => release.semver),
+      releases: failedReleases.map((release) => release.semver),
       user,
     })
   }
@@ -547,4 +598,19 @@ export async function getAllFileIds(modelId: string, semvers: string[]) {
     return result.at(0).fileIds
   }
   return []
+}
+
+export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
+  const foundRelease = await Release.findOneAndUpdate(
+    { modelId: release.modelId, semver: semverStringToObject(release.semver) },
+    release,
+    {
+      upsert: true,
+    },
+  )
+
+  if (!foundRelease) {
+    // This release did not already exist in Mongo, so it is a new release. Return it to be audited.
+    return release
+  }
 }

@@ -5,7 +5,6 @@ import DefaultErrorWrapper from './ErrorWrapper'
 
 export default function MultipleErrorWrapper(generic: string, errors: any, ErrorWrapper: any = DefaultErrorWrapper) {
   for (const key of Object.keys(errors)) {
-    // eslint-disable-next-line react/destructuring-assignment
     const error = errors[key]
 
     if (error) {

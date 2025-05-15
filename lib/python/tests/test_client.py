@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
+# isort: split
+
 from bailo import Client, ModelVisibility, SchemaKind
 from bailo.core.enums import EntryKind
 
@@ -17,19 +21,25 @@ def test_post_model(requests_mock):
         kind=EntryKind.MODEL,
         description="test",
         visibility=ModelVisibility.PUBLIC,
+        organisation="Example Organisation",
+        state="Development",
     )
 
     assert result == {"success": True}
 
 
-def test_get_models(requests_mock):
+@pytest.mark.parametrize(
+    ("libraries", "filters"),
+    [(None, []), (None, [])],
+)
+def test_get_models(libraries, filters, requests_mock):
     requests_mock.get(
         "https://example.com/api/v2/models/search?task=image_classification",
         json={"success": True},
     )
 
     client = Client("https://example.com")
-    result = client.get_models(task="image_classification")
+    result = client.get_models(task="image_classification", libraries=libraries, filters=filters)
 
     assert result == {"success": True}
 
@@ -50,6 +60,8 @@ def test_patch_model(requests_mock):
     result = client.patch_model(
         model_id="test_id",
         name="test",
+        organisation="Example Organisation",
+        state="Development",
     )
 
     assert result == {"success": True}
@@ -216,6 +228,40 @@ def test_get_reviews(requests_mock):
     client = Client("https://example.com")
     result = client.get_reviews(
         active=True,
+    )
+
+    assert result == {"success": True}
+
+
+@pytest.mark.parametrize(("comment"), [(None, "test_comment")])
+def test_post_release_review(comment, requests_mock):
+    requests_mock.post("https://example.com/api/v2/model/test_id/release/1.0.0/review", json={"success": True})
+
+    client = Client("https://example.com")
+    result = client.post_release_review(
+        model_id="test_id",
+        version="1.0.0",
+        role="test_role",
+        decision="test_decision",
+        comment=comment,
+    )
+
+    assert result == {"success": True}
+
+
+@pytest.mark.parametrize(("comment"), [(None, "test_comment")])
+def test_post_access_request_review(comment, requests_mock):
+    requests_mock.post(
+        "https://example.com/api/v2/model/test_id/access-request/test_access_request/review", json={"success": True}
+    )
+
+    client = Client("https://example.com")
+    result = client.post_access_request_review(
+        model_id="test_id",
+        access_request_id="test_access_request",
+        role="test_role",
+        decision="test_decision",
+        comment=comment,
     )
 
     assert result == {"success": True}

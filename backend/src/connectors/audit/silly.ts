@@ -1,17 +1,17 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ModelCardRevisionInterface } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
+import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
+import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { BaseAuditConnector } from './Base.js'
 
@@ -24,7 +24,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onViewModel(_req: Request, _model: ModelDoc) {}
   onUpdateModel(_req: Request, _model: ModelDoc) {}
   onSearchModel(_req: Request, _models: ModelSearchResult[]) {}
-  onCreateModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
+  onCreateModelCard(_req: Request, _model: ModelDoc, _modelCard: ModelCardInterface) {}
   onViewModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
   onUpdateModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
   onViewModelCardRevisions(_req: Request, _modelId: string, _modelCards: ModelCardInterface[]) {}
@@ -63,12 +63,13 @@ export class SillyAuditConnector extends BaseAuditConnector {
     _req: Request,
     _mirroredModel: ModelInterface,
     _sourceModelId: string,
-    _modelCardVersions: number[],
     _exporter: string,
-    _newModelCards: ModelCardRevisionInterface[],
+    _importResult: MongoDocumentImportInformation | FileImportInformation,
   ) {}
   onError(_req: Request, _error: BailoError) {}
   onCreateCommentResponse(_req: Request, _responseInterface: ResponseInterface) {}
   onViewResponses(_req: Request, _responseInters: ResponseInterface[]) {}
   onUpdateResponse(_req: Request, _responseId: string) {}
+  onCreateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
+  onViewReviewRoles(_req: Request) {}
 }

@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import pytest
-from bailo import Client, Experiment, Model, Datacard, ModelVisibility
+from bailo.core.enums import MinimalSchema
+
+# isort: split
+
+from bailo import Client, Datacard, Experiment, Model, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 
@@ -18,16 +22,19 @@ def test_create_experiment_from_model(local_model):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "visibility"),
+    ("name", "description", "organisation", "state", "visibility"),
     [
-        ("test-model", "test", ModelVisibility.PUBLIC),
-        ("test-model", "test", None),
+        ("test-model", "test", None, None, ModelVisibility.PUBLIC),
+        ("test-model", "test", None, None, None),
+        ("test-model", "test", "Example Organisation", "Development", None),
     ],
 )
 def test_create_get_from_id_and_update(
     name: str,
     description: str,
     visibility: ModelVisibility | None,
+    organisation: str | None,
+    state: str | None,
     integration_client: Client,
 ):
     # Create model
@@ -36,6 +43,8 @@ def test_create_get_from_id_and_update(
         name=name,
         description=description,
         visibility=visibility,
+        organisation=organisation,
+        state=state,
     )
     model.card_from_schema("minimal-general-v10")
     assert isinstance(model, Model)
@@ -53,7 +62,8 @@ def test_create_get_from_id_and_update(
 
 @pytest.mark.integration
 def test_search_models(integration_client):
-    models = Model.search(client=integration_client)
+    with pytest.warns(UserWarning):
+        models = Model.search(client=integration_client)
 
     assert all(isinstance(model, Model) for model in models)
 
@@ -215,12 +225,13 @@ def test_import_model_files_no_run(integration_client, mlflow_model_no_run, requ
 
 @pytest.mark.mlflow
 def test_import_model_no_schema(integration_client, mlflow_model, request):
-    with pytest.raises(BailoException):
-        model = Model.from_mlflow(
-            client=integration_client,
-            mlflow_uri=request.config.mlflow_uri,
-            name=mlflow_model,
-        )
+    model = Model.from_mlflow(
+        client=integration_client,
+        mlflow_uri=request.config.mlflow_uri,
+        name=mlflow_model,
+    )
+
+    assert model.model_card_schema == MinimalSchema.MODEL
 
 
 @pytest.mark.mlflow

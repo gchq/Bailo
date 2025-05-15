@@ -1,26 +1,26 @@
-"""FastAPI app.
-"""
+"""FastAPI app to provide a ModelScan REST API."""
 
 from __future__ import annotations
 
 import logging
-from contextlib import nullcontext
 from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import NamedTemporaryFile
 from typing import Annotated, Any
 
 import modelscan
 import uvicorn
+from content_size_limit_asgi import ContentSizeLimitMiddleware
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 from modelscan.modelscan import ModelScan
 from pydantic import BaseModel
 
-from bailo_modelscan_api.config import Settings
-from bailo_modelscan_api.dependencies import safe_join
+# isort: split
 
-logger = logging.getLogger(__name__)
+from bailo_modelscan_api.config import Settings
+
+logger = logging.getLogger("uvicorn.error")
 
 
 @lru_cache
@@ -32,6 +32,13 @@ def get_settings() -> Settings:
     return Settings()
 
 
+class CustomMiddlewareHTTPExceptionWrapper(HTTPException):
+    """Wrapper of HTTPException to make ContentSizeLimitMiddleware raise HTTPException status_code 413 which FastAPI can capture and return."""
+
+    def __init__(self, detail):
+        super().__init__(status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE.value, detail=detail)
+
+
 # Instantiate FastAPI app with various dependencies.
 app = FastAPI(
     title=get_settings().app_name,
@@ -39,6 +46,12 @@ app = FastAPI(
     description=get_settings().app_description,
     version=get_settings().app_version,
     dependencies=[Depends(get_settings)],
+)
+# Limit the maximum filesize
+app.add_middleware(
+    ContentSizeLimitMiddleware,
+    max_content_size=get_settings().maximum_filesize,
+    exception_cls=CustomMiddlewareHTTPExceptionWrapper,
 )
 
 
@@ -91,13 +104,21 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                         "Normal": {
                             "value": {
                                 "summary": {
-                                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
                                     "total_issues": 0,
                                     "input_path": "/foo/bar/safe_model.pkl",
                                     "absolute_path": "/foo/bar",
                                     "modelscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
-                                    "scanned": {"total_scanned": 1, "scanned_files": ["safe_model.pkl"]},
+                                    "scanned": {
+                                        "total_scanned": 1,
+                                        "scanned_files": ["safe_model.pkl"],
+                                    },
                                     "skipped": {
                                         "total_skipped": 0,
                                         "skipped_files": [],
@@ -110,14 +131,25 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                         "Issue": {
                             "value": {
                                 "summary": {
-                                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 1, "HIGH": 0, "CRITICAL": 0},
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 1,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
                                     "total_issues": 1,
                                     "input_path": "/foo/bar/unsafe_model.h5",
                                     "absolute_path": "/foo/bar",
                                     "modelscan_version": "0.8.1",
                                     "timestamp": "2024-11-19T12:00:00.000000",
-                                    "scanned": {"total_scanned": 1, "scanned_files": ["unsafe_model.h5"]},
-                                    "skipped": {"total_skipped": 0, "skipped_files": []},
+                                    "scanned": {
+                                        "total_scanned": 1,
+                                        "scanned_files": ["unsafe_model.h5"],
+                                    },
+                                    "skipped": {
+                                        "total_skipped": 0,
+                                        "skipped_files": [],
+                                    },
                                 },
                                 "issues": [
                                     {
@@ -153,14 +185,24 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
                                     },
                                     "timestamp": "2024-11-19T12:00:00.000000",
                                     "total_issues": 0,
-                                    "total_issues_by_severity": {"CRITICAL": 0, "HIGH": 0, "LOW": 0, "MEDIUM": 0},
+                                    "total_issues_by_severity": {
+                                        "CRITICAL": 0,
+                                        "HIGH": 0,
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                    },
                                 },
                             }
                         },
                         "Error": {
                             "value": {
                                 "summary": {
-                                    "total_issues_by_severity": {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0},
+                                    "total_issues_by_severity": {
+                                        "LOW": 0,
+                                        "MEDIUM": 0,
+                                        "HIGH": 0,
+                                        "CRITICAL": 0,
+                                    },
                                     "total_issues": 0,
                                     "input_path": "/foo/bar/null.h5",
                                     "absolute_path": "/foo/bar",
@@ -196,7 +238,9 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]) -> ApiInfor
             "description": "The server could not complete the request",
             "content": {
                 "application/json": {
-                    "example": {"detail": "An error occurred while processing the uploaded file's name."}
+                    "example": {
+                        "detail": "The following error was raised during a pytorch scan:\nInvalid magic number for file: /tmp/tmpzlugzlrh.pt"
+                    }
                 }
             },
         },
@@ -219,31 +263,15 @@ async def scan_file(
         # Instantiate ModelScan
         modelscan_model = ModelScan(settings=settings.modelscan_settings)
 
-        # Use Setting's download_dir if defined else use a temporary directory.
-        with TemporaryDirectory() if not settings.download_dir else nullcontext(settings.download_dir) as download_dir:
-            if in_file.filename and str(in_file.filename).strip():
-                # Prevent escaping to a parent dir
-                try:
-                    pathlib_path = safe_join(download_dir, in_file.filename)
-                except ValueError:
-                    logger.exception("Failed to safely join the filename to the path.")
-                    raise HTTPException(
-                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                        detail="An error occurred while processing the uploaded file's name.",
-                    )
-            else:
-                raise HTTPException(
-                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
-                    detail="An error occurred while extracting the uploaded file's name.",
-                )
-
+        file_suffix = Path(str(in_file.filename).strip()).suffix
+        with NamedTemporaryFile("wb", suffix=file_suffix, delete=False) as out_file:
+            file_path = Path(out_file.name)
             # Write the streamed in_file to disk.
             # This is a bit silly as modelscan will ultimately load this back into memory, but modelscan
-            # doesn't currently support streaming.
+            # doesn't currently support streaming directly from memory.
             try:
-                with open(pathlib_path, "wb") as out_file:
-                    while content := in_file.file.read(settings.block_size):
-                        out_file.write(content)
+                while content := in_file.file.read(settings.block_size):
+                    out_file.write(content)
             except OSError as exception:
                 logger.exception("Failed writing the file to the disk.")
                 raise HTTPException(
@@ -251,13 +279,13 @@ async def scan_file(
                     detail=f"An error occurred while trying to write the uploaded file to the disk: {exception}",
                 ) from exception
 
-            # Scan the uploaded file.
-            logger.info("Initiating ModelScan scan of %s", pathlib_path)
-            result = modelscan_model.scan(pathlib_path)
-            logger.info("ModelScan result: %s", result)
+        # Scan the uploaded file.
+        logger.info("Initiating ModelScan scan of %s", file_path)
+        result = modelscan_model.scan(file_path)
+        logger.info("ModelScan result: %s", result)
 
-            # Finally, return the result.
-            return result
+        # Finally, return the result.
+        return result
 
     except HTTPException:
         # Re-raise HTTPExceptions.
@@ -274,12 +302,11 @@ async def scan_file(
     finally:
         try:
             # Clean up the downloaded file as a background task to allow returning sooner.
-            # If using a temporary dir then this would happen anyway, but if Settings' download_dir evaluates
-            # then this is required.
+            # The OS should handle this anyway, but it's safer to be explicit.
             logger.info("Cleaning up downloaded file.")
-            background_tasks.add_task(Path.unlink, pathlib_path, missing_ok=True)
+            background_tasks.add_task(Path.unlink, file_path, missing_ok=True)
         except UnboundLocalError:
-            # pathlib_path may not exist.
+            # file_path may not be defined.
             logger.exception("An error occurred while trying to cleanup the downloaded file.")
 
 

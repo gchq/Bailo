@@ -1,16 +1,17 @@
 import { Request } from 'express'
 
 import { AccessRequestDoc } from '../../models/AccessRequest.js'
-import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
+import { FileInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ModelCardRevisionInterface } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
+import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
+import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 
 const AuditKind = {
@@ -122,6 +123,16 @@ export const AuditInfo = {
     description: 'Updated a comment or review response',
     auditKind: AuditKind.Update,
   },
+  CreateReviewRole: {
+    typeId: 'CreateReviewRole',
+    description: 'Created a new review role',
+    auditKind: AuditKind.Create,
+  },
+  ViewReviewRoles: {
+    typeId: 'ViewReviewRole',
+    description: 'Viewed a list of review roles',
+    auditKind: AuditKind.View,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -131,13 +142,13 @@ export abstract class BaseAuditConnector {
   abstract onUpdateModel(req: Request, model: ModelDoc)
   abstract onSearchModel(req: Request, models: ModelSearchResult[])
 
-  abstract onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
+  abstract onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface)
   abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[])
 
-  abstract onCreateFile(req: Request, file: FileInterfaceDoc)
-  abstract onViewFile(req: Request, file: FileInterfaceDoc)
+  abstract onCreateFile(req: Request, file: FileInterface)
+  abstract onViewFile(req: Request, file: FileInterface)
   abstract onViewFiles(req: Request, modelId: string, files: FileInterface[])
   abstract onDeleteFile(req: Request, modelId: string, fileId: string)
   abstract onUpdateFile(req: Request, modelId: string, fileId: string)
@@ -188,10 +199,12 @@ export abstract class BaseAuditConnector {
     req: Request,
     mirroredModel: ModelInterface,
     sourceModelId: string,
-    modelCardVersions: number[],
     exporter: string,
-    newModelCards: ModelCardRevisionInterface[],
+    importResult: MongoDocumentImportInformation | FileImportInformation,
   )
+
+  abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
+  abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[])
 
   abstract onError(req: Request, error: BailoError)
 

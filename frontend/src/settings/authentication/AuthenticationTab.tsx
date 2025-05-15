@@ -9,7 +9,8 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { TokenInterface } from 'types/types'
-import { formatDateString, sortByCreatedAtDescending } from 'utils/dateUtils'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
+import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function AuthenticationTab() {

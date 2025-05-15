@@ -1,7 +1,7 @@
 import { LoadingButton } from '@mui/lab'
 import { Stack, Typography } from '@mui/material'
-import { patchModel, useGetModel, useGetModelRoles } from 'actions/model'
-import { useState } from 'react'
+import { patchModel, useGetCurrentUserPermissionsForEntry, useGetModel, useGetModelRoles } from 'actions/model'
+import { useCallback, useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
 import EntryRolesInfo from 'src/entry/model/settings/EntryRolesInfo'
@@ -19,7 +19,7 @@ type EntryAccessTabProps = {
 export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [accessList, setAccessList] = useState<CollaboratorEntry[]>(entry.collaborators)
+  const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(entry.collaborators)
 
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
   const {
@@ -28,11 +28,17 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
     isModelRolesError: isEntryRolesError,
   } = useGetModelRoles(entry.id)
 
+  const { mutateEntryUserPermissions } = useGetCurrentUserPermissionsForEntry(entry.id)
   const sendNotification = useNotification()
 
-  async function updateAccessList() {
+  const handleCollaboratorsChange = useCallback(
+    (updatedCollaborators: CollaboratorEntry[]) => setCollaborators(updatedCollaborators),
+    [],
+  )
+
+  async function updateCollaborators() {
     setLoading(true)
-    const res = await patchModel(entry.id, { collaborators: accessList })
+    const res = await patchModel(entry.id, { collaborators })
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
     } else {
@@ -42,6 +48,7 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
       mutateEntry()
+      mutateEntryUserPermissions()
     }
     setLoading(false)
   }
@@ -65,11 +72,11 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
       </Stack>
       <EntryAccessInput
         value={entry.collaborators}
-        onUpdate={(val) => setAccessList(val)}
+        onChange={handleCollaboratorsChange}
         entryKind={entry.kind}
         entryRoles={entryRoles}
       />
-      <LoadingButton variant='contained' aria-label='Save access list' onClick={updateAccessList} loading={loading}>
+      <LoadingButton variant='contained' aria-label='Save access list' onClick={updateCollaborators} loading={loading}>
         Save
       </LoadingButton>
       <MessageAlert message={errorMessage} severity='error' />

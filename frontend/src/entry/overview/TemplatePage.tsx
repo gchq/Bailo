@@ -36,30 +36,6 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
           alignItems='center'
           divider={<Divider orientation='vertical' flexItem />}
         >
-          {entry.kind === EntryKind.MODEL && (
-            <Card
-              sx={{
-                width: '300px',
-                p: 2,
-              }}
-            >
-              <Stack spacing={2}>
-                <Typography component='h3' variant='h6' color='primary'>
-                  Create from a template
-                </Typography>
-                <Typography>Create a model card using an existing model as a template.</Typography>
-                <Button
-                  sx={{ width: '100%' }}
-                  variant='contained'
-                  href={`/${entry.kind}/${entry.id}/template`}
-                  LinkComponent={Link}
-                  disabled={!!entry.settings.mirror?.sourceModelId}
-                >
-                  Create
-                </Button>
-              </Stack>
-            </Card>
-          )}
           <Card
             sx={{
               width: '300px',
@@ -85,6 +61,30 @@ export default function TemplatePage({ entry }: TemplatePageProps) {
               </Button>
             </Stack>
           </Card>
+          {entry.kind === EntryKind.MODEL && (
+            <Card
+              sx={{
+                width: '300px',
+                p: 2,
+              }}
+            >
+              <Stack spacing={2}>
+                <Typography component='h3' variant='h6' color='primary'>
+                  Create from a template
+                </Typography>
+                <Typography>Create a model card using an existing model as a template.</Typography>
+                <Button
+                  sx={{ width: '100%' }}
+                  variant='contained'
+                  href={`/${entry.kind}/${entry.id}/template`}
+                  LinkComponent={Link}
+                  disabled={!!entry.settings.mirror?.sourceModelId}
+                >
+                  Create
+                </Button>
+              </Stack>
+            </Card>
+          )}
         </Stack>
       </Stack>
     </Box>

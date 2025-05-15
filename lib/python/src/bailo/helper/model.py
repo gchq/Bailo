@@ -7,20 +7,23 @@ import tempfile
 import warnings
 from typing import Any
 
+from semantic_version import Version
+
+# isort: split
+
 from bailo.core.client import Client
 from bailo.core.enums import EntryKind, MinimalSchema, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 from bailo.helper.entry import Entry
 from bailo.helper.release import Release
-from semantic_version import Version
 
 try:
     import mlflow
 
-    ml_flow = True
+    ML_FLOW = True
 except ImportError:
-    ml_flow = False
+    ML_FLOW = False
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +35,8 @@ class Model(Entry):
     :param model_id: A unique ID for the model
     :param name: Name of model
     :param description: Description of model
+    :param organisation: Organisation responsible for the model, defaults to None
+    :param state: Development readiness of the model, defaults to None
     :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -41,6 +46,8 @@ class Model(Entry):
         model_id: str,
         name: str,
         description: str,
+        organisation: str | None = None,
+        state: str | None = None,
         visibility: ModelVisibility | None = None,
     ) -> None:
         super().__init__(
@@ -50,6 +57,8 @@ class Model(Entry):
             description=description,
             kind=EntryKind.MODEL,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
 
         self.model_id = model_id
@@ -60,6 +69,8 @@ class Model(Entry):
         client: Client,
         name: str,
         description: str,
+        organisation: str | None = None,
+        state: str | None = None,
         visibility: ModelVisibility | None = None,
     ) -> Model:
         """Build a model from Bailo and upload it.
@@ -67,6 +78,8 @@ class Model(Entry):
         :param client: A client object used to interact with Bailo
         :param name: Name of model
         :param description: Description of model
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
         :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
@@ -75,9 +88,11 @@ class Model(Entry):
             kind=EntryKind.MODEL,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
         model_id = res["model"]["id"]
-        logger.info(f"Model successfully created on server with ID %s.", model_id)
+        logger.info("Model successfully created on server with ID %s.", model_id)
 
         model = cls(
             client=client,
@@ -85,6 +100,8 @@ class Model(Entry):
             name=name,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
 
         model._unpack(res["model"])
@@ -103,13 +120,15 @@ class Model(Entry):
         if res["kind"] != "model":
             raise BailoException(f"ID {model_id} does not belong to a model. Did you mean to use Datacard.from_id()?")
 
-        logger.info(f"Model %s successfully retrieved from server.", model_id)
+        logger.info("Model %s successfully retrieved from server.", model_id)
 
         model = cls(
             client=client,
             model_id=model_id,
             name=res["name"],
             description=res["description"],
+            organisation=res.get("organisation"),
+            state=res.get("state"),
         )
 
         model._unpack(res)
@@ -145,6 +164,8 @@ class Model(Entry):
                 model_id=model["id"],
                 name=model["name"],
                 description=model["description"],
+                organisation=res.get("organisation"),
+                state=res.get("state"),
             )
             model_obj._unpack(res_model)
             model_obj.get_card_latest()
@@ -162,6 +183,8 @@ class Model(Entry):
         version: str | None = None,
         files: bool = True,
         visibility: ModelVisibility | None = None,
+        organisation: str | None = None,
+        state: str | None = None,
     ) -> Model:
         """Import an MLFlow Model into Bailo.
 
@@ -172,17 +195,19 @@ class Model(Entry):
         :param version: Specific MLFlow model version to import, defaults to None
         :param files: Import files?, defaults to True
         :param visibility: Visibility of model on Bailo, using ModelVisibility enum (e.g Public or Private), defaults to None
+        :param organisation: Organisation responsible for the model, defaults to None
+        :param state: Development readiness of the model, defaults to None
         :return: A model object
         """
-        if not ml_flow:
+        if not ML_FLOW:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
-        mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)
+        mlflow_client = mlflow.tracking.MlflowClient(tracking_uri=mlflow_uri)  # type: ignore[reportPrivateImportUsage]
         mlflow.set_tracking_uri(mlflow_uri)
         filter_string = f"name = '{name}'"
 
         res = mlflow_client.search_model_versions(filter_string=filter_string, order_by=["version_number DESC"])
-        if not len(res):
+        if not res:
             raise BailoException("No MLFlow models found. Are you sure the name/alias/version provided is correct?")
 
         sel_model = None
@@ -203,9 +228,11 @@ class Model(Entry):
             kind=EntryKind.MODEL,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
         model_id = bailo_res["model"]["id"]
-        logger.info(f"MLFlow model successfully imported to Bailo with ID %s", model_id)
+        logger.info("MLFlow model successfully imported to Bailo with ID %s", model_id)
 
         model = cls(
             client=client,
@@ -213,6 +240,8 @@ class Model(Entry):
             name=name,
             description=description,
             visibility=visibility,
+            organisation=organisation,
+            state=state,
         )
         model._unpack(bailo_res["model"])
 
@@ -230,10 +259,10 @@ class Model(Entry):
             if artifact_uri is None:
                 raise BailoException("Artifact URI could not be found, therefore artifacts cannot be transferred.")
 
-            if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:
+            if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:  # type: ignore[reportPrivateImportUsage]
                 temp_dir = os.path.join(tempfile.gettempdir(), "mlflow_model")
                 mlflow_dir = os.path.join(temp_dir, f"mlflow_{run_id}")
-                mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
+                mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)  # type: ignore[reportPrivateImportUsage]
                 release.upload(mlflow_dir)
         return model
 
@@ -299,7 +328,7 @@ class Model(Entry):
         for release in res["releases"]:
             releases.append(self.get_release(version=release["semver"]))
 
-        logger.info(f"Successfully retrieved all releases for model %s.", self.model_id)
+        logger.info("Successfully retrieved all releases for model %s.", self.model_id)
 
         return releases
 
@@ -322,7 +351,7 @@ class Model(Entry):
 
         latest_release = max(releases)
         logger.info(
-            f"latest_release (%s) for %s retrieved successfully.",
+            "latest_release (%s) for %s retrieved successfully.",
             str(latest_release.version),
             self.model_id,
         )
@@ -336,7 +365,7 @@ class Model(Entry):
         """
         res = self.client.get_all_images(model_id=self.model_id)
 
-        logger.info(f"Images for %s retrieved successfully.", self.model_id)
+        logger.info("Images for %s retrieved successfully.", self.model_id)
 
         return res["images"]
 
@@ -407,6 +436,7 @@ class Experiment:
         self.run = -1
         self.temp_dir = os.path.join(tempfile.gettempdir(), "bailo_runs")
         self.published = False
+        self.run_data = {}
 
     @classmethod
     def create(
@@ -439,7 +469,7 @@ class Experiment:
         self.raw.append(self.run_data)
 
         if not is_mlflow:
-            logger.info(f"Bailo tracking run %s.", self.run)
+            logger.info("Bailo tracking run %s.", self.run)
 
     def log_params(self, params: dict[str, Any]):
         """Logs parameters to the current run.
@@ -476,14 +506,14 @@ class Experiment:
         :param experiment_id: MLFlow Tracking experiment ID
         :raises ImportError: Import error if MLFlow not installed
         """
-        if not ml_flow:
+        if not ML_FLOW:
             raise ImportError("Optional MLFlow dependencies (needed for this method) are not installed.")
 
-        client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)
+        client = mlflow.tracking.MlflowClient(tracking_uri=tracking_uri)  # type: ignore[reportPrivateImportUsage]
         runs = client.search_runs([experiment_id])
         if len(runs):
             logger.info(
-                f"Successfully retrieved MLFlow experiment %s from tracking server. %d were found.",
+                "Successfully retrieved MLFlow experiment %s from tracking server. %d were found.",
                 experiment_id,
                 len(runs),
             )
@@ -508,12 +538,12 @@ class Experiment:
             if status != "FINISHED":
                 continue
 
-            if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:
+            if mlflow.artifacts.list_artifacts(artifact_uri=artifact_uri) is not None:  # type: ignore[reportPrivateImportUsage]
                 mlflow_dir = os.path.join(self.temp_dir, f"mlflow_{run_id}")
-                mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)
+                mlflow.artifacts.download_artifacts(artifact_uri=artifact_uri, dst_path=mlflow_dir)  # type: ignore[reportPrivateImportUsage]
                 artifacts.append(mlflow_dir)
                 logger.info(
-                    f"Successfully downloaded artifacts for MLFlow experiment %s to %s.",
+                    "Successfully downloaded artifacts for MLFlow experiment %s to %s.",
                     experiment_id,
                     mlflow_dir,
                 )
@@ -525,7 +555,7 @@ class Experiment:
             self.log_dataset("".join(datasets_str))
             self.run_data["run"] = info.run_id
 
-        logger.info(f"Successfully imported MLFlow experiment %s.", experiment_id)
+        logger.info("Successfully imported MLFlow experiment %s.", experiment_id)
 
     def publish(
         self,
@@ -563,7 +593,7 @@ class Experiment:
                 "Either select_by (e.g. 'accuracy MIN|MAX') or run_id is required to publish an experiment run."
             )
 
-        sel_run: dict[any, any]
+        sel_run: dict[Any, Any]
         if (select_by is not None) and (run_id is None):
             sel_run = self.__select_run(select_by=select_by)
 
@@ -601,7 +631,7 @@ class Experiment:
             release_new = self.model.create_release(version=release_new_version, minor=True, notes=notes)
 
             logger.info(
-                f"Uploading %d artifacts to version %s of model %s.",
+                "Uploading %d artifacts to version %s of model %s.",
                 len(artifacts),
                 str(release_new_version),
                 self.model.model_id,
@@ -614,7 +644,7 @@ class Experiment:
                 shutil.rmtree(self.temp_dir)
 
         logger.info(
-            f"Successfully published experiment run %s to model %s.",
+            "Successfully published experiment run %s to model %s.",
             str(run_id),
             self.model.model_id,
         )
@@ -625,7 +655,7 @@ class Experiment:
         if len(select_by_split) != 2:
             raise BailoException("Invalid select_by string. Expected format is 'metric_name MIN|MAX'.")
         order_str = select_by_split[1].upper()
-        order_opt = ["MIN", "MAX"]
+        order_opt = {"MIN": 0, "MAX": -1}
         if order_str not in order_opt:
             raise BailoException(f"Runs can only be ordered by MIN or MAX, not {order_str}.")
         target_str = select_by_split[0]
@@ -645,7 +675,4 @@ class Experiment:
 
         # Sort experiment runs by target value into ascending order, and select first or last depending on order_str
         ordered_runs = sorted(runs, key=lambda run: run["target"])
-        if order_str == "MIN":
-            return ordered_runs[0]
-        if order_str == "MAX":  # MAX
-            return ordered_runs[-1]
+        return ordered_runs[order_opt[order_str]]

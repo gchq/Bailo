@@ -11,6 +11,36 @@ exports[`services > file > downloadFile > success 1`] = `
 exports[`services > file > getFilesByIds > success 1`] = `
 [
   {
+    "_id": {
+      "toString": [MockFunction spy],
+    },
+    "avScan": [],
+    "example": "file",
+  },
+]
+`;
+
+exports[`services > file > getFilesByIds > success with scans mapped 1`] = `
+[
+  {
+    "_id": "123",
+    "avScan": [
+      {
+        "fileId": "123",
+      },
+      {
+        "fileId": "123",
+      },
+    ],
+    "example": "file",
+  },
+  {
+    "_id": "321",
+    "avScan": [
+      {
+        "fileId": "321",
+      },
+    ],
     "example": "file",
   },
 ]
@@ -19,6 +49,9 @@ exports[`services > file > getFilesByIds > success 1`] = `
 exports[`services > file > getFilesByModel > success 1`] = `
 [
   {
+    "_id": {
+      "toString": [MockFunction spy],
+    },
     "example": "file",
   },
 ]
@@ -26,24 +59,100 @@ exports[`services > file > getFilesByModel > success 1`] = `
 
 exports[`services > file > removeFile > success 1`] = `
 {
-  "aggregate": [MockFunction spy],
-  "delete": [MockFunction spy] {
+  "_id": {
+    "toString": [MockFunction spy] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+      ],
+    },
+  },
+  "id": "73859F8D26679D2E52597326",
+  "modelId": "testModel",
+}
+`;
+
+exports[`services > file > updateFile > does not updated unchangable property name 1`] = `
+{
+  "_id": {
+    "toString": [MockFunction spy] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+      ],
+    },
+  },
+  "id": "73859F8D26679D2E52597326",
+  "modelId": "testModel",
+  "name": "my-file.txt",
+}
+`;
+
+exports[`services > file > updateFile > success 1`] = `
+{
+  "_id": [MockFunction spy],
+  "aggregate": [MockFunction spy] {
     "calls": [
-      [],
+      [
+        [
+          {
+            "$match": {
+              "_id": "73859f8d26679d2e52597326",
+            },
+          },
+          {
+            "$limit": 1,
+          },
+          {
+            "$addFields": {
+              "id": {
+                "$toString": "$_id",
+              },
+            },
+          },
+          {
+            "$lookup": {
+              "as": "avScan",
+              "foreignField": "fileId",
+              "from": "v2_scans",
+              "localField": "id",
+            },
+          },
+        ],
+      ],
     ],
     "results": [
       {
         "type": "return",
-        "value": [Circular],
+        "value": Promise {},
       },
     ],
   },
+  "delete": [MockFunction spy],
   "find": [MockFunction spy],
-  "findOne": [MockFunction spy] {
+  "findOneAndDelete": [MockFunction spy],
+  "findOneAndUpdate": [MockFunction spy] {
     "calls": [
       [
         {
-          "_id": "testFileId",
+          "_id": "73859F8D26679D2E52597326",
+        },
+        {
+          "$set": {
+            "tags": [
+              "test1",
+            ],
+          },
         },
       ],
     ],
@@ -58,7 +167,342 @@ exports[`services > file > removeFile > success 1`] = `
   "match": [MockFunction spy],
   "save": [MockFunction spy],
   "size": 100,
+  "toObject": [MockFunction spy],
 }
 `;
 
-exports[`services > file > uploadFile > virus scan initialised 1`] = `[]`;
+exports[`services > file > uploadFile > success 1`] = `
+{
+  "_id": [MockFunction spy],
+  "aggregate": [MockFunction spy],
+  "avScan": {
+    "aggregate": [MockFunction spy],
+    "delete": [MockFunction spy],
+    "find": [MockFunction spy] {
+      "calls": [
+        [
+          {
+            "fileId": "function(...s) {
+    let r = T(t);
+    r.called = !0, r.callCount++, r.calls.push(s);
+    let S = r.next.shift();
+    if (S) {
+      r.results.push(S);
+      let [o, g] = S;
+      if (o === "ok")
+        return g;
+      throw g;
+    }
+    let p, c = "ok", a = r.results.length;
+    if (r.impl)
+      try {
+        new.target ? p = Reflect.construct(r.impl, s, new.target) : p = r.impl.apply(this, s), c = "ok";
+      } catch (o) {
+        throw p = o, c = "error", r.results.push([c, o]), o;
+      }
+    let R = [c, p];
+    return w(p) && p.then(
+      (o) => r.resolves[a] = ["ok", o],
+      (o) => r.resolves[a] = ["error", o]
+    ), r.results.push(R), p;
+  }",
+          },
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "findOne": [MockFunction spy],
+  },
+  "delete": [MockFunction spy],
+  "find": [MockFunction spy],
+  "findOneAndDelete": [MockFunction spy],
+  "findOneAndUpdate": [MockFunction spy],
+  "group": [MockFunction spy],
+  "id": "function(...s) {
+    let r = T(t);
+    r.called = !0, r.callCount++, r.calls.push(s);
+    let S = r.next.shift();
+    if (S) {
+      r.results.push(S);
+      let [o, g] = S;
+      if (o === "ok")
+        return g;
+      throw g;
+    }
+    let p, c = "ok", a = r.results.length;
+    if (r.impl)
+      try {
+        new.target ? p = Reflect.construct(r.impl, s, new.target) : p = r.impl.apply(this, s), c = "ok";
+      } catch (o) {
+        throw p = o, c = "error", r.results.push([c, o]), o;
+      }
+    let R = [c, p];
+    return w(p) && p.then(
+      (o) => r.resolves[a] = ["ok", o],
+      (o) => r.resolves[a] = ["error", o]
+    ), r.results.push(R), p;
+  }",
+  "match": [MockFunction spy],
+  "save": [MockFunction spy] {
+    "calls": [
+      [],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": {
+          "_id": [MockFunction spy],
+          "aggregate": [MockFunction spy],
+          "delete": [MockFunction spy],
+          "find": [MockFunction spy],
+          "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
+          "group": [MockFunction spy],
+          "match": [MockFunction spy],
+          "save": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "size": 100,
+          "toObject": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+        },
+      },
+    ],
+  },
+  "size": 100,
+  "toObject": [MockFunction spy] {
+    "calls": [
+      [],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": {
+          "_id": [MockFunction spy],
+          "aggregate": [MockFunction spy],
+          "delete": [MockFunction spy],
+          "find": [MockFunction spy],
+          "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
+          "group": [MockFunction spy],
+          "match": [MockFunction spy],
+          "save": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "size": 100,
+          "toObject": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`services > file > uploadFile > virus scan initialised 1`] = `
+{
+  "_id": [MockFunction spy],
+  "aggregate": [MockFunction spy],
+  "avScan": {
+    "aggregate": [MockFunction spy],
+    "delete": [MockFunction spy],
+    "find": [MockFunction spy] {
+      "calls": [
+        [
+          {
+            "fileId": "function(...s) {
+    let r = T(t);
+    r.called = !0, r.callCount++, r.calls.push(s);
+    let S = r.next.shift();
+    if (S) {
+      r.results.push(S);
+      let [o, g] = S;
+      if (o === "ok")
+        return g;
+      throw g;
+    }
+    let p, c = "ok", a = r.results.length;
+    if (r.impl)
+      try {
+        new.target ? p = Reflect.construct(r.impl, s, new.target) : p = r.impl.apply(this, s), c = "ok";
+      } catch (o) {
+        throw p = o, c = "error", r.results.push([c, o]), o;
+      }
+    let R = [c, p];
+    return w(p) && p.then(
+      (o) => r.resolves[a] = ["ok", o],
+      (o) => r.resolves[a] = ["error", o]
+    ), r.results.push(R), p;
+  }",
+          },
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "findOne": [MockFunction spy],
+  },
+  "delete": [MockFunction spy],
+  "find": [MockFunction spy],
+  "findOneAndDelete": [MockFunction spy],
+  "findOneAndUpdate": [MockFunction spy],
+  "group": [MockFunction spy],
+  "id": "function(...s) {
+    let r = T(t);
+    r.called = !0, r.callCount++, r.calls.push(s);
+    let S = r.next.shift();
+    if (S) {
+      r.results.push(S);
+      let [o, g] = S;
+      if (o === "ok")
+        return g;
+      throw g;
+    }
+    let p, c = "ok", a = r.results.length;
+    if (r.impl)
+      try {
+        new.target ? p = Reflect.construct(r.impl, s, new.target) : p = r.impl.apply(this, s), c = "ok";
+      } catch (o) {
+        throw p = o, c = "error", r.results.push([c, o]), o;
+      }
+    let R = [c, p];
+    return w(p) && p.then(
+      (o) => r.resolves[a] = ["ok", o],
+      (o) => r.resolves[a] = ["error", o]
+    ), r.results.push(R), p;
+  }",
+  "match": [MockFunction spy],
+  "save": [MockFunction spy] {
+    "calls": [
+      [],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": {
+          "_id": [MockFunction spy],
+          "aggregate": [MockFunction spy],
+          "delete": [MockFunction spy],
+          "find": [MockFunction spy],
+          "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
+          "group": [MockFunction spy],
+          "match": [MockFunction spy],
+          "save": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "size": 100,
+          "toObject": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+        },
+      },
+    ],
+  },
+  "size": 100,
+  "toObject": [MockFunction spy] {
+    "calls": [
+      [],
+    ],
+    "results": [
+      {
+        "type": "return",
+        "value": {
+          "_id": [MockFunction spy],
+          "aggregate": [MockFunction spy],
+          "delete": [MockFunction spy],
+          "find": [MockFunction spy],
+          "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
+          "group": [MockFunction spy],
+          "match": [MockFunction spy],
+          "save": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "size": 100,
+          "toObject": [MockFunction spy] {
+            "calls": [
+              [],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`services > file > uploadFile > virus scan initialised 2`] = `[]`;

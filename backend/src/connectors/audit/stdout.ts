@@ -4,13 +4,14 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ModelCardRevisionInterface } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
+import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
+import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
@@ -53,9 +54,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
+  onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface) {
     this.checkEventType(AuditInfo.CreateModelCard, req)
-    const event = this.generateEvent(req, { modelId, version: modelCard.version })
+    const event = this.generateEvent(req, { modelId: model.id, version: modelCard.version })
     req.log.info(event, req.audit.description)
   }
 
@@ -79,7 +80,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   onCreateFile(req: Request, file: FileInterfaceDoc) {
     this.checkEventType(AuditInfo.CreateFile, req)
-    const event = this.generateEvent(req, { id: file._id, modelId: file.modelId })
+    const event = this.generateEvent(req, { id: file._id.toString(), modelId: file.modelId })
     req.log.info(event, req.audit.description)
   }
 
@@ -91,7 +92,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   onViewFiles(req: Request, modelId: string, files: FileInterface[]) {
     this.checkEventType(AuditInfo.ViewFiles, req)
-    const event = this.generateEvent(req, { modelId, results: files.map((file) => file._id) })
+    const event = this.generateEvent(req, { modelId, results: files.map((file) => file._id.toString()) })
     req.log.info(event, req.audit.description)
   }
 
@@ -351,12 +352,23 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req: Request,
     mirroredModel: ModelInterface,
     sourceModelId: string,
-    modelCardVersions: number[],
     exporter: string,
-    newModelCards: ModelCardRevisionInterface[],
+    importResult: MongoDocumentImportInformation | FileImportInformation,
   ) {
     this.checkEventType(AuditInfo.CreateImport, req)
-    const event = this.generateEvent(req, { mirroredModel, sourceModelId, modelCardVersions, exporter, newModelCards })
+    const event = this.generateEvent(req, { mirroredModel, sourceModelId, exporter, importResult })
+    req.log.info(event, req.audit.description)
+  }
+
+  onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+    this.checkEventType(AuditInfo.CreateReviewRole, req)
+    const event = this.generateEvent(req, { reviewRoleId: reviewRole.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  onViewReviewRoles(req: Request) {
+    this.checkEventType(AuditInfo.ViewReviewRoles, req)
+    const event = this.generateEvent(req, {})
     req.log.info(event, req.audit.description)
   }
 }

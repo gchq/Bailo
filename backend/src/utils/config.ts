@@ -122,6 +122,7 @@ export interface Config {
       identityProviderClient: { region: string; credentials: { accessKeyId: string; secretAccessKey: string } }
       userPoolId: string
       userIdAttribute: string
+      adminGroupName: string
     }
     keycloak?: {
       realm: string

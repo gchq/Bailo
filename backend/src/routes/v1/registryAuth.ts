@@ -2,7 +2,8 @@ import bodyParser from 'body-parser'
 import { createHash, X509Certificate } from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { readFile } from 'fs/promises'
-import jwt from 'jsonwebtoken'
+import jwt, { SignOptions } from 'jsonwebtoken'
+import type { StringValue } from 'ms'
 import { stringify as uuidStringify, v4 as uuidv4 } from 'uuid'
 
 import audit from '../../connectors/audit/index.js'
@@ -23,9 +24,7 @@ export async function getAdminToken() {
   if (!adminToken) {
     const key = await getPrivateKey()
     const hash = createHash('sha256').update(key).digest().slice(0, 16)
-    // eslint-disable-next-line no-bitwise
     hash[6] = (hash[6] & 0x0f) | 0x40
-    // eslint-disable-next-line no-bitwise
     hash[8] = (hash[8] & 0x3f) | 0x80
 
     adminToken = uuidStringify(hash)
@@ -43,11 +42,9 @@ async function getPublicKey() {
 }
 
 function getBit(buffer: Buffer, index: number) {
-  // eslint-disable-next-line no-bitwise
   const byte = ~~(index / 8)
   const bit = index % 8
   const idByte = buffer[byte]
-  // eslint-disable-next-line no-bitwise
   return Number((idByte & (2 ** (7 - bit))) !== 0)
 }
 
@@ -63,7 +60,6 @@ function formatKid(keyBuffer: Buffer) {
   for (let i = 0; i < bitLength; i += 5) {
     let idx = 0
     for (let j = 0; j < 5; j += 1) {
-      // eslint-disable-next-line no-bitwise
       idx <<= 1
       idx += getBit(keyBuffer, i + j)
     }
@@ -78,16 +74,19 @@ function formatKid(keyBuffer: Buffer) {
   return match.join(':')
 }
 
-export async function getKid() {
-  const cert = new X509Certificate(await getPublicKey())
+export async function getKid(cert?: X509Certificate) {
+  if (!cert) {
+    cert = new X509Certificate(await getPublicKey())
+  }
   const der = cert.publicKey.export({ format: 'der', type: 'spki' })
   const hash = createHash('sha256').update(der).digest().slice(0, 30)
 
   return formatKid(hash)
 }
 
-async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn: string }) {
+async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn: StringValue }) {
   const privateKey = await getPrivateKey()
+  const cert = new X509Certificate(await getPublicKey())
 
   return jwt.sign(
     {
@@ -103,10 +102,12 @@ async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn
       issuer: config.registry.issuer,
 
       header: {
-        kid: await getKid(),
+        kid: await getKid(cert),
         alg: 'RS256',
+        // The registry >=3.0.0-beta.1 image requires the (typically optional) x5c header
+        x5c: [cert.raw.toString('base64')],
       },
-    },
+    } as SignOptions,
   )
 }
 

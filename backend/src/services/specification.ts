@@ -1,7 +1,10 @@
 import { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import { AnyZodObject, z } from 'zod'
 
+import { ScanState } from '../connectors/fileScanning/Base.js'
+import { CollaboratorRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
+import { ArtefactKind } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 
@@ -93,6 +96,42 @@ export const modelInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+export const scanInterfaceSchema = z.object({
+  artefactKind: z.nativeEnum(ArtefactKind).openapi({ example: 'file' }),
+  fileId: z.string().optional().openapi({ example: '507f1f77bcf86cd799439011' }),
+  repositoryName: z.string().optional().openapi({ example: 'yolo-v4-abcdef' }),
+  imageDigest: z
+    .string()
+    .optional()
+    .openapi({ example: 'sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf' }),
+  toolName: z.string().openapi({ example: 'Clam AV' }),
+  scannerVersion: z.string().optional().openapi({ example: '1.4.2' }),
+  state: z.nativeEnum(ScanState).openapi({ example: 'complete' }),
+  isInfected: z.boolean().optional().openapi({ example: true }),
+  viruses: z.array(z.string().openapi({ example: 'Win.Test.EICAR_HDB-1' })).optional(),
+  lastRunAt: z.string().openapi({ example: new Date().toISOString() }),
+  _id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
+  id: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
+})
+
+export const fileWithScanInterfaceSchema = z.object({
+  modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
+
+  name: z.string().openapi({ example: 'yolo.tar.gz' }),
+  size: z.number().openapi({ example: 1024 }),
+  mime: z.string().openapi({ example: 'application/tar' }),
+
+  bucket: z.string().openapi({ example: 'uploads ' }),
+  path: z.string().openapi({ example: '/model/yolo-v4-abcdef/files/abcdef' }),
+
+  complete: z.boolean().openapi({ example: true }),
+
+  avScan: z.array(scanInterfaceSchema).optional(),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
 export const releaseInterfaceSchema = z.object({
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   modelCardVersion: z.number().openapi({ example: 5 }),
@@ -103,7 +142,7 @@ export const releaseInterfaceSchema = z.object({
   minor: z.boolean().openapi({ example: false }),
   draft: z.boolean().openapi({ example: false }),
 
-  files: z.array(z.string()).openapi({ example: ['507f1f77bcf86cd799439011'] }),
+  fileIds: z.array(z.string()).openapi({ example: ['507f1f77bcf86cd799439011'] }),
   images: z.array(z.string()).openapi({ example: ['/yolo-v4-abcdef/example:v1.0.0'] }),
 
   comments: z
@@ -117,6 +156,8 @@ export const releaseInterfaceSchema = z.object({
     .optional(),
 
   deleted: z.boolean().openapi({ example: false }),
+
+  files: z.array(fileWithScanInterfaceSchema).optional(),
 
   createdBy: z.string().openapi({ example: 'user' }),
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
@@ -176,22 +217,6 @@ export const accessRequestInterfaceSchema = z.object({
   deleted: z.boolean().openapi({ example: false }),
 
   createdBy: z.string().openapi({ example: 'user' }),
-  createdAt: z.string().openapi({ example: new Date().toISOString() }),
-  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
-})
-
-export const fileInterfaceSchema = z.object({
-  modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
-
-  name: z.string().openapi({ example: 'yolo.tar.gz' }),
-  size: z.number().openapi({ example: 1024 }),
-  mime: z.string().openapi({ example: 'application/tar' }),
-
-  bucket: z.string().openapi({ example: 'uploads ' }),
-  path: z.string().openapi({ example: '/model/yolo-v4-abcdef/files/abcdef' }),
-
-  complete: z.boolean().openapi({ example: true }),
-
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
@@ -305,4 +330,15 @@ export const UserInformationSchema = z.object({
   email: z.string().optional().openapi({ example: 'user@example.com' }),
   name: z.string().optional().openapi({ example: 'Joe Bloggs' }),
   organisation: z.string().optional().openapi({ example: 'Acme Corp' }),
+})
+
+export const reviewRoleSchema = z.object({
+  id: z.string().openapi({ example: 'reviewer' }),
+  name: z.string().openapi({ example: 'Reviewer' }),
+  short: z.string().openapi({ example: 'reviewer' }),
+  kind: z.string().openapi({ example: 'schema' }),
+  description: z.string().openapi({ example: 'This is an example review role' }),
+  defaultEntities: z.array(z.string()).openapi({ example: ['user:user'] }),
+  lockEntities: z.boolean().openapi({ example: false }),
+  CollaboratorRoles: z.string().optional().openapi({ example: CollaboratorRoles.Owner }),
 })

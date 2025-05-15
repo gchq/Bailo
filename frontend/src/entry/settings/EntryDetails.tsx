@@ -1,10 +1,12 @@
 import { Lock, LockOpen } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
-import { patchModel } from 'actions/model'
+import { patchModel, useGetModel } from 'actions/model'
 import { FormEvent, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
+import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
+import EntryStateInput from 'src/entry/EntryStateInput'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, EntryKindLabel, UpdateEntryForm } from 'types/types'
@@ -18,11 +20,14 @@ type EntryDetailsProps = {
 export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [name, setName] = useState(entry.name)
   const [description, setDescription] = useState(entry.description)
+  const [organisation, setOrganisation] = useState(entry.organisation || '')
+  const [state, setState] = useState(entry.state || '')
   const [visibility, setVisibility] = useState<UpdateEntryForm['visibility']>(entry.visibility)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   const sendNotification = useNotification()
+  const { mutateModel } = useGetModel(entry.id, entry.kind)
 
   const isFormValid = useMemo(() => name && description, [name, description])
 
@@ -42,6 +47,8 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
       name,
       description,
       visibility,
+      organisation: organisation || '',
+      state: state || '',
     }
     const response = await patchModel(entry.id, formData)
 
@@ -53,6 +60,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
         msg: `${toSentenceCase(EntryKindLabel[entry.kind])} updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      mutateModel()
     }
     setIsLoading(false)
   }
@@ -93,7 +101,9 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
             {`${toTitleCase(EntryKindLabel[entry.kind])} Details`}
           </Typography>
           <EntryNameInput autoFocus value={name} kind={entry.kind} onChange={(value) => setName(value)} />
+          <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
           <EntryDescriptionInput value={description} onChange={(value) => setDescription(value)} />
+          <EntryStateInput value={state} onChange={(value) => setState(value)} />
         </>
         <Divider />
         <>

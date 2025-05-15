@@ -6,6 +6,8 @@ import { useGetUserInformation } from 'actions/user'
 import { MouseEvent, useMemo, useRef, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
+import UserAvatar from 'src/common/UserAvatar'
+import { EntityKind } from 'types/types'
 
 export type UserInformation = {
   name?: string
@@ -19,9 +21,16 @@ interface AdditionalProperties {
 export type UserDisplayProps = {
   dn: string
   hidePopover?: boolean
+  displayAsAvatar?: boolean
+  smallAvatars?: boolean
 }
 
-export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProps) {
+export default function UserDisplay({
+  dn,
+  hidePopover = false,
+  displayAsAvatar = false,
+  smallAvatars = false,
+}: UserDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = useMemo(() => !!anchorEl, [anchorEl])
   const ref = useRef<HTMLDivElement>(null)
@@ -45,17 +54,25 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
 
   return (
     <>
+      {displayAsAvatar}
       <Box
         component='span'
         ref={ref}
         data-test='userDisplayName'
         aria-owns={open ? 'user-popover' : undefined}
         aria-haspopup='true'
-        sx={{ fontWeight: 'bold' }}
+        fontWeight='bold'
         onMouseEnter={(e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
         onMouseLeave={() => setAnchorEl(null)}
       >
-        {userInformation ? userInformation.name : dn.charAt(0).toUpperCase() + dn.slice(1)}
+        {displayAsAvatar ? (
+          <UserAvatar
+            entity={{ kind: (dn.split(':')[0] as EntityKind) || EntityKind.USER, id: dn.split(':')[1] || dn }}
+            size={smallAvatars ? 'chip' : undefined}
+          />
+        ) : (
+          <div>{userInformation ? userInformation.name : dn.charAt(0).toUpperCase() + dn.slice(1)}</div>
+        )}
       </Box>
       {!hidePopover && (
         <Popover
@@ -63,7 +80,9 @@ export default function UserDisplay({ dn, hidePopover = false }: UserDisplayProp
           sx={{
             pointerEvents: 'none',
           }}
-          PaperProps={{ onMouseEnter: popoverEnter, onMouseLeave: popoverLeave, sx: { pointerEvents: 'auto' } }}
+          slotProps={{
+            paper: { onMouseEnter: popoverEnter, onMouseLeave: popoverLeave, sx: { pointerEvents: 'auto' } },
+          }}
           open={open}
           anchorEl={anchorEl}
           anchorOrigin={{

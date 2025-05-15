@@ -50,9 +50,16 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           </Stack>
           <Box sx={{ overflowX: 'auto', p: 1 }}>
             <Stack spacing={1} direction='row'>
-              {value.map((tag) => (
-                <Chip label={tag} key={tag} sx={{ width: 'fit-content' }} onDelete={() => handleChipOnDelete(tag)} />
-              ))}
+              <Box sx={{ whitespace: 'pre-wrap' }}>
+                {value.map((tag) => (
+                  <Chip
+                    label={tag}
+                    key={tag}
+                    sx={{ width: 'fit-content', m: 0.5 }}
+                    onDelete={() => handleChipOnDelete(tag)}
+                  />
+                ))}
+              </Box>
             </Stack>
           </Box>
           <Typography variant='caption' color={theme.palette.error.main}>
