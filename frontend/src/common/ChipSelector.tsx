@@ -3,7 +3,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Tooltip } from '@mui/mat
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
-import { ReactElement, useState } from 'react'
+import { CSSProperties, ReactElement, useState } from 'react'
 
 type PartialChipSelectorProps =
   | {
@@ -26,6 +26,9 @@ type ChipSelectorProps = {
   chipTooltipTitle?: string
   ariaLabel?: string
   accordion?: boolean
+  variant?: 'filled' | 'outlined'
+  icon?: ReactElement
+  style?: CSSProperties
 } & PartialChipSelectorProps
 
 export default function ChipSelector({
@@ -39,6 +42,9 @@ export default function ChipSelector({
   chipTooltipTitle = '',
   ariaLabel = '',
   accordion = false,
+  variant = 'filled',
+  icon = <></>,
+  style = {},
 }: ChipSelectorProps): ReactElement {
   const [expanded, setExpanded] = useState(false)
 
@@ -67,6 +73,9 @@ export default function ChipSelector({
       handleChange={handleChange}
       chipTooltipTitle={chipTooltipTitle}
       ariaLabel={ariaLabel}
+      variant={variant}
+      icon={icon}
+      style={style}
     />
   ))
 
@@ -110,20 +119,35 @@ type ChipItemProps = {
   activeChip: boolean
   chipTooltipTitle?: string
   ariaLabel?: string
+  variant?: 'filled' | 'outlined'
+  icon?: ReactElement
+  style?: CSSProperties
 }
 
-function ChipItem({ chip, handleChange, size, activeChip, chipTooltipTitle = '', ariaLabel = '' }: ChipItemProps) {
+function ChipItem({
+  chip,
+  handleChange,
+  size,
+  activeChip,
+  chipTooltipTitle = '',
+  ariaLabel = '',
+  variant = 'filled',
+  icon = <></>,
+  style = {},
+}: ChipItemProps) {
   return (
     <Tooltip title={chipTooltipTitle}>
       <Chip
         color={activeChip ? 'secondary' : 'default'}
         size={size}
         key={chip}
-        sx={{ mr: 1, mb: 1 }}
+        sx={{ mx: 0.5, mb: 1, ...style }}
         label={chip}
         data-test={`chipOption-${chip}`}
         onClick={() => handleChange(chip)}
         aria-label={ariaLabel}
+        variant={variant}
+        icon={icon}
       />
     </Tooltip>
   )

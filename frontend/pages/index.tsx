@@ -18,9 +18,10 @@ import {
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useGetAllModelReviewRoles, useListModels } from 'actions/model'
+import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
@@ -44,15 +45,19 @@ export default function Marketplace() {
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const debouncedFilter = useDebounce(filter, 250)
+
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const { models, isModelsError, isModelsLoading } = useListModels(
     EntryKind.MODEL,
     selectedRoles,
     selectedTask,
     selectedLibraries,
+    selectedOrganisations,
     debouncedFilter,
   )
 
@@ -60,14 +65,26 @@ export default function Marketplace() {
     models: dataCards,
     isModelsError: isDataCardsError,
     isModelsLoading: isDataCardsLoading,
-  } = useListModels(EntryKind.DATA_CARD, selectedRoles, selectedTask, selectedLibraries, debouncedFilter)
+  } = useListModels(
+    EntryKind.DATA_CARD,
+    selectedRoles,
+    selectedTask,
+    selectedLibraries,
+    selectedOrganisations,
+    debouncedFilter,
+  )
 
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetAllModelReviewRoles()
 
   const theme = useTheme()
   const router = useRouter()
 
-  const { filter: filterFromQuery, task: taskFromQuery, libraries: librariesFromQuery } = router.query
+  const {
+    filter: filterFromQuery,
+    task: taskFromQuery,
+    libraries: librariesFromQuery,
+    organisations: organisationsFromQuery,
+  } = router.query
 
   useEffect(() => {
     if (filterFromQuery) setFilter(filterFromQuery as string)
@@ -81,7 +98,16 @@ export default function Marketplace() {
       }
       setSelectedLibraries([...librariesAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery])
+    if (organisationsFromQuery) {
+      let organisationsAsArray: string[] = []
+      if (typeof organisationsFromQuery === 'string') {
+        organisationsAsArray.push(organisationsFromQuery)
+      } else {
+        organisationsAsArray = [...organisationsFromQuery]
+      }
+      setSelectedOrganisations([...organisationsAsArray])
+    }
+  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery])
 
   const handleSelectedRolesOnChange = useCallback(
     (selectedFilters: string[]) => {
@@ -101,6 +127,10 @@ export default function Marketplace() {
     [roleOptions],
   )
 
+  const organisationList = useMemo(() => {
+    return uiConfig ? uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem) : []
+  }, [uiConfig])
+
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
       router.replace({
@@ -114,6 +144,14 @@ export default function Marketplace() {
     (e: ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value)
       updateQueryParams('filter', e.target.value)
+    },
+    [updateQueryParams],
+  )
+
+  const handleOrganisationsOnChange = useCallback(
+    (organisations: string[]) => {
+      setSelectedOrganisations(organisations)
+      updateQueryParams('organisations', organisations)
     },
     [updateQueryParams],
   )
@@ -141,6 +179,7 @@ export default function Marketplace() {
   const handleResetFilters = () => {
     setSelectedTask('')
     setSelectedLibraries([])
+    setSelectedOrganisations([])
     setFilter('')
     router.replace('/', undefined, { shallow: true })
   }
@@ -156,12 +195,20 @@ export default function Marketplace() {
     }
   }, [modelRoles])
 
+  if (isModelRolesLoading) {
+    return <Loading />
+  }
+
+  if (isUiConfigLoading) {
+    return <Loading />
+  }
+
   if (isModelRolesError) {
     return <ErrorWrapper message={isModelRolesError.info.message} />
   }
 
-  if (isModelRolesLoading) {
-    return <Loading />
+  if (isUiConfigError) {
+    return <ErrorWrapper message={isUiConfigError.info.message} />
   }
 
   return (
@@ -208,6 +255,20 @@ export default function Marketplace() {
                 />
               </FormControl>
               <Stack divider={<Divider flexItem />}>
+                <Box>
+                  <ChipSelector
+                    label='Organisations'
+                    chipTooltipTitle={'Filter by organisation'}
+                    options={organisationList}
+                    expandThreshold={10}
+                    multiple
+                    selectedChips={selectedOrganisations}
+                    onChange={handleOrganisationsOnChange}
+                    size='small'
+                    ariaLabel='add organisation to search filter'
+                    accordion
+                  />
+                </Box>
                 <Box>
                   <ChipSelector
                     label='Tasks'
@@ -286,6 +347,8 @@ export default function Marketplace() {
                     entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
+                    selectedOrganisations={selectedOrganisations}
+                    onSelectedOrganisationsChange={handleOrganisationsOnChange}
                   />
                 </div>
               )}
@@ -296,6 +359,8 @@ export default function Marketplace() {
                     entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
+                    selectedOrganisations={selectedOrganisations}
+                    onSelectedOrganisationsChange={handleOrganisationsOnChange}
                   />
                 </div>
               )}

@@ -1,8 +1,9 @@
+import { Box } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
-import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { VariableSizeList } from 'react-window'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
+import Paginate from 'src/common/Paginate'
 import EntryListRow from 'src/marketplace/EntryListRow'
 import MessageAlert from 'src/MessageAlert'
 
@@ -10,13 +11,14 @@ interface EntryListProps {
   entries: EntrySearchResult[]
   selectedChips: string[]
   onSelectedChipsChange: (chips: string[]) => void
+  selectedOrganisations: string[]
+  onSelectedOrganisationsChange: (chips: string[]) => void
   entriesErrorMessage?: string
 }
 
 interface RowProps {
   data: EntrySearchResult[]
   index: number
-  style: CSSProperties
 }
 
 type ListRef = {
@@ -27,6 +29,8 @@ export default function EntryList({
   entries,
   selectedChips,
   onSelectedChipsChange,
+  selectedOrganisations,
+  onSelectedOrganisationsChange,
   entriesErrorMessage,
 }: EntryListProps) {
   const [windowHeight, setWindowHeight] = useState(0)
@@ -49,21 +53,19 @@ export default function EntryList({
     }
   }, [entries, ref])
 
-  const columnWidths = useMemo(() => entries.map((entry) => (entry.tags.length === 0 ? 100 : 140)), [entries])
-
   if (entriesErrorMessage) return <MessageAlert message={entriesErrorMessage} severity='error' />
 
-  const Row = ({ data, index, style }: RowProps) => (
+  const Row = ({ data, index }: RowProps) => (
     <EntryListRow
       selectedChips={selectedChips}
       onSelectedChipsChange={onSelectedChipsChange}
+      selectedOrganisations={selectedOrganisations}
+      onSelectedOrganisationsChange={onSelectedOrganisationsChange}
       data={data}
       index={index}
-      style={{ padding: theme.spacing(2.5), ...style }}
+      style={{ padding: theme.spacing(2.5) }}
     />
   )
-
-  const getItemSize = (index: number) => columnWidths[index]
 
   if (entries.length === 0) {
     return (
@@ -76,18 +78,21 @@ export default function EntryList({
   }
 
   return (
-    <>
-      <VariableSizeList
-        ref={ref}
-        height={windowHeight - 230}
-        itemCount={entries.length}
-        itemData={entries}
-        itemSize={getItemSize}
-        overscanCount={5}
-        width='100%'
+    <Box sx={{ py: 2 }}>
+      <Paginate
+        list={entries}
+        searchFilterProperty='name'
+        sortingProperties={[
+          { value: 'name', title: 'Name', iconKind: 'text' },
+          { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+          { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+        ]}
+        searchPlaceholderText='Search by name'
+        defaultSortProperty='createdAt'
+        hideSearchInput
       >
         {Row}
-      </VariableSizeList>
-    </>
+      </Paginate>
+    </Box>
   )
 }

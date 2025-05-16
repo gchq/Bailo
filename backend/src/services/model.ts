@@ -109,6 +109,7 @@ export async function searchModels(
   user: UserInterface,
   kind: EntryKindKeys,
   libraries: Array<string>,
+  organisations: Array<string>,
   filters: Array<string>,
   search: string,
   task?: string,
@@ -119,6 +120,10 @@ export async function searchModels(
 
   if (kind) {
     query['kind'] = { $all: kind }
+  }
+
+  if (organisations.length) {
+    query.organisation = { $in: organisations }
   }
 
   if (libraries.length) {
