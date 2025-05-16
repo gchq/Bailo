@@ -98,7 +98,7 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
     setReleaseNotes(release.notes)
     setIsMinorRelease(!!release.minor)
     setFiles(release.files)
-    setFilesMetadata(release.files.map((file) => ({ fileName: file.name, metadata: '' })))
+    setFilesMetadata(release.files.map((file) => ({ fileName: file.name, metadata: { tags: [], text: '' } })))
     setImageList(release.images)
   }, [release.semver, release.notes, release.minor, release.files, release.images])
 
@@ -159,8 +159,15 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
       }
 
       if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
-        const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
-        const tags = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.tags
+        const fileWithMetadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)
+
+        let textMetadata = ''
+        let tags: string[] = []
+
+        if (fileWithMetadata && fileWithMetadata.metadata) {
+          textMetadata = fileWithMetadata.metadata.text
+          tags = fileWithMetadata.metadata.tags
+        }
 
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
@@ -170,7 +177,10 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         }
 
         try {
-          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata, tags)
+          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, {
+            text: textMetadata ? textMetadata : '',
+            tags: tags ? tags : [],
+          })
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])

@@ -510,8 +510,7 @@ export interface FlattenedModelImage {
 
 export interface FileWithMetadataAndTags {
   fileName: string
-  metadata?: string
-  tags?: string[]
+  metadata: FileUploadMetadata
 }
 
 export const Decision = {
@@ -606,3 +605,13 @@ export type AccessRequestUserPermissions = {
 export type UserPermissions = EntryUserPermissions & AccessRequestUserPermissions
 
 export type RestrictedActionKeys = keyof UserPermissions
+
+export type FileUploadWithMetadata = {
+  file: File
+  metadata?: FileUploadMetadata
+}
+
+export type FileUploadMetadata = {
+  tags: string[]
+  text: string
+}

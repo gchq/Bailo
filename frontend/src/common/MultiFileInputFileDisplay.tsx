@@ -6,7 +6,7 @@ import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useState } from 'react'
 import Restricted from 'src/common/Restricted'
 import FileTagSelector from 'src/entry/model/releases/FileTagSelector'
-import { FileInterface, FileWithMetadataAndTags, isFileInterface } from 'types/types'
+import { FileInterface, FileUploadMetadata, FileWithMetadataAndTags, isFileInterface } from 'types/types'
 
 interface MultiFileInputDisplayProps {
   file: File | FileInterface
@@ -21,7 +21,7 @@ export default function MultiFileInputFileDisplay({
   onMetadataChange,
   readOnly = false,
 }: MultiFileInputDisplayProps) {
-  const [metadata, setMetadata] = useState('')
+  const [metadata, setMetadata] = useState<FileUploadMetadata>({ text: '', tags: [] })
   const [anchorElFileTag, setAnchorElFileTag] = useState<HTMLButtonElement | null>(null)
   const [fileTagErrorMessage, setFileTagErrorMessage] = useState('')
   const [newFileTags, setNewFileTags] = useState<string[]>([])
@@ -34,7 +34,7 @@ export default function MultiFileInputFileDisplay({
   }
 
   const handleMetadataChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setMetadata(event.target.value)
+    setMetadata({ ...metadata, text: event.target.value })
     onMetadataChange({ fileName: file.name, metadata })
   }
 
@@ -51,7 +51,10 @@ export default function MultiFileInputFileDisplay({
       setNewFileTags(newTags)
       onMetadataChange({
         fileName: file.name,
-        tags: newTags.filter((newTag) => newTag !== ''),
+        metadata: {
+          text: '',
+          tags: newTags.filter((newTag) => newTag !== ''),
+        },
       })
     }
   }
