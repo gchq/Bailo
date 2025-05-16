@@ -238,7 +238,9 @@ export default function Paginate<T>({
         </Menu>
       </Stack>
       {listDisplay}
-      <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
+      <Stack sx={{ width: '100%', pt: 3, pb: 1 }} alignItems='center'>
+        <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
+      </Stack>
     </>
   )
 }
