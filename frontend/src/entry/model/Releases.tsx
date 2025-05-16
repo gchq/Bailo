@@ -1,9 +1,10 @@
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
+import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
-import EmptyBlob from 'src/common/EmptyBlob'
+import { useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Paginate from 'src/common/Paginate'
 import Restricted from 'src/common/Restricted'
 import ReleaseDisplay from 'src/entry/model/releases/ReleaseDisplay'
 import MessageAlert from 'src/MessageAlert'
@@ -22,28 +23,28 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
 
-  const releaseDisplays = useMemo(
-    () =>
-      releases.map((release) => (
-        <ReleaseDisplay
-          key={release.semver}
-          model={model}
-          release={release}
-          latestRelease={latestRelease}
-          hideReviewBanner={!hasRole(currentUserRoles, ['msro', 'mtr']) || readOnly}
-        />
-      )),
-    [latestRelease, model, releases, currentUserRoles, readOnly],
-  )
+  const ReleaseListItem = memoize(({ data, index }) => (
+    <ReleaseDisplay
+      key={data[index].semver}
+      model={model}
+      release={data[index]}
+      latestRelease={latestRelease}
+      hideReviewBanner={!hasRole(currentUserRoles, ['msro', 'mtr']) || readOnly}
+    />
+  ))
 
   useEffect(() => {
     if (model && releases.length > 0) {
-      setLatestRelease(releases[0].semver)
+      setLatestRelease(releases.map((release) => release.semver).sort()[releases.length - 1])
     }
   }, [model, releases])
 
   function handleDraftNewRelease() {
     router.push(`/model/${model.id}/release/new`)
+  }
+
+  if (isReleasesLoading) {
+    return <Loading />
   }
 
   if (isReleasesError) {
@@ -69,9 +70,22 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
             </Box>
           </Box>
         )}
-        {isReleasesLoading && <Loading />}
-        {releases.length === 0 && <EmptyBlob text={`No releases found for model ${model.name}`} />}
-        {releaseDisplays}
+        <Paginate
+          list={releases.map((entryFile) => {
+            return { key: entryFile._id, ...entryFile }
+          })}
+          emptyListText={`No releases found for model ${model.name}`}
+          searchFilterProperty='semver'
+          sortingProperties={[
+            { value: 'semver', title: 'Semver', iconKind: 'text' },
+            { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+            { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+          ]}
+          searchPlaceholderText='Search by semver'
+          defaultSortProperty='semver'
+        >
+          {ReleaseListItem}
+        </Paginate>
       </Stack>
     </Container>
   )
