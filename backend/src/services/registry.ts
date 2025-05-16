@@ -34,7 +34,7 @@ export async function listModelImages(user: UserInterface, modelId: string) {
   return versions
 }
 
-export async function listImageTagLayers(user: UserInterface, modelId: string, imageName: string, imageTag: string) {
+export async function getImageManifest(user: UserInterface, modelId: string, imageName: string, imageTag: string) {
   const model = await getModelById(user, modelId)
 
   const auth = await authorisation.image(user, model, {
@@ -54,7 +54,7 @@ export async function listImageTagLayers(user: UserInterface, modelId: string, i
   const manifest = (await getImageTagManifest(repositoryToken, { namespace: modelId, image: imageName }, imageTag))
     .responseBody
 
-  return manifest.layers
+  return manifest
 }
 
 export async function getImageBlob(user: UserInterface, modelId: string, imageName: string, digest: string) {
