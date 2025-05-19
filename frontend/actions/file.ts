@@ -37,7 +37,7 @@ export async function postFileForModelId(
   }
   const fileResponse = await axios
     .post(
-      `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}&${qs.stringify(queryParams)}}`,
+      `/api/v2/model/${modelId}/files/upload/simple?name=${file.name}&mime=${mime}&${qs.stringify(queryParams)}`,
       file,
       {
         onUploadProgress,
