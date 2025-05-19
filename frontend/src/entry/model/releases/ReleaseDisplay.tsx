@@ -19,11 +19,13 @@ import { useGetReleasesForModelId } from 'actions/release'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
+import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
+import Paginate from 'src/common/Paginate'
 import UserDisplay from 'src/common/UserDisplay'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
@@ -92,6 +94,16 @@ export default function ReleaseDisplay({
   const handleAccordionChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false)
   }
+
+  const FileRowItem = memoize(({ data, index }) => (
+    <FileDisplay
+      showMenuItems={{ rescanFile: scanners.length > 0 }}
+      key={data[index].name}
+      file={data[index]}
+      modelId={model.id}
+      mutator={mutateReleases}
+    />
+  ))
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
@@ -174,17 +186,20 @@ export default function ReleaseDisplay({
                     <Typography fontWeight='bold'>{`${expanded === 'filesPanel' ? 'Hide' : 'Show'} ${plural(release.files.length, 'file')}`}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <Stack divider={<Divider />} spacing={2}>
-                      {release.files.map((file) => (
-                        <FileDisplay
-                          showMenuItems={{ rescanFile: scanners.length > 0 }}
-                          key={file.name}
-                          file={file}
-                          modelId={model.id}
-                          mutator={mutateReleases}
-                        />
-                      ))}
-                    </Stack>
+                    <Paginate
+                      list={release.files}
+                      defaultSortProperty='name'
+                      searchFilterProperty='name'
+                      searchPlaceholderText='Search by filename'
+                      emptyListText='No files found'
+                      sortingProperties={[
+                        { value: 'name', title: 'Name', iconKind: 'text' },
+                        { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+                        { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+                      ]}
+                    >
+                      {FileRowItem}
+                    </Paginate>
                   </AccordionDetails>
                 </Accordion>
               )}

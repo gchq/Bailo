@@ -199,8 +199,8 @@ export default function Paginate<T>({
   }
 
   return (
-    <>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent='space-between' sx={{ width: '100%' }}>
+    <Stack spacing={3}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent='space-between' sx={{ width: '100%' }}>
         <TextField
           size='small'
           placeholder={searchPlaceholderText}
@@ -238,9 +238,9 @@ export default function Paginate<T>({
         </Menu>
       </Stack>
       {listDisplay}
-      <Stack sx={{ width: '100%', pt: 3, pb: 1 }} alignItems='center'>
+      <Stack sx={{ width: '100%', pb: 1 }} alignItems='center'>
         <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
       </Stack>
-    </>
+    </Stack>
   )
 }

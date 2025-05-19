@@ -87,7 +87,7 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
   )
 
   const FileRow = memoize(({ data, index }) => (
-    <ListItem key={data[index]._id} disablePadding sx={{ m: 1 }}>
+    <ListItem key={data[index]._id} disablePadding>
       <ListItemButton dense onClick={handleToggle(data[index])} disabled={isFileDisabled(data[index])}>
         <ListItemIcon>
           <Checkbox
@@ -139,7 +139,9 @@ export default function ExistingFileSelector({ model, existingReleaseFiles, onCh
         <DialogContent sx={{ p: 1 }}>
           <Paginate
             list={files}
+            emptyListText='No files found'
             sortingProperties={[
+              { value: 'name', title: 'Name', iconKind: 'text' },
               { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
               { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
             ]}

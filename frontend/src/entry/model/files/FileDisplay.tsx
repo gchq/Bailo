@@ -335,7 +335,7 @@ export default function FileDisplay({
   return (
     <Box sx={style} key={key}>
       {isFileInterface(file) && (
-        <Stack spacing={2}>
+        <Stack spacing={1}>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
             <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center'>
               <Tooltip title={file.name}>
