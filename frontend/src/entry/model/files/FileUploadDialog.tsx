@@ -104,7 +104,6 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
         key={fileWithMetadata.file.name}
         fileWithMetadata={fileWithMetadata}
         onFileMetadataChange={handleFileMetadataOnChange}
-        showMetaDataInput
       />
     ))
   }, [filesToBeUploaded, handleFileMetadataOnChange])

@@ -52,7 +52,7 @@ export default function Files({ model }: FilesProps) {
             width='100%'
             direction={{ sm: 'column', md: 'row' }}
             justifyContent='space-between'
-            sx={{ px: 0.5, width: '100%' }}
+            sx={{ py: 0.5, width: '100%' }}
           >
             <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
               <>
