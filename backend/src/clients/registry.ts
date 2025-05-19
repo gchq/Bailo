@@ -1,5 +1,3 @@
-import { Readable } from 'node:stream'
-
 import fetch, { Response } from 'node-fetch'
 
 import { getHttpsAgent } from '../services/http.js'
@@ -212,7 +210,7 @@ function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManife
 
 type GetRegistryLayerStreamResponse = {
   ok: boolean
-  body: Readable
+  body: ReadableStream
 }
 export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
   const responseStream = (

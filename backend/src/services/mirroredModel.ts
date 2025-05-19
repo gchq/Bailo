@@ -6,7 +6,8 @@ import * as fflate from 'fflate'
 import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
 import prettyBytes from 'pretty-bytes'
-import stream, { PassThrough, Readable } from 'stream'
+import stream, { PassThrough, Readable, Writable } from 'stream'
+import { pack } from 'tar-stream'
 
 import { sign } from '../clients/kms.js'
 import { getObjectStream, objectExists, putObjectStream } from '../clients/s3.js'
@@ -125,17 +126,22 @@ export async function exportCompressedRegistryImage(
     ...logData,
   })
 
+  // setup tar
+  const packerStream = pack()
+
   // setup gzip
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
-  // default `['close', 'error', 'prefinish', 'finish', 'end', 'readable']` plus one `'error'` emitter per layer (including config)
-  gzipStream.setMaxListeners(7 + tagManifest.layers.length)
+  // pipe the tar stream to gzip
+  packerStream.pipe(gzipStream)
 
   // start uploading the gzip stream to S3
   const path = `beta/registry/${modelId}/${imageName}/blobs/compressed/${imageTag}.tar.gz`
   const s3Upload = uploadToExportS3Location(path, gzipStream, logData, metadata)
 
   // upload the manifest first as this is the starting point when later importing the blob
-  await pipeStreamToGzip(Readable.from(JSON.stringify(tagManifest)), gzipStream, { mediaType: tagManifest.mediaType })
+  const tagManifestJson = JSON.stringify(tagManifest)
+  const packerEntry = packerStream.entry({ name: 'manifest.json', size: tagManifestJson.length })
+  await pipeStreamToTarEntry(Readable.from(tagManifestJson), packerEntry, { mediaType: tagManifest.mediaType })
 
   // fetch and compress one layer (including config) at a time to manage RAM usage
   // also, gzip can only handle one pipe at a time
@@ -154,32 +160,46 @@ export async function exportCompressedRegistryImage(
     })
     const responseBody = await getImageBlob(user, modelId, imageName, layerDigest)
 
-    // pipe the body to gzip using streams
-    await pipeStreamToGzip(responseBody.body, gzipStream, { layerDigest, mediaType: layer.mediaType })
+    // pipe the body to tar using streams
+    const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
+    const packerEntry = packerStream.entry({ name: entryName, size: layer.size })
+    // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
+    await pipeStreamToTarEntry(responseBody.body, packerEntry, { layerDigest, mediaType: layer.mediaType })
   }
   // no more data to write
-  gzipStream.end()
+  packerStream.finalize()
 
   // wait for the upload to complete
   await s3Upload
 }
 
-async function pipeStreamToGzip(inputStream: Readable, gzipStream: zlib.Gzip, logData: { [key: string]: string } = {}) {
-  return new Promise<void>((resolve, reject) => {
-    inputStream
-      .on('error', (err) => {
-        reject(InternalError('Error while fetching layer stream', { error: err, ...logData }))
-      })
-      .on('end', () => {
-        log.debug('Finished fetching layer stream', { ...logData })
-        // call `resolve()` otherwise the pipe will get stuck
-        resolve()
-      })
-      // pipe to gzip but indicate more data is coming
-      .pipe(gzipStream, { end: false })
-      .on('error', (err) => {
-        reject(InternalError('Error while compressing layer stream', { error: err, ...logData }))
-      })
+async function pipeStreamToTarEntry(
+  inputStream: NodeJS.ReadableStream,
+  packerEntry: Writable,
+  logData: { [key: string]: string } = {},
+) {
+  inputStream.pipe(packerEntry)
+  return new Promise((resolve, reject) => {
+    packerEntry.on('finish', () => {
+      log.debug('Finished fetching layer stream', { ...logData })
+      resolve('ok')
+    })
+    packerEntry.on('error', (err) =>
+      reject(
+        InternalError('Error while tarring layer stream', {
+          error: err,
+          ...logData,
+        }),
+      ),
+    )
+    inputStream.on('error', (err) =>
+      reject(
+        InternalError('Error while fetching layer stream', {
+          error: err,
+          ...logData,
+        }),
+      ),
+    )
   })
 }
 
@@ -256,7 +276,7 @@ export async function importModel(
 
   switch (importKind) {
     case ImportKind.Documents: {
-      log.info({ mirroredModelId, payloadUrl, importId }, 'Importing colection of documents.')
+      log.info({ mirroredModelId, payloadUrl, importId }, 'Importing collection of documents.')
       return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl, importId)
     }
     case ImportKind.File: {
