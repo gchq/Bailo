@@ -128,15 +128,17 @@ export async function exportCompressedRegistryImage(
 
   // setup tar
   const packerStream = pack()
-
   // setup gzip
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
   // pipe the tar stream to gzip
   packerStream.pipe(gzipStream)
-
   // start uploading the gzip stream to S3
-  const path = `beta/registry/${modelId}/${imageName}/blobs/compressed/${imageTag}.tar.gz`
-  const s3Upload = uploadToExportS3Location(path, gzipStream, logData, metadata)
+  const s3Upload = uploadToExportS3Location(
+    `beta/registry/${modelId}/${imageName}/blobs/compressed/${imageTag}.tar.gz`,
+    gzipStream,
+    logData,
+    metadata,
+  )
 
   // upload the manifest first as this is the starting point when later importing the blob
   const tagManifestJson = JSON.stringify(tagManifest)
@@ -144,7 +146,7 @@ export async function exportCompressedRegistryImage(
   await pipeStreamToTarEntry(Readable.from(tagManifestJson), packerEntry, { mediaType: tagManifest.mediaType })
 
   // fetch and compress one layer (including config) at a time to manage RAM usage
-  // also, gzip can only handle one pipe at a time
+  // also, tar can only handle one pipe at a time
   for (const layer of [tagManifest.config, ...tagManifest.layers]) {
     const layerDigest = layer['digest']
     if (!layerDigest || layerDigest.length === 0) {
