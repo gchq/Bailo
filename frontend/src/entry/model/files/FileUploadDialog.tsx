@@ -1,11 +1,11 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Dialog, DialogContent, LinearProgress, Stack, styled, Typography } from '@mui/material'
+import { Box, Button, Chip, Dialog, DialogContent, LinearProgress, Stack, styled, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 import FileUploadProgressDisplay, { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import FileToBeUploaded from 'src/entry/model/files/FileToBeUploaded'
-import { EntryInterface, FileUploadWithMetadata } from 'types/types'
+import { EntryInterface, FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
 
 interface FileUploadDialogProps {
   model: EntryInterface
@@ -35,15 +35,15 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
   }, [])
 
   const handleFileMetadataOnChange = useCallback(
-    (metadata: string, fileName: string) => {
+    (metadata: FileUploadMetadata, fileName: string) => {
       setFilesToBeUpload(
         filesToBeUploaded.map((fileWithMetadata) =>
           fileWithMetadata.file.name === fileName
             ? {
                 ...fileWithMetadata,
                 metadata: {
-                  text: metadata,
-                  tags: [...(fileWithMetadata.metadata ? fileWithMetadata.metadata.tags : [])],
+                  text: metadata.text,
+                  tags: metadata.tags,
                 },
               }
             : fileWithMetadata,
@@ -95,16 +95,21 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
     setIsFilesUploading(false)
     if (failedFiles.length === 0) {
       onDialogClose()
+      setFilesToBeUpload([])
     }
   }, [failedFileUploads, model.id, mutateEntryFiles, filesToBeUploaded, onDialogClose])
 
   const fileListToUpload = useMemo(() => {
     return filesToBeUploaded.map((fileWithMetadata) => (
-      <FileToBeUploaded
-        key={fileWithMetadata.file.name}
-        fileWithMetadata={fileWithMetadata}
-        onFileMetadataChange={handleFileMetadataOnChange}
-      />
+      <Stack key={fileWithMetadata.file.name}>
+        <FileToBeUploaded fileWithMetadata={fileWithMetadata} onFileMetadataChange={handleFileMetadataOnChange} />
+        <Box sx={{ whiteSpace: 'pre-wrap' }}>
+          {fileWithMetadata.metadata &&
+            fileWithMetadata.metadata.tags.map((tag) => {
+              return <Chip label={tag} sx={{ width: 'fit-content', m: 0.5 }} key={tag} />
+            })}
+        </Box>
+      </Stack>
     ))
   }, [filesToBeUploaded, handleFileMetadataOnChange])
 
