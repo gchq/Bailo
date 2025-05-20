@@ -2,9 +2,11 @@ import { List } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
+import { memoize } from 'lodash-es'
 import { useCallback, useEffect, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
+import Paginate from 'src/common/Paginate'
 import MessageAlert from 'src/MessageAlert'
 import ReviewItem from 'src/reviews/ReviewItem'
 import { ReviewListStatus, ReviewListStatusKeys, ReviewRequestInterface } from 'types/types'
@@ -47,6 +49,13 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
     }
   }, [reviews, kind, approvedByUser, status])
 
+  const ReviewListItem = memoize(({ data, index }) => (
+    <ReviewItem
+      review={data[index]}
+      key={`${data[index].model.id}-${data[index].semver || data[index].accessRequestId}-${data[index].role}`}
+    />
+  ))
+
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
@@ -64,12 +73,21 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
       {(isCurrentUserLoading || isReviewsLoading || isResponsesLoading) && <Loading />}
       {filteredReviews.length === 0 && <EmptyBlob text='No reviews found' />}
       <List>
-        {filteredReviews.map((review) => (
-          <ReviewItem
-            review={review}
-            key={`${review.model.id}-${review.semver || review.accessRequestId}-${review.role}`}
-          />
-        ))}
+        <Paginate
+          list={filteredReviews.map((entryFile) => {
+            return { key: entryFile._id, ...entryFile }
+          })}
+          emptyListText={`No reviews found`}
+          sortingProperties={[
+            { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+            { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+          ]}
+          defaultSortProperty='createdAt'
+          searchFilterProperty={kind === 'release' ? 'semver' : 'accessRequestId'}
+          searchPlaceholderText={`Search for ${kind === 'release' ? 'semver' : 'access request name'}`}
+        >
+          {ReviewListItem}
+        </Paginate>
       </List>
     </>
   )
