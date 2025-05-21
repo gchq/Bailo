@@ -38,17 +38,17 @@ export async function putObjectStream(
   body: PassThrough | Readable,
   metadata?: Record<string, string>,
 ) {
-  const upload = new Upload({
-    client: await getS3Client(),
-    params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
-    queueSize: 4,
-    partSize: 1024 * 1024 * 64,
-    leavePartsOnError: false,
-  })
-
-  let fileSize = 0
-
   try {
+    const upload = new Upload({
+      client: await getS3Client(),
+      params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
+      queueSize: 4,
+      partSize: 1024 * 1024 * 64,
+      leavePartsOnError: false,
+    })
+
+    let fileSize = 0
+
     upload.on('httpUploadProgress', (progress) => {
       log.debug(
         {
