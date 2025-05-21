@@ -17,6 +17,7 @@ import { PassThrough, Readable } from 'stream'
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
 import config from '../utils/config.js'
+import { InternalError } from '../utils/error.js'
 
 export async function getS3Client() {
   return new S3Client({
@@ -80,10 +81,17 @@ export async function getObjectStream(bucket: string, key: string, range?: { sta
     input.Range = `bytes=${range.start}-${range.end}`
   }
 
-  const command = new GetObjectCommand(input)
-  const response = await client.send(command)
-
-  return response
+  try {
+    const command = new GetObjectCommand(input)
+    const response = await client.send(command)
+    return response
+  } catch (error) {
+    if (JSON.stringify(error).includes('NoSuchKey')) {
+      return undefined
+    } else {
+      throw InternalError('There was a problem retrieving this file.')
+    }
+  }
 }
 
 export async function headObject(bucket: string, key: string) {

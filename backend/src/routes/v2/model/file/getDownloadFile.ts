@@ -10,7 +10,7 @@ import { FileInterface, FileWithScanResultsInterface } from '../../../../models/
 import { downloadFile, getFileById } from '../../../../services/file.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
 import { registerPath } from '../../../../services/specification.js'
-import { BadReq, InternalError } from '../../../../utils/error.js'
+import { BadReq, InternalError, NotFound } from '../../../../utils/error.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getDownloadFileSchema = z
@@ -108,6 +108,19 @@ export const getDownloadFile = [
     // TODO: support ranges
     // res.set('Accept-Ranges', 'bytes')
     const stream = await downloadFile(req.user, file.id)
+
+    // If stream is undefined, we can return a 404 response.
+    // Checker the referer header to see if it came via the UI, if so, redirect
+    if (!stream) {
+      if (req.headers.referer && req.headers.referer.includes(`/model/${params.modelId}`)) {
+        res.redirect('/404?kind=file')
+      } else {
+        throw NotFound(
+          'Requested file does not exist. If you suspect that this is in error please contact the system administrators',
+        )
+      }
+      return
+    }
 
     if (!stream.Body) {
       throw InternalError('We were not able to retrieve the body of this file', { fileId: file._id.toString() })
