@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Chip, Dialog, DialogContent, Divider, LinearProgress, Stack, styled, Typography } from '@mui/material'
+import { Box, Dialog, DialogContent, Divider, LinearProgress, Stack, styled, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
@@ -116,19 +116,12 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
 
   const fileListToUpload = useMemo(() => {
     return filesToBeUploaded.map((fileWithMetadata) => (
-      <Stack key={fileWithMetadata.file.name}>
-        <FileToBeUploaded
-          fileWithMetadata={fileWithMetadata}
-          onFileMetadataChange={handleFileMetadataOnChange}
-          onDelete={handleDeleteFileFromUploadList}
-        />
-        <Box sx={{ whiteSpace: 'pre-wrap' }}>
-          {fileWithMetadata.metadata &&
-            fileWithMetadata.metadata.tags.map((tag) => {
-              return <Chip label={tag} sx={{ width: 'fit-content', m: 0.5 }} key={tag} />
-            })}
-        </Box>
-      </Stack>
+      <FileToBeUploaded
+        key={fileWithMetadata.file.name}
+        fileWithMetadata={fileWithMetadata}
+        onFileMetadataChange={handleFileMetadataOnChange}
+        onDelete={handleDeleteFileFromUploadList}
+      />
     ))
   }, [filesToBeUploaded, handleFileMetadataOnChange, handleDeleteFileFromUploadList])
 
@@ -146,7 +139,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
   )
 
   return (
-    <Dialog open={open} onClose={onDialogClose} maxWidth='sm' fullWidth>
+    <Dialog open={open} onClose={onDialogClose} maxWidth='md' fullWidth>
       <DialogContent>
         <Stack spacing={2}>
           <label htmlFor='add-files-button'>
