@@ -1,5 +1,6 @@
 import { CalendarMonth, Check, ExpandLess, ExpandMore, Sort, SortByAlpha } from '@mui/icons-material'
 import {
+  Box,
   Button,
   Divider,
   Grid2,
@@ -11,6 +12,7 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
 import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -22,6 +24,7 @@ interface PaginateProps<T> {
   sortingProperties: SortingProperty<T>[]
   searchFilterProperty: keyof T
   searchPlaceholderText?: string
+  hideSearchInput?: boolean
   defaultSortProperty: keyof T
   children: ({ data, index }: { data: T[]; index: number }) => ReactElement
 }
@@ -46,6 +49,7 @@ export default function Paginate<T>({
   sortingProperties,
   searchFilterProperty,
   searchPlaceholderText = 'Search...',
+  hideSearchInput = false,
   defaultSortProperty,
   children,
 }: PaginateProps<T>) {
@@ -57,6 +61,8 @@ export default function Paginate<T>({
   const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(SortingDirection.DESC)
   const [searchFilter, setSearchFilter] = useState('')
   const [filteredList, setFilteredList] = useState(list)
+
+  const theme = useTheme()
 
   useEffect(() => {
     setFilteredList(
@@ -203,15 +209,23 @@ export default function Paginate<T>({
   }
 
   return (
-    <Stack spacing={3}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent='space-between' sx={{ width: '100%' }}>
-        <TextField
-          size='small'
-          placeholder={searchPlaceholderText}
-          value={searchFilter}
-          onChange={(e) => setSearchFilter(e.target.value)}
-          sx={{ maxWidth: '200px' }}
-        />
+    <>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        sx={{ pt: 1, pb: 2, width: '100%', px: 2 }}
+        spacing={1}
+        justifyContent='space-between'
+      >
+        {!hideSearchInput && (
+          <TextField
+            size='small'
+            placeholder={searchPlaceholderText}
+            value={searchFilter}
+            onChange={(e) => setSearchFilter(e.target.value)}
+            sx={{ maxWidth: '200px' }}
+          />
+        )}
+        {hideSearchInput && <div style={{ maxWidth: '200px', width: '100%' }}></div>}
         <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
         <Button
           onClick={handleMenuButtonClick}
@@ -241,10 +255,24 @@ export default function Paginate<T>({
           {ascOrDescMenuListItems(SortingDirection.DESC)}
         </Menu>
       </Stack>
-      {listDisplay}
-      <Stack sx={{ width: '100%', pb: 1 }} alignItems='center'>
+      <Box sx={{ px: 2, width: '100%' }}>
+        <Stack
+          sx={{
+            border: 'solid',
+            borderWidth: '0.5px',
+            width: '100%',
+            margin: 'auto',
+            borderColor: theme.palette.divider,
+            borderRadius: 1,
+          }}
+          divider={<Divider flexItem />}
+        >
+          {listDisplay}
+        </Stack>
+      </Box>
+      <Stack sx={{ width: '100%', pt: 3, pb: 1 }} alignItems='center'>
         <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
       </Stack>
-    </Stack>
+    </>
   )
 }

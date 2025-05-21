@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Card, Chip, Container, LinearProgress, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, Container, LinearProgress, Stack, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { postFileForModelId } from 'actions/file'
 import { useGetModelFiles } from 'actions/model'
@@ -31,7 +31,7 @@ export default function Files({ model }: FilesProps) {
   const [activeFileTag, setActiveFileTag] = useState('')
 
   const EntryListItem = ({ data, index }) => (
-    <Card key={data[index]._id} sx={{ width: '100%' }}>
+    <Box key={data[index]._id} sx={{ width: '100%' }}>
       <Stack spacing={1} p={2}>
         <FileDisplay
           showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
@@ -40,7 +40,7 @@ export default function Files({ model }: FilesProps) {
           mutator={mutateEntryFiles}
         />
       </Stack>
-    </Card>
+    </Box>
   )
 
   const handleAddNewFiles = useCallback(

@@ -1,4 +1,4 @@
-import { Divider, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -50,7 +50,7 @@ export default function ReviewItem({ review }: ReviewItemProps) {
       <ListItem disablePadding>
         <ListItemButton onClick={handleListItemClick} aria-label={`Review model ${review.model} ${review.semver}`}>
           <Stack>
-            <Stack spacing={1} direction='column' justifyContent='flex-start' divider={<Divider flexItem />}>
+            <Stack spacing={1} direction='column' justifyContent='flex-start'>
               <Typography sx={{ wordBreak: 'break-all' }} color='primary' variant='h6' component='h2' fontWeight='bold'>
                 {review.model.name}
               </Typography>
