@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Chip, Dialog, DialogContent, LinearProgress, Stack, styled, Typography } from '@mui/material'
+import { Box, Chip, Dialog, DialogContent, Divider, LinearProgress, Stack, styled, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
@@ -25,14 +25,22 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
   const [currentFileUploadProgress, setCurrentFileUploadProgress] = useState<FileUploadProgress | undefined>(undefined)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
 
-  const handleAddNewFiles = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files ? Array.from(event.target.files) : []
-    setFilesToBeUpload(
-      files.map((file) => {
-        return { file: file }
-      }),
-    )
-  }, [])
+  const handleAddNewFiles = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const newFiles = event.target.files
+        ? Array.from(event.target.files).map((newFile) => {
+            return { file: newFile }
+          })
+        : []
+      const filteredNewFiles = newFiles.filter(
+        (newFile) =>
+          filesToBeUploaded.find((existingFile) => existingFile.file.name === newFile.file.name) === undefined,
+      )
+
+      setFilesToBeUpload([...filteredNewFiles, ...filesToBeUploaded])
+    },
+    [filesToBeUploaded],
+  )
 
   const handleFileMetadataOnChange = useCallback(
     (metadata: FileUploadMetadata, fileName: string) => {
@@ -99,10 +107,21 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
     }
   }, [failedFileUploads, model.id, mutateEntryFiles, filesToBeUploaded, onDialogClose])
 
+  const handleDeleteFileFromUploadList = useCallback(
+    (fileName: string) => {
+      setFilesToBeUpload(filesToBeUploaded.filter((file) => file.file.name !== fileName))
+    },
+    [filesToBeUploaded],
+  )
+
   const fileListToUpload = useMemo(() => {
     return filesToBeUploaded.map((fileWithMetadata) => (
       <Stack key={fileWithMetadata.file.name}>
-        <FileToBeUploaded fileWithMetadata={fileWithMetadata} onFileMetadataChange={handleFileMetadataOnChange} />
+        <FileToBeUploaded
+          fileWithMetadata={fileWithMetadata}
+          onFileMetadataChange={handleFileMetadataOnChange}
+          onDelete={handleDeleteFileFromUploadList}
+        />
         <Box sx={{ whiteSpace: 'pre-wrap' }}>
           {fileWithMetadata.metadata &&
             fileWithMetadata.metadata.tags.map((tag) => {
@@ -111,7 +130,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
         </Box>
       </Stack>
     ))
-  }, [filesToBeUploaded, handleFileMetadataOnChange])
+  }, [filesToBeUploaded, handleFileMetadataOnChange, handleDeleteFileFromUploadList])
 
   const failedFileList = useMemo(
     () =>
@@ -131,13 +150,15 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
       <DialogContent>
         <Stack spacing={2}>
           <label htmlFor='add-files-button'>
-            <Button component='span' variant='outlined' sx={{ width: '100%' }}>
+            <LoadingButton loading={isFilesUploading} component='span' variant='outlined' sx={{ width: '100%' }}>
               Select files
-            </Button>
+            </LoadingButton>
           </label>
           <Input multiple id='add-files-button' type='file' onInput={handleAddNewFiles} data-test='uploadFileButton' />
           {filesToBeUploaded.length > 0 && <Typography fontWeight='bold'>Files to upload</Typography>}
-          <Stack>{fileListToUpload}</Stack>
+          <Stack divider={<Divider />} spacing={1}>
+            {fileListToUpload}
+          </Stack>
           {currentFileUploadProgress && (
             <>
               <LinearProgress
