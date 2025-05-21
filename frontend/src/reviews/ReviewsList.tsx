@@ -4,7 +4,6 @@ import { useGetReviewRequestsForUser } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
 import { memoize } from 'lodash-es'
 import { useCallback, useEffect, useState } from 'react'
-import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import MessageAlert from 'src/MessageAlert'
@@ -71,7 +70,6 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
   return (
     <>
       {(isCurrentUserLoading || isReviewsLoading || isResponsesLoading) && <Loading />}
-      {filteredReviews.length === 0 && <EmptyBlob text='No reviews found' />}
       <List>
         <Paginate
           list={filteredReviews.map((entryFile) => {
