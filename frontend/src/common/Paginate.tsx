@@ -247,7 +247,6 @@ export default function Paginate<T>({
           {ascOrDescMenuListItems(SortingDirection.DESC)}
         </Menu>
       </Stack>
-      <Divider />
       {listDisplay}
       <Stack sx={{ width: '100%', pt: 3, pb: 1 }} alignItems='center'>
         <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
