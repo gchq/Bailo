@@ -33,9 +33,6 @@ export default function EntryListRow({
       justifyContent='flex-start'
       alignItems='center'
       sx={{
-        borderBottomStyle: 'solid',
-        borderBottomWidth: 1,
-        borderBottomColor: theme.palette.divider,
         px: 3,
         py: 1,
         margin: 'auto',

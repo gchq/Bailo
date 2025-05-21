@@ -1,5 +1,6 @@
 import { CalendarMonth, Check, ExpandLess, ExpandMore, Sort, SortByAlpha } from '@mui/icons-material'
 import {
+  Box,
   Button,
   Divider,
   Grid2,
@@ -11,6 +12,7 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
 import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -59,6 +61,8 @@ export default function Paginate<T>({
   const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(SortingDirection.DESC)
   const [searchFilter, setSearchFilter] = useState('')
   const [filteredList, setFilteredList] = useState(list)
+
+  const theme = useTheme()
 
   useEffect(() => {
     setFilteredList(
@@ -247,7 +251,21 @@ export default function Paginate<T>({
           {ascOrDescMenuListItems(SortingDirection.DESC)}
         </Menu>
       </Stack>
-      {listDisplay}
+      <Box sx={{ px: 2, width: '100%' }}>
+        <Stack
+          sx={{
+            border: 'solid',
+            borderWidth: '0.5px',
+            width: '100%',
+            margin: 'auto',
+            borderColor: theme.palette.divider,
+            borderRadius: 1,
+          }}
+          divider={<Divider flexItem />}
+        >
+          {listDisplay}
+        </Stack>
+      </Box>
       <Stack sx={{ width: '100%', pt: 3, pb: 1 }} alignItems='center'>
         <Pagination count={pageCount} page={page} onChange={handlePageOnChange} />
       </Stack>
