@@ -1,4 +1,9 @@
-import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, Settings as SettingsIcon } from '@mui/icons-material'
+import {
+  BabyChangingStation,
+  KeyboardDoubleArrowLeft,
+  KeyboardDoubleArrowRight,
+  Settings as SettingsIcon,
+} from '@mui/icons-material'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DescriptionIcon from '@mui/icons-material/Description'
@@ -140,17 +145,6 @@ export default function SideNavigation({
               icon={<ListAltIcon />}
               badgeCount={reviewCount}
             />
-            {/* <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
-              <NavMenuItem
-                href='/reviewRoles'
-                selectedPage={page}
-                primaryText='Review Roles'
-                drawerOpen={drawerOpen}
-                menuPage='reviewRoles'
-                title='Review Roles'
-                icon={<BabyChangingStation />}
-              />
-            </Restricted> */}
             <Divider />
             <NavMenuItem
               href='/docs/api'
@@ -191,8 +185,18 @@ export default function SideNavigation({
                   title='Schemas'
                   icon={<SchemaIcon />}
                 />
-                <Divider />
               </>
+            )}
+            {currentUser.isAdmin && (
+              <NavMenuItem
+                href='/reviewRoles/view'
+                selectedPage={page}
+                primaryText='Review Roles'
+                drawerOpen={drawerOpen}
+                menuPage='reviewRoles'
+                title='Review Roles'
+                icon={<BabyChangingStation />}
+              />
             )}
           </StyledList>
           <StyledList>
