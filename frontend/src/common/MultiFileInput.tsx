@@ -49,7 +49,7 @@ export default function MultiFileInput({
           ...filesMetadata.filter(
             (fileMetadata) => !newFiles.some((newFile) => newFile.name === fileMetadata.fileName),
           ),
-          ...newFiles.map((newFile) => ({ fileName: newFile.name, metadata: '' })),
+          ...newFiles.map((newFile) => ({ fileName: newFile.name, metadata: { text: '', tags: [] } })),
         ])
       }
     },

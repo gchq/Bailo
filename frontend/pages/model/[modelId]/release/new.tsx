@@ -105,8 +105,9 @@ export default function NewRelease() {
       }
 
       if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
-        const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
-        const tags = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.tags
+        const metadataText = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+          .text
+        const tags = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata.tags
 
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
@@ -115,8 +116,13 @@ export default function NewRelease() {
           }
         }
 
+        const metadata = {
+          text: metadataText ? metadataText : '',
+          tags: tags ? tags : [],
+        }
+
         try {
-          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata, tags)
+          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata)
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
