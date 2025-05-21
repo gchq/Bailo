@@ -1,4 +1,5 @@
 import { ExpandMore, PersonAdd } from '@mui/icons-material'
+import { LoadingButton } from '@mui/lab'
 import {
   Accordion,
   AccordionDetails,
@@ -169,6 +170,17 @@ export default function ReviewRolesForm() {
             label='Lock ability to assign entities to this role after creation'
           />
         </Stack>
+        <Box display='flex'>
+          <Box ml='auto'>
+            <LoadingButton
+              variant='contained'
+              color='primary'
+              disabled={!(formData.name && formData.shortName && formData.description && formData.collaboratorRole)}
+            >
+              Create Role
+            </LoadingButton>
+          </Box>
+        </Box>
       </Paper>
     </Container>
   )
