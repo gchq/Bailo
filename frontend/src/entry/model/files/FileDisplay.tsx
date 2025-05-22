@@ -341,10 +341,15 @@ export default function FileDisplay({
       {isFileInterface(file) && (
         <Stack spacing={1}>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center'>
+            <Stack
+              direction={{ sm: 'column', md: 'row' }}
+              spacing={2}
+              alignItems='center'
+              sx={{ wordBreak: 'break-word' }}
+            >
               <Tooltip title={file.name}>
                 <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
-                  <Typography textOverflow='ellipsis' overflow='hidden' variant='h6' sx={{ wordBreak: 'word-break' }}>
+                  <Typography textOverflow='ellipsis' overflow='hidden' variant='h6'>
                     {file.name}
                   </Typography>
                 </Link>
