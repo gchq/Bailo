@@ -17,6 +17,7 @@ import { PassThrough, Readable } from 'stream'
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
 import config from '../utils/config.js'
+import { InternalError } from '../utils/error.js'
 
 export async function getS3Client() {
   return new S3Client({
@@ -37,34 +38,39 @@ export async function putObjectStream(
   body: PassThrough | Readable,
   metadata?: Record<string, string>,
 ) {
-  const upload = new Upload({
-    client: await getS3Client(),
-    params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
-    queueSize: 4,
-    partSize: 1024 * 1024 * 64,
-    leavePartsOnError: false,
-  })
+  try {
+    const upload = new Upload({
+      client: await getS3Client(),
+      params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
+      queueSize: 4,
+      partSize: 1024 * 1024 * 64,
+      leavePartsOnError: false,
+    })
 
-  let fileSize = 0
-  upload.on('httpUploadProgress', (progress) => {
-    log.debug(
-      {
-        ...progress,
-        ...(progress.loaded && { loaded: prettyBytes(progress.loaded), loadedBytes: progress.loaded }),
-        ...(progress.total && { total: prettyBytes(progress.total), totalBytes: progress.total }),
-      },
-      'Object upload is in progress',
-    )
-    if (progress.loaded) {
-      fileSize = progress.loaded
+    let fileSize = 0
+
+    upload.on('httpUploadProgress', (progress) => {
+      log.debug(
+        {
+          ...progress,
+          ...(progress.loaded && { loaded: prettyBytes(progress.loaded), loadedBytes: progress.loaded }),
+          ...(progress.total && { total: prettyBytes(progress.total), totalBytes: progress.total }),
+        },
+        'Object upload is in progress',
+      )
+      if (progress.loaded) {
+        fileSize = progress.loaded
+      }
+    })
+
+    const s3Response = await upload.done()
+    log.debug(s3Response, 'Object upload complete')
+
+    return {
+      fileSize,
     }
-  })
-
-  const s3Response = await upload.done()
-  log.debug(s3Response, 'Object upload complete')
-
-  return {
-    fileSize,
+  } catch (error) {
+    throw InternalError('There was a problem uploading the object', { error })
   }
 }
 
@@ -80,10 +86,13 @@ export async function getObjectStream(bucket: string, key: string, range?: { sta
     input.Range = `bytes=${range.start}-${range.end}`
   }
 
-  const command = new GetObjectCommand(input)
-  const response = await client.send(command)
-
-  return response
+  try {
+    const command = new GetObjectCommand(input)
+    const response = await client.send(command)
+    return response
+  } catch (error) {
+    throw InternalError('There was a problem retrieving this file.', { error })
+  }
 }
 
 export async function headObject(bucket: string, key: string) {
@@ -94,10 +103,13 @@ export async function headObject(bucket: string, key: string) {
     Key: key,
   }
 
-  const command = new GetObjectCommand(input)
-  const response = await client.send(command)
-
-  return response
+  try {
+    const command = new GetObjectCommand(input)
+    const response = await client.send(command)
+    return response
+  } catch (error) {
+    throw InternalError('There was a problem retrieving this file.', { error })
+  }
 }
 
 export async function objectExists(bucket: string, key: string) {
@@ -110,7 +122,7 @@ export async function objectExists(bucket: string, key: string) {
       log.info({ bucket, key }, `Failed to find ${key} in ${bucket}`)
       return false
     } else {
-      throw error
+      throw InternalError('There was a problem retrieving this file.', { error })
     }
   }
 }
@@ -122,10 +134,13 @@ export async function headBucket(bucket: string) {
     Bucket: bucket,
   }
 
-  const command = new HeadBucketCommand(input)
-  const response = await client.send(command)
-
-  return response
+  try {
+    const command = new HeadBucketCommand(input)
+    const response = await client.send(command)
+    return response
+  } catch (error) {
+    throw InternalError('There was a problem querying this bucket.', { error })
+  }
 }
 
 export async function createBucket(bucket: string) {
@@ -135,10 +150,13 @@ export async function createBucket(bucket: string) {
     Bucket: bucket,
   }
 
-  const command = new CreateBucketCommand(input)
-  const response = await client.send(command)
-
-  return response
+  try {
+    const command = new CreateBucketCommand(input)
+    const response = await client.send(command)
+    return response
+  } catch (error) {
+    throw InternalError('There was a problem creating this bucket.', { error })
+  }
 }
 
 export async function ensureBucketExists(bucket: string) {
@@ -151,7 +169,7 @@ export async function ensureBucketExists(bucket: string) {
       log.info({ bucket }, `Bucket does not exist, creating ${bucket}`)
       return createBucket(bucket)
     }
-    throw error
+    throw InternalError('There was a problem ensuring this bucket exists.', { error })
   }
 }
 
