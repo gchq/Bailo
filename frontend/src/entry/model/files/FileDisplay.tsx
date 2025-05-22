@@ -333,7 +333,7 @@ export default function FileDisplay({
   }
 
   return (
-    <Box sx={style} key={key}>
+    <Box sx={{ ...style, p: 1 }} key={key}>
       {isFileInterface(file) && (
         <Stack spacing={1}>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>

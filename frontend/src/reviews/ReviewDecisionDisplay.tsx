@@ -120,12 +120,7 @@ export default function ReviewDecisionDisplay({
               direction='row'
               sx={{ width: '100%' }}
             >
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={1}
-                alignItems='center'
-                data-test='reviewDecisionDisplay'
-              >
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
                 <UserDisplay dn={username} />
                 <span data-test='reviewDecisionDisplay'>
                   {response.decision === Decision.Approve && ' has approved'}
