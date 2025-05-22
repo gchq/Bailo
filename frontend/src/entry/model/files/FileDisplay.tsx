@@ -295,6 +295,10 @@ export default function FileDisplay({
 
   const handleFileTagSelectorOnChange = async (newTags: string[]) => {
     setFileTagErrorMessage('')
+    if (newTags.includes('')) {
+      setFileTagErrorMessage('Tags must have at least one character')
+      return
+    }
     const res = await patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
     mutateEntryFiles()
     if (res.status !== 200) {
@@ -340,7 +344,7 @@ export default function FileDisplay({
             <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center'>
               <Tooltip title={file.name}>
                 <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
-                  <Typography textOverflow='ellipsis' overflow='hidden' variant='h6'>
+                  <Typography textOverflow='ellipsis' overflow='hidden' variant='h6' sx={{ wordBreak: 'word-break' }}>
                     {file.name}
                   </Typography>
                 </Link>

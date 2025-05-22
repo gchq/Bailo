@@ -217,6 +217,7 @@ export default function Paginate<T>({
         sx={{ pt: 1, pb: 2, width: '100%', px: 2 }}
         spacing={1}
         justifyContent='space-between'
+        alignItems='center'
       >
         {!hideSearchInput && (
           <TextField
