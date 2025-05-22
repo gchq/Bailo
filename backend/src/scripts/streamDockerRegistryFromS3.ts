@@ -44,19 +44,29 @@ async function script() {
   let manifestBody
   await new Promise((resolve, reject) => {
     tarStream.on('entry', async function (entry, stream, next) {
-      log.debug('entry ', { entry })
+      log.debug('Processing un-tarred entry', {
+        tarball: inputS3Path,
+        name: entry.name,
+        type: entry.type,
+        size: entry.size,
+      })
+
       if (entry.type === 'file') {
         // Process file
         if (entry.name === 'manifest.json') {
           // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
-          log.debug('Un-tarred manifest')
+          log.debug('Extracting un-tarred manifest', { tarball: inputS3Path })
           manifestBody = await new Response(stream).json()
         } else {
-          log.debug('Initiating un-tarred blob upload', { name: entry.name, size: entry.size })
+          log.debug('Initiating un-tarred blob upload', { tarball: inputS3Path, name: entry.name, size: entry.size })
           const res = await initialiseUpload(repositoryToken, { namespace: outputImageModel, image: outputImageName })
 
-          log.debug('Starting monolithic upload of blob', { url: res.location })
-          const monolithicRes = await uploadLayerMonolithic(
+          log.debug('Starting monolithic upload of blob', {
+            tarball: inputS3Path,
+            file: entry.name,
+            location: res.location,
+          })
+          await uploadLayerMonolithic(
             repositoryToken,
             res.location,
             // convert filename to digest format
@@ -65,17 +75,24 @@ async function script() {
             new Readable().wrap(stream),
             String(entry.size),
           )
-          log.debug('Uploaded monolithic layer', monolithicRes)
         }
         next()
       } else {
         // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
-        log.warn('Did not process non-file entry', entry)
+        log.warn('Skipping non-file entry', { tarball: inputS3Path, name: entry.name, type: entry.type })
         next()
       }
 
       // ready for the next file
-      stream.on('end', next)
+      stream.on('end', function () {
+        log.debug('Finished processing entry', {
+          tarball: inputS3Path,
+          name: entry.name,
+          type: entry.type,
+          size: entry.size,
+        })
+        next()
+      })
       // auto-drain the stream
       stream.resume()
     })
@@ -89,17 +106,20 @@ async function script() {
     )
 
     tarStream.on('finish', async function () {
-      log.debug('Uploading manifest', JSON.stringify(manifestBody))
-      const manifestUpload = await putImageManifest(
+      log.debug('Uploading manifest', { tarball: inputS3Path })
+      await putImageManifest(
         repositoryToken,
         { namespace: outputImageModel, image: outputImageName },
         outputImageTag,
         JSON.stringify(manifestBody),
         manifestBody['mediaType'],
       )
-      log.debug(manifestUpload)
       resolve('ok')
     })
+  })
+  log.debug('Completed registry upload', {
+    tarball: inputS3Path,
+    image: { outputImageModel, outputImageName, outputImageTag },
   })
 
   // cleanup
