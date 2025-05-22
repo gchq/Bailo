@@ -1,7 +1,7 @@
 import mongoose, { ClientSession } from 'mongoose'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { executeInsideTransaction, useTransaction } from '../../src/utils/transactions.js'
+import { execute, useTransaction } from '../../src/utils/transactions.js'
 
 const callback = async (mirror: any) => {
   return Promise.resolve(mirror)
@@ -38,7 +38,7 @@ describe('utils => transactions', () => {
   })
 
   it('executes callbacks and returns the appropriate results', async () => {
-    const [trueResult, falseResult, undefinedResult] = await executeInsideTransaction([
+    const [trueResult, falseResult, undefinedResult] = await execute([
       (_) => callback(true),
       (_) => callback(false),
       (_) => callback(undefined),
@@ -50,12 +50,7 @@ describe('utils => transactions', () => {
 
   it('handles errors inside the callbacks appropriately', async () => {
     await expect(
-      executeInsideTransaction([
-        (_) => callback(true),
-        (_) => callback(false),
-        (_) => callback(undefined),
-        (_) => errorCallback(_),
-      ]),
+      execute([(_) => callback(true), (_) => callback(false), (_) => callback(undefined), (_) => errorCallback(_)]),
     ).rejects.toThrowError()
   })
 

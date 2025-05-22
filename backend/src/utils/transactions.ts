@@ -13,7 +13,7 @@ export interface TransactionCallback<T> {
  *
  * @returns result of each callback inside an array
  */
-export async function executeInsideTransaction<T extends any[]>(
+export async function execute<T extends any[]>(
   actions: { [K in keyof T]: TransactionCallback<T[K]> },
   session?: ClientSession,
 ): Promise<T> {
@@ -39,10 +39,10 @@ const transactionsNotEnabled = 'Database is not in replica set mode, cannot use 
 export async function useTransaction<T extends any[]>(actions: {
   [K in keyof T]: TransactionCallback<T[K]>
 }): Promise<T> {
-  if (useTransactions()) {
-    return await mongoose.connection.transaction((session) => executeInsideTransaction(actions, session))
-  } else {
+  if (!useTransactions()) {
     log.trace(transactionsNotEnabled)
-    return executeInsideTransaction(actions)
+    return execute(actions)
+  } else {
+    return await mongoose.connection.transaction((session) => execute(actions, session))
   }
 }
