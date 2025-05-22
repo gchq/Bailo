@@ -127,7 +127,7 @@ export default function ReviewDecisionDisplay({
                 data-test='reviewDecisionDisplay'
               >
                 <UserDisplay dn={username} />
-                <span>
+                <span data-test='reviewDecisionDisplay'>
                   {response.decision === Decision.Approve && ' has approved'}
                   {response.decision === Decision.RequestChanges && ' has requested changes'}
                   {response.decision === Decision.Undo && ' has undone their review'}
