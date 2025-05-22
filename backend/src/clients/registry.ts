@@ -25,7 +25,7 @@ const agent = getHttpsAgent({
 async function registryRequest(
   token: string,
   endpoint: string,
-  returnStream: boolean = false,
+  returnRawBody: boolean = false,
   extraFetchOptions: { [key: string]: string } = {},
   extraHeaders: { [key: string]: string } = {},
 ) {
@@ -44,16 +44,12 @@ async function registryRequest(
   }
   let body
   const headers = res.headers
-  // don't get the json if the response is a stream and is ok
-  if (!returnStream || !res.ok) {
+  // don't get the json if the response raw (e.g. for a stream) and is ok
+  if (!returnRawBody || !res.ok) {
     try {
       body = await res.json()
     } catch (err) {
-      if (err instanceof SyntaxError) {
-        // pass
-      } else {
-        throw InternalError('Unable to parse response body JSON.', { err })
-      }
+      throw InternalError('Unable to parse response body JSON.', { err })
     }
   }
   if (!res.ok) {
@@ -72,7 +68,7 @@ async function registryRequest(
     }
   }
 
-  if (returnStream) {
+  if (returnRawBody) {
     return { res, headers }
   } else {
     return { body, headers }
@@ -275,7 +271,7 @@ type InitialiseUploadResponse = {
 }
 export async function initialiseUpload(token: string, imageRef: RepoRef) {
   const responseHeaders = (
-    await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`, false, {
+    await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`, true, {
       method: 'POST',
     })
   ).headers
@@ -332,7 +328,7 @@ export async function putImageManifest(
     await registryRequest(
       token,
       `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
-      false,
+      true,
       {
         method: 'PUT',
         body: manifest,
@@ -351,12 +347,16 @@ export async function uploadLayerMonolithic(token: string, uploadURL: string, di
     await registryRequest(
       token,
       `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''),
-      false,
+      true,
       {
         method: 'PUT',
         body: blob,
+        duplex: 'half',
       },
-      { 'Content-Length': size, 'Content-Type': 'application/octet-stream' },
+      {
+        'content-length': size,
+        'content-type': 'application/octet-stream',
+      },
     )
   ).headers
 

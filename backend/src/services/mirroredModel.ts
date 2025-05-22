@@ -6,7 +6,7 @@ import * as fflate from 'fflate'
 import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
 import prettyBytes from 'pretty-bytes'
-import stream, { PassThrough, Readable, Writable } from 'stream'
+import stream, { PassThrough, Readable } from 'stream'
 import { pack } from 'tar-stream'
 
 import { sign } from '../clients/kms.js'
@@ -177,7 +177,7 @@ export async function exportCompressedRegistryImage(
 
 async function pipeStreamToTarEntry(
   inputStream: NodeJS.ReadableStream,
-  packerEntry: Writable,
+  packerEntry: NodeJS.WritableStream,
   logData: { [key: string]: string } = {},
 ) {
   inputStream.pipe(packerEntry)
@@ -622,6 +622,33 @@ async function uploadToTemporaryS3Location(
 async function getObjectFromTemporaryS3Location(fileName: string, logData: Record<string, unknown>) {
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
+  try {
+    const stream = (await getObjectStream(bucket, object)).Body as Readable
+    log.debug(
+      {
+        bucket,
+        object,
+        ...logData,
+      },
+      'Successfully retrieved stream from temporary S3 location.',
+    )
+    return stream
+  } catch (error) {
+    log.error(
+      {
+        bucket,
+        object,
+        error,
+        ...logData,
+      },
+      'Failed to retrieve stream from temporary S3 location.',
+    )
+    throw error
+  }
+}
+
+export async function getObjectFromExportS3Location(object: string, logData: Record<string, unknown>) {
+  const bucket = config.modelMirror.export.bucket
   try {
     const stream = (await getObjectStream(bucket, object)).Body as Readable
     log.debug(
