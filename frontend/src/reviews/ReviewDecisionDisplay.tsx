@@ -99,7 +99,7 @@ export default function ReviewDecisionDisplay({
       {isModelRolesLoading && <Loading />}
       <Stack direction='row' spacing={2} alignItems='flex-start'>
         <Box sx={{ pt: 2, pl: 2 }}>
-          <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} size='chip' />
+          <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} />
         </Box>
         <Box
           sx={{
