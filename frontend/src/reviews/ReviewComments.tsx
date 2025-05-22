@@ -172,7 +172,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
         ]}
         defaultSortProperty='createdAt'
         hideSearchInput
-        searchFilterProperty='comment'
+        searchFilterProperty='createdAt'
       >
         {ResponseListItem}
       </Paginate>

@@ -69,7 +69,7 @@ export default function Paginate<T>({
   useEffect(() => {
     setFilteredList(
       list.filter((item: T) => {
-        if (item[searchFilterProperty as string]) {
+        if (searchFilterProperty !== undefined && item[searchFilterProperty as string]) {
           return item[searchFilterProperty as string].toLowerCase().includes(searchFilter.toLowerCase())
         }
       }),
