@@ -114,12 +114,7 @@ export default function ReviewDecisionDisplay({
             sx={{ width: '100%' }}
             justifyContent='space-between'
           >
-            <Stack
-              alignItems={{ xs: 'center', sm: 'flex-start' }}
-              spacing={{ xs: 1, sm: 0 }}
-              direction='row'
-              sx={{ width: '100%' }}
-            >
+            <Stack alignItems='center' direction='row' sx={{ width: '100%' }} spacing={1}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
                 <UserDisplay dn={username} />
                 <span data-test='reviewDecisionDisplay'>
@@ -132,17 +127,17 @@ export default function ReviewDecisionDisplay({
                   {response.decision === Decision.RequestChanges && <HourglassEmpty color='warning' fontSize='small' />}
                   {response.decision === Decision.Undo && <Undo fontSize='small' />}
                 </span>
-                <span>
-                  {response.outdated && (
-                    <Typography sx={{ backgroundColor: theme.palette.warning.light, borderRadius: 1, px: 0.5 }}>
-                      Outdated
-                    </Typography>
-                  )}
-                </span>
               </Stack>
               {response.role && (
                 <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
               )}
+              <span>
+                {response.outdated && (
+                  <Typography sx={{ backgroundColor: theme.palette.warning.light, borderRadius: 1, px: 0.5 }}>
+                    Outdated
+                  </Typography>
+                )}
+              </span>
             </Stack>
             <Stack direction='row' alignItems='center' spacing={1}>
               <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
