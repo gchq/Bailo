@@ -171,6 +171,7 @@ export default function ReleaseForm({
         modelId={model.id}
         showMenuItems={{ rescanFile: true }}
         mutator={mutateReleases}
+        style={{ padding: 1 }}
       />
     ) : (
       <></>

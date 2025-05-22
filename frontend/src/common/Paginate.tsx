@@ -26,6 +26,7 @@ interface PaginateProps<T> {
   searchPlaceholderText?: string
   hideSearchInput?: boolean
   defaultSortProperty: keyof T
+  defaultSortDirection?: SortingDirectionKeys
   children: ({ data, index }: { data: T[]; index: number }) => ReactElement
 }
 
@@ -51,6 +52,7 @@ export default function Paginate<T>({
   searchPlaceholderText = 'Search...',
   hideSearchInput = false,
   defaultSortProperty,
+  defaultSortDirection = SortingDirection.DESC,
   children,
 }: PaginateProps<T>) {
   const [page, setPage] = useState(1)
@@ -58,7 +60,7 @@ export default function Paginate<T>({
   const menuOpen = Boolean(anchorEl)
   const [orderByValue, setOrderByValue] = useState<keyof T>(defaultSortProperty)
   const [orderByButtonTitle, setOrderByButtonTitle] = useState('Order by')
-  const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(SortingDirection.DESC)
+  const [ascOrDesc, setAscOrDesc] = useState<SortingDirectionKeys>(defaultSortDirection)
   const [searchFilter, setSearchFilter] = useState('')
   const [filteredList, setFilteredList] = useState(list)
 

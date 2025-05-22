@@ -1,5 +1,5 @@
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import { Box, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { patchResponse } from 'actions/response'
 import { useGetUserInformation } from 'actions/user'
 import { useCallback, useMemo, useState } from 'react'
@@ -83,20 +83,20 @@ export default function ReviewCommentDisplay({
   return (
     <>
       <Stack direction='row' spacing={2} alignItems='flex-start'>
-        <Box mt={2}>
+        <Box sx={{ pt: 2, pl: 2 }}>
           <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} size='chip' />
         </Box>
-        <Card
+        <Box
           sx={{
             width: '100%',
             p: 1,
           }}
         >
           <Stack direction='row' spacing={1} alignItems='center' sx={{ width: '100%' }} justifyContent='space-between'>
-            <Typography>
+            <Stack direction='row' spacing={1}>
               <UserDisplay dn={username} />
-              {' has left a comment'}
-            </Typography>
+              <span>{' has left a comment'}</span>
+            </Stack>
             <Stack direction='row' alignItems='center' spacing={1}>
               <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
               <IconButton onClick={(event) => setAnchorEl(event.currentTarget)} aria-label='Actions'>
@@ -116,7 +116,7 @@ export default function ReviewCommentDisplay({
             mutateResponses={mutateResponses}
           />
           <MessageAlert message={errorMessage} severity='error' />
-        </Card>
+        </Box>
       </Stack>
       <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
         <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>

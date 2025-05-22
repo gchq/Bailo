@@ -7,7 +7,6 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Card,
   Divider,
   IconButton,
   Stack,
@@ -133,7 +132,7 @@ export default function ReleaseDisplay({
         isReviewResponsesLoading ||
         isScannersLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
-        <Card sx={{ width: '100%' }}>
+        <Box sx={{ width: '100%' }}>
           {reviews.length > 0 && !hideReviewBanner && <ReviewBanner release={release} />}
           <Stack spacing={1} p={2}>
             <Stack
@@ -250,7 +249,7 @@ export default function ReleaseDisplay({
               </Stack>
             </Stack>
           </Stack>
-        </Card>
+        </Box>
       </Stack>
     </>
   )
