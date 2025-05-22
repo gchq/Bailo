@@ -60,8 +60,8 @@ export default function MultiFileInputFileDisplay({
   }
 
   return (
-    <Grid2 container spacing={1} alignItems='center'>
-      <Grid2 size='auto'>
+    <Grid2 container spacing={1} alignItems='center' sx={{ width: '100%' }}>
+      <Grid2 size={{ xs: 4 }}>
         <Tooltip title={file.name}>
           <Chip color='primary' label={file.name} onDelete={readOnly ? undefined : handleDelete} />
         </Tooltip>

@@ -51,8 +51,8 @@ export default function Files({ model }: FilesProps) {
           <Stack
             width='100%'
             direction={{ sm: 'column', md: 'row' }}
-            justifyContent='space-between'
-            sx={{ py: 0.5, width: '100%' }}
+            justifyContent='flex-end'
+            sx={{ py: 0.5, width: '100%', px: 2 }}
           >
             <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
               <>
