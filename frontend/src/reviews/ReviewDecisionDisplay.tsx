@@ -117,16 +117,18 @@ export default function ReviewDecisionDisplay({
             <Stack alignItems='center' direction='row' sx={{ width: '100%' }} spacing={1}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
                 <UserDisplay dn={username} />
-                <span data-test='reviewDecisionDisplay'>
-                  {response.decision === Decision.Approve && ' has approved'}
-                  {response.decision === Decision.RequestChanges && ' has requested changes'}
-                  {response.decision === Decision.Undo && ' has undone their review'}
+                <span data-test='reviewDecisionDisplayApproved'>
+                  {response.decision === Decision.Approve && 'has approved'}
                 </span>
+                <span data-test='reviewDecisionDisplayRequestChanges'>
+                  {response.decision === Decision.RequestChanges && 'has requested changes'}
+                </span>
+                <span>{response.decision === Decision.Undo && 'has undone their review'}</span>
+                <span>{response.decision === Decision.Approve && <Done color='success' fontSize='small' />}</span>
                 <span>
-                  {response.decision === Decision.Approve && <Done color='success' fontSize='small' />}
                   {response.decision === Decision.RequestChanges && <HourglassEmpty color='warning' fontSize='small' />}
-                  {response.decision === Decision.Undo && <Undo fontSize='small' />}
                 </span>
+                <span>{response.decision === Decision.Undo && <Undo fontSize='small' />}</span>
               </Stack>
               {response.role && (
                 <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
