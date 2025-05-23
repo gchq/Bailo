@@ -1,5 +1,5 @@
-import { CorporateFare } from '@mui/icons-material'
-import { Box, Divider, Stack, Typography } from '@mui/material'
+import { CloudQueue, CorporateFare } from '@mui/icons-material'
+import { Box, Chip, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
 import { CSSProperties } from 'react'
@@ -62,6 +62,19 @@ export default function EntryListRow({
           {entry.description}
         </Typography>
         <Stack direction='row' spacing={1} divider={<Divider flexItem orientation='vertical' />} alignItems='center'>
+          {entry.peerId && (
+            <Stack direction='row' justifyContent='normal' alignItems='center' spacing={2}>
+              <Tooltip title={'Available from ' + entry.peerId}>
+                <Chip
+                  size={'small'}
+                  color={'default'}
+                  sx={{ mx: 0.5, mb: 1, ...style }}
+                  label={entry.peerId}
+                  icon={<CloudQueue />}
+                />
+              </Tooltip>
+            </Stack>
+          )}
           {entry.organisation && (
             <ChipSelector
               chipTooltipTitle={'Filter by organisation'}
