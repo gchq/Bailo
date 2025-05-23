@@ -19,7 +19,7 @@ export class BailoPeerConnector extends BasePeerConnector {
   async queryModels(opts: { query: string }): Promise<Array<ModelSearchResult>> {
     let query: URLSearchParams = new URLSearchParams()
     if (opts.query) {
-      query = new URLSearchParams(opts.query)
+      query = new URLSearchParams({ search: opts.query })
     }
 
     const results = await this.request<GetModelsResponse>('/api/v2/models/search'.concat('?', query.toString()))
