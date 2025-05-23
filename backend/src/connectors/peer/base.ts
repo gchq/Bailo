@@ -1,3 +1,4 @@
+import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { getHttpsAgent } from '../../services/http.js'
 import { FederationState, FederationStateKeys, RemoteFederationConfig, SystemStatus } from '../../types/types.js'
 
@@ -56,4 +57,6 @@ export abstract class BasePeerConnector {
    * Fetch the peer's system status
    */
   abstract getPeerStatus(): Promise<SystemStatus>
+
+  abstract queryModels(opts): Promise<Array<ModelSearchResult>>
 }

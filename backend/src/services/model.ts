@@ -4,10 +4,12 @@ import * as _ from 'lodash-es'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import getPeerConnectors from '../connectors/peer/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
+import { ModelSearchResult } from '../routes/v2/model/getModelsSearch.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { EntityKind, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
@@ -106,6 +108,64 @@ export async function canUserActionModelById(user: UserInterface, modelId: strin
 }
 
 export async function searchModels(
+  user: UserInterface,
+  kind: EntryKindKeys,
+  libraries: Array<string>,
+  organisations: Array<string>,
+  filters: Array<string>,
+  search: string,
+  peers: Array<string>,
+  task?: string,
+  allowTemplating?: boolean,
+  schemaId?: string,
+): Promise<Array<ModelSearchResult>> {
+  const promises = new Array<Promise<any>>()
+  const models = new Array<ModelSearchResult>()
+  const localPromise = searchLocalModels(
+    user,
+    kind,
+    libraries,
+    organisations,
+    filters,
+    search,
+    task,
+    allowTemplating,
+    schemaId,
+  )
+  promises.push(localPromise)
+
+  localPromise.then((localModels) => {
+    models.push(
+      ...localModels.map((model) => ({
+        id: model.id,
+        name: model.name,
+        description: model.description,
+        tags: model.card?.metadata?.overview?.tags || [],
+        kind: model.kind,
+        organisation: model.organisation,
+        state: model.state,
+        collaborators: model.collaborators,
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+      })),
+    )
+  })
+
+  if (peers.length > 0) {
+    const connectors = await getPeerConnectors()
+    const remotePromise = connectors.queryModels({ query: search }, peers)
+    promises.push(remotePromise)
+    remotePromise.then((remoteModels) => {
+      models.push(...remoteModels)
+    })
+  }
+
+  await Promise.all(promises)
+
+  return models
+}
+
+async function searchLocalModels(
   user: UserInterface,
   kind: EntryKindKeys,
   libraries: Array<string>,

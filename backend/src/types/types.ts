@@ -75,6 +75,9 @@ export interface RemoteFederationConfig {
   kind: PeerKindKeys
   proxy: string
   httpConfig: ProxyAgentOptions
+  extra: {
+    [key: string]: any
+  }
 }
 
 export type FederationStatus = {

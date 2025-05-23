@@ -1,5 +1,6 @@
 import fetch, { Response } from 'node-fetch'
 
+import { GetModelsResponse, ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { isBailoError } from '../../types/error.js'
 import { SystemStatus } from '../../types/types.js'
 import config from '../../utils/config.js'
@@ -13,6 +14,21 @@ const emptyPing: SystemStatus = {
 export class BailoPeerConnector extends BasePeerConnector {
   init() {
     return Promise.resolve(true)
+  }
+
+  async queryModels(opts: { query: string }): Promise<Array<ModelSearchResult>> {
+    let query: URLSearchParams = new URLSearchParams()
+    if (opts.query) {
+      query = new URLSearchParams(opts.query)
+    }
+
+    const results = await this.request<GetModelsResponse>('/api/v2/models/search'.concat('?', query.toString()))
+    const models = results.models
+
+    return models.map((model) => ({
+      ...model,
+      peerId: this.getId(),
+    }))
   }
 
   async getPeerStatus(): Promise<SystemStatus> {
