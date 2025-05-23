@@ -1,6 +1,5 @@
-import fetch, { Response } from 'node-fetch'
-
-import { getHttpsAgent } from '../services/http.js'
+import { getHttpsUndiciAgent } from '../services/http.js'
+import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
@@ -18,8 +17,8 @@ export type ErrorInfo = { code: string; message: string; details: Array<unknown>
 
 const registry = config.registry.connection.internal
 
-const agent = getHttpsAgent({
-  rejectUnauthorized: !config.registry.connection.insecure,
+const agent = getHttpsUndiciAgent({
+  connect: { rejectUnauthorized: !config.registry.connection.insecure },
 })
 
 async function registryRequest(
@@ -36,7 +35,7 @@ async function registryRequest(
         Authorization: `Bearer ${token}`,
         ...extraHeaders,
       },
-      agent,
+      dispatcher: agent,
       ...extraFetchOptions,
     })
   } catch (err) {
@@ -45,7 +44,7 @@ async function registryRequest(
   let body
   const headers = res.headers
   // don't get the json if the response raw (e.g. for a stream) and is ok
-  if (!returnRawBody || !res.ok) {
+  if (!returnRawBody) {
     try {
       body = await res.json()
     } catch (err) {
@@ -235,33 +234,93 @@ function isGetRegistryLayerStream(resp: unknown): resp is GetRegistryLayerStream
   if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
     return false
   }
+  if (!('ok' in resp) || typeof resp.ok !== 'boolean') {
+    return false
+  }
   if (!('body' in resp) || typeof resp.body !== 'object' || Array.isArray(resp.body) || resp.body === null) {
     return false
   }
-  for (const objectKey of ['_events', '_readableState', '_writableState']) {
+  for (const objectKey of ['cancel', 'getReader', 'pipeThrough', 'pipeTo', 'tee', 'values']) {
     if (
       !(objectKey in resp.body) ||
-      typeof resp.body[objectKey] !== 'object' ||
+      typeof resp.body[objectKey] !== 'function' ||
       Array.isArray(resp.body[objectKey]) ||
       resp.body[objectKey] === null
     ) {
       return false
     }
   }
-  if (!('allowHalfOpen' in resp.body) || typeof resp.body.allowHalfOpen !== 'boolean') {
+  return true
+}
+
+type DoesLayerExistResponse = {
+  'accept-ranges': string
+  'content-length': string
+  'content-type': string
+  date: string
+  'docker-content-digest': string
+  'docker-distribution-api-version': string
+  etag: string
+}
+export async function doesLayerExist(token: string, imageRef: RepoRef, digest: string) {
+  try {
+    const responseHeaders = (
+      await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${digest}`, true, {
+        method: 'HEAD',
+      })
+    ).headers
+    const headersObject = Object.fromEntries(responseHeaders)
+
+    if (!isDoesLayerExistResponse(headersObject)) {
+      throw InternalError('Unrecognised response headers when heading image layer.', {
+        responseHeaders: responseHeaders,
+        namespace: imageRef.namespace,
+        image: imageRef.image,
+        digest,
+      })
+    }
+
+    return true
+  } catch (error) {
+    if (typeof error === 'object' && error !== null && error['context']['status'] === 404) {
+      // 404 response indicates that the layer does not exist
+      return false
+    } else {
+      throw error
+    }
+  }
+}
+
+function isDoesLayerExistResponse(resp: unknown): resp is DoesLayerExistResponse {
+  if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
     return false
   }
-  if (!('_maxListeners' in resp.body)) {
+  // type guard expected header keys
+  if (!('accept-ranges' in resp) || !(typeof resp['accept-ranges'] === 'string')) {
     return false
   }
-  if (!('_eventsCount' in resp.body) || !Number.isInteger(resp.body._eventsCount)) {
+  if (!('content-length' in resp) || !(typeof resp['content-length'] === 'string')) {
+    return false
+  }
+  if (!('content-type' in resp) || !(typeof resp['content-type'] === 'string')) {
+    return false
+  }
+  if (!('date' in resp) || !(typeof resp['date'] === 'string')) {
+    return false
+  }
+  if (!('docker-content-digest' in resp) || !(typeof resp['docker-content-digest'] === 'string')) {
+    return false
+  }
+  if (!('docker-distribution-api-version' in resp) || !(typeof resp['docker-distribution-api-version'] === 'string')) {
+    return false
+  }
+  if (!('etag' in resp) || !(typeof resp['etag'] === 'string')) {
     return false
   }
   return true
 }
 
 type InitialiseUploadResponse = {
-  connection: string
   'content-length': string
   date: string
   'docker-distribution-api-version': string
@@ -280,6 +339,7 @@ export async function initialiseUpload(token: string, imageRef: RepoRef) {
   if (!isInitialiseUploadObjectResponse(headersObject)) {
     throw InternalError('Unrecognised response headers when posting initialise image upload.', {
       responseHeaders: responseHeaders,
+      headersObject,
       namespace: imageRef.namespace,
       image: imageRef.image,
     })
@@ -293,9 +353,6 @@ function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUplo
     return false
   }
   // type guard expected header keys
-  if (!('connection' in resp) || !(typeof resp['connection'] === 'string')) {
-    return false
-  }
   if (!('content-length' in resp) || !(typeof resp['content-length'] === 'string')) {
     return false
   }
@@ -317,6 +374,13 @@ function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUplo
   return true
 }
 
+type PutImageManifestResponse = {
+  'content-length': string
+  date: string
+  'docker-content-digest': string
+  'docker-distribution-api-version': string
+  location: string
+}
 export async function putImageManifest(
   token: string,
   imageRef: RepoRef,
@@ -336,13 +400,45 @@ export async function putImageManifest(
       { 'Content-Type': contentType, name: `${imageRef.namespace}/${imageRef.image}`, reference: imageTag },
     )
   ).headers
+  const headersObject = Object.fromEntries(responseHeaders)
 
-  // TODO: type guard
+  if (!isPutImageManifestResponse(headersObject)) {
+    throw InternalError('Unrecognised response headers when putting image manifest.', {
+      responseHeaders: responseHeaders,
+      namespace: imageRef.namespace,
+      image: imageRef.image,
+    })
+  }
 
-  return responseHeaders
+  return headersObject
 }
 
+function isPutImageManifestResponse(resp: unknown): resp is UploadLayerMonolithicResponse {
+  if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
+    return false
+  }
+  // type guard expected header keys
+  if (!('content-length' in resp) || !(typeof resp['content-length'] === 'string')) {
+    return false
+  }
+  if (!('date' in resp) || !(typeof resp['date'] === 'string')) {
+    return false
+  }
+  if (!('docker-content-digest' in resp) || !(typeof resp['docker-content-digest'] === 'string')) {
+    return false
+  }
+  if (!('docker-distribution-api-version' in resp) || !(typeof resp['docker-distribution-api-version'] === 'string')) {
+    return false
+  }
+  if (!('location' in resp) || !(typeof resp['location'] === 'string')) {
+    return false
+  }
+  return true
+}
+
+type UploadLayerMonolithicResponse = PutImageManifestResponse
 export async function uploadLayerMonolithic(token: string, uploadURL: string, digest: string, blob: any, size: string) {
+  log.debug('uploadLayerMonolithic', { token, uploadURL, digest, blob, size })
   const responseHeaders = (
     await registryRequest(
       token,
@@ -359,37 +455,20 @@ export async function uploadLayerMonolithic(token: string, uploadURL: string, di
       },
     )
   ).headers
+  const headersObject = Object.fromEntries(responseHeaders)
 
-  // TODO: type guard
+  if (!isUploadLayerMonolithicResponse(headersObject)) {
+    throw InternalError('Unrecognised response headers when putting image manifest.', {
+      responseHeaders: responseHeaders,
+      uploadURL,
+      digest,
+      size,
+    })
+  }
 
-  return responseHeaders
+  return headersObject
 }
 
-export async function uploadLayerChunk(
-  token: string,
-  uploadURL: string,
-  chunk: any,
-  size: string,
-  startOffset: number,
-) {
-  const responseHeaders = (
-    await registryRequest(
-      token,
-      `${uploadURL}`.replace(/^(\/v2)/, ''),
-      false,
-      {
-        method: 'PATCH',
-        body: chunk,
-      },
-      {
-        'Content-Length': size,
-        'Content-Range': `${startOffset}-${startOffset + Number.parseInt(size)}`,
-        'Content-Type': 'application/octet-stream',
-      },
-    )
-  ).headers
-
-  // TODO: type guard
-
-  return responseHeaders
+function isUploadLayerMonolithicResponse(resp: unknown): resp is UploadLayerMonolithicResponse {
+  return isPutImageManifestResponse(resp)
 }

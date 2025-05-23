@@ -1,9 +1,9 @@
 import zlib from 'node:zlib'
 
-import { Readable } from 'stream'
+import { finished } from 'stream/promises'
 import { extract } from 'tar-stream'
 
-import { initialiseUpload, putImageManifest, uploadLayerMonolithic } from '../clients/registry.js'
+import { doesLayerExist, initialiseUpload, putImageManifest, uploadLayerMonolithic } from '../clients/registry.js'
 import { ensureBucketExists } from '../clients/s3.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import log from '../services/log.js'
@@ -57,49 +57,42 @@ async function script() {
           // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
           log.debug('Extracting un-tarred manifest', { tarball: inputS3Path })
           manifestBody = await new Response(stream).json()
-        } else {
-          log.debug('Initiating un-tarred blob upload', { tarball: inputS3Path, name: entry.name, size: entry.size })
-          const res = await initialiseUpload(repositoryToken, { namespace: outputImageModel, image: outputImageName })
 
-          log.debug('Starting monolithic upload of blob', {
-            tarball: inputS3Path,
-            file: entry.name,
-            location: res.location,
-          })
-          await uploadLayerMonolithic(
-            repositoryToken,
-            res.location,
-            // convert filename to digest format
-            `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`,
-            // convert `PassThrough` to `Readable` for `fetch`
-            new Readable().wrap(stream),
-            String(entry.size),
-          )
+          next()
+        } else {
+          // convert filename to digest format
+          const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
+          if (
+            await doesLayerExist(repositoryToken, { namespace: outputImageModel, image: outputImageName }, layerDigest)
+          ) {
+            log.debug('Skipping blob as it already exists in the registry', {
+              tarball: inputS3Path,
+              name: entry.name,
+              size: entry.size,
+            })
+
+            // auto-drain the stream
+            stream.resume()
+            next()
+          } else {
+            log.debug('Initiating un-tarred blob upload', { tarball: inputS3Path, name: entry.name, size: entry.size })
+            const res = await initialiseUpload(repositoryToken, { namespace: outputImageModel, image: outputImageName })
+
+            await uploadLayerMonolithic(repositoryToken, res.location, layerDigest, stream, String(entry.size))
+            await finished(stream)
+            next()
+          }
         }
-        next()
       } else {
         // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
         log.warn('Skipping non-file entry', { tarball: inputS3Path, name: entry.name, type: entry.type })
         next()
       }
-
-      // ready for the next file
-      stream.on('end', function () {
-        log.debug('Finished processing entry', {
-          tarball: inputS3Path,
-          name: entry.name,
-          type: entry.type,
-          size: entry.size,
-        })
-        next()
-      })
-      // auto-drain the stream
-      stream.resume()
     })
 
     tarStream.on('error', (err) =>
       reject(
-        InternalError('Error while un-tarring layer stream', {
+        InternalError('Error while un-tarring blob', {
           error: err,
         }),
       ),
