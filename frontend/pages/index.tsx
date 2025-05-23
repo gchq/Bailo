@@ -17,6 +17,7 @@ import {
 } from '@mui/material/'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
+import { useGetPeers } from 'actions/federation'
 import { useGetAllModelReviewRoles, useListModels } from 'actions/model'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
@@ -45,12 +46,14 @@ export default function Marketplace() {
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [selectedPeers, setSelectedPeers] = useState<string[]>([])
   const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { peers } = useGetPeers()
 
   const { models, isModelsError, isModelsLoading } = useListModels(
     EntryKind.MODEL,
@@ -58,6 +61,7 @@ export default function Marketplace() {
     selectedTask,
     selectedLibraries,
     selectedOrganisations,
+    selectedPeers,
     debouncedFilter,
   )
 
@@ -70,6 +74,7 @@ export default function Marketplace() {
     selectedRoles,
     selectedTask,
     selectedLibraries,
+    selectedPeers,
     selectedOrganisations,
     debouncedFilter,
   )
@@ -83,6 +88,7 @@ export default function Marketplace() {
     filter: filterFromQuery,
     task: taskFromQuery,
     libraries: librariesFromQuery,
+    peers: peersFromQuery,
     organisations: organisationsFromQuery,
   } = router.query
 
@@ -107,7 +113,16 @@ export default function Marketplace() {
       }
       setSelectedOrganisations([...organisationsAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery])
+    if (peersFromQuery) {
+      let peersAsArray: string[] = []
+      if (typeof peersFromQuery === 'string') {
+        peersAsArray.push(peersFromQuery)
+      } else {
+        peersAsArray = [...peersFromQuery]
+      }
+      setSelectedPeers([...peersAsArray])
+    }
+  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery, peersFromQuery])
 
   const handleSelectedRolesOnChange = useCallback(
     (selectedFilters: string[]) => {
@@ -127,6 +142,10 @@ export default function Marketplace() {
     [roleOptions],
   )
 
+  const peerList = useMemo(() => {
+    return peers ? Object.keys(peers) : []
+  }, [peers])
+
   const organisationList = useMemo(() => {
     return uiConfig ? uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem) : []
   }, [uiConfig])
@@ -144,6 +163,14 @@ export default function Marketplace() {
     (e: ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value)
       updateQueryParams('filter', e.target.value)
+    },
+    [updateQueryParams],
+  )
+
+  const handlePeersOnChange = useCallback(
+    (peers: string[]) => {
+      setSelectedPeers(peers)
+      updateQueryParams('peers', peers)
     },
     [updateQueryParams],
   )
@@ -255,6 +282,20 @@ export default function Marketplace() {
                 />
               </FormControl>
               <Stack divider={<Divider flexItem />}>
+                <Box>
+                  <ChipSelector
+                    label='Sources'
+                    chipTooltipTitle={'Include external repostories'}
+                    options={peerList}
+                    expandThreshold={10}
+                    multiple
+                    selectedChips={selectedPeers}
+                    onChange={handlePeersOnChange}
+                    size='small'
+                    ariaLabel='add peer to search filter'
+                    accordion
+                  />
+                </Box>
                 <Box>
                   <ChipSelector
                     label='Organisations'
