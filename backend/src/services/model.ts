@@ -5,11 +5,13 @@ import { Optional } from 'utility-types'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import getPeerConnectors from '../connectors/peer/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
+import { ModelSearchResult } from '../routes/v2/model/getModelsSearch.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { EntityKind, EntryUserPermissions } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
@@ -119,6 +121,67 @@ export async function canUserActionModelById(user: UserInterface, modelId: strin
 }
 
 export async function searchModels(
+  user: UserInterface,
+  kind: EntryKindKeys,
+  libraries: Array<string>,
+  organisations: Array<string>,
+  states: Array<string>,
+  filters: Array<string>,
+  search: string,
+  task?: string,
+  peers?: Array<string>,
+  allowTemplating?: boolean,
+  schemaId?: string,
+): Promise<Array<ModelSearchResult>> {
+  const models: ModelSearchResult[] = []
+
+  const localModelsPromise = searchLocalModels(
+    user,
+    kind,
+    libraries,
+    organisations,
+    states,
+    filters,
+    search,
+    task,
+    allowTemplating,
+    schemaId,
+  )
+
+  const processLocalModels = localModelsPromise.then((localModels) => {
+    models.push(
+      ...localModels.map((model) => ({
+        id: model.id,
+        name: model.name,
+        description: model.description,
+        tags: model.tags,
+        kind: model.kind,
+        organisation: model.organisation,
+        state: model.state,
+        collaborators: model.collaborators,
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+      })),
+    )
+  })
+
+  const promises: Promise<any>[] = [processLocalModels]
+
+  if (peers && peers.length > 0) {
+    const connectors = await getPeerConnectors()
+    const remotePromise = connectors.queryModels({ query: search }, user, peers)
+    const processRemoteModels = remotePromise.then((remoteModels) => {
+      models.push(...remoteModels)
+    })
+    promises.push(processRemoteModels)
+  }
+
+  await Promise.all(promises)
+
+  return models
+}
+
+async function searchLocalModels(
   user: UserInterface,
   kind: EntryKindKeys,
   libraries: Array<string>,

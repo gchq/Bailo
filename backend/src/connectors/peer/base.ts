@@ -1,12 +1,26 @@
+import NodeCache from 'node-cache'
+
+import { UserInterface } from '../../models/User.js'
+import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { getHttpsAgent } from '../../services/http.js'
 import { FederationState, FederationStateKeys, RemoteFederationConfig, SystemStatus } from '../../types/types.js'
 
 export abstract class BasePeerConnector {
   id: string
   config: RemoteFederationConfig
+  queryCache: NodeCache | undefined
+
   constructor(id: string, config: RemoteFederationConfig) {
     this.id = id
     this.config = config
+  }
+
+  getQueryCache(): NodeCache | undefined {
+    const queryTtl = this.config.cache?.query
+    if (queryTtl && queryTtl > -1 && !this.queryCache) {
+      this.queryCache = new NodeCache({ stdTTL: queryTtl })
+    }
+    return this.queryCache
   }
 
   getHttpsAgent() {
@@ -56,4 +70,17 @@ export abstract class BasePeerConnector {
    * Fetch the peer's system status
    */
   abstract getPeerStatus(): Promise<SystemStatus>
+
+  abstract queryModels(opts, user: UserInterface): Promise<Array<ModelSearchResult>>
+
+  /**
+   * Namespace cache by user
+   *
+   * @param user to extract the DN from
+   * @param key to use as the remainder of the key (such as a query string)
+   * @returns a user-specific cache key
+   */
+  buildCacheKey(user: UserInterface, key: string) {
+    return `${user.dn}+${key}`
+  }
 }

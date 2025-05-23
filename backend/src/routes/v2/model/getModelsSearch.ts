@@ -20,6 +20,7 @@ export const getModelsSearchSchema = z.object({
     search: z.string().optional().default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
+    peers: coerceArray(z.array(z.string()).optional().default([])),
   }),
 })
 
@@ -44,6 +45,7 @@ registerPath({
                 kind: z.string().openapi({ example: EntryKind.Model }),
                 allowTemplating: z.boolean().openapi({ example: true }),
                 schemaId: z.string().optional(),
+                peerId: z.string().optional(),
               }),
             ),
           }),
@@ -64,9 +66,10 @@ export interface ModelSearchResult {
   collaborators: Array<CollaboratorEntry>
   createdAt: Date
   updatedAt: Date
+  peerId?: string
 }
 
-interface GetModelsResponse {
+export interface GetModelsResponse {
   models: Array<ModelSearchResult>
 }
 
@@ -74,10 +77,10 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states },
+      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states, peers },
     } = parse(req, getModelsSearchSchema)
 
-    const foundModels = await searchModels(
+    const models = await searchModels(
       req.user,
       kind as EntryKindKeys,
       libraries,
@@ -86,21 +89,10 @@ export const getModelsSearch = [
       filters,
       search,
       task,
+      peers,
       allowTemplating,
       schemaId,
     )
-    const models = foundModels.map((model) => ({
-      id: model.id,
-      name: model.name,
-      description: model.description,
-      tags: model.tags,
-      kind: model.kind,
-      organisation: model.organisation,
-      state: model.state,
-      collaborators: model.collaborators,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-    }))
 
     await audit.onSearchModel(req, models)
 

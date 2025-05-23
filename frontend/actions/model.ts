@@ -23,6 +23,7 @@ export interface EntrySearchResult {
   kind: EntryKindKeys
   organisation?: string
   state?: string
+  peerId?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -39,6 +40,7 @@ export function useListModels(
   libraries: string[] = [],
   organisations: string[] = [],
   states: string[] = [],
+  peers: string[] = [],
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
@@ -50,6 +52,7 @@ export function useListModels(
     ...(libraries.length > 0 && { libraries }),
     ...(organisations.length > 0 && { organisations }),
     ...(states.length > 0 && { states }),
+    ...(peers.length > 0 && { peers }),
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
