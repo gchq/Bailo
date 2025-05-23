@@ -8,13 +8,15 @@ import config from '../utils/config.js'
 import { InternalError } from '../utils/error.js'
 import log from './log.js'
 
+const defaultOpts = config.httpClient?.defaultOpts
+
 // This function has the same syntax as 'https.Agent', but is centralised throughout
 // the application in case it needs to be altered.
 export function getHttpsAgent(opts?: https.AgentOptions) {
   return new ProxyAgent({
     getProxyForUrl,
-    ...config.httpClient.defaultOpts,
-    ...opts,
+    ...(defaultOpts && { defaultOpts }),
+    ...(opts && { opts }),
   })
 }
 
