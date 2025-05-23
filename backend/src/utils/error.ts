@@ -25,6 +25,11 @@ export function GenericError(code: number, message: string, context?: BailoError
     enumerable: false,
   })
 
+  Object.defineProperty(err, 'message', {
+    value: message,
+    enumerable: true,
+  })
+
   return err
 }
 

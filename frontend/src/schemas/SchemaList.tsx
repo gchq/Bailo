@@ -41,6 +41,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     [],
     [],
     [],
+    [],
     '',
     false,
     schemaToBeDeleted,
