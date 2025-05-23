@@ -19,6 +19,7 @@ import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { useGetReviewRoles } from 'actions/reviewRoles'
+import { useGetPeers } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -46,6 +47,7 @@ export default function Marketplace() {
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [selectedPeers, setSelectedPeers] = useState<string[]>([])
   const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
   const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
@@ -53,6 +55,7 @@ export default function Marketplace() {
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { peers } = useGetPeers()
 
   const { models, isModelsError, isModelsLoading } = useListModels(
     EntryKind.MODEL,
@@ -61,6 +64,7 @@ export default function Marketplace() {
     selectedLibraries,
     selectedOrganisations,
     selectedStates,
+    selectedPeers,
     debouncedFilter,
   )
 
@@ -73,6 +77,7 @@ export default function Marketplace() {
     selectedRoles,
     selectedTask,
     selectedLibraries,
+    selectedPeers,
     selectedOrganisations,
     selectedStates,
     debouncedFilter,
@@ -87,6 +92,7 @@ export default function Marketplace() {
     filter: filterFromQuery,
     task: taskFromQuery,
     libraries: librariesFromQuery,
+    peers: peersFromQuery,
     organisations: organisationsFromQuery,
     states: statesFromQuery,
   } = router.query
@@ -121,7 +127,16 @@ export default function Marketplace() {
       }
       setSelectedStates([...statesAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery, statesFromQuery])
+    if (peersFromQuery) {
+      let peersAsArray: string[] = []
+      if (typeof peersFromQuery === 'string') {
+        peersAsArray.push(peersFromQuery)
+      } else {
+        peersAsArray = [...peersFromQuery]
+      }
+      setSelectedPeers([...peersAsArray])
+    }
+  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery, statesFromQuery, peersFromQuery])
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -150,6 +165,10 @@ export default function Marketplace() {
     [roleOptions],
   )
 
+  const peerList = useMemo(() => {
+    return peers ? Object.keys(peers) : []
+  }, [peers])
+
   const organisationList = useMemo(() => {
     return uiConfig ? uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem) : []
   }, [uiConfig])
@@ -162,6 +181,14 @@ export default function Marketplace() {
     (e: ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value)
       updateQueryParams('filter', e.target.value)
+    },
+    [updateQueryParams],
+  )
+
+  const handlePeersOnChange = useCallback(
+    (peers: string[]) => {
+      setSelectedPeers(peers)
+      updateQueryParams('peers', peers)
     },
     [updateQueryParams],
   )
@@ -315,6 +342,22 @@ export default function Marketplace() {
                     />
                   </Box>
                 )}
+                {peerList && peerList.length > 0 && (
+                  <Box>
+                    <ChipSelector
+                      label='Sources'
+                      chipTooltipTitle={'Include external repostories'}
+                      options={peerList}
+                      expandThreshold={10}
+                      multiple
+                      selectedChips={selectedPeers}
+                      onChange={handlePeersOnChange}
+                      size='small'
+                      ariaLabel='add peer to search filter'
+                      accordion
+                    />
+                  </Box>
+                )}
                 <Box>
                   <ChipSelector
                     label='Tasks'
@@ -399,6 +442,7 @@ export default function Marketplace() {
                     onSelectedStatesChange={handleStatesOnChange}
                     displayOrganisation={uiConfig && uiConfig.modelDetails.organisations.length > 0}
                     displayState={uiConfig && uiConfig.modelDetails.states.length > 0}
+                    peers={peers}
                   />
                 </div>
               )}
