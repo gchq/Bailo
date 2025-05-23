@@ -7,12 +7,6 @@ const config: PartialDeep<Config> = {
     host: '',
     port: 3000,
   },
-  httpClient: {
-    // Default proxy to use for all requests
-    proxy: '',
-    // Don't use a proxy for any address in this list
-    noProxy: ['localhost', '127.0.0.1'],
-  },
   s3: {
     credentials: {
       accessKeyId: '',
