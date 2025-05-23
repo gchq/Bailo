@@ -2,6 +2,7 @@
 
 exports[`utils > error > GenericError 1`] = `
 "{
+    "message": "Example Message",
     "name": "Bailo Error",
     "code": 999,
     "context": {

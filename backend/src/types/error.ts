@@ -6,6 +6,8 @@ export interface BailoError extends Error {
   // message: string
 
   // An HTTP response code that represents the error
+  name: string
+  message: string
   code: number
   status: number
 

@@ -1,7 +1,7 @@
 import { ProxyAgentOptions } from 'proxy-agent'
 
 import { PeerKindKeys } from '../connectors/peer/index.js'
-import { SystemRolesKeys } from '../models/Model.js'
+import { CollaboratorEntry, EntryKindKeys, SystemRolesKeys } from '../models/Model.js'
 import { BailoError } from './error.js'
 
 export type PartialDeep<T> = T extends object
@@ -74,8 +74,14 @@ export interface RemoteFederationConfig {
   baseUrl: string
   label: string
   kind: PeerKindKeys
-  proxy: string
-  httpConfig: ProxyAgentOptions
+  proxy?: string
+  httpConfig?: ProxyAgentOptions
+  cache?: {
+    query?: number
+  }
+  extra?: {
+    [key: string]: any
+  }
 }
 
 export type FederationStatus = {
@@ -150,4 +156,24 @@ export interface UiConfig {
     contributor: string
     consumer: string
   }
+}
+
+export interface ModelSearchResult {
+  id: string
+  name: string
+  description: string
+  tags: Array<string>
+  kind: EntryKindKeys
+  organisation?: string
+  state?: string
+  collaborators: Array<CollaboratorEntry>
+  createdAt: Date
+  updatedAt: Date
+  peerId?: string
+  sourceModelId?: string
+}
+
+export interface ModelSearchResultWithErrors {
+  models: Array<ModelSearchResult>
+  errors?: Record<string, BailoError>
 }

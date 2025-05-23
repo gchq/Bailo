@@ -2,6 +2,7 @@ import qs from 'querystring'
 import useSWR from 'swr'
 
 import {
+  BailoError,
   EntryForm,
   EntryInterface,
   EntryKindKeys,
@@ -25,6 +26,7 @@ export interface EntrySearchResult {
   organisation?: string
   state?: string
   visibility: EntryVisibilityKeys
+  peerId?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -43,6 +45,7 @@ export function useListModels(
   libraries: string[] = [],
   organisations: string[] = [],
   states: string[] = [],
+  peers: string[] = [],
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
@@ -55,6 +58,7 @@ export function useListModels(
     ...(libraries.length > 0 && { libraries }),
     ...(organisations.length > 0 && { organisations }),
     ...(states.length > 0 && { states }),
+    ...(peers.length > 0 && { peers }),
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
@@ -63,6 +67,7 @@ export function useListModels(
   const { data, isLoading, error, mutate } = useSWR<
     {
       models: EntrySearchResult[]
+      errors: Record<string, BailoError>
     },
     ErrorInfo
   >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
@@ -70,6 +75,7 @@ export function useListModels(
   return {
     mutateModels: mutate,
     models: data ? data.models : emptyModelList,
+    errors: data ? data.errors : {},
     isModelsLoading: isLoading,
     isModelsError: error,
   }

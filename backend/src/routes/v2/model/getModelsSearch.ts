@@ -3,9 +3,10 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { CollaboratorEntry, EntryKind, EntryKindKeys } from '../../../models/Model.js'
+import { EntryKind, EntryKindKeys } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
+import { ModelSearchResultWithErrors } from '../../../types/types.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
 
 export const getModelsSearchSchema = z.object({
@@ -17,10 +18,18 @@ export const getModelsSearchSchema = z.object({
     organisations: coerceArray(z.array(z.string()).optional().default([])),
     states: coerceArray(z.array(z.string()).optional().default([])),
     filters: coerceArray(z.array(z.string()).optional().default([])),
-    search: z.string().optional().default(''),
+    search: z
+      .string()
+      .optional()
+      .openapi({
+        example: `Text to filter by - must be longer than 0 characters to be considered, and longer than 3 characters to be used for searching this local instance.
+        External repos may have their own minimum length`,
+      })
+      .default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
     adminAccess: strictCoerceBoolean(z.boolean().optional()),
+    peers: coerceArray(z.array(z.string()).optional().default([])),
   }),
 })
 
@@ -46,8 +55,19 @@ registerPath({
                 allowTemplating: z.boolean().openapi({ example: true }),
                 schemaId: z.string().optional(),
                 adminAccess: z.boolean().optional(),
+                peerId: z.string().optional(),
               }),
             ),
+            errors: z
+              .record(
+                z.string(),
+                z.object({
+                  peerId: z.string().optional(),
+                  message: z.string().optional(),
+                  code: z.number().optional(),
+                }),
+              )
+              .optional(),
           }),
         },
       },
@@ -55,32 +75,30 @@ registerPath({
   },
 })
 
-export interface ModelSearchResult {
-  id: string
-  name: string
-  description: string
-  tags: Array<string>
-  kind: EntryKindKeys
-  organisation?: string
-  state?: string
-  collaborators: Array<CollaboratorEntry>
-  createdAt: Date
-  updatedAt: Date
-  sourceModelId?: string
-}
-
-interface GetModelsResponse {
-  models: Array<ModelSearchResult>
-}
-
 export const getModelsSearch = [
-  async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
+  async (req: Request, res: Response<ModelSearchResultWithErrors>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states, adminAccess },
+      query: {
+        kind,
+        libraries,
+        filters,
+        search,
+        task,
+        allowTemplating,
+        schemaId,
+        organisations,
+        states,
+        adminAccess,
+        peers,
+      },
     } = parse(req, getModelsSearchSchema)
 
-    const foundModels = await searchModels(
+    let results: ModelSearchResultWithErrors = {
+      models: [],
+    }
+
+    results = await searchModels(
       req.user,
       kind as EntryKindKeys,
       libraries,
@@ -89,27 +107,14 @@ export const getModelsSearch = [
       filters,
       search,
       task,
+      peers,
       allowTemplating,
       schemaId,
       adminAccess,
     )
-    const models = foundModels.map((model) => ({
-      id: model.id,
-      name: model.name,
-      description: model.description,
-      tags: model.tags,
-      kind: model.kind,
-      organisation: model.organisation,
-      state: model.state,
-      collaborators: model.collaborators,
-      visibility: model.visibility,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-      sourceModelId: model.settings?.mirror?.sourceModelId,
-    }))
 
-    await audit.onSearchModel(req, models)
+    await audit.onSearchModel(req, results.models)
 
-    res.json({ models })
+    res.json(results)
   },
 ]

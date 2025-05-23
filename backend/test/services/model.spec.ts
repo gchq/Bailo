@@ -233,7 +233,7 @@ describe('services > model', () => {
     const user = { dn: 'not admin' }
     const adminAccess = true
     authenticationMocks.hasRole.mockImplementation(() => false)
-    await expect(searchModels(user, 'model', [], [], [], [], '', '', false, '', adminAccess)).rejects.toThrow(
+    await expect(searchModels(user, 'model', [], [], [], [], '', '', [], false, '', adminAccess)).rejects.toThrow(
       'You do not have the required role.',
     )
   })
@@ -243,7 +243,7 @@ describe('services > model', () => {
     const adminAccess = true
     modelMocks.sort.mockResolvedValueOnce([])
     authenticationMocks.hasRole.mockImplementation(() => true)
-    await searchModels(user, 'model', [], [], [], [], '', '', false, '', adminAccess)
+    await searchModels(user, 'model', [], [], [], [], '', '', [], false, '', adminAccess)
   })
 
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {

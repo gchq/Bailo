@@ -6,13 +6,15 @@ import { Roles } from '../connectors/authentication/Base.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import getPeerConnectors from '../connectors/peer/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
-import { EntityKind, EntryUserPermissions } from '../types/types.js'
+import { isBailoError } from '../types/error.js'
+import { EntityKind, EntryUserPermissions, ModelSearchResultWithErrors } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -29,6 +31,7 @@ export function checkModelRestriction(model: ModelInterface) {
 }
 
 type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
+
 export type CreateModelParams = Pick<
   ModelInterface,
   'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
@@ -128,6 +131,95 @@ export async function searchModels(
   filters: Array<string>,
   search: string,
   task?: string,
+  peers?: Array<string>,
+  allowTemplating?: boolean,
+  schemaId?: string,
+  adminAccess?: boolean,
+): Promise<ModelSearchResultWithErrors> {
+  const results: ModelSearchResultWithErrors = {
+    models: [],
+  }
+
+  const localModelsPromise = searchLocalModels(
+    user,
+    kind,
+    libraries,
+    organisations,
+    states,
+    filters,
+    search,
+    task,
+    allowTemplating,
+    schemaId,
+    adminAccess,
+  )
+
+  localModelsPromise.catch((e) => {
+    if (!results.errors) {
+      results.errors = {}
+    }
+    if (isBailoError(e)) {
+      results.errors['local'] = e
+    } else {
+      results.errors['local'] = InternalError('Search error', { err: e })
+    }
+  })
+
+  const processLocalModels = localModelsPromise.then((localModels) => {
+    results.models.push(
+      ...localModels.map((model) => ({
+        id: model.id,
+        name: model.name,
+        description: model.description,
+        tags: model.tags,
+        kind: model.kind,
+        organisation: model.organisation,
+        state: model.state,
+        collaborators: model.collaborators,
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+        sourceModelId: model.settings?.mirror?.sourceModelId,
+      })),
+    )
+  })
+
+  const promises: Promise<any>[] = [processLocalModels]
+
+  if (peers && peers.length > 0) {
+    const connectors = await getPeerConnectors()
+    const remotePromise = connectors.queryModels({ query: search }, user, peers)
+
+    const processRemoteModels = remotePromise.then((remoteResponses) => {
+      for (const response of remoteResponses.flat()) {
+        if (response.models) {
+          results.models.push(...response.models)
+        }
+        if (response.errors) {
+          for (const [peerId, error] of Object.entries(response.errors)) {
+            if (!results.errors) results.errors = {}
+            results.errors[peerId] = error
+            results.errors[peerId].message = error.message
+          }
+        }
+      }
+    })
+    promises.push(processRemoteModels)
+  }
+
+  await Promise.all(promises)
+
+  return results
+}
+
+async function searchLocalModels(
+  user: UserInterface,
+  kind: EntryKindKeys,
+  libraries: Array<string>,
+  organisations: Array<string>,
+  states: Array<string>,
+  filters: Array<string>,
+  search: string,
+  task?: string,
   allowTemplating?: boolean,
   schemaId?: string,
   adminAccess?: boolean,
@@ -168,6 +260,9 @@ export async function searchModels(
   }
 
   if (search) {
+    if (search.length > 0 && search.length < 3) {
+      throw BadReq(`Search query too short - must be at least 3 characters`)
+    }
     query.$text = { $search: search }
   }
 
