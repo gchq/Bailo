@@ -1,4 +1,5 @@
-import { FederationStateKeys, RemoteFederationConfig, SystemStatus } from '../../types/types.js'
+import { getHttpsAgent } from '../../services/http.js'
+import { FederationState, FederationStateKeys, RemoteFederationConfig, SystemStatus } from '../../types/types.js'
 
 export abstract class BasePeerConnector {
   id: string
@@ -6,6 +7,22 @@ export abstract class BasePeerConnector {
   constructor(id: string, config: RemoteFederationConfig) {
     this.id = id
     this.config = config
+  }
+
+  getHttpsAgent() {
+    const opts = this.config.httpConfig || {}
+    let proxyOpts = {}
+    if (this.getConfig().proxy) {
+      proxyOpts = {
+        getProxyForUrl: () => {
+          return this.config.proxy
+        },
+      }
+    }
+    return getHttpsAgent({
+      ...opts,
+      ...proxyOpts,
+    })
   }
 
   /**
@@ -28,6 +45,12 @@ export abstract class BasePeerConnector {
   getConfiguredState(): FederationStateKeys {
     return this.config.state
   }
+
+  isDisabled() {
+    return FederationState.DISABLED === this.getConfiguredState()
+  }
+
+  abstract init(): Promise<boolean>
 
   /**
    * Fetch the peer's system status

@@ -29,8 +29,6 @@ export interface Config {
   }
 
   httpClient: {
-    proxy: string
-    noProxy: string[]
     defaultOpts: AgentOptions
   }
 
@@ -59,7 +57,6 @@ export interface Config {
     state: FederationStateKeys
     id: string
     peers: Map<string, RemoteFederationConfig>
-    defaultProxy: string
   }
 
   smtp: {

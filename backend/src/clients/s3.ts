@@ -29,7 +29,6 @@ async function getS3Client() {
     region: config.s3.region,
     forcePathStyle: config.s3.forcePathStyle,
     requestHandler: new NodeHttpHandler({
-      httpAgent: getHttpsAgent(),
       httpsAgent: getHttpsAgent({ rejectUnauthorized: config.s3.rejectUnauthorized }),
     }),
   })

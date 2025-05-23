@@ -1,6 +1,5 @@
 import fetch from 'node-fetch'
 
-import { getHttpsAgent } from '../../services/http.js'
 import log from '../../services/log.js'
 import { isBailoError } from '../../types/error.js'
 import { SystemStatus } from '../../types/types.js'
@@ -9,7 +8,16 @@ import { InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
 export class BailoPeerConnector extends BasePeerConnector {
+  init() {
+    return Promise.resolve(true)
+  }
+
   async getPeerStatus(): Promise<SystemStatus> {
+    if (this.isDisabled()) {
+      return {
+        ping: '',
+      }
+    }
     return this.request<SystemStatus>('/api/v2/system/status').catch((err) => {
       if (isBailoError(err)) {
         return {
@@ -27,7 +35,7 @@ export class BailoPeerConnector extends BasePeerConnector {
     const requestUrl = this.config.baseUrl.concat(path)
     try {
       res = await fetch(requestUrl, {
-        agent: getHttpsAgent(),
+        agent: this.getHttpsAgent(),
         headers: {
           'x-bailo-id': config.federation.id,
           'x-bailo-remote-id': this.id,
