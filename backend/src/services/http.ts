@@ -1,7 +1,18 @@
-import https from 'node:https'
+import { ProxyAgent, ProxyAgentOptions } from 'proxy-agent'
 
-// This function has the same syntax as 'https.Agent', but is centralised throughout
-// the application in case it needs to be altered.
-export function getHttpsAgent(config?: https.AgentOptions) {
-  return new https.Agent({ ...config })
+import config from '../utils/config.js'
+
+/**
+ * Common HTTPS agent for use throughout the application.
+ *
+ * By default, ProxyAgent will use environment-defined proxy configuration
+ *
+ * @param opts compatible with node's HTTPS Agent or the ProxyAgent
+ * @returns a configured HTTPS agent
+ */
+export function getHttpsAgent(opts?: ProxyAgentOptions) {
+  return new ProxyAgent({
+    ...(config.httpClient.defaultOpts && { ...config.httpClient.defaultOpts }),
+    ...(opts && { opts }),
+  })
 }
