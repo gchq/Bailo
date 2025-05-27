@@ -13,6 +13,7 @@ type EntryAccessInputProps = {
   onChange: (value: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
   hideActionsTable?: boolean
+  collaboratorsValue?: CollaboratorEntry[]
   entryRoles: Role[]
 } & (
   | {
