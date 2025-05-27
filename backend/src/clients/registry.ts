@@ -146,9 +146,15 @@ type GetImageTagManifestResponse = {
   layers: { mediaType: string; size: number; digest: string }[]
 }
 export async function getImageTagManifest(token: string, imageRef: RepoRef, imageTag: string) {
+  // TODO: handle `Accept: 'application/vnd.docker.distribution.manifest.list.v2+json'` type for multi-platform images
   const { body: responseBody, headers: responseHeaders } = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
+    false,
+    {},
+    {
+      Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+    },
   )
   if (!isGetImageTagManifestResponse(responseBody)) {
     throw InternalError('Unrecognised response body when getting image tag manifest.', {

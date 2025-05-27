@@ -7,6 +7,7 @@ exports[`clients > registry > getImageTagManifest > success 1`] = `
     {
       "dispatcher": "mock agent",
       "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
         "Authorization": "Bearer token",
       },
     },
