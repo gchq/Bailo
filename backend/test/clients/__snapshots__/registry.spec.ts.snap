@@ -5,7 +5,7 @@ exports[`clients > registry > getImageTagManifest > success 1`] = `
   [
     "https://localhost:5000/v2/modelId/image/manifests/tag1",
     {
-      "agent": "mock agent",
+      "dispatcher": "mock agent",
       "headers": {
         "Authorization": "Bearer token",
       },
@@ -19,8 +19,9 @@ exports[`clients > registry > getRegistryLayerStream > success 1`] = `
   [
     "https://localhost:5000/v2/modelId/image/blobs/sha256:digest1",
     {
-      "agent": "mock agent",
+      "dispatcher": "mock agent",
       "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
         "Authorization": "Bearer token",
       },
     },
@@ -33,7 +34,7 @@ exports[`clients > registry > listImageTags > success 1`] = `
   [
     "https://localhost:5000/v2/modelId/image/tags/list",
     {
-      "agent": "mock agent",
+      "dispatcher": "mock agent",
       "headers": {
         "Authorization": "Bearer token",
       },
@@ -47,7 +48,7 @@ exports[`clients > registry > listModelRepos > only returns model repos 1`] = `
   [
     "https://localhost:5000/v2/_catalog?n=100&last=modelId",
     {
-      "agent": "mock agent",
+      "dispatcher": "mock agent",
       "headers": {
         "Authorization": "Bearer token",
       },
