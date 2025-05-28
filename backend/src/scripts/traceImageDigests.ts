@@ -1,6 +1,6 @@
 import fetch, { Response } from 'node-fetch'
 
-import { isRegistryErrorResponse } from '../clients/registry.js'
+import { isRegistryErrorResponse, listImageTags } from '../clients/registry.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -38,17 +38,9 @@ async function getTags(repository: string): Promise<string[]> {
   const repositoryToken = await getAccessToken({ dn: 'user' }, [
     { type: 'repository', class: '', name: repository, actions: ['*'] },
   ])
-  const repositoryAuthorisation = `Bearer ${repositoryToken}`
 
-  const res: Response = await fetch(`${registry}/${repository}/tags/list`, {
-    headers: {
-      Authorization: repositoryAuthorisation,
-    },
-    agent: httpsAgent,
-  })
-  const repositoryTags = (await res.json()) as object
-
-  return repositoryTags['tags']
+  const tags = listImageTags(repositoryToken, { namespace: registry, image: repository })
+  return tags
 }
 
 async function getTagDigests(
