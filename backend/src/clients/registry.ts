@@ -1,3 +1,5 @@
+import { Stream } from 'node:stream'
+
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -25,7 +27,7 @@ async function registryRequest(
   token: string,
   endpoint: string,
   returnRawBody: boolean = false,
-  extraFetchOptions: { [key: string]: string } = {},
+  extraFetchOptions: { [key: string]: any } = {},
   extraHeaders: { [key: string]: string } = {},
 ) {
   let res: Response
@@ -380,14 +382,14 @@ function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUplo
   return true
 }
 
-type PutImageManifestResponse = {
+type PutManifestResponse = {
   'content-length': string
   date: string
   'docker-content-digest': string
   'docker-distribution-api-version': string
   location: string
 }
-export async function putImageManifest(
+export async function putManifest(
   token: string,
   imageRef: RepoRef,
   imageTag: string,
@@ -408,7 +410,7 @@ export async function putImageManifest(
   ).headers
   const headersObject = Object.fromEntries(responseHeaders)
 
-  if (!isPutImageManifestResponse(headersObject)) {
+  if (!isPutManifestResponse(headersObject)) {
     throw InternalError('Unrecognised response headers when putting image manifest.', {
       responseHeaders: responseHeaders,
       namespace: imageRef.namespace,
@@ -419,7 +421,7 @@ export async function putImageManifest(
   return headersObject
 }
 
-function isPutImageManifestResponse(resp: unknown): resp is UploadLayerMonolithicResponse {
+function isPutManifestResponse(resp: unknown): resp is UploadLayerMonolithicResponse {
   if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
     return false
   }
@@ -442,8 +444,14 @@ function isPutImageManifestResponse(resp: unknown): resp is UploadLayerMonolithi
   return true
 }
 
-type UploadLayerMonolithicResponse = PutImageManifestResponse
-export async function uploadLayerMonolithic(token: string, uploadURL: string, digest: string, blob: any, size: string) {
+type UploadLayerMonolithicResponse = PutManifestResponse
+export async function uploadLayerMonolithic(
+  token: string,
+  uploadURL: string,
+  digest: string,
+  blob: Stream,
+  size: string,
+) {
   log.debug('uploadLayerMonolithic', { token, uploadURL, digest, blob, size })
   const responseHeaders = (
     await registryRequest(
@@ -476,5 +484,5 @@ export async function uploadLayerMonolithic(token: string, uploadURL: string, di
 }
 
 function isUploadLayerMonolithicResponse(resp: unknown): resp is UploadLayerMonolithicResponse {
-  return isPutImageManifestResponse(resp)
+  return isPutManifestResponse(resp)
 }
