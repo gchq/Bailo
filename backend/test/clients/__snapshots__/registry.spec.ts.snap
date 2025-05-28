@@ -1,5 +1,50 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`clients > registry > doesLayerExist > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/blobs/digest",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "method": "HEAD",
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > doesLayerExist > success false 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/blobs/digest",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "method": "HEAD",
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > doesLayerExist > success true 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/blobs/digest",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "method": "HEAD",
+    },
+  ],
+]
+`;
+
 exports[`clients > registry > getImageTagManifest > success 1`] = `
 [
   [
@@ -30,6 +75,36 @@ exports[`clients > registry > getRegistryLayerStream > success 1`] = `
 ]
 `;
 
+exports[`clients > registry > initialiseUpload > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/blobs/uploads/",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > initialiseUpload > success true 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/blobs/uploads/",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+      },
+      "method": "POST",
+    },
+  ],
+]
+`;
+
 exports[`clients > registry > listImageTags > success 1`] = `
 [
   [
@@ -53,6 +128,64 @@ exports[`clients > registry > listModelRepos > only returns model repos 1`] = `
       "headers": {
         "Authorization": "Bearer token",
       },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > putManifest > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag",
+    {
+      "body": {},
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+        "Content-Type": "",
+        "name": "modelId/image",
+        "reference": "tag",
+      },
+      "method": "PUT",
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > uploadLayerMonolithic > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/url&digest=digest",
+    {
+      "body": Readable {
+        "_events": {
+          "close": undefined,
+          "data": undefined,
+          "end": undefined,
+          "error": undefined,
+          "readable": undefined,
+        },
+        "_maxListeners": undefined,
+        "_readableState": ReadableState {
+          "awaitDrainWriters": null,
+          "buffer": [],
+          "bufferIndex": 0,
+          "highWaterMark": 65536,
+          "length": 0,
+          "pipes": [],
+          Symbol(kState): 1052940,
+        },
+        Symbol(shapeMode): true,
+        Symbol(kCapture): false,
+      },
+      "dispatcher": "mock agent",
+      "duplex": "half",
+      "headers": {
+        "Authorization": "Bearer token",
+        "content-length": "size",
+        "content-type": "application/octet-stream",
+      },
+      "method": "PUT",
     },
   ],
 ]

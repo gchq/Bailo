@@ -1,12 +1,16 @@
-import { PassThrough } from 'node:stream'
+import { Readable } from 'node:stream'
 
 import { describe, expect, Mock, test, vi } from 'vitest'
 
 import {
+  doesLayerExist,
   getImageTagManifest,
   getRegistryLayerStream,
+  initialiseUpload,
   listImageTags,
   listModelRepos,
+  putManifest,
+  uploadLayerMonolithic,
 } from '../../src/clients/registry.js'
 
 const mockHttpService = vi.hoisted(() => {
@@ -37,7 +41,13 @@ describe('clients > registry', () => {
         size: 1,
         digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
       },
-      layers: [],
+      layers: [
+        {
+          mediaType: 'application/vnd.docker.container.image.v1+json',
+          size: 1,
+          digest: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+        },
+      ],
     }
 
     fetchMock.mockReturnValueOnce({
@@ -141,7 +151,7 @@ describe('clients > registry', () => {
   })
 
   test('getRegistryLayerStream > success', async () => {
-    const mockedStream = new ReadableStream()
+    const mockedStream = new Readable()
 
     fetchMock.mockReturnValueOnce({
       ok: true,
@@ -173,11 +183,10 @@ describe('clients > registry', () => {
   })
 
   test('getRegistryLayerStream > malformed response', async () => {
-    const mockPassThrough = new PassThrough()
-    mockPassThrough['_events'] = undefined
+    const mockStream = { read: null, _read: null, pipe: null }
     fetchMock.mockReturnValueOnce({
       ok: true,
-      body: mockPassThrough,
+      body: mockStream,
     })
 
     const response = getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
@@ -327,5 +336,146 @@ describe('clients > registry', () => {
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
 
     expect(response).rejects.toThrowError('Error response received from registry.')
+  })
+
+  test('doesLayerExist > success true', async () => {
+    const mockHeaders = new Headers({
+      'accept-ranges': 'string',
+      'content-length': 'string',
+      'content-type': 'string',
+      date: 'string',
+      'docker-content-digest': 'string',
+      'docker-distribution-api-version': 'string',
+      etag: 'string',
+    })
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      headers: mockHeaders,
+    })
+
+    const response = await doesLayerExist('token', { namespace: 'modelId', image: 'image' }, 'digest')
+
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual(true)
+  })
+
+  test('doesLayerExist > success false', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: false,
+      status: 404,
+      statusText: '',
+    })
+
+    const response = await doesLayerExist('token', { namespace: 'modelId', image: 'image' }, 'digest')
+
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual(false)
+  })
+
+  test('doesLayerExist > malformed response', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      headers: new Headers({}),
+    })
+
+    const response = doesLayerExist('token', { namespace: 'modelId', image: 'image' }, 'digest')
+
+    expect(response).rejects.toThrowError('Unrecognised response headers when heading image layer.')
+  })
+
+  test('initialiseUpload > success', async () => {
+    const mockHeaders = new Headers({
+      'content-length': 'string',
+      date: 'string',
+      'docker-distribution-api-version': 'string',
+      'docker-upload-uuid': 'string',
+      location: 'string',
+      range: 'string',
+    })
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      headers: mockHeaders,
+    })
+
+    const response = await initialiseUpload('token', { namespace: 'modelId', image: 'image' })
+
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('initialiseUpload > malformed response', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      headers: new Headers({}),
+    })
+
+    const response = initialiseUpload('token', { namespace: 'modelId', image: 'image' })
+
+    expect(response).rejects.toThrowError('Unrecognised response headers when posting initialise image upload.')
+  })
+
+  test('putManifest > success', async () => {
+    const mockHeaders = new Headers({
+      'content-length': 'string',
+      date: 'string',
+      'docker-content-digest': 'string',
+      'docker-distribution-api-version': 'string',
+      location: 'string',
+    })
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      headers: mockHeaders,
+    })
+
+    const response = await putManifest('token', { namespace: 'modelId', image: 'image' }, 'tag', {}, '')
+
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('putManifest > malformed response', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      headers: new Headers({}),
+    })
+
+    const response = putManifest('token', { namespace: 'modelId', image: 'image' }, 'tag', {}, '')
+
+    expect(response).rejects.toThrowError('Unrecognised response headers when putting image manifest.')
+  })
+
+  test('uploadLayerMonolithic > success', async () => {
+    const mockHeaders = new Headers({
+      'content-length': 'string',
+      date: 'string',
+      'docker-content-digest': 'string',
+      'docker-distribution-api-version': 'string',
+      location: 'string',
+    })
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      headers: mockHeaders,
+    })
+
+    const response = await uploadLayerMonolithic('token', 'url', 'digest', new Readable(), 'size')
+
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('uploadLayerMonolithic > malformed response', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: true,
+      headers: new Headers({}),
+    })
+
+    const response = uploadLayerMonolithic('token', 'url', 'digest', new Readable(), 'size')
+
+    expect(response).rejects.toThrowError('Unrecognised response headers when putting image manifest.')
   })
 })
