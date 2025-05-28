@@ -143,7 +143,6 @@ async function script() {
           foundDigests.add(layer)
         }
       }
-      log.info({ repositoryName: repository, tag: tag, digest: a }, 'Digest')
     }
   }
   const digestsNotFound = digestsToSearchFor.filter((digest) => !foundDigests.has(digest))
