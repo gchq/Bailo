@@ -97,6 +97,7 @@ async function script() {
   await connectToMongoose()
 
   const repositories = await getRepositories()
+  log.info('Retrieved repositories', { amount: repositories.length })
 
   const affectedImages: {
     modelId: string
@@ -112,6 +113,7 @@ async function script() {
     const [modelId, image] = repository.split('/')
     const tags = await getTags(repository)
     let a
+    log.info('Retrieved tags for repository', { amount: tags.length, tags })
     for (const tag of tags) {
       const b = { modelId, image, tag }
       try {
