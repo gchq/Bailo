@@ -1,8 +1,6 @@
-import { ListObjectsCommand, ListObjectsRequest } from '@aws-sdk/client-s3'
 import fetch, { Response } from 'node-fetch'
 
 import { isRegistryErrorResponse, listImageTags } from '../clients/registry.js'
-import { getS3Client } from '../clients/s3.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -87,23 +85,6 @@ async function getTagDigests(
   }
 }
 
-export async function listObjects(bucket: string) {
-  const client = await getS3Client()
-
-  const input: ListObjectsRequest = {
-    Bucket: bucket,
-    Prefix: 'docker/registry/v2/blobs/sha256/',
-  }
-
-  const command = new ListObjectsCommand(input)
-  const response = await client.send(command)
-
-  if (!response.Contents) {
-    throw Error()
-  }
-  return response['Contents']
-}
-
 async function script() {
   await connectToMongoose()
 
@@ -119,7 +100,6 @@ async function script() {
   }[] = []
 
   const foundDigests: Set<string> = new Set()
-  const allDigests: Set<string> = new Set()
 
   for (const repository of repositories) {
     const [modelId, image] = repository.split('/')
@@ -140,7 +120,6 @@ async function script() {
           const digest = detail.slice(detail.indexOf('sha256:') + 'sha256:'.length)
           affectedImages.push({ ...b, digest: digest, digestType: 'manifest' })
           foundDigests.add(digest)
-          allDigests.add(digest)
           continue
         }
       }
@@ -153,14 +132,11 @@ async function script() {
         foundDigests.add(a.image)
       }
       for (const layer of a.layers) {
-        allDigests.add(layer)
         if (digestsToSearchFor.includes(layer)) {
           affectedImages.push({ ...b, digest: layer, digestType: 'layer' })
           foundDigests.add(layer)
         }
       }
-      allDigests.add(a.manifest)
-      allDigests.add(a.image)
     }
   }
   const digestsNotFound = digestsToSearchFor.filter((digest) => !foundDigests.has(digest))
@@ -168,11 +144,6 @@ async function script() {
   log.info(affectedImages, 'Affected Images.')
   log.info('Warning: If manifest data is missing, the image and layer will not be able to be checked.')
   log.info(digestsNotFound, 'Digests not found')
-
-  const objects = await listObjects('registry')
-  const s3Digests = objects.map((o) => o.Key?.slice('docker/registry/v2/blobs/sha256/02/'.length).replace('/data', ''))
-  log.info('Length', { s3: s3Digests.length, registry: allDigests.size })
-  const _missingInRegistry = s3Digests.filter((x) => !allDigests.has(x || ''))
 
   setTimeout(disconnectFromMongoose, 50)
 }
