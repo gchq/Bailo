@@ -59,6 +59,16 @@ describe('clients > registry', () => {
     expect(response).rejects.toThrowError('Unable to communicate with the registry.')
   })
 
+  test('getImageTagManifest > unable to parse JSON error response', async () => {
+    fetchMock.mockReturnValueOnce({
+      ok: false,
+      body: {},
+    })
+    const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
+
+    expect(response).rejects.toThrowError('Unable to parse response body JSON.')
+  })
+
   test('getImageTagManifest > unrecognised error response', async () => {
     fetchMock.mockReturnValueOnce({
       ok: false,
@@ -79,7 +89,7 @@ describe('clients > registry', () => {
           {
             code: 'NAME_UNKNOWN',
             message: 'repository name not known to registry',
-            detail: [Object],
+            details: [Object],
           },
         ],
       })),
@@ -119,7 +129,7 @@ describe('clients > registry', () => {
           {
             code: 'UNAUTHORIZED',
             message: 'You are not authorized.',
-            detail: {},
+            details: [],
           },
         ],
       })),
@@ -215,7 +225,7 @@ describe('clients > registry', () => {
           {
             code: 'NAME_UNKNOWN',
             message: 'repository name not known to registry',
-            detail: [Object],
+            details: [Object],
           },
         ],
       })),
@@ -289,7 +299,7 @@ describe('clients > registry', () => {
           {
             code: 'NAME_UNKNOWN',
             message: 'repository name not known to registry',
-            detail: {},
+            details: [],
           },
         ],
       })),
@@ -308,7 +318,7 @@ describe('clients > registry', () => {
           {
             code: 'UNAUTHORIZED',
             message: 'You are not authorized.',
-            detail: {},
+            details: [],
           },
         ],
       })),

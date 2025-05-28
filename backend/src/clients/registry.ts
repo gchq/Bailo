@@ -1,10 +1,11 @@
-import { Stream } from 'node:stream'
+import { Readable, Stream } from 'node:stream'
 
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
+import { hasKeys, hasKeysOfType } from '../utils/typeguards.js'
 
 interface RepoRef {
   namespace: string
@@ -89,13 +90,11 @@ export async function listModelRepos(token: string, modelId: string) {
 }
 
 function isListModelReposResponse(resp: unknown): resp is ListModelReposResponse {
-  if (typeof resp !== 'object' || resp === null) {
-    return false
-  }
-  if (!('repositories' in resp) || !Array.isArray(resp.repositories)) {
-    return false
-  }
-  return true
+  return (
+    hasKeysOfType<ListModelReposResponse>(resp, { repositories: 'object' }) &&
+    Array.isArray(resp['repositories']) &&
+    resp['repositories'].every((repo: unknown) => typeof repo === 'string')
+  )
 }
 
 type ListImageTagResponse = { tags: Array<string> }
@@ -119,26 +118,23 @@ export async function listImageTags(token: string, imageRef: RepoRef) {
 }
 
 function isListImageTagResponse(resp: unknown): resp is ListImageTagResponse {
-  if (typeof resp !== 'object' || resp === null) {
-    return false
-  }
-  if (!('tags' in resp) || !Array.isArray(resp.tags)) {
-    return false
-  }
-  return true
+  return (
+    hasKeysOfType<ListImageTagResponse>(resp, { tags: 'object' }) &&
+    Array.isArray(resp['tags']) &&
+    resp['tags'].every((repo: unknown) => typeof repo === 'string')
+  )
 }
 
 function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
-  if (typeof resp !== 'object' || resp === null) {
-    return false
-  }
-  if (!('errors' in resp) || !Array.isArray(resp.errors)) {
-    return false
-  }
-  if (!resp.errors.every((item) => 'code' in item && 'message' in item && 'detail' in item)) {
-    return false
-  }
-  return true
+  return (
+    hasKeys<{ errors: unknown }>(resp, ['errors']) &&
+    Array.isArray(resp['errors']) &&
+    resp['errors'].every(
+      (e) =>
+        hasKeysOfType<ErrorInfo>(e, { code: 'string', message: 'string', details: 'object' }) &&
+        Array.isArray(e['details']),
+    )
+  )
 }
 
 type GetImageTagManifestResponse = {
@@ -170,50 +166,35 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
 }
 
 function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManifestResponse {
-  if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
-    return false
-  }
-  if (!('schemaVersion' in resp) || !Number.isInteger(resp.schemaVersion)) {
-    return false
-  }
-  if (!('mediaType' in resp) || !(typeof resp.mediaType === 'string')) {
-    return false
-  }
-  if (!('config' in resp) || typeof resp.config !== 'object' || Array.isArray(resp.config) || resp.config === null) {
-    return false
-  }
-  if (!('mediaType' in resp.config) || !(typeof resp.config.mediaType === 'string')) {
-    return false
-  }
-  if (!('size' in resp.config) || !Number.isInteger(resp.config.size)) {
-    return false
-  }
-  if (!('digest' in resp.config) || !(typeof resp.config.digest === 'string')) {
-    return false
-  }
-  if (!('layers' in resp) || !Array.isArray(resp.layers)) {
-    return false
-  }
-  for (const layer of resp.layers) {
-    if (typeof layer !== 'object' || Array.isArray(layer) || layer === null) {
-      return false
-    }
-    if (!('mediaType' in layer) || !(typeof layer['mediaType'] === 'string')) {
-      return false
-    }
-    if (!('size' in layer) || !Number.isInteger(layer['size'])) {
-      return false
-    }
-    if (!('digest' in layer) || !(typeof layer['digest'] === 'string')) {
-      return false
-    }
-  }
-  return true
+  return (
+    typeof resp === 'object' &&
+    !Array.isArray(resp) &&
+    resp !== null &&
+    hasKeysOfType<GetImageTagManifestResponse>(resp, {
+      schemaVersion: 'number',
+      mediaType: 'string',
+      config: 'object',
+      layers: 'object',
+    }) &&
+    hasKeysOfType<GetImageTagManifestResponse['config']>(resp['config'], {
+      mediaType: 'string',
+      size: 'number',
+      digest: 'string',
+    }) &&
+    Array.isArray(resp['layers']) &&
+    resp['layers'].every((layer) =>
+      hasKeysOfType<GetImageTagManifestResponse['layers'][number]>(layer, {
+        mediaType: 'string',
+        size: 'number',
+        digest: 'string',
+      }),
+    )
+  )
 }
 
 type GetRegistryLayerStreamResponse = {
   ok: boolean
-  body: ReadableStream
+  body: Readable
 }
 export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
   const responseStream = (
@@ -239,26 +220,18 @@ export async function getRegistryLayerStream(token: string, imageRef: RepoRef, l
 }
 
 function isGetRegistryLayerStream(resp: unknown): resp is GetRegistryLayerStreamResponse {
-  if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
-    return false
-  }
-  if (!('ok' in resp) || typeof resp.ok !== 'boolean') {
-    return false
-  }
-  if (!('body' in resp) || typeof resp.body !== 'object' || Array.isArray(resp.body) || resp.body === null) {
-    return false
-  }
-  for (const objectKey of ['cancel', 'getReader', 'pipeThrough', 'pipeTo', 'tee', 'values']) {
-    if (
-      !(objectKey in resp.body) ||
-      typeof resp.body[objectKey] !== 'function' ||
-      Array.isArray(resp.body[objectKey]) ||
-      resp.body[objectKey] === null
-    ) {
-      return false
-    }
-  }
-  return true
+  return (
+    typeof resp === 'object' &&
+    !Array.isArray(resp) &&
+    resp !== null &&
+    hasKeysOfType<GetRegistryLayerStreamResponse>(resp, {
+      ok: 'boolean',
+      body: 'object',
+    }) &&
+    resp['body'] !== null &&
+    (resp['body'] instanceof Readable ||
+      hasKeysOfType(resp['body'], { pipe: 'function', read: 'function', _read: 'function' }))
+  )
 }
 
 type DoesLayerExistResponse = {
@@ -300,32 +273,15 @@ export async function doesLayerExist(token: string, imageRef: RepoRef, digest: s
 }
 
 function isDoesLayerExistResponse(resp: unknown): resp is DoesLayerExistResponse {
-  if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
-    return false
-  }
-  // type guard expected header keys
-  if (!('accept-ranges' in resp) || !(typeof resp['accept-ranges'] === 'string')) {
-    return false
-  }
-  if (!('content-length' in resp) || !(typeof resp['content-length'] === 'string')) {
-    return false
-  }
-  if (!('content-type' in resp) || !(typeof resp['content-type'] === 'string')) {
-    return false
-  }
-  if (!('date' in resp) || !(typeof resp['date'] === 'string')) {
-    return false
-  }
-  if (!('docker-content-digest' in resp) || !(typeof resp['docker-content-digest'] === 'string')) {
-    return false
-  }
-  if (!('docker-distribution-api-version' in resp) || !(typeof resp['docker-distribution-api-version'] === 'string')) {
-    return false
-  }
-  if (!('etag' in resp) || !(typeof resp['etag'] === 'string')) {
-    return false
-  }
-  return true
+  return hasKeysOfType<DoesLayerExistResponse>(resp, {
+    'accept-ranges': 'string',
+    'content-length': 'string',
+    'content-type': 'string',
+    date: 'string',
+    'docker-content-digest': 'string',
+    'docker-distribution-api-version': 'string',
+    etag: 'string',
+  })
 }
 
 type InitialiseUploadResponse = {
@@ -357,29 +313,14 @@ export async function initialiseUpload(token: string, imageRef: RepoRef) {
 }
 
 function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUploadResponse {
-  if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
-    return false
-  }
-  // type guard expected header keys
-  if (!('content-length' in resp) || !(typeof resp['content-length'] === 'string')) {
-    return false
-  }
-  if (!('date' in resp) || !(typeof resp['date'] === 'string')) {
-    return false
-  }
-  if (!('docker-distribution-api-version' in resp) || !(typeof resp['docker-distribution-api-version'] === 'string')) {
-    return false
-  }
-  if (!('docker-upload-uuid' in resp) || !(typeof resp['docker-upload-uuid'] === 'string')) {
-    return false
-  }
-  if (!('location' in resp) || !(typeof resp['location'] === 'string')) {
-    return false
-  }
-  if (!('range' in resp) || !(typeof resp['range'] === 'string')) {
-    return false
-  }
-  return true
+  return hasKeysOfType<InitialiseUploadResponse>(resp, {
+    'content-length': 'string',
+    date: 'string',
+    'docker-distribution-api-version': 'string',
+    'docker-upload-uuid': 'string',
+    location: 'string',
+    range: 'string',
+  })
 }
 
 type PutManifestResponse = {
@@ -421,27 +362,14 @@ export async function putManifest(
   return headersObject
 }
 
-function isPutManifestResponse(resp: unknown): resp is UploadLayerMonolithicResponse {
-  if (typeof resp !== 'object' || Array.isArray(resp) || resp === null) {
-    return false
-  }
-  // type guard expected header keys
-  if (!('content-length' in resp) || !(typeof resp['content-length'] === 'string')) {
-    return false
-  }
-  if (!('date' in resp) || !(typeof resp['date'] === 'string')) {
-    return false
-  }
-  if (!('docker-content-digest' in resp) || !(typeof resp['docker-content-digest'] === 'string')) {
-    return false
-  }
-  if (!('docker-distribution-api-version' in resp) || !(typeof resp['docker-distribution-api-version'] === 'string')) {
-    return false
-  }
-  if (!('location' in resp) || !(typeof resp['location'] === 'string')) {
-    return false
-  }
-  return true
+function isPutManifestResponse(resp: unknown): resp is PutManifestResponse {
+  return hasKeysOfType<PutManifestResponse>(resp, {
+    'content-length': 'string',
+    date: 'string',
+    'docker-content-digest': 'string',
+    'docker-distribution-api-version': 'string',
+    location: 'string',
+  })
 }
 
 type UploadLayerMonolithicResponse = PutManifestResponse
