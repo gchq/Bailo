@@ -114,11 +114,6 @@ function isListImageTagResponse(resp: unknown): resp is ListImageTagResponse {
   return true
 }
 
-export async function getImageDigest(token: string, repository: string, tag: string) {
-  const responseBody = await registryRequest(token, `${repository}/manifests/${tag}`)
-  return responseBody
-}
-
 export function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
   if (typeof resp !== 'object' || resp === null) {
     return false
