@@ -12,10 +12,10 @@ import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 
 const httpsAgent = getHttpsAgent({
-  rejectUnauthorized: !config.registry.insecure,
+  rejectUnauthorized: !config.registry.connection.insecure,
 })
 
-const registry = `https://localhost:5000/v2`
+const registry = `${config.registry.connection.internal}/v2`
 
 const digestsToSearchFor: string[] = []
 
