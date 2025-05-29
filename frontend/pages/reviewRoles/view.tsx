@@ -1,58 +1,59 @@
 import { Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
-import { useGetAllModelReviewRoles } from 'actions/model'
+import { useGetAllReviewRoles } from 'actions/model'
 import { useGetCurrentUser } from 'actions/user'
 import { Fragment, useMemo, useState } from 'react'
+import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
-import { Role } from 'types/types'
+import { ReviewRolesFormData } from 'types/types'
 
 export default function ReviewRoles() {
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetAllModelReviewRoles()
-  const [selectedRole, setSelectedRole] = useState<Role>(modelRoles[0])
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetAllReviewRoles()
+  const [selectedRole, setSelectedRole] = useState<ReviewRolesFormData>(reviewRoles[0])
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const listRoles = useMemo(
     () =>
-      modelRoles.map((modelRole) => (
+      reviewRoles.map((reviewRole) => (
         <SimpleListItemButton
-          selected={selectedRole === modelRole}
-          key={modelRole.id}
-          onClick={() => setSelectedRole(modelRole)}
+          selected={selectedRole === reviewRole}
+          key={reviewRole.id}
+          onClick={() => setSelectedRole(reviewRole)}
         >
-          {modelRole.name}
+          {reviewRole.name}
         </SimpleListItemButton>
       )),
-    [modelRoles, selectedRole],
+    [reviewRoles, selectedRole],
   )
 
   const listRoleDescriptions = useMemo(
     () =>
-      modelRoles.map((modelRole) => (
-        <Fragment key={modelRole.id}>
-          {selectedRole === modelRole && (
+      reviewRoles.map((reviewRole) => (
+        <Fragment key={reviewRole.id}>
+          {selectedRole === reviewRole && (
             <>
               <Typography color='primary' fontWeight='bold'>
                 Description
               </Typography>
-              <Typography>{modelRole.description}</Typography>
+              <Typography>{reviewRole.description}</Typography>
               <Typography color='primary' fontWeight='bold'>
                 Short Name
               </Typography>
-              <Typography>{modelRole.short}</Typography>
+              <Typography>{reviewRole.short}</Typography>
               <Typography color='primary' fontWeight='bold'>
                 System Role
               </Typography>
-              {modelRole.collaboratorRole ? <Typography>{modelRole.collaboratorRole}</Typography> : 'None'}
+              {reviewRole.collaboratorRole ? <Typography>{reviewRole.collaboratorRole}</Typography> : 'None'}
             </>
           )}
         </Fragment>
       )),
-    [modelRoles, selectedRole],
+    [reviewRoles, selectedRole],
   )
 
-  if (isCurrentUserLoading || isModelRolesLoading) {
+  if (isCurrentUserLoading) {
     return <Loading />
   }
 
@@ -60,8 +61,8 @@ export default function ReviewRoles() {
     return <ErrorWrapper message={isCurrentUserError.info.message} />
   }
 
-  if (isModelRolesError) {
-    return <ErrorWrapper message={isModelRolesError.info.message} />
+  if (isReviewRolesError) {
+    return <ErrorWrapper message={isReviewRolesError.info.message} />
   }
 
   if (!currentUser || !currentUser.isAdmin) {
@@ -73,7 +74,6 @@ export default function ReviewRoles() {
       />
     )
   }
-  //what happens if the instance has no review roles? it just errors? maybe use empty blob for the second portion
 
   return (
     <>
@@ -86,16 +86,24 @@ export default function ReviewRoles() {
             Create new Review Role
           </Button>
         </Stack>
-        <Paper sx={{ p: 4, my: 4 }}>
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={{ sm: 2 }}
-            divider={<Divider orientation='vertical' flexItem />}
-          >
-            <List sx={{ width: '200px' }}>{listRoles}</List>
-            <Container sx={{ my: 2 }}>{listRoleDescriptions}</Container>
-          </Stack>
-        </Paper>
+        {!isReviewRolesLoading ? (
+          <Paper sx={{ p: 4, my: 4 }}>
+            {reviewRoles.length > 0 ? (
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={{ sm: 2 }}
+                divider={<Divider orientation='vertical' flexItem />}
+              >
+                <List sx={{ width: '200px' }}>{listRoles}</List>
+                <Container sx={{ my: 2 }}>{listRoleDescriptions}</Container>
+              </Stack>
+            ) : (
+              <EmptyBlob text='No review roles found. Press button in top-right to create new review role.' />
+            )}
+          </Paper>
+        ) : (
+          <Loading />
+        )}
       </Container>
     </>
   )

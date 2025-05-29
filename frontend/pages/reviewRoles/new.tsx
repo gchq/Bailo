@@ -115,8 +115,9 @@ export default function ReviewRolesForm() {
 
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
+    } else {
+      router.push(`/reviewRoles/view`)
     }
-    router.push(`/reviewRoles/view`)
 
     setLoading(false)
   }
@@ -150,7 +151,6 @@ export default function ReviewRolesForm() {
                   fullWidth
                   value={formData.short}
                   onChange={handleShortNameChange}
-                  autoFocus
                   size='small'
                   id='role-shortname-input'
                 />
@@ -162,7 +162,6 @@ export default function ReviewRolesForm() {
                 fullWidth
                 value={formData.description}
                 onChange={handleDescriptionChange}
-                autoFocus
                 size='small'
                 id='role-description-input'
               />

@@ -207,19 +207,19 @@ export async function postModelExportToS3(id: string, modelExport: ModelExportRe
   })
 }
 
-export function useGetAllModelReviewRoles() {
+export function useGetAllReviewRoles() {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      roles: ReviewRolesFormData[]
+      reviewRoles: ReviewRolesFormData[]
     },
     ErrorInfo
-  >('/api/v2/roles/review', fetcher)
+  >('/api/v2/review/roles', fetcher)
 
   return {
-    mutateModelRoles: mutate,
-    modelRoles: data ? data.roles : emptyRolesList,
-    isModelRolesLoading: isLoading,
-    isModelRolesError: error,
+    mutateReviewRoles: mutate,
+    reviewRoles: data ? data.reviewRoles : emptyRolesList,
+    isReviewRolesLoading: isLoading,
+    isReviewRolesError: error,
   }
 }
 
