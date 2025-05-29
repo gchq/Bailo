@@ -16,7 +16,7 @@ export type RegistryErrorResponse = {
   errors: Array<ErrorInfo>
 }
 
-export type ErrorInfo = { code: string; message: string; details: Array<unknown> }
+export type ErrorInfo = { code: string; message: string; detail: string }
 
 const registry = config.registry.connection.internal
 
@@ -133,8 +133,8 @@ function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
     Array.isArray(resp['errors']) &&
     resp['errors'].every(
       (e) =>
-        hasKeysOfType<ErrorInfo>(e, { code: 'string', message: 'string', details: 'object' }) &&
-        Array.isArray(e['details']),
+        hasKeysOfType<ErrorInfo>(e, { code: 'string', message: 'string', detail: 'object' }) &&
+        Array.isArray(e['detail']),
     )
   )
 }

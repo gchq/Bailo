@@ -99,7 +99,7 @@ describe('clients > registry', () => {
           {
             code: 'NAME_UNKNOWN',
             message: 'repository name not known to registry',
-            details: [Object],
+            detail: [Object],
           },
         ],
       })),
@@ -139,7 +139,7 @@ describe('clients > registry', () => {
           {
             code: 'UNAUTHORIZED',
             message: 'You are not authorized.',
-            details: [],
+            detail: [],
           },
         ],
       })),
@@ -234,7 +234,7 @@ describe('clients > registry', () => {
           {
             code: 'NAME_UNKNOWN',
             message: 'repository name not known to registry',
-            details: [Object],
+            detail: [Object],
           },
         ],
       })),
@@ -308,7 +308,7 @@ describe('clients > registry', () => {
           {
             code: 'NAME_UNKNOWN',
             message: 'repository name not known to registry',
-            details: [],
+            detail: [],
           },
         ],
       })),
@@ -327,7 +327,7 @@ describe('clients > registry', () => {
           {
             code: 'UNAUTHORIZED',
             message: 'You are not authorized.',
-            details: [],
+            detail: [],
           },
         ],
       })),

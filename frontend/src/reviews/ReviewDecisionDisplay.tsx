@@ -2,7 +2,7 @@ import { Undo } from '@mui/icons-material'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import { Box, Card, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
+import { Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
 import { patchResponse } from 'actions/response'
@@ -98,10 +98,10 @@ export default function ReviewDecisionDisplay({
     <>
       {isModelRolesLoading && <Loading />}
       <Stack direction='row' spacing={2} alignItems='flex-start'>
-        <Box mt={1}>
-          <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} size='chip' />
+        <Box sx={{ pt: 2, pl: 2 }}>
+          <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} />
         </Box>
-        <Card
+        <Box
           sx={{
             width: '100%',
             p: 1,
@@ -114,26 +114,32 @@ export default function ReviewDecisionDisplay({
             sx={{ width: '100%' }}
             justifyContent='space-between'
           >
-            <Stack alignItems={{ xs: 'center', sm: 'flex-start' }} spacing={{ xs: 1, sm: 0 }}>
+            <Stack alignItems='center' direction='row' sx={{ width: '100%' }} spacing={1}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems='center'>
-                <Typography data-test='reviewDecisionDisplay'>
-                  <UserDisplay dn={username} />
-                  {response.decision === Decision.Approve && ' has approved'}
-                  {response.decision === Decision.RequestChanges && ' has requested changes'}
-                  {response.decision === Decision.Undo && ' has undone their review'}
-                </Typography>
-                {response.decision === Decision.Approve && <Done color='success' fontSize='small' />}
-                {response.decision === Decision.RequestChanges && <HourglassEmpty color='warning' fontSize='small' />}
-                {response.decision === Decision.Undo && <Undo fontSize='small' />}
+                <UserDisplay dn={username} />
+                <span data-test='reviewDecisionDisplayApproved'>
+                  {response.decision === Decision.Approve && 'has approved'}
+                </span>
+                <span data-test='reviewDecisionDisplayRequestChanges'>
+                  {response.decision === Decision.RequestChanges && 'has requested changes'}
+                </span>
+                <span>{response.decision === Decision.Undo && 'has undone their review'}</span>
+                <span>{response.decision === Decision.Approve && <Done color='success' fontSize='small' />}</span>
+                <span>
+                  {response.decision === Decision.RequestChanges && <HourglassEmpty color='warning' fontSize='small' />}
+                </span>
+                <span>{response.decision === Decision.Undo && <Undo fontSize='small' />}</span>
+              </Stack>
+              {response.role && (
+                <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
+              )}
+              <span>
                 {response.outdated && (
                   <Typography sx={{ backgroundColor: theme.palette.warning.light, borderRadius: 1, px: 0.5 }}>
                     Outdated
                   </Typography>
                 )}
-              </Stack>
-              {response.role && (
-                <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
-              )}
+              </span>
             </Stack>
             <Stack direction='row' alignItems='center' spacing={1}>
               <Typography fontWeight='bold'>{formatDateString(response.createdAt)}</Typography>
@@ -154,7 +160,7 @@ export default function ReviewDecisionDisplay({
             mutateResponses={mutateResponses}
           />
           <MessageAlert message={errorMessage} severity='error' />
-        </Card>
+        </Box>
       </Stack>
       <Menu anchorEl={anchorEl} open={!!anchorEl} onClose={() => setAnchorEl(null)}>
         <MenuItem onClick={() => handleReplyOnClick(comment)}>Reply</MenuItem>
