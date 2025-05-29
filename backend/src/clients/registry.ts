@@ -33,6 +33,8 @@ async function registryRequest(
 ) {
   let res: Response
   try {
+    // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
+    // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
     res = await fetch(`${registry}/v2/${endpoint}`, {
       headers: {
         Authorization: `Bearer ${token}`,

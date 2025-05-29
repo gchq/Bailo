@@ -192,7 +192,7 @@ export async function exportCompressedRegistryImage(
   await s3Upload
 }
 
-async function pipeStreamToTarEntry(
+export async function pipeStreamToTarEntry(
   inputStream: NodeJS.ReadableStream,
   packerEntry: NodeJS.WritableStream,
   logData: { [key: string]: string } = {},
