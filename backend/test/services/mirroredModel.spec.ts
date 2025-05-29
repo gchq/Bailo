@@ -805,7 +805,7 @@ describe('services > mirroredModel', () => {
     expect(registryMocks.getImageBlob).toBeCalledTimes(3)
   })
 
-  test('exportCompressedRegistryImage > success', async () => {
+  test('exportCompressedRegistryImage > missing layer digest', async () => {
     registryMocks.getImageManifest.mockResolvedValueOnce({
       schemaVersion: 2,
       mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
