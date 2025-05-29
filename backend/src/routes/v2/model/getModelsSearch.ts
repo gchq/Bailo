@@ -20,6 +20,7 @@ export const getModelsSearchSchema = z.object({
     search: z.string().optional().default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
+    peers: coerceArray(z.array(z.string()).optional().default([])),
   }),
 })
 
@@ -44,6 +45,7 @@ registerPath({
                 kind: z.string().openapi({ example: EntryKind.Model }),
                 allowTemplating: z.boolean().openapi({ example: true }),
                 schemaId: z.string().optional(),
+                peerId: z.string().optional(),
               }),
             ),
           }),
@@ -62,9 +64,10 @@ export interface ModelSearchResult {
   organisation?: string
   createdAt: Date
   updatedAt: Date
+  peerId?: string
 }
 
-interface GetModelsResponse {
+export interface GetModelsResponse {
   models: Array<ModelSearchResult>
 }
 
@@ -73,30 +76,21 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>) => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations },
+      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, peers },
     } = parse(req, getModelsSearchSchema)
 
-    const foundModels = await searchModels(
+    const models = await searchModels(
       req.user,
       kind as EntryKindKeys,
       libraries,
       organisations,
       filters,
       search,
+      peers,
       task,
       allowTemplating,
       schemaId,
     )
-    const models = foundModels.map((model) => ({
-      id: model.id,
-      name: model.name,
-      description: model.description,
-      tags: model.card?.metadata?.overview?.tags || [],
-      kind: model.kind,
-      organisation: model.organisation,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-    }))
 
     await audit.onSearchModel(req, models)
 
