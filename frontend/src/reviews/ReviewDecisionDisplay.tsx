@@ -1,4 +1,4 @@
-import { Undo } from '@mui/icons-material'
+import { ErrorOutline, Undo } from '@mui/icons-material'
 import Done from '@mui/icons-material/Done'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
@@ -120,11 +120,15 @@ export default function ReviewDecisionDisplay({
                 <span data-test='reviewDecisionDisplayApproved'>
                   {response.decision === Decision.Approve && 'has approved'}
                 </span>
+                <span data-test='reviewDecisionDisplayDenied'>
+                  {response.decision === Decision.Deny && 'has denied'}
+                </span>
                 <span data-test='reviewDecisionDisplayRequestChanges'>
                   {response.decision === Decision.RequestChanges && 'has requested changes'}
                 </span>
                 <span>{response.decision === Decision.Undo && 'has undone their review'}</span>
                 <span>{response.decision === Decision.Approve && <Done color='success' fontSize='small' />}</span>
+                <span>{response.decision === Decision.Deny && <ErrorOutline color='error' fontSize='small' />}</span>
                 <span>
                   {response.decision === Decision.RequestChanges && <HourglassEmpty color='warning' fontSize='small' />}
                 </span>

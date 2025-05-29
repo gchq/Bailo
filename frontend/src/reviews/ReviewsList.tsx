@@ -9,6 +9,7 @@ import Paginate from 'src/common/Paginate'
 import MessageAlert from 'src/MessageAlert'
 import ReviewItem from 'src/reviews/ReviewItem'
 import { ReviewListStatus, ReviewListStatusKeys, ReviewRequestInterface } from 'types/types'
+import { isFinalised } from 'utils/reviewUtils'
 
 type ReviewsListProps = {
   kind: 'release' | 'access'
@@ -21,7 +22,7 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [filteredReviews, setFilteredReviews] = useState<ReviewRequestInterface[]>([])
 
-  const approvedByUser = useCallback(
+  const completedByUser = useCallback(
     (review: ReviewRequestInterface) => {
       return (
         currentUser &&
@@ -29,7 +30,7 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
           (response) =>
             response.parentId === review._id &&
             response.entity === `user:${currentUser.dn}` &&
-            response.decision === 'approve',
+            isFinalised(response.decision),
         )
       )
     },
@@ -39,14 +40,14 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
   useEffect(() => {
     if (status === ReviewListStatus.ARCHIVED) {
       setFilteredReviews(
-        reviews.filter((filteredReview) => filteredReview.kind === kind && approvedByUser(filteredReview)),
+        reviews.filter((filteredReview) => filteredReview.kind === kind && completedByUser(filteredReview)),
       )
     } else {
       setFilteredReviews(
-        reviews.filter((filteredReview) => filteredReview.kind === kind && !approvedByUser(filteredReview)),
+        reviews.filter((filteredReview) => filteredReview.kind === kind && !completedByUser(filteredReview)),
       )
     }
-  }, [reviews, kind, approvedByUser, status])
+  }, [reviews, kind, completedByUser, status])
 
   const ReviewListItem = memoize(({ data, index }) => (
     <ReviewItem

@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongoose'
+
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
@@ -12,6 +14,7 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
+import { getUniqueResponseStatus } from './response.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 // This should be replaced by using the dynamic schema
@@ -25,12 +28,13 @@ export const allReviewRoles = [...new Set(requiredRoles.release.concat(requiredR
 export async function findReviews(
   user: UserInterface,
   mine: boolean,
+  decision: boolean = false,
   modelId?: string,
   semver?: string,
   accessRequestId?: string,
   kind?: string,
 ): Promise<(ReviewInterface & { model: ModelInterface })[]> {
-  const reviews = await Review.aggregate()
+  const reviews = await Review.aggregate<ReviewDoc & { model: ModelDoc }>()
     .match({
       ...(modelId && { modelId }),
       ...(semver && { semver }),
@@ -50,7 +54,26 @@ export async function findReviews(
     ModelAction.View,
   )
 
-  return reviews.filter((_, i) => auths[i].success)
+  const validReviews = reviews.filter((_, i) => auths[i].success)
+
+  if (decision) {
+    const reviewIds = validReviews.map((r: ReviewDoc) => {
+      const id: ObjectId = r._id as ObjectId
+      return id.toString()
+    })
+
+    const decisions = await getUniqueResponseStatus(user, reviewIds)
+
+    return validReviews.map((r) => {
+      const decision = decisions.find((s) => s._id == r.id)
+      if (decision?.decision) {
+        r.decision = decision.decision
+      }
+      return r
+    })
+  } else {
+    return validReviews
+  }
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {

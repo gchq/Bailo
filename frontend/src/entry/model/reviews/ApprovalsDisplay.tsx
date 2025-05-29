@@ -1,10 +1,11 @@
-import { Done } from '@mui/icons-material'
+import { Done, ErrorOutline } from '@mui/icons-material'
 import { Stack, Tooltip, Typography } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
 import { ReactElement, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { ResponseInterface } from 'types/types'
+import { isFinalised } from 'utils/reviewUtils'
 import { plural } from 'utils/stringUtils'
 
 interface ApprovalsDisplayProps {
@@ -26,12 +27,17 @@ export default function ApprovalsDisplay({
 
   const roleApprovals = useMemo(
     () =>
-      dynamicRoles.reduce<ReactElement[]>((approvals, dynamicRole) => {
-        const hasRoleApproved = !!acceptedReviewResponses.find(
-          (acceptedResponse) => acceptedResponse.role === dynamicRole.id,
+      dynamicRoles.reduce<ReactElement[]>((decisions, dynamicRole) => {
+        const finalisedDecisions = acceptedReviewResponses.filter(
+          (r) => isFinalised(r.decision) && r.role === dynamicRole.id,
         )
-        if (hasRoleApproved) {
-          approvals.push(
+        const latestDecision = finalisedDecisions.at(0)
+        if (!latestDecision || !latestDecision.decision) {
+          return decisions
+        }
+
+        if (latestDecision.decision === 'approve') {
+          decisions.push(
             <Tooltip title={`${plural(acceptedReviewResponses.length, 'review')}`} key={dynamicRole.id}>
               <Stack direction='row'>
                 <Done color='success' fontSize='small' />
@@ -44,7 +50,21 @@ export default function ApprovalsDisplay({
             </Tooltip>,
           )
         }
-        return approvals
+        if (latestDecision.decision === 'deny') {
+          decisions.push(
+            <Tooltip title={`${plural(acceptedReviewResponses.length, 'review')}`} key={dynamicRole.id}>
+              <Stack direction='row'>
+                <ErrorOutline color='error' fontSize='small' />
+                <Typography variant='caption'>
+                  {showCurrentUserResponses
+                    ? `You have denied this as a ${dynamicRole.name}`
+                    : `Denied by ${dynamicRole.name}`}
+                </Typography>
+              </Stack>
+            </Tooltip>,
+          )
+        }
+        return decisions
       }, []),
     [acceptedReviewResponses, dynamicRoles, showCurrentUserResponses],
   )
