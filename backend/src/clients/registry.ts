@@ -127,7 +127,7 @@ function isListImageTagResponse(resp: unknown): resp is ListImageTagResponse {
   )
 }
 
-function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
+export function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
   return (
     hasKeys<{ errors: unknown }>(resp, ['errors']) &&
     Array.isArray(resp['errors']) &&
