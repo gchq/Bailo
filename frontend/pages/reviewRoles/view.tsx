@@ -6,6 +6,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
+import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import { ReviewRolesFormData } from 'types/types'
 
@@ -77,6 +78,7 @@ export default function ReviewRoles() {
 
   return (
     <>
+      <Title text='View Review Roles' />
       <Container>
         <Stack mx={2} mb={1} direction={'row'} justifyContent={'space-between'}>
           <Typography component='h1' color='primary' variant='h6' noWrap>

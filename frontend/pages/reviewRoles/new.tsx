@@ -21,6 +21,7 @@ import { postReviewRole } from 'actions/model'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
+import Title from 'src/common/Title'
 import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
@@ -123,88 +124,91 @@ export default function ReviewRolesForm() {
   }
 
   return (
-    <Container>
-      <Paper sx={{ p: 4, mb: 4 }}>
-        <Box component='form' onSubmit={handleSubmit}>
-          <Stack spacing={2}>
-            <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
-              <Typography variant='h6' component='h1'>
-                Create new Role
-              </Typography>
-              <PersonAdd color='primary' fontSize='large' />
-            </Stack>
-            <Stack spacing={2} direction='row'>
-              <LabelledInput required fullWidth label='Name' htmlFor='role-name-input'>
+    <>
+      <Title text='Create new Review Role' />
+      <Container>
+        <Paper sx={{ p: 4, mb: 4 }}>
+          <Box component='form' onSubmit={handleSubmit}>
+            <Stack spacing={2}>
+              <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+                <Typography variant='h6' component='h1'>
+                  Create new Role
+                </Typography>
+                <PersonAdd color='primary' fontSize='large' />
+              </Stack>
+              <Stack spacing={2} direction='row'>
+                <LabelledInput required fullWidth label='Name' htmlFor='role-name-input'>
+                  <TextField
+                    required
+                    value={formData.name}
+                    onChange={handleNameChange}
+                    size='small'
+                    fullWidth
+                    autoFocus
+                    id='role-name-input'
+                  />
+                </LabelledInput>
+                <LabelledInput required fullWidth label='Short name' htmlFor='role-shortname-input'>
+                  <TextField
+                    required
+                    fullWidth
+                    value={formData.short}
+                    onChange={handleShortNameChange}
+                    size='small'
+                    id='role-shortname-input'
+                  />
+                </LabelledInput>
+              </Stack>
+              <LabelledInput required fullWidth label='Description' htmlFor='role-description-input'>
                 <TextField
                   required
-                  value={formData.name}
-                  onChange={handleNameChange}
-                  size='small'
                   fullWidth
-                  autoFocus
-                  id='role-name-input'
+                  value={formData.description}
+                  onChange={handleDescriptionChange}
+                  size='small'
+                  id='role-description-input'
                 />
               </LabelledInput>
-              <LabelledInput required fullWidth label='Short name' htmlFor='role-shortname-input'>
-                <TextField
-                  required
-                  fullWidth
-                  value={formData.short}
-                  onChange={handleShortNameChange}
-                  size='small'
-                  id='role-shortname-input'
-                />
+              <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
+                <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
+                  <MenuItem value='None'>None</MenuItem>
+                  <MenuItem value='Owner'>Owner</MenuItem>
+                  <MenuItem value='Contributor'>Contributor</MenuItem>
+                  <MenuItem value='Consumer'>Consumer</MenuItem>
+                </Select>
               </LabelledInput>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
+                  <Typography fontWeight='bold'>Default collaborators</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ mt: 1 }}>
+                    {displayEntryAccessInput}
+                    <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} sx={{ mt: 2 }}>
+                      {formData.defaultEntities && <Typography>Default Collaborators: </Typography>}
+                      {displayDefaultEntitiesList}
+                    </Stack>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
             </Stack>
-            <LabelledInput required fullWidth label='Description' htmlFor='role-description-input'>
-              <TextField
-                required
-                fullWidth
-                value={formData.description}
-                onChange={handleDescriptionChange}
-                size='small'
-                id='role-description-input'
-              />
-            </LabelledInput>
-            <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
-              <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
-                <MenuItem value='None'>None</MenuItem>
-                <MenuItem value='Owner'>Owner</MenuItem>
-                <MenuItem value='Contributor'>Contributor</MenuItem>
-                <MenuItem value='Consumer'>Consumer</MenuItem>
-              </Select>
-            </LabelledInput>
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
-                <Typography fontWeight='bold'>Default collaborators</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Box sx={{ mt: 1 }}>
-                  {displayEntryAccessInput}
-                  <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} sx={{ mt: 2 }}>
-                    {formData.defaultEntities && <Typography>Default Collaborators: </Typography>}
-                    {displayDefaultEntitiesList}
-                  </Stack>
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          </Stack>
-          <Box display='flex'>
-            <Box ml='auto'>
-              <LoadingButton
-                loading={loading}
-                type='submit'
-                variant='contained'
-                color='primary'
-                disabled={!(formData.name && formData.short && formData.description && formData.collaboratorRole)}
-              >
-                Create Role
-              </LoadingButton>
-              <MessageAlert message={errorMessage} severity='error' />
+            <Box display='flex'>
+              <Box ml='auto'>
+                <LoadingButton
+                  loading={loading}
+                  type='submit'
+                  variant='contained'
+                  color='primary'
+                  disabled={!(formData.name && formData.short && formData.description && formData.collaboratorRole)}
+                >
+                  Create Role
+                </LoadingButton>
+                <MessageAlert message={errorMessage} severity='error' />
+              </Box>
             </Box>
           </Box>
-        </Box>
-      </Paper>
-    </Container>
+        </Paper>
+      </Container>
+    </>
   )
 }

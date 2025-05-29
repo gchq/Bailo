@@ -1,8 +1,8 @@
 import {
-  BabyChangingStation,
   KeyboardDoubleArrowLeft,
   KeyboardDoubleArrowRight,
   Settings as SettingsIcon,
+  SupervisorAccount,
 } from '@mui/icons-material'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
@@ -195,7 +195,7 @@ export default function SideNavigation({
                 drawerOpen={drawerOpen}
                 menuPage='reviewRoles'
                 title='Review Roles'
-                icon={<BabyChangingStation />}
+                icon={<SupervisorAccount />}
               />
             )}
           </StyledList>
