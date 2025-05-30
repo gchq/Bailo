@@ -71,6 +71,8 @@ export interface UiConfig {
   }
 }
 
+export type CollaboratorRoleType = 'None' | 'Contributor' | 'Consumer' | 'Owner'
+
 export interface FileInterface {
   _id: string
   modelId: string
@@ -227,6 +229,12 @@ export interface Role {
   short?: string
   kind?: RoleKindKeys
   description?: string
+}
+
+export type ReviewRolesFormData = Role & {
+  defaultEntities?: CollaboratorEntry[]
+  lockEntities: boolean
+  collaboratorRole?: CollaboratorRoleType
 }
 
 export const SchemaKind = {

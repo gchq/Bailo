@@ -12,6 +12,8 @@ type EntryAccessInputProps = {
   value: CollaboratorEntry[]
   onChange: (value: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
+  hideActionsTable?: boolean
+  collaboratorsValue?: CollaboratorEntry[]
   entryRoles: Role[]
 } & (
   | {
@@ -24,7 +26,13 @@ type EntryAccessInputProps = {
     }
 )
 
-export default function EntryAccessInput({ value, onChange, entryKind, entryRoles }: EntryAccessInputProps) {
+export default function EntryAccessInput({
+  value,
+  onChange,
+  entryKind,
+  entryRoles,
+  hideActionsTable = false,
+}: EntryAccessInputProps) {
   const [open, setOpen] = useState(false)
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(value)
   const [userListQuery, setUserListQuery] = useState('')
@@ -125,16 +133,18 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
         )}
       />
       <ManualEntityInput onAddEntityManually={handleAddEntityManually} errorMessage={manualEntityInputErrorMessage} />
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Entity</TableCell>
-            <TableCell>Roles</TableCell>
-            <TableCell align='right'>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>{collaboratorList}</TableBody>
-      </Table>
+      {!hideActionsTable && (
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Entity</TableCell>
+              <TableCell>Roles</TableCell>
+              <TableCell align='right'>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>{collaboratorList}</TableBody>
+        </Table>
+      )}
     </Stack>
   )
 }
