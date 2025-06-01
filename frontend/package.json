@@ -54,7 +54,7 @@
     "rehype-highlight": "^7.0.1",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.0",
-    "semver": "^7.6.2",
+    "semver": "^7.7.2",
     "swagger-ui-react": "^5.20.2",
     "swr": "^2.3.0",
     "typescript": "5.8.3",
