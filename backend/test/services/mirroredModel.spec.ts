@@ -9,6 +9,7 @@ import { UserInterface } from '../../src/models/User.js'
 import {
   exportCompressedRegistryImage,
   exportModel,
+  importCompressedRegistryImage,
   ImportKind,
   ImportKindKeys,
   importModel,
@@ -173,6 +174,39 @@ const hashMocks = vi.hoisted(() => ({
   })),
 }))
 vi.mock('node:crypto', () => hashMocks)
+
+const zlibMocks = vi.hoisted(() => ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  createGunzip: vi.fn((options) => {
+    return new MockReadable()
+  }),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  createGzip: vi.fn((options) => {
+    return new MockReadable()
+  }),
+  constants: { Z_BEST_SPEED: 1 },
+}))
+vi.mock('node:zlib', () => ({ default: zlibMocks }))
+
+const mockTarStream = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  entry: vi.fn(({ name, size }) => {
+    return new MockWritable()
+  }),
+  pipe: vi.fn().mockReturnThis(),
+  finalize: vi.fn(),
+}
+const tarMocks = vi.hoisted(() => ({
+  extract: vi.fn(() => new MockReadable()),
+  pack: vi.fn(() => mockTarStream),
+  constants: { Z_BEST_SPEED: 1 },
+}))
+vi.mock('tar-stream', () => tarMocks)
+
+const streamPromisesMock = vi.hoisted(() => ({
+  finished: vi.fn(() => true),
+}))
+vi.mock('stream/promises', async () => streamPromisesMock)
 
 const registryMocks = vi.hoisted(() => ({
   doesImageLayerExist: vi.fn(),
@@ -801,6 +835,8 @@ describe('services > mirroredModel', () => {
     await exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
 
     expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+    expect(zlibMocks.createGzip).toBeCalledTimes(1)
+    expect(tarMocks.pack).toBeCalledTimes(1)
     expect(registryMocks.getImageManifest).toBeCalledTimes(1)
     expect(registryMocks.getImageBlob).toBeCalledTimes(3)
   })
@@ -818,7 +854,104 @@ describe('services > mirroredModel', () => {
     await expect(promise).rejects.toThrow('Could not extract layer digest.')
 
     expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+    expect(zlibMocks.createGzip).toBeCalledTimes(1)
+    expect(tarMocks.pack).toBeCalledTimes(1)
     expect(registryMocks.getImageManifest).toBeCalledTimes(1)
     expect(registryMocks.getImageBlob).toBeCalledTimes(1)
+  })
+
+  test('importCompressedRegistryImage > success', async () => {
+    // this is not a nice test because of the streams and events, but it does work
+
+    // set up mock API responses
+    s3Mocks.getObjectStream.mockResolvedValueOnce({ Body: new PassThrough() })
+    registryMocks.doesImageLayerExist.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
+    registryMocks.initialiseImageUpload.mockResolvedValue({
+      'content-length': 'string',
+      date: 'string',
+      'docker-distribution-api-version': 'string',
+      'docker-upload-uuid': 'string',
+      location: 'string',
+      range: 'string',
+    })
+    registryMocks.putImageBlob.mockResolvedValue({
+      'content-length': 'string',
+      date: 'string',
+      'docker-content-digest': 'string',
+      'docker-distribution-api-version': 'string',
+      location: 'string',
+    })
+    registryMocks.putImageManifest.mockResolvedValueOnce({
+      'content-length': 'string',
+      date: 'string',
+      'docker-content-digest': 'string',
+      'docker-distribution-api-version': 'string',
+      location: 'string',
+    })
+    // set up mock stream responses
+    const mockTarExtractEntryEntries = [
+      { name: 'manifest.json', type: 'file', size: 123 },
+      { name: 'blobs/sha256/0', type: 'file', size: 4 },
+      { name: 'blobs/sha256/1', type: 'file', size: 256 },
+      { name: 'blobs/sha256/2', type: 'file', size: 512 },
+      { name: 'blobs/sha256', type: 'directory', size: 0 },
+    ]
+    const mockTarExtractEntryStreamEvents: string[] = [
+      JSON.stringify({
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+        config: { mediaType: 'application/vnd.docker.container.image.v1+json', size: 4, digest: 'sha256:0' },
+        layers: [
+          { mediaType: 'application/vnd.docker.image.rootfs.diff.tar.gzip', size: 256, digest: 'sha256:1' },
+          { mediaType: 'application/vnd.docker.image.rootfs.diff.tar.gzip', size: 512, digest: 'sha256:2' },
+        ],
+      }),
+      'test',
+      'x'.repeat(256),
+      'a'.repeat(512),
+      '',
+    ]
+    // inject our own `.on(<name>, cb)` method to get the handlers
+    let storedEntryHandler
+    let storedFinishHandler
+    const mockTarStream = Object.assign(new MockReadable(), {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+      on: vi.fn((eventName: string, callback: Function) => {
+        // extract the wanted handlers
+        if (eventName === 'entry') {
+          storedEntryHandler = callback
+        } else if (eventName === 'finish') {
+          // extract the wanted event handler
+          storedFinishHandler = callback
+        }
+      }),
+    })
+    tarMocks.extract.mockReturnValueOnce(mockTarStream)
+
+    const promise = importCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
+
+    // have to wait for a tick otherwise handlers won't yet be set
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(storedEntryHandler).toBeDefined()
+    expect(storedFinishHandler).toBeDefined()
+
+    // for each 'entry' event
+    for (let mockIndex = 0; mockIndex < mockTarExtractEntryEntries.length; mockIndex++) {
+      const eventStream = ReadableStream.from(mockTarExtractEntryStreamEvents[mockIndex])
+      // inject `resume` function
+      eventStream['resume'] = vi.fn()
+      storedEntryHandler(mockTarExtractEntryEntries[mockIndex], eventStream, () => {})
+
+      // have to wait for a tick otherwise shared variable `manifestBody` may be undefined by the time `finish` triggers
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    }
+    // send 'final' event
+    storedFinishHandler()
+
+    await promise
+
+    expect(s3Mocks.getObjectStream).toBeCalledTimes(1)
+    expect(zlibMocks.createGunzip).toBeCalledTimes(1)
+    expect(tarMocks.extract).toBeCalledTimes(1)
   })
 })

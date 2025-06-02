@@ -196,7 +196,7 @@ function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManife
 
 type GetRegistryLayerStreamResponse = {
   ok: boolean
-  body: Readable
+  body: Readable | ReadableStream
 }
 export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
   const responseStream = (
@@ -232,6 +232,7 @@ function isGetRegistryLayerStream(resp: unknown): resp is GetRegistryLayerStream
     }) &&
     resp['body'] !== null &&
     (resp['body'] instanceof Readable ||
+      resp['body'] instanceof ReadableStream ||
       hasKeysOfType(resp['body'], { pipe: 'function', read: 'function', _read: 'function' }))
   )
 }
