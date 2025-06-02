@@ -1,4 +1,4 @@
-import { Button, Card, Chip, Container, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/model'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -19,7 +19,7 @@ export default function Files({ model }: FilesProps) {
   const [activeFileTag, setActiveFileTag] = useState('')
 
   const EntryListItem = ({ data, index }) => (
-    <Card key={data[index]._id} sx={{ width: '100%' }}>
+    <Box key={data[index]._id} sx={{ width: '100%' }}>
       <Stack spacing={1} p={2}>
         <FileDisplay
           showMenuItems={{ associatedReleases: true, deleteFile: true, rescanFile: true }}
@@ -28,7 +28,7 @@ export default function Files({ model }: FilesProps) {
           mutator={mutateEntryFiles}
         />
       </Stack>
-    </Card>
+    </Box>
   )
 
   if (isEntryFilesError) {
@@ -51,8 +51,8 @@ export default function Files({ model }: FilesProps) {
           <Stack
             width='100%'
             direction={{ sm: 'column', md: 'row' }}
-            justifyContent='space-between'
-            sx={{ py: 0.5, width: '100%' }}
+            justifyContent='flex-end'
+            sx={{ py: 0.5, width: '100%', px: 2 }}
           >
             <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
               <>

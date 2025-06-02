@@ -20,6 +20,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
+import { memoize } from 'lodash-es'
 import { ChangeEvent, useCallback, useMemo } from 'react'
 import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
@@ -27,6 +28,7 @@ import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
 import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
+import Paginate from 'src/common/Paginate'
 import RichTextEditor from 'src/common/RichTextEditor'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import ModelImageList from 'src/entry/model/ModelImageList'
@@ -158,6 +160,22 @@ export default function ReleaseForm({
       onFilesMetadataChange(tempFilesWithMetadata)
     },
     [filesMetadata, onFilesMetadataChange],
+  )
+
+  // We can assume that all the displayed files will be interfaces when the form is in read only
+  const FileRowItem = memoize(({ data, index }) =>
+    isFileInterface(data[index]) ? (
+      <FileDisplay
+        key={data[index].name}
+        file={data[index]}
+        modelId={model.id}
+        showMenuItems={{ rescanFile: true }}
+        mutator={mutateReleases}
+        style={{ padding: 1 }}
+      />
+    ) : (
+      <></>
+    ),
   )
 
   if (isReleasesError) {
@@ -321,21 +339,22 @@ export default function ReleaseForm({
                 </Stack>
               )}
               <Stack spacing={1} divider={<Divider />}>
-                {isReadOnly &&
-                  formData.files.map(
-                    (file) =>
-                      isFileInterface(file) && (
-                        <FileDisplay
-                          key={file.name}
-                          file={file}
-                          modelId={model.id}
-                          showMenuItems={{ rescanFile: true }}
-                          mutator={mutateReleases}
-                        />
-                      ),
-                  )}
+                {isReadOnly && (
+                  <Paginate
+                    list={formData.files as FileInterface[]}
+                    defaultSortProperty='name'
+                    searchFilterProperty='name'
+                    searchPlaceholderText='Search by filename'
+                    sortingProperties={[
+                      { value: 'name', title: 'Name', iconKind: 'text' },
+                      { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+                      { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+                    ]}
+                  >
+                    {FileRowItem}
+                  </Paginate>
+                )}
               </Stack>
-              {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
             </>
           </AccordionDetails>
         </Accordion>

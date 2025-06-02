@@ -295,6 +295,10 @@ export default function FileDisplay({
 
   const handleFileTagSelectorOnChange = async (newTags: string[]) => {
     setFileTagErrorMessage('')
+    if (newTags.includes('')) {
+      setFileTagErrorMessage('Tags must have at least one character')
+      return
+    }
     const res = await patchFile(modelId, file._id, { tags: newTags.filter((newTag) => newTag !== '') })
     mutateEntryFiles()
     if (res.status !== 200) {
@@ -333,11 +337,16 @@ export default function FileDisplay({
   }
 
   return (
-    <Box sx={style} key={key}>
+    <Box sx={{ ...style, p: 1 }} key={key}>
       {isFileInterface(file) && (
-        <Stack spacing={2}>
+        <Stack spacing={1}>
           <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' justifyContent='space-between'>
-            <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center'>
+            <Stack
+              direction={{ sm: 'column', md: 'row' }}
+              spacing={2}
+              alignItems='center'
+              sx={{ wordBreak: 'break-word' }}
+            >
               <Tooltip title={file.name}>
                 <Link
                   target='_blank'
