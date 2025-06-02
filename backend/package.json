@@ -38,7 +38,7 @@
     "chalk": "^5.4.1",
     "clamscan": "^2.4.0",
     "cls-hooked": "^4.2.2",
-    "config": "^3.3.12",
+    "config": "^4.0.0",
     "connect-mongo": "^5.1.0",
     "content-disposition": "^0.5.4",
     "dedent-js": "^1.0.1",
