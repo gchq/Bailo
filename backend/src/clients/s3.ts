@@ -16,6 +16,7 @@ import { PassThrough, Readable } from 'stream'
 
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
+import { isBailoError } from '../types/error.js'
 import config from '../utils/config.js'
 import { InternalError } from '../utils/error.js'
 
@@ -70,7 +71,7 @@ export async function putObjectStream(
       fileSize,
     }
   } catch (error) {
-    throw InternalError('There was a problem uploading the object', { error })
+    throw InternalError(getErrorMessage('object upload'), { error, bucket, key, metadata })
   }
 }
 
@@ -91,7 +92,7 @@ export async function getObjectStream(bucket: string, key: string, range?: { sta
     const response = await client.send(command)
     return response
   } catch (error) {
-    throw InternalError('There was a problem retrieving this file.', { error })
+    throw InternalError(getErrorMessage('get object'), { error, bucket, key, range })
   }
 }
 
@@ -108,7 +109,7 @@ export async function headObject(bucket: string, key: string) {
     const response = await client.send(command)
     return response
   } catch (error) {
-    throw InternalError('There was a problem retrieving this file.', { error })
+    throw InternalError(getErrorMessage('head object'), { error, bucket, key })
   }
 }
 
@@ -122,7 +123,7 @@ export async function objectExists(bucket: string, key: string) {
       log.info({ bucket, key }, `Failed to find ${key} in ${bucket}`)
       return false
     } else {
-      throw InternalError('There was a problem retrieving this file.', { error })
+      throw InternalError(getErrorMessage('head object'), { error, bucket, key })
     }
   }
 }
@@ -139,7 +140,7 @@ export async function headBucket(bucket: string) {
     const response = await client.send(command)
     return response
   } catch (error) {
-    throw InternalError('There was a problem querying this bucket.', { error })
+    throw InternalError(getErrorMessage('head bucket'), { error, bucket })
   }
 }
 
@@ -155,7 +156,7 @@ export async function createBucket(bucket: string) {
     const response = await client.send(command)
     return response
   } catch (error) {
-    throw InternalError('There was a problem creating this bucket.', { error })
+    throw InternalError(getErrorMessage('create bucket'), { error, bucket })
   }
 }
 
@@ -165,7 +166,11 @@ export async function ensureBucketExists(bucket: string) {
     await headBucket(bucket)
     log.info({ bucket }, `Bucket ${bucket} already exists`)
   } catch (error) {
-    if (isS3ServiceException(error) && error.$metadata.httpStatusCode === 404) {
+    if (
+      isBailoError(error) &&
+      isS3ServiceException(error.context?.error) &&
+      error.context.error.$metadata.httpStatusCode === 404
+    ) {
       log.info({ bucket }, `Bucket does not exist, creating ${bucket}`)
       return createBucket(bucket)
     }
@@ -173,7 +178,7 @@ export async function ensureBucketExists(bucket: string) {
   }
 }
 
-const isS3ServiceException = (value: unknown): value is S3ServiceException => {
+function isS3ServiceException(value: unknown): value is S3ServiceException {
   if (typeof value !== 'object' || value === null) {
     return false
   }
@@ -181,4 +186,8 @@ const isS3ServiceException = (value: unknown): value is S3ServiceException => {
     return false
   }
   return true
+}
+
+function getErrorMessage(s3Action: string) {
+  return `There was a problem completing ${s3Action}.`
 }
