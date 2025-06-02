@@ -71,7 +71,9 @@ export async function putObjectStream(
       fileSize,
     }
   } catch (error) {
-    throw InternalError(getErrorMessage('object upload'), { error, bucket, key, metadata })
+    throw InternalError('Unable to upload the object to the S3 service.', {
+      internal: { error, bucket, key, metadata },
+    })
   }
 }
 
@@ -92,24 +94,9 @@ export async function getObjectStream(bucket: string, key: string, range?: { sta
     const response = await client.send(command)
     return response
   } catch (error) {
-    throw InternalError(getErrorMessage('get object'), { error, bucket, key, range })
-  }
-}
-
-export async function headObject(bucket: string, key: string) {
-  const client = await getS3Client()
-
-  const input: HeadObjectRequest = {
-    Bucket: bucket,
-    Key: key,
-  }
-
-  try {
-    const command = new GetObjectCommand(input)
-    const response = await client.send(command)
-    return response
-  } catch (error) {
-    throw InternalError(getErrorMessage('head object'), { error, bucket, key })
+    throw InternalError('Unable to retrieve the object from the S3 service.', {
+      internal: { error, bucket, key, range },
+    })
   }
 }
 
@@ -123,40 +110,8 @@ export async function objectExists(bucket: string, key: string) {
       log.info({ bucket, key }, `Failed to find ${key} in ${bucket}`)
       return false
     } else {
-      throw InternalError(getErrorMessage('head object'), { error, bucket, key })
+      throw InternalError('Unable to get object metadata from the S3 service.', { error, bucket, key })
     }
-  }
-}
-
-export async function headBucket(bucket: string) {
-  const client = await getS3Client()
-
-  const input: HeadBucketRequest = {
-    Bucket: bucket,
-  }
-
-  try {
-    const command = new HeadBucketCommand(input)
-    const response = await client.send(command)
-    return response
-  } catch (error) {
-    throw InternalError(getErrorMessage('head bucket'), { error, bucket })
-  }
-}
-
-export async function createBucket(bucket: string) {
-  const client = await getS3Client()
-
-  const input: CreateBucketRequest = {
-    Bucket: bucket,
-  }
-
-  try {
-    const command = new CreateBucketCommand(input)
-    const response = await client.send(command)
-    return response
-  } catch (error) {
-    throw InternalError(getErrorMessage('create bucket'), { error, bucket })
   }
 }
 
@@ -174,7 +129,52 @@ export async function ensureBucketExists(bucket: string) {
       log.info({ bucket }, `Bucket does not exist, creating ${bucket}`)
       return createBucket(bucket)
     }
-    throw InternalError('There was a problem ensuring this bucket exists.', { error })
+    throw InternalError('There was a problem ensuring this bucket exists.', { internal: { error } })
+  }
+}
+
+async function headObject(bucket: string, key: string) {
+  const client = await getS3Client()
+
+  const input: HeadObjectRequest = {
+    Bucket: bucket,
+    Key: key,
+  }
+
+  const command = new GetObjectCommand(input)
+  const response = await client.send(command)
+  return response
+}
+
+async function headBucket(bucket: string) {
+  const client = await getS3Client()
+
+  const input: HeadBucketRequest = {
+    Bucket: bucket,
+  }
+
+  try {
+    const command = new HeadBucketCommand(input)
+    const response = await client.send(command)
+    return response
+  } catch (error) {
+    throw InternalError('Unable to retrieve bucket metadata from the S3 service.', { error, bucket })
+  }
+}
+
+async function createBucket(bucket: string) {
+  const client = await getS3Client()
+
+  const input: CreateBucketRequest = {
+    Bucket: bucket,
+  }
+
+  try {
+    const command = new CreateBucketCommand(input)
+    const response = await client.send(command)
+    return response
+  } catch (error) {
+    throw InternalError('Unable to create a new bucket.', { error, bucket })
   }
 }
 
@@ -186,8 +186,4 @@ function isS3ServiceException(value: unknown): value is S3ServiceException {
     return false
   }
   return true
-}
-
-function getErrorMessage(s3Action: string) {
-  return `There was a problem completing ${s3Action}.`
 }
