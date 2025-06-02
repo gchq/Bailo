@@ -74,7 +74,7 @@
   },
   "devDependencies": {
     "@anatine/zod-mock": "^3.14.0",
-    "@faker-js/faker": "^8.4.1",
+    "@faker-js/faker": "^9.8.0",
     "@swc/core": "^1.11.29",
     "@types/archiver": "^6.0.3",
     "@types/bunyan": "^1.8.11",
