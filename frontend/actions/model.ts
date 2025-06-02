@@ -22,6 +22,9 @@ export interface EntrySearchResult {
   description: string
   tags: Array<string>
   kind: EntryKindKeys
+  organisation?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface ModelExportRequest {
@@ -34,6 +37,7 @@ export function useListModels(
   filters: string[] = [],
   task = '',
   libraries: string[] = [],
+  organisations: string[] = [],
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
@@ -43,6 +47,7 @@ export function useListModels(
     ...(filters.length > 0 && { filters }),
     ...(task && { task }),
     ...(libraries.length > 0 && { libraries }),
+    ...(organisations.length > 0 && { organisations }),
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),

@@ -15,6 +15,7 @@ export const getModelsSearchSchema = z.object({
     kind: z.string(z.nativeEnum(EntryKind)).optional(),
     task: z.string().optional(),
     libraries: coerceArray(z.array(z.string()).optional().default([])),
+    organisations: coerceArray(z.array(z.string()).optional().default([])),
     filters: coerceArray(z.array(z.string()).optional().default([])),
     search: z.string().optional().default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
@@ -58,6 +59,9 @@ export interface ModelSearchResult {
   description: string
   tags: Array<string>
   kind: EntryKindKeys
+  organisation?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 interface GetModelsResponse {
@@ -69,13 +73,14 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>) => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId },
+      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations },
     } = parse(req, getModelsSearchSchema)
 
     const foundModels = await searchModels(
       req.user,
       kind as EntryKindKeys,
       libraries,
+      organisations,
       filters,
       search,
       task,
@@ -88,6 +93,9 @@ export const getModelsSearch = [
       description: model.description,
       tags: model.card?.metadata?.overview?.tags || [],
       kind: model.kind,
+      organisation: model.organisation,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
     }))
 
     await audit.onSearchModel(req, models)

@@ -16,8 +16,8 @@ export const postSimpleUploadSchema = z.object({
   query: z.object({
     name: z.string(),
     mime: z.string().optional().default('application/octet-stream'),
-    metadata: z.object({}).optional(),
     tags: coerceArray(z.array(z.string()).optional()),
+    metadataText: z.string().optional(),
   }),
 })
 

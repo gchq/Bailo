@@ -39,13 +39,7 @@ export default function SchemasPage() {
 function Schemas() {
   const router = useRouter()
 
-  const tabs = useMemo(
-    () => [
-      { title: 'Schemas', path: 'overview', view: <SchemaTab /> },
-      { title: 'Designer (beta)', path: 'releases', view: <></>, disabled: true },
-    ],
-    [],
-  )
+  const tabs = useMemo(() => [{ title: 'Schemas', path: 'overview', view: <SchemaTab /> }], [])
 
   return (
     <>

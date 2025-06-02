@@ -5,9 +5,11 @@ import { postReleaseComment, useGetRelease } from 'actions/release'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
+import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Paginate from 'src/common/Paginate'
 import RichTextEditor from 'src/common/RichTextEditor'
 import MessageAlert from 'src/MessageAlert'
 import ReviewCommentDisplay from 'src/reviews/ReviewCommentDisplay'
@@ -90,32 +92,33 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
         ...responses.filter((response) => response.kind === ResponseKind.Comment),
       ]
     }
-    decisionsAndComments.sort(sortByCreatedAtAscending)
-    return decisionsAndComments.map((response) => {
-      if (response.kind === ResponseKind.Review) {
-        return (
-          <ReviewDecisionDisplay
-            key={response._id}
-            response={response}
-            modelId={modelId}
-            onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
-            currentUser={currentUser}
-            mutateResponses={mutateResponses}
-          />
-        )
-      } else {
-        return (
-          <ReviewCommentDisplay
-            key={response._id}
-            response={response}
-            onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
-            currentUser={currentUser}
-            mutateResponses={mutateResponses}
-          />
-        )
-      }
-    })
-  }, [reviews, responses, release, accessRequest, modelId, currentUser, mutateResponses, newReviewComment])
+    return decisionsAndComments.sort(sortByCreatedAtAscending)
+  }, [reviews, responses, release, accessRequest])
+
+  const ResponseListItem = memoize(({ data, index }) => {
+    if (data[index].kind === ResponseKind.Review) {
+      return (
+        <ReviewDecisionDisplay
+          key={data[index]._id}
+          response={data[index]}
+          modelId={modelId}
+          onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
+          currentUser={currentUser}
+          mutateResponses={mutateResponses}
+        />
+      )
+    } else {
+      return (
+        <ReviewCommentDisplay
+          key={data[index]._id}
+          response={data[index]}
+          onReplyButtonClick={(quote) => setNewReviewComment(`${quote} \n\n ${newReviewComment}`)}
+          currentUser={currentUser}
+          mutateResponses={mutateResponses}
+        />
+      )
+    }
+  })
 
   async function submitReviewComment() {
     setCommentSubmissionError('')
@@ -160,7 +163,19 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
     <Stack spacing={2} ref={ref}>
       {(hasResponseOrComment || !isEdit) && <Divider />}
       {(isReviewsLoading || isResponsesLoading || isCurrentUserLoading) && <Loading />}
-      {reviewDetails}
+      <Paginate
+        list={reviewDetails}
+        emptyListText='No responses found'
+        sortingProperties={[
+          { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+          { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+        ]}
+        defaultSortProperty='createdAt'
+        hideSearchInput
+        searchFilterProperty='createdAt'
+      >
+        {ResponseListItem}
+      </Paginate>
       {!isEdit && (
         <Stack spacing={1} justifyContent='center' alignItems='flex-end'>
           <Box sx={{ width: '100%' }}>
