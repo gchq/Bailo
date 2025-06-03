@@ -5,6 +5,7 @@ import {
   GetObjectRequest,
   HeadBucketCommand,
   HeadBucketRequest,
+  HeadObjectCommand,
   HeadObjectRequest,
   S3Client,
   S3ServiceException,
@@ -20,7 +21,7 @@ import { isBailoError } from '../types/error.js'
 import config from '../utils/config.js'
 import { InternalError } from '../utils/error.js'
 
-export async function getS3Client() {
+async function getS3Client() {
   return new S3Client({
     ...(config.s3.credentials.accessKeyId &&
       config.s3.credentials.secretAccessKey && { credentials: { ...config.s3.credentials } }),
@@ -141,7 +142,7 @@ async function headObject(bucket: string, key: string) {
     Key: key,
   }
 
-  const command = new GetObjectCommand(input)
+  const command = new HeadObjectCommand(input)
   const response = await client.send(command)
   return response
 }
