@@ -10,7 +10,7 @@ exports[`routes > images > getImages > 200 > ok 1`] = `
 }
 `;
 
-exports[`routes > images > getImages > audit > expected call 1`] = `"vespillo"`;
+exports[`routes > images > getImages > audit > expected call 1`] = `"expedita"`;
 
 exports[`routes > images > getImages > audit > expected call 2`] = `
 [
