@@ -865,7 +865,7 @@ describe('services > mirroredModel', () => {
 
     // set up mock API responses
     s3Mocks.getObjectStream.mockResolvedValueOnce({ Body: new PassThrough() })
-    registryMocks.doesImageLayerExist.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
+    registryMocks.doesImageLayerExist.mockResolvedValueOnce(true).mockResolvedValue(false)
     registryMocks.initialiseImageUpload.mockResolvedValue({
       'content-length': 'string',
       date: 'string',
@@ -911,6 +911,7 @@ describe('services > mirroredModel', () => {
       'a'.repeat(512),
       '',
     ]
+    expect(mockTarExtractEntryEntries.length).toEqual(mockTarExtractEntryStreamEvents.length)
     // inject our own `.on(<name>, cb)` method to get the handlers
     let storedEntryHandler
     let storedFinishHandler
@@ -937,18 +938,54 @@ describe('services > mirroredModel', () => {
 
     // for each 'entry' event
     for (let mockIndex = 0; mockIndex < mockTarExtractEntryEntries.length; mockIndex++) {
-      const eventStream = ReadableStream.from(mockTarExtractEntryStreamEvents[mockIndex])
       // inject `resume` function
-      eventStream['resume'] = vi.fn()
+      const eventStream = Object.assign(ReadableStream.from(mockTarExtractEntryStreamEvents[mockIndex]), {
+        resume: vi.fn(),
+      })
       storedEntryHandler(mockTarExtractEntryEntries[mockIndex], eventStream, () => {})
 
       // have to wait for a tick otherwise shared variable `manifestBody` may be undefined by the time `finish` triggers
       await new Promise((resolve) => setTimeout(resolve, 10))
     }
-    // send 'final' event
+    // send 'finish' event
     storedFinishHandler()
 
     await promise
+
+    expect(s3Mocks.getObjectStream).toBeCalledTimes(1)
+    expect(zlibMocks.createGunzip).toBeCalledTimes(1)
+    expect(tarMocks.extract).toBeCalledTimes(1)
+    expect(registryMocks.doesImageLayerExist).toBeCalledTimes(3)
+    expect(registryMocks.initialiseImageUpload).toBeCalledTimes(2)
+    expect(registryMocks.putImageBlob).toBeCalledTimes(2)
+    expect(registryMocks.putImageManifest).toBeCalledTimes(1)
+  })
+
+  test('importCompressedRegistryImage > tar error', async () => {
+    // this is not a nice test because of the streams and events, but it does work
+
+    // inject our own `.on(<name>, cb)` method to get the handlers
+    let storedErrorHandler
+    const mockTarStream = Object.assign(new MockReadable(), {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+      on: vi.fn((eventName: string, callback: Function) => {
+        // extract the wanted handlers
+        if (eventName === 'error') {
+          storedErrorHandler = callback
+        }
+      }),
+    })
+    tarMocks.extract.mockReturnValueOnce(mockTarStream)
+
+    const promise = importCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
+
+    // have to wait for a tick otherwise handlers won't yet be set
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(storedErrorHandler).toBeDefined()
+
+    storedErrorHandler({})
+
+    await expect(promise).rejects.toThrow('Error while un-tarring blob')
 
     expect(s3Mocks.getObjectStream).toBeCalledTimes(1)
     expect(zlibMocks.createGunzip).toBeCalledTimes(1)
