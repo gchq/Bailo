@@ -6,7 +6,7 @@ import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
-import cypress from 'eslint-plugin-cypress'
+import pluginCypress from 'eslint-plugin-cypress'
 import prettier from 'eslint-plugin-prettier'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 
@@ -30,16 +30,6 @@ const eslintConfig = [
       'next/core-web-vitals',
     ),
   ),
-  ...compat
-    .config({
-      extends: ['plugin:cypress/recommended'],
-      parserOptions: {
-        ecmaVersion: 2020,
-        sourceType: 'module',
-        project: './cypress/tsconfig.json',
-      },
-    })
-    .map((config) => ({ ...config, files: ['cypress/**/*.cy.ts'] })),
   {
     plugins: {
       '@typescript-eslint': fixupPluginRules(typescriptEslint),
@@ -78,12 +68,7 @@ const eslintConfig = [
   {
     files: ['cypress/**/*.cy.ts'],
     plugins: {
-      cypress,
-    },
-    languageOptions: {
-      globals: {
-        ...cypress.environments.globals.globals,
-      },
+      cypress: pluginCypress,
     },
     rules: {
       'func-names': 'off',
