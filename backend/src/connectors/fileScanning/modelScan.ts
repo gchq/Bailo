@@ -29,7 +29,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
 
     const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
     try {
-      const scanResults = await scanStream(s3Stream, file.name, file.size)
+      const scanResults = await scanStream(s3Stream, file.name)
 
       if (scanResults.errors.length !== 0) {
         return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
