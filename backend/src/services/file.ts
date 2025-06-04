@@ -323,7 +323,7 @@ export async function updateFile(
   fileId: string,
   patchFileParams: Partial<Pick<FileInterface, 'tags' | 'name' | 'mime'>>,
 ) {
-  let file: FileInterface
+  let file: FileWithScanResultsInterface
   try {
     file = await getFileById(user, fileId)
   } catch {
@@ -337,23 +337,22 @@ export async function updateFile(
     throw BadReq('Cannot find requested model', { modelId: modelId })
   }
 
+  if (!Object.keys(patchFileParams).every((k) => ['tags', 'name', 'mime'].includes(k))) {
+    throw BadReq('Invalid patch parameter specific', { modelId: modelId, fileId: fileId })
+  }
+
   const patchFileAuth = await authorisation.file(user, model, file, FileAction.Update)
   if (!patchFileAuth.success) {
     throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
   }
 
-  for (const [patchFileParamKey, patchFileParamValue] of Object.entries(patchFileParams)) {
-    if (['tags', 'name', 'mime'].includes(patchFileParamKey) && patchFileParamValue) {
-      const updatedFile = await FileModel.findOneAndUpdate(
-        { _id: fileId },
-        { $set: { [patchFileParamKey]: patchFileParamValue } },
-      )
-      file[patchFileParamKey] = patchFileParamValue
-      if (!updatedFile) {
-        throw BadReq('There was a problem updating the file', { modelId, fileId, patchFileParams })
-      }
-    }
+  const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, patchFileParams, { new: true })
+  if (!updatedFile) {
+    throw BadReq('There was a problem updating the file', { modelId, fileId, patchFileParams })
   }
+
+  // return the full FileWithScanResultsInterface and not just the FileInterface
+  file = await getFileById(user, fileId)
 
   return file
 }

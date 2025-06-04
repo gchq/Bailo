@@ -529,9 +529,7 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    fileModelMocks.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
-    ])
+    fileModelMocks.aggregate.mockResolvedValue([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
 
     const result = await updateFile(user, modelId, testFileId, { tags: ['test1'] })
 
@@ -543,9 +541,7 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    fileModelMocks.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
-    ])
+    fileModelMocks.aggregate.mockResolvedValue([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
 
     const result = await updateFile(user, modelId, testFileId, {
       tags: ['test1'],
@@ -554,28 +550,30 @@ describe('services > file', () => {
     })
 
     expect(result).toMatchSnapshot()
-    expect(fileModelMocks.findOneAndUpdate).toBeCalledTimes(3)
+    expect(fileModelMocks.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: testFileId },
+      {
+        tags: ['test1'],
+        name: 'my-file-renamed.txt',
+        mime: 'text/plain',
+      },
+      { new: true },
+    )
+    expect(fileModelMocks.findOneAndUpdate).toHaveBeenCalledOnce()
   })
 
   test('updateFile > does not updated unchangeable property size', async () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    fileModelMocks.findOneAndUpdate.mockResolvedValueOnce({
-      modelId: 'testModel',
-      _id: { toString: vi.fn(() => testFileId) },
-      name: 'my-file.txt',
-      size: 100,
-    })
     fileModelMocks.aggregate.mockResolvedValueOnce([
       { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) }, name: 'my-file.txt', size: 100 },
     ])
 
     // @ts-expect-error size not in type but is a property
-    const result = await updateFile(user, modelId, testFileId, { size: 200 })
-    expect(result?.size).toBe(100)
+    const promise = updateFile(user, modelId, testFileId, { size: 200 })
 
-    expect(result).toMatchSnapshot()
+    await expect(promise).rejects.toThrowError(/^Invalid patch parameter specific/)
     expect(fileModelMocks.findOneAndUpdate).not.toBeCalled()
   })
 
@@ -632,11 +630,11 @@ describe('services > file', () => {
     fileModelMocks.aggregate.mockResolvedValueOnce([
       { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
     ])
-    fileModelMocks.findOneAndUpdate.mockResolvedValueOnce({ success: true }).mockResolvedValueOnce(null)
+    fileModelMocks.findOneAndUpdate.mockResolvedValueOnce(null)
 
     const promise = updateFile(user, modelId, testFileId, { tags: ['test1'], name: 'this-will-break.txt' })
 
     await expect(promise).rejects.toThrowError(/^There was a problem updating the file/)
-    expect(fileModelMocks.findOneAndUpdate).toHaveBeenCalledTimes(2)
+    expect(fileModelMocks.findOneAndUpdate).toHaveBeenCalledOnce()
   })
 })

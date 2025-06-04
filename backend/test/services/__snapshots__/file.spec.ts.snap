@@ -77,36 +77,19 @@ exports[`services > file > removeFile > success 1`] = `
 }
 `;
 
-exports[`services > file > updateFile > does not updated unchangeable property size 1`] = `
-{
-  "_id": {
-    "toString": [MockFunction spy] {
-      "calls": [
-        [],
-      ],
-      "results": [
-        {
-          "type": "return",
-          "value": "73859F8D26679D2E52597326",
-        },
-      ],
-    },
-  },
-  "id": "73859F8D26679D2E52597326",
-  "modelId": "testModel",
-  "name": "my-file.txt",
-  "size": 100,
-}
-`;
-
 exports[`services > file > updateFile > success 1`] = `
 {
   "_id": {
     "toString": [MockFunction spy] {
       "calls": [
         [],
+        [],
       ],
       "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
         {
           "type": "return",
           "value": "73859F8D26679D2E52597326",
@@ -116,9 +99,6 @@ exports[`services > file > updateFile > success 1`] = `
   },
   "id": "73859F8D26679D2E52597326",
   "modelId": "testModel",
-  "tags": [
-    "test1",
-  ],
 }
 `;
 
@@ -128,8 +108,13 @@ exports[`services > file > updateFile > success multiple params 1`] = `
     "toString": [MockFunction spy] {
       "calls": [
         [],
+        [],
       ],
       "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
         {
           "type": "return",
           "value": "73859F8D26679D2E52597326",
@@ -138,12 +123,7 @@ exports[`services > file > updateFile > success multiple params 1`] = `
     },
   },
   "id": "73859F8D26679D2E52597326",
-  "mime": "text/plain",
   "modelId": "testModel",
-  "name": "my-file-renamed.txt",
-  "tags": [
-    "test1",
-  ],
 }
 `;
 

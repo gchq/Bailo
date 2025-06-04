@@ -22,7 +22,7 @@ export const patchFileSchema = z.object({
     tags: z.array(z.string()).optional(),
     metadata: z.object({}).optional(),
     name: z.string().optional(),
-    mime: z.string().optional().default('application/octet-stream'),
+    mime: z.string().optional(),
   }),
 })
 
