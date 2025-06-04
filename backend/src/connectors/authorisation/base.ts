@@ -102,7 +102,7 @@ export class BasicAuthorisationConnector {
         }
 
         // Prohibit non-collaborators from seeing private models
-        if (!ModelAction.Import && !(await this.hasModelVisibilityAccess(user, model))) {
+        if (ModelAction.Import !== action && !(await this.hasModelVisibilityAccess(user, model))) {
           return {
             id: model.id,
             success: false,

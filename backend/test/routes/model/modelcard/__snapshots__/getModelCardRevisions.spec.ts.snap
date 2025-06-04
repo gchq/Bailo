@@ -1,3 +1,3 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > model > modelcard > getModelCardRevisions > audit > expected call 1`] = `"expedita"`;
+exports[`routes > model > modelcard > getModelCardRevisions > audit > expected call 1`] = `"vespillo"`;

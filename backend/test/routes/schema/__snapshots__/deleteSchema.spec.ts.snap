@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > schema > deleteSchema > audit > expected call 1`] = `"expedita"`;
+exports[`routes > schema > deleteSchema > audit > expected call 1`] = `"vespillo"`;
 
 exports[`routes > schema > deleteSchema > successfully updates the schema 1`] = `
 {

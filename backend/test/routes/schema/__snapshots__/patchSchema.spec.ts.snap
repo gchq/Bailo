@@ -3,9 +3,9 @@
 exports[`routes > schema > patchSchema > audit > expected call 1`] = `
 {
   "active": false,
-  "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
+  "description": "vespillo",
   "hidden": false,
-  "name": "Dr. Garry Cummerata",
+  "name": "Jaime Hilll",
 }
 `;
 
@@ -13,9 +13,9 @@ exports[`routes > schema > patchSchema > successfully updates the schema 1`] = `
 {
   "schema": {
     "active": false,
-    "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
+    "description": "vespillo",
     "hidden": false,
-    "name": "Dr. Garry Cummerata",
+    "name": "Jaime Hilll",
   },
 }
 `;

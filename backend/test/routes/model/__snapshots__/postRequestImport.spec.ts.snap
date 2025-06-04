@@ -3,7 +3,7 @@
 exports[`routes > model > postRequestImport > 200 > ok 1`] = `
 {
   "mirroredModelId": "abc",
-  "sourceModelId": "expedita",
+  "sourceModelId": "vespillo",
 }
 `;
 
