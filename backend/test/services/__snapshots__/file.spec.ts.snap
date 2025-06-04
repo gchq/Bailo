@@ -77,7 +77,7 @@ exports[`services > file > removeFile > success 1`] = `
 }
 `;
 
-exports[`services > file > updateFile > does not updated unchangable property name 1`] = `
+exports[`services > file > updateFile > does not updated unchangeable property size 1`] = `
 {
   "_id": {
     "toString": [MockFunction spy] {
@@ -95,79 +95,55 @@ exports[`services > file > updateFile > does not updated unchangable property na
   "id": "73859F8D26679D2E52597326",
   "modelId": "testModel",
   "name": "my-file.txt",
+  "size": 100,
 }
 `;
 
 exports[`services > file > updateFile > success 1`] = `
 {
-  "_id": [MockFunction spy],
-  "aggregate": [MockFunction spy] {
-    "calls": [
-      [
-        [
-          {
-            "$match": {
-              "_id": "73859f8d26679d2e52597326",
-            },
-          },
-          {
-            "$limit": 1,
-          },
-          {
-            "$addFields": {
-              "id": {
-                "$toString": "$_id",
-              },
-            },
-          },
-          {
-            "$lookup": {
-              "as": "avScan",
-              "foreignField": "fileId",
-              "from": "v2_scans",
-              "localField": "id",
-            },
-          },
-        ],
+  "_id": {
+    "toString": [MockFunction spy] {
+      "calls": [
+        [],
       ],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": Promise {},
-      },
-    ],
-  },
-  "delete": [MockFunction spy],
-  "find": [MockFunction spy],
-  "findOneAndDelete": [MockFunction spy],
-  "findOneAndUpdate": [MockFunction spy] {
-    "calls": [
-      [
+      "results": [
         {
-          "_id": "73859F8D26679D2E52597326",
-        },
-        {
-          "$set": {
-            "tags": [
-              "test1",
-            ],
-          },
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
         },
       ],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": [Circular],
-      },
-    ],
+    },
   },
-  "group": [MockFunction spy],
-  "match": [MockFunction spy],
-  "save": [MockFunction spy],
-  "size": 100,
-  "toObject": [MockFunction spy],
+  "id": "73859F8D26679D2E52597326",
+  "modelId": "testModel",
+  "tags": [
+    "test1",
+  ],
+}
+`;
+
+exports[`services > file > updateFile > success multiple params 1`] = `
+{
+  "_id": {
+    "toString": [MockFunction spy] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+      ],
+    },
+  },
+  "id": "73859F8D26679D2E52597326",
+  "mime": "text/plain",
+  "modelId": "testModel",
+  "name": "my-file-renamed.txt",
+  "tags": [
+    "test1",
+  ],
 }
 `;
 

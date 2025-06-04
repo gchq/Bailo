@@ -7,6 +7,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
 import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import { ModelDoc } from '../models/Model.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
@@ -322,25 +323,37 @@ export async function updateFile(
   fileId: string,
   patchFileParams: Partial<Pick<FileInterface, 'tags' | 'name' | 'mime'>>,
 ) {
-  const file = await getFileById(user, fileId)
-  if (!file) {
+  let file: FileInterface
+  try {
+    file = await getFileById(user, fileId)
+  } catch {
     throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
   }
-  const model = await getModelById(user, modelId)
-  if (!model) {
+
+  let model: ModelDoc
+  try {
+    model = await getModelById(user, modelId)
+  } catch {
     throw BadReq('Cannot find requested model', { modelId: modelId })
   }
+
   const patchFileAuth = await authorisation.file(user, model, file, FileAction.Update)
   if (!patchFileAuth.success) {
     throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
   }
 
-  if (patchFileParams.tags) {
-    const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, { $set: { tags: patchFileParams.tags } })
-    if (!updatedFile) {
-      throw BadReq('There was a problem updating the file', { modelId: modelId, fileId: fileId })
+  for (const [patchFileParamKey, patchFileParamValue] of Object.entries(patchFileParams)) {
+    if (['tags', 'name', 'mime'].includes(patchFileParamKey) && patchFileParamValue) {
+      const updatedFile = await FileModel.findOneAndUpdate(
+        { _id: fileId },
+        { $set: { [patchFileParamKey]: patchFileParamValue } },
+      )
+      file[patchFileParamKey] = patchFileParamValue
+      if (!updatedFile) {
+        throw BadReq('There was a problem updating the file', { modelId, fileId, patchFileParams })
+      }
     }
-    return updatedFile
   }
+
   return file
 }
