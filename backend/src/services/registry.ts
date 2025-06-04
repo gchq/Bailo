@@ -1,4 +1,4 @@
-import { Stream } from 'node:stream'
+import { Readable } from 'node:stream'
 
 import {
   doesLayerExist,
@@ -57,8 +57,11 @@ export async function getImageManifest(user: UserInterface, modelId: string, ima
   ])
 
   // get which layers exist for the model
-  const manifest = (await getImageTagManifest(repositoryToken, { namespace: modelId, image: imageName }, imageTag))
-    .responseBody
+  const { body: manifest } = await getImageTagManifest(
+    repositoryToken,
+    { namespace: modelId, image: imageName },
+    imageTag,
+  )
 
   return manifest
 }
@@ -102,7 +105,7 @@ export async function putImageBlob(
   imageName: string,
   uploadURL: string,
   digest: string,
-  blob: Stream,
+  blob: Readable | ReadableStream,
   size: string,
 ) {
   await checkUserAuth(user, modelId, ['push'])

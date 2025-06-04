@@ -1,4 +1,6 @@
-import { Readable, Stream } from 'node:stream'
+import { Readable } from 'node:stream'
+
+import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -28,8 +30,8 @@ async function registryRequest(
   token: string,
   endpoint: string,
   returnRawBody: boolean = false,
-  extraFetchOptions: { [key: string]: any } = {},
-  extraHeaders: { [key: string]: string } = {},
+  extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher'>> = {},
+  extraHeaders: HeadersInit = {},
 ) {
   let res: Response
   try {
@@ -46,7 +48,7 @@ async function registryRequest(
   } catch (err) {
     throw InternalError('Unable to communicate with the registry.', { err })
   }
-  let body
+  let body: unknown
   const headers = res.headers
   // don't get the json if the response raw (e.g. for a stream) and is ok
   if (!returnRawBody) {
@@ -72,22 +74,24 @@ async function registryRequest(
     }
   }
 
+  const headersObject = headers ? Object.fromEntries(headers) : {}
+
   if (returnRawBody) {
-    return { res, headers }
+    return { res, headers: headersObject }
   } else {
-    return { body, headers }
+    return { body, headers: headersObject }
   }
 }
 
 // Currently limited to a maximum 100 image names
 type ListModelReposResponse = { repositories: Array<string> }
 export async function listModelRepos(token: string, modelId: string) {
-  const responseBody = (await registryRequest(token, `_catalog?n=100&last=${modelId}`)).body
-  if (!isListModelReposResponse(responseBody)) {
-    throw InternalError('Unrecognised response body when listing model repositories.', { responseBody: responseBody })
+  const { body } = await registryRequest(token, `_catalog?n=100&last=${modelId}`)
+  if (!isListModelReposResponse(body)) {
+    throw InternalError('Unrecognised response body when listing model repositories.', { body })
   }
 
-  const filteredRepos = responseBody.repositories.filter((repo) => repo.startsWith(`${modelId}/`))
+  const filteredRepos = body.repositories.filter((repo) => repo.startsWith(`${modelId}/`))
   return filteredRepos
 }
 
@@ -103,9 +107,9 @@ type ListImageTagResponse = { tags: Array<string> }
 export async function listImageTags(token: string, imageRef: RepoRef) {
   const repo = `${imageRef.namespace}/${imageRef.image}`
 
-  let responseBody
+  let body: unknown
   try {
-    responseBody = (await registryRequest(token, `${repo}/tags/list`)).body
+    ;({ body } = await registryRequest(token, `${repo}/tags/list`))
   } catch (error) {
     if (isRegistryError(error) && error.errors.length === 1 && error.errors.at(0)?.code === 'NAME_UNKNOWN') {
       return []
@@ -113,10 +117,10 @@ export async function listImageTags(token: string, imageRef: RepoRef) {
     throw error
   }
 
-  if (!isListImageTagResponse(responseBody)) {
-    throw InternalError('Unrecognised response body when listing image tags.', { responseBody: responseBody })
+  if (!isListImageTagResponse(body)) {
+    throw InternalError('Unrecognised response body when listing image tags.', { responseBody: body })
   }
-  return responseBody.tags
+  return body.tags
 }
 
 function isListImageTagResponse(resp: unknown): resp is ListImageTagResponse {
@@ -147,31 +151,28 @@ type GetImageTagManifestResponse = {
 }
 export async function getImageTagManifest(token: string, imageRef: RepoRef, imageTag: string) {
   // TODO: handle `Accept: 'application/vnd.docker.distribution.manifest.list.v2+json'` type for multi-platform images
-  const { body: responseBody, headers: responseHeaders } = await registryRequest(
+  const { body, headers } = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
-    false,
-    {},
+    undefined,
+    undefined,
     {
       Accept: 'application/vnd.docker.distribution.manifest.v2+json',
     },
   )
-  if (!isGetImageTagManifestResponse(responseBody)) {
+  if (!isGetImageTagManifestResponse(body)) {
     throw InternalError('Unrecognised response body when getting image tag manifest.', {
-      responseBody,
+      responseBody: body,
       namespace: imageRef.namespace,
       image: imageRef.image,
       imageTag,
     })
   }
-  return { responseBody, responseHeaders }
+  return { body, headers }
 }
 
 function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManifestResponse {
   return (
-    typeof resp === 'object' &&
-    !Array.isArray(resp) &&
-    resp !== null &&
     hasKeysOfType<GetImageTagManifestResponse>(resp, {
       schemaVersion: 'number',
       mediaType: 'string',
@@ -200,13 +201,9 @@ type GetRegistryLayerStreamResponse = {
 }
 export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
   const responseStream = (
-    await registryRequest(
-      token,
-      `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
-      true,
-      {},
-      { Accept: 'application/vnd.docker.distribution.manifest.v2+json' },
-    )
+    await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`, true, undefined, {
+      Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+    })
   ).res
 
   if (!isGetRegistryLayerStream(responseStream)) {
@@ -223,9 +220,6 @@ export async function getRegistryLayerStream(token: string, imageRef: RepoRef, l
 
 function isGetRegistryLayerStream(resp: unknown): resp is GetRegistryLayerStreamResponse {
   return (
-    typeof resp === 'object' &&
-    !Array.isArray(resp) &&
-    resp !== null &&
     hasKeysOfType<GetRegistryLayerStreamResponse>(resp, {
       ok: 'boolean',
       body: 'object',
@@ -248,16 +242,13 @@ type DoesLayerExistResponse = {
 }
 export async function doesLayerExist(token: string, imageRef: RepoRef, digest: string) {
   try {
-    const responseHeaders = (
-      await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${digest}`, true, {
-        method: 'HEAD',
-      })
-    ).headers
-    const headersObject = Object.fromEntries(responseHeaders)
+    const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${digest}`, true, {
+      method: 'HEAD',
+    })
 
-    if (!isDoesLayerExistResponse(headersObject)) {
+    if (!isDoesLayerExistResponse(headers)) {
       throw InternalError('Unrecognised response headers when heading image layer.', {
-        responseHeaders: responseHeaders,
+        headers,
         namespace: imageRef.namespace,
         image: imageRef.image,
         digest,
@@ -266,7 +257,7 @@ export async function doesLayerExist(token: string, imageRef: RepoRef, digest: s
 
     return true
   } catch (error) {
-    if (typeof error === 'object' && error !== null && error['context']['status'] === 404) {
+    if (isRegistryError(error) && error.context?.status === 404) {
       // 404 response indicates that the layer does not exist
       return false
     } else {
@@ -296,23 +287,19 @@ type InitialiseUploadResponse = {
   range: string
 }
 export async function initialiseUpload(token: string, imageRef: RepoRef) {
-  const responseHeaders = (
-    await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`, true, {
-      method: 'POST',
-    })
-  ).headers
-  const headersObject = Object.fromEntries(responseHeaders)
+  const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`, true, {
+    method: 'POST',
+  })
 
-  if (!isInitialiseUploadObjectResponse(headersObject)) {
+  if (!isInitialiseUploadObjectResponse(headers)) {
     throw InternalError('Unrecognised response headers when posting initialise image upload.', {
-      responseHeaders: responseHeaders,
-      headersObject,
+      headers,
       namespace: imageRef.namespace,
       image: imageRef.image,
     })
   }
 
-  return headersObject
+  return headers
 }
 
 function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUploadResponse {
@@ -337,32 +324,29 @@ export async function putManifest(
   token: string,
   imageRef: RepoRef,
   imageTag: string,
-  manifest: any,
+  manifest: BodyInit,
   contentType: string,
 ) {
-  const responseHeaders = (
-    await registryRequest(
-      token,
-      `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
-      true,
-      {
-        method: 'PUT',
-        body: manifest,
-      },
-      { 'Content-Type': contentType, name: `${imageRef.namespace}/${imageRef.image}`, reference: imageTag },
-    )
-  ).headers
-  const headersObject = Object.fromEntries(responseHeaders)
+  const { headers } = await registryRequest(
+    token,
+    `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
+    true,
+    {
+      method: 'PUT',
+      body: manifest,
+    },
+    { 'Content-Type': contentType, name: `${imageRef.namespace}/${imageRef.image}`, reference: imageTag },
+  )
 
-  if (!isPutManifestResponse(headersObject)) {
+  if (!isPutManifestResponse(headers)) {
     throw InternalError('Unrecognised response headers when putting image manifest.', {
-      responseHeaders: responseHeaders,
+      headers,
       namespace: imageRef.namespace,
       image: imageRef.image,
     })
   }
 
-  return headersObject
+  return headers
 }
 
 function isPutManifestResponse(resp: unknown): resp is PutManifestResponse {
@@ -380,38 +364,35 @@ export async function uploadLayerMonolithic(
   token: string,
   uploadURL: string,
   digest: string,
-  blob: Stream,
+  blob: BodyInit,
   size: string,
 ) {
   log.debug('uploadLayerMonolithic', { token, uploadURL, digest, blob, size })
-  const responseHeaders = (
-    await registryRequest(
-      token,
-      `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''),
-      true,
-      {
-        method: 'PUT',
-        body: blob,
-        duplex: 'half',
-      },
-      {
-        'content-length': size,
-        'content-type': 'application/octet-stream',
-      },
-    )
-  ).headers
-  const headersObject = Object.fromEntries(responseHeaders)
+  const { headers } = await registryRequest(
+    token,
+    `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''),
+    true,
+    {
+      method: 'PUT',
+      body: blob,
+      duplex: 'half',
+    },
+    {
+      'content-length': size,
+      'content-type': 'application/octet-stream',
+    },
+  )
 
-  if (!isUploadLayerMonolithicResponse(headersObject)) {
+  if (!isUploadLayerMonolithicResponse(headers)) {
     throw InternalError('Unrecognised response headers when putting image manifest.', {
-      responseHeaders: responseHeaders,
+      headers,
       uploadURL,
       digest,
       size,
     })
   }
 
-  return headersObject
+  return headers
 }
 
 function isUploadLayerMonolithicResponse(resp: unknown): resp is UploadLayerMonolithicResponse {

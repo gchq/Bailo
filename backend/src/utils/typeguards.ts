@@ -7,7 +7,7 @@ export function hasKeysOfType<T extends object>(obj: unknown, keyTypes: Record<k
     typeof obj === 'object' &&
     obj !== null &&
     !Array.isArray(obj) &&
-    Object.entries(keyTypes).every(([k, type]) => typeof (obj as any)[k] === type)
+    Object.entries(keyTypes).every(([k, type]) => typeof obj[k] === type)
   )
 }
 

@@ -1,35 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`clients > registry > doesLayerExist > success 1`] = `
-[
-  [
-    "https://localhost:5000/v2/modelId/image/blobs/digest",
-    {
-      "dispatcher": "mock agent",
-      "headers": {
-        "Authorization": "Bearer token",
-      },
-      "method": "HEAD",
-    },
-  ],
-]
-`;
-
-exports[`clients > registry > doesLayerExist > success false 1`] = `
-[
-  [
-    "https://localhost:5000/v2/modelId/image/blobs/digest",
-    {
-      "dispatcher": "mock agent",
-      "headers": {
-        "Authorization": "Bearer token",
-      },
-      "method": "HEAD",
-    },
-  ],
-]
-`;
-
 exports[`clients > registry > doesLayerExist > success true 1`] = `
 [
   [
@@ -90,21 +60,6 @@ exports[`clients > registry > initialiseUpload > success 1`] = `
 ]
 `;
 
-exports[`clients > registry > initialiseUpload > success true 1`] = `
-[
-  [
-    "https://localhost:5000/v2/modelId/image/blobs/uploads/",
-    {
-      "dispatcher": "mock agent",
-      "headers": {
-        "Authorization": "Bearer token",
-      },
-      "method": "POST",
-    },
-  ],
-]
-`;
-
 exports[`clients > registry > listImageTags > success 1`] = `
 [
   [
@@ -138,7 +93,7 @@ exports[`clients > registry > putManifest > success 1`] = `
   [
     "https://localhost:5000/v2/modelId/image/manifests/tag",
     {
-      "body": {},
+      "body": null,
       "dispatcher": "mock agent",
       "headers": {
         "Authorization": "Bearer token",

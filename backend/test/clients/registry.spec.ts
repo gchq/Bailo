@@ -59,7 +59,7 @@ describe('clients > registry', () => {
 
     expect(fetchMock).toBeCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
-    expect(response.responseBody).toStrictEqual(mockManifest)
+    expect(response.body).toStrictEqual(mockManifest)
   })
 
   test('getImageTagManifest > cannot reach registry', async () => {
@@ -365,6 +365,7 @@ describe('clients > registry', () => {
       ok: false,
       status: 404,
       statusText: '',
+      errors: [],
     })
 
     const response = await doesLayerExist('token', { namespace: 'modelId', image: 'image' }, 'digest')
@@ -430,7 +431,7 @@ describe('clients > registry', () => {
       headers: mockHeaders,
     })
 
-    const response = await putManifest('token', { namespace: 'modelId', image: 'image' }, 'tag', {}, '')
+    const response = await putManifest('token', { namespace: 'modelId', image: 'image' }, 'tag', null, '')
 
     expect(fetchMock).toBeCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
@@ -443,7 +444,7 @@ describe('clients > registry', () => {
       headers: new Headers({}),
     })
 
-    const response = putManifest('token', { namespace: 'modelId', image: 'image' }, 'tag', {}, '')
+    const response = putManifest('token', { namespace: 'modelId', image: 'image' }, 'tag', null, '')
 
     expect(response).rejects.toThrowError('Unrecognised response headers when putting image manifest.')
   })
