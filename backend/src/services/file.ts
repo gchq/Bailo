@@ -337,10 +337,6 @@ export async function updateFile(
     throw BadReq('Cannot find requested model', { modelId: modelId })
   }
 
-  if (!Object.keys(patchFileParams).every((k) => ['tags', 'name', 'mime'].includes(k))) {
-    throw BadReq('Invalid patch parameter specific', { modelId: modelId, fileId: fileId })
-  }
-
   const patchFileAuth = await authorisation.file(user, model, file, FileAction.Update)
   if (!patchFileAuth.success) {
     throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })

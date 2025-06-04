@@ -562,21 +562,6 @@ describe('services > file', () => {
     expect(fileModelMocks.findOneAndUpdate).toHaveBeenCalledOnce()
   })
 
-  test('updateFile > does not updated unchangeable property size', async () => {
-    const user = { dn: 'testUser' } as UserInterface
-    const modelId = 'testModelId'
-
-    fileModelMocks.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) }, name: 'my-file.txt', size: 100 },
-    ])
-
-    // @ts-expect-error size not in type but is a property
-    const promise = updateFile(user, modelId, testFileId, { size: 200 })
-
-    await expect(promise).rejects.toThrowError(/^Invalid patch parameter specific/)
-    expect(fileModelMocks.findOneAndUpdate).not.toBeCalled()
-  })
-
   test('updateFile > file missing', async () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
