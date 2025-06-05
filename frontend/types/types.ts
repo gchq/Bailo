@@ -232,7 +232,7 @@ export interface Role {
 }
 
 export type ReviewRolesFormData = Role & {
-  defaultEntities?: CollaboratorEntry[]
+  defaultEntities?: string[]
   lockEntities: boolean
   collaboratorRole?: CollaboratorRoleType
 }

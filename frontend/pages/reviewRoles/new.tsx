@@ -44,6 +44,8 @@ export default function ReviewRolesForm() {
     collaboratorRole: 'None',
   })
 
+  const [defaultEntitiesEntry, setDefaultEntities] = useState<Array<CollaboratorEntry>>([])
+
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFormData((prevFormData) => ({ ...prevFormData, name: event.target.value as string }))
   }
@@ -63,27 +65,21 @@ export default function ReviewRolesForm() {
 
   const handleDefaultEntitiesChange = useMemo(() => {
     return (newValue: Array<CollaboratorEntry>) => {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        defaultEntities: newValue,
-      }))
+      setDefaultEntities(newValue)
     }
   }, [])
 
   const displayDefaultEntitiesList = useMemo(() => {
     return (
-      formData.defaultEntities &&
-      formData.defaultEntities.map((defaultEntity) => (
+      defaultEntitiesEntry &&
+      defaultEntitiesEntry.map((defaultEntity) => (
         <Stack key={defaultEntity.entity} direction='row' alignItems='center' spacing={1}>
           <EntityIcon entryCollaborator={defaultEntity} />
           <EntityNameDisplay entryCollaborator={defaultEntity} />
           <Tooltip title='Remove user'>
             <IconButton
               onClick={() =>
-                setFormData((prevFormData) => ({
-                  ...prevFormData,
-                  defaultEntities: formData.defaultEntities!.filter((entity) => entity.entity !== defaultEntity.entity),
-                }))
+                setDefaultEntities(defaultEntitiesEntry!.filter((entity) => entity.entity !== defaultEntity.entity))
               }
             >
               <ClearIcon color='secondary' fontSize='inherit' />
@@ -92,26 +88,28 @@ export default function ReviewRolesForm() {
         </Stack>
       ))
     )
-  }, [formData.defaultEntities])
+  }, [defaultEntitiesEntry])
 
   const displayEntryAccessInput = useMemo(() => {
     return (
-      formData.id && (
-        <EntryAccessInput
-          value={formData.defaultEntities!}
-          entryRoles={[{ id: formData.id, name: formData.name }]}
-          onChange={handleDefaultEntitiesChange}
-          entryKind={EntryKind.MODEL}
-          hideActionsTable
-        />
-      )
+      <EntryAccessInput
+        value={defaultEntitiesEntry!}
+        entryRoles={[{ id: formData.id, name: formData.name }]}
+        onChange={handleDefaultEntitiesChange}
+        entryKind={EntryKind.MODEL}
+        hideActionsTable
+      />
     )
-  }, [formData.defaultEntities, formData.id, formData.name, handleDefaultEntitiesChange])
+  }, [defaultEntitiesEntry, formData.id, formData.name, handleDefaultEntitiesChange])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage('')
     setLoading(true)
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
+    }))
     const res = await postReviewRole(formData)
 
     if (!res.ok) {
