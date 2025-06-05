@@ -94,13 +94,12 @@ export default function ReviewRolesForm() {
     return (
       <EntryAccessInput
         value={defaultEntitiesEntry!}
-        entryRoles={[{ id: formData.id, name: formData.name }]}
         onChange={handleDefaultEntitiesChange}
         entryKind={EntryKind.MODEL}
         hideActionsTable
       />
     )
-  }, [defaultEntitiesEntry, formData.id, formData.name, handleDefaultEntitiesChange])
+  }, [defaultEntitiesEntry, handleDefaultEntitiesChange])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()

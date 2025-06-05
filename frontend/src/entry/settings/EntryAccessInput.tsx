@@ -14,7 +14,7 @@ type EntryAccessInputProps = {
   entryKind: EntryKindKeys
   hideActionsTable?: boolean
   collaboratorsValue?: CollaboratorEntry[]
-  entryRoles: Role[]
+  entryRoles?: Role[]
 } & (
   | {
       isReadOnly: boolean
@@ -42,6 +42,7 @@ export default function EntryAccessInput({
 
   const collaboratorList = useMemo(
     () =>
+      entryRoles &&
       collaborators.map((entity) => (
         <EntityItem
           key={entity.entity}
