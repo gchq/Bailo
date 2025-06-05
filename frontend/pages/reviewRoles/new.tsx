@@ -79,7 +79,7 @@ export default function ReviewRolesForm() {
           <Tooltip title='Remove user'>
             <IconButton
               onClick={() =>
-                setDefaultEntities(defaultEntitiesEntry!.filter((entity) => entity.entity !== defaultEntity.entity))
+                setDefaultEntities(defaultEntitiesEntry.filter((entity) => entity.entity !== defaultEntity.entity))
               }
             >
               <ClearIcon color='secondary' fontSize='inherit' />
@@ -93,10 +93,9 @@ export default function ReviewRolesForm() {
   const displayEntryAccessInput = useMemo(() => {
     return (
       <EntryAccessInput
-        value={defaultEntitiesEntry!}
+        value={defaultEntitiesEntry}
         onChange={handleDefaultEntitiesChange}
         entryKind={EntryKind.MODEL}
-        hideActionsTable
       />
     )
   }, [defaultEntitiesEntry, handleDefaultEntitiesChange])
