@@ -194,7 +194,7 @@ export default function ReleaseForm({
           <Typography noWrap>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
         </Stack>
       )}
-      <Stack overflow={'hidden'} spacing={2}>
+      <Stack overflow='hidden' spacing={2}>
         <Stack sx={{ width: '100%' }}>
           <Typography fontWeight='bold'>
             Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
