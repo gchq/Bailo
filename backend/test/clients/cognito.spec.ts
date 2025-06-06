@@ -54,7 +54,7 @@ describe('clients > cognito', () => {
     vi.spyOn(configMock, 'oauth', 'get').mockReturnValueOnce({})
     const response = listUsers('dn')
 
-    expect(response).rejects.toThrowError('Cannot find userIdAttribute in oauth configuration')
+    await expect(response).rejects.toThrowError('Cannot find userIdAttribute in oauth configuration')
   })
 
   test('listUsers > do not include users with missing DN', async () => {
@@ -88,7 +88,7 @@ describe('clients > cognito', () => {
 
     const response = listUsers('dn')
 
-    expect(response).rejects.toThrowError('Error when querying Cognito for users')
+    await expect(response).rejects.toThrowError('Error when querying Cognito for users')
   })
 
   test('listUsers > exact match', async () => {
@@ -118,7 +118,7 @@ describe('clients > cognito', () => {
 
     const response = getGroupMembership('group1')
 
-    expect(response).rejects.toThrowError('Error when querying Cognito for group membership')
+    await expect(response).rejects.toThrowError('Error when querying Cognito for group membership')
   })
 
   test('getGroupMembership > no users', async () => {

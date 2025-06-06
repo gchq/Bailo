@@ -63,7 +63,7 @@ describe('services > schema', () => {
     })
 
     const result = () => createSchema(testUser, testModelSchema)
-    expect(result).rejects.toThrowError(/^You do not have permission to create this schema./)
+    await expect(result).rejects.toThrowError(/^You do not have permission to create this schema./)
 
     expect(mockSchema.save).not.toBeCalled()
     expect(mockSchema.deleteOne).not.toBeCalled()

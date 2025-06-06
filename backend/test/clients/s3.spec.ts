@@ -53,7 +53,7 @@ describe('clients > s3', () => {
 
     const response = putObjectStream(bucket, key, body)
 
-    expect(response).rejects.toThrowError('Unable to upload the object to the S3 service.')
+    await expect(response).rejects.toThrowError('Unable to upload the object to the S3 service.')
   })
 
   test('getObjectStream > success', async () => {
@@ -80,7 +80,7 @@ describe('clients > s3', () => {
 
     const response = getObjectStream(bucket, key, range)
 
-    expect(response).rejects.toThrowError('Unable to retrieve the object from the S3 service.')
+    await expect(response).rejects.toThrowError('Unable to retrieve the object from the S3 service.')
   })
 
   test('objectExists > success', async () => {
@@ -119,7 +119,7 @@ describe('clients > s3', () => {
 
     const response = objectExists(bucket, key)
 
-    expect(response).rejects.toThrowError('Unable to get object metadata from the S3 service.')
+    await expect(response).rejects.toThrowError('Unable to get object metadata from the S3 service.')
   })
 
   test('ensureBucketExists > create new bucket', async () => {
@@ -144,7 +144,7 @@ describe('clients > s3', () => {
 
     const response = ensureBucketExists(bucket)
 
-    expect(response).rejects.toThrowError('There was a problem ensuring this bucket exists.')
+    await expect(response).rejects.toThrowError('There was a problem ensuring this bucket exists.')
   })
 
   test('ensureBucketExists > create bucket error', async () => {
@@ -154,6 +154,6 @@ describe('clients > s3', () => {
 
     const response = ensureBucketExists(bucket)
 
-    expect(response).rejects.toThrowError('Unable to create a new bucket.')
+    await expect(response).rejects.toThrowError('Unable to create a new bucket.')
   })
 })

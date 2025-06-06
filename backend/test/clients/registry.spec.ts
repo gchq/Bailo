@@ -52,7 +52,7 @@ describe('clients > registry', () => {
     fetchMock.default.mockRejectedValueOnce('Error')
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
-    expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
   })
 
   test('getImageTagManifest > unrecognised error response', async () => {
@@ -64,7 +64,7 @@ describe('clients > registry', () => {
     })
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
-    expect(response).rejects.toThrowError('Unrecognised response returned by the registry.')
+    await expect(response).rejects.toThrowError('Unrecognised response returned by the registry.')
   })
 
   test('getImageTagManifest > unrecognised error response', async () => {
@@ -84,7 +84,7 @@ describe('clients > registry', () => {
     })
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
-    expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrowError('Error response received from registry.')
   })
 
   test('getImageTagManifest > malformed response', async () => {
@@ -97,7 +97,7 @@ describe('clients > registry', () => {
 
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
-    expect(response).rejects.toThrowError('Unrecognised response body when getting image tag manifest.')
+    await expect(response).rejects.toThrowError('Unrecognised response body when getting image tag manifest.')
   })
 
   test('getImageTagManifest > missing repositories in response', async () => {
@@ -110,7 +110,7 @@ describe('clients > registry', () => {
 
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
-    expect(response).rejects.toThrowError('Unrecognised response body when getting image tag manifest.')
+    await expect(response).rejects.toThrowError('Unrecognised response body when getting image tag manifest.')
   })
 
   test('getImageTagManifest > throw all errors apart from unknown name', async () => {
@@ -131,7 +131,7 @@ describe('clients > registry', () => {
 
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
-    expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrowError('Error response received from registry.')
   })
 
   test('getRegistryLayerStream > success', async () => {
@@ -155,7 +155,7 @@ describe('clients > registry', () => {
     fetchMock.default.mockRejectedValueOnce('Error')
     const response = getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
 
-    expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
   })
 
   test('getRegistryLayerStream > unrecognised error response', async () => {
@@ -167,7 +167,7 @@ describe('clients > registry', () => {
     })
     const response = getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
 
-    expect(response).rejects.toThrowError('Unrecognised response returned by the registry.')
+    await expect(response).rejects.toThrowError('Unrecognised response returned by the registry.')
   })
 
   test('getRegistryLayerStream > malformed response', async () => {
@@ -182,7 +182,7 @@ describe('clients > registry', () => {
 
     const response = getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
 
-    expect(response).rejects.toThrowError('Unrecognised response body when getting image layer blob.')
+    await expect(response).rejects.toThrowError('Unrecognised response body when getting image layer blob.')
   })
 
   test('listModelRepos > only returns model repos', async () => {
@@ -204,7 +204,7 @@ describe('clients > registry', () => {
     fetchMock.default.mockRejectedValueOnce('Error')
     const response = listModelRepos('token', 'modelId')
 
-    expect(response).rejects.toThrowError('Unable to communicate with the registry.')
+    await expect(response).rejects.toThrowError('Unable to communicate with the registry.')
   })
 
   test('listModelRepos > unrecognised error response', async () => {
@@ -216,7 +216,7 @@ describe('clients > registry', () => {
     })
     const response = listModelRepos('token', 'modelId')
 
-    expect(response).rejects.toThrowError('Unrecognised response returned by the registry.')
+    await expect(response).rejects.toThrowError('Unrecognised response returned by the registry.')
   })
 
   test('listModelRepos > unrecognised error response', async () => {
@@ -236,7 +236,7 @@ describe('clients > registry', () => {
     })
     const response = listModelRepos('token', 'modelId')
 
-    expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrowError('Error response received from registry.')
   })
 
   test('listModelRepos > malformed response', async () => {
@@ -248,7 +248,7 @@ describe('clients > registry', () => {
     })
     const response = listModelRepos('token', 'modelId')
 
-    expect(response).rejects.toThrowError('Unrecognised response body when listing model repositories.')
+    await expect(response).rejects.toThrowError('Unrecognised response body when listing model repositories.')
   })
 
   test('listModelRepos > missing repositories in response', async () => {
@@ -260,7 +260,7 @@ describe('clients > registry', () => {
     })
     const response = listModelRepos('token', 'modelId')
 
-    expect(response).rejects.toThrowError('Unrecognised response body when listing model repositories.')
+    await expect(response).rejects.toThrowError('Unrecognised response body when listing model repositories.')
   })
 
   test('listImageTags > success', async () => {
@@ -289,7 +289,7 @@ describe('clients > registry', () => {
 
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
 
-    expect(response).rejects.toThrowError('Unrecognised response body when listing image tags.')
+    await expect(response).rejects.toThrowError('Unrecognised response body when listing image tags.')
   })
 
   test('listImageTags > missing repositories in response', async () => {
@@ -302,7 +302,7 @@ describe('clients > registry', () => {
 
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
 
-    expect(response).rejects.toThrowError('Unrecognised response body when listing image tags.')
+    await expect(response).rejects.toThrowError('Unrecognised response body when listing image tags.')
   })
 
   test('listImageTags > unknown name return empty list', async () => {
@@ -344,6 +344,6 @@ describe('clients > registry', () => {
 
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
 
-    expect(response).rejects.toThrowError('Error response received from registry.')
+    await expect(response).rejects.toThrowError('Error response received from registry.')
   })
 })

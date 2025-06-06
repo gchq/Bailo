@@ -360,7 +360,7 @@ describe('services > model', () => {
 
     const result = saveImportedModelCard({} as Omit<ModelCardRevisionDoc, '_id'>)
 
-    expect(result).rejects.toThrowError(/^Unable to validate./)
+    await expect(result).rejects.toThrowError(/^Unable to validate./)
   })
 
   test('saveImportedModelCard > successfully saves model card', async () => {

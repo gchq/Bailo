@@ -268,7 +268,7 @@ describe('services > release', () => {
         modelCardVersion: 999,
       } as any,
     )
-    expect(result).rejects.toThrowError(/is not a valid semver value./)
+    await expect(result).rejects.toThrowError(/is not a valid semver value./)
 
     expect(releaseModelMocks.save).not.toBeCalled()
   })
@@ -518,7 +518,7 @@ describe('services > release', () => {
 
     const result = removeFileFromReleases(mockUser, mockModel, '')
 
-    expect(result).rejects.toThrowError(/^You do not have permission to update these releases./)
+    await expect(result).rejects.toThrowError(/^You do not have permission to update these releases./)
     expect(releaseModelMocks.updateMany).not.toBeCalled()
   })
 
@@ -568,7 +568,7 @@ describe('services > release', () => {
     fileMocks.getFilesByIds.mockResolvedValueOnce([{ name: 'not_test.png' }])
 
     const result = getFileByReleaseFileName(mockUser, modelId, semver, fileName)
-    expect(result).rejects.toThrowError(/^The requested file name was not found on the release./)
+    await expect(result).rejects.toThrowError(/^The requested file name was not found on the release./)
   })
 
   test('getReleasesForExport > release not found', async () => {
@@ -579,7 +579,7 @@ describe('services > release', () => {
 
     const result = getReleasesForExport(mockUser, modelId, semvers)
 
-    expect(result).rejects.toThrowError(/^The following releases were not found./)
+    await expect(result).rejects.toThrowError(/^The following releases were not found./)
   })
 
   test('getReleasesForExport > release not found', async () => {
@@ -593,7 +593,7 @@ describe('services > release', () => {
 
     const result = getReleasesForExport(mockUser, modelId, semvers)
 
-    expect(result).rejects.toThrowError(/^You do not have the necessary permissions to export these releases./)
+    await expect(result).rejects.toThrowError(/^You do not have the necessary permissions to export these releases./)
   })
 
   test('getReleasesForExport > return releases', async () => {
