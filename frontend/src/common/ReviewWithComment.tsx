@@ -184,6 +184,7 @@ export default function ReviewWithComment({
                 )}
                 <LoadingButton
                   variant='outlined'
+                  color='warning'
                   onClick={() => submitForm(Decision.RequestChanges)}
                   loading={loading}
                   data-test='requestChangesReviewButton'
@@ -192,6 +193,16 @@ export default function ReviewWithComment({
                 </LoadingButton>
                 <LoadingButton
                   variant='contained'
+                  color='error'
+                  onClick={() => submitForm(Decision.Deny)}
+                  loading={loading}
+                  data-test='denyReviewButton'
+                >
+                  Deny
+                </LoadingButton>
+                <LoadingButton
+                  variant='contained'
+                  color='success'
                   onClick={() => submitForm(Decision.Approve)}
                   loading={loading}
                   data-test='approveReviewButton'

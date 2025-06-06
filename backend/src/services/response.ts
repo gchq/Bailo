@@ -1,5 +1,6 @@
 import ResponseModel, {
   Decision,
+  DecisionKeys,
   ReactionKindKeys,
   ResponseInterface,
   ResponseKind,
@@ -85,6 +86,52 @@ export async function updateResponseReaction(user: UserInterface, responseId: st
   await response.save()
 
   return response
+}
+
+export function determineOverallResponseStatus(
+  roles: Array<string>,
+  decisions: Array<DecisionKeys>,
+): DecisionKeys | undefined {
+  if (!decisions || decisions.length === 0) {
+    return undefined
+  }
+
+  const uniqueDecisions = new Set<DecisionKeys>()
+  decisions.filter((d) => {
+    if (Decision.Undo != d) {
+      uniqueDecisions.add(d)
+    }
+  })
+
+  if (uniqueDecisions.has(Decision.Deny)) {
+    return Decision.Deny
+  }
+
+  if (uniqueDecisions.has(Decision.RequestChanges)) {
+    return Decision.RequestChanges
+  }
+
+  if (uniqueDecisions.has(Decision.Approve) && decisions.every((d) => d == Decision.Approve)) {
+    return Decision.Approve
+  }
+
+  return undefined
+}
+
+export async function getUniqueResponseStatus(_user: UserInterface, parentIds: string[]) {
+  const responses: Array<{ _id: string; decision: DecisionKeys }> = await ResponseModel.aggregate()
+    .match({
+      parentId: { $in: parentIds },
+      decision: { $ne: Decision.Undo },
+    })
+    .sort({ role: 1, updatedAt: -1 })
+    .group({ _id: '$role', decision: { $first: '$$ROOT.decision' } })
+
+  if (!responses) {
+    throw NotFound('Request responses not found', { parentIds })
+  }
+
+  return responses
 }
 
 export type ReviewResponseParams = Pick<ResponseInterface, 'comment' | 'decision'>
