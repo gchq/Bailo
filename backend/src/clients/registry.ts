@@ -1,24 +1,25 @@
-import { Readable } from 'node:stream'
-
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 
 import { getHttpsUndiciAgent } from '../services/http.js'
-import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
-import { hasKeys, hasKeysOfType } from '../utils/typeguards.js'
+import {
+  isDoesLayerExistResponse,
+  isGetImageTagManifestResponse,
+  isInitialiseUploadObjectResponse,
+  isListImageTagResponse,
+  isListModelReposResponse,
+  isPutManifestResponse,
+  isRegistryErrorResponse,
+  isStreamResponse,
+  isUploadLayerMonolithicResponse,
+} from './registryResponses.js'
 
 interface RepoRef {
   namespace: string
   image: string
 }
-
-export type RegistryErrorResponse = {
-  errors: Array<ErrorInfo>
-}
-
-export type ErrorInfo = { code: string; message: string; detail: string }
 
 const registry = config.registry.connection.internal
 
@@ -64,6 +65,14 @@ async function registryRequest(
       status: res.status,
       statusText: res.statusText,
     }
+    if (body === undefined && returnRawBody && res.body !== null) {
+      // try to get the json if there's an error, even if we wanted the raw body
+      try {
+        body = await res.json()
+      } catch {
+        // the response may not have a json body
+      }
+    }
     if (isRegistryErrorResponse(body)) {
       throw RegistryError(body, context)
     } else {
@@ -84,7 +93,6 @@ async function registryRequest(
 }
 
 // Currently limited to a maximum 100 image names
-type ListModelReposResponse = { repositories: Array<string> }
 export async function listModelRepos(token: string, modelId: string) {
   const { body } = await registryRequest(token, `_catalog?n=100&last=${modelId}`)
   if (!isListModelReposResponse(body)) {
@@ -95,15 +103,6 @@ export async function listModelRepos(token: string, modelId: string) {
   return filteredRepos
 }
 
-function isListModelReposResponse(resp: unknown): resp is ListModelReposResponse {
-  return (
-    hasKeysOfType<ListModelReposResponse>(resp, { repositories: 'object' }) &&
-    Array.isArray(resp['repositories']) &&
-    resp['repositories'].every((repo: unknown) => typeof repo === 'string')
-  )
-}
-
-type ListImageTagResponse = { tags: Array<string> }
 export async function listImageTags(token: string, imageRef: RepoRef) {
   const repo = `${imageRef.namespace}/${imageRef.image}`
 
@@ -118,40 +117,14 @@ export async function listImageTags(token: string, imageRef: RepoRef) {
   }
 
   if (!isListImageTagResponse(body)) {
-    throw InternalError('Unrecognised response body when listing image tags.', { responseBody: body })
+    throw InternalError('Unrecognised response body when listing image tags.', { body })
   }
   return body.tags
 }
 
-function isListImageTagResponse(resp: unknown): resp is ListImageTagResponse {
-  return (
-    hasKeysOfType<ListImageTagResponse>(resp, { tags: 'object' }) &&
-    Array.isArray(resp['tags']) &&
-    resp['tags'].every((repo: unknown) => typeof repo === 'string')
-  )
-}
-
-export function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
-  return (
-    hasKeys<{ errors: unknown }>(resp, ['errors']) &&
-    Array.isArray(resp['errors']) &&
-    resp['errors'].every(
-      (e) =>
-        hasKeysOfType<ErrorInfo>(e, { code: 'string', message: 'string', detail: 'object' }) &&
-        Array.isArray(e['detail']),
-    )
-  )
-}
-
-type GetImageTagManifestResponse = {
-  schemaVersion: number
-  mediaType: string
-  config: { mediaType: string; size: number; digest: string }
-  layers: { mediaType: string; size: number; digest: string }[]
-}
 export async function getImageTagManifest(token: string, imageRef: RepoRef, imageTag: string) {
   // TODO: handle `Accept: 'application/vnd.docker.distribution.manifest.list.v2+json'` type for multi-platform images
-  const { body, headers } = await registryRequest(
+  const { body } = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
     undefined,
@@ -162,43 +135,15 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
   )
   if (!isGetImageTagManifestResponse(body)) {
     throw InternalError('Unrecognised response body when getting image tag manifest.', {
-      responseBody: body,
+      body,
       namespace: imageRef.namespace,
       image: imageRef.image,
       imageTag,
     })
   }
-  return { body, headers }
+  return body
 }
 
-function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManifestResponse {
-  return (
-    hasKeysOfType<GetImageTagManifestResponse>(resp, {
-      schemaVersion: 'number',
-      mediaType: 'string',
-      config: 'object',
-      layers: 'object',
-    }) &&
-    hasKeysOfType<GetImageTagManifestResponse['config']>(resp['config'], {
-      mediaType: 'string',
-      size: 'number',
-      digest: 'string',
-    }) &&
-    Array.isArray(resp['layers']) &&
-    resp['layers'].every((layer) =>
-      hasKeysOfType<GetImageTagManifestResponse['layers'][number]>(layer, {
-        mediaType: 'string',
-        size: 'number',
-        digest: 'string',
-      }),
-    )
-  )
-}
-
-type GetRegistryLayerStreamResponse = {
-  ok: boolean
-  body: Readable | ReadableStream
-}
 export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
   const responseStream = (
     await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`, true, undefined, {
@@ -206,7 +151,7 @@ export async function getRegistryLayerStream(token: string, imageRef: RepoRef, l
     })
   ).res
 
-  if (!isGetRegistryLayerStream(responseStream)) {
+  if (!isStreamResponse(responseStream)) {
     throw InternalError('Unrecognised response stream when getting image layer blob.', {
       responseStream,
       namespace: imageRef.namespace,
@@ -218,28 +163,6 @@ export async function getRegistryLayerStream(token: string, imageRef: RepoRef, l
   return responseStream
 }
 
-function isGetRegistryLayerStream(resp: unknown): resp is GetRegistryLayerStreamResponse {
-  return (
-    hasKeysOfType<GetRegistryLayerStreamResponse>(resp, {
-      ok: 'boolean',
-      body: 'object',
-    }) &&
-    resp['body'] !== null &&
-    (resp['body'] instanceof Readable ||
-      resp['body'] instanceof ReadableStream ||
-      hasKeysOfType(resp['body'], { pipe: 'function', read: 'function', _read: 'function' }))
-  )
-}
-
-type DoesLayerExistResponse = {
-  'accept-ranges': string
-  'content-length': string
-  'content-type': string
-  date: string
-  'docker-content-digest': string
-  'docker-distribution-api-version': string
-  etag: string
-}
 export async function doesLayerExist(token: string, imageRef: RepoRef, digest: string) {
   try {
     const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${digest}`, true, {
@@ -257,7 +180,7 @@ export async function doesLayerExist(token: string, imageRef: RepoRef, digest: s
 
     return true
   } catch (error) {
-    if (isRegistryError(error) && error.context?.status === 404) {
+    if (typeof error === 'object' && error !== null && error['context']['status'] === 404) {
       // 404 response indicates that the layer does not exist
       return false
     } else {
@@ -266,26 +189,6 @@ export async function doesLayerExist(token: string, imageRef: RepoRef, digest: s
   }
 }
 
-function isDoesLayerExistResponse(resp: unknown): resp is DoesLayerExistResponse {
-  return hasKeysOfType<DoesLayerExistResponse>(resp, {
-    'accept-ranges': 'string',
-    'content-length': 'string',
-    'content-type': 'string',
-    date: 'string',
-    'docker-content-digest': 'string',
-    'docker-distribution-api-version': 'string',
-    etag: 'string',
-  })
-}
-
-type InitialiseUploadResponse = {
-  'content-length': string
-  date: string
-  'docker-distribution-api-version': string
-  'docker-upload-uuid': string
-  location: string
-  range: string
-}
 export async function initialiseUpload(token: string, imageRef: RepoRef) {
   const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`, true, {
     method: 'POST',
@@ -302,24 +205,6 @@ export async function initialiseUpload(token: string, imageRef: RepoRef) {
   return headers
 }
 
-function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUploadResponse {
-  return hasKeysOfType<InitialiseUploadResponse>(resp, {
-    'content-length': 'string',
-    date: 'string',
-    'docker-distribution-api-version': 'string',
-    'docker-upload-uuid': 'string',
-    location: 'string',
-    range: 'string',
-  })
-}
-
-type PutManifestResponse = {
-  'content-length': string
-  date: string
-  'docker-content-digest': string
-  'docker-distribution-api-version': string
-  location: string
-}
 export async function putManifest(
   token: string,
   imageRef: RepoRef,
@@ -349,17 +234,6 @@ export async function putManifest(
   return headers
 }
 
-function isPutManifestResponse(resp: unknown): resp is PutManifestResponse {
-  return hasKeysOfType<PutManifestResponse>(resp, {
-    'content-length': 'string',
-    date: 'string',
-    'docker-content-digest': 'string',
-    'docker-distribution-api-version': 'string',
-    location: 'string',
-  })
-}
-
-type UploadLayerMonolithicResponse = PutManifestResponse
 export async function uploadLayerMonolithic(
   token: string,
   uploadURL: string,
@@ -367,7 +241,6 @@ export async function uploadLayerMonolithic(
   blob: BodyInit,
   size: string,
 ) {
-  log.debug('uploadLayerMonolithic', { token, uploadURL, digest, blob, size })
   const { headers } = await registryRequest(
     token,
     `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''),
@@ -393,8 +266,4 @@ export async function uploadLayerMonolithic(
   }
 
   return headers
-}
-
-function isUploadLayerMonolithicResponse(resp: unknown): resp is UploadLayerMonolithicResponse {
-  return isPutManifestResponse(resp)
 }

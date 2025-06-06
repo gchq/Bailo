@@ -14,3 +14,10 @@ export function hasKeysOfType<T extends object>(obj: unknown, keyTypes: Record<k
 export function arrayOfObjectsHasKeys<T extends object>(arr: unknown, keys: Array<keyof T>): arr is T[] {
   return Array.isArray(arr) && arr.every((item) => hasKeys(item, keys))
 }
+
+export function arrayOfObjectsHasKeysOfType<T extends object>(
+  arr: unknown,
+  keyTypes: Record<keyof T, string>,
+): arr is T[] {
+  return Array.isArray(arr) && arr.every((item) => hasKeysOfType(item, keyTypes))
+}

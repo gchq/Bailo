@@ -57,11 +57,7 @@ export async function getImageManifest(user: UserInterface, modelId: string, ima
   ])
 
   // get which layers exist for the model
-  const { body: manifest } = await getImageTagManifest(
-    repositoryToken,
-    { namespace: modelId, image: imageName },
-    imageTag,
-  )
+  const manifest = await getImageTagManifest(repositoryToken, { namespace: modelId, image: imageName }, imageTag)
 
   return manifest
 }
