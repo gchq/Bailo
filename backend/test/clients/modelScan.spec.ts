@@ -51,13 +51,15 @@ describe('clients > modelScan', () => {
       json: vi.fn(),
     })
 
-    expect(() => getModelScanInfo()).rejects.toThrowError(/^Unrecognised response returned by the ModelScan service./)
+    await expect(() => getModelScanInfo()).rejects.toThrowError(
+      /^Unrecognised response returned by the ModelScan service./,
+    )
   })
 
   test('getModelScanInfo > rejected', async () => {
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
 
-    expect(() => getModelScanInfo()).rejects.toThrowError(/^Unable to communicate with the ModelScan service./)
+    await expect(() => getModelScanInfo()).rejects.toThrowError(/^Unable to communicate with the ModelScan service./)
   })
 
   test('scanStream > success', async () => {
@@ -108,7 +110,7 @@ describe('clients > modelScan', () => {
       text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
     })
-    expect(() => scanStream(new PassThrough(), 'safe_model.h5', 0)).rejects.toThrowError(
+    await expect(() => scanStream(new PassThrough(), 'safe_model.h5', 0)).rejects.toThrowError(
       /^Unrecognised response returned by the ModelScan service./,
     )
   })
@@ -116,7 +118,7 @@ describe('clients > modelScan', () => {
   test('scanStream > rejected', async () => {
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the ModelScan service.')
 
-    expect(() => scanStream(new PassThrough(), 'safe_model.h5', 0)).rejects.toThrowError(
+    await expect(() => scanStream(new PassThrough(), 'safe_model.h5', 0)).rejects.toThrowError(
       /^Unable to communicate with the ModelScan service./,
     )
   })

@@ -378,7 +378,7 @@ describe('services > response', () => {
       'semver',
     )
 
-    expect(result).rejects.toThrowError(`Unable to find Review to respond to`)
+    await expect(result).rejects.toThrowError(`Unable to find Review to respond to`)
     expect(responseModelMock.save).not.toBeCalled()
   })
 
