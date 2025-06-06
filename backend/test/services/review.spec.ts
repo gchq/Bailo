@@ -180,7 +180,7 @@ describe('services > review', () => {
       throw Error('Error deleting object')
     })
 
-    expect(() => removeAccessRequestReviews('')).rejects.toThrowError(
+    await expect(() => removeAccessRequestReviews('')).rejects.toThrowError(
       /^The requested access request review could not be deleted./,
     )
   })

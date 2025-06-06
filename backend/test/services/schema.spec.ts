@@ -86,7 +86,7 @@ describe('services > schema', () => {
     mockSchema.save.mockRejectedValueOnce(mongoError)
     mockMongoUtils.isMongoServerError.mockReturnValueOnce(true)
 
-    expect(() => createSchema(testUser, testModelSchema)).rejects.toThrowError(
+    await expect(() => createSchema(testUser, testModelSchema)).rejects.toThrowError(
       /^The following is not unique: {"mockKey":"mockValue"}/,
     )
   })
@@ -98,6 +98,6 @@ describe('services > schema', () => {
   })
 
   test('that a schema cannot be retrieved by ID when schema does not exist', async () => {
-    expect(() => getSchemaById(testModelSchema.id)).rejects.toThrowError(/^The requested schema was not found/)
+    await expect(() => getSchemaById(testModelSchema.id)).rejects.toThrowError(/^The requested schema was not found/)
   })
 })

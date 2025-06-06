@@ -103,7 +103,7 @@ describe('services > model', () => {
   test('createModel > bad authorisation', async () => {
     vi.mocked(authorisation.model).mockResolvedValueOnce({ info: 'You do not have permission', success: false, id: '' })
 
-    expect(() => createModel({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
+    await expect(() => createModel({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
     expect(modelMocks.save).not.toBeCalled()
   })
 
@@ -114,7 +114,7 @@ describe('services > model', () => {
       id: '',
     })
 
-    expect(() => createModel({} as any, {} as any)).rejects.toThrowError(
+    await expect(() => createModel({} as any, {} as any)).rejects.toThrowError(
       /^You cannot select both settings simultaneously./,
     )
     expect(modelMocks.save).not.toBeCalled()
@@ -124,7 +124,7 @@ describe('services > model', () => {
     authenticationMocks.getUserInformation.mockImplementation(() => {
       throw new Error('Unable to find user user:unknown_user')
     })
-    expect(() =>
+    await expect(() =>
       createModel({} as any, { collaborators: [{ entity: 'user:unknown_user', roles: [] }] } as any),
     ).rejects.toThrowError(/^Unable to find user user:unknown_user/)
   })
@@ -142,13 +142,13 @@ describe('services > model', () => {
     modelMocks.findOne.mockResolvedValueOnce({})
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
-    expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
+    await expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^You do not have permission/)
   })
 
   test('getModelById > no model', async () => {
     modelMocks.findOne.mockResolvedValueOnce(undefined)
 
-    expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^The requested entry was not found/)
+    await expect(() => getModelById({} as any, {} as any)).rejects.toThrowError(/^The requested entry was not found/)
   })
 
   test('canUserActionModelById > allowed', async () => {
@@ -293,7 +293,9 @@ describe('services > model', () => {
       success: false,
       id: '',
     })
-    expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrowError(/^Cannot alter a mirrored model./)
+    await expect(() => updateModelCard({} as any, '123', {} as any)).rejects.toThrowError(
+      /^Cannot alter a mirrored model./,
+    )
   })
 
   test('updateModel > should throw bad request when attempting to change a standard model to be a mirrored model', async () => {
@@ -302,7 +304,7 @@ describe('services > model', () => {
       success: false,
       id: '',
     })
-    expect(() =>
+    await expect(() =>
       updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '', destinationModelId: '123' } } }),
     ).rejects.toThrowError(/^Cannot change standard model to be a mirrored model./)
   })
@@ -313,7 +315,7 @@ describe('services > model', () => {
       success: false,
       id: '',
     })
-    expect(() =>
+    await expect(() =>
       updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '', destinationModelId: '123' } } }),
     ).rejects.toThrowError(/^Cannot set a destination model ID for a mirrored model./)
   })
@@ -324,7 +326,7 @@ describe('services > model', () => {
       success: false,
       id: '',
     })
-    expect(() =>
+    await expect(() =>
       updateModel({} as any, '123', { settings: { mirror: { sourceModelId: '123', destinationModelId: '234' } } }),
     ).rejects.toThrowError(/^You cannot select both mirror settings simultaneously./)
   })
@@ -333,7 +335,7 @@ describe('services > model', () => {
     authenticationMocks.getUserInformation.mockImplementation(() => {
       throw new Error('Unable to find user user:unknown_user')
     })
-    expect(() =>
+    await expect(() =>
       updateModel({} as any, '123', { collaborators: [{ entity: 'user:unknown_user', roles: [] }] }),
     ).rejects.toThrowError(/^Unable to find user user:unknown_user/)
   })
@@ -345,7 +347,7 @@ describe('services > model', () => {
       id: '',
     })
 
-    expect(() => createModelCardFromSchema({} as any, '123', 'abc')).rejects.toThrowError(
+    await expect(() => createModelCardFromSchema({} as any, '123', 'abc')).rejects.toThrowError(
       /^Cannot alter a mirrored model./,
     )
     expect(modelMocks.save).not.toBeCalled()
@@ -465,13 +467,13 @@ describe('services > model', () => {
       },
     }
     modelMocks.findOne.mockResolvedValue(testModel)
-    expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')).rejects.toThrowError(
+    await expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')).rejects.toThrowError(
       /^The template model is missing a model card/,
     )
   })
 
   test('createModelCardFromTemplate > throw bad request when supplying the same template and model id', async () => {
-    expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testModel')).rejects.toThrowError(
+    await expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testModel')).rejects.toThrowError(
       'The model and template ID must be different',
     )
   })
@@ -482,7 +484,7 @@ describe('services > model', () => {
       success: false,
       id: '',
     })
-    expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')).rejects.toThrowError(
+    await expect(() => createModelCardFromTemplate({} as any, 'testModel', 'testTemplateModel')).rejects.toThrowError(
       'User does not have access to model',
     )
   })
