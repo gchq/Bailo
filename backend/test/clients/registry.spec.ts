@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream'
 
-import { describe, expect, Mock, test, vi } from 'vitest'
+import { beforeEach, describe, expect, Mock, test, vi } from 'vitest'
 
 import {
   doesLayerExist,
@@ -21,17 +21,31 @@ const mockHttpService = vi.hoisted(() => {
 })
 vi.mock('../../src/services/http.js', () => mockHttpService)
 
-global.fetch = vi.fn().mockResolvedValueOnce({
-  ok: true,
-  body: new ReadableStream(),
-  text: vi.fn(),
-  json: vi.fn(),
-  headers: vi.fn(),
-})
+const mockedFetchBodyStream = new ReadableStream()
+global.fetch = vi.fn()
 // workaround TS being difficult
 const fetchMock: Mock = global.fetch as Mock
 
 describe('clients > registry', () => {
+  beforeEach(() => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      body: mockedFetchBodyStream,
+      status: 1,
+      statusText: '',
+      url: '',
+      redirected: false,
+      clone: vi.fn(),
+      bodyUsed: false,
+      arrayBuffer: vi.fn(),
+      blob: vi.fn(),
+      formData: vi.fn(),
+      type: {},
+      text: vi.fn(),
+      json: vi.fn(),
+      headers: new Headers(),
+    })
+  })
   test('getImageTagManifest > success', async () => {
     const mockManifest = {
       schemaVersion: 2,
@@ -151,18 +165,11 @@ describe('clients > registry', () => {
   })
 
   test('getRegistryLayerStream > success', async () => {
-    const mockedStream = new Readable()
-
-    fetchMock.mockReturnValueOnce({
-      ok: true,
-      body: mockedStream,
-    })
-
     const response = await getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
 
     expect(fetchMock).toBeCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
-    expect(response.body).toStrictEqual(mockedStream)
+    expect(response.body).toStrictEqual(mockedFetchBodyStream)
   })
 
   test('getRegistryLayerStream > cannot reach registry', async () => {

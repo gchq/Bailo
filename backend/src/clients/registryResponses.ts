@@ -1,18 +1,14 @@
-import { Readable } from 'node:stream'
-
 import { arrayOfObjectsHasKeysOfType, hasKeys, hasKeysOfType } from '../utils/typeguards.js'
 
-type RegistryErrorResponse = {
+export type RegistryErrorResponse = {
   errors: Array<ErrorInfo>
 }
 
-type ErrorInfo = { code: string; message: string; detail: string }
+export type ErrorInfo = { code: string; message: string; detail: string }
 
-type StreamResponse =
-  | Omit<Response, 'body'>
-  | {
-      body: Readable | ReadableStream
-    }
+export type StreamResponse = Omit<Response, 'body'> & {
+  body: ReadableStream
+}
 
 type ListImageTagResponse = { tags: Array<string> }
 
@@ -66,10 +62,23 @@ export function isStreamResponse(resp: unknown): resp is StreamResponse {
   return (
     hasKeysOfType<StreamResponse>(resp, {
       body: 'object',
+      headers: 'object',
+      ok: 'boolean',
+      status: 'number',
+      statusText: 'string',
+      type: 'object',
+      url: 'string',
+      redirected: 'boolean',
+      clone: 'function',
+      bodyUsed: 'boolean',
+      arrayBuffer: 'function',
+      blob: 'function',
+      formData: 'function',
+      json: 'function',
+      text: 'function',
     }) &&
     resp['body'] !== null &&
-    (resp['body'] instanceof Readable ||
-      resp['body'] instanceof ReadableStream ||
+    (resp['body'] instanceof ReadableStream ||
       hasKeysOfType(resp['body'], { pipe: 'function', read: 'function', _read: 'function' }))
   )
 }

@@ -1,4 +1,4 @@
-import { ErrorInfo } from '../clients/registry.js'
+import { ErrorInfo } from '../clients/registryResponses.js'
 import { BailoError } from './error.js'
 
 export interface RegistryError extends BailoError {

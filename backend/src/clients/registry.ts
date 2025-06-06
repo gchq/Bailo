@@ -14,6 +14,7 @@ import {
   isRegistryErrorResponse,
   isStreamResponse,
   isUploadLayerMonolithicResponse,
+  StreamResponse,
 } from './registryResponses.js'
 
 interface RepoRef {
@@ -51,7 +52,7 @@ async function registryRequest(
   }
   let body: unknown
   const headers = res.headers
-  // don't get the json if the response raw (e.g. for a stream) and is ok
+  // don't get the json e.g. for a stream response
   if (!returnRawBody) {
     try {
       body = await res.json()
@@ -144,7 +145,11 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
   return body
 }
 
-export async function getRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
+export async function getRegistryLayerStream(
+  token: string,
+  imageRef: RepoRef,
+  layerDigest: string,
+): Promise<StreamResponse> {
   const responseStream = (
     await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`, true, undefined, {
       Accept: 'application/vnd.docker.distribution.manifest.v2+json',
