@@ -1,6 +1,7 @@
 import fetch, { Response } from 'node-fetch'
 
-import { isRegistryErrorResponse, listImageTags } from '../clients/registry.js'
+import { listImageTags } from '../clients/registry.js'
+import { isRegistryErrorResponse } from '../clients/registryResponses.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'

@@ -1,6 +1,6 @@
 import Logger from 'bunyan'
 
-import { RegistryErrorResponse } from '../clients/registry.js'
+import { RegistryErrorResponse } from '../clients/registryResponses.js'
 import { BailoError } from '../types/error.js'
 import { RegistryError } from '../types/RegistryError.js'
 

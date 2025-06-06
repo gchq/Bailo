@@ -7,6 +7,7 @@ export interface BailoError extends Error {
 
   // An HTTP response code that represents the error
   code: number
+  status: number
 
   // This data is logged publicly to the frontend
   context?: {
