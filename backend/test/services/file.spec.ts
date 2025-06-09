@@ -187,7 +187,7 @@ describe('services > file', () => {
       id: '',
     })
 
-    expect(() => uploadFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrowError(
+    await expect(() => uploadFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrowError(
       /^You do not have permission to upload a file to this model./,
     )
   })
@@ -205,7 +205,7 @@ describe('services > file', () => {
       id: '',
     })
 
-    expect(() => uploadFile(user, modelId, name, mime, stream)).rejects.toThrowError(
+    await expect(() => uploadFile(user, modelId, name, mime, stream)).rejects.toThrowError(
       /^Cannot upload files to a mirrored model./,
     )
     expect(fileModelMocks.save).not.toBeCalled()
@@ -236,7 +236,7 @@ describe('services > file', () => {
 
     const result = removeFile(user, modelId, testFileId)
 
-    expect(result).rejects.toThrowError(/^Cannot update releases/)
+    await expect(result).rejects.toThrowError(/^Cannot update releases/)
     expect(fileModelMocks.delete).not.toBeCalled()
   })
 
@@ -255,7 +255,7 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    expect(() => removeFile(user, modelId, testFileId)).rejects.toThrowError(
+    await expect(() => removeFile(user, modelId, testFileId)).rejects.toThrowError(
       /^You do not have permission to delete a file from this model./,
     )
     expect(fileModelMocks.delete).not.toBeCalled()
@@ -273,7 +273,7 @@ describe('services > file', () => {
       success: false,
       id: '',
     })
-    expect(() => removeFile(user, modelId, testFileId)).rejects.toThrowError(
+    await expect(() => removeFile(user, modelId, testFileId)).rejects.toThrowError(
       /^Cannot remove file from a mirrored model./,
     )
     expect(fileModelMocks.delete).not.toBeCalled()
@@ -370,7 +370,7 @@ describe('services > file', () => {
 
     const files = getFilesByIds(user, modelId, fileIds)
 
-    expect(files).rejects.toThrowError(/^The requested files were not found./)
+    await expect(files).rejects.toThrowError(/^The requested files were not found./)
   })
 
   test('getFilesByIds > no permission', async () => {
@@ -529,31 +529,97 @@ describe('services > file', () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    fileModelMocks.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
-    ])
+    fileModelMocks.aggregate.mockResolvedValue([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
 
     const result = await updateFile(user, modelId, testFileId, { tags: ['test1'] })
 
     expect(result).toMatchSnapshot()
+    expect(fileModelMocks.findOneAndUpdate).toHaveBeenCalledOnce()
   })
 
-  test('updateFile > does not updated unchangable property name', async () => {
+  test('updateFile > success multiple params', async () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    fileModelMocks.findOneAndUpdate.mockResolvedValueOnce({
-      modelId: 'testModel',
-      _id: { toString: vi.fn(() => testFileId) },
-      name: 'my-file.txt',
-    })
-    fileModelMocks.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) }, name: 'my-file.txt' },
-    ])
+    fileModelMocks.aggregate.mockResolvedValue([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
 
-    const result = await updateFile(user, modelId, testFileId, { name: 'test1' })
-    expect(result?.name).toBe('my-file.txt')
+    const result = await updateFile(user, modelId, testFileId, {
+      tags: ['test1'],
+      name: 'my-file-renamed.txt',
+      mime: 'text/plain',
+    })
 
     expect(result).toMatchSnapshot()
+    expect(fileModelMocks.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: testFileId },
+      {
+        tags: ['test1'],
+        name: 'my-file-renamed.txt',
+        mime: 'text/plain',
+      },
+      { new: true },
+    )
+    expect(fileModelMocks.findOneAndUpdate).toHaveBeenCalledOnce()
+  })
+
+  test('updateFile > file missing', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+
+    fileModelMocks.aggregate.mockResolvedValueOnce([])
+
+    const promise = updateFile(user, modelId, testFileId, { tags: ['test1'] })
+
+    await expect(promise).rejects.toThrowError(/^Cannot find requested file/)
+    expect(fileModelMocks.findOneAndUpdate).not.toBeCalled()
+  })
+
+  test('updateFile > model missing', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
+    modelMocks.getModelById.mockResolvedValueOnce(modelMocks.getModelById()).mockRejectedValueOnce('Error')
+
+    const promise = updateFile(user, modelId, testFileId, { tags: ['test1'] })
+
+    await expect(promise).rejects.toThrowError(/^Cannot find requested model/)
+    expect(fileModelMocks.findOneAndUpdate).not.toBeCalled()
+  })
+
+  test('updateFile > no permission', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
+    vi.mocked(authorisation.file).mockResolvedValueOnce({ success: true, id: '' }).mockResolvedValue({
+      info: 'You do not have permission to upload a file to this model.',
+      success: false,
+      id: '',
+    })
+
+    const promise = updateFile(user, modelId, testFileId, { tags: ['test1'] })
+
+    await expect(promise).rejects.toThrowError(/^You do not have permission to upload a file to this model./)
+    expect(fileModelMocks.findOneAndUpdate).not.toBeCalled()
+  })
+
+  test('updateFile > problem updating file', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+
+    fileModelMocks.aggregate.mockResolvedValueOnce([
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+    ])
+    fileModelMocks.findOneAndUpdate.mockResolvedValueOnce(null)
+
+    const promise = updateFile(user, modelId, testFileId, { tags: ['test1'], name: 'this-will-break.txt' })
+
+    await expect(promise).rejects.toThrowError(/^There was a problem updating the file/)
+    expect(fileModelMocks.findOneAndUpdate).toHaveBeenCalledOnce()
   })
 })

@@ -81,7 +81,7 @@ describe('connectors > authentication > oauth', () => {
     const connector = new OauthAuthenticationConnector()
     const response = connector.getUserInformation('group:name')
 
-    expect(response).rejects.toThrowError('Cannot get user information for a non-user entity: group:name')
+    await expect(response).rejects.toThrowError('Cannot get user information for a non-user entity: group:name')
   })
 
   test('getUserInformation > returns user information', async () => {
@@ -102,7 +102,7 @@ describe('connectors > authentication > oauth', () => {
     const connector = new OauthAuthenticationConnector()
     const response = connector.getUserInformation('user:name')
 
-    expect(response).rejects.toThrowError('Cannot get user information. Found more than one user.')
+    await expect(response).rejects.toThrowError('Cannot get user information. Found more than one user.')
   })
 
   test('getUserInformation > throws error no user is found', async () => {
@@ -111,14 +111,14 @@ describe('connectors > authentication > oauth', () => {
     const connector = new OauthAuthenticationConnector()
     const response = connector.getUserInformation('user:name')
 
-    expect(response).rejects.toThrowError('Cannot get user information. User not found.')
+    await expect(response).rejects.toThrowError('Cannot get user information. User not found.')
   })
 
   test('getEntityMembers > throws error if not a user', async () => {
     const connector = new OauthAuthenticationConnector()
     const response = connector.getEntityMembers('unknown:name')
 
-    expect(response).rejects.toThrowError('Unable to get members, entity kind not recognised')
+    await expect(response).rejects.toThrowError('Unable to get members, entity kind not recognised')
   })
 
   test('getEntityMembers > returns entity', async () => {

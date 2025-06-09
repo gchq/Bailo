@@ -348,7 +348,11 @@ export default function FileDisplay({
               sx={{ wordBreak: 'break-word' }}
             >
               <Tooltip title={file.name}>
-                <Link href={`/api/v2/model/${modelId}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
+                <Link
+                  target='_blank'
+                  href={`/api/v2/model/${modelId}/file/${file._id}/download`}
+                  data-test={`fileLink-${file.name}`}
+                >
                   <Typography textOverflow='ellipsis' overflow='hidden' variant='h6'>
                     {file.name}
                   </Typography>
