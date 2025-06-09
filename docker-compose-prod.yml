@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: bitnami/mongodb:7.0.15
+    image: bitnami/mongodb:8.0.10
     environment:
       - MONGODB_REPLICA_SET_NAME=repl-set
     volumes:
