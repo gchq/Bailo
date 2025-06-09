@@ -22,30 +22,21 @@ const mockHttpService = vi.hoisted(() => {
 vi.mock('../../src/services/http.js', () => mockHttpService)
 
 const mockedFetchBodyStream = new ReadableStream()
+const fetchMockResponse = new Response(mockedFetchBodyStream, {
+  status: 200,
+  statusText: 'ok',
+  headers: new Headers(),
+})
 global.fetch = vi.fn()
 // workaround TS being difficult
 const fetchMock: Mock = global.fetch as Mock
 
 describe('clients > registry', () => {
   beforeEach(() => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      body: mockedFetchBodyStream,
-      status: 1,
-      statusText: '',
-      url: '',
-      redirected: false,
-      clone: vi.fn(),
-      bodyUsed: false,
-      arrayBuffer: vi.fn(),
-      blob: vi.fn(),
-      formData: vi.fn(),
-      type: {},
-      text: vi.fn(),
-      json: vi.fn(),
-      headers: new Headers(),
-    })
+    // globals (e.g. `fetch`) persist changes between tests so always reset to the default mock
+    fetchMock.mockResolvedValue(fetchMockResponse)
   })
+
   test('getImageTagManifest > success', async () => {
     const mockManifest = {
       schemaVersion: 2,

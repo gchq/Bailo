@@ -6,7 +6,7 @@ export type RegistryErrorResponse = {
 
 export type ErrorInfo = { code: string; message: string; detail: string }
 
-export type StreamResponse = Omit<Response, 'body'> & {
+export type StreamResponse = Response & {
   body: ReadableStream
 }
 
@@ -59,28 +59,7 @@ export function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorRes
 }
 
 export function isStreamResponse(resp: unknown): resp is StreamResponse {
-  return (
-    hasKeysOfType<StreamResponse>(resp, {
-      body: 'object',
-      headers: 'object',
-      ok: 'boolean',
-      status: 'number',
-      statusText: 'string',
-      type: 'object',
-      url: 'string',
-      redirected: 'boolean',
-      clone: 'function',
-      bodyUsed: 'boolean',
-      arrayBuffer: 'function',
-      blob: 'function',
-      formData: 'function',
-      json: 'function',
-      text: 'function',
-    }) &&
-    resp['body'] !== null &&
-    (resp['body'] instanceof ReadableStream ||
-      hasKeysOfType(resp['body'], { pipe: 'function', read: 'function', _read: 'function' }))
-  )
+  return resp instanceof Response && resp['body'] !== null && resp['body'] instanceof ReadableStream
 }
 
 export function isListImageTagResponse(resp: unknown): resp is ListImageTagResponse {
