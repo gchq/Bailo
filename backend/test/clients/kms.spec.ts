@@ -69,7 +69,7 @@ describe('clients > s3', () => {
     expect(kmsMocks.DescribeKeyCommand).toHaveBeenCalledWith({
       KeyId: configMock.modelMirror.export.kmsSignature.keyId,
     })
-    expect(response).rejects.toThrowError(/^Cannot get key information./)
+    await expect(response).rejects.toThrowError(/^Cannot get key information./)
   })
 
   test('sign > cannot get signature', async () => {
@@ -85,6 +85,6 @@ describe('clients > s3', () => {
     expect(kmsMocks.DescribeKeyCommand).toHaveBeenCalledWith({
       KeyId: configMock.modelMirror.export.kmsSignature.keyId,
     })
-    expect(response).rejects.toThrowError(/^Cannot get signature./)
+    await expect(response).rejects.toThrowError(/^Cannot get signature./)
   })
 })

@@ -85,7 +85,7 @@ describe('services > accessRequest', () => {
     modelMocks.getModelById.mockResolvedValue(undefined)
     schemaMocks.getSchemaById.mockResolvedValue({ jsonSchema: {} })
 
-    expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
+    await expect(() => createAccessRequest({} as any, 'example-model', accessRequest)).rejects.toThrowError(
       /^You do not have permission/,
     )
   })
@@ -119,7 +119,7 @@ describe('services > accessRequest', () => {
       id: '',
     })
 
-    expect(() => removeAccessRequest({} as any, 'test')).rejects.toThrowError(
+    await expect(() => removeAccessRequest({} as any, 'test')).rejects.toThrowError(
       /^You do not have permission to delete this access request./,
     )
   })

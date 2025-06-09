@@ -86,7 +86,7 @@ describe('services > inference', () => {
 
   test('createInference > non-existent image', async () => {
     const mockUser: any = { dn: 'test' }
-    expect(() =>
+    await expect(() =>
       createInference(mockUser, 'test', { image: 'non-existent', tag: 'image' } as any),
     ).rejects.toThrowError(/^Image non-existent:image was not found on this model./)
   })
@@ -94,7 +94,9 @@ describe('services > inference', () => {
   test('createInference > bad authorisation', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
-    expect(() => createInference({} as any, 'modelId', inference)).rejects.toThrowError(/^You do not have permission/)
+    await expect(() => createInference({} as any, 'modelId', inference)).rejects.toThrowError(
+      /^You do not have permission/,
+    )
   })
 
   test('createInference > existing service', async () => {
@@ -104,7 +106,7 @@ describe('services > inference', () => {
       mockKey: 'mockValue',
     }
     inferenceModelMocks.save.mockRejectedValueOnce(mongoError)
-    expect(() => createInference({} as any, 'test', inference)).rejects.toThrowError(
+    await expect(() => createInference({} as any, 'test', inference)).rejects.toThrowError(
       /^A service with this image already exists./,
     )
   })
@@ -123,7 +125,7 @@ describe('services > inference', () => {
 
   test('updateInference > inference not found', async () => {
     vi.mocked(inferenceModelMocks.findOneAndUpdate).mockResolvedValueOnce()
-    expect(() =>
+    await expect(() =>
       updateInference({} as any, 'test', 'non-existent', 'image', {
         description: 'New description',
         settings: {
@@ -138,7 +140,7 @@ describe('services > inference', () => {
   test('updateInference > bad authorisation', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
-    expect(() =>
+    await expect(() =>
       updateInference({} as any, 'test', 'nginx', 'latest', {
         description: 'New description',
         settings: {
@@ -163,13 +165,13 @@ describe('services > inference', () => {
       success: false,
       id: '',
     })
-    expect(() => getInferenceByImage({} as any, 'test', 'nginx', 'latest')).rejects.toThrowError(
+    await expect(() => getInferenceByImage({} as any, 'test', 'nginx', 'latest')).rejects.toThrowError(
       /^You do not have permission to view this inference./,
     )
   })
   test('getInferenceByImage > no inference', async () => {
     inferenceModelMocks.findOne.mockResolvedValueOnce(undefined)
-    expect(() => getInferenceByImage({} as any, 'test', 'nginx', 'latest')).rejects.toThrowError(
+    await expect(() => getInferenceByImage({} as any, 'test', 'nginx', 'latest')).rejects.toThrowError(
       /^The requested inferencing service was not found./,
     )
   })
@@ -187,6 +189,6 @@ describe('services > inference', () => {
   test('getInferenceByModel > bad authorisation', async () => {
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
-    expect(() => getInferencesByModel({} as any, 'modelId')).rejects.toThrowError(/^You do not have permission/)
+    await expect(() => getInferencesByModel({} as any, 'modelId')).rejects.toThrowError(/^You do not have permission/)
   })
 })

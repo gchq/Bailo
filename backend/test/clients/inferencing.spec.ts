@@ -46,7 +46,7 @@ describe('clients > inferencing', () => {
       text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
     })
-    expect(() => createInferenceService({} as any)).rejects.toThrowError(
+    await expect(() => createInferenceService({} as any)).rejects.toThrowError(
       /^Unrecognised response returned by the inferencing service./,
     )
   })
@@ -54,7 +54,7 @@ describe('clients > inferencing', () => {
   test('createInferencing > rejected', async () => {
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
 
-    expect(() => createInferenceService({} as any)).rejects.toThrowError(
+    await expect(() => createInferenceService({} as any)).rejects.toThrowError(
       /^Unable to communicate with the inferencing service./,
     )
   })
@@ -62,7 +62,7 @@ describe('clients > inferencing', () => {
   test('createInferencing > no authorization token', async () => {
     vi.spyOn(configMock, 'inference', 'get').mockReturnValueOnce({ authorisationToken: '' })
 
-    expect(() => createInferenceService({} as any)).rejects.toThrowError(/^No authentication key exists./)
+    await expect(() => createInferenceService({} as any)).rejects.toThrowError(/^No authentication key exists./)
   })
 
   test('updateInferencing > success', async () => {
@@ -84,7 +84,7 @@ describe('clients > inferencing', () => {
       text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
     })
-    expect(() => updateInferenceService({} as any)).rejects.toThrowError(
+    await expect(() => updateInferenceService({} as any)).rejects.toThrowError(
       /^Unrecognised response returned by the inferencing service./,
     )
   })
@@ -92,7 +92,7 @@ describe('clients > inferencing', () => {
   test('updateInferencing > rejected', async () => {
     fetchMock.default.mockRejectedValueOnce('Unable to communicate with the inferencing service.')
 
-    expect(() => updateInferenceService({} as any)).rejects.toThrowError(
+    await expect(() => updateInferenceService({} as any)).rejects.toThrowError(
       /^Unable to communicate with the inferencing service./,
     )
   })
@@ -100,6 +100,6 @@ describe('clients > inferencing', () => {
   test('updateInferencing > no authorization token', async () => {
     vi.spyOn(configMock, 'inference', 'get').mockReturnValueOnce({ authorisationToken: '' })
 
-    expect(() => updateInferenceService({} as any)).rejects.toThrowError(/^No authentication key exists./)
+    await expect(() => updateInferenceService({} as any)).rejects.toThrowError(/^No authentication key exists./)
   })
 })

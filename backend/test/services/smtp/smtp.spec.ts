@@ -201,6 +201,6 @@ describe('services > smtp > smtp', () => {
     transporterMock.sendMail.mockRejectedValueOnce('Failed to send email')
 
     const result: Promise<void> = requestReviewForRelease('user:user', review, release)
-    expect(result).rejects.toThrowError(`Unable to send email`)
+    await expect(result).rejects.toThrowError(`Unable to send email`)
   })
 })
