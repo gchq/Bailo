@@ -86,8 +86,8 @@ export const getModelsSearch = [
       organisations,
       filters,
       search,
-      peers,
       task,
+      peers,
       allowTemplating,
       schemaId,
     )

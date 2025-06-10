@@ -4,7 +4,7 @@ import * as _ from 'lodash-es'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { getPeerConnectors } from '../connectors/peer/index.js'
+import getPeerConnectors from '../connectors/peer/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
@@ -114,8 +114,8 @@ export async function searchModels(
   organisations: Array<string>,
   filters: Array<string>,
   search: string,
-  peers: Array<string>,
   task?: string,
+  peers?: Array<string>,
   allowTemplating?: boolean,
   schemaId?: string,
 ): Promise<Array<ModelSearchResult>> {
@@ -149,7 +149,7 @@ export async function searchModels(
     )
   })
 
-  if (peers.length > 0) {
+  if (peers && peers.length > 0) {
     const connectors = await getPeerConnectors()
     const remotePromise = connectors.queryModels({ query: search }, peers)
     promises.push(remotePromise)
