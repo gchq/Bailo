@@ -7,6 +7,9 @@ const config: PartialDeep<Config> = {
     host: '',
     port: 3000,
   },
+  federation: {
+    state: 'disabled',
+  },
   s3: {
     credentials: {
       accessKeyId: '',
