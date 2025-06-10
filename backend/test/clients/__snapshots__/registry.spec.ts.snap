@@ -127,27 +127,7 @@ exports[`clients > registry > uploadLayerMonolithic > success 1`] = `
   [
     "https://localhost:5000/v2/url&digest=digest",
     {
-      "body": Readable {
-        "_events": {
-          "close": undefined,
-          "data": undefined,
-          "end": undefined,
-          "error": undefined,
-          "readable": undefined,
-        },
-        "_maxListeners": undefined,
-        "_readableState": ReadableState {
-          "awaitDrainWriters": null,
-          "buffer": [],
-          "bufferIndex": 0,
-          "highWaterMark": 65536,
-          "length": 0,
-          "pipes": [],
-          Symbol(kState): 1052940,
-        },
-        Symbol(shapeMode): true,
-        Symbol(kCapture): false,
-      },
+      "body": [MockFunction spy],
       "dispatcher": "mock agent",
       "duplex": "half",
       "headers": {

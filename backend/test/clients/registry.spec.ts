@@ -21,6 +21,7 @@ const mockHttpService = vi.hoisted(() => {
 })
 vi.mock('../../src/services/http.js', () => mockHttpService)
 
+const mockReadable = vi.fn() as unknown as Readable
 const mockedFetchBodyStream = new ReadableStream()
 const fetchMockResponse = new Response(mockedFetchBodyStream, {
   status: 200,
@@ -459,7 +460,7 @@ describe('clients > registry', () => {
       headers: mockHeaders,
     })
 
-    const response = await uploadLayerMonolithic('token', 'url', 'digest', new Readable(), 'size')
+    const response = await uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
 
     expect(fetchMock).toBeCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
@@ -472,7 +473,7 @@ describe('clients > registry', () => {
       headers: new Headers({}),
     })
 
-    const response = uploadLayerMonolithic('token', 'url', 'digest', new Readable(), 'size')
+    const response = uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
 
     await expect(response).rejects.toThrowError('Unrecognised response headers when putting image manifest.')
   })
