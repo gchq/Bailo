@@ -22,7 +22,7 @@ classifiers = [
 requires-python = ">=3.9"
 dynamic = ["version"]
 dependencies = [
-    "requests==2.32.3",
+    "requests==2.32.4",
     "semantic-version==2.10.0",
     "tqdm==4.67.1"
 ]
