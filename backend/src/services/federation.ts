@@ -2,5 +2,5 @@ import peers from '../connectors/peer/index.js'
 import { PeerConfigStatus } from '../types/types.js'
 
 export async function getAllPeerStatus(): Promise<Map<string, PeerConfigStatus>> {
-  return peers.status()
+  return (await peers()).status()
 }

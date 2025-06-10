@@ -13,7 +13,11 @@ export type PeerKindKeys = (typeof PeerKind)[keyof typeof PeerKind]
 const peers = new Map<string, BasePeerConnector>()
 let peerWrapper: undefined | PeerConnectorWrapper = undefined
 
-function validate(cfg: RemoteFederationConfig): void {
+function validate(id: string, cfg: RemoteFederationConfig): void {
+  if (peers.has(id)) {
+    throw ConfigurationError('Duplicate ID specified in federation config', { id })
+  }
+
   const keys = new Array<string>()
 
   if (!cfg.kind) {
@@ -26,23 +30,24 @@ function validate(cfg: RemoteFederationConfig): void {
     keys.push('state')
   }
   if (keys.length > 0) {
-    throw ConfigurationError(`Missing required configuration for peer`, {
+    throw ConfigurationError('Missing required configuration for peer', {
       missingConfig: keys,
     })
   }
 }
 
-export async function getPeerConnectors(cache = true) {
+export default async function getPeerConnectors(cache = true): Promise<PeerConnectorWrapper> {
   if (peerWrapper && cache) {
     return peerWrapper
   }
   // If not globally disabled, setup each peer
   if (FederationState.DISABLED !== config.federation.state) {
     for (const [id, cfg] of Object.entries(config.federation.peers)) {
-      validate(cfg)
+      validate(id, cfg)
       switch (cfg.kind) {
         case PeerKind.Bailo:
           try {
+            // Validate carries out a duplicate ID check and basic config validation
             const connector = new BailoPeerConnector(id, cfg)
             peers.set(id, connector)
           } catch (error) {
@@ -61,5 +66,3 @@ export async function getPeerConnectors(cache = true) {
   await peerWrapper.init()
   return peerWrapper
 }
-
-export default getPeerConnectors()
