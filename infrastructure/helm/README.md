@@ -156,16 +156,16 @@ modelscan:
 #### Image parameters
 | Name  | Decription  | Value |
 | ----  | ----------  | ----- |
-| `frontendRepository`  | frontend image location | `&nbsp;`  |
-| `frontendTag`  | frontend image tag | `&nbsp;`  |
-| `backendRepository`  | backend image location | `&nbsp;`  |
-| `backendTag`  | backend image tag | `&nbsp;`  |
-| `modelscanRepository`  | modelscan image location | `&nbsp;`  |
-| `modelscanTag`  | modelscan image tag | `&nbsp;`  |
+| `frontendRepository`  | frontend image location | `null`  |
+| `frontendTag`  | frontend image tag | `null`  |
+| `backendRepository`  | backend image location | `null`  |
+| `backendTag`  | backend image tag | `null`  |
+| `modelscanRepository`  | modelscan image location | `null`  |
+| `modelscanTag`  | modelscan image tag | `null`  |
 | `pullPolicy`  | https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  | `IfNotPresent` |
-| `imagePullSecrets`  | https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers | `` |
+| `imagePullSecrets`  | https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers | `null` |
 
-#### non-identifying metadata
+#### Non-identifying metadata
 | Name  | Decription  | Value |
 | ----  | ----------  | ----- |
 | `podAnnotations`  | https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#attaching-metadata-to-objects  | `{}` |
