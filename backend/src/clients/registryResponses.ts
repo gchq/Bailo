@@ -52,19 +52,29 @@ type InitialiseUploadResponse = {
 
 export function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
   return (
-    hasKeys<{ errors: unknown }>(resp, ['errors']) &&
-    arrayOfObjectsHasKeysOfType<ErrorInfo>(resp['errors'], { code: 'string', message: 'string', detail: 'object' }) &&
+    hasKeys(resp, ['errors']) &&
+    arrayOfObjectsHasKeysOfType(resp['errors'], {
+      code: 'string',
+      message: 'string',
+      detail: 'object',
+    }) &&
     resp['errors'].every((e) => Array.isArray(e['detail']))
   )
 }
 
 export function isStreamResponse(resp: unknown): resp is StreamResponse {
-  return resp instanceof Response && resp['body'] !== null && resp['body'] instanceof ReadableStream
+  return (
+    typeof resp === 'object' &&
+    resp !== null &&
+    resp instanceof Response &&
+    resp['body'] !== null &&
+    resp['body'] instanceof ReadableStream
+  )
 }
 
 export function isListImageTagResponse(resp: unknown): resp is ListImageTagResponse {
   return (
-    hasKeysOfType<ListImageTagResponse>(resp, { tags: 'object' }) &&
+    hasKeysOfType(resp, { tags: 'object' }) &&
     Array.isArray(resp['tags']) &&
     resp['tags'].every((repo: unknown) => typeof repo === 'string')
   )
@@ -72,7 +82,7 @@ export function isListImageTagResponse(resp: unknown): resp is ListImageTagRespo
 
 export function isListModelReposResponse(resp: unknown): resp is ListModelReposResponse {
   return (
-    hasKeysOfType<ListModelReposResponse>(resp, { repositories: 'object' }) &&
+    hasKeysOfType(resp, { repositories: 'object' }) &&
     Array.isArray(resp['repositories']) &&
     resp['repositories'].every((repo: unknown) => typeof repo === 'string')
   )
@@ -80,18 +90,18 @@ export function isListModelReposResponse(resp: unknown): resp is ListModelReposR
 
 export function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTagManifestResponse {
   return (
-    hasKeysOfType<GetImageTagManifestResponse>(resp, {
+    hasKeysOfType(resp, {
       schemaVersion: 'number',
       mediaType: 'string',
       config: 'object',
       layers: 'object',
     }) &&
-    hasKeysOfType<GetImageTagManifestResponse['config']>(resp['config'], {
+    hasKeysOfType(resp['config'], {
       mediaType: 'string',
       size: 'number',
       digest: 'string',
     }) &&
-    arrayOfObjectsHasKeysOfType<GetImageTagManifestResponse['layers'][number]>(resp['layers'], {
+    arrayOfObjectsHasKeysOfType(resp['layers'], {
       mediaType: 'string',
       size: 'number',
       digest: 'string',
@@ -100,7 +110,7 @@ export function isGetImageTagManifestResponse(resp: unknown): resp is GetImageTa
 }
 
 export function isDoesLayerExistResponse(resp: unknown): resp is DoesLayerExistResponse {
-  return hasKeysOfType<DoesLayerExistResponse>(resp, {
+  return hasKeysOfType(resp, {
     'accept-ranges': 'string',
     'content-length': 'string',
     'content-type': 'string',
@@ -112,7 +122,7 @@ export function isDoesLayerExistResponse(resp: unknown): resp is DoesLayerExistR
 }
 
 export function isPutManifestResponse(resp: unknown): resp is PutManifestResponse {
-  return hasKeysOfType<PutManifestResponse>(resp, {
+  return hasKeysOfType(resp, {
     'content-length': 'string',
     date: 'string',
     'docker-content-digest': 'string',
@@ -126,7 +136,7 @@ export function isUploadLayerMonolithicResponse(resp: unknown): resp is UploadLa
 }
 
 export function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUploadResponse {
-  return hasKeysOfType<InitialiseUploadResponse>(resp, {
+  return hasKeysOfType(resp, {
     'content-length': 'string',
     date: 'string',
     'docker-distribution-api-version': 'string',
