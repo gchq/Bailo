@@ -1,6 +1,6 @@
 import { FederationState, RemoteFederationConfig } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { ConfigurationError, InternalError } from '../../utils/error.js'
+import { ConfigurationError } from '../../utils/error.js'
 import { BailoPeerConnector } from './bailo.js'
 import { BasePeerConnector } from './base.js'
 import { PeerConnectorWrapper } from './wrapper.js'
@@ -30,14 +30,6 @@ function validate(cfg: RemoteFederationConfig): void {
       missingConfig: keys,
     })
   }
-}
-
-export function getPeerConnector(id: string): BasePeerConnector {
-  const peer = peers.get(id)
-  if (!peer) {
-    throw InternalError('Peer not configured')
-  }
-  return peer
 }
 
 export async function getPeerConnectors(cache = true) {
@@ -70,4 +62,4 @@ export async function getPeerConnectors(cache = true) {
   return peerWrapper
 }
 
-export default await getPeerConnectors()
+export default getPeerConnectors()

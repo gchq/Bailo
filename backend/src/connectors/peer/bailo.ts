@@ -7,6 +7,10 @@ import config from '../../utils/config.js'
 import { InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
+const emptyPing: SystemStatus = {
+  ping: '',
+}
+
 export class BailoPeerConnector extends BasePeerConnector {
   init() {
     return Promise.resolve(true)
@@ -14,20 +18,20 @@ export class BailoPeerConnector extends BasePeerConnector {
 
   async getPeerStatus(): Promise<SystemStatus> {
     if (this.isDisabled()) {
-      return {
-        ping: '',
-      }
+      return emptyPing
     }
-    return this.request<SystemStatus>('/api/v2/system/status').catch((err) => {
+
+    try {
+      return this.request<SystemStatus>('/api/v2/system/status')
+    } catch (err) {
       if (isBailoError(err)) {
         return {
-          ping: '',
-          code: err.code,
           error: err,
+          ...emptyPing,
         }
       }
       throw err
-    })
+    }
   }
 
   async request<T>(path: string) {
@@ -38,7 +42,6 @@ export class BailoPeerConnector extends BasePeerConnector {
         agent: this.getHttpsAgent(),
         headers: {
           'x-bailo-id': config.federation.id,
-          'x-bailo-remote-id': this.id,
         },
       })
     } catch (err) {

@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { registerPath, systemStatusSchema } from '../../../services/specification.js'
 import { SystemStatus } from '../../../types/types.js'
 import config from '../../../utils/config.js'
-import { parse } from '../../../utils/validate.js'
 
 export const getSystemStatusSchema = z.object({})
 
@@ -29,9 +28,7 @@ registerPath({
 
 export const getSystemStatus = [
   bodyParser.json(),
-  async (req: Request, res: Response<SystemStatus>) => {
-    const _ = parse(req, getSystemStatusSchema)
-
+  async (_req: Request, res: Response<SystemStatus>) => {
     const federation = {
       state: config.federation.state,
       id: config.federation.id,

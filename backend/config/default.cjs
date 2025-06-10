@@ -23,6 +23,9 @@ module.exports = {
   },
 
   httpClient: {
+    defaultOpts: {
+      rejectUnauthorized: true,
+    },
     // Default proxy to use for all requests
     proxy: '',
     // Don't use a proxy for any address in this list
