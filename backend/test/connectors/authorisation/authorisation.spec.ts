@@ -26,9 +26,6 @@ const configMock = vi.hoisted(() => ({
   app: {
     protocol: 'http',
   },
-  httpClient: {
-    defaultOpts: {},
-  },
   instrumentation: {
     enabled: false,
   },

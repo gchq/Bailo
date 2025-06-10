@@ -2,6 +2,9 @@ import { ProxyAgent, ProxyAgentOptions } from 'proxy-agent'
 
 import config from '../utils/config.js'
 
+// Pull in default options once
+const defaultOpts = config.httpClient?.defaultOpts || {}
+
 /**
  * Common HTTPS agent for use throughout the application.
  *
@@ -12,7 +15,7 @@ import config from '../utils/config.js'
  */
 export function getHttpsAgent(opts?: ProxyAgentOptions) {
   return new ProxyAgent({
-    ...(config.httpClient.defaultOpts && { ...config.httpClient.defaultOpts }),
-    ...(opts && { opts }),
+    ...defaultOpts,
+    ...(opts || {}),
   })
 }

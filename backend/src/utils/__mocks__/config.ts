@@ -7,9 +7,6 @@ const config: PartialDeep<Config> = {
     host: '',
     port: 3000,
   },
-  httpClient: {
-    defaultOpts: {},
-  },
   federation: {
     state: 'disabled',
   },
