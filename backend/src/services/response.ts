@@ -1,7 +1,10 @@
+import { ObjectId } from 'mongoose'
+
 import ResponseModel, {
   Decision,
   DecisionKeys,
   ReactionKindKeys,
+  ResponseDoc,
   ResponseInterface,
   ResponseKind,
   ResponseReaction,
@@ -10,6 +13,7 @@ import { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
+import { IdRoles } from '../types/types.js'
 import { toEntity } from '../utils/entity.js'
 import { Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { getAccessRequestById } from './accessRequest.js'
@@ -89,8 +93,8 @@ export async function updateResponseReaction(user: UserInterface, responseId: st
 }
 
 export function determineOverallResponseStatus(
-  roles: Array<string>,
-  decisions: Array<DecisionKeys>,
+  roles: Array<IdRoles>,
+  decisions: ResponseDoc,
 ): DecisionKeys | undefined {
   if (!decisions || decisions.length === 0) {
     return undefined
@@ -98,8 +102,8 @@ export function determineOverallResponseStatus(
 
   const uniqueDecisions = new Set<DecisionKeys>()
   decisions.filter((d) => {
-    if (Decision.Undo != d) {
-      uniqueDecisions.add(d)
+    if (Decision.Undo != d.decision) {
+      uniqueDecisions.add(d.decision)
     }
   })
 
@@ -111,21 +115,24 @@ export function determineOverallResponseStatus(
     return Decision.RequestChanges
   }
 
-  if (uniqueDecisions.has(Decision.Approve) && decisions.every((d) => d == Decision.Approve)) {
+  if (uniqueDecisions.has(Decision.Approve) && decisions.every((d) => Decision.Approve === d.decision)) {
     return Decision.Approve
   }
 
   return undefined
 }
 
-export async function getUniqueResponseStatus(_user: UserInterface, parentIds: string[]) {
-  const responses: Array<{ _id: string; decision: DecisionKeys }> = await ResponseModel.aggregate()
-    .match({
-      parentId: { $in: parentIds },
-      decision: { $ne: Decision.Undo },
-    })
-    .sort({ role: 1, updatedAt: -1 })
-    .group({ _id: '$role', decision: { $first: '$$ROOT.decision' } })
+export async function getUniqueResponseStatus(_user: UserInterface, reviewIdRoles: IdRoles[]) {
+  // Given the IDs for reviews (parent IDs), gather the current responses for each of the roles
+  const parentIds = reviewIdRoles.map((r) => r.id as ObjectId)
+  const responses: Array<{ _id: { parentId: string; role: string }; latestResponse: ResponseDoc }> =
+    await ResponseModel.aggregate()
+      .match({
+        parentId: { $in: parentIds },
+        decision: { $ne: Decision.Undo },
+      })
+      .sort({ parentId: 1, role: 1, updatedAt: -1 })
+      .group({ _id: { parentId: '$parentId', role: '$role' }, latestResponse: { $first: '$$ROOT' } })
 
   if (!responses) {
     throw NotFound('Request responses not found', { parentIds })

@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongoose'
+
 export type PartialDeep<T> = T extends object
   ? {
       [P in keyof T]?: PartialDeep<T[P]>
@@ -22,6 +24,11 @@ export interface Role {
   kind: RoleKindKeys
   short?: string
   description?: string
+}
+
+export type IdRoles = {
+  id: ObjectId
+  roles: string[]
 }
 
 export type PermissionDetail =

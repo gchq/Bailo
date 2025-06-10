@@ -10,20 +10,24 @@ import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleInterface } from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
+import { IdRoles } from '../types/types.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
-import { getUniqueResponseStatus } from './response.js'
+import { determineOverallResponseStatus, getUniqueResponseStatus } from './response.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 // This should be replaced by using the dynamic schema
 const requiredRoles = {
   release: ['mtr', 'msro'],
-  accessRequest: ['msro'],
+  access: ['msro'],
 }
 
-export const allReviewRoles = [...new Set(requiredRoles.release.concat(requiredRoles.accessRequest))]
+export const allReviewRoles = [...new Set(requiredRoles.release.concat(requiredRoles.access))]
+
+type ReviewModelDoc = ReviewDoc & { model: ModelDoc }
+type ReviewModelInterface = ReviewInterface & { model: ModelInterface }
 
 export async function findReviews(
   user: UserInterface,
@@ -33,8 +37,8 @@ export async function findReviews(
   semver?: string,
   accessRequestId?: string,
   kind?: string,
-): Promise<(ReviewInterface & { model: ModelInterface })[]> {
-  const reviews = await Review.aggregate<ReviewDoc & { model: ModelDoc }>()
+): Promise<ReviewModelInterface[]> {
+  const reviews = await Review.aggregate<ReviewModelDoc>()
     .match({
       ...(modelId && { modelId }),
       ...(semver && { semver }),
@@ -56,24 +60,34 @@ export async function findReviews(
 
   const validReviews = reviews.filter((_, i) => auths[i].success)
 
-  if (decision) {
-    const reviewIds = validReviews.map((r: ReviewDoc) => {
-      const id: ObjectId = r._id as ObjectId
-      return id.toString()
-    })
-
-    const decisions = await getUniqueResponseStatus(user, reviewIds)
-
-    return validReviews.map((r) => {
-      const decision = decisions.find((s) => s._id == r.id)
-      if (decision?.decision) {
-        r.decision = decision.decision
-      }
-      return r
-    })
-  } else {
+  // Default is to not calculate a decision for each review, which can be expensive
+  if (!decision) {
     return validReviews
   }
+
+  // For each review the user can see, get the list of required roles
+  const reviewIdRoles: Array<IdRoles> = validReviews.map((reviewWithModel: ReviewDoc & { model: ModelDoc }) => {
+    return {
+      // Review ID or 'parent' ID
+      id: reviewWithModel._id as ObjectId,
+      // Based on the model, and the type of review, provide the list of role entities that should be providing responses
+      roles: getRoleEntities(requiredRoles[reviewWithModel.kind], reviewWithModel.model.collaborators).map(
+        (roleEntity) => roleEntity.role,
+      ),
+    }
+  })
+
+  // Get decisions for the reviews
+  const decisions = await getUniqueResponseStatus(user, reviewIdRoles)
+
+  return validReviews.map((review) => {
+    const decisionsForReview = decisions.find((s) => s._id.parentId == review._id)
+    if (decisionsForReview) {
+      const decision = determineOverallResponseStatus(reviewIdRoles, decisionsForReview.latestResponse)
+      review.decision = decision
+    }
+    return review
+  })
 }
 
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
@@ -97,7 +111,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
 }
 
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
-  const roleEntities = getRoleEntities(requiredRoles.accessRequest, model.collaborators)
+  const roleEntities = getRoleEntities(requiredRoles.access, model.collaborators)
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -185,7 +199,7 @@ export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
   const reviews: ReviewDoc[] = await Review.find({
     accessRequestId: accessRequestIds,
   })
-  return reviews.filter((review) => requiredRoles.accessRequest.includes(review.role))
+  return reviews.filter((review) => requiredRoles.access.includes(review.role))
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {

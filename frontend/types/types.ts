@@ -544,6 +544,7 @@ export type ReviewRequestInterface = {
   kind: 'release' | 'access'
   createdAt: string
   updatedAt: string
+  decision?: DecisionKeys
 } & PartialReviewRequestInterface
 
 export interface InferenceInterface {

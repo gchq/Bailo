@@ -1,9 +1,7 @@
 import { List } from '@mui/material'
-import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForUser } from 'actions/review'
-import { useGetCurrentUser } from 'actions/user'
 import { memoize } from 'lodash-es'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import MessageAlert from 'src/MessageAlert'
@@ -18,36 +16,19 @@ type ReviewsListProps = {
 
 export default function ReviewsList({ kind, status }: ReviewsListProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
-  const { responses, isResponsesLoading, isResponsesError } = useGetResponses(reviews.map((review) => review._id))
-  const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [filteredReviews, setFilteredReviews] = useState<ReviewRequestInterface[]>([])
-
-  const completedByUser = useCallback(
-    (review: ReviewRequestInterface) => {
-      return (
-        currentUser &&
-        responses.find(
-          (response) =>
-            response.parentId === review._id &&
-            response.entity === `user:${currentUser.dn}` &&
-            isFinalised(response.decision),
-        )
-      )
-    },
-    [currentUser, responses],
-  )
 
   useEffect(() => {
     if (status === ReviewListStatus.ARCHIVED) {
       setFilteredReviews(
-        reviews.filter((filteredReview) => filteredReview.kind === kind && completedByUser(filteredReview)),
+        reviews.filter((filteredReview) => filteredReview.kind === kind && isFinalised(filteredReview.decision)),
       )
     } else {
       setFilteredReviews(
-        reviews.filter((filteredReview) => filteredReview.kind === kind && !completedByUser(filteredReview)),
+        reviews.filter((filteredReview) => filteredReview.kind === kind && !isFinalised(filteredReview.decision)),
       )
     }
-  }, [reviews, kind, completedByUser, status])
+  }, [reviews, kind, status])
 
   const ReviewListItem = memoize(({ data, index }) => (
     <ReviewItem
@@ -60,17 +41,9 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
   }
 
-  if (isResponsesError) {
-    return <MessageAlert message={isResponsesError.info.message} severity='error' />
-  }
-
-  if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
-  }
-
   return (
     <>
-      {(isCurrentUserLoading || isReviewsLoading || isResponsesLoading) && <Loading />}
+      {isReviewsLoading && <Loading />}
       <List>
         <Paginate
           list={filteredReviews.map((entryFile) => {
