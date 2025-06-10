@@ -10,6 +10,9 @@ const config: PartialDeep<Config> = {
   httpClient: {
     defaultOpts: {},
   },
+  federation: {
+    state: 'disabled',
+  },
   s3: {
     credentials: {
       accessKeyId: '',

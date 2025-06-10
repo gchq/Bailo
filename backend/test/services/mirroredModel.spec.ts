@@ -57,6 +57,9 @@ vi.mock('../../src/connectors/authorisation/index.js', async () => ({
 const configMock = vi.hoisted(
   () =>
     ({
+      httpClient: {
+        defaultOpts: {},
+      },
       ui: {
         modelMirror: {
           import: {
