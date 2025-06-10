@@ -114,8 +114,8 @@ export async function searchModels(
   organisations: Array<string>,
   filters: Array<string>,
   search: string,
-  peers: Array<string>,
   task?: string,
+  peers?: Array<string>,
   allowTemplating?: boolean,
   schemaId?: string,
 ): Promise<Array<ModelSearchResult>> {
@@ -151,7 +151,7 @@ export async function searchModels(
     )
   })
 
-  if (peers.length > 0) {
+  if (peers && peers.length > 0) {
     const connectors = await getPeerConnectors()
     const remotePromise = connectors.queryModels({ query: search }, peers)
     promises.push(remotePromise)
