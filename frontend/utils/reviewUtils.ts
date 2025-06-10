@@ -1,9 +1,15 @@
 import { groupBy } from 'lodash-es'
-import { ResponseInterface, ReviewRequestInterface } from 'types/types'
+import { DecisionKeys, ResponseInterface, ReviewRequestInterface } from 'types/types'
 import { sortByCreatedAtAscending } from 'utils/arrayUtils'
 
 interface GroupedReviewResponse {
   [user: string]: ResponseInterface[]
+}
+
+export const finalisedDecisions: Array<DecisionKeys> = ['approve', 'deny']
+
+export function isFinalised(decision: DecisionKeys | undefined) {
+  return decision && finalisedDecisions.includes(decision)
 }
 
 export function latestReviewsForEachUser(reviews: ReviewRequestInterface[], responses: ResponseInterface[]) {

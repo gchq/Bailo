@@ -17,12 +17,12 @@ const staticProperties = z.object({
 
 const optionalComment = z.object({
   comment: z.string().optional(),
-  decision: z.enum(getEnumValues(Decision)).exclude([Decision.RequestChanges]),
+  decision: z.enum(getEnumValues(Decision)).exclude([Decision.RequestChanges, Decision.Deny]),
 })
 
 const mandatoryComment = z.object({
-  comment: z.string().min(1, 'A comment must be supplied when requesting changes'),
-  decision: z.literal(Decision.RequestChanges),
+  comment: z.string().min(1, 'A comment must be supplied when requesting changes or denying a request'),
+  decision: z.enum(getEnumValues(Decision)).exclude([Decision.Approve, Decision.Undo]),
 })
 
 export const postReleaseReviewResponseSchema = z.object({
