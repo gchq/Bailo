@@ -506,7 +506,6 @@ describe('services > file', () => {
     const result = isFileInterfaceDoc({
       modelId: '',
       name: '',
-      size: 1,
       mime: '',
       path: '',
       complete: true,

@@ -61,7 +61,7 @@ describe('clients > s3', () => {
     const key = 'test-key'
     const range = { start: 0, end: 100 }
 
-    const response = await getObjectStream(bucket, key, range)
+    const response = await getObjectStream(key, bucket, range)
 
     expect(s3Mocks.GetObjectCommand).toHaveBeenCalledWith({
       Bucket: bucket,
