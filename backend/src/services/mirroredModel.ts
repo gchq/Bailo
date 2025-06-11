@@ -348,7 +348,7 @@ export async function importModel(
   sourceModelId: string,
   payloadUrl: string,
   importKind: ImportKindKeys,
-  filePath?: string,
+  fileId?: string,
 ): Promise<{
   mirroredModel: ModelInterface
   importResult: MongoDocumentImportInformation | FileImportInformation
@@ -399,10 +399,10 @@ export async function importModel(
     }
     case ImportKind.File: {
       log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
-      if (!filePath) {
-        throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
+      if (!fileId) {
+        throw BadReq('Missing File ID.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
-      const result = await importModelFile(res, filePath, mirroredModelId, importId)
+      const result = await importModelFile(res, fileId, mirroredModelId, importId)
       return {
         mirroredModel,
         importResult: {
@@ -548,13 +548,13 @@ async function importDocuments(
   }
 }
 
-async function importModelFile(content: Response, importedPath: string, mirroredModelId: string, importId: string) {
+async function importModelFile(content: Response, fileId: string, mirroredModelId: string, importId: string) {
   const bucket = config.s3.buckets.uploads
-  const updatedPath = createFilePath(mirroredModelId, importedPath)
+  const updatedPath = createFilePath(mirroredModelId, fileId)
   await putObjectStream(updatedPath, content.body as Readable)
   log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
   await markFileAsCompleteAfterImport(updatedPath)
-  return { sourcePath: importedPath, newPath: updatedPath }
+  return { sourcePath: fileId, newPath: updatedPath }
 }
 
 function parseModelCard(
@@ -624,7 +624,6 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, importId })
   }
 
-  file.modelId = mirroredModelId
   file.path = createFilePath(mirroredModelId, file.id)
 
   try {
@@ -648,6 +647,7 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
       importId,
     })
   }
+  file.modelId = mirroredModelId
 
   return file
 }
