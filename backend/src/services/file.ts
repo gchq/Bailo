@@ -60,17 +60,16 @@ export async function uploadFile(
 
   const fileId = longId()
 
-  const bucket = config.s3.buckets.uploads
   const path = createFilePath(modelId, fileId)
 
-  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, bucket, path, complete: true })
+  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: true })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id.toString() })
   }
 
-  const { fileSize } = await putObjectStream(bucket, path, stream)
+  const { fileSize } = await putObjectStream(path, stream)
   if (fileSize === 0) {
     throw BadReq(`Could not upload ${file.name} as it is an empty file.`, { file: file })
   }
@@ -130,7 +129,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
     throw Forbidden(auth.info, { userDn: user.dn, fileId })
   }
 
-  return getObjectStream(file.bucket, file.path, range)
+  return getObjectStream(file.path, undefined, range)
 }
 
 export async function getFileById(user: UserInterface, fileId: string): Promise<FileWithScanResultsInterface> {

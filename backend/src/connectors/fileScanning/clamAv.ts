@@ -31,7 +31,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     if (!this.av) {
       return await this.scanError(`Could not use ${this.toolName} as it is not been correctly initialised.`)
     }
-    const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
+    const s3Stream = (await getObjectStream(file.path)).Body as Readable
     try {
       const { isInfected, viruses } = await this.av.scanStream(s3Stream)
       log.info(

@@ -31,7 +31,7 @@ describe('clients > s3', () => {
     const key = 'test-key'
     const body = new Readable()
 
-    await putObjectStream(bucket, key, body)
+    await putObjectStream(key, body, bucket)
 
     expect(s3UploadMocks.Upload).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -51,7 +51,7 @@ describe('clients > s3', () => {
     const body = new Readable()
     s3UploadMocks.Upload.mockRejectedValueOnce('Error')
 
-    const response = putObjectStream(bucket, key, body)
+    const response = putObjectStream(key, body, bucket)
 
     await expect(response).rejects.toThrowError('Unable to upload the object to the S3 service.')
   })
@@ -87,7 +87,7 @@ describe('clients > s3', () => {
     const bucket = 'test-bucket'
     const key = 'test-key'
 
-    const response = await objectExists(bucket, key)
+    const response = await objectExists(key, bucket)
 
     expect(s3Mocks.HeadObjectCommand).toHaveBeenCalledWith({
       Bucket: bucket,
@@ -102,7 +102,7 @@ describe('clients > s3', () => {
     const key = 'test-key'
     s3Mocks.send.mockRejectedValueOnce({ name: '', message: '', $fault: {}, $metadata: { httpStatusCode: 404 } })
 
-    const response = await objectExists(bucket, key)
+    const response = await objectExists(key, bucket)
 
     expect(s3Mocks.HeadObjectCommand).toHaveBeenCalledWith({
       Bucket: bucket,
@@ -117,7 +117,7 @@ describe('clients > s3', () => {
     const key = 'test-key'
     s3Mocks.send.mockRejectedValueOnce({ name: '', message: '', $fault: {}, $metadata: { httpStatusCode: 500 } })
 
-    const response = objectExists(bucket, key)
+    const response = objectExists(key, bucket)
 
     await expect(response).rejects.toThrowError('Unable to get object metadata from the S3 service.')
   })

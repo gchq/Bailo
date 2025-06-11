@@ -27,7 +27,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
       return await this.scanError('Could not use ModelScan as it is not running.')
     }
 
-    const s3Stream = (await getObjectStream(file.bucket, file.path)).Body as Readable
+    const s3Stream = (await getObjectStream(file.path)).Body as Readable
     try {
       const scanResults = await scanStream(s3Stream, file.name, file.size)
 
