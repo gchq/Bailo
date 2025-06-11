@@ -21,6 +21,6 @@ export function getHttpsAgent(opts?: ProxyAgentOptions) {
   })
 }
 
-export function getHttpsUndiciAgent(config?: Agent.Options) {
-  return new Agent({ ...config })
+export function getHttpsUndiciAgent(opts?: Agent.Options) {
+  return new Agent({ ...opts })
 }
