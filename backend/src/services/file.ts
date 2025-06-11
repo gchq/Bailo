@@ -28,7 +28,6 @@ export function isFileInterfaceDoc(data: unknown): data is FileInterfaceDoc {
     !('name' in data) ||
     !('size' in data) ||
     !('mime' in data) ||
-    !('bucket' in data) ||
     !('path' in data) ||
     !('complete' in data) ||
     !('deleted' in data) ||
