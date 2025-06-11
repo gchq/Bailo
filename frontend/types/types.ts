@@ -249,7 +249,6 @@ export interface FileInterface {
   size: number
   mime: string
 
-  bucket: string
   path: string
 
   complete: boolean
@@ -259,7 +258,7 @@ export interface FileInterface {
 }
 
 export const isFileInterface = (file: File | FileInterface): file is FileInterface => {
-  return (file as FileInterface).bucket !== undefined
+  return (file as FileInterface).path !== undefined
 }
 
 export interface PostSimpleUpload {
