@@ -453,9 +453,9 @@ describe('services > mirroredModel', () => {
 
     await exportModel({} as UserInterface, 'modelId', true)
     expect(s3Mocks.putObjectStream).toHaveBeenCalledWith(
-      'exports',
       'modelId.zip',
       expect.any(Object),
+      'exports',
       expect.any(Object),
     )
     expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(1)
@@ -748,7 +748,7 @@ describe('services > mirroredModel', () => {
       ImportKind.File,
     )
 
-    await expect(result).rejects.toThrowError(/^Missing File Path/)
+    await expect(result).rejects.toThrowError(/^Missing File ID/)
   })
 
   test('importModel > uploads file to S3 on success', async () => {

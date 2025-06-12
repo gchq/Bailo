@@ -348,7 +348,7 @@ export async function importModel(
   sourceModelId: string,
   payloadUrl: string,
   importKind: ImportKindKeys,
-  filePath?: string,
+  fileId?: string,
 ): Promise<{
   mirroredModel: ModelInterface
   importResult: MongoDocumentImportInformation | FileImportInformation
@@ -399,10 +399,10 @@ export async function importModel(
     }
     case ImportKind.File: {
       log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
-      if (!filePath) {
-        throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
+      if (!fileId) {
+        throw BadReq('Missing File ID.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
-      const result = await importModelFile(res, filePath, mirroredModelId, importId)
+      const result = await importModelFile(res, fileId, mirroredModelId, importId)
       return {
         mirroredModel,
         importResult: {
@@ -548,13 +548,13 @@ async function importDocuments(
   }
 }
 
-async function importModelFile(content: Response, importedPath: string, mirroredModelId: string, importId: string) {
+async function importModelFile(content: Response, fileId: string, mirroredModelId: string, importId: string) {
   const bucket = config.s3.buckets.uploads
-  const updatedPath = createFilePath(mirroredModelId, importedPath)
-  await putObjectStream(bucket, updatedPath, content.body as Readable)
+  const updatedPath = createFilePath(mirroredModelId, fileId)
+  await putObjectStream(updatedPath, content.body as Readable)
   log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
   await markFileAsCompleteAfterImport(updatedPath)
-  return { sourcePath: importedPath, newPath: updatedPath }
+  return { sourcePath: fileId, newPath: updatedPath }
 }
 
 function parseModelCard(
@@ -624,15 +624,12 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, importId })
   }
 
-  file.modelId = mirroredModelId
-  file.bucket = config.s3.buckets.uploads
   file.path = createFilePath(mirroredModelId, file.id)
 
   try {
-    file.complete = await objectExists(file.bucket, file.path)
+    file.complete = await objectExists(file.path)
   } catch (error) {
     throw InternalError('Failed to check if file exists.', {
-      bucket: file.bucket,
       path: file.path,
       mirroredModelId,
       sourceModelId,
@@ -650,6 +647,7 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
       importId,
     })
   }
+  file.modelId = mirroredModelId
 
   return file
 }
@@ -713,7 +711,7 @@ async function uploadToTemporaryS3Location(
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
-    await putObjectStream(bucket, object, stream, metadata)
+    await putObjectStream(object, stream, undefined, metadata)
     log.debug(
       {
         bucket,
@@ -739,7 +737,7 @@ async function getObjectFromTemporaryS3Location(fileName: string, logData: Recor
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
-    const stream = (await getObjectStream(bucket, object)).Body as Readable
+    const stream = (await getObjectStream(object, bucket)).Body as Readable
     log.debug(
       {
         bucket,
@@ -766,7 +764,7 @@ async function getObjectFromTemporaryS3Location(fileName: string, logData: Recor
 export async function getObjectFromExportS3Location(object: string, logData: Record<string, unknown>) {
   const bucket = config.modelMirror.export.bucket
   try {
-    const stream = (await getObjectStream(bucket, object)).Body as Readable
+    const stream = (await getObjectStream(object, bucket)).Body as Readable
     log.debug(
       {
         bucket,
@@ -798,7 +796,7 @@ async function uploadToExportS3Location(
 ) {
   const bucket = config.modelMirror.export.bucket
   try {
-    await putObjectStream(bucket, object, stream, metadata)
+    await putObjectStream(object, stream, bucket, metadata)
     log.debug(
       {
         bucket,
