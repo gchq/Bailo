@@ -26,7 +26,6 @@ import Link from 'src/Link'
 import SchemaButton from 'src/schemas/SchemaButton'
 import {
   EntryInterface,
-  EntryKind,
   EntryKindLabel,
   SchemaInterface,
   SchemaKind,
@@ -45,7 +44,7 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas(schemaKind, false)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
-  const { mutateModel: mutateEntry } = useGetModel(entry.id, EntryKind[schemaKind])
+  const { mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
 
   const isLoadingData = useMemo(
     () => isSchemasLoading || isCurrentUserLoading,
