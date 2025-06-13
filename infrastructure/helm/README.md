@@ -151,21 +151,141 @@ modelscan:
 
 1. `helm uninstall bailo`
 
-### Parameters - values.yaml
+### Parameters - supplements values.yaml
 
 #### Image parameters
-| Name  | Decription  | Value |
+| Name  | Description  | Value |
 | ----  | ----------  | ----- |
-| `frontendRepository`  | frontend image location | `null`  |
-| `frontendTag`  | frontend image tag | `null`  |
-| `backendRepository`  | backend image location | `null`  |
-| `backendTag`  | backend image tag | `null`  |
-| `modelscanRepository`  | modelscan image location | `null`  |
-| `modelscanTag`  | modelscan image tag | `null`  |
-| `pullPolicy`  | https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  | `IfNotPresent` |
-| `imagePullSecrets`  | https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers | `null` |
+| `image.frontendRepository`  | frontend image location | `null`  |
+| `image.frontendTag`  | frontend image tag | `null`  |
+| `image.backendRepository`  | backend image location | `null`  |
+| `image.backendTag`  | backend image tag | `null`  |
+| `image.modelscanRepository`  | modelscan image location | `null`  |
+| `image.modelscanTag`  | modelscan image tag | `null`  |
+| `image.pullPolicy`  | https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  | `IfNotPresent` |
 
-#### Non-identifying metadata
-| Name  | Decription  | Value |
+
+#### Pod parameters
+| Name  | Description  | Value |
 | ----  | ----------  | ----- |
+| `imagePullSecrets`  | https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#containers | `null` |
 | `podAnnotations`  | https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#attaching-metadata-to-objects  | `{}` |
+| `replicaCount`  | ignored if autoscaling is enabled | `1` |
+| `autoscaling.enabled`  | https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ | `false` |
+| `autoscaling.minReplicas`  | HPA configuration | `1` |
+| `autoscaling.maxReplicas`  | HPA configuration | `10` |
+| `autoscaling.targetCPUUtilizationPercentage`  | HPA configuration | `80` |
+| `autoscaling.targetMemoryUtilizationPercentage`  | HPA configuration | `80` |
+| `podSecurityContext`  | https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context | `{}` |
+| `securityContext.readOnlyRootFilesystem`  | https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context | `false` |
+| `securityContext.runAsNonRoot`  | does not run as UID 0 (root) https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context | `true` |
+| `resources.limits.cpu`  | default pod cpu limits https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#alpha-level| `400m` |
+| `resources.limits.memory`  | default pod memory limits | `512Mi` |
+| `resources.requests.cpu`  | default pod cpu requests | `200m` |
+| `resources.requests.memory`  | default pod memory requests | `256Mi` |
+| `resourcesFrontend.limits.cpu`  | default pod cpu limits https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#alpha-level| `400m` |
+| `resourcesFrontend.limits.memory`  | default pod memory limits | `800Mi` |
+| `resourcesFrontend.requests.cpu`  | default pod cpu requests | `400m` |
+| `resourcesFrontend.requests.memory`  | default pod memory requests | `800Mi` |
+| `resourcesBackend.limits.cpu`  | default pod cpu limits https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#alpha-level| `800m` |
+| `resourcesBackend.limits.memory`  | default pod memory limits | `2Gi` |
+| `resourcesBackend.requests.cpu`  | default pod cpu requests | `400m` |
+| `resourcesBackend.requests.memory`  | default pod memory requests | `1Gi` |
+| `nodeSelector`  | pod placement https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#scheduling | `{}` |
+| `tolerations`  | pod placement | `[]` |
+| `affinity`  | pod placement | `{}` |
+
+#### Service Account parameters
+| Name  | Description  | Value |
+| ----  | ----------  | ----- |
+| `backend.serviceAccount`  | if set, service account can be used to connect backend to S3 without using aws access and secret keys | `null` |
+| `registry.serviceAccount` | if set, service account can be used to connect registry to S3 without using aws access and secret keys | `null` |
+
+
+#### Network parameters
+| Name  | Description  | Value |
+| ----  | ----------  | ----- |
+| `service.type`  | exposes the Service on a cluster-internal IP https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types  | `ClusterIP` |
+| `service.frontendPort`  | frontend port for Service to connect to | `3000` |
+| `service.backendPort`  | frontend port for Service to connect to | `3001` |
+| `ingress.enabled `  |  map traffic to different backends based on rules you define via the Kubernetes API https://kubernetes.io/docs/concepts/services-networking/ingress/ | `false`  |
+| `route.enabled`  | OpenShift configuration used in lieu of Ingress https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/networking/configuring-routes#route-configuration  | `false` |
+| `route.appPublicRoute`  | public url for Bailo whilst using OpenShift | `false` |
+
+#### AWS specific configuration
+| Name  | Description  | Value |
+| ----  | ----------  | ----- |
+| `aws.enabled` | this is only a guide and depends on EKS setup. Enable Service NodePort, StorageClass and PersistentVolumeClaim for MinoIO and MongoDB.  See nodeport.yaml and storage.yaml | `false` |
+
+#### OAuth configuration
+| Name  | Description  | Value |
+| ----  | ----------  | ----- |
+| `cookie.secret`  | a randomly generated secret key used to encrypt and sign session cookies, ensuring data security and integrity   | `somerandomstring12341234567890AB` |
+| `oauth.enabled`  | currently setup to use Cognito. https://aws.amazon.com/blogs/security/how-to-use-oauth-2-0-in-amazon-cognito-learn-about-the-different-oauth-2-0-grants/   | `false` |
+
+#### Bailo supporting service configurations
+| Name  | Description  | Value |
+| ----  | ----------  | ----- |
+| `nginxAuth.repository`  | runs Nginx as non-root unprivileged user  | `nginxinc/nginx-unprivileged` |
+| `mongodb.enabled`  | using bitnami chart 15.1.4. https://artifacthub.io/packages/helm/bitnami/mongodb/15.1.4. Also refer to Mongo host defination and Create the mongo connection URI in template/_helper.tpl  | `true` |
+| `minio.enabled`  | using bitnami chart 14.2.0. https://artifacthub.io/packages/helm/bitnami/minio/14.2.0  | `true` |
+| `mail.enabled`  | using image marlonb/mailcrab:latest  | `true` |
+| `registry.enabled`  | using image registry:3.0.0. Must use regitsry:3.0.0 if registry.serviceAccount is defined  | `true` |
+| `registry.jwksFile`  | Registry requires a JWKS file for the token authentication with the backend application. For development, a JWKS
+file is generated by running `npm run certs`. For production, the script `generateJWKS.ts` can be used to generate a
+JWKS file for the public key referenced in the backend application configuration.  | `jwks.json` |
+| `clamav.enabled`  | optional. Using image clamav/clamav:1.4.2_base   | `false` |
+| `modelscan.enabled`  | optional. Image defined in image.modelscanRepository  | `false` |
+
+#### Bailo instance settings
+| Name  | Description  | Value |
+| ----  | ----------  | ----- |
+| `config.ui.banner.enabled`  | ----  | `false`  |
+| `config.ui.banner.text`  | ----  | `BAILO`  |
+| `config.ui.banner.colour`  | ----  | `#047a06`  |
+| `config.ui.banner.textColor`  | ----  | `black`  |
+| `config.announcement.enabled`  | ----  | `false`  |
+| `config.announcement.text`  | ----  | `null`  |
+| `config.announcement.startTimestamp`  | ----  | `null`  |
+| `config.helpPopoverText.manualEntryAccess`  | ----  | `null`  |
+| `config.modelDetails.organisations`  | ----  | `[]`  |
+| `config.modelDetails.states`  | ----  | `[]`  |
+| `config.smtp.port`  | ----  | `1025`  |
+| `config.smtp.secure`  | ----  | `false`  |
+| `config.smtp.rejectUnauthorized`  | ----  | `false`  |
+| `config.smtp.user`  | ----  | `mailuser`  |
+| `config.smtp.pass`  | ----  | `mailpass`  |
+| `config.smtp.from`  | ----  | `bailo@example.com`  |
+| `config.app.protocol`  | ----  | `https`  |
+| `config.app.port`  | ----  | `443`  |
+| `config.issueLinks.support`  | ----  | `mailto:?subject=Bailo%20Contact`  |
+| `config.issueLinks.contact`  | ----  | `mailto:?subject=Bailo%20Contact`  |
+| `nginxcert.cert`  | ---- use san.cnf to create certs | `cert.pem`  |
+| `nginxcert.key`  | ----  | `key.pem`  |
+| `connectors.authentication.kind`  | ----  | `silly`  |
+| `connectors.authorisation.kind`  | ----  | `basic`  |
+| `connectors.audit.kind`  | ----  | `silly`  |
+| `connectors.fileScanners.kinds`  | ----  | `[]`  |
+| `connectors.fileScanners.retryDelayInMinutes`  | ----  | `60`  |
+| `connectors.fileScanners.maxInitRetries`  | ----  | `5`  |
+| `connectors.fileScanners.initRetryDelay`  | ----  | `5000`  |
+| `instrumentation.enabled`  | ----  | `false`  |
+| `instrumentation.debug`  | ----  | `false`  |
+| `modelMirror.import.enabled`  | ----  | `false`  |
+| `modelMirror.export.enabled`  | ----  | `false`  |
+| `modelMirror.export.disclaimer`  | ----## Example Agreement \n I agree that this model is suitable for exporting  | ``  |
+| `modelMirror.export.kmsSignature.enabled`  | ----  | `false`  |
+| `modelMirror.export.kmsSignature.keyId`  | ----  | `123`  |
+| `modelMirror.export.kmsSignature.KMSClient.region`  | ----  | `eu-west-1`  |
+| `modelMirror.export.kmsSignature.KMSClient.`  | ----  | `accessKey`  |
+| `modelMirror.export.kmsSignature.KMSClient.`  | ----  | `secretKey`  |
+
+#### Inferencing cluster reference configurations
+| Name  | Description  | Value |
+| ----  | ----------  | ----- |
+| `inference.enabled`  | | ----  | `false`  |
+| `inference.host`  | ----  | `https://example.com`  |
+| `inference.gpus`  | ----  | ``  |
+| `inference.authorizationTokenName`  | ----  | `inferencing-token`  |
+| `inference.authorisationToken`  | ----  | ``  |
+
