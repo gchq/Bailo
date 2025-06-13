@@ -229,6 +229,13 @@ export interface Role {
   description?: string
 }
 
+export const SchemaKindLabel = {
+  model: 'model',
+  accessRequest: 'access request',
+  dataCard: 'data card',
+}
+export type SchemaKindLabelKeys = (typeof SchemaKindLabel)[keyof typeof SchemaKindLabel]
+
 export const SchemaKind = {
   MODEL: 'model',
   ACCESS_REQUEST: 'accessRequest',
