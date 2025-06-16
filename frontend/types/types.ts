@@ -79,7 +79,6 @@ export interface FileInterface {
   size: number
   mime: string
 
-  bucket: string
   path: string
 
   complete: boolean
@@ -239,22 +238,6 @@ export type SchemaKindKeys = (typeof SchemaKind)[keyof typeof SchemaKind]
 
 export const isSchemaKind = (value: unknown): value is SchemaKindKeys => {
   return Object.values(SchemaKind).includes(value as SchemaKindKeys)
-}
-
-export interface FileInterface {
-  _id: string
-  modelId: string
-
-  name: string
-  size: number
-  mime: string
-
-  path: string
-
-  complete: boolean
-
-  createdAt: Date
-  updatedAt: Date
 }
 
 export const isFileInterface = (file: File | FileInterface): file is FileInterface => {
