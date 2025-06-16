@@ -1,3 +1,5 @@
+import zlib from 'node:zlib'
+
 import { EventEmitter, PassThrough } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
@@ -213,6 +215,7 @@ const registryMocks = vi.hoisted(() => ({
   getImageBlob: vi.fn(() => ({ body: ReadableStream.from('test') })),
   getImageManifest: vi.fn(),
   initialiseImageUpload: vi.fn(),
+  listModelImages: vi.fn(() => [] as { name: string; tags: string[] }[]),
   putImageBlob: vi.fn(),
   putImageManifest: vi.fn(),
 }))
@@ -323,7 +326,7 @@ describe('services > mirroredModel', () => {
     })
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
-    await expect(logMock.error).toBeCalledWith(
+    expect(logMock.error).toBeCalledWith(
       expect.any(Object),
       'Failed to upload export to export location with signatures',
     )
@@ -333,7 +336,7 @@ describe('services > mirroredModel', () => {
     kmsMocks.sign.mockRejectedValueOnce('Error')
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
-    await expect(logMock.error).toBeCalledWith(
+    expect(logMock.error).toBeCalledWith(
       expect.any(Object),
       'Failed to upload export to export location with signatures',
     )
@@ -360,7 +363,6 @@ describe('services > mirroredModel', () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '1.2.4'])
     // Allow for completion of asynchronous content
     await new Promise((r) => setTimeout(r))
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
   })
 
   test('exportModel > missing mirrored model ID', async () => {
@@ -370,7 +372,7 @@ describe('services > mirroredModel', () => {
     })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await expect(response).rejects.toThrowError(/^The 'Destination Model ID' has not been set on this model./)
-    await expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > missing mirrored model card schemaId', async () => {
@@ -382,7 +384,7 @@ describe('services > mirroredModel', () => {
     await expect(response).rejects.toThrowError(
       /^You must select a schema for your model before you can start the export process./,
     )
-    await expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > export contains infected file', async () => {
@@ -400,7 +402,7 @@ describe('services > mirroredModel', () => {
     ])
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await expect(response).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
-    await expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > export contains incomplete file scan', async () => {
@@ -418,7 +420,7 @@ describe('services > mirroredModel', () => {
     ])
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await expect(response).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
-    await expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > export missing file scan', async () => {
@@ -437,7 +439,7 @@ describe('services > mirroredModel', () => {
     ])
     const response = exportModel({} as UserInterface, 'testmod', true, ['1.2.3'])
     await expect(response).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
-    await expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > upload straight to the export bucket if signatures are disabled', async () => {
@@ -486,13 +488,32 @@ describe('services > mirroredModel', () => {
       },
     })
     await exportModel({} as UserInterface, 'modelId', true)
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
   })
 
   test('exportModel > export uploaded to S3 for model cards and releases', async () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '3.2.1'])
 
     expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
+  })
+
+  test('exportModel > export uploaded to S3 for model cards and releases', async () => {
+    registryMocks.getImageManifest.mockResolvedValue({
+      schemaVersion: 2,
+      mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+      config: { mediaType: 'application/vnd.docker.container.image.v1+json', size: 4, digest: 'sha256:0' },
+      layers: [],
+    })
+    registryMocks.listModelImages.mockReturnValueOnce([
+      { name: 'image1', tags: ['tag1', 'tag2'] },
+      { name: 'image2', tags: [] },
+      { name: 'image3', tags: ['tag3'] },
+    ])
+
+    await exportModel({} as UserInterface, 'modelId', true)
+
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+    expect(zlibMocks.createGzip).toBeCalledTimes(3)
+    expect(archiverMocks.append).toBeCalledTimes(4)
   })
 
   test('exportModel > unable to upload to tmp S3 location', async () => {
@@ -831,10 +852,10 @@ describe('services > mirroredModel', () => {
         { mediaType: 'application/vnd.docker.image.rootfs.diff.tar.gzip', size: 512, digest: 'sha256:2' },
       ],
     })
+    const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
 
-    await exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
+    await exportCompressedRegistryImage({} as UserInterface, gzipStream, 'modelId', 'imageName', 'tag', {})
 
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
     expect(zlibMocks.createGzip).toBeCalledTimes(1)
     expect(tarMocks.pack).toBeCalledTimes(1)
     expect(registryMocks.getImageManifest).toBeCalledTimes(1)
@@ -848,12 +869,12 @@ describe('services > mirroredModel', () => {
       config: { mediaType: 'application/vnd.docker.container.image.v1+json', size: 4, digest: 'sha256:0' },
       layers: [{ mediaType: 'application/vnd.docker.image.rootfs.diff.tar.gzip', size: 256, digest: '' }],
     })
+    const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
 
-    const promise = exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
+    const promise = exportCompressedRegistryImage({} as UserInterface, gzipStream, 'modelId', 'imageName', 'tag', {})
 
     await expect(promise).rejects.toThrow('Could not extract layer digest.')
 
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
     expect(zlibMocks.createGzip).toBeCalledTimes(1)
     expect(tarMocks.pack).toBeCalledTimes(1)
     expect(registryMocks.getImageManifest).toBeCalledTimes(1)

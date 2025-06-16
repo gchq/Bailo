@@ -49,6 +49,7 @@ import {
   getImageBlob,
   getImageManifest,
   initialiseImageUpload,
+  listModelImages,
   putImageBlob,
   putImageManifest,
 } from './registry.js'
@@ -110,29 +111,27 @@ export async function exportModel(
   }
   zip.finalize()
   log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
-}
 
-function getS3ImageLocation(modelId: string, imageName: string, imageTag: string) {
-  return `beta/registry/${modelId}/${imageName}/blobs/compressed/${imageTag}.tar.gz`
-}
-
-// Reverses the above `getS3ImageLocation` function to extract the imageName and imageTag
-function splitS3ImageLocation(filePath: string) {
-  const found = filePath.match(/^beta\/registry\/[a-z0-9-]+\/(.+)\/blobs\/compressed\/(.+)\.tar\.gz$/)
-  if (!found || found.length != 3) {
-    throw BadReq('Unable to extract image name and tag', { filePath })
-  }
-  const [, imageName, imageTag] = found
-  return { imageName, imageTag }
+  const modelImages = await listModelImages(user, modelId)
+  await Promise.all(
+    modelImages.map(async (imageObj) => {
+      imageObj.tags.map(async (imageTag) => {
+        // setup gzip prior to calling addRegistryImageToZip to allow the stream to drain, otherwise the stream will get stuck
+        const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
+        addRegistryImageToZip(user, gzipStream, modelId, `images/${imageObj.name}/tags/${imageTag}.tar.gz`, zip)
+        await exportCompressedRegistryImage(user, gzipStream, modelId, imageObj.name, imageTag, {})
+      })
+    }),
+  )
 }
 
 export async function exportCompressedRegistryImage(
   user: UserInterface,
+  gzipStream: zlib.Gzip,
   modelId: string,
   imageName: string,
   imageTag: string,
   logData: Record<string, unknown>,
-  metadata?: ExportMetadata,
 ) {
   // get which layers exist for the model
   const tagManifest = await getImageManifest(user, modelId, imageName, imageTag)
@@ -151,17 +150,8 @@ export async function exportCompressedRegistryImage(
 
   // setup tar
   const packerStream = pack()
-  // setup gzip
-  const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
   // pipe the tar stream to gzip
   packerStream.pipe(gzipStream)
-  // start uploading the gzip stream to S3
-  const s3Upload = uploadToExportS3Location(
-    getS3ImageLocation(modelId, imageName, imageTag),
-    gzipStream,
-    logData,
-    metadata,
-  )
 
   // upload the manifest first as this is the starting point when later importing the blob
   const tagManifestJson = JSON.stringify(tagManifest)
@@ -196,9 +186,6 @@ export async function exportCompressedRegistryImage(
   }
   // no more data to write
   packerStream.finalize()
-
-  // wait for the upload to complete
-  await s3Upload
 }
 
 export async function pipeStreamToTarEntry(
@@ -363,6 +350,8 @@ export async function importModel(
   payloadUrl: string,
   importKind: ImportKindKeys,
   filePath?: string,
+  imageName?: string,
+  imageTag?: string,
 ): Promise<{
   mirroredModel: ModelInterface
   importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation
@@ -429,7 +418,12 @@ export async function importModel(
       if (!filePath) {
         throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
-      const { imageName, imageTag } = splitS3ImageLocation(filePath)
+      if (!imageName) {
+        throw BadReq('Missing Image Name.', { mirroredModelId, sourceModelIdMeta: sourceModelId, filePath })
+      }
+      if (!imageTag) {
+        throw BadReq('Missing Image Tag.', { mirroredModelId, sourceModelIdMeta: sourceModelId, filePath, imageName })
+      }
       const result = await importCompressedRegistryImage(
         user,
         res.body as Readable,
@@ -826,7 +820,7 @@ export async function getObjectFromExportS3Location(object: string, logData: Rec
   }
 }
 
-async function uploadToExportS3Location(
+export async function uploadToExportS3Location(
   object: string,
   stream: Readable,
   logData: Record<string, unknown>,
@@ -863,6 +857,19 @@ async function addModelCardRevisionsToZip(user: UserInterface, model: ModelDoc, 
     zip.append(JSON.stringify(card.toJSON()), { name: `${card.version}.json` })
   }
   log.debug({ user, modelId: model.id }, 'Finished generating zip file of model card revisions.')
+}
+
+async function addRegistryImageToZip(
+  user: UserInterface,
+  gzipStream: zlib.Gzip,
+  modelId: string,
+  imagePath: string,
+  zip: archiver.Archiver,
+) {
+  // TODO: Update log image name tag message
+  log.debug({ user, modelId }, 'Generating zip file of registry image.')
+  zip.append(gzipStream, { name: imagePath })
+  log.debug({ user, modelId }, 'Finished generating zip file of registry image.')
 }
 
 async function addReleasesToZip(
