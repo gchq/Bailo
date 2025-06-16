@@ -929,7 +929,15 @@ describe('services > mirroredModel', () => {
     })
     tarMocks.extract.mockReturnValueOnce(mockTarStream)
 
-    const promise = importCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
+    const promise = importCompressedRegistryImage(
+      {} as UserInterface,
+      (await s3Mocks.getObjectStream()).Body,
+      'importedPath',
+      'modelId',
+      'imageName',
+      'tag',
+      'importId',
+    )
 
     // have to wait for a tick otherwise handlers won't yet be set
     await new Promise((resolve) => setTimeout(resolve, 10))
@@ -977,7 +985,15 @@ describe('services > mirroredModel', () => {
     })
     tarMocks.extract.mockReturnValueOnce(mockTarStream)
 
-    const promise = importCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
+    const promise = importCompressedRegistryImage(
+      {} as UserInterface,
+      (await s3Mocks.getObjectStream()).Body,
+      'importedPath',
+      'modelId',
+      'imageName',
+      'tag',
+      'importId',
+    )
 
     // have to wait for a tick otherwise handlers won't yet be set
     await new Promise((resolve) => setTimeout(resolve, 10))

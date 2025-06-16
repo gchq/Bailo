@@ -112,8 +112,18 @@ export async function exportModel(
   log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
 }
 
-function getS3ExportLocation(modelId: string, imageName: string, imageTag: string) {
+function getS3ImageLocation(modelId: string, imageName: string, imageTag: string) {
   return `beta/registry/${modelId}/${imageName}/blobs/compressed/${imageTag}.tar.gz`
+}
+
+// Reverses the above `getS3ImageLocation` function to extract the imageName and imageTag
+function splitS3ImageLocation(filePath: string) {
+  const found = filePath.match(/^beta\/registry\/[a-z0-9-]+\/(.+)\/blobs\/compressed\/(.+)\.tar\.gz$/)
+  if (!found || found.length != 3) {
+    throw BadReq('Unable to extract image name and tag', { filePath })
+  }
+  const [, imageName, imageTag] = found
+  return { imageName, imageTag }
 }
 
 export async function exportCompressedRegistryImage(
@@ -147,7 +157,7 @@ export async function exportCompressedRegistryImage(
   packerStream.pipe(gzipStream)
   // start uploading the gzip stream to S3
   const s3Upload = uploadToExportS3Location(
-    getS3ExportLocation(modelId, imageName, imageTag),
+    getS3ImageLocation(modelId, imageName, imageTag),
     gzipStream,
     logData,
     metadata,
@@ -223,38 +233,35 @@ export async function pipeStreamToTarEntry(
 
 export async function importCompressedRegistryImage(
   user: UserInterface,
+  body: Readable,
+  importedPath: string,
   modelId: string,
   imageName: string,
   imageTag: string,
-  logData: Record<string, unknown>,
-  inputS3Path?: string,
+  importId: string,
 ) {
-  if (!inputS3Path) {
-    inputS3Path = getS3ExportLocation(modelId, imageName, imageTag)
-  }
-
   // setup streams
   const gzipStream = zlib.createGunzip({ chunkSize: 16 * 1024 * 1024 })
   const tarStream = extract()
-  const tarGzBlob = await getObjectFromExportS3Location(inputS3Path, {})
-  tarGzBlob.pipe(gzipStream).pipe(tarStream)
+  // body is tar.gz blob stream
+  body.pipe(gzipStream).pipe(tarStream)
 
   let manifestBody
   await new Promise((resolve, reject) => {
     tarStream.on('entry', async function (entry, stream, next) {
       log.debug('Processing un-tarred entry', {
-        tarball: inputS3Path,
+        importedPath,
         name: entry.name,
         type: entry.type,
         size: entry.size,
-        ...logData,
+        importId,
       })
 
       if (entry.type === 'file') {
         // Process file
         if (entry.name === 'manifest.json') {
           // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
-          log.debug('Extracting un-tarred manifest', { tarball: inputS3Path, ...logData })
+          log.debug('Extracting un-tarred manifest', { importedPath, importId })
           manifestBody = await json(stream)
 
           next()
@@ -263,10 +270,10 @@ export async function importCompressedRegistryImage(
           const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
           if (await doesImageLayerExist(user, modelId, imageName, layerDigest)) {
             log.debug('Skipping blob as it already exists in the registry', {
-              tarball: inputS3Path,
+              importedPath,
               name: entry.name,
               size: entry.size,
-              ...logData,
+              importId,
             })
 
             // auto-drain the stream
@@ -274,10 +281,10 @@ export async function importCompressedRegistryImage(
             next()
           } else {
             log.debug('Initiating un-tarred blob upload', {
-              tarball: inputS3Path,
+              importedPath,
               name: entry.name,
               size: entry.size,
-              ...logData,
+              importId,
             })
             const res = await initialiseImageUpload(user, modelId, imageName)
 
@@ -288,7 +295,7 @@ export async function importCompressedRegistryImage(
         }
       } else {
         // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
-        log.warn('Skipping non-file entry', { tarball: inputS3Path, name: entry.name, type: entry.type, ...logData })
+        log.warn('Skipping non-file entry', { importedPath, name: entry.name, type: entry.type, importId })
         next()
       }
     })
@@ -302,7 +309,7 @@ export async function importCompressedRegistryImage(
     )
 
     tarStream.on('finish', async function () {
-      log.debug('Uploading manifest', { tarball: inputS3Path, ...logData })
+      log.debug('Uploading manifest', { importedPath, importId })
       await putImageManifest(
         user,
         modelId,
@@ -315,15 +322,18 @@ export async function importCompressedRegistryImage(
     })
   })
   log.debug('Completed registry upload', {
-    tarball: inputS3Path,
+    importedPath,
     image: { modelId, imageName, imageTag },
-    ...logData,
+    importId,
   })
+
+  return { sourcePath: importedPath, image: { modelId, imageName, imageTag } }
 }
 
 export const ImportKind = {
   Documents: 'documents',
   File: 'file',
+  Image: 'image',
 } as const
 
 export type ImportKindKeys<T extends keyof typeof ImportKind | void = void> = T extends keyof typeof ImportKind
@@ -341,6 +351,10 @@ export type FileImportInformation = {
   sourcePath: string
   newPath: string
 }
+export type ImageImportInformation = {
+  sourcePath: string
+  image: { modelId: string; imageName: string; imageTag: string }
+}
 
 export async function importModel(
   user: UserInterface,
@@ -351,7 +365,7 @@ export async function importModel(
   filePath?: string,
 ): Promise<{
   mirroredModel: ModelInterface
-  importResult: MongoDocumentImportInformation | FileImportInformation
+  importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation
 }> {
   if (!config.ui.modelMirror.import.enabled) {
     throw BadReq('Importing models has not been enabled.')
@@ -402,7 +416,29 @@ export async function importModel(
       if (!filePath) {
         throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
-      const result = await importModelFile(res, filePath, mirroredModelId, importId)
+      const result = await importModelFile(res.body as Readable, filePath, mirroredModelId, importId)
+      return {
+        mirroredModel,
+        importResult: {
+          ...result,
+        },
+      }
+    }
+    case ImportKind.Image: {
+      log.info({ mirroredModelId, payloadUrl }, 'Importing image data.')
+      if (!filePath) {
+        throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
+      }
+      const { imageName, imageTag } = splitS3ImageLocation(filePath)
+      const result = await importCompressedRegistryImage(
+        user,
+        res.body as Readable,
+        filePath,
+        mirroredModelId,
+        imageName,
+        imageTag,
+        importId,
+      )
       return {
         mirroredModel,
         importResult: {
@@ -548,10 +584,10 @@ async function importDocuments(
   }
 }
 
-async function importModelFile(content: Response, importedPath: string, mirroredModelId: string, importId: string) {
+async function importModelFile(body: Readable, importedPath: string, mirroredModelId: string, importId: string) {
   const bucket = config.s3.buckets.uploads
   const updatedPath = createFilePath(mirroredModelId, importedPath)
-  await putObjectStream(bucket, updatedPath, content.body as Readable)
+  await putObjectStream(bucket, updatedPath, body)
   log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
   await markFileAsCompleteAfterImport(updatedPath)
   return { sourcePath: importedPath, newPath: updatedPath }
