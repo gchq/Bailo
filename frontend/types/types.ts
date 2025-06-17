@@ -517,6 +517,7 @@ export const Decision = {
   RequestChanges: 'request_changes',
   Approve: 'approve',
   Undo: 'undo',
+  Deny: 'deny',
 } as const
 export type DecisionKeys = (typeof Decision)[keyof typeof Decision]
 
@@ -543,6 +544,7 @@ export type ReviewRequestInterface = {
   kind: 'release' | 'access'
   createdAt: string
   updatedAt: string
+  decision?: DecisionKeys
 } & PartialReviewRequestInterface
 
 export interface InferenceInterface {
