@@ -610,7 +610,7 @@ describe('services > mirroredModel', () => {
       '1.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
       '2.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
     })
-    await importModel(
+    const result = await importModel(
       {} as UserInterface,
       'mirrored-model-id',
       'source-model-id',
@@ -618,7 +618,8 @@ describe('services > mirroredModel', () => {
       ImportKind.Documents,
     )
 
-    await expect(modelMocks.saveImportedModelCard.mock.calls.length).toBe(2)
+    expect(result).toMatchSnapshot()
+    expect(modelMocks.saveImportedModelCard.mock.calls.length).toBe(2)
   })
 
   test('importModel > failed to parse zip file', async () => {
@@ -789,7 +790,7 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > uploads file to S3 on success', async () => {
-    await importModel(
+    const result = await importModel(
       {} as UserInterface,
       'mirrored-model-id',
       'source-model-id',
@@ -797,6 +798,8 @@ describe('services > mirroredModel', () => {
       ImportKind.File,
       '/s3/path/',
     )
+
+    expect(result).toMatchSnapshot()
     expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
   })
 

@@ -298,7 +298,7 @@ export async function importCompressedRegistryImage(
 
     tarStream.on('finish', async function () {
       log.debug('Uploading manifest', { importedPath, importId })
-      if (hasKeysOfType(manifestBody, [{ mediaType: 'string' }])) {
+      if (hasKeysOfType<{ mediaType: 'string' }>(manifestBody, { mediaType: 'string' })) {
         await putImageManifest(
           user,
           modelId,
