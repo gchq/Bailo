@@ -25,6 +25,7 @@ import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import { shortId } from '../utils/id.js'
+import { hasKeysOfType } from '../utils/typeguards.js'
 import {
   createFilePath,
   downloadFile,
@@ -233,7 +234,7 @@ export async function importCompressedRegistryImage(
   // body is tar.gz blob stream
   body.pipe(gzipStream).pipe(tarStream)
 
-  let manifestBody
+  let manifestBody: unknown
   await new Promise((resolve, reject) => {
     tarStream.on('entry', async function (entry, stream, next) {
       log.debug('Processing un-tarred entry', {
@@ -297,15 +298,19 @@ export async function importCompressedRegistryImage(
 
     tarStream.on('finish', async function () {
       log.debug('Uploading manifest', { importedPath, importId })
-      await putImageManifest(
-        user,
-        modelId,
-        imageName,
-        imageTag,
-        JSON.stringify(manifestBody),
-        manifestBody['mediaType'],
-      )
-      resolve('ok')
+      if (hasKeysOfType(manifestBody, [{ mediaType: 'string' }])) {
+        await putImageManifest(
+          user,
+          modelId,
+          imageName,
+          imageTag,
+          JSON.stringify(manifestBody),
+          manifestBody['mediaType'],
+        )
+        resolve('ok')
+      } else {
+        reject(InternalError('Could not find manifest.json in tarball'))
+      }
     })
   })
   log.debug('Completed registry upload', {

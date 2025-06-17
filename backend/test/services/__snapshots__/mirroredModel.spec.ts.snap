@@ -1,0 +1,24 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > mirroredModel > importModel > uploads image to S3 on success 1`] = `
+{
+  "importResult": {
+    "image": {
+      "imageName": "image-name",
+      "imageTag": "image-tag",
+      "modelId": "mirrored-model-id",
+    },
+    "sourcePath": "/s3/path/",
+  },
+  "mirroredModel": {
+    "card": {
+      "schemaId": "test",
+    },
+    "settings": {
+      "mirror": {
+        "destinationModelId": "abc",
+      },
+    },
+  },
+}
+`;
