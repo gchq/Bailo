@@ -184,8 +184,8 @@ See [our user documentation](https://gchq.github.io/Bailo/docs)
 
 - [ ] Export/Import of Releases with Files.
 - [ ] Model LifeCycle State.
-- [ ] Model Organisation.
-- [ ] Improve Open Source Ways of Working.
+- [x] Model Organisation.
+- [x] Improve Open Source Ways of Working.
 - [ ] Export/Import of Releases with Docker Images.
 
 <br />
