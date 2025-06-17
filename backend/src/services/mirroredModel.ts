@@ -119,7 +119,15 @@ export async function exportModel(
       imageObj.tags.map(async (imageTag) => {
         // setup gzip prior to calling addRegistryImageToZip to allow the stream to drain, otherwise the stream will get stuck
         const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
-        addRegistryImageToZip(user, gzipStream, modelId, `images/${imageObj.name}/tags/${imageTag}.tar.gz`, zip)
+        addRegistryImageToZip(
+          user,
+          gzipStream,
+          modelId,
+          `images/${imageObj.name}/tags/${imageTag}.tar.gz`,
+          zip,
+          imageObj.name,
+          imageTag,
+        )
         await exportCompressedRegistryImage(user, gzipStream, modelId, imageObj.name, imageTag, {})
       })
     }),
@@ -870,11 +878,12 @@ async function addRegistryImageToZip(
   modelId: string,
   imagePath: string,
   zip: archiver.Archiver,
+  imageName: string,
+  imageTag: string,
 ) {
-  // TODO: Update log image name tag message
-  log.debug({ user, modelId }, 'Generating zip file of registry image.')
+  log.debug({ user, modelId, imagePath, imageName, imageTag }, 'Generating zip file of registry image.')
   zip.append(gzipStream, { name: imagePath })
-  log.debug({ user, modelId }, 'Finished generating zip file of registry image.')
+  log.debug({ user, modelId, imagePath, imageName, imageTag }, 'Finished generating zip file of registry image.')
 }
 
 async function addReleasesToZip(
