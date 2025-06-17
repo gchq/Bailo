@@ -2,7 +2,7 @@ import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { getAllPeerStatus } from '../../../services/federation.js'
+import peers from '../../../connectors/peer/index.js'
 import { peersConfigStatusSchema, registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -34,9 +34,10 @@ export const getPeerStatus = [
   bodyParser.json(),
   async (req: Request, res: Response<GetPeerStatusResponse>) => {
     const _ = parse(req, getPeerStatusSchema)
+    const peersWrapper = await peers()
 
     return res.json({
-      peers: Object.fromEntries(await getAllPeerStatus()),
+      peers: Object.fromEntries(await peersWrapper.status()),
     })
   },
 ]

@@ -1,6 +1,5 @@
-import fetch from 'node-fetch'
+import fetch, { Response } from 'node-fetch'
 
-import log from '../../services/log.js'
 import { isBailoError } from '../../types/error.js'
 import { SystemStatus } from '../../types/types.js'
 import config from '../../utils/config.js'
@@ -35,7 +34,7 @@ export class BailoPeerConnector extends BasePeerConnector {
   }
 
   async request<T>(path: string) {
-    let res
+    let res: Response
     const requestUrl = this.config.baseUrl.concat(path)
     try {
       res = await fetch(requestUrl, {
@@ -56,10 +55,16 @@ export class BailoPeerConnector extends BasePeerConnector {
         status: res.status,
         statusText: res.statusText,
       }
-      log.error('Non-200 response from remote', context)
-      throw InternalError('Unrecognised response returned by the peer.', context)
+      throw InternalError('Non-200 response from remote', context)
     }
-    const body = (await res.json()) as T
+
+    let body: T
+
+    try {
+      body = (await res.json()) as T
+    } catch (err) {
+      throw InternalError('Unexpected response from peer', { err })
+    }
 
     return body
   }

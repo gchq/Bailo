@@ -1,3 +1,4 @@
+import log from '../../services/log.js'
 import { FederationState, RemoteFederationConfig } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
@@ -41,24 +42,25 @@ export default async function getPeerConnectors(cache = true): Promise<PeerConne
     return peerWrapper
   }
   // If not globally disabled, setup each peer
-  if (FederationState.DISABLED !== config.federation.state) {
-    for (const [id, cfg] of Object.entries(config.federation.peers)) {
-      validate(id, cfg)
-      switch (cfg.kind) {
-        case PeerKind.Bailo:
-          try {
-            // Validate carries out a duplicate ID check and basic config validation
-            const connector = new BailoPeerConnector(id, cfg)
-            peers.set(id, connector)
-          } catch (error) {
-            throw ConfigurationError('Could not configure or initialise Bailo connector', { error })
-          }
-          break
-        default:
-          throw ConfigurationError(`'${cfg.kind}' is not a valid peer connector kind.`, {
-            validKinds: Object.values(PeerKind),
-          })
-      }
+  if (FederationState.DISABLED === config.federation.state) {
+    log.debug('Federation is disabled, skipping setup of peers')
+  }
+  for (const [id, cfg] of Object.entries(config.federation.peers)) {
+    validate(id, cfg)
+    switch (cfg.kind) {
+      case PeerKind.Bailo:
+        try {
+          // Validate carries out a duplicate ID check and basic config validation
+          const connector = new BailoPeerConnector(id, cfg)
+          peers.set(id, connector)
+        } catch (error) {
+          throw ConfigurationError('Could not configure or initialise Bailo connector', { error })
+        }
+        break
+      default:
+        throw ConfigurationError(`'${cfg.kind}' is not a valid peer connector kind.`, {
+          validKinds: Object.values(PeerKind),
+        })
     }
   }
 
