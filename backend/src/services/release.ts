@@ -15,7 +15,7 @@ import { findDuplicates } from '../utils/array.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
-import { hasKeysOfType } from '../utils/typeguards.js'
+import { arrayOfObjectsHasKeysOfType, hasKeysOfType } from '../utils/typeguards.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
@@ -24,28 +24,26 @@ import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
 export function isReleaseDoc(data: unknown): data is ReleaseDoc {
-  if (typeof data !== 'object' || data === null) {
-    return false
-  }
-
-  if (
-    !('modelId' in data) ||
-    !('modelCardVersion' in data) ||
-    !('semver' in data) ||
-    !('notes' in data) ||
-    !('minor' in data) ||
-    !('draft' in data) ||
-    !('fileIds' in data) ||
-    !('images' in data) ||
-    !('deleted' in data) ||
-    !('createdBy' in data) ||
-    !('createdAt' in data) ||
-    !('updatedAt' in data) ||
-    !('_id' in data)
-  ) {
-    return false
-  }
-  return true
+  return (
+    hasKeysOfType(data, {
+      _id: 'string',
+      modelId: 'string',
+      modelCardVersion: 'number',
+      semver: 'string',
+      notes: 'string',
+      minor: 'boolean',
+      draft: 'boolean',
+      fileIds: 'object',
+      images: 'object',
+      deleted: 'boolean',
+      createdBy: 'string',
+      createdAt: 'string',
+      updatedAt: 'string',
+    }) &&
+    Array.isArray(data['fileIds']) &&
+    data['fileIds'].every((fileId: unknown) => typeof fileId === 'string') &&
+    arrayOfObjectsHasKeysOfType(data['images'], { repository: 'string', name: 'string', tag: 'string' })
+  )
 }
 
 // this only has the id and _id properties that mongoose adds, but none of the functions so is not a document
