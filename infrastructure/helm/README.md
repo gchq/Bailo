@@ -6,7 +6,7 @@ prerequisites:
 
 - Helm (https://helm.sh/).
 - Kubectl (https://kubernetes.io/docs/tasks/tools/).
-- An existing Kubernetes cluseter, AWS EKS for example.
+- An existing Kubernetes cluster, AWS EKS for example.
 - Kubectl pointing to EKS cluster (check with `kubectl cluster-info`).
 
 All commands assume they are run in the `helm/bailo` directory with the right context. Context can be set with:
@@ -238,35 +238,35 @@ modelscan:
 #### Bailo instance settings
 | Name  | Description  | Value |
 | ----  | ----------  | ----- |
-| `config.ui.banner.enabled`  | ----  | `false`  |
-| `config.ui.banner.text`  | ----  | `BAILO`  |
-| `config.ui.banner.colour`  | ----  | `#047a06`  |
-| `config.ui.banner.textColor`  | ----  | `black`  |
-| `config.announcement.enabled`  | ----  | `false`  |
-| `config.announcement.text`  | ----  | `null`  |
-| `config.announcement.startTimestamp`  | ----  | `null`  |
+| `config.ui.banner.enabled`  | enables banner at top of the page  | `false`  |
+| `config.ui.banner.text`  | content of top banner | `BAILO`  |
+| `config.ui.banner.colour`  | colour of top banner  | `#047a06`  |
+| `config.ui.banner.textColor`  | colour of top banner text  | `black`  |
+| `config.announcement.enabled`  | enables announcement banner at bottom of the page  | `false`  |
+| `config.announcement.text`  | content of announcement banner  | `null`  |
+| `config.announcement.startTimestamp`  | start time of announcement banner  | `null`  |
 | `config.helpPopoverText.manualEntryAccess`  | ----  | `null`  |
-| `config.modelDetails.organisations`  | ----  | `[]`  |
-| `config.modelDetails.states`  | ----  | `[]`  |
-| `config.smtp.port`  | ----  | `1025`  |
-| `config.smtp.secure`  | ----  | `false`  |
-| `config.smtp.rejectUnauthorized`  | ----  | `false`  |
-| `config.smtp.user`  | ----  | `mailuser`  |
-| `config.smtp.pass`  | ----  | `mailpass`  |
-| `config.smtp.from`  | ----  | `bailo@example.com`  |
-| `config.app.protocol`  | ----  | `https`  |
-| `config.app.port`  | ----  | `443`  |
-| `config.issueLinks.support`  | ----  | `mailto:?subject=Bailo%20Contact`  |
-| `config.issueLinks.contact`  | ----  | `mailto:?subject=Bailo%20Contact`  |
-| `nginxcert.cert`  | ---- use san.cnf to create certs | `cert.pem`  |
-| `nginxcert.key`  | ----  | `key.pem`  |
+| `config.modelDetails.organisations`  | organisation options for models  | `[]`  |
+| `config.modelDetails.states`  | states options for models  | `[]`  |
+| `config.smtp.port`  | backend connection port to mail server. https://nodemailer.com/smtp  | `1025`  |
+| `config.smtp.secure`  | enable to use TLS   | `false`  |
+| `config.smtp.rejectUnauthorized`  | TLS option | `false`  |
+| `config.smtp.user`  | auth username  | `mailuser`  |
+| `config.smtp.pass`  | auth password  | `mailpass`  |
+| `config.smtp.from`  | email address used by Bailo, When a review is required, for example  | `bailo@example.com`  |
+| `config.app.protocol`  | used for external bailo url. See backed/src/services/smtp   | `https`  |
+| `config.app.port`  | used for external bailo url  | `443`  |
+| `config.issueLinks.support`  | help page email configuration  | `mailto:?subject=Bailo%20Contact`  |
+| `config.issueLinks.contact`  | help page email configuration | `mailto:?subject=Bailo%20Contact`  |
+| `nginxcert.cert`  | ----  | `cert.pem`  | ???
+| `nginxcert.key`  | ----   | `key.pem`  | ????
 | `connectors.authentication.kind`  | ----  | `silly`  |
 | `connectors.authorisation.kind`  | ----  | `basic`  |
 | `connectors.audit.kind`  | ----  | `silly`  |
-| `connectors.fileScanners.kinds`  | ----  | `[]`  |
-| `connectors.fileScanners.retryDelayInMinutes`  | ----  | `60`  |
-| `connectors.fileScanners.maxInitRetries`  | ----  | `5`  |
-| `connectors.fileScanners.initRetryDelay`  | ----  | `5000`  |
+| `connectors.fileScanners.kinds` | a list of the file scanner names to enable  | `[]`  |
+| `connectors.fileScanners.retryDelayInMinutes` | number of minutes between scans on a given file   | `60`  |
+| `connectors.fileScanners.maxInitRetries` | number of times the microservice is attempted to be reached before failing at startup  | `5`    |
+| `connectors.fileScanners.initRetryDelay` | delay between successive microservice pings in milliseconds    | `5000` |
 | `instrumentation.enabled`  | ----  | `false`  |
 | `instrumentation.debug`  | ----  | `false`  |
 | `modelMirror.import.enabled`  | ----  | `false`  |
@@ -281,9 +281,9 @@ modelscan:
 #### Inferencing cluster reference configurations
 | Name  | Description  | Value |
 | ----  | ----------  | ----- |
-| `inference.enabled`  | | ----  | `false`  |
-| `inference.host`  | ----  | `https://example.com`  |
-| `inference.gpus`  | ----  | ``  |
-| `inference.authorizationTokenName`  | ----  | `inferencing-token`  |
-| `inference.authorisationToken`  | ----  | ``  |
+| `inference.enabled`  | enable infrencing  | `false`  |
+| `inference.host`  | url of infrencing cluster  | `https://example.com`  |
+| `inference.gpus`  | ----  | ``  | ???
+| `inference.authorizationTokenName`  | ----  | `inferencing-token`  | ???
+| `inference.authorisationToken`  | ----  | ``  | ???
 
