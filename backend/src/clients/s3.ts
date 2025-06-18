@@ -35,9 +35,9 @@ async function getS3Client() {
 }
 
 export async function putObjectStream(
-  bucket: string,
   key: string,
   body: PassThrough | Readable,
+  bucket: string = config.s3.buckets.uploads,
   metadata?: Record<string, string>,
 ) {
   try {
@@ -78,7 +78,11 @@ export async function putObjectStream(
   }
 }
 
-export async function getObjectStream(bucket: string, key: string, range?: { start: number; end: number }) {
+export async function getObjectStream(
+  key: string,
+  bucket: string = config.s3.buckets.uploads,
+  range?: { start: number; end: number },
+) {
   const client = await getS3Client()
 
   const input: GetObjectRequest = {
@@ -101,7 +105,7 @@ export async function getObjectStream(bucket: string, key: string, range?: { sta
   }
 }
 
-export async function objectExists(bucket: string, key: string) {
+export async function objectExists(key: string, bucket: string = config.s3.buckets.uploads) {
   try {
     log.info({ bucket, key }, `Searching for ${key} in ${bucket}`)
     await headObject(bucket, key)

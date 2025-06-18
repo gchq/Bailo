@@ -79,7 +79,6 @@ export interface FileInterface {
   size: number
   mime: string
 
-  bucket: string
   path: string
 
   complete: boolean
@@ -241,25 +240,8 @@ export const isSchemaKind = (value: unknown): value is SchemaKindKeys => {
   return Object.values(SchemaKind).includes(value as SchemaKindKeys)
 }
 
-export interface FileInterface {
-  _id: string
-  modelId: string
-
-  name: string
-  size: number
-  mime: string
-
-  bucket: string
-  path: string
-
-  complete: boolean
-
-  createdAt: Date
-  updatedAt: Date
-}
-
 export const isFileInterface = (file: File | FileInterface): file is FileInterface => {
-  return (file as FileInterface).bucket !== undefined
+  return (file as FileInterface).path !== undefined
 }
 
 export interface PostSimpleUpload {

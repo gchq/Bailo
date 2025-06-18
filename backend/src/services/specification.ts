@@ -121,7 +121,6 @@ export const fileWithScanInterfaceSchema = z.object({
   size: z.number().openapi({ example: 1024 }),
   mime: z.string().openapi({ example: 'application/tar' }),
 
-  bucket: z.string().openapi({ example: 'uploads ' }),
   path: z.string().openapi({ example: '/model/yolo-v4-abcdef/files/abcdef' }),
 
   complete: z.boolean().openapi({ example: true }),
