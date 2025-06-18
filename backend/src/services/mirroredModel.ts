@@ -35,7 +35,6 @@ import {
   markFileAsCompleteAfterImport,
   saveImportedFile,
 } from './file.js'
-import { getHttpsAgent } from './http.js'
 import log from './log.js'
 import {
   getModelById,
@@ -50,11 +49,17 @@ import {
   getImageBlob,
   getImageManifest,
   initialiseImageUpload,
-  listModelImages,
   putImageBlob,
   putImageManifest,
 } from './registry.js'
-import { getAllFileIds, getReleasesForExport, isReleaseDoc, saveImportedRelease } from './release.js'
+import {
+  getAllFileIds,
+  getReleasesForExport,
+  HydratedImageRefInterface,
+  isImageRef,
+  isReleaseDoc,
+  saveImportedRelease,
+} from './release.js'
 
 export async function exportModel(
   user: UserInterface,
@@ -110,28 +115,9 @@ export async function exportModel(
   } catch (error) {
     throw InternalError('Error when adding the release(s) to the zip file.', { error })
   }
+
   zip.finalize()
   log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
-
-  const modelImages = await listModelImages(user, modelId)
-  await Promise.all(
-    modelImages.map(async (imageObj) => {
-      imageObj.tags.map(async (imageTag) => {
-        // setup gzip prior to calling addRegistryImageToZip to allow the stream to drain, otherwise the stream will get stuck
-        const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
-        addRegistryImageToZip(
-          user,
-          gzipStream,
-          modelId,
-          `images/${imageObj.name}/tags/${imageTag}.tar.gz`,
-          zip,
-          imageObj.name,
-          imageTag,
-        )
-        await exportCompressedRegistryImage(user, gzipStream, modelId, imageObj.name, imageTag, {})
-      })
-    }),
-  )
 }
 
 export async function exportCompressedRegistryImage(
@@ -388,9 +374,7 @@ export async function importModel(
 
   let res: Response
   try {
-    res = await fetch(payloadUrl, {
-      agent: getHttpsAgent(),
-    })
+    res = await fetch(payloadUrl, {})
   } catch (err) {
     throw InternalError('Unable to get the file.', { err, payloadUrl, importId })
   }
@@ -469,6 +453,7 @@ async function importDocuments(
   const modelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   const releases: Omit<ReleaseDoc, '_id'>[] = []
   const files: FileInterfaceDoc[] = []
+  const images: HydratedImageRefInterface[] = []
   const zipData = new Uint8Array(await res.arrayBuffer())
   let zipContent
   try {
@@ -485,10 +470,12 @@ async function importDocuments(
   const modelCardRegex = /^[0-9]+\.json$/
   const releaseRegex = /^releases\/(.*)\.json$/
   const fileRegex = /^files\/(.*)\.json$/
+  const imageRegex = /^images\/(.*)\.json$/
 
   const modelCardJsonStrings: string[] = []
   const releaseJsonStrings: string[] = []
   const fileJsonStrings: string[] = []
+  const imageJsonStringsMap: { key: string; contents: string }[] = []
   Object.keys(zipContent).forEach(function (key) {
     if (modelCardRegex.test(key)) {
       modelCardJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
@@ -496,6 +483,8 @@ async function importDocuments(
       releaseJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
     } else if (fileRegex.test(key)) {
       fileJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
+    } else if (imageRegex.test(key)) {
+      imageJsonStringsMap.push({ key, contents: Buffer.from(zipContent[key]).toString('utf8') })
     } else {
       throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId, importId })
     }
@@ -536,13 +525,27 @@ async function importDocuments(
     }),
   )
 
+  // Parse image documents.
+
+  await Promise.all(
+    imageJsonStringsMap.map(async ({ key, contents: imageJson }) => {
+      const image = await parseImage(imageJson, mirroredModelId, sourceModelId, importId, key)
+      images.push(image)
+    }),
+  )
+
   log.info(
     {
       mirroredModelId,
       payloadUrl,
       sourceModelId,
       importId,
-      numberOfDocuments: { modelCards: modelCards.length, releases: releases.length, files: files.length },
+      numberOfDocuments: {
+        modelCards: modelCards.length,
+        releases: releases.length,
+        files: files.length,
+        images: images.length,
+      },
     },
     'Finished parsing the collection of model documents.',
   )
@@ -565,6 +568,7 @@ async function importDocuments(
   const modelCardVersions = modelCards.map((modelCard) => modelCard.version)
   const releaseSemvers = releases.map((release) => release.semver)
   const fileIds: ObjectId[] = files.map((file) => file._id)
+  const imageIds: ObjectId[] = images.map((image) => image._id)
 
   log.info(
     {
@@ -574,6 +578,7 @@ async function importDocuments(
       modelCardVersions,
       releaseSemvers,
       fileIds,
+      imageIds,
       importId,
     },
     'Finished importing the collection of model documents.',
@@ -587,6 +592,7 @@ async function importDocuments(
       releaseSemvers,
       newReleases,
       fileIds,
+      imageIds,
     },
   }
 }
@@ -647,8 +653,7 @@ function parseRelease(
   const modelId = release.modelId
   release.modelId = mirroredModelId
   delete release._id
-  // Remove Docker Images until we add the functionality to import Docker images
-  release.images = []
+
   if (sourceModelId !== modelId) {
     throw InternalError('Zip file contains releases that have a model ID that does not match the source model Id.', {
       release,
@@ -667,7 +672,6 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, importId })
   }
 
-  file.modelId = mirroredModelId
   file.bucket = config.s3.buckets.uploads
   file.path = createFilePath(mirroredModelId, file.id)
 
@@ -693,15 +697,53 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
       importId,
     })
   }
+  file.modelId = mirroredModelId
 
   return file
+}
+
+async function parseImage(
+  imageJson: string,
+  mirroredModelId: string,
+  sourceModelId: string,
+  importId: string,
+  path: string,
+) {
+  const image = JSON.parse(imageJson)
+  if (!isImageRef(image)) {
+    throw InternalError('Data cannot be converted into an image.', {
+      image,
+      mirroredModelId,
+      sourceModelId,
+      importId,
+    })
+  }
+
+  try {
+    await objectExists(config.s3.buckets.uploads, path)
+  } catch (error) {
+    throw InternalError('Failed to check if image exists.', {
+      bucket: config.s3.buckets.uploads,
+      path,
+      mirroredModelId,
+      sourceModelId,
+      error,
+      importId,
+    })
+  }
+
+  return image
 }
 
 type ExportMetadata = {
   sourceModelId: string
   mirroredModelId: string
   exporter: string
-} & ({ importKind: ImportKindKeys<'Documents'> } | { importKind: ImportKindKeys<'File'>; filePath: string })
+} & (
+  | { importKind: ImportKindKeys<'Documents'> }
+  | { importKind: ImportKindKeys<'File'>; filePath: string }
+  | { importKind: ImportKindKeys<'Image'>; filePath: string }
+)
 async function uploadToS3(
   fileName: string,
   stream: Readable,
@@ -872,20 +914,6 @@ async function addModelCardRevisionsToZip(user: UserInterface, model: ModelDoc, 
   log.debug({ user, modelId: model.id }, 'Finished generating zip file of model card revisions.')
 }
 
-async function addRegistryImageToZip(
-  user: UserInterface,
-  gzipStream: zlib.Gzip,
-  modelId: string,
-  imagePath: string,
-  zip: archiver.Archiver,
-  imageName: string,
-  imageTag: string,
-) {
-  log.debug({ user, modelId, imagePath, imageName, imageTag }, 'Generating zip file of registry image.')
-  zip.append(gzipStream, { name: imagePath })
-  log.debug({ user, modelId, imagePath, imageName, imageTag }, 'Finished generating zip file of registry image.')
-}
-
 async function addReleasesToZip(
   user: UserInterface,
   model: ModelDoc,
@@ -938,6 +966,39 @@ async function addReleaseToZip(
         },
       )
     }
+
+    if (Array.isArray(release.images)) {
+      for (const image of release.images) {
+        zip.append(JSON.stringify({ modelId: model.id, ...image.toObject() }), {
+          name: `images/${image.id}.json`,
+        })
+        const imageLogData = {
+          releaseId: release.id,
+          sourceModelId: model.id,
+          imageName: image.name,
+          imageTag: image.tag,
+          imageId: image._id,
+        }
+
+        // setup gzip prior to calling addRegistryImageToZip to allow the stream to drain, otherwise the stream will get stuck
+        const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
+        const s3Upload = uploadToS3(
+          `${image.id}.tar.gz`,
+          gzipStream,
+          {
+            exporter: user.dn,
+            sourceModelId: model.id,
+            mirroredModelId,
+            filePath: image.id,
+            importKind: ImportKind.Image,
+          },
+          imageLogData,
+        )
+
+        await exportCompressedRegistryImage(user, gzipStream, model.id, image.name, image.tag, imageLogData)
+        await s3Upload
+      }
+    }
   } catch (error: any) {
     throw InternalError('Error when generating the zip file.', { error })
   }
@@ -965,7 +1026,7 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     }
   }
 
-  if (await scanners.info()) {
+  if (scanners.info()) {
     const files = await getFilesByIds(user, modelId, fileIds)
     const scanErrors: {
       missingScan: Array<{ name: string; id: string }>

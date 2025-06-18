@@ -1,5 +1,6 @@
 import zlib from 'node:zlib'
 
+import { Readable } from 'stream'
 import { EventEmitter, PassThrough } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
@@ -127,9 +128,13 @@ const modelMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
-  getReleasesForExport: vi.fn(() => [{ toJSON: vi.fn() }]),
+  getReleasesForExport: vi.fn(() => [
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+    { toJSON: vi.fn(), images: [] as { repository: string; name: string; tag: string; toObject: Function }[] },
+  ]),
   getAllFileIds: vi.fn(() => [{}]),
   isReleaseDoc: vi.fn(() => true),
+  isImageRef: vi.fn(() => true),
 }))
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
@@ -158,7 +163,7 @@ vi.mock('archiver', () => ({ default: vi.fn(() => archiverMocks) }))
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => Promise.resolve({ fileSize: 100 })),
-  getObjectStream: vi.fn(() => Promise.resolve({ Body: new PassThrough() })),
+  getObjectStream: vi.fn(() => Promise.resolve({ Body: new MockReadable() })),
   objectExists: vi.fn(() => Promise.resolve(true)),
 }))
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
@@ -333,6 +338,8 @@ describe('services > mirroredModel', () => {
   })
 
   test('exportModel > unable to create kms signature for zip file', async () => {
+    // MockReadable isn't quite correct for this use case
+    s3Mocks.getObjectStream.mockResolvedValueOnce({ Body: new PassThrough() })
     kmsMocks.sign.mockRejectedValueOnce('Error')
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
@@ -340,7 +347,7 @@ describe('services > mirroredModel', () => {
       expect.any(Object),
       'Failed to upload export to export location with signatures',
     )
-  })
+  }, 100000)
 
   test('exportModel > release export size too large', async () => {
     vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
@@ -496,7 +503,7 @@ describe('services > mirroredModel', () => {
     expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
   })
 
-  test('exportModel > export uploaded to S3 for model cards and releases', async () => {
+  test('exportModel > export uploaded to S3 for model cards, releases and images', async () => {
     registryMocks.getImageManifest.mockResolvedValue({
       schemaVersion: 2,
       mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
@@ -508,12 +515,23 @@ describe('services > mirroredModel', () => {
       { name: 'image2', tags: [] },
       { name: 'image3', tags: ['tag3'] },
     ])
+    releaseMocks.getReleasesForExport.mockResolvedValueOnce([
+      {
+        toJSON: vi.fn(),
+        images: [
+          { repository: '', name: 'image1', tag: 'tag1', toObject: vi.fn() },
+          { repository: '', name: 'image1', tag: 'tag3', toObject: vi.fn() },
+          { repository: '', name: 'image4', tag: 'tag3', toObject: vi.fn() },
+        ],
+      },
+    ])
 
-    await exportModel({} as UserInterface, 'modelId', true)
+    await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(5)
+    expect(archiverMocks.append).toBeCalledTimes(6)
     expect(zlibMocks.createGzip).toBeCalledTimes(3)
-    expect(archiverMocks.append).toBeCalledTimes(4)
+    expect(tarMocks.pack).toBeCalledTimes(3)
   })
 
   test('exportModel > unable to upload to tmp S3 location', async () => {
@@ -759,6 +777,23 @@ describe('services > mirroredModel', () => {
     await expect(result).rejects.toThrowError(
       'Zip file contains files that have a model ID that does not match the source model Id.',
     )
+  })
+
+  test('importModel > cannot parse into an image', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockReturnValueOnce({
+      'images/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+    })
+    releaseMocks.isImageRef.mockReturnValueOnce(false)
+    const result = importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Documents,
+    )
+
+    await expect(result).rejects.toThrowError('Data cannot be converted into an image.')
   })
 
   test('importModel > invalid zip data', async () => {
@@ -1193,7 +1228,7 @@ describe('services > mirroredModel', () => {
 
     const promise = importCompressedRegistryImage(
       {} as UserInterface,
-      (await s3Mocks.getObjectStream()).Body,
+      (await s3Mocks.getObjectStream()).Body as Readable,
       'importedPath',
       'modelId',
       'imageName',

@@ -4,6 +4,7 @@ exports[`services > mirroredModel > importModel > save each imported model card 
 {
   "importResult": {
     "fileIds": [],
+    "imageIds": [],
     "modelCardVersions": [
       undefined,
       undefined,

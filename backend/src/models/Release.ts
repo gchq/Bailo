@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { HydratedDocument, model, Schema } from 'mongoose'
 import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { semverObjectToString, semverStringToObject } from '../services/release.js'
@@ -17,7 +17,7 @@ export interface ReleaseInterface {
   draft: boolean
 
   fileIds: Array<string>
-  images: Array<ImageRef>
+  images: Array<ImageRefInterface>
 
   deleted: boolean
 
@@ -26,7 +26,7 @@ export interface ReleaseInterface {
   updatedAt: Date
 }
 
-export interface ImageRef {
+export interface ImageRefInterface {
   repository: string
   name: string
   tag: string
@@ -35,7 +35,9 @@ export interface ImageRef {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ReleaseDoc = ReleaseInterface & SoftDeleteDocument
+export type ReleaseDoc = Omit<ReleaseInterface, 'images'> & {
+  images: Array<HydratedDocument<ImageRefInterface>>
+} & SoftDeleteDocument
 
 export interface SemverObject {
   major: number

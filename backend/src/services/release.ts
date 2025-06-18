@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongoose'
 import semver from 'semver'
 import { Optional } from 'utility-types'
 
@@ -5,7 +6,7 @@ import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
-import Release, { ImageRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
+import Release, { ImageRefInterface, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
@@ -14,6 +15,7 @@ import { findDuplicates } from '../utils/array.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
+import { hasKeysOfType } from '../utils/typeguards.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
@@ -46,6 +48,18 @@ export function isReleaseDoc(data: unknown): data is ReleaseDoc {
   return true
 }
 
+// this only has the id and _id properties that mongoose adds, but none of the functions so is not a document
+export type HydratedImageRefInterface = ImageRefInterface & { _id: ObjectId; id: string }
+export function isImageRef(data: unknown): data is HydratedImageRefInterface {
+  return hasKeysOfType<HydratedImageRefInterface>(data, {
+    _id: 'string',
+    id: 'string',
+    repository: 'string',
+    name: 'string',
+    tag: 'string',
+  })
+}
+
 export async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
   if (!semver.valid(release.semver)) {
     throw BadReq(`The version '${release.semver}' is not a valid semver value.`)
@@ -54,7 +68,7 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
   if (release.images && release.images.length > 0) {
     const registryImages = await listModelImages(user, release.modelId)
 
-    const initialValue: ImageRef[] = []
+    const initialValue: ImageRefInterface[] = []
     const missingImages = release.images.reduce((acc, releaseImage) => {
       if (
         !registryImages.some(
