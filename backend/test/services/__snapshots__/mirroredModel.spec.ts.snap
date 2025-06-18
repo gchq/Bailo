@@ -1,5 +1,38 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`services > mirroredModel > importModel > save each imported file 1`] = `
+{
+  "importResult": {
+    "fileIds": [
+      undefined,
+      undefined,
+    ],
+    "imageIds": [],
+    "modelCardVersions": [],
+    "newModelCards": [],
+    "newReleases": [],
+    "releaseSemvers": [],
+  },
+  "mirroredModel": undefined,
+}
+`;
+
+exports[`services > mirroredModel > importModel > save each imported image 1`] = `
+{
+  "importResult": {
+    "fileIds": [],
+    "imageIds": [
+      undefined,
+    ],
+    "modelCardVersions": [],
+    "newModelCards": [],
+    "newReleases": [],
+    "releaseSemvers": [],
+  },
+  "mirroredModel": undefined,
+}
+`;
+
 exports[`services > mirroredModel > importModel > save each imported model card 1`] = `
 {
   "importResult": {
@@ -12,6 +45,30 @@ exports[`services > mirroredModel > importModel > save each imported model card 
     "newModelCards": [],
     "newReleases": [],
     "releaseSemvers": [],
+  },
+  "mirroredModel": undefined,
+}
+`;
+
+exports[`services > mirroredModel > importModel > save each imported release 1`] = `
+{
+  "importResult": {
+    "fileIds": [],
+    "imageIds": [],
+    "modelCardVersions": [],
+    "newModelCards": [],
+    "newReleases": [
+      {
+        "modelId": "source-model-id",
+      },
+      {
+        "modelId": "source-model-id",
+      },
+    ],
+    "releaseSemvers": [
+      undefined,
+      undefined,
+    ],
   },
   "mirroredModel": undefined,
 }

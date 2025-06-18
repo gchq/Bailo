@@ -135,6 +135,7 @@ const releaseMocks = vi.hoisted(() => ({
   getAllFileIds: vi.fn(() => [{}]),
   isReleaseDoc: vi.fn(() => true),
   isImageRef: vi.fn(() => true),
+  saveImportedRelease: vi.fn(() => ({ modelId: 'source-model-id' })),
 }))
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
@@ -151,6 +152,7 @@ const fileMocks = vi.hoisted(() => ({
   markFileAsCompleteAfterImport: vi.fn(),
   isFileInterfaceDoc: vi.fn(() => true),
   createFilePath: vi.fn(() => 'file/path'),
+  saveImportedFile: vi.fn(),
 }))
 vi.mock('../../src/services/file.js', () => fileMocks)
 
@@ -347,7 +349,7 @@ describe('services > mirroredModel', () => {
       expect.any(Object),
       'Failed to upload export to export location with signatures',
     )
-  }, 100000)
+  })
 
   test('exportModel > release export size too large', async () => {
     vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
@@ -637,7 +639,7 @@ describe('services > mirroredModel', () => {
     )
 
     expect(result).toMatchSnapshot()
-    expect(modelMocks.saveImportedModelCard.mock.calls.length).toBe(2)
+    expect(modelMocks.saveImportedModelCard).toBeCalledTimes(2)
   })
 
   test('importModel > failed to parse zip file', async () => {
@@ -690,6 +692,30 @@ describe('services > mirroredModel', () => {
     await expect(result).rejects.toThrowError(
       /^Zip file contains model cards that have a model ID that does not match the source model Id./,
     )
+  })
+
+  test('importModel > save each imported release', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockReturnValueOnce({
+      'releases/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+      'releases/foo.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+    })
+    vi.mocked(authorisation.releases).mockResolvedValueOnce([
+      { success: true, id: 'string' },
+      { success: true, id: 'string' },
+    ])
+    releaseMocks.saveImportedRelease.mockResolvedValue({ modelId: 'source-model-id' })
+
+    const result = await importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Documents,
+    )
+
+    expect(result).toMatchSnapshot()
+    expect(releaseMocks.saveImportedRelease).toBeCalledTimes(2)
   })
 
   test('importModel > cannot parse into a release', async () => {
@@ -779,6 +805,25 @@ describe('services > mirroredModel', () => {
     )
   })
 
+  test('importModel > save each imported file', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockReturnValueOnce({
+      'files/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id', path: 'test' })),
+      'files/foo.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id', path: 'test' })),
+    })
+
+    const result = await importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Documents,
+    )
+
+    expect(result).toMatchSnapshot()
+    expect(fileMocks.saveImportedFile).toBeCalledTimes(2)
+  })
+
   test('importModel > cannot parse into an image', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
@@ -794,6 +839,40 @@ describe('services > mirroredModel', () => {
     )
 
     await expect(result).rejects.toThrowError('Data cannot be converted into an image.')
+  })
+
+  test('importModel > failed to check if image exists', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockReturnValueOnce({
+      'images/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+    })
+    s3Mocks.objectExists.mockRejectedValueOnce('error')
+    const result = importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Documents,
+    )
+
+    await expect(result).rejects.toThrowError('Failed to check if image exists.')
+  })
+
+  test('importModel > save each imported image', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockReturnValueOnce({
+      'images/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+    })
+
+    const result = await importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Documents,
+    )
+
+    expect(result).toMatchSnapshot()
   })
 
   test('importModel > invalid zip data', async () => {
