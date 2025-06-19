@@ -1,11 +1,10 @@
 import { useGetModel } from 'actions/model'
-import * as _ from 'lodash-es'
 import { useRouter } from 'next/router'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import SchemaSelect from 'src/schemas/SchemaSelect'
-import { EntryKind } from 'types/types'
+import { EntryKind, SchemaKind } from 'types/types'
 
 export default function ModelSchema() {
   const router = useRouter()
@@ -21,7 +20,7 @@ export default function ModelSchema() {
     <>
       <Title text='Select a schema' />
       {isModelLoading && <Loading />}
-      {model && <SchemaSelect entry={model} />}
+      {model && <SchemaSelect schemaKind={SchemaKind.MODEL} entry={model} />}
     </>
   )
 }
