@@ -41,7 +41,7 @@ export default function ReviewRolesForm() {
     description: '',
     defaultEntities: [],
     lockEntities: false,
-    collaboratorRole: 'None',
+    collaboratorRole: 'none',
   })
 
   const [defaultEntitiesEntry, setDefaultEntities] = useState<Array<CollaboratorEntry>>([])
@@ -108,6 +108,7 @@ export default function ReviewRolesForm() {
       ...prevFormData,
       defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
     }))
+
     const res = await postReviewRole(formData)
 
     if (!res.ok) {
@@ -167,10 +168,10 @@ export default function ReviewRolesForm() {
               </LabelledInput>
               <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
                 <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
-                  <MenuItem value='None'>None</MenuItem>
-                  <MenuItem value='Owner'>Owner</MenuItem>
-                  <MenuItem value='Contributor'>Contributor</MenuItem>
-                  <MenuItem value='Consumer'>Consumer</MenuItem>
+                  <MenuItem value='none'>None</MenuItem>
+                  <MenuItem value='owner'>Owner</MenuItem>
+                  <MenuItem value='contributor'>Contributor</MenuItem>
+                  <MenuItem value='consumer'>Consumer</MenuItem>
                 </Select>
               </LabelledInput>
               <Accordion>

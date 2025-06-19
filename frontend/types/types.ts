@@ -71,7 +71,7 @@ export interface UiConfig {
   }
 }
 
-export type CollaboratorRoleType = 'None' | 'Contributor' | 'Consumer' | 'Owner'
+export type CollaboratorRoleType = 'none' | 'contributor' | 'consumer' | 'owner'
 
 export interface FileInterface {
   _id: string
@@ -414,7 +414,7 @@ export interface EntryCardInterface {
 
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<'owner' | 'contributor' | 'consumer' | string>
+  roles: Array<CollaboratorRoleType | string>
 }
 
 export const EntryKindLabel = {
