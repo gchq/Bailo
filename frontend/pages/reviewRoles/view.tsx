@@ -1,5 +1,5 @@
 import { Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
-import { useGetAllReviewRoles } from 'actions/model'
+import { useGetAllReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
 import { Fragment, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'

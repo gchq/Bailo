@@ -228,22 +228,6 @@ export function useGetAllModelReviewRoles() {
   }
 }
 
-export function useGetAllReviewRoles() {
-  const { data, isLoading, error, mutate } = useSWR<
-    {
-      reviewRoles: ReviewRolesFormData[]
-    },
-    ErrorInfo
-  >('/api/v2/review/roles', fetcher)
-
-  return {
-    mutateReviewRoles: mutate,
-    reviewRoles: data ? data.reviewRoles : emptyRolesList,
-    isReviewRolesLoading: isLoading,
-    isReviewRolesError: error,
-  }
-}
-
 export async function postReviewRole(reviewRole: ReviewRolesFormData) {
   return fetch(`/api/v2/review/role`, {
     method: 'post',
