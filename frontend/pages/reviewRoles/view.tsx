@@ -8,20 +8,19 @@ import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
-import { ReviewRolesFormData } from 'types/types'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetAllReviewRoles()
-  const [selectedRole, setSelectedRole] = useState<ReviewRolesFormData>(reviewRoles[0])
+  const [selectedRole, setSelectedRole] = useState<number>(0)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const listRoles = useMemo(
     () =>
-      reviewRoles.map((reviewRole) => (
+      reviewRoles.map((reviewRole, index) => (
         <SimpleListItemButton
-          selected={selectedRole === reviewRole}
+          selected={selectedRole === index}
           key={reviewRole.id}
-          onClick={() => setSelectedRole(reviewRole)}
+          onClick={() => setSelectedRole(index)}
         >
           {reviewRole.name}
         </SimpleListItemButton>
@@ -31,9 +30,9 @@ export default function ReviewRoles() {
 
   const listRoleDescriptions = useMemo(
     () =>
-      reviewRoles.map((reviewRole) => (
+      reviewRoles.map((reviewRole, index) => (
         <Fragment key={reviewRole.id}>
-          {selectedRole === reviewRole && (
+          {selectedRole === index && (
             <>
               <Typography color='primary' fontWeight='bold'>
                 Description
