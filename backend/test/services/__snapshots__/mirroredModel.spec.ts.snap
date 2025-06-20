@@ -17,22 +17,6 @@ exports[`services > mirroredModel > importModel > save each imported file 1`] = 
 }
 `;
 
-exports[`services > mirroredModel > importModel > save each imported image 1`] = `
-{
-  "importResult": {
-    "fileIds": [],
-    "imageIds": [
-      undefined,
-    ],
-    "modelCardVersions": [],
-    "newModelCards": [],
-    "newReleases": [],
-    "releaseSemvers": [],
-  },
-  "mirroredModel": undefined,
-}
-`;
-
 exports[`services > mirroredModel > importModel > save each imported model card 1`] = `
 {
   "importResult": {
@@ -54,7 +38,9 @@ exports[`services > mirroredModel > importModel > save each imported release 1`]
 {
   "importResult": {
     "fileIds": [],
-    "imageIds": [],
+    "imageIds": [
+      undefined,
+    ],
     "modelCardVersions": [],
     "newModelCards": [],
     "newReleases": [
@@ -101,7 +87,6 @@ exports[`services > mirroredModel > importModel > uploads image to S3 on success
       "imageTag": "image-tag",
       "modelId": "mirrored-model-id",
     },
-    "sourcePath": "/s3/path/",
   },
   "mirroredModel": {
     "card": {

@@ -13,7 +13,6 @@ import {
   getModelReleases,
   getReleaseBySemver,
   getReleasesForExport,
-  isImageRef,
   isReleaseDoc,
   newReleaseComment,
   removeFileFromReleases,
@@ -631,7 +630,7 @@ describe('services > release', () => {
       minor: false,
       draft: false,
       fileIds: ['id1'],
-      images: [{ repository: 'repo', name: 'name', tag: 'tag' }],
+      images: [{ repository: 'repo', name: 'name', tag: 'tag', _id: '' }],
       deleted: false,
       createdBy: '',
       createdAt: '',
@@ -650,7 +649,7 @@ describe('services > release', () => {
       minor: false,
       draft: false,
       fileIds: ['id1'],
-      images: [{ repository: 'repo', name: 'name', tag: 'tag' }],
+      images: [{ repository: 'repo', name: 'name', tag: 'tag', _id: '' }],
       deleted: false,
       createdBy: '',
       createdAt: '',
@@ -663,35 +662,6 @@ describe('services > release', () => {
 
   test('isReleaseDoc > wrong type', async () => {
     const result = isReleaseDoc(null)
-
-    expect(result).toBe(false)
-  })
-
-  test('isImageRef > success', async () => {
-    const result = isImageRef({
-      _id: '',
-      id: '',
-      repository: '',
-      name: '',
-      tag: '',
-    })
-
-    expect(result).toBe(true)
-  })
-
-  test('isImageRef > missing property', async () => {
-    const result = isImageRef({
-      _id: '',
-      id: '',
-      repository: '',
-      name: '',
-    })
-
-    expect(result).toBe(false)
-  })
-
-  test('isImageRef > wrong type', async () => {
-    const result = isImageRef(null)
 
     expect(result).toBe(false)
   })

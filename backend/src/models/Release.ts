@@ -1,4 +1,4 @@
-import { HydratedDocument, model, Schema } from 'mongoose'
+import { model, Schema } from 'mongoose'
 import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { semverObjectToString, semverStringToObject } from '../services/release.js'
@@ -36,7 +36,7 @@ export interface ImageRefInterface {
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
 export type ReleaseDoc = Omit<ReleaseInterface, 'images'> & {
-  images: Array<HydratedDocument<ImageRefInterface>>
+  images: Array<ImageRefInterface & { _id: Schema.Types.ObjectId }>
 } & SoftDeleteDocument
 
 export interface SemverObject {

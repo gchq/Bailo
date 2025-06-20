@@ -29,7 +29,6 @@ async function script() {
   await importCompressedRegistryImage(
     { dn: 'user' },
     fileBlob,
-    inputS3Path,
     outputImageModel,
     outputImageName,
     outputImageTag,

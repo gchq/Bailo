@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongoose'
 import semver from 'semver'
 import { Optional } from 'utility-types'
 
@@ -42,20 +41,8 @@ export function isReleaseDoc(data: unknown): data is ReleaseDoc {
     }) &&
     Array.isArray(data['fileIds']) &&
     data['fileIds'].every((fileId: unknown) => typeof fileId === 'string') &&
-    arrayOfObjectsHasKeysOfType(data['images'], { repository: 'string', name: 'string', tag: 'string' })
+    arrayOfObjectsHasKeysOfType(data['images'], { repository: 'string', name: 'string', tag: 'string', _id: 'string' })
   )
-}
-
-// this only has the id and _id properties that mongoose adds, but none of the functions so is not a document
-export type HydratedImageRefInterface = ImageRefInterface & { _id: ObjectId; id: string }
-export function isImageRef(data: unknown): data is HydratedImageRefInterface {
-  return hasKeysOfType<HydratedImageRefInterface>(data, {
-    _id: 'string',
-    id: 'string',
-    repository: 'string',
-    name: 'string',
-    tag: 'string',
-  })
 }
 
 export async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {

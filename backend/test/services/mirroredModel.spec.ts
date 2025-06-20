@@ -134,7 +134,6 @@ const releaseMocks = vi.hoisted(() => ({
   ]),
   getAllFileIds: vi.fn(() => [{}]),
   isReleaseDoc: vi.fn(() => true),
-  isImageRef: vi.fn(() => true),
   saveImportedRelease: vi.fn(() => ({ modelId: 'source-model-id' })),
 }))
 vi.mock('../../src/services/release.js', () => releaseMocks)
@@ -531,7 +530,7 @@ describe('services > mirroredModel', () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
     expect(s3Mocks.putObjectStream).toBeCalledTimes(5)
-    expect(archiverMocks.append).toBeCalledTimes(6)
+    expect(archiverMocks.append).toBeCalledTimes(3)
     expect(zlibMocks.createGzip).toBeCalledTimes(3)
     expect(tarMocks.pack).toBeCalledTimes(3)
   })
@@ -697,8 +696,18 @@ describe('services > mirroredModel', () => {
   test('importModel > save each imported release', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
-      'releases/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
-      'releases/foo.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+      'releases/test.json': Buffer.from(
+        JSON.stringify({
+          modelId: 'source-model-id',
+          images: [{ repository: '', name: 'image1', tag: 'tag1', toObject: vi.fn() }],
+        }),
+      ),
+      'releases/foo.json': Buffer.from(
+        JSON.stringify({
+          modelId: 'source-model-id',
+          images: [],
+        }),
+      ),
     })
     vi.mocked(authorisation.releases).mockResolvedValueOnce([
       { success: true, id: 'string' },
@@ -824,57 +833,6 @@ describe('services > mirroredModel', () => {
     expect(fileMocks.saveImportedFile).toBeCalledTimes(2)
   })
 
-  test('importModel > cannot parse into an image', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'images/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
-    })
-    releaseMocks.isImageRef.mockReturnValueOnce(false)
-    const result = importModel(
-      {} as UserInterface,
-      'mirrored-model-id',
-      'source-model-id',
-      'https://test.com',
-      ImportKind.Documents,
-    )
-
-    await expect(result).rejects.toThrowError('Data cannot be converted into an image.')
-  })
-
-  test('importModel > failed to check if image exists', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'images/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
-    })
-    s3Mocks.objectExists.mockRejectedValueOnce('error')
-    const result = importModel(
-      {} as UserInterface,
-      'mirrored-model-id',
-      'source-model-id',
-      'https://test.com',
-      ImportKind.Documents,
-    )
-
-    await expect(result).rejects.toThrowError('Failed to check if image exists.')
-  })
-
-  test('importModel > save each imported image', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'images/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
-    })
-
-    const result = await importModel(
-      {} as UserInterface,
-      'mirrored-model-id',
-      'source-model-id',
-      'https://test.com',
-      ImportKind.Documents,
-    )
-
-    expect(result).toMatchSnapshot()
-  })
-
   test('importModel > invalid zip data', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockImplementationOnce(() => {
@@ -917,18 +875,6 @@ describe('services > mirroredModel', () => {
     expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
   })
 
-  test('importModel > missing file path for image imports', async () => {
-    const result = importModel(
-      {} as UserInterface,
-      'mirrored-model-id',
-      'source-model-id',
-      'https://test.com',
-      ImportKind.Image,
-    )
-
-    await expect(result).rejects.toThrowError(/^Missing File Path/)
-  })
-
   test('importModel > missing image name for image imports', async () => {
     const result = importModel(
       {} as UserInterface,
@@ -936,7 +882,7 @@ describe('services > mirroredModel', () => {
       'source-model-id',
       'https://test.com',
       ImportKind.Image,
-      'file/path',
+      undefined,
     )
 
     await expect(result).rejects.toThrowError(/^Missing Image Name/)
@@ -949,7 +895,7 @@ describe('services > mirroredModel', () => {
       'source-model-id',
       'https://test.com',
       ImportKind.Image,
-      'file/path',
+      undefined,
       'image-name',
     )
 
@@ -983,7 +929,7 @@ describe('services > mirroredModel', () => {
       'source-model-id',
       'https://test.com',
       ImportKind.Image,
-      '/s3/path/',
+      undefined,
       'image-name',
       'image-tag',
     )
@@ -1195,7 +1141,6 @@ describe('services > mirroredModel', () => {
     const promise = importCompressedRegistryImage(
       {} as UserInterface,
       new PassThrough(),
-      'importedPath',
       'modelId',
       'imageName',
       'tag',
@@ -1255,7 +1200,6 @@ describe('services > mirroredModel', () => {
     const promise = importCompressedRegistryImage(
       {} as UserInterface,
       new PassThrough(),
-      'importedPath',
       'modelId',
       'imageName',
       'tag',
@@ -1308,7 +1252,6 @@ describe('services > mirroredModel', () => {
     const promise = importCompressedRegistryImage(
       {} as UserInterface,
       (await s3Mocks.getObjectStream()).Body as Readable,
-      'importedPath',
       'modelId',
       'imageName',
       'tag',
