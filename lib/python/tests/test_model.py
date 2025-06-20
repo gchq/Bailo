@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from bailo.core.enums import MinimalSchema
+from bailo.core.enums import CollaboratorEntry, Role, MinimalSchema
 
 # isort: split
 
@@ -22,11 +22,18 @@ def test_create_experiment_from_model(local_model):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "organisation", "state", "visibility"),
+    ("name", "description", "organisation", "state", "visibility", "collaborators"),
     [
-        ("test-model", "test", None, None, ModelVisibility.PUBLIC),
-        ("test-model", "test", None, None, None),
-        ("test-model", "test", "Example Organisation", "Development", None),
+        ("test-model", "test", None, None, ModelVisibility.PUBLIC, None),
+        ("test-model", "test", None, None, None, [CollaboratorEntry("user:user", ["owner", "contributor"])]),
+        (
+            "test-model",
+            "test",
+            "Example Organisation",
+            "Development",
+            None,
+            [CollaboratorEntry("user:user", [Role.OWNER])],
+        ),
     ],
 )
 def test_create_get_from_id_and_update(
@@ -35,6 +42,7 @@ def test_create_get_from_id_and_update(
     visibility: ModelVisibility | None,
     organisation: str | None,
     state: str | None,
+    collaborators: list[CollaboratorEntry] | None,
     integration_client: Client,
 ):
     # Create model
@@ -45,6 +53,7 @@ def test_create_get_from_id_and_update(
         visibility=visibility,
         organisation=organisation,
         state=state,
+        collaborators=collaborators,
     )
     model.card_from_schema("minimal-general-v10")
     assert isinstance(model, Model)

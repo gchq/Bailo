@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from bailo.core.enums import CollaboratorEntry, Role
 import pytest
 
 # isort: split
@@ -14,11 +15,18 @@ def test_datacard(local_datacard):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "organisation", "state", "visibility"),
+    ("name", "description", "organisation", "state", "visibility", "collaborators"),
     [
-        ("test-datacard", "test", None, None, ModelVisibility.PUBLIC),
-        ("test-datacard", "test", None, None, None),
-        ("test-datacard", "test", "Example Organisation", "Development", None),
+        ("test-datacard", "test", None, None, ModelVisibility.PUBLIC, None),
+        ("test-datacard", "test", None, None, None, [CollaboratorEntry("user:user", ["owner", "contributor"])]),
+        (
+            "test-datacard",
+            "test",
+            "Example Organisation",
+            "Development",
+            None,
+            [CollaboratorEntry("user:user", [Role.OWNER])],
+        ),
     ],
 )
 def test_create_get_from_id_and_update(
@@ -27,6 +35,7 @@ def test_create_get_from_id_and_update(
     visibility: ModelVisibility | None,
     organisation: str | None,
     state: str | None,
+    collaborators: list[CollaboratorEntry] | None,
     integration_client: Client,
 ):
     # Create model
@@ -37,6 +46,7 @@ def test_create_get_from_id_and_update(
         visibility=visibility,
         organisation=organisation,
         state=state,
+        collaborators=collaborators,
     )
     datacard.card_from_schema("minimal-data-card-v10")
     assert isinstance(datacard, Datacard)

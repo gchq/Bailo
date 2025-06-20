@@ -5,7 +5,7 @@ import warnings
 from typing import Any
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, MinimalSchema, ModelVisibility
+from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, ModelVisibility
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,7 @@ class Entry:
     :param visibility: Visibility of model, using ModelVisibility enum (i.e. Public or Private), defaults to None
     :param organisation: Organisation responsible for the model, defaults to None
     :param state: Development readiness of the model, defaults to None
+    :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
     """
 
     def __init__(
@@ -33,6 +34,7 @@ class Entry:
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
     ) -> None:
         self.client = client
 
@@ -42,6 +44,7 @@ class Entry:
         self.kind = kind
         self.visibility = visibility
         self.organisation = organisation
+        self.collaborators = collaborators
         self.state = state
 
         self._card = None
@@ -57,6 +60,7 @@ class Entry:
             description=self.description,
             visibility=self.visibility,
             organisation=self.organisation,
+            collaborators=self.collaborators,
             state=self.state,
         )
         self._unpack(res["model"])
