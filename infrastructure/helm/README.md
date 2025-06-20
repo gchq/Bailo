@@ -267,23 +267,23 @@ modelscan:
 | `connectors.fileScanners.retryDelayInMinutes` | number of minutes between scans on a given file   | `60`  |
 | `connectors.fileScanners.maxInitRetries` | number of times the microservice is attempted to be reached before failing at startup  | `5`    |
 | `connectors.fileScanners.initRetryDelay` | delay between successive microservice pings in milliseconds    | `5000` |
-| `instrumentation.enabled`  | ----  | `false`  |
-| `instrumentation.debug`  | ----  | `false`  |
-| `modelMirror.import.enabled`  | ----  | `false`  |
-| `modelMirror.export.enabled`  | ----  | `false`  |
-| `modelMirror.export.disclaimer`  | ----## Example Agreement \n I agree that this model is suitable for exporting  | ``  |
-| `modelMirror.export.kmsSignature.enabled`  | ----  | `false`  |
-| `modelMirror.export.kmsSignature.keyId`  | ----  | `123`  |
-| `modelMirror.export.kmsSignature.KMSClient.region`  | ----  | `eu-west-1`  |
-| `modelMirror.export.kmsSignature.KMSClient.`  | ----  | `accessKey`  |
-| `modelMirror.export.kmsSignature.KMSClient.`  | ----  | `secretKey`  |
+| `instrumentation.enabled`  | Enable OpenTelemetry instrumentation | `false`  |
+| `instrumentation.debug`  | Enable instrumentation debugging  | `false`  |
+| `modelMirror.import.enabled`  | Enable creation of mirrored models  | `false`  |
+| `modelMirror.export.enabled`  | Enable the exporting of models to S3  | `false`  |
+| `modelMirror.export.disclaimer`  | Disclaimer shown to the user in the UI prior to exporting a model |## Example Agreement \n I agree that this model is suitable for exporting  | ``  |
+| `modelMirror.export.kmsSignature.enabled`  | Enable the use of KMS signatures when exporting a model  | `false`  |
+| `modelMirror.export.kmsSignature.keyId`  | KMS key to use when signing an export  | `123`  |
+| `modelMirror.export.kmsSignature.KMSClient.region`  | AWS region for the KMS client  | `eu-west-1`  |
+| `modelMirror.export.kmsSignature.KMSClient.`  | Access key credential for the KMS client  | `accessKey`  |
+| `modelMirror.export.kmsSignature.KMSClient.`  | Secret key credential for the KMS client  | `secretKey`  |
 
 #### Inferencing cluster reference configurations
 | Name  | Description  | Value |
 | ----  | ----------  | ----- |
-| `inference.enabled`  | enable infrencing  | `false`  |
-| `inference.host`  | url of infrencing cluster  | `https://example.com`  |
-| `inference.gpus`  | ----  | ``  | ???
-| `inference.authorizationTokenName`  | ----  | `inferencing-token`  | ???
-| `inference.authorisationToken`  | ----  | ``  | ???
+| `inference.enabled`  | Enable infrencing  | `false`  |
+| `inference.host`  | URL of infrencing cluster  | `https://example.com`  |
+| `inference.gpus`  | Available GPUs a user can select  | ``  | ???
+| `inference.authorizationTokenName`  | Name of authorisation token  | `inferencing-token`  | ???
+| `inference.authorisationToken`  | Authorisation token used to connect to inferencing service  | ``  | ???
 
