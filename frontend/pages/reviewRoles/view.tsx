@@ -45,7 +45,7 @@ export default function ReviewRoles() {
               <Typography color='primary' fontWeight='bold'>
                 System Role
               </Typography>
-              {reviewRole.collaboratorRole ? <Typography>{reviewRole.collaboratorRole}</Typography> : 'None'}
+              <Typography>{reviewRole.collaboratorRole}</Typography>
             </>
           )}
         </Fragment>
