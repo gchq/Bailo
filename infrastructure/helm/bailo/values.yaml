@@ -228,7 +228,6 @@ mail:
 # Openshift specific configuration
 openshift:
   namespace: openshift-project
-  dockerPushSecretName: "registry-push-secret"
   termination: edge
 
 # Instance Settings
