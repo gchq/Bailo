@@ -44,8 +44,8 @@ class Entry:
         self.kind = kind
         self.visibility = visibility
         self.organisation = organisation
-        self.collaborators = collaborators
         self.state = state
+        self.collaborators = collaborators
 
         self._card = None
         self._card_version = None
@@ -60,8 +60,8 @@ class Entry:
             description=self.description,
             visibility=self.visibility,
             organisation=self.organisation,
-            collaborators=self.collaborators,
             state=self.state,
+            collaborators=self.collaborators,
         )
         self._unpack(res["model"])
 

@@ -67,8 +67,8 @@ class Datacard(Entry):
         :param description: Description of datacard
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
-        :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
         :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Datacard object
         """
         res = client.post_model(
@@ -119,9 +119,9 @@ class Datacard(Entry):
             datacard_id=datacard_id,
             name=res["name"],
             description=res["description"],
+            collaborators=res["collaborators"],
             organisation=res.get("organisation"),
             state=res.get("state"),
-            collaborators=res.get("collaborators"),
         )
         datacard._unpack(res)
 

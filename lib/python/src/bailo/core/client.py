@@ -26,8 +26,8 @@ class Client:
         description: str,
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
-        collaborators: list[CollaboratorEntry] | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
     ):
         """Create a model.
 
@@ -51,8 +51,8 @@ class Client:
                 "description": description,
                 "visibility": _visibility,
                 "organisation": organisation,
-                "collaborators": collaborators,
                 "state": state,
+                "collaborators": collaborators,
             }
         )
 
