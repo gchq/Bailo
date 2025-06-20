@@ -12,7 +12,7 @@ from semantic_version import Version
 # isort: split
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, MinimalSchema, ModelVisibility
+from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 from bailo.helper.entry import Entry
@@ -37,6 +37,7 @@ class Model(Entry):
     :param description: Description of model
     :param organisation: Organisation responsible for the model, defaults to None
     :param state: Development readiness of the model, defaults to None
+    :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
     :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -48,6 +49,7 @@ class Model(Entry):
         description: str,
         organisation: str | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
         visibility: ModelVisibility | None = None,
     ) -> None:
         super().__init__(
@@ -59,6 +61,7 @@ class Model(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
+            collaborators=collaborators,
         )
 
         self.model_id = model_id
@@ -71,6 +74,7 @@ class Model(Entry):
         description: str,
         organisation: str | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
         visibility: ModelVisibility | None = None,
     ) -> Model:
         """Build a model from Bailo and upload it.
@@ -80,6 +84,7 @@ class Model(Entry):
         :param description: Description of model
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
+        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
@@ -90,6 +95,7 @@ class Model(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
+            collaborators=collaborators,
         )
         model_id = res["model"]["id"]
         logger.info("Model successfully created on server with ID %s.", model_id)
@@ -102,6 +108,7 @@ class Model(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
+            collaborators=collaborators,
         )
 
         model._unpack(res["model"])
@@ -127,6 +134,7 @@ class Model(Entry):
             model_id=model_id,
             name=res["name"],
             description=res["description"],
+            collaborators=res["collaborators"],
             organisation=res.get("organisation"),
             state=res.get("state"),
         )
@@ -164,8 +172,9 @@ class Model(Entry):
                 model_id=model["id"],
                 name=model["name"],
                 description=model["description"],
-                organisation=res.get("organisation"),
-                state=res.get("state"),
+                collaborators=model["collaborators"],
+                organisation=model.get("organisation"),
+                state=model.get("state"),
             )
             model_obj._unpack(res_model)
             model_obj.get_card_latest()
@@ -185,6 +194,7 @@ class Model(Entry):
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
     ) -> Model:
         """Import an MLFlow Model into Bailo.
 
@@ -197,6 +207,7 @@ class Model(Entry):
         :param visibility: Visibility of model on Bailo, using ModelVisibility enum (e.g Public or Private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
+        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: A model object
         """
         if not ML_FLOW:
@@ -230,6 +241,7 @@ class Model(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
+            collaborators=collaborators,
         )
         model_id = bailo_res["model"]["id"]
         logger.info("MLFlow model successfully imported to Bailo with ID %s", model_id)
@@ -242,6 +254,7 @@ class Model(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
+            collaborators=collaborators,
         )
         model._unpack(bailo_res["model"])
 
@@ -587,7 +600,7 @@ class Experiment:
         mc = NestedDict(mc)
 
         if len(self.raw) == 0:
-            raise BailoException(f"This experiment has no runs to publish.")
+            raise BailoException("This experiment has no runs to publish.")
         if (select_by is None) and (run_id is None):
             raise BailoException(
                 "Either select_by (e.g. 'accuracy MIN|MAX') or run_id is required to publish an experiment run."
