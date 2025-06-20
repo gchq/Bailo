@@ -172,9 +172,9 @@ class Model(Entry):
                 model_id=model["id"],
                 name=model["name"],
                 description=model["description"],
-                collaborators=res["collaborators"],
-                organisation=res.get("organisation"),
-                state=res.get("state"),
+                collaborators=model["collaborators"],
+                organisation=model.get("organisation"),
+                state=model.get("state"),
             )
             model_obj._unpack(res_model)
             model_obj.get_card_latest()

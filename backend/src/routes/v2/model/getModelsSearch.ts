@@ -4,7 +4,8 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { EntryKind, EntryKindKeys } from '../../../models/Model.js'
+import { CollaboratorEntry, EntryKind, EntryKindKeys } from '../../../models/Model.js'
+import log from '../../../services/log.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
@@ -60,6 +61,8 @@ export interface ModelSearchResult {
   tags: Array<string>
   kind: EntryKindKeys
   organisation?: string
+  state?: string
+  collaborators: Array<CollaboratorEntry>
   createdAt: Date
   updatedAt: Date
 }
@@ -94,9 +97,12 @@ export const getModelsSearch = [
       tags: model.card?.metadata?.overview?.tags || [],
       kind: model.kind,
       organisation: model.organisation,
+      state: model.state,
+      collaborators: model.collaborators,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
     }))
+    log.debug('Search models', models)
 
     await audit.onSearchModel(req, models)
 
