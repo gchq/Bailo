@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from bailo.core.enums import CollaboratorEntry, Role, MinimalSchema
+from bailo.core.enums import CollaboratorEntry, MinimalSchema, Role
 
 # isort: split
 

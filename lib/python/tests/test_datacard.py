@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from bailo.core.enums import CollaboratorEntry, Role
 import pytest
 
 # isort: split
 
 from bailo import Client, Datacard, Model, ModelVisibility
+from bailo.core.enums import CollaboratorEntry, Role
 from bailo.core.exceptions import BailoException
 
 
