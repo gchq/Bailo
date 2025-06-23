@@ -456,7 +456,6 @@ async function importDocuments(
   try {
     zipContent = fflate.unzipSync(zipData, {
       filter(file) {
-        log.debug('Got file', { file })
         return /.+\.json/.test(file.name)
       },
     })
