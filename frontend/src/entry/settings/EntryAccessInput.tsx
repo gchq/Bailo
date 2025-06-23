@@ -12,7 +12,8 @@ type EntryAccessInputProps = {
   value: CollaboratorEntry[]
   onChange: (value: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
-  entryRoles: Role[]
+  collaboratorsValue?: CollaboratorEntry[]
+  entryRoles?: Role[]
 } & (
   | {
       isReadOnly: boolean
@@ -34,6 +35,7 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
 
   const collaboratorList = useMemo(
     () =>
+      entryRoles &&
       collaborators.map((entity) => (
         <EntityItem
           key={entity.entity}
@@ -125,16 +127,18 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
         )}
       />
       <ManualEntityInput onAddEntityManually={handleAddEntityManually} errorMessage={manualEntityInputErrorMessage} />
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Entity</TableCell>
-            <TableCell>Roles</TableCell>
-            <TableCell align='right'>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>{collaboratorList}</TableBody>
-      </Table>
+      {entryRoles && (
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Entity</TableCell>
+              <TableCell>Roles</TableCell>
+              <TableCell align='right'>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>{collaboratorList}</TableBody>
+        </Table>
+      )}
     </Stack>
   )
 }

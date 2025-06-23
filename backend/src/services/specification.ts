@@ -339,5 +339,5 @@ export const reviewRoleSchema = z.object({
   description: z.string().openapi({ example: 'This is an example review role' }),
   defaultEntities: z.array(z.string()).openapi({ example: ['user:user'] }),
   lockEntities: z.boolean().openapi({ example: false }),
-  CollaboratorRoles: z.string().optional().openapi({ example: CollaboratorRoles.Owner }),
+  collaboratorRole: z.string().optional().openapi({ example: CollaboratorRoles.Owner }),
 })

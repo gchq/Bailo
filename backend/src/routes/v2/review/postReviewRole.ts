@@ -24,7 +24,7 @@ export const postReviewRoleSchema = z.object({
       .optional()
       .openapi({ example: ['user:user'] }),
     lockEntities: z.boolean().optional().openapi({ example: false }),
-    CollaboratorRoles: z.string().optional().openapi({ example: CollaboratorRoles.Owner }),
+    collaboratorRole: z.nativeEnum(CollaboratorRoles).optional().openapi({ example: CollaboratorRoles.Owner }),
   }),
 })
 
