@@ -205,9 +205,6 @@ registry:
   port: 5000 # default 5000
   insecure: "true"
   certDir: "/certs"
-  certFile: cert.pem #use san.cnf to create certs
-  jwksFile: jwks.json
-  keyFile: key.pem
   serviceAccount: ''
 
 # Nginx Dependencies
@@ -267,11 +264,6 @@ config:
   issueLinks:
     support: "mailto:?subject=Bailo%20Contact"
     contact: "mailto:?subject=Bailo%20Contact"
-
-# nginx.deployment registry.deployment
-nginxcert:
-  cert: cert.pem #use san.cnf to create certs
-  key: key.pem
 
 connectors:
   authentication:
