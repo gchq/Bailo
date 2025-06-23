@@ -221,11 +221,12 @@ const registryMocks = vi.hoisted(() => ({
   getImageBlob: vi.fn(() => ({ body: ReadableStream.from('test') })),
   getImageManifest: vi.fn(),
   initialiseImageUpload: vi.fn(),
-  joinDistributionPackageName: vi.fn(() => 'imageName:tag'),
+  joinDistributionPackageName: vi.fn(() => 'localhost:8080/imageName:tag'),
   listModelImages: vi.fn(() => [] as { name: string; tags: string[] }[]),
   putImageBlob: vi.fn(),
   putImageManifest: vi.fn(),
   splitDistributionPackageName: vi.fn(() => ({
+    domain: 'localhost:8080',
     path: 'imageName',
     tag: 'tag',
   })),

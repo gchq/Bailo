@@ -39,7 +39,7 @@ exports[`services > mirroredModel > importModel > save each imported release 1`]
   "importResult": {
     "fileIds": [],
     "imageIds": [
-      undefined,
+      "localhost:8080/imageName:tag",
     ],
     "modelCardVersions": [],
     "newModelCards": [],

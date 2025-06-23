@@ -46,6 +46,7 @@ import {
   validateMirroredModel,
 } from './model.js'
 import {
+  DistributionPackageName,
   doesImageLayerExist,
   getImageBlob,
   getImageManifest,
@@ -448,7 +449,7 @@ async function importDocuments(
   const modelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   const releases: Omit<ReleaseDoc, '_id'>[] = []
   const files: FileInterfaceDoc[] = []
-  const images: ReleaseDoc['images'] = []
+  const images: DistributionPackageName[] = []
   const zipData = new Uint8Array(await res.arrayBuffer())
   let zipContent
   try {
@@ -499,7 +500,11 @@ async function importDocuments(
       importId,
     })
   }
-  releases.forEach((release) => release.images.forEach((image) => images.push(image)))
+  releases.forEach((release) =>
+    release.images.forEach((image) =>
+      images.push({ domain: image.repository, path: image.name, tag: image.tag } as DistributionPackageName),
+    ),
+  )
 
   // Parse model card documents.
 
@@ -551,7 +556,7 @@ async function importDocuments(
   const modelCardVersions = modelCards.map((modelCard) => modelCard.version)
   const releaseSemvers = releases.map((release) => release.semver)
   const fileIds: ObjectId[] = files.map((file) => file._id)
-  const imageIds: ObjectId[] = images.map((image) => image._id)
+  const imageIds: string[] = images.map((image) => joinDistributionPackageName(image))
 
   log.info(
     {
@@ -922,13 +927,13 @@ async function addReleaseToZip(
           sourceModelId: model.id,
           imageName: image.name,
           imageTag: image.tag,
-          imageId: image._id,
         }
+        const imageId = joinDistributionPackageName({ domain: image.repository, path: image.name, tag: image.tag })
 
         // setup gzip prior to calling addRegistryImageToZip to allow the stream to drain, otherwise the stream will get stuck
         const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
         const s3Upload = uploadToS3(
-          `${image._id}.tar.gz`,
+          `${imageId}.tar.gz`,
           gzipStream,
           {
             exporter: user.dn,
