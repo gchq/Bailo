@@ -205,6 +205,9 @@ registry:
   port: 5000 # default 5000
   insecure: "true"
   certDir: "/certs"
+  certFile: cert.pem #use san.cnf to create certs
+  jwksFile: jwks.json
+  keyFile: key.pem
   serviceAccount: ''
 
 # Nginx Dependencies
@@ -298,6 +301,7 @@ modelMirror:
         region: 'eu-west-1'
         accessKey: ''
         secretKey: ''
+
 # Inferencing cluster reference
 inference:
   enabled: false

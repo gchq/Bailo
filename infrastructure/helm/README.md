@@ -186,7 +186,6 @@ oauth:
 | `image.modelscanTag`  | Modelscan image tag | `null`  |
 | `image.pullPolicy`  | https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy  | `IfNotPresent` |
 
-
 #### Pod parameters
 | Name  | Description  | Value |
 | ----  | ----------  | ----- |
@@ -222,7 +221,6 @@ oauth:
 | ----  | ----------  | ----- |
 | `backend.serviceAccount`  | If set, service account can be used to connect Backend to S3 without using aws access and secret keys | `null` |
 | `registry.serviceAccount` | If set, service account can be used to connect Registry to S3 without using aws access and secret keys | `null` |
-
 
 #### Network parameters
 | Name  | Description  | Value |
@@ -279,6 +277,10 @@ oauth:
 | `config.app.port`  | Used for external bailo url  | `443`  |
 | `config.issueLinks.support`  | Help page email configuration  | `mailto:?subject=Bailo%20Contact`  |
 | `config.issueLinks.contact`  | Help page email configuration | `mailto:?subject=Bailo%20Contact`  |
+| `connectors.authentication.kind`  | Name of the connector to be used for authentication  | `silly`  |
+| `registry.certFile`  | Ensure this name matches certs name used in backend.deployment.yaml and registry.deployment.yaml  | `cert.pem`  |
+| `registry.keyFile`  | Ensure this name matches certs name used in backend.deployment.yaml and registry.deployment.yaml  | `key.pem`  |
+| `registry.jwksFile`  | See generate certs section above  | `jwks.json`  |
 | `connectors.authentication.kind`  | Name of the connector to be used for authentication  | `silly`  |
 | `connectors.authorisation.kind`  | Name of the connector to be used for authorisation  | `basic`  |
 | `connectors.audit.kind`  | Name of the connector to be used for auditing  | `silly`  |
