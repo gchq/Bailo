@@ -134,6 +134,27 @@ modelscan:
   enabled: true
 ```
 
+#### Cognito example (optional)
+
+```yaml
+cookie:
+  secret: 'random secret'
+oauth:
+  enabled: true
+  origin: 'https://your-hosted-url'
+  cognito:
+    key: cognito key
+    secret: cognito secret
+    dynamic: "['scope']"
+    response: "['tokens', 'raw', 'jwt']"
+    callback: '/'
+    subdomain: 'cognito domain'
+    adminGroupName: 'cognito admin group if you have set one'
+  identityProviderClient:
+    userPoolId: "user pool"
+    userIdAttribute: "email"
+```
+
 #### Install Bailo
 
 1. `helm dependency update`
@@ -281,6 +302,6 @@ modelscan:
 | ----  | ----------  | ----- |
 | `inference.enabled`  | Enable infrencing  | `false`  |
 | `inference.host`  | URL of infrencing cluster  | `https://example.com`  |
-| `inference.gpus`  | Available GPUs a user can select  | ``  |
+| `inference.gpus`  | Available GPUs a user can select  | null  |
 | `inference.authorizationTokenName`  | Name of authorisation token  | `inferencing-token`  |
-| `inference.authorisationToken`  | Authorisation token used to connect to inferencing service  | ``  |
+| `inference.authorisationToken`  | Authorisation token used to connect to inferencing service  | null  |
