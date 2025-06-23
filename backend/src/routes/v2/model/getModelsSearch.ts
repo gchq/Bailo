@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { CollaboratorEntry, EntryKind, EntryKindKeys } from '../../../models/Model.js'
-import log from '../../../services/log.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
@@ -102,7 +101,6 @@ export const getModelsSearch = [
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
     }))
-    log.debug('Search models', models)
 
     await audit.onSearchModel(req, models)
 
