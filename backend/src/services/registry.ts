@@ -53,12 +53,12 @@ export function joinDistributionPackageName(distributionPackageName: Distributio
     if (distributionPackageName['tag']) {
       return `${distributionPackageName.domain}/${distributionPackageName.path}:${distributionPackageName['tag']}`
     }
-    return `${distributionPackageName.domain}/${distributionPackageName.path}:${distributionPackageName['digest']}`
+    return `${distributionPackageName.domain}/${distributionPackageName.path}@${distributionPackageName['digest']}`
   }
   if (distributionPackageName['tag']) {
     return `${distributionPackageName.path}:${distributionPackageName['tag']}`
   }
-  return `${distributionPackageName.path}:${distributionPackageName['digest']}`
+  return `${distributionPackageName.path}@${distributionPackageName['digest']}`
 }
 
 async function checkUserAuth(user: UserInterface, modelId: string, actions: Action[] = []) {
