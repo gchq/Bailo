@@ -134,7 +134,7 @@ modelscan:
   enabled: true
 ```
 
-#### Cognito client configuarion example (optional)
+#### Cognito client configuration example (optional)
 
 ```yaml
 cookie:
