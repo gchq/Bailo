@@ -134,7 +134,7 @@ modelscan:
   enabled: true
 ```
 
-#### Cognito example (optional)
+#### Cognito client configuarion example (optional)
 
 ```yaml
 cookie:
@@ -229,15 +229,15 @@ oauth:
 | `service.frontendPort`  | Frontend port for Service to connect to | `3000` |
 | `service.backendPort`  | Frontend port for Service to connect to | `3001` |
 | `ingress.enabled `  |  Map traffic to different backends based on rules you define via the Kubernetes API https://kubernetes.io/docs/concepts/services-networking/ingress/ | `false`  |
-| `route.enabled`  | OpenShift configuration used in lieu of Ingress https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/networking/configuring-routes#route-configuration  | `false` |
+| `route.enabled`  | OpenShift configuration used in lieu of Ingress  | `false` |
 | `route.appPublicRoute`  | Public url for Bailo whilst using OpenShift | `false` |
 
-#### AWS specific configuration
+#### AWS specific configurations
 | Name  | Description  | Value |
 | ----  | ----------  | ----- |
 | `aws.enabled` | This is only a guide and depends on EKS setup. Enable Service NodePort, StorageClass and PersistentVolumeClaim for MinoIO and MongoDB.  See nodeport.yaml and storage.yaml | `false` |
 
-#### OAuth configuration
+#### OAuth configurations
 | Name  | Description  | Value |
 | ----  | ----------  | ----- |
 | `cookie.secret`  | A randomly generated secret key used to encrypt and sign session cookies, ensuring data security and integrity   | `somerandomstring12341234567890AB` |
