@@ -133,6 +133,7 @@ export type MongoDocumentImportInformation = {
   releaseSemvers: ReleaseDoc['semver'][]
   newReleases: Omit<ReleaseDoc, '_id'>[]
   fileIds: ObjectId[]
+  imageIds: string[]
 }
 export type FileImportInformation = {
   sourcePath: string
@@ -455,6 +456,7 @@ async function importDocuments(
   try {
     zipContent = fflate.unzipSync(zipData, {
       filter(file) {
+        log.debug('Got file', { file })
         return /.+\.json/.test(file.name)
       },
     })
