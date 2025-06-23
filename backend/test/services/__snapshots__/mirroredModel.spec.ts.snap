@@ -83,8 +83,8 @@ exports[`services > mirroredModel > importModel > uploads image to S3 on success
 {
   "importResult": {
     "image": {
-      "imageName": "image-name",
-      "imageTag": "image-tag",
+      "imageName": "imageName",
+      "imageTag": "tag",
       "modelId": "mirrored-model-id",
     },
   },

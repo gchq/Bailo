@@ -221,9 +221,14 @@ const registryMocks = vi.hoisted(() => ({
   getImageBlob: vi.fn(() => ({ body: ReadableStream.from('test') })),
   getImageManifest: vi.fn(),
   initialiseImageUpload: vi.fn(),
+  joinDistributionPackageName: vi.fn(() => 'imageName:tag'),
   listModelImages: vi.fn(() => [] as { name: string; tags: string[] }[]),
   putImageBlob: vi.fn(),
   putImageManifest: vi.fn(),
+  splitDistributionPackageName: vi.fn(() => ({
+    path: 'imageName',
+    tag: 'tag',
+  })),
 }))
 vi.mock('../../src/services/registry.js', () => registryMocks)
 
@@ -885,21 +890,7 @@ describe('services > mirroredModel', () => {
       undefined,
     )
 
-    await expect(result).rejects.toThrowError(/^Missing Image Name/)
-  })
-
-  test('importModel > missing image tag for image imports', async () => {
-    const result = importModel(
-      {} as UserInterface,
-      'mirrored-model-id',
-      'source-model-id',
-      'https://test.com',
-      ImportKind.Image,
-      undefined,
-      'image-name',
-    )
-
-    await expect(result).rejects.toThrowError(/^Missing Image Tag/)
+    await expect(result).rejects.toThrowError(/^Missing Distribution Package Name./)
   })
 
   test('importModel > uploads image to S3 on success', async () => {
@@ -930,8 +921,7 @@ describe('services > mirroredModel', () => {
       'https://test.com',
       ImportKind.Image,
       undefined,
-      'image-name',
-      'image-tag',
+      'image-name:image-tag',
     )
 
     // have to wait for a tick otherwise handlers won't yet be set
@@ -1037,7 +1027,7 @@ describe('services > mirroredModel', () => {
     })
     const gzipStream = zlibMocks.createGzip({})
 
-    await exportCompressedRegistryImage({} as UserInterface, gzipStream as zlib.Gzip, 'modelId', 'imageName', 'tag', {})
+    await exportCompressedRegistryImage({} as UserInterface, gzipStream as zlib.Gzip, 'modelId', 'imageName:tag', {})
 
     expect(zlibMocks.createGzip).toBeCalledTimes(1)
     expect(tarMocks.pack).toBeCalledTimes(1)
@@ -1058,8 +1048,7 @@ describe('services > mirroredModel', () => {
       {} as UserInterface,
       gzipStream as zlib.Gzip,
       'modelId',
-      'imageName',
-      'tag',
+      'imageName:tag',
       {},
     )
 
@@ -1142,8 +1131,7 @@ describe('services > mirroredModel', () => {
       {} as UserInterface,
       new PassThrough(),
       'modelId',
-      'imageName',
-      'tag',
+      'imageName:tag',
       'importId',
     )
 
@@ -1201,8 +1189,7 @@ describe('services > mirroredModel', () => {
       {} as UserInterface,
       new PassThrough(),
       'modelId',
-      'imageName',
-      'tag',
+      'imageName:tag',
       'importId',
     )
 
@@ -1253,8 +1240,7 @@ describe('services > mirroredModel', () => {
       {} as UserInterface,
       (await s3Mocks.getObjectStream()).Body as Readable,
       'modelId',
-      'imageName',
-      'tag',
+      'imageName:tag',
       'importId',
     )
 

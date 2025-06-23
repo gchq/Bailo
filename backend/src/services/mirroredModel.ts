@@ -50,8 +50,10 @@ import {
   getImageBlob,
   getImageManifest,
   initialiseImageUpload,
+  joinDistributionPackageName,
   putImageBlob,
   putImageManifest,
+  splitDistributionPackageName,
 } from './registry.js'
 import { getAllFileIds, getReleasesForExport, isReleaseDoc, saveImportedRelease } from './release.js'
 
@@ -146,8 +148,7 @@ export async function importModel(
   payloadUrl: string,
   importKind: ImportKindKeys,
   fileId?: string,
-  imageName?: string,
-  imageTag?: string,
+  distributionPackageName?: string,
 ): Promise<{
   mirroredModel: ModelInterface
   importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation
@@ -209,18 +210,14 @@ export async function importModel(
     }
     case ImportKind.Image: {
       log.info({ mirroredModelId, payloadUrl }, 'Importing image data.')
-      if (!imageName) {
-        throw BadReq('Missing Image Name.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
-      }
-      if (!imageTag) {
-        throw BadReq('Missing Image Tag.', { mirroredModelId, sourceModelIdMeta: sourceModelId, imageName })
+      if (!distributionPackageName) {
+        throw BadReq('Missing Distribution Package Name.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
       const result = await importCompressedRegistryImage(
         user,
         res.body as Readable,
         mirroredModelId,
-        imageName,
-        imageTag,
+        distributionPackageName,
         importId,
       )
       return {
@@ -239,10 +236,17 @@ export async function exportCompressedRegistryImage(
   user: UserInterface,
   gzipStream: zlib.Gzip,
   modelId: string,
-  imageName: string,
-  imageTag: string,
+  distributionPackageName: string,
   logData: Record<string, unknown>,
 ) {
+  const distributionPackageNameObject = splitDistributionPackageName(distributionPackageName)
+  if (!('tag' in distributionPackageNameObject)) {
+    throw InternalError('Could not get tag from Distribution Package Name.', {
+      distributionPackageNameObject,
+      distributionPackageName,
+    })
+  }
+  const { path: imageName, tag: imageTag } = distributionPackageNameObject
   // get which layers exist for the model
   const tagManifest = await getImageManifest(user, modelId, imageName, imageTag)
   log.debug('Got image tag manifest', {
@@ -332,10 +336,17 @@ export async function importCompressedRegistryImage(
   user: UserInterface,
   body: Readable,
   modelId: string,
-  imageName: string,
-  imageTag: string,
+  distributionPackageName: string,
   importId: string,
 ) {
+  const distributionPackageNameObject = splitDistributionPackageName(distributionPackageName)
+  if (!('tag' in distributionPackageNameObject)) {
+    throw InternalError('Could not get tag from Distribution Package Name.', {
+      distributionPackageNameObject,
+      distributionPackageName,
+    })
+  }
+  const { path: imageName, tag: imageTag } = distributionPackageNameObject
   // setup streams
   const gzipStream = zlib.createGunzip({ chunkSize: 16 * 1024 * 1024 })
   const tarStream = extract()
@@ -929,8 +940,9 @@ async function addReleaseToZip(
           },
           imageLogData,
         )
+        const distributionPackageName = joinDistributionPackageName({ path: image.name, tag: image.tag })
 
-        await exportCompressedRegistryImage(user, gzipStream, model.id, image.name, image.tag, imageLogData)
+        await exportCompressedRegistryImage(user, gzipStream, model.id, distributionPackageName, imageLogData)
         await s3Upload
       }
     }

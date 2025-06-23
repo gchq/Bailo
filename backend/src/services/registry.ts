@@ -19,12 +19,14 @@ import { getModelById } from './model.js'
 // derived from https://pkg.go.dev/github.com/distribution/reference#pkg-overview
 const imageRegex =
   /^((?=[^:/]{1,253})(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(?:\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*(?::[0-9]{1,5})?)(?:\/)?((?![._-])(?:[a-z0-9._-]*)(?<![._-])(?:\/(?![._-])[a-z0-9._-]*(?<![._-]))*)(?:(?:@((?![+.\-_])[A-Za-z][a-zA-Z0-9+.\-_]*(?<![+.\-_]):[0-9a-fA-F]{32,}))|)(?:(?::((?![.-])[a-zA-Z0-9_.-]{1,128}))|)$/
-export type DistributionPackageName = { domain: string; path: string } & ({ tag: string } | { digest: string })
-export function splitDistributionPackageName(containerNameFull: string): DistributionPackageName {
-  const split = imageRegex.exec(containerNameFull)
+export type DistributionPackageName =
+  | { domain?: string; path: string; tag: string }
+  | { domain?: string; path: string; digest: string }
+export function splitDistributionPackageName(distributionPackageName: string): DistributionPackageName {
+  const split = imageRegex.exec(distributionPackageName)
   // Group 3 is tag and 4 is digest. These can be empty strings to preserve indexing, but at least one must be present.
   if (!split || split.length != 5 || !(split[3]?.length ^ split[4]?.length)) {
-    throw InternalError('Could not parse Distribution Package Name.', { containerNameFull, split })
+    throw InternalError('Could not parse Distribution Package Name.', { distributionPackageName, split })
   }
   // tag
   if (split[4] && split[4].length) {

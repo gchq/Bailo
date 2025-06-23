@@ -10,15 +10,14 @@ async function script() {
   const args = process.argv.slice(2)[0].split(',')
   if (args.length != 4) {
     log.error(
-      'Please use format "npm run script -- streamDockerRegistryFromS3 <input-s3-path> <output-model-id> <output-image-name> <output-image-tag>"',
+      'Please use format "npm run script -- streamDockerRegistryFromS3 <input-s3-path> <output-model-id> <output-image-name:output-image-tag>"',
     )
     return
   }
   const inputS3Path = args[0]
   const outputImageModel = args[1]
-  const outputImageName = args[2]
-  const outputImageTag = args[3]
-  log.info({ inputS3Path }, { outputImageModel, outputImageName, outputImageTag })
+  const outputDistributionPackageName = args[2]
+  log.info({ inputS3Path }, { outputImageModel, outputDistributionPackageName })
 
   // setup
   await connectToMongoose()
@@ -30,8 +29,7 @@ async function script() {
     { dn: 'user' },
     fileBlob,
     outputImageModel,
-    outputImageName,
-    outputImageTag,
+    outputDistributionPackageName,
     shortId(),
   )
 

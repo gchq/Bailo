@@ -10,13 +10,12 @@ async function script() {
   // process args
   const args = process.argv.slice(2)[0].split(',')
   if (args.length != 3) {
-    log.error('Please use format "npm run script -- streamDockerRegistryToS3 <model-id> <image-name> <image-tag>"')
+    log.error('Please use format "npm run script -- streamDockerRegistryToS3 <model-id> <image-name:image-tag>"')
     return
   }
   const imageModel = args[0]
-  const imageName = args[1]
-  const imageTag = args[2]
-  log.info({ imageModel, imageName, imageTag })
+  const imageDistributionPackageName = args[1]
+  log.info({ imageModel, imageDistributionPackageName })
 
   // setup
   await connectToMongoose()
@@ -25,13 +24,13 @@ async function script() {
 
   // start early upload to allow gzip to drain
   const s3Upload = uploadToExportS3Location(
-    `registry/script/${imageModel}/${imageName}/${imageTag}.tar.gz`,
+    `registry/script/${imageModel}/${imageDistributionPackageName}.tar.gz`,
     gzipStream,
     {},
   )
 
   // main functionality
-  await exportCompressedRegistryImage({ dn: 'user' }, gzipStream, imageModel, imageName, imageTag, {})
+  await exportCompressedRegistryImage({ dn: 'user' }, gzipStream, imageModel, imageDistributionPackageName, {})
   await s3Upload
 
   // cleanup
