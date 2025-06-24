@@ -1,4 +1,6 @@
 import { Grid2, Stack } from '@mui/material'
+import { useGetModelRoles } from 'actions/model'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { Fragment, useMemo } from 'react'
 import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
@@ -10,6 +12,8 @@ type EntryRoleListProps = {
 }
 
 export default function EntryRoleList({ entry }: EntryRoleListProps) {
+  const { uiConfig } = useGetUiConfig() //TODO ADD THE LOADING AND ERRORS FOR THESE TWO
+  const { modelRoles } = useGetModelRoles()
   const rows = useMemo(
     () =>
       entry.collaborators.map((collaborator) => (
@@ -21,11 +25,13 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
             </Stack>
           </Grid2>
           <Grid2 size={{ xs: 6 }}>
-            <EntryRolesChipSet entryCollaborator={collaborator} />
+            {uiConfig && (
+              <EntryRolesChipSet entryCollaborator={collaborator} modelRoles={modelRoles} uiConfig={uiConfig} />
+            )}
           </Grid2>
         </Fragment>
       )),
-    [entry.collaborators],
+    [entry.collaborators, modelRoles, uiConfig],
   )
 
   return (
