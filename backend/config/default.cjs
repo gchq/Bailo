@@ -213,6 +213,12 @@ module.exports = {
       organisations: ['Example Organisation'],
       states: ['Development', 'Review', 'Production'],
     },
+
+    roleDisplayNames: {
+      owner: 'Model Developer',
+      contributor: 'Contributor',
+      consumer: 'Consumer',
+    },
   },
 
   connectors: {

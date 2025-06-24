@@ -252,6 +252,11 @@ config:
       organisations: []
       states: []
 
+    roleDisplayNames:
+      owner: 'TEST_HELM'
+      consumer: 'TEST_HELM'
+      contributor: 'TEST_HELM'
+
   smtp:
     #host: 'mail' #service name
     port: 1025

@@ -17,10 +17,12 @@ import {
   Typography,
 } from '@mui/material'
 import { ClearIcon } from '@mui/x-date-pickers'
-import { postReviewRole } from 'actions/model'
+import { postReviewRole, useGetModelRoles } from 'actions/model'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
+import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
@@ -28,6 +30,7 @@ import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, CollaboratorRoleType, EntryKind, ReviewRolesFormData } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { getRoleDisplayName } from 'utils/roles'
 
 export default function ReviewRolesForm() {
   const router = useRouter()
@@ -41,10 +44,11 @@ export default function ReviewRolesForm() {
     description: '',
     defaultEntities: [],
     lockEntities: false,
-    collaboratorRole: 'none',
   })
 
   const [defaultEntitiesEntry, setDefaultEntities] = useState<Array<CollaboratorEntry>>([])
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles('placeholder_id')
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFormData((prevFormData) => ({ ...prevFormData, name: event.target.value as string }))
@@ -60,7 +64,10 @@ export default function ReviewRolesForm() {
   }
 
   const handleCollaboratorRoleChange = (event: SelectChangeEvent) => {
-    setFormData((prevFormData) => ({ ...prevFormData, collaboratorRole: event.target.value as CollaboratorRoleType }))
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      ...(event.target.value !== 'none' && { collaboratorRole: event.target.value as CollaboratorRoleType }),
+    }))
   }
 
   const handleDefaultEntitiesChange = useMemo(() => {
@@ -120,6 +127,18 @@ export default function ReviewRolesForm() {
     setLoading(false)
   }
 
+  if (isModelRolesError) {
+    return <MessageAlert message={isModelRolesError.info.message} />
+  }
+
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} />
+  }
+
+  if (isModelRolesLoading || isUiConfigLoading) {
+    return <Loading />
+  }
+
   return (
     <>
       <Title text='Create new Review Role' />
@@ -167,12 +186,14 @@ export default function ReviewRolesForm() {
                 />
               </LabelledInput>
               <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
-                <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
-                  <MenuItem value='none'>None</MenuItem>
-                  <MenuItem value='owner'>Owner</MenuItem>
-                  <MenuItem value='contributor'>Contributor</MenuItem>
-                  <MenuItem value='consumer'>Consumer</MenuItem>
-                </Select>
+                {uiConfig && (
+                  <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
+                    <MenuItem value='none'>None</MenuItem>
+                    <MenuItem value='owner'>{getRoleDisplayName('owner', modelRoles, uiConfig)}</MenuItem>
+                    <MenuItem value='contributor'>{getRoleDisplayName('contributor', modelRoles, uiConfig)}</MenuItem>
+                    <MenuItem value='consumer'>{getRoleDisplayName('consumer', modelRoles, uiConfig)}</MenuItem>
+                  </Select>
+                )}
               </LabelledInput>
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
@@ -196,7 +217,7 @@ export default function ReviewRolesForm() {
                   type='submit'
                   variant='contained'
                   color='primary'
-                  disabled={!(formData.name && formData.short && formData.description && formData.collaboratorRole)}
+                  disabled={!(formData.name && formData.short && formData.description)}
                 >
                   Create Role
                 </LoadingButton>
