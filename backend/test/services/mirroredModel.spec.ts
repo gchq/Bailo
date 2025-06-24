@@ -1,5 +1,3 @@
-import zlib from 'node:zlib'
-
 import { Readable } from 'stream'
 import { EventEmitter, PassThrough } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
@@ -1026,9 +1024,8 @@ describe('services > mirroredModel', () => {
         { mediaType: 'application/vnd.docker.image.rootfs.diff.tar.gzip', size: 512, digest: 'sha256:2' },
       ],
     })
-    const gzipStream = zlibMocks.createGzip({})
 
-    await exportCompressedRegistryImage({} as UserInterface, gzipStream as zlib.Gzip, 'modelId', 'imageName:tag', {})
+    await exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName:tag', {} as any)
 
     expect(zlibMocks.createGzip).toBeCalledTimes(1)
     expect(tarMocks.pack).toBeCalledTimes(1)
@@ -1043,15 +1040,8 @@ describe('services > mirroredModel', () => {
       config: { mediaType: 'application/vnd.docker.container.image.v1+json', size: 4, digest: 'sha256:0' },
       layers: [{ mediaType: 'application/vnd.docker.image.rootfs.diff.tar.gzip', size: 256, digest: '' }],
     })
-    const gzipStream = zlibMocks.createGzip({})
 
-    const promise = exportCompressedRegistryImage(
-      {} as UserInterface,
-      gzipStream as zlib.Gzip,
-      'modelId',
-      'imageName:tag',
-      {},
-    )
+    const promise = exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName:tag', {} as any)
 
     await expect(promise).rejects.toThrow('Could not extract layer digest.')
 

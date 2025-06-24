@@ -236,10 +236,10 @@ export async function importModel(
 
 export async function exportCompressedRegistryImage(
   user: UserInterface,
-  gzipStream: zlib.Gzip,
   modelId: string,
   distributionPackageName: string,
-  logData: Record<string, unknown>,
+  metadata: ExportMetadata,
+  logData?: Record<string, unknown>,
 ) {
   const distributionPackageNameObject = splitDistributionPackageName(distributionPackageName)
   if (!('tag' in distributionPackageNameObject)) {
@@ -264,9 +264,10 @@ export async function exportCompressedRegistryImage(
     ...logData,
   })
 
-  // setup tar
+  // setup gzip, stream to s3 to allow draining, and then pipe tar to gzip
+  const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
+  const s3Upload = uploadToS3(`${distributionPackageName}.tar.gz`, gzipStream, metadata, logData)
   const packerStream = pack()
-  // pipe the tar stream to gzip
   packerStream.pipe(gzipStream)
 
   // upload the manifest first as this is the starting point when later importing the blob
@@ -302,6 +303,8 @@ export async function exportCompressedRegistryImage(
   }
   // no more data to write
   packerStream.finalize()
+
+  await s3Upload
 }
 
 export async function pipeStreamToTarEntry(
@@ -698,7 +701,7 @@ type ExportMetadata = {
   | { importKind: ImportKindKeys<'File'>; filePath: string }
   | { importKind: ImportKindKeys<'Image'>; imageName: string; imageTag: string }
 )
-async function uploadToS3(
+export async function uploadToS3(
   fileName: string,
   stream: Readable,
   metadata: ExportMetadata,
@@ -829,7 +832,7 @@ export async function getObjectFromExportS3Location(object: string, logData: Rec
   }
 }
 
-export async function uploadToExportS3Location(
+async function uploadToExportS3Location(
   object: string,
   stream: Readable,
   logData: Record<string, unknown>,
@@ -929,13 +932,16 @@ async function addReleaseToZip(
           imageName: image.name,
           imageTag: image.tag,
         }
-        const imageId = joinDistributionPackageName({ domain: image.repository, path: image.name, tag: image.tag })
+        const distributionPackageName = joinDistributionPackageName({
+          domain: image.repository,
+          path: image.name,
+          tag: image.tag,
+        })
 
-        // setup gzip prior to calling addRegistryImageToZip to allow the stream to drain, otherwise the stream will get stuck
-        const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
-        const s3Upload = uploadToS3(
-          `${imageId}.tar.gz`,
-          gzipStream,
+        await exportCompressedRegistryImage(
+          user,
+          model.id,
+          distributionPackageName,
           {
             exporter: user.dn,
             sourceModelId: model.id,
@@ -946,10 +952,6 @@ async function addReleaseToZip(
           },
           imageLogData,
         )
-        const distributionPackageName = joinDistributionPackageName({ path: image.name, tag: image.tag })
-
-        await exportCompressedRegistryImage(user, gzipStream, model.id, distributionPackageName, imageLogData)
-        await s3Upload
       }
     }
   } catch (error: any) {
