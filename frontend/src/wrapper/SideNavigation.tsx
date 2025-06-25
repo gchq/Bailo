@@ -1,4 +1,9 @@
-import { KeyboardDoubleArrowLeft, KeyboardDoubleArrowRight, Settings as SettingsIcon } from '@mui/icons-material'
+import {
+  KeyboardDoubleArrowLeft,
+  KeyboardDoubleArrowRight,
+  Settings as SettingsIcon,
+  SupervisorAccount,
+} from '@mui/icons-material'
 import ContactSupportIcon from '@mui/icons-material/ContactSupport'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import DescriptionIcon from '@mui/icons-material/Description'
@@ -180,8 +185,18 @@ export default function SideNavigation({
                   title='Schemas'
                   icon={<SchemaIcon />}
                 />
-                <Divider />
               </>
+            )}
+            {currentUser.isAdmin && (
+              <NavMenuItem
+                href='/reviewRoles/view'
+                selectedPage={page}
+                primaryText='Review Roles'
+                drawerOpen={drawerOpen}
+                menuPage='reviewRoles'
+                title='Review Roles'
+                icon={<SupervisorAccount />}
+              />
             )}
           </StyledList>
           <StyledList>

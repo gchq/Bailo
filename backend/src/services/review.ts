@@ -1,13 +1,15 @@
 import authentication from '../connectors/authentication/index.js'
-import { ModelAction } from '../connectors/authorisation/actions.js'
+import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import { ReleaseDoc } from '../models/Release.js'
 import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
+import ReviewRoleModel, { ReviewRoleInterface } from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
-import { BadReq, InternalError, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
@@ -203,4 +205,31 @@ async function findUserInCollaborators(user: UserInterface) {
       ],
     },
   }
+}
+
+export async function createReviewRole(user: UserInterface, newReviewRole: ReviewRoleInterface) {
+  const reviewRole = new ReviewRoleModel({
+    ...newReviewRole,
+  })
+
+  const auth = await authorisation.reviewRole(user, reviewRole, ReviewRoleAction.Create)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
+      userDn: user.dn,
+    })
+  }
+
+  try {
+    return await reviewRole.save()
+  } catch (error) {
+    handleDuplicateKeys(error)
+    throw error
+  }
+
+  return reviewRole
+}
+
+export async function findReviewRoles(): Promise<ReviewRoleInterface[]> {
+  const reviewRoles = await ReviewRoleModel.find()
+  return reviewRoles
 }

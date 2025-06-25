@@ -1,7 +1,7 @@
 import { Lock, LockOpen } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Stack, Tooltip, Typography } from '@mui/material'
-import { patchModel } from 'actions/model'
+import { patchModel, useGetModel } from 'actions/model'
 import { FormEvent, useMemo, useState } from 'react'
 import EntryDescriptionInput from 'src/entry/EntryDescriptionInput'
 import EntryNameInput from 'src/entry/EntryNameInput'
@@ -27,6 +27,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
   const [errorMessage, setErrorMessage] = useState('')
 
   const sendNotification = useNotification()
+  const { mutateModel } = useGetModel(entry.id, entry.kind)
 
   const isFormValid = useMemo(() => name && description, [name, description])
 
@@ -59,6 +60,7 @@ export default function EntryDetails({ entry }: EntryDetailsProps) {
         msg: `${toSentenceCase(EntryKindLabel[entry.kind])} updated`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
+      mutateModel()
     }
     setIsLoading(false)
   }

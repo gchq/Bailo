@@ -61,6 +61,12 @@ export const ResponseAction = {
 } as const
 export type ResponseActionKeys = (typeof ResponseAction)[keyof typeof ResponseAction]
 
+export const ReviewRoleAction = {
+  Create: 'reviewRole:create',
+  View: 'reviewRole:view',
+} as const
+export type ReviewRoleActionKeys = (typeof ReviewRoleAction)[keyof typeof ReviewRoleAction]
+
 export const ActionLookup = {
   [ModelAction.Create]: TokenActions.ModelWrite.id,
   [ModelAction.View]: TokenActions.ModelRead.id,
@@ -92,5 +98,8 @@ export const ActionLookup = {
   [ImageAction.List]: TokenActions.ImageRead.id,
   [ImageAction.Wildcard]: TokenActions.ImageWrite.id,
   [ImageAction.Delete]: TokenActions.ImageWrite.id,
+
+  [ReviewRoleAction.Create]: TokenActions.ReviewRoleWrite.id,
+  [ReviewRoleAction.View]: TokenActions.ReviewRoleWrite.id,
 } as const
 export type ActionLookupKeys = (typeof ActionLookup)[keyof typeof ActionLookup]

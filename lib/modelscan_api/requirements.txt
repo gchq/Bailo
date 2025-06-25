@@ -1,6 +1,6 @@
 content-size-limit-asgi==0.1.5
-fastapi[standard]==0.115.12
+fastapi[standard]==0.115.13
 modelscan[tensorflow,h5py]==0.8.5
-pydantic_settings==2.9.1
+pydantic_settings==2.10.0
 python-multipart==0.0.20
-uvicorn==0.34.2
+uvicorn==0.34.3

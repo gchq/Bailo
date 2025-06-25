@@ -12,6 +12,9 @@ All dates are formatted dd/mm/yyyy.
 ### Changes
 
 - Add `Client.post_access_request_review` endpoint.
+- Add `Entry.collaborators` attribute (inherited by `Model` and `DataCard`), and add associated optional parameter
+  `collaborators` to helper `Model.__init__`, `Model.create`, `Model.from_mlflow`, `DataCard.__init__` &
+  `DataCard.create` and core `Client.post_model` & `Client.patch_model` methods.
 - Increase test coverage.
 - Update package dependencies.
 

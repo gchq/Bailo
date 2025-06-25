@@ -7,6 +7,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
 import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import { ModelDoc } from '../models/Model.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
@@ -27,7 +28,6 @@ export function isFileInterfaceDoc(data: unknown): data is FileInterfaceDoc {
     !('name' in data) ||
     !('size' in data) ||
     !('mime' in data) ||
-    !('bucket' in data) ||
     !('path' in data) ||
     !('complete' in data) ||
     !('deleted' in data) ||
@@ -44,7 +44,14 @@ export const createFilePath = (modelId: string, fileId: string) => {
   return `beta/model/${modelId}/files/${fileId}`
 }
 
-export async function uploadFile(user: UserInterface, modelId: string, name: string, mime: string, stream: Readable) {
+export async function uploadFile(
+  user: UserInterface,
+  modelId: string,
+  name: string,
+  mime: string,
+  stream: Readable,
+  tags?: string[],
+) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {
     throw BadReq(`Cannot upload files to a mirrored model.`)
@@ -52,21 +59,24 @@ export async function uploadFile(user: UserInterface, modelId: string, name: str
 
   const fileId = longId()
 
-  const bucket = config.s3.buckets.uploads
   const path = createFilePath(modelId, fileId)
 
-  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, bucket, path, complete: true })
+  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: true })
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id.toString() })
   }
 
-  const { fileSize } = await putObjectStream(bucket, path, stream)
+  const { fileSize } = await putObjectStream(path, stream)
   if (fileSize === 0) {
     throw BadReq(`Could not upload ${file.name} as it is an empty file.`, { file: file })
   }
   file.size = fileSize
+
+  if (tags) {
+    file.tags = tags
+  }
 
   await file.save()
 
@@ -118,7 +128,7 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
     throw Forbidden(auth.info, { userDn: user.dn, fileId })
   }
 
-  return getObjectStream(file.bucket, file.path, range)
+  return getObjectStream(file.path, undefined, range)
 }
 
 export async function getFileById(user: UserInterface, fileId: string): Promise<FileWithScanResultsInterface> {
@@ -303,4 +313,40 @@ export async function saveImportedFile(file: FileInterface) {
   await FileModel.findOneAndUpdate({ modelId: file.modelId, _id: file._id }, file, {
     upsert: true,
   })
+}
+
+export async function updateFile(
+  user: UserInterface,
+  modelId: string,
+  fileId: string,
+  patchFileParams: Partial<Pick<FileInterface, 'tags' | 'name' | 'mime'>>,
+) {
+  let file: FileWithScanResultsInterface
+  try {
+    file = await getFileById(user, fileId)
+  } catch {
+    throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
+  }
+
+  let model: ModelDoc
+  try {
+    model = await getModelById(user, modelId)
+  } catch {
+    throw BadReq('Cannot find requested model', { modelId: modelId })
+  }
+
+  const patchFileAuth = await authorisation.file(user, model, file, FileAction.Update)
+  if (!patchFileAuth.success) {
+    throw Forbidden(patchFileAuth.info, { userDn: user.dn, modelId, file })
+  }
+
+  const updatedFile = await FileModel.findOneAndUpdate({ _id: fileId }, patchFileParams, { new: true })
+  if (!updatedFile) {
+    throw BadReq('There was a problem updating the file', { modelId, fileId, patchFileParams })
+  }
+
+  // return the full FileWithScanResultsInterface and not just the FileInterface
+  file = await getFileById(user, fileId)
+
+  return file
 }

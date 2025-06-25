@@ -2,8 +2,7 @@ import { Box } from '@mui/material'
 import Button from '@mui/material/Button'
 import { styled } from '@mui/material/styles'
 import { ChangeEvent, useCallback, useMemo } from 'react'
-import { FileInterface, FileWithMetadata } from 'types/types'
-
+import { FileInterface, FileWithMetadataAndTags } from 'types/types'
 const Input = styled('input')({
   display: 'none',
 })
@@ -11,9 +10,9 @@ const Input = styled('input')({
 type MultiFileInputProps = {
   label: string
   files: (File | FileInterface)[]
-  filesMetadata: FileWithMetadata[]
+  filesMetadata: FileWithMetadataAndTags[]
   onFilesChange: (value: (File | FileInterface)[]) => void
-  onFilesMetadataChange: (value: FileWithMetadata[]) => void
+  onFilesMetadataChange: (value: FileWithMetadataAndTags[]) => void
   accepts?: string
   disabled?: boolean
   fullWidth?: boolean
@@ -50,7 +49,7 @@ export default function MultiFileInput({
           ...filesMetadata.filter(
             (fileMetadata) => !newFiles.some((newFile) => newFile.name === fileMetadata.fileName),
           ),
-          ...newFiles.map((newFile) => ({ fileName: newFile.name, metadata: '' })),
+          ...newFiles.map((newFile) => ({ fileName: newFile.name, metadata: { text: '', tags: [] } })),
         ])
       }
     },

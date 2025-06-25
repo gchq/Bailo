@@ -1,4 +1,6 @@
 import { createHash } from 'node:crypto'
+import { json } from 'node:stream/consumers'
+import zlib from 'node:zlib'
 
 import archiver from 'archiver'
 import * as fflate from 'fflate'
@@ -6,6 +8,8 @@ import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
 import prettyBytes from 'pretty-bytes'
 import stream, { PassThrough, Readable } from 'stream'
+import { finished } from 'stream/promises'
+import { extract, pack } from 'tar-stream'
 
 import { sign } from '../clients/kms.js'
 import { getObjectStream, objectExists, putObjectStream } from '../clients/s3.js'
@@ -40,6 +44,14 @@ import {
   setLatestImportedModelCard,
   validateMirroredModel,
 } from './model.js'
+import {
+  doesImageLayerExist,
+  getImageBlob,
+  getImageManifest,
+  initialiseImageUpload,
+  putImageBlob,
+  putImageManifest,
+} from './registry.js'
 import { getAllFileIds, getReleasesForExport, isReleaseDoc, saveImportedRelease } from './release.js'
 
 export async function exportModel(
@@ -100,6 +112,215 @@ export async function exportModel(
   log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
 }
 
+function getS3ExportLocation(modelId: string, imageName: string, imageTag: string) {
+  return `beta/registry/${modelId}/${imageName}/blobs/compressed/${imageTag}.tar.gz`
+}
+
+export async function exportCompressedRegistryImage(
+  user: UserInterface,
+  modelId: string,
+  imageName: string,
+  imageTag: string,
+  logData: Record<string, unknown>,
+  metadata?: ExportMetadata,
+) {
+  // get which layers exist for the model
+  const tagManifest = await getImageManifest(user, modelId, imageName, imageTag)
+  log.debug('Got image tag manifest', {
+    modelId,
+    imageName,
+    imageTag,
+    layersLength: tagManifest.layers.length,
+    layers: tagManifest.layers.map((layer: { [x: string]: any }) => {
+      return { size: layer['size'], digest: layer['digest'] }
+    }),
+    config: tagManifest.config,
+    tagManifest,
+    ...logData,
+  })
+
+  // setup tar
+  const packerStream = pack()
+  // setup gzip
+  const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
+  // pipe the tar stream to gzip
+  packerStream.pipe(gzipStream)
+  // start uploading the gzip stream to S3
+  const s3Upload = uploadToExportS3Location(
+    getS3ExportLocation(modelId, imageName, imageTag),
+    gzipStream,
+    logData,
+    metadata,
+  )
+
+  // upload the manifest first as this is the starting point when later importing the blob
+  const tagManifestJson = JSON.stringify(tagManifest)
+  const packerEntry = packerStream.entry({ name: 'manifest.json', size: tagManifestJson.length })
+  await pipeStreamToTarEntry(Readable.from(tagManifestJson), packerEntry, { mediaType: tagManifest.mediaType })
+
+  // fetch and compress one layer (including config) at a time to manage RAM usage
+  // also, tar can only handle one pipe at a time
+  for (const layer of [tagManifest.config, ...tagManifest.layers]) {
+    const layerDigest = layer['digest']
+    if (!layerDigest || layerDigest.length === 0) {
+      throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
+    }
+
+    log.debug('Fetching image layer', {
+      modelId,
+      imageName,
+      imageTag,
+      layerDigest,
+      ...logData,
+    })
+    const responseBody = await getImageBlob(user, modelId, imageName, layerDigest)
+
+    // pipe the body to tar using streams
+    const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
+    const packerEntry = packerStream.entry({ name: entryName, size: layer.size })
+    // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
+    await pipeStreamToTarEntry(Readable.fromWeb(responseBody.body), packerEntry, {
+      layerDigest,
+      mediaType: layer.mediaType,
+    })
+  }
+  // no more data to write
+  packerStream.finalize()
+
+  // wait for the upload to complete
+  await s3Upload
+}
+
+export async function pipeStreamToTarEntry(
+  inputStream: NodeJS.ReadableStream,
+  packerEntry: NodeJS.WritableStream,
+  logData: { [key: string]: string } = {},
+) {
+  inputStream.pipe(packerEntry)
+  return new Promise((resolve, reject) => {
+    packerEntry.on('finish', () => {
+      log.debug('Finished fetching layer stream', { ...logData })
+      resolve('ok')
+    })
+    packerEntry.on('error', (err) =>
+      reject(
+        InternalError('Error while tarring layer stream', {
+          error: err,
+          ...logData,
+        }),
+      ),
+    )
+    inputStream.on('error', (err) =>
+      reject(
+        InternalError('Error while fetching layer stream', {
+          error: err,
+          ...logData,
+        }),
+      ),
+    )
+  })
+}
+
+export async function importCompressedRegistryImage(
+  user: UserInterface,
+  modelId: string,
+  imageName: string,
+  imageTag: string,
+  logData: Record<string, unknown>,
+  inputS3Path?: string,
+) {
+  if (!inputS3Path) {
+    inputS3Path = getS3ExportLocation(modelId, imageName, imageTag)
+  }
+
+  // setup streams
+  const gzipStream = zlib.createGunzip({ chunkSize: 16 * 1024 * 1024 })
+  const tarStream = extract()
+  const tarGzBlob = await getObjectFromExportS3Location(inputS3Path, {})
+  tarGzBlob.pipe(gzipStream).pipe(tarStream)
+
+  let manifestBody
+  await new Promise((resolve, reject) => {
+    tarStream.on('entry', async function (entry, stream, next) {
+      log.debug('Processing un-tarred entry', {
+        tarball: inputS3Path,
+        name: entry.name,
+        type: entry.type,
+        size: entry.size,
+        ...logData,
+      })
+
+      if (entry.type === 'file') {
+        // Process file
+        if (entry.name === 'manifest.json') {
+          // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
+          log.debug('Extracting un-tarred manifest', { tarball: inputS3Path, ...logData })
+          manifestBody = await json(stream)
+
+          next()
+        } else {
+          // convert filename to digest format
+          const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
+          if (await doesImageLayerExist(user, modelId, imageName, layerDigest)) {
+            log.debug('Skipping blob as it already exists in the registry', {
+              tarball: inputS3Path,
+              name: entry.name,
+              size: entry.size,
+              ...logData,
+            })
+
+            // auto-drain the stream
+            stream.resume()
+            next()
+          } else {
+            log.debug('Initiating un-tarred blob upload', {
+              tarball: inputS3Path,
+              name: entry.name,
+              size: entry.size,
+              ...logData,
+            })
+            const res = await initialiseImageUpload(user, modelId, imageName)
+
+            await putImageBlob(user, modelId, imageName, res.location, layerDigest, stream, String(entry.size))
+            await finished(stream)
+            next()
+          }
+        }
+      } else {
+        // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
+        log.warn('Skipping non-file entry', { tarball: inputS3Path, name: entry.name, type: entry.type, ...logData })
+        next()
+      }
+    })
+
+    tarStream.on('error', (err) =>
+      reject(
+        InternalError('Error while un-tarring blob', {
+          error: err,
+        }),
+      ),
+    )
+
+    tarStream.on('finish', async function () {
+      log.debug('Uploading manifest', { tarball: inputS3Path, ...logData })
+      await putImageManifest(
+        user,
+        modelId,
+        imageName,
+        imageTag,
+        JSON.stringify(manifestBody),
+        manifestBody['mediaType'],
+      )
+      resolve('ok')
+    })
+  })
+  log.debug('Completed registry upload', {
+    tarball: inputS3Path,
+    image: { modelId, imageName, imageTag },
+    ...logData,
+  })
+}
+
 export const ImportKind = {
   Documents: 'documents',
   File: 'file',
@@ -127,7 +348,7 @@ export async function importModel(
   sourceModelId: string,
   payloadUrl: string,
   importKind: ImportKindKeys,
-  filePath?: string,
+  fileId?: string,
 ): Promise<{
   mirroredModel: ModelInterface
   importResult: MongoDocumentImportInformation | FileImportInformation
@@ -173,15 +394,15 @@ export async function importModel(
 
   switch (importKind) {
     case ImportKind.Documents: {
-      log.info({ mirroredModelId, payloadUrl, importId }, 'Importing colection of documents.')
+      log.info({ mirroredModelId, payloadUrl, importId }, 'Importing collection of documents.')
       return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl, importId)
     }
     case ImportKind.File: {
       log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
-      if (!filePath) {
-        throw BadReq('Missing File Path.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
+      if (!fileId) {
+        throw BadReq('Missing File ID.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
-      const result = await importModelFile(res, filePath, mirroredModelId, importId)
+      const result = await importModelFile(res, fileId, mirroredModelId, importId)
       return {
         mirroredModel,
         importResult: {
@@ -327,13 +548,13 @@ async function importDocuments(
   }
 }
 
-async function importModelFile(content: Response, importedPath: string, mirroredModelId: string, importId: string) {
+async function importModelFile(content: Response, fileId: string, mirroredModelId: string, importId: string) {
   const bucket = config.s3.buckets.uploads
-  const updatedPath = createFilePath(mirroredModelId, importedPath)
-  await putObjectStream(bucket, updatedPath, content.body as Readable)
+  const updatedPath = createFilePath(mirroredModelId, fileId)
+  await putObjectStream(updatedPath, content.body as Readable)
   log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
   await markFileAsCompleteAfterImport(updatedPath)
-  return { sourcePath: importedPath, newPath: updatedPath }
+  return { sourcePath: fileId, newPath: updatedPath }
 }
 
 function parseModelCard(
@@ -403,15 +624,12 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, importId })
   }
 
-  file.modelId = mirroredModelId
-  file.bucket = config.s3.buckets.uploads
   file.path = createFilePath(mirroredModelId, file.id)
 
   try {
-    file.complete = await objectExists(file.bucket, file.path)
+    file.complete = await objectExists(file.path)
   } catch (error) {
     throw InternalError('Failed to check if file exists.', {
-      bucket: file.bucket,
       path: file.path,
       mirroredModelId,
       sourceModelId,
@@ -429,6 +647,7 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
       importId,
     })
   }
+  file.modelId = mirroredModelId
 
   return file
 }
@@ -492,7 +711,7 @@ async function uploadToTemporaryS3Location(
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
-    await putObjectStream(bucket, object, stream, metadata)
+    await putObjectStream(object, stream, undefined, metadata)
     log.debug(
       {
         bucket,
@@ -518,7 +737,34 @@ async function getObjectFromTemporaryS3Location(fileName: string, logData: Recor
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
-    const stream = (await getObjectStream(bucket, object)).Body as Readable
+    const stream = (await getObjectStream(object, bucket)).Body as Readable
+    log.debug(
+      {
+        bucket,
+        object,
+        ...logData,
+      },
+      'Successfully retrieved stream from temporary S3 location.',
+    )
+    return stream
+  } catch (error) {
+    log.error(
+      {
+        bucket,
+        object,
+        error,
+        ...logData,
+      },
+      'Failed to retrieve stream from temporary S3 location.',
+    )
+    throw error
+  }
+}
+
+export async function getObjectFromExportS3Location(object: string, logData: Record<string, unknown>) {
+  const bucket = config.modelMirror.export.bucket
+  try {
+    const stream = (await getObjectStream(object, bucket)).Body as Readable
     log.debug(
       {
         bucket,
@@ -550,7 +796,7 @@ async function uploadToExportS3Location(
 ) {
   const bucket = config.modelMirror.export.bucket
   try {
-    await putObjectStream(bucket, object, stream, metadata)
+    await putObjectStream(object, stream, bucket, metadata)
     log.debug(
       {
         bucket,

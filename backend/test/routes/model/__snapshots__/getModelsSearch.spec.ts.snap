@@ -16,11 +16,16 @@ exports[`routes > model > getModelsSearch > 200 > ok 1`] = `
 exports[`routes > model > getModelsSearch > audit > expected call 1`] = `
 [
   {
+    "collaborators": undefined,
+    "createdAt": undefined,
     "description": "description",
     "id": "test",
     "kind": undefined,
     "name": "name",
+    "organisation": undefined,
+    "state": undefined,
     "tags": [],
+    "updatedAt": undefined,
   },
 ]
 `;

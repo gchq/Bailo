@@ -68,8 +68,8 @@ describe('Draft and review a model release', () => {
 
     cy.log('Checking that we can see both review states')
     cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
-    cy.get('[data-test=reviewDecisionDisplay]').contains('requested changes')
-    cy.get('[data-test=reviewDecisionDisplay]').contains('approved')
+    cy.get('[data-test=reviewDecisionDisplayRequestChanges]').contains('requested changes')
+    cy.get('[data-test=reviewDecisionDisplayApproved]').contains('approved')
     cy.contains('This is a comment')
   })
 

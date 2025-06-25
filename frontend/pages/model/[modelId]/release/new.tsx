@@ -17,7 +17,7 @@ import MessageAlert from 'src/MessageAlert'
 import {
   EntryKind,
   FileInterface,
-  FileWithMetadata,
+  FileWithMetadataAndTags,
   FlattenedModelImage,
   isFileInterface,
   SuccessfulFileUpload,
@@ -31,7 +31,7 @@ export default function NewRelease() {
   const [modelCardVersion, setModelCardVersion] = useState(0)
   const [isMinorRelease, setIsMinorRelease] = useState(false)
   const [files, setFiles] = useState<(File | FileInterface)[]>([])
-  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadata[]>([])
+  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -105,13 +105,20 @@ export default function NewRelease() {
       }
 
       if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
-        const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+        const metadataText = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+          .text
+        const tags = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata.tags
 
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
             const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
             setCurrentFileUploadProgress({ fileName: file.name, uploadProgress: percentCompleted })
           }
+        }
+
+        const metadata = {
+          text: metadataText ? metadataText : '',
+          tags: tags ? tags : [],
         }
 
         try {

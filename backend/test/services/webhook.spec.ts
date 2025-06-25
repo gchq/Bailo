@@ -88,7 +88,7 @@ describe('services > webhook', () => {
 
     const result = createWebhook(user, { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
 
-    expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
+    await expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
     expect(modelServiceMock.getModelById).toBeCalled()
     expect(webhookModelMock.save).not.toBeCalled()
   })
@@ -98,7 +98,7 @@ describe('services > webhook', () => {
 
     const result = updateWebhook(user, 'modelId', { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
 
-    expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
+    await expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
     expect(modelServiceMock.getModelById).toBeCalled()
     expect(webhookModelMock.findOneAndUpdate).not.toBeCalled()
   })
@@ -108,7 +108,7 @@ describe('services > webhook', () => {
 
     const result = removeWebhook(user, 'model', 'webhook')
 
-    expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
+    await expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
     expect(modelServiceMock.getModelById).toBeCalled()
     expect(webhookModelMock.findOneAndDelete).not.toBeCalled()
   })
@@ -118,7 +118,7 @@ describe('services > webhook', () => {
 
     const result = getWebhooksByModel(user, 'model')
 
-    expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
+    await expect(result).rejects.toThrowError(`You do not have permission to update this model.`)
     expect(modelServiceMock.getModelById).toBeCalled()
     expect(webhookModelMock.find).not.toBeCalled()
   })
@@ -128,7 +128,7 @@ describe('services > webhook', () => {
 
     const result = removeWebhook(user, 'model', 'webhook')
 
-    expect(result).rejects.toThrowError(`The requested webhook was not found.`)
+    await expect(result).rejects.toThrowError(`The requested webhook was not found.`)
     expect(modelServiceMock.getModelById).toBeCalled()
   })
 
@@ -137,7 +137,7 @@ describe('services > webhook', () => {
 
     const result = updateWebhook(user, 'modelId', { name: 'test', modelId: 'abc', uri: 'test/uri', insecureSSL: false })
 
-    expect(result).rejects.toThrowError(`The requested webhook was not found.`)
+    await expect(result).rejects.toThrowError(`The requested webhook was not found.`)
     expect(modelServiceMock.getModelById).toBeCalled()
   })
 

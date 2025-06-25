@@ -1,6 +1,6 @@
 import CommentIcon from '@mui/icons-material/ChatBubble'
 import ListAltIcon from '@mui/icons-material/ListAlt'
-import { Card, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Card, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useEffect, useState } from 'react'
@@ -58,13 +58,13 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
   return (
     <>
       {(isReviewsLoading || isReviewResponsesLoading || isCommentResponsesLoading) && <Loading />}
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
-        <Card sx={{ width: '100%' }}>
+      <Stack direction='row' spacing={4} justifyContent='center' alignItems='center'>
+        <Box sx={{ width: '100%' }}>
           {reviews.length > 0 && !hideReviewBanner && <ReviewBanner accessRequest={accessRequest} />}
           <Stack p={2}>
-            <Stack direction={{ sm: 'row', xs: 'column' }} alignItems='center' spacing={1}>
-              <Link href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
-                <Typography component='h2' variant='h6' color='primary'>
+            <Stack direction='row' alignItems='center' spacing={1}>
+              <Link overflow='hidden' href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}`}>
+                <Typography overflow='hidden' textOverflow='ellipsis' component='h2' variant='h6' color='primary'>
                   {accessRequest.metadata.overview.name}
                 </Typography>
               </Link>
@@ -144,7 +144,7 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
               </IconButton>
             </Stack>
           </Stack>
-        </Card>
+        </Box>
       </Stack>
     </>
   )

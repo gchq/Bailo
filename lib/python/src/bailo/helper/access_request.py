@@ -58,7 +58,7 @@ class AccessRequest:
         schema_id = json_access_request["schemaId"]
 
         logger.info(
-            f"Access request %s for model %s successfully retrieved from server.",
+            "Access request %s for model %s successfully retrieved from server.",
             access_request_id,
             model_id,
         )
@@ -99,7 +99,7 @@ class AccessRequest:
         created_by = access_request_json["createdBy"]
 
         logger.info(
-            f"Access request successfully created on server with ID %s for model %s.",
+            "Access request successfully created on server with ID %s for model %s.",
             access_request_id,
             model_id,
         )

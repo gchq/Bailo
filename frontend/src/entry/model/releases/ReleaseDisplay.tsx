@@ -7,25 +7,27 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Card,
   Divider,
   IconButton,
   Stack,
   Tooltip,
   Typography,
 } from '@mui/material'
+import { useGetFileScannerInfo } from 'actions/fileScanning'
 import { useGetReleasesForModelId } from 'actions/release'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
 import { useGetUiConfig } from 'actions/uiConfig'
+import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
+import Paginate from 'src/common/Paginate'
 import UserDisplay from 'src/common/UserDisplay'
+import FileDisplay from 'src/entry/model/files/FileDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
-import FileDownload from 'src/entry/model/releases/FileDownload'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
 import Link from 'src/Link'
@@ -59,6 +61,7 @@ export default function ReleaseDisplay({
 
   const { mutateReleases } = useGetReleasesForModelId(model.id)
 
+  const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const {
     responses: commentResponses,
@@ -91,8 +94,22 @@ export default function ReleaseDisplay({
     setExpanded(isExpanded ? panel : false)
   }
 
+  const FileRowItem = memoize(({ data, index }) => (
+    <FileDisplay
+      showMenuItems={{ rescanFile: scanners.length > 0 }}
+      key={data[index].name}
+      file={data[index]}
+      modelId={model.id}
+      mutator={mutateReleases}
+    />
+  ))
+
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
+  }
+
+  if (isScannersError) {
+    return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
 
   if (isUiConfigError) {
@@ -109,9 +126,13 @@ export default function ReleaseDisplay({
 
   return (
     <>
-      {(isReviewsLoading || isUiConfigLoading || isCommentResponsesLoading || isReviewResponsesLoading) && <Loading />}
+      {(isReviewsLoading ||
+        isUiConfigLoading ||
+        isCommentResponsesLoading ||
+        isReviewResponsesLoading ||
+        isScannersLoading) && <Loading />}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent='center' alignItems='center'>
-        <Card sx={{ width: '100%' }}>
+        <Box sx={{ width: '100%' }}>
           {reviews.length > 0 && !hideReviewBanner && <ReviewBanner release={release} />}
           <Stack spacing={1} p={2}>
             <Stack
@@ -129,7 +150,7 @@ export default function ReleaseDisplay({
               >
                 <Link noLinkStyle href={`/model/${model.id}/release/${release.semver}`} noWrap>
                   <Stack direction='row' alignItems='center' spacing={1} width='100%'>
-                    <Typography component='h2' variant='h6' color='primary'>
+                    <Typography component='h2' variant='h6' color='primary' noWrap>
                       {release.semver}
                     </Typography>
                   </Stack>
@@ -164,15 +185,20 @@ export default function ReleaseDisplay({
                     <Typography fontWeight='bold'>{`${expanded === 'filesPanel' ? 'Hide' : 'Show'} ${plural(release.files.length, 'file')}`}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    {release.files.map((file) => (
-                      <FileDownload
-                        showMenuItems={{ rescanFile: true }}
-                        key={file.name}
-                        file={file}
-                        modelId={model.id}
-                        mutator={mutateReleases}
-                      />
-                    ))}
+                    <Paginate
+                      list={release.files}
+                      defaultSortProperty='name'
+                      searchFilterProperty='name'
+                      searchPlaceholderText='Search by filename'
+                      emptyListText='No files found'
+                      sortingProperties={[
+                        { value: 'name', title: 'Name', iconKind: 'text' },
+                        { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+                        { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+                      ]}
+                    >
+                      {FileRowItem}
+                    </Paginate>
                   </AccordionDetails>
                 </Accordion>
               )}
@@ -199,7 +225,7 @@ export default function ReleaseDisplay({
                 </Accordion>
               )}
               <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2}>
-                <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />
+                {!release.minor && <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />}
                 <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>
                   <Stack direction='row' spacing={2}>
                     {reviewResponses.length > 0 && (
@@ -223,7 +249,7 @@ export default function ReleaseDisplay({
               </Stack>
             </Stack>
           </Stack>
-        </Card>
+        </Box>
       </Stack>
     </>
   )

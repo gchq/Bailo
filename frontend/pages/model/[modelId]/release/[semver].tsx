@@ -91,8 +91,8 @@ export default function Release() {
                     Back to model
                   </Button>
                 </Link>
-                <Stack direction='row' alignItems='center'>
-                  <Typography variant='h6' component='h1' color='primary'>
+                <Stack overflow='hidden' direction='row' alignItems='center'>
+                  <Typography overflow='hidden' textOverflow='ellipsis' variant='h6' component='h1' color='primary'>
                     {release ? release.semver : 'Loading...'}
                   </Typography>
                   <CopyToClipboardButton

@@ -26,8 +26,8 @@ export default function UserAvatar({
   useEffect(() => {
     switch (size) {
       case 'chip':
-        setAvatarSize('30px')
-        setFontSize(13)
+        setAvatarSize('25px')
+        setFontSize(11)
         break
       default:
         break

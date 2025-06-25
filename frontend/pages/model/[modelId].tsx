@@ -8,9 +8,10 @@ import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
 import AccessRequests from 'src/entry/model/AccessRequests'
-import Files from 'src/entry/model/Files'
 import InferenceServices from 'src/entry/model/InferenceServices'
+import ModelFileManagement from 'src/entry/model/ModelFileManagement'
 import ModelImages from 'src/entry/model/ModelImages'
+import OrganisationAndStateDetails from 'src/entry/model/OrganisationAndStateDetails'
 import Releases from 'src/entry/model/Releases'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
@@ -69,7 +70,7 @@ export default function Model() {
             {
               title: 'File Management',
               path: 'files',
-              view: <Files model={model} />,
+              view: <ModelFileManagement model={model} />,
             },
             {
               title: 'Inferencing',
@@ -118,6 +119,7 @@ export default function Model() {
           titleToCopy={model.name}
           subheadingToCopy={model.id}
           sourceModelId={model.settings.mirror?.sourceModelId}
+          additionalHeaderDisplay={<OrganisationAndStateDetails entry={model} />}
         />
       )}
     </>
