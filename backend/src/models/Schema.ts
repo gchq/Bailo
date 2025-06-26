@@ -17,6 +17,8 @@ export interface SchemaInterface {
   kind: SchemaKindKeys
   jsonSchema: JsonSchema
 
+  reviewRoles: string[] //Array of reviewRole ID's
+
   createdAt: Date
   updatedAt: Date
 }

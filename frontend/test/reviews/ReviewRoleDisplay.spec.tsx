@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { useGetModelRoles } from 'actions/model'
 import { useGetResponses } from 'actions/response'
+import { useGetUiConfig } from 'actions/uiConfig'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import {
   testAccessRequestReview,
@@ -9,6 +10,7 @@ import {
   testReleaseReview,
   testReleaseReviewNoResponses,
   testReviewResponse,
+  testUiConfig,
 } from 'utils/test/testModels'
 import { describe, expect, vi } from 'vitest'
 
@@ -27,6 +29,10 @@ vi.mock('actions/response', () => ({
   useGetResponses: vi.fn(),
 }))
 
+vi.mock('actions/uiConfig', () => ({
+  useGetUiConfig: vi.fn(),
+}))
+
 describe('ReviewRoleDisplay', () => {
   const testMessageAccess = 'This access needs to be reviewed by the Manager.'
   const testMessageRelease = 'This release needs to be reviewed by the Manager.'
@@ -43,6 +49,12 @@ describe('ReviewRoleDisplay', () => {
       isResponsesLoading: false,
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
+    })
+    vi.mocked(useGetUiConfig).mockReturnValue({
+      uiConfig: testUiConfig,
+      isUiConfigLoading: false,
+      isUiConfigError: undefined,
+      mutateUiConfig: vi.fn(),
     })
     mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReviewNoResponses} />)
@@ -64,6 +76,12 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
+    vi.mocked(useGetUiConfig).mockReturnValue({
+      uiConfig: testUiConfig,
+      isUiConfigLoading: false,
+      isUiConfigError: undefined,
+      mutateUiConfig: vi.fn(),
+    })
     mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testReleaseReviewNoResponses} />)
     await waitFor(async () => {
@@ -83,6 +101,12 @@ describe('ReviewRoleDisplay', () => {
       isResponsesLoading: false,
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
+    })
+    vi.mocked(useGetUiConfig).mockReturnValue({
+      uiConfig: testUiConfig,
+      isUiConfigLoading: false,
+      isUiConfigError: undefined,
+      mutateUiConfig: vi.fn(),
     })
     mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReview} />)
@@ -104,6 +128,12 @@ describe('ReviewRoleDisplay', () => {
       isResponsesLoading: false,
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
+    })
+    vi.mocked(useGetUiConfig).mockReturnValue({
+      uiConfig: testUiConfig,
+      isUiConfigLoading: false,
+      isUiConfigError: undefined,
+      mutateUiConfig: vi.fn(),
     })
     mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testReleaseReview} />)
