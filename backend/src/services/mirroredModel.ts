@@ -25,6 +25,7 @@ import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import { shortId } from '../utils/id.js'
+import { hasKeysOfType } from '../utils/typeguards.js'
 import {
   createFilePath,
   downloadFile,
@@ -45,12 +46,15 @@ import {
   validateMirroredModel,
 } from './model.js'
 import {
+  DistributionPackageName,
   doesImageLayerExist,
   getImageBlob,
   getImageManifest,
   initialiseImageUpload,
+  joinDistributionPackageName,
   putImageBlob,
   putImageManifest,
+  splitDistributionPackageName,
 } from './registry.js'
 import { getAllFileIds, getReleasesForExport, isReleaseDoc, saveImportedRelease } from './release.js'
 
@@ -108,22 +112,143 @@ export async function exportModel(
   } catch (error) {
     throw InternalError('Error when adding the release(s) to the zip file.', { error })
   }
+
   zip.finalize()
   log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
 }
 
-function getS3ExportLocation(modelId: string, imageName: string, imageTag: string) {
-  return `beta/registry/${modelId}/${imageName}/blobs/compressed/${imageTag}.tar.gz`
+export const ImportKind = {
+  Documents: 'documents',
+  File: 'file',
+  Image: 'image',
+} as const
+
+export type ImportKindKeys<T extends keyof typeof ImportKind | void = void> = T extends keyof typeof ImportKind
+  ? (typeof ImportKind)[T]
+  : (typeof ImportKind)[keyof typeof ImportKind]
+
+export type MongoDocumentImportInformation = {
+  modelCardVersions: ModelCardRevisionDoc['version'][]
+  newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
+  releaseSemvers: ReleaseDoc['semver'][]
+  newReleases: Omit<ReleaseDoc, '_id'>[]
+  fileIds: ObjectId[]
+  imageIds: string[]
+}
+export type FileImportInformation = {
+  sourcePath: string
+  newPath: string
+}
+export type ImageImportInformation = {
+  image: { modelId: string; imageName: string; imageTag: string }
+}
+
+export async function importModel(
+  user: UserInterface,
+  mirroredModelId: string,
+  sourceModelId: string,
+  payloadUrl: string,
+  importKind: ImportKindKeys,
+  fileId?: string,
+  distributionPackageName?: string,
+): Promise<{
+  mirroredModel: ModelInterface
+  importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation
+}> {
+  if (!config.ui.modelMirror.import.enabled) {
+    throw BadReq('Importing models has not been enabled.')
+  }
+
+  if (mirroredModelId === '') {
+    throw BadReq('Missing mirrored model ID.')
+  }
+
+  const importId = shortId()
+  log.info({ importId, mirroredModelId, payloadUrl }, 'Received a request to import a model.')
+  const mirroredModel = await validateMirroredModel(mirroredModelId, sourceModelId, importId)
+
+  const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, importId })
+  }
+
+  let res: Response
+  try {
+    res = await fetch(payloadUrl, { agent: getHttpsAgent() })
+  } catch (err) {
+    throw InternalError('Unable to get the file.', { err, payloadUrl, importId })
+  }
+  if (!res.ok) {
+    throw InternalError('Unable to get the file.', {
+      payloadUrl,
+      response: { status: res.status, body: await res.text() },
+      importId,
+    })
+  }
+
+  if (!res.body) {
+    throw InternalError('Unable to get the file.', { payloadUrl, importId })
+  }
+
+  log.info({ mirroredModelId, payloadUrl, importId }, 'Obtained the file from the payload URL.')
+
+  switch (importKind) {
+    case ImportKind.Documents: {
+      log.info({ mirroredModelId, payloadUrl, importId }, 'Importing collection of documents.')
+      return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl, importId)
+    }
+    case ImportKind.File: {
+      log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
+      if (!fileId) {
+        throw BadReq('Missing File ID.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
+      }
+      const result = await importModelFile(res.body as Readable, fileId, mirroredModelId, importId)
+      return {
+        mirroredModel,
+        importResult: {
+          ...result,
+        },
+      }
+    }
+    case ImportKind.Image: {
+      log.info({ mirroredModelId, payloadUrl }, 'Importing image data.')
+      if (!distributionPackageName) {
+        throw BadReq('Missing Distribution Package Name.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
+      }
+      const result = await importCompressedRegistryImage(
+        user,
+        res.body as Readable,
+        mirroredModelId,
+        distributionPackageName,
+        importId,
+      )
+      return {
+        mirroredModel,
+        importResult: {
+          ...result,
+        },
+      }
+    }
+    default:
+      throw BadReq('Unrecognised import kind', { importKind, importId })
+  }
 }
 
 export async function exportCompressedRegistryImage(
   user: UserInterface,
   modelId: string,
-  imageName: string,
-  imageTag: string,
-  logData: Record<string, unknown>,
-  metadata?: ExportMetadata,
+  distributionPackageName: string,
+  metadata: ExportMetadata,
+  logData?: Record<string, unknown>,
 ) {
+  const distributionPackageNameObject = splitDistributionPackageName(distributionPackageName)
+  if (!('tag' in distributionPackageNameObject)) {
+    throw InternalError('Could not get tag from Distribution Package Name.', {
+      distributionPackageNameObject,
+      distributionPackageName,
+    })
+  }
+  const { path: imageName, tag: imageTag } = distributionPackageNameObject
   // get which layers exist for the model
   const tagManifest = await getImageManifest(user, modelId, imageName, imageTag)
   log.debug('Got image tag manifest', {
@@ -139,19 +264,11 @@ export async function exportCompressedRegistryImage(
     ...logData,
   })
 
-  // setup tar
-  const packerStream = pack()
-  // setup gzip
+  // setup gzip, stream to s3 to allow draining, and then pipe tar to gzip
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
-  // pipe the tar stream to gzip
+  const s3Upload = uploadToS3(`${distributionPackageName}.tar.gz`, gzipStream, metadata, logData)
+  const packerStream = pack()
   packerStream.pipe(gzipStream)
-  // start uploading the gzip stream to S3
-  const s3Upload = uploadToExportS3Location(
-    getS3ExportLocation(modelId, imageName, imageTag),
-    gzipStream,
-    logData,
-    metadata,
-  )
 
   // upload the manifest first as this is the starting point when later importing the blob
   const tagManifestJson = JSON.stringify(tagManifest)
@@ -187,7 +304,6 @@ export async function exportCompressedRegistryImage(
   // no more data to write
   packerStream.finalize()
 
-  // wait for the upload to complete
   await s3Upload
 }
 
@@ -223,38 +339,40 @@ export async function pipeStreamToTarEntry(
 
 export async function importCompressedRegistryImage(
   user: UserInterface,
+  body: Readable,
   modelId: string,
-  imageName: string,
-  imageTag: string,
-  logData: Record<string, unknown>,
-  inputS3Path?: string,
+  distributionPackageName: string,
+  importId: string,
 ) {
-  if (!inputS3Path) {
-    inputS3Path = getS3ExportLocation(modelId, imageName, imageTag)
+  const distributionPackageNameObject = splitDistributionPackageName(distributionPackageName)
+  if (!('tag' in distributionPackageNameObject)) {
+    throw InternalError('Could not get tag from Distribution Package Name.', {
+      distributionPackageNameObject,
+      distributionPackageName,
+    })
   }
-
+  const { path: imageName, tag: imageTag } = distributionPackageNameObject
   // setup streams
   const gzipStream = zlib.createGunzip({ chunkSize: 16 * 1024 * 1024 })
   const tarStream = extract()
-  const tarGzBlob = await getObjectFromExportS3Location(inputS3Path, {})
-  tarGzBlob.pipe(gzipStream).pipe(tarStream)
+  // body is tar.gz blob stream
+  body.pipe(gzipStream).pipe(tarStream)
 
-  let manifestBody
+  let manifestBody: unknown
   await new Promise((resolve, reject) => {
     tarStream.on('entry', async function (entry, stream, next) {
       log.debug('Processing un-tarred entry', {
-        tarball: inputS3Path,
         name: entry.name,
         type: entry.type,
         size: entry.size,
-        ...logData,
+        importId,
       })
 
       if (entry.type === 'file') {
         // Process file
         if (entry.name === 'manifest.json') {
           // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
-          log.debug('Extracting un-tarred manifest', { tarball: inputS3Path, ...logData })
+          log.debug('Extracting un-tarred manifest', { importId })
           manifestBody = await json(stream)
 
           next()
@@ -263,10 +381,9 @@ export async function importCompressedRegistryImage(
           const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
           if (await doesImageLayerExist(user, modelId, imageName, layerDigest)) {
             log.debug('Skipping blob as it already exists in the registry', {
-              tarball: inputS3Path,
               name: entry.name,
               size: entry.size,
-              ...logData,
+              importId,
             })
 
             // auto-drain the stream
@@ -274,10 +391,9 @@ export async function importCompressedRegistryImage(
             next()
           } else {
             log.debug('Initiating un-tarred blob upload', {
-              tarball: inputS3Path,
               name: entry.name,
               size: entry.size,
-              ...logData,
+              importId,
             })
             const res = await initialiseImageUpload(user, modelId, imageName)
 
@@ -288,7 +404,7 @@ export async function importCompressedRegistryImage(
         }
       } else {
         // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
-        log.warn('Skipping non-file entry', { tarball: inputS3Path, name: entry.name, type: entry.type, ...logData })
+        log.warn('Skipping non-file entry', { name: entry.name, type: entry.type, importId })
         next()
       }
     })
@@ -302,117 +418,28 @@ export async function importCompressedRegistryImage(
     )
 
     tarStream.on('finish', async function () {
-      log.debug('Uploading manifest', { tarball: inputS3Path, ...logData })
-      await putImageManifest(
-        user,
-        modelId,
-        imageName,
-        imageTag,
-        JSON.stringify(manifestBody),
-        manifestBody['mediaType'],
-      )
-      resolve('ok')
+      log.debug('Uploading manifest', { importId })
+      if (hasKeysOfType<{ mediaType: 'string' }>(manifestBody, { mediaType: 'string' })) {
+        await putImageManifest(
+          user,
+          modelId,
+          imageName,
+          imageTag,
+          JSON.stringify(manifestBody),
+          manifestBody['mediaType'],
+        )
+        resolve('ok')
+      } else {
+        reject(InternalError('Could not find manifest.json in tarball'))
+      }
     })
   })
   log.debug('Completed registry upload', {
-    tarball: inputS3Path,
     image: { modelId, imageName, imageTag },
-    ...logData,
+    importId,
   })
-}
 
-export const ImportKind = {
-  Documents: 'documents',
-  File: 'file',
-} as const
-
-export type ImportKindKeys<T extends keyof typeof ImportKind | void = void> = T extends keyof typeof ImportKind
-  ? (typeof ImportKind)[T]
-  : (typeof ImportKind)[keyof typeof ImportKind]
-
-export type MongoDocumentImportInformation = {
-  modelCardVersions: ModelCardRevisionDoc['version'][]
-  newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
-  releaseSemvers: ReleaseDoc['semver'][]
-  newReleases: Omit<ReleaseDoc, '_id'>[]
-  fileIds: ObjectId[]
-}
-export type FileImportInformation = {
-  sourcePath: string
-  newPath: string
-}
-
-export async function importModel(
-  user: UserInterface,
-  mirroredModelId: string,
-  sourceModelId: string,
-  payloadUrl: string,
-  importKind: ImportKindKeys,
-  fileId?: string,
-): Promise<{
-  mirroredModel: ModelInterface
-  importResult: MongoDocumentImportInformation | FileImportInformation
-}> {
-  if (!config.ui.modelMirror.import.enabled) {
-    throw BadReq('Importing models has not been enabled.')
-  }
-
-  if (mirroredModelId === '') {
-    throw BadReq('Missing mirrored model ID.')
-  }
-
-  const importId = shortId()
-  log.info({ importId, mirroredModelId, payloadUrl }, 'Received a request to import a model.')
-  const mirroredModel = await validateMirroredModel(mirroredModelId, sourceModelId, importId)
-
-  const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, importId })
-  }
-
-  let res: Response
-  try {
-    res = await fetch(payloadUrl, {
-      agent: getHttpsAgent(),
-    })
-  } catch (err) {
-    throw InternalError('Unable to get the file.', { err, payloadUrl, importId })
-  }
-  if (!res.ok) {
-    throw InternalError('Unable to get the file.', {
-      payloadUrl,
-      response: { status: res.status, body: await res.text() },
-      importId,
-    })
-  }
-
-  if (!res.body) {
-    throw InternalError('Unable to get the file.', { payloadUrl, importId })
-  }
-
-  log.info({ mirroredModelId, payloadUrl, importId }, 'Obtained the file from the payload URL.')
-
-  switch (importKind) {
-    case ImportKind.Documents: {
-      log.info({ mirroredModelId, payloadUrl, importId }, 'Importing collection of documents.')
-      return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl, importId)
-    }
-    case ImportKind.File: {
-      log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
-      if (!fileId) {
-        throw BadReq('Missing File ID.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
-      }
-      const result = await importModelFile(res, fileId, mirroredModelId, importId)
-      return {
-        mirroredModel,
-        importResult: {
-          ...result,
-        },
-      }
-    }
-    default:
-      throw BadReq('Unrecognised import kind', { importKind, importId })
-  }
+  return { image: { modelId, imageName, imageTag } }
 }
 
 async function importDocuments(
@@ -426,6 +453,7 @@ async function importDocuments(
   const modelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   const releases: Omit<ReleaseDoc, '_id'>[] = []
   const files: FileInterfaceDoc[] = []
+  const images: DistributionPackageName[] = []
   const zipData = new Uint8Array(await res.arrayBuffer())
   let zipContent
   try {
@@ -476,6 +504,11 @@ async function importDocuments(
       importId,
     })
   }
+  releases.forEach((release) =>
+    release.images.forEach((image) =>
+      images.push({ domain: image.repository, path: image.name, tag: image.tag } as DistributionPackageName),
+    ),
+  )
 
   // Parse model card documents.
 
@@ -499,7 +532,12 @@ async function importDocuments(
       payloadUrl,
       sourceModelId,
       importId,
-      numberOfDocuments: { modelCards: modelCards.length, releases: releases.length, files: files.length },
+      numberOfDocuments: {
+        modelCards: modelCards.length,
+        releases: releases.length,
+        files: files.length,
+        images: images.length,
+      },
     },
     'Finished parsing the collection of model documents.',
   )
@@ -522,6 +560,7 @@ async function importDocuments(
   const modelCardVersions = modelCards.map((modelCard) => modelCard.version)
   const releaseSemvers = releases.map((release) => release.semver)
   const fileIds: ObjectId[] = files.map((file) => file._id)
+  const imageIds: string[] = images.map((image) => joinDistributionPackageName(image))
 
   log.info(
     {
@@ -531,6 +570,7 @@ async function importDocuments(
       modelCardVersions,
       releaseSemvers,
       fileIds,
+      imageIds,
       importId,
     },
     'Finished importing the collection of model documents.',
@@ -544,14 +584,15 @@ async function importDocuments(
       releaseSemvers,
       newReleases,
       fileIds,
+      imageIds,
     },
   }
 }
 
-async function importModelFile(content: Response, fileId: string, mirroredModelId: string, importId: string) {
+async function importModelFile(body: Readable, fileId: string, mirroredModelId: string, importId: string) {
   const bucket = config.s3.buckets.uploads
   const updatedPath = createFilePath(mirroredModelId, fileId)
-  await putObjectStream(updatedPath, content.body as Readable)
+  await putObjectStream(updatedPath, body, bucket)
   log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
   await markFileAsCompleteAfterImport(updatedPath)
   return { sourcePath: fileId, newPath: updatedPath }
@@ -604,8 +645,7 @@ function parseRelease(
   const modelId = release.modelId
   release.modelId = mirroredModelId
   delete release._id
-  // Remove Docker Images until we add the functionality to import Docker images
-  release.images = []
+
   if (sourceModelId !== modelId) {
     throw InternalError('Zip file contains releases that have a model ID that does not match the source model Id.', {
       release,
@@ -656,8 +696,12 @@ type ExportMetadata = {
   sourceModelId: string
   mirroredModelId: string
   exporter: string
-} & ({ importKind: ImportKindKeys<'Documents'> } | { importKind: ImportKindKeys<'File'>; filePath: string })
-async function uploadToS3(
+} & (
+  | { importKind: ImportKindKeys<'Documents'> }
+  | { importKind: ImportKindKeys<'File'>; filePath: string }
+  | { importKind: ImportKindKeys<'Image'>; imageName: string; imageTag: string }
+)
+export async function uploadToS3(
   fileName: string,
   stream: Readable,
   metadata: ExportMetadata,
@@ -879,6 +923,37 @@ async function addReleaseToZip(
         },
       )
     }
+
+    if (Array.isArray(release.images)) {
+      for (const image of release.images) {
+        const imageLogData = {
+          releaseId: release.id,
+          sourceModelId: model.id,
+          imageName: image.name,
+          imageTag: image.tag,
+        }
+        const distributionPackageName = joinDistributionPackageName({
+          domain: image.repository,
+          path: image.name,
+          tag: image.tag,
+        })
+
+        await exportCompressedRegistryImage(
+          user,
+          model.id,
+          distributionPackageName,
+          {
+            exporter: user.dn,
+            sourceModelId: model.id,
+            mirroredModelId,
+            importKind: ImportKind.Image,
+            imageName: image.name,
+            imageTag: image.tag,
+          },
+          imageLogData,
+        )
+      }
+    }
   } catch (error: any) {
     throw InternalError('Error when generating the zip file.', { error })
   }
@@ -906,7 +981,7 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
     }
   }
 
-  if (await scanners.info()) {
+  if (scanners.info()) {
     const files = await getFilesByIds(user, modelId, fileIds)
     const scanErrors: {
       missingScan: Array<{ name: string; id: string }>

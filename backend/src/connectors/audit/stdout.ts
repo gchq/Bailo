@@ -11,7 +11,11 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
-import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
+import {
+  FileImportInformation,
+  ImageImportInformation,
+  MongoDocumentImportInformation,
+} from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
@@ -353,7 +357,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     mirroredModel: ModelInterface,
     sourceModelId: string,
     exporter: string,
-    importResult: MongoDocumentImportInformation | FileImportInformation,
+    importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation,
   ) {
     this.checkEventType(AuditInfo.CreateImport, req)
     const event = this.generateEvent(req, { mirroredModel, sourceModelId, exporter, importResult })

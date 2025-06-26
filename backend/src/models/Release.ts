@@ -17,7 +17,7 @@ export interface ReleaseInterface {
   draft: boolean
 
   fileIds: Array<string>
-  images: Array<ImageRef>
+  images: Array<ImageRefInterface>
 
   deleted: boolean
 
@@ -26,7 +26,7 @@ export interface ReleaseInterface {
   updatedAt: Date
 }
 
-export interface ImageRef {
+export interface ImageRefInterface {
   repository: string
   name: string
   tag: string
@@ -35,7 +35,9 @@ export interface ImageRef {
 // The doc type includes all values in the plain interface, as well as all the
 // properties and functions that Mongoose provides.  If a function takes in an
 // object from Mongoose it should use this interface
-export type ReleaseDoc = ReleaseInterface & SoftDeleteDocument
+export type ReleaseDoc = Omit<ReleaseInterface, 'images'> & {
+  images: Array<ImageRefInterface & { _id: Schema.Types.ObjectId }>
+} & SoftDeleteDocument
 
 export interface SemverObject {
   major: number
