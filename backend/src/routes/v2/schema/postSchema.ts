@@ -25,7 +25,6 @@ export const postSchemaSchema = z.object({
       required_error: 'Must specify schema kind',
     }),
     jsonSchema: z.object({}).passthrough(),
-    reviewRoles: z.array(z.string({ required_error: 'Must specify associated review roles' })),
   }),
 })
 
