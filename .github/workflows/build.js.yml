@@ -259,6 +259,9 @@ jobs:
         run: sleep 90s
         shell: bash
 
+      - name: List Certs
+        run: kubectl describe secret bailo-certs
+
       - name: List Pods
         run: kubectl get pods
 

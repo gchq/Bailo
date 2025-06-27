@@ -228,7 +228,6 @@ mail:
 # Openshift specific configuration
 openshift:
   namespace: openshift-project
-  dockerPushSecretName: "registry-push-secret"
   termination: edge
 
 # Instance Settings
@@ -269,11 +268,6 @@ config:
     support: "mailto:?subject=Bailo%20Contact"
     contact: "mailto:?subject=Bailo%20Contact"
 
-# nginx.deployment registry.deployment
-nginxcert:
-  cert: cert.pem #use san.cnf to create certs
-  key: key.pem
-
 connectors:
   authentication:
     kind: 'silly'
@@ -307,6 +301,7 @@ modelMirror:
         region: 'eu-west-1'
         accessKey: ''
         secretKey: ''
+
 # Inferencing cluster reference
 inference:
   enabled: false
