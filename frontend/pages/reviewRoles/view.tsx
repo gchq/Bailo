@@ -1,5 +1,7 @@
 import { Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
+import { useGetModelRoles } from 'actions/model'
 import { useGetAllReviewRoles } from 'actions/reviewRoles'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
 import { Fragment, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -8,9 +10,12 @@ import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import { getRoleDisplayName } from 'utils/roles'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetAllReviewRoles()
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles('placeholder_id')
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
@@ -32,7 +37,7 @@ export default function ReviewRoles() {
     () =>
       reviewRoles.map((reviewRole, index) => (
         <Fragment key={reviewRole.id}>
-          {selectedRole === index && (
+          {selectedRole === index && uiConfig && (
             <>
               <Typography color='primary' fontWeight='bold'>
                 Description
@@ -45,15 +50,19 @@ export default function ReviewRoles() {
               <Typography color='primary' fontWeight='bold'>
                 System Role
               </Typography>
-              <Typography>{reviewRole.collaboratorRole}</Typography>
+              {reviewRole.collaboratorRole ? (
+                <Typography>{getRoleDisplayName(reviewRole.collaboratorRole, modelRoles, uiConfig)}</Typography>
+              ) : (
+                <Typography fontStyle='italic'>Unset</Typography>
+              )}
             </>
           )}
         </Fragment>
       )),
-    [reviewRoles, selectedRole],
+    [modelRoles, reviewRoles, selectedRole, uiConfig],
   )
 
-  if (isCurrentUserLoading) {
+  if (isCurrentUserLoading || isUiConfigLoading || isModelRolesLoading) {
     return <Loading />
   }
 
@@ -65,6 +74,12 @@ export default function ReviewRoles() {
     return <ErrorWrapper message={isReviewRolesError.info.message} />
   }
 
+  if (isUiConfigError) {
+    return <ErrorWrapper message={isUiConfigError.info.message} />
+  }
+  if (isModelRolesError) {
+    return <ErrorWrapper message={isModelRolesError.info.message} />
+  }
   if (!currentUser || !currentUser.isAdmin) {
     return (
       <Forbidden

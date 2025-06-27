@@ -69,9 +69,15 @@ export interface UiConfig {
     organisations: string[]
     states: string[]
   }
+
+  roleDisplayNames: {
+    owner: string
+    contributor: string
+    consumer: string
+  }
 }
 
-export type CollaboratorRoleType = 'none' | 'contributor' | 'consumer' | 'owner'
+export type CollaboratorRoleType = 'contributor' | 'consumer' | 'owner'
 
 export interface FileInterface {
   _id: string

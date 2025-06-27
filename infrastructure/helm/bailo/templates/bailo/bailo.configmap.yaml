@@ -195,6 +195,12 @@ data:
           organisations: {{ toJson .Values.config.ui.modelDetails.organisations }},
           states: {{ toJson .Values.config.ui.modelDetails.states }},
         },
+
+        roleDisplayNames: {
+          owner: '{{ .Values.config.ui.roleDisplayNames.owner }}',
+          consumer: '{{ .Values.config.ui.roleDisplayNames.consumer }}',
+          contributor: '{{ .Values.config.ui.roleDisplayNames.contributor }}',
+        },
       },
 
       connectors: {
