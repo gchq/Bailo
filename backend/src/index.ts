@@ -7,6 +7,7 @@ import { z } from 'zod'
 
 import { ensureBucketExists } from './clients/s3.js'
 import log from './services/log.js'
+import { addDefaultReviewRoles } from './services/review.js'
 import { addDefaultSchemas } from './services/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
@@ -32,6 +33,9 @@ await runMigrations()
 
 // lazily add default schemas
 addDefaultSchemas()
+
+// lazily add default dynamic review roles
+addDefaultReviewRoles()
 
 const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {

@@ -64,6 +64,7 @@ export type ResponseActionKeys = (typeof ResponseAction)[keyof typeof ResponseAc
 export const ReviewRoleAction = {
   Create: 'reviewRole:create',
   View: 'reviewRole:view',
+  Delete: 'reviewRole:delete',
 } as const
 export type ReviewRoleActionKeys = (typeof ReviewRoleAction)[keyof typeof ReviewRoleAction]
 

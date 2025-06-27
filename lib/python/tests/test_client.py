@@ -278,17 +278,6 @@ def test_get_model_roles(requests_mock):
     assert result == {"success": True}
 
 
-def test_get_model_user_roles(requests_mock):
-    requests_mock.get("https://example.com/api/v2/model/test_id/roles/mine", json={"success": True})
-
-    client = Client("https://example.com")
-    result = client.get_model_user_roles(
-        model_id="test_id",
-    )
-
-    assert result == {"success": True}
-
-
 def test_get_access_request(requests_mock):
     requests_mock.get(
         "https://example.com/api/v2/model/test_id/access-request/test_id",

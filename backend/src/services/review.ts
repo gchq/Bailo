@@ -6,21 +6,24 @@ import { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import { ReleaseDoc } from '../models/Release.js'
 import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleInterface } from '../models/ReviewRole.js'
+import SchemaModel from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
+import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
-// This should be replaced by using the dynamic schema
-const requiredRoles = {
-  release: ['mtr', 'msro'],
-  accessRequest: ['msro'],
+export interface DefaultReviewRole {
+  id: unknown | Uint8Array<ArrayBufferLike>
+  name: string
+  short: string
+  description: string
+  kind: string
+  collaboratorRole: string
 }
-
-export const allReviewRoles = [...new Set(requiredRoles.release.concat(requiredRoles.accessRequest))]
 
 export async function findReviews(
   user: UserInterface,
@@ -53,8 +56,24 @@ export async function findReviews(
   return reviews.filter((_, i) => auths[i].success)
 }
 
+// Find out why requested schema isn't being found
+
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
-  const roleEntities = getRoleEntities(requiredRoles.release, model.collaborators)
+  if (!model.card) {
+    throw BadReq('A model needs to have a model card before a review can be made for its releases', {
+      modelId: model.id,
+    })
+  }
+  const modelSchema = await SchemaModel.findOne({ id: model.card.schemaId })
+  if (!modelSchema) {
+    throw BadReq('Cannot find schema for associated model', { modelId: model._id })
+  }
+
+  const requiredRolesForRelease = await ReviewRoleModel.find({ short: { $in: modelSchema.reviewRoles } })
+  const roleEntities = getRoleEntities(
+    requiredRolesForRelease.map((role) => role.short),
+    model.collaborators,
+  )
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -73,8 +92,20 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
   await Promise.all(createReviews)
 }
 
+// Update access request to use schema roles
+
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
-  const roleEntities = getRoleEntities(requiredRoles.accessRequest, model.collaborators)
+  const accessRequestSchema = await SchemaModel.findOne({ id: accessRequest.schemaId })
+  if (!accessRequestSchema) {
+    throw BadReq('Cannot find schema for associated model', { modelId: model._id })
+  }
+
+  const requiredRolesForAccessRequest = await ReviewRoleModel.find({ short: { $in: accessRequestSchema.reviewRoles } })
+
+  const roleEntities = getRoleEntities(
+    requiredRolesForAccessRequest.map((role) => role.short),
+    model.collaborators,
+  )
 
   const createReviews = roleEntities.map((roleInfo) => {
     const review = new Review({
@@ -159,10 +190,9 @@ export async function findReviewForResponse(
 
 //TODO This won't work for response refactor
 export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
-  const reviews: ReviewDoc[] = await Review.find({
+  return await Review.find({
     accessRequestId: accessRequestIds,
   })
-  return reviews.filter((review) => requiredRoles.accessRequest.includes(review.role))
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
@@ -232,4 +262,15 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
 export async function findReviewRoles(): Promise<ReviewRoleInterface[]> {
   const reviewRoles = await ReviewRoleModel.find()
   return reviewRoles
+}
+
+export async function addDefaultReviewRoles() {
+  for (const reviewRole of config.defaultReviewRoles) {
+    log.info({ name: reviewRole.name }, `Ensuring review role ${reviewRole.name} exists`)
+    const reviewRoleSchema = new ReviewRoleModel({
+      ...reviewRole,
+    })
+    await ReviewRoleModel.deleteOne({ id: reviewRole.id })
+    await reviewRoleSchema.save()
+  }
 }

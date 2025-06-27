@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { ReviewRolesFormData } from 'types/types'
+import { ReviewRoleInterface } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyRolesList = []
@@ -7,7 +7,7 @@ const emptyRolesList = []
 export function useGetAllReviewRoles() {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      reviewRoles: ReviewRolesFormData[]
+      reviewRoles: ReviewRoleInterface[]
     },
     ErrorInfo
   >('/api/v2/review/roles', fetcher)

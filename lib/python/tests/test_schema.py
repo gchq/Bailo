@@ -39,7 +39,7 @@ def test_schema():
         ("Test", "Example Description", SchemaKind.ACCESS_REQUEST, MINIMAL_JSON_SCHEMA),
     ],
 )
-def test_create_get_from_version_and_update(name, description, kind, json_schema, integration_client):
+def test_create_get_from_version_and_update(name, description, kind, json_schema, integration_client, review_roles):
     # Create schema
     schema_id = random_generator()
     schema = Schema.create(
@@ -49,6 +49,7 @@ def test_create_get_from_version_and_update(name, description, kind, json_schema
         description=description,
         kind=kind,
         json_schema=json_schema,
+        review_roles=review_roles,
     )
     assert isinstance(schema, Schema)
 

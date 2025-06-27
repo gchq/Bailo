@@ -177,6 +177,7 @@ export const testAccessRequestSchema: SchemaInterface = {
     required: ['overview'],
     additionalProperties: false,
   },
+  reviewRoles: ['msro'],
   createdAt: new Date(),
   updatedAt: new Date(),
 }

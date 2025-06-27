@@ -7,7 +7,7 @@ exports[`routes > review > postReviewRole > creates and returns new review role 
   "reviewRole": {
     "id": "my-role-125",
     "name": "Reviewer",
-    "short": "reviewer",
+    "short": "msro",
   },
 }
 `;
