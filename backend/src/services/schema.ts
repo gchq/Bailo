@@ -15,6 +15,7 @@ export interface DefaultSchema {
   id: string
   description: string
   jsonSchema: JsonSchema
+  reviewRoles?: string[]
 }
 
 export async function searchSchemas(kind?: SchemaKindKeys, hidden?: boolean): Promise<SchemaInterface[]> {

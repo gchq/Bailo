@@ -77,6 +77,25 @@ module.exports = {
     level: 'debug',
   },
 
+  defaultReviewRoles: [
+    {
+      id: 'msro',
+      name: 'Model Senior Responsible Officer',
+      short: 'msro',
+      kind: 'schema',
+      description: 'Reviewer',
+      collaboratorRole: 'owner',
+    },
+    {
+      id: 'mtr',
+      name: 'Model Technical Reviewer',
+      short: 'mtr',
+      kind: 'schema',
+      description: 'Reviewer',
+      collaboratorRole: 'owner',
+    },
+  ],
+
   defaultSchemas: {
     modelCards: [
       {
@@ -85,6 +104,7 @@ module.exports = {
         description:
           "This is the latest version of the default model card. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which model card to pick, you'll likely want this one!",
         jsonSchema: require('../src/scripts/example_schemas/minimal_model_schema.json'),
+        reviewRoles: ['msro', 'mtr'],
       },
     ],
     dataCards: [
@@ -103,6 +123,7 @@ module.exports = {
         description:
           'This access request should be used for models that are being deployed by the same organisation that created it and MAY be being used for operational use cases.\n\n ✔ Development Work  \n ✔ Operational Deployments  \n ✖ Second Party Sharing',
         jsonSchema: require('../src/scripts/example_schemas/minimal_access_request_schema.json'),
+        reviewRoles: ['msro'],
       },
     ],
   },

@@ -6,6 +6,7 @@ import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
 import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
+import { DefaultReviewRole } from '../services/review.js'
 import { DefaultSchema } from '../services/schema.js'
 import { UiConfig } from '../types/types.js'
 import { deepFreeze } from './object.js'
@@ -130,6 +131,8 @@ export interface Config {
     accessRequests: Array<DefaultSchema>
     dataCards: Array<DefaultSchema>
   }
+
+  defaultReviewRoles: Array<DefaultReviewRole>
 
   instrumentation: {
     enabled: boolean

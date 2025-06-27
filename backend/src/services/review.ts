@@ -9,11 +9,21 @@ import ReviewRoleModel, { ReviewRoleInterface } from '../models/ReviewRole.js'
 import SchemaModel from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
+import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
+
+export interface DefaultReviewRole {
+  id: unknown | Uint8Array<ArrayBufferLike>
+  name: string
+  short: string
+  description: string
+  kind: string
+  collaboratorRole: string
+}
 
 export async function findReviews(
   user: UserInterface,
@@ -252,4 +262,15 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
 export async function findReviewRoles(): Promise<ReviewRoleInterface[]> {
   const reviewRoles = await ReviewRoleModel.find()
   return reviewRoles
+}
+
+export async function addDefaultReviewRoles() {
+  for (const reviewRole of config.defaultReviewRoles) {
+    log.info({ name: reviewRole.name }, `Ensuring review role ${reviewRole.name} exists`)
+    const reviewRoleSchema = new ReviewRoleModel({
+      ...reviewRole,
+    })
+    await ReviewRoleModel.deleteOne({ id: reviewRole.id })
+    await reviewRoleSchema.save()
+  }
 }
