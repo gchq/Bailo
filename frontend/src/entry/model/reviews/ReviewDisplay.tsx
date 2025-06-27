@@ -5,6 +5,7 @@ import ApprovalsDisplay from 'src/entry/model/reviews/ApprovalsDisplay'
 import { Decision, ResponseInterface } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { fromEntity } from 'utils/entityUtils'
+import { isFinalised } from 'utils/reviewUtils'
 import { plural } from 'utils/stringUtils'
 
 export interface ReviewDisplayProps {
@@ -32,7 +33,7 @@ export default function ReviewDisplay({
 
   return (
     <>
-      {orderedReviewResponses.length > 0 && orderedReviewResponses[0].decision === Decision.Approve && (
+      {orderedReviewResponses.length > 0 && isFinalised(orderedReviewResponses[0].decision) && (
         <ApprovalsDisplay
           modelId={modelId}
           acceptedReviewResponses={orderedReviewResponses}

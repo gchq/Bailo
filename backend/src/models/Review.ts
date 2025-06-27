@@ -2,6 +2,7 @@ import { model, Schema } from 'mongoose'
 import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
+import { DecisionKeys } from './Response.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
@@ -16,6 +17,8 @@ export interface ReviewInterface {
 
   createdAt: Date
   updatedAt: Date
+
+  decision?: DecisionKeys
 }
 
 // The doc type includes all values in the plain interface, as well as all the

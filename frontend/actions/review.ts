@@ -18,7 +18,7 @@ export function useGetReviewRequestsForUser() {
       reviews: ReviewRequestInterface[]
     },
     ErrorInfo
-  >('/api/v2/reviews', fetcher)
+  >('/api/v2/reviews?decision=true', fetcher)
 
   return {
     mutateReviews: mutate,
