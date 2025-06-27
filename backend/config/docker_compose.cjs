@@ -17,6 +17,13 @@ module.exports = {
     publicKey: '/certs/cert.pem',
   },
 
+  httpClient: {
+    noProxy: ['localhost', '127.0.0.1', 'registry', 'minio'],
+    defaultOpts: {
+      rejectUnauthorized: false,
+    },
+  },
+
   s3: {
     credentials: {
       accessKeyId: 'minioadmin',
