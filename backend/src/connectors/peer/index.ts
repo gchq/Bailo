@@ -4,10 +4,12 @@ import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
 import { BailoPeerConnector } from './bailo.js'
 import { BasePeerConnector } from './base.js'
+import { HuggingFaceHubConnector } from './huggingface.js'
 import { PeerConnectorWrapper } from './wrapper.js'
 
 export const PeerKind = {
   Bailo: 'bailo',
+  HuggingFaceHub: 'huggingfacehub',
 } as const
 export type PeerKindKeys = (typeof PeerKind)[keyof typeof PeerKind]
 
@@ -55,6 +57,14 @@ export default async function getPeerConnectors(cache = true): Promise<PeerConne
           peers.set(id, connector)
         } catch (error) {
           throw ConfigurationError('Could not configure or initialise Bailo connector', { error })
+        }
+        break
+      case PeerKind.HuggingFaceHub:
+        try {
+          const connector = new HuggingFaceHubConnector(id, cfg)
+          peers.set(id, connector)
+        } catch (error) {
+          throw ConfigurationError('Could not configure or initialise HuggingFace connector', { error })
         }
         break
       default:
