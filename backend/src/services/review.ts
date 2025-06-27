@@ -15,14 +15,6 @@ import log from './log.js'
 import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
-// This should be replaced by using the dynamic schema
-const requiredRoles = {
-  release: ['mtr', 'msro'],
-  accessRequest: ['msro'],
-}
-
-export const allReviewRoles = [...new Set(requiredRoles.release.concat(requiredRoles.accessRequest))]
-
 export async function findReviews(
   user: UserInterface,
   mine: boolean,
@@ -188,10 +180,9 @@ export async function findReviewForResponse(
 
 //TODO This won't work for response refactor
 export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
-  const reviews: ReviewDoc[] = await Review.find({
+  return await Review.find({
     accessRequestId: accessRequestIds,
   })
-  return reviews.filter((review) => requiredRoles.accessRequest.includes(review.role))
 }
 
 function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {

@@ -542,19 +542,6 @@ class Client:
             f"{self.url}/v2/model/{model_id}/roles",
         ).json()
 
-    def get_model_user_roles(
-        self,
-        model_id: str,
-    ):
-        """Get current users roles for a model.
-
-        :param model_id: Unique model ID
-        :return: JSON response object
-        """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/roles/mine",
-        ).json()
-
     def get_access_request(self, model_id: str, access_request_id: str):
         """Retrieve a specific access request given its unique ID.
 

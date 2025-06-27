@@ -5,7 +5,7 @@ exports[`routes > review > getReviewRoles > audit > expected call 1`] = `
   {
     "id": "my-role-125",
     "name": "Reviewer",
-    "short": "reviewer",
+    "short": "msro",
   },
 ]
 `;
@@ -16,7 +16,7 @@ exports[`routes > review > getReviewRoles > returns review roles 1`] = `
     {
       "id": "my-role-125",
       "name": "Reviewer",
-      "short": "reviewer",
+      "short": "msro",
     },
   ],
 }

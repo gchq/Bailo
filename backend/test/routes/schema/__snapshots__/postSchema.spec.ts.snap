@@ -7,6 +7,12 @@ exports[`routes > schema > postSchema > audit > expected call 1`] = `
   "jsonSchema": {},
   "kind": "accessRequest",
   "name": "Dr. Garry Cummerata",
+  "reviewRoles": [
+    "expedita",
+    "expedita",
+    "expedita",
+    "expedita",
+  ],
 }
 `;
 
@@ -18,6 +24,12 @@ exports[`routes > schema > postSchema > successfully stores the schema 1`] = `
     "jsonSchema": {},
     "kind": "accessRequest",
     "name": "Dr. Garry Cummerata",
+    "reviewRoles": [
+      "expedita",
+      "expedita",
+      "expedita",
+      "expedita",
+    ],
   },
 }
 `;

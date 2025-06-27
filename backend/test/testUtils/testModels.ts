@@ -111,5 +111,5 @@ export const testResponse = {
 export const testReviewRole = {
   id: 'my-role-125',
   name: 'Reviewer',
-  short: 'reviewer',
+  short: 'msro',
 }

@@ -1,4 +1,4 @@
-import { Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
 import { useGetAllReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
 import { Fragment, useMemo, useState } from 'react'
@@ -33,20 +33,20 @@ export default function ReviewRoles() {
       reviewRoles.map((reviewRole, index) => (
         <Fragment key={reviewRole.id}>
           {selectedRole === index && (
-            <>
-              <Typography color='primary' fontWeight='bold'>
-                Description
-              </Typography>
-              <Typography>{reviewRole.description}</Typography>
-              <Typography color='primary' fontWeight='bold'>
-                Short Name
-              </Typography>
-              <Typography>{reviewRole.short}</Typography>
-              <Typography color='primary' fontWeight='bold'>
-                System Role
-              </Typography>
-              <Typography>{reviewRole.collaboratorRole}</Typography>
-            </>
+            <Stack spacing={2}>
+              <Box>
+                <Typography color='primary' fontWeight='bold'>
+                  Description
+                </Typography>
+                <Typography>{reviewRole.description}</Typography>
+              </Box>
+              <Box>
+                <Typography color='primary' fontWeight='bold'>
+                  System Role
+                </Typography>
+                <Typography>{reviewRole.collaboratorRole}</Typography>
+              </Box>
+            </Stack>
           )}
         </Fragment>
       )),
