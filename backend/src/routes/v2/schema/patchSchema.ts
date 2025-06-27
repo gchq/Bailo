@@ -21,6 +21,10 @@ export const patchSchemaSchema = z.object({
       hidden: z.boolean().openapi({ example: false }).optional(),
       name: z.string().openapi({ example: 'Test Schema v1' }).optional(),
       description: z.string().openapi({ example: 'This is an example of schema description' }).optional(),
+      reviewRoles: z
+        .array(z.string())
+        .optional()
+        .openapi({ example: ['reviewer'] }),
     })
     .strict(),
 })

@@ -132,10 +132,20 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
             onDeleteSchemaClick={handleDeleteSchema}
             onOpenMenuClick={handleOpenMenu}
             onEditSchemaClick={handleEditSchema}
+            mutateSchemas={mutateSchemas}
           />
         )
       }),
-    [schemas, anchorEl, openMenuSchemaId, handleCloseMenu, handleDeleteSchema, handleOpenMenu, handleEditSchema],
+    [
+      schemas,
+      anchorEl,
+      openMenuSchemaId,
+      handleCloseMenu,
+      handleDeleteSchema,
+      handleOpenMenu,
+      handleEditSchema,
+      mutateSchemas,
+    ],
   )
 
   const objectsToDeleteList = useMemo(() => {

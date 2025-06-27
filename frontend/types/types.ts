@@ -201,6 +201,7 @@ export interface SchemaInterface {
   meta: unknown
   uiSchema: unknown
   schema: unknown
+  reviewRoles: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -605,3 +606,25 @@ export type FileUploadMetadata = {
   tags: string[]
   text: string
 }
+
+export interface ReviewRoleInterface {
+  id: string
+  name: string
+  short: string
+  kind: RoleKindKeys
+  description?: string
+  defaultEntities?: string[]
+  lockEntities?: boolean
+  collaboratorRole?: CollaboratorRolesKeys
+}
+
+export const CollaboratorRoles = {
+  None: 'none',
+  Owner: 'owner',
+  Contributor: 'contributor',
+  Consumer: 'consumer',
+  MSRO: 'msro',
+  MTR: 'mtr',
+} as const
+
+export type CollaboratorRolesKeys = (typeof CollaboratorRoles)[keyof typeof CollaboratorRoles]

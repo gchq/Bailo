@@ -25,6 +25,10 @@ export const postSchemaSchema = z.object({
       required_error: 'Must specify schema kind',
     }),
     jsonSchema: z.object({}).passthrough(),
+    reviewRoles: z.array(z.string()).openapi({
+      example: ['reviewer'],
+      description: 'This is an array made up of the "short" property from a Review Role object.',
+    }),
   }),
 })
 
