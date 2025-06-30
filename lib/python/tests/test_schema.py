@@ -26,6 +26,7 @@ def test_schema():
         description="test description",
         kind=kind,
         json_schema={"test": "test"},
+        review_roles=["test"],
     )
 
     assert isinstance(schema, Schema)
@@ -33,13 +34,13 @@ def test_schema():
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "kind", "json_schema"),
+    ("name", "description", "kind", "json_schema", "review_roles"),
     [
-        ("Test", "Example Description", SchemaKind.MODEL, MINIMAL_JSON_SCHEMA),
-        ("Test", "Example Description", SchemaKind.ACCESS_REQUEST, MINIMAL_JSON_SCHEMA),
+        ("Test", "Example Description", SchemaKind.MODEL, MINIMAL_JSON_SCHEMA, ["reviewer"]),
+        ("Test", "Example Description", SchemaKind.ACCESS_REQUEST, MINIMAL_JSON_SCHEMA, ["reviewer"]),
     ],
 )
-def test_create_get_from_version_and_update(name, description, kind, json_schema, integration_client, review_roles):
+def test_create_get_from_version_and_update(name, description, kind, json_schema, review_roles, integration_client):
     # Create schema
     schema_id = random_generator()
     schema = Schema.create(

@@ -217,6 +217,7 @@ def test_post_schema(requests_mock):
         description="example_description",
         kind=SchemaKind.MODEL,
         json_schema={"test": "test"},
+        review_roles=["test"],
     )
 
     assert result == {"success": True}

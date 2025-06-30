@@ -47,6 +47,7 @@ def test_create_get_from_version_update_and_delete_release(
         model_card_version=model_card_version,
         notes=notes,
         files=files,
+        images=images,
         minor=minor,
         draft=draft,
     )

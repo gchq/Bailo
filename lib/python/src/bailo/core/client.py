@@ -461,6 +461,7 @@ class Client:
         description: str,
         kind: SchemaKind,
         json_schema: dict[str, Any],
+        review_roles: list[str],
     ):
         """Create a schema.
 
@@ -469,6 +470,7 @@ class Client:
         :param description: Description for the schema
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest)
         :param json_schema: JSON schema
+        :param review_roles: list made up of the "short" property from a Review Role object
         :return: JSON response object
         """
         return self.agent.post(
@@ -479,6 +481,7 @@ class Client:
                 "description": description,
                 "kind": str(kind),
                 "jsonSchema": json_schema,
+                "reviewRoles": review_roles,
             },
         ).json()
 

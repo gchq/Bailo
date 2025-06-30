@@ -28,6 +28,7 @@ class Schema:
         description: str,
         kind: SchemaKind,
         json_schema: dict[str, Any],
+        review_roles: list[str],
     ) -> None:
         self.client = client
         self.schema_id = schema_id
@@ -35,6 +36,7 @@ class Schema:
         self.description = description
         self.kind = kind
         self.json_schema = json_schema
+        self.review_roles = review_roles
 
     @classmethod
     def create(
@@ -45,6 +47,7 @@ class Schema:
         description: str,
         kind: SchemaKind,
         json_schema: dict[str, Any],
+        review_roles: list[str],
     ) -> Schema:
         """Build a schema from Bailo and uploads it.
 
@@ -54,6 +57,7 @@ class Schema:
         :param description: Description of schema
         :param kind: Kind of schema, using SchemaKind enum (e.g Model or AccessRequest)
         :param json_schema: Schema JSON
+        :param review_roles: list made up of the "short" property from a Review Role object
         :return: Schema object
         """
         schema = cls(
@@ -63,6 +67,7 @@ class Schema:
             description=description,
             kind=kind,
             json_schema=json_schema,
+            review_roles=review_roles,
         )
         res = client.post_schema(
             schema_id=schema_id,
@@ -70,6 +75,7 @@ class Schema:
             description=description,
             kind=kind,
             json_schema=json_schema,
+            review_roles=review_roles,
         )
         logger.info("Schema successfully created on server with ID %s.", schema_id)
         schema.__unpack(res["schema"])
@@ -91,6 +97,7 @@ class Schema:
             description="temp",
             kind=SchemaKind.MODEL,
             json_schema={"temp": "temp"},
+            review_roles=[],
         )
         res = client.get_schema(schema_id=schema_id)
         logger.info("Schema %s successfully retrieved from server.", schema_id)
@@ -115,6 +122,7 @@ class Schema:
         self.description = res["description"]
         kind = res["kind"]
         self.json_schema = res["jsonSchema"]
+        self.review_roles = res["reviewRoles"]
 
         if kind == "model":
             self.kind = SchemaKind.MODEL
