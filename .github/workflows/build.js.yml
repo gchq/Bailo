@@ -7,9 +7,34 @@ on:
     branches: [main]
 
 jobs:
-  build_backend:
+  build_images:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
+    strategy:
+      matrix:
+        component:
+          - name: backend
+            context: backend
+            dockerfile: backend/Dockerfile
+            tar: /tmp/bailo_backend.tar
+            artifact: bailo_backend
+            cache_scope: backend
+            tag: bailo_backend:latest
+          - name: frontend
+            context: frontend
+            dockerfile: frontend/Dockerfile
+            tar: /tmp/bailo_frontend.tar
+            artifact: bailo_frontend
+            cache_scope: frontend
+            tag: bailo_frontend:latest
+          - name: modelscan
+            context: lib/modelscan
+            dockerfile: lib/modelscan/Dockerfile
+            tar: /tmp/bailo_modelscan.tar
+            artifact: bailo_modelscan
+            cache_scope: modelscan
+            tag: bailo_modelscan:latest
 
     steps:
       # Clone repository
@@ -19,129 +44,67 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build backend image
+      - name: Build ${{ matrix.component.name }} image
         uses: docker/build-push-action@v6
         with:
-          context: backend
-          file: backend/Dockerfile
-          tags: bailo_backend:latest
-          cache-from: type=gha,scope=backend
-          cache-to: type=gha,mode=max,scope=backend
-          outputs: type=docker,dest=/tmp/bailo_backend.tar
+          context: ${{ matrix.component.context }}
+          file: ${{ matrix.component.file }}
+          tags: ${{ matrix.component.tag }}
+          cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component.cache_scope }}
+          outputs: type=docker,dest=${{ matrix.component.tar }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bailo_backend
-          path: /tmp/bailo_backend.tar
+          name: ${{ matrix.component.artifact }}
+          path: ${{ matrix.component.tar }}
 
-  build_frontend:
+  tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    strategy:
+      matrix:
+        task: [unit, style]
 
     steps:
       # Clone repository
       - uses: actions/checkout@v4
 
-      # Setup BuildX
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build frontend image
-        uses: docker/build-push-action@v6
-        with:
-          context: frontend
-          file: frontend/Dockerfile
-          tags: bailo_frontend:latest
-          cache-from: type=gha,scope=frontend
-          cache-to: type=gha,mode=max,scope=frontend
-          outputs: type=docker,dest=/tmp/bailo_frontend.tar
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: bailo_frontend
-          path: /tmp/bailo_frontend.tar
-
-  build_modelscan:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-      # Clone repository
-      - uses: actions/checkout@v4
-
-      # Setup BuildX
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build ModelScan image
-        uses: docker/build-push-action@v6
-        with:
-          context: lib/modelscan_api
-          file: lib/modelscan_api/Dockerfile
-          tags: bailo_modelscan:latest
-          cache-from: type=gha,scope=modelscan
-          cache-to: type=gha,mode=max,scope=modelscan
-          outputs: type=docker,dest=/tmp/bailo_modelscan.tar
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: bailo_modelscan
-          path: /tmp/bailo_modelscan.tar
-
-  unit_testing:
-    runs-on: ubuntu-latest
-
-    steps:
-      # Clone repository
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js 24
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24.3.0
           cache: "npm"
 
-      # Install dependencies
-      - run: npm ci
-
-      # Create certs
-      - run: sudo chown -R runner:docker backend/certs
-      - run: npm run certs
-
-      # Run unit tests
-      - run: npm run test
-
-  style:
-    runs-on: ubuntu-latest
-
-    steps:
-      # Clone repository
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js 24
-        uses: actions/setup-node@v4
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
         with:
-          node-version: 24.3.0
-          cache: "npm"
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**package-lock.json') }}
 
-      # Install dependencies
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      # Run style checks
-      - run: npm run check-style
-      - run: npm run lint
+      - name: Create certs
+        if: matrix.task == 'unit'
+        run: sudo chown -R runner:docker backend/certs && npm run certs
+
+      - name: Run unit tests
+        if: matrix.task == 'unit'
+        run: npm run test
+
+      - name: Run style checks
+        if: matrix.task == 'style'
+        run: npm run check-style && npm run lint
 
   kubernetes:
-    needs: [build_backend, build_frontend, build_modelscan]
+    needs: [build_images]
     runs-on: ubuntu-latest
 
     steps:
       # Clone repository
       - uses: actions/checkout@v4
-      - name: Use Node.js 24
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24.3.0
@@ -181,12 +144,11 @@ jobs:
           docker load -i /tmp/bailo_frontend.tar
           docker load -i /tmp/bailo_modelscan.tar
 
-      # Install dependencies
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      # Create certs
-      - run: sudo chown -R runner:docker backend/certs
-      - run: npm run certs
+      - name: Create certs
+        run: sudo chown -R runner:docker backend/certs && npm run certs
 
       # Add bailo NodePort
       - name: Create NodePort Config
@@ -255,9 +217,8 @@ jobs:
         working-directory: ./infrastructure/helm/bailo
         run: helm install --values ./local.yaml bailo .
 
-      - name: Sleep for 90 seconds
-        run: sleep 90s
-        shell: bash
+      - name: Wait for all pods to be ready
+        run: kubectl wait --for=condition=Ready pods --all --timeout 120s
 
       - name: List Certs
         run: kubectl describe secret bailo-certs
@@ -298,14 +259,17 @@ jobs:
         run: kubectl logs -l app.kubernetes.io/instance=bailo --tail=-1
 
   end_to_end:
-    needs: [build_backend, build_frontend, build_modelscan]
+    needs: [build_images]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        job_name: [end_to_end, integration_python]
 
     steps:
       # Clone repository
       - uses: actions/checkout@v4
 
-      - name: Use Node.js 24
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24.3.0
@@ -338,7 +302,6 @@ jobs:
           docker load --input /tmp/bailo_backend.tar
           docker load --input /tmp/bailo_modelscan.tar
           docker image ls -a
-
           rm -rf /tmp/bailo_frontend.tar /tmp/bailo_backend.tar /tmp/bailo_modelscan.tar
 
       # Create logs directory
@@ -391,150 +354,49 @@ jobs:
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
 
+      # e2e with Cypress
       - uses: cypress-io/github-action@v6
+        if: matrix.job_name -- 'end_to_end'
         with:
           wait-on: 'http://localhost:8080/api/v2/config/ui'
           working-directory: ./frontend
           install: false
           spec: cypress/e2e/bailo/**/*
 
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: cypress-screenshots-e2e
-          path: frontend/cypress/screenshots
-
-      # - uses: actions/upload-artifact@v4
-      #   if: always()
-      #   with:
-      #     name: cypress-videos
-      #     path: cypress/videos
-
-      - name: Dump docker compose logs
-        if: always()
-        run: docker compose logs > logs/stack.log
-
-      - name: Docker Compose Logs
-        if: always()
-        run: cat logs/stack.log
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: logs
-          path: logs
-
-  integration_python:
-    needs: [build_backend, build_frontend]
-    runs-on: ubuntu-latest
-
-    steps:
-      # Clone repository
-      - uses: actions/checkout@v4
-      - name: Use Node.js 24
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24.3.0
-          cache: "npm"
-
-      # Setup BuildX
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # Get Bailo Docker images
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bailo_backend
-          path: /tmp
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bailo_frontend
-          path: /tmp
-
-      - name: Load image
-        run: |
-          docker load --input /tmp/bailo_frontend.tar
-          docker load --input /tmp/bailo_backend.tar
-          docker image ls -a
-
-      # Create logs directory
-      - run: mkdir logs
-
-      # Install dependencies
-      - run: npm ci
-
-      # Create certs
-      - run: sudo chown -R runner:docker backend/certs
-      - run: npm run certs
-
-      # Configure application
-      - name: Configure Bailo
-        run: |
-          cat <<EOT >> backend/config/local.cjs
-          module.exports = {
-            minio: {
-              accessKey: 'minioadmin',
-              secretKey: 'minioadmin',
-            },
-
-            smtp: {
-              auth: {
-                user: 'mailuser',
-                pass: 'mailpass',
-              },
-              tls: {
-                rejectUnauthorized: false,
-              },
-            },
-
-            logging: {
-              file: {
-                path: '/home/runner/work/Bailo/Bailo/logs/out.log',
-              },
-            },
-          }
-          EOT
-
-      - run: docker compose -f docker-compose-prod.yml up -d
-
-      # wait for app to start
-      - run: |
-          chmod +x ./backend/src/scripts/waitForIt.sh
-          ./backend/src/scripts/waitForIt.sh localhost:8080 -t 10
-
-      # wait for mongo to start
-      - run: |
-          chmod +x ./backend/src/scripts/waitForIt.sh
-          ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
-
-      # Setup python
-      - name: Set up Python 3.13
+      # Python integration
+      - name: Set up Python
+        if: matrix.job_name -- 'integration_python'
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
 
-      # Install dependencies
+      - name: Cache python pip
+        if: matrix.job_name -- 'integration_python'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+
       - name: Install dependencies
+        if: matrix.job_name -- 'integration_python'
         run: |
           python -m pip install --upgrade pip
-
           cd lib/python
           python -m pip install -e .[test]
 
-      # start mlflow server
       - name: Start MLFlow
+        if: matrix.job_name -- 'integration_python'
         run: |
           mlflow server --host 127.0.0.1 --port 5050 &
 
-      # wait for mlflow to start
-      - run: |
+      - name: Wait for mlflow to start
+        if: matrix.job_name -- 'integration_python'
+        run: |
           chmod +x ./backend/src/scripts/waitForIt.sh
           ./backend/src/scripts/waitForIt.sh localhost:5050 -t 10
 
-      # Run tests
       - name: Test with pytest
+        if: matrix.job_name -- 'integration_python'
         run: |
           cd lib/python
           python -m pytest -m integration
@@ -542,6 +404,13 @@ jobs:
         env:
           PYTEST_RUN_PATH: "lib/python"
 
+      # Upload all artifacts & logs
+      - uses: actions/upload-artifact@v4
+        if: failure() && matrix.job_name -- 'end_to_end'
+        with:
+          name: cypress-screenshots-e2e
+          path: frontend/cypress/screenshots
+
       - name: Dump docker compose logs
         if: always()
         run: docker compose logs > logs/stack.log
@@ -551,7 +420,7 @@ jobs:
         run: cat logs/stack.log
 
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && matrix.job_name -- 'end_to_end'
         with:
-          name: python-logs
+          name: logs
           path: logs
