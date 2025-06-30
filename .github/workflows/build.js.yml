@@ -98,10 +98,10 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v4
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22.14.0
+          node-version: 24.3.0
           cache: "npm"
 
       # Install dependencies
@@ -121,10 +121,10 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v4
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22.14.0
+          node-version: 24.3.0
           cache: "npm"
 
       # Install dependencies
@@ -141,10 +141,10 @@ jobs:
     steps:
       # Clone repository
       - uses: actions/checkout@v4
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22.14.0
+          node-version: 24.3.0
           cache: "npm"
 
       # Setup BuildX
@@ -305,10 +305,10 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v4
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22.14.0
+          node-version: 24.3.0
           cache: "npm"
 
       # Setup BuildX
@@ -431,10 +431,10 @@ jobs:
     steps:
       # Clone repository
       - uses: actions/checkout@v4
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22.14.0
+          node-version: 24.3.0
           cache: "npm"
 
       # Setup BuildX
