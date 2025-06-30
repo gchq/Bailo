@@ -16,6 +16,7 @@ export const postRequestImportFromS3Schema = z.object({
     exporter: z.string(),
     importKind: z.nativeEnum(ImportKind),
     filePath: z.string().optional(),
+    distributionPackageName: z.string().optional(),
   }),
 })
 
@@ -51,7 +52,7 @@ export const postRequestImportFromS3 = [
   async (req: Request, res: Response<PostRequestImportResponse>) => {
     req.audit = AuditInfo.CreateImport
     const {
-      body: { payloadUrl, sourceModelId, mirroredModelId, exporter, importKind, filePath },
+      body: { payloadUrl, sourceModelId, mirroredModelId, exporter, importKind, filePath, distributionPackageName },
     } = parse(req, postRequestImportFromS3Schema)
 
     const { mirroredModel, importResult } = await importModel(
@@ -61,6 +62,7 @@ export const postRequestImportFromS3 = [
       payloadUrl,
       importKind,
       filePath,
+      distributionPackageName,
     )
     await audit.onCreateImport(req, mirroredModel, sourceModelId, exporter, importResult)
 

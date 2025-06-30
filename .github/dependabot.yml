@@ -12,7 +12,7 @@ updates:
       interval: 'monthly'
     versioning-strategy: increase
     # Allow up to 15 open pull requests for node dependencies
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 25
     # group related packages into one PR
     groups:
       opentelemetry:
@@ -53,7 +53,7 @@ updates:
     schedule:
       interval: 'monthly'
     versioning-strategy: increase
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 25
     groups:
       opentelemetry:
         patterns:
@@ -93,7 +93,7 @@ updates:
     schedule:
       interval: 'monthly'
     versioning-strategy: increase
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 25
     groups:
       opentelemetry:
         patterns:
@@ -133,7 +133,7 @@ updates:
     schedule:
       interval: 'monthly'
     versioning-strategy: increase
-    open-pull-requests-limit: 15
+    open-pull-requests-limit: 25
     groups:
       opentelemetry:
         patterns:
@@ -178,7 +178,6 @@ updates:
     # Check for updates once a week
     schedule:
       interval: 'weekly'
-    open-pull-requests-limit: 10
 
   # Enable version updates for Docker Compose
   - package-ecosystem: 'docker-compose'
@@ -188,7 +187,6 @@ updates:
     # Check for updates once a week
     schedule:
       interval: 'weekly'
-    open-pull-requests-limit: 10
 
   # Enable version updates for python
   - package-ecosystem: 'pip'

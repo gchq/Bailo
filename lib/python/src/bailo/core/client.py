@@ -4,7 +4,7 @@ from io import BytesIO
 from typing import Any
 
 from bailo.core.agent import Agent, TokenAgent
-from bailo.core.enums import EntryKind, ModelVisibility, SchemaKind
+from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, SchemaKind
 from bailo.core.utils import filter_none
 
 
@@ -27,15 +27,17 @@ class Client:
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
     ):
         """Create a model.
 
         :param name: Name of the model
         :param kind: Either a Model or a Datacard
         :param description: Description of the model
+        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
-        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
+        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
         _visibility: str = "public"
@@ -50,6 +52,7 @@ class Client:
                 "visibility": _visibility,
                 "organisation": organisation,
                 "state": state,
+                "collaborators": collaborators,
             }
         )
 
@@ -111,16 +114,18 @@ class Client:
         visibility: str | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
     ):
         """Update a specific model using its unique ID.
 
         :param model_id: Unique model ID
         :param name: Name of the model, defaults to None
-        :param kind: Either a Model or a Datacard
+        :param kind: Either a Model or a Datacard, defaults to None
         :param description: Description of the model, defaults to None
+        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
-        :param kind: Either a Model or a Datacard, defaults to None
+        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
         filtered_json = filter_none(
@@ -131,6 +136,7 @@ class Client:
                 "kind": kind,
                 "description": description,
                 "visibility": visibility,
+                "collaborators": collaborators,
             }
         )
 

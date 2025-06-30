@@ -26,6 +26,7 @@ const ReviewRoleSchema = new Schema<ReviewRoleDoc>(
     description: { type: String },
     defaultEntities: [{ type: String }],
     lockEntities: { type: Boolean, default: false },
+    collaboratorRole: { type: String },
   },
   {
     timestamps: true,

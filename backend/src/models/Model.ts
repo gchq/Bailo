@@ -16,9 +16,12 @@ export const EntryKind = {
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
 export const CollaboratorRoles = {
+  None: 'none',
   Owner: 'owner',
   Contributor: 'contributor',
   Consumer: 'consumer',
+  MSRO: 'msro',
+  MTR: 'mtr',
 } as const
 
 export type CollaboratorRolesKeys = (typeof CollaboratorRoles)[keyof typeof CollaboratorRoles]

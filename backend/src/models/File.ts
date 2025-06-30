@@ -14,7 +14,6 @@ export interface FileInterface {
   size: number
   mime: string
 
-  bucket: string
   path: string
 
   complete: boolean
@@ -40,7 +39,6 @@ const FileSchema = new Schema<FileInterfaceDoc>(
     size: { type: Number },
     mime: { type: String, required: true },
 
-    bucket: { type: String, required: true },
     path: { type: String, required: true },
 
     tags: [{ type: String }],

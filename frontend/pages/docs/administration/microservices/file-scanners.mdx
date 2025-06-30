@@ -1,0 +1,36 @@
+import DocsWrapper from 'src/docs/DocsWrapper'
+
+# File Scanners
+
+Within Bailo, it is possible to optionally deploy file scanners which are designed to help manage any potential risk of
+files being uploaded with potentially malicious contents. We provide two file scanners by default:
+[ClamAV](https://www.clamav.net/) and [ModelScan](https://github.com/protectai/modelscan).
+
+## ClamAV
+
+We use the [docker image](https://hub.docker.com/r/clamav/clamav) with a
+[custom connector](https://github.com/gchq/Bailo/blob/main/backend/src/connectors/fileScanning/clamAv.ts) to communicate
+with ClamAV using [clamscan](https://www.npmjs.com/package/clamscan).
+
+> ClamAV® is an open-source antivirus engine for detecting trojans, viruses, malware & other malicious threats.
+
+## ModelScan
+
+We have a [dockerised REST API](https://github.com/gchq/Bailo/tree/main/lib/modelscan_api) to programmatically interact
+with ModelScan via a
+[custom connector](https://github.com/gchq/Bailo/blob/main/backend/src/connectors/fileScanning/modelScan.ts).
+
+> ModelScan is an open source project from Protect AI that scans models to determine if they contain unsafe code. It is
+> the first model scanning tool to support multiple model formats. ModelScan currently supports: H5, Pickle, and
+> SavedModel formats. This protects you when using PyTorch, TensorFlow, Keras, Sklearn, XGBoost, with more on the way.
+
+## Minimal Configuration
+
+| Name                                          | Description                                                                           | Value  |
+| --------------------------------------------- | ------------------------------------------------------------------------------------- | ------ |
+| `connectors.fileScanners.kinds`               | A list of the file scanner names to enable                                            | `[]`   |
+| `connectors.fileScanners.retryDelayInMinutes` | Number of minutes between scans on a given file                                       | `60`   |
+| `connectors.fileScanners.maxInitRetries`      | Number of times the microservice is attempted to be reached before failing at startup | `5`    |
+| `connectors.fileScanners.initRetryDelay`      | Delay between successive microservice pings in milliseconds                           | `5000` |
+
+export default ({ children }) => <DocsWrapper>{children}</DocsWrapper>

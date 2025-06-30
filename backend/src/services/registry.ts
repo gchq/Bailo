@@ -13,8 +13,55 @@ import {
 import authorisation from '../connectors/authorisation/index.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken } from '../routes/v1/registryAuth.js'
-import { Forbidden } from '../utils/error.js'
+import { Forbidden, InternalError } from '../utils/error.js'
 import { getModelById } from './model.js'
+
+// derived from https://pkg.go.dev/github.com/distribution/reference#pkg-overview
+const imageRegex =
+  /^((?=[^:/]{1,253})(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(?:\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*(?::[0-9]{1,5})?)(?:\/)?((?![._-])(?:[a-z0-9._-]*)(?<![._-])(?:\/(?![._-])[a-z0-9._-]*(?<![._-]))*)(?:(?:@((?![+.\-_])[A-Za-z][a-zA-Z0-9+.\-_]*(?<![+.\-_]):[0-9a-fA-F]{32,}))|)(?:(?::((?![.-])[a-zA-Z0-9_.-]{1,128}))|)$/
+export type DistributionPackageName =
+  | { domain?: string; path: string; tag: string }
+  | { domain?: string; path: string; digest: string }
+export function splitDistributionPackageName(distributionPackageName: string): DistributionPackageName {
+  const split = imageRegex.exec(distributionPackageName)
+  // Group 3 is tag and 4 is digest. These can be empty strings to preserve indexing, but at least one must be present.
+  if (!split || split.length != 5 || !(split[3]?.length ^ split[4]?.length)) {
+    throw InternalError('Could not parse Distribution Package Name.', { distributionPackageName, split })
+  }
+  // tag
+  if (split[4] && split[4].length) {
+    // `path` ends up in group 1 when there's no domain, otherwise is in group 2
+    if (split[2].length) {
+      return { domain: split[1], path: split[2], tag: split[4] }
+    }
+    return { domain: '', path: split[1], tag: split[4] }
+  }
+  // digest
+  if (split[2].length) {
+    return { domain: split[1], path: split[2], digest: split[3] }
+  }
+  return { domain: '', path: split[1], digest: split[3] }
+}
+
+export function joinDistributionPackageName(distributionPackageName: DistributionPackageName) {
+  if (
+    !distributionPackageName ||
+    !distributionPackageName.path ||
+    (!distributionPackageName['tag'] && !distributionPackageName['digest'])
+  ) {
+    throw InternalError('Could not join Distribution Package Name.', { distributionPackageName })
+  }
+  if (distributionPackageName.domain) {
+    if (distributionPackageName['tag']) {
+      return `${distributionPackageName.domain}/${distributionPackageName.path}:${distributionPackageName['tag']}`
+    }
+    return `${distributionPackageName.domain}/${distributionPackageName.path}@${distributionPackageName['digest']}`
+  }
+  if (distributionPackageName['tag']) {
+    return `${distributionPackageName.path}:${distributionPackageName['tag']}`
+  }
+  return `${distributionPackageName.path}@${distributionPackageName['digest']}`
+}
 
 async function checkUserAuth(user: UserInterface, modelId: string, actions: Action[] = []) {
   const model = await getModelById(user, modelId)
