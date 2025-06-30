@@ -29,8 +29,8 @@ jobs:
             cache_scope: frontend
             tag: bailo_frontend:latest
           - name: modelscan
-            context: lib/modelscan
-            dockerfile: lib/modelscan/Dockerfile
+            context: lib/modelscan_api
+            dockerfile: lib/modelscan_api/Dockerfile
             tar: /tmp/bailo_modelscan.tar
             artifact: bailo_modelscan
             cache_scope: modelscan
