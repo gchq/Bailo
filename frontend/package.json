@@ -64,7 +64,7 @@
     "@eslint/compat": "^1.2.9",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.28.0",
-    "@next/bundle-analyzer": "^15.3.3",
+    "@next/bundle-analyzer": "^15.3.4",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/lodash-es": "^4.17.12",
