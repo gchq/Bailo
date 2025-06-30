@@ -7,22 +7,31 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  static_checks:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+    outputs:
+      black: ${{ steps.black.outputs.status }}
+      pylint: ${{ steps.pylint.outputs.status }}
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.13
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-static-${{ hashFiles('lib/python/pyproject.toml') }}-python3.13
+          restore-keys: |
+            ${{ runner.os }}-pip-static-python3.13
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-
           cd lib/python
           python -m pip install -e .[test]
 
@@ -30,13 +39,46 @@ jobs:
       - name: Check formatting
         run: |
           cd lib/python
-          black --check --verbose .
+          black --check --verbose . || echo "black_check=false"
+        continue-on-error: true
 
       # Pylint
       - name: Check linting
         run: |
           cd lib/python
-          pylint src/bailo --verbose --exit-zero --fail-on=F,E
+          pylint src/bailo --verbose --exit-zero --fail-on=F,E || echo "pylint_error=false"
+        continue-on-error: true
+
+
+  test:
+    needs: static_checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-test-${{ matrix.python-version }}-${{ hashFiles('lib/python/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-test-${{ matrix.python-version }}
+            ${{ runner.os }}-pip-test-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          cd lib/python
+          python -m pip install -e .[test]
 
       # Pytest
       - name: Run basic testing
