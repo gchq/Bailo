@@ -60,6 +60,7 @@ import { putRelease } from './routes/v2/release/putRelease.js'
 import { getResponses } from './routes/v2/response/getResponses.js'
 import { patchResponse } from './routes/v2/response/patchResponse.js'
 import { patchResponseReaction } from './routes/v2/response/patchResponseReaction.js'
+import { deleteReviewRole } from './routes/v2/review/deleteReviewRole.js'
 import { getReviewRoles } from './routes/v2/review/getReviewRoles.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
@@ -203,6 +204,7 @@ server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
 server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
 
 server.get('/api/v2/review/roles', ...getReviewRoles)
+server.delete('/api/v2/review/role/:reviewRoleId', ...deleteReviewRole)
 server.post('/api/v2/review/role', ...postReviewRole)
 
 // Python docs

@@ -17,7 +17,6 @@ import { getModelById } from './model.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 export interface DefaultReviewRole {
-  id: unknown | Uint8Array<ArrayBufferLike>
   name: string
   short: string
   description: string
@@ -242,7 +241,7 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
     ...newReviewRole,
   })
 
-  const auth = await authorisation.reviewRole(user, reviewRole, ReviewRoleAction.Create)
+  const auth = await authorisation.reviewRole(user, reviewRole.id, ReviewRoleAction.Create)
   if (!auth.success) {
     throw Forbidden(auth.info, {
       userDn: user.dn,
@@ -255,8 +254,6 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
     handleDuplicateKeys(error)
     throw error
   }
-
-  return reviewRole
 }
 
 export async function findReviewRoles(): Promise<ReviewRoleInterface[]> {
@@ -267,10 +264,29 @@ export async function findReviewRoles(): Promise<ReviewRoleInterface[]> {
 export async function addDefaultReviewRoles() {
   for (const reviewRole of config.defaultReviewRoles) {
     log.info({ name: reviewRole.name }, `Ensuring review role ${reviewRole.name} exists`)
-    const reviewRoleSchema = new ReviewRoleModel({
-      ...reviewRole,
-    })
-    await ReviewRoleModel.deleteOne({ id: reviewRole.id })
-    await reviewRoleSchema.save()
+    await ReviewRoleModel.findOneAndUpdate({ short: reviewRole.short }, reviewRole, { upsert: true })
   }
+}
+
+export async function removeReviewRole(user: UserInterface, reviewRoleId: string) {
+  const reviewRole = await ReviewRoleModel.findOne({ _id: reviewRoleId })
+  if (!reviewRole) {
+    throw BadReq('Review role could not be deleted as it does not exist.', { reviewRoleId })
+  }
+
+  const auth = await authorisation.reviewRole(user, reviewRoleId, ReviewRoleAction.Create)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
+      userDn: user.dn,
+    })
+  }
+
+  const schemas = await SchemaModel.find({ reviewRoles: reviewRole.short })
+
+  for (const schema of schemas) {
+    schema.reviewRoles = schema.reviewRoles.filter((role) => role !== reviewRole.short)
+    await schema.save()
+  }
+
+  reviewRole.delete()
 }

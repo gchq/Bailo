@@ -5,7 +5,6 @@ import { RoleKindKeys } from '../types/types.js'
 import { CollaboratorRolesKeys } from './Model.js'
 
 export interface ReviewRoleInterface {
-  id: string
   name: string
   short: string
   kind: RoleKindKeys
@@ -19,7 +18,6 @@ export type ReviewRoleDoc = ReviewRoleInterface & SoftDeleteDocument
 
 const ReviewRoleSchema = new Schema<ReviewRoleDoc>(
   {
-    id: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true, unique: true, index: true },
     short: { type: String, required: true, unique: true, index: true },
     kind: { type: String, required: true },

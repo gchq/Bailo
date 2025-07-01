@@ -608,7 +608,7 @@ export type FileUploadMetadata = {
 }
 
 export interface ReviewRoleInterface {
-  id: string
+  _id: string
   name: string
   short: string
   kind: RoleKindKeys
@@ -616,6 +616,8 @@ export interface ReviewRoleInterface {
   defaultEntities?: string[]
   lockEntities?: boolean
   collaboratorRole?: CollaboratorRolesKeys
+  createdAt: string
+  updatedAt: string
 }
 
 export const CollaboratorRoles = {

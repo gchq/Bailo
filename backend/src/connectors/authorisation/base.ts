@@ -3,7 +3,6 @@ import { FileInterface } from '../../models/File.js'
 import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
-import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc } from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
 import { Access } from '../../routes/v1/registryAuth.js'
@@ -67,8 +66,8 @@ export class BasicAuthorisationConnector {
     return (await this.releases(user, model, release ? [release] : [], action))[0]
   }
 
-  async reviewRole(user: UserInterface, reviewRole: ReviewRoleInterface, action: ReviewRoleActionKeys) {
-    return (await this.reviewRoles(user, [reviewRole], action))[0]
+  async reviewRole(user: UserInterface, reviewRoleId: string, action: ReviewRoleActionKeys) {
+    return (await this.reviewRoles(user, [reviewRoleId], action))[0]
   }
 
   async accessRequest(
@@ -392,23 +391,27 @@ export class BasicAuthorisationConnector {
 
   async reviewRoles(
     user: UserInterface,
-    reviewRoles: Array<ReviewRoleInterface>,
+    reviewRoles: string[],
     action: ReviewRoleActionKeys,
   ): Promise<Array<Response>> {
     return Promise.all(
-      reviewRoles.map(async (reviewRole) => {
+      reviewRoles.map(async (reviewRoleId) => {
         // Is this a constrained user token.
         const tokenAuth = await validateTokenForUse(user.token, ActionLookup[action])
         if (!tokenAuth.success) {
           return tokenAuth
         }
 
-        if (action === ReviewRoleAction.Create) {
+        if (
+          action === ReviewRoleAction.Create ||
+          action === ReviewRoleAction.Update ||
+          action === ReviewRoleAction.Delete
+        ) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {
             return {
-              id: reviewRole.id,
+              id: reviewRoleId,
               success: false,
               info: 'You cannot upload or modify a review role if you are not an admin.',
             }
@@ -416,7 +419,7 @@ export class BasicAuthorisationConnector {
         }
 
         return {
-          id: reviewRole.id,
+          id: reviewRoleId,
           success: true,
         }
       }),

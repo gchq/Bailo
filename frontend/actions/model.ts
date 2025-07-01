@@ -9,7 +9,6 @@ import {
   FileInterface,
   ModelImage,
   ReleaseInterface,
-  ReviewRolesFormData,
   Role,
 } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
@@ -208,12 +207,4 @@ export function useGetAllModelReviewRoles() {
     isModelRolesLoading: isLoading,
     isModelRolesError: error,
   }
-}
-
-export async function postReviewRole(reviewRole: ReviewRolesFormData) {
-  return fetch(`/api/v2/review/role`, {
-    method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(reviewRole),
-  })
 }

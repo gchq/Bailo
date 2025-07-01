@@ -13,6 +13,7 @@ All dates are formatted dd/mm/yyyy.
   `DataCard.create` and core `Client.post_model` & `Client.patch_model` methods.
 - Add required `Schema.review_roles` property and add associated parameter `review_roles` to helper `Schema.__init__`,
   `Schema.create` and core `Client.post_schema`
+- API endpoint for `get_user_roles` has been removed as it was never fully implemented and is no longer needed.
 
 ## 3.0.0 - 02/04/2025
 

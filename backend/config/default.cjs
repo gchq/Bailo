@@ -79,7 +79,6 @@ module.exports = {
 
   defaultReviewRoles: [
     {
-      id: 'msro',
       name: 'Model Senior Responsible Officer',
       short: 'msro',
       kind: 'schema',
@@ -87,7 +86,6 @@ module.exports = {
       collaboratorRole: 'owner',
     },
     {
-      id: 'mtr',
       name: 'Model Technical Reviewer',
       short: 'mtr',
       kind: 'schema',
