@@ -160,7 +160,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnami/mongodb
-    tag: 7.0.15
+    tag: 8.0.10
 
 # MinIO Dependencies
 minio:
