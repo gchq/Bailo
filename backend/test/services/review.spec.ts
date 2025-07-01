@@ -233,7 +233,6 @@ describe('services > review', () => {
 
   test('createReviewRole > successful', async () => {
     await createReviewRole(user, {
-      id: 'test',
       name: 'reviewer',
       short: 'reviewer',
       kind: 'schema',
