@@ -1,16 +1,30 @@
 import { ArrowBack, Schema } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
-import { Box, Button, Container, MenuItem, Paper, Select, Stack, TextField, Typography } from '@mui/material'
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Container,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { useTheme } from '@mui/material/styles'
+import { useGetAllReviewRoles } from 'actions/reviewRoles'
 import { postSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
-import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
+import { ChangeEvent, FormEvent, SyntheticEvent, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
 import Title from 'src/common/Title'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { SchemaKind, SchemaKindKeys } from 'types/types'
+import { ReviewRoleInterface, SchemaKind, SchemaKindKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { camelCaseToSentenceCase, camelCaseToTitleCase } from 'utils/stringUtils'
 
@@ -35,6 +49,9 @@ export default function NewSchema() {
   const [schemaKind, setSchemaKind] = useState<SchemaKindKeys>(SchemaKind.MODEL)
   const [fileName, setFileName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [newReviewRoles, setNewReviewRoles] = useState<ReviewRoleInterface[]>([])
+
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetAllReviewRoles()
 
   const router = useRouter()
   const theme = useTheme()
@@ -73,6 +90,10 @@ export default function NewSchema() {
     }
   }
 
+  const handleReviewRolesOnChange = (_event: SyntheticEvent<Element, Event>, newValue: ReviewRoleInterface[]) => {
+    setNewReviewRoles(newValue)
+  }
+
   async function handleSubmit(event: FormEvent) {
     if (event) {
       event.preventDefault()
@@ -90,6 +111,7 @@ export default function NewSchema() {
           description: schemaDescription,
           kind: schemaKind,
           jsonSchema: JSON.parse(jsonSchema),
+          reviewRoles: newReviewRoles.map((role) => role.short),
         })
 
         if (!response.ok) {
@@ -115,6 +137,15 @@ export default function NewSchema() {
     }
   }
 
+  const error = MultipleErrorWrapper(`Unable to load new schema page`, {
+    isReviewRolesError,
+  })
+  if (error) return error
+
+  if (isReviewRolesLoading) {
+    return <Loading />
+  }
+
   return (
     <>
       <Title text='Upload a new Schema' />
@@ -134,36 +165,38 @@ export default function NewSchema() {
           </Stack>
           <Box onSubmit={handleSubmit} component='form'>
             <Stack spacing={2} sx={{ mt: 2 }}>
-              <Stack>
-                <Typography fontWeight='bold'>
-                  Id <span style={{ color: theme.palette.error.main }}>*</span>
-                </Typography>
-                <TextField
-                  fullWidth
-                  required
-                  size='small'
-                  value={schemaId}
-                  aria-label='Schema ID'
-                  onChange={(e) => setSchemaId(e.target.value)}
-                  slotProps={{
-                    htmlInput: { autoFocus: true },
-                  }}
-                />
-                <Typography variant='caption'>Please specify a unique ID for your schema</Typography>
-              </Stack>
-              <Stack>
-                <Typography fontWeight='bold'>
-                  Name <span style={{ color: theme.palette.error.main }}>*</span>
-                </Typography>
-                <TextField
-                  fullWidth
-                  required
-                  size='small'
-                  value={schemaName}
-                  aria-label='Schema name'
-                  onChange={(e) => setSchemaName(e.target.value)}
-                />
-                <Typography variant='caption'>Please specify a name for your schema</Typography>
+              <Stack direction='row' spacing={2}>
+                <Stack>
+                  <Typography fontWeight='bold'>
+                    Id <span style={{ color: theme.palette.error.main }}>*</span>
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    required
+                    size='small'
+                    value={schemaId}
+                    aria-label='Schema ID'
+                    onChange={(e) => setSchemaId(e.target.value)}
+                    slotProps={{
+                      htmlInput: { autoFocus: true },
+                    }}
+                  />
+                  <Typography variant='caption'>Please specify a unique ID for your schema</Typography>
+                </Stack>
+                <Stack>
+                  <Typography fontWeight='bold'>
+                    Name <span style={{ color: theme.palette.error.main }}>*</span>
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    required
+                    size='small'
+                    value={schemaName}
+                    aria-label='Schema name'
+                    onChange={(e) => setSchemaName(e.target.value)}
+                  />
+                  <Typography variant='caption'>Please specify a name for your schema</Typography>
+                </Stack>
               </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
@@ -176,6 +209,22 @@ export default function NewSchema() {
                 />
                 <Typography variant='caption'>A short description describing the purpose of this schema</Typography>
               </Stack>
+              <Autocomplete
+                multiple
+                size='small'
+                options={reviewRoles}
+                onChange={handleReviewRolesOnChange}
+                getOptionLabel={(option: ReviewRoleInterface) => option.name}
+                value={newReviewRoles || []}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label='Select an option below'
+                    size='small'
+                    placeholder={reviewRoles.length ? undefined : 'Unanswered'}
+                  />
+                )}
+              />
               <Stack>
                 <Typography fontWeight='bold'>
                   Schema Type <span style={{ color: theme.palette.error.main }}>*</span>

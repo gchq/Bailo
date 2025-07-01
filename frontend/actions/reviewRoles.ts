@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { ReviewRolesFormData } from 'types/types'
+import { ReviewRoleInterface, ReviewRolesFormData } from 'types/types'
 import { ErrorInfo, fetcher } from 'utils/fetcher'
 
 const emptyRolesList = []
@@ -7,7 +7,7 @@ const emptyRolesList = []
 export function useGetAllReviewRoles() {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      reviewRoles: ReviewRolesFormData[]
+      reviewRoles: ReviewRoleInterface[]
     },
     ErrorInfo
   >('/api/v2/review/roles', fetcher)
@@ -18,4 +18,19 @@ export function useGetAllReviewRoles() {
     isReviewRolesLoading: isLoading,
     isReviewRolesError: error,
   }
+}
+
+export async function postReviewRole(reviewRole: ReviewRolesFormData) {
+  return fetch('/api/v2/review/role', {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(reviewRole),
+  })
+}
+
+export async function deleteReviewRole(reviewRoleId: string) {
+  return fetch(`/api/v2/review/role/${reviewRoleId}`, {
+    method: 'delete',
+    headers: { 'Content-Type': 'application/json' },
+  })
 }
