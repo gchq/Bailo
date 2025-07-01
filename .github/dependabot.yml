@@ -188,6 +188,12 @@ updates:
     schedule:
       interval: 'weekly'
 
+  - package-ecosystem: 'helm'
+    directories:
+      - '/infrastructure/helm/bailo'
+    schedule:
+      interval: 'weekly'
+
   # Enable version updates for python
   - package-ecosystem: 'pip'
     # Look for a `requirements*` or `pyproject.toml` in these directories
