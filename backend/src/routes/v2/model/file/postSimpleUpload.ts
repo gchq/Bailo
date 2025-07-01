@@ -46,7 +46,7 @@ interface PostSimpleUpload {
 }
 
 export const postSimpleUpload = [
-  async (req: Request, res: Response<PostSimpleUpload>) => {
+  async (req: Request, res: Response<PostSimpleUpload>): Promise<void> => {
     req.audit = AuditInfo.CreateFile
     // Does user have permission to upload a file?
     const {
@@ -63,7 +63,7 @@ export const postSimpleUpload = [
     const file = await uploadFile(req.user, modelId, name, mime, req as unknown as Readable, tags)
     await audit.onCreateFile(req, file)
 
-    return res.json({
+    res.json({
       file,
     })
   },

@@ -51,7 +51,7 @@ interface PostInferenceService {
 
 export const postInference = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostInferenceService>) => {
+  async (req: Request, res: Response<PostInferenceService>): Promise<void> => {
     req.audit = AuditInfo.CreateInference
     const {
       params: { modelId },
@@ -62,7 +62,7 @@ export const postInference = [
 
     await audit.onCreateInference(req, inference)
 
-    return res.json({
+    res.json({
       inference,
     })
   },

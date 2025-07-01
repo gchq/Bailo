@@ -17,16 +17,16 @@ interface GetEntitiesResponse {
 
 export const getEntities = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetEntitiesResponse>) => {
+  async (req: Request, res: Response<GetEntitiesResponse>): Promise<void> => {
     const {
       query: { q },
     } = parse(req, getEntitiesSchema)
 
     if (q.length < 3) {
-      return { results: [] }
+      res.json({ results: [] })
     }
     const queryResults = await authentication.queryEntities(q)
 
-    return res.json({ results: queryResults })
+    res.json({ results: queryResults })
   },
 ]

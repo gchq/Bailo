@@ -48,7 +48,7 @@ interface PostFromTemplateResponse {
 
 export const postFromTemplate = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostFromTemplateResponse>) => {
+  async (req: Request, res: Response<PostFromTemplateResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateModelCard
     const {
       params: { modelId },
@@ -60,7 +60,7 @@ export const postFromTemplate = [
 
     await audit.onCreateModelCard(req, model, modelCard)
 
-    return res.json({
+    res.json({
       card: modelCard,
     })
   },

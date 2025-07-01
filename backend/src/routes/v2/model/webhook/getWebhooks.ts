@@ -39,14 +39,14 @@ interface GetWebhooksResponse {
 
 export const getWebhooks = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetWebhooksResponse>) => {
+  async (req: Request, res: Response<GetWebhooksResponse>): Promise<void> => {
     const {
       params: { modelId },
     } = parse(req, getWebhooksSchema)
 
     const webhooks = await getWebhooksByModel(req.user, modelId)
 
-    return res.json({
+    res.json({
       webhooks,
     })
   },

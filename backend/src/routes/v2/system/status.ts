@@ -28,13 +28,13 @@ registerPath({
 
 export const getSystemStatus = [
   bodyParser.json(),
-  async (_req: Request, res: Response<SystemStatus>) => {
+  async (_req: Request, res: Response<SystemStatus>): Promise<void> => {
     const federation = {
       state: config.federation.state,
       id: config.federation.id,
     }
 
-    return res.json({
+    res.json({
       ping: 'pong',
       federation,
     })

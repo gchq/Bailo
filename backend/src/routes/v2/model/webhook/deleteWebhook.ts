@@ -39,14 +39,14 @@ interface DeleteWebhookResponse {
 
 export const deleteWebhook = [
   bodyParser.json(),
-  async (req: Request, res: Response<DeleteWebhookResponse>) => {
+  async (req: Request, res: Response<DeleteWebhookResponse>): Promise<void> => {
     const {
       params: { modelId, webhookId },
     } = parse(req, deleteWebhookSchema)
 
     await removeWebhook(req.user, modelId, webhookId)
 
-    return res.json({
+    res.json({
       message: 'Successfully removed file.',
     })
   },

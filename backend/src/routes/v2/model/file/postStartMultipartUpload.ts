@@ -27,10 +27,10 @@ interface PostStartMultipartUpload {
 }
 
 export const postStartMultipartUpload = [
-  async (req: Request, res: Response<PostStartMultipartUpload>) => {
+  async (req: Request, res: Response<PostStartMultipartUpload>): Promise<void> => {
     const _ = parse(req, postStartMultipartUploadSchema)
 
-    return res.json({
+    res.json({
       fileId: 'random_hash',
       chunks: [
         {
