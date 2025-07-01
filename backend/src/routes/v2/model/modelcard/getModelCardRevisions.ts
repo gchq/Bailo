@@ -43,7 +43,7 @@ interface GetModelCardResponse {
 
 export const getModelCardRevisions = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetModelCardResponse>) => {
+  async (req: Request, res: Response<GetModelCardResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewModelCardRevisions
     const {
       params: { modelId },
@@ -53,6 +53,6 @@ export const getModelCardRevisions = [
 
     await audit.onViewModelCardRevisions(req, modelId, modelCardRevisions)
 
-    return res.json({ modelCardRevisions })
+    res.json({ modelCardRevisions })
   },
 ]

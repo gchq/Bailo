@@ -48,7 +48,7 @@ interface PutWebhookResponse {
 
 export const putWebhook = [
   bodyParser.json(),
-  async (req: Request, res: Response<PutWebhookResponse>) => {
+  async (req: Request, res: Response<PutWebhookResponse>): Promise<void> => {
     const {
       params: { modelId, webhookId },
       body,
@@ -56,7 +56,7 @@ export const putWebhook = [
 
     const webhook = await updateWebhook(req.user, webhookId, { modelId, ...body })
 
-    return res.json({
+    res.json({
       webhook,
     })
   },
