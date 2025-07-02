@@ -3,6 +3,7 @@ import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/mater
 import { useGetModel } from 'actions/model'
 import { useGetRelease } from 'actions/release'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
+import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -36,19 +37,24 @@ export default function Release() {
     isReviewsError: isUserReviewsError,
   } = useGetReviewRequestsForUser()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
-
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(
+    model ? model.card.schemaId : undefined,
+  )
   const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
 
   const userCanReview = useMemo(
     () =>
-      hasRole(currentUserRoles, ['msro', 'mtr']) &&
+      hasRole(
+        currentUserRoles,
+        reviewRoles.map((role) => role.short),
+      ) &&
       reviews.filter((review) =>
         userReviews.some(
           (userReview) =>
             userReview.model.id === review.model.id && userReview.accessRequestId === review.accessRequestId,
         ),
       ).length > 0,
-    [currentUserRoles, reviews, userReviews],
+    [currentUserRoles, reviews, userReviews, reviewRoles],
   )
 
   const error = MultipleErrorWrapper('Unable to load release', {
@@ -57,6 +63,7 @@ export default function Release() {
     isReviewsError,
     isUserReviewsError,
     isCurrentUserError,
+    isReviewRolesError,
   })
 
   if (error) return error
@@ -68,7 +75,8 @@ export default function Release() {
     isReviewsLoading ||
     isUserReviewsLoading ||
     isModelLoading ||
-    isCurrentUserLoading
+    isCurrentUserLoading ||
+    isReviewRolesLoading
   ) {
     return <Loading />
   }

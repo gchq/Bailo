@@ -2,7 +2,7 @@ import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
-import { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
+import ModelModel, { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import { ReleaseDoc } from '../models/Release.js'
 import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleInterface } from '../models/ReviewRole.js'
@@ -301,8 +301,23 @@ export async function removeReviewRole(user: UserInterface, reviewRoleId: string
   const schemas = await SchemaModel.find({ reviewRoles: reviewRole.short })
 
   for (const schema of schemas) {
+    // Remove role from schemas
     schema.reviewRoles = schema.reviewRoles.filter((role) => role !== reviewRole.short)
     await schema.save()
+
+    // Also remove the role from any model collaborators
+    const models = await ModelModel.find({ 'card.schemaId': schema.id })
+    for (const model of models) {
+      for (let i = model.collaborators.length - 1; i >= 0; i--) {
+        if (model.collaborators[i].roles.includes(reviewRole.short)) {
+          model.collaborators[i].roles = model.collaborators[i].roles.filter((role) => role !== reviewRole.short)
+          if (model.collaborators[i].roles.length === 0) {
+            model.collaborators.splice(i, 1)
+          }
+        }
+      }
+      await model.save()
+    }
   }
 
   reviewRole.delete()

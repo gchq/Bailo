@@ -1,4 +1,4 @@
-import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Divider, List, ListItem, Paper, Stack, Typography } from '@mui/material'
 import { deleteReviewRole, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
 import { Fragment, useCallback, useMemo, useState } from 'react'
@@ -8,6 +8,7 @@ import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
+import UserDisplay from 'src/common/UserDisplay'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 
 export default function ReviewRoles() {
@@ -68,6 +69,21 @@ export default function ReviewRoles() {
                   </Typography>
                   <Typography>{reviewRole.collaboratorRole}</Typography>
                 </Box>
+                <Box>
+                  <Typography color='primary' fontWeight='bold'>
+                    Default entities
+                  </Typography>
+                  <List>
+                    {!reviewRole.defaultEntities ||
+                      (reviewRole.defaultEntities.length === 0 && <Typography>No entities assigned</Typography>)}
+                    {reviewRole.defaultEntities &&
+                      reviewRole.defaultEntities.map((entity) => (
+                        <ListItem key={entity}>
+                          <UserDisplay dn={entity} />
+                        </ListItem>
+                      ))}
+                  </List>
+                </Box>
                 <Button
                   color='error'
                   sx={{ width: 'max-content' }}
@@ -79,7 +95,7 @@ export default function ReviewRoles() {
               </Stack>
               <ConfirmationDialogue
                 open={confirmationOpen}
-                title='Deleting this role will remove it from any schemas it is attached to.'
+                title='Deleting this role will remove it from any schemas it is attached to, and will also remove the role from any model collaborators assigned to that role.'
                 onCancel={() => setConfirmationOpen(false)}
                 onConfirm={() => handleDeleteReviewRole(reviewRole._id)}
                 errorMessage={errorMessage}

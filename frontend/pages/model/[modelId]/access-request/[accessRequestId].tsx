@@ -3,6 +3,7 @@ import { Button, Container, Divider, Paper, Stack, Typography } from '@mui/mater
 import { useGetAccessRequest } from 'actions/accessRequest'
 import { useGetModel } from 'actions/model'
 import { useGetReviewRequestsForModel, useGetReviewRequestsForUser } from 'actions/review'
+import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -35,19 +36,25 @@ export default function AccessRequest() {
   } = useGetReviewRequestsForUser()
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(
+    accessRequest ? accessRequest.schemaId : undefined,
+  )
 
   const currentUserRoles = useMemo(() => getCurrentUserRoles(model, currentUser), [model, currentUser])
 
   const userCanReview = useMemo(
     () =>
-      hasRole(currentUserRoles, ['msro']) &&
+      hasRole(
+        currentUserRoles,
+        reviewRoles.map((role) => role.short),
+      ) &&
       reviews.filter((review) =>
         userReviews.some(
           (userReview) =>
             userReview.model.id === review.model.id && userReview.accessRequestId === review.accessRequestId,
         ),
       ).length > 0,
-    [currentUserRoles, reviews, userReviews],
+    [currentUserRoles, reviews, userReviews, reviewRoles],
   )
 
   const error = MultipleErrorWrapper('Unable to load access request', {
@@ -56,6 +63,7 @@ export default function AccessRequest() {
     isUserReviewsError,
     isModelError,
     isCurrentUserError,
+    isReviewRolesError,
   })
   if (error) return error
 
@@ -68,7 +76,8 @@ export default function AccessRequest() {
             isReviewsLoading ||
             isUserReviewsLoading ||
             isModelLoading ||
-            isCurrentUserLoading) && <Loading />}
+            isCurrentUserLoading ||
+            isReviewRolesLoading) && <Loading />}
           {accessRequest && (
             <>
               {userCanReview && <ReviewBanner accessRequest={accessRequest} />}

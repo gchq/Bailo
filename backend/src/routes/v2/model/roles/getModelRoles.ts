@@ -21,9 +21,11 @@ interface GetModelRolesResponse {
 export const getModelRoles = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelRolesResponse>) => {
-    const _ = parse(req, getModelRolesSchema)
+    const {
+      params: { modelId },
+    } = parse(req, getModelRolesSchema)
 
-    const allRoles = await getAllEntryRoles()
+    const allRoles = await getAllEntryRoles(modelId)
 
     return res.json({
       roles: allRoles,
