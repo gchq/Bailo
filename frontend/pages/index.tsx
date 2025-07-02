@@ -392,6 +392,7 @@ export default function Marketplace() {
                     onSelectedChipsChange={handleLibrariesOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
+                    peers={peers}
                   />
                 </div>
               )}

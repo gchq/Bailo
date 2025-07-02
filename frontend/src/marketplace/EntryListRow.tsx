@@ -5,6 +5,8 @@ import { EntrySearchResult } from 'actions/model'
 import { CSSProperties } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
 import Link from 'src/Link'
+import { PeerConfigStatus } from 'types/types'
+import { getEntryUrl } from 'utils/peerUtils'
 
 interface EntryListRowProps {
   selectedChips: string[]
@@ -14,6 +16,7 @@ interface EntryListRowProps {
   data: EntrySearchResult[]
   index: number
   style: CSSProperties
+  peers?: Map<string, PeerConfigStatus>
 }
 
 export default function EntryListRow({
@@ -24,9 +27,21 @@ export default function EntryListRow({
   data,
   index,
   style,
+  peers,
 }: EntryListRowProps) {
   const theme = useTheme()
   const entry = data[index]
+
+  // Link to view this entry, defaults to 'this' instance
+  let href = `${entry.kind}/${entry.id}`
+
+  // Handle the case where the entry must be viewed on a different peer
+  const peerId = entry.peerId
+  if (peerId && peers && peers[peerId]) {
+    const peer: PeerConfigStatus = peers[peerId]
+    // Override link for peer URL
+    href = getEntryUrl(peer.config, entry)
+  }
 
   return (
     <Box
@@ -43,7 +58,7 @@ export default function EntryListRow({
       <Stack spacing={1}>
         <Link
           sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-          href={`${entry.kind}/${entry.id}`}
+          href={href}
         >
           <Typography
             variant='h5'

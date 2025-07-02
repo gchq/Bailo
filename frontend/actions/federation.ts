@@ -1,12 +1,12 @@
 import useSWRImmutable from 'swr/immutable'
 
-import { RemoteFederationConfig } from '../types/types'
+import { PeerConfigStatus } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 export function useGetPeers() {
   const { data, isLoading, error, mutate } = useSWRImmutable<
     {
-      peers: Map<string, RemoteFederationConfig>
+      peers: Map<string, PeerConfigStatus>
     },
     ErrorInfo
   >('/api/v2/system/peers', fetcher)
