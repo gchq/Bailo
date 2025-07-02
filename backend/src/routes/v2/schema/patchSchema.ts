@@ -51,13 +51,13 @@ interface PatchSchemaResponse {
 
 export const patchSchema = [
   bodyParser.json(),
-  async (req: Request, res: Response<PatchSchemaResponse>) => {
+  async (req: Request, res: Response<PatchSchemaResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateSchema
     const { body, params } = parse(req, patchSchemaSchema)
     const schema = await updateSchema(req.user, params.schemaId, body)
     await audit.onUpdateSchema(req, schema)
 
-    return res.json({
+    res.json({
       schema,
     })
   },

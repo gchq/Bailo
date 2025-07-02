@@ -49,7 +49,7 @@ interface PostRequestImportResponse {
 
 export const postRequestImportFromS3 = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostRequestImportResponse>) => {
+  async (req: Request, res: Response<PostRequestImportResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateImport
     const {
       body: { payloadUrl, sourceModelId, mirroredModelId, exporter, importKind, filePath, distributionPackageName },
@@ -66,7 +66,7 @@ export const postRequestImportFromS3 = [
     )
     await audit.onCreateImport(req, mirroredModel, sourceModelId, exporter, importResult)
 
-    return res.json({
+    res.json({
       mirroredModelId: mirroredModel.id,
       sourceModelId,
     })

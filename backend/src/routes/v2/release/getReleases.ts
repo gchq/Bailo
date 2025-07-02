@@ -50,7 +50,7 @@ interface getReleasesResponse {
 
 export const getReleases = [
   bodyParser.json(),
-  async (req: Request, res: Response<getReleasesResponse>) => {
+  async (req: Request, res: Response<getReleasesResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewReleases
     const {
       params: { modelId },
@@ -60,7 +60,7 @@ export const getReleases = [
     const releases = await getModelReleases(req.user, modelId, querySemver)
     await audit.onViewReleases(req, releases)
 
-    return res.json({
+    res.json({
       releases,
     })
   },

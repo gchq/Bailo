@@ -45,7 +45,7 @@ interface PostRequestCommentResponse {
 
 export const postAccessRequestComment = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostRequestCommentResponse>) => {
+  async (req: Request, res: Response<PostRequestCommentResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateAccessRequest
     const {
       body,
@@ -56,7 +56,7 @@ export const postAccessRequestComment = [
 
     await audit.onCreateCommentResponse(req, accessRequestComment)
 
-    return res.json({
+    res.json({
       accessRequestComment,
     })
   },

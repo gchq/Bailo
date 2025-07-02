@@ -55,7 +55,7 @@ interface PostReviewRoleResponse {
 
 export const postReviewRole = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostReviewRoleResponse>) => {
+  async (req: Request, res: Response<PostReviewRoleResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateReviewRole
 
     const { body } = parse(req, postReviewRoleSchema)
@@ -63,6 +63,6 @@ export const postReviewRole = [
     const reviewRole = await createReviewRole(req.user, body)
     await audit.onCreateReviewRole(req, reviewRole.id)
 
-    return res.json({ reviewRole })
+    res.json({ reviewRole })
   },
 ]

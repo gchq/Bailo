@@ -72,7 +72,7 @@ interface GetModelsResponse {
 
 export const getModelsSearch = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetModelsResponse>) => {
+  async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
     const {
       query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations },
@@ -104,6 +104,6 @@ export const getModelsSearch = [
 
     await audit.onSearchModel(req, models)
 
-    return res.json({ models })
+    res.json({ models })
   },
 ]
