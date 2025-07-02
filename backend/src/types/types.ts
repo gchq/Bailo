@@ -17,10 +17,9 @@ export enum EntityKind {
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
 export interface Role {
-  id: string
   name: string
   kind: RoleKindKeys
-  short?: string
+  short: string
   description?: string
 }
 

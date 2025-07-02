@@ -30,6 +30,8 @@ export const testModelSchema = {
     },
   },
 
+  reviewRoles: ['reviewer'],
+
   createdAt: new Date('2023-07-28T10:50:00.928Z'),
   updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }

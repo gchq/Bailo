@@ -7,6 +7,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { EntityKind, EntryUserPermissions } from '../types/types.js'
@@ -410,6 +411,44 @@ export async function createModelCardFromSchema(
   if (schema.hidden) {
     throw BadReq('Cannot create a new Card using a hidden schema.', { schemaId, kind: schema.kind })
   }
+
+  // Check schema review roles for any default entities
+  const reviewRolesForSchema = await ReviewRoleModel.find({ short: schema.reviewRoles })
+  const updatedCollaborators: CollaboratorEntry[] = [...model.collaborators]
+  for (const reviewRole of reviewRolesForSchema) {
+    if (reviewRole.defaultEntities) {
+      for (const defaultEntity of reviewRole.defaultEntities) {
+        const existingUser = model.collaborators.find((collaborator) => collaborator.entity === defaultEntity)
+        if (existingUser) {
+          const existingUpdatedUser = updatedCollaborators.findIndex(
+            (collaborator) => collaborator.entity === defaultEntity,
+          )
+          if (existingUpdatedUser > -1) {
+            updatedCollaborators[existingUpdatedUser] = {
+              entity: defaultEntity,
+              roles: [...updatedCollaborators[existingUpdatedUser].roles, reviewRole.short],
+            }
+          } else {
+            updatedCollaborators.push({ entity: defaultEntity, roles: [...existingUser.roles, reviewRole.short] })
+          }
+        } else {
+          const existingUpdatedUser = updatedCollaborators.findIndex(
+            (collaborator) => collaborator.entity === defaultEntity,
+          )
+          if (existingUpdatedUser > -1) {
+            updatedCollaborators[existingUpdatedUser] = {
+              entity: defaultEntity,
+              roles: [...updatedCollaborators[existingUpdatedUser].roles, reviewRole.short],
+            }
+          } else {
+            updatedCollaborators.push({ entity: defaultEntity, roles: [reviewRole.short] })
+          }
+        }
+      }
+    }
+  }
+  model.collaborators = updatedCollaborators
+  await model.save()
 
   const revision = await _setModelCard(user, modelId, schemaId, 1, {})
   return revision

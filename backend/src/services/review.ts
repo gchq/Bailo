@@ -241,7 +241,7 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
     ...newReviewRole,
   })
 
-  const auth = await authorisation.reviewRole(user, reviewRole.id, ReviewRoleAction.Create)
+  const auth = await authorisation.reviewRole(user, reviewRole['_id'] as string, ReviewRoleAction.Create)
   if (!auth.success) {
     throw Forbidden(auth.info, {
       userDn: user.dn,
@@ -264,7 +264,11 @@ export async function findReviewRoles(): Promise<ReviewRoleInterface[]> {
 export async function addDefaultReviewRoles() {
   for (const reviewRole of config.defaultReviewRoles) {
     log.info({ name: reviewRole.name }, `Ensuring review role ${reviewRole.name} exists`)
-    await ReviewRoleModel.findOneAndUpdate({ short: reviewRole.short }, reviewRole, { upsert: true })
+    const defaultRole = await ReviewRoleModel.findOne({ short: reviewRole.short })
+    if (!defaultRole) {
+      const newRole = new ReviewRoleModel({ ...reviewRole })
+      newRole.save()
+    }
   }
 }
 

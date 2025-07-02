@@ -60,7 +60,7 @@ export const postReviewRole = [
     const { body } = parse(req, postReviewRoleSchema)
 
     const reviewRole = await createReviewRole(req.user, body)
-    await audit.onCreateReviewRole(req, reviewRole.id)
+    await audit.onCreateReviewRole(req, reviewRole)
 
     return res.json({ reviewRole })
   },

@@ -34,7 +34,6 @@ export default function ReviewRolesForm() {
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<ReviewRolesFormData>({
-    id: '',
     name: '',
     short: '',
     kind: 'schema',
@@ -104,12 +103,11 @@ export default function ReviewRolesForm() {
     event.preventDefault()
     setErrorMessage('')
     setLoading(true)
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
-    }))
 
-    const res = await postReviewRole(formData)
+    const res = await postReviewRole({
+      ...formData,
+      defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
+    })
 
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))

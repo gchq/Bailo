@@ -224,14 +224,14 @@ export const RoleKind = {
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
 export interface Role {
-  id: string
+  _id: string
   name: string
-  short?: string
+  short: string
   kind?: RoleKindKeys
   description?: string
 }
 
-export type ReviewRolesFormData = Role & {
+export type ReviewRolesFormData = Omit<Role, '_id'> & {
   defaultEntities?: string[]
   lockEntities: boolean
   collaboratorRole?: CollaboratorRoleType

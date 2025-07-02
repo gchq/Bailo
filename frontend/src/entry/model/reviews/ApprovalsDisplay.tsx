@@ -22,17 +22,17 @@ export default function ApprovalsDisplay({
 }: ApprovalsDisplayProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
 
-  const dynamicRoles = useMemo(() => modelRoles.filter((role) => !staticRoles.includes(role.id)), [modelRoles])
+  const dynamicRoles = useMemo(() => modelRoles.filter((role) => !staticRoles.includes(role._id)), [modelRoles])
 
   const roleApprovals = useMemo(
     () =>
       dynamicRoles.reduce<ReactElement[]>((approvals, dynamicRole) => {
         const hasRoleApproved = !!acceptedReviewResponses.find(
-          (acceptedResponse) => acceptedResponse.role === dynamicRole.id,
+          (acceptedResponse) => acceptedResponse.role === dynamicRole._id,
         )
         if (hasRoleApproved) {
           approvals.push(
-            <Tooltip title={`${plural(acceptedReviewResponses.length, 'review')}`} key={dynamicRole.id}>
+            <Tooltip title={`${plural(acceptedReviewResponses.length, 'review')}`} key={dynamicRole._id}>
               <Stack direction='row'>
                 <Done color='success' fontSize='small' />
                 <Typography variant='caption'>
