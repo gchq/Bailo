@@ -68,7 +68,6 @@ sharing.
 - [Next.js](https://nextjs.org/)
 - [Node.js](https://nodejs.org/)
 - [MongoDB](https://www.mongodb.com/)
-- [Seldon](https://www.seldon.io/)
 
 <br />
 
@@ -78,7 +77,7 @@ sharing.
 
 ### Requirements
 
-- Node v22
+- Node v24
 - Docker / Docker Compose
 
 <br />
