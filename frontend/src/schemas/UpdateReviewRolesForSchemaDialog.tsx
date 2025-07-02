@@ -13,7 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useGetAllReviewRoles } from 'actions/reviewRoles'
+import { useGetReviewRoles } from 'actions/reviewRoles'
 import { patchSchema } from 'actions/schema'
 import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -34,7 +34,7 @@ export default function UpdateReviewRolesForSchemaDialog({
   schema,
   mutateSchemas,
 }: UpdateReviewRolesForSchemaDialogProps) {
-  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetAllReviewRoles()
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
 
   const [checked, setChecked] = useState<string[]>(schema.reviewRoles)
   const [errorMessage, setErrorMessage] = useState('')

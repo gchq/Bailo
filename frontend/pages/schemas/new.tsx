@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { useTheme } from '@mui/material/styles'
-import { useGetAllReviewRoles } from 'actions/reviewRoles'
+import { useGetReviewRoles } from 'actions/reviewRoles'
 import { postSchema } from 'actions/schema'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, SyntheticEvent, useMemo, useState } from 'react'
@@ -51,7 +51,7 @@ export default function NewSchema() {
   const [loading, setLoading] = useState(false)
   const [newReviewRoles, setNewReviewRoles] = useState<ReviewRoleInterface[]>([])
 
-  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetAllReviewRoles()
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
 
   const router = useRouter()
   const theme = useTheme()

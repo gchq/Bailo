@@ -1,5 +1,6 @@
 import { Box, Button, Container, Stack } from '@mui/material'
 import { useGetReleasesForModelId } from 'actions/release'
+import { useGetReviewRoles } from 'actions/reviewRoles'
 import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
@@ -22,6 +23,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
   const [latestRelease, setLatestRelease] = useState('')
 
   const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles(model.card.schemaId)
 
   const ReleaseListItem = memoize(({ data, index }) => (
     <ReleaseDisplay
@@ -29,7 +31,12 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
       model={model}
       release={data[index]}
       latestRelease={latestRelease}
-      hideReviewBanner={!hasRole(currentUserRoles, ['msro', 'mtr']) || readOnly}
+      hideReviewBanner={
+        !hasRole(
+          currentUserRoles,
+          reviewRoles.map((role) => role.short),
+        ) || readOnly
+      }
     />
   ))
 
@@ -43,12 +50,16 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
     router.push(`/model/${model.id}/release/new`)
   }
 
-  if (isReleasesLoading) {
+  if (isReleasesLoading || isReviewRolesLoading) {
     return <Loading />
   }
 
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  }
+
+  if (isReviewRolesError) {
+    return <MessageAlert message={isReviewRolesError.info.message} severity='error' />
   }
 
   return (

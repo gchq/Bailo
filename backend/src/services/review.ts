@@ -256,8 +256,21 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
   }
 }
 
-export async function findReviewRoles(): Promise<ReviewRoleInterface[]> {
-  const reviewRoles = await ReviewRoleModel.find()
+export async function findReviewRoles(schemaId?: string): Promise<ReviewRoleInterface[]> {
+  let reviewRolesFromSchema: string[] = []
+  if (schemaId) {
+    const schema = await SchemaModel.findOne({ id: schemaId })
+    if (!schema) {
+      throw BadReq('Could not find requested schema when finding filtered review roles', { schemaId })
+    }
+    if (schema.reviewRoles) {
+      reviewRolesFromSchema = schema?.reviewRoles
+    }
+  }
+  let reviewRoles = await ReviewRoleModel.find()
+  if (reviewRolesFromSchema.length > 0) {
+    reviewRoles = reviewRoles.filter((reviewRole) => reviewRolesFromSchema.includes(reviewRole.short))
+  }
   return reviewRoles
 }
 

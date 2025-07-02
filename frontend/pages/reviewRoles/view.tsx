@@ -1,5 +1,5 @@
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
-import { deleteReviewRole, useGetAllReviewRoles } from 'actions/reviewRoles'
+import { deleteReviewRole, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
 import { Fragment, useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
@@ -11,7 +11,7 @@ import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 
 export default function ReviewRoles() {
-  const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetAllReviewRoles()
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const [confirmationOpen, setConfirmationOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
