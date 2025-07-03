@@ -4,6 +4,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestDoc } from '../models/AccessRequest.js'
 import { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import { ReleaseDoc } from '../models/Release.js'
+import { ResponseDoc } from '../models/Response.js'
 import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleInterface } from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
@@ -12,6 +13,7 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
+import { getResponsesByParentIds } from './response.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 // This should be replaced by using the dynamic schema
@@ -111,6 +113,49 @@ export async function removeAccessRequestReviews(accessRequestId: string) {
   }
 
   return deletions
+}
+
+export async function removeReleaseReviews(user: UserInterface, modelId: string, semver: string) {
+  // finding and then calling potentially multiple deletes is inefficient but the mongoose-softdelete
+  // plugin doesn't cover bulkDelete
+  const reviews: ReviewDoc[] = await Review.find({
+    modelId,
+    semver,
+  })
+
+  const reviewDeletions: ReviewDoc[] = []
+
+  for (const review of reviews) {
+    try {
+      reviewDeletions.push(await review.delete())
+    } catch (error) {
+      throw InternalError('The requested release review could not be deleted.', {
+        modelId,
+        semver,
+        error,
+      })
+    }
+  }
+
+  const responses = await getResponsesByParentIds(
+    user,
+    reviews.flatMap((r) => r.id),
+  )
+  const responseDeletions: ResponseDoc[] = []
+  for (const response of responses) {
+    try {
+      responseDeletions.push(await response.delete())
+    } catch (error) {
+      throw InternalError('The requested response could not be deleted.', {
+        modelId,
+        semver,
+        responseId: response.id,
+        error,
+      })
+    }
+  }
+
+  return reviewDeletions
 }
 
 export async function findReviewForResponse(
