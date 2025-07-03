@@ -113,7 +113,7 @@ export async function removeAccessRequestReviews(accessRequestId: string) {
   return deletions
 }
 
-export async function removeReleaseReviews(user: UserInterface, modelId: string, semver: string) {
+export async function removeReleaseReviews(user: UserInterface, modelId: string, semver: string): Promise<ReviewDoc[]> {
   // finding and then calling potentially multiple deletes is inefficient but the mongoose-softdelete
   // plugin doesn't cover bulkDelete
   const reviews: ReviewDoc[] = await Review.find({
