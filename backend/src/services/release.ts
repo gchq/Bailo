@@ -19,6 +19,7 @@ import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
+import { removeResponses } from './response.js'
 import { createReleaseReviews, removeReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
@@ -534,7 +535,11 @@ export async function deleteRelease(user: UserInterface, modelId: string, semver
 
   // TODO: Wrap this in transactions in the future
 
-  await removeReleaseReviews(user, modelId, semver)
+  const deletedReleases = await removeReleaseReviews(user, modelId, semver)
+  await removeResponses(
+    user,
+    deletedReleases.flatMap((r) => r.id),
+  )
 
   await release.delete()
 
