@@ -19,7 +19,8 @@ import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
-import { createReleaseReviews } from './review.js'
+import { removeResponses } from './response.js'
+import { createReleaseReviews, removeReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
 export function isReleaseDoc(data: unknown): data is ReleaseDoc {
@@ -530,6 +531,16 @@ export async function deleteRelease(user: UserInterface, modelId: string, semver
   const auth = await authorisation.release(user, model, ReleaseAction.Delete, release)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
+  }
+
+  // TODO: Wrap this in transactions in the future
+
+  const deletedReleases = await removeReleaseReviews(user, modelId, semver)
+  if (deletedReleases && deletedReleases.length > 0) {
+    await removeResponses(
+      user,
+      deletedReleases.flatMap((r) => r.id),
+    )
   }
 
   await release.delete()
