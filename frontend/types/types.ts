@@ -612,3 +612,43 @@ export type FileUploadMetadata = {
   tags: string[]
   text: string
 }
+
+export const FederationState = {
+  DISABLED: 'disabled',
+  READ_ONLY: 'readOnly',
+  ENABLED: 'enabled',
+} as const
+
+export type FederationStateKeys = (typeof FederationState)[keyof typeof FederationState]
+
+export const PeerKind = {
+  Bailo: 'bailo',
+  HuggingFaceHub: 'huggingfacehub',
+} as const
+export type PeerKindKeys = (typeof PeerKind)[keyof typeof PeerKind]
+
+export interface RemoteFederationConfig {
+  state: FederationStateKeys
+  baseUrl: string
+  label: string
+  kind: PeerKindKeys
+  extra: {
+    [key: string]: any
+  }
+}
+
+export type FederationStatus = {
+  state: FederationStateKeys
+  id?: string
+}
+
+export type SystemStatus = {
+  ping: 'pong' | ''
+  federation?: FederationStatus
+  error?: BailoError
+}
+
+export type PeerConfigStatus = {
+  config: RemoteFederationConfig
+  status: SystemStatus
+}
