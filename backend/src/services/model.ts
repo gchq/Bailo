@@ -119,9 +119,9 @@ export async function searchModels(
   allowTemplating?: boolean,
   schemaId?: string,
 ): Promise<Array<ModelSearchResult>> {
-  const promises = new Array<Promise<any>>()
-  const models = new Array<ModelSearchResult>()
-  const localPromise = searchLocalModels(
+  const models: ModelSearchResult[] = []
+
+  const localModelsPromise = searchLocalModels(
     user,
     kind,
     libraries,
@@ -132,9 +132,8 @@ export async function searchModels(
     allowTemplating,
     schemaId,
   )
-  promises.push(localPromise)
 
-  localPromise.then((localModels) => {
+  const processLocalModels = localModelsPromise.then((localModels) => {
     models.push(
       ...localModels.map((model) => ({
         id: model.id,
@@ -151,13 +150,15 @@ export async function searchModels(
     )
   })
 
+  const promises: Promise<any>[] = [processLocalModels]
+
   if (peers && peers.length > 0) {
     const connectors = await getPeerConnectors()
     const remotePromise = connectors.queryModels({ query: search }, peers)
-    promises.push(remotePromise)
-    remotePromise.then((remoteModels) => {
+    const processRemoteModels = remotePromise.then((remoteModels) => {
       models.push(...remoteModels)
     })
+    promises.push(processRemoteModels)
   }
 
   await Promise.all(promises)
