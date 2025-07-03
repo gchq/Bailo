@@ -73,9 +73,12 @@ export interface RemoteFederationConfig {
   baseUrl: string
   label: string
   kind: PeerKindKeys
-  proxy: string
-  httpConfig: ProxyAgentOptions
-  extra: {
+  proxy?: string
+  httpConfig?: ProxyAgentOptions
+  cache?: {
+    query?: number
+  }
+  extra?: {
     [key: string]: any
   }
 }

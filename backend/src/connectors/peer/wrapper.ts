@@ -1,3 +1,4 @@
+import { UserInterface } from '../../models/User.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { PeerConfigStatus } from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
@@ -40,6 +41,7 @@ export class PeerConnectorWrapper {
     opts: {
       query: string
     },
+    user: UserInterface,
     peersToQuery: Array<string> = this.peerIds,
   ): Promise<Array<ModelSearchResult>> {
     const results = new Array<ModelSearchResult>()
@@ -52,7 +54,7 @@ export class PeerConnectorWrapper {
       if (!peer) {
         throw InternalError(`Peer connector not found: ${id}`)
       }
-      const queryResponse = await peer.queryModels(opts)
+      const queryResponse = await peer.queryModels(opts, user)
       results.push(...queryResponse)
     }
 

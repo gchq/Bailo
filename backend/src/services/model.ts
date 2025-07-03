@@ -154,7 +154,7 @@ export async function searchModels(
 
   if (peers && peers.length > 0) {
     const connectors = await getPeerConnectors()
-    const remotePromise = connectors.queryModels({ query: search }, peers)
+    const remotePromise = connectors.queryModels({ query: search }, user, peers)
     const processRemoteModels = remotePromise.then((remoteModels) => {
       models.push(...remoteModels)
     })

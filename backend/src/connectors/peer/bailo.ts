@@ -1,5 +1,6 @@
 import fetch, { Response } from 'node-fetch'
 
+import { UserInterface } from '../../models/User.js'
 import { GetModelsResponse, ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { isBailoError } from '../../types/error.js'
 import { SystemStatus } from '../../types/types.js'
@@ -16,13 +17,13 @@ export class BailoPeerConnector extends BasePeerConnector {
     return Promise.resolve(true)
   }
 
-  async queryModels(opts: { query: string }): Promise<Array<ModelSearchResult>> {
+  async queryModels(opts: { query: string }, _user: UserInterface): Promise<Array<ModelSearchResult>> {
     let query: URLSearchParams = new URLSearchParams()
     if (opts.query) {
       query = new URLSearchParams({ search: opts.query })
     }
 
-    const results = await this.request<GetModelsResponse>('/api/v2/models/search'.concat('?', query.toString()))
+    const results = await this.request<GetModelsResponse>(`/api/v2/models/search?${query.toString()}`)
     const models = results.models
 
     return models.map((model) => ({
