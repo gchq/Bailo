@@ -6,6 +6,7 @@ import { Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mu
 import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
 import { patchResponse } from 'actions/response'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetUserInformation } from 'actions/user'
 import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -16,7 +17,7 @@ import EditableReviewComment from 'src/reviews/EditableReviewComment'
 import { Decision, EntityKind, ResponseInterface, User } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
-import { getRoleDisplay } from 'utils/roles'
+import { getRoleDisplayName } from 'utils/roles'
 
 type ReviewDecisionDisplayProps = {
   response: ResponseInterface
@@ -39,6 +40,7 @@ export default function ReviewDecisionDisplay({
   const [comment, setComment] = useState(response.comment || '')
   const [errorMessage, setErrorMessage] = useState('')
 
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     response.entity.split(':')[1],
@@ -90,7 +92,11 @@ export default function ReviewDecisionDisplay({
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
-  if (isUserInformationLoading) {
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
+  if (isUserInformationLoading || isUiConfigLoading) {
     return <Loading />
   }
 
@@ -130,8 +136,8 @@ export default function ReviewDecisionDisplay({
                 </span>
                 <span>{response.decision === Decision.Undo && <Undo fontSize='small' />}</span>
               </Stack>
-              {response.role && (
-                <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
+              {response.role && uiConfig && (
+                <Typography variant='caption'>as {getRoleDisplayName(response.role, modelRoles, uiConfig)}</Typography>
               )}
               <span>
                 {response.outdated && (

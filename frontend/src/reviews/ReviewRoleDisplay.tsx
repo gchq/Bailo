@@ -1,10 +1,11 @@
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined'
 import { Stack, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { ReviewRequestInterface } from 'types/types'
 
 import { useGetModelRoles } from '../../actions/model'
-import { getRoleDisplay } from '../../utils/roles'
+import { getRoleDisplayName } from '../../utils/roles'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
@@ -15,6 +16,7 @@ type ReviewRoleDisplayProps = {
 export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(review.model.id)
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([review._id])
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   if (isModelRolesError) {
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
@@ -24,18 +26,24 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
     return <MessageAlert message={isResponsesError.info.message} severity='error' />
   }
 
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
   if (responses.length > 0) {
     return <></>
   }
 
   return (
     <>
-      {(isModelRolesLoading || isResponsesLoading) && <Loading />}
+      {(isModelRolesLoading || isResponsesLoading || isUiConfigLoading) && <Loading />}
       <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
         <NotificationsNoneOutlinedIcon sx={{ fontSize: 'medium' }} color='warning' />
-        <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }}>
-          {`This ${review.kind} needs to be reviewed by the ${getRoleDisplay(review.role, modelRoles)}.`}
-        </Typography>
+        {uiConfig && (
+          <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }}>
+            {`This ${review.kind} needs to be reviewed by the ${getRoleDisplayName(review.role, modelRoles, uiConfig)}.`}
+          </Typography>
+        )}
       </Stack>
     </>
   )

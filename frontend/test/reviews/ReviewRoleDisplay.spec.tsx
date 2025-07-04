@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { useGetModelRoles } from 'actions/model'
 import { useGetResponses } from 'actions/response'
+import { useGetUiConfig } from 'actions/uiConfig'
 import ReviewRoleDisplay from 'src/reviews/ReviewRoleDisplay'
 import {
   testAccessRequestReview,
@@ -9,12 +10,13 @@ import {
   testReleaseReview,
   testReleaseReviewNoResponses,
   testReviewResponse,
+  testUiConfig,
 } from 'utils/test/testModels'
 import { describe, expect, vi } from 'vitest'
 
 const mockRoleUtils = vi.hoisted(() => {
   return {
-    getRoleDisplay: vi.fn(),
+    getRoleDisplayName: vi.fn(),
   }
 })
 vi.mock('utils/roles.ts', () => mockRoleUtils)
@@ -25,6 +27,10 @@ vi.mock('actions/model', () => ({
 
 vi.mock('actions/response', () => ({
   useGetResponses: vi.fn(),
+}))
+
+vi.mock('actions/uiConfig', () => ({
+  useGetUiConfig: vi.fn(),
 }))
 
 describe('ReviewRoleDisplay', () => {
@@ -44,7 +50,13 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
+    vi.mocked(useGetUiConfig).mockReturnValue({
+      uiConfig: testUiConfig,
+      isUiConfigLoading: false,
+      isUiConfigError: undefined,
+      mutateUiConfig: vi.fn(),
+    })
+    mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReviewNoResponses} />)
     await waitFor(async () => {
       expect(await screen.findByText(testMessageAccess)).toBeDefined()
@@ -64,7 +76,13 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
+    vi.mocked(useGetUiConfig).mockReturnValue({
+      uiConfig: testUiConfig,
+      isUiConfigLoading: false,
+      isUiConfigError: undefined,
+      mutateUiConfig: vi.fn(),
+    })
+    mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testReleaseReviewNoResponses} />)
     await waitFor(async () => {
       expect(await screen.findByText(testMessageRelease)).toBeDefined()
@@ -84,7 +102,13 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
+    vi.mocked(useGetUiConfig).mockReturnValue({
+      uiConfig: testUiConfig,
+      isUiConfigLoading: false,
+      isUiConfigError: undefined,
+      mutateUiConfig: vi.fn(),
+    })
+    mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testAccessRequestReview} />)
 
     await waitFor(async () => {
@@ -105,7 +129,13 @@ describe('ReviewRoleDisplay', () => {
       isResponsesError: undefined,
       mutateResponses: vi.fn(),
     })
-    mockRoleUtils.getRoleDisplay.mockReturnValue('Manager')
+    vi.mocked(useGetUiConfig).mockReturnValue({
+      uiConfig: testUiConfig,
+      isUiConfigLoading: false,
+      isUiConfigError: undefined,
+      mutateUiConfig: vi.fn(),
+    })
+    mockRoleUtils.getRoleDisplayName.mockReturnValue('Manager')
     render(<ReviewRoleDisplay review={testReleaseReview} />)
 
     await waitFor(async () => {
