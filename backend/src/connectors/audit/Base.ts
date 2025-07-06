@@ -7,10 +7,15 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
+import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
-import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
+import {
+  FileImportInformation,
+  ImageImportInformation,
+  MongoDocumentImportInformation,
+} from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 
 const AuditKind = {
@@ -122,6 +127,16 @@ export const AuditInfo = {
     description: 'Updated a comment or review response',
     auditKind: AuditKind.Update,
   },
+  CreateReviewRole: {
+    typeId: 'CreateReviewRole',
+    description: 'Created a new review role',
+    auditKind: AuditKind.Create,
+  },
+  ViewReviewRoles: {
+    typeId: 'ViewReviewRole',
+    description: 'Viewed a list of review roles',
+    auditKind: AuditKind.View,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -131,7 +146,7 @@ export abstract class BaseAuditConnector {
   abstract onUpdateModel(req: Request, model: ModelDoc)
   abstract onSearchModel(req: Request, models: ModelSearchResult[])
 
-  abstract onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
+  abstract onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface)
   abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onUpdateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
   abstract onViewModelCardRevisions(req: Request, modelId: string, modelCards: ModelCardInterface[])
@@ -189,8 +204,11 @@ export abstract class BaseAuditConnector {
     mirroredModel: ModelInterface,
     sourceModelId: string,
     exporter: string,
-    importResult: MongoDocumentImportInformation | FileImportInformation,
+    importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation,
   )
+
+  abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
+  abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[])
 
   abstract onError(req: Request, error: BailoError)
 

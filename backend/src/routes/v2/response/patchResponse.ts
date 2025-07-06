@@ -44,7 +44,7 @@ interface PatchResponseResponse {
 
 export const patchResponse = [
   bodyParser.json(),
-  async (req: Request, res: Response<PatchResponseResponse>) => {
+  async (req: Request, res: Response<PatchResponseResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateResponse
     const {
       params: { responseId },
@@ -55,7 +55,7 @@ export const patchResponse = [
 
     await audit.onUpdateResponse(req, responseId)
 
-    return res.json({
+    res.json({
       response,
     })
   },

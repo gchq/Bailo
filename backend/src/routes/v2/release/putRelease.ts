@@ -17,6 +17,7 @@ export const putReleaseSchema = z.object({
   body: z.object({
     notes: z.string().min(1, 'Please provide release notes.'),
     draft: z.coerce.boolean().optional().default(false),
+    modelCardVersion: z.number().openapi({ example: 1 }),
 
     fileIds: z.array(z.string()),
     images: z.array(
@@ -55,7 +56,7 @@ interface PutReleaseResponse {
 
 export const putRelease = [
   bodyParser.json(),
-  async (req: Request, res: Response<PutReleaseResponse>) => {
+  async (req: Request, res: Response<PutReleaseResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateRelease
     const {
       params: { modelId, semver },
@@ -65,7 +66,7 @@ export const putRelease = [
     const release = await updateRelease(req.user, modelId, semver, body)
     await audit.onUpdateRelease(req, release)
 
-    return res.json({
+    res.json({
       release,
     })
   },

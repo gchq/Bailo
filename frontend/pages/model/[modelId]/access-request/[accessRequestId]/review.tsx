@@ -1,5 +1,5 @@
 import { ArrowBack } from '@mui/icons-material'
-import { Button, Card, Container, Divider, Grid2, Paper, Stack, Typography } from '@mui/material'
+import { Button, Card, Container, Dialog, DialogContent, Divider, Grid2, Paper, Stack, Typography } from '@mui/material'
 import { useGetAccessRequest, useGetAccessRequestsForModelId } from 'actions/accessRequest'
 import { useGetModel } from 'actions/model'
 import { postReviewResponse, useGetReviewRequestsForModel } from 'actions/review'
@@ -9,6 +9,7 @@ import Loading from 'src/common/Loading'
 import ReviewWithComment from 'src/common/ReviewWithComment'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
+import EditableAccessRequestForm from 'src/entry/model/accessRequests/EditableAccessRequestForm'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -23,6 +24,7 @@ export default function AccessRequestReview() {
 
   const [errorMessage, setErrorMessage] = useState('')
   const [isReviewButtonLoading, setIsReviewButtonLoading] = useState(false)
+  const [isOpenAccessRequestDialogOpen, setIsOpenAccessRequestDialogOpen] = useState(false)
 
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
   const { accessRequest, isAccessRequestLoading, isAccessRequestError } = useGetAccessRequest(modelId, accessRequestId)
@@ -101,6 +103,7 @@ export default function AccessRequestReview() {
                   ? `Reviewing access request ${accessRequest.metadata.overview.name} for model ${model.name}`
                   : 'Loading...'}
               </Typography>
+              <Button onClick={() => setIsOpenAccessRequestDialogOpen(true)}>View access request</Button>
             </Stack>
             <ReviewWithComment onSubmit={handleSubmit} accessRequest={accessRequest} loading={isReviewButtonLoading} />
             <MessageAlert message={errorMessage} severity='error' />
@@ -144,6 +147,21 @@ export default function AccessRequestReview() {
           </Stack>
         </Paper>
       </Container>
+      <Dialog
+        open={isOpenAccessRequestDialogOpen}
+        maxWidth='md'
+        fullWidth
+        onClose={() => setIsOpenAccessRequestDialogOpen(false)}
+      >
+        <DialogContent>
+          <EditableAccessRequestForm
+            accessRequest={accessRequest}
+            isEdit={false}
+            readOnly={true}
+            onIsEditChange={() => {}}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

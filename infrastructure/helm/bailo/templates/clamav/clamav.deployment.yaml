@@ -34,13 +34,11 @@ spec:
         args: ["/init-unprivileged && chown -R 1002:1002 /var/lib/clamav"] # Runs ClamAV as non-root unprivileged user. https://docs.clamav.net/manual/Installing/Docker.html#running-clamd-using-non-root-user-using---user-and---entrypoint
         resources:
           requests:
-            memory: "100Mi"
-            ephemeral-storage: "1000Mi"
+            memory: "1Gi"
             cpu: "200m"
           limits:
-            memory: "4Gi" # This is a memory requirement for ClamAV see here: https://docs.clamav.net/manual/Installing/Docker.html#memory-ram-requirements
-            ephemeral-storage: "2000Mi"
-            cpu: "1"
+            memory: "5Gi" # This is a memory requirement for ClamAV see here: https://docs.clamav.net/manual/Installing/Docker.html#memory-ram-requirements
+            cpu: "2"
         volumeMounts:
         - name: tmp
           mountPath: /tmp
@@ -48,6 +46,9 @@ spec:
           mountPath: /var/lib/clamav
         - name: clamav-log
           mountPath: /var/log/clamav
+        - name: config-map-vol
+          mountPath: /etc/clamav/clamd.conf
+          subPath: clamd.conf
         securityContext:
           allowPrivilegeEscalation: false
       volumes:
@@ -55,6 +56,12 @@ spec:
           emptyDir: {}
         - name: clamav-log
           emptyDir: {}
+        - name: config-map-vol
+          configMap:
+            name: {{ include "bailo.fullname" . }}-clamav
+            items:
+            - key: clamd.conf
+              path: clamd.conf
         - name: clamav-signatures
           persistentVolumeClaim:
             claimName: {{ include "bailo.fullname" . }}-clamav-pvc

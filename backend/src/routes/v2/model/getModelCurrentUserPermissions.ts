@@ -39,14 +39,14 @@ interface GetModelCurrentUserPermissionsResponse {
 
 export const getModelCurrentUserPermissions = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetModelCurrentUserPermissionsResponse>) => {
+  async (req: Request, res: Response<GetModelCurrentUserPermissionsResponse>): Promise<void> => {
     const {
       params: { modelId },
     } = parse(req, getModelCurrentUserPermissionsSchema)
 
     const permissions = await getCurrentUserPermissionsByModel(req.user, modelId)
 
-    return res.json({
+    res.json({
       permissions,
     })
   },

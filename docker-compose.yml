@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: bitnami/mongodb:7.0.8
+    image: bitnami/mongodb:7.0.15
     environment:
       - MONGODB_REPLICA_SET_NAME=repl-set
     volumes:
@@ -15,12 +15,13 @@ services:
       start_period: 30s
 
   minio:
-    image: bitnami/minio:2025.3.12
+    image: bitnami/minio:2025.5.24
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
       MINIO_BROWSER_REDIRECT_URL: http://localhost:8080/minio/ui/
       MINIO_SERVER_URL: http://minio:9000
+      MINIO_SKIP_CLIENT: yes
     ports:
       - 9000:9000
       - 9001:9001
@@ -28,7 +29,7 @@ services:
       - minioVolume:/bitnami/minio
 
   clamd:
-    image: clamav/clamav:1.4.2_base
+    image: clamav/clamav:1.4.3_base
     healthcheck:
       test: ['CMD-SHELL', "echo 'PING' | nc -w 5 localhost 3310"]
       interval: 30s
@@ -50,13 +51,13 @@ services:
       retries: 5
 
   mailcrab:
-    image: marlonb/mailcrab:v1.5.0
+    image: marlonb/mailcrab:v1.6.1
     ports:
       - 1080:1080
       - 1025:1025
 
   nginx:
-    image: nginxinc/nginx-unprivileged:1.25.4-alpine3.18
+    image: nginxinc/nginx-unprivileged:1.28.0-alpine3.21-slim
     volumes:
       - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
@@ -68,7 +69,7 @@ services:
 
   registry:
     restart: always
-    image: registry:3.0.0-alpha.1
+    image: registry:3.0.0
     ports:
       - 5000:5000
     environment:
@@ -85,7 +86,7 @@ services:
       REGISTRY_AUTH_TOKEN_JWKS: /certs/jwks.json
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/cert.pem
     volumes:
-      - ./backend/config/registry.conf:/etc/docker/registry/config.yml
+      - ./backend/config/registry.conf:/etc/distribution/config.yml
       - ./backend/certs:/certs
 
   frontend:

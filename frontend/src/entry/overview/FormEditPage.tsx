@@ -1,7 +1,6 @@
 import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import EditIcon from '@mui/icons-material/Edit'
 import HistoryIcon from '@mui/icons-material/History'
-import PersonIcon from '@mui/icons-material/Person'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
@@ -17,7 +16,6 @@ import Restricted from 'src/common/Restricted'
 import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
-import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -36,7 +34,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   const [errorMessage, setErrorMessage] = useState('')
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
   const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
-  const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
@@ -193,17 +190,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
                 <MenuItem
                   onClick={() => {
                     handleActionButtonClose()
-                    setRolesDialogOpen(true)
-                  }}
-                >
-                  <ListItemIcon>
-                    <PersonIcon fontSize='small' />
-                  </ListItemIcon>
-                  <ListItemText>View Roles</ListItemText>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    handleActionButtonClose()
                     setHistoryDialogOpen(true)
                   }}
                 >
@@ -238,7 +224,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
         )}
       </Box>
       {historyDialogOpen && <EntryCardHistoryDialog entry={entry} setOpen={setHistoryDialogOpen} />}
-      <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
       <TextInputDialog
         open={jsonUploadDialogOpen}
         onClose={() => setJsonUploadDialogOpen(false)}

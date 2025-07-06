@@ -9,6 +9,7 @@ import {
   FileInterface,
   ModelImage,
   ReleaseInterface,
+  ReviewRolesFormData,
   Role,
 } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
@@ -21,6 +22,9 @@ export interface EntrySearchResult {
   description: string
   tags: Array<string>
   kind: EntryKindKeys
+  organisation?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface ModelExportRequest {
@@ -33,6 +37,7 @@ export function useListModels(
   filters: string[] = [],
   task = '',
   libraries: string[] = [],
+  organisations: string[] = [],
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
@@ -42,6 +47,7 @@ export function useListModels(
     ...(filters.length > 0 && { filters }),
     ...(task && { task }),
     ...(libraries.length > 0 && { libraries }),
+    ...(organisations.length > 0 && { organisations }),
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
@@ -220,4 +226,12 @@ export function useGetAllModelReviewRoles() {
     isModelRolesLoading: isLoading,
     isModelRolesError: error,
   }
+}
+
+export async function postReviewRole(reviewRole: ReviewRolesFormData) {
+  return fetch(`/api/v2/review/role`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(reviewRole),
+  })
 }

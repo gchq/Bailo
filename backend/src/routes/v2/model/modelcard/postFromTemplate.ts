@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { ModelCardRevisionInterface } from '../../../../models/ModelCardRevision.js'
-import { createModelCardFromTemplate } from '../../../../services/model.js'
+import { createModelCardFromTemplate, getModelById } from '../../../../services/model.js'
 import { modelCardRevisionInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { parse } from '../../../../utils/validate.js'
 
@@ -48,7 +48,7 @@ interface PostFromTemplateResponse {
 
 export const postFromTemplate = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostFromTemplateResponse>) => {
+  async (req: Request, res: Response<PostFromTemplateResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateModelCard
     const {
       params: { modelId },
@@ -56,10 +56,11 @@ export const postFromTemplate = [
     } = parse(req, postFromTemplateSchema)
 
     const modelCard = await createModelCardFromTemplate(req.user, modelId, templateId)
+    const model = await getModelById(req.user, modelId)
 
-    await audit.onCreateModelCard(req, modelId, modelCard)
+    await audit.onCreateModelCard(req, model, modelCard)
 
-    return res.json({
+    res.json({
       card: modelCard,
     })
   },

@@ -19,25 +19,7 @@ exports[`clients > modelScan > scanStream > success 1`] = `
   [
     "undefined://undefined:undefined/scan/file",
     {
-      "body": FormData {
-        Symbol(state): [
-          {
-            "name": "in_file",
-            "value": FileLike {
-              Symbol(state): {
-                "blobLike": {
-                  "size": 0,
-                  "stream": [Function],
-                  Symbol(Symbol.toStringTag): "File",
-                },
-                "lastModified": 0,
-                "name": "safe_model.h5",
-                "type": undefined,
-              },
-            },
-          },
-        ],
-      },
+      "body": FormData {},
       "headers": {
         "accept": "application/json",
       },

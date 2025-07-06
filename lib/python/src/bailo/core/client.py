@@ -4,7 +4,7 @@ from io import BytesIO
 from typing import Any
 
 from bailo.core.agent import Agent, TokenAgent
-from bailo.core.enums import EntryKind, ModelVisibility, SchemaKind
+from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility, SchemaKind
 from bailo.core.utils import filter_none
 
 
@@ -27,15 +27,17 @@ class Client:
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
     ):
         """Create a model.
 
         :param name: Name of the model
         :param kind: Either a Model or a Datacard
         :param description: Description of the model
+        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
-        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
+        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
         _visibility: str = "public"
@@ -50,6 +52,7 @@ class Client:
                 "visibility": _visibility,
                 "organisation": organisation,
                 "state": state,
+                "collaborators": collaborators,
             }
         )
 
@@ -111,16 +114,18 @@ class Client:
         visibility: str | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
     ):
         """Update a specific model using its unique ID.
 
         :param model_id: Unique model ID
         :param name: Name of the model, defaults to None
-        :param kind: Either a Model or a Datacard
+        :param kind: Either a Model or a Datacard, defaults to None
         :param description: Description of the model, defaults to None
+        :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
-        :param kind: Either a Model or a Datacard, defaults to None
+        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
         filtered_json = filter_none(
@@ -131,6 +136,7 @@ class Client:
                 "kind": kind,
                 "description": description,
                 "visibility": visibility,
+                "collaborators": collaborators,
             }
         )
 
@@ -239,6 +245,7 @@ class Client:
     def put_release(
         self,
         model_id: str,
+        model_card_version: int,
         release_version: str,
         notes: str,
         draft: bool,
@@ -265,6 +272,7 @@ class Client:
                 "draft": draft,
                 "fileIds": file_ids,
                 "images": images,
+                "modelCardVersion": model_card_version,
             },
         ).json()
 
@@ -498,18 +506,18 @@ class Client:
             },
         ).json()
 
-    def post_review(
+    def post_release_review(
         self,
         model_id: str,
+        version: str,
         role: str,
         decision: str,
-        version: str | None = None,
         comment: str | None = None,
     ):
         """Create a review for a release.
 
         :param model_id: A unique model ID
-        :param version: A semantic version for a release
+        :param version: Semver of the release
         :param role: The role of the user making the review
         :param decision: Either approve or request changes
         :param comment: A comment to go with the review
@@ -631,3 +639,26 @@ class Client:
         return self.agent.put(
             f"{self.url}/v2/filescanning/model/{model_id}/file/{file_id}/scan",
         ).json()
+
+    def post_access_request_review(
+        self,
+        model_id: str,
+        access_request_id: str,
+        role: str,
+        decision: str,
+        comment: str | None = None,
+    ):
+        """Create a review for a release.
+
+        :param model_id: A unique model ID
+        :param access_request_id: Unique access request ID
+        :param role: The role of the user making the review
+        :param decision: Either approve or request changes
+        :param comment: A comment to go with the review
+        """
+        filtered_json = filter_none({"role": role, "decision": decision, "comment": comment})
+        return self.agent.post(
+            f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}/review",
+            json=filtered_json,
+        ).json()
+

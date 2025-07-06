@@ -77,6 +77,56 @@ exports[`services > file > removeFile > success 1`] = `
 }
 `;
 
+exports[`services > file > updateFile > success 1`] = `
+{
+  "_id": {
+    "toString": [MockFunction spy] {
+      "calls": [
+        [],
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+      ],
+    },
+  },
+  "id": "73859F8D26679D2E52597326",
+  "modelId": "testModel",
+}
+`;
+
+exports[`services > file > updateFile > success multiple params 1`] = `
+{
+  "_id": {
+    "toString": [MockFunction spy] {
+      "calls": [
+        [],
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+      ],
+    },
+  },
+  "id": "73859F8D26679D2E52597326",
+  "modelId": "testModel",
+}
+`;
+
 exports[`services > file > uploadFile > success 1`] = `
 {
   "_id": [MockFunction spy],
@@ -88,29 +138,29 @@ exports[`services > file > uploadFile > success 1`] = `
       "calls": [
         [
           {
-            "fileId": "function(...s) {
-    let r = T(t);
-    r.called = !0, r.callCount++, r.calls.push(s);
-    let S = r.next.shift();
-    if (S) {
-      r.results.push(S);
-      let [o, g] = S;
-      if (o === "ok")
-        return g;
-      throw g;
+            "fileId": "function(...args) {
+    let state2 = getInternalState(fn);
+    state2.called = !0, state2.callCount++, state2.calls.push(args);
+    let next = state2.next.shift();
+    if (next) {
+      state2.results.push(next);
+      let [type2, result2] = next;
+      if (type2 === "ok")
+        return result2;
+      throw result2;
     }
-    let p, c = "ok", a = r.results.length;
-    if (r.impl)
+    let result, type = "ok", resultIndex = state2.results.length;
+    if (state2.impl)
       try {
-        new.target ? p = Reflect.construct(r.impl, s, new.target) : p = r.impl.apply(this, s), c = "ok";
-      } catch (o) {
-        throw p = o, c = "error", r.results.push([c, o]), o;
+        new.target ? result = Reflect.construct(state2.impl, args, new.target) : result = state2.impl.apply(this, args), type = "ok";
+      } catch (err) {
+        throw result = err, type = "error", state2.results.push([type, err]), err;
       }
-    let R = [c, p];
-    return w(p) && p.then(
-      (o) => r.resolves[a] = ["ok", o],
-      (o) => r.resolves[a] = ["error", o]
-    ), r.results.push(R), p;
+    let resultTuple = [type, result];
+    return isPromise(result) && result.then(
+      (r) => state2.resolves[resultIndex] = ["ok", r],
+      (e) => state2.resolves[resultIndex] = ["error", e]
+    ), state2.results.push(resultTuple), result;
   }",
           },
         ],
@@ -127,30 +177,31 @@ exports[`services > file > uploadFile > success 1`] = `
   "delete": [MockFunction spy],
   "find": [MockFunction spy],
   "findOneAndDelete": [MockFunction spy],
+  "findOneAndUpdate": [MockFunction spy],
   "group": [MockFunction spy],
-  "id": "function(...s) {
-    let r = T(t);
-    r.called = !0, r.callCount++, r.calls.push(s);
-    let S = r.next.shift();
-    if (S) {
-      r.results.push(S);
-      let [o, g] = S;
-      if (o === "ok")
-        return g;
-      throw g;
+  "id": "function(...args) {
+    let state2 = getInternalState(fn);
+    state2.called = !0, state2.callCount++, state2.calls.push(args);
+    let next = state2.next.shift();
+    if (next) {
+      state2.results.push(next);
+      let [type2, result2] = next;
+      if (type2 === "ok")
+        return result2;
+      throw result2;
     }
-    let p, c = "ok", a = r.results.length;
-    if (r.impl)
+    let result, type = "ok", resultIndex = state2.results.length;
+    if (state2.impl)
       try {
-        new.target ? p = Reflect.construct(r.impl, s, new.target) : p = r.impl.apply(this, s), c = "ok";
-      } catch (o) {
-        throw p = o, c = "error", r.results.push([c, o]), o;
+        new.target ? result = Reflect.construct(state2.impl, args, new.target) : result = state2.impl.apply(this, args), type = "ok";
+      } catch (err) {
+        throw result = err, type = "error", state2.results.push([type, err]), err;
       }
-    let R = [c, p];
-    return w(p) && p.then(
-      (o) => r.resolves[a] = ["ok", o],
-      (o) => r.resolves[a] = ["error", o]
-    ), r.results.push(R), p;
+    let resultTuple = [type, result];
+    return isPromise(result) && result.then(
+      (r) => state2.resolves[resultIndex] = ["ok", r],
+      (e) => state2.resolves[resultIndex] = ["error", e]
+    ), state2.results.push(resultTuple), result;
   }",
   "match": [MockFunction spy],
   "save": [MockFunction spy] {
@@ -166,6 +217,7 @@ exports[`services > file > uploadFile > success 1`] = `
           "delete": [MockFunction spy],
           "find": [MockFunction spy],
           "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
           "group": [MockFunction spy],
           "match": [MockFunction spy],
           "save": [MockFunction spy] {
@@ -209,6 +261,7 @@ exports[`services > file > uploadFile > success 1`] = `
           "delete": [MockFunction spy],
           "find": [MockFunction spy],
           "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
           "group": [MockFunction spy],
           "match": [MockFunction spy],
           "save": [MockFunction spy] {
@@ -252,29 +305,29 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
       "calls": [
         [
           {
-            "fileId": "function(...s) {
-    let r = T(t);
-    r.called = !0, r.callCount++, r.calls.push(s);
-    let S = r.next.shift();
-    if (S) {
-      r.results.push(S);
-      let [o, g] = S;
-      if (o === "ok")
-        return g;
-      throw g;
+            "fileId": "function(...args) {
+    let state2 = getInternalState(fn);
+    state2.called = !0, state2.callCount++, state2.calls.push(args);
+    let next = state2.next.shift();
+    if (next) {
+      state2.results.push(next);
+      let [type2, result2] = next;
+      if (type2 === "ok")
+        return result2;
+      throw result2;
     }
-    let p, c = "ok", a = r.results.length;
-    if (r.impl)
+    let result, type = "ok", resultIndex = state2.results.length;
+    if (state2.impl)
       try {
-        new.target ? p = Reflect.construct(r.impl, s, new.target) : p = r.impl.apply(this, s), c = "ok";
-      } catch (o) {
-        throw p = o, c = "error", r.results.push([c, o]), o;
+        new.target ? result = Reflect.construct(state2.impl, args, new.target) : result = state2.impl.apply(this, args), type = "ok";
+      } catch (err) {
+        throw result = err, type = "error", state2.results.push([type, err]), err;
       }
-    let R = [c, p];
-    return w(p) && p.then(
-      (o) => r.resolves[a] = ["ok", o],
-      (o) => r.resolves[a] = ["error", o]
-    ), r.results.push(R), p;
+    let resultTuple = [type, result];
+    return isPromise(result) && result.then(
+      (r) => state2.resolves[resultIndex] = ["ok", r],
+      (e) => state2.resolves[resultIndex] = ["error", e]
+    ), state2.results.push(resultTuple), result;
   }",
           },
         ],
@@ -291,30 +344,31 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
   "delete": [MockFunction spy],
   "find": [MockFunction spy],
   "findOneAndDelete": [MockFunction spy],
+  "findOneAndUpdate": [MockFunction spy],
   "group": [MockFunction spy],
-  "id": "function(...s) {
-    let r = T(t);
-    r.called = !0, r.callCount++, r.calls.push(s);
-    let S = r.next.shift();
-    if (S) {
-      r.results.push(S);
-      let [o, g] = S;
-      if (o === "ok")
-        return g;
-      throw g;
+  "id": "function(...args) {
+    let state2 = getInternalState(fn);
+    state2.called = !0, state2.callCount++, state2.calls.push(args);
+    let next = state2.next.shift();
+    if (next) {
+      state2.results.push(next);
+      let [type2, result2] = next;
+      if (type2 === "ok")
+        return result2;
+      throw result2;
     }
-    let p, c = "ok", a = r.results.length;
-    if (r.impl)
+    let result, type = "ok", resultIndex = state2.results.length;
+    if (state2.impl)
       try {
-        new.target ? p = Reflect.construct(r.impl, s, new.target) : p = r.impl.apply(this, s), c = "ok";
-      } catch (o) {
-        throw p = o, c = "error", r.results.push([c, o]), o;
+        new.target ? result = Reflect.construct(state2.impl, args, new.target) : result = state2.impl.apply(this, args), type = "ok";
+      } catch (err) {
+        throw result = err, type = "error", state2.results.push([type, err]), err;
       }
-    let R = [c, p];
-    return w(p) && p.then(
-      (o) => r.resolves[a] = ["ok", o],
-      (o) => r.resolves[a] = ["error", o]
-    ), r.results.push(R), p;
+    let resultTuple = [type, result];
+    return isPromise(result) && result.then(
+      (r) => state2.resolves[resultIndex] = ["ok", r],
+      (e) => state2.resolves[resultIndex] = ["error", e]
+    ), state2.results.push(resultTuple), result;
   }",
   "match": [MockFunction spy],
   "save": [MockFunction spy] {
@@ -330,6 +384,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
           "delete": [MockFunction spy],
           "find": [MockFunction spy],
           "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
           "group": [MockFunction spy],
           "match": [MockFunction spy],
           "save": [MockFunction spy] {
@@ -373,6 +428,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
           "delete": [MockFunction spy],
           "find": [MockFunction spy],
           "findOneAndDelete": [MockFunction spy],
+          "findOneAndUpdate": [MockFunction spy],
           "group": [MockFunction spy],
           "match": [MockFunction spy],
           "save": [MockFunction spy] {

@@ -1,11 +1,13 @@
 import { ArrowBack, DesignServices } from '@mui/icons-material'
 import { LoadingButton } from '@mui/lab'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
+import { postFileForModelId } from 'actions/file'
 import { useGetModel } from 'actions/model'
-import { CreateReleaseParams, postRelease, postSimpleFileForRelease } from 'actions/release'
+import { CreateReleaseParams, postRelease } from 'actions/release'
 import { AxiosProgressEvent } from 'axios'
 import { useRouter } from 'next/router'
-import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { FailedFileUpload, FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ReleaseForm from 'src/entry/model/releases/ReleaseForm'
@@ -14,10 +16,8 @@ import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import {
   EntryKind,
-  FailedFileUpload,
   FileInterface,
-  FileUploadProgress,
-  FileWithMetadata,
+  FileWithMetadataAndTags,
   FlattenedModelImage,
   isFileInterface,
   SuccessfulFileUpload,
@@ -28,9 +28,10 @@ import { isValidSemver, plural } from 'utils/stringUtils'
 export default function NewRelease() {
   const [semver, setSemver] = useState('')
   const [releaseNotes, setReleaseNotes] = useState('')
+  const [modelCardVersion, setModelCardVersion] = useState(0)
   const [isMinorRelease, setIsMinorRelease] = useState(false)
   const [files, setFiles] = useState<(File | FileInterface)[]>([])
-  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadata[]>([])
+  const [filesMetadata, setFilesMetadata] = useState<FileWithMetadataAndTags[]>([])
   const [imageList, setImageList] = useState<FlattenedModelImage[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -44,6 +45,12 @@ export default function NewRelease() {
 
   const { modelId }: { modelId?: string } = router.query
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+
+  useEffect(() => {
+    if (model && modelCardVersion !== model.card.version) {
+      setModelCardVersion(model.card.version)
+    }
+  }, [model, setModelCardVersion, modelCardVersion])
 
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
@@ -73,6 +80,7 @@ export default function NewRelease() {
     event.preventDefault()
 
     setFailedFileUploads([])
+    const failedFiles: FailedFileUpload[] = []
 
     if (!model) {
       return setErrorMessage('Please wait for the model to finish loading before trying to make a release.')
@@ -89,7 +97,6 @@ export default function NewRelease() {
     setErrorMessage('')
     setLoading(true)
 
-    const failedFiles: FailedFileUpload[] = []
     const successfulFiles: SuccessfulFileUpload[] = []
     for (const file of files) {
       if (isFileInterface(file)) {
@@ -98,7 +105,9 @@ export default function NewRelease() {
       }
 
       if (!successfulFileUploads.find((successfulFile) => successfulFile.fileName === file.name)) {
-        const metadata = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+        const metadataText = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata
+          .text
+        const tags = filesMetadata.find((fileWithMetadata) => fileWithMetadata.fileName === file.name)?.metadata.tags
 
         const handleUploadProgress = (progressEvent: AxiosProgressEvent) => {
           if (progressEvent.total) {
@@ -107,8 +116,13 @@ export default function NewRelease() {
           }
         }
 
+        const metadata = {
+          text: metadataText ? metadataText : '',
+          tags: tags ? tags : [],
+        }
+
         try {
-          const fileUploadResponse = await postSimpleFileForRelease(model.id, file, handleUploadProgress, metadata)
+          const fileUploadResponse = await postFileForModelId(model.id, file, handleUploadProgress, metadata)
           setCurrentFileUploadProgress(undefined)
           if (fileUploadResponse) {
             setUploadedFiles((uploadedFiles) => [...uploadedFiles, file.name])
@@ -124,6 +138,7 @@ export default function NewRelease() {
         }
       }
     }
+    setFailedFileUploads(failedFiles)
 
     const updatedSuccessfulFiles = successfulFiles.reduce(
       (updatedFiles, file) => {
@@ -136,19 +151,14 @@ export default function NewRelease() {
     )
     setSuccessfulFileUploads(updatedSuccessfulFiles)
 
-    if (failedFiles.length > 0) {
-      setFailedFileUploads(failedFiles)
-      return
-    }
-
     const release: CreateReleaseParams = {
       modelId: model.id,
       semver,
-      modelCardVersion: model.card.version,
       notes: releaseNotes,
       minor: isMinorRelease,
       fileIds: successfulFiles.map((file) => file.fileId),
       images: imageList,
+      modelCardVersion: modelCardVersion,
     }
 
     const response = await postRelease(release)
@@ -201,11 +211,13 @@ export default function NewRelease() {
                     isMinorRelease,
                     files,
                     imageList,
+                    modelCardVersion,
                   }}
                   onSemverChange={(value) => setSemver(value)}
                   onReleaseNotesChange={(value) => setReleaseNotes(value)}
                   onMinorReleaseChange={(value) => setIsMinorRelease(value)}
                   onFilesChange={(value) => handleFileOnChange(value)}
+                  onModelCardVersionChange={(value) => setModelCardVersion(value)}
                   filesMetadata={filesMetadata}
                   onFilesMetadataChange={(value) => setFilesMetadata(value)}
                   onImageListChange={(value) => setImageList(value)}

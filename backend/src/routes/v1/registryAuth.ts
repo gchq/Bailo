@@ -74,8 +74,10 @@ function formatKid(keyBuffer: Buffer) {
   return match.join(':')
 }
 
-export async function getKid() {
-  const cert = new X509Certificate(await getPublicKey())
+export async function getKid(cert?: X509Certificate) {
+  if (!cert) {
+    cert = new X509Certificate(await getPublicKey())
+  }
   const der = cert.publicKey.export({ format: 'der', type: 'spki' })
   const hash = createHash('sha256').update(der).digest().slice(0, 30)
 
@@ -84,6 +86,7 @@ export async function getKid() {
 
 async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn: StringValue }) {
   const privateKey = await getPrivateKey()
+  const cert = new X509Certificate(await getPublicKey())
 
   return jwt.sign(
     {
@@ -99,8 +102,10 @@ async function encodeToken<T extends object>(data: T, { expiresIn }: { expiresIn
       issuer: config.registry.issuer,
 
       header: {
-        kid: await getKid(),
+        kid: await getKid(cert),
         alg: 'RS256',
+        // The registry >=3.0.0-beta.1 image requires the (typically optional) x5c header
+        x5c: [cert.raw.toString('base64')],
       },
     } as SignOptions,
   )
@@ -170,7 +175,7 @@ async function checkAccess(access: Access, user: UserInterface): Promise<AuthRes
 
 export const getDockerRegistryAuth = [
   bodyParser.urlencoded({ extended: true }),
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response): Promise<void> => {
     const { account, client_id: clientId, offline_token: offlineToken, service, scope } = req.query
     const isOfflineToken = offlineToken === 'true'
 
@@ -206,14 +211,16 @@ export const getDockerRegistryAuth = [
     if (isOfflineToken) {
       const refreshToken = await getRefreshToken(user)
       rlog.trace('Successfully generated offline token')
-      return res.json({ token: refreshToken })
+      res.json({ token: refreshToken })
+      return
     }
 
     if (!scope) {
       // User requesting no scope, they're just trying to login
       // Because this token has no permissions, it is safe to
       // provide.
-      return res.json({ token: await getAccessToken(user, []) })
+      res.json({ token: await getAccessToken(user, []) })
+      return
     }
 
     let scopes: Array<string> = []
@@ -238,9 +245,9 @@ export const getDockerRegistryAuth = [
     const accessToken = await getAccessToken(user, accesses)
     rlog.trace('Successfully generated access token')
 
-    return res.json({ token: accessToken })
+    res.json({ token: accessToken })
   },
-  async (err: unknown, req: Request, res: Response, _next: NextFunction) => {
+  async (err: unknown, req: Request, res: Response, _next: NextFunction): Promise<void> => {
     if (!bailoErrorGuard(err)) {
       log.error({ err }, 'No error code was found, returning generic error to user.')
       throw err
@@ -262,7 +269,7 @@ export const getDockerRegistryAuth = [
         dockerCode = 'DENIED'
     }
 
-    return res.status(err.code).json({
+    res.status(err.code).json({
       errors: [
         {
           code: dockerCode,

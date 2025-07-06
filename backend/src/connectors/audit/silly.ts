@@ -7,10 +7,15 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
+import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
-import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
+import {
+  FileImportInformation,
+  ImageImportInformation,
+  MongoDocumentImportInformation,
+} from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { BaseAuditConnector } from './Base.js'
 
@@ -23,7 +28,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onViewModel(_req: Request, _model: ModelDoc) {}
   onUpdateModel(_req: Request, _model: ModelDoc) {}
   onSearchModel(_req: Request, _models: ModelSearchResult[]) {}
-  onCreateModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
+  onCreateModelCard(_req: Request, _model: ModelDoc, _modelCard: ModelCardInterface) {}
   onViewModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
   onUpdateModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
   onViewModelCardRevisions(_req: Request, _modelId: string, _modelCards: ModelCardInterface[]) {}
@@ -63,10 +68,12 @@ export class SillyAuditConnector extends BaseAuditConnector {
     _mirroredModel: ModelInterface,
     _sourceModelId: string,
     _exporter: string,
-    _importResult: MongoDocumentImportInformation | FileImportInformation,
+    _importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation,
   ) {}
   onError(_req: Request, _error: BailoError) {}
   onCreateCommentResponse(_req: Request, _responseInterface: ResponseInterface) {}
   onViewResponses(_req: Request, _responseInters: ResponseInterface[]) {}
   onUpdateResponse(_req: Request, _responseId: string) {}
+  onCreateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
+  onViewReviewRoles(_req: Request) {}
 }

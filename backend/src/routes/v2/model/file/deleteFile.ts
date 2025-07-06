@@ -41,7 +41,7 @@ interface DeleteFileResponse {
 
 export const deleteFile = [
   bodyParser.json(),
-  async (req: Request, res: Response<DeleteFileResponse>) => {
+  async (req: Request, res: Response<DeleteFileResponse>): Promise<void> => {
     req.audit = AuditInfo.DeleteFile
     const {
       params: { modelId, fileId },
@@ -51,7 +51,7 @@ export const deleteFile = [
 
     await audit.onDeleteFile(req, modelId, fileId)
 
-    return res.json({
+    res.json({
       message: 'Successfully removed file.',
     })
   },

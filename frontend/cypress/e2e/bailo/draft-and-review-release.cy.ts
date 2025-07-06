@@ -68,8 +68,8 @@ describe('Draft and review a model release', () => {
 
     cy.log('Checking that we can see both review states')
     cy.visit(`/model/${modelUuidForRelease}/release/${releaseVersion}`)
-    cy.get('[data-test=reviewDecisionDisplay]').contains('requested changes')
-    cy.get('[data-test=reviewDecisionDisplay]').contains('approved')
+    cy.get('[data-test=reviewDecisionDisplayRequestChanges]').contains('requested changes')
+    cy.get('[data-test=reviewDecisionDisplayApproved]').contains('approved')
     cy.contains('This is a comment')
   })
 
@@ -96,6 +96,7 @@ describe('Draft and review a model release', () => {
     cy.contains('Draft new Release')
     // The following logic is to get around a known bug with Cypress and downloading files from anchor tags
     cy.log('Clicking the test file that is attached to a release')
+    cy.get('[data-test="release-files-accordion-1.0.0"]').click()
     cy.window()
       .document()
       .then(function (doc) {
@@ -104,7 +105,7 @@ describe('Draft and review a model release', () => {
             doc.location.reload()
           }, 5000)
         })
-        cy.get('[data-test="fileLink-test.txt"]').click()
+        cy.get('[data-test="fileLink-test.txt"]').click({ force: true })
         cy.readFile('cypress/downloads/test.txt')
       })
   })

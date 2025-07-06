@@ -27,7 +27,7 @@ class Release:
         client: Client,
         model_id: str,
         version: Version | str,
-        model_card_version: int | None = None,
+        model_card_version: int,
         notes: str = "",
         files: list[str] | None = None,
         images: list[str] | None = None,
@@ -73,7 +73,7 @@ class Release:
         model_id: str,
         version: Version | str,
         notes: str,
-        model_card_version: int | None = None,
+        model_card_version: int,
         files: list[str] | None = None,
         images: list[str] | None = None,
         minor: bool = False,
@@ -85,7 +85,7 @@ class Release:
         :param model_id: A Unique Model ID
         :param version: A semantic version of a model release
         :param notes: Notes on release
-        :param model_card_version: Model card version, defaults to None
+        :param model_card_version: Model card version
         :param files: Files for release, defaults to None
         :param images: Images for release, defaults to None
         :param minor: Signifies a minor release, defaults to False
@@ -108,7 +108,7 @@ class Release:
             draft,
         )
         logger.info(
-            f"Release %s successfully created on server for model with ID %s.",
+            "Release %s successfully created on server for model with ID %s.",
             str(version),
             model_id,
         )
@@ -143,7 +143,7 @@ class Release:
         draft = res["draft"]
 
         logger.info(
-            f"Release %s of model ID %s successfully retrieved from server.",
+            "Release %s of model ID %s successfully retrieved from server.",
             str(version),
             model_id,
         )
@@ -171,7 +171,7 @@ class Release:
         """
         res = self.client.get_download_by_filename(self.model_id, str(self.version), filename)
         logger.info(
-            f"Downloading file %s from version %s of %s...",
+            "Downloading file %s from version %s of %s...",
             filename,
             str(self.version),
             self.model_id,
@@ -200,10 +200,10 @@ class Release:
                         t.update(len(data))
                         f.write(data)
 
-            logger.info(f"File written to %s", path)
+            logger.info("File written to %s", path)
 
         logger.info(
-            f"Downloading of file %s from version %s of %s completed.",
+            "Downloading of file %s from version %s of %s completed.",
             filename,
             str(self.version),
             self.model_id,
@@ -245,7 +245,7 @@ class Release:
             ]
 
         logger.info(
-            f"Downloading %d of %%d files for version %s of %s...",
+            "Downloading %d of %%d files for version %s of %s...",
             len(file_names),
             len(orig_file_names),
             str(self.version),
@@ -266,7 +266,7 @@ class Release:
         ..note:: If path provided is a directory, it will be uploaded as a zip
         """
         logger.info(
-            f"Uploading file(s) to version %s of %s...",
+            "Uploading file(s) to version %s of %s...",
             str(self.version),
             self.model_id,
         )
@@ -281,7 +281,7 @@ class Release:
 
             if zip_required:
                 logger.info(
-                    f"Given path (%s) is a directory. This will be converted to a zip file for upload.",
+                    "Given path (%s) is a directory. This will be converted to a zip file for upload.",
                     path,
                 )
                 shutil.make_archive(name, "zip", path)
@@ -321,7 +321,7 @@ class Release:
         if to_close:
             data.close()
         logger.info(
-            f"Upload of file %s to version %s of %s complete.",
+            "Upload of file %s to version %s of %s complete.",
             name,
             str(self.version),
             self.model_id,
@@ -336,6 +336,7 @@ class Release:
         """
         return self.client.put_release(
             self.model_id,
+            self.model_card_version,
             str(self.__version_raw),
             self.notes,
             self.draft,
@@ -349,7 +350,7 @@ class Release:
         :return: JSON Response object
         """
         self.client.delete_release(self.model_id, str(self.version))
-        logger.info(f"Release %s of %s successfully deleted.", str(self.version), self.model_id)
+        logger.info("Release %s of %s successfully deleted.", str(self.version), self.model_id)
 
         return True
 

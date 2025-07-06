@@ -5,7 +5,7 @@ import { ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
-import Release, { ImageRef, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
+import Release, { ImageRefInterface, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
@@ -14,6 +14,7 @@ import { findDuplicates } from '../utils/array.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
+import { arrayOfObjectsHasKeysOfType, hasKeysOfType } from '../utils/typeguards.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
@@ -22,28 +23,26 @@ import { createReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
 export function isReleaseDoc(data: unknown): data is ReleaseDoc {
-  if (typeof data !== 'object' || data === null) {
-    return false
-  }
-
-  if (
-    !('modelId' in data) ||
-    !('modelCardVersion' in data) ||
-    !('semver' in data) ||
-    !('notes' in data) ||
-    !('minor' in data) ||
-    !('draft' in data) ||
-    !('fileIds' in data) ||
-    !('images' in data) ||
-    !('deleted' in data) ||
-    !('createdBy' in data) ||
-    !('createdAt' in data) ||
-    !('updatedAt' in data) ||
-    !('_id' in data)
-  ) {
-    return false
-  }
-  return true
+  return (
+    hasKeysOfType(data, {
+      _id: 'string',
+      modelId: 'string',
+      modelCardVersion: 'number',
+      semver: 'string',
+      notes: 'string',
+      minor: 'boolean',
+      draft: 'boolean',
+      fileIds: 'object',
+      images: 'object',
+      deleted: 'boolean',
+      createdBy: 'string',
+      createdAt: 'string',
+      updatedAt: 'string',
+    }) &&
+    Array.isArray(data['fileIds']) &&
+    data['fileIds'].every((fileId: unknown) => typeof fileId === 'string') &&
+    arrayOfObjectsHasKeysOfType(data['images'], { repository: 'string', name: 'string', tag: 'string', _id: 'string' })
+  )
 }
 
 export async function validateRelease(user: UserInterface, model: ModelDoc, release: ReleaseDoc) {
@@ -54,7 +53,7 @@ export async function validateRelease(user: UserInterface, model: ModelDoc, rele
   if (release.images && release.images.length > 0) {
     const registryImages = await listModelImages(user, release.modelId)
 
-    const initialValue: ImageRef[] = []
+    const initialValue: ImageRefInterface[] = []
     const missingImages = release.images.reduce((acc, releaseImage) => {
       if (
         !registryImages.some(
@@ -206,7 +205,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
   return release
 }
 
-export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'fileIds' | 'images'>
+export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'modelCardVersion' | 'fileIds' | 'images'>
 export async function updateRelease(user: UserInterface, modelId: string, semver: string, delta: UpdateReleaseParams) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {

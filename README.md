@@ -68,7 +68,6 @@ sharing.
 - [Next.js](https://nextjs.org/)
 - [Node.js](https://nodejs.org/)
 - [MongoDB](https://www.mongodb.com/)
-- [Seldon](https://www.seldon.io/)
 
 <br />
 
@@ -78,7 +77,7 @@ sharing.
 
 ### Requirements
 
-- Node v22
+- Node v24
 - Docker / Docker Compose
 
 <br />
@@ -184,8 +183,8 @@ See [our user documentation](https://gchq.github.io/Bailo/docs)
 
 - [ ] Export/Import of Releases with Files.
 - [ ] Model LifeCycle State.
-- [ ] Model Organisation.
-- [ ] Improve Open Source Ways of Working.
+- [x] Model Organisation.
+- [x] Improve Open Source Ways of Working.
 - [ ] Export/Import of Releases with Docker Images.
 
 <br />

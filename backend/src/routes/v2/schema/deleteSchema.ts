@@ -42,14 +42,14 @@ interface DeletedSchemaResponse {
 
 export const deleteSchema = [
   bodyParser.json(),
-  async (req: Request, res: Response<DeletedSchemaResponse>) => {
+  async (req: Request, res: Response<DeletedSchemaResponse>): Promise<void> => {
     req.audit = AuditInfo.DeleteSchema
     const { params } = parse(req, deleteSchemaSchema)
 
     await deleteSchemaById(req.user, params.schemaId)
     await audit.onDeleteSchema(req, params.schemaId)
 
-    return res.json({
+    res.json({
       deleted: true,
     })
   },

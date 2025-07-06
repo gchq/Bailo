@@ -40,7 +40,7 @@ interface DeleteUserTokenResponse {
 
 export const deleteUserToken = [
   bodyParser.json(),
-  async (req: Request, res: Response<DeleteUserTokenResponse>) => {
+  async (req: Request, res: Response<DeleteUserTokenResponse>): Promise<void> => {
     req.audit = AuditInfo.DeleteUserToken
     const {
       params: { accessKey },
@@ -49,7 +49,7 @@ export const deleteUserToken = [
     await removeToken(req.user, accessKey)
     await audit.onDeleteUserToken(req, accessKey)
 
-    return res.json({
+    res.json({
       message: 'Successfully removed access key.',
     })
   },

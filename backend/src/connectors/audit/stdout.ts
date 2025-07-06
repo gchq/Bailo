@@ -7,10 +7,15 @@ import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model
 import { ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
+import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
-import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
+import {
+  FileImportInformation,
+  ImageImportInformation,
+  MongoDocumentImportInformation,
+} from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
@@ -53,9 +58,9 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onCreateModelCard(req: Request, modelId: string, modelCard: ModelCardInterface) {
+  onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface) {
     this.checkEventType(AuditInfo.CreateModelCard, req)
-    const event = this.generateEvent(req, { modelId, version: modelCard.version })
+    const event = this.generateEvent(req, { modelId: model.id, version: modelCard.version })
     req.log.info(event, req.audit.description)
   }
 
@@ -352,10 +357,22 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     mirroredModel: ModelInterface,
     sourceModelId: string,
     exporter: string,
-    importResult: MongoDocumentImportInformation | FileImportInformation,
+    importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation,
   ) {
     this.checkEventType(AuditInfo.CreateImport, req)
     const event = this.generateEvent(req, { mirroredModel, sourceModelId, exporter, importResult })
+    req.log.info(event, req.audit.description)
+  }
+
+  onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+    this.checkEventType(AuditInfo.CreateReviewRole, req)
+    const event = this.generateEvent(req, { reviewRoleId: reviewRole.id })
+    req.log.info(event, req.audit.description)
+  }
+
+  onViewReviewRoles(req: Request) {
+    this.checkEventType(AuditInfo.ViewReviewRoles, req)
+    const event = this.generateEvent(req, {})
     req.log.info(event, req.audit.description)
   }
 }

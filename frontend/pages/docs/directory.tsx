@@ -54,6 +54,10 @@ export const flatDirectory: Array<DirectoryEntry> = [
   { title: 'Getting Started', slug: 'administration/getting-started', header: true },
   { title: 'App Configuration', slug: 'administration/getting-started/app-configuration' },
 
+  /// Microservices
+  { title: 'Microservices', slug: 'administration/microservices', header: true },
+  { title: 'File Scanners', slug: 'administration/microservices/file-scanners' },
+
   /// Helm
   { title: 'Helm', slug: 'administration/helm', header: true },
   { title: 'Basic Usage', slug: 'administration/helm/basic-usage' },

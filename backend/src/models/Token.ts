@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { createHash } from 'crypto'
-import { model, Schema } from 'mongoose'
+import { model, ObjectId, Schema } from 'mongoose'
 import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { BadReq } from '../utils/error.js'
@@ -36,6 +36,15 @@ export const TokenActions = {
     id: 'schema:write',
     description: 'Grants permissions to upload and modify schemas for administrators.',
   },
+
+  ReviewRoleWrite: {
+    id: 'reviewRole:write',
+    description: 'Grants permission to upload and modify review roles',
+  },
+  ReviewRoleRead: {
+    id: 'reviewRole:read',
+    description: 'Grants permission to view review roles',
+  },
 } as const
 
 export const tokenActionIds = Object.values(TokenActions).map((tokenAction) => tokenAction.id)
@@ -53,6 +62,8 @@ export type HashTypeKeys = (typeof HashType)[keyof typeof HashType]
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface TokenInterface {
+  _id: ObjectId
+
   user: string
   description: string
 

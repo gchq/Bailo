@@ -1,4 +1,4 @@
-import { Divider, ListItem, ListItemButton, Stack, Typography } from '@mui/material'
+import { ListItem, ListItemButton, Stack, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
@@ -50,22 +50,16 @@ export default function ReviewItem({ review }: ReviewItemProps) {
       <ListItem disablePadding>
         <ListItemButton onClick={handleListItemClick} aria-label={`Review model ${review.model} ${review.semver}`}>
           <Stack>
-            <Stack
-              spacing={1}
-              direction='row'
-              justifyContent='flex-start'
-              alignItems='center'
-              divider={<Divider flexItem />}
-            >
-              <Typography color='primary' variant='h6' component='h2' fontWeight='bold'>
+            <Stack spacing={1} direction='column' justifyContent='flex-start'>
+              <Typography sx={{ wordBreak: 'break-all' }} color='primary' variant='h6' component='h2' fontWeight='bold'>
                 {review.model.name}
               </Typography>
               {review.accessRequestId && (
-                <Typography>
+                <Typography sx={{ wordBreak: 'break-all' }}>
                   {toTitleCase(review.accessRequestId.substring(0, review.accessRequestId.lastIndexOf('-')))}
                 </Typography>
               )}
-              {review.semver && <Typography>{review.semver}</Typography>}
+              {review.semver && <Typography sx={{ wordBreak: 'break-all' }}>{review.semver}</Typography>}
             </Stack>
             <Stack spacing={1} direction='row' justifyContent='flex-start' alignItems='center'>
               <Typography variant='caption'>{`Created ${timeDifference(

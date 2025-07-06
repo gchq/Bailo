@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from bailo.core.client import Client
-from bailo.core.enums import EntryKind, ModelVisibility
+from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.helper.entry import Entry
 
@@ -20,6 +20,7 @@ class Datacard(Entry):
     :param description: Description of datacard
     :param organisation: Organisation responsible for the model, defaults to None
     :param state: Development readiness of the model, defaults to None
+    :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
     :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -31,6 +32,7 @@ class Datacard(Entry):
         description: str,
         organisation: str | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
         visibility: ModelVisibility | None = None,
     ) -> None:
         super().__init__(
@@ -41,6 +43,7 @@ class Datacard(Entry):
             kind=EntryKind.DATACARD,
             organisation=organisation,
             state=state,
+            collaborators=collaborators,
             visibility=visibility,
         )
 
@@ -54,6 +57,7 @@ class Datacard(Entry):
         description: str,
         organisation: str | None = None,
         state: str | None = None,
+        collaborators: list[CollaboratorEntry] | None = None,
         visibility: ModelVisibility | None = None,
     ) -> Datacard:
         """Build a datacard from Bailo and upload it.
@@ -63,6 +67,7 @@ class Datacard(Entry):
         :param description: Description of datacard
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
+        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Datacard object
         """
@@ -73,9 +78,10 @@ class Datacard(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
+            collaborators=collaborators,
         )
         datacard_id = res["model"]["id"]
-        logger.info(f"Datacard successfully created on server with ID %s.", datacard_id)
+        logger.info("Datacard successfully created on server with ID %s.", datacard_id)
 
         datacard = cls(
             client=client,
@@ -84,6 +90,7 @@ class Datacard(Entry):
             description=description,
             organisation=organisation,
             state=state,
+            collaborators=collaborators,
             visibility=visibility,
         )
 
@@ -105,13 +112,14 @@ class Datacard(Entry):
                 f"ID {datacard_id} does not belong to a datacard. Did you mean to use Model.from_id()?"
             )
 
-        logger.info(f"Datacard %s successfully retrieved from server.", datacard_id)
+        logger.info("Datacard %s successfully retrieved from server.", datacard_id)
 
         datacard = cls(
             client=client,
             datacard_id=datacard_id,
             name=res["name"],
             description=res["description"],
+            collaborators=res["collaborators"],
             organisation=res.get("organisation"),
             state=res.get("state"),
         )

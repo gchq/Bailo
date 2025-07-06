@@ -2,10 +2,12 @@ import { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import { AnyZodObject, z } from 'zod'
 
 import { ScanState } from '../connectors/fileScanning/Base.js'
+import { CollaboratorRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
+import { FederationState } from '../types/types.js'
 
 export const registry = new OpenAPIRegistry()
 
@@ -45,6 +47,30 @@ export const errorSchemaContent = {
     }),
   },
 }
+
+export const systemStatusSchema = z.object({
+  code: z.number().openapi({ example: 200 }),
+  ping: z.string().openapi({ example: 'pong' }),
+  federation: z.object({
+    id: z.string().openapi({ example: 'my-bailo' }),
+    state: z.nativeEnum(FederationState).openapi({ example: 'readOnly' }),
+  }),
+})
+
+export const remoteFederationConfigSchema = z.object({
+  state: z.nativeEnum(FederationState).openapi({ example: 'readOnly' }),
+  baseUrl: z.string().openapi({ example: 'https://example.com' }),
+  label: z.string().openapi({ example: 'My Bailo' }),
+})
+
+export const peerConfigStatusSchema = z.object({
+  config: remoteFederationConfigSchema,
+  status: systemStatusSchema,
+})
+
+export const peersConfigStatusSchema = z.object({
+  peers: z.record(z.string(), peerConfigStatusSchema),
+})
 
 export const modelCardInterfaceSchema = z.object({
   schemaId: z.string().openapi({ example: 'minimal-general-v10-beta' }),
@@ -120,7 +146,6 @@ export const fileWithScanInterfaceSchema = z.object({
   size: z.number().openapi({ example: 1024 }),
   mime: z.string().openapi({ example: 'application/tar' }),
 
-  bucket: z.string().openapi({ example: 'uploads ' }),
   path: z.string().openapi({ example: '/model/yolo-v4-abcdef/files/abcdef' }),
 
   complete: z.boolean().openapi({ example: true }),
@@ -329,4 +354,15 @@ export const UserInformationSchema = z.object({
   email: z.string().optional().openapi({ example: 'user@example.com' }),
   name: z.string().optional().openapi({ example: 'Joe Bloggs' }),
   organisation: z.string().optional().openapi({ example: 'Acme Corp' }),
+})
+
+export const reviewRoleSchema = z.object({
+  id: z.string().openapi({ example: 'reviewer' }),
+  name: z.string().openapi({ example: 'Reviewer' }),
+  short: z.string().openapi({ example: 'reviewer' }),
+  kind: z.string().openapi({ example: 'schema' }),
+  description: z.string().openapi({ example: 'This is an example review role' }),
+  defaultEntities: z.array(z.string()).openapi({ example: ['user:user'] }),
+  lockEntities: z.boolean().openapi({ example: false }),
+  collaboratorRole: z.string().optional().openapi({ example: CollaboratorRoles.Owner }),
 })

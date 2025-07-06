@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   FilledInput,
   FormControl,
   IconButton,
@@ -12,14 +13,19 @@ import {
   Stack,
   Tab,
   Tabs,
+  Typography,
 } from '@mui/material/'
+import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useGetAllModelReviewRoles, useListModels } from 'actions/model'
+import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import ChipSelector from 'src/common/ChipSelector'
+import HelpDialog from 'src/common/HelpDialog'
 import Loading from 'src/common/Loading'
+import SearchInfo from 'src/common/SearchInfo'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
@@ -39,15 +45,19 @@ export default function Marketplace() {
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const debouncedFilter = useDebounce(filter, 250)
+
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const { models, isModelsError, isModelsLoading } = useListModels(
     EntryKind.MODEL,
     selectedRoles,
     selectedTask,
     selectedLibraries,
+    selectedOrganisations,
     debouncedFilter,
   )
 
@@ -55,14 +65,26 @@ export default function Marketplace() {
     models: dataCards,
     isModelsError: isDataCardsError,
     isModelsLoading: isDataCardsLoading,
-  } = useListModels(EntryKind.DATA_CARD, selectedRoles, selectedTask, selectedLibraries, debouncedFilter)
+  } = useListModels(
+    EntryKind.DATA_CARD,
+    selectedRoles,
+    selectedTask,
+    selectedLibraries,
+    selectedOrganisations,
+    debouncedFilter,
+  )
 
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetAllModelReviewRoles()
 
   const theme = useTheme()
   const router = useRouter()
 
-  const { filter: filterFromQuery, task: taskFromQuery, libraries: librariesFromQuery } = router.query
+  const {
+    filter: filterFromQuery,
+    task: taskFromQuery,
+    libraries: librariesFromQuery,
+    organisations: organisationsFromQuery,
+  } = router.query
 
   useEffect(() => {
     if (filterFromQuery) setFilter(filterFromQuery as string)
@@ -76,7 +98,16 @@ export default function Marketplace() {
       }
       setSelectedLibraries([...librariesAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery])
+    if (organisationsFromQuery) {
+      let organisationsAsArray: string[] = []
+      if (typeof organisationsFromQuery === 'string') {
+        organisationsAsArray.push(organisationsFromQuery)
+      } else {
+        organisationsAsArray = [...organisationsFromQuery]
+      }
+      setSelectedOrganisations([...organisationsAsArray])
+    }
+  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery])
 
   const handleSelectedRolesOnChange = useCallback(
     (selectedFilters: string[]) => {
@@ -96,6 +127,10 @@ export default function Marketplace() {
     [roleOptions],
   )
 
+  const organisationList = useMemo(() => {
+    return uiConfig ? uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem) : []
+  }, [uiConfig])
+
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
       router.replace({
@@ -109,6 +144,14 @@ export default function Marketplace() {
     (e: ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value)
       updateQueryParams('filter', e.target.value)
+    },
+    [updateQueryParams],
+  )
+
+  const handleOrganisationsOnChange = useCallback(
+    (organisations: string[]) => {
+      setSelectedOrganisations(organisations)
+      updateQueryParams('organisations', organisations)
     },
     [updateQueryParams],
   )
@@ -136,6 +179,7 @@ export default function Marketplace() {
   const handleResetFilters = () => {
     setSelectedTask('')
     setSelectedLibraries([])
+    setSelectedOrganisations([])
     setFilter('')
     router.replace('/', undefined, { shallow: true })
   }
@@ -151,12 +195,20 @@ export default function Marketplace() {
     }
   }, [modelRoles])
 
+  if (isModelRolesLoading) {
+    return <Loading />
+  }
+
+  if (isUiConfigLoading) {
+    return <Loading />
+  }
+
   if (isModelRolesError) {
     return <ErrorWrapper message={isModelRolesError.info.message} />
   }
 
-  if (isModelRolesLoading) {
-    return <Loading />
+  if (isUiConfigError) {
+    return <ErrorWrapper message={isUiConfigError.info.message} />
   }
 
   return (
@@ -164,83 +216,112 @@ export default function Marketplace() {
       <Title text='Marketplace' />
       <Container maxWidth='xl'>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <Stack spacing={2} sx={{ maxWidth: '250px' }}>
+          <Stack spacing={2} sx={{ maxWidth: '300px' }}>
             <Button component={Link} href='/entry/new' variant='contained'>
               Create
             </Button>
-            <FormControl
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                maxWidth: '400px',
-                marginBottom: 3,
-              }}
-              variant='filled'
-              onSubmit={onFilterSubmit}
-            >
-              <InputLabel htmlFor='entry-filter-input'>Search</InputLabel>
-              <FilledInput
-                sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2 }}
-                id='entry-filter-input'
-                value={filter}
-                disableUnderline
-                onChange={handleFilterChange}
-                endAdornment={
-                  <InputAdornment position='end'>
-                    <IconButton color='secondary' type='submit' sx={{ p: '10px' }} aria-label='filter'>
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
-            <Box>
-              <ChipSelector
-                label='Tasks'
-                chipTooltipTitle={'Filter by task'}
-                // TODO fetch all model tags
-                options={[
-                  'Translation',
-                  'Image Classification',
-                  'Summarization',
-                  'Tokenisation',
-                  'Text to Speech',
-                  'Tabular Regression',
-                ]}
-                expandThreshold={10}
-                selectedChips={selectedTask}
-                onChange={handleTaskOnChange}
-                size='small'
-                ariaLabel='add task to search filter'
-              />
-            </Box>
-            <Box>
-              <ChipSelector
-                label='Libraries'
-                chipTooltipTitle={'Filter by library'}
-                // TODO fetch all model libraries
-                options={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
-                expandThreshold={10}
-                multiple
-                selectedChips={selectedLibraries}
-                onChange={handleLibrariesOnChange}
-                size='small'
-                ariaLabel='add library to search filter'
-              />
-            </Box>
-            <Box>
-              <ChipSelector
-                label='My Roles'
-                multiple
-                options={roleOptions.map((role) => role.label)}
-                onChange={handleSelectedRolesOnChange}
-                selectedChips={roleOptions
-                  .filter((label) => selectedRoles.includes(label.key))
-                  .map((type) => type.label)}
-                size='small'
-              />
-            </Box>
-            <Button onClick={handleResetFilters}>Reset filters</Button>
+            <Container sx={{ backgroundColor: grey[200], py: 2, borderRadius: '8px' }}>
+              <Stack direction='row' spacing={0.5} marginBottom={2} justifyContent='left'>
+                <Typography component='h2' variant='h5' fontWeight='bold'>
+                  Filters
+                </Typography>
+                <HelpDialog title='Search Info' content={<SearchInfo />} />
+              </Stack>
+              <FormControl
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  maxWidth: '400px',
+                  mb: 3,
+                  my: 2,
+                }}
+                variant='filled'
+                onSubmit={onFilterSubmit}
+              >
+                <InputLabel htmlFor='entry-filter-input'>Search</InputLabel>
+                <FilledInput
+                  sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2 }}
+                  id='entry-filter-input'
+                  value={filter}
+                  disableUnderline
+                  onChange={handleFilterChange}
+                  endAdornment={
+                    <InputAdornment position='end'>
+                      <IconButton color='secondary' type='submit' sx={{ p: 2 }} aria-label='filter'>
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+              </FormControl>
+              <Stack divider={<Divider flexItem />}>
+                <Box>
+                  <ChipSelector
+                    label='Organisations'
+                    chipTooltipTitle={'Filter by organisation'}
+                    options={organisationList}
+                    expandThreshold={10}
+                    multiple
+                    selectedChips={selectedOrganisations}
+                    onChange={handleOrganisationsOnChange}
+                    size='small'
+                    ariaLabel='add organisation to search filter'
+                    accordion
+                  />
+                </Box>
+                <Box>
+                  <ChipSelector
+                    label='Tasks'
+                    chipTooltipTitle={'Filter by task'}
+                    // TODO fetch all model tags
+                    options={[
+                      'Translation',
+                      'Image Classification',
+                      'Summarization',
+                      'Tokenisation',
+                      'Text to Speech',
+                      'Tabular Regression',
+                    ]}
+                    expandThreshold={10}
+                    selectedChips={selectedTask}
+                    onChange={handleTaskOnChange}
+                    size='small'
+                    ariaLabel='add task to search filter'
+                    accordion
+                  />
+                </Box>
+                <Box>
+                  <ChipSelector
+                    label='Libraries'
+                    chipTooltipTitle={'Filter by library'}
+                    // TODO fetch all model libraries
+                    options={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
+                    expandThreshold={10}
+                    multiple
+                    selectedChips={selectedLibraries}
+                    onChange={handleLibrariesOnChange}
+                    size='small'
+                    ariaLabel='add library to search filter'
+                    accordion
+                  />
+                </Box>
+                <Box>
+                  <ChipSelector
+                    label='My Roles'
+                    multiple
+                    options={roleOptions.map((role) => role.label)}
+                    onChange={handleSelectedRolesOnChange}
+                    selectedChips={roleOptions
+                      .filter((label) => selectedRoles.includes(label.key))
+                      .map((type) => type.label)}
+                    size='small'
+                  />
+                </Box>
+              </Stack>
+              <Box justifySelf='center' marginTop={1}>
+                <Button onClick={handleResetFilters}>Reset filters</Button>
+              </Box>
+            </Container>
           </Stack>
           <Box sx={{ overflow: 'hidden', width: '100%' }}>
             <Paper>
@@ -266,6 +347,8 @@ export default function Marketplace() {
                     entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
+                    selectedOrganisations={selectedOrganisations}
+                    onSelectedOrganisationsChange={handleOrganisationsOnChange}
                   />
                 </div>
               )}
@@ -276,6 +359,8 @@ export default function Marketplace() {
                     entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
+                    selectedOrganisations={selectedOrganisations}
+                    onSelectedOrganisationsChange={handleOrganisationsOnChange}
                   />
                 </div>
               )}

@@ -43,7 +43,7 @@ interface GetInferenceService {
 
 export const getInferences = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetInferenceService>) => {
+  async (req: Request, res: Response<GetInferenceService>): Promise<void> => {
     req.audit = AuditInfo.ViewInferences
     const { params } = parse(req, getInferencesSchema)
 
@@ -51,7 +51,7 @@ export const getInferences = [
 
     await audit.onViewInferences(req, inferences)
 
-    return res.json({
+    res.json({
       inferences,
     })
   },

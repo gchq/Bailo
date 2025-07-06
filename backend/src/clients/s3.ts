@@ -5,6 +5,7 @@ import {
   GetObjectRequest,
   HeadBucketCommand,
   HeadBucketRequest,
+  HeadObjectCommand,
   HeadObjectRequest,
   S3Client,
   S3ServiceException,
@@ -16,9 +17,11 @@ import { PassThrough, Readable } from 'stream'
 
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
+import { isBailoError } from '../types/error.js'
 import config from '../utils/config.js'
+import { InternalError } from '../utils/error.js'
 
-export async function getS3Client() {
+async function getS3Client() {
   return new S3Client({
     ...(config.s3.credentials.accessKeyId &&
       config.s3.credentials.secretAccessKey && { credentials: { ...config.s3.credentials } }),
@@ -32,43 +35,54 @@ export async function getS3Client() {
 }
 
 export async function putObjectStream(
-  bucket: string,
   key: string,
   body: PassThrough | Readable,
+  bucket: string = config.s3.buckets.uploads,
   metadata?: Record<string, string>,
 ) {
-  const upload = new Upload({
-    client: await getS3Client(),
-    params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
-    queueSize: 4,
-    partSize: 1024 * 1024 * 64,
-    leavePartsOnError: false,
-  })
+  try {
+    const upload = new Upload({
+      client: await getS3Client(),
+      params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
+      queueSize: 4,
+      partSize: 1024 * 1024 * 64,
+      leavePartsOnError: false,
+    })
 
-  let fileSize = 0
-  upload.on('httpUploadProgress', (progress) => {
-    log.debug(
-      {
-        ...progress,
-        ...(progress.loaded && { loaded: prettyBytes(progress.loaded), loadedBytes: progress.loaded }),
-        ...(progress.total && { total: prettyBytes(progress.total), totalBytes: progress.total }),
-      },
-      'Object upload is in progress',
-    )
-    if (progress.loaded) {
-      fileSize = progress.loaded
+    let fileSize = 0
+
+    upload.on('httpUploadProgress', (progress) => {
+      log.debug(
+        {
+          ...progress,
+          ...(progress.loaded && { loaded: prettyBytes(progress.loaded), loadedBytes: progress.loaded }),
+          ...(progress.total && { total: prettyBytes(progress.total), totalBytes: progress.total }),
+        },
+        'Object upload is in progress',
+      )
+      if (progress.loaded) {
+        fileSize = progress.loaded
+      }
+    })
+
+    const s3Response = await upload.done()
+    log.debug(s3Response, 'Object upload complete')
+
+    return {
+      fileSize,
     }
-  })
-
-  const s3Response = await upload.done()
-  log.debug(s3Response, 'Object upload complete')
-
-  return {
-    fileSize,
+  } catch (error) {
+    throw InternalError('Unable to upload the object to the S3 service.', {
+      internal: { error, bucket, key, metadata },
+    })
   }
 }
 
-export async function getObjectStream(bucket: string, key: string, range?: { start: number; end: number }) {
+export async function getObjectStream(
+  key: string,
+  bucket: string = config.s3.buckets.uploads,
+  range?: { start: number; end: number },
+) {
   const client = await getS3Client()
 
   const input: GetObjectRequest = {
@@ -80,27 +94,18 @@ export async function getObjectStream(bucket: string, key: string, range?: { sta
     input.Range = `bytes=${range.start}-${range.end}`
   }
 
-  const command = new GetObjectCommand(input)
-  const response = await client.send(command)
-
-  return response
-}
-
-export async function headObject(bucket: string, key: string) {
-  const client = await getS3Client()
-
-  const input: HeadObjectRequest = {
-    Bucket: bucket,
-    Key: key,
+  try {
+    const command = new GetObjectCommand(input)
+    const response = await client.send(command)
+    return response
+  } catch (error) {
+    throw InternalError('Unable to retrieve the object from the S3 service.', {
+      internal: { error, bucket, key, range },
+    })
   }
-
-  const command = new GetObjectCommand(input)
-  const response = await client.send(command)
-
-  return response
 }
 
-export async function objectExists(bucket: string, key: string) {
+export async function objectExists(key: string, bucket: string = config.s3.buckets.uploads) {
   try {
     log.info({ bucket, key }, `Searching for ${key} in ${bucket}`)
     await headObject(bucket, key)
@@ -110,35 +115,9 @@ export async function objectExists(bucket: string, key: string) {
       log.info({ bucket, key }, `Failed to find ${key} in ${bucket}`)
       return false
     } else {
-      throw error
+      throw InternalError('Unable to get object metadata from the S3 service.', { error, bucket, key })
     }
   }
-}
-
-export async function headBucket(bucket: string) {
-  const client = await getS3Client()
-
-  const input: HeadBucketRequest = {
-    Bucket: bucket,
-  }
-
-  const command = new HeadBucketCommand(input)
-  const response = await client.send(command)
-
-  return response
-}
-
-export async function createBucket(bucket: string) {
-  const client = await getS3Client()
-
-  const input: CreateBucketRequest = {
-    Bucket: bucket,
-  }
-
-  const command = new CreateBucketCommand(input)
-  const response = await client.send(command)
-
-  return response
 }
 
 export async function ensureBucketExists(bucket: string) {
@@ -147,15 +126,64 @@ export async function ensureBucketExists(bucket: string) {
     await headBucket(bucket)
     log.info({ bucket }, `Bucket ${bucket} already exists`)
   } catch (error) {
-    if (isS3ServiceException(error) && error.$metadata.httpStatusCode === 404) {
+    if (
+      isBailoError(error) &&
+      isS3ServiceException(error.context?.error) &&
+      error.context.error.$metadata.httpStatusCode === 404
+    ) {
       log.info({ bucket }, `Bucket does not exist, creating ${bucket}`)
       return createBucket(bucket)
     }
-    throw error
+    throw InternalError('There was a problem ensuring this bucket exists.', { internal: { error } })
   }
 }
 
-const isS3ServiceException = (value: unknown): value is S3ServiceException => {
+async function headObject(bucket: string, key: string) {
+  const client = await getS3Client()
+
+  const input: HeadObjectRequest = {
+    Bucket: bucket,
+    Key: key,
+  }
+
+  const command = new HeadObjectCommand(input)
+  const response = await client.send(command)
+  return response
+}
+
+async function headBucket(bucket: string) {
+  const client = await getS3Client()
+
+  const input: HeadBucketRequest = {
+    Bucket: bucket,
+  }
+
+  try {
+    const command = new HeadBucketCommand(input)
+    const response = await client.send(command)
+    return response
+  } catch (error) {
+    throw InternalError('Unable to retrieve bucket metadata from the S3 service.', { error, bucket })
+  }
+}
+
+async function createBucket(bucket: string) {
+  const client = await getS3Client()
+
+  const input: CreateBucketRequest = {
+    Bucket: bucket,
+  }
+
+  try {
+    const command = new CreateBucketCommand(input)
+    const response = await client.send(command)
+    return response
+  } catch (error) {
+    throw InternalError('Unable to create a new bucket.', { error, bucket })
+  }
+}
+
+function isS3ServiceException(value: unknown): value is S3ServiceException {
   if (typeof value !== 'object' || value === null) {
     return false
   }

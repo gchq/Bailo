@@ -28,6 +28,8 @@ class Role(ValuedEnum):
     OWNER = "owner"
     MODEL_TECHNICAL_REVIEWER = "mtr"
     MODEL_SENIOR_RESPONSIBLE_OFFICER = "msro"
+    CONTRIBUTOR = "contributor"
+    CONSUMER = "consumer"
 
 
 class EntryKind(ValuedEnum):
@@ -43,3 +45,10 @@ class MinimalSchema(ValuedEnum):
     MODEL = "minimal-general-v10"
     DATACARD = "minimal-data-card-v10"
     ACCESS_REQUEST = "minimal-access-request-general-v10"
+
+
+class CollaboratorEntry(dict):
+    """A set of roles linked to a given entity (a.k.a. user)."""
+
+    def __init__(self, entity: str, roles: list[Role | str]) -> None:
+        super().__init__(self, entity=entity, roles=roles)

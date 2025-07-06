@@ -45,7 +45,7 @@ interface getReleaseResponse {
 
 export const getRelease = [
   bodyParser.json(),
-  async (req: Request, res: Response<getReleaseResponse>) => {
+  async (req: Request, res: Response<getReleaseResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewRelease
     const {
       params: { modelId, semver },
@@ -56,7 +56,7 @@ export const getRelease = [
     const files = await getFilesByIds(req.user, modelId, release.fileIds)
     const releaseWithFiles = { ...release.toObject(), files, kind: ResponseKind.Comment }
 
-    return res.json({
+    res.json({
       release: releaseWithFiles,
     })
   },

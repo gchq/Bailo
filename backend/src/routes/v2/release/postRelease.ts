@@ -16,7 +16,7 @@ export const postReleaseSchema = z.object({
     }),
   }),
   body: z.object({
-    modelCardVersion: z.coerce.number().optional(),
+    modelCardVersion: z.coerce.number().optional().openapi({ example: 1 }),
 
     semver: z.string(),
     notes: z.string().min(1, 'Please provide release notes.'),
@@ -61,7 +61,7 @@ interface PostReleaseResponse {
 
 export const postRelease = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostReleaseResponse>) => {
+  async (req: Request, res: Response<PostReleaseResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateRelease
     const {
       params: { modelId },
@@ -72,7 +72,7 @@ export const postRelease = [
 
     await audit.onCreateRelease(req, release)
 
-    return res.json({
+    res.json({
       release,
     })
   },

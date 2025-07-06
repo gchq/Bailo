@@ -29,6 +29,7 @@ interface PageWithTabsProps {
   titleToCopy?: string
   subheadingToCopy?: string
   sourceModelId?: string
+  additionalHeaderDisplay?: ReactElement
 }
 
 export default function PageWithTabs({
@@ -43,6 +44,7 @@ export default function PageWithTabs({
   titleToCopy = '',
   subheadingToCopy = '',
   sourceModelId = '',
+  additionalHeaderDisplay,
 }: PageWithTabsProps) {
   const router = useRouter()
   const { tab } = router.query
@@ -120,21 +122,16 @@ export default function PageWithTabs({
   return (
     <>
       <Stack
-        direction={{ xs: 'column', sm: 'row' }}
+        direction='row'
         divider={<Divider flexItem orientation='vertical' />}
         alignItems='center'
         spacing={{ xs: 1, sm: 2 }}
         sx={{ px: 2, pb: 2 }}
       >
         <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
-          <Stack direction='row'>
+          <Stack textOverflow='ellipsis' overflow='hidden' direction='row'>
             <Tooltip title={title}>
-              <Typography
-                component='h1'
-                color='primary'
-                variant='h6'
-                sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }}
-              >
+              <Typography component='h1' color='primary' variant='h6' noWrap>
                 {title}
               </Typography>
             </Tooltip>
@@ -170,6 +167,7 @@ export default function PageWithTabs({
           </Button>
         )}
         {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
+        {additionalHeaderDisplay}
       </Stack>
       <Typography sx={{ pl: 2, pb: 1, textOverflow: 'ellipsis', overflow: 'hidden' }}>{additionalInfo}</Typography>
       <Tabs

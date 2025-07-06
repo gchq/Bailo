@@ -1,16 +1,49 @@
-import { Checkbox, FormControl, FormControlLabel, LinearProgress, Stack, TextField, Typography } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
-import { ChangeEvent, useMemo } from 'react'
+import { memoize } from 'lodash-es'
+import { ChangeEvent, useCallback, useMemo } from 'react'
+import FileUploadProgressDisplay, { FileUploadProgress } from 'src/common/FileUploadProgressDisplay'
 import HelpPopover from 'src/common/HelpPopover'
+import Loading from 'src/common/Loading'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import MultiFileInput from 'src/common/MultiFileInput'
+import MultiFileInputFileDisplay from 'src/common/MultiFileInputFileDisplay'
+import Paginate from 'src/common/Paginate'
 import RichTextEditor from 'src/common/RichTextEditor'
+import FileDisplay from 'src/entry/model/files/FileDisplay'
 import ModelImageList from 'src/entry/model/ModelImageList'
-import FileDownload from 'src/entry/model/releases/FileDownload'
+import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
+import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, FileInterface, FileUploadProgress, FileWithMetadata, FlattenedModelImage } from 'types/types'
+import {
+  EntryInterface,
+  FileInterface,
+  FileWithMetadataAndTags,
+  FlattenedModelImage,
+  isFileInterface,
+} from 'types/types'
+import { sortByCreatedAtDescending } from 'utils/arrayUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -19,6 +52,7 @@ type ReleaseFormData = {
   isMinorRelease: boolean
   files: (File | FileInterface)[]
   imageList: FlattenedModelImage[]
+  modelCardVersion: number
 }
 
 type EditableReleaseFormProps =
@@ -38,8 +72,9 @@ type ReleaseFormProps = {
   onReleaseNotesChange: (value: string) => void
   onMinorReleaseChange: (value: boolean) => void
   onFilesChange: (value: (File | FileInterface)[]) => void
-  filesMetadata: FileWithMetadata[]
-  onFilesMetadataChange: (value: FileWithMetadata[]) => void
+  onModelCardVersionChange: (value: number) => void
+  filesMetadata: FileWithMetadataAndTags[]
+  onFilesMetadataChange: (value: FileWithMetadataAndTags[]) => void
   onImageListChange: (value: FlattenedModelImage[]) => void
   onRegistryError: (value: boolean) => void
   currentFileUploadProgress?: FileUploadProgress
@@ -54,6 +89,7 @@ export default function ReleaseForm({
   onReleaseNotesChange,
   onMinorReleaseChange,
   onFilesChange,
+  onModelCardVersionChange,
   filesMetadata,
   onFilesMetadataChange,
   onImageListChange,
@@ -69,6 +105,9 @@ export default function ReleaseForm({
   const isReadOnly = useMemo(() => editable && !isEdit, [editable, isEdit])
 
   const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
+  const { modelCardRevisions, isModelCardRevisionsLoading, isModelCardRevisionsError } = useGetModelCardRevisions(
+    model.id,
+  )
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
@@ -80,82 +119,134 @@ export default function ReleaseForm({
     onMinorReleaseChange(checked)
   }
 
+  const handleModelCardVersionChange = useCallback(
+    (event: SelectChangeEvent) => {
+      const newModelCardVersion = parseInt(event.target.value)
+      onModelCardVersionChange(newModelCardVersion)
+    },
+    [onModelCardVersionChange],
+  )
+
   const releaseNotesLabel = (
     <Typography component='label' fontWeight='bold' htmlFor={'new-model-description'}>
-      Release Notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
+      Release notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
 
-  const fileProgressText = () => {
-    if (!currentFileUploadProgress) {
-      return <Typography>Could not determine file progress</Typography>
+  const modelCardVersionList = useMemo(() => {
+    return modelCardRevisions.sort(sortByCreatedAtDescending).map((revision) => (
+      <MenuItem key={revision.version} value={revision.version}>
+        {revision.version}
+      </MenuItem>
+    ))
+  }, [modelCardRevisions])
+
+  const handleDeleteFile = (fileToDelete: File | FileInterface) => {
+    if (formData.files) {
+      const updatedFileList = formData.files.filter((file) => file.name !== fileToDelete.name)
+      onFilesChange(updatedFileList)
     }
-    if (uploadedFiles && uploadedFiles.length === filesToUploadCount) {
-      return <Typography>All files uploaded successfully.</Typography>
-    }
-    return currentFileUploadProgress.uploadProgress < 100 ? (
-      <Stack direction='row' spacing={1}>
-        <Typography fontWeight='bold'>
-          [File {uploadedFiles ? uploadedFiles.length + 1 : '1'} / {filesToUploadCount}] -
-        </Typography>
-        <Typography fontWeight='bold'>{currentFileUploadProgress.fileName}</Typography>
-        <Typography>uploading {currentFileUploadProgress.uploadProgress}%</Typography>
-      </Stack>
-    ) : (
-      <Stack direction='row' spacing={1}>
-        <Typography fontWeight='bold'>
-          File {uploadedFiles && uploadedFiles.length + 1} / {filesToUploadCount} -{currentFileUploadProgress.fileName}
-        </Typography>
-        <Typography>received - waiting for response from server...</Typography>
-      </Stack>
-    )
   }
+
+  const handleMetadataChange = useCallback(
+    (fileWithMetadata: FileWithMetadataAndTags) => {
+      const tempFilesWithMetadata = [...filesMetadata]
+      const metadataIndex = filesMetadata.findIndex((artefact) => artefact.fileName === fileWithMetadata.fileName)
+      if (metadataIndex === -1) {
+        tempFilesWithMetadata.push(fileWithMetadata)
+      } else {
+        tempFilesWithMetadata[metadataIndex] = fileWithMetadata
+      }
+      onFilesMetadataChange(tempFilesWithMetadata)
+    },
+    [filesMetadata, onFilesMetadataChange],
+  )
+
+  // We can assume that all the displayed files will be interfaces when the form is in read only
+  const FileRowItem = memoize(({ data, index }) =>
+    isFileInterface(data[index]) ? (
+      <FileDisplay
+        key={data[index].name}
+        file={data[index]}
+        modelId={model.id}
+        showMenuItems={{ rescanFile: true }}
+        mutator={mutateReleases}
+        style={{ padding: 1 }}
+      />
+    ) : (
+      <></>
+    ),
+  )
 
   if (isReleasesError) {
     return <MessageAlert message={isReleasesError.info.message} severity='error' />
   }
 
+  if (isModelCardRevisionsError) {
+    return <MessageAlert message={isModelCardRevisionsError.info.message} severity='error' />
+  }
+
   return (
     <Stack spacing={2}>
-      {!editable && (
-        <Stack sx={{ width: '100%' }} justifyContent='center'>
-          <Stack direction='row'>
-            <Typography fontWeight='bold'>Release name</Typography>
-            {!editable && (
-              <HelpPopover>
-                The release name is automatically generated using the model name and release semantic version
-              </HelpPopover>
-            )}
-          </Stack>
-          <Typography>{`${model.name} - ${formData.semver}`}</Typography>
-        </Stack>
-      )}
-      {!editable && (
+      {isReadOnly && (
         <Stack>
           <Typography fontWeight='bold'>Latest version</Typography>
-          <Typography>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
+          <Typography noWrap>{isReleasesLoading ? 'Loading...' : latestRelease}</Typography>
         </Stack>
       )}
-      <Stack>
-        <Typography fontWeight='bold'>
-          Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
-        </Typography>
-        {isReadOnly || isEdit ? (
-          <ReadOnlyAnswer value={formData.semver} />
-        ) : (
-          <TextField
-            required
-            size='small'
-            autoFocus={!isEdit}
-            error={formData.semver !== '' && !isValidSemver(formData.semver)}
-            helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
-            value={formData.semver}
-            onChange={handleSemverChange}
-            slotProps={{
-              htmlInput: { 'data-test': 'releaseSemanticVersionTextField' },
-            }}
-          />
-        )}
+      <Stack overflow='hidden' spacing={2}>
+        <Stack sx={{ width: '100%' }}>
+          <Typography fontWeight='bold'>
+            Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
+          </Typography>
+          {isReadOnly || isEdit ? (
+            <ReadOnlyAnswer value={formData.semver} />
+          ) : (
+            <TextField
+              required
+              size='small'
+              autoFocus={!isEdit}
+              error={formData.semver !== '' && !isValidSemver(formData.semver)}
+              helperText={formData.semver !== '' && !isValidSemver(formData.semver) ? 'Must follow format #.#.#' : ''}
+              value={formData.semver}
+              onChange={handleSemverChange}
+              slotProps={{
+                htmlInput: { 'data-test': 'releaseSemanticVersionTextField' },
+              }}
+            />
+          )}
+        </Stack>
+        <Stack sx={{ width: '100%' }}>
+          <Stack direction='row' spacing={1}>
+            <Typography fontWeight='bold'>
+              Model card version {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
+            </Typography>
+            {!isReadOnly && <HelpPopover>Leave this as default if you want the latest available version</HelpPopover>}
+          </Stack>
+          {isReadOnly ? (
+            <Typography>
+              {formData.modelCardVersion} -{' '}
+              <Link href={`/${model.kind}/${model.id}/history/${formData.modelCardVersion}`}>
+                <Button size='small'>View Model card</Button>
+              </Link>
+            </Typography>
+          ) : (
+            <>
+              {isModelCardRevisionsLoading && <Loading />}
+              {!isModelCardRevisionsLoading && (
+                <>
+                  <Select
+                    size='small'
+                    value={formData.modelCardVersion.toString()}
+                    onChange={handleModelCardVersionChange}
+                  >
+                    {modelCardVersionList}
+                  </Select>
+                </>
+              )}
+            </>
+          )}
+        </Stack>
       </Stack>
       <Stack>
         {isReadOnly ? (
@@ -190,55 +281,102 @@ export default function ReleaseForm({
         )}
       </Stack>
       <Stack>
-        <Typography fontWeight='bold'>Files</Typography>
-        {!isReadOnly && (
-          <Stack spacing={2}>
-            <MultiFileInput
-              fullWidth
-              label='Attach files'
-              files={formData.files}
-              filesMetadata={filesMetadata}
+        <Accordion defaultExpanded sx={{ p: 0 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
+            <Typography fontWeight='bold'>{`Files (${formData.files.length})`}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <>
+              {!isReadOnly && (
+                <Stack spacing={2}>
+                  <Stack
+                    spacing={2}
+                    direction={{ xs: 'column', sm: 'row' }}
+                    divider={<Divider flexItem orientation='vertical' />}
+                  >
+                    <ExistingFileSelector
+                      model={model}
+                      onChange={onFilesChange}
+                      existingReleaseFiles={formData.files}
+                    />
+                    <MultiFileInput
+                      fullWidth
+                      label='Attach new files'
+                      files={formData.files}
+                      filesMetadata={filesMetadata}
+                      readOnly={isReadOnly}
+                      onFilesChange={onFilesChange}
+                      onFilesMetadataChange={onFilesMetadataChange}
+                    />
+                  </Stack>
+                  {currentFileUploadProgress && (
+                    <>
+                      <LinearProgress
+                        variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
+                        value={currentFileUploadProgress.uploadProgress}
+                      />
+                      <FileUploadProgressDisplay
+                        currentFileUploadProgress={currentFileUploadProgress}
+                        uploadedFiles={uploadedFiles.length}
+                        totalFilesToUpload={filesToUploadCount}
+                      />
+                    </>
+                  )}
+                  {formData.files.length > 0 && (
+                    <Stack spacing={1} mt={1}>
+                      {formData.files.map((file, index) => (
+                        <div key={`${file.name}-${file.size}-${index}`}>
+                          <MultiFileInputFileDisplay
+                            file={file}
+                            readOnly={isReadOnly}
+                            onDelete={handleDeleteFile}
+                            onMetadataChange={handleMetadataChange}
+                          />
+                        </div>
+                      ))}
+                    </Stack>
+                  )}
+                </Stack>
+              )}
+              <Stack spacing={1} divider={<Divider />}>
+                {isReadOnly && (
+                  <Paginate
+                    list={formData.files as FileInterface[]}
+                    defaultSortProperty='name'
+                    searchFilterProperty='name'
+                    searchPlaceholderText='Search by filename'
+                    sortingProperties={[
+                      { value: 'name', title: 'Name', iconKind: 'text' },
+                      { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+                      { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+                    ]}
+                  >
+                    {FileRowItem}
+                  </Paginate>
+                )}
+              </Stack>
+            </>
+          </AccordionDetails>
+        </Accordion>
+      </Stack>
+      <Box>
+        <Accordion defaultExpanded sx={{ p: 0 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
+            <Typography fontWeight='bold'>{`Images (${formData.imageList.length})`}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <ModelImageList
+              multiple
+              model={model}
+              value={formData.imageList}
               readOnly={isReadOnly}
-              onFilesChange={onFilesChange}
-              onFilesMetadataChange={onFilesMetadataChange}
+              onChange={onImageListChange}
+              onRegistryError={onRegistryError}
             />
-            {currentFileUploadProgress && (
-              <>
-                <LinearProgress
-                  variant={currentFileUploadProgress.uploadProgress < 100 ? 'determinate' : 'indeterminate'}
-                  value={currentFileUploadProgress.uploadProgress}
-                />
-                {fileProgressText()}
-              </>
-            )}
-          </Stack>
-        )}
-        <Stack spacing={1}>
-          {isReadOnly &&
-            formData.files.map((file) => (
-              <FileDownload
-                key={file.name}
-                file={file}
-                modelId={model.id}
-                showMenuItems={{ rescanFile: true }}
-                mutator={mutateReleases}
-              />
-            ))}
-        </Stack>
-        {isReadOnly && formData.files.length === 0 && <ReadOnlyAnswer value='No files' />}
-      </Stack>
-      <Stack>
-        <Typography fontWeight='bold'>Images</Typography>
-        <ModelImageList
-          multiple
-          model={model}
-          value={formData.imageList}
-          readOnly={isReadOnly}
-          onChange={onImageListChange}
-          onRegistryError={onRegistryError}
-        />
-        {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
-      </Stack>
+            {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
+          </AccordionDetails>
+        </Accordion>
+      </Box>
     </Stack>
   )
 }

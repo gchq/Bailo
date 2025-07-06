@@ -98,10 +98,10 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v4
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22.6.0
+          node-version: 24.3.0
           cache: "npm"
 
       # Install dependencies
@@ -121,10 +121,10 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v4
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22.6.0
+          node-version: 24.3.0
           cache: "npm"
 
       # Install dependencies
@@ -141,10 +141,10 @@ jobs:
     steps:
       # Clone repository
       - uses: actions/checkout@v4
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22.6.0
+          node-version: 24.3.0
           cache: "npm"
 
       # Setup BuildX
@@ -259,6 +259,9 @@ jobs:
         run: sleep 90s
         shell: bash
 
+      - name: List Certs
+        run: kubectl describe secret bailo-certs
+
       - name: List Pods
         run: kubectl get pods
 
@@ -302,10 +305,10 @@ jobs:
       # Clone repository
       - uses: actions/checkout@v4
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22.6.0
+          node-version: 24.3.0
           cache: "npm"
 
       # Setup BuildX
@@ -390,7 +393,7 @@ jobs:
 
       - uses: cypress-io/github-action@v6
         with:
-          wait-on: 'http://localhost:8080/api/v2/config/ui'
+          wait-on: 'http://localhost:8080/api/v2/config/ui, http://localhost:8080'
           working-directory: ./frontend
           install: false
           spec: cypress/e2e/bailo/**/*
@@ -428,10 +431,10 @@ jobs:
     steps:
       # Clone repository
       - uses: actions/checkout@v4
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22.6.0
+          node-version: 24.3.0
           cache: "npm"
 
       # Setup BuildX
@@ -520,11 +523,22 @@ jobs:
           cd lib/python
           python -m pip install -e .[test]
 
+      # start mlflow server
+      - name: Start MLFlow
+        run: |
+          mlflow server --host 127.0.0.1 --port 5050 &
+
+      # wait for mlflow to start
+      - run: |
+          chmod +x ./backend/src/scripts/waitForIt.sh
+          ./backend/src/scripts/waitForIt.sh localhost:5050 -t 10
+
       # Run tests
       - name: Test with pytest
         run: |
           cd lib/python
           python -m pytest -m integration
+          python -m pytest -m mlflow
         env:
           PYTEST_RUN_PATH: "lib/python"
 
