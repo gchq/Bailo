@@ -314,3 +314,16 @@ def test_patch_access_request(requests_mock):
     )
 
     assert result == {"success": True}
+
+def test_put_file_scan(requests_mock):
+    requests_mock.put(
+        "https://example.com/api/v2/filescanning/model/test_model_id/file/test_file_id/scan",
+        json={"status": "Scan started"},
+    )
+
+    client = Client("https://example.com")
+    result = client.put_file_scan(
+        model_id="test_model_id", file_id="test_file_id"
+    )
+
+    assert result == {"status": "Scan started"}
