@@ -253,9 +253,9 @@ config:
       states: []
 
     roleDisplayNames:
-      owner: 'TEST_HELM'
-      consumer: 'TEST_HELM'
-      contributor: 'TEST_HELM'
+      owner: 'Owner'
+      consumer: 'Consumer'
+      contributor: 'Contributor'
 
   smtp:
     #host: 'mail' #service name
