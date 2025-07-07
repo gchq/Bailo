@@ -22,7 +22,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
 
   async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
     this.init()
-    const scannerInfo = await this.info()
+    const scannerInfo = this.info()
     if (scannerInfo.scannerVersion === undefined) {
       return await this.scanError('Could not use ModelScan as it is not running.')
     }

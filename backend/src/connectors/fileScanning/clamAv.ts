@@ -40,7 +40,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
       )
       return [
         {
-          ...(await this.info()),
+          ...this.info(),
           state: ScanState.Complete,
           isInfected,
           viruses,
