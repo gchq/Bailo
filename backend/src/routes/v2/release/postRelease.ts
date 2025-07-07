@@ -61,7 +61,7 @@ interface PostReleaseResponse {
 
 export const postRelease = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostReleaseResponse>) => {
+  async (req: Request, res: Response<PostReleaseResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateRelease
     const {
       params: { modelId },
@@ -72,7 +72,7 @@ export const postRelease = [
 
     await audit.onCreateRelease(req, release)
 
-    return res.json({
+    res.json({
       release,
     })
   },

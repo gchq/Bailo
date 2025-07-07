@@ -41,7 +41,7 @@ interface GetModelAccessRequestsResponse {
 
 export const getModelAccessRequests = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetModelAccessRequestsResponse>) => {
+  async (req: Request, res: Response<GetModelAccessRequestsResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewAccessRequests
     const {
       params: { modelId },
@@ -51,6 +51,6 @@ export const getModelAccessRequests = [
 
     await audit.onViewAccessRequests(req, accessRequests)
 
-    return res.json({ accessRequests })
+    res.json({ accessRequests })
   },
 ]

@@ -38,13 +38,13 @@ interface GetEntityLookup {
 
 export const getEntityLookup = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetEntityLookup>) => {
+  async (req: Request, res: Response<GetEntityLookup>): Promise<void> => {
     const {
       params: { dn },
     } = parse(req, getEntityLookupSchema)
 
     const information = await authentication.getUserInformation(toEntity('user', dn))
 
-    return res.json({ entity: information })
+    res.json({ entity: information })
   },
 ]

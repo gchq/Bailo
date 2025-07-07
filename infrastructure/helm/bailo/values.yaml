@@ -160,7 +160,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnami/mongodb
-    tag: 7.0.15-debian-12-r2
+    tag: 7.0.15
 
 # MinIO Dependencies
 minio:
@@ -192,7 +192,7 @@ minio:
   image:
     registry: docker.io
     repository: bitnami/minio
-    tag: 2024.4.18-debian-12-r0
+    tag: 2025.5.24
     debug: true
 
 # Registry Dependencies
@@ -213,7 +213,7 @@ registry:
 # Nginx Dependencies
 nginxAuth:
   repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unprivileged user.
-  tag: latest
+  tag: 1.28.0-alpine3.21-slim
   #host: "bailo-nginx" # service name
   port: 8080
   #certDir: "/certs"
@@ -223,12 +223,11 @@ nginxAuth:
 # Mail
 mail:
   enabled: true
-  image: marlonb/mailcrab:latest
+  image: marlonb/mailcrab:v1.6.1
 
 # Openshift specific configuration
 openshift:
   namespace: openshift-project
-  dockerPushSecretName: "registry-push-secret"
   termination: edge
 
 # Instance Settings
@@ -274,11 +273,6 @@ config:
     support: "mailto:?subject=Bailo%20Contact"
     contact: "mailto:?subject=Bailo%20Contact"
 
-# nginx.deployment registry.deployment
-nginxcert:
-  cert: cert.pem #use san.cnf to create certs
-  key: key.pem
-
 connectors:
   authentication:
     kind: 'silly'
@@ -312,6 +306,7 @@ modelMirror:
         region: 'eu-west-1'
         accessKey: ''
         secretKey: ''
+
 # Inferencing cluster reference
 inference:
   enabled: false
@@ -327,7 +322,7 @@ backend:
 clamav:
   enabled: false
   runAsUser: 1002
-  image: clamav/clamav:1.4.2_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
+  image: clamav/clamav:1.4.3_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
   port: 3310
   accessModes:
     - ReadWriteOnce

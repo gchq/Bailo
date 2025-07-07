@@ -43,9 +43,9 @@ class Agent:
         try:
             # Give the error message issued by bailo
             raise BailoException(res.json()["error"]["message"])
-        except JSONDecodeError:
+        except JSONDecodeError as e:
             # No response given
-            raise ResponseException(f"{res.status_code} Cannot {method} to {res.request.url}")
+            raise ResponseException(f"{res.status_code} Cannot {method} to {res.request.url}") from e
 
     def get(self, *args, **kwargs):
         return self.__request("GET", *args, **kwargs)

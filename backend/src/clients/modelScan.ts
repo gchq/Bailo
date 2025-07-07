@@ -1,4 +1,4 @@
-import fetch, { Response } from 'node-fetch'
+import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Readable } from 'stream'
 
 import config from '../utils/config.js'
@@ -50,7 +50,7 @@ interface ModelScanResponse {
 
 export async function getModelScanInfo() {
   const url = `${config.avScanning.modelscan.protocol}://${config.avScanning.modelscan.host}:${config.avScanning.modelscan.port}`
-  let res: Response
+  let res: FetchResponse
 
   try {
     res = await fetch(`${url}/info`, {
@@ -67,21 +67,14 @@ export async function getModelScanInfo() {
   return (await res.json()) as ModelScanInfoResponse
 }
 
-export async function scanStream(stream: Readable, fileName: string, fileSize: number) {
+export async function scanStream(stream: Readable, fileName: string) {
   const url = `${config.avScanning.modelscan.protocol}://${config.avScanning.modelscan.host}:${config.avScanning.modelscan.port}`
-  let res: Response
+  let res: FetchResponse
 
   try {
     const formData = new FormData()
-    formData.append(
-      'in_file',
-      {
-        [Symbol.toStringTag]: 'File',
-        size: fileSize,
-        stream: () => stream,
-      },
-      fileName,
-    )
+    // contrary to what the docs say, `.blob()` lazily loads streams so this is a safe way to send large files
+    formData.append('in_file', await new Response(stream).blob(), fileName)
 
     res = await fetch(`${url}/scan/file`, {
       method: 'POST',

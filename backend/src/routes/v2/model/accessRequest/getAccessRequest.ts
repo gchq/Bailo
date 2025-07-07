@@ -42,7 +42,7 @@ interface GetAccessRequestResponse {
 
 export const getAccessRequest = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetAccessRequestResponse>) => {
+  async (req: Request, res: Response<GetAccessRequestResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewAccessRequest
     const { params } = parse(req, getAccessRequestSchema)
 
@@ -50,7 +50,7 @@ export const getAccessRequest = [
 
     await audit.onViewAccessRequest(req, accessRequest)
 
-    return res.json({
+    res.json({
       accessRequest,
     })
   },

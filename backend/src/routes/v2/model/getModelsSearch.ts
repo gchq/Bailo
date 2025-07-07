@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { EntryKind, EntryKindKeys } from '../../../models/Model.js'
+import { CollaboratorEntry, EntryKind, EntryKindKeys } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
@@ -60,6 +60,8 @@ export interface ModelSearchResult {
   tags: Array<string>
   kind: EntryKindKeys
   organisation?: string
+  state?: string
+  collaborators: Array<CollaboratorEntry>
   createdAt: Date
   updatedAt: Date
 }
@@ -70,7 +72,7 @@ interface GetModelsResponse {
 
 export const getModelsSearch = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetModelsResponse>) => {
+  async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
     const {
       query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations },
@@ -94,12 +96,14 @@ export const getModelsSearch = [
       tags: model.card?.metadata?.overview?.tags || [],
       kind: model.kind,
       organisation: model.organisation,
+      state: model.state,
+      collaborators: model.collaborators,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
     }))
 
     await audit.onSearchModel(req, models)
 
-    return res.json({ models })
+    res.json({ models })
   },
 ]

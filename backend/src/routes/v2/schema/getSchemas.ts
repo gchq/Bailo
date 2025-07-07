@@ -43,14 +43,14 @@ interface GetSchemaResponse {
 
 export const getSchemas = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetSchemaResponse>) => {
+  async (req: Request, res: Response<GetSchemaResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchSchemas
     const { query } = parse(req, getSchemasSchema)
 
     const schemas = await searchSchemas(query.kind, query.hidden)
     await audit.onSearchSchemas(req, schemas)
 
-    return res.json({
+    res.json({
       schemas,
     })
   },

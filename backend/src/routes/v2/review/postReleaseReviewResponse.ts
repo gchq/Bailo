@@ -62,7 +62,7 @@ interface PostReleaseReviewResponse {
 
 export const postReleaseReviewResponse = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostReleaseReviewResponse>) => {
+  async (req: Request, res: Response<PostReleaseReviewResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateReviewResponse
     const {
       params: { modelId, semver },
@@ -73,7 +73,7 @@ export const postReleaseReviewResponse = [
 
     await audit.onCreateReviewResponse(req, response)
 
-    return res.json({
+    res.json({
       response,
     })
   },

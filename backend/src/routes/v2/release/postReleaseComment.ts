@@ -45,7 +45,7 @@ interface PostReleaseCommentResponse {
 
 export const postReleaseComment = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostReleaseCommentResponse>) => {
+  async (req: Request, res: Response<PostReleaseCommentResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateRelease
     const {
       params: { modelId, semver },
@@ -56,7 +56,7 @@ export const postReleaseComment = [
 
     await audit.onCreateCommentResponse(req, releaseComment)
 
-    return res.json({
+    res.json({
       response: releaseComment,
     })
   },

@@ -1,0 +1,102 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > mirroredModel > importModel > save each imported file 1`] = `
+{
+  "importResult": {
+    "fileIds": [
+      undefined,
+      undefined,
+    ],
+    "imageIds": [],
+    "modelCardVersions": [],
+    "newModelCards": [],
+    "newReleases": [],
+    "releaseSemvers": [],
+  },
+  "mirroredModel": undefined,
+}
+`;
+
+exports[`services > mirroredModel > importModel > save each imported model card 1`] = `
+{
+  "importResult": {
+    "fileIds": [],
+    "imageIds": [],
+    "modelCardVersions": [
+      undefined,
+      undefined,
+    ],
+    "newModelCards": [],
+    "newReleases": [],
+    "releaseSemvers": [],
+  },
+  "mirroredModel": undefined,
+}
+`;
+
+exports[`services > mirroredModel > importModel > save each imported release 1`] = `
+{
+  "importResult": {
+    "fileIds": [],
+    "imageIds": [
+      "localhost:8080/imageName:tag",
+    ],
+    "modelCardVersions": [],
+    "newModelCards": [],
+    "newReleases": [
+      {
+        "modelId": "source-model-id",
+      },
+      {
+        "modelId": "source-model-id",
+      },
+    ],
+    "releaseSemvers": [
+      undefined,
+      undefined,
+    ],
+  },
+  "mirroredModel": undefined,
+}
+`;
+
+exports[`services > mirroredModel > importModel > uploads file to S3 on success 1`] = `
+{
+  "importResult": {
+    "newPath": "file/path",
+    "sourcePath": "/s3/path/",
+  },
+  "mirroredModel": {
+    "card": {
+      "schemaId": "test",
+    },
+    "settings": {
+      "mirror": {
+        "destinationModelId": "abc",
+      },
+    },
+  },
+}
+`;
+
+exports[`services > mirroredModel > importModel > uploads image to S3 on success 1`] = `
+{
+  "importResult": {
+    "image": {
+      "imageName": "imageName",
+      "imageTag": "tag",
+      "modelId": "mirrored-model-id",
+    },
+  },
+  "mirroredModel": {
+    "card": {
+      "schemaId": "test",
+    },
+    "settings": {
+      "mirror": {
+        "destinationModelId": "abc",
+      },
+    },
+  },
+}
+`;

@@ -2,14 +2,14 @@ import { FileInterface } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
 import { ConfigurationError } from '../../utils/error.js'
-import { BaseFileScanningConnector, FileScanningConnectorInfo, FileScanResult } from './Base.js'
+import { BaseFileScanningConnector, FileScanningConnectorInfo } from './Base.js'
 
 export class FileScanningWrapper extends BaseFileScanningConnector {
   toolName = this.constructor.name
   version = undefined
-  scanners: BaseFileScanningConnector[] = []
+  scanners: Set<BaseFileScanningConnector> = new Set<BaseFileScanningConnector>()
 
-  constructor(scanners: BaseFileScanningConnector[]) {
+  constructor(scanners: Set<BaseFileScanningConnector>) {
     super()
     this.scanners = scanners
   }
@@ -34,7 +34,7 @@ export class FileScanningWrapper extends BaseFileScanningConnector {
           })
           break
         } catch (error) {
-          log.warn(`Could not initialise scanner, retrying.`, { attempt: attempt, toolName: this.toolName, error })
+          log.warn(`Could not initialise scanner, retrying.`, { attempt: attempt, toolName: scanner.toolName, error })
         }
       }
       if (attempt > config.connectors.fileScanners.maxInitRetries) {
@@ -47,7 +47,7 @@ export class FileScanningWrapper extends BaseFileScanningConnector {
   }
 
   info(): FileScanningConnectorInfo & { scannerNames: string[] } {
-    const scannersInfo = this.scanners.map((scanner) => {
+    const scannersInfo = Array.from(this.scanners).map((scanner) => {
       return scanner.info()
     })
 
@@ -56,16 +56,16 @@ export class FileScanningWrapper extends BaseFileScanningConnector {
   }
 
   async scan(file: FileInterface) {
-    const results: FileScanResult[] = []
-    for (const scanner of this.scanners) {
-      log.info(
-        { modelId: file.modelId, fileId: file._id.toString(), name: file.name, toolName: this.toolName },
-        'Scan started.',
-      )
-      const scannerResults = await scanner.scan(file)
-      results.push(...scannerResults)
-    }
+    const results = await Promise.all(
+      Array.from(this.scanners).map((scanner) => {
+        log.info(
+          { modelId: file.modelId, fileId: file._id.toString(), name: file.name, toolName: scanner.toolName },
+          'Scan started.',
+        )
+        return scanner.scan(file)
+      }),
+    )
 
-    return results
+    return results.flat()
   }
 }
