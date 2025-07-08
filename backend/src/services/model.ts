@@ -417,34 +417,16 @@ export async function createModelCardFromSchema(
   const updatedCollaborators: CollaboratorEntry[] = [...model.collaborators]
   for (const reviewRole of reviewRolesForSchema) {
     if (reviewRole.defaultEntities) {
-      for (const defaultEntity of reviewRole.defaultEntities) {
-        const existingUser = model.collaborators.find((collaborator) => collaborator.entity === defaultEntity)
-        if (existingUser) {
-          const existingUpdatedUser = updatedCollaborators.findIndex(
-            (collaborator) => collaborator.entity === defaultEntity,
-          )
-          if (existingUpdatedUser > -1) {
-            updatedCollaborators[existingUpdatedUser] = {
-              entity: defaultEntity,
-              roles: [...updatedCollaborators[existingUpdatedUser].roles, reviewRole.short],
-            }
-          } else {
-            updatedCollaborators.push({ entity: defaultEntity, roles: [...existingUser.roles, reviewRole.short] })
-          }
-        } else {
-          const existingUpdatedUser = updatedCollaborators.findIndex(
-            (collaborator) => collaborator.entity === defaultEntity,
-          )
-          if (existingUpdatedUser > -1) {
-            updatedCollaborators[existingUpdatedUser] = {
-              entity: defaultEntity,
-              roles: [...updatedCollaborators[existingUpdatedUser].roles, reviewRole.short],
-            }
-          } else {
-            updatedCollaborators.push({ entity: defaultEntity, roles: [reviewRole.short] })
-          }
-        }
-      }
+      reviewRole.defaultEntities.forEach((defaultEntity) => {
+        const existingDefault = updatedCollaborators.find(
+          (existingCollaborator) => existingCollaborator.entity === defaultEntity,
+        )
+        return existingDefault
+          ? existingDefault.roles.includes(reviewRole.short)
+            ? null
+            : existingDefault.roles.push(reviewRole.short)
+          : updatedCollaborators.push({ entity: defaultEntity, roles: [reviewRole.short] })
+      })
     }
   }
   model.collaborators = updatedCollaborators
