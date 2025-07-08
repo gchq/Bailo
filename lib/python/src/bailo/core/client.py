@@ -624,6 +624,22 @@ class Client:
             json=filtered_json,
         ).json()
 
+    def put_file_scan(
+        self,
+        model_id: str,
+        file_id: str,
+    ):
+        """
+        Manually re-request a new antivirus scan for a file.
+
+        :param model_id: Unique model ID
+        :param file_id: Unique file ID
+        :return: JSON response object
+        """
+        return self.agent.put(
+            f"{self.url}/v2/filescanning/model/{model_id}/file/{file_id}/scan",
+        ).json()
+
     def post_access_request_review(
         self,
         model_id: str,
