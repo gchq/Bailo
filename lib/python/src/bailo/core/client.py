@@ -625,9 +625,9 @@ class Client:
         ).json()
 
     def put_file_scan(
-            self,
-            model_id: str,
-            file_id: str,
+        self,
+        model_id: str,
+        file_id: str,
     ):
         """
         Manually re-request a new antivirus scan for a file.
@@ -661,4 +661,3 @@ class Client:
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}/review",
             json=filtered_json,
         ).json()
-
