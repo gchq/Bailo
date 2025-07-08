@@ -106,6 +106,7 @@ vi.mock('../../src/models/Release.js', () => ({ default: releaseModelMocks }))
 const mockReviewService = vi.hoisted(() => {
   return {
     createReleaseReviews: vi.fn(),
+    removeReleaseReviews: vi.fn(),
   }
 })
 vi.mock('../../src/services/review.js', () => mockReviewService)
