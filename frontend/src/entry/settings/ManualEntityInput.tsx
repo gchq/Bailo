@@ -1,7 +1,7 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Stack, TextField, Typography } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, TextField, Typography } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -16,8 +16,7 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
-  const handleAddEntityManuallyOnClick = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const handleAddEntityManuallyOnClick = () => {
     if (manualEntityName !== undefined && manualEntityName !== '') {
       setManualEntityName('')
       onAddEntityManually(manualEntityName)
@@ -43,23 +42,21 @@ export default function ManualEntityInput({ onAddEntityManually, errorMessage }:
       <AccordionDetails sx={{ p: 0 }}>
         {isUiConfigLoading && <Loading />}
         {!isUiConfigLoading && uiConfig && (
-          <Box component='form' onSubmit={handleAddEntityManuallyOnClick}>
-            <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} alignItems='center'>
-              <TextField
-                size='small'
-                fullWidth
-                label='User'
-                value={manualEntityName}
-                onChange={(e) => setManualEntityName(e.target.value)}
-              />
-              {uiConfig.helpPopoverText.manualEntryAccess && (
-                <HelpPopover>{uiConfig.helpPopoverText.manualEntryAccess}</HelpPopover>
-              )}
-              <Button variant='contained' type='submit' disabled={manualEntityName === ''}>
-                Add
-              </Button>
-            </Stack>
-          </Box>
+          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} alignItems='center'>
+            <TextField
+              size='small'
+              fullWidth
+              label='User'
+              value={manualEntityName}
+              onChange={(e) => setManualEntityName(e.target.value)}
+            />
+            {uiConfig.helpPopoverText.manualEntryAccess && (
+              <HelpPopover>{uiConfig.helpPopoverText.manualEntryAccess}</HelpPopover>
+            )}
+            <Button variant='contained' disabled={manualEntityName === ''} onClick={handleAddEntityManuallyOnClick}>
+              Add
+            </Button>
+          </Stack>
         )}
         <MessageAlert message={errorMessage} severity='error' />
       </AccordionDetails>
