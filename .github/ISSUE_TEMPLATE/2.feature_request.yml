@@ -1,0 +1,40 @@
+name: 💡 Feature request
+description: Suggest an idea for this project.
+labels: [triage,feature]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is used for requesting a feature. 
+
+        Bug reports should be opened using this [template](https://github.com/gchq/Bailo/issues/new?template=1.bug_report.yml).
+
+        Before opening a new issue, please do a [search](https://github.com/gchq/Bailo/issues) of existing issues and :+1: upvote the existing issue instead. This will result in a quicker resolution.
+
+  - type: textarea
+    attributes:
+      label: Problem
+      description: Please describe the problem you are trying to solve.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposed Solution
+      description: Please describe the desired behaviour.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Alternatives
+      description: Please describe alternative solutions or features you have considered.
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: What is the priority of your issue?
+      options:
+        - 'Low'
+        - 'Medium'
+        - 'High'
+    validations:
+      required: true
