@@ -1,0 +1,19 @@
+name: ⁉️ Need help with Bailo?
+description: We will try to help out.
+labels: [triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is used for questions that are not features or bug reports. 
+
+        Bug reports should be opened using this [template](https://github.com/gchq/Bailo/issues/new?template=1.bug_report.yml).
+        Feature requests should be opened using this [template](https://github.com/gchq/Bailo/issues/new?template=2.feature_request.yml).
+
+        Before opening a new issue, please do a [search](https://github.com/gchq/Bailo/issues) of existing issues and :+1: upvote the existing issue instead. This will result in a quicker resolution.
+  - type: textarea
+    attributes:
+      label: Description
+      description: If you have a question about Bailo that is not a bug report or feature request please include as much information as possible here and we will try to help you out.
+    validations:
+      required: true
