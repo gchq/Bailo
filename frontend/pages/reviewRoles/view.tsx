@@ -60,7 +60,7 @@ export default function ReviewRoles() {
     [modelRoles, reviewRoles, selectedRole],
   )
 
-  if (isCurrentUserLoading || isModelRolesLoading) {
+  if (isCurrentUserLoading || isModelRolesLoading || isReviewRolesLoading) {
     return <Loading />
   }
 
@@ -97,7 +97,7 @@ export default function ReviewRoles() {
             Create new Review Role
           </Button>
         </Stack>
-        {!isReviewRolesLoading ? (
+        {reviewRoles ? (
           <Paper sx={{ p: 4, my: 4 }}>
             {reviewRoles.length > 0 ? (
               <Stack
