@@ -2,7 +2,6 @@ import { LoadingButton } from '@mui/lab'
 import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetResponses } from 'actions/response'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
 import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
@@ -63,7 +62,6 @@ export default function ReviewWithComment({
 
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface>(
     reviews.find((review) => review.role === router.query.role) || reviews[0],
@@ -125,18 +123,14 @@ export default function ReviewWithComment({
     return <MessageAlert message={isResponsesError.info.message} severity='error' />
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
   return (
     <>
-      {(isReviewsLoading || isModelRolesLoading || isResponsesLoading || isUiConfigLoading) && <Loading />}
+      {(isReviewsLoading || isModelRolesLoading || isResponsesLoading) && <Loading />}
       <div data-test='reviewWithCommentContent'>
         {modelRoles.length === 0 && (
           <Typography color={theme.palette.error.main}>There was a problem fetching model roles.</Typography>
         )}
-        {modelRoles.length > 0 && uiConfig && (
+        {modelRoles.length > 0 && (
           <Stack spacing={2}>
             <Autocomplete
               sx={{ pt: 1 }}
@@ -152,7 +146,7 @@ export default function ReviewWithComment({
               }
               onChange={onChange}
               value={reviewRequest}
-              getOptionLabel={(option) => getRoleDisplayName(option.role, modelRoles, uiConfig)}
+              getOptionLabel={(option) => getRoleDisplayName(option.role, modelRoles)}
               options={reviews}
               renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
             />

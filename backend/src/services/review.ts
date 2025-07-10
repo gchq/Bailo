@@ -225,8 +225,6 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
     handleDuplicateKeys(error)
     throw error
   }
-
-  return reviewRole
 }
 
 export async function findReviewRoles(): Promise<ReviewRoleInterface[]> {

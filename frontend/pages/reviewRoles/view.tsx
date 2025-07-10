@@ -1,7 +1,6 @@
 import { Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
 import { useGetAllReviewRoles } from 'actions/reviewRoles'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetCurrentUser } from 'actions/user'
 import { Fragment, useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
@@ -15,7 +14,6 @@ import { getRoleDisplayName } from 'utils/roles'
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetAllReviewRoles()
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles('placeholder_id')
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
@@ -37,7 +35,7 @@ export default function ReviewRoles() {
     () =>
       reviewRoles.map((reviewRole, index) => (
         <Fragment key={reviewRole.id}>
-          {selectedRole === index && uiConfig && (
+          {selectedRole === index && (
             <>
               <Typography color='primary' fontWeight='bold'>
                 Description
@@ -51,7 +49,7 @@ export default function ReviewRoles() {
                 System Role
               </Typography>
               {reviewRole.collaboratorRole ? (
-                <Typography>{getRoleDisplayName(reviewRole.collaboratorRole, modelRoles, uiConfig)}</Typography>
+                <Typography>{getRoleDisplayName(reviewRole.collaboratorRole, modelRoles)}</Typography>
               ) : (
                 <Typography fontStyle='italic'>Unset</Typography>
               )}
@@ -59,10 +57,10 @@ export default function ReviewRoles() {
           )}
         </Fragment>
       )),
-    [modelRoles, reviewRoles, selectedRole, uiConfig],
+    [modelRoles, reviewRoles, selectedRole],
   )
 
-  if (isCurrentUserLoading || isUiConfigLoading || isModelRolesLoading) {
+  if (isCurrentUserLoading || isModelRolesLoading) {
     return <Loading />
   }
 
@@ -74,9 +72,6 @@ export default function ReviewRoles() {
     return <ErrorWrapper message={isReviewRolesError.info.message} />
   }
 
-  if (isUiConfigError) {
-    return <ErrorWrapper message={isUiConfigError.info.message} />
-  }
   if (isModelRolesError) {
     return <ErrorWrapper message={isModelRolesError.info.message} />
   }

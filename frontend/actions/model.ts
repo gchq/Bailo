@@ -10,7 +10,7 @@ import {
   ModelImage,
   ReleaseInterface,
   ReviewRolesFormData,
-  Role,
+  SystemRole,
 } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -92,7 +92,7 @@ const emptyRolesList = []
 export function useGetModelRoles(id?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      roles: Role[]
+      roles: SystemRole[]
     },
     ErrorInfo
   >(id ? `/api/v2/model/${id}/roles` : null, fetcher)
@@ -128,7 +128,7 @@ const emptyMyRolesList = []
 export function useGetModelRolesCurrentUser(id?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      roles: Role[]
+      roles: SystemRole[]
     },
     ErrorInfo
   >(id ? `/api/v2/model/${id}/roles/mine` : null, fetcher)
@@ -215,7 +215,7 @@ export async function postModelExportToS3(id: string, modelExport: ModelExportRe
 export function useGetAllModelReviewRoles() {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      roles: Role[]
+      roles: SystemRole[]
     },
     ErrorInfo
   >('/api/v2/roles/review', fetcher)

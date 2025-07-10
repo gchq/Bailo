@@ -1,6 +1,5 @@
 import { Grid2, Stack } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { Fragment, useMemo } from 'react'
 import Loading from 'src/common/Loading'
 import EntityIcon from 'src/entry/EntityIcon'
@@ -14,7 +13,6 @@ type EntryRoleListProps = {
 }
 
 export default function EntryRoleList({ entry }: EntryRoleListProps) {
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles('placeholder_id')
   const rows = useMemo(
     () =>
@@ -27,21 +25,15 @@ export default function EntryRoleList({ entry }: EntryRoleListProps) {
             </Stack>
           </Grid2>
           <Grid2 size={{ xs: 6 }}>
-            {uiConfig && (
-              <EntryRolesChipSet entryCollaborator={collaborator} modelRoles={modelRoles} uiConfig={uiConfig} />
-            )}
+            <EntryRolesChipSet entryCollaborator={collaborator} modelRoles={modelRoles} />
           </Grid2>
         </Fragment>
       )),
-    [entry.collaborators, modelRoles, uiConfig],
+    [entry.collaborators, modelRoles],
   )
 
-  if (isUiConfigLoading || isModelRolesLoading) {
+  if (isModelRolesLoading) {
     return <Loading />
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
   }
 
   if (isModelRolesError) {

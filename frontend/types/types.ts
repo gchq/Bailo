@@ -77,7 +77,8 @@ export interface UiConfig {
   }
 }
 
-export type CollaboratorRoleType = 'contributor' | 'consumer' | 'owner'
+//System roles
+export type CollaboratorRoleType = 'contributor' | 'consumer' | 'owner' | string
 
 export interface FileInterface {
   _id: string
@@ -228,7 +229,7 @@ export const RoleKind = {
 
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
-export interface Role {
+export interface SystemRole {
   id: string
   name: string
   short?: string
@@ -243,7 +244,7 @@ export const SchemaKindLabel = {
 }
 export type SchemaKindLabelKeys = (typeof SchemaKindLabel)[keyof typeof SchemaKindLabel]
 
-export type ReviewRolesFormData = Role & {
+export type ReviewRolesFormData = SystemRole & {
   defaultEntities?: string[]
   lockEntities: boolean
   collaboratorRole?: CollaboratorRoleType

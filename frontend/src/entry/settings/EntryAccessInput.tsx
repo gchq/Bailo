@@ -5,7 +5,7 @@ import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react
 import EntityItem from 'src/entry/settings/EntityItem'
 import ManualEntityInput from 'src/entry/settings/ManualEntityInput'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, Role } from 'types/types'
+import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, SystemRole } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessInputProps = {
@@ -13,7 +13,7 @@ type EntryAccessInputProps = {
   onChange: (value: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
   collaboratorsValue?: CollaboratorEntry[]
-  entryRoles?: Role[]
+  entryRoles?: SystemRole[]
 } & (
   | {
       isReadOnly: boolean

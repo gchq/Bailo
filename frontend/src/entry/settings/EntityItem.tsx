@@ -1,13 +1,10 @@
 import ClearIcon from '@mui/icons-material/Clear'
 import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
-import { useGetUiConfig } from 'actions/uiConfig'
 import * as _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
-import Loading from 'src/common/Loading'
 import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
-import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, Role } from 'types/types'
+import { CollaboratorEntry, SystemRole } from 'types/types'
 import { getRoleDisplayName } from 'utils/roles'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -16,7 +13,7 @@ type EntityItemProps = {
   collaborators: CollaboratorEntry[]
   onCollaboratorsChange: (value: CollaboratorEntry[]) => void
   entryKind: string
-  entryRoles: Role[]
+  entryRoles: SystemRole[]
 }
 
 export default function EntityItem({
@@ -27,7 +24,6 @@ export default function EntityItem({
   entryRoles,
 }: EntityItemProps) {
   const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.id), [entryRoles])
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   function onRoleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(collaborators)
@@ -40,14 +36,6 @@ export default function EntityItem({
     onCollaboratorsChange(collaborators.filter((access) => access.entity !== entity.entity))
   }
 
-  if (isUiConfigLoading) {
-    return <Loading />
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
   return (
     <TableRow>
       <TableCell>
@@ -57,7 +45,7 @@ export default function EntityItem({
         </Stack>
       </TableCell>
       <TableCell>
-        {entryRoles.length > 0 && uiConfig && (
+        {entryRoles.length > 0 && (
           <Autocomplete
             multiple
             size='small'
@@ -65,16 +53,12 @@ export default function EntityItem({
             value={entity.roles}
             data-test='accessListAutocomplete'
             options={entryRoleOptions}
-            getOptionLabel={(role) => getRoleDisplayName(role, entryRoles, uiConfig)}
+            getOptionLabel={(role) => getRoleDisplayName(role, entryRoles)}
             onChange={onRoleChange}
             renderInput={(params) => <TextField {...params} label='Select roles' />}
             renderTags={(value, getTagProps) =>
               value.map((option, index) => (
-                <Chip
-                  label={getRoleDisplayName(option, entryRoles, uiConfig)}
-                  {...getTagProps({ index })}
-                  key={option}
-                />
+                <Chip label={getRoleDisplayName(option, entryRoles)} {...getTagProps({ index })} key={option} />
               ))
             }
           />
