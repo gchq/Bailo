@@ -21,7 +21,7 @@ describe('services > export', () => {
     name: 'Test Model',
     description: 'Test Description',
     card: {},
-    collaboators: [{ entity: 'user:user', role: ['owner'] }],
+    collaborators: [{ entity: 'user:user', roles: ['owner'] }],
   }
   const mockModelCardRevision: ModelCardRevisionInterface = {
     modelId: mockModelId,
