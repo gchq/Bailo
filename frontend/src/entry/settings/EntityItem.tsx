@@ -4,7 +4,8 @@ import * as _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
 import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
-import { CollaboratorEntry, Role } from 'types/types'
+import { CollaboratorEntry, SystemRole } from 'types/types'
+import { getRoleDisplayName } from 'utils/roles'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntityItemProps = {
@@ -12,7 +13,7 @@ type EntityItemProps = {
   collaborators: CollaboratorEntry[]
   onCollaboratorsChange: (value: CollaboratorEntry[]) => void
   entryKind: string
-  entryRoles: Role[]
+  entryRoles: SystemRole[]
 }
 
 export default function EntityItem({
@@ -35,13 +36,6 @@ export default function EntityItem({
     onCollaboratorsChange(collaborators.filter((access) => access.entity !== entity.entity))
   }
 
-  function getRole(roleId: string) {
-    const role = entryRoles.find((role) => role.id === roleId)
-    if (!role) return { id: roleId, name: 'Unknown Role' }
-
-    return role
-  }
-
   return (
     <TableRow>
       <TableCell>
@@ -59,12 +53,12 @@ export default function EntityItem({
             value={entity.roles}
             data-test='accessListAutocomplete'
             options={entryRoleOptions}
-            getOptionLabel={(role) => getRole(role).name}
+            getOptionLabel={(role) => getRoleDisplayName(role, entryRoles)}
             onChange={onRoleChange}
             renderInput={(params) => <TextField {...params} label='Select roles' />}
             renderTags={(value, getTagProps) =>
               value.map((option, index) => (
-                <Chip label={getRole(option).name} {...getTagProps({ index })} key={option} />
+                <Chip label={getRoleDisplayName(option, entryRoles)} {...getTagProps({ index })} key={option} />
               ))
             }
           />

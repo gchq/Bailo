@@ -4,7 +4,7 @@ import { useGetResponses } from 'actions/response'
 import { ReviewRequestInterface } from 'types/types'
 
 import { useGetModelRoles } from '../../actions/model'
-import { getRoleDisplay } from '../../utils/roles'
+import { getRoleDisplayName } from '../../utils/roles'
 import Loading from '../common/Loading'
 import MessageAlert from '../MessageAlert'
 
@@ -23,7 +23,6 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
   if (isResponsesError) {
     return <MessageAlert message={isResponsesError.info.message} severity='error' />
   }
-
   if (responses.length > 0) {
     return <></>
   }
@@ -34,7 +33,7 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
       <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
         <NotificationsNoneOutlinedIcon sx={{ fontSize: 'medium' }} color='warning' />
         <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }}>
-          {`This ${review.kind} needs to be reviewed by the ${getRoleDisplay(review.role, modelRoles)}.`}
+          {`This ${review.kind} needs to be reviewed by the ${getRoleDisplayName(review.role, modelRoles)}.`}
         </Typography>
       </Stack>
     </>

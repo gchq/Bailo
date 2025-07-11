@@ -1,4 +1,5 @@
 import { Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
+import { useGetModelRoles } from 'actions/model'
 import { useGetAllReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
 import { Fragment, useMemo, useState } from 'react'
@@ -8,9 +9,11 @@ import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import { getRoleDisplayName } from 'utils/roles'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetAllReviewRoles()
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles('placeholder_id')
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
@@ -45,15 +48,19 @@ export default function ReviewRoles() {
               <Typography color='primary' fontWeight='bold'>
                 System Role
               </Typography>
-              <Typography>{reviewRole.collaboratorRole}</Typography>
+              {reviewRole.collaboratorRole ? (
+                <Typography>{getRoleDisplayName(reviewRole.collaboratorRole, modelRoles)}</Typography>
+              ) : (
+                <Typography fontStyle='italic'>Unset</Typography>
+              )}
             </>
           )}
         </Fragment>
       )),
-    [reviewRoles, selectedRole],
+    [modelRoles, reviewRoles, selectedRole],
   )
 
-  if (isCurrentUserLoading) {
+  if (isCurrentUserLoading || isModelRolesLoading || isReviewRolesLoading) {
     return <Loading />
   }
 
@@ -65,6 +72,9 @@ export default function ReviewRoles() {
     return <ErrorWrapper message={isReviewRolesError.info.message} />
   }
 
+  if (isModelRolesError) {
+    return <ErrorWrapper message={isModelRolesError.info.message} />
+  }
   if (!currentUser || !currentUser.isAdmin) {
     return (
       <Forbidden
@@ -87,7 +97,7 @@ export default function ReviewRoles() {
             Create new Review Role
           </Button>
         </Stack>
-        {!isReviewRolesLoading ? (
+        {reviewRoles ? (
           <Paper sx={{ p: 4, my: 4 }}>
             {reviewRoles.length > 0 ? (
               <Stack
