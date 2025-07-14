@@ -10,7 +10,7 @@ export type PartialDeep<T> = T extends object
   : T
 
 export const RoleKind = {
-  ENTRY: 'entry',
+  SYSTEM: 'system',
   SCHEMA: 'schema',
 } as const
 
