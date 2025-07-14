@@ -45,7 +45,7 @@ interface GetReviewRolesResponse {
 
 export const getReviewRoles = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetReviewRolesResponse>) => {
+  async (req: Request, res: Response<GetReviewRolesResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewReviewRoles
     const {
       query: { schemaId },
@@ -53,6 +53,6 @@ export const getReviewRoles = [
     const reviewRoles = await findReviewRoles(schemaId)
     await audit.onViewReviewRoles(req, reviewRoles)
     res.setHeader('x-count', reviewRoles.length)
-    return res.json({ reviewRoles })
+    res.json({ reviewRoles })
   },
 ]

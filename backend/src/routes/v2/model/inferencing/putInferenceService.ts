@@ -51,7 +51,7 @@ interface PutInferenceService {
 
 export const putInference = [
   bodyParser.json(),
-  async (req: Request, res: Response<PutInferenceService>) => {
+  async (req: Request, res: Response<PutInferenceService>): Promise<void> => {
     req.audit = AuditInfo.UpdateInference
     const {
       params: { modelId, image, tag },
@@ -62,7 +62,7 @@ export const putInference = [
 
     await audit.onUpdateInference(req, inference)
 
-    return res.json({
+    res.json({
       inference,
     })
   },

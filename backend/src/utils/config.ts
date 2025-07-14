@@ -1,3 +1,5 @@
+import { AgentOptions } from 'node:https'
+
 import bunyan from 'bunyan'
 import _config from 'config'
 import grant from 'grant'
@@ -8,7 +10,7 @@ import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
 import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
 import { DefaultReviewRole } from '../services/review.js'
 import { DefaultSchema } from '../services/schema.js'
-import { UiConfig } from '../types/types.js'
+import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
 import { deepFreeze } from './object.js'
 
 export interface Config {
@@ -25,6 +27,10 @@ export interface Config {
     privateKey: string
     publicKey: string
     jwks: string
+  }
+
+  httpClient: {
+    defaultOpts: AgentOptions
   }
 
   connectors: {
@@ -46,6 +52,12 @@ export interface Config {
       maxInitRetries: number
       initRetryDelay: number
     }
+  }
+
+  federation: {
+    state: FederationStateKeys
+    id: string
+    peers: Map<string, RemoteFederationConfig>
   }
 
   smtp: {

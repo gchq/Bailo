@@ -1,11 +1,12 @@
 import { outdent } from 'outdent'
 import showdown from 'showdown'
 
-import { ModelInterface } from '../models/Model.js'
+import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { getModelById, getModelCard } from './model.js'
+import { getRoleEntities } from './review.js'
 import { getSchemaById } from './schema.js'
 
 type Common = {
@@ -69,11 +70,21 @@ export async function renderToMarkdown(model: ModelInterface, modelCardRevision:
   let output = outdent`
     # ${model.name}
     > ${model.description}
+    ## Model State\n
+    ${model.state ? model.state : 'State Not Set'}\n\n
+    ## Model Senior Responsible Officers\n
+    ${getEntitiesWithRole('msro', model.collaborators)}\n\n
+    ## Model Technical Reviewers\n
+    ${getEntitiesWithRole('mtr', model.collaborators)}\n\n
   `
 
   // 'Fragment' is a more strictly typed version of 'JsonSchema'.
   output = recursiveRender(modelCardRevision.metadata, schema.jsonSchema as Fragment, output)
   return output
+}
+
+function getEntitiesWithRole(role: string, collaborators: CollaboratorEntry[]) {
+  return getRoleEntities([role], collaborators)[0].entities.join('\n')
 }
 
 export async function renderToHtml(model: ModelInterface, modelCardRevision: ModelCardRevisionInterface) {

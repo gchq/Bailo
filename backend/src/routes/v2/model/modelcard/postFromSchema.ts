@@ -48,7 +48,7 @@ interface PostFromSchemaResponse {
 
 export const postFromSchema = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostFromSchemaResponse>) => {
+  async (req: Request, res: Response<PostFromSchemaResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateModelCard
     const {
       params: { modelId },
@@ -60,7 +60,7 @@ export const postFromSchema = [
 
     await audit.onCreateModelCard(req, model, modelCard)
 
-    return res.json({
+    res.json({
       card: modelCard,
     })
   },

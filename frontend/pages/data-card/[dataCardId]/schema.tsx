@@ -5,7 +5,7 @@ import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import SchemaSelect from 'src/schemas/SchemaSelect'
-import { EntryKind } from 'types/types'
+import { EntryKind, SchemaKind } from 'types/types'
 
 export default function DataCardSchema() {
   const router = useRouter()
@@ -25,7 +25,7 @@ export default function DataCardSchema() {
     <>
       <Title text='Select a schema' />
       {isDataCardLoading && <Loading />}
-      {dataCard && <SchemaSelect entry={dataCard} />}
+      {dataCard && <SchemaSelect schemaKind={SchemaKind.DATA_CARD} entry={dataCard} />}
     </>
   )
 }

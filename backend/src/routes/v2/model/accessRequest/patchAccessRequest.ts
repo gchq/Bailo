@@ -46,7 +46,7 @@ interface PatchAccessRequestResponse {
 
 export const patchAccessRequest = [
   bodyParser.json(),
-  async (req: Request, res: Response<PatchAccessRequestResponse>) => {
+  async (req: Request, res: Response<PatchAccessRequestResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateAccessRequest
     const {
       body,
@@ -57,7 +57,7 @@ export const patchAccessRequest = [
 
     await audit.onUpdateAccessRequest(req, accessRequest)
 
-    return res.json({
+    res.json({
       accessRequest,
     })
   },

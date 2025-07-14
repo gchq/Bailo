@@ -272,7 +272,7 @@ async function fileScanDelay(file: FileInterface): Promise<number> {
   return Math.round(minutesBeforeRetrying / 60000)
 }
 
-export async function rerunFileScan(user: UserInterface, modelId, fileId: string) {
+export async function rerunFileScan(user: UserInterface, modelId: string, fileId: string) {
   const model = await getModelById(user, modelId)
   if (!model) {
     throw BadReq('Cannot find requested model', { modelId: modelId })
@@ -281,7 +281,7 @@ export async function rerunFileScan(user: UserInterface, modelId, fileId: string
   if (!file) {
     throw BadReq('Cannot find requested file', { modelId: modelId, fileId: fileId })
   }
-  const rerunFileScanAuth = await authorisation.file(user, modelId, file, FileAction.Update)
+  const rerunFileScanAuth = await authorisation.file(user, model, file, FileAction.Update)
   if (!rerunFileScanAuth.success) {
     throw Forbidden(rerunFileScanAuth.info, { userDn: user.dn, modelId, file })
   }

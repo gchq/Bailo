@@ -88,9 +88,9 @@ spec:
         secret:
           secretName: {{ include "bailo.fullname" . }}-certs
           items:
-            - key: {{ .Values.nginxcert.cert }}
-              path: {{ .Values.registry.certFile }}
-            - key: {{ .Values.nginxcert.key }}
-              path: {{ .Values.registry.keyFile }}
-            - key: {{ .Values.registry.jwksFile }}
-              path: {{ .Values.registry.jwksFile }}
+            - key: cert.pem
+              path: cert.pem
+            - key: key.pem
+              path: key.pem
+            - key: jwks.json
+              path: jwks.json

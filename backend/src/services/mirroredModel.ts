@@ -11,8 +11,7 @@ import stream, { PassThrough, Readable } from 'stream'
 import { finished } from 'stream/promises'
 import { extract, pack } from 'tar-stream'
 
-import { sign } from '../clients/kms.js'
-import { getObjectStream, objectExists, putObjectStream } from '../clients/s3.js'
+import { objectExists, putObjectStream } from '../clients/s3.js'
 import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { ScanState } from '../connectors/fileScanning/Base.js'
@@ -57,6 +56,7 @@ import {
   splitDistributionPackageName,
 } from './registry.js'
 import { getAllFileIds, getReleasesForExport, isReleaseDoc, saveImportedRelease } from './release.js'
+import { uploadToS3 } from './s3.js'
 
 export async function exportModel(
   user: UserInterface,
@@ -142,6 +142,16 @@ export type FileImportInformation = {
 export type ImageImportInformation = {
   image: { modelId: string; imageName: string; imageTag: string }
 }
+
+export type ExportMetadata = {
+  sourceModelId: string
+  mirroredModelId: string
+  exporter: string
+} & (
+  | { importKind: ImportKindKeys<'Documents'> }
+  | { importKind: ImportKindKeys<'File'>; filePath: string }
+  | { importKind: ImportKindKeys<'Image'>; imageName: string; imageTag: string }
+)
 
 export async function importModel(
   user: UserInterface,
@@ -692,176 +702,6 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
   return file
 }
 
-type ExportMetadata = {
-  sourceModelId: string
-  mirroredModelId: string
-  exporter: string
-} & (
-  | { importKind: ImportKindKeys<'Documents'> }
-  | { importKind: ImportKindKeys<'File'>; filePath: string }
-  | { importKind: ImportKindKeys<'Image'>; imageName: string; imageTag: string }
-)
-export async function uploadToS3(
-  fileName: string,
-  stream: Readable,
-  metadata: ExportMetadata,
-  logData?: Record<string, unknown>,
-) {
-  const s3LogData = { ...metadata, ...logData }
-  if (config.modelMirror.export.kmsSignature.enabled) {
-    log.debug(logData, 'Using signatures. Uploading to temporary S3 location first.')
-    uploadToTemporaryS3Location(fileName, stream, s3LogData).then(() =>
-      copyToExportBucketWithSignatures(fileName, s3LogData, metadata).catch((error) =>
-        log.error({ error, ...logData }, 'Failed to upload export to export location with signatures'),
-      ),
-    )
-  } else {
-    log.debug(logData, 'Signatures not enabled. Uploading to export S3 location.')
-    uploadToExportS3Location(fileName, stream, s3LogData, metadata)
-  }
-}
-
-async function copyToExportBucketWithSignatures(
-  fileName: string,
-  logData: Record<string, unknown>,
-  metadata: ExportMetadata,
-) {
-  let signatures = {}
-  log.debug(logData, 'Getting stream from S3 to generate signatures.')
-  const streamForDigest = await getObjectFromTemporaryS3Location(fileName, logData)
-  const messageDigest = await generateDigest(streamForDigest)
-  log.debug(logData, 'Generating signatures.')
-  try {
-    signatures = await sign(messageDigest)
-  } catch (e) {
-    log.error(logData, 'Error generating signature for export.')
-    throw e
-  }
-  log.debug(logData, 'Successfully generated signatures')
-  log.debug(logData, 'Getting stream from S3 to upload to export location.')
-  const streamToCopy = await getObjectFromTemporaryS3Location(fileName, logData)
-  await uploadToExportS3Location(fileName, streamToCopy, logData, {
-    ...signatures,
-    ...metadata,
-  })
-}
-
-async function uploadToTemporaryS3Location(
-  fileName: string,
-  stream: Readable,
-  logData: Record<string, unknown>,
-  metadata?: Record<string, string>,
-) {
-  const bucket = config.s3.buckets.uploads
-  const object = `exportQueue/${fileName}`
-  try {
-    await putObjectStream(object, stream, undefined, metadata)
-    log.debug(
-      {
-        bucket,
-        object,
-        ...logData,
-      },
-      'Successfully uploaded export to temporary S3 location.',
-    )
-  } catch (error) {
-    log.error(
-      {
-        bucket,
-        object,
-        error,
-        ...logData,
-      },
-      'Failed to export to temporary S3 location.',
-    )
-  }
-}
-
-async function getObjectFromTemporaryS3Location(fileName: string, logData: Record<string, unknown>) {
-  const bucket = config.s3.buckets.uploads
-  const object = `exportQueue/${fileName}`
-  try {
-    const stream = (await getObjectStream(object, bucket)).Body as Readable
-    log.debug(
-      {
-        bucket,
-        object,
-        ...logData,
-      },
-      'Successfully retrieved stream from temporary S3 location.',
-    )
-    return stream
-  } catch (error) {
-    log.error(
-      {
-        bucket,
-        object,
-        error,
-        ...logData,
-      },
-      'Failed to retrieve stream from temporary S3 location.',
-    )
-    throw error
-  }
-}
-
-export async function getObjectFromExportS3Location(object: string, logData: Record<string, unknown>) {
-  const bucket = config.modelMirror.export.bucket
-  try {
-    const stream = (await getObjectStream(object, bucket)).Body as Readable
-    log.debug(
-      {
-        bucket,
-        object,
-        ...logData,
-      },
-      'Successfully retrieved stream from temporary S3 location.',
-    )
-    return stream
-  } catch (error) {
-    log.error(
-      {
-        bucket,
-        object,
-        error,
-        ...logData,
-      },
-      'Failed to retrieve stream from temporary S3 location.',
-    )
-    throw error
-  }
-}
-
-async function uploadToExportS3Location(
-  object: string,
-  stream: Readable,
-  logData: Record<string, unknown>,
-  metadata?: ExportMetadata,
-) {
-  const bucket = config.modelMirror.export.bucket
-  try {
-    await putObjectStream(object, stream, bucket, metadata)
-    log.debug(
-      {
-        bucket,
-        object,
-        ...logData,
-      },
-      'Successfully uploaded export to export S3 location.',
-    )
-  } catch (error) {
-    log.error(
-      {
-        bucket,
-        object,
-        error,
-        ...logData,
-      },
-      'Failed to export to export S3 location.',
-    )
-  }
-}
-
 async function addModelCardRevisionsToZip(user: UserInterface, model: ModelDoc, zip: archiver.Archiver) {
   log.debug({ user, modelId: model.id }, 'Generating zip file of model card revisions.')
   const cards = await getModelCardRevisions(user, model.id)
@@ -1003,7 +843,7 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
   }
 }
 
-async function generateDigest(file: Readable) {
+export async function generateDigest(file: Readable) {
   let messageDigest: string
   try {
     const hash = createHash('sha256')

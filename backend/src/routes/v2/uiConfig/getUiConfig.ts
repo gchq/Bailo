@@ -33,7 +33,7 @@ interface GetUiConfigResponse {
 }
 
 export const getUiConfig = [
-  async (req: Request, res: Response<GetUiConfigResponse>) => {
+  async (req: Request, res: Response<GetUiConfigResponse>): Promise<void> => {
     const _ = parse(req, getUiConfigSchema)
     const uiConfig = config.ui
 
@@ -41,6 +41,6 @@ export const getUiConfig = [
       throw NotFound({ code: 'ui_config_not_found' }, `Unable to find UI config`)
     }
 
-    return res.json({ uiConfig })
+    res.json({ uiConfig })
   },
 ]

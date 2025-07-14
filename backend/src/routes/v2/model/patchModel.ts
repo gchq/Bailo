@@ -71,7 +71,7 @@ interface PatchModelResponse {
 
 export const patchModel = [
   bodyParser.json(),
-  async (req: Request, res: Response<PatchModelResponse>) => {
+  async (req: Request, res: Response<PatchModelResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateModel
     const {
       body,
@@ -81,7 +81,7 @@ export const patchModel = [
     const model = await updateModel(req.user, modelId, body)
     await audit.onUpdateModel(req, model)
 
-    return res.json({
+    res.json({
       model,
     })
   },

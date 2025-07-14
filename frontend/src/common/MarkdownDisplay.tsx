@@ -34,7 +34,13 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
         },
         h4: {
           component: (props: TypographyProps) => (
-            <Typography gutterBottom variant='subtitle1' component='h4' sx={{ wordWrap: 'break-word' }} {...props} />
+            <Typography
+              gutterBottom
+              variant='subtitle1'
+              component='h4'
+              sx={{ wordWrap: 'break-word', pb: 2 }}
+              {...props}
+            />
           ),
         },
         p: {

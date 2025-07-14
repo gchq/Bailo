@@ -11,7 +11,7 @@ export const FileScanKind = {
 } as const
 export type FileScanKindKeys = (typeof FileScanKind)[keyof typeof FileScanKind]
 
-const fileScanConnectors: BaseFileScanningConnector[] = []
+const fileScanConnectors: Set<BaseFileScanningConnector> = new Set<BaseFileScanningConnector>()
 let scannerWrapper: undefined | FileScanningWrapper = undefined
 export async function runFileScanners(cache = true) {
   if (scannerWrapper && cache) {
@@ -22,7 +22,7 @@ export async function runFileScanners(cache = true) {
       case FileScanKind.ClamAv:
         try {
           const scanner = new ClamAvFileScanningConnector()
-          fileScanConnectors.push(scanner)
+          fileScanConnectors.add(scanner)
         } catch (error) {
           throw ConfigurationError('Could not configure or initialise Clam AV', { error })
         }
@@ -30,7 +30,7 @@ export async function runFileScanners(cache = true) {
       case FileScanKind.ModelScan:
         try {
           const scanner = new ModelScanFileScanningConnector()
-          fileScanConnectors.push(scanner)
+          fileScanConnectors.add(scanner)
         } catch (error) {
           throw ConfigurationError('Could not configure or initialise ModelScan', { error })
         }
