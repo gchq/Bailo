@@ -8,9 +8,9 @@ import {
   ResponseInterface,
   ResponseKind,
   ReviewRequestInterface,
-  Role,
   SchemaInterface,
   StepNoRender,
+  SystemRole,
   UiConfig,
 } from 'types/types'
 
@@ -194,7 +194,7 @@ export const testAccessRequestSchemaStepNoRender: StepNoRender = {
   isComplete: () => false,
 }
 
-export const testManagerRole: Role = {
+export const testManagerRole: SystemRole = {
   id: 'mngr',
   name: 'Manager',
 }
