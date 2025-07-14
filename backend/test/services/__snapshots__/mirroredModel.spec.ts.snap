@@ -60,6 +60,20 @@ exports[`services > mirroredModel > importModel > save each imported release 1`]
 }
 `;
 
+exports[`services > mirroredModel > importModel > skip non-File entry 1`] = `
+{
+  "importResult": {
+    "fileIds": [],
+    "imageIds": [],
+    "modelCardVersions": [],
+    "newModelCards": [],
+    "newReleases": [],
+    "releaseSemvers": [],
+  },
+  "mirroredModel": undefined,
+}
+`;
+
 exports[`services > mirroredModel > importModel > uploads file to S3 on success 1`] = `
 {
   "importResult": {

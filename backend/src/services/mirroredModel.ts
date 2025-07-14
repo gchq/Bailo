@@ -205,7 +205,7 @@ export async function importModel(
   switch (importKind) {
     case ImportKind.Documents: {
       log.info({ mirroredModelId, payloadUrl, importId }, 'Importing collection of documents.')
-      return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl, importId)
+      return await importDocuments(user, res.body as Readable, mirroredModelId, sourceModelId, payloadUrl, importId)
     }
     case ImportKind.File: {
       log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
@@ -454,7 +454,7 @@ export async function importCompressedRegistryImage(
 
 async function importDocuments(
   user: UserInterface,
-  res: Response,
+  body: Readable,
   mirroredModelId: string,
   sourceModelId: string,
   payloadUrl: string,
@@ -463,10 +463,6 @@ async function importDocuments(
   const modelCardRegex = /^[0-9]+\.json$/
   const releaseRegex = /^releases\/(.*)\.json$/
   const fileRegex = /^files\/(.*)\.json$/
-
-  if (!res.body) {
-    throw InternalError('Body is not a ReadableStream.', { modelId: mirroredModelId, res, importId })
-  }
 
   let modelCardCount = 0
   let releaseCount = 0
@@ -479,7 +475,7 @@ async function importDocuments(
   const newReleases: Omit<ReleaseDoc, '_id'>[] = []
 
   // Parse zip entries one by one
-  for await (const entry of res.body.pipe(unzipper.Parse({ forceStream: true }))) {
+  for await (const entry of body.pipe(unzipper.Parse({ forceStream: true }))) {
     const { path: key, type } = entry
     if (type !== 'File') {
       // skip directories etc.

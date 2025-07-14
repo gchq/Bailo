@@ -36,9 +36,12 @@ class MockUnzipperEntry {
   type: string = 'File'
   fileContents: string
 
-  constructor(path: string, fileContents: string) {
+  constructor(path: string, fileContents: string, type?: string) {
     this.path = path
     this.fileContents = fileContents
+    if (type) {
+      this.type = type
+    }
   }
 
   async *[Symbol.asyncIterator]() {
@@ -51,7 +54,11 @@ const unzipperMock = vi.hoisted(() => ({
     return {
       async *[Symbol.asyncIterator]() {
         for (const mockEntryData of mockUnzipperEntries) {
-          yield new MockUnzipperEntry(mockEntryData.path, mockEntryData.fileContents)
+          if (mockEntryData['type']) {
+            yield new MockUnzipperEntry(mockEntryData.path, mockEntryData.fileContents, mockEntryData.type)
+          } else {
+            yield new MockUnzipperEntry(mockEntryData.path, mockEntryData.fileContents)
+          }
         }
       },
       pipe() {
@@ -644,6 +651,7 @@ describe('services > mirroredModel', () => {
 
   test('importModel > file missing from body', async () => {
     fetchMock.default.mockResolvedValueOnce({ ok: true, text: vi.fn() } as any)
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -672,6 +680,22 @@ describe('services > mirroredModel', () => {
 
     expect(result).toMatchSnapshot()
     expect(modelMocks.saveImportedModelCard).toBeCalledTimes(2)
+  })
+
+  test('importModel > skip non-File entry', async () => {
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push({ path: 'dir', fileContents: JSON.stringify({}), type: 'Directory' })
+
+    const result = await importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Documents,
+    )
+
+    expect(result).toMatchSnapshot()
+    expect(modelMocks.saveImportedModelCard).toBeCalledTimes(0)
   })
 
   test('importModel > failed to parse zip file', async () => {
