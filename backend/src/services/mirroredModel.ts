@@ -3,13 +3,13 @@ import { json } from 'node:stream/consumers'
 import zlib from 'node:zlib'
 
 import archiver from 'archiver'
-import * as fflate from 'fflate'
 import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
 import prettyBytes from 'pretty-bytes'
 import stream, { PassThrough, Readable } from 'stream'
 import { finished } from 'stream/promises'
 import { extract, pack } from 'tar-stream'
+import * as unzipper from 'unzipper'
 
 import { objectExists, putObjectStream } from '../clients/s3.js'
 import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.js'
@@ -464,18 +464,6 @@ async function importDocuments(
   const releases: Omit<ReleaseDoc, '_id'>[] = []
   const files: FileInterfaceDoc[] = []
   const images: DistributionPackageName[] = []
-  const zipData = new Uint8Array(await res.arrayBuffer())
-  let zipContent
-  try {
-    zipContent = fflate.unzipSync(zipData, {
-      filter(file) {
-        return /.+\.json/.test(file.name)
-      },
-    })
-  } catch (error) {
-    log.error({ error }, 'Unable to read zip file.')
-    throw InternalError('Unable to read zip file.', { mirroredModelId, importId })
-  }
 
   const modelCardRegex = /^[0-9]+\.json$/
   const releaseRegex = /^releases\/(.*)\.json$/
@@ -484,17 +472,35 @@ async function importDocuments(
   const modelCardJsonStrings: string[] = []
   const releaseJsonStrings: string[] = []
   const fileJsonStrings: string[] = []
-  Object.keys(zipContent).forEach(function (key) {
+
+  if (!res.body || !(res.body instanceof ReadableStream)) {
+    throw InternalError('Body is not a ReadableStream.', { modelId: mirroredModelId, res, importId })
+  }
+
+  // Parse zip entries one by one
+  for await (const entry of res.body.pipe(unzipper.Parse({ forceStream: true }))) {
+    const { path: key, type } = entry
+    if (type !== 'File') {
+      // skip directories etc.
+      entry.autodrain()
+      continue
+    }
+
+    let fileContents = ''
+    for await (const chunk of entry) {
+      fileContents += chunk.toString('utf8')
+    }
+
     if (modelCardRegex.test(key)) {
-      modelCardJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
+      modelCardJsonStrings.push(fileContents)
     } else if (releaseRegex.test(key)) {
-      releaseJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
+      releaseJsonStrings.push(fileContents)
     } else if (fileRegex.test(key)) {
-      fileJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
+      fileJsonStrings.push(fileContents)
     } else {
       throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId, importId })
     }
-  })
+  }
 
   // Parse release documents.
 
