@@ -16,7 +16,7 @@ import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.
 import authorisation from '../connectors/authorisation/index.js'
 import { ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import { FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../models/Release.js'
@@ -460,22 +460,23 @@ async function importDocuments(
   payloadUrl: string,
   importId: string,
 ) {
-  const modelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
-  const releases: Omit<ReleaseDoc, '_id'>[] = []
-  const files: FileInterfaceDoc[] = []
-  const images: DistributionPackageName[] = []
-
   const modelCardRegex = /^[0-9]+\.json$/
   const releaseRegex = /^releases\/(.*)\.json$/
   const fileRegex = /^files\/(.*)\.json$/
 
-  const modelCardJsonStrings: string[] = []
-  const releaseJsonStrings: string[] = []
-  const fileJsonStrings: string[] = []
-
   if (!res.body || !(res.body instanceof ReadableStream)) {
     throw InternalError('Body is not a ReadableStream.', { modelId: mirroredModelId, res, importId })
   }
+
+  let modelCardCount = 0
+  let releaseCount = 0
+  let fileCount = 0
+  const modelCardVersions: number[] = []
+  const releaseSemvers: string[] = []
+  const fileIds: ObjectId[] = []
+  const imageIds: string[] = []
+  const newModelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
+  const newReleases: Omit<ReleaseDoc, '_id'>[] = []
 
   // Parse zip entries one by one
   for await (const entry of res.body.pipe(unzipper.Parse({ forceStream: true }))) {
@@ -491,92 +492,64 @@ async function importDocuments(
       fileContents += chunk.toString('utf8')
     }
 
-    if (modelCardRegex.test(key)) {
-      modelCardJsonStrings.push(fileContents)
-    } else if (releaseRegex.test(key)) {
-      releaseJsonStrings.push(fileContents)
-    } else if (fileRegex.test(key)) {
-      fileJsonStrings.push(fileContents)
-    } else {
-      throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId, importId })
+    // enable lazy fetching
+    let lazyMirroredModel: ModelDoc | null = null
+
+    try {
+      if (modelCardRegex.test(key)) {
+        modelCardCount++
+        const modelCard = parseModelCard(fileContents, mirroredModelId, sourceModelId, importId)
+        modelCardVersions.push(modelCard.version)
+        const savedModelCard = await saveImportedModelCard(modelCard)
+        if (savedModelCard) {
+          newModelCards.push(savedModelCard)
+        }
+      } else if (releaseRegex.test(key)) {
+        releaseCount++
+        const release = parseRelease(fileContents, mirroredModelId, sourceModelId, importId)
+
+        // have to authorise per-release due to streaming, rather than all releases at once
+        if (!lazyMirroredModel) {
+          lazyMirroredModel = await getModelById(user, mirroredModelId)
+        }
+        const authResponse = await authorisation.releases(user, lazyMirroredModel, [release], ReleaseAction.Import)
+        if (!authResponse[0]?.success) {
+          throw Forbidden('You do not have the necessary permissions to import these releases.', {
+            modelId: mirroredModelId,
+            release: release.semver,
+            user,
+            importId,
+          })
+        }
+
+        for (const image of release.images) {
+          imageIds.push(
+            joinDistributionPackageName({
+              domain: image.repository,
+              path: image.name,
+              tag: image.tag,
+            } as DistributionPackageName),
+          )
+        }
+        releaseSemvers.push(release.semver)
+        const savedRelease = await saveImportedRelease(release)
+        if (savedRelease) {
+          newReleases.push(savedRelease)
+        }
+      } else if (fileRegex.test(key)) {
+        fileCount++
+        const file = await parseFile(fileContents, mirroredModelId, sourceModelId, importId)
+        fileIds.push(file._id)
+        await saveImportedFile(file)
+      } else {
+        throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId, importId })
+      }
+    } catch (err) {
+      throw InternalError('Failed to process zip file contents.', { err, mirroredModelId, importId })
     }
   }
 
-  // Parse release documents.
-
-  releaseJsonStrings.forEach((releaseJson) => {
-    const release = parseRelease(releaseJson, mirroredModelId, sourceModelId, importId)
-    releases.push(release)
-  })
-
-  const mirroredModel = await getModelById(user, mirroredModelId)
-  const authResponses = await authorisation.releases(user, mirroredModel, releases, ReleaseAction.Import)
-  const failedReleases = releases.filter((_, i) => !authResponses[i].success)
-  if (failedReleases.length > 0) {
-    throw Forbidden('You do not have the necessary permissions to import these releases.', {
-      modelId: mirroredModelId,
-      releases: failedReleases.map((release) => release.semver),
-      user,
-      importId,
-    })
-  }
-  releases.forEach((release) =>
-    release.images.forEach((image) =>
-      images.push({ domain: image.repository, path: image.name, tag: image.tag } as DistributionPackageName),
-    ),
-  )
-
-  // Parse model card documents.
-
-  modelCardJsonStrings.forEach((modelCardJson) => {
-    const modelCard = parseModelCard(modelCardJson, mirroredModelId, sourceModelId, importId)
-    modelCards.push(modelCard)
-  })
-
-  // Parse file documents.
-
-  await Promise.all(
-    fileJsonStrings.map(async (fileJson) => {
-      const file = await parseFile(fileJson, mirroredModelId, sourceModelId, importId)
-      files.push(file)
-    }),
-  )
-
-  log.info(
-    {
-      mirroredModelId,
-      payloadUrl,
-      sourceModelId,
-      importId,
-      numberOfDocuments: {
-        modelCards: modelCards.length,
-        releases: releases.length,
-        files: files.length,
-        images: images.length,
-      },
-    },
-    'Finished parsing the collection of model documents.',
-  )
-
-  // Save model card documents
-  const newModelCards = (await Promise.all(modelCards.map((card) => saveImportedModelCard(card)))).filter(
-    (card): card is Omit<ModelCardRevisionDoc, '_id'> => !!card,
-  )
-
-  // Save release documents
-  const newReleases = (await Promise.all(releases.map((release) => saveImportedRelease(release)))).filter(
-    (release): release is Omit<ReleaseDoc, '_id'> => !!release,
-  )
-
-  // Save file documents
-  await Promise.all(files.map((file) => saveImportedFile(file)))
-
   const updatedMirroredModel = await setLatestImportedModelCard(mirroredModelId)
-
-  const modelCardVersions = modelCards.map((modelCard) => modelCard.version)
-  const releaseSemvers = releases.map((release) => release.semver)
-  const fileIds: ObjectId[] = files.map((file) => file._id)
-  const imageIds: string[] = images.map((image) => joinDistributionPackageName(image))
 
   log.info(
     {
@@ -587,6 +560,12 @@ async function importDocuments(
       releaseSemvers,
       fileIds,
       imageIds,
+      numberOfDocuments: {
+        modelCards: modelCardCount,
+        releases: releaseCount,
+        files: fileCount,
+        images: imageIds.length,
+      },
       importId,
     },
     'Finished importing the collection of model documents.',
