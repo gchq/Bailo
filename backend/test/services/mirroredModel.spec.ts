@@ -30,10 +30,37 @@ const fileScanningMock = vi.hoisted(() => ({
 }))
 vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
 
-const fflateMock = vi.hoisted(() => ({
-  unzipSync: vi.fn(),
+const mockUnzipperEntries: any[] = []
+class MockUnzipperEntry {
+  path: string
+  type: string = 'File'
+  fileContents: string
+
+  constructor(path: string, fileContents: string) {
+    this.path = path
+    this.fileContents = fileContents
+  }
+
+  async *[Symbol.asyncIterator]() {
+    yield Buffer.from(this.fileContents, 'utf-8')
+  }
+  autodrain() {}
+}
+const unzipperMock = vi.hoisted(() => ({
+  Parse: vi.fn(() => {
+    return {
+      async *[Symbol.asyncIterator]() {
+        for (const mockEntryData of mockUnzipperEntries) {
+          yield new MockUnzipperEntry(mockEntryData.path, mockEntryData.fileContents)
+        }
+      },
+      pipe() {
+        return this
+      },
+    }
+  }),
 }))
-vi.mock('fflate', async () => fflateMock)
+vi.mock('unzipper', async () => unzipperMock)
 
 const baseScannerMock = vi.hoisted(() => ({
   ScanState: {
@@ -51,7 +78,7 @@ const bufferMock = vi.hoisted(() => ({
 vi.mock('node:buffer', async () => bufferMock)
 
 const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(() => ({ ok: true, body: {}, text: vi.fn() })),
+  default: vi.fn(() => ({ ok: true, body: new MockReadable(), text: vi.fn() })),
 }))
 vi.mock('node-fetch', async () => fetchMock)
 
@@ -602,7 +629,8 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > non 200 response when getting zip file', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: false, body: {}, text: vi.fn() })
+    fetchMock.default.mockResolvedValueOnce({ ok: false, body: {} as any, text: vi.fn() })
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -628,11 +656,12 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > save each imported model card', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      '1.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
-      '2.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
-    })
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push(
+      { path: '1.json', fileContents: JSON.stringify({ modelId: 'source-model-id' }) },
+      { path: '2.json', fileContents: JSON.stringify({ modelId: 'source-model-id' }) },
+    )
+
     const result = await importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -646,10 +675,12 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > failed to parse zip file', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'invalid.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push({
+      path: 'invalid.json',
+      fileContents: JSON.stringify({ modelId: 'source-model-id' }),
     })
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -662,11 +693,13 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > cannot parse into model card', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      '1.json': Buffer.from(JSON.stringify({})),
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push({
+      path: '1.json',
+      fileContents: JSON.stringify({}),
     })
     modelMocks.isModelCardRevisionDoc.mockReturnValueOnce(false)
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -679,11 +712,18 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > different model IDs in zip files', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      '1.json': Buffer.from(JSON.stringify({ modelId: 'abc' })),
-      '2.json': Buffer.from(JSON.stringify({ modelId: 'cba' })),
-    })
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push(
+      {
+        path: '1.json',
+        fileContents: JSON.stringify({ modelId: 'abc' }),
+      },
+      {
+        path: '2.json',
+        fileContents: JSON.stringify({ modelId: 'cba' }),
+      },
+    )
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -698,25 +738,24 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > save each imported release', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'releases/test.json': Buffer.from(
-        JSON.stringify({
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push(
+      {
+        path: 'releases/test.json',
+        fileContents: JSON.stringify({
           modelId: 'source-model-id',
           images: [{ repository: '', name: 'image1', tag: 'tag1', toObject: vi.fn() }],
         }),
-      ),
-      'releases/foo.json': Buffer.from(
-        JSON.stringify({
+      },
+      {
+        path: 'releases/foo.json',
+        fileContents: JSON.stringify({
           modelId: 'source-model-id',
           images: [],
         }),
-      ),
-    })
-    vi.mocked(authorisation.releases).mockResolvedValueOnce([
-      { success: true, id: 'string' },
-      { success: true, id: 'string' },
-    ])
+      },
+    )
+    vi.mocked(authorisation.releases).mockResolvedValue([{ success: true, id: 'string' }])
     releaseMocks.saveImportedRelease.mockResolvedValue({ modelId: 'source-model-id' })
 
     const result = await importModel(
@@ -732,11 +771,13 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > cannot parse into a release', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'releases/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push({
+      path: 'releases/test.json',
+      fileContents: JSON.stringify({ modelId: 'source-model-id' }),
     })
     releaseMocks.isReleaseDoc.mockReturnValueOnce(false)
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -749,10 +790,12 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > contains releases from an invalid model', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'releases/test.json': Buffer.from(JSON.stringify({ modelId: 'test' })),
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push({
+      path: 'releases/test.json',
+      fileContents: JSON.stringify({ modelId: 'test' }),
     })
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -767,11 +810,13 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > cannot parse into a file', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'files/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push({
+      path: 'files/test.json',
+      fileContents: JSON.stringify({ modelId: 'source-model-id' }),
     })
     fileMocks.isFileInterfaceDoc.mockReturnValueOnce(false)
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -784,11 +829,13 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > failed to check if file exists', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'files/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push({
+      path: 'files/test.json',
+      fileContents: JSON.stringify({ modelId: 'source-model-id' }),
     })
     s3Mocks.objectExists.mockRejectedValueOnce('error')
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -801,10 +848,12 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > contains files from an invalid model', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'files/test.json': Buffer.from(JSON.stringify({ modelId: 'test', path: 'test' })),
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push({
+      path: 'files/test.json',
+      fileContents: JSON.stringify({ modelId: 'test', path: 'test' }),
     })
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -819,11 +868,17 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > save each imported file', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockReturnValueOnce({
-      'files/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id', path: 'test' })),
-      'files/foo.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id', path: 'test' })),
-    })
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push(
+      {
+        path: 'files/test.json',
+        fileContents: JSON.stringify({ modelId: 'source-model-id', path: 'test' }),
+      },
+      {
+        path: 'files/foo.json',
+        fileContents: JSON.stringify({ modelId: 'source-model-id', path: 'test' }),
+      },
+    )
 
     const result = await importModel(
       {} as UserInterface,
@@ -838,10 +893,10 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > invalid zip data', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
-    fflateMock.unzipSync.mockImplementationOnce(() => {
+    unzipperMock.Parse.mockImplementationOnce(() => {
       throw Error('Cannot import file.')
     })
+
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -850,7 +905,7 @@ describe('services > mirroredModel', () => {
       ImportKind.Documents,
     )
 
-    await expect(result).rejects.toThrowError(/^Unable to read zip file./)
+    await expect(result).rejects.toThrowError(/^Cannot import file./)
   })
 
   test('importModel > missing file path for file imports', async () => {

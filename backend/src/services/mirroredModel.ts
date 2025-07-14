@@ -464,7 +464,7 @@ async function importDocuments(
   const releaseRegex = /^releases\/(.*)\.json$/
   const fileRegex = /^files\/(.*)\.json$/
 
-  if (!res.body || !(res.body instanceof ReadableStream)) {
+  if (!res.body) {
     throw InternalError('Body is not a ReadableStream.', { modelId: mirroredModelId, res, importId })
   }
 
@@ -545,7 +545,8 @@ async function importDocuments(
         throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId, importId })
       }
     } catch (err) {
-      throw InternalError('Failed to process zip file contents.', { err, mirroredModelId, importId })
+      log.error('Error processing zipped document', { err, mirroredModelId, importId })
+      throw err
     }
   }
 
