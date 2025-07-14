@@ -27,7 +27,7 @@ export const getModelRoles = [
 
     const allRoles = await getAllEntryRoles(modelId)
 
-    return res.json({
+    res.json({
       roles: allRoles,
     })
   },

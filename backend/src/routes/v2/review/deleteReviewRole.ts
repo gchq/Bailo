@@ -48,6 +48,6 @@ export const deleteReviewRole = [
     await removeReviewRole(req.user, params.reviewRoleId)
     await audit.onDeleteReviewRole(req, params.reviewRoleId)
 
-    return res.json({ deleted: true })
+    res.json({ deleted: true })
   },
 ]
