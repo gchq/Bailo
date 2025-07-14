@@ -28,20 +28,20 @@ export const getModelCurrentUserRoles = [
         {
           short: 'consumer',
           name: 'Consumer',
-          kind: RoleKind.ENTRY,
+          kind: RoleKind.SYSTEM,
           description:
             'This provides read only permissions for the model. If a model is private, these users will be able to view the model and create access requests.',
         },
         {
           short: 'contributor',
           name: 'Contributor',
-          kind: RoleKind.ENTRY,
+          kind: RoleKind.SYSTEM,
           description: 'This role allows users edit the model card and draft releases.',
         },
         {
           short: 'owner',
           name: 'Owner',
-          kind: RoleKind.ENTRY,
+          kind: RoleKind.SYSTEM,
           description: 'This role includes all permissions, such as managing model access and model deletion.',
         },
       ],
