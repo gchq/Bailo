@@ -90,7 +90,7 @@
     "@types/mjml": "^4.7.4",
     "@types/mongoose-delete": "^1.0.6",
     "@types/morgan": "^1.9.10",
-    "@types/node": "^24.0.8",
+    "@types/node": "^24.0.13",
     "@types/nodemailer": "^6.4.17",
     "@types/semver": "^7.7.0",
     "@types/shelljs": "^0.8.16",
