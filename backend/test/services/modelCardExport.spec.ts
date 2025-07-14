@@ -9,10 +9,20 @@ import { getSchemaById } from '../../src/services/schema.js'
 vi.mock('../../src/services/model.js')
 vi.mock('../../src/services/schema.js')
 
+const reviewServiceMock = vi.hoisted(() => ({
+  getRoleEntities: vi.fn(() => [{ role: 'msro', entities: ['user:user'] }]),
+}))
+vi.mock('../../src/services/review.js', async () => reviewServiceMock)
+
 describe('services > export', () => {
   const mockModelId = 'model123'
   const mockSchemaId = 'schema123'
-  const mockModel = { name: 'Test Model', description: 'Test Description', card: {} }
+  const mockModel = {
+    name: 'Test Model',
+    description: 'Test Description',
+    card: {},
+    collaborators: [{ entity: 'user:user', roles: ['owner'] }],
+  }
   const mockModelCardRevision: ModelCardRevisionInterface = {
     modelId: mockModelId,
     schemaId: mockSchemaId,

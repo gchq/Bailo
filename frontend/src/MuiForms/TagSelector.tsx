@@ -23,6 +23,10 @@ export default function TagSelector({ onChange, value, label, formContext, requi
       setErrorText('You cannot add duplicate tags')
       return
     }
+    if (!newTag.trim()) {
+      setErrorText('You cannot add an empty tag')
+      return
+    }
     const updatedArray = value
     updatedArray.push(newTag)
     onChange(updatedArray)
