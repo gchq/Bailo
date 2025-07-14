@@ -33,30 +33,26 @@ export default function ReviewRoles() {
 
   const listRoleDescriptions = useMemo(
     () =>
-      reviewRoles.map((reviewRole, index) => (
-        <Fragment key={reviewRole.id}>
-          {selectedRole === index && (
-            <>
-              <Typography color='primary' fontWeight='bold'>
-                Description
-              </Typography>
-              <Typography>{reviewRole.description}</Typography>
-              <Typography color='primary' fontWeight='bold'>
-                Short Name
-              </Typography>
-              <Typography>{reviewRole.short}</Typography>
-              <Typography color='primary' fontWeight='bold'>
-                System Role
-              </Typography>
-              {reviewRole.collaboratorRole ? (
-                <Typography>{getRoleDisplayName(reviewRole.collaboratorRole, modelRoles)}</Typography>
-              ) : (
-                <Typography fontStyle='italic'>Unset</Typography>
-              )}
-            </>
+      reviewRoles[selectedRole] && (
+        <>
+          <Typography color='primary' fontWeight='bold'>
+            Description
+          </Typography>
+          <Typography>{reviewRoles[selectedRole].description}</Typography>
+          <Typography color='primary' fontWeight='bold'>
+            Short Name
+          </Typography>
+          <Typography>{reviewRoles[selectedRole].short}</Typography>
+          <Typography color='primary' fontWeight='bold'>
+            System Role
+          </Typography>
+          {reviewRoles[selectedRole].collaboratorRole ? (
+            <Typography>{getRoleDisplayName(reviewRoles[selectedRole].collaboratorRole, modelRoles)}</Typography>
+          ) : (
+            <Typography fontStyle='italic'>Unset</Typography>
           )}
-        </Fragment>
-      )),
+        </>
+      ),
     [modelRoles, reviewRoles, selectedRole],
   )
 
@@ -89,7 +85,7 @@ export default function ReviewRoles() {
     <>
       <Title text='View Review Roles' />
       <Container>
-        <Stack mx={2} mb={1} direction={'row'} justifyContent={'space-between'}>
+        <Stack mx={2} mb={1} direction='row' justifyContent='space-between'>
           <Typography component='h1' color='primary' variant='h6' noWrap>
             Review Roles
           </Typography>

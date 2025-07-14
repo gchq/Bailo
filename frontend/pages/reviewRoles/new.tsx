@@ -61,10 +61,14 @@ export default function ReviewRolesForm() {
   }
 
   const handleCollaboratorRoleChange = (event: SelectChangeEvent) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      collaboratorRole: event.target.value.toLowerCase() as CollaboratorRoleType, //TODO this should probably be changed, as short is the same n
-    }))
+    if (event.target.value === 'none') {
+      delete formData.collaboratorRole
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        collaboratorRole: event.target.value.toLowerCase() as CollaboratorRoleType,
+      }))
+    }
   }
 
   const handleDefaultEntitiesChange = useMemo(() => {
@@ -180,6 +184,7 @@ export default function ReviewRolesForm() {
               </LabelledInput>
               <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
                 <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
+                  <MenuItem value='none'>{'None'}</MenuItem>
                   {modelRoles.map((role) => (
                     <MenuItem key={role.id} value={role.id}>
                       {role.name}
