@@ -92,7 +92,7 @@ services:
   frontend:
     build:
       context: ./frontend/
-      dockerfile: ./Dockerfile.dev
+      target: dev
     volumes:
       - ./frontend:/app
     depends_on:
@@ -103,7 +103,7 @@ services:
   backend:
     build:
       context: ./backend/
-      dockerfile: ./Dockerfile.dev
+      target: dev
     volumes:
       - ./backend/src:/app/src
       - ./backend/config:/app/config
