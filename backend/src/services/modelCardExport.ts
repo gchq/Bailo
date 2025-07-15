@@ -3,6 +3,7 @@ import showdown from 'showdown'
 
 import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
+import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { getModelById, getModelCard } from './model.js'
@@ -72,11 +73,15 @@ export async function renderToMarkdown(model: ModelInterface, modelCardRevision:
     > ${model.description}
     ## Model State\n
     ${model.state ? model.state : 'State Not Set'}\n\n
-    ## Model Senior Responsible Officers\n
-    ${getEntitiesWithRole('msro', model.collaborators)}\n\n
-    ## Model Technical Reviewers\n
-    ${getEntitiesWithRole('mtr', model.collaborators)}\n\n
   `
+  const reviewRoles = await ReviewRoleModel.find({ reviewRoles: schema.reviewRoles })
+
+  for (const reviewRole of reviewRoles) {
+    output += `
+      ## ${reviewRole.name}\n
+      ${getEntitiesWithRole(reviewRole.short, model.collaborators)}\n\n
+    `
+  }
 
   // 'Fragment' is a more strictly typed version of 'JsonSchema'.
   output = recursiveRender(modelCardRevision.metadata, schema.jsonSchema as Fragment, output)

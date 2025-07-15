@@ -258,6 +258,7 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
 
 export async function findReviewRoles(schemaId?: string): Promise<ReviewRoleInterface[]> {
   let reviewRolesFromSchema: string[] = []
+  let reviewRoles = []
   if (schemaId) {
     const schema = await SchemaModel.findOne({ id: schemaId })
     if (!schema) {
@@ -266,8 +267,10 @@ export async function findReviewRoles(schemaId?: string): Promise<ReviewRoleInte
     if (schema.reviewRoles) {
       reviewRolesFromSchema = schema.reviewRoles
     }
+    reviewRoles = await ReviewRoleModel.find({ short: reviewRolesFromSchema })
+  } else {
+    reviewRoles = await ReviewRoleModel.find()
   }
-  const reviewRoles = await ReviewRoleModel.find({ short: reviewRolesFromSchema })
   return reviewRoles
 }
 
