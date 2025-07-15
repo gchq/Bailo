@@ -1,3 +1,5 @@
+import { Readable } from 'stream'
+
 import { arrayOfObjectsHasKeysOfType, hasKeys, hasKeysOfType } from '../utils/typeguards.js'
 
 export type RegistryErrorResponse = {
@@ -6,9 +8,7 @@ export type RegistryErrorResponse = {
 
 export type ErrorInfo = { code: string; message: string; detail: string }
 
-export type StreamResponse = Response & {
-  body: ReadableStream
-}
+export type StreamResponse = Omit<Response, 'body'> & { body: Readable | ReadableStream }
 
 type ListImageTagResponse = { tags: Array<string> }
 
@@ -68,7 +68,7 @@ export function isStreamResponse(resp: unknown): resp is StreamResponse {
     resp !== null &&
     resp instanceof Response &&
     resp['body'] !== null &&
-    resp['body'] instanceof ReadableStream
+    (resp['body'] instanceof Readable || resp['body'] instanceof ReadableStream)
   )
 }
 

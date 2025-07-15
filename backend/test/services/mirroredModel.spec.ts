@@ -1,5 +1,4 @@
-import { Readable } from 'stream'
-import { EventEmitter, PassThrough } from 'stream'
+import { PassThrough, Readable, Writable } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { Response } from '../../src/connectors/authorisation/base.js'
@@ -22,6 +21,25 @@ const fileScanResult: FileScanResult = {
   isInfected: false,
   lastRunAt: new Date(),
   toolName: 'Test',
+}
+class MockReadable extends Readable {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _read(size: number) {}
+}
+
+class MockWritable extends Writable {
+  _write(chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void) {
+    // Default to success
+    callback()
+  }
+  // Helper to trigger an error
+  triggerError(error: Error) {
+    this.emit('error', error)
+  }
+  // Helper to trigger an error
+  triggerFinish() {
+    this.emit('finish')
+  }
 }
 
 const fileScanningMock = vi.hoisted(() => ({
@@ -51,7 +69,8 @@ class MockUnzipperEntry {
 }
 const unzipperMock = vi.hoisted(() => ({
   Parse: vi.fn(() => {
-    return {
+    const mockParse = new MockReadable()
+    Object.assign(mockParse, {
       async *[Symbol.asyncIterator]() {
         for (const mockEntryData of mockUnzipperEntries) {
           if (mockEntryData['type']) {
@@ -61,10 +80,8 @@ const unzipperMock = vi.hoisted(() => ({
           }
         }
       },
-      pipe() {
-        return this
-      },
-    }
+    })
+    return mockParse
   }),
 }))
 vi.mock('unzipper', async () => unzipperMock)
@@ -228,14 +245,16 @@ const zlibMocks = vi.hoisted(() => ({
 }))
 vi.mock('node:zlib', () => ({ default: zlibMocks }))
 
-const mockTarStream = {
+const mockTarStream = new MockReadable()
+Object.assign(mockTarStream, {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   entry: vi.fn(({ name, size }) => {
     return new MockWritable()
   }),
   pipe: vi.fn().mockReturnThis(),
   finalize: vi.fn(),
-}
+  destroy: vi.fn(),
+})
 const tarMocks = vi.hoisted(() => ({
   extract: vi.fn(() => new MockReadable()),
   pack: vi.fn(() => mockTarStream),
@@ -250,7 +269,7 @@ vi.mock('stream/promises', async () => streamPromisesMock)
 
 const registryMocks = vi.hoisted(() => ({
   doesImageLayerExist: vi.fn(),
-  getImageBlob: vi.fn(() => ({ body: ReadableStream.from('test') })),
+  getImageBlob: vi.fn(() => ({ body: Readable.from('test') })),
   getImageManifest: vi.fn(),
   initialiseImageUpload: vi.fn(),
   joinDistributionPackageName: vi.fn(() => 'localhost:8080/imageName:tag'),
@@ -264,66 +283,6 @@ const registryMocks = vi.hoisted(() => ({
   })),
 }))
 vi.mock('../../src/services/registry.js', () => registryMocks)
-
-class MockReadable extends EventEmitter implements NodeJS.ReadableStream {
-  readable: boolean = true
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  pipe<T extends NodeJS.WritableStream>(destination: T, options?: { end?: boolean | undefined }): T {
-    this.emit('pipe', destination)
-    return destination
-  }
-  [Symbol.asyncIterator](): NodeJS.AsyncIterator<string | Buffer> {
-    throw new Error('Method not implemented.')
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  read(size?: number): string | Buffer {
-    return 'data'
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  setEncoding(encoding: BufferEncoding): this {
-    return this
-  }
-  pause(): this {
-    return this
-  }
-  resume(): this {
-    return this
-  }
-  isPaused(): boolean {
-    return false
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  unpipe(destination?: NodeJS.WritableStream): this {
-    return this
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  unshift(chunk: string | Uint8Array, encoding?: BufferEncoding): void {
-    return
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  wrap(oldStream: NodeJS.ReadableStream): this {
-    return this
-  }
-}
-
-class MockWritable extends EventEmitter implements NodeJS.WritableStream {
-  writable: boolean = true
-  finish() {
-    // short delay
-    setTimeout(() => this.emit('finish'), 10)
-  }
-  write() {
-    return true
-  }
-  end(): this {
-    this.emit('finish')
-    return this
-  }
-  // Helper to trigger an error
-  triggerError(error: Error) {
-    this.emit('error', error)
-  }
-}
 
 describe('services > mirroredModel', () => {
   test('exportModel > not enabled', async () => {
@@ -1051,13 +1010,11 @@ describe('services > mirroredModel', () => {
     const inputStream = new MockReadable()
     const packerEntry = new MockWritable()
 
-    const promise = pipeStreamToTarEntry(inputStream, packerEntry, { test: 'data' })
-
     setTimeout(() => {
       packerEntry.emit('finish')
     }, 20)
 
-    const result = await promise
+    const result = await pipeStreamToTarEntry(inputStream, packerEntry, { test: 'data' })
     expect(result).toBe('ok')
   })
 
@@ -1072,7 +1029,7 @@ describe('services > mirroredModel', () => {
       inputStream.emit('error', error)
     }, 10)
 
-    await expect(promise).rejects.toThrow('Error while fetching layer stream')
+    await expect(promise).rejects.toThrow('Stream error during tar operation')
   })
 
   test('pipeStreamToTarEntry > packerEntry error', async () => {
@@ -1086,14 +1043,14 @@ describe('services > mirroredModel', () => {
       packerEntry.emit('error', error)
     }, 10)
 
-    await expect(promise).rejects.toThrow('Error while tarring layer stream')
+    await expect(promise).rejects.toThrow('Stream error during tar operation')
   })
 
   test('exportCompressedRegistryImage > success', async () => {
     registryMocks.getImageBlob
-      .mockResolvedValueOnce({ body: ReadableStream.from('test') })
-      .mockResolvedValueOnce({ body: ReadableStream.from('x'.repeat(256)) })
-      .mockResolvedValueOnce({ body: ReadableStream.from('a'.repeat(512)) })
+      .mockResolvedValueOnce({ body: Readable.from('test') })
+      .mockResolvedValueOnce({ body: Readable.from('x'.repeat(256)) })
+      .mockResolvedValueOnce({ body: Readable.from('a'.repeat(512)) })
     registryMocks.getImageManifest.mockResolvedValueOnce({
       schemaVersion: 2,
       mediaType: 'application/vnd.docker.distribution.manifest.v2+json',

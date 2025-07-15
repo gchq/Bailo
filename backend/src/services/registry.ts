@@ -148,7 +148,7 @@ export async function putImageBlob(
   imageName: string,
   uploadURL: string,
   digest: string,
-  blob: Readable | ReadableStream,
+  blob: Readable,
   size: string,
 ) {
   await checkUserAuth(user, modelId, ['push'])

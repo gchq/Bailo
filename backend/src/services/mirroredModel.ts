@@ -6,7 +6,7 @@ import archiver from 'archiver'
 import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
 import prettyBytes from 'pretty-bytes'
-import stream, { PassThrough, Readable } from 'stream'
+import stream, { PassThrough, Readable, Writable } from 'stream'
 import { finished } from 'stream/promises'
 import { extract, pack } from 'tar-stream'
 import * as unzipper from 'unzipper'
@@ -278,72 +278,77 @@ export async function exportCompressedRegistryImage(
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
   const s3Upload = uploadToS3(`${distributionPackageName}.tar.gz`, gzipStream, metadata, logData)
   const packerStream = pack()
-  packerStream.pipe(gzipStream)
 
-  // upload the manifest first as this is the starting point when later importing the blob
-  const tagManifestJson = JSON.stringify(tagManifest)
-  const packerEntry = packerStream.entry({ name: 'manifest.json', size: tagManifestJson.length })
-  await pipeStreamToTarEntry(Readable.from(tagManifestJson), packerEntry, { mediaType: tagManifest.mediaType })
+  try {
+    packerStream.pipe(gzipStream)
 
-  // fetch and compress one layer (including config) at a time to manage RAM usage
-  // also, tar can only handle one pipe at a time
-  for (const layer of [tagManifest.config, ...tagManifest.layers]) {
-    const layerDigest = layer['digest']
-    if (!layerDigest || layerDigest.length === 0) {
-      throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
+    // upload the manifest first as this is the starting point when later importing the blob
+    const tagManifestJson = JSON.stringify(tagManifest)
+    const packerEntry = packerStream.entry({ name: 'manifest.json', size: tagManifestJson.length })
+    await pipeStreamToTarEntry(Readable.from(tagManifestJson), packerEntry, { mediaType: tagManifest.mediaType })
+
+    // fetch and compress one layer (including config) at a time to manage RAM usage
+    // also, tar can only handle one pipe at a time
+    for (const layer of [tagManifest.config, ...tagManifest.layers]) {
+      const layerDigest = layer['digest']
+      if (!layerDigest || layerDigest.length === 0) {
+        throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
+      }
+
+      log.debug('Fetching image layer', {
+        modelId,
+        imageName,
+        imageTag,
+        layerDigest,
+        ...logData,
+      })
+      const imageBlobResponse = await getImageBlob(user, modelId, imageName, layerDigest)
+      const imageBlobReadable =
+        imageBlobResponse.body instanceof Readable ? imageBlobResponse.body : Readable.fromWeb(imageBlobResponse.body)
+
+      // pipe the body to tar using streams
+      const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
+      const packerEntry = packerStream.entry({ name: entryName, size: layer.size })
+      // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
+      await pipeStreamToTarEntry(imageBlobReadable, packerEntry, {
+        layerDigest,
+        mediaType: layer.mediaType,
+      })
     }
+    // no more data to write
+    packerStream.finalize()
 
-    log.debug('Fetching image layer', {
-      modelId,
-      imageName,
-      imageTag,
-      layerDigest,
-      ...logData,
-    })
-    const responseBody = await getImageBlob(user, modelId, imageName, layerDigest)
-
-    // pipe the body to tar using streams
-    const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
-    const packerEntry = packerStream.entry({ name: entryName, size: layer.size })
-    // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
-    await pipeStreamToTarEntry(Readable.fromWeb(responseBody.body), packerEntry, {
-      layerDigest,
-      mediaType: layer.mediaType,
-    })
+    await s3Upload
+  } catch (err) {
+    gzipStream.destroy()
+    packerStream.destroy()
+    throw err
   }
-  // no more data to write
-  packerStream.finalize()
-
-  await s3Upload
 }
 
 export async function pipeStreamToTarEntry(
-  inputStream: NodeJS.ReadableStream,
-  packerEntry: NodeJS.WritableStream,
+  inputStream: Readable,
+  packerEntry: Writable,
   logData: { [key: string]: string } = {},
 ) {
-  inputStream.pipe(packerEntry)
   return new Promise((resolve, reject) => {
+    const onError = (err: any) => {
+      inputStream.destroy()
+      packerEntry.destroy()
+      reject(
+        InternalError('Stream error during tar operation', {
+          error: err,
+          ...logData,
+        }),
+      )
+    }
+    inputStream.pipe(packerEntry)
     packerEntry.on('finish', () => {
       log.debug('Finished fetching layer stream', { ...logData })
       resolve('ok')
     })
-    packerEntry.on('error', (err) =>
-      reject(
-        InternalError('Error while tarring layer stream', {
-          error: err,
-          ...logData,
-        }),
-      ),
-    )
-    inputStream.on('error', (err) =>
-      reject(
-        InternalError('Error while fetching layer stream', {
-          error: err,
-          ...logData,
-        }),
-      ),
-    )
+    packerEntry.on('error', onError)
+    inputStream.on('error', onError)
   })
 }
 
@@ -362,94 +367,102 @@ export async function importCompressedRegistryImage(
     })
   }
   const { path: imageName, tag: imageTag } = distributionPackageNameObject
+
   // setup streams
   const gzipStream = zlib.createGunzip({ chunkSize: 16 * 1024 * 1024 })
   const tarStream = extract()
-  // body is tar.gz blob stream
-  body.pipe(gzipStream).pipe(tarStream)
+  try {
+    // body is tar.gz blob stream
+    body.pipe(gzipStream).pipe(tarStream)
 
-  let manifestBody: unknown
-  await new Promise((resolve, reject) => {
-    tarStream.on('entry', async function (entry, stream, next) {
-      log.debug('Processing un-tarred entry', {
-        name: entry.name,
-        type: entry.type,
-        size: entry.size,
-        importId,
-      })
+    let manifestBody: unknown
+    await new Promise((resolve, reject) => {
+      tarStream.on('entry', async function (entry, stream, next) {
+        log.debug('Processing un-tarred entry', {
+          name: entry.name,
+          type: entry.type,
+          size: entry.size,
+          importId,
+        })
 
-      if (entry.type === 'file') {
-        // Process file
-        if (entry.name === 'manifest.json') {
-          // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
-          log.debug('Extracting un-tarred manifest', { importId })
-          manifestBody = await json(stream)
+        if (entry.type === 'file') {
+          // Process file
+          if (entry.name === 'manifest.json') {
+            // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
+            log.debug('Extracting un-tarred manifest', { importId })
+            manifestBody = await json(stream)
 
-          next()
-        } else {
-          // convert filename to digest format
-          const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
-          if (await doesImageLayerExist(user, modelId, imageName, layerDigest)) {
-            log.debug('Skipping blob as it already exists in the registry', {
-              name: entry.name,
-              size: entry.size,
-              importId,
-            })
-
-            // auto-drain the stream
-            stream.resume()
             next()
           } else {
-            log.debug('Initiating un-tarred blob upload', {
-              name: entry.name,
-              size: entry.size,
-              importId,
-            })
-            const res = await initialiseImageUpload(user, modelId, imageName)
+            // convert filename to digest format
+            const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
+            if (await doesImageLayerExist(user, modelId, imageName, layerDigest)) {
+              log.debug('Skipping blob as it already exists in the registry', {
+                name: entry.name,
+                size: entry.size,
+                importId,
+              })
 
-            await putImageBlob(user, modelId, imageName, res.location, layerDigest, stream, String(entry.size))
-            await finished(stream)
-            next()
+              // auto-drain the stream
+              stream.resume()
+              next()
+            } else {
+              log.debug('Initiating un-tarred blob upload', {
+                name: entry.name,
+                size: entry.size,
+                importId,
+              })
+              const res = await initialiseImageUpload(user, modelId, imageName)
+
+              await putImageBlob(user, modelId, imageName, res.location, layerDigest, stream, String(entry.size))
+              await finished(stream)
+              next()
+            }
           }
+        } else {
+          // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
+          log.warn('Skipping non-file entry', { name: entry.name, type: entry.type, importId })
+          next()
         }
-      } else {
-        // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
-        log.warn('Skipping non-file entry', { name: entry.name, type: entry.type, importId })
-        next()
-      }
+      })
+
+      tarStream.on('error', (err) =>
+        reject(
+          InternalError('Error while un-tarring blob', {
+            error: err,
+          }),
+        ),
+      )
+
+      tarStream.on('finish', async function () {
+        log.debug('Uploading manifest', { importId })
+        if (hasKeysOfType<{ mediaType: 'string' }>(manifestBody, { mediaType: 'string' })) {
+          await putImageManifest(
+            user,
+            modelId,
+            imageName,
+            imageTag,
+            JSON.stringify(manifestBody),
+            manifestBody['mediaType'],
+          )
+          resolve('ok')
+        } else {
+          reject(InternalError('Could not find manifest.json in tarball'))
+        }
+      })
+    })
+    log.debug('Completed registry upload', {
+      image: { modelId, imageName, imageTag },
+      importId,
     })
 
-    tarStream.on('error', (err) =>
-      reject(
-        InternalError('Error while un-tarring blob', {
-          error: err,
-        }),
-      ),
-    )
-
-    tarStream.on('finish', async function () {
-      log.debug('Uploading manifest', { importId })
-      if (hasKeysOfType<{ mediaType: 'string' }>(manifestBody, { mediaType: 'string' })) {
-        await putImageManifest(
-          user,
-          modelId,
-          imageName,
-          imageTag,
-          JSON.stringify(manifestBody),
-          manifestBody['mediaType'],
-        )
-        resolve('ok')
-      } else {
-        reject(InternalError('Could not find manifest.json in tarball'))
-      }
-    })
-  })
-  log.debug('Completed registry upload', {
-    image: { modelId, imageName, imageTag },
-    importId,
-  })
-
-  return { image: { modelId, imageName, imageTag } }
+    return { image: { modelId, imageName, imageTag } }
+  } catch (err) {
+    body.destroy()
+    gzipStream.destroy()
+    tarStream.destroy()
+    throw err
+  }
 }
 
 async function importDocuments(
@@ -464,9 +477,6 @@ async function importDocuments(
   const releaseRegex = /^releases\/(.*)\.json$/
   const fileRegex = /^files\/(.*)\.json$/
 
-  let modelCardCount = 0
-  let releaseCount = 0
-  let fileCount = 0
   const modelCardVersions: number[] = []
   const releaseSemvers: string[] = []
   const fileIds: ObjectId[] = []
@@ -474,6 +484,7 @@ async function importDocuments(
   const newModelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   const newReleases: Omit<ReleaseDoc, '_id'>[] = []
 
+  log.debug('Parsing zip file', { importId })
   // Parse zip entries one by one
   for await (const entry of body.pipe(unzipper.Parse({ forceStream: true }))) {
     const { path: key, type } = entry
@@ -482,6 +493,7 @@ async function importDocuments(
       entry.autodrain()
       continue
     }
+    log.debug('Found zipped file', { key, importId })
 
     let fileContents = ''
     for await (const chunk of entry) {
@@ -493,7 +505,7 @@ async function importDocuments(
 
     try {
       if (modelCardRegex.test(key)) {
-        modelCardCount++
+        log.debug('Processing zipped file as a Model Card', { key, importId })
         const modelCard = parseModelCard(fileContents, mirroredModelId, sourceModelId, importId)
         modelCardVersions.push(modelCard.version)
         const savedModelCard = await saveImportedModelCard(modelCard)
@@ -501,7 +513,7 @@ async function importDocuments(
           newModelCards.push(savedModelCard)
         }
       } else if (releaseRegex.test(key)) {
-        releaseCount++
+        log.debug('Processing zipped file as a Release', { key, importId })
         const release = parseRelease(fileContents, mirroredModelId, sourceModelId, importId)
 
         // have to authorise per-release due to streaming, rather than all releases at once
@@ -533,7 +545,7 @@ async function importDocuments(
           newReleases.push(savedRelease)
         }
       } else if (fileRegex.test(key)) {
-        fileCount++
+        log.debug('Processing zipped file as a File', { key, importId })
         const file = await parseFile(fileContents, mirroredModelId, sourceModelId, importId)
         fileIds.push(file._id)
         await saveImportedFile(file)
@@ -545,28 +557,26 @@ async function importDocuments(
       throw err
     }
   }
+  log.debug('Finished processing zipped file', { importId })
 
   const updatedMirroredModel = await setLatestImportedModelCard(mirroredModelId)
 
-  log.info(
-    {
-      mirroredModelId,
-      payloadUrl,
-      sourceModelId,
-      modelCardVersions,
-      releaseSemvers,
-      fileIds,
-      imageIds,
-      numberOfDocuments: {
-        modelCards: modelCardCount,
-        releases: releaseCount,
-        files: fileCount,
-        images: imageIds.length,
-      },
-      importId,
+  log.info('Finished importing the collection of model documents.', {
+    mirroredModelId,
+    payloadUrl,
+    sourceModelId,
+    modelCardVersions,
+    releaseSemvers,
+    fileIds,
+    imageIds,
+    numberOfDocuments: {
+      modelCards: newModelCards.length,
+      releases: newReleases.length,
+      files: fileIds.length,
+      images: imageIds.length,
     },
-    'Finished importing the collection of model documents.',
-  )
+    importId,
+  })
 
   return {
     mirroredModel: updatedMirroredModel,
@@ -709,7 +719,7 @@ async function addReleasesToZip(
     releases.map((release) => addReleaseToZip(user, model, release, zip, mirroredModelId).catch((e) => errors.push(e))),
   )
   if (errors.length > 0) {
-    throw InternalError('Error when generating the release zip file.', { errors })
+    throw InternalError('Error when generating the release zip file.', { errors, errorsString: JSON.stringify(errors) })
   }
   log.debug({ user, modelId: model.id, semvers }, 'Completed generating zip file of releases.')
   return zip
@@ -827,8 +837,8 @@ async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: 
 
 export async function generateDigest(file: Readable) {
   let messageDigest: string
+  const hash = createHash('sha256')
   try {
-    const hash = createHash('sha256')
     hash.setEncoding('hex')
     file.pipe(hash)
     messageDigest = await new Promise((resolve) =>
@@ -839,6 +849,8 @@ export async function generateDigest(file: Readable) {
     )
     return messageDigest
   } catch (error: any) {
+    file.destroy()
+    hash.destroy()
     throw InternalError('Error when generating the digest for the zip file.', { error })
   }
 }

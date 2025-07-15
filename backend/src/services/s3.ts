@@ -3,6 +3,7 @@ import { Readable } from 'stream'
 import { sign } from '../clients/kms.js'
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import config from '../utils/config.js'
+import { InternalError } from '../utils/error.js'
 import log from './log.js'
 import { ExportMetadata, generateDigest } from './mirroredModel.js'
 
@@ -86,7 +87,10 @@ async function getObjectFromTemporaryS3Location(fileName: string, logData: Recor
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
-    const stream = (await getObjectStream(object, bucket)).Body as Readable
+    const stream = (await getObjectStream(object, bucket)).Body as Readable | null
+    if (!stream) {
+      throw InternalError('Could not get object stream', { object, bucket, ...logData })
+    }
     log.debug(
       {
         bucket,
@@ -113,7 +117,10 @@ async function getObjectFromTemporaryS3Location(fileName: string, logData: Recor
 export async function getObjectFromExportS3Location(object: string, logData: Record<string, unknown>) {
   const bucket = config.modelMirror.export.bucket
   try {
-    const stream = (await getObjectStream(object, bucket)).Body as Readable
+    const stream = (await getObjectStream(object, bucket)).Body as Readable | null
+    if (!stream) {
+      throw InternalError('Could not get object stream', { object, bucket, ...logData })
+    }
     log.debug(
       {
         bucket,
