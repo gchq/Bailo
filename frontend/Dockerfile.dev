@@ -1,4 +1,7 @@
-FROM node:24.4.0-alpine AS installer
+# syntax=docker/dockerfile:1
+ARG NODE_IMG=node:24.4.0-alpine
+
+FROM ${NODE_IMG} AS installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update

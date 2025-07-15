@@ -1,5 +1,8 @@
 # syntax=docker/dockerfile:1
-FROM python:3.13.2-bookworm AS sphinx-docs
+ARG NODE_IMG=node:24.4.0-alpine \
+    DOCS_IMG=python:3.13.2-bookworm
+
+FROM ${DOCS_IMG} AS sphinx-docs
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -16,7 +19,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade bailo -r re
 
 RUN make dirhtml
 
-FROM node:24.4.0-alpine AS installer
+FROM ${NODE_IMG} AS installer
 
 RUN apk add --no-cache libc6-compat
 RUN apk update
@@ -29,7 +32,7 @@ RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 COPY . .
 RUN npm run build
 
-FROM node:24.4.0-alpine AS runner
+FROM ${NODE_IMG} AS runner
 
 RUN apk update
 RUN apk add --no-cache libc6-compat ca-certificates

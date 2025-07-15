@@ -1,4 +1,8 @@
-FROM node:24-alpine AS backend
+# syntax=docker/dockerfile:1
+ARG NODE_IMG=node:24.4.0-alpine \
+    BASE_IMG=ubuntu:jammy
+
+FROM ${NODE_IMG} AS backend
 RUN apk add --no-cache libc6-compat
 RUN apk update
 WORKDIR /app
@@ -7,7 +11,7 @@ RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 COPY backend .
 RUN npm run build
 
-FROM node:24-alpine AS frontend
+FROM ${NODE_IMG} AS frontend
 RUN apk add --no-cache libc6-compat
 RUN apk update
 WORKDIR /app
@@ -18,7 +22,7 @@ RUN npm install sharp@0.33.5
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM ubuntu:jammy
+FROM ${BASE_IMG} as runtime
 RUN apt update
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt install git curl wget gnupg ca-certificates iproute2 nginx supervisor -y

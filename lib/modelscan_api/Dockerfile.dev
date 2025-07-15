@@ -1,4 +1,7 @@
-FROM python:3.12.11-slim-bookworm
+# syntax=docker/dockerfile:1
+ARG PYTHON_IMG=python:3.12.11-slim-bookworm
+
+FROM ${PYTHON_IMG}
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
