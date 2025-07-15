@@ -1,5 +1,6 @@
 import { Box, Button, Chip, Container, Stack, Typography } from '@mui/material'
 import { useGetModelFiles } from 'actions/model'
+import { useGetReleasesForModelId } from 'actions/release'
 import { useState } from 'react'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
@@ -18,6 +19,8 @@ export default function Files({ model }: FilesProps) {
   const [isFileUploadDialogOpen, setIsFileUploadDialogOpen] = useState(false)
   const [activeFileTag, setActiveFileTag] = useState('')
 
+  const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(model.id)
+
   const EntryListItem = ({ data, index }) => (
     <Box key={data[index]._id} sx={{ width: '100%' }}>
       <Stack spacing={1} p={2}>
@@ -26,6 +29,7 @@ export default function Files({ model }: FilesProps) {
           file={data[index]}
           modelId={model.id}
           mutator={mutateEntryFiles}
+          releases={releases}
         />
       </Stack>
     </Box>
@@ -35,10 +39,13 @@ export default function Files({ model }: FilesProps) {
     return <MessageAlert message={isEntryFilesError.info.message} severity='error' />
   }
 
-  if (isEntryFilesLoading) {
+  if (isEntryFilesLoading || isReleasesLoading) {
     return <Loading />
   }
 
+  if (isReleasesError) {
+    return <MessageAlert message={isReleasesError.info.message} severity='error' />
+  }
   return (
     <>
       <Container sx={{ my: 2 }}>
