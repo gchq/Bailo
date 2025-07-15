@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     groupadd -g 65532 nonroot && \
     useradd nonroot -u 65532 -g 65532 -M && \
     apt-get update && \
-    apt-get install -y --no-install-recommends python3 && \
+    apt-get install -y --no-install-recommends curl python3 && \
     apt-get dist-upgrade -y
 
 WORKDIR /app
