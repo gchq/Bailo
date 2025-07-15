@@ -203,7 +203,7 @@ export async function importModel(
   // type cast `NodeJS.ReadableStream` to `'stream/web'.ReadableStream`
   // as per https://stackoverflow.com/questions/63630114/argument-of-type-readablestreamany-is-not-assignable-to-parameter-of-type-r/66629140#66629140
   // and https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js/74722818#comment133510726_74722818
-  const responseBody = Readable.fromWeb(res.body as unknown as ReadableStream)
+  const responseBody = res.body instanceof Readable ? res.body : Readable.fromWeb(res.body as unknown as ReadableStream)
 
   log.info({ mirroredModelId, payloadUrl, importId }, 'Obtained the file from the payload URL.')
 
