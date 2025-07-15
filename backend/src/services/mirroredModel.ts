@@ -8,6 +8,7 @@ import fetch, { Response } from 'node-fetch'
 import prettyBytes from 'pretty-bytes'
 import stream, { PassThrough, Readable, Writable } from 'stream'
 import { finished } from 'stream/promises'
+import { ReadableStream } from 'stream/web'
 import { extract, pack } from 'tar-stream'
 import * as unzipper from 'unzipper'
 
@@ -199,20 +200,24 @@ export async function importModel(
   if (!res.body) {
     throw InternalError('Unable to get the file.', { payloadUrl, importId })
   }
+  // type cast `NodeJS.ReadableStream` to `'stream/web'.ReadableStream`
+  // as per https://stackoverflow.com/questions/63630114/argument-of-type-readablestreamany-is-not-assignable-to-parameter-of-type-r/66629140#66629140
+  // and https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js/74722818#comment133510726_74722818
+  const responseBody = Readable.fromWeb(res.body as unknown as ReadableStream)
 
   log.info({ mirroredModelId, payloadUrl, importId }, 'Obtained the file from the payload URL.')
 
   switch (importKind) {
     case ImportKind.Documents: {
       log.info({ mirroredModelId, payloadUrl, importId }, 'Importing collection of documents.')
-      return await importDocuments(user, res.body as Readable, mirroredModelId, sourceModelId, payloadUrl, importId)
+      return await importDocuments(user, responseBody, mirroredModelId, sourceModelId, payloadUrl, importId)
     }
     case ImportKind.File: {
       log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
       if (!fileId) {
         throw BadReq('Missing File ID.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
-      const result = await importModelFile(res.body as Readable, fileId, mirroredModelId, importId)
+      const result = await importModelFile(responseBody, fileId, mirroredModelId, importId)
       return {
         mirroredModel,
         importResult: {
@@ -227,7 +232,7 @@ export async function importModel(
       }
       const result = await importCompressedRegistryImage(
         user,
-        res.body as Readable,
+        responseBody,
         mirroredModelId,
         distributionPackageName,
         importId,
