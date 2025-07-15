@@ -4,6 +4,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { Response } from '../../src/connectors/authorisation/base.js'
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { FileScanResult } from '../../src/connectors/fileScanning/Base.js'
+import { ModelCardRevisionDoc } from '../../src/models/ModelCardRevision.js'
 import { ArtefactKind } from '../../src/models/Scan.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
@@ -167,7 +168,7 @@ const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } }, card: { schemaId: 'test' } })),
   getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(), version: 123 }]),
   setLatestImportedModelCard: vi.fn(),
-  saveImportedModelCard: vi.fn(),
+  saveImportedModelCard: vi.fn(() => ({}) as Omit<ModelCardRevisionDoc, '_id'>),
   isModelCardRevisionDoc: vi.fn(() => true),
   validateMirroredModel: vi.fn(() => ({
     settings: { mirror: { destinationModelId: 'abc' } },
@@ -276,11 +277,14 @@ const registryMocks = vi.hoisted(() => ({
   listModelImages: vi.fn(() => [] as { name: string; tags: string[] }[]),
   putImageBlob: vi.fn(),
   putImageManifest: vi.fn(),
-  splitDistributionPackageName: vi.fn(() => ({
-    domain: 'localhost:8080',
-    path: 'imageName',
-    tag: 'tag',
-  })),
+  splitDistributionPackageName: vi.fn(
+    () =>
+      ({
+        domain: 'localhost:8080',
+        path: 'imageName',
+        tag: 'tag',
+      }) as any,
+  ),
 }))
 vi.mock('../../src/services/registry.js', () => registryMocks)
 
@@ -739,7 +743,6 @@ describe('services > mirroredModel', () => {
       },
     )
     vi.mocked(authorisation.releases).mockResolvedValue([{ success: true, id: 'string' }])
-    releaseMocks.saveImportedRelease.mockResolvedValue({ modelId: 'source-model-id' })
 
     const result = await importModel(
       {} as UserInterface,
@@ -753,6 +756,29 @@ describe('services > mirroredModel', () => {
     expect(releaseMocks.saveImportedRelease).toBeCalledTimes(2)
   })
 
+  test('importModel > save imported release unauthorised', async () => {
+    mockUnzipperEntries.length = 0
+    mockUnzipperEntries.push({
+      path: 'releases/test.json',
+      fileContents: JSON.stringify({
+        modelId: 'source-model-id',
+        images: [{ repository: '', name: 'image1', tag: 'tag1', toObject: vi.fn() }],
+      }),
+    })
+    vi.mocked(authorisation.releases).mockResolvedValue([{ success: false, id: 'string', info: 'string' }])
+
+    const promise = importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Documents,
+    )
+
+    await expect(promise).rejects.toThrowError('You do not have the necessary permissions to import these releases.')
+    expect(releaseMocks.saveImportedRelease).toBeCalledTimes(0)
+  })
+
   test('importModel > cannot parse into a release', async () => {
     mockUnzipperEntries.length = 0
     mockUnzipperEntries.push({
@@ -761,7 +787,7 @@ describe('services > mirroredModel', () => {
     })
     releaseMocks.isReleaseDoc.mockReturnValueOnce(false)
 
-    const result = importModel(
+    const promise = importModel(
       {} as UserInterface,
       'mirrored-model-id',
       'source-model-id',
@@ -769,7 +795,7 @@ describe('services > mirroredModel', () => {
       ImportKind.Documents,
     )
 
-    await expect(result).rejects.toThrowError('Data cannot be converted into a release.')
+    await expect(promise).rejects.toThrowError('Data cannot be converted into a release.')
   })
 
   test('importModel > contains releases from an invalid model', async () => {
@@ -779,7 +805,7 @@ describe('services > mirroredModel', () => {
       fileContents: JSON.stringify({ modelId: 'test' }),
     })
 
-    const result = importModel(
+    const promise = importModel(
       {} as UserInterface,
       'mirrored-model-id',
       'source-model-id',
@@ -787,7 +813,7 @@ describe('services > mirroredModel', () => {
       ImportKind.Documents,
     )
 
-    await expect(result).rejects.toThrowError(
+    await expect(promise).rejects.toThrowError(
       'Zip file contains releases that have a model ID that does not match the source model Id.',
     )
   })
@@ -1069,6 +1095,23 @@ describe('services > mirroredModel', () => {
     expect(registryMocks.getImageBlob).toBeCalledTimes(3)
   })
 
+  test('exportCompressedRegistryImage > incorrectly formatted distributionPackageNameObject', async () => {
+    registryMocks.splitDistributionPackageName.mockResolvedValueOnce({
+      domain: 'localhost:8080',
+      path: 'imageName',
+      digest: 'sha256:0',
+    })
+
+    const promise = exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName@sha256:0', {} as any)
+
+    await expect(promise).rejects.toThrow('Could not get tag from Distribution Package Name.')
+
+    expect(zlibMocks.createGzip).toBeCalledTimes(0)
+    expect(tarMocks.pack).toBeCalledTimes(0)
+    expect(registryMocks.getImageManifest).toBeCalledTimes(0)
+    expect(registryMocks.getImageBlob).toBeCalledTimes(0)
+  })
+
   test('exportCompressedRegistryImage > missing layer digest', async () => {
     registryMocks.getImageManifest.mockResolvedValueOnce({
       schemaVersion: 2,
@@ -1189,6 +1232,31 @@ describe('services > mirroredModel', () => {
     expect(registryMocks.initialiseImageUpload).toBeCalledTimes(2)
     expect(registryMocks.putImageBlob).toBeCalledTimes(2)
     expect(registryMocks.putImageManifest).toBeCalledTimes(1)
+  })
+
+  test('importCompressedRegistryImage > incorrectly formatted distributionPackageNameObject', async () => {
+    registryMocks.splitDistributionPackageName.mockResolvedValueOnce({
+      domain: 'localhost:8080',
+      path: 'imageName',
+      digest: 'sha256:0',
+    })
+
+    const promise = importCompressedRegistryImage(
+      {} as UserInterface,
+      new PassThrough(),
+      'modelId',
+      'imageName@sha256:0',
+      'importId',
+    )
+
+    await expect(promise).rejects.toThrow('Could not get tag from Distribution Package Name.')
+
+    expect(zlibMocks.createGunzip).toBeCalledTimes(0)
+    expect(tarMocks.extract).toBeCalledTimes(0)
+    expect(registryMocks.doesImageLayerExist).toBeCalledTimes(0)
+    expect(registryMocks.initialiseImageUpload).toBeCalledTimes(0)
+    expect(registryMocks.putImageBlob).toBeCalledTimes(0)
+    expect(registryMocks.putImageManifest).toBeCalledTimes(0)
   })
 
   test('importCompressedRegistryImage > error due to missing manifest.json', async () => {

@@ -26,7 +26,10 @@ exports[`services > mirroredModel > importModel > save each imported model card 
       undefined,
       undefined,
     ],
-    "newModelCards": [],
+    "newModelCards": [
+      {},
+      {},
+    ],
     "newReleases": [],
     "releaseSemvers": [],
   },

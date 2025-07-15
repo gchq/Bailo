@@ -855,7 +855,6 @@ export async function generateDigest(file: Readable) {
     return messageDigest
   } catch (error: any) {
     file.destroy()
-    hash.destroy()
     throw InternalError('Error when generating the digest for the zip file.', { error })
   }
 }
