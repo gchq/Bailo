@@ -19,18 +19,7 @@ exports[`clients > modelScan > scanStream > success 1`] = `
   [
     "undefined://undefined:undefined/scan/file",
     {
-      "body": FormData {
-        Symbol(state): [
-          {
-            "name": "in_file",
-            "value": File {
-              Symbol(kHandle): Blob {},
-              Symbol(kLength): 0,
-              Symbol(kType): "",
-            },
-          },
-        ],
-      },
+      "body": FormData {},
       "headers": {
         "accept": "application/json",
       },
