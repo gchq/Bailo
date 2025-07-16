@@ -17,7 +17,8 @@ import {
 } from '@mui/material/'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { useGetAllModelReviewRoles, useListModels } from 'actions/model'
+import { useListModels } from 'actions/model'
+import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -74,7 +75,7 @@ export default function Marketplace() {
     debouncedFilter,
   )
 
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetAllModelReviewRoles()
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
 
   const theme = useTheme()
   const router = useRouter()
@@ -185,17 +186,17 @@ export default function Marketplace() {
   }
 
   useEffect(() => {
-    if (modelRoles) {
+    if (reviewRoles) {
       setRoleOptions([
         ...defaultRoleOptions,
-        ...modelRoles.map((role) => {
+        ...reviewRoles.map((role) => {
           return { key: role._id, label: `${role.shortName}` }
         }),
       ])
     }
-  }, [modelRoles])
+  }, [reviewRoles])
 
-  if (isModelRolesLoading) {
+  if (isReviewRolesLoading) {
     return <Loading />
   }
 
@@ -203,8 +204,8 @@ export default function Marketplace() {
     return <Loading />
   }
 
-  if (isModelRolesError) {
-    return <ErrorWrapper message={isModelRolesError.info.message} />
+  if (isReviewRolesError) {
+    return <ErrorWrapper message={isReviewRolesError.info.message} />
   }
 
   if (isUiConfigError) {

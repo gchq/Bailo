@@ -6,6 +6,7 @@ import {
   AccordionSummary,
   Box,
   Container,
+  FormControl,
   IconButton,
   MenuItem,
   Paper,
@@ -164,14 +165,16 @@ export default function ReviewRolesForm() {
                   id='role-description-input'
                 />
               </LabelledInput>
-              <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
-                <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
-                  <MenuItem value='none'>None</MenuItem>
-                  <MenuItem value='owner'>Owner</MenuItem>
-                  <MenuItem value='contributor'>Contributor</MenuItem>
-                  <MenuItem value='consumer'>Consumer</MenuItem>
-                </Select>
-              </LabelledInput>
+              <FormControl size='small'>
+                <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
+                  <Select disabled value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
+                    <MenuItem value='none'>None</MenuItem>
+                    <MenuItem value='owner'>Owner</MenuItem>
+                    <MenuItem value='contributor'>Contributor</MenuItem>
+                    <MenuItem value='consumer'>Consumer</MenuItem>
+                  </Select>
+                </LabelledInput>
+              </FormControl>
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
                   <Typography fontWeight='bold'>Default collaborators</Typography>
