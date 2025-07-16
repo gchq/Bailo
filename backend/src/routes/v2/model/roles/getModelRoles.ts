@@ -8,7 +8,9 @@ import { parse } from '../../../../utils/validate.js'
 
 export const getModelRolesSchema = z.object({
   params: z.object({
-    modelId: z.string().optional(),
+    modelId: z.string({
+      required_error: 'Must specify model id as param',
+    }),
   }),
 })
 
@@ -19,14 +21,10 @@ interface GetModelRolesResponse {
 export const getModelRoles = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelRolesResponse>): Promise<void> => {
-    const {
-      params: { modelId },
-    } = parse(req, getModelRolesSchema)
+    const _ = parse(req, getModelRolesSchema)
 
-    let resReview
-
-    if (modelId) {
-      resReview = [
+    res.json({
+      roles: [
         {
           id: 'msro',
           name: 'Model Senior Responsible Officer',
@@ -41,12 +39,6 @@ export const getModelRoles = [
           kind: RoleKind.SCHEMA,
           description: 'This role is specified by the schema in accordance with its policy.',
         },
-      ]
-    }
-
-    res.json({
-      roles: [
-        resReview,
         {
           id: 'consumer',
           name: `${config.ui.roleDisplayNames.consumer}`,
