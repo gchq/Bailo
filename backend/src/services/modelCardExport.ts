@@ -34,6 +34,9 @@ type Fragment = (
   | {
       type: 'number'
     }
+  | {
+      type: 'boolean'
+    }
 ) &
   Common
 
@@ -205,6 +208,25 @@ function recursiveRender(obj: any, schema: Fragment, output = '', depth = 1) {
     case 'string':
       if (obj === undefined || obj === '') {
         obj = 'No response'
+      }
+
+      if (schema.title) {
+        output += outdent`\n\n
+            ${'#'.repeat(depth)} ${schema.title}
+
+            ${obj}
+        `
+      } else {
+        output += outdent`\n\n
+            ${obj}
+        `
+      }
+      break
+    case 'boolean':
+      if (obj === undefined) {
+        obj = 'No response'
+      } else {
+        obj = obj ? 'Yes' : 'No'
       }
 
       if (schema.title) {
