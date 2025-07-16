@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  static_checks:
+  python_static_checks:
     runs-on: ubuntu-latest
     outputs:
       black: ${{ steps.black.outputs.status }}
@@ -50,7 +50,7 @@ jobs:
         continue-on-error: true
 
 
-  test:
+  python_test:
     needs: static_checks
     runs-on: ubuntu-latest
     strategy:
