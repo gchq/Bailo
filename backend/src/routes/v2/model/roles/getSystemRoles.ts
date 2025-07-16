@@ -1,52 +1,18 @@
 import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
-import { z } from 'zod'
 
 import { Role, RoleKind } from '../../../../types/types.js'
 import config from '../../../../utils/config.js'
-import { parse } from '../../../../utils/validate.js'
 
-export const getModelRolesSchema = z.object({
-  params: z.object({
-    modelId: z.string().optional(),
-  }),
-})
-
-interface GetModelRolesResponse {
+interface GetSystemRolesResponse {
   roles: Array<Role>
 }
 
-export const getModelRoles = [
+export const getSystemRoles = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetModelRolesResponse>): Promise<void> => {
-    const {
-      params: { modelId },
-    } = parse(req, getModelRolesSchema)
-
-    let resReview
-
-    if (modelId) {
-      resReview = [
-        {
-          id: 'msro',
-          name: 'Model Senior Responsible Officer',
-          short: 'MSRO',
-          kind: RoleKind.SCHEMA,
-          description: 'This role is specified by the schema in accordance with its policy.',
-        },
-        {
-          id: 'mtr',
-          name: 'Model Technical Reviewer',
-          short: 'MTR',
-          kind: RoleKind.SCHEMA,
-          description: 'This role is specified by the schema in accordance with its policy.',
-        },
-      ]
-    }
-
+  async (_req: Request, res: Response<GetSystemRolesResponse>): Promise<void> => {
     res.json({
       roles: [
-        resReview,
         {
           id: 'consumer',
           name: `${config.ui.roleDisplayNames.consumer}`,

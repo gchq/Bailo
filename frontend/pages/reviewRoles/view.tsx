@@ -1,8 +1,8 @@
 import { Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
-import { useGetModelRoles } from 'actions/model'
+import { useGetSystemRoles } from 'actions/model'
 import { useGetAllReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
-import { Fragment, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
@@ -13,7 +13,7 @@ import { getRoleDisplayName } from 'utils/roles'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetAllReviewRoles()
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles('placeholder_id')
+  const { systemRoles, isSystemRolesLoading, isSystemRolesError } = useGetSystemRoles()
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
@@ -47,16 +47,16 @@ export default function ReviewRoles() {
             System Role
           </Typography>
           {reviewRoles[selectedRole].collaboratorRole ? (
-            <Typography>{getRoleDisplayName(reviewRoles[selectedRole].collaboratorRole, modelRoles)}</Typography>
+            <Typography>{getRoleDisplayName(reviewRoles[selectedRole].collaboratorRole, systemRoles)}</Typography>
           ) : (
             <Typography fontStyle='italic'>Unset</Typography>
           )}
         </>
       ),
-    [modelRoles, reviewRoles, selectedRole],
+    [systemRoles, reviewRoles, selectedRole],
   )
 
-  if (isCurrentUserLoading || isModelRolesLoading || isReviewRolesLoading) {
+  if (isCurrentUserLoading || isSystemRolesLoading || isReviewRolesLoading) {
     return <Loading />
   }
 
@@ -68,8 +68,8 @@ export default function ReviewRoles() {
     return <ErrorWrapper message={isReviewRolesError.info.message} />
   }
 
-  if (isModelRolesError) {
-    return <ErrorWrapper message={isModelRolesError.info.message} />
+  if (isSystemRolesError) {
+    return <ErrorWrapper message={isSystemRolesError.info.message} />
   }
   if (!currentUser || !currentUser.isAdmin) {
     return (

@@ -95,7 +95,7 @@ export function useGetModelRoles(id?: string) {
       roles: SystemRole[]
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}/roles` : null, fetcher)
+  >(id ? `/api/v2/model/roles` : null, fetcher)
 
   return {
     mutateModelRoles: mutate,
@@ -225,6 +225,22 @@ export function useGetAllModelReviewRoles() {
     modelRoles: data ? data.roles : emptyRolesList,
     isModelRolesLoading: isLoading,
     isModelRolesError: error,
+  }
+}
+
+export function useGetSystemRoles() {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      roles: SystemRole[]
+    },
+    ErrorInfo
+  >('/api/v2/roles', fetcher)
+
+  return {
+    mutateModelRoles: mutate,
+    systemRoles: data ? data.roles : emptyRolesList,
+    isSystemRolesLoading: isLoading,
+    isSystemRolesError: error,
   }
 }
 

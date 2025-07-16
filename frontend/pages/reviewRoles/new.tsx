@@ -17,7 +17,7 @@ import {
   Typography,
 } from '@mui/material'
 import { ClearIcon } from '@mui/x-date-pickers'
-import { postReviewRole, useGetModelRoles } from 'actions/model'
+import { postReviewRole, useGetSystemRoles } from 'actions/model'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
@@ -45,7 +45,7 @@ export default function ReviewRolesForm() {
   })
 
   const [defaultEntitiesEntry, setDefaultEntities] = useState<Array<CollaboratorEntry>>([])
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles('placeholder_id')
+  const { systemRoles, isSystemRolesLoading, isSystemRolesError } = useGetSystemRoles()
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFormData((prevFormData) => ({ ...prevFormData, name: event.target.value as string }))
@@ -128,11 +128,11 @@ export default function ReviewRolesForm() {
     setLoading(false)
   }
 
-  if (isModelRolesError) {
-    return <MessageAlert message={isModelRolesError.info.message} />
+  if (isSystemRolesError) {
+    return <MessageAlert message={isSystemRolesError.info.message} />
   }
 
-  if (isModelRolesLoading) {
+  if (isSystemRolesLoading) {
     return <Loading />
   }
 
@@ -185,7 +185,7 @@ export default function ReviewRolesForm() {
               <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
                 <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
                   <MenuItem value='none'>{'None'}</MenuItem>
-                  {modelRoles.map((role) => (
+                  {systemRoles.map((role) => (
                     <MenuItem key={role.id} value={role.id}>
                       {role.name}
                     </MenuItem>
