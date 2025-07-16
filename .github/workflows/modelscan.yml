@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  modelscan_build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
