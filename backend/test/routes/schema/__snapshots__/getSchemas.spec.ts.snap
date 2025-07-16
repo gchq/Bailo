@@ -42,6 +42,9 @@ exports[`routes > schema > getSchemas > audit > expected call 1`] = `
     },
     "kind": "model",
     "name": "Example Schema 1",
+    "reviewRoles": [
+      "reviewer",
+    ],
     "updatedAt": 2023-07-28T10:50:00.928Z,
   },
 ]
@@ -117,6 +120,9 @@ exports[`routes > schema > getSchemas > returns all schemas 1`] = `
       },
       "kind": "model",
       "name": "Example Schema 1",
+      "reviewRoles": [
+        "reviewer",
+      ],
       "updatedAt": "2023-07-28T10:50:00.928Z",
     },
   ],
@@ -173,6 +179,9 @@ exports[`routes > schema > getSchemas > returns only model schemas with the mode
       },
       "kind": "model",
       "name": "Example Schema 1",
+      "reviewRoles": [
+        "reviewer",
+      ],
       "updatedAt": "2023-07-28T10:50:00.928Z",
     },
   ],

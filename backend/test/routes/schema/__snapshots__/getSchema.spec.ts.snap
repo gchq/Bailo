@@ -28,6 +28,9 @@ exports[`routes > schema > getSchema > audit > expected call 1`] = `
   },
   "kind": "model",
   "name": "Example Schema 1",
+  "reviewRoles": [
+    "reviewer",
+  ],
   "updatedAt": 2023-07-28T10:50:00.928Z,
 }
 `;
@@ -61,6 +64,9 @@ exports[`routes > schema > getSchema > returns the schema with the matching ID 1
     },
     "kind": "model",
     "name": "Example Schema 1",
+    "reviewRoles": [
+      "reviewer",
+    ],
     "updatedAt": "2023-07-28T10:50:00.928Z",
   },
 }
