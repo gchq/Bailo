@@ -226,7 +226,7 @@ export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 export interface Role {
   _id: string
   name: string
-  short: string
+  shortName: string
   kind?: RoleKindKeys
   description?: string
 }
@@ -617,7 +617,7 @@ export type FileUploadMetadata = {
 export interface ReviewRoleInterface {
   _id: string
   name: string
-  short: string
+  shortName: string
   kind: RoleKindKeys
   description?: string
   defaultEntities?: string[]

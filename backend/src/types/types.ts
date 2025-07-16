@@ -24,7 +24,7 @@ export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 export interface Role {
   name: string
   kind: RoleKindKeys
-  short: string
+  shortName: string
   description?: string
 }
 

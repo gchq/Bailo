@@ -18,7 +18,7 @@ import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/s
 
 export interface DefaultReviewRole {
   name: string
-  short: string
+  shortName: string
   description: string
   kind: string
   collaboratorRole: string
@@ -55,8 +55,6 @@ export async function findReviews(
   return reviews.filter((_, i) => auths[i].success)
 }
 
-// Find out why requested schema isn't being found
-
 export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc) {
   if (!model.card) {
     throw BadReq('A model needs to have a model card before a review can be made for its releases', {
@@ -68,9 +66,9 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
     throw BadReq('Cannot find schema for associated model', { modelId: model._id })
   }
 
-  const requiredRolesForRelease = await ReviewRoleModel.find({ short: { $in: modelSchema.reviewRoles } })
+  const requiredRolesForRelease = await ReviewRoleModel.find({ shortName: { $in: modelSchema.reviewRoles } })
   const roleEntities = getRoleEntities(
-    requiredRolesForRelease.map((role) => role.short),
+    requiredRolesForRelease.map((role) => role.shortName),
     model.collaborators,
   )
 
@@ -91,18 +89,18 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
   await Promise.all(createReviews)
 }
 
-// Update access request to use schema roles
-
 export async function createAccessRequestReviews(model: ModelDoc, accessRequest: AccessRequestDoc) {
   const accessRequestSchema = await SchemaModel.findOne({ id: accessRequest.schemaId })
   if (!accessRequestSchema) {
     throw BadReq('Cannot find schema for associated model', { modelId: model._id })
   }
 
-  const requiredRolesForAccessRequest = await ReviewRoleModel.find({ short: { $in: accessRequestSchema.reviewRoles } })
+  const requiredRolesForAccessRequest = await ReviewRoleModel.find({
+    shortName: { $in: accessRequestSchema.reviewRoles },
+  })
 
   const roleEntities = getRoleEntities(
-    requiredRolesForAccessRequest.map((role) => role.short),
+    requiredRolesForAccessRequest.map((role) => role.shortName),
     model.collaborators,
   )
 
@@ -267,7 +265,7 @@ export async function findReviewRoles(schemaId?: string): Promise<ReviewRoleInte
     if (schema.reviewRoles) {
       reviewRolesFromSchema = schema.reviewRoles
     }
-    reviewRoles = await ReviewRoleModel.find({ short: reviewRolesFromSchema })
+    reviewRoles = await ReviewRoleModel.find({ shortName: reviewRolesFromSchema })
   } else {
     reviewRoles = await ReviewRoleModel.find()
   }
@@ -277,7 +275,7 @@ export async function findReviewRoles(schemaId?: string): Promise<ReviewRoleInte
 export async function addDefaultReviewRoles() {
   for (const reviewRole of config.defaultReviewRoles) {
     log.info({ name: reviewRole.name }, `Ensuring review role ${reviewRole.name} exists`)
-    const defaultRole = await ReviewRoleModel.findOne({ short: reviewRole.short })
+    const defaultRole = await ReviewRoleModel.findOne({ shortName: reviewRole.shortName })
     if (!defaultRole) {
       const newRole = new ReviewRoleModel({ ...reviewRole })
       newRole.save()
@@ -298,19 +296,19 @@ export async function removeReviewRole(user: UserInterface, reviewRoleId: string
     })
   }
 
-  const schemas = await SchemaModel.find({ reviewRoles: reviewRole.short })
+  const schemas = await SchemaModel.find({ reviewRoles: reviewRole.shortName })
 
   for (const schema of schemas) {
     // Remove role from schemas
-    schema.reviewRoles = schema.reviewRoles.filter((role) => role !== reviewRole.short)
+    schema.reviewRoles = schema.reviewRoles.filter((role) => role !== reviewRole.shortName)
     await schema.save()
 
     // Also remove the role from any model collaborators
     const models = await ModelModel.find({ 'card.schemaId': schema.id })
     for (const model of models) {
       for (let i = model.collaborators.length - 1; i >= 0; i--) {
-        if (model.collaborators[i].roles.includes(reviewRole.short)) {
-          model.collaborators[i].roles = model.collaborators[i].roles.filter((role) => role !== reviewRole.short)
+        if (model.collaborators[i].roles.includes(reviewRole.shortName)) {
+          model.collaborators[i].roles = model.collaborators[i].roles.filter((role) => role !== reviewRole.shortName)
           if (model.collaborators[i].roles.length === 0) {
             model.collaborators.splice(i, 1)
           }

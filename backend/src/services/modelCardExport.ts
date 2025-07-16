@@ -79,7 +79,7 @@ export async function renderToMarkdown(model: ModelInterface, modelCardRevision:
   for (const reviewRole of reviewRoles) {
     output += `
       ## ${reviewRole.name}\n
-      ${getEntitiesWithRole(reviewRole.short, model.collaborators)}\n\n
+      ${getEntitiesWithRole(reviewRole.shortName, model.collaborators)}\n\n
     `
   }
 

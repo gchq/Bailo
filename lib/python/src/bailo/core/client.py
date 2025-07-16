@@ -470,7 +470,7 @@ class Client:
         :param description: Description for the schema
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest)
         :param json_schema: JSON schema
-        :param review_roles: list made up of the "short" property from a Review Role object
+        :param review_roles: list made up of the "shortName" property from a Review Role object
         :return: JSON response object
         """
         return self.agent.post(

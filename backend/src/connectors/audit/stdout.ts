@@ -366,7 +366,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
     this.checkEventType(AuditInfo.CreateReviewRole, req)
-    const event = this.generateEvent(req, { reviewRole: reviewRole.short })
+    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
     req.log.info(event, req.audit.description)
   }
 
@@ -379,12 +379,6 @@ export class StdoutAuditConnector extends BaseAuditConnector {
   onDeleteReviewRole(req: Request, reviewRoleId: string) {
     this.checkEventType(AuditInfo.CreateReviewRole, req)
     const event = this.generateEvent(req, { reviewRoleId: reviewRoleId })
-    req.log.info(event, req.audit.description)
-  }
-
-  onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
-    this.checkEventType(AuditInfo.CreateReviewRole, req)
-    const event = this.generateEvent(req, { reviewRole: reviewRole.short })
     req.log.info(event, req.audit.description)
   }
 }

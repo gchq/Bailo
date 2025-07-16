@@ -413,7 +413,7 @@ export async function createModelCardFromSchema(
   }
 
   // Check schema review roles for any default entities
-  const reviewRolesForSchema = await ReviewRoleModel.find({ short: schema.reviewRoles })
+  const reviewRolesForSchema = await ReviewRoleModel.find({ shortName: schema.reviewRoles })
   const updatedCollaborators: CollaboratorEntry[] = [...model.collaborators]
   for (const reviewRole of reviewRolesForSchema) {
     if (reviewRole.defaultEntities) {
@@ -422,10 +422,10 @@ export async function createModelCardFromSchema(
           (existingCollaborator) => existingCollaborator.entity === defaultEntity,
         )
         return existingDefault
-          ? existingDefault.roles.includes(reviewRole.short)
+          ? existingDefault.roles.includes(reviewRole.shortName)
             ? null
-            : existingDefault.roles.push(reviewRole.short)
-          : updatedCollaborators.push({ entity: defaultEntity, roles: [reviewRole.short] })
+            : existingDefault.roles.push(reviewRole.shortName)
+          : updatedCollaborators.push({ entity: defaultEntity, roles: [reviewRole.shortName] })
       })
     }
   }

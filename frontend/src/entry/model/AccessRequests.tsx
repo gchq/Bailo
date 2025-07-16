@@ -32,12 +32,12 @@ export default function AccessRequests({ model, currentUserRoles }: AccessReques
             .filter((role) => {
               const accessRequestSchema = schemas.find((schema) => schema.id === data[index].schemaId)
               if (accessRequestSchema && accessRequestSchema.reviewRoles) {
-                return accessRequestSchema.reviewRoles.includes(role.short)
+                return accessRequestSchema.reviewRoles.includes(role.shortName)
               } else {
                 return
               }
             })
-            .map((role) => role.short),
+            .map((role) => role.shortName),
         )
       }
     />

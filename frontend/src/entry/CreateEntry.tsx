@@ -255,9 +255,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                     onChange={handleCollaboratorsChange}
                     entryKind={entryKind}
                     entryRoles={[
-                      { _id: 'owner', short: 'owner', name: 'Owner' },
-                      { _id: 'contributor', short: 'contributor', name: 'Contributor' },
-                      { _id: 'consumer', short: 'consumer', name: 'Consumer' },
+                      { _id: 'owner', shortName: 'owner', name: 'Owner' },
+                      { _id: 'contributor', shortName: 'contributor', name: 'Contributor' },
+                      { _id: 'consumer', shortName: 'consumer', name: 'Consumer' },
                     ]}
                   />
                 </Box>

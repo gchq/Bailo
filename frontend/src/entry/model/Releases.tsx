@@ -34,7 +34,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
       hideReviewBanner={
         !hasRole(
           currentUserRoles,
-          reviewRoles.map((role) => role.short),
+          reviewRoles.map((role) => role.shortName),
         ) || readOnly
       }
     />

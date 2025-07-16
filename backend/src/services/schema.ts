@@ -121,7 +121,7 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
       // Update add users/roles based on new defaultEntities
       const updatedCollaborators: CollaboratorEntry[] = [...model.collaborators]
       for (const reviewRoleDiff of diff.reviewRoles) {
-        const reviewRole = await ReviewRoleModel.findOne({ short: reviewRoleDiff })
+        const reviewRole = await ReviewRoleModel.findOne({ shortName: reviewRoleDiff })
         if (reviewRole && reviewRole.defaultEntities) {
           for (const defaultEntity of reviewRole.defaultEntities) {
             const existingUser = model.collaborators.find((collaborator) => collaborator.entity === defaultEntity)
@@ -132,12 +132,12 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
               if (existingIndex > -1) {
                 updatedCollaborators[existingIndex] = {
                   entity: defaultEntity,
-                  roles: [...new Set([...updatedCollaborators[existingIndex].roles, reviewRole.short])],
+                  roles: [...new Set([...updatedCollaborators[existingIndex].roles, reviewRole.shortName])],
                 }
               } else {
                 updatedCollaborators.push({
                   entity: defaultEntity,
-                  roles: [...new Set([...existingUser.roles, reviewRole.short])],
+                  roles: [...new Set([...existingUser.roles, reviewRole.shortName])],
                 })
               }
             } else {
@@ -147,10 +147,10 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
               if (existingIndex > -1) {
                 updatedCollaborators[existingIndex] = {
                   entity: defaultEntity,
-                  roles: [...new Set([...updatedCollaborators[existingIndex].roles, reviewRole.short])],
+                  roles: [...new Set([...updatedCollaborators[existingIndex].roles, reviewRole.shortName])],
                 }
               } else {
-                updatedCollaborators.push({ entity: defaultEntity, roles: [reviewRole.short] })
+                updatedCollaborators.push({ entity: defaultEntity, roles: [reviewRole.shortName] })
               }
             }
           }

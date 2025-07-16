@@ -15,7 +15,7 @@ import { parse } from '../../../utils/validate.js'
 export const postReviewRoleSchema = z.object({
   body: z.object({
     name: z.string().openapi({ example: 'Reviewer' }),
-    short: z.string().openapi({ example: 'reviewer' }),
+    shortName: z.string().openapi({ example: 'reviewer' }),
     kind: z.enum(getEnumValues(RoleKind)).exclude([RoleKind.SYSTEM]).openapi({ example: RoleKind.SCHEMA }),
     description: z.string().optional().openapi({ example: 'This is an example review role' }),
     defaultEntities: z

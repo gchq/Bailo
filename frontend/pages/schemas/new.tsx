@@ -111,7 +111,7 @@ export default function NewSchema() {
           description: schemaDescription,
           kind: schemaKind,
           jsonSchema: JSON.parse(jsonSchema),
-          reviewRoles: newReviewRoles.map((role) => role.short),
+          reviewRoles: newReviewRoles.map((role) => role.shortName),
         })
 
         if (!response.ok) {

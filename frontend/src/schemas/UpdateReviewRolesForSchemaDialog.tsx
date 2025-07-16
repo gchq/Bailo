@@ -70,15 +70,15 @@ export default function UpdateReviewRolesForSchemaDialog({
   const reviewRoleList = useMemo(
     () =>
       reviewRoles.map((role) => (
-        <ListItem key={role.short} dense>
-          <ListItemButton role={undefined} onClick={handleToggle(role.short)} dense>
+        <ListItem key={role.shortName} dense>
+          <ListItemButton role={undefined} onClick={handleToggle(role.shortName)} dense>
             <ListItemIcon>
               <Checkbox
                 edge='start'
-                checked={checked.includes(role.short)}
+                checked={checked.includes(role.shortName)}
                 tabIndex={-1}
                 disableRipple
-                slotProps={{ input: { 'aria-labelledby': role.short } }}
+                slotProps={{ input: { 'aria-labelledby': role.shortName } }}
               />
             </ListItemIcon>
             <ListItemText primary={role.name} secondary={role.description} />

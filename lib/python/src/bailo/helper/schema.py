@@ -57,7 +57,7 @@ class Schema:
         :param description: Description of schema
         :param kind: Kind of schema, using SchemaKind enum (e.g Model or AccessRequest)
         :param json_schema: Schema JSON
-        :param review_roles: list made up of the "short" property from a Review Role object
+        :param review_roles: list made up of the "shortName" property from a Review Role object
         :return: Schema object
         """
         schema = cls(

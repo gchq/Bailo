@@ -196,7 +196,7 @@ export const testAccessRequestSchemaStepNoRender: StepNoRender = {
 
 export const testManagerRole: Role = {
   _id: '123',
-  short: 'mngr',
+  shortName: 'mngr',
   name: 'Manager',
 }
 

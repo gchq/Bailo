@@ -15,13 +15,13 @@ export const getAllModelReviewRoles = [
       roles: [
         {
           name: 'Model Senior Responsible Officer',
-          short: 'MSRO',
+          shortName: 'MSRO',
           kind: RoleKind.SCHEMA,
           description: 'This role is specified by the schema in accordance with its policy.',
         },
         {
           name: 'Model Technical Reviewer',
-          short: 'MTR',
+          shortName: 'MTR',
           kind: RoleKind.SCHEMA,
           description: 'This role is specified by the schema in accordance with its policy.',
         },

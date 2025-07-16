@@ -220,7 +220,6 @@ export abstract class BaseAuditConnector {
   abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
   abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[])
   abstract onDeleteReviewRole(req: Request, reviewRoleId: string)
-  abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
 
   abstract onError(req: Request, error: BailoError)
 

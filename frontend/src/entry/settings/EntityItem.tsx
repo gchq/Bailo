@@ -22,7 +22,7 @@ export default function EntityItem({
   entryKind,
   entryRoles,
 }: EntityItemProps) {
-  const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.short), [entryRoles])
+  const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.shortName), [entryRoles])
 
   function onRoleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(collaborators)
@@ -35,9 +35,9 @@ export default function EntityItem({
     onCollaboratorsChange(collaborators.filter((access) => access.entity !== entity.entity))
   }
 
-  function getRole(short: string) {
-    const role = entryRoles.find((role) => role.short === short)
-    if (!role) return { short: short, name: 'Unknown Role' }
+  function getRole(shortName: string) {
+    const role = entryRoles.find((role) => role.shortName === shortName)
+    if (!role) return { shortName: shortName, name: 'Unknown Role' }
 
     return role
   }

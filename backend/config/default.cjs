@@ -94,14 +94,14 @@ module.exports = {
   defaultReviewRoles: [
     {
       name: 'Model Senior Responsible Officer',
-      short: 'msro',
+      shortName: 'msro',
       kind: 'schema',
       description: 'Reviewer',
       collaboratorRole: 'owner',
     },
     {
       name: 'Model Technical Reviewer',
-      short: 'mtr',
+      shortName: 'mtr',
       kind: 'schema',
       description: 'Reviewer',
       collaboratorRole: 'owner',

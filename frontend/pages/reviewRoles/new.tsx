@@ -35,7 +35,7 @@ export default function ReviewRolesForm() {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<ReviewRolesFormData>({
     name: '',
-    short: '',
+    shortName: '',
     kind: 'schema',
     description: '',
     defaultEntities: [],
@@ -50,7 +50,7 @@ export default function ReviewRolesForm() {
   }
 
   const handleShortNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData) => ({ ...prevFormData, short: event.target.value as string }))
+    setFormData((prevFormData) => ({ ...prevFormData, shortName: event.target.value as string }))
     setFormData((prevFormData) => ({ ...prevFormData, id: event.target.value.toLowerCase() as string }))
   }
 
@@ -147,7 +147,7 @@ export default function ReviewRolesForm() {
                   <TextField
                     required
                     fullWidth
-                    value={formData.short}
+                    value={formData.shortName}
                     onChange={handleShortNameChange}
                     size='small'
                     id='role-shortname-input'
@@ -194,7 +194,7 @@ export default function ReviewRolesForm() {
                   type='submit'
                   variant='contained'
                   color='primary'
-                  disabled={!(formData.name && formData.short && formData.description && formData.collaboratorRole)}
+                  disabled={!(formData.name && formData.shortName && formData.description && formData.collaboratorRole)}
                 >
                   Create Role
                 </LoadingButton>

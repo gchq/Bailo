@@ -46,7 +46,7 @@ export default function Release() {
     () =>
       hasRole(
         currentUserRoles,
-        reviewRoles.map((role) => role.short),
+        reviewRoles.map((role) => role.shortName),
       ) &&
       reviews.filter((review) =>
         userReviews.some(
