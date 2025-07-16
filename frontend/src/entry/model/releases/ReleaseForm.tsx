@@ -33,6 +33,7 @@ import RichTextEditor from 'src/common/RichTextEditor'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import ModelImageList from 'src/entry/model/ModelImageList'
 import ExistingFileSelector from 'src/entry/model/releases/ExistingFileSelector'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import ReadOnlyAnswer from 'src/Form/ReadOnlyAnswer'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
@@ -172,6 +173,7 @@ export default function ReleaseForm({
         showMenuItems={{ rescanFile: true }}
         mutator={mutateReleases}
         style={{ padding: 1 }}
+        releases={releases}
       />
     ) : (
       <></>
@@ -185,6 +187,12 @@ export default function ReleaseForm({
   if (isModelCardRevisionsError) {
     return <MessageAlert message={isModelCardRevisionsError.info.message} severity='error' />
   }
+
+  const error = MultipleErrorWrapper('Unable to load release form', {
+    isModelCardRevisionsError,
+    isReleasesError,
+  })
+  if (error) return error
 
   return (
     <Stack spacing={2}>
