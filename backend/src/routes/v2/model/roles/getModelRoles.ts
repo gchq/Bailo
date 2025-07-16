@@ -25,7 +25,7 @@ export const getModelRoles = [
       params: { modelId },
     } = parse(req, getModelRolesSchema)
 
-    const allRoles = await getAllEntryRoles(modelId)
+    const allRoles = await getAllEntryRoles(req.user, modelId)
 
     res.json({
       roles: allRoles,

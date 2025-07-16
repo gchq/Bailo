@@ -5,7 +5,7 @@ import { AccessRequestDoc } from '../models/AccessRequest.js'
 import ModelModel, { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
 import { ReleaseDoc } from '../models/Release.js'
 import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
-import ReviewRoleModel, { ReviewRoleInterface } from '../models/ReviewRole.js'
+import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
 import SchemaModel from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
@@ -254,18 +254,21 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
   }
 }
 
-export async function findReviewRoles(schemaId?: string): Promise<ReviewRoleInterface[]> {
-  let reviewRolesFromSchema: string[] = []
-  let reviewRoles = []
+export async function findReviewRoles(schemaId?: string | string[]): Promise<ReviewRoleInterface[]> {
+  let reviewRoles: ReviewRoleDoc[] = []
+  let schemaIds: string[] = []
   if (schemaId) {
-    const schema = await SchemaModel.findOne({ id: schemaId })
-    if (!schema) {
-      throw BadReq('Could not find requested schema when finding filtered review roles', { schemaId })
+    if (typeof schemaId === 'string') {
+      schemaIds.push(schemaId)
+    } else {
+      schemaIds = schemaId
     }
-    if (schema.reviewRoles) {
-      reviewRolesFromSchema = schema.reviewRoles
+    const schemas = await SchemaModel.find({ id: schemaIds })
+    if (schemas.length > 0) {
+      const schemaRoles = schemas.map((schema) => schema.reviewRoles)
+      const uniqueRoles = [...new Set(...schemaRoles)]
+      reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles })
     }
-    reviewRoles = await ReviewRoleModel.find({ shortName: reviewRolesFromSchema })
   } else {
     reviewRoles = await ReviewRoleModel.find()
   }
