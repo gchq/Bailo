@@ -209,22 +209,25 @@ export default function NewSchema() {
                 />
                 <Typography variant='caption'>A short description describing the purpose of this schema</Typography>
               </Stack>
-              <Autocomplete
-                multiple
-                size='small'
-                options={reviewRoles}
-                onChange={handleReviewRolesOnChange}
-                getOptionLabel={(option: ReviewRoleInterface) => option.name}
-                value={newReviewRoles || []}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label='Select an option below'
-                    size='small'
-                    placeholder={reviewRoles.length ? undefined : 'Unanswered'}
-                  />
-                )}
-              />
+              <Stack spacing={1}>
+                <Typography fontWeight='bold'>Default Review Roles</Typography>
+                <Autocomplete
+                  multiple
+                  size='small'
+                  options={reviewRoles}
+                  onChange={handleReviewRolesOnChange}
+                  getOptionLabel={(option: ReviewRoleInterface) => option.name}
+                  value={newReviewRoles || []}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label='Select an option below'
+                      size='small'
+                      placeholder={reviewRoles.length ? undefined : 'Unanswered'}
+                    />
+                  )}
+                />
+              </Stack>
               <Stack>
                 <Typography fontWeight='bold'>
                   Schema Type <span style={{ color: theme.palette.error.main }}>*</span>
