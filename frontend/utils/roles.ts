@@ -5,7 +5,7 @@ export function getRoleDisplayName(roleId: string, entryRoles: SystemRole[]) {
   if (role) {
     return role.name
   }
-  return roleId
+  return 'Unknown Role'
 }
 
 export const hasRole = (userRoles: string[], validRoles: string[]) => {
