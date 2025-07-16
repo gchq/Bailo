@@ -54,14 +54,14 @@ interface PostSchemaResponse {
 
 export const postSchema = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostSchemaResponse>) => {
+  async (req: Request, res: Response<PostSchemaResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateSchema
     const { body } = parse(req, postSchemaSchema)
 
     const schema = await createSchema(req.user, body)
     await audit.onCreateSchema(req, schema)
 
-    return res.json({
+    res.json({
       schema,
     })
   },

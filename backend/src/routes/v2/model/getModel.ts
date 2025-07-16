@@ -42,7 +42,7 @@ interface GetModelResponse {
 
 export const getModel = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetModelResponse>) => {
+  async (req: Request, res: Response<GetModelResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewModel
     const { params, query } = parse(req, getModelSchema)
 
@@ -50,7 +50,7 @@ export const getModel = [
 
     await audit.onViewModel(req, model)
 
-    return res.json({
+    res.json({
       model,
     })
   },

@@ -45,14 +45,14 @@ interface PostUserTokenResponse {
 
 export const postUserToken = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostUserTokenResponse>) => {
+  async (req: Request, res: Response<PostUserTokenResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateUserToken
     const { body } = parse(req, postUserTokenSchema)
 
     const token = await createToken(req.user, body)
     await audit.onCreateUserToken(req, token)
 
-    return res.json({
+    res.json({
       token,
     })
   },

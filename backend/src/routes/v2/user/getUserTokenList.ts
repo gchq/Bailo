@@ -31,8 +31,8 @@ registerPath({
 
 export const getUserTokenList = [
   bodyParser.json(),
-  async (_req: Request, res: Response) => {
-    return res.json({
+  async (_req: Request, res: Response): Promise<void> => {
+    res.json({
       tokenActionMap,
     })
   },

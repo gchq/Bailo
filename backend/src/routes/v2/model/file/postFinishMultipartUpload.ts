@@ -18,10 +18,10 @@ interface PostFinishMultipartUpload {
 }
 
 export const postFinishMultipartUpload = [
-  async (req: Request, res: Response<PostFinishMultipartUpload>) => {
+  async (req: Request, res: Response<PostFinishMultipartUpload>): Promise<void> => {
     const _ = parse(req, postFinishMultipartUploadSchema)
 
-    return res.json({
+    res.json({
       message: 'Successfully finished multipart upload.',
     })
   },

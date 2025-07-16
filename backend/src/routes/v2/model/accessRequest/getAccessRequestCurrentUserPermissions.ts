@@ -40,14 +40,14 @@ interface GetAccessRequestCurrentUserPermissionsResponse {
 
 export const getAccessRequestCurrentUserPermissions = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetAccessRequestCurrentUserPermissionsResponse>) => {
+  async (req: Request, res: Response<GetAccessRequestCurrentUserPermissionsResponse>): Promise<void> => {
     const {
       params: { accessRequestId },
     } = parse(req, getAccessRequestCurrentUserPermissionsSchema)
 
     const permissions = await getCurrentUserPermissionsByAccessRequest(req.user, accessRequestId)
 
-    return res.json({
+    res.json({
       permissions,
     })
   },

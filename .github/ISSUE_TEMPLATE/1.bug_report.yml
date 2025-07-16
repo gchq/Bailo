@@ -1,0 +1,69 @@
+name: 🐛 Bug report
+description: Create a report to help us improve Bailo.
+labels: [triage,bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is used for reporting a bug. 
+
+        Feature requests should be opened using this [template](https://github.com/gchq/Bailo/issues/new?template=2.feature_request.yml).
+
+        Before opening a new issue, please do a [search](https://github.com/gchq/Bailo/issues) of existing issues and :+1: upvote the existing issue instead. This will result in a quicker resolution.
+
+  - type: textarea
+    attributes:
+      label: To Reproduce
+      description: A step-by-step description of how to reproduce the issue, based on the linked reproduction. Screenshots can be provided in the issue body below. If using code blocks, make sure that [syntax highlighting is correct](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#syntax-highlighting) and double check that the rendered preview is not broken.
+      placeholder: |
+        1. Start the application in development
+        2. Click X
+        3. Y will happen
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Current vs. Expected behavior
+      description: |
+        A clear and concise description of what the bug is (e.g., screenshots, logs, etc.), and what you expected to happen.
+
+      placeholder: 'Following the steps from the previous section, I expected A to happen, but I observed B instead.'
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Provide environment information
+      render: bash
+      placeholder: |
+        version / commit hash of bailo (git rev-parse HEAD)
+        Runtime environment:
+          docker-compose
+          openshift
+          AWS EKS
+        Binaries:
+          Node: 20.17.0
+          npm: 10.8.2
+        Relevant Packages:
+          typescript: 5.6.2
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: |
+        Any extra information that might help us investigate. For example, where are you deploying your application (Vercel, Docker, other platform)? Is it only reproducible on that platform, or locally too? Is the issue only happening in a specific browser? etc.
+      placeholder: |
+        I tested my reproduction against different canary releases, and the first one that introduced the bug was "15.0.0-canary.148", since reverting to "15.0.0-canary.147" works.
+
+        or
+
+        I am hosting via Docker with the recommended `output: "standalone"` option, and if I remove that option or try a different hosting option, I cannot reproduce the same issue.
+  - type: dropdown
+    attributes:
+      label: What is the priority of your issue?
+      options:
+        - 'Low'
+        - 'Medium'
+        - 'High'
+    validations:
+      required: true

@@ -59,7 +59,7 @@ interface PostAccessRequest {
 
 export const postAccessRequest = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostAccessRequest>) => {
+  async (req: Request, res: Response<PostAccessRequest>): Promise<void> => {
     req.audit = AuditInfo.CreateAccessRequest
     const {
       params: { modelId },
@@ -70,7 +70,7 @@ export const postAccessRequest = [
 
     await audit.onCreateAccessRequest(req, accessRequest)
 
-    return res.json({
+    res.json({
       accessRequest,
     })
   },

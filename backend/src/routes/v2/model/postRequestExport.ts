@@ -48,7 +48,7 @@ interface PostRequestExportResponse {
 
 export const postRequestExportToS3 = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostRequestExportResponse>) => {
+  async (req: Request, res: Response<PostRequestExportResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateExport
     const {
       params: { modelId },
@@ -58,7 +58,7 @@ export const postRequestExportToS3 = [
     await exportModel(req.user, modelId, disclaimerAgreement, semvers)
     await audit.onCreateS3Export(req, modelId)
 
-    return res.json({
+    res.json({
       message: 'Successfully started export upload.',
     })
   },
