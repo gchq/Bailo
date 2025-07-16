@@ -51,7 +51,7 @@ jobs:
 
 
   python_test:
-    needs: static_checks
+    needs: python_static_checks
     runs-on: ubuntu-latest
     strategy:
       matrix:
