@@ -6,6 +6,7 @@ import EmptyBlob from 'src/common/EmptyBlob'
 import Paginate from 'src/common/Paginate'
 import EntryListRow from 'src/marketplace/EntryListRow'
 import MessageAlert from 'src/MessageAlert'
+import { PeerConfigStatus } from 'types/types'
 
 interface EntryListProps {
   entries: EntrySearchResult[]
@@ -14,6 +15,7 @@ interface EntryListProps {
   selectedOrganisations: string[]
   onSelectedOrganisationsChange: (chips: string[]) => void
   entriesErrorMessage?: string
+  peers?: Map<string, PeerConfigStatus>
 }
 
 interface RowProps {
@@ -32,6 +34,7 @@ export default function EntryList({
   selectedOrganisations,
   onSelectedOrganisationsChange,
   entriesErrorMessage,
+  peers,
 }: EntryListProps) {
   const [windowHeight, setWindowHeight] = useState(0)
 
@@ -64,6 +67,7 @@ export default function EntryList({
       data={data}
       index={index}
       style={{ padding: theme.spacing(2.5) }}
+      peers={peers}
     />
   )
 
