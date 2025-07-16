@@ -201,6 +201,7 @@ export interface SchemaInterface {
   meta: unknown
   uiSchema: unknown
   schema: unknown
+  reviewRoles: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -223,9 +224,9 @@ export const RoleKind = {
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
 export interface Role {
-  id: string
+  _id: string
   name: string
-  short?: string
+  shortName: string
   kind?: RoleKindKeys
   description?: string
 }
@@ -237,7 +238,7 @@ export const SchemaKindLabel = {
 }
 export type SchemaKindLabelKeys = (typeof SchemaKindLabel)[keyof typeof SchemaKindLabel]
 
-export type ReviewRolesFormData = Role & {
+export type ReviewRolesFormData = Omit<Role, '_id'> & {
   defaultEntities?: string[]
   lockEntities: boolean
   collaboratorRole?: CollaboratorRoleType
@@ -612,3 +613,25 @@ export type FileUploadMetadata = {
   tags: string[]
   text: string
 }
+
+export interface ReviewRoleInterface {
+  _id: string
+  name: string
+  shortName: string
+  kind: RoleKindKeys
+  description?: string
+  defaultEntities?: string[]
+  lockEntities?: boolean
+  collaboratorRole?: CollaboratorRolesKeys
+  createdAt: string
+  updatedAt: string
+}
+
+export const CollaboratorRoles = {
+  None: 'none',
+  Owner: 'owner',
+  Contributor: 'contributor',
+  Consumer: 'consumer',
+} as const
+
+export type CollaboratorRolesKeys = (typeof CollaboratorRoles)[keyof typeof CollaboratorRoles]

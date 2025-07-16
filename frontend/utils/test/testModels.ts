@@ -8,7 +8,9 @@ import {
   ResponseInterface,
   ResponseKind,
   ReviewRequestInterface,
+  ReviewRoleInterface,
   Role,
+  RoleKind,
   SchemaInterface,
   StepNoRender,
 } from 'types/types'
@@ -177,6 +179,7 @@ export const testAccessRequestSchema: SchemaInterface = {
     required: ['overview'],
     additionalProperties: false,
   },
+  reviewRoles: ['msro'],
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -194,8 +197,16 @@ export const testAccessRequestSchemaStepNoRender: StepNoRender = {
 }
 
 export const testManagerRole: Role = {
-  id: 'mngr',
+  _id: '123',
+  shortName: 'mngr',
   name: 'Manager',
+}
+
+export const testManagerRoleInterface: ReviewRoleInterface = {
+  ...testManagerRole,
+  kind: RoleKind.SCHEMA,
+  createdAt: '',
+  updatedAt: '',
 }
 
 export const testUserInformation: UserInformation = {

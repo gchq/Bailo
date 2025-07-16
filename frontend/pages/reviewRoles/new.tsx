@@ -6,6 +6,7 @@ import {
   AccordionSummary,
   Box,
   Container,
+  FormControl,
   IconButton,
   MenuItem,
   Paper,
@@ -17,7 +18,7 @@ import {
   Typography,
 } from '@mui/material'
 import { ClearIcon } from '@mui/x-date-pickers'
-import { postReviewRole } from 'actions/model'
+import { postReviewRole } from 'actions/reviewRoles'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
@@ -34,9 +35,8 @@ export default function ReviewRolesForm() {
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<ReviewRolesFormData>({
-    id: '',
     name: '',
-    short: '',
+    shortName: '',
     kind: 'schema',
     description: '',
     defaultEntities: [],
@@ -51,7 +51,7 @@ export default function ReviewRolesForm() {
   }
 
   const handleShortNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData) => ({ ...prevFormData, short: event.target.value as string }))
+    setFormData((prevFormData) => ({ ...prevFormData, shortName: event.target.value as string }))
     setFormData((prevFormData) => ({ ...prevFormData, id: event.target.value.toLowerCase() as string }))
   }
 
@@ -104,12 +104,11 @@ export default function ReviewRolesForm() {
     event.preventDefault()
     setErrorMessage('')
     setLoading(true)
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
-    }))
 
-    const res = await postReviewRole(formData)
+    const res = await postReviewRole({
+      ...formData,
+      defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
+    })
 
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
@@ -149,7 +148,7 @@ export default function ReviewRolesForm() {
                   <TextField
                     required
                     fullWidth
-                    value={formData.short}
+                    value={formData.shortName}
                     onChange={handleShortNameChange}
                     size='small'
                     id='role-shortname-input'
@@ -166,14 +165,16 @@ export default function ReviewRolesForm() {
                   id='role-description-input'
                 />
               </LabelledInput>
-              <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
-                <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
-                  <MenuItem value='none'>None</MenuItem>
-                  <MenuItem value='owner'>Owner</MenuItem>
-                  <MenuItem value='contributor'>Contributor</MenuItem>
-                  <MenuItem value='consumer'>Consumer</MenuItem>
-                </Select>
-              </LabelledInput>
+              <FormControl size='small'>
+                <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
+                  <Select disabled value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
+                    <MenuItem value='none'>None</MenuItem>
+                    <MenuItem value='owner'>Owner</MenuItem>
+                    <MenuItem value='contributor'>Contributor</MenuItem>
+                    <MenuItem value='consumer'>Consumer</MenuItem>
+                  </Select>
+                </LabelledInput>
+              </FormControl>
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
                   <Typography fontWeight='bold'>Default collaborators</Typography>
@@ -196,7 +197,7 @@ export default function ReviewRolesForm() {
                   type='submit'
                   variant='contained'
                   color='primary'
-                  disabled={!(formData.name && formData.short && formData.description && formData.collaboratorRole)}
+                  disabled={!(formData.name && formData.shortName && formData.description && formData.collaboratorRole)}
                 >
                   Create Role
                 </LoadingButton>

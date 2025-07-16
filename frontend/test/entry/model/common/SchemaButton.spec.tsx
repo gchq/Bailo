@@ -1,15 +1,26 @@
 import { ThemeProvider } from '@mui/material/styles'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { useGetReviewRoles } from 'actions/reviewRoles'
 import { MarkdownDisplayProps } from 'src/common/MarkdownDisplay'
 import SchemaButton from 'src/schemas/SchemaButton'
 import { lightTheme } from 'src/theme'
-import { testAccessRequestSchema } from 'utils/test/testModels'
+import { testAccessRequestSchema, testManagerRoleInterface } from 'utils/test/testModels'
 import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('src/common/MarkdownDisplay.tsx', () => ({ default: (_props: MarkdownDisplayProps) => <></> }))
 
+vi.mock('actions/reviewRoles', () => ({
+  useGetReviewRoles: vi.fn(),
+}))
+
 describe('SchemaButton', () => {
   it('displays a loading spinner when loading prop is true', async () => {
+    vi.mocked(useGetReviewRoles).mockReturnValue({
+      reviewRoles: [testManagerRoleInterface],
+      isReviewRolesLoading: false,
+      isReviewRolesError: undefined,
+      mutateReviewRoles: vi.fn(),
+    })
     render(
       <ThemeProvider theme={lightTheme}>
         <SchemaButton schema={testAccessRequestSchema} onClick={() => undefined} loading />

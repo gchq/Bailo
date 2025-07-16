@@ -217,6 +217,7 @@ def test_post_schema(requests_mock):
         description="example_description",
         kind=SchemaKind.MODEL,
         json_schema={"test": "test"},
+        review_roles=["test"],
     )
 
     assert result == {"success": True}
@@ -272,17 +273,6 @@ def test_get_model_roles(requests_mock):
 
     client = Client("https://example.com")
     result = client.get_model_roles(
-        model_id="test_id",
-    )
-
-    assert result == {"success": True}
-
-
-def test_get_model_user_roles(requests_mock):
-    requests_mock.get("https://example.com/api/v2/model/test_id/roles/mine", json={"success": True})
-
-    client = Client("https://example.com")
-    result = client.get_model_user_roles(
         model_id="test_id",
     )
 
