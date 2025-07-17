@@ -89,13 +89,13 @@ export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
 
 const emptyRolesList = []
 
-export function useGetModelRoles(id?: string) {
+export function useGetModelRoles(id: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       roles: SystemRole[]
     },
     ErrorInfo
-  >(id ? `/api/v2/model/roles` : null, fetcher)
+  >(`/api/v2/model/${id}/roles`, fetcher)
 
   return {
     mutateModelRoles: mutate,
