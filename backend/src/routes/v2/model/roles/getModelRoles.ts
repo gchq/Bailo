@@ -7,10 +7,8 @@ import config from '../../../../utils/config.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getModelRolesSchema = z.object({
-  params: z.object({
-    modelId: z.string({
-      required_error: 'Must specify model id as param',
-    }),
+  query: z.object({
+    modelId: z.string().optional().openapi({ example: 'model-0qjrad' }),
   }),
 })
 
@@ -21,10 +19,14 @@ interface GetModelRolesResponse {
 export const getModelRoles = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelRolesResponse>): Promise<void> => {
-    const _ = parse(req, getModelRolesSchema)
+    const {
+      query: { modelId },
+    } = parse(req, getModelRolesSchema)
 
-    res.json({
-      roles: [
+    let modelRoles: Role[] = []
+
+    if (modelId) {
+      modelRoles = [
         {
           id: 'msro',
           name: 'Model Senior Responsible Officer',
@@ -39,6 +41,12 @@ export const getModelRoles = [
           kind: RoleKind.SCHEMA,
           description: 'This role is specified by the schema in accordance with its policy.',
         },
+      ]
+    }
+
+    res.json({
+      roles: [
+        ...modelRoles,
         {
           id: 'consumer',
           name: `${config.ui.roleDisplayNames.consumer}`,

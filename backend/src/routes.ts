@@ -47,7 +47,6 @@ import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
 import { getAllModelReviewRoles } from './routes/v2/model/roles/getAllModelReviewRoles.js'
 import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
-import { getSystemRoles } from './routes/v2/model/roles/getSystemRoles.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
 import { getWebhooks } from './routes/v2/model/webhook/getWebhooks.js'
 import { postWebhook } from './routes/v2/model/webhook/postWebhook.js'
@@ -185,12 +184,11 @@ server.get('/api/v2/responses', ...getResponses)
 server.patch('/api/v2/response/:responseId', ...patchResponse)
 server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReaction)
 
-server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
 server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
 server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
 
-server.get('/api/v2/roles', ...getSystemRoles)
 server.get('/api/v2/roles/review', ...getAllModelReviewRoles)
+server.get('/api/v2/roles', ...getModelRoles)
 
 server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)

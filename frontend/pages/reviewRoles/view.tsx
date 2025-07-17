@@ -1,5 +1,5 @@
 import { Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
-import { useGetSystemRoles } from 'actions/model'
+import { useGetModelRoles } from 'actions/model'
 import { useGetAllReviewRoles } from 'actions/reviewRoles'
 import { useGetCurrentUser } from 'actions/user'
 import { useMemo, useState } from 'react'
@@ -13,7 +13,7 @@ import { getRoleDisplayName } from 'utils/roles'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetAllReviewRoles()
-  const { systemRoles, isSystemRolesLoading, isSystemRolesError } = useGetSystemRoles()
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
@@ -47,16 +47,16 @@ export default function ReviewRoles() {
             System Role
           </Typography>
           {reviewRoles[selectedRole].collaboratorRole ? (
-            <Typography>{getRoleDisplayName(reviewRoles[selectedRole].collaboratorRole, systemRoles)}</Typography>
+            <Typography>{getRoleDisplayName(reviewRoles[selectedRole].collaboratorRole, modelRoles)}</Typography>
           ) : (
             <Typography fontStyle='italic'>Unset</Typography>
           )}
         </>
       ),
-    [systemRoles, reviewRoles, selectedRole],
+    [reviewRoles, selectedRole, modelRoles],
   )
 
-  if (isCurrentUserLoading || isSystemRolesLoading || isReviewRolesLoading) {
+  if (isCurrentUserLoading || isModelRolesLoading || isReviewRolesLoading) {
     return <Loading />
   }
 
@@ -68,8 +68,8 @@ export default function ReviewRoles() {
     return <ErrorWrapper message={isReviewRolesError.info.message} />
   }
 
-  if (isSystemRolesError) {
-    return <ErrorWrapper message={isSystemRolesError.info.message} />
+  if (isModelRolesError) {
+    return <ErrorWrapper message={isModelRolesError.info.message} />
   }
   if (!currentUser || !currentUser.isAdmin) {
     return (
