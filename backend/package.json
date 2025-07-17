@@ -46,6 +46,7 @@
     "express": "5.1.0",
     "express-session": "^1.18.1",
     "fflate": "^0.8.2",
+    "form-data": "^4.0.4",
     "grant": "^5.4.23",
     "jsonschema": "^1.5.0",
     "jsonwebtoken": "^9.0.2",
