@@ -11,7 +11,7 @@ services:
       - '8082:8082'
   mailcrab:
     networks:
-      debug:
+      default:
     ports:
       - 1080:1080
       - 1025:1025
