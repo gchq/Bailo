@@ -171,6 +171,7 @@ minio:
     rootUser: ""
     rootPassword: ""
     existingSecret: "bailo-minio" # Helm generated Secret
+    usePasswordFiles: false
   defaultBuckets: "uploads,registry"
   createBuckets: "false" # attempt to create buckets
   uploadBucket: uploads # required for Bailo
@@ -179,6 +180,10 @@ minio:
   service:
     ports:
       api: 31111 # default 9000
+  # skip the security verification check https://github.com/bitnami/charts/issues/30850
+  global:
+    security:
+      allowInsecureImages: true
   useSSL: false
   persistence:
     #enabled: false # Required for aws. EKS is not able to handle dynamic creation of PVC using this helm chart. Instead /templates/storage.yaml handles eks storage. Storage is not removed when deployed minio is removed.
