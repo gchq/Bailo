@@ -18,21 +18,22 @@ jobs:
       matrix:
         component:
           - name: backend
-            build_contexts: context=backend,python=./lib/python
+            context: backend
+            additional_contexts: python=./lib/python
             dockerfile: backend/Dockerfile
             tar: /tmp/bailo_backend.tar
             artifact: bailo_backend
             cache_scope: backend
             tag: bailo_backend:latest
           - name: frontend
-            build_contexts: context=frontend
+            context: frontend
             dockerfile: frontend/Dockerfile
             tar: /tmp/bailo_frontend.tar
             artifact: bailo_frontend
             cache_scope: frontend
             tag: bailo_frontend:latest
           - name: modelscan
-            build_contexts: context=lib/modelscan_api
+            context: lib/modelscan_api
             dockerfile: lib/modelscan_api/Dockerfile
             tar: /tmp/bailo_modelscan.tar
             artifact: bailo_modelscan
@@ -50,8 +51,9 @@ jobs:
       - name: Build ${{ matrix.component.name }} image
         uses: docker/build-push-action@v6
         with:
-          build-contexts: ${{ matrix.component.build_contexts }}
-          file: ${{ matrix.component.file }}
+          context: ${{ matrix.component.build_contexts }}
+          build-contexts: ${{ matrix.component.additional_contexts || '' }}
+          file: ${{ matrix.component.dockerfile }}
           tags: ${{ matrix.component.tag }}
           cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
           cache-to: type=gha,mode=max,scope=${{ matrix.component.cache_scope }}
