@@ -6,4 +6,4 @@ class BailoException(Exception):
 
 
 class ResponseException(Exception):
-    """Exception used if an endpoint gave no response."""
+    """Exception raised when the Bailo API returns a non-JSON response."""
