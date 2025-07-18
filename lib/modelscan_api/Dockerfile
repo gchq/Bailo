@@ -1,10 +1,7 @@
 # syntax=docker/dockerfile:1
-ARG PYTHON_VERSION=3.12 \
-    PYTHONPATH=/venv/lib/python${PYTHON_VERSION}/site-packages \
-    PY_IMG=python:${PYTHON_VERSION}-slim-bookworm \
-    RUNTIME_IMG=ubuntu:24.04
+ARG PYTHONPATH=/venv/lib/python3.12/site-packages
 
-FROM ${PY_IMG} AS build
+FROM python:3.12.11-slim-bookworm AS build
 ARG PYTHONPATH
 
 COPY requirements.txt /requirements.txt
@@ -13,7 +10,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     /venv/bin/pip install --upgrade pip setuptools wheel && \
     /venv/bin/pip install -r /requirements.txt
 
-FROM ${RUNTIME_IMG} AS final
+FROM ubuntu:24.04 AS final
 ARG PYTHONPATH
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
