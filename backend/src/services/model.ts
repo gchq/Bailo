@@ -110,7 +110,7 @@ export async function searchModels(
   kind: EntryKindKeys,
   libraries: Array<string>,
   organisations: Array<string>,
-  states: string,
+  states: Array<string>,
   filters: Array<string>,
   search: string,
   task?: string,
