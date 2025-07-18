@@ -1,0 +1,38 @@
+name: bailo-dev
+
+services:
+  webhook-tester:
+    networks:
+      default:
+      internal:
+    image: tarampampam/webhook-tester
+    command: serve --port 8082 --create-session 00000000-0000-0000-0000-000000000000
+    ports:
+      - '8082:8082'
+  mailcrab:
+    networks:
+      default:
+    ports:
+      - 1080:1080
+      - 1025:1025
+    image: marlonb/mailcrab:v1.6.1
+
+  backend:
+    ports:
+      - 9229:9229
+    volumes:
+      - ./backend/src:/app/src
+
+  frontend:
+    volumes:
+      - ./frontend:/app
+
+  modelscan:
+    volumes:
+      - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
+
+  minio:
+    environment:
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:8080/minio/ui/
+      MINIO_SERVER_URL: http://minio:9000
+      MINIO_SKIP_CLIENT: yes
