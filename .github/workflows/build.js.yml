@@ -342,7 +342,7 @@ jobs:
           }
           EOT
 
-      - run: docker compose -f docker-compose.yml -f docker-compose.prod.yml --env-file prod.env up -d
+      - run: docker compose -f compose.yaml -f compose.prod.yaml --env-file prod.env up -d
 
       # wait for app to start
       - run: |
