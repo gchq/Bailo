@@ -16,34 +16,39 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade bailo -r re
 
 RUN make dirhtml
 
-FROM node:24.4.0-alpine AS installer
+FROM node:24.4.0-alpine AS base
 
-RUN apk add --no-cache libc6-compat
-RUN apk update
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
-
-COPY . .
-RUN npm run build
-
-FROM node:24.4.0-alpine AS runner
-
-RUN apk update
 RUN apk add --no-cache libc6-compat ca-certificates
+RUN apk update
 
 WORKDIR /app
 
+COPY --from=sphinx-docs /app/docs/python-docs python-docs
 COPY package*.json ./
 RUN --mount=type=cache,target=/cache/npm npm install --omit=dev --cache=/cache/npm
 
-COPY --from=installer /app/config config
-COPY --from=installer /app/dist .
-COPY --from=sphinx-docs /app/docs/python-docs python-docs
-
-ENV NODE_ENV=production
 EXPOSE 3001
+
+FROM base AS dev
+
+# Pickup dev packages too
+RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
+
+COPY . .
+
+EXPOSE 9229
+
+CMD [ "npm", "run", "dev" ]
+
+FROM dev AS build
+
+WORKDIR /app
+RUN npm run build
+
+FROM base AS prod
+ENV NODE_ENV=production
+
+COPY --from=build /app/config config
+COPY --from=build /app/dist .
 
 CMD ["node", "src/index.js"]

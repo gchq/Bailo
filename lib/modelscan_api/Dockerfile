@@ -1,4 +1,4 @@
-FROM python:3.12.11-slim-bookworm
+FROM python:3.12.11-slim-bookworm AS dev
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 COPY ./requirements.txt /app/requirements.txt
 
 RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade -r /app/requirements.txt
+
+CMD ["fastapi", "dev", "bailo_modelscan_api/main.py", "--port", "3311", "--host", "0.0.0.0"]
+
+FROM dev AS prod
 
 COPY ./bailo_modelscan_api /app/bailo_modelscan_api
 
