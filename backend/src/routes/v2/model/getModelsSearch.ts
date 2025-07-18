@@ -16,6 +16,7 @@ export const getModelsSearchSchema = z.object({
     task: z.string().optional(),
     libraries: coerceArray(z.array(z.string()).optional().default([])),
     organisations: coerceArray(z.array(z.string()).optional().default([])),
+    states: coerceArray(z.array(z.string()).optional().default([])),
     filters: coerceArray(z.array(z.string()).optional().default([])),
     search: z.string().optional().default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
@@ -75,7 +76,7 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations },
+      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states },
     } = parse(req, getModelsSearchSchema)
 
     const foundModels = await searchModels(
@@ -83,6 +84,7 @@ export const getModelsSearch = [
       kind as EntryKindKeys,
       libraries,
       organisations,
+      states,
       filters,
       search,
       task,

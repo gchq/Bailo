@@ -110,6 +110,7 @@ export async function searchModels(
   kind: EntryKindKeys,
   libraries: Array<string>,
   organisations: Array<string>,
+  states: Array<string>,
   filters: Array<string>,
   search: string,
   task?: string,
@@ -124,6 +125,10 @@ export async function searchModels(
 
   if (organisations.length) {
     query.organisation = { $in: organisations }
+  }
+
+  if (states.length) {
+    query.state = { $in: states }
   }
 
   if (libraries.length) {

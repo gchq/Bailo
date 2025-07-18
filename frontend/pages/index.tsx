@@ -46,6 +46,7 @@ export default function Marketplace() {
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
+  const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const debouncedFilter = useDebounce(filter, 250)
@@ -58,6 +59,7 @@ export default function Marketplace() {
     selectedTask,
     selectedLibraries,
     selectedOrganisations,
+    selectedStates,
     debouncedFilter,
   )
 
@@ -71,6 +73,7 @@ export default function Marketplace() {
     selectedTask,
     selectedLibraries,
     selectedOrganisations,
+    selectedStates,
     debouncedFilter,
   )
 
@@ -84,6 +87,7 @@ export default function Marketplace() {
     task: taskFromQuery,
     libraries: librariesFromQuery,
     organisations: organisationsFromQuery,
+    states: statesFromQuery,
   } = router.query
 
   useEffect(() => {
@@ -107,7 +111,16 @@ export default function Marketplace() {
       }
       setSelectedOrganisations([...organisationsAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery])
+    if (statesFromQuery) {
+      let statesAsArray: string[] = []
+      if (typeof statesFromQuery === 'string') {
+        statesAsArray.push(statesFromQuery)
+      } else {
+        statesAsArray = [...statesFromQuery]
+      }
+      setSelectedStates([...statesAsArray])
+    }
+  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery, statesFromQuery])
 
   const handleSelectedRolesOnChange = useCallback(
     (selectedFilters: string[]) => {
@@ -131,6 +144,10 @@ export default function Marketplace() {
     return uiConfig ? uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem) : []
   }, [uiConfig])
 
+  const stateList = useMemo(() => {
+    return uiConfig ? uiConfig.modelDetails.states.map((stateItem) => stateItem) : []
+  }, [uiConfig])
+
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
       router.replace({
@@ -152,6 +169,14 @@ export default function Marketplace() {
     (organisations: string[]) => {
       setSelectedOrganisations(organisations)
       updateQueryParams('organisations', organisations)
+    },
+    [updateQueryParams],
+  )
+
+  const handleStatesOnChange = useCallback(
+    (states: string[]) => {
+      setSelectedStates(states)
+      updateQueryParams('states', states)
     },
     [updateQueryParams],
   )
@@ -180,6 +205,7 @@ export default function Marketplace() {
     setSelectedTask('')
     setSelectedLibraries([])
     setSelectedOrganisations([])
+    setSelectedStates([])
     setFilter('')
     router.replace('/', undefined, { shallow: true })
   }
@@ -271,6 +297,20 @@ export default function Marketplace() {
                 </Box>
                 <Box>
                   <ChipSelector
+                    label='States'
+                    chipTooltipTitle={'Filter by state'}
+                    options={stateList}
+                    expandThreshold={10}
+                    multiple
+                    selectedChips={selectedStates}
+                    onChange={handleStatesOnChange}
+                    size='small'
+                    ariaLabel='add state to search filter'
+                    accordion
+                  />
+                </Box>
+                <Box>
+                  <ChipSelector
                     label='Tasks'
                     chipTooltipTitle={'Filter by task'}
                     // TODO fetch all model tags
@@ -349,6 +389,8 @@ export default function Marketplace() {
                     onSelectedChipsChange={handleLibrariesOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
+                    selectedStates={selectedStates}
+                    onSelectedStatesChange={handleStatesOnChange}
                   />
                 </div>
               )}
@@ -361,6 +403,8 @@ export default function Marketplace() {
                     onSelectedChipsChange={handleLibrariesOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
+                    selectedStates={selectedStates}
+                    onSelectedStatesChange={handleStatesOnChange}
                   />
                 </div>
               )}
