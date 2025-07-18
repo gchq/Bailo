@@ -22,6 +22,7 @@ export const getEntities = [
       query: { q },
     } = parse(req, getEntitiesSchema)
 
+    throw Error
     if (q.length < 3) {
       res.json({ results: [] })
     }
