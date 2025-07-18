@@ -15,7 +15,7 @@ import {
   ReleaseInterface,
   ReviewRequestInterface,
 } from '../../types/types'
-import { getRoleDisplay } from '../../utils/roles'
+import { getRoleDisplayName } from '../../utils/roles'
 import MessageAlert from '../MessageAlert'
 import Loading from './Loading'
 
@@ -62,6 +62,7 @@ export default function ReviewWithComment({
 
   const { responses, isResponsesLoading, isResponsesError } = useGetResponses([...reviews.map((review) => review._id)])
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles(modelId)
+
   const [reviewRequest, setReviewRequest] = useState<ReviewRequestInterface>(
     reviews.find((review) => review.role === router.query.role) || reviews[0],
   )
@@ -145,7 +146,7 @@ export default function ReviewWithComment({
               }
               onChange={onChange}
               value={reviewRequest}
-              getOptionLabel={(option) => getRoleDisplay(option.role, modelRoles)}
+              getOptionLabel={(option) => getRoleDisplayName(option.role, modelRoles)}
               options={reviews}
               renderInput={(params) => <TextField {...params} label='Select your role' size='small' />}
             />

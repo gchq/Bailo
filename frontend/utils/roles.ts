@@ -1,10 +1,11 @@
-import { EntryInterface, Role, User } from 'types/types'
+import { EntryInterface, SystemRole, User } from 'types/types'
 
-export function getRoleDisplay(roleId: string, modelRoles: Role[]) {
-  const role = modelRoles.find((role) => role.id === roleId)
-  if (!role) return 'Unknown Role'
-
-  return role.name
+export function getRoleDisplayName(roleId: string, entryRoles: SystemRole[]) {
+  const role = entryRoles.find((role) => role.id === roleId)
+  if (role) {
+    return role.name
+  }
+  return roleId
 }
 
 export const hasRole = (userRoles: string[], validRoles: string[]) => {

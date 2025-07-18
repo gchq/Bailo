@@ -184,11 +184,11 @@ server.get('/api/v2/responses', ...getResponses)
 server.patch('/api/v2/response/:responseId', ...patchResponse)
 server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReaction)
 
-server.get('/api/v2/model/:modelId/roles', ...getModelRoles)
 server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
 server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
 
 server.get('/api/v2/roles/review', ...getAllModelReviewRoles)
+server.get('/api/v2/roles', ...getModelRoles)
 
 server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
