@@ -37,7 +37,6 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
       const scanResults = await scanStream(s3Stream, file.name)
 
       if (scanResults.errors.length !== 0) {
-        log.error('Errors during file scan', { scanResults, file, toolName: this.toolName })
         return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
           errors: scanResults.errors,
           file,
@@ -63,7 +62,6 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
         },
       ]
     } catch (error) {
-      log.error('Error during file scan', { error, file, toolName: this.toolName })
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
         error,
         file,
