@@ -16,6 +16,7 @@ jobs:
         component:
           - name: backend
             context: backend
+            additional_contexts: python=./lib/python
             dockerfile: backend/Dockerfile
             tar: /tmp/bailo_backend.tar
             artifact: bailo_backend
@@ -52,6 +53,7 @@ jobs:
           tags: ${{ matrix.component.tag }}
           cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
           cache-to: type=gha,mode=max,scope=${{ matrix.component.cache_scope }}
+          build-contexts: ${{ matrix.component.context }}${{ matrix.component.additional_contexts && ',' + matrix.component.additional_contexts  }}
           outputs: type=docker,dest=${{ matrix.component.tar }}
 
       - name: Upload artifact
