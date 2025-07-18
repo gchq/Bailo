@@ -1,6 +1,7 @@
 import ResponseModel, {
   Decision,
   ReactionKindKeys,
+  ResponseDoc,
   ResponseInterface,
   ResponseKind,
   ResponseReaction,
@@ -30,7 +31,7 @@ export async function findResponseById(responseId: string) {
   return response
 }
 
-export async function getResponsesByParentIds(_user: UserInterface, parentIds: string[]) {
+export async function getResponsesByParentIds(parentIds: string[]) {
   const responses = await ResponseModel.find({ parentId: { $in: parentIds } })
 
   if (!responses) {
@@ -59,6 +60,22 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   response.save()
 
   return response
+}
+
+export async function removeResponses(parentIds: string[]) {
+  const responses = await getResponsesByParentIds(parentIds)
+  const responseDeletions: ResponseDoc[] = []
+  for (const response of responses) {
+    try {
+      responseDeletions.push(await response.delete())
+    } catch (error) {
+      throw InternalError('The requested response could not be deleted.', {
+        responseId: response.id,
+        error,
+      })
+    }
+  }
+  return responseDeletions
 }
 
 export async function updateResponseReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
