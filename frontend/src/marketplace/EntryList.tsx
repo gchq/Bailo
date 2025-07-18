@@ -13,6 +13,8 @@ interface EntryListProps {
   onSelectedChipsChange: (chips: string[]) => void
   selectedOrganisations: string[]
   onSelectedOrganisationsChange: (chips: string[]) => void
+  selectedStates: string[]
+  onSelectedStatesChange: (chips: string[]) => void
   entriesErrorMessage?: string
 }
 
@@ -31,6 +33,8 @@ export default function EntryList({
   onSelectedChipsChange,
   selectedOrganisations,
   onSelectedOrganisationsChange,
+  selectedStates,
+  onSelectedStatesChange,
   entriesErrorMessage,
 }: EntryListProps) {
   const [windowHeight, setWindowHeight] = useState(0)
@@ -61,6 +65,8 @@ export default function EntryList({
       onSelectedChipsChange={onSelectedChipsChange}
       selectedOrganisations={selectedOrganisations}
       onSelectedOrganisationsChange={onSelectedOrganisationsChange}
+      selectedStates={selectedStates}
+      onSelectedStatesChange={onSelectedStatesChange}
       data={data}
       index={index}
       style={{ padding: theme.spacing(2.5) }}
