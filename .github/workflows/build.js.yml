@@ -51,7 +51,7 @@ jobs:
       - name: Build ${{ matrix.component.name }} image
         uses: docker/build-push-action@v6
         with:
-          context: ${{ matrix.component.build_contexts }}
+          context: ${{ matrix.component.context }}
           build-contexts: ${{ matrix.component.additional_contexts || '' }}
           file: ${{ matrix.component.dockerfile }}
           tags: ${{ matrix.component.tag }}
