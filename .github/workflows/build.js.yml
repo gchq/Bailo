@@ -18,21 +18,21 @@ jobs:
       matrix:
         component:
           - name: backend
-            build_contexts: backend,python=./lib/python
+            build_contexts: context=backend,python=./lib/python
             dockerfile: backend/Dockerfile
             tar: /tmp/bailo_backend.tar
             artifact: bailo_backend
             cache_scope: backend
             tag: bailo_backend:latest
           - name: frontend
-            build_contexts: frontend
+            build_contexts: context=frontend
             dockerfile: frontend/Dockerfile
             tar: /tmp/bailo_frontend.tar
             artifact: bailo_frontend
             cache_scope: frontend
             tag: bailo_frontend:latest
           - name: modelscan
-            build_contexts: lib/modelscan_api
+            build_contexts: context=lib/modelscan_api
             dockerfile: lib/modelscan_api/Dockerfile
             tar: /tmp/bailo_modelscan.tar
             artifact: bailo_modelscan
