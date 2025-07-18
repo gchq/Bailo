@@ -1,30 +1,22 @@
 import ReleaseModel from '../models/Release.js'
 import { ReviewDoc } from '../models/Review.js'
-import { UserInterface } from '../models/User.js'
 import { removeResponses } from '../services/response.js'
 import { removeReleaseReviews } from '../services/review.js'
 
-/**
- * This isn't really used but needed for consistency
- */
-const migrationUser: UserInterface = {
-  dn: 'migration',
-}
-
 export async function up() {
   // Find all releases have already been marked as deleted
-  const deletedReleases = await ReleaseModel.find({ deleted: true }).lean()
+  const deletedReleases = await ReleaseModel.find({ deleted: true })
   const deletedReviews: ReviewDoc[] = []
 
   // For each deleted release, deleted the reviews associated with it
   for (const { modelId, semver } of deletedReleases) {
-    const reviews = await removeReleaseReviews(migrationUser, modelId, semver)
+    const reviews = await removeReleaseReviews(modelId, semver)
     deletedReviews.push(...reviews)
   }
 
   const reviewIds = deletedReviews.map((r) => r.id)
   // For each deleted review, delete the responses associated with it
-  const deletedResponses = await removeResponses(migrationUser, reviewIds)
+  const deletedResponses = await removeResponses(reviewIds)
 
   // Store some basic metadata about the migration
   return {

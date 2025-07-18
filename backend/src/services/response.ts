@@ -31,7 +31,7 @@ export async function findResponseById(responseId: string) {
   return response
 }
 
-export async function getResponsesByParentIds(_user: UserInterface, parentIds: string[]) {
+export async function getResponsesByParentIds(parentIds: string[]) {
   const responses = await ResponseModel.find({ parentId: { $in: parentIds } })
 
   if (!responses) {
@@ -62,8 +62,8 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   return response
 }
 
-export async function removeResponses(user: UserInterface, parentIds: string[]) {
-  const responses = await getResponsesByParentIds(user, parentIds)
+export async function removeResponses(parentIds: string[]) {
+  const responses = await getResponsesByParentIds(parentIds)
   const responseDeletions: ResponseDoc[] = []
   for (const response of responses) {
     try {

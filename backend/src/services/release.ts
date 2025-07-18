@@ -535,12 +535,9 @@ export async function deleteRelease(user: UserInterface, modelId: string, semver
 
   // TODO: Wrap this in transactions in the future
 
-  const deletedReleases = await removeReleaseReviews(user, modelId, semver)
+  const deletedReleases = await removeReleaseReviews(modelId, semver)
   if (deletedReleases && deletedReleases.length > 0) {
-    await removeResponses(
-      user,
-      deletedReleases.flatMap((r) => r.id),
-    )
+    await removeResponses(deletedReleases.flatMap((r) => r.id))
   }
 
   await release.delete()
