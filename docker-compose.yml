@@ -103,6 +103,8 @@ services:
   backend:
     build:
       context: ./backend/
+      additional_contexts:
+        python: ./lib/python
       dockerfile: ./Dockerfile.dev
     volumes:
       - ./backend/src:/app/src
