@@ -19,6 +19,8 @@ class Agent:
     """Base API Agent for talking with Bailo.
 
     Wraps each request in an exception handler that maps API errors to Python Bailo errors, among status codes less than 400.
+
+    .. automethod:: __request
     """
 
     def __init__(
@@ -32,6 +34,15 @@ class Agent:
         self.verify = verify
 
     def __request(self, method, *args, **kwargs):
+        """Private method. Make an HTTP request with error handling.
+
+        :param method: HTTP method name (e.g. 'GET', 'POST' etc.).
+        :param *args: Positional arguments to requests.request.
+        :param **kwargs: Keyword arguments to requests.request.
+        :raises BailoException: If Bailo instance returns an error.
+        :raises ResponseException: Non-JSON error responses.
+        :return: Response object.
+        """
         kwargs["verify"] = self.verify
 
         res = requests.request(method, *args, **kwargs)
@@ -48,21 +59,45 @@ class Agent:
             raise ResponseException(f"{res.status_code} Cannot {method} to {res.request.url}") from e
 
     def get(self, *args, **kwargs):
+        """Make a GET request. See :func:`__request` for parameters.
+
+        :return: Response object.
+        """
         return self.__request("GET", *args, **kwargs)
 
     def post(self, *args, **kwargs):
+        """Make a POST request. See :func:`__request for parameters.
+
+        :return: Response object.
+        """
         return self.__request("POST", *args, **kwargs)
 
     def patch(self, *args, **kwargs):
+        """Make a PATCH request. See :func:`__request` for parameters.
+
+        :return: Response object.
+        """
         return self.__request("PATCH", *args, **kwargs)
 
     def push(self, *args, **kwargs):
+        """Make a PUSH request. See :func:`__request for parameters.
+
+        :return: Response object.
+        """
         return self.__request("PUSH", *args, **kwargs)
 
     def delete(self, *args, **kwargs):
+        """Make a DELETE request. See :func:`__request` for parameters.
+
+        :return: Response object.
+        """
         return self.__request("DELETE", *args, **kwargs)
 
     def put(self, *args, **kwargs):
+        """Make a PUT request. See :func:`__request` for parameters.
+
+        :return: Response object.
+        """
         return self.__request("PUT", *args, **kwargs)
 
 
