@@ -11,6 +11,8 @@ interface EntryListRowProps {
   onSelectedChipsChange: (chips: string[]) => void
   selectedOrganisations: string[]
   onSelectedOrganisationsChange: (organisations: string[]) => void
+  selectedStates: string[]
+  onSelectedStatesChange: (states: string[]) => void
   data: EntrySearchResult[]
   index: number
   style: CSSProperties
@@ -21,6 +23,8 @@ export default function EntryListRow({
   onSelectedChipsChange,
   selectedOrganisations,
   onSelectedOrganisationsChange,
+  selectedStates,
+  onSelectedStatesChange,
   data,
   index,
   style,
@@ -62,21 +66,37 @@ export default function EntryListRow({
           {entry.description}
         </Typography>
         <Stack direction='row' spacing={1} divider={<Divider flexItem orientation='vertical' />} alignItems='center'>
-          {entry.organisation && (
-            <ChipSelector
-              chipTooltipTitle={'Filter by organisation'}
-              options={[entry.organisation]}
-              expandThreshold={10}
-              variant='outlined'
-              multiple
-              selectedChips={selectedOrganisations}
-              onChange={onSelectedOrganisationsChange}
-              size='small'
-              ariaLabel='add tag to search filter'
-              icon={<CorporateFare />}
-              style={{ padding: 1 }}
-            />
-          )}
+          <Stack direction='row' spacing={1}>
+            {entry.organisation && (
+              <ChipSelector
+                chipTooltipTitle={'Filter by organisation'}
+                options={[entry.organisation]}
+                expandThreshold={10}
+                variant='outlined'
+                multiple
+                selectedChips={selectedOrganisations}
+                onChange={onSelectedOrganisationsChange}
+                size='small'
+                ariaLabel='add tag to search filter'
+                icon={<CorporateFare />}
+                style={{ padding: 1 }}
+              />
+            )}
+            {entry.state && (
+              <ChipSelector
+                chipTooltipTitle={'Filter by state'}
+                options={[entry.state]}
+                expandThreshold={10}
+                variant='outlined'
+                multiple
+                selectedChips={selectedStates}
+                onChange={onSelectedStatesChange}
+                size='small'
+                ariaLabel='add tag to search filter'
+                style={{ padding: 1 }}
+              />
+            )}
+          </Stack>
           <ChipSelector
             chipTooltipTitle={'Filter by tag'}
             options={entry.tags.slice(0, 10)}
