@@ -34,8 +34,8 @@ vi.mock('actions/uiConfig', () => ({
 }))
 
 describe('ReviewRoleDisplay', () => {
-  const testMessageAccess = 'This access needs to be reviewed by the Manager role.'
-  const testMessageRelease = 'This release needs to be reviewed by the Manager role.'
+  const testMessageAccess = 'This access needs to be reviewed by the Manager.'
+  const testMessageRelease = 'This release needs to be reviewed by the Manager.'
 
   it('shows a message when an access request has no responses', async () => {
     vi.mocked(useGetModelRoles).mockReturnValue({

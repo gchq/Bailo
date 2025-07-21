@@ -39,7 +39,7 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
       entryRoles.reduce<ReactNode[]>((filteredRoles, entryRole) => {
         if (entryRole.kind === roleKind) {
           filteredRoles.push(
-            <Box key={entryRole._id}>
+            <Box key={entryRole.shortName}>
               <Typography fontWeight='bold'>{entryRole.name}</Typography>
               <Typography>{entryRole.description}</Typography>
             </Box>,
