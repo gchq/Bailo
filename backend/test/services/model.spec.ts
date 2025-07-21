@@ -183,7 +183,16 @@ describe('services > model', () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, 'model', ['library'], ['mine'], [], [], 'search', 'task')
+    await searchModels(
+      user,
+      'model',
+      ['library'],
+      ['mine'],
+      ['example organisation'],
+      ['development'],
+      'search',
+      'task',
+    )
   })
 
   test('searchModels > task no library', async () => {
