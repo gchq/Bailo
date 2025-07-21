@@ -115,7 +115,7 @@ export default function ReviewRoles() {
     ],
   )
 
-  if (isCurrentUserLoading) {
+  if (isCurrentUserLoading || isReviewRolesLoading) {
     return <Loading />
   }
 
@@ -141,7 +141,7 @@ export default function ReviewRoles() {
     <>
       <Title text='View Review Roles' />
       <Container>
-        <Stack mx={2} mb={1} direction={'row'} justifyContent={'space-between'}>
+        <Stack mx={2} mb={1} direction='row' justifyContent='space-between'>
           <Typography component='h1' color='primary' variant='h6' noWrap>
             Review Roles
           </Typography>
@@ -149,7 +149,7 @@ export default function ReviewRoles() {
             Create new Review Role
           </Button>
         </Stack>
-        {!isReviewRolesLoading ? (
+        {reviewRoles ? (
           <Paper sx={{ p: 4, my: 4 }}>
             {reviewRoles.length > 0 ? (
               <Stack

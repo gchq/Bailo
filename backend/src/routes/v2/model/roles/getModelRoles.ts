@@ -7,10 +7,8 @@ import { Role } from '../../../../types/types.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getModelRolesSchema = z.object({
-  params: z.object({
-    modelId: z.string({
-      required_error: 'Must specify model id as param',
-    }),
+  query: z.object({
+    modelId: z.string().optional().openapi({ example: 'model-0qjrad' }),
   }),
 })
 
@@ -22,7 +20,7 @@ export const getModelRoles = [
   bodyParser.json(),
   async (req: Request, res: Response<GetModelRolesResponse>) => {
     const {
-      params: { modelId },
+      query: { modelId },
     } = parse(req, getModelRolesSchema)
 
     const allRoles = await getAllEntryRoles(req.user, modelId)

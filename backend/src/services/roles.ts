@@ -18,14 +18,14 @@ export async function getAllEntryRoles(user: UserInterface, modelId?: string) {
       const accessRequestsForModel = await getAccessRequestsByModel(user, model.id)
       if (accessRequestsForModel.length > 0) {
         accessRequestSchemaIds = [...new Set(accessRequestsForModel.map((accessRequest) => accessRequest.schemaId))]
-        const modelReviewRoles = await findReviewRoles([model.card.schemaId, ...accessRequestSchemaIds])
-        schemaRoles = modelReviewRoles.map((role) => ({
-          name: role.name,
-          kind: RoleKind.SCHEMA,
-          description: role.description,
-          shortName: role.shortName,
-        }))
       }
+      const modelReviewRoles = await findReviewRoles([model.card.schemaId, ...accessRequestSchemaIds])
+      schemaRoles = modelReviewRoles.map((role) => ({
+        name: role.name,
+        kind: RoleKind.SCHEMA,
+        description: role.description,
+        shortName: role.shortName,
+      }))
     } else {
       log.info({ modelId }, 'Schema has not been set on the model. Returning system roles.')
     }

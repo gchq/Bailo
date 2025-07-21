@@ -16,7 +16,7 @@ import EditableReviewComment from 'src/reviews/EditableReviewComment'
 import { Decision, EntityKind, ResponseInterface, User } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { getErrorMessage } from 'utils/fetcher'
-import { getRoleDisplay } from 'utils/roles'
+import { getRoleDisplayName } from 'utils/roles'
 
 type ReviewDecisionDisplayProps = {
   response: ResponseInterface
@@ -131,7 +131,7 @@ export default function ReviewDecisionDisplay({
                 <span>{response.decision === Decision.Undo && <Undo fontSize='small' />}</span>
               </Stack>
               {response.role && (
-                <Typography variant='caption'>as {getRoleDisplay(response.role, modelRoles)}</Typography>
+                <Typography variant='caption'>as {getRoleDisplayName(response.role, modelRoles)}</Typography>
               )}
               <span>
                 {response.outdated && (

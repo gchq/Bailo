@@ -9,7 +9,7 @@ import {
   FileInterface,
   ModelImage,
   ReleaseInterface,
-  Role,
+  SystemRole,
 } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -91,10 +91,10 @@ const emptyRolesList = []
 export function useGetModelRoles(id?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      roles: Role[]
+      roles: SystemRole[]
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}/roles` : null, fetcher)
+  >(id ? `/api/v2/roles?modelId=${id}` : `/api/v2/roles`, fetcher)
 
   return {
     mutateModelRoles: mutate,

@@ -19,12 +19,48 @@ exports[`clients > modelScan > scanStream > success 1`] = `
   [
     "undefined://undefined:undefined/scan/file",
     {
-      "body": FormData {},
+      "body": {
+        "append": [MockFunction spy] {
+          "calls": [
+            [
+              "in_file",
+              {},
+              {
+                "contentType": "application/octet-stream",
+                "filename": "safe_model.h5",
+              },
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+        "getHeaders": [MockFunction spy] {
+          "calls": [
+            [],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      },
       "headers": {
         "accept": "application/json",
       },
       "method": "POST",
     },
   ],
+]
+`;
+
+exports[`clients > modelScan > scanStream > success 2`] = `
+[
+  [],
 ]
 `;
