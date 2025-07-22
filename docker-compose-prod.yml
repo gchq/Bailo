@@ -99,6 +99,8 @@ services:
     build:
       context: ./backend/
       dockerfile: ./Dockerfile
+      additional_contexts:
+        python: ./lib/python
     ports:
       - 3001:3001
     volumes:
