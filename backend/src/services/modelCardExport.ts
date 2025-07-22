@@ -79,11 +79,15 @@ export async function renderToMarkdown(model: ModelInterface, modelCardRevision:
   `
   const reviewRoles = await ReviewRoleModel.find({ reviewRoles: schema.reviewRoles })
 
-  for (const reviewRole of reviewRoles) {
-    output += `
+  if (reviewRoles.length > 0 && reviewRoles !== undefined) {
+    for (const reviewRole of reviewRoles) {
+      output += `
       ## ${reviewRole.name}\n
       ${getEntitiesWithRole(reviewRole.shortName, model.collaborators)}\n\n
     `
+    }
+  } else {
+    output += `## No reviewers assigned\n\n`
   }
 
   // 'Fragment' is a more strictly typed version of 'JsonSchema'.

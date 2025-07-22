@@ -325,5 +325,5 @@ export async function removeReviewRole(user: UserInterface, reviewRoleId: string
     }
   }
 
-  reviewRole.delete()
+  await reviewRole.delete()
 }
