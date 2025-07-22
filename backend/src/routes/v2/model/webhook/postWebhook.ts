@@ -47,7 +47,7 @@ interface PostWebhookResponse {
 
 export const postWebhook = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostWebhookResponse>) => {
+  async (req: Request, res: Response<PostWebhookResponse>): Promise<void> => {
     const {
       params: { modelId },
       body,
@@ -55,7 +55,7 @@ export const postWebhook = [
 
     const webhook = await createWebhook(req.user, { modelId, ...body })
 
-    return res.json({
+    res.json({
       webhook,
     })
   },

@@ -17,10 +17,11 @@ import {
   Typography,
 } from '@mui/material'
 import { ClearIcon } from '@mui/x-date-pickers'
-import { postReviewRole } from 'actions/model'
+import { postReviewRole, useGetModelRoles } from 'actions/model'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
+import Loading from 'src/common/Loading'
 import Title from 'src/common/Title'
 import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
@@ -41,10 +42,10 @@ export default function ReviewRolesForm() {
     description: '',
     defaultEntities: [],
     lockEntities: false,
-    collaboratorRole: 'none',
   })
 
   const [defaultEntitiesEntry, setDefaultEntities] = useState<Array<CollaboratorEntry>>([])
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFormData((prevFormData) => ({ ...prevFormData, name: event.target.value as string }))
@@ -60,7 +61,14 @@ export default function ReviewRolesForm() {
   }
 
   const handleCollaboratorRoleChange = (event: SelectChangeEvent) => {
-    setFormData((prevFormData) => ({ ...prevFormData, collaboratorRole: event.target.value as CollaboratorRoleType }))
+    if (event.target.value === 'none') {
+      delete formData.collaboratorRole
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        collaboratorRole: event.target.value.toLowerCase() as CollaboratorRoleType,
+      }))
+    }
   }
 
   const handleDefaultEntitiesChange = useMemo(() => {
@@ -120,6 +128,14 @@ export default function ReviewRolesForm() {
     setLoading(false)
   }
 
+  if (isModelRolesError) {
+    return <MessageAlert message={isModelRolesError.info.message} />
+  }
+
+  if (isModelRolesLoading) {
+    return <Loading />
+  }
+
   return (
     <>
       <Title text='Create new Review Role' />
@@ -168,10 +184,12 @@ export default function ReviewRolesForm() {
               </LabelledInput>
               <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
                 <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
-                  <MenuItem value='none'>None</MenuItem>
-                  <MenuItem value='owner'>Owner</MenuItem>
-                  <MenuItem value='contributor'>Contributor</MenuItem>
-                  <MenuItem value='consumer'>Consumer</MenuItem>
+                  <MenuItem value='none'>{'None'}</MenuItem>
+                  {modelRoles.map((role) => (
+                    <MenuItem key={role.id} value={role.id}>
+                      {role.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </LabelledInput>
               <Accordion>
@@ -196,7 +214,7 @@ export default function ReviewRolesForm() {
                   type='submit'
                   variant='contained'
                   color='primary'
-                  disabled={!(formData.name && formData.short && formData.description && formData.collaboratorRole)}
+                  disabled={!(formData.name && formData.short && formData.description)}
                 >
                   Create Role
                 </LoadingButton>

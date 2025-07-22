@@ -1,3 +1,4 @@
+import FormData from 'form-data'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Readable } from 'stream'
 
@@ -73,22 +74,23 @@ export async function scanStream(stream: Readable, fileName: string) {
 
   try {
     const formData = new FormData()
-    // contrary to what the docs say, `.blob()` lazily loads streams so this is a safe way to send large files
-    formData.append('in_file', await new Response(stream).blob(), fileName)
+    formData.append('in_file', stream, { filename: fileName, contentType: 'application/octet-stream' })
 
     res = await fetch(`${url}/scan/file`, {
       method: 'POST',
       headers: {
+        ...formData.getHeaders(),
         accept: 'application/json',
       },
       body: formData,
     })
   } catch (err) {
+    stream.destroy()
     throw InternalError('Unable to communicate with the ModelScan service.', { err })
   }
   if (!res.ok) {
     throw BadReq('Unrecognised response returned by the ModelScan service.', {
-      body: JSON.stringify(await res.json()),
+      body: JSON.stringify(await res.text()),
     })
   }
 

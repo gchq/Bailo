@@ -41,7 +41,7 @@ interface DeleteAccessRequestResponse {
 
 export const deleteAccessRequest = [
   bodyParser.json(),
-  async (req: Request, res: Response<DeleteAccessRequestResponse>) => {
+  async (req: Request, res: Response<DeleteAccessRequestResponse>): Promise<void> => {
     req.audit = AuditInfo.DeleteAccessRequest
     const {
       params: { accessRequestId },
@@ -51,7 +51,7 @@ export const deleteAccessRequest = [
 
     await audit.onDeleteAccessRequest(req, accessRequestId)
 
-    return res.json({
+    res.json({
       message: 'Successfully removed access request.',
     })
   },

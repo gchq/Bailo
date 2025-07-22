@@ -25,7 +25,12 @@ export function bailoErrorGuard(err: unknown): err is BailoError {
   return true
 }
 
-export async function expressErrorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
+export async function expressErrorHandler(
+  err: unknown,
+  req: Request,
+  res: Response,
+  _next: NextFunction,
+): Promise<void> {
   if (bailoErrorGuard(err)) {
     const logger = err.logger || req.log
     if (err.context) {
@@ -38,25 +43,27 @@ export async function expressErrorHandler(err: unknown, req: Request, res: Respo
 
     await audit.onError(req, err)
 
-    return res.status(err.code).json({
+    res.status(err.code).json({
       error: {
         name: err.name,
         message: err.message,
         context: err.context,
       },
     })
+    return
   } else if (isNativeError(err)) {
     log.warn(
       { err: { name: err.name, stack: err.stack } },
       'Generic Javascript error found, returning generic error to user.',
     )
     await audit.onError(req, InternalError('Internal Server Error'))
-    return res.status(500).json({
+    res.status(500).json({
       error: {
         name: 'Internal Server Error',
         message: 'Unknown error - Please contact Bailo support',
       },
     })
+    return
   }
   log.error({ err }, 'Unknown error format was found, returning generic error to user.')
   throw err

@@ -23,6 +23,10 @@ export default function TagSelector({ onChange, value, label, formContext, requi
       setErrorText('You cannot add duplicate tags')
       return
     }
+    if (!newTag.trim()) {
+      setErrorText('You cannot add an empty tag')
+      return
+    }
     const updatedArray = value
     updatedArray.push(newTag)
     onChange(updatedArray)
@@ -43,7 +47,16 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
           <Stack direction='row' spacing={2}>
-            <TextField size='small' value={newTag} onChange={(e) => setNewTag(e.target.value)} />
+            <TextField
+              size='small'
+              value={newTag}
+              onKeyUp={(e) => {
+                if (e.code === 'Enter') {
+                  handleNewTagSubmit()
+                }
+              }}
+              onChange={(e) => setNewTag(e.target.value)}
+            />
             <Button size='small' onClick={handleNewTagSubmit}>
               Add tag
             </Button>

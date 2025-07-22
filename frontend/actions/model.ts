@@ -10,7 +10,7 @@ import {
   ModelImage,
   ReleaseInterface,
   ReviewRolesFormData,
-  Role,
+  SystemRole,
 } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
 
@@ -23,6 +23,7 @@ export interface EntrySearchResult {
   tags: Array<string>
   kind: EntryKindKeys
   organisation?: string
+  state?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -38,6 +39,7 @@ export function useListModels(
   task = '',
   libraries: string[] = [],
   organisations: string[] = [],
+  states: string[] = [],
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
@@ -48,6 +50,7 @@ export function useListModels(
     ...(task && { task }),
     ...(libraries.length > 0 && { libraries }),
     ...(organisations.length > 0 && { organisations }),
+    ...(states.length > 0 && { states }),
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
@@ -92,10 +95,10 @@ const emptyRolesList = []
 export function useGetModelRoles(id?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      roles: Role[]
+      roles: SystemRole[]
     },
     ErrorInfo
-  >(id ? `/api/v2/model/${id}/roles` : null, fetcher)
+  >(id ? `/api/v2/roles?modelId=${id}` : `/api/v2/roles`, fetcher)
 
   return {
     mutateModelRoles: mutate,
@@ -128,7 +131,7 @@ const emptyMyRolesList = []
 export function useGetModelRolesCurrentUser(id?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      roles: Role[]
+      roles: SystemRole[]
     },
     ErrorInfo
   >(id ? `/api/v2/model/${id}/roles/mine` : null, fetcher)
@@ -215,7 +218,7 @@ export async function postModelExportToS3(id: string, modelExport: ModelExportRe
 export function useGetAllModelReviewRoles() {
   const { data, isLoading, error, mutate } = useSWR<
     {
-      roles: Role[]
+      roles: SystemRole[]
     },
     ErrorInfo
   >('/api/v2/roles/review', fetcher)
@@ -225,6 +228,22 @@ export function useGetAllModelReviewRoles() {
     modelRoles: data ? data.roles : emptyRolesList,
     isModelRolesLoading: isLoading,
     isModelRolesError: error,
+  }
+}
+
+export function useGetSystemRoles() {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      roles: SystemRole[]
+    },
+    ErrorInfo
+  >('/api/v2/roles', fetcher)
+
+  return {
+    mutateModelRoles: mutate,
+    systemRoles: data ? data.roles : emptyRolesList,
+    isSystemRolesLoading: isLoading,
+    isSystemRolesError: error,
   }
 }
 

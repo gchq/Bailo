@@ -46,7 +46,7 @@ interface GetReviewResponse {
 
 export const getReviews = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetReviewResponse>) => {
+  async (req: Request, res: Response<GetReviewResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchReviews
     const {
       query: { mine, modelId, semver, accessRequestId, kind },
@@ -56,6 +56,6 @@ export const getReviews = [
     await audit.onSearchReviews(req, reviews)
 
     res.setHeader('x-count', reviews.length)
-    return res.json({ reviews })
+    res.json({ reviews })
   },
 ]

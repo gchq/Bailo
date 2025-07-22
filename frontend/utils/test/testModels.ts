@@ -8,9 +8,10 @@ import {
   ResponseInterface,
   ResponseKind,
   ReviewRequestInterface,
-  Role,
   SchemaInterface,
   StepNoRender,
+  SystemRole,
+  UiConfig,
 } from 'types/types'
 
 /******** V2 ********/
@@ -193,9 +194,72 @@ export const testAccessRequestSchemaStepNoRender: StepNoRender = {
   isComplete: () => false,
 }
 
-export const testManagerRole: Role = {
+export const testManagerRole: SystemRole = {
   id: 'mngr',
   name: 'Manager',
+}
+
+export const testUiConfig: UiConfig = {
+  banner: {
+    enabled: true,
+    text: 'DEVELOPMENT DEPLOYMENT',
+    colour: 'orange',
+    textColor: 'black',
+  },
+
+  // Contact details for the support team
+  issues: {
+    label: 'Bailo Support Team',
+    supportHref: 'mailto:hello@example.com?subject=Bailo%20Support',
+    contactHref: 'mailto:hello@example.com?subject=Bailo%20Contact',
+  },
+
+  // The publicly accessible location of the registry, including host and port
+  registry: {
+    host: 'localhost:8080',
+  },
+
+  inference: {
+    enabled: false,
+    connection: {
+      host: 'http://example.com',
+    },
+    authorizationTokenName: 'inferencing-token',
+    gpus: {},
+  },
+  modelMirror: {
+    import: {
+      enabled: false,
+    },
+    export: {
+      enabled: false,
+      disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting',
+    },
+  },
+
+  announcement: {
+    enabled: false,
+    text: '',
+    startTimestamp: '',
+  },
+
+  helpPopoverText: {
+    manualEntryAccess: '',
+  },
+
+  modelDetails: {
+    organisations: ['Example Organisation'],
+    states: ['Development', 'Review', 'Production'],
+  },
+
+  roleDisplayNames: {
+    owner: 'Model Developer',
+    contributor: 'Contributor',
+    consumer: 'Consumer',
+  },
+  development: {
+    logUrl: '',
+  },
 }
 
 export const testUserInformation: UserInformation = {

@@ -62,7 +62,7 @@ interface PostAccessRequestReviewResponse {
 
 export const postAccessRequestReviewResponse = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostAccessRequestReviewResponse>) => {
+  async (req: Request, res: Response<PostAccessRequestReviewResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateReviewResponse
     const {
       params: { modelId, accessRequestId },
@@ -73,7 +73,7 @@ export const postAccessRequestReviewResponse = [
 
     await audit.onCreateReviewResponse(req, response)
 
-    return res.json({
+    res.json({
       response,
     })
   },

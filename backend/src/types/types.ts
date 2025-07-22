@@ -143,4 +143,10 @@ export interface UiConfig {
     organisations: string[]
     states: string[]
   }
+
+  roleDisplayNames: {
+    owner: string
+    contributor: string
+    consumer: string
+  }
 }
