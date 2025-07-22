@@ -200,7 +200,7 @@ export default function SideNavigation({
             )}
           </StyledList>
           <StyledList>
-            <Divider />
+            <Divider aria-hidden='true' />
             <NavMenuItem
               href='/settings'
               selectedPage={page}
@@ -212,7 +212,7 @@ export default function SideNavigation({
             />
             <Divider />
             <ListItem disablePadding>
-              <ListItemButton onClick={toggleDrawer} sx={{ py: 2 }}>
+              <ListItemButton aria-label='toggle side drawer expansion' onClick={toggleDrawer} sx={{ py: 2 }}>
                 <ListItemIcon>{drawerOpen ? <KeyboardDoubleArrowLeft /> : <KeyboardDoubleArrowRight />}</ListItemIcon>
               </ListItemButton>
             </ListItem>
