@@ -27,7 +27,7 @@ appVersion: "0.1.0"
 dependencies:
 - name: minio
   repository: "https://charts.bitnami.com/bitnami"
-  version: "~14.2.1"
+  version: 17.0.9
   condition: minio.enabled
 - name: mongodb
   repository: "https://charts.bitnami.com/bitnami"
