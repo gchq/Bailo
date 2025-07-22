@@ -145,7 +145,7 @@ export default function SideNavigation({
               icon={<ListAltIcon />}
               badgeCount={reviewCount}
             />
-            <Divider />
+            <Divider aria-hidden='true' />
             <NavMenuItem
               href='/docs/api'
               selectedPage={page}
@@ -173,7 +173,7 @@ export default function SideNavigation({
               title='Help & Support'
               icon={<ContactSupportIcon />}
             />
-            <Divider />
+            <Divider aria-hidden='true' />
             {currentUser.isAdmin && (
               <>
                 <NavMenuItem
