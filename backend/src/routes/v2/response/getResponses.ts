@@ -49,7 +49,7 @@ export const getResponses = [
       query: { parentIds },
     } = parse(req, getResponseSchema)
 
-    const responses = await getResponsesByParentIds(req.user, parentIds)
+    const responses = await getResponsesByParentIds(parentIds)
     await audit.onViewResponses(req, responses)
 
     res.json({
