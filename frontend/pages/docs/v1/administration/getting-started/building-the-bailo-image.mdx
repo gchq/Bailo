@@ -12,8 +12,8 @@ $ docker build -t "bailo-frontend" -f ./frontend/Dockerfile .
 $ docker build -t "bailo-modelscan" -f ./lib/modelscan_api/Dockerfile .
 ```
 
-Ensure you do not use the development Dockerfiles (called `Dockerfile.dev`) as they expect the application to be mounted
-into them at a later point in time (to enable hot code reloading).
+Ensure you do not use the development stages in Dockerfiles (used by building with `--target dev`) as they expect the
+application to be mounted into them at a later point in time (to enable hot code reloading).
 
 `docker` can be swapped out for any other OCI compliant container build platform. We routinely test with both `podman`
 and `OpenShift Builder`. This image should be pushed to a registry that is accessible from your deployment target.

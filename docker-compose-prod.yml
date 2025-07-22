@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: bitnami/mongodb:7.0.15
+    image: bitnami/mongodb:8.0.11
     environment:
       - MONGODB_REPLICA_SET_NAME=repl-set
     volumes:
@@ -15,7 +15,7 @@ services:
       start_period: 30s
 
   minio:
-    image: bitnami/minio:2025.5.24
+    image: bitnami/minio:2025.7.18
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -38,7 +38,6 @@ services:
     image: bailo_modelscan:latest
     build:
       context: ./lib/modelscan_api
-      dockerfile: ./Dockerfile
     ports:
       - 3311:3311
     healthcheck:
@@ -88,7 +87,6 @@ services:
     image: bailo_frontend:latest
     build:
       context: ./frontend/
-      dockerfile: ./Dockerfile
     depends_on:
       - backend
     ports:
@@ -98,7 +96,6 @@ services:
     image: bailo_backend:latest
     build:
       context: ./backend/
-      dockerfile: ./Dockerfile
       additional_contexts:
         python: ./lib/python
     ports:
