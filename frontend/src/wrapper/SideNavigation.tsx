@@ -210,7 +210,7 @@ export default function SideNavigation({
               title='User settings'
               icon={<SettingsIcon />}
             />
-            <Divider />
+            <Divider aria-hidden='true' />
             <ListItem disablePadding>
               <ListItemButton aria-label='toggle side drawer expansion' onClick={toggleDrawer} sx={{ py: 2 }}>
                 <ListItemIcon>{drawerOpen ? <KeyboardDoubleArrowLeft /> : <KeyboardDoubleArrowRight />}</ListItemIcon>
