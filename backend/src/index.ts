@@ -31,11 +31,11 @@ if (config.s3.automaticallyCreateBuckets) {
 await connectToMongoose()
 await runMigrations()
 
-// lazily add default schemas
-addDefaultSchemas()
-
 // lazily add default dynamic review roles
-addDefaultReviewRoles()
+await addDefaultReviewRoles()
+
+// lazily add default schemas
+await addDefaultSchemas()
 
 const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {

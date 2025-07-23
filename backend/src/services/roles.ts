@@ -22,7 +22,7 @@ export async function getAllEntryRoles(user: UserInterface, modelId?: string) {
       const modelReviewRoles = await findReviewRoles([model.card.schemaId, ...accessRequestSchemaIds])
       schemaRoles = modelReviewRoles.map((role) => ({
         name: role.name,
-        kind: RoleKind.SCHEMA,
+        kind: RoleKind.REVIEW,
         description: role.description,
         shortName: role.shortName,
       }))

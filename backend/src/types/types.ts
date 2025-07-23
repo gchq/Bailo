@@ -11,7 +11,7 @@ export type PartialDeep<T> = T extends object
 
 export const RoleKind = {
   SYSTEM: 'system',
-  SCHEMA: 'schema',
+  REVIEW: 'review',
 } as const
 
 export enum EntityKind {

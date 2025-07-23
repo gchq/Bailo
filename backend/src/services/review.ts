@@ -296,7 +296,7 @@ export async function removeReviewRole(user: UserInterface, reviewRoleId: string
     throw BadReq('Review role could not be deleted as it does not exist.', { reviewRoleId })
   }
 
-  const auth = await authorisation.reviewRole(user, reviewRoleId, ReviewRoleAction.Create)
+  const auth = await authorisation.reviewRole(user, reviewRoleId, ReviewRoleAction.Delete)
   if (!auth.success) {
     throw Forbidden(auth.info, {
       userDn: user.dn,

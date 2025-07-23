@@ -142,11 +142,6 @@ export const AuditInfo = {
     description: 'Delete a list of review roles',
     auditKind: AuditKind.Delete,
   },
-  UpdateReviewRole: {
-    typeId: 'UpdateReviewRole',
-    description: 'Update a review role',
-    auditKind: AuditKind.Update,
-  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 

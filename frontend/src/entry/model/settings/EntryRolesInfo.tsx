@@ -50,7 +50,7 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
     [entryRoles],
   )
 
-  const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.SCHEMA), [getFilteredRoles])
+  const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.REVIEW), [getFilteredRoles])
 
   const permissionTableRows = useMemo(() => {
     return rows.map((row) => (

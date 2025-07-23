@@ -225,7 +225,7 @@ export interface EntryCardRevisionInterface {
 
 export const RoleKind = {
   ENTRY: 'entry',
-  SCHEMA: 'schema',
+  REVIEW: 'review',
 } as const
 
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]

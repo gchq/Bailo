@@ -402,11 +402,7 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        if (
-          action === ReviewRoleAction.Create ||
-          action === ReviewRoleAction.Update ||
-          action === ReviewRoleAction.Delete
-        ) {
+        if (action === ReviewRoleAction.Create || action === ReviewRoleAction.Delete) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {

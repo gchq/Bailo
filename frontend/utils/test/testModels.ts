@@ -205,7 +205,7 @@ export const testManagerRole: SystemRole = {
 export const testManagerRoleInterface: ReviewRoleInterface = {
   ...testManagerRole,
   _id: '12415234234',
-  kind: RoleKind.SCHEMA,
+  kind: RoleKind.REVIEW,
   createdAt: '',
   updatedAt: '',
 }

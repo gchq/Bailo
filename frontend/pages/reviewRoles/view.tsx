@@ -141,7 +141,7 @@ export default function ReviewRoles() {
     <>
       <Title text='View Review Roles' />
       <Container>
-        <Stack mx={2} mb={1} direction='row' justifyContent='space-between'>
+        <Stack mx={2} mb={1} direction='row' divider={<Divider />}>
           <Typography component='h1' color='primary' variant='h6' noWrap>
             Review Roles
           </Typography>
