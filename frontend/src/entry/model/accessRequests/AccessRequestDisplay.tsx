@@ -118,30 +118,32 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
             </Stack>
             <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2} sx={{ pt: 2 }}>
               <ReviewDisplay reviewResponses={reviewsWithLatestResponses} modelId={accessRequest.modelId} />
-              <IconButton href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}#responses`}>
-                <Stack direction='row' spacing={2}>
-                  {reviewResponses.length > 0 && (
-                    <Tooltip title='Reviews'>
-                      <Stack direction='row' spacing={1}>
-                        <ListAltIcon color='primary' />
-                        <Typography variant='caption' data-test='reviewCount'>
-                          {reviewResponses.length}
-                        </Typography>
-                      </Stack>
-                    </Tooltip>
-                  )}
-                  {commentResponses.length > 0 && (
-                    <Tooltip title='Comments'>
-                      <Stack direction='row' spacing={1}>
-                        <CommentIcon color='primary' />
-                        <Typography variant='caption' data-test='commentCount'>
-                          {commentResponses.length}
-                        </Typography>
-                      </Stack>
-                    </Tooltip>
-                  )}
-                </Stack>
-              </IconButton>
+              {(reviewResponses.length > 0 || commentResponses.length > 0) && (
+                <IconButton href={`/model/${accessRequest.modelId}/access-request/${accessRequest.id}#responses`}>
+                  <Stack direction='row' spacing={2}>
+                    {reviewResponses.length > 0 && (
+                      <Tooltip title='Reviews'>
+                        <Stack direction='row' spacing={1}>
+                          <ListAltIcon color='primary' />
+                          <Typography variant='caption' data-test='reviewCount'>
+                            {reviewResponses.length}
+                          </Typography>
+                        </Stack>
+                      </Tooltip>
+                    )}
+                    {commentResponses.length > 0 && (
+                      <Tooltip title='Comments'>
+                        <Stack direction='row' spacing={1}>
+                          <CommentIcon color='primary' />
+                          <Typography variant='caption' data-test='commentCount'>
+                            {commentResponses.length}
+                          </Typography>
+                        </Stack>
+                      </Tooltip>
+                    )}
+                  </Stack>
+                </IconButton>
+              )}
             </Stack>
           </Stack>
         </Box>
