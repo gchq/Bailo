@@ -178,9 +178,9 @@ export async function renderToHtml(
 
 function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
   let reviewTable =
-    '## Table test\n\n' +
+    '## Model Reviews\n\n' +
     '| Version | Collaborator | Role | Decision | Comment | Last Updated |\n' +
-    '| :-----: | :----------: | :--: | :------: | :-----: | :----------: |'
+    '| :-----: | :----------: | :--: | :------: | :-----: | :----------: |\n'
 
   if (!reviewExports || reviewExports.length === 0) {
     return null
@@ -194,7 +194,7 @@ function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
       `|${reviewExport.role}|` +
       `|${reviewExport.decision}|` +
       `|${reviewExport.comment}|` +
-      `|${reviewExport.lastUpdated}|`
+      `|${reviewExport.lastUpdated}|\n`
   }
 
   return reviewTable
