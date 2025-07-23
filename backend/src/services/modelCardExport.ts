@@ -189,11 +189,11 @@ function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
   for (const reviewExport of reviewExports) {
     reviewTable =
       reviewTable +
-      `|${reviewExport.semver}|` +
-      `|${reviewExport.collaborator}|` +
-      `|${reviewExport.role}|` +
-      `|${reviewExport.decision}|` +
-      `|${reviewExport.comment}|` +
+      `|${reviewExport.semver}` +
+      `|${reviewExport.collaborator}` +
+      `|${reviewExport.role}` +
+      `|${reviewExport.decision}` +
+      `|${reviewExport.comment}` +
       `|${reviewExport.lastUpdated}|\n`
   }
 
