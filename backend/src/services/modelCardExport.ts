@@ -114,9 +114,7 @@ async function createModelReviewExports(modelId: string) {
   const modelReviews = await ReviewModel.find({ modelId: modelId, kind: 'release', deleted: false })
 
   for (const modelReview of modelReviews) {
-    const modelResponses = await ResponseModel.find({ parentId: modelReview._id, deleted: false }) // model.collaborators is now entity
-
-    // TODO: potential modelResponses null check?
+    const modelResponses = await ResponseModel.find({ parentId: modelReview._id, deleted: false })
 
     for (const modelResponse of modelResponses) {
       const reviewExport: ReviewExport = {
@@ -193,7 +191,8 @@ function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
       `|${reviewExport.collaborator}` +
       `|${reviewExport.role}` +
       `|${reviewExport.decision}` +
-      `|${reviewExport.comment}` +
+      // Linebreaks breaks the markdown-to-html conversion within a table
+      `|${reviewExport.comment?.replace(/(\r\n|\n|\r)/gm, ' ')}` +
       `|${reviewExport.lastUpdated}|\n`
   }
 
