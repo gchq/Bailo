@@ -37,6 +37,7 @@ export default function RocketConfiguration({ token }: RocketConfigurationProps)
         <Typography fontWeight='bold'>Step 1: Download credentials config</Typography>
         <Typography>First, download the rkt credentials file for the personal access token:</Typography>
         <SplitButton
+          aria-label='download rocket credentials file'
           options={[`${showFilePreview ? 'Close file preview' : 'Preview file'}`]}
           onPrimaryButtonClick={() =>
             downloadFile(
