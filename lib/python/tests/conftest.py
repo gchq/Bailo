@@ -189,6 +189,7 @@ def metrics_schema(integration_client):
         description="Metrics schema test.",
         kind=SchemaKind.MODEL,
         json_schema=METRICS_JSON_SCHEMA,
+        review_roles=["reviewer"],
     )
 
     return schema

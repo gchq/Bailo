@@ -9,6 +9,22 @@ import { getSchemaById } from '../../src/services/schema.js'
 vi.mock('../../src/services/model.js')
 vi.mock('../../src/services/schema.js')
 
+const reviewRoleModelMock = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.find = vi.fn(() => [obj])
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+
+vi.mock('../../src/models/ReviewRole.js', async () => ({
+  ...((await vi.importActual('../../src/models/ReviewRole.js')) as object),
+  default: reviewRoleModelMock,
+}))
+
 const reviewServiceMock = vi.hoisted(() => ({
   getRoleEntities: vi.fn(() => [{ role: 'msro', entities: ['user:user'] }]),
 }))

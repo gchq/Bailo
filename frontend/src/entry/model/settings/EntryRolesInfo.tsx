@@ -39,7 +39,7 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
       entryRoles.reduce<ReactNode[]>((filteredRoles, entryRole) => {
         if (entryRole.kind === roleKind) {
           filteredRoles.push(
-            <Box key={entryRole.id}>
+            <Box key={entryRole.shortName}>
               <Typography fontWeight='bold'>{entryRole.name}</Typography>
               <Typography>{entryRole.description}</Typography>
             </Box>,
@@ -50,7 +50,7 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
     [entryRoles],
   )
 
-  const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.SCHEMA), [getFilteredRoles])
+  const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.REVIEW), [getFilteredRoles])
 
   const permissionTableRows = useMemo(() => {
     return rows.map((row) => (

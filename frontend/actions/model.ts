@@ -9,7 +9,6 @@ import {
   FileInterface,
   ModelImage,
   ReleaseInterface,
-  ReviewRolesFormData,
   SystemRole,
 } from '../types/types'
 import { ErrorInfo, fetcher } from '../utils/fetcher'
@@ -126,24 +125,6 @@ export function useGetModelImages(id?: string) {
   }
 }
 
-const emptyMyRolesList = []
-
-export function useGetModelRolesCurrentUser(id?: string) {
-  const { data, isLoading, error, mutate } = useSWR<
-    {
-      roles: SystemRole[]
-    },
-    ErrorInfo
-  >(id ? `/api/v2/model/${id}/roles/mine` : null, fetcher)
-
-  return {
-    mutateModelRolesCurrentUser: mutate,
-    modelRolesCurrentUser: data ? data.roles : emptyMyRolesList,
-    isModelRolesCurrentUserLoading: isLoading,
-    isModelRolesCurrentUserError: error,
-  }
-}
-
 export function useGetCurrentUserPermissionsForEntry(entryId?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -212,45 +193,5 @@ export async function postModelExportToS3(id: string, modelExport: ModelExportRe
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(modelExport),
-  })
-}
-
-export function useGetAllModelReviewRoles() {
-  const { data, isLoading, error, mutate } = useSWR<
-    {
-      roles: SystemRole[]
-    },
-    ErrorInfo
-  >('/api/v2/roles/review', fetcher)
-
-  return {
-    mutateModelRoles: mutate,
-    modelRoles: data ? data.roles : emptyRolesList,
-    isModelRolesLoading: isLoading,
-    isModelRolesError: error,
-  }
-}
-
-export function useGetSystemRoles() {
-  const { data, isLoading, error, mutate } = useSWR<
-    {
-      roles: SystemRole[]
-    },
-    ErrorInfo
-  >('/api/v2/roles', fetcher)
-
-  return {
-    mutateModelRoles: mutate,
-    systemRoles: data ? data.roles : emptyRolesList,
-    isSystemRolesLoading: isLoading,
-    isSystemRolesError: error,
-  }
-}
-
-export async function postReviewRole(reviewRole: ReviewRolesFormData) {
-  return fetch(`/api/v2/review/role`, {
-    method: 'post',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(reviewRole),
   })
 }

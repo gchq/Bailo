@@ -19,8 +19,6 @@ export const CollaboratorRoles = {
   Owner: 'owner',
   Contributor: 'contributor',
   Consumer: 'consumer',
-  MSRO: 'msro',
-  MTR: 'mtr',
 } as const
 
 export type CollaboratorRolesKeys = (typeof CollaboratorRoles)[keyof typeof CollaboratorRoles]

@@ -23,7 +23,7 @@ export default function EntityItem({
   entryKind,
   entryRoles,
 }: EntityItemProps) {
-  const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.id), [entryRoles])
+  const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.shortName), [entryRoles])
 
   function onRoleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(collaborators)

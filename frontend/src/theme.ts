@@ -104,7 +104,7 @@ export const lightTheme = createTheme({
       light: '#e5f6fd',
     },
     warning: {
-      main: '#ed6c02',
+      main: '#C55302',
       light: '#ffd08b',
     },
     markdownBorder: {

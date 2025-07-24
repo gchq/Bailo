@@ -137,6 +137,11 @@ export const AuditInfo = {
     description: 'Viewed a list of review roles',
     auditKind: AuditKind.View,
   },
+  DeleteReviewRole: {
+    typeId: 'DeleteReviewRole',
+    description: 'Delete a list of review roles',
+    auditKind: AuditKind.Delete,
+  },
 } as const
 export type AuditInfoKeys = (typeof AuditInfo)[keyof typeof AuditInfo]
 
@@ -209,6 +214,7 @@ export abstract class BaseAuditConnector {
 
   abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
   abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[])
+  abstract onDeleteReviewRole(req: Request, reviewRoleId: string)
 
   abstract onError(req: Request, error: BailoError)
 
