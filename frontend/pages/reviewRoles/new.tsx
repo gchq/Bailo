@@ -29,7 +29,7 @@ import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, CollaboratorRoleType, EntryKind, ReviewRolesFormData } from 'types/types'
+import { CollaboratorEntry, CollaboratorRoleType, EntryKind, ReviewRolesFormData, RoleKind } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function ReviewRolesForm() {
@@ -39,7 +39,7 @@ export default function ReviewRolesForm() {
   const [formData, setFormData] = useState<ReviewRolesFormData>({
     name: '',
     shortName: '',
-    kind: 'schema',
+    kind: RoleKind.REVIEW,
     description: '',
     defaultEntities: [],
     lockEntities: false,
