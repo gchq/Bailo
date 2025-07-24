@@ -138,7 +138,7 @@ export default function AccessRequestReview() {
                   width: '100%',
                 }}
               >
-                <Typography variant='subtitle2' component='h3' mb={1}>
+                <Typography variant='subtitle2' component='h2' mb={1}>
                   Users
                 </Typography>
                 <Grid2 container>{accessRequestEntities}</Grid2>

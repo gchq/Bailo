@@ -134,7 +134,9 @@ export default function EditableAccessRequestForm({
         <EditableFormHeading
           heading={
             <div>
-              <Typography fontWeight='bold'>Schema</Typography>
+              <Typography component='h2' fontWeight='bold'>
+                Schema
+              </Typography>
               <Stack direction='row' alignItems='center'>
                 <Typography>{schema?.name}</Typography>
                 <CopyToClipboardButton

@@ -239,7 +239,9 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
         heading={
           <Stack overflow='hidden' justifyContent='center'>
             <Stack direction='row' spacing={1}>
-              <Typography fontWeight='bold'>Release name</Typography>
+              <Typography component='h1' fontWeight='bold'>
+                Release name
+              </Typography>
               <HelpPopover>
                 The release name is automatically generated using the model name and release semantic version
               </HelpPopover>
