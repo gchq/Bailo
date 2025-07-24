@@ -2,14 +2,13 @@ import { createHash } from 'node:crypto'
 import { json } from 'node:stream/consumers'
 import zlib from 'node:zlib'
 
-import archiver from 'archiver'
 import * as fflate from 'fflate'
 import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
 import prettyBytes from 'pretty-bytes'
-import stream, { PassThrough, Readable } from 'stream'
+import stream, { Readable } from 'stream'
 import { finished } from 'stream/promises'
-import { extract, pack } from 'tar-stream'
+import { extract, Pack, pack } from 'tar-stream'
 
 import { objectExists, putObjectStream } from '../clients/s3.js'
 import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.js'
@@ -89,32 +88,32 @@ export async function exportModel(
   }
   log.debug('Request checks complete')
 
-  const zip = archiver('zip')
-  const s3Stream = new PassThrough()
-  zip.pipe(s3Stream)
-
-  await uploadToS3(
-    `${modelId}.zip`,
-    s3Stream,
+  const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
+  const s3Upload = uploadToS3(
+    `${modelId}.tar.gz`,
+    gzipStream,
     { exporter: user.dn, sourceModelId: modelId, mirroredModelId, importKind: ImportKind.Documents },
     { semvers },
   )
+  const packerStream = pack()
+  packerStream.pipe(gzipStream)
 
   try {
-    await addModelCardRevisionsToZip(user, model, zip)
+    await addModelCardRevisionsToTarball(user, model, packerStream)
   } catch (error) {
-    throw InternalError('Error when adding the model card revision(s) to the zip file.', { error })
+    throw InternalError('Error when adding the model card revision(s) to the Tarball file.', { error })
   }
   try {
     if (releases.length > 0) {
-      await addReleasesToZip(user, model, releases, zip, mirroredModelId)
+      await addReleasesToTarball(user, model, releases, packerStream, mirroredModelId)
     }
   } catch (error) {
-    throw InternalError('Error when adding the release(s) to the zip file.', { error })
+    throw InternalError('Error when adding the release(s) to the Tarball file.', { error })
   }
 
-  zip.finalize()
-  log.debug({ modelId, semvers }, 'Successfully finalized zip file.')
+  await s3Upload
+
+  log.debug({ modelId, semvers }, 'Successfully finalized Tarball file.')
 }
 
 export const ImportKind = {
@@ -702,52 +701,61 @@ async function parseFile(fileJson: string, mirroredModelId: string, sourceModelI
   return file
 }
 
-async function addModelCardRevisionsToZip(user: UserInterface, model: ModelDoc, zip: archiver.Archiver) {
-  log.debug({ user, modelId: model.id }, 'Generating zip file of model card revisions.')
+async function addModelCardRevisionsToTarball(user: UserInterface, model: ModelDoc, packerStream: Pack) {
+  log.debug({ user, modelId: model.id }, 'Adding model card revisions to Tarball file.')
   const cards = await getModelCardRevisions(user, model.id)
   for (const card of cards) {
-    zip.append(JSON.stringify(card.toJSON()), { name: `${card.version}.json` })
+    const cardJson = JSON.stringify(card.toJSON())
+    const packerEntry = packerStream.entry({ name: '${card.version}.json', size: cardJson.length })
+    await pipeStreamToTarEntry(Readable.from(cardJson), packerEntry, { modelId: model.id })
   }
-  log.debug({ user, modelId: model.id }, 'Finished generating zip file of model card revisions.')
+  log.debug({ user, modelId: model.id }, 'Completed adding model card revisions to Tarball file.')
 }
 
-async function addReleasesToZip(
+async function addReleasesToTarball(
   user: UserInterface,
   model: ModelDoc,
   releases: ReleaseDoc[],
-  zip: archiver.Archiver,
+  packerStream: Pack,
   mirroredModelId: string,
 ) {
   const semvers = releases.map((release) => release.semver)
-  log.debug({ user, modelId: model.id, semvers }, 'Adding releases to zip file')
+  log.debug({ user, modelId: model.id, semvers }, 'Adding model releases to Tarball file.')
 
   const errors: any[] = []
   // Using a .catch here to ensure all errors are returned, rather than just the first error.
   await Promise.all(
-    releases.map((release) => addReleaseToZip(user, model, release, zip, mirroredModelId).catch((e) => errors.push(e))),
+    releases.map((release) =>
+      addReleaseToTarball(user, model, release, packerStream, mirroredModelId).catch((e) => errors.push(e)),
+    ),
   )
   if (errors.length > 0) {
-    throw InternalError('Error when generating the release zip file.', { errors })
+    throw InternalError('Error when adding release(s) to Tarball file.', { errors })
   }
-  log.debug({ user, modelId: model.id, semvers }, 'Completed generating zip file of releases.')
-  return zip
+  log.debug({ user, modelId: model.id, semvers }, 'Completed adding model releases to Tarball file.')
 }
 
-async function addReleaseToZip(
+async function addReleaseToTarball(
   user: UserInterface,
   model: ModelDoc,
   release: ReleaseDoc,
-  zip: archiver.Archiver,
+  packerStream: Pack,
   mirroredModelId: string,
 ) {
-  log.debug('Adding release to zip file of releases.', { user, modelId: model.id, semver: release.semver })
+  log.debug('Adding release to gzip file of releases.', { user, modelId: model.id, semver: release.semver })
   const files: FileWithScanResultsInterface[] = await getFilesByIds(user, release.modelId, release.fileIds)
 
   try {
-    zip.append(JSON.stringify(release.toJSON()), { name: `releases/${release.semver}.json` })
+    const releaseJson = JSON.stringify(release.toJSON())
+    const packerEntry = packerStream.entry({ name: `releases/${release.semver}.json`, size: releaseJson.length })
+    await pipeStreamToTarEntry(Readable.from(releaseJson), packerEntry, { modelId: model.id })
+
     for (const file of files) {
-      zip.append(JSON.stringify(file), { name: `files/${file._id.toString()}.json` })
-      await uploadToS3(
+      const fileJson = JSON.stringify(file)
+      const packerEntry = packerStream.entry({ name: `files/${file._id.toString()}.json`, size: fileJson.length })
+      await pipeStreamToTarEntry(Readable.from(fileJson), packerEntry, { modelId: model.id })
+
+      uploadToS3(
         file.id,
         (await downloadFile(user, file.id)).Body as stream.Readable,
         {
@@ -795,10 +803,9 @@ async function addReleaseToZip(
       }
     }
   } catch (error: any) {
-    throw InternalError('Error when generating the zip file.', { error })
+    throw InternalError('Error when generating the gzip file.', { error })
   }
-  log.debug({ user, modelId: model.id, semver: release.semver }, 'Finished adding release to zip file of releases.')
-  return zip
+  log.debug({ user, modelId: model.id, semver: release.semver }, 'Finished adding release to gzip file of releases.')
 }
 
 async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: string[]) {
@@ -857,6 +864,6 @@ export async function generateDigest(file: Readable) {
     )
     return messageDigest
   } catch (error: any) {
-    throw InternalError('Error when generating the digest for the zip file.', { error })
+    throw InternalError('Error when generating the digest for the gzip file.', { error })
   }
 }
