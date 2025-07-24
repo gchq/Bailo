@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto'
 import { json } from 'node:stream/consumers'
 import zlib from 'node:zlib'
 
-import * as fflate from 'fflate'
 import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
 import prettyBytes from 'pretty-bytes'
@@ -15,7 +14,7 @@ import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.
 import authorisation from '../connectors/authorisation/index.js'
 import { ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import { FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../models/Release.js'
@@ -198,20 +197,24 @@ export async function importModel(
   if (!res.body) {
     throw InternalError('Unable to get the file.', { payloadUrl, importId })
   }
+  // type cast `NodeJS.ReadableStream` to `'stream/web'.ReadableStream`
+  // as per https://stackoverflow.com/questions/63630114/argument-of-type-readablestreamany-is-not-assignable-to-parameter-of-type-r/66629140#66629140
+  // and https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js/74722818#comment133510726_74722818
+  const responseBody = res.body instanceof Readable ? res.body : Readable.fromWeb(res.body as unknown as ReadableStream)
 
   log.info({ mirroredModelId, payloadUrl, importId }, 'Obtained the file from the payload URL.')
 
   switch (importKind) {
     case ImportKind.Documents: {
       log.info({ mirroredModelId, payloadUrl, importId }, 'Importing collection of documents.')
-      return await importDocuments(user, res, mirroredModelId, sourceModelId, payloadUrl, importId)
+      return await importDocuments(user, responseBody, mirroredModelId, sourceModelId, payloadUrl, importId)
     }
     case ImportKind.File: {
       log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
       if (!fileId) {
         throw BadReq('Missing File ID.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
       }
-      const result = await importModelFile(res.body as Readable, fileId, mirroredModelId, importId)
+      const result = await importModelFile(responseBody, fileId, mirroredModelId, importId)
       return {
         mirroredModel,
         importResult: {
@@ -226,7 +229,7 @@ export async function importModel(
       }
       const result = await importCompressedRegistryImage(
         user,
-        res.body as Readable,
+        responseBody,
         mirroredModelId,
         distributionPackageName,
         importId,
@@ -453,123 +456,118 @@ export async function importCompressedRegistryImage(
 
 async function importDocuments(
   user: UserInterface,
-  res: Response,
+  body: Readable,
   mirroredModelId: string,
   sourceModelId: string,
   payloadUrl: string,
   importId: string,
 ) {
-  const modelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
-  const releases: Omit<ReleaseDoc, '_id'>[] = []
-  const files: FileInterfaceDoc[] = []
-  const images: DistributionPackageName[] = []
-  const zipData = new Uint8Array(await res.arrayBuffer())
-  let zipContent
-  try {
-    zipContent = fflate.unzipSync(zipData, {
-      filter(file) {
-        return /.+\.json/.test(file.name)
-      },
-    })
-  } catch (error) {
-    log.error({ error }, 'Unable to read zip file.')
-    throw InternalError('Unable to read zip file.', { mirroredModelId, importId })
-  }
+  const modelCardVersions: number[] = []
+  const releaseSemvers: string[] = []
+  const fileIds: ObjectId[] = []
+  const imageIds: string[] = []
+  const newModelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
+  const newReleases: Omit<ReleaseDoc, '_id'>[] = []
 
   const modelCardRegex = /^[0-9]+\.json$/
   const releaseRegex = /^releases\/(.*)\.json$/
   const fileRegex = /^files\/(.*)\.json$/
 
-  const modelCardJsonStrings: string[] = []
-  const releaseJsonStrings: string[] = []
-  const fileJsonStrings: string[] = []
-  Object.keys(zipContent).forEach(function (key) {
-    if (modelCardRegex.test(key)) {
-      modelCardJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
-    } else if (releaseRegex.test(key)) {
-      releaseJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
-    } else if (fileRegex.test(key)) {
-      fileJsonStrings.push(Buffer.from(zipContent[key]).toString('utf8'))
-    } else {
-      throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId, importId })
-    }
-  })
+  // setup streams
+  const gzipStream = zlib.createGunzip({ chunkSize: 16 * 1024 * 1024 })
+  const tarStream = extract()
+  // body is tar.gz blob stream
+  body.pipe(gzipStream).pipe(tarStream)
 
-  // Parse release documents.
+  await new Promise((resolve, reject) => {
+    // enable lazy fetching
+    let lazyMirroredModel: ModelDoc | null = null
 
-  releaseJsonStrings.forEach((releaseJson) => {
-    const release = parseRelease(releaseJson, mirroredModelId, sourceModelId, importId)
-    releases.push(release)
-  })
+    tarStream.on('entry', async function (entry, stream, next) {
+      log.debug(
+        {
+          name: entry.name,
+          type: entry.type,
+          size: entry.size,
+          importId,
+        },
+        'Processing un-tarred entry',
+      )
 
-  const mirroredModel = await getModelById(user, mirroredModelId)
-  const authResponses = await authorisation.releases(user, mirroredModel, releases, ReleaseAction.Import)
-  const failedReleases = releases.filter((_, i) => !authResponses[i].success)
-  if (failedReleases.length > 0) {
-    throw Forbidden('You do not have the necessary permissions to import these releases.', {
-      modelId: mirroredModelId,
-      releases: failedReleases.map((release) => release.semver),
-      user,
-      importId,
+      if (entry.type === 'file') {
+        // Process file
+        const fileContents = await json(stream)
+
+        if (modelCardRegex.test(entry.name)) {
+          log.debug({ name: entry.name, importId }, 'Processing compressed file as a Model Card')
+          const modelCard = parseModelCard(fileContents, mirroredModelId, sourceModelId, importId)
+          modelCardVersions.push(modelCard.version)
+          const savedModelCard = await saveImportedModelCard(modelCard)
+          if (savedModelCard) {
+            newModelCards.push(savedModelCard)
+          }
+        } else if (releaseRegex.test(entry.name)) {
+          log.debug({ name: entry.name, importId }, 'Processing compressed file as a Release')
+          const release = parseRelease(fileContents, mirroredModelId, sourceModelId, importId)
+
+          // have to authorise per-release due to streaming, rather than do all releases at once
+          if (!lazyMirroredModel) {
+            lazyMirroredModel = await getModelById(user, mirroredModelId)
+          }
+          const authResponse = await authorisation.releases(user, lazyMirroredModel, [release], ReleaseAction.Import)
+          if (!authResponse[0]?.success) {
+            throw Forbidden('You do not have the necessary permissions to import these releases.', {
+              modelId: mirroredModelId,
+              release: release.semver,
+              user,
+              importId,
+            })
+          }
+
+          for (const image of release.images) {
+            imageIds.push(
+              joinDistributionPackageName({
+                domain: image.repository,
+                path: image.name,
+                tag: image.tag,
+              } as DistributionPackageName),
+            )
+          }
+          releaseSemvers.push(release.semver)
+          const savedRelease = await saveImportedRelease(release)
+          if (savedRelease) {
+            newReleases.push(savedRelease)
+          }
+        } else if (fileRegex.test(entry.name)) {
+          log.debug({ name: entry.name, importId }, 'Processing compressed file as a File')
+          const file = await parseFile(fileContents, mirroredModelId, sourceModelId, importId)
+          fileIds.push(file._id)
+          await saveImportedFile(file)
+        } else {
+          throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId, importId })
+        }
+      } else {
+        // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
+        log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry')
+        next()
+      }
     })
-  }
-  releases.forEach((release) =>
-    release.images.forEach((image) =>
-      images.push({ domain: image.repository, path: image.name, tag: image.tag } as DistributionPackageName),
-    ),
-  )
 
-  // Parse model card documents.
+    tarStream.on('error', (err) =>
+      reject(
+        InternalError('Error while un-tarring blob', {
+          error: err,
+        }),
+      ),
+    )
 
-  modelCardJsonStrings.forEach((modelCardJson) => {
-    const modelCard = parseModelCard(modelCardJson, mirroredModelId, sourceModelId, importId)
-    modelCards.push(modelCard)
+    tarStream.on('finish', async function () {
+      resolve('ok')
+    })
   })
-
-  // Parse file documents.
-
-  await Promise.all(
-    fileJsonStrings.map(async (fileJson) => {
-      const file = await parseFile(fileJson, mirroredModelId, sourceModelId, importId)
-      files.push(file)
-    }),
-  )
-
-  log.info(
-    {
-      mirroredModelId,
-      payloadUrl,
-      sourceModelId,
-      importId,
-      numberOfDocuments: {
-        modelCards: modelCards.length,
-        releases: releases.length,
-        files: files.length,
-        images: images.length,
-      },
-    },
-    'Finished parsing the collection of model documents.',
-  )
-
-  // Save model card documents
-  const newModelCards = (await Promise.all(modelCards.map((card) => saveImportedModelCard(card)))).filter(
-    (card): card is Omit<ModelCardRevisionDoc, '_id'> => !!card,
-  )
-
-  // Save release documents
-  const newReleases = (await Promise.all(releases.map((release) => saveImportedRelease(release)))).filter(
-    (release): release is Omit<ReleaseDoc, '_id'> => !!release,
-  )
-
-  // Save file documents
-  await Promise.all(files.map((file) => saveImportedFile(file)))
+  log.debug({ importId }, 'Completed extracting archive')
 
   const updatedMirroredModel = await setLatestImportedModelCard(mirroredModelId)
-
-  const modelCardVersions = modelCards.map((modelCard) => modelCard.version)
-  const releaseSemvers = releases.map((release) => release.semver)
-  const fileIds: ObjectId[] = files.map((file) => file._id)
-  const imageIds: string[] = images.map((image) => joinDistributionPackageName(image))
 
   log.info(
     {
@@ -580,6 +578,12 @@ async function importDocuments(
       releaseSemvers,
       fileIds,
       imageIds,
+      numberOfDocuments: {
+        modelCards: newModelCards.length,
+        releases: newReleases.length,
+        files: fileIds.length,
+        images: imageIds.length,
+      },
       importId,
     },
     'Finished importing the collection of model documents.',
@@ -608,12 +612,11 @@ async function importModelFile(body: Readable, fileId: string, mirroredModelId: 
 }
 
 function parseModelCard(
-  modelCardJson: string,
+  modelCard: unknown,
   mirroredModelId: string,
   sourceModelId: string,
   importId: string,
 ): Omit<ModelCardRevisionDoc, '_id'> {
-  const modelCard = JSON.parse(modelCardJson)
   if (!isModelCardRevisionDoc(modelCard)) {
     throw InternalError('Data cannot be converted into a model card.', {
       modelCard,
@@ -636,12 +639,11 @@ function parseModelCard(
 }
 
 function parseRelease(
-  releaseJson: string,
+  release: unknown,
   mirroredModelId: string,
   sourceModelId: string,
   importId: string,
 ): Omit<ReleaseDoc, '_id'> {
-  const release = JSON.parse(releaseJson)
   if (!isReleaseDoc(release)) {
     throw InternalError('Data cannot be converted into a release.', {
       release,
@@ -667,8 +669,7 @@ function parseRelease(
   return release
 }
 
-async function parseFile(fileJson: string, mirroredModelId: string, sourceModelId: string, importId: string) {
-  const file = JSON.parse(fileJson)
+async function parseFile(file: unknown, mirroredModelId: string, sourceModelId: string, importId: string) {
   if (!isFileInterfaceDoc(file)) {
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, importId })
   }
