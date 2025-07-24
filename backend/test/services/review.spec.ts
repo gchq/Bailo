@@ -12,6 +12,7 @@ import {
   findReviewsForAccessRequests,
   removeAccessRequestReviews,
 } from '../../src/services/review.js'
+import { RoleKind } from '../../src/types/types.js'
 import { testReviewRole } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js', async () => ({
@@ -235,7 +236,7 @@ describe('services > review', () => {
     await createReviewRole(user, {
       name: 'reviewer',
       shortName: 'reviewer',
-      kind: 'schema',
+      kind: RoleKind.REVIEW,
     })
 
     expect(reviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
