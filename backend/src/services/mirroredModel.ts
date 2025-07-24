@@ -109,7 +109,8 @@ export async function exportModel(
   } catch (error) {
     throw InternalError('Error when adding the release(s) to the Tarball file.', { error })
   }
-
+  // no more data to write
+  packerStream.finalize()
   await s3Upload
 
   log.debug({ modelId, semvers }, 'Successfully finalized Tarball file.')
@@ -549,8 +550,8 @@ async function importDocuments(
       } else {
         // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
         log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry')
-        next()
       }
+      next()
     })
 
     tarStream.on('error', (err) =>
@@ -707,7 +708,7 @@ async function addModelCardRevisionsToTarball(user: UserInterface, model: ModelD
   const cards = await getModelCardRevisions(user, model.id)
   for (const card of cards) {
     const cardJson = JSON.stringify(card.toJSON())
-    const packerEntry = packerStream.entry({ name: '${card.version}.json', size: cardJson.length })
+    const packerEntry = packerStream.entry({ name: `${card.version}.json`, size: cardJson.length })
     await pipeStreamToTarEntry(Readable.from(cardJson), packerEntry, { modelId: model.id })
   }
   log.debug({ user, modelId: model.id }, 'Completed adding model card revisions to Tarball file.')
