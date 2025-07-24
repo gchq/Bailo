@@ -1,13 +1,12 @@
 import { createHash } from 'node:crypto'
 import { json } from 'node:stream/consumers'
-import zlib from 'node:zlib'
 
 import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
 import prettyBytes from 'pretty-bytes'
 import stream, { Readable } from 'stream'
 import { finished } from 'stream/promises'
-import { extract, Pack, pack } from 'tar-stream'
+import { Pack } from 'tar-stream'
 
 import { objectExists, putObjectStream } from '../clients/s3.js'
 import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.js'
@@ -22,6 +21,7 @@ import { UserInterface } from '../models/User.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../utils/error.js'
 import { shortId } from '../utils/id.js'
+import { createTarGzStreams, extractTarGzStream, pipeStreamToTarEntry } from '../utils/tarball.js'
 import { hasKeysOfType } from '../utils/typeguards.js'
 import {
   createFilePath,
@@ -87,30 +87,29 @@ export async function exportModel(
   }
   log.debug('Request checks complete')
 
-  const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
+  const { gzipStream, tarStream } = createTarGzStreams()
   const s3Upload = uploadToS3(
     `${modelId}.tar.gz`,
     gzipStream,
     { exporter: user.dn, sourceModelId: modelId, mirroredModelId, importKind: ImportKind.Documents },
     { semvers },
   )
-  const packerStream = pack()
-  packerStream.pipe(gzipStream)
+  tarStream.pipe(gzipStream)
 
   try {
-    await addModelCardRevisionsToTarball(user, model, packerStream)
+    await addModelCardRevisionsToTarball(user, model, tarStream)
   } catch (error) {
     throw InternalError('Error when adding the model card revision(s) to the Tarball file.', { error })
   }
   try {
     if (releases.length > 0) {
-      await addReleasesToTarball(user, model, releases, packerStream, mirroredModelId)
+      await addReleasesToTarball(user, model, releases, tarStream, mirroredModelId)
     }
   } catch (error) {
     throw InternalError('Error when adding the release(s) to the Tarball file.', { error })
   }
   // no more data to write
-  packerStream.finalize()
+  tarStream.finalize()
   await s3Upload
 
   log.debug({ modelId, semvers }, 'Successfully finalized Tarball file.')
@@ -278,14 +277,13 @@ export async function exportCompressedRegistryImage(
   })
 
   // setup gzip, stream to s3 to allow draining, and then pipe tar to gzip
-  const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
+  const { gzipStream, tarStream } = createTarGzStreams()
   const s3Upload = uploadToS3(`${distributionPackageName}.tar.gz`, gzipStream, metadata, logData)
-  const packerStream = pack()
-  packerStream.pipe(gzipStream)
+  tarStream.pipe(gzipStream)
 
   // upload the manifest first as this is the starting point when later importing the blob
   const tagManifestJson = JSON.stringify(tagManifest)
-  const packerEntry = packerStream.entry({ name: 'manifest.json', size: tagManifestJson.length })
+  const packerEntry = tarStream.entry({ name: 'manifest.json', size: tagManifestJson.length })
   await pipeStreamToTarEntry(Readable.from(tagManifestJson), packerEntry, { mediaType: tagManifest.mediaType })
 
   // fetch and compress one layer (including config) at a time to manage RAM usage
@@ -307,7 +305,7 @@ export async function exportCompressedRegistryImage(
 
     // pipe the body to tar using streams
     const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
-    const packerEntry = packerStream.entry({ name: entryName, size: layer.size })
+    const packerEntry = tarStream.entry({ name: entryName, size: layer.size })
     // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
     await pipeStreamToTarEntry(Readable.fromWeb(responseBody.body), packerEntry, {
       layerDigest,
@@ -315,39 +313,9 @@ export async function exportCompressedRegistryImage(
     })
   }
   // no more data to write
-  packerStream.finalize()
+  tarStream.finalize()
 
   await s3Upload
-}
-
-export async function pipeStreamToTarEntry(
-  inputStream: NodeJS.ReadableStream,
-  packerEntry: NodeJS.WritableStream,
-  logData: { [key: string]: string } = {},
-) {
-  inputStream.pipe(packerEntry)
-  return new Promise((resolve, reject) => {
-    packerEntry.on('finish', () => {
-      log.debug('Finished fetching layer stream', { ...logData })
-      resolve('ok')
-    })
-    packerEntry.on('error', (err) =>
-      reject(
-        InternalError('Error while tarring layer stream', {
-          error: err,
-          ...logData,
-        }),
-      ),
-    )
-    inputStream.on('error', (err) =>
-      reject(
-        InternalError('Error while fetching layer stream', {
-          error: err,
-          ...logData,
-        }),
-      ),
-    )
-  })
 }
 
 export async function importCompressedRegistryImage(
@@ -365,15 +333,12 @@ export async function importCompressedRegistryImage(
     })
   }
   const { path: imageName, tag: imageTag } = distributionPackageNameObject
-  // setup streams
-  const gzipStream = zlib.createGunzip({ chunkSize: 16 * 1024 * 1024 })
-  const tarStream = extract()
-  // body is tar.gz blob stream
-  body.pipe(gzipStream).pipe(tarStream)
 
   let manifestBody: unknown
-  await new Promise((resolve, reject) => {
-    tarStream.on('entry', async function (entry, stream, next) {
+
+  await extractTarGzStream(
+    body,
+    async function (entry, stream, next) {
       log.debug('Processing un-tarred entry', {
         name: entry.name,
         type: entry.type,
@@ -420,17 +385,9 @@ export async function importCompressedRegistryImage(
         log.warn('Skipping non-file entry', { name: entry.name, type: entry.type, importId })
         next()
       }
-    })
-
-    tarStream.on('error', (err) =>
-      reject(
-        InternalError('Error while un-tarring blob', {
-          error: err,
-        }),
-      ),
-    )
-
-    tarStream.on('finish', async function () {
+    },
+    undefined,
+    async function (resolve: (reason?: any) => void, reject: (reason?: any) => void) {
       log.debug('Uploading manifest', { importId })
       if (hasKeysOfType<{ mediaType: 'string' }>(manifestBody, { mediaType: 'string' })) {
         await putImageManifest(
@@ -445,8 +402,8 @@ export async function importCompressedRegistryImage(
       } else {
         reject(InternalError('Could not find manifest.json in tarball'))
       }
-    })
-  })
+    },
+  )
   log.debug('Completed registry upload', {
     image: { modelId, imageName, imageTag },
     importId,
@@ -474,97 +431,76 @@ async function importDocuments(
   const releaseRegex = /^releases\/(.*)\.json$/
   const fileRegex = /^files\/(.*)\.json$/
 
-  // setup streams
-  const gzipStream = zlib.createGunzip({ chunkSize: 16 * 1024 * 1024 })
-  const tarStream = extract()
-  // body is tar.gz blob stream
-  body.pipe(gzipStream).pipe(tarStream)
-
-  await new Promise((resolve, reject) => {
-    // enable lazy fetching
-    let lazyMirroredModel: ModelDoc | null = null
-
-    tarStream.on('entry', async function (entry, stream, next) {
-      log.debug(
-        {
-          name: entry.name,
-          type: entry.type,
-          size: entry.size,
-          importId,
-        },
-        'Processing un-tarred entry',
-      )
-
-      if (entry.type === 'file') {
-        // Process file
-        const fileContents = await json(stream)
-
-        if (modelCardRegex.test(entry.name)) {
-          log.debug({ name: entry.name, importId }, 'Processing compressed file as a Model Card')
-          const modelCard = parseModelCard(fileContents, mirroredModelId, sourceModelId, importId)
-          modelCardVersions.push(modelCard.version)
-          const savedModelCard = await saveImportedModelCard(modelCard)
-          if (savedModelCard) {
-            newModelCards.push(savedModelCard)
-          }
-        } else if (releaseRegex.test(entry.name)) {
-          log.debug({ name: entry.name, importId }, 'Processing compressed file as a Release')
-          const release = parseRelease(fileContents, mirroredModelId, sourceModelId, importId)
-
-          // have to authorise per-release due to streaming, rather than do all releases at once
-          if (!lazyMirroredModel) {
-            lazyMirroredModel = await getModelById(user, mirroredModelId)
-          }
-          const authResponse = await authorisation.releases(user, lazyMirroredModel, [release], ReleaseAction.Import)
-          if (!authResponse[0]?.success) {
-            throw Forbidden('You do not have the necessary permissions to import these releases.', {
-              modelId: mirroredModelId,
-              release: release.semver,
-              user,
-              importId,
-            })
-          }
-
-          for (const image of release.images) {
-            imageIds.push(
-              joinDistributionPackageName({
-                domain: image.repository,
-                path: image.name,
-                tag: image.tag,
-              } as DistributionPackageName),
-            )
-          }
-          releaseSemvers.push(release.semver)
-          const savedRelease = await saveImportedRelease(release)
-          if (savedRelease) {
-            newReleases.push(savedRelease)
-          }
-        } else if (fileRegex.test(entry.name)) {
-          log.debug({ name: entry.name, importId }, 'Processing compressed file as a File')
-          const file = await parseFile(fileContents, mirroredModelId, sourceModelId, importId)
-          fileIds.push(file._id)
-          await saveImportedFile(file)
-        } else {
-          throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId, importId })
-        }
-      } else {
-        // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
-        log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry')
-      }
-      next()
-    })
-
-    tarStream.on('error', (err) =>
-      reject(
-        InternalError('Error while un-tarring blob', {
-          error: err,
-        }),
-      ),
+  // enable lazy fetching
+  let lazyMirroredModel: ModelDoc | null = null
+  await extractTarGzStream(body, async function (entry, stream, next) {
+    log.debug(
+      {
+        name: entry.name,
+        type: entry.type,
+        size: entry.size,
+        importId,
+      },
+      'Processing un-tarred entry',
     )
 
-    tarStream.on('finish', async function () {
-      resolve('ok')
-    })
+    if (entry.type === 'file') {
+      // Process file
+      const fileContentsJson = await json(stream)
+
+      if (modelCardRegex.test(entry.name)) {
+        log.debug({ name: entry.name, importId }, 'Processing compressed file as a Model Card')
+        const modelCard = parseModelCard(fileContentsJson, mirroredModelId, sourceModelId, importId)
+        modelCardVersions.push(modelCard.version)
+        const savedModelCard = await saveImportedModelCard(modelCard)
+        if (savedModelCard) {
+          newModelCards.push(savedModelCard)
+        }
+      } else if (releaseRegex.test(entry.name)) {
+        log.debug({ name: entry.name, importId }, 'Processing compressed file as a Release')
+        const release = parseRelease(fileContentsJson, mirroredModelId, sourceModelId, importId)
+
+        // have to authorise per-release due to streaming, rather than do all releases at once
+        if (!lazyMirroredModel) {
+          lazyMirroredModel = await getModelById(user, mirroredModelId)
+        }
+        const authResponse = await authorisation.releases(user, lazyMirroredModel, [release], ReleaseAction.Import)
+        if (!authResponse[0]?.success) {
+          throw Forbidden('You do not have the necessary permissions to import these releases.', {
+            modelId: mirroredModelId,
+            release: release.semver,
+            user,
+            importId,
+          })
+        }
+
+        for (const image of release.images) {
+          imageIds.push(
+            joinDistributionPackageName({
+              domain: image.repository,
+              path: image.name,
+              tag: image.tag,
+            } as DistributionPackageName),
+          )
+        }
+        releaseSemvers.push(release.semver)
+        const savedRelease = await saveImportedRelease(release)
+        if (savedRelease) {
+          newReleases.push(savedRelease)
+        }
+      } else if (fileRegex.test(entry.name)) {
+        log.debug({ name: entry.name, importId }, 'Processing compressed file as a File')
+        const file = await parseFile(fileContentsJson, mirroredModelId, sourceModelId, importId)
+        fileIds.push(file._id)
+        await saveImportedFile(file)
+      } else {
+        throw InternalError('Failed to parse zip file - Unrecognised file contents.', { mirroredModelId, importId })
+      }
+    } else {
+      // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
+      log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry')
+    }
+    next()
   })
   log.debug({ importId }, 'Completed extracting archive')
 
@@ -703,12 +639,12 @@ async function parseFile(file: unknown, mirroredModelId: string, sourceModelId: 
   return file
 }
 
-async function addModelCardRevisionsToTarball(user: UserInterface, model: ModelDoc, packerStream: Pack) {
+async function addModelCardRevisionsToTarball(user: UserInterface, model: ModelDoc, tarStream: Pack) {
   log.debug({ user, modelId: model.id }, 'Adding model card revisions to Tarball file.')
   const cards = await getModelCardRevisions(user, model.id)
   for (const card of cards) {
     const cardJson = JSON.stringify(card.toJSON())
-    const packerEntry = packerStream.entry({ name: `${card.version}.json`, size: cardJson.length })
+    const packerEntry = tarStream.entry({ name: `${card.version}.json`, size: cardJson.length })
     await pipeStreamToTarEntry(Readable.from(cardJson), packerEntry, { modelId: model.id })
   }
   log.debug({ user, modelId: model.id }, 'Completed adding model card revisions to Tarball file.')
@@ -718,7 +654,7 @@ async function addReleasesToTarball(
   user: UserInterface,
   model: ModelDoc,
   releases: ReleaseDoc[],
-  packerStream: Pack,
+  tarStream: Pack,
   mirroredModelId: string,
 ) {
   const semvers = releases.map((release) => release.semver)
@@ -728,7 +664,7 @@ async function addReleasesToTarball(
   // Using a .catch here to ensure all errors are returned, rather than just the first error.
   await Promise.all(
     releases.map((release) =>
-      addReleaseToTarball(user, model, release, packerStream, mirroredModelId).catch((e) => errors.push(e)),
+      addReleaseToTarball(user, model, release, tarStream, mirroredModelId).catch((e) => errors.push(e)),
     ),
   )
   if (errors.length > 0) {
@@ -741,7 +677,7 @@ async function addReleaseToTarball(
   user: UserInterface,
   model: ModelDoc,
   release: ReleaseDoc,
-  packerStream: Pack,
+  tarStream: Pack,
   mirroredModelId: string,
 ) {
   log.debug('Adding release to gzip file of releases.', { user, modelId: model.id, semver: release.semver })
@@ -749,12 +685,12 @@ async function addReleaseToTarball(
 
   try {
     const releaseJson = JSON.stringify(release.toJSON())
-    const packerEntry = packerStream.entry({ name: `releases/${release.semver}.json`, size: releaseJson.length })
+    const packerEntry = tarStream.entry({ name: `releases/${release.semver}.json`, size: releaseJson.length })
     await pipeStreamToTarEntry(Readable.from(releaseJson), packerEntry, { modelId: model.id })
 
     for (const file of files) {
       const fileJson = JSON.stringify(file)
-      const packerEntry = packerStream.entry({ name: `files/${file._id.toString()}.json`, size: fileJson.length })
+      const packerEntry = tarStream.entry({ name: `files/${file._id.toString()}.json`, size: fileJson.length })
       await pipeStreamToTarEntry(Readable.from(fileJson), packerEntry, { modelId: model.id })
 
       uploadToS3(
