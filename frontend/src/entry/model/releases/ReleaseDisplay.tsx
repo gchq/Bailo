@@ -218,26 +218,28 @@ export default function ReleaseDisplay({
               )}
               <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2}>
                 {!release.minor && <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />}
-                <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>
-                  <Stack direction='row' spacing={2}>
-                    {reviewResponses.length > 0 && (
-                      <Tooltip title='Reviews'>
-                        <Stack direction='row' spacing={1}>
-                          <ListAltIcon color='primary' />
-                          <Typography variant='caption'>{reviewResponses.length}</Typography>
-                        </Stack>
-                      </Tooltip>
-                    )}
-                    {commentResponses.length > 0 && (
-                      <Tooltip title='Comments'>
-                        <Stack direction='row' spacing={1}>
-                          <CommentIcon color='primary' />
-                          <Typography variant='caption'>{commentResponses.length}</Typography>
-                        </Stack>
-                      </Tooltip>
-                    )}
-                  </Stack>
-                </IconButton>
+                {(reviewResponses.length > 0 || commentResponses.length > 0) && (
+                  <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>
+                    <Stack direction='row' spacing={2}>
+                      {reviewResponses.length > 0 && (
+                        <Tooltip title='Reviews'>
+                          <Stack direction='row' spacing={1}>
+                            <ListAltIcon color='primary' />
+                            <Typography variant='caption'>{reviewResponses.length}</Typography>
+                          </Stack>
+                        </Tooltip>
+                      )}
+                      {commentResponses.length > 0 && (
+                        <Tooltip title='Comments'>
+                          <Stack direction='row' spacing={1}>
+                            <CommentIcon color='primary' />
+                            <Typography variant='caption'>{commentResponses.length}</Typography>
+                          </Stack>
+                        </Tooltip>
+                      )}
+                    </Stack>
+                  </IconButton>
+                )}
               </Stack>
             </Stack>
           </Stack>

@@ -369,7 +369,7 @@ export default function FileDisplay({
                 </Stack>
               )}
               <Stack>
-                <IconButton onClick={handleFileMoreButtonClick}>
+                <IconButton aria-label='toggle file options menu' onClick={handleFileMoreButtonClick}>
                   <MoreVert color='primary' />
                 </IconButton>
                 <Menu
