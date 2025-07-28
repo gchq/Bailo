@@ -3,11 +3,12 @@ import showdown from 'showdown'
 
 import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
-import ResponseModel, { ResponseInterface } from '../models/Response.js'
+import { ResponseInterface } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { getModelById, getModelCard } from './model.js'
+import { getResponsesByParentIds } from './response.js'
 import { getRoleEntities } from './review.js'
 import { getSchemaById } from './schema.js'
 
@@ -61,7 +62,7 @@ export async function getModelCardHtml(
     throw new Error('Failed to find model card to export.')
   }
 
-  const reviewExports = await createReleaseReviewExports(modelId)
+  const reviewExports = await createReleaseReviewExports(user, modelId)
   const modelCardRevision: ModelCardRevisionInterface = { ...modelCard, modelId, deleted: model.deleted }
   const html = await renderToHtml(model, modelCardRevision, reviewExports)
 
@@ -105,14 +106,14 @@ function getEntitiesWithRole(role: string, collaborators: CollaboratorEntry[]) {
   return getRoleEntities([role], collaborators)[0].entities.join('\n')
 }
 
-async function createReleaseReviewExports(modelId: string) {
+async function createReleaseReviewExports(user: UserInterface, modelId: string) {
   const reviewExports: ReviewExport[] = []
   const modelReviews = await ReviewModel.find({ modelId: modelId, kind: 'release', deleted: false })
 
   for (const modelReview of modelReviews) {
-    const modelResponses = await ResponseModel.find({ parentId: modelReview._id, deleted: false })
+    const modelResponses = getResponsesByParentIds(user, [modelReview._id as string])
 
-    for (const modelResponse of modelResponses) {
+    for (const modelResponse of await modelResponses) {
       const reviewExport: ReviewExport = {
         semver: modelReview.semver,
         collaborator: modelResponse.entity,
