@@ -40,7 +40,7 @@ describe('services > export', () => {
       role: '',
       decision: 'approve',
       comment: '',
-      lastUpdated: '',
+      updatedAt: '',
     },
   ]
 

@@ -3,7 +3,7 @@ import showdown from 'showdown'
 
 import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
-import ResponseModel, { DecisionKeys } from '../models/Response.js'
+import ResponseModel, { ResponseInterface } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
@@ -44,11 +44,7 @@ type Fragment = (
 export type ReviewExport = {
   semver?: string
   collaborator: string
-  role?: string
-  decision?: DecisionKeys
-  comment?: string
-  lastUpdated: string
-}
+} & Pick<ResponseInterface, 'role' | 'decision' | 'comment' | 'updatedAt'>
 
 export async function getModelCardHtml(
   user: UserInterface,
@@ -65,7 +61,7 @@ export async function getModelCardHtml(
     throw new Error('Failed to find model card to export.')
   }
 
-  const reviewExports = await createModelReviewExports(modelId)
+  const reviewExports = await createReleaseReviewExports(modelId)
   const modelCardRevision: ModelCardRevisionInterface = { ...modelCard, modelId, deleted: model.deleted }
   const html = await renderToHtml(model, modelCardRevision, reviewExports)
 
@@ -109,7 +105,7 @@ function getEntitiesWithRole(role: string, collaborators: CollaboratorEntry[]) {
   return getRoleEntities([role], collaborators)[0].entities.join('\n')
 }
 
-async function createModelReviewExports(modelId: string) {
+async function createReleaseReviewExports(modelId: string) {
   const reviewExports: ReviewExport[] = []
   const modelReviews = await ReviewModel.find({ modelId: modelId, kind: 'release', deleted: false })
 
@@ -123,7 +119,7 @@ async function createModelReviewExports(modelId: string) {
         role: modelResponse.role,
         decision: modelResponse.decision,
         comment: modelResponse.comment,
-        lastUpdated: modelResponse.updatedAt,
+        updatedAt: modelResponse.updatedAt,
       }
       reviewExports.push(reviewExport)
     }
@@ -176,7 +172,7 @@ export async function renderToHtml(
 
 function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
   let reviewTable =
-    '## Model Reviews\n\n' +
+    '## Release Reviews\n\n' +
     '| Version | Collaborator | Role | Decision | Comment | Last Updated |\n' +
     '| :-----: | :----------: | :--: | :------: | :-----: | :----------: |\n'
 
@@ -193,7 +189,7 @@ function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
       `|${reviewExport.decision}` +
       // Linebreaks breaks the markdown-to-html conversion within a table
       `|${reviewExport.comment?.replace(/(\r\n|\n|\r)/gm, ' ')}` +
-      `|${reviewExport.lastUpdated}|\n`
+      `|${reviewExport.updatedAt}|\n`
   }
 
   return reviewTable
