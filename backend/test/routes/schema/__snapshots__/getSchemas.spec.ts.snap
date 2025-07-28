@@ -44,6 +44,7 @@ exports[`routes > schema > getSchemas > audit > expected call 1`] = `
     "name": "Example Schema 1",
     "reviewRoles": [
       "reviewer",
+      "msro",
     ],
     "updatedAt": 2023-07-28T10:50:00.928Z,
   },
@@ -122,6 +123,7 @@ exports[`routes > schema > getSchemas > returns all schemas 1`] = `
       "name": "Example Schema 1",
       "reviewRoles": [
         "reviewer",
+        "msro",
       ],
       "updatedAt": "2023-07-28T10:50:00.928Z",
     },
@@ -181,6 +183,7 @@ exports[`routes > schema > getSchemas > returns only model schemas with the mode
       "name": "Example Schema 1",
       "reviewRoles": [
         "reviewer",
+        "msro",
       ],
       "updatedAt": "2023-07-28T10:50:00.928Z",
     },

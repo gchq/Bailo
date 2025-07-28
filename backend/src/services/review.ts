@@ -239,7 +239,7 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
     ...newReviewRole,
   })
 
-  const auth = await authorisation.reviewRole(user, reviewRole['_id'] as string, ReviewRoleAction.Create)
+  const auth = await authorisation.reviewRole(user, reviewRole.shortName, ReviewRoleAction.Create)
   if (!auth.success) {
     throw Forbidden(auth.info, {
       userDn: user.dn,
@@ -290,13 +290,13 @@ export async function addDefaultReviewRoles() {
   }
 }
 
-export async function removeReviewRole(user: UserInterface, reviewRoleId: string) {
-  const reviewRole = await ReviewRoleModel.findOne({ _id: reviewRoleId })
+export async function removeReviewRole(user: UserInterface, reviewRoleShortName: string) {
+  const reviewRole = await ReviewRoleModel.findOne({ shortName: reviewRoleShortName })
   if (!reviewRole) {
-    throw BadReq('Review role could not be deleted as it does not exist.', { reviewRoleId })
+    throw BadReq('Review role could not be deleted as it does not exist.', { reviewRoleShortName })
   }
 
-  const auth = await authorisation.reviewRole(user, reviewRoleId, ReviewRoleAction.Delete)
+  const auth = await authorisation.reviewRole(user, reviewRoleShortName, ReviewRoleAction.Delete)
   if (!auth.success) {
     throw Forbidden(auth.info, {
       userDn: user.dn,
@@ -309,7 +309,6 @@ export async function removeReviewRole(user: UserInterface, reviewRoleId: string
     // Remove role from schemas
     schema.reviewRoles = schema.reviewRoles.filter((role) => role !== reviewRole.shortName)
     await schema.save()
-
     // Also remove the role from any model collaborators
     const models = await ModelModel.find({ 'card.schemaId': schema.id })
     for (const model of models) {

@@ -66,8 +66,8 @@ export class BasicAuthorisationConnector {
     return (await this.releases(user, model, release ? [release] : [], action))[0]
   }
 
-  async reviewRole(user: UserInterface, reviewRoleId: string, action: ReviewRoleActionKeys) {
-    return (await this.reviewRoles(user, [reviewRoleId], action))[0]
+  async reviewRole(user: UserInterface, reviewRoleShortName: string, action: ReviewRoleActionKeys) {
+    return (await this.reviewRoles(user, [reviewRoleShortName], action))[0]
   }
 
   async accessRequest(
@@ -395,7 +395,7 @@ export class BasicAuthorisationConnector {
     action: ReviewRoleActionKeys,
   ): Promise<Array<Response>> {
     return Promise.all(
-      reviewRoles.map(async (reviewRoleId) => {
+      reviewRoles.map(async (reviewRoleShortName) => {
         // Is this a constrained user token.
         const tokenAuth = await validateTokenForUse(user.token, ActionLookup[action])
         if (!tokenAuth.success) {
@@ -407,7 +407,7 @@ export class BasicAuthorisationConnector {
 
           if (!isAdmin) {
             return {
-              id: reviewRoleId,
+              id: reviewRoleShortName,
               success: false,
               info: 'You cannot upload or modify a review role if you are not an admin.',
             }
@@ -415,7 +415,7 @@ export class BasicAuthorisationConnector {
         }
 
         return {
-          id: reviewRoleId,
+          id: reviewRoleShortName,
           success: true,
         }
       }),

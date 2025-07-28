@@ -2,18 +2,16 @@
 
 exports[`routes > review > postReviewRole > audit > expected call 1`] = `
 {
-  "id": "my-role-125",
   "name": "Reviewer",
-  "shortName": "msro",
+  "shortName": "reviewer",
 }
 `;
 
 exports[`routes > review > postReviewRole > creates and returns new review role 1`] = `
 {
   "reviewRole": {
-    "id": "my-role-125",
     "name": "Reviewer",
-    "shortName": "msro",
+    "shortName": "reviewer",
   },
 }
 `;

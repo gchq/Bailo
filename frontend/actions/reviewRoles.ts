@@ -37,8 +37,8 @@ export async function postReviewRole(reviewRole: ReviewRolesFormData) {
   })
 }
 
-export async function deleteReviewRole(reviewRoleId: string) {
-  return fetch(`/api/v2/review/role/${reviewRoleId}`, {
+export async function deleteReviewRole(reviewRoleShortName: string) {
+  return fetch(`/api/v2/review/role/${reviewRoleShortName}`, {
     method: 'delete',
     headers: { 'Content-Type': 'application/json' },
   })

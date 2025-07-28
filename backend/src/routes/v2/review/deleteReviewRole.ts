@@ -10,7 +10,7 @@ import { parse } from '../../../utils/validate.js'
 
 export const deleteReviewRoleSchema = z.object({
   params: z.object({
-    reviewRoleId: z.string().openapi({ example: 'reviewer' }),
+    reviewRoleShortName: z.string().openapi({ example: 'reviewer' }),
   }),
 })
 
@@ -45,8 +45,8 @@ export const deleteReviewRole = [
 
     const { params } = parse(req, deleteReviewRoleSchema)
 
-    await removeReviewRole(req.user, params.reviewRoleId)
-    await audit.onDeleteReviewRole(req, params.reviewRoleId)
+    await removeReviewRole(req.user, params.reviewRoleShortName)
+    await audit.onDeleteReviewRole(req, params.reviewRoleShortName)
 
     res.json({ deleted: true })
   },

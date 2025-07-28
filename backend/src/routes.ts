@@ -204,7 +204,7 @@ server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
 server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
 
 server.get('/api/v2/review/roles', ...getReviewRoles)
-server.delete('/api/v2/review/role/:reviewRoleId', ...deleteReviewRole)
+server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
 server.post('/api/v2/review/role', ...postReviewRole)
 
 // Python docs
