@@ -15,7 +15,7 @@ export interface PostSchemaParams {
   reviewRoles?: string[]
 }
 
-export function useGetSchemas(kind: SchemaKindKeys, hidden?: boolean) {
+export function useGetSchemas(kind?: SchemaKindKeys, hidden?: boolean) {
   const queryParams = {
     kind,
     ...(hidden != undefined && { hidden }),

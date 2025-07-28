@@ -1,5 +1,6 @@
 import { Box, Button, Container, Divider, List, ListItem, Paper, Stack, Typography } from '@mui/material'
 import { deleteReviewRole, useGetReviewRoles } from 'actions/reviewRoles'
+import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { Fragment, useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
@@ -10,6 +11,7 @@ import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import { plural } from 'utils/stringUtils'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
@@ -17,6 +19,7 @@ export default function ReviewRoles() {
   const [confirmationOpen, setConfirmationOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
+  const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
 
   const listRoles = useMemo(
     () =>
@@ -30,6 +33,17 @@ export default function ReviewRoles() {
         </SimpleListItemButton>
       )),
     [reviewRoles, selectedRole],
+  )
+
+  const schemasLength = useCallback(
+    (reviewRole: string) => {
+      if (schemas) {
+        return schemas.filter((schema) => schema.reviewRoles.includes(reviewRole)).length
+      } else {
+        return 0
+      }
+    },
+    [schemas],
   )
 
   const handleOpenDeleteConfirmation = useCallback(() => {
@@ -98,6 +112,11 @@ export default function ReviewRoles() {
                 title='Deleting this role will remove it from any schemas it is attached to, and will also remove the role from any model collaborators assigned to that role.'
                 onCancel={() => setConfirmationOpen(false)}
                 onConfirm={() => handleDeleteReviewRole(reviewRole._id)}
+                dialogMessage={
+                  schemasLength(reviewRole.shortName) > 0
+                    ? `If deleted, this role will be removed from ${plural(schemasLength(reviewRole.shortName), 'schema')}. Are you sure you want to remove this review role?`
+                    : 'Are you sure want to remove this review role?'
+                }
                 errorMessage={errorMessage}
               />
             </>
@@ -112,10 +131,11 @@ export default function ReviewRoles() {
       handleDeleteReviewRole,
       confirmationOpen,
       errorMessage,
+      schemasLength,
     ],
   )
 
-  if (isCurrentUserLoading || isReviewRolesLoading) {
+  if (isCurrentUserLoading || isReviewRolesLoading || isSchemasLoading) {
     return <Loading />
   }
 
@@ -125,6 +145,10 @@ export default function ReviewRoles() {
 
   if (isReviewRolesError) {
     return <ErrorWrapper message={isReviewRolesError.info.message} />
+  }
+
+  if (isSchemasError) {
+    return <ErrorWrapper message={isSchemasError.info.message} />
   }
 
   if (!currentUser || !currentUser.isAdmin) {
@@ -140,34 +164,32 @@ export default function ReviewRoles() {
   return (
     <>
       <Title text='View Review Roles' />
-      <Container>
-        <Stack mx={2} mb={1} direction='row' divider={<Divider />}>
-          <Typography component='h1' color='primary' variant='h6' noWrap>
-            Review Roles
-          </Typography>
-          <Button variant='contained' href='/reviewRoles/new' color='primary'>
-            Create new Review Role
-          </Button>
-        </Stack>
-        {reviewRoles ? (
-          <Paper sx={{ p: 4, my: 4 }}>
-            {reviewRoles.length > 0 ? (
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={{ sm: 2 }}
-                divider={<Divider orientation='vertical' flexItem />}
-              >
-                <List sx={{ width: '200px' }}>{listRoles}</List>
-                <Container sx={{ my: 2 }}>{listRoleDescriptions}</Container>
-              </Stack>
-            ) : (
-              <EmptyBlob text='No review roles found. Press button in top-right to create new review role.' />
-            )}
-          </Paper>
-        ) : (
-          <Loading />
-        )}
-      </Container>
+      <Stack mx={2} mb={1} direction='row' divider={<Divider flexItem orientation='vertical' />} spacing={2}>
+        <Typography component='h1' color='primary' variant='h6' noWrap>
+          Review Roles
+        </Typography>
+        <Button variant='contained' href='/reviewRoles/new' color='primary'>
+          Create new Review Role
+        </Button>
+      </Stack>
+      {reviewRoles ? (
+        <Paper sx={{ p: 4, my: 4 }}>
+          {reviewRoles.length > 0 ? (
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={{ sm: 2 }}
+              divider={<Divider orientation='vertical' flexItem />}
+            >
+              <List sx={{ width: '200px' }}>{listRoles}</List>
+              <Container sx={{ my: 2 }}>{listRoleDescriptions}</Container>
+            </Stack>
+          ) : (
+            <EmptyBlob text='No review roles found. Press button in top-right to create new review role.' />
+          )}
+        </Paper>
+      ) : (
+        <Loading />
+      )}
     </>
   )
 }
