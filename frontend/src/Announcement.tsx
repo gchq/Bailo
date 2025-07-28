@@ -65,7 +65,7 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
             </Stack>
           </Grid2>
           <Grid2 size={{ xs: 1 }} sx={{ textAlign: 'right' }}>
-            <IconButton size='small' onClick={onClose}>
+            <IconButton aria-label='close announcement pop-up' size='small' onClick={onClose}>
               <Close color='primary' />
             </IconButton>
           </Grid2>

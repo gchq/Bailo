@@ -4,6 +4,7 @@ import { useGetReviewRoles } from 'actions/reviewRoles'
 import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import semver from 'semver'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import Restricted from 'src/common/Restricted'
@@ -42,9 +43,9 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
 
   useEffect(() => {
     if (model && releases.length > 0) {
-      setLatestRelease(releases.map((release) => release.semver).sort()[releases.length - 1])
+      setLatestRelease(semver.sort(releases.map((release) => release.semver))[releases.length - 1])
     }
-  }, [model, releases])
+  }, [latestRelease, model, releases])
 
   function handleDraftNewRelease() {
     router.push(`/model/${model.id}/release/new`)
@@ -82,8 +83,8 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
           </Box>
         )}
         <Paginate
-          list={releases.map((entryFile) => {
-            return { key: entryFile._id, ...entryFile }
+          list={releases.map((release) => {
+            return { key: release._id, ...release }
           })}
           emptyListText={`No releases found for model ${model.name}`}
           searchFilterProperty='semver'
