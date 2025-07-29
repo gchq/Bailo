@@ -98,7 +98,7 @@ export default function AuthenticationTab() {
           Personal Access Tokens
         </Typography>
         <LoadingButton
-          aria-label='Add personal authentication token button'
+          aria-label='add personal authentication token button'
           variant='outlined'
           loading={isLoading}
           onClick={handleAddToken}
