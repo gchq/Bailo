@@ -36,22 +36,18 @@ export default function OrganisationAndStateDetails({ entry }: OrganisationAndSt
         divider={<Divider flexItem />}
       >
         <Stack spacing={1}>
-          {entry.organisation && (
-            <Box>
-              <Typography>
-                <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Organisation: </span>
-                {entry.organisation}
-              </Typography>
-            </Box>
-          )}
-          {entry.state && (
-            <Box>
-              <Typography>
-                <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>State: </span>
-                <span>{entry.state}</span>
-              </Typography>
-            </Box>
-          )}
+          <Box>
+            <Typography>
+              <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Organisation: </span>
+              {entry.organisation || 'Not set'}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography>
+              <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>State: </span>
+              <span>{entry.state || 'Not set'}</span>
+            </Typography>
+          </Box>
         </Stack>
         <Stack spacing={1}>
           <Button size='small' onClick={() => setRolesDialogOpen(true)} sx={{ width: 'max-content' }}>
