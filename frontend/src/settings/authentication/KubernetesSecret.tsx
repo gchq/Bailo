@@ -38,7 +38,7 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
         <Typography fontWeight='bold'>Step 1: Download Secret</Typography>
         <Typography>First, download the Kubernetes pull secret for your personal access token.</Typography>
         <SplitButton
-          aria-label='Download Kubernetes pull secret'
+          aria-label='download Kubernetes pull secret'
           options={[`${showFilePreview ? 'Close file preview' : 'Preview file'}`]}
           onPrimaryButtonClick={() =>
             downloadFile(
