@@ -11,7 +11,7 @@ import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
-import { plural } from 'utils/stringUtils'
+import { plural, toTitleCase } from 'utils/stringUtils'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
@@ -81,7 +81,7 @@ export default function ReviewRoles() {
                   <Typography color='primary' fontWeight='bold'>
                     System Role
                   </Typography>
-                  <Typography>{reviewRole.collaboratorRole}</Typography>
+                  <Typography>{toTitleCase(reviewRole.collaboratorRole || '')}</Typography>
                 </Box>
                 <Box>
                   <Typography color='primary' fontWeight='bold'>
