@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Stack, Typography } from '@mui/material'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
@@ -27,40 +27,33 @@ export default function OrganisationAndStateDetails({ entry }: OrganisationAndSt
 
   return (
     <Box>
-      <Stack
-        direction={{ md: 'column', lg: 'row' }}
-        spacing={2}
-        justifyContent='center'
-        alignItems='center'
-        sx={{ mr: 0 }}
-        divider={<Divider flexItem />}
-      >
+      <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' sx={{ mr: 0 }}>
         <Stack spacing={1}>
-          {entry.organisation && (
-            <Box>
-              <Typography>
-                <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Organisation: </span>
-                {entry.organisation}
-              </Typography>
-            </Box>
-          )}
-          {entry.state && (
-            <Box>
-              <Typography>
-                <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>State: </span>
-                <span>{entry.state}</span>
-              </Typography>
-            </Box>
-          )}
+          <Box>
+            <Typography>
+              <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Organisation: </span>
+              {entry.organisation || 'Not set'}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography>
+              <span style={{ fontWeight: 'bold', color: theme.palette.primary.main }}>State: </span>
+              <span>{entry.state || 'Not set'}</span>
+            </Typography>
+          </Box>
         </Stack>
-        <Stack spacing={1}>
-          <Button size='small' onClick={() => setRolesDialogOpen(true)} sx={{ width: 'max-content' }}>
+        <Stack spacing={1} sx={{ width: { sm: '100%', md: 'max-content' } }}>
+          <Button
+            size='small'
+            onClick={() => setRolesDialogOpen(true)}
+            sx={{ width: 'max-content', fontWeight: 'bold' }}
+          >
             View collaborators
           </Button>
           {collaboratorList}
         </Stack>
-        <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
       </Stack>
+      <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
     </Box>
   )
 }
