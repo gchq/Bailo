@@ -117,6 +117,10 @@ class Schema:
         return [schema["id"] for schema in all_schemas["schemas"]]
 
     def __unpack(self, res) -> None:
+        """Set schema attributes from server response.
+
+        :param res: Dictionary returned by the server for a schema object.
+        """
         self.schema_id = res["id"]
         self.name = res["name"]
         self.description = res["description"]

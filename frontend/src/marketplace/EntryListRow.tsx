@@ -65,7 +65,7 @@ export default function EntryListRow({
         <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
           {entry.description}
         </Typography>
-        <Stack direction='row' spacing={1} divider={<Divider flexItem orientation='vertical' />} alignItems='center'>
+        <Stack direction='row' spacing={1} alignItems='center'>
           <Stack direction='row' spacing={1}>
             {entry.organisation && (
               <ChipSelector
@@ -97,6 +97,7 @@ export default function EntryListRow({
               />
             )}
           </Stack>
+          {(entry.state || entry.organisation) && entry.tags.length > 0 && <Divider flexItem orientation='vertical' />}
           <ChipSelector
             chipTooltipTitle={'Filter by tag'}
             options={entry.tags.slice(0, 10)}
