@@ -110,9 +110,10 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
   Object.assign(schema, diff)
   await schema.save()
 
-  // Find out why roles are duplicating!
   if (diff.reviewRoles) {
     const models = await ModelModel.find({ 'card.schemaId': schemaId })
+    const reviewRoles = await ReviewRoleModel.find({ shortName: { $in: diff.reviewRoles } })
+    const roleMap = new Map(reviewRoles.map((role) => [role.shortName, role]))
     for (const model of models) {
       // Remove any roles from model collaborators that have been removed from the schema
       for (const collaborator of model.collaborators) {
@@ -121,7 +122,7 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
       // Update add users/roles based on new defaultEntities
       const updatedCollaborators: CollaboratorEntry[] = [...model.collaborators]
       for (const reviewRoleDiff of diff.reviewRoles) {
-        const reviewRole = await ReviewRoleModel.findOne({ shortName: reviewRoleDiff })
+        const reviewRole = roleMap.get(reviewRoleDiff)
         if (reviewRole && reviewRole.defaultEntities) {
           for (const defaultEntity of reviewRole.defaultEntities) {
             const existingUser = model.collaborators.find((collaborator) => collaborator.entity === defaultEntity)

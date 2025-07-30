@@ -5,12 +5,12 @@ export async function up() {
   await ReviewRoleModel.updateMany({}, { $unset: { short: '' } }, { strict: false })
   await ReviewRoleModel.updateMany({ kind: 'schema' }, { $set: { kind: RoleKind.REVIEW } })
   const reviewRoles = await ReviewRoleModel.find()
-  reviewRoles.forEach(async (role) => {
-    if (role['shortName'] === undefined) {
-      role['shortName'] = role.name.toLowerCase()
+  for (const reviewRole of reviewRoles) {
+    if (reviewRole['shortName'] === undefined) {
+      reviewRole['shortName'] = reviewRole.name.toLowerCase()
     }
-    await role.save()
-  })
+    await reviewRole.save()
+  }
 }
 
 export async function down() {

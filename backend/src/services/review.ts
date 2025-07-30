@@ -268,13 +268,11 @@ export async function findReviewRoles(schemaId?: string | string[]): Promise<Rev
       throw BadReq('Unable to find schemas', { schemaIds })
     }
     if (schemas.length > 0) {
-      const schemaRoles: string[] = []
-      schemas.forEach((schema) => schemaRoles.push(...schema.reviewRoles))
-      const uniqueRoles = [...new Set(schemaRoles)]
-      reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles })
+      const uniqueRoles = [...new Set(schemas.flatMap((s) => s.reviewRoles))]
+      reviewRoles = await ReviewRoleModel.find({ shortName: uniqueRoles }).lean()
     }
   } else {
-    reviewRoles = await ReviewRoleModel.find()
+    reviewRoles = await ReviewRoleModel.find().lean()
   }
   return reviewRoles
 }

@@ -79,7 +79,7 @@ export async function renderToMarkdown(model: ModelInterface, modelCardRevision:
   `
   const reviewRoles = await ReviewRoleModel.find({ reviewRoles: schema.reviewRoles })
 
-  if (reviewRoles.length > 0 && reviewRoles !== undefined) {
+  if (Array.isArray(reviewRoles)) {
     for (const reviewRole of reviewRoles) {
       output += `
       ## ${reviewRole.name}\n
