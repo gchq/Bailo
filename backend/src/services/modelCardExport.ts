@@ -62,7 +62,7 @@ export async function getModelCardHtml(
     throw new Error('Failed to find model card to export.')
   }
 
-  const reviewExports = await createReleaseReviewExports(user, modelId)
+  const reviewExports = await createReleaseReviewExports(modelId)
   const modelCardRevision: ModelCardRevisionInterface = { ...modelCard, modelId, deleted: model.deleted }
   const html = await renderToHtml(model, modelCardRevision, reviewExports)
 
@@ -106,7 +106,7 @@ function getEntitiesWithRole(role: string, collaborators: CollaboratorEntry[]) {
   return getRoleEntities([role], collaborators)[0].entities.join('\n')
 }
 
-async function createReleaseReviewExports(user: UserInterface, modelId: string) {
+async function createReleaseReviewExports(modelId: string) {
   const reviewExports: ReviewExport[] = []
   const modelReviews = await ReviewModel.find({ modelId: modelId, kind: 'release', deleted: false })
 
