@@ -10,17 +10,15 @@ logger = logging.getLogger(__name__)
 
 
 class AccessRequest:
-    """Represent a review within Bailo.
+    """Represent an access request within Bailo.
 
-    A review can either be access to a model or to a specific release.
-
-    :param client: A client object that is used to make requests to bailo
-    :param name: The name of the access request
-    :param model_id: The unique model id of the model that the access request is being made with
-    :param schema_id: An ID for the schema within Bailo
-    :param metadata: A metadata object
-    :param access_request_id: The Unique ID for this access request
-    :param deleted: Whether the access request has been deleted
+    :param client: Bailo Client instance used for requests.
+    :param model_id: Unique model ID.
+    :param schema_id: ID of the schema used for the request.
+    :param metadata: Access request metadata.
+    :param access_request_id: Unique ID for this access request.
+    :param created_by: Username or ID of the request creator.
+    :param deleted: Whether the access request has been deleted, defaults to False.
     """
 
     def __init__(
@@ -126,18 +124,31 @@ class AccessRequest:
         return True
 
     def update(self):
-        """Update the current state of the access request to Bailo."""
+        """Update the access requests's metadata on Bailo."""
         self.client.patch_access_request(self.model_id, self.access_request_id, metadata=self.metadata)
 
         logger.info("Access request %s successfully updated on server.", self.access_request_id)
 
     def __str__(self) -> str:
+        """Return the human-readable string representation of the access request.
+
+        :return: String value of the enum.
+        """
         return f"Access Request: {self.metadata['overview']['name']} - {self.model_id}"
 
     def __repr__(self):
+        """Return a developer-oriented string representation of the access request.
+
+        :return: String representation with class and IDs.
+        """
         return f"{self.__class__.__name__}({self.model_id},{self.schema_id})"
 
     def __eq__(self, other):
+        """Check if this access request is equal to another.
+
+        :param other: Object to compare with.
+        :return: True if both represent the same request, False otherwise.
+        """
         if not isinstance(other, self.__class__):
             return NotImplemented
         return self.access_request_id == other.access_request_id
