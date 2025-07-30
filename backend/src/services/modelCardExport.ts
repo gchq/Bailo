@@ -111,7 +111,7 @@ async function createReleaseReviewExports(user: UserInterface, modelId: string) 
   const modelReviews = await ReviewModel.find({ modelId: modelId, kind: 'release', deleted: false })
 
   for (const modelReview of modelReviews) {
-    const modelResponses = await getResponsesByParentIds(user, [modelReview._id as string])
+    const modelResponses = await getResponsesByParentIds([modelReview._id as string])
 
     for (const modelResponse of modelResponses) {
       const reviewExport: ReviewExport = {
