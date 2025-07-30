@@ -50,7 +50,13 @@ export default function EntryOrganisationInput({ value, onChange }: EntryOrganis
 
   return (
     <LabelledInput fullWidth label='Organisation' htmlFor={htmlId}>
-      <Select size='small' value={value} onChange={handleChange} id={htmlId}>
+      <Select
+        aria-label='toggle entry organisation menu'
+        size='small'
+        value={value}
+        onChange={handleChange}
+        id={htmlId}
+      >
         {organisationOptions}
       </Select>
     </LabelledInput>
