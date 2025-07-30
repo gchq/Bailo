@@ -60,7 +60,7 @@ interface PutModelCardResponse {
 
 export const putModelCard = [
   bodyParser.json(),
-  async (req: Request, res: Response<PutModelCardResponse>) => {
+  async (req: Request, res: Response<PutModelCardResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateModelCard
     const {
       params: { modelId },
@@ -71,7 +71,7 @@ export const putModelCard = [
 
     await audit.onUpdateModelCard(req, modelId, modelCard.toObject())
 
-    return res.json({
+    res.json({
       card: modelCard,
     })
   },

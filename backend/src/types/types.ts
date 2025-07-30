@@ -1,3 +1,8 @@
+import { ProxyAgentOptions } from 'proxy-agent'
+
+import { PeerKindKeys } from '../connectors/peer/index.js'
+import { BailoError } from './error.js'
+
 export type PartialDeep<T> = T extends object
   ? {
       [P in keyof T]?: PartialDeep<T[P]>
@@ -55,6 +60,39 @@ export interface AccessRequestUserPermissions {
   deleteAccessRequest: PermissionDetail
 }
 
+export const FederationState = {
+  DISABLED: 'disabled',
+  READ_ONLY: 'readOnly',
+  ENABLED: 'enabled',
+} as const
+
+export type FederationStateKeys = (typeof FederationState)[keyof typeof FederationState]
+
+export interface RemoteFederationConfig {
+  state: FederationStateKeys
+  baseUrl: string
+  label: string
+  kind: PeerKindKeys
+  proxy: string
+  httpConfig: ProxyAgentOptions
+}
+
+export type FederationStatus = {
+  state: FederationStateKeys
+  id?: string
+}
+
+export type SystemStatus = {
+  ping: 'pong' | ''
+  federation?: FederationStatus
+  error?: BailoError
+}
+
+export type PeerConfigStatus = {
+  config: RemoteFederationConfig
+  status: SystemStatus
+}
+
 export interface UiConfig {
   banner: {
     enabled: boolean
@@ -104,5 +142,11 @@ export interface UiConfig {
   modelDetails: {
     organisations: string[]
     states: string[]
+  }
+
+  roleDisplayNames: {
+    owner: string
+    contributor: string
+    consumer: string
   }
 }

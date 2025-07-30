@@ -1,0 +1,221 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > registry > joinDistributionPackageName > success 1`] = `"name:tag"`;
+
+exports[`services > registry > joinDistributionPackageName > success 2`] = `"registry:3.0.0"`;
+
+exports[`services > registry > joinDistributionPackageName > success 3`] = `"alpine:latest"`;
+
+exports[`services > registry > joinDistributionPackageName > success 4`] = `"name@digest:0123456789abcdef0123456789abcdef"`;
+
+exports[`services > registry > joinDistributionPackageName > success 5`] = `"registry@sha256:1fc7de654f2ac1247f0b67e8a459e273b0993be7d2beda1f3f56fbf1001ed3e7"`;
+
+exports[`services > registry > joinDistributionPackageName > success 6`] = `"alpine@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c"`;
+
+exports[`services > registry > joinDistributionPackageName > success 7`] = `"localhost:8080/name:tag"`;
+
+exports[`services > registry > joinDistributionPackageName > success 8`] = `"clamav/clamav:1.4.2_base"`;
+
+exports[`services > registry > joinDistributionPackageName > success 9`] = `"bitnami/minio:2025.4.22"`;
+
+exports[`services > registry > joinDistributionPackageName > success 10`] = `"tarampampam/webhook-tester:latest"`;
+
+exports[`services > registry > joinDistributionPackageName > success 11`] = `"marlonb/mailcrab:v1.5.0"`;
+
+exports[`services > registry > joinDistributionPackageName > success 12`] = `"localhost:8080/export-4lvt8w/alpine:latest"`;
+
+exports[`services > registry > joinDistributionPackageName > success 13`] = `"localhost:8080/exportfrom-v4yzsn/alpine/test/foo/bar:latest"`;
+
+exports[`services > registry > joinDistributionPackageName > success 14`] = `"nginxinc/nginx-unprivileged:1.25.4-alpine3.18"`;
+
+exports[`services > registry > joinDistributionPackageName > success 15`] = `"localhost:8080/name@sha256:0123456789abcdef0123456789abcdef"`;
+
+exports[`services > registry > joinDistributionPackageName > success 16`] = `"clamav/clamav@sha256:e7d108f30ea8f16935dbd12e4b58665f1bc148ce3dd59028cf04088330216910"`;
+
+exports[`services > registry > joinDistributionPackageName > success 17`] = `"bitnami/minio@sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab"`;
+
+exports[`services > registry > joinDistributionPackageName > success 18`] = `"tarampampam/webhook-tester@sha256:958a70683cbfdc8b150207b3f3732d0087df1c1a260e8b2f9cf0ec77dbedead3"`;
+
+exports[`services > registry > joinDistributionPackageName > success 19`] = `"marlonb/mailcrab@sha256:217db02005fbf51263789d63bfa63011011004685932d330ef8cefcfc054e8da"`;
+
+exports[`services > registry > joinDistributionPackageName > success 20`] = `"localhost:8080/export-4lvt8w/alpine@sha256:ec1b05d1eac264d9204a57f4ad9d4dc35e9e756e9fedaea0674aefc7edb1d6a4"`;
+
+exports[`services > registry > joinDistributionPackageName > success 21`] = `"localhost:8080/exportfrom-v4yzsn/alpine/test/foo/bar@sha256:ec1b05d1eac264d9204a57f4ad9d4dc35e9e756e9fedaea0674aefc7edb1d6a4"`;
+
+exports[`services > registry > joinDistributionPackageName > success 22`] = `"nginxinc/nginx-unprivileged@sha256:7b4316677e4015a53d326e657915340128d9fd506f826f676d9f169c0c8557f6"`;
+
+exports[`services > registry > splitDistributionPackageName > success 1`] = `
+{
+  "domain": "",
+  "path": "name",
+  "tag": "tag",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 2`] = `
+{
+  "domain": "",
+  "path": "registry",
+  "tag": "3.0.0",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 3`] = `
+{
+  "domain": "",
+  "path": "alpine",
+  "tag": "latest",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 4`] = `
+{
+  "domain": "localhost:8080",
+  "path": "name",
+  "tag": "tag",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 5`] = `
+{
+  "domain": "clamav",
+  "path": "clamav",
+  "tag": "1.4.2_base",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 6`] = `
+{
+  "domain": "bitnami",
+  "path": "minio",
+  "tag": "2025.4.22",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 7`] = `
+{
+  "domain": "tarampampam",
+  "path": "webhook-tester",
+  "tag": "latest",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 8`] = `
+{
+  "domain": "marlonb",
+  "path": "mailcrab",
+  "tag": "v1.5.0",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 9`] = `
+{
+  "domain": "localhost:8080",
+  "path": "export-4lvt8w/alpine",
+  "tag": "latest",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 10`] = `
+{
+  "domain": "localhost:8080",
+  "path": "exportfrom-v4yzsn/alpine/test/foo/bar",
+  "tag": "latest",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 11`] = `
+{
+  "domain": "nginxinc",
+  "path": "nginx-unprivileged",
+  "tag": "1.25.4-alpine3.18",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 12`] = `
+{
+  "digest": "digest:0123456789abcdef0123456789abcdef",
+  "domain": "",
+  "path": "name",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 13`] = `
+{
+  "digest": "sha256:1fc7de654f2ac1247f0b67e8a459e273b0993be7d2beda1f3f56fbf1001ed3e7",
+  "domain": "",
+  "path": "registry",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 14`] = `
+{
+  "digest": "sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c",
+  "domain": "",
+  "path": "alpine",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 15`] = `
+{
+  "digest": "digest:0123456789abcdef0123456789abcdef",
+  "domain": "localhost:8080",
+  "path": "name",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 16`] = `
+{
+  "digest": "sha256:e7d108f30ea8f16935dbd12e4b58665f1bc148ce3dd59028cf04088330216910",
+  "domain": "clamav",
+  "path": "clamav",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 17`] = `
+{
+  "digest": "sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab",
+  "domain": "bitnami",
+  "path": "minio",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 18`] = `
+{
+  "digest": "sha256:958a70683cbfdc8b150207b3f3732d0087df1c1a260e8b2f9cf0ec77dbedead3",
+  "domain": "tarampampam",
+  "path": "webhook-tester",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 19`] = `
+{
+  "digest": "sha256:217db02005fbf51263789d63bfa63011011004685932d330ef8cefcfc054e8da",
+  "domain": "marlonb",
+  "path": "mailcrab",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 20`] = `
+{
+  "digest": "sha256:ec1b05d1eac264d9204a57f4ad9d4dc35e9e756e9fedaea0674aefc7edb1d6a4",
+  "domain": "localhost:8080",
+  "path": "export-4lvt8w/alpine",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 21`] = `
+{
+  "digest": "sha256:ec1b05d1eac264d9204a57f4ad9d4dc35e9e756e9fedaea0674aefc7edb1d6a4",
+  "domain": "localhost:8080",
+  "path": "exportfrom-v4yzsn/alpine/test/foo/bar",
+}
+`;
+
+exports[`services > registry > splitDistributionPackageName > success 22`] = `
+{
+  "digest": "sha256:7b4316677e4015a53d326e657915340128d9fd506f826f676d9f169c0c8557f6",
+  "domain": "nginxinc",
+  "path": "nginx-unprivileged",
+}
+`;

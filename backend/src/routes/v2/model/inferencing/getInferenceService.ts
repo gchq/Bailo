@@ -44,7 +44,7 @@ interface GetInferenceService {
 
 export const getInference = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetInferenceService>) => {
+  async (req: Request, res: Response<GetInferenceService>): Promise<void> => {
     req.audit = AuditInfo.ViewInference
     const {
       params: { modelId, image, tag },
@@ -54,7 +54,7 @@ export const getInference = [
 
     await audit.onViewInference(req, inference)
 
-    return res.json({
+    res.json({
       inference,
     })
   },

@@ -11,7 +11,11 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
-import { FileImportInformation, MongoDocumentImportInformation } from '../../services/mirroredModel.js'
+import {
+  FileImportInformation,
+  ImageImportInformation,
+  MongoDocumentImportInformation,
+} from '../../services/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { BaseAuditConnector } from './Base.js'
 
@@ -64,7 +68,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
     _mirroredModel: ModelInterface,
     _sourceModelId: string,
     _exporter: string,
-    _importResult: MongoDocumentImportInformation | FileImportInformation,
+    _importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation,
   ) {}
   onError(_req: Request, _error: BailoError) {}
   onCreateCommentResponse(_req: Request, _responseInterface: ResponseInterface) {}

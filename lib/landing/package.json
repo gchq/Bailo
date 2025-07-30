@@ -21,7 +21,7 @@
     "@emotion/cache": "11.14.0",
     "@emotion/react": "11.14.0",
     "@emotion/server": "11.11.0",
-    "@emotion/styled": "11.14.0",
+    "@emotion/styled": "11.14.1",
     "@mdx-js/loader": "^2.1.5",
     "@mdx-js/react": "^2.1.5",
     "@mui/icons-material": "6.4.8",
@@ -29,22 +29,22 @@
     "@next/mdx": "^14.2.4",
     "dedent-js": "^1.0.1",
     "gray-matter": "^4.0.3",
-    "next": "15.3.3",
+    "next": "15.3.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rehype-highlight": "^7.0.2",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^3.0.1",
     "shelljs": "^0.10.0",
-    "styled-components": "^6.1.18",
+    "styled-components": "^6.1.19",
     "swiper": "^8.4.5"
   },
   "devDependencies": {
-    "@types/node": "22.15.29",
+    "@types/node": "24.0.8",
     "@types/react": "18.3.3",
     "@types/styled-components": "^5.1.26",
-    "eslint": "9.28.0",
-    "eslint-config-next": "15.3.3",
+    "eslint": "9.30.0",
+    "eslint-config-next": "15.3.4",
     "typescript": "5.8.3"
   }
 }

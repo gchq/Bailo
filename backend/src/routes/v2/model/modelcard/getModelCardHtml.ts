@@ -40,7 +40,7 @@ registerPath({
 
 export const getModelCardHtml = [
   bodyParser.json(),
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response): Promise<void> => {
     req.audit = AuditInfo.ViewModelCard
     const {
       params: { modelId, version },
@@ -49,6 +49,6 @@ export const getModelCardHtml = [
     const { html, modelCard } = await getModelCardHtmlService(req.user, modelId, version)
     await audit.onViewModelCard(req, modelId, modelCard)
 
-    return res.send(html)
+    res.send(html)
   },
 ]

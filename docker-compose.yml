@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: bitnami/mongodb:7.0.15
+    image: bitnami/mongodb:8.0.12
     environment:
       - MONGODB_REPLICA_SET_NAME=repl-set
     volumes:
@@ -15,7 +15,7 @@ services:
       start_period: 30s
 
   minio:
-    image: bitnami/minio:2025.5.24
+    image: bitnami/minio:2025.7.23
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -29,7 +29,7 @@ services:
       - minioVolume:/bitnami/minio
 
   clamd:
-    image: clamav/clamav:1.4.2_base
+    image: clamav/clamav:1.4.3_base
     healthcheck:
       test: ['CMD-SHELL', "echo 'PING' | nc -w 5 localhost 3310"]
       interval: 30s
@@ -39,7 +39,7 @@ services:
   modelscan:
     build:
       context: ./lib/modelscan_api
-      dockerfile: ./Dockerfile.dev
+      target: dev
     volumes:
       - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
     ports:
@@ -51,13 +51,13 @@ services:
       retries: 5
 
   mailcrab:
-    image: marlonb/mailcrab:v1.5.0
+    image: marlonb/mailcrab:v1.6.1
     ports:
       - 1080:1080
       - 1025:1025
 
   nginx:
-    image: nginxinc/nginx-unprivileged:1.25.4-alpine3.18
+    image: nginxinc/nginx-unprivileged:1.28.0-alpine3.21-slim
     volumes:
       - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
@@ -92,7 +92,7 @@ services:
   frontend:
     build:
       context: ./frontend/
-      dockerfile: ./Dockerfile.dev
+      target: dev
     volumes:
       - ./frontend:/app
     depends_on:
@@ -103,7 +103,7 @@ services:
   backend:
     build:
       context: ./backend/
-      dockerfile: ./Dockerfile.dev
+      target: dev
     volumes:
       - ./backend/src:/app/src
       - ./backend/config:/app/config

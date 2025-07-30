@@ -47,7 +47,7 @@ export default function NewRelease() {
   const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
 
   useEffect(() => {
-    if (model && modelCardVersion === 0) {
+    if (model && modelCardVersion !== model.card.version) {
       setModelCardVersion(model.card.version)
     }
   }, [model, setModelCardVersion, modelCardVersion])

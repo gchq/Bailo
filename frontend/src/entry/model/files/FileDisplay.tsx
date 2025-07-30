@@ -19,7 +19,6 @@ import {
 import { patchFile } from 'actions/file'
 import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import { deleteModelFile, useGetModelFiles } from 'actions/model'
-import { useGetReleasesForModelId } from 'actions/release'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
 import { CSSProperties, Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
@@ -70,6 +69,7 @@ type FileDisplayProps = {
   hideTags?: boolean
   style?: CSSProperties
   key?: string
+  releases: ReleaseInterface[]
 } & ClickableFileDownloadProps
 
 interface ChipDetails {
@@ -89,6 +89,7 @@ export default function FileDisplay({
   activeFileTagOnChange,
   style = {},
   key = '',
+  releases,
 }: FileDisplayProps) {
   const [anchorElMore, setAnchorElMore] = useState<HTMLElement | null>(null)
   const [anchorElScan, setAnchorElScan] = useState<HTMLElement | null>(null)
@@ -101,7 +102,6 @@ export default function FileDisplay({
   const { mutateEntryFiles } = useGetModelFiles(modelId)
   const router = useRouter()
 
-  const { releases, isReleasesLoading, isReleasesError } = useGetReleasesForModelId(modelId)
   const [latestRelease, setLatestRelease] = useState('')
 
   const sortedAssociatedReleases = useMemo(
@@ -328,11 +328,7 @@ export default function FileDisplay({
     return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
 
-  if (isReleasesError) {
-    return <MessageAlert message={isReleasesError.info.message} severity='error' />
-  }
-
-  if (isScannersLoading || isReleasesLoading) {
+  if (isScannersLoading) {
     return <Loading />
   }
 
@@ -373,7 +369,7 @@ export default function FileDisplay({
                 </Stack>
               )}
               <Stack>
-                <IconButton onClick={handleFileMoreButtonClick}>
+                <IconButton aria-label='toggle file options menu' onClick={handleFileMoreButtonClick}>
                   <MoreVert color='primary' />
                 </IconButton>
                 <Menu

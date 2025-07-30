@@ -16,6 +16,11 @@ class Client:
     """
 
     def __init__(self, url: str, agent: Agent = Agent()):
+        """Initialise a Client.
+
+        :param url: URL of the Bailo instance website.
+        :param agent: An agent object to handle requests, defaults to Agent().
+        """
         self.url = url.rstrip("/") + "/api"
         self.agent = agent
 
@@ -383,11 +388,12 @@ class Client:
             )
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
-        """Create a simple file upload.
+        """Upload a file associated with a model.
 
-        :param model_id: Unique model ID
-        :param name: File name
-        :return: JSON response object
+        :param model_id: Unique model ID.
+        :param name: Name of the file to upload.
+        :param buffer: File-like BytesIO object containing the data to upload.
+        :return: Response object from the upload endpoint.
         """
         return self.agent.post(
             f"{self.url}/v2/model/{model_id}/files/upload/simple",
@@ -622,6 +628,22 @@ class Client:
         return self.agent.patch(
             f"{self.url}/v2/model/{model_id}/access-request/{access_request_id}",
             json=filtered_json,
+        ).json()
+
+    def put_file_scan(
+        self,
+        model_id: str,
+        file_id: str,
+    ):
+        """
+        Manually re-request a new antivirus scan for a file.
+
+        :param model_id: Unique model ID
+        :param file_id: Unique file ID
+        :return: JSON response object
+        """
+        return self.agent.put(
+            f"{self.url}/v2/filescanning/model/{model_id}/file/{file_id}/scan",
         ).json()
 
     def post_access_request_review(

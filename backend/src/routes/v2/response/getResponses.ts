@@ -43,7 +43,7 @@ interface getResponsesResponse {
 
 export const getResponses = [
   bodyParser.json(),
-  async (req: Request, res: Response<getResponsesResponse>) => {
+  async (req: Request, res: Response<getResponsesResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewResponses
     const {
       query: { parentIds },
@@ -52,7 +52,7 @@ export const getResponses = [
     const responses = await getResponsesByParentIds(req.user, parentIds)
     await audit.onViewResponses(req, responses)
 
-    return res.json({
+    res.json({
       responses,
     })
   },

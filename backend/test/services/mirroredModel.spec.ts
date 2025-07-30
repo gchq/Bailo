@@ -1,3 +1,4 @@
+import { Readable } from 'stream'
 import { EventEmitter, PassThrough } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
@@ -50,7 +51,7 @@ const bufferMock = vi.hoisted(() => ({
 vi.mock('node:buffer', async () => bufferMock)
 
 const fetchMock = vi.hoisted(() => ({
-  default: vi.fn(() => ({ ok: true, body: vi.fn(), text: vi.fn() })),
+  default: vi.fn(() => ({ ok: true, body: {}, text: vi.fn() })),
 }))
 vi.mock('node-fetch', async () => fetchMock)
 
@@ -125,9 +126,13 @@ const modelMocks = vi.hoisted(() => ({
 vi.mock('../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
-  getReleasesForExport: vi.fn(() => [{ toJSON: vi.fn() }]),
+  getReleasesForExport: vi.fn(() => [
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+    { toJSON: vi.fn(), images: [] as { repository: string; name: string; tag: string; toObject: Function }[] },
+  ]),
   getAllFileIds: vi.fn(() => [{}]),
   isReleaseDoc: vi.fn(() => true),
+  saveImportedRelease: vi.fn(() => ({ modelId: 'source-model-id' })),
 }))
 vi.mock('../../src/services/release.js', () => releaseMocks)
 
@@ -144,6 +149,7 @@ const fileMocks = vi.hoisted(() => ({
   markFileAsCompleteAfterImport: vi.fn(),
   isFileInterfaceDoc: vi.fn(() => true),
   createFilePath: vi.fn(() => 'file/path'),
+  saveImportedFile: vi.fn(),
 }))
 vi.mock('../../src/services/file.js', () => fileMocks)
 
@@ -156,7 +162,7 @@ vi.mock('archiver', () => ({ default: vi.fn(() => archiverMocks) }))
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => Promise.resolve({ fileSize: 100 })),
-  getObjectStream: vi.fn(() => Promise.resolve({ Body: new PassThrough() })),
+  getObjectStream: vi.fn(() => Promise.resolve({ Body: new MockReadable() })),
   objectExists: vi.fn(() => Promise.resolve(true)),
 }))
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
@@ -213,8 +219,15 @@ const registryMocks = vi.hoisted(() => ({
   getImageBlob: vi.fn(() => ({ body: ReadableStream.from('test') })),
   getImageManifest: vi.fn(),
   initialiseImageUpload: vi.fn(),
+  joinDistributionPackageName: vi.fn(() => 'localhost:8080/imageName:tag'),
+  listModelImages: vi.fn(() => [] as { name: string; tags: string[] }[]),
   putImageBlob: vi.fn(),
   putImageManifest: vi.fn(),
+  splitDistributionPackageName: vi.fn(() => ({
+    domain: 'localhost:8080',
+    path: 'imageName',
+    tag: 'tag',
+  })),
 }))
 vi.mock('../../src/services/registry.js', () => registryMocks)
 
@@ -323,17 +336,19 @@ describe('services > mirroredModel', () => {
     })
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
-    await expect(logMock.error).toBeCalledWith(
+    expect(logMock.error).toBeCalledWith(
       expect.any(Object),
       'Failed to upload export to export location with signatures',
     )
   })
 
   test('exportModel > unable to create kms signature for zip file', async () => {
+    // MockReadable isn't quite correct for this use case
+    s3Mocks.getObjectStream.mockResolvedValueOnce({ Body: new PassThrough() })
     kmsMocks.sign.mockRejectedValueOnce('Error')
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await new Promise((r) => setTimeout(r))
-    await expect(logMock.error).toBeCalledWith(
+    expect(logMock.error).toBeCalledWith(
       expect.any(Object),
       'Failed to upload export to export location with signatures',
     )
@@ -360,7 +375,6 @@ describe('services > mirroredModel', () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '1.2.4'])
     // Allow for completion of asynchronous content
     await new Promise((r) => setTimeout(r))
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
   })
 
   test('exportModel > missing mirrored model ID', async () => {
@@ -370,7 +384,7 @@ describe('services > mirroredModel', () => {
     })
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await expect(response).rejects.toThrowError(/^The 'Destination Model ID' has not been set on this model./)
-    await expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > missing mirrored model card schemaId', async () => {
@@ -382,7 +396,7 @@ describe('services > mirroredModel', () => {
     await expect(response).rejects.toThrowError(
       /^You must select a schema for your model before you can start the export process./,
     )
-    await expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > export contains infected file', async () => {
@@ -400,7 +414,7 @@ describe('services > mirroredModel', () => {
     ])
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await expect(response).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
-    await expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > export contains incomplete file scan', async () => {
@@ -418,7 +432,7 @@ describe('services > mirroredModel', () => {
     ])
     const response = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
     await expect(response).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
-    await expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > export missing file scan', async () => {
@@ -437,7 +451,7 @@ describe('services > mirroredModel', () => {
     ])
     const response = exportModel({} as UserInterface, 'testmod', true, ['1.2.3'])
     await expect(response).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
-    await expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(0)
   })
 
   test('exportModel > upload straight to the export bucket if signatures are disabled', async () => {
@@ -486,13 +500,43 @@ describe('services > mirroredModel', () => {
       },
     })
     await exportModel({} as UserInterface, 'modelId', true)
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
   })
 
   test('exportModel > export uploaded to S3 for model cards and releases', async () => {
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '3.2.1'])
 
     expect(s3Mocks.putObjectStream).toBeCalledTimes(2)
+  })
+
+  test('exportModel > export uploaded to S3 for model cards, releases and images', async () => {
+    registryMocks.getImageManifest.mockResolvedValue({
+      schemaVersion: 2,
+      mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+      config: { mediaType: 'application/vnd.docker.container.image.v1+json', size: 4, digest: 'sha256:0' },
+      layers: [],
+    })
+    registryMocks.listModelImages.mockReturnValueOnce([
+      { name: 'image1', tags: ['tag1', 'tag2'] },
+      { name: 'image2', tags: [] },
+      { name: 'image3', tags: ['tag3'] },
+    ])
+    releaseMocks.getReleasesForExport.mockResolvedValueOnce([
+      {
+        toJSON: vi.fn(),
+        images: [
+          { repository: '', name: 'image1', tag: 'tag1', toObject: vi.fn() },
+          { repository: '', name: 'image1', tag: 'tag3', toObject: vi.fn() },
+          { repository: '', name: 'image4', tag: 'tag3', toObject: vi.fn() },
+        ],
+      },
+    ])
+
+    await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(5)
+    expect(archiverMocks.append).toBeCalledTimes(3)
+    expect(zlibMocks.createGzip).toBeCalledTimes(3)
+    expect(tarMocks.pack).toBeCalledTimes(3)
   })
 
   test('exportModel > unable to upload to tmp S3 location', async () => {
@@ -528,6 +572,22 @@ describe('services > mirroredModel', () => {
     await expect(result).rejects.toThrowError('Missing mirrored model ID.')
   })
 
+  test('importModel > auth failure', async () => {
+    vi.mocked(authorisation.model).mockResolvedValueOnce({
+      id: '',
+      success: false,
+      info: 'User does not have access to model',
+    })
+    const response = importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Documents,
+    )
+    await expect(response).rejects.toThrowError(/^User does not have access to model/)
+  })
+
   test('importModel > error when getting zip file', async () => {
     fetchMock.default.mockRejectedValueOnce('a')
     const result = importModel(
@@ -542,7 +602,7 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > non 200 response when getting zip file', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: false, body: vi.fn(), text: vi.fn() })
+    fetchMock.default.mockResolvedValueOnce({ ok: false, body: {}, text: vi.fn() })
     const result = importModel(
       {} as UserInterface,
       'mirrored-model-id',
@@ -568,12 +628,12 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > save each imported model card', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
       '1.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
       '2.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
     })
-    await importModel(
+    const result = await importModel(
       {} as UserInterface,
       'mirrored-model-id',
       'source-model-id',
@@ -581,11 +641,12 @@ describe('services > mirroredModel', () => {
       ImportKind.Documents,
     )
 
-    await expect(modelMocks.saveImportedModelCard.mock.calls.length).toBe(2)
+    expect(result).toMatchSnapshot()
+    expect(modelMocks.saveImportedModelCard).toBeCalledTimes(2)
   })
 
   test('importModel > failed to parse zip file', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
       'invalid.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
     })
@@ -601,7 +662,7 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > cannot parse into model card', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
       '1.json': Buffer.from(JSON.stringify({})),
     })
@@ -618,7 +679,7 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > different model IDs in zip files', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
       '1.json': Buffer.from(JSON.stringify({ modelId: 'abc' })),
       '2.json': Buffer.from(JSON.stringify({ modelId: 'cba' })),
@@ -636,8 +697,42 @@ describe('services > mirroredModel', () => {
     )
   })
 
+  test('importModel > save each imported release', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockReturnValueOnce({
+      'releases/test.json': Buffer.from(
+        JSON.stringify({
+          modelId: 'source-model-id',
+          images: [{ repository: '', name: 'image1', tag: 'tag1', toObject: vi.fn() }],
+        }),
+      ),
+      'releases/foo.json': Buffer.from(
+        JSON.stringify({
+          modelId: 'source-model-id',
+          images: [],
+        }),
+      ),
+    })
+    vi.mocked(authorisation.releases).mockResolvedValueOnce([
+      { success: true, id: 'string' },
+      { success: true, id: 'string' },
+    ])
+    releaseMocks.saveImportedRelease.mockResolvedValue({ modelId: 'source-model-id' })
+
+    const result = await importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Documents,
+    )
+
+    expect(result).toMatchSnapshot()
+    expect(releaseMocks.saveImportedRelease).toBeCalledTimes(2)
+  })
+
   test('importModel > cannot parse into a release', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
       'releases/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
     })
@@ -654,7 +749,7 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > contains releases from an invalid model', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
       'releases/test.json': Buffer.from(JSON.stringify({ modelId: 'test' })),
     })
@@ -672,7 +767,7 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > cannot parse into a file', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
       'files/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
     })
@@ -689,7 +784,7 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > failed to check if file exists', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
       'files/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id' })),
     })
@@ -706,7 +801,7 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > contains files from an invalid model', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockReturnValueOnce({
       'files/test.json': Buffer.from(JSON.stringify({ modelId: 'test', path: 'test' })),
     })
@@ -723,8 +818,27 @@ describe('services > mirroredModel', () => {
     )
   })
 
+  test('importModel > save each imported file', async () => {
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fflateMock.unzipSync.mockReturnValueOnce({
+      'files/test.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id', path: 'test' })),
+      'files/foo.json': Buffer.from(JSON.stringify({ modelId: 'source-model-id', path: 'test' })),
+    })
+
+    const result = await importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Documents,
+    )
+
+    expect(result).toMatchSnapshot()
+    expect(fileMocks.saveImportedFile).toBeCalledTimes(2)
+  })
+
   test('importModel > invalid zip data', async () => {
-    fetchMock.default.mockResolvedValueOnce({ ok: true, body: vi.fn(), text: vi.fn(), arrayBuffer: vi.fn() } as any)
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: {}, text: vi.fn(), arrayBuffer: vi.fn() } as any)
     fflateMock.unzipSync.mockImplementationOnce(() => {
       throw Error('Cannot import file.')
     })
@@ -752,7 +866,7 @@ describe('services > mirroredModel', () => {
   })
 
   test('importModel > uploads file to S3 on success', async () => {
-    await importModel(
+    const result = await importModel(
       {} as UserInterface,
       'mirrored-model-id',
       'source-model-id',
@@ -760,7 +874,86 @@ describe('services > mirroredModel', () => {
       ImportKind.File,
       '/s3/path/',
     )
-    await expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+
+    expect(result).toMatchSnapshot()
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+  })
+
+  test('importModel > missing image name for image imports', async () => {
+    const result = importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Image,
+      undefined,
+    )
+
+    await expect(result).rejects.toThrowError(/^Missing Distribution Package Name./)
+  })
+
+  test('importModel > uploads image to S3 on success', async () => {
+    // this is not a nice test because of the streams and events, but it does work
+
+    // set up mock API responses
+    fetchMock.default.mockResolvedValueOnce({ ok: true, body: new PassThrough(), text: vi.fn() })
+    // inject our own `.on(<name>, cb)` method to get the handlers
+    let storedEntryHandler
+    let storedFinishHandler
+    const mockTarStream = Object.assign(new MockReadable(), {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+      on: vi.fn((eventName: string, callback: Function) => {
+        // extract the wanted handlers
+        if (eventName === 'entry') {
+          storedEntryHandler = callback
+        } else if (eventName === 'finish') {
+          storedFinishHandler = callback
+        }
+      }),
+    })
+    tarMocks.extract.mockReturnValueOnce(mockTarStream)
+
+    const promise = importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.Image,
+      undefined,
+      'image-name:image-tag',
+    )
+
+    // have to wait for a tick otherwise handlers won't yet be set
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(storedEntryHandler).toBeDefined()
+    expect(storedFinishHandler).toBeDefined()
+
+    // inject `resume` function
+    const eventStream = Object.assign(
+      ReadableStream.from(
+        JSON.stringify({
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {},
+          layers: [],
+        }),
+      ),
+      {
+        resume: vi.fn(),
+      },
+    )
+    storedEntryHandler({ name: 'manifest.json', type: 'file', size: 123 }, eventStream, () => {})
+
+    // have to wait for a tick otherwise shared variable `manifestBody` may be undefined by the time `finish` triggers
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    // send 'finish' event
+    storedFinishHandler()
+
+    const result = await promise
+    expect(result).toMatchSnapshot()
+    expect(fetchMock.default).toBeCalledTimes(1)
+    expect(registryMocks.putImageManifest).toBeCalledTimes(1)
   })
 
   test('importModel > unrecognised import kind', async () => {
@@ -832,9 +1025,8 @@ describe('services > mirroredModel', () => {
       ],
     })
 
-    await exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
+    await exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName:tag', {} as any)
 
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
     expect(zlibMocks.createGzip).toBeCalledTimes(1)
     expect(tarMocks.pack).toBeCalledTimes(1)
     expect(registryMocks.getImageManifest).toBeCalledTimes(1)
@@ -849,11 +1041,10 @@ describe('services > mirroredModel', () => {
       layers: [{ mediaType: 'application/vnd.docker.image.rootfs.diff.tar.gzip', size: 256, digest: '' }],
     })
 
-    const promise = exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
+    const promise = exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName:tag', {} as any)
 
     await expect(promise).rejects.toThrow('Could not extract layer digest.')
 
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
     expect(zlibMocks.createGzip).toBeCalledTimes(1)
     expect(tarMocks.pack).toBeCalledTimes(1)
     expect(registryMocks.getImageManifest).toBeCalledTimes(1)
@@ -864,7 +1055,6 @@ describe('services > mirroredModel', () => {
     // this is not a nice test because of the streams and events, but it does work
 
     // set up mock API responses
-    s3Mocks.getObjectStream.mockResolvedValueOnce({ Body: new PassThrough() })
     registryMocks.doesImageLayerExist.mockResolvedValueOnce(true).mockResolvedValue(false)
     registryMocks.initialiseImageUpload.mockResolvedValue({
       'content-length': 'string',
@@ -922,14 +1112,19 @@ describe('services > mirroredModel', () => {
         if (eventName === 'entry') {
           storedEntryHandler = callback
         } else if (eventName === 'finish') {
-          // extract the wanted event handler
           storedFinishHandler = callback
         }
       }),
     })
     tarMocks.extract.mockReturnValueOnce(mockTarStream)
 
-    const promise = importCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
+    const promise = importCompressedRegistryImage(
+      {} as UserInterface,
+      new PassThrough(),
+      'modelId',
+      'imageName:tag',
+      'importId',
+    )
 
     // have to wait for a tick otherwise handlers won't yet be set
     await new Promise((resolve) => setTimeout(resolve, 10))
@@ -952,13 +1147,68 @@ describe('services > mirroredModel', () => {
 
     await promise
 
-    expect(s3Mocks.getObjectStream).toBeCalledTimes(1)
     expect(zlibMocks.createGunzip).toBeCalledTimes(1)
     expect(tarMocks.extract).toBeCalledTimes(1)
     expect(registryMocks.doesImageLayerExist).toBeCalledTimes(3)
     expect(registryMocks.initialiseImageUpload).toBeCalledTimes(2)
     expect(registryMocks.putImageBlob).toBeCalledTimes(2)
     expect(registryMocks.putImageManifest).toBeCalledTimes(1)
+  })
+
+  test('importCompressedRegistryImage > error due to missing manifest.json', async () => {
+    // this is not a nice test because of the streams and events, but it does work
+
+    // set up mock API responses
+    registryMocks.doesImageLayerExist.mockResolvedValue(true)
+    // inject our own `.on(<name>, cb)` method to get the handlers
+    let storedEntryHandler
+    let storedFinishHandler
+    const mockTarStream = Object.assign(new MockReadable(), {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+      on: vi.fn((eventName: string, callback: Function) => {
+        // extract the wanted handlers
+        if (eventName === 'entry') {
+          storedEntryHandler = callback
+        } else if (eventName === 'finish') {
+          storedFinishHandler = callback
+        }
+      }),
+    })
+    tarMocks.extract.mockReturnValueOnce(mockTarStream)
+
+    const promise = importCompressedRegistryImage(
+      {} as UserInterface,
+      new PassThrough(),
+      'modelId',
+      'imageName:tag',
+      'importId',
+    )
+
+    // have to wait for a tick otherwise handlers won't yet be set
+    await new Promise((resolve) => setTimeout(resolve, 10))
+    expect(storedEntryHandler).toBeDefined()
+    expect(storedFinishHandler).toBeDefined()
+
+    // inject `resume` function
+    const eventStream = Object.assign(ReadableStream.from('test'), {
+      resume: vi.fn(),
+    })
+    storedEntryHandler({ name: 'blobs/sha256/0', type: 'file', size: 4 }, eventStream, () => {})
+
+    // have to wait for a tick otherwise shared variable `manifestBody` may be undefined by the time `finish` triggers
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    // send 'finish' event
+    storedFinishHandler()
+
+    await expect(promise).rejects.toThrow('Could not find manifest.json in tarball')
+
+    expect(zlibMocks.createGunzip).toBeCalledTimes(1)
+    expect(tarMocks.extract).toBeCalledTimes(1)
+    expect(registryMocks.doesImageLayerExist).toBeCalledTimes(1)
+    expect(registryMocks.initialiseImageUpload).toBeCalledTimes(0)
+    expect(registryMocks.putImageBlob).toBeCalledTimes(0)
+    expect(registryMocks.putImageManifest).toBeCalledTimes(0)
   })
 
   test('importCompressedRegistryImage > tar error', async () => {
@@ -977,7 +1227,13 @@ describe('services > mirroredModel', () => {
     })
     tarMocks.extract.mockReturnValueOnce(mockTarStream)
 
-    const promise = importCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName', 'tag', {})
+    const promise = importCompressedRegistryImage(
+      {} as UserInterface,
+      (await s3Mocks.getObjectStream()).Body as Readable,
+      'modelId',
+      'imageName:tag',
+      'importId',
+    )
 
     // have to wait for a tick otherwise handlers won't yet be set
     await new Promise((resolve) => setTimeout(resolve, 10))

@@ -1,4 +1,5 @@
-import fetch, { Response } from 'node-fetch'
+import FormData from 'form-data'
+import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Readable } from 'stream'
 
 import config from '../utils/config.js'
@@ -50,7 +51,7 @@ interface ModelScanResponse {
 
 export async function getModelScanInfo() {
   const url = `${config.avScanning.modelscan.protocol}://${config.avScanning.modelscan.host}:${config.avScanning.modelscan.port}`
-  let res: Response
+  let res: FetchResponse
 
   try {
     res = await fetch(`${url}/info`, {
@@ -67,35 +68,29 @@ export async function getModelScanInfo() {
   return (await res.json()) as ModelScanInfoResponse
 }
 
-export async function scanStream(stream: Readable, fileName: string, fileSize: number) {
+export async function scanStream(stream: Readable, fileName: string) {
   const url = `${config.avScanning.modelscan.protocol}://${config.avScanning.modelscan.host}:${config.avScanning.modelscan.port}`
-  let res: Response
+  let res: FetchResponse
 
   try {
     const formData = new FormData()
-    formData.append(
-      'in_file',
-      {
-        [Symbol.toStringTag]: 'File',
-        size: fileSize,
-        stream: () => stream,
-      },
-      fileName,
-    )
+    formData.append('in_file', stream, { filename: fileName, contentType: 'application/octet-stream' })
 
     res = await fetch(`${url}/scan/file`, {
       method: 'POST',
       headers: {
+        ...formData.getHeaders(),
         accept: 'application/json',
       },
       body: formData,
     })
   } catch (err) {
+    stream.destroy()
     throw InternalError('Unable to communicate with the ModelScan service.', { err })
   }
   if (!res.ok) {
     throw BadReq('Unrecognised response returned by the ModelScan service.', {
-      body: JSON.stringify(await res.json()),
+      body: JSON.stringify(await res.text()),
     })
   }
 

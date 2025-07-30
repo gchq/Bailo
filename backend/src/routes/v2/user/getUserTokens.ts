@@ -37,14 +37,14 @@ interface GetUserTokensResponse {
 
 export const getUserTokens = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetUserTokensResponse>) => {
+  async (req: Request, res: Response<GetUserTokensResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewUserTokens
     const _ = parse(req, getUserTokensSchema)
 
     const tokens = await findUserTokens(req.user)
     await audit.onViewUserTokens(req, tokens)
 
-    return res.json({
+    res.json({
       tokens,
     })
   },

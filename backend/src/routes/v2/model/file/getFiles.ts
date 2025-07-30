@@ -43,7 +43,7 @@ interface GetFilesResponse {
 
 export const getFiles = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetFilesResponse>) => {
+  async (req: Request, res: Response<GetFilesResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewFiles
     const {
       params: { modelId },
@@ -52,7 +52,7 @@ export const getFiles = [
     const files = await getFilesByModel(req.user, modelId)
     await audit.onViewFiles(req, modelId, files)
 
-    return res.json({
+    res.json({
       files,
     })
   },

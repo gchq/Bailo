@@ -41,7 +41,7 @@ interface DeleteReleaseResponse {
 
 export const deleteRelease = [
   bodyParser.json(),
-  async (req: Request, res: Response<DeleteReleaseResponse>) => {
+  async (req: Request, res: Response<DeleteReleaseResponse>): Promise<void> => {
     req.audit = AuditInfo.DeleteRelease
     const {
       params: { modelId, semver },
@@ -50,7 +50,7 @@ export const deleteRelease = [
     await deleteReleaseService(req.user, modelId, semver)
     await audit.onDeleteRelease(req, modelId, semver)
 
-    return res.json({
+    res.json({
       message: 'Successfully removed release.',
     })
   },

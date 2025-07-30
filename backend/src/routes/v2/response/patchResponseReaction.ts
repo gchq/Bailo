@@ -40,14 +40,14 @@ interface PatchResponseReactionResponse {
 
 export const patchResponseReaction = [
   bodyParser.json(),
-  async (req: Request, res: Response<PatchResponseReactionResponse>) => {
+  async (req: Request, res: Response<PatchResponseReactionResponse>): Promise<void> => {
     const {
       params: { responseId, kind },
     } = parse(req, patchResponseReactionSchema)
 
     const response = await updateResponseReaction(req.user, responseId, kind)
 
-    return res.json({
+    res.json({
       response,
     })
   },

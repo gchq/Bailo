@@ -71,7 +71,7 @@ interface PostModelResponse {
 
 export const postModel = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostModelResponse>) => {
+  async (req: Request, res: Response<PostModelResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateModel
     const { body } = parse(req, postModelSchema)
 
@@ -79,6 +79,6 @@ export const postModel = [
 
     await audit.onCreateModel(req, model)
 
-    return res.json({ model })
+    res.json({ model })
   },
 ]

@@ -42,7 +42,7 @@ interface PutFileScanResponse {
 
 export const putFileScan = [
   bodyParser.json(),
-  async (req: Request, res: Response<PutFileScanResponse>) => {
+  async (req: Request, res: Response<PutFileScanResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateFile
     const {
       params: { modelId, fileId },
@@ -52,7 +52,7 @@ export const putFileScan = [
 
     await audit.onUpdateFile(req, modelId, fileId)
 
-    return res.json({
+    res.json({
       status: 'Scan started',
     })
   },

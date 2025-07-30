@@ -89,7 +89,7 @@ interface GetDownloadFileResponse {
 
 export const getDownloadFile = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetDownloadFileResponse>) => {
+  async (req: Request, res: Response<GetDownloadFileResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewFile
     const { params } = parse(req, getDownloadFileSchema)
     let file: FileWithScanResultsInterface

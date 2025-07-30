@@ -34,9 +34,9 @@ interface GetCurrentUserResponses {
 
 export const getCurrentUser = [
   bodyParser.json(),
-  async (req: Request, res: Response<GetCurrentUserResponses>) => {
+  async (req: Request, res: Response<GetCurrentUserResponses>): Promise<void> => {
     const _ = parse(req, getCurrentUserSchema)
     const isAdmin = await authentication.hasRole(req.user, Roles.Admin)
-    return res.json({ user: { ...req.user, isAdmin } })
+    res.json({ user: { ...req.user, isAdmin } })
   },
 ]

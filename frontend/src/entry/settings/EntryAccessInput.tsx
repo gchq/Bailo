@@ -5,7 +5,7 @@ import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react
 import EntityItem from 'src/entry/settings/EntityItem'
 import ManualEntityInput from 'src/entry/settings/ManualEntityInput'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, Role } from 'types/types'
+import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, SystemRole } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
 type EntryAccessInputProps = {
@@ -13,7 +13,7 @@ type EntryAccessInputProps = {
   onChange: (value: CollaboratorEntry[]) => void
   entryKind: EntryKindKeys
   collaboratorsValue?: CollaboratorEntry[]
-  entryRoles?: Role[]
+  entryRoles?: SystemRole[]
 } & (
   | {
       isReadOnly: boolean
@@ -94,38 +94,38 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
     return 'No options'
   }, [userListQuery, isUsersError])
 
-  if (isUsersError && isUsersError.status !== 413) {
-    return <MessageAlert message={isUsersError.info.message} severity='error' />
-  }
-
   return (
     <Stack spacing={2}>
-      <Autocomplete
-        open={open}
-        onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
-        size='small'
-        noOptionsText={noOptionsText}
-        onInputChange={debounceOnInputChange}
-        groupBy={(option) => option.kind.toUpperCase()}
-        getOptionLabel={(option) => option.id}
-        isOptionEqualToValue={(option, value) => option.id === value.id}
-        onChange={onUserChange}
-        options={users}
-        filterOptions={(options) =>
-          options.filter(
-            (option) => !collaborators.find((collaborator) => collaborator.entity === `${option.kind}:${option.id}`),
-          )
-        }
-        loading={isUsersLoading && userListQuery.length >= 3}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            autoFocus
-            label={`Add a user or group to the ${toSentenceCase(entryKind)} access list`}
-          />
-        )}
-      />
+      {isUsersError && isUsersError.status !== 413 ? (
+        <MessageAlert message={isUsersError.info.message} severity='error' />
+      ) : (
+        <Autocomplete
+          open={open}
+          onOpen={() => setOpen(true)}
+          onClose={() => setOpen(false)}
+          size='small'
+          noOptionsText={noOptionsText}
+          onInputChange={debounceOnInputChange}
+          groupBy={(option) => option.kind.toUpperCase()}
+          getOptionLabel={(option) => option.id}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          onChange={onUserChange}
+          options={users}
+          filterOptions={(options) =>
+            options.filter(
+              (option) => !collaborators.find((collaborator) => collaborator.entity === `${option.kind}:${option.id}`),
+            )
+          }
+          loading={isUsersLoading && userListQuery.length >= 3}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              autoFocus
+              label={`Add a user or group to the ${toSentenceCase(entryKind)} access list`}
+            />
+          )}
+        />
+      )}
       <ManualEntityInput onAddEntityManually={handleAddEntityManually} errorMessage={manualEntityInputErrorMessage} />
       {entryRoles && (
         <Table>

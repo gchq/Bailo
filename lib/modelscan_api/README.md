@@ -17,9 +17,9 @@ This API is used as a filescanner and is not published to PyPI.
 
 ## Docker
 
-Two Docker files exist - [Dockerfile.dev for development](./Dockerfile.dev) and
-[Dockerfile for deployment](./Dockerfile). These make deployment and running of the ModelScan REST API simpler. These
-Docker images are used by the docker compose files in the root of the project.
+Two Docker end-stages exist in [Dockerfile](./Dockerfile). These make deployment and running of the ModelScan REST API
+simpler. These Docker stages are used by the docker compose files in the root of the project, and can be built manually
+by using `--target dev` or `--target prod` respectively (targetting prod is optional and will be built by default)
 
 Note that the Docker containers run on port `3311` rather than `8000`, so adjust URLs accordingly.
 
@@ -102,11 +102,11 @@ To run in [dev mode](https://fastapi.tiangolo.com/fastapi-cli/#fastapi-dev):
 fastapi dev bailo_modelscan_api/main.py
 ```
 
-Alternatively, build and run [Dockerfile.dev](./Dockerfile.dev) which mounts the `bailo_modelscan_api` directory as a
-volume, so allows for real-time changes with FastAPI running in dev mode.
+Alternatively, build and run [Dockerfile](./Dockerfile) using `--target dev` which mounts the `bailo_modelscan_api`
+directory as a volume, so allows for real-time changes with FastAPI running in dev mode.
 
 ```bash
-docker build -t modelscan_rest_api:latest -f ./Dockerfile.dev .
+docker build -t modelscan_rest_api:latest --target dev .
 docker run -v ./bailo_modelscan_api:/app/bailo_modelscan_api -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
 ```
 

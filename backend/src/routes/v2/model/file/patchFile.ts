@@ -50,7 +50,7 @@ interface PostModelResponse {
 
 export const patchFile = [
   bodyParser.json(),
-  async (req: Request, res: Response<PostModelResponse>) => {
+  async (req: Request, res: Response<PostModelResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateFile
     const {
       params: { modelId, fileId },
@@ -61,6 +61,6 @@ export const patchFile = [
 
     await audit.onUpdateFile(req, modelId, fileId)
 
-    return res.json({ file })
+    res.json({ file })
   },
 ]

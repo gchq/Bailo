@@ -165,7 +165,7 @@ export async function findReviewsForAccessRequests(accessRequestIds: string[]) {
   return reviews.filter((review) => requiredRoles.accessRequest.includes(review.role))
 }
 
-function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
+export function getRoleEntities(roles: string[], collaborators: CollaboratorEntry[]) {
   return roles.map((role) => {
     const entities = collaborators
       .filter((collaborator) => collaborator.roles.includes(role))
@@ -225,8 +225,6 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
     handleDuplicateKeys(error)
     throw error
   }
-
-  return reviewRole
 }
 
 export async function findReviewRoles(): Promise<ReviewRoleInterface[]> {

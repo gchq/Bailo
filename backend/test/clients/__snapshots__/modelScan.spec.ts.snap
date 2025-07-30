@@ -19,24 +19,36 @@ exports[`clients > modelScan > scanStream > success 1`] = `
   [
     "undefined://undefined:undefined/scan/file",
     {
-      "body": FormData {
-        Symbol(state): [
-          {
-            "name": "in_file",
-            "value": FileLike {
-              Symbol(state): {
-                "blobLike": {
-                  "size": 0,
-                  "stream": [Function],
-                  Symbol(Symbol.toStringTag): "File",
-                },
-                "lastModified": 0,
-                "name": "safe_model.h5",
-                "type": undefined,
+      "body": {
+        "append": [MockFunction spy] {
+          "calls": [
+            [
+              "in_file",
+              {},
+              {
+                "contentType": "application/octet-stream",
+                "filename": "safe_model.h5",
               },
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": undefined,
             },
-          },
-        ],
+          ],
+        },
+        "getHeaders": [MockFunction spy] {
+          "calls": [
+            [],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
       },
       "headers": {
         "accept": "application/json",
@@ -44,5 +56,11 @@ exports[`clients > modelScan > scanStream > success 1`] = `
       "method": "POST",
     },
   ],
+]
+`;
+
+exports[`clients > modelScan > scanStream > success 2`] = `
+[
+  [],
 ]
 `;

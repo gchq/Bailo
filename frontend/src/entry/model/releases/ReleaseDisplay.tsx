@@ -30,8 +30,8 @@ import FileDisplay from 'src/entry/model/files/FileDisplay'
 import CodeLine from 'src/entry/model/registry/CodeLine'
 import ReviewBanner from 'src/entry/model/reviews/ReviewBanner'
 import ReviewDisplay from 'src/entry/model/reviews/ReviewDisplay'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import Link from 'src/Link'
-import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, ReleaseInterface, ResponseInterface } from 'types/types'
 import { formatDateString } from 'utils/dateUtils'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
@@ -59,7 +59,7 @@ export default function ReleaseDisplay({
     semver: release.semver,
   })
 
-  const { mutateReleases } = useGetReleasesForModelId(model.id)
+  const { releases, isReleasesLoading, isReleasesError, mutateReleases } = useGetReleasesForModelId(model.id)
 
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -101,32 +101,24 @@ export default function ReleaseDisplay({
       file={data[index]}
       modelId={model.id}
       mutator={mutateReleases}
+      releases={releases}
     />
   ))
 
-  if (isReviewsError) {
-    return <MessageAlert message={isReviewsError.info.message} severity='error' />
-  }
-
-  if (isScannersError) {
-    return <MessageAlert message={isScannersError.info.message} severity='error' />
-  }
-
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isCommentResponsesError) {
-    return <MessageAlert message={isCommentResponsesError.info.message} severity='error' />
-  }
-
-  if (isReviewResponsesError) {
-    return <MessageAlert message={isReviewResponsesError.info.message} severity='error' />
-  }
+  const error = MultipleErrorWrapper('Unable to load release', {
+    isReviewResponsesError,
+    isScannersError,
+    isReviewsError,
+    isUiConfigError,
+    isCommentResponsesError,
+    isReleasesError,
+  })
+  if (error) return error
 
   return (
     <>
       {(isReviewsLoading ||
+        isReleasesLoading ||
         isUiConfigLoading ||
         isCommentResponsesLoading ||
         isReviewResponsesLoading ||
@@ -226,26 +218,28 @@ export default function ReleaseDisplay({
               )}
               <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2}>
                 {!release.minor && <ReviewDisplay modelId={model.id} reviewResponses={reviewsWithLatestResponses} />}
-                <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>
-                  <Stack direction='row' spacing={2}>
-                    {reviewResponses.length > 0 && (
-                      <Tooltip title='Reviews'>
-                        <Stack direction='row' spacing={1}>
-                          <ListAltIcon color='primary' />
-                          <Typography variant='caption'>{reviewResponses.length}</Typography>
-                        </Stack>
-                      </Tooltip>
-                    )}
-                    {commentResponses.length > 0 && (
-                      <Tooltip title='Comments'>
-                        <Stack direction='row' spacing={1}>
-                          <CommentIcon color='primary' />
-                          <Typography variant='caption'>{commentResponses.length}</Typography>
-                        </Stack>
-                      </Tooltip>
-                    )}
-                  </Stack>
-                </IconButton>
+                {(reviewResponses.length > 0 || commentResponses.length > 0) && (
+                  <IconButton href={`/model/${release.modelId}/release/${release.semver}#responses`}>
+                    <Stack direction='row' spacing={2}>
+                      {reviewResponses.length > 0 && (
+                        <Tooltip title='Reviews'>
+                          <Stack direction='row' spacing={1}>
+                            <ListAltIcon color='primary' />
+                            <Typography variant='caption'>{reviewResponses.length}</Typography>
+                          </Stack>
+                        </Tooltip>
+                      )}
+                      {commentResponses.length > 0 && (
+                        <Tooltip title='Comments'>
+                          <Stack direction='row' spacing={1}>
+                            <CommentIcon color='primary' />
+                            <Typography variant='caption'>{commentResponses.length}</Typography>
+                          </Stack>
+                        </Tooltip>
+                      )}
+                    </Stack>
+                  </IconButton>
+                )}
               </Stack>
             </Stack>
           </Stack>

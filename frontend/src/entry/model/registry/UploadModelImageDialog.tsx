@@ -61,8 +61,8 @@ export default function UploadModelImageDialog({ open, handleClose, model }: Upl
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Pushing an image to the registry</Typography>
                 <Stack spacing={2}>
-                  <CodeLine line={`docker tag <image> ${window.location.host}/${model.id}/<name>:<tag>`} />
-                  <CodeLine line={`docker push ${window.location.host}/${model.id}/<name>:<tag>`} />
+                  <CodeLine line={`docker tag <image> ${uiConfig.registry.host}/${model.id}/<name>:<tag>`} />
+                  <CodeLine line={`docker push ${uiConfig.registry.host}/${model.id}/<name>:<tag>`} />
                 </Stack>
               </Stack>
             </Stack>

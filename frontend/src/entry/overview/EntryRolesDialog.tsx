@@ -12,7 +12,7 @@ type EntryRolesDialogProps = {
 
 export default function EntryRolesDialog({ entry, open, onClose }: EntryRolesDialogProps) {
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth='md' TransitionComponent={Transition}>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth='lg' TransitionComponent={Transition}>
       <DialogTitle>Roles</DialogTitle>
       <DialogContent>
         <EntryRoleList entry={entry} />
