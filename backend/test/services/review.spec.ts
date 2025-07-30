@@ -290,6 +290,9 @@ describe('services > review', () => {
   })
 
   test('getReviewRoles > returns array of review roles', async () => {
+    reviewRoleModelMock.find.mockImplementation(() => ({
+      lean: vi.fn(),
+    }))
     await findReviewRoles()
 
     expect(reviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
@@ -297,6 +300,9 @@ describe('services > review', () => {
   })
 
   test('getReviewRoles > returns array of review roles when given a single schema Id', async () => {
+    reviewRoleModelMock.find.mockImplementationOnce(() => ({
+      lean: vi.fn(),
+    }))
     schemaModelMock.find.mockResolvedValue([testModelSchema])
     reviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
     await findReviewRoles('test123')
