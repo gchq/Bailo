@@ -35,6 +35,7 @@ export default function DockerConfiguration({ token }: DockerConfigurationProps)
         <Typography fontWeight='bold'>Step 1: Download credentials config</Typography>
         <Typography>First, download the Docker credentials for the application token: </Typography>
         <SplitButton
+          aria-label='download docker credentials'
           options={[`${showFilePreview ? 'Close file preview' : 'Preview file'}`]}
           onPrimaryButtonClick={() =>
             downloadFile(
