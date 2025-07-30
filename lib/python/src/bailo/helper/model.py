@@ -391,32 +391,64 @@ class Model(Entry):
 
     @property
     def model_card(self):
+        """Get the data of the model card.
+
+        :return: Model card data.
+        """
         return self._card
 
     @model_card.setter
     def model_card(self, value):
+        """Set the data of the model card.
+
+        :param value: The data to set.
+        """
         self._card = value
 
     @property
     def model_card_version(self):
+        """Get the version of the model card.
+
+        :return: Model card version.
+        """
         return self._card_version
 
     @model_card_version.setter
     def model_card_version(self, value):
+        """Set the version of the model card.
+
+        :param value: The version to set.
+        """
         self._card_version = value
 
     @property
     def model_card_schema(self):
+        """Get the schema of the model card.
+
+        :return: Model card schema.
+        """
         return self._card_schema
 
     @model_card_schema.setter
     def model_card_schema(self, value):
+        """Set the schema of the model card.
+
+        :param value: The schema to set.
+        """
         self._card_schema = value
 
     def __repr__(self) -> str:
+        """Return a developer-oriented string representation of the model.
+
+        :return: String representation with class and ID
+        """
         return f"{self.__class__.__name__}({str(self)})"
 
     def __str__(self) -> str:
+        """Return the human-readable string representation of the model.
+
+        :return: String value of the enum.
+        """
         return f"{self.model_id}"
 
 

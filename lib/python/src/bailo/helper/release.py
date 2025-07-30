@@ -217,12 +217,12 @@ class Release:
         include: list | str = "",
         exclude: list | str = "",
     ):
-        """Writes all files to disk given a local directory.
+        """Writes all files in a release to disk at the given path, applying inclusion/exclusion filters.
 
-        :param path: Local directory to write files to
-        :param include: List or string of fnmatch statements for file names to include, defaults to None
-        :param exclude: List or string of fnmatch statements for file names to exclude, defaults to None
-        :raises BailoException: If the release has no files assigned to it
+        :param path: Local directory to output files.
+        :param include: List of glob patterns (str) or single string to include, defaults to None
+        :param exclude: List of glob patterns (str) or single string to exclude, defaults to None
+        :raises BailoException: If the release has no files assigned.
         ..note:: Fnmatch statements support Unix shell-style wildcards.
         """
         files_metadata = self.client.get_release(self.model_id, str(self.version))["release"]["files"]
@@ -378,40 +378,82 @@ class Release:
             )
 
     def __repr__(self) -> str:
+        """Return a developer-oriented string representation of the release.
+
+        :return: String representation with class and ID.
+        """
         return f"{self.__class__.__name__}({str(self)})"
 
     def __str__(self) -> str:
+        """Return the human-readable string representation of the release.
+
+        :return: String combining model_id and version.
+        """
         return f"{self.model_id} v{self.__version_obj}"
 
     def __eq__(self, other) -> bool:
+        """Check for equality between two releases.
+
+        :param other: Object to compare with.
+        :return: True if releases have the same version, False otherwise.
+        """
         if not isinstance(other, self.__class__):
             return NotImplemented
         return self.__version_obj == other.__version_obj
 
     def __ne__(self, other):
+        """Check for inequality between two releases.
+
+        :param other: Object to compare with.
+        :return: True if releases no not have the same version, False otherwise.
+        """
         if not isinstance(other, self.__class__):
             return NotImplemented
         return self != other
 
     def __lt__(self, other):
+        """Check if this release is less than another (by version).
+
+        :param other: Object to compare with.
+        :return: True if this release's version is less, False otherwise.
+        """
         if not isinstance(other, self.__class__):
             return NotImplemented
         return self.__version_obj < other.__version_obj
 
     def __le__(self, other):
+        """Check if this release is less than or equal to another (by version).
+
+        :param other: Object to compare with.
+        :return: True if this release's version is less or equal, False otherwise.
+        """
         if not isinstance(other, self.__class__):
             return NotImplemented
         return self.__version_obj <= other.__version_obj
 
     def __gt__(self, other):
+        """Check if this release is greater than another (by version).
+
+        :param other: Object to compare with.
+        :return: True if this release's version is greater, False otherwise.
+        """
         if not isinstance(other, self.__class__):
             return NotImplemented
         return self.__version_obj > other.__version_obj
 
     def __ge__(self, other):
+        """Check if this release is greater than or equal to another (by version).
+
+        :param other: Object to compare with.
+        :return: True if this release's version is greater or equal, False otherwise.
+        """
         if not isinstance(other, self.__class__):
             return NotImplemented
         return self.__version_obj >= other.__version_obj
 
     def __hash__(self) -> int:
+        """Return the hash of this release object, based on its version.
+
+        :return: Hash value.
+        """
         return hash((self.model_id, self.__version_obj))
