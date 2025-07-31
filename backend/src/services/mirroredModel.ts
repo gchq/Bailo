@@ -16,7 +16,7 @@ import { ModelAction, ReleaseAction } from '../connectors/authorisation/actions.
 import authorisation from '../connectors/authorisation/index.js'
 import { ScanState } from '../connectors/fileScanning/Base.js'
 import scanners from '../connectors/fileScanning/index.js'
-import { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
+import FileModel, { FileInterfaceDoc, FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../models/Release.js'
@@ -602,9 +602,14 @@ async function importDocuments(
 async function importModelFile(body: Readable, fileId: string, mirroredModelId: string, importId: string) {
   const bucket = config.s3.buckets.uploads
   const updatedPath = createFilePath(mirroredModelId, fileId)
-  await putObjectStream(updatedPath, body, bucket)
-  log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
-  await markFileAsCompleteAfterImport(updatedPath)
+  const foundFile = await FileModel.findOne({ path: updatedPath, complete: true })
+  if (foundFile) {
+    log.debug({ bucket, path: updatedPath, importId }, 'Skipped imported file already uploaded to S3.')
+  } else {
+    await putObjectStream(updatedPath, body, bucket)
+    log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
+    await markFileAsCompleteAfterImport(updatedPath)
+  }
   return { sourcePath: fileId, newPath: updatedPath }
 }
 

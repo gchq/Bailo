@@ -112,6 +112,18 @@ vi.mock('../../src/services/log.js', async () => ({
   default: logMock,
 }))
 
+const fileModelMocks = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.findOne = vi.fn()
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/File.js', () => ({ default: fileModelMocks }))
+
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } }, card: { schemaId: 'test' } })),
   getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(), version: 123 }]),
@@ -876,7 +888,25 @@ describe('services > mirroredModel', () => {
     )
 
     expect(result).toMatchSnapshot()
+    expect(fileModelMocks.findOne).toBeCalledTimes(1)
     expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
+  })
+
+  test('importModel > skip existing file upload to S3', async () => {
+    fileModelMocks.findOne.mockResolvedValueOnce({ complete: true })
+
+    const result = await importModel(
+      {} as UserInterface,
+      'mirrored-model-id',
+      'source-model-id',
+      'https://test.com',
+      ImportKind.File,
+      '/s3/path/',
+    )
+
+    expect(result).toMatchSnapshot()
+    expect(fileModelMocks.findOne).toBeCalledTimes(1)
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(0)
   })
 
   test('importModel > missing image name for image imports', async () => {
