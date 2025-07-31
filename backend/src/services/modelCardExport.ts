@@ -63,6 +63,7 @@ export async function getModelCardHtml(
   }
 
   const reviewExports = await createReleaseReviewExports(modelId)
+
   const modelCardRevision: ModelCardRevisionInterface = { ...modelCard, modelId, deleted: model.deleted }
   const html = await renderToHtml(model, modelCardRevision, reviewExports)
 
@@ -111,9 +112,8 @@ async function createReleaseReviewExports(modelId: string) {
   const modelReviews = await ReviewModel.find({ modelId: modelId, kind: 'release', deleted: false })
 
   for (const modelReview of modelReviews) {
-    const modelResponses = await getResponsesByParentIds([modelReview._id as string])
-
-    for (const modelResponse of modelResponses) {
+    const modelResponse = (await getResponsesByParentIds([modelReview._id as string])).find(Boolean)
+    if (modelResponse) {
       const reviewExport: ReviewExport = {
         semver: modelReview.semver,
         collaborator: modelResponse.entity,
