@@ -104,6 +104,7 @@ function slugsToTree(paths: Array<DirectoryEntry>) {
       currentId += (isFirstPart ? '' : '/') + part
 
       let child = leaf.children?.find((node) => node.slug === currentId)
+
       if (!child) {
         if (!leaf.children) leaf.children = []
 
