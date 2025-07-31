@@ -14,6 +14,7 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
+import { getSchemaById } from './schema.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
 export interface DefaultReviewRole {
@@ -61,7 +62,7 @@ export async function createReleaseReviews(model: ModelDoc, release: ReleaseDoc)
       modelId: model.id,
     })
   }
-  const modelSchema = await SchemaModel.findOne({ id: model.card.schemaId })
+  const modelSchema = await getSchemaById(model.card.schemaId)
   if (!modelSchema) {
     throw BadReq('Cannot find schema for associated model', { modelId: model._id })
   }
