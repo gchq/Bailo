@@ -8,7 +8,6 @@ import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { getModelById, getModelCard } from './model.js'
-import { getResponsesByParentIds } from './response.js'
 import { getRoleEntities } from './review.js'
 import { getSchemaById } from './schema.js'
 
@@ -109,22 +108,39 @@ function getEntitiesWithRole(role: string, collaborators: CollaboratorEntry[]) {
 
 async function createReleaseReviewExports(modelId: string) {
   const reviewExports: ReviewExport[] = []
-  const modelReviews = await ReviewModel.find({ modelId: modelId, kind: 'release', deleted: false })
 
-  for (const modelReview of modelReviews) {
-    const modelResponse = (await getResponsesByParentIds([modelReview._id as string])).find(Boolean)
-    if (modelResponse) {
-      const reviewExport: ReviewExport = {
-        semver: modelReview.semver,
-        collaborator: modelResponse.entity,
-        role: modelResponse.role,
-        decision: modelResponse.decision,
-        comment: modelResponse.comment,
-        updatedAt: modelResponse.updatedAt,
-      }
-      reviewExports.push(reviewExport)
+  const reviews = await ReviewModel.aggregate([
+    {
+      $match: {
+        modelId: modelId,
+        kind: 'release',
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        localField: '_id',
+        foreignField: 'parentId',
+        as: 'response',
+      },
+    },
+    {
+      $unwind: '$response',
+    },
+  ])
+
+  for (const review of reviews) {
+    const reviewExport: ReviewExport = {
+      semver: review.semver,
+      collaborator: review.response.entity,
+      role: review.response.role,
+      decision: review.response.decision,
+      comment: review.response.comment,
+      updatedAt: review.response.updatedAt,
     }
+    reviewExports.push(reviewExport)
   }
+
   return reviewExports
 }
 
