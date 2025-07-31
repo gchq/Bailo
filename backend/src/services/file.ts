@@ -224,10 +224,7 @@ export async function removeFile(user: UserInterface, modelId: string, fileId: s
 
   await removeFileFromReleases(user, model, fileId)
 
-  // the soft-delete plugin does not support multiple deletions so have to do one-by-one
-  for (const avScan of file.avScan) {
-    await ScanModel.findOneAndDelete({ _id: avScan._id })
-  }
+  await ScanModel.deleteMany({ _id: { $in: file.avScan.map((scan) => scan._id) } })
 
   // We don't actually remove the file from storage, we only hide all
   // references to it.  This makes the file not visible to the user.

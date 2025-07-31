@@ -121,6 +121,7 @@ const scanModelMocks = vi.hoisted(() => {
   obj.find = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
+  obj.deleteMany = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -215,12 +216,14 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     fileModelMocks.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) }, avScan: [{ _id: 'foo' }, { _id: 'bar' }] },
     ])
 
     const result = await removeFile(user, modelId, testFileId)
 
     expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
+    expect(scanModelMocks.deleteMany).toBeCalledWith({ _id: { $in: ['foo', 'bar'] } })
+    expect(fileModelMocks.findOneAndDelete).toBeCalled()
     expect(result).toMatchSnapshot()
   })
 
