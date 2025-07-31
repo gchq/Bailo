@@ -95,13 +95,13 @@ module.exports = {
     {
       name: 'Model Senior Responsible Officer',
       shortName: 'msro',
-      kind: 'schema',
+      kind: 'review',
       description: 'Reviewer',
     },
     {
       name: 'Model Technical Reviewer',
       shortName: 'mtr',
-      kind: 'schema',
+      kind: 'review',
       description: 'Reviewer',
     },
   ],
