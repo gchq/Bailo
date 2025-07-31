@@ -72,14 +72,6 @@ exports[`services > file > removeFile > success 1`] = `
       ],
     },
   },
-  "avScan": [
-    {
-      "_id": "foo",
-    },
-    {
-      "_id": "bar",
-    },
-  ],
   "id": "73859F8D26679D2E52597326",
   "modelId": "testModel",
 }

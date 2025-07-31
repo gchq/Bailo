@@ -216,13 +216,13 @@ describe('services > file', () => {
     const modelId = 'testModelId'
 
     fileModelMocks.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) }, avScan: [{ _id: 'foo' }, { _id: 'bar' }] },
+      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
     ])
 
     const result = await removeFile(user, modelId, testFileId)
 
     expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
-    expect(scanModelMocks.deleteMany).toBeCalledWith({ _id: { $in: ['foo', 'bar'] } })
+    expect(scanModelMocks.deleteMany).toBeCalledWith({ fileId: { $eq: testFileId } })
     expect(fileModelMocks.findOneAndDelete).toBeCalled()
     expect(result).toMatchSnapshot()
   })

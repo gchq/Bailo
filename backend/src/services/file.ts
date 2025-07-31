@@ -224,7 +224,8 @@ export async function removeFile(user: UserInterface, modelId: string, fileId: s
 
   await removeFileFromReleases(user, model, fileId)
 
-  await ScanModel.deleteMany({ _id: { $in: file.avScan.map((scan) => scan._id) } })
+  // TODO: use a transaction here once they're part of the codebase
+  await ScanModel.deleteMany({ fileId: { $eq: file.id } })
 
   // We don't actually remove the file from storage, we only hide all
   // references to it.  This makes the file not visible to the user.
