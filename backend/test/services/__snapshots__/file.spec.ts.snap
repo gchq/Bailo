@@ -134,6 +134,7 @@ exports[`services > file > uploadFile > success 1`] = `
   "avScan": {
     "aggregate": [MockFunction spy],
     "delete": [MockFunction spy],
+    "deleteMany": [MockFunction spy],
     "find": [MockFunction spy] {
       "calls": [
         [
@@ -301,6 +302,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
   "avScan": {
     "aggregate": [MockFunction spy],
     "delete": [MockFunction spy],
+    "deleteMany": [MockFunction spy],
     "find": [MockFunction spy] {
       "calls": [
         [
