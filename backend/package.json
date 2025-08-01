@@ -106,7 +106,7 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
-    "supertest": "^7.1.1",
+    "supertest": "^7.1.4",
     "typescript": "^5.8.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.5"
