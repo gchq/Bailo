@@ -144,6 +144,7 @@ export default function FileDisplay({
   const updateChipDetails = useCallback(() => {
     if (!isFileInterface(file) || file.avScan === undefined) {
       setChipDisplay({ label: 'Virus scan results could not be found', colour: 'warning', icon: <Warning /> })
+      return
     }
     if (
       isFileInterface(file) &&
@@ -151,6 +152,7 @@ export default function FileDisplay({
       file.avScan.some((scan) => scan.state === ScanState.Error)
     ) {
       setChipDisplay({ label: 'One or more virus scanning tools failed', colour: 'warning', icon: <Warning /> })
+      return
     }
     if (threatsFound(file as FileInterface)) {
       setChipDisplay({
@@ -158,6 +160,7 @@ export default function FileDisplay({
         colour: 'error',
         icon: <Error />,
       })
+      return
     } else {
       setChipDisplay({ label: 'Virus scan passed', colour: 'success', icon: <Done /> })
     }
