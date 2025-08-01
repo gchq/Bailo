@@ -733,20 +733,15 @@ async function addReleasesToZip(
   return zip
 }
 
-async function addReleaseToZip(
+async function uploadReleaseFiles(
   user: UserInterface,
   model: ModelDoc,
   release: ReleaseDoc,
-  zip: archiver.Archiver,
+  files: FileWithScanResultsInterface[],
   mirroredModelId: string,
 ) {
-  log.debug('Adding release to zip file of releases.', { user, modelId: model.id, semver: release.semver })
-  const files: FileWithScanResultsInterface[] = await getFilesByIds(user, release.modelId, release.fileIds)
-
-  try {
-    zip.append(JSON.stringify(release.toJSON()), { name: `releases/${release.semver}.json` })
-    for (const file of files) {
-      zip.append(JSON.stringify(file), { name: `files/${file._id.toString()}.json` })
+  for (const file of files) {
+    try {
       await uploadToS3(
         file.id,
         (await downloadFile(user, file.id)).Body as stream.Readable,
@@ -762,22 +757,33 @@ async function addReleaseToZip(
           fileId: file.id,
         },
       )
+    } catch (error: any) {
+      throw InternalError('Error when uploading Release File to S3.', {
+        error,
+        modelId: model.id,
+        releaseSemver: release.semver,
+        fileId: file.id,
+        mirroredModelId,
+      })
     }
+  }
+}
 
-    if (Array.isArray(release.images)) {
-      for (const image of release.images) {
-        const imageLogData = {
-          releaseId: release.id,
-          sourceModelId: model.id,
-          imageName: image.name,
-          imageTag: image.tag,
-        }
-        const distributionPackageName = joinDistributionPackageName({
-          domain: image.repository,
-          path: image.name,
-          tag: image.tag,
-        })
-
+async function uploadReleaseImages(user: UserInterface, model: ModelDoc, release: ReleaseDoc, mirroredModelId: string) {
+  if (Array.isArray(release.images)) {
+    for (const image of release.images) {
+      const imageLogData = {
+        releaseId: release.id,
+        sourceModelId: model.id,
+        imageName: image.name,
+        imageTag: image.tag,
+      }
+      const distributionPackageName = joinDistributionPackageName({
+        domain: image.repository,
+        path: image.name,
+        tag: image.tag,
+      })
+      try {
         await exportCompressedRegistryImage(
           user,
           model.id,
@@ -792,11 +798,38 @@ async function addReleaseToZip(
           },
           imageLogData,
         )
+      } catch (error: any) {
+        throw InternalError('Error when uploading Release Image to S3.', {
+          error,
+          modelId: model.id,
+          releaseSemver: release.semver,
+          distributionPackageName,
+          mirroredModelId,
+        })
       }
     }
-  } catch (error: any) {
-    throw InternalError('Error when generating the zip file.', { error })
   }
+}
+
+async function addReleaseToZip(
+  user: UserInterface,
+  model: ModelDoc,
+  release: ReleaseDoc,
+  zip: archiver.Archiver,
+  mirroredModelId: string,
+) {
+  log.debug('Adding release to zip file of releases.', { user, modelId: model.id, semver: release.semver })
+  const files: FileWithScanResultsInterface[] = await getFilesByIds(user, release.modelId, release.fileIds)
+
+  zip.append(JSON.stringify(release.toJSON()), { name: `releases/${release.semver}.json` })
+  for (const file of files) {
+    zip.append(JSON.stringify(file), { name: `files/${file._id.toString()}.json` })
+  }
+
+  // Fire-and-forget upload of artifacts so that the endpoint is able to return without awaiting lots of uploads
+  uploadReleaseFiles(user, model, release, files, mirroredModelId)
+  uploadReleaseImages(user, model, release, mirroredModelId)
+
   log.debug({ user, modelId: model.id, semver: release.semver }, 'Finished adding release to zip file of releases.')
   return zip
 }
