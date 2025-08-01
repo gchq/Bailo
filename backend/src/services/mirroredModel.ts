@@ -261,18 +261,21 @@ export async function exportCompressedRegistryImage(
   const { path: imageName, tag: imageTag } = distributionPackageNameObject
   // get which layers exist for the model
   const tagManifest = await getImageManifest(user, modelId, imageName, imageTag)
-  log.debug('Got image tag manifest', {
-    modelId,
-    imageName,
-    imageTag,
-    layersLength: tagManifest.layers.length,
-    layers: tagManifest.layers.map((layer: { [x: string]: any }) => {
-      return { size: layer['size'], digest: layer['digest'] }
-    }),
-    config: tagManifest.config,
-    tagManifest,
-    ...logData,
-  })
+  log.debug(
+    {
+      modelId,
+      imageName,
+      imageTag,
+      layersLength: tagManifest.layers.length,
+      layers: tagManifest.layers.map((layer: { [x: string]: any }) => {
+        return { size: layer['size'], digest: layer['digest'] }
+      }),
+      config: tagManifest.config,
+      tagManifest,
+      ...logData,
+    },
+    'Got image tag manifest',
+  )
 
   // setup gzip, stream to s3 to allow draining, and then pipe tar to gzip
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
@@ -293,13 +296,16 @@ export async function exportCompressedRegistryImage(
       throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
     }
 
-    log.debug('Fetching image layer', {
-      modelId,
-      imageName,
-      imageTag,
-      layerDigest,
-      ...logData,
-    })
+    log.debug(
+      {
+        modelId,
+        imageName,
+        imageTag,
+        layerDigest,
+        ...logData,
+      },
+      'Fetching image layer',
+    )
     const responseBody = await getImageBlob(user, modelId, imageName, layerDigest)
 
     // pipe the body to tar using streams
@@ -325,7 +331,7 @@ export async function pipeStreamToTarEntry(
   inputStream.pipe(packerEntry)
   return new Promise((resolve, reject) => {
     packerEntry.on('finish', () => {
-      log.debug('Finished fetching layer stream', { ...logData })
+      log.debug({ ...logData }, 'Finished fetching layer stream')
       resolve('ok')
     })
     packerEntry.on('error', (err) =>
@@ -371,18 +377,21 @@ export async function importCompressedRegistryImage(
   let manifestBody: unknown
   await new Promise((resolve, reject) => {
     tarStream.on('entry', async function (entry, stream, next) {
-      log.debug('Processing un-tarred entry', {
-        name: entry.name,
-        type: entry.type,
-        size: entry.size,
-        importId,
-      })
+      log.debug(
+        {
+          name: entry.name,
+          type: entry.type,
+          size: entry.size,
+          importId,
+        },
+        'Processing un-tarred entry',
+      )
 
       if (entry.type === 'file') {
         // Process file
         if (entry.name === 'manifest.json') {
           // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
-          log.debug('Extracting un-tarred manifest', { importId })
+          log.debug({ importId }, 'Extracting un-tarred manifest')
           manifestBody = await json(stream)
 
           next()
@@ -390,21 +399,27 @@ export async function importCompressedRegistryImage(
           // convert filename to digest format
           const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
           if (await doesImageLayerExist(user, modelId, imageName, layerDigest)) {
-            log.debug('Skipping blob as it already exists in the registry', {
-              name: entry.name,
-              size: entry.size,
-              importId,
-            })
+            log.debug(
+              {
+                name: entry.name,
+                size: entry.size,
+                importId,
+              },
+              'Skipping blob as it already exists in the registry',
+            )
 
             // auto-drain the stream
             stream.resume()
             next()
           } else {
-            log.debug('Initiating un-tarred blob upload', {
-              name: entry.name,
-              size: entry.size,
-              importId,
-            })
+            log.debug(
+              {
+                name: entry.name,
+                size: entry.size,
+                importId,
+              },
+              'Initiating un-tarred blob upload',
+            )
             const res = await initialiseImageUpload(user, modelId, imageName)
 
             await putImageBlob(user, modelId, imageName, res.location, layerDigest, stream, String(entry.size))
@@ -414,7 +429,7 @@ export async function importCompressedRegistryImage(
         }
       } else {
         // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
-        log.warn('Skipping non-file entry', { name: entry.name, type: entry.type, importId })
+        log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry')
         next()
       }
     })
@@ -428,7 +443,7 @@ export async function importCompressedRegistryImage(
     )
 
     tarStream.on('finish', async function () {
-      log.debug('Uploading manifest', { importId })
+      log.debug({ importId }, 'Uploading manifest')
       if (hasKeysOfType<{ mediaType: 'string' }>(manifestBody, { mediaType: 'string' })) {
         await putImageManifest(
           user,
@@ -444,10 +459,13 @@ export async function importCompressedRegistryImage(
       }
     })
   })
-  log.debug('Completed registry upload', {
-    image: { modelId, imageName, imageTag },
-    importId,
-  })
+  log.debug(
+    {
+      image: { modelId, imageName, imageTag },
+      importId,
+    },
+    'Completed registry upload',
+  )
 
   return { image: { modelId, imageName, imageTag } }
 }
@@ -829,7 +847,7 @@ async function addReleaseToZip(
   zip: archiver.Archiver,
   mirroredModelId: string,
 ) {
-  log.debug('Adding release to zip file of releases.', { user, modelId: model.id, semver: release.semver })
+  log.debug({ user, modelId: model.id, semver: release.semver }, 'Adding release to zip file of releases.')
   const files: FileWithScanResultsInterface[] = await getFilesByIds(user, release.modelId, release.fileIds)
 
   zip.append(JSON.stringify(release.toJSON()), { name: `releases/${release.semver}.json` })
