@@ -105,7 +105,7 @@ export async function sendWebhooks(
           'Non 200 response received when sending Webhook.',
         )
       } else {
-        log.debug('Successfully sent webhook', { webhook, event: eventKind })
+        log.debug({ webhook, event: eventKind }, 'Successfully sent webhook')
       }
     } catch (err) {
       log.error({ eventKind, err }, 'Unable to send Webhook.')
