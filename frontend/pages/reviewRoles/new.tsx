@@ -62,7 +62,7 @@ export default function ReviewRolesForm() {
   }
 
   const handleCollaboratorRoleChange = (event: SelectChangeEvent) => {
-    if (event.target.value === 'none') {
+    if (event.target.value === '') {
       delete formData.collaboratorRole
     } else {
       setFormData((prevFormData) => ({
@@ -183,9 +183,11 @@ export default function ReviewRolesForm() {
                 />
               </LabelledInput>
               <FormControl size='small'>
-                <LabelledInput required fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
+                <LabelledInput fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
                   <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
-                    <MenuItem value='none'>{'None'}</MenuItem>
+                    <MenuItem value=''>
+                      <em>None</em>
+                    </MenuItem>
                     {modelRoles.map((role) => (
                       <MenuItem key={role.shortName} value={role.shortName}>
                         {role.name}
