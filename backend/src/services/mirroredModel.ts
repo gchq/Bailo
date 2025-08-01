@@ -758,13 +758,16 @@ async function uploadReleaseFiles(
         },
       )
     } catch (error: any) {
-      throw InternalError('Error when uploading Release File to S3.', {
-        error,
-        modelId: model.id,
-        releaseSemver: release.semver,
-        fileId: file.id,
-        mirroredModelId,
-      })
+      log.error(
+        {
+          error,
+          modelId: model.id,
+          releaseSemver: release.semver,
+          fileId: file.id,
+          mirroredModelId,
+        },
+        'Error when uploading Release File to S3.',
+      )
     }
   }
 }
@@ -799,13 +802,16 @@ async function uploadReleaseImages(user: UserInterface, model: ModelDoc, release
           imageLogData,
         )
       } catch (error: any) {
-        throw InternalError('Error when uploading Release Image to S3.', {
-          error,
-          modelId: model.id,
-          releaseSemver: release.semver,
-          distributionPackageName,
-          mirroredModelId,
-        })
+        log.error(
+          {
+            error,
+            modelId: model.id,
+            releaseSemver: release.semver,
+            distributionPackageName,
+            mirroredModelId,
+          },
+          'Error when uploading Release Image to S3.',
+        )
       }
     }
   }
