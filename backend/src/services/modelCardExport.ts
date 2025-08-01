@@ -107,8 +107,6 @@ function getEntitiesWithRole(role: string, collaborators: CollaboratorEntry[]) {
 }
 
 async function createReleaseReviewExports(modelId: string) {
-  const reviewExports: ReviewExport[] = []
-
   const reviews = await ReviewModel.aggregate([
     {
       $match: {
@@ -129,17 +127,14 @@ async function createReleaseReviewExports(modelId: string) {
     },
   ])
 
-  for (const review of reviews) {
-    const reviewExport: ReviewExport = {
-      semver: review.semver,
-      collaborator: review.response.entity,
-      role: review.response.role,
-      decision: review.response.decision,
-      comment: review.response.comment,
-      updatedAt: review.response.updatedAt,
-    }
-    reviewExports.push(reviewExport)
-  }
+  const reviewExports: ReviewExport[] = reviews.map((review) => ({
+    semver: review.semver,
+    collaborator: review.response.entity,
+    role: review.response.role,
+    decision: review.response.decision,
+    comment: review.response.comment,
+    updatedAt: review.response.updatedAt,
+  }))
 
   return reviewExports
 }
