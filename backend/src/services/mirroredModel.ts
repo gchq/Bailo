@@ -604,7 +604,7 @@ async function importModelFile(body: Readable, fileId: string, mirroredModelId: 
   const updatedPath = createFilePath(mirroredModelId, fileId)
   const foundFile = await FileModel.findOne({ path: updatedPath, complete: true })
   if (foundFile) {
-    log.debug({ bucket, path: updatedPath, importId }, 'Skipped imported file already uploaded to S3.')
+    log.debug({ bucket, path: updatedPath, importId }, 'Skipping imported file as it has already been uploaded to S3.')
   } else {
     await putObjectStream(updatedPath, body, bucket)
     log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
