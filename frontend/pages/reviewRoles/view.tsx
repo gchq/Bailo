@@ -52,8 +52,8 @@ export default function ReviewRoles() {
   }, [setErrorMessage, setConfirmationOpen])
 
   const handleDeleteReviewRole = useCallback(
-    async (reviewRoleId) => {
-      const res = await deleteReviewRole(reviewRoleId)
+    async (reviewRoleShortName) => {
+      const res = await deleteReviewRole(reviewRoleShortName)
       if (res.status !== 200) {
         setErrorMessage('There was a problem deleting this role.')
       } else {
@@ -111,7 +111,7 @@ export default function ReviewRoles() {
                 open={confirmationOpen}
                 title='Deleting this role will remove it from any schemas it is attached to, and will also remove the role from any model collaborators assigned to that role.'
                 onCancel={() => setConfirmationOpen(false)}
-                onConfirm={() => handleDeleteReviewRole(reviewRole._id)}
+                onConfirm={() => handleDeleteReviewRole(reviewRole.shortName)}
                 dialogMessage={
                   schemasLength(reviewRole.shortName) > 0
                     ? `If deleted, this role will be removed from ${plural(schemasLength(reviewRole.shortName), 'schema')}. Are you sure you want to remove this review role?`
