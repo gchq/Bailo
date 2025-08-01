@@ -71,8 +71,8 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
             </ListItem>
           ) : (
             <ListItem dense>
-              <Link passHref href={path} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <ListItemButton dense selected={isSelected} sx={{ pl: paddingLeft }}>
+              <Link passHref href={path} style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
+                <ListItemButton dense selected={isSelected} sx={{ pl: doc.slug ? paddingLeft : 0 }}>
                   <ListItemText
                     primary={doc.title}
                     slotProps={{
