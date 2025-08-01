@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
 jobs:
   build_images:
     runs-on: ubuntu-latest
@@ -16,6 +19,7 @@ jobs:
         component:
           - name: backend
             context: backend
+            additional_contexts: python=./lib/python
             dockerfile: backend/Dockerfile
             tar: /tmp/bailo_backend.tar
             artifact: bailo_backend
@@ -48,7 +52,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.component.context }}
-          file: ${{ matrix.component.file }}
+          build-contexts: ${{ matrix.component.additional_contexts || '' }}
+          file: ${{ matrix.component.dockerfile }}
           tags: ${{ matrix.component.tag }}
           cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
           cache-to: type=gha,mode=max,scope=${{ matrix.component.cache_scope }}

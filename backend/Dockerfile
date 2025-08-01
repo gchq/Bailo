@@ -11,8 +11,9 @@ RUN apt-get update && apt-get install -y pandoc && rm -rf /var/lib/apt/lists/*
 WORKDIR /app/docs
 
 COPY docs .
+COPY --from=python . /app/python
 
-RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade bailo -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
 
 RUN make dirhtml
 

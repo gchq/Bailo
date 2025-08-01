@@ -96,6 +96,8 @@ services:
     image: bailo_backend:latest
     build:
       context: ./backend/
+      additional_contexts:
+        python: ./lib/python
     ports:
       - 3001:3001
     volumes:
