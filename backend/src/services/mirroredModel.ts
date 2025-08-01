@@ -826,7 +826,7 @@ async function addReleaseToZip(
     zip.append(JSON.stringify(file), { name: `files/${file._id.toString()}.json` })
   }
 
-  // Fire-and-forget upload of artifacts so that the endpoint is able to return without awaiting lots of uploads
+  // Fire-and-forget upload of artefacts so that the endpoint is able to return without awaiting lots of uploads
   uploadReleaseFiles(user, model, release, files, mirroredModelId)
   uploadReleaseImages(user, model, release, mirroredModelId)
 
