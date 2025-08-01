@@ -3,6 +3,8 @@ import showdown from 'showdown'
 
 import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
+import { ResponseInterface } from '../models/Response.js'
+import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
@@ -40,6 +42,11 @@ type Fragment = (
 ) &
   Common
 
+export type ReviewExport = {
+  semver?: string
+  collaborator: string
+} & Pick<ResponseInterface, 'role' | 'decision' | 'comment' | 'updatedAt'>
+
 export async function getModelCardHtml(
   user: UserInterface,
   modelId: ModelInterface['id'],
@@ -55,13 +62,19 @@ export async function getModelCardHtml(
     throw new Error('Failed to find model card to export.')
   }
 
+  const reviewExports = await createReleaseReviewExports(modelId)
+
   const modelCardRevision: ModelCardRevisionInterface = { ...modelCard, modelId, deleted: model.deleted }
-  const html = await renderToHtml(model, modelCardRevision)
+  const html = await renderToHtml(model, modelCardRevision, reviewExports)
 
   return { html, modelCard }
 }
 
-export async function renderToMarkdown(model: ModelInterface, modelCardRevision: ModelCardRevisionInterface) {
+export async function renderToMarkdown(
+  model: ModelInterface,
+  modelCardRevision: ModelCardRevisionInterface,
+  reviewExports: ReviewExport[],
+) {
   if (!model.card) {
     throw new Error('Trying to export model with no corresponding card')
   }
@@ -71,11 +84,18 @@ export async function renderToMarkdown(model: ModelInterface, modelCardRevision:
     throw new Error('Trying to export model with no corresponding card')
   }
 
+  const reviewTable = renderMarkdownReviewTable(reviewExports)
+
   let output = outdent`
-    # ${model.name}
-    > ${model.description}
+    # ${model.name}\n
+    ${model.description}\n\n
     ## Model State\n
     ${model.state ? model.state : 'State Not Set'}\n\n
+    ## Model Senior Responsible Officers\n
+    ${getEntitiesWithRole('msro', model.collaborators)}\n\n
+    ## Model Technical Reviewers\n
+    ${getEntitiesWithRole('mtr', model.collaborators)}\n
+    ${reviewTable}
   `
   const reviewRoles = await ReviewRoleModel.find({ reviewRoles: schema.reviewRoles })
 
@@ -99,8 +119,45 @@ function getEntitiesWithRole(role: string, collaborators: CollaboratorEntry[]) {
   return getRoleEntities([role], collaborators)[0].entities.join('\n')
 }
 
-export async function renderToHtml(model: ModelInterface, modelCardRevision: ModelCardRevisionInterface) {
-  const markdown = await renderToMarkdown(model, modelCardRevision)
+async function createReleaseReviewExports(modelId: string) {
+  const reviews = await ReviewModel.aggregate([
+    {
+      $match: {
+        modelId: modelId,
+        kind: 'release',
+      },
+    },
+    {
+      $lookup: {
+        from: 'v2_responses',
+        localField: '_id',
+        foreignField: 'parentId',
+        as: 'response',
+      },
+    },
+    {
+      $unwind: '$response',
+    },
+  ])
+
+  const reviewExports: ReviewExport[] = reviews.map((review) => ({
+    semver: review.semver,
+    collaborator: review.response.entity,
+    role: review.response.role,
+    decision: review.response.decision,
+    comment: review.response.comment,
+    updatedAt: review.response.updatedAt,
+  }))
+
+  return reviewExports
+}
+
+export async function renderToHtml(
+  model: ModelInterface,
+  modelCardRevision: ModelCardRevisionInterface,
+  reviewExports: ReviewExport[],
+) {
+  const markdown = await renderToMarkdown(model, modelCardRevision, reviewExports)
   const converter = new showdown.Converter()
   converter.setFlavor('github')
   const body = converter.makeHtml(markdown)
@@ -117,6 +174,9 @@ export async function renderToHtml(model: ModelInterface, modelCardRevision: Mod
           h5 { margin-top: 16px; margin-bottom: 8px }
           h6 { margin-top: 16px; margin-bottom: 8px }
           p { margin-top: 8px; margin-bottom: 8px }
+          table { border-spacing: 0px; }
+          td, th { border-bottom: 1px solid rgba(81, 81, 81, 1); padding: 8px; }
+          tbody > tr:last-child > td { border-bottom: 0; }
         </style>
       </head>
       <body>
@@ -133,6 +193,31 @@ export async function renderToHtml(model: ModelInterface, modelCardRevision: Mod
   `
 
   return html
+}
+
+function renderMarkdownReviewTable(reviewExports: ReviewExport[]) {
+  let reviewTable =
+    '## Release Reviews\n\n' +
+    '| Version | Collaborator | Role | Decision | Comment | Last Updated |\n' +
+    '| :-----: | :----------: | :--: | :------: | :-----: | :----------: |\n'
+
+  if (!reviewExports || reviewExports.length === 0) {
+    return null
+  }
+
+  for (const reviewExport of reviewExports) {
+    reviewTable =
+      reviewTable +
+      `|${reviewExport.semver}` +
+      `|${reviewExport.collaborator}` +
+      `|${reviewExport.role}` +
+      `|${reviewExport.decision}` +
+      // Linebreaks breaks the markdown-to-html conversion within a table
+      `|${reviewExport.comment?.replace(/(\r\n|\n|\r)/gm, ' ')}` +
+      `|${reviewExport.updatedAt}|\n`
+  }
+
+  return reviewTable
 }
 
 function recursiveRender(obj: any, schema: Fragment, output = '', depth = 1) {
