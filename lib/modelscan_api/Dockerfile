@@ -1,7 +1,12 @@
 # syntax=docker/dockerfile:1
+
 ARG PYTHONPATH=/venv/lib/python3.12/site-packages
+
 FROM python:3.12.11-slim-bookworm AS build
 ARG PYTHONPATH
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=${PYTHONPATH}
 
 COPY requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \

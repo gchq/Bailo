@@ -1,12 +1,16 @@
 # syntax=docker/dockerfile:1
+
 FROM python:3.13.2-bookworm AS sphinx-docs
 
-# Prevents Python from writing pyc files.
-ENV PYTHONDONTWRITEBYTECODE=1
-# Keeps Python from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
-ENV PYTHONUNBUFFERED=1
+# Prevents Python from writing pyc files, and from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get install -y pandoc && rm -rf /var/lib/apt/lists/*
+# Cache packages with run cache, update system packages, install pandoc
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
+    rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends pandoc
 
 WORKDIR /app/docs
 
@@ -18,14 +22,15 @@ RUN make dirhtml
 
 FROM node:24.4.1-alpine AS base
 
-RUN apk add --no-cache libc6-compat ca-certificates
-RUN apk update
+RUN apk add --no-cache libc6-compat ca-certificates && \
+    apk update
 
 WORKDIR /app
 
 COPY --from=sphinx-docs /app/docs/python-docs python-docs
+
 COPY package*.json ./
-RUN --mount=type=cache,target=/cache/npm npm install --omit=dev --cache=/cache/npm
+RUN --mount=type=cache,target=/cache/npm npm ci --omit=dev --cache=/cache/npm
 
 EXPOSE 3001
 
