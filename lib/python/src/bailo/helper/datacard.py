@@ -140,24 +140,48 @@ class Datacard(Entry):
 
     @property
     def data_card(self):
+        """Get the datacard metadata.
+
+        :return: Datacard as a dictionary.
+        """
         return self._card
 
     @data_card.setter
     def data_card(self, value):
+        """Sets the datacard metadata.
+
+        :param value: The new datacard metadata as a dictionary.
+        """
         self._card = value
 
     @property
     def data_card_version(self):
+        """Get the version of the datacard.
+
+        :return: Datacard version.
+        """
         return self._card_version
 
     @data_card_version.setter
     def data_card_version(self, value):
+        """Set the version of the datacard.
+
+        :param value: The version to set.
+        """
         self._card_version = value
 
     @property
     def data_card_schema(self):
+        """Get the schema ID associated with the datacard.
+
+        :return: Schema ID of the datacard.
+        """
         return self._card_schema
 
     @data_card_schema.setter
     def data_card_schema(self, value):
+        """Set the schema ID associated with the datacard.
+
+        :param value: The Schema ID to set.
+        """
         self._card_schema = value

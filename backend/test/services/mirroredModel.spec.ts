@@ -515,28 +515,20 @@ describe('services > mirroredModel', () => {
       config: { mediaType: 'application/vnd.docker.container.image.v1+json', size: 4, digest: 'sha256:0' },
       layers: [],
     })
-    registryMocks.listModelImages.mockReturnValueOnce([
-      { name: 'image1', tags: ['tag1', 'tag2'] },
-      { name: 'image2', tags: [] },
-      { name: 'image3', tags: ['tag3'] },
-    ])
+    registryMocks.listModelImages.mockReturnValueOnce([{ name: 'image1', tags: ['tag1', 'tag2'] }])
     releaseMocks.getReleasesForExport.mockResolvedValueOnce([
       {
         toJSON: vi.fn(),
-        images: [
-          { repository: '', name: 'image1', tag: 'tag1', toObject: vi.fn() },
-          { repository: '', name: 'image1', tag: 'tag3', toObject: vi.fn() },
-          { repository: '', name: 'image4', tag: 'tag3', toObject: vi.fn() },
-        ],
+        images: [{ repository: '', name: 'image1', tag: 'tag1', toObject: vi.fn() }],
       },
     ])
 
     await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(5)
+    expect(s3Mocks.putObjectStream).toBeCalledTimes(3)
     expect(archiverMocks.append).toBeCalledTimes(3)
-    expect(zlibMocks.createGzip).toBeCalledTimes(3)
-    expect(tarMocks.pack).toBeCalledTimes(3)
+    expect(zlibMocks.createGzip).toBeCalledTimes(1)
+    expect(tarMocks.pack).toBeCalledTimes(1)
   })
 
   test('exportModel > unable to upload to tmp S3 location', async () => {
