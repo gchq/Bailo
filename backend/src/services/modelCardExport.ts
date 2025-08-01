@@ -5,6 +5,7 @@ import { CollaboratorEntry, ModelInterface } from '../models/Model.js'
 import { ModelCardRevisionInterface } from '../models/ModelCardRevision.js'
 import { ResponseInterface } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
+import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { getModelById, getModelCard } from './model.js'
@@ -96,6 +97,18 @@ export async function renderToMarkdown(
     ${getEntitiesWithRole('mtr', model.collaborators)}\n
     ${reviewTable}
   `
+  const reviewRoles = await ReviewRoleModel.find({ reviewRoles: schema.reviewRoles })
+
+  if (Array.isArray(reviewRoles)) {
+    for (const reviewRole of reviewRoles) {
+      output += `
+      ## ${reviewRole.name}\n
+      ${getEntitiesWithRole(reviewRole.shortName, model.collaborators)}\n\n
+    `
+    }
+  } else {
+    output += `## No reviewers assigned\n\n`
+  }
 
   // 'Fragment' is a more strictly typed version of 'JsonSchema'.
   output = recursiveRender(modelCardRevision.metadata, schema.jsonSchema as Fragment, output)

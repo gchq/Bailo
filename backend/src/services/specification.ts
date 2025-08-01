@@ -357,9 +357,8 @@ export const UserInformationSchema = z.object({
 })
 
 export const reviewRoleSchema = z.object({
-  id: z.string().openapi({ example: 'reviewer' }),
   name: z.string().openapi({ example: 'Reviewer' }),
-  short: z.string().openapi({ example: 'reviewer' }),
+  shortName: z.string().openapi({ example: 'reviewer' }),
   kind: z.string().openapi({ example: 'schema' }),
   description: z.string().openapi({ example: 'This is an example review role' }),
   defaultEntities: z.array(z.string()).openapi({ example: ['user:user'] }),

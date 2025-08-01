@@ -44,8 +44,6 @@ import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
 import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
-import { getAllModelReviewRoles } from './routes/v2/model/roles/getAllModelReviewRoles.js'
-import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
 import { getWebhooks } from './routes/v2/model/webhook/getWebhooks.js'
@@ -60,6 +58,7 @@ import { putRelease } from './routes/v2/release/putRelease.js'
 import { getResponses } from './routes/v2/response/getResponses.js'
 import { patchResponse } from './routes/v2/response/patchResponse.js'
 import { patchResponseReaction } from './routes/v2/response/patchResponseReaction.js'
+import { deleteReviewRole } from './routes/v2/review/deleteReviewRole.js'
 import { getReviewRoles } from './routes/v2/review/getReviewRoles.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
@@ -184,11 +183,8 @@ server.get('/api/v2/responses', ...getResponses)
 server.patch('/api/v2/response/:responseId', ...patchResponse)
 server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReaction)
 
-server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
-server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
-
-server.get('/api/v2/roles/review', ...getAllModelReviewRoles)
 server.get('/api/v2/roles', ...getModelRoles)
+server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
 
 server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
@@ -208,6 +204,7 @@ server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
 server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
 
 server.get('/api/v2/review/roles', ...getReviewRoles)
+server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
 server.post('/api/v2/review/role', ...postReviewRole)
 
 // Python docs
