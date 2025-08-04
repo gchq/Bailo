@@ -35,7 +35,7 @@
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "bunyan": "^1.8.15",
-    "chalk": "^5.4.1",
+    "chalk": "^5.5.0",
     "clamscan": "^2.4.0",
     "cls-hooked": "^4.2.2",
     "config": "^4.1.0",
