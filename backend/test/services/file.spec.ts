@@ -121,6 +121,7 @@ const scanModelMocks = vi.hoisted(() => {
   obj.find = vi.fn(() => obj)
   obj.findOne = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
+  obj.deleteMany = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -221,6 +222,8 @@ describe('services > file', () => {
     const result = await removeFile(user, modelId, testFileId)
 
     expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
+    expect(scanModelMocks.deleteMany).toBeCalledWith({ fileId: { $eq: testFileId } })
+    expect(fileModelMocks.findOneAndDelete).toBeCalled()
     expect(result).toMatchSnapshot()
   })
 

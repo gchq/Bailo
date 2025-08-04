@@ -76,6 +76,10 @@ exports[`services > review > getReviewRoles > returns array of review roles 1`] 
 
 exports[`services > review > getReviewRoles > returns array of review roles 2`] = `undefined`;
 
+exports[`services > review > getReviewRoles > returns array of review roles when given a single schema Id 1`] = `undefined`;
+
+exports[`services > review > getReviewRoles > returns array of review roles when given a single schema Id 2`] = `undefined`;
+
 exports[`services > review > removeAccessRequestReviews > successful 1`] = `
 [
   {
@@ -85,3 +89,7 @@ exports[`services > review > removeAccessRequestReviews > successful 1`] = `
   },
 ]
 `;
+
+exports[`services > review > removeReviewRole > successful 1`] = `undefined`;
+
+exports[`services > review > removeReviewRole > successful 2`] = `undefined`;

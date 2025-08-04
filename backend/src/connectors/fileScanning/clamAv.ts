@@ -32,7 +32,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     this.av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
     const scannerVersion = await this.av.getVersion()
     this.version = safeParseVersion(scannerVersion)
-    log.debug('Initialised Clam AV scanner', { version: this.version })
+    log.debug({ version: this.version }, 'Initialised Clam AV scanner')
     return this
   }
 

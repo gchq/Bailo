@@ -467,6 +467,7 @@ class Client:
         description: str,
         kind: SchemaKind,
         json_schema: dict[str, Any],
+        review_roles: list[str],
     ):
         """Create a schema.
 
@@ -475,6 +476,7 @@ class Client:
         :param description: Description for the schema
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest)
         :param json_schema: JSON schema
+        :param review_roles: list made up of the "shortName" property from a Review Role object
         :return: JSON response object
         """
         return self.agent.post(
@@ -485,6 +487,7 @@ class Client:
                 "description": description,
                 "kind": str(kind),
                 "jsonSchema": json_schema,
+                "reviewRoles": review_roles,
             },
         ).json()
 
@@ -546,19 +549,6 @@ class Client:
         """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/roles",
-        ).json()
-
-    def get_model_user_roles(
-        self,
-        model_id: str,
-    ):
-        """Get current users roles for a model.
-
-        :param model_id: Unique model ID
-        :return: JSON response object
-        """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/roles/mine",
         ).json()
 
     def get_access_request(self, model_id: str, access_request_id: str):

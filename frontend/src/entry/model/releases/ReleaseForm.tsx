@@ -18,6 +18,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { useGetFileScannerInfo } from 'actions/fileScanning'
 import { useGetModelCardRevisions } from 'actions/modelCard'
 import { useGetReleasesForModelId } from 'actions/release'
 import { memoize } from 'lodash-es'
@@ -109,6 +110,7 @@ export default function ReleaseForm({
   const { modelCardRevisions, isModelCardRevisionsLoading, isModelCardRevisionsError } = useGetModelCardRevisions(
     model.id,
   )
+  const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
 
   const latestRelease = useMemo(() => (releases.length > 0 ? releases[0].semver : 'None'), [releases])
 
@@ -165,12 +167,12 @@ export default function ReleaseForm({
 
   // We can assume that all the displayed files will be interfaces when the form is in read only
   const FileRowItem = memoize(({ data, index }) =>
-    isFileInterface(data[index]) ? (
+    isFileInterface(data[index]) && !isScannersLoading ? (
       <FileDisplay
         key={data[index].name}
         file={data[index]}
         modelId={model.id}
-        showMenuItems={{ rescanFile: true }}
+        showMenuItems={{ rescanFile: scanners.length > 0 }}
         mutator={mutateReleases}
         style={{ padding: 1 }}
         releases={releases}
@@ -186,6 +188,10 @@ export default function ReleaseForm({
 
   if (isModelCardRevisionsError) {
     return <MessageAlert message={isModelCardRevisionsError.info.message} severity='error' />
+  }
+
+  if (isScannersError) {
+    return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
 
   const error = MultipleErrorWrapper('Unable to load release form', {

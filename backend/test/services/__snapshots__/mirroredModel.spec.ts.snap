@@ -60,6 +60,25 @@ exports[`services > mirroredModel > importModel > save each imported release 1`]
 }
 `;
 
+exports[`services > mirroredModel > importModel > skip existing file upload to S3 1`] = `
+{
+  "importResult": {
+    "newPath": "file/path",
+    "sourcePath": "/s3/path/",
+  },
+  "mirroredModel": {
+    "card": {
+      "schemaId": "test",
+    },
+    "settings": {
+      "mirror": {
+        "destinationModelId": "abc",
+      },
+    },
+  },
+}
+`;
+
 exports[`services > mirroredModel > importModel > uploads file to S3 on success 1`] = `
 {
   "importResult": {
