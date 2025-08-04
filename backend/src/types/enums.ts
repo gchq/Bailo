@@ -1,4 +1,5 @@
 export const SchemaKind = {
+  All: '',
   Model: 'model',
   AccessRequest: 'accessRequest',
   DataCard: 'dataCard',

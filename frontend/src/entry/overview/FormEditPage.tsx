@@ -125,9 +125,10 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
       {isSchemaLoading && <Loading />}
       <Box sx={{ py: 1 }}>
         <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          justifyContent={{ xs: 'center', sm: 'space-between' }}
+          direction={{ sm: 'column', md: 'row' }}
+          justifyContent='space-between'
           alignItems='center'
+          spacing={2}
           sx={{ pb: 2 }}
         >
           <div>

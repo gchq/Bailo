@@ -1,5 +1,4 @@
 import { ArrowBack } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
 import {
   Autocomplete,
   AutocompleteChangeDetails,
@@ -287,7 +286,7 @@ export default function NewToken() {
                 </Stack>
               </Stack>
               <Stack alignItems='flex-end'>
-                <LoadingButton
+                <Button
                   variant='contained'
                   loading={isLoading}
                   disabled={isGenerateButtonDisabled}
@@ -295,7 +294,7 @@ export default function NewToken() {
                   data-test='generatePersonalAccessTokenButton'
                 >
                   Generate Token
-                </LoadingButton>
+                </Button>
                 <MessageAlert message={isModelsError?.info.message || errorMessage} severity='error' />
               </Stack>
             </Stack>

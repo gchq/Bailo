@@ -1,5 +1,4 @@
-import { LoadingButton } from '@mui/lab'
-import { Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
+import { Button, Checkbox, Divider, FormControlLabel, Stack, Typography } from '@mui/material'
 import { patchModel } from 'actions/model'
 import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'
@@ -58,14 +57,9 @@ export default function AccessRequestSettings({ model }: AccessRequestSettingsPr
       />
       <Divider />
       <div>
-        <LoadingButton
-          variant='contained'
-          aria-label='Save ungoverned access requests'
-          onClick={handleSave}
-          loading={loading}
-        >
+        <Button variant='contained' aria-label='Save ungoverned access requests' onClick={handleSave} loading={loading}>
           Save
-        </LoadingButton>
+        </Button>
         <MessageAlert message={errorMessage} severity='error' />
       </div>
     </Stack>

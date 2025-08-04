@@ -1,6 +1,5 @@
 import { Delete } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { deleteUserToken, useGetUserTokens } from 'actions/user'
 import { useRouter } from 'next/router'
 import { Fragment, useCallback, useMemo, useState } from 'react'
@@ -97,14 +96,14 @@ export default function AuthenticationTab() {
         <Typography fontWeight='bold' mb={1}>
           Personal Access Tokens
         </Typography>
-        <LoadingButton
+        <Button
           aria-label='add personal authentication token button'
           variant='outlined'
           loading={isLoading}
           onClick={handleAddToken}
         >
           Add token
-        </LoadingButton>
+        </Button>
       </Stack>
       <MessageAlert message={isTokensError?.info.message} severity='error' />
       {isTokensLoading && <Loading />}

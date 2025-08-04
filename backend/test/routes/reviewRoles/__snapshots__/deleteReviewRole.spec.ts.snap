@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > reviewRoles > deleteReviewRole > 200 > ok 1`] = `
+{
+  "deleted": true,
+}
+`;
+
+exports[`routes > reviewRoles > deleteReviewRole > audit > expected call 1`] = `"expedita"`;

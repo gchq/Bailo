@@ -1,4 +1,3 @@
-import { LoadingButton } from '@mui/lab'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import {
   deleteAccessRequest,
@@ -172,9 +171,9 @@ export default function EditableAccessRequestForm({
             <Button variant='outlined' onClick={handleCancel}>
               Cancel
             </Button>
-            <LoadingButton variant='contained' loading={isLoading} onClick={handleSubmit}>
+            <Button variant='contained' loading={isLoading} onClick={handleSubmit}>
               Save
-            </LoadingButton>
+            </Button>
           </Stack>
         )}
       </Box>

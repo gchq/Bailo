@@ -42,6 +42,10 @@ exports[`routes > schema > getSchemas > audit > expected call 1`] = `
     },
     "kind": "model",
     "name": "Example Schema 1",
+    "reviewRoles": [
+      "reviewer",
+      "msro",
+    ],
     "updatedAt": 2023-07-28T10:50:00.928Z,
   },
 ]
@@ -54,8 +58,9 @@ exports[`routes > schema > getSchemas > rejects unknown query parameter 1`] = `
       "errors": [
         {
           "code": "invalid_enum_value",
-          "message": "Invalid enum value. Expected 'model' | 'accessRequest' | 'dataCard', received 'notValid'",
+          "message": "Invalid enum value. Expected '' | 'model' | 'accessRequest' | 'dataCard', received 'notValid'",
           "options": [
+            "",
             "model",
             "accessRequest",
             "dataCard",
@@ -68,7 +73,7 @@ exports[`routes > schema > getSchemas > rejects unknown query parameter 1`] = `
         },
       ],
     },
-    "message": "Path: query.kind - Message: Invalid enum value. Expected 'model' | 'accessRequest' | 'dataCard', received 'notValid'",
+    "message": "Path: query.kind - Message: Invalid enum value. Expected '' | 'model' | 'accessRequest' | 'dataCard', received 'notValid'",
     "name": "Bailo Error",
   },
 }
@@ -117,6 +122,10 @@ exports[`routes > schema > getSchemas > returns all schemas 1`] = `
       },
       "kind": "model",
       "name": "Example Schema 1",
+      "reviewRoles": [
+        "reviewer",
+        "msro",
+      ],
       "updatedAt": "2023-07-28T10:50:00.928Z",
     },
   ],
@@ -173,6 +182,10 @@ exports[`routes > schema > getSchemas > returns only model schemas with the mode
       },
       "kind": "model",
       "name": "Example Schema 1",
+      "reviewRoles": [
+        "reviewer",
+        "msro",
+      ],
       "updatedAt": "2023-07-28T10:50:00.928Z",
     },
   ],
