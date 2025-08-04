@@ -1,4 +1,3 @@
-import { LoadingButton } from '@mui/lab'
 import { Button, Stack } from '@mui/material'
 import { ReactNode } from 'react'
 import Restricted from 'src/common/Restricted'
@@ -71,7 +70,7 @@ export default function EditableFormHeading({
             <Button variant='outlined' onClick={onCancel} data-test='cancelEditFormButton'>
               Cancel
             </Button>
-            <LoadingButton
+            <Button
               variant='contained'
               loading={isLoading}
               onClick={onSubmit}
@@ -79,7 +78,7 @@ export default function EditableFormHeading({
               disabled={isRegistryError || disableSaveButton}
             >
               Save
-            </LoadingButton>
+            </Button>
           </Stack>
         )}
       </Stack>

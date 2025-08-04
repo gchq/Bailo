@@ -1,6 +1,5 @@
 import { ArrowBack } from '@mui/icons-material'
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
-import { LoadingButton } from '@mui/lab'
 import { Box, Button, Container, Link, Paper, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
 import { CreateInferenceParams, postInference } from 'actions/inferencing'
@@ -111,14 +110,14 @@ export default function NewInference() {
                 />
               </Stack>
               <Stack alignItems='flex-end' padding={2}>
-                <LoadingButton
+                <Button
                   variant='contained'
                   type='submit'
                   disabled={!(image && description && port && !isRegistryError)}
                   loading={loading}
                 >
                   Create Inferencing Service
-                </LoadingButton>
+                </Button>
                 <MessageAlert message={errorMessage} severity='error' />
               </Stack>
             </Box>

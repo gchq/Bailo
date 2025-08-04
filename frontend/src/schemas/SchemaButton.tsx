@@ -1,5 +1,16 @@
-import { LoadingButton } from '@mui/lab'
-import { Box, Card, CardActions, CardContent, Divider, Grid2, List, ListItem, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Divider,
+  Grid2,
+  List,
+  ListItem,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useMemo } from 'react'
 import Loading from 'src/common/Loading'
@@ -56,7 +67,7 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
         <CardActions sx={{ px: 2, pb: 2, textAlign: 'right' }}>
           <Stack spacing={2} sx={{ width: '100%' }}>
             <Divider />
-            <LoadingButton
+            <Button
               loading={loading}
               variant='contained'
               size='small'
@@ -64,7 +75,7 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
               data-test={`selectSchemaButton-${schema.id}`}
             >
               Select schema
-            </LoadingButton>
+            </Button>
           </Stack>
         </CardActions>
       </Card>
