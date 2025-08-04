@@ -16,6 +16,8 @@ interface EntryListProps {
   selectedStates: string[]
   onSelectedStatesChange: (chips: string[]) => void
   entriesErrorMessage?: string
+  displayOrganisation?: boolean
+  displayState?: boolean
 }
 
 interface RowProps {
@@ -36,6 +38,8 @@ export default function EntryList({
   selectedStates,
   onSelectedStatesChange,
   entriesErrorMessage,
+  displayOrganisation = true,
+  displayState = true,
 }: EntryListProps) {
   const [windowHeight, setWindowHeight] = useState(0)
 
@@ -70,6 +74,8 @@ export default function EntryList({
       data={data}
       index={index}
       style={{ padding: theme.spacing(2.5) }}
+      displayOrganisation={displayOrganisation}
+      displayState={displayState}
     />
   )
 
