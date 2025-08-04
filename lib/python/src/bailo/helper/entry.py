@@ -122,15 +122,6 @@ class Entry:
 
         return res["roles"]
 
-    def get_user_roles(self):
-        """Get all user roles for the entry.
-
-        :return: List of user roles
-        """
-        res = self.client.get_model_user_roles(model_id=self.id)
-
-        return res["roles"]
-
     def _update_card(self, card: dict[str, Any] | None = None) -> None:
         """Update the card metadata for this entry on the Bailo server.
 
