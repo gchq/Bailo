@@ -20,7 +20,7 @@ export default function SaveAndCancelButtons({
 }: SaveAndCancelButtonsProps) {
   return (
     <Stack
-      direction='row'
+      direction={{ xs: 'column', sm: 'row' }}
       spacing={1}
       justifyContent='flex-end'
       divider={<Divider orientation='vertical' flexItem />}
