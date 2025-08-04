@@ -56,7 +56,7 @@
     "remark-gfm": "^4.0.0",
     "semver": "^7.7.2",
     "swagger-ui-react": "^5.27.1",
-    "swr": "^2.3.0",
+    "swr": "^2.3.4",
     "typescript": "5.8.3",
     "uuid": "^11.0.5"
   },
