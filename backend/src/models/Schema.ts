@@ -17,6 +17,8 @@ export interface SchemaInterface {
   kind: SchemaKindKeys
   jsonSchema: JsonSchema
 
+  reviewRoles: string[]
+
   createdAt: Date
   updatedAt: Date
 }
@@ -37,6 +39,8 @@ const SchemaSchema = new Schema<SchemaInterface>(
 
     kind: { type: String, enum: Object.values(SchemaKind), required: true },
     jsonSchema: { type: String, required: true, get: getSchema, set: setSchema },
+
+    reviewRoles: [{ type: String }],
   },
   {
     timestamps: true,

@@ -1,5 +1,4 @@
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import { LoadingButton } from '@mui/lab'
 import { Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { postAccessRequest } from 'actions/accessRequest'
 import { useGetModel } from 'actions/model'
@@ -128,7 +127,7 @@ export default function NewAccessRequest() {
                   defaultCurrentUserInEntityList
                 />
                 <Stack alignItems='flex-end'>
-                  <LoadingButton
+                  <Button
                     sx={{ width: 'fit-content' }}
                     variant='contained'
                     onClick={onSubmit}
@@ -136,7 +135,7 @@ export default function NewAccessRequest() {
                     data-test='createAccessRequestButton'
                   >
                     Submit
-                  </LoadingButton>
+                  </Button>
                   <MessageAlert message={submissionErrorText} severity='error' />
                 </Stack>
               </Stack>

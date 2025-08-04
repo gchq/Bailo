@@ -1,5 +1,4 @@
-import { LoadingButton } from '@mui/lab'
-import { Stack, Typography } from '@mui/material'
+import { Button, Stack, Typography } from '@mui/material'
 import { patchModel, useGetCurrentUserPermissionsForEntry, useGetModel, useGetModelRoles } from 'actions/model'
 import { useCallback, useState } from 'react'
 import HelpDialog from 'src/common/HelpDialog'
@@ -76,9 +75,9 @@ export default function EntryAccessTab({ entry }: EntryAccessTabProps) {
         entryKind={entry.kind}
         entryRoles={entryRoles}
       />
-      <LoadingButton variant='contained' aria-label='Save access list' onClick={updateCollaborators} loading={loading}>
+      <Button variant='contained' aria-label='Save access list' onClick={updateCollaborators} loading={loading}>
         Save
-      </LoadingButton>
+      </Button>
       <MessageAlert message={errorMessage} severity='error' />
     </Stack>
   )

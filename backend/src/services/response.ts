@@ -30,7 +30,7 @@ export async function findResponseById(responseId: string) {
   return response
 }
 
-export async function getResponsesByParentIds(_user: UserInterface, parentIds: string[]) {
+export async function getResponsesByParentIds(parentIds: string[]) {
   const responses = await ResponseModel.find({ parentId: { $in: parentIds } })
 
   if (!responses) {

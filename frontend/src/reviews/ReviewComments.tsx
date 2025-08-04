@@ -1,5 +1,4 @@
-import { LoadingButton } from '@mui/lab'
-import { Box, Divider, Stack } from '@mui/material'
+import { Box, Button, Divider, Stack } from '@mui/material'
 import { postAccessRequestComment, useGetAccessRequest } from 'actions/accessRequest'
 import { postReleaseComment, useGetRelease } from 'actions/release'
 import { useGetResponses } from 'actions/response'
@@ -185,7 +184,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
               textareaProps={{ placeholder: 'Add your comment here...' }}
             />
           </Box>
-          <LoadingButton
+          <Button
             sx={{ mt: 1 }}
             variant='contained'
             onClick={submitReviewComment}
@@ -193,7 +192,7 @@ export default function ReviewComments({ release, accessRequest, isEdit }: Revie
             disabled={!newReviewComment}
           >
             Add comment
-          </LoadingButton>
+          </Button>
           <MessageAlert severity='error' message={commentSubmissionError} />
         </Stack>
       )}

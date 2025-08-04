@@ -116,16 +116,16 @@ export default function ReleaseReview() {
     }
   }, [release, model, uiConfig])
 
-  if (!release || !model || !uiConfig || isReleaseLoading || isModelLoading || isUiConfigLoading) {
-    return <Loading />
-  }
-
-  const error = MultipleErrorWrapper(`Unable to load release review page`, {
+  const error = MultipleErrorWrapper('Unable to load release review page', {
     isReleaseError,
     isModelError,
     isUiConfigError,
   })
   if (error) return error
+
+  if (!release || !model || !uiConfig || isReleaseLoading || isModelLoading || isUiConfigLoading) {
+    return <Loading />
+  }
 
   return (
     <>
