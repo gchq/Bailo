@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: bitnami/mongodb:8.0.11
+    image: bitnami/mongodb:8.0.12
     environment:
       - MONGODB_REPLICA_SET_NAME=repl-set
     volumes:
@@ -15,7 +15,7 @@ services:
       start_period: 30s
 
   minio:
-    image: bitnami/minio:2025.7.18
+    image: bitnami/minio:2025.7.23
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -103,6 +103,8 @@ services:
   backend:
     build:
       context: ./backend/
+      additional_contexts:
+        python: ./lib/python
       target: dev
     volumes:
       - ./backend/src:/app/src

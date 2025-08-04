@@ -53,6 +53,7 @@ const audit = {
 
   onCreateReviewRole: vi.fn(),
   onViewReviewRoles: vi.fn(),
+  onDeleteReviewRole: vi.fn(),
 
   onError: vi.fn(),
 }

@@ -50,7 +50,7 @@ export default function EntryStateInput({ value, onChange }: EntryStateInputProp
 
   return (
     <LabelledInput fullWidth label='Model State' htmlFor={htmlId}>
-      <Select size='small' value={value} onChange={handleChange} id={htmlId}>
+      <Select aria-label='toggle entry state menu' size='small' value={value} onChange={handleChange} id={htmlId}>
         {stateOptions}
       </Select>
     </LabelledInput>

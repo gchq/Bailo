@@ -30,6 +30,8 @@ export const testModelSchema = {
     },
   },
 
+  reviewRoles: ['reviewer', 'msro'],
+
   createdAt: new Date('2023-07-28T10:50:00.928Z'),
   updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }
@@ -109,7 +111,6 @@ export const testResponse = {
 }
 
 export const testReviewRole = {
-  id: 'my-role-125',
   name: 'Reviewer',
-  short: 'reviewer',
+  shortName: 'reviewer',
 }

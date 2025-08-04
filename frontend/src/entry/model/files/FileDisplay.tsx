@@ -144,22 +144,29 @@ export default function FileDisplay({
   const updateChipDetails = useCallback(() => {
     if (!isFileInterface(file) || file.avScan === undefined) {
       setChipDisplay({ label: 'Virus scan results could not be found', colour: 'warning', icon: <Warning /> })
-    }
-    if (
+      return
+    } else if (
       isFileInterface(file) &&
       file.avScan !== undefined &&
       file.avScan.some((scan) => scan.state === ScanState.Error)
     ) {
       setChipDisplay({ label: 'One or more virus scanning tools failed', colour: 'warning', icon: <Warning /> })
-    }
-    if (threatsFound(file as FileInterface)) {
+      return
+    } else if (threatsFound(file as FileInterface)) {
       setChipDisplay({
         label: `Virus scan failed: ${plural(threatsFound(file as FileInterface), 'threat')} found`,
         colour: 'error',
         icon: <Error />,
       })
-    } else {
+      return
+    } else if (!threatsFound(file as FileInterface)) {
       setChipDisplay({ label: 'Virus scan passed', colour: 'success', icon: <Done /> })
+    } else {
+      setChipDisplay({
+        label: 'There was a problem fetching the file scan results',
+        colour: 'warning',
+        icon: <Warning />,
+      })
     }
   }, [file])
 
@@ -324,6 +331,10 @@ export default function FileDisplay({
     )
   }
 
+  const showMenu = () => {
+    return Object.keys(showMenuItems).length > 0 && Object.values(showMenuItems).some((item) => item === true)
+  }
+
   if (isScannersError) {
     return <MessageAlert message={isScannersError.info.message} severity='error' />
   }
@@ -369,43 +380,47 @@ export default function FileDisplay({
                 </Stack>
               )}
               <Stack>
-                <IconButton onClick={handleFileMoreButtonClick}>
-                  <MoreVert color='primary' />
-                </IconButton>
-                <Menu
-                  slotProps={{ list: { dense: true } }}
-                  anchorEl={anchorElMore}
-                  open={openMore}
-                  onClose={handleFileMoreButtonClose}
-                >
-                  {showMenuItems.associatedReleases && (
-                    <MenuItem
-                      onClick={() => {
-                        handleFileMoreButtonClose()
-                        setAssociatedReleasesOpen(true)
-                      }}
+                {showMenu() && (
+                  <>
+                    <IconButton aria-label='toggle file options menu' onClick={handleFileMoreButtonClick}>
+                      <MoreVert color='primary' />
+                    </IconButton>
+                    <Menu
+                      slotProps={{ list: { dense: true } }}
+                      anchorEl={anchorElMore}
+                      open={openMore}
+                      onClose={handleFileMoreButtonClose}
                     >
-                      <ListItemIcon>
-                        <Info color='primary' fontSize='small' />
-                      </ListItemIcon>
-                      <ListItemText>Associated Releases</ListItemText>
-                    </MenuItem>
-                  )}
-                  {showMenuItems.deleteFile && (
-                    <MenuItem
-                      onClick={() => {
-                        handleFileMoreButtonClose()
-                        setDeleteFileOpen(true)
-                      }}
-                    >
-                      <ListItemIcon>
-                        <Delete color='primary' fontSize='small' />
-                      </ListItemIcon>
-                      <ListItemText>Delete File</ListItemText>
-                    </MenuItem>
-                  )}
-                  {showMenuItems.rescanFile && rerunFileScanButton}
-                </Menu>
+                      {showMenuItems.associatedReleases && (
+                        <MenuItem
+                          onClick={() => {
+                            handleFileMoreButtonClose()
+                            setAssociatedReleasesOpen(true)
+                          }}
+                        >
+                          <ListItemIcon>
+                            <Info color='primary' fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>Associated Releases</ListItemText>
+                        </MenuItem>
+                      )}
+                      {showMenuItems.deleteFile && (
+                        <MenuItem
+                          onClick={() => {
+                            handleFileMoreButtonClose()
+                            setDeleteFileOpen(true)
+                          }}
+                        >
+                          <ListItemIcon>
+                            <Delete color='primary' fontSize='small' />
+                          </ListItemIcon>
+                          <ListItemText>Delete File</ListItemText>
+                        </MenuItem>
+                      )}
+                      {showMenuItems.rescanFile && rerunFileScanButton}
+                    </Menu>
+                  </>
+                )}
               </Stack>
             </Stack>
           </Stack>

@@ -81,7 +81,7 @@ export async function pipeStreamToTarEntry(
     }
     inputStream.pipe(tarEntry)
     tarEntry.on('finish', () => {
-      log.debug('Finished fetching stream', { ...logData })
+      log.debug({ ...logData }, 'Finished fetching stream')
       resolve('ok')
     })
     tarEntry.on('error', onError)

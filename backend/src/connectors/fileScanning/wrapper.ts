@@ -16,7 +16,7 @@ export class FileScanningWrapper extends BaseFileScanningConnector {
 
   async init() {
     for (const scanner of this.scanners) {
-      log.info(`Initialising scanner...`, { toolName: scanner.toolName })
+      log.info({ toolName: scanner.toolName }, `Scanner initialising...`)
       let attempt = 0
       while (attempt <= config.connectors.fileScanners.maxInitRetries) {
         ++attempt
@@ -28,13 +28,13 @@ export class FileScanningWrapper extends BaseFileScanningConnector {
               } catch (error) {
                 return reject(error)
               }
-              log.info(`Scanner initialised`, { toolName: scanner.toolName })
+              log.info({ toolName: scanner.toolName }, `Scanner initialised`)
               return resolve()
             }, config.connectors.fileScanners.initRetryDelay)
           })
           break
         } catch (error) {
-          log.warn(`Could not initialise scanner, retrying.`, { attempt: attempt, toolName: scanner.toolName, error })
+          log.warn({ attempt: attempt, toolName: scanner.toolName, error }, `Could not initialise scanner, retrying.`)
         }
       }
       if (attempt > config.connectors.fileScanners.maxInitRetries) {

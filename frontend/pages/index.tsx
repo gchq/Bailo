@@ -17,7 +17,8 @@ import {
 } from '@mui/material/'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { useGetAllModelReviewRoles, useListModels } from 'actions/model'
+import { useListModels } from 'actions/model'
+import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -77,7 +78,7 @@ export default function Marketplace() {
     debouncedFilter,
   )
 
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetAllModelReviewRoles()
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
 
   const theme = useTheme()
   const router = useRouter()
@@ -211,17 +212,17 @@ export default function Marketplace() {
   }
 
   useEffect(() => {
-    if (modelRoles) {
+    if (reviewRoles) {
       setRoleOptions([
         ...defaultRoleOptions,
-        ...modelRoles.map((role) => {
-          return { key: role.id, label: `${role.short}` }
+        ...reviewRoles.map((role) => {
+          return { key: role._id, label: `${role.shortName}` }
         }),
       ])
     }
-  }, [modelRoles])
+  }, [reviewRoles])
 
-  if (isModelRolesLoading) {
+  if (isReviewRolesLoading) {
     return <Loading />
   }
 
@@ -229,8 +230,8 @@ export default function Marketplace() {
     return <Loading />
   }
 
-  if (isModelRolesError) {
-    return <ErrorWrapper message={isModelRolesError.info.message} />
+  if (isReviewRolesError) {
+    return <ErrorWrapper message={isReviewRolesError.info.message} />
   }
 
   if (isUiConfigError) {
@@ -281,34 +282,38 @@ export default function Marketplace() {
                 />
               </FormControl>
               <Stack divider={<Divider flexItem />}>
-                <Box>
-                  <ChipSelector
-                    label='Organisations'
-                    chipTooltipTitle={'Filter by organisation'}
-                    options={organisationList}
-                    expandThreshold={10}
-                    multiple
-                    selectedChips={selectedOrganisations}
-                    onChange={handleOrganisationsOnChange}
-                    size='small'
-                    ariaLabel='add organisation to search filter'
-                    accordion
-                  />
-                </Box>
-                <Box>
-                  <ChipSelector
-                    label='States'
-                    chipTooltipTitle={'Filter by state'}
-                    options={stateList}
-                    expandThreshold={10}
-                    multiple
-                    selectedChips={selectedStates}
-                    onChange={handleStatesOnChange}
-                    size='small'
-                    ariaLabel='add state to search filter'
-                    accordion
-                  />
-                </Box>
+                {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
+                  <Box>
+                    <ChipSelector
+                      label='Organisations'
+                      chipTooltipTitle={'Filter by organisation'}
+                      options={organisationList}
+                      expandThreshold={10}
+                      multiple
+                      selectedChips={selectedOrganisations}
+                      onChange={handleOrganisationsOnChange}
+                      size='small'
+                      ariaLabel='add organisation to search filter'
+                      accordion
+                    />
+                  </Box>
+                )}
+                {uiConfig && uiConfig.modelDetails.states.length > 0 && (
+                  <Box>
+                    <ChipSelector
+                      label='States'
+                      chipTooltipTitle={'Filter by state'}
+                      options={stateList}
+                      expandThreshold={10}
+                      multiple
+                      selectedChips={selectedStates}
+                      onChange={handleStatesOnChange}
+                      size='small'
+                      ariaLabel='add state to search filter'
+                      accordion
+                    />
+                  </Box>
+                )}
                 <Box>
                   <ChipSelector
                     label='Tasks'
@@ -391,6 +396,8 @@ export default function Marketplace() {
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}
                     onSelectedStatesChange={handleStatesOnChange}
+                    displayOrganisation={uiConfig && uiConfig.modelDetails.organisations.length > 0}
+                    displayState={uiConfig && uiConfig.modelDetails.states.length > 0}
                   />
                 </div>
               )}
