@@ -9,7 +9,7 @@ interface OrganisationAndStateDetailsProps {
   entry: EntryInterface
 }
 
-export default function OrganisationAndStateDetails({ entry }: OrganisationAndStateDetailsProps) {
+export default function OrganisationStateCollaboratorsDetails({ entry }: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
 
   const theme = useTheme()
