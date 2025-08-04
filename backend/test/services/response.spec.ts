@@ -117,14 +117,12 @@ describe('services > response', () => {
 
     responseModelMock.find.mockResolvedValueOnce(mockResponses)
 
-    expect(await getResponsesByParentIds({} as any, ['test'])).toBe(mockResponses)
+    expect(await getResponsesByParentIds(['test'])).toBe(mockResponses)
   })
   test('getResponsesByParentIds > response not found', async () => {
     responseModelMock.find.mockResolvedValueOnce(undefined)
 
-    await expect(getResponsesByParentIds({} as any, ['test'])).rejects.toThrowError(
-      'The requested response was not found.',
-    )
+    await expect(getResponsesByParentIds(['test'])).rejects.toThrowError('The requested response was not found.')
   })
 
   test('updateResponse > success', async () => {

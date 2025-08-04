@@ -1,5 +1,4 @@
 import { ArrowBack, DesignServices } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
 import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { useGetModel } from 'actions/model'
@@ -227,7 +226,7 @@ export default function NewRelease() {
                   filesToUploadCount={files.length}
                 />
                 <Stack alignItems='flex-end'>
-                  <LoadingButton
+                  <Button
                     variant='contained'
                     loading={loading}
                     type='submit'
@@ -236,7 +235,7 @@ export default function NewRelease() {
                     data-test='createReleaseButton'
                   >
                     Create Release
-                  </LoadingButton>
+                  </Button>
                   <MessageAlert message={errorMessage} severity='error' />
                 </Stack>
                 {failedFileUploads.length > 0 && (

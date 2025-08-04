@@ -15,8 +15,9 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
 WORKDIR /app/docs
 
 COPY docs .
+COPY --from=python . /app/python
 
-RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade bailo -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
 
 RUN make dirhtml
 

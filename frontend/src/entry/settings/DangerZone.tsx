@@ -1,5 +1,4 @@
-import { LoadingButton } from '@mui/lab'
-import { Stack, Typography } from '@mui/material'
+import { Button, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 import { EntryInterface } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
@@ -23,9 +22,9 @@ export default function DangerZone({ entry }: DangerZoneProps) {
         Danger Zone!
       </Typography>
       {/* TODO - Remove disabled prop when reenabling delete functionality */}
-      <LoadingButton fullWidth variant='contained' disabled onClick={handleDeleteEntry} loading={loading}>
+      <Button fullWidth variant='contained' disabled onClick={handleDeleteEntry} loading={loading}>
         {`Delete ${toTitleCase(entry.kind)}`}
-      </LoadingButton>
+      </Button>
     </Stack>
   )
 }
