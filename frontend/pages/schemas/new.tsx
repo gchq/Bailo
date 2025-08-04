@@ -1,5 +1,4 @@
 import { ArrowBack, Schema } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
 import {
   Autocomplete,
   Box,
@@ -247,14 +246,14 @@ export default function NewSchema() {
                 <VisuallyHiddenInput type='file' onChange={handleUploadChange} />
               </Button>
               <Stack alignItems='flex-end'>
-                <LoadingButton
+                <Button
                   variant='contained'
                   loading={loading}
                   type='submit'
                   disabled={!schemaId || !schemaName || !schemaDescription || !jsonSchema}
                 >
                   Upload schema
-                </LoadingButton>
+                </Button>
                 <MessageAlert message={errorMessage} severity='error' />
               </Stack>
             </Stack>

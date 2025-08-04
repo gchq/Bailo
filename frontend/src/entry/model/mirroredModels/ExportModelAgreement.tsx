@@ -1,4 +1,3 @@
-import { LoadingButton } from '@mui/lab'
 import { Box, Button, Checkbox, FormControlLabel, Stack, Typography } from '@mui/material'
 import { postModelExportToS3 } from 'actions/model'
 import { ChangeEvent, useState } from 'react'
@@ -55,9 +54,9 @@ export default function ExportModelAgreement({ modelId }: ExportModelAgreementPr
             label='I agree to the terms and conditions of this model export agreement'
           />
           <Restricted action='exportMirroredModel' fallback={<Button disabled>Submit</Button>}>
-            <LoadingButton variant='contained' loading={loading} disabled={!checked} onClick={handleSubmit}>
+            <Button variant='contained' loading={loading} disabled={!checked} onClick={handleSubmit}>
               Submit
-            </LoadingButton>
+            </Button>
           </Restricted>
           <MessageAlert message={errorMessage} severity='error' />
         </Stack>

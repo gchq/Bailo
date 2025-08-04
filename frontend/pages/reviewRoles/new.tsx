@@ -1,10 +1,10 @@
 import { ExpandMore, PersonAdd } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
+  Button,
   Container,
   FormControl,
   IconButton,
@@ -213,7 +213,7 @@ export default function ReviewRolesForm() {
             </Stack>
             <Box display='flex'>
               <Box ml='auto'>
-                <LoadingButton
+                <Button
                   loading={loading}
                   type='submit'
                   variant='contained'
@@ -221,7 +221,7 @@ export default function ReviewRolesForm() {
                   disabled={!(formData.name && formData.shortName && formData.description)}
                 >
                   Create Role
-                </LoadingButton>
+                </Button>
                 <MessageAlert message={errorMessage} severity='error' />
               </Box>
             </Box>
