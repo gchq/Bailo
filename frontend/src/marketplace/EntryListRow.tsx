@@ -16,6 +16,8 @@ interface EntryListRowProps {
   data: EntrySearchResult[]
   index: number
   style: CSSProperties
+  displayOrganisation?: boolean
+  displayState?: boolean
 }
 
 export default function EntryListRow({
@@ -28,6 +30,8 @@ export default function EntryListRow({
   data,
   index,
   style,
+  displayOrganisation = true,
+  displayState = true,
 }: EntryListRowProps) {
   const theme = useTheme()
   const entry = data[index]
@@ -67,7 +71,7 @@ export default function EntryListRow({
         </Typography>
         <Stack direction='row' spacing={1} alignItems='center'>
           <Stack direction='row' spacing={1}>
-            {entry.organisation && (
+            {displayOrganisation && entry.organisation && (
               <ChipSelector
                 chipTooltipTitle={'Filter by organisation'}
                 options={[entry.organisation]}
@@ -82,7 +86,7 @@ export default function EntryListRow({
                 style={{ padding: 1 }}
               />
             )}
-            {entry.state && (
+            {displayState && entry.state && (
               <ChipSelector
                 chipTooltipTitle={'Filter by state'}
                 options={[entry.state]}
@@ -97,7 +101,9 @@ export default function EntryListRow({
               />
             )}
           </Stack>
-          {(entry.state || entry.organisation) && entry.tags.length > 0 && <Divider flexItem orientation='vertical' />}
+          {(entry.state || entry.organisation) && (displayOrganisation || displayState) && entry.tags.length > 0 && (
+            <Divider flexItem orientation='vertical' />
+          )}
           <ChipSelector
             chipTooltipTitle={'Filter by tag'}
             options={entry.tags.slice(0, 10)}
