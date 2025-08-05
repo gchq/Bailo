@@ -97,12 +97,14 @@ module.exports = {
       shortName: 'msro',
       kind: 'review',
       description: 'Reviewer',
+      collaboratorRole: 'owner',
     },
     {
       name: 'Model Technical Reviewer',
       shortName: 'mtr',
       kind: 'review',
       description: 'Reviewer',
+      collaboratorRole: 'owner',
     },
   ],
 

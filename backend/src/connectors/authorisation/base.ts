@@ -3,6 +3,7 @@ import { FileInterface } from '../../models/File.js'
 import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
+import ReviewRoleModel from '../../models/ReviewRole.js'
 import { SchemaDoc } from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
 import { Access } from '../../routes/v1/registryAuth.js'
@@ -110,16 +111,13 @@ export class BasicAuthorisationConnector {
         }
 
         // Check a user has a role before allowing write actions
-        if (
-          ModelAction.Write === action &&
-          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro', 'contributor']))
-        ) {
+        if (ModelAction.Write === action && (await missingRequiredRole(user, model, ['owner', 'contributor']))) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model card.' }
         }
 
         if (
           ModelAction.Update === action &&
-          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro'])) &&
+          (await missingRequiredRole(user, model, ['owner'])) &&
           !(await authentication.hasRole(user, Roles.Admin))
         ) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
@@ -234,7 +232,7 @@ export class BasicAuthorisationConnector {
          */
         if (
           !isNamed &&
-          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro'])) &&
+          (await missingRequiredRole(user, model, ['owner'])) &&
           ([AccessRequestAction.Delete, AccessRequestAction.Update] as AccessRequestActionKeys[]).includes(action)
         ) {
           return { success: false, info: 'You cannot change an access request you do not own.', id: request.id }
@@ -360,10 +358,7 @@ export class BasicAuthorisationConnector {
         }
 
         // If they are not listed on the model, don't let them upload or delete images.
-        if (
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor'])) &&
-          actions.includes(ImageAction.Push)
-        ) {
+        if ((await missingRequiredRole(user, model, ['owner', 'contributor'])) && actions.includes(ImageAction.Push)) {
           return {
             success: false,
             info: 'You do not have permission to upload an image.',
@@ -373,7 +368,7 @@ export class BasicAuthorisationConnector {
 
         if (
           !hasAccessRequest &&
-          (await missingRequiredRole(user, model, ['owner', 'contributor', 'msro', 'mtr', 'consumer'])) &&
+          (await missingRequiredRole(user, model, ['owner', 'contributor', 'consumer'])) &&
           actions.includes(ImageAction.Pull) &&
           !model.settings.ungovernedAccess
         ) {
@@ -425,7 +420,12 @@ export class BasicAuthorisationConnector {
 
 async function missingRequiredRole(user: UserInterface, model: ModelDoc, roles: Array<string>) {
   const modelRoles = await authentication.getUserModelRoles(user, model)
-  return !modelRoles.some((value) => roles.includes(value))
+  const reviewRoles = await ReviewRoleModel.find({ shortName: modelRoles })
+  const collaboratorRoles = reviewRoles.map((role) => role.collaboratorRole)
+  return (
+    !modelRoles.some((value) => roles.includes(value)) &&
+    !collaboratorRoles.some((value) => value && roles.includes(value))
+  )
 }
 
 export async function partials<T>(
