@@ -78,7 +78,8 @@ export interface UiConfig {
 }
 
 //System roles
-export type CollaboratorRoleType = 'contributor' | 'consumer' | 'owner' | string
+export type SystemRoleKeys = 'contributor' | 'consumer' | 'owner'
+export type CollaboratorRoleType = SystemRoleKeys | string
 
 export interface FileInterface {
   _id: string
@@ -247,7 +248,7 @@ export type SchemaKindLabelKeys = (typeof SchemaKindLabel)[keyof typeof SchemaKi
 export type ReviewRolesFormData = SystemRole & {
   defaultEntities?: string[]
   lockEntities: boolean
-  collaboratorRole?: CollaboratorRoleType
+  systemRole?: SystemRoleKeys
 }
 
 export const SchemaKind = {
@@ -410,7 +411,7 @@ export interface EntryCardInterface {
 
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<CollaboratorRoleType | string>
+  roles: Array<CollaboratorRoleType>
 }
 
 export const EntryKindLabel = {
@@ -628,16 +629,16 @@ export interface ReviewRoleInterface {
   description?: string
   defaultEntities?: string[]
   lockEntities?: boolean
-  collaboratorRole?: CollaboratorRolesKeys
+  systemRole?: SystemRoleKeys
   createdAt: string
   updatedAt: string
 }
 
-export const CollaboratorRoles = {
+export const SystemRoles = {
   None: 'none',
   Owner: 'owner',
   Contributor: 'contributor',
   Consumer: 'consumer',
 } as const
 
-export type CollaboratorRolesKeys = (typeof CollaboratorRoles)[keyof typeof CollaboratorRoles]
+export type SystemRolesKeys = (typeof SystemRoles)[keyof typeof SystemRoles]

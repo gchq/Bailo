@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { CollaboratorRoles } from '../../../models/Model.js'
+import { SystemRoles } from '../../../models/Model.js'
 import { ReviewRoleInterface } from '../../../models/ReviewRole.js'
 import { createReviewRole } from '../../../services/review.js'
 import { registerPath, reviewRoleSchema } from '../../../services/specification.js'
@@ -23,7 +23,7 @@ export const postReviewRoleSchema = z.object({
       .optional()
       .openapi({ example: ['user:user'] }),
     lockEntities: z.boolean().optional().openapi({ example: false }),
-    collaboratorRole: z.nativeEnum(CollaboratorRoles).optional().openapi({ example: CollaboratorRoles.Owner }),
+    systemRole: z.nativeEnum(SystemRoles).optional().openapi({ example: SystemRoles.Owner }),
   }),
 })
 
