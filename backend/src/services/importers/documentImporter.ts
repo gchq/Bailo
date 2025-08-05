@@ -18,6 +18,10 @@ import { parseFile, parseModelCard, parseRelease } from '../parsers/modelParser.
 import { DistributionPackageName, joinDistributionPackageName } from '../registry.js'
 import { saveImportedRelease } from '../release.js'
 
+const modelCardRegex = /^[0-9]+\.json$/
+const releaseRegex = /^releases\/(.*)\.json$/
+const fileRegex = /^files\/(.*)\.json$/
+
 export async function importDocuments(
   user: UserInterface,
   body: Readable,
@@ -32,10 +36,6 @@ export async function importDocuments(
   const imageIds: string[] = []
   const newModelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
   const newReleases: Omit<ReleaseDoc, '_id'>[] = []
-
-  const modelCardRegex = /^[0-9]+\.json$/
-  const releaseRegex = /^releases\/(.*)\.json$/
-  const fileRegex = /^files\/(.*)\.json$/
 
   // enable lazy fetching
   let lazyMirroredModel: ModelDoc | null = null
@@ -100,7 +100,6 @@ export async function importDocuments(
         fileIds.push(file._id)
         await saveImportedFile(file)
       } else {
-        log.error('error')
         throw InternalError('Failed to parse compressed file - Unrecognised file contents.', {
           mirroredModelId,
           importId,

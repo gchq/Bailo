@@ -16,6 +16,9 @@ import {
   splitDistributionPackageName,
 } from '../registry.js'
 
+const manifestRegex = /^manifest\.json$/
+const blobRegex = /^blobs\/sha256\/[0-9a-f]{64}$/
+
 export async function importCompressedRegistryImage(
   user: UserInterface,
   body: Readable,
@@ -49,13 +52,13 @@ export async function importCompressedRegistryImage(
 
       if (entry.type === 'file') {
         // Process file
-        if (entry.name === 'manifest.json') {
+        if (manifestRegex.test(entry.name)) {
           // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
           log.debug({ importId }, 'Extracting un-tarred manifest')
           manifestBody = await json(stream)
 
           next()
-        } else {
+        } else if (blobRegex.test(entry.name)) {
           // convert filename to digest format
           const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
           if (await doesImageLayerExist(user, modelId, imageName, layerDigest)) {
@@ -86,6 +89,10 @@ export async function importCompressedRegistryImage(
             await finished(stream)
             next()
           }
+        } else {
+          throw InternalError('Failed to parse compressed image - Unrecognised image contents.', {
+            importId,
+          })
         }
       } else {
         // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
