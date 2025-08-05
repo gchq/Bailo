@@ -3,6 +3,7 @@
 exports[`routes > review > getReviewRoles > audit > expected call 1`] = `
 [
   {
+    "collaboratorRole": "Contributor",
     "name": "Reviewer",
     "shortName": "reviewer",
   },
@@ -13,6 +14,7 @@ exports[`routes > review > getReviewRoles > returns review roles 1`] = `
 {
   "reviewRoles": [
     {
+      "collaboratorRole": "Contributor",
       "name": "Reviewer",
       "shortName": "reviewer",
     },

@@ -4,6 +4,7 @@ exports[`routes > model > roles > getModelRoles > 200 > ok 1`] = `
 {
   "roles": [
     {
+      "collaboratorRole": "Contributor",
       "name": "Reviewer",
       "shortName": "reviewer",
     },
@@ -14,6 +15,7 @@ exports[`routes > model > roles > getModelRoles > 200 > ok 1`] = `
 exports[`routes > model > roles > getModelRoles > audit > expected call 1`] = `
 [
   {
+    "collaboratorRole": "Contributor",
     "name": "Reviewer",
     "shortName": "reviewer",
   },
