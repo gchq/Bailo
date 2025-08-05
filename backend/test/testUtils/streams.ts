@@ -1,8 +1,7 @@
 import { Readable, Writable } from 'stream'
 
 export class MockReadable extends Readable {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _read(size: number) {}
+  _read(_size: number) {}
 }
 
 export class MockWritable extends Writable {

@@ -10,12 +10,10 @@ import {
 import { MockReadable, MockWritable } from '../testUtils/streams.js'
 
 const zlibMocks = vi.hoisted(() => ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  createGunzip: vi.fn((options) => {
+  createGunzip: vi.fn((_options) => {
     return new MockReadable()
   }),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  createGzip: vi.fn((options) => {
+  createGzip: vi.fn((_options) => {
     return new MockReadable()
   }),
   constants: { Z_BEST_SPEED: 1 },
@@ -23,8 +21,7 @@ const zlibMocks = vi.hoisted(() => ({
 vi.mock('node:zlib', () => ({ default: zlibMocks }))
 
 const mockTarStream = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  entry: vi.fn(({ name, size }) => {
+  entry: vi.fn(({ _name, _size }) => {
     return new MockWritable()
   }),
   pipe: vi.fn().mockReturnThis(),
