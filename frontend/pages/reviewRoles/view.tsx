@@ -81,7 +81,11 @@ export default function ReviewRoles() {
                   <Typography color='primary' fontWeight='bold'>
                     System Role
                   </Typography>
-                  <Typography>{toTitleCase(reviewRole.collaboratorRole || '')}</Typography>
+                  {reviewRole.collaboratorRole ? (
+                    <Typography>{toTitleCase(reviewRole.collaboratorRole)}</Typography>
+                  ) : (
+                    <em>None</em>
+                  )}
                 </Box>
                 <Box>
                   <Typography color='primary' fontWeight='bold'>
@@ -89,7 +93,7 @@ export default function ReviewRoles() {
                   </Typography>
                   <List>
                     {!reviewRole.defaultEntities ||
-                      (reviewRole.defaultEntities.length === 0 && <Typography>No entities assigned</Typography>)}
+                      (reviewRole.defaultEntities.length === 0 && <em>No entities assigned</em>)}
                     {reviewRole.defaultEntities &&
                       reviewRole.defaultEntities.map((entity) => (
                         <ListItem key={entity}>
