@@ -113,4 +113,11 @@ export const testResponse = {
 export const testReviewRole = {
   name: 'Reviewer',
   shortName: 'reviewer',
+  collaboratorRole: 'Contributor',
+}
+
+export const testReviewerWithOwnerCollaboratorRole = {
+  name: 'Reviewer',
+  shortName: 'reviewer',
+  collaboratorRole: 'owner',
 }
