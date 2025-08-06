@@ -33,12 +33,12 @@ os-backend-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:20.10
+    name: docker:27.5.1
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:20.10-dind
+    - name: docker:27.5.1-dind
   before_script:
     - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
     - cd backend
@@ -53,12 +53,12 @@ os-frontend-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:20.10
+    name: docker:27.5.1
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:20.10-dind
+    - name: docker:27.5.1-dind
   before_script:
     - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
     - cd frontend
@@ -73,12 +73,12 @@ os-modelscan-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:20.10
+    name: docker:27.5.1
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:20.10-dind
+    - name: docker:27.5.1-dind
   before_script:
     - docker login -u $OPENSHIFT_USER -p $OPENSHIFT_TOKEN $REGISTRY_URL
     - cd lib/modelscan_api
@@ -157,12 +157,12 @@ aws-backend-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:20.10
+    name: docker:27.5.1
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:20.10-dind
+    - name: docker:27.5.1-dind
   before_script:
     - apk add --no-cache curl jq python3 py3-pip
     - pip install awscli --break-system-packages
@@ -184,12 +184,12 @@ aws-frontend-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:20.10
+    name: docker:27.5.1
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:20.10-dind
+    - name: docker:27.5.1-dind
   before_script:
     - apk add --no-cache curl jq python3 py3-pip
     - pip install awscli --break-system-packages
@@ -210,12 +210,12 @@ aws-modelscan-build:
     - when: manual
       allow_failure: true
   image:
-    name: docker:20.10
+    name: docker:27.5.1
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ''
   services:
-    - name: docker:20.10-dind
+    - name: docker:27.5.1-dind
   before_script:
     - apk add --no-cache curl jq python3 py3-pip
     - pip install awscli --break-system-packages
