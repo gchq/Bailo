@@ -22,7 +22,7 @@ export interface DefaultReviewRole {
   shortName: string
   description: string
   kind: string
-  collaboratorRole: string
+  systemRole: string
 }
 
 export async function findReviews(
