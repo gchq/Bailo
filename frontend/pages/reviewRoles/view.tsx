@@ -81,7 +81,7 @@ export default function ReviewRoles() {
                   <Typography color='primary' fontWeight='bold'>
                     System Role
                   </Typography>
-                  <Typography>{toTitleCase(reviewRole.collaboratorRole || '')}</Typography>
+                  <Typography>{toTitleCase(reviewRole.systemRole || '')}</Typography>
                 </Box>
                 <Box>
                   <Typography color='primary' fontWeight='bold'>

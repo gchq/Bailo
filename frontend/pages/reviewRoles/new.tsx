@@ -29,7 +29,7 @@ import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, CollaboratorRoleType, EntryKind, ReviewRolesFormData, RoleKind } from 'types/types'
+import { CollaboratorEntry, EntryKind, ReviewRolesFormData, RoleKind, SystemRoleKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 export default function ReviewRolesForm() {
@@ -61,13 +61,13 @@ export default function ReviewRolesForm() {
     setFormData((prevFormData) => ({ ...prevFormData, description: event.target.value as string }))
   }
 
-  const handleCollaboratorRoleChange = (event: SelectChangeEvent) => {
+  const handleSystemRoleChange = (event: SelectChangeEvent) => {
     if (event.target.value === '') {
-      delete formData.collaboratorRole
+      delete formData.systemRole
     } else {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        collaboratorRole: event.target.value.toLowerCase() as CollaboratorRoleType,
+        systemRole: event.target.value.toLowerCase() as SystemRoleKeys,
       }))
     }
   }
@@ -184,7 +184,7 @@ export default function ReviewRolesForm() {
               </LabelledInput>
               <FormControl size='small'>
                 <LabelledInput fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
-                  <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
+                  <Select value={formData.systemRole} onChange={handleSystemRoleChange}>
                     <MenuItem value=''>
                       <em>None</em>
                     </MenuItem>
