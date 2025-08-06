@@ -523,7 +523,7 @@ describe('services > mirroredModel', () => {
         ImportKind.File,
       )
 
-      await expect(result).rejects.toThrowError(/^Missing File ID/)
+      await expect(result).rejects.toThrowError(/^File ID must be specified for file import./)
     })
 
     test('importModelFile on file success', async () => {
