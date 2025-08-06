@@ -15,8 +15,22 @@ exports[`services > importers > documentImporter > importDocuments > multiple fi
       1,
       2,
     ],
-    "newModelCards": [],
-    "newReleases": [],
+    "newModelCards": [
+      {
+        "completed": true,
+      },
+      {
+        "completed": true,
+      },
+    ],
+    "newReleases": [
+      {
+        "completed": true,
+      },
+      {
+        "completed": true,
+      },
+    ],
     "releaseSemvers": [
       "0.0.1",
       "0.0.2",
@@ -50,7 +64,11 @@ exports[`services > importers > documentImporter > importDocuments > single mode
     "modelCardVersions": [
       1,
     ],
-    "newModelCards": [],
+    "newModelCards": [
+      {
+        "completed": true,
+      },
+    ],
     "newReleases": [],
     "releaseSemvers": [],
   },
@@ -65,7 +83,11 @@ exports[`services > importers > documentImporter > importDocuments > single rele
     "imageIds": [],
     "modelCardVersions": [],
     "newModelCards": [],
-    "newReleases": [],
+    "newReleases": [
+      {
+        "completed": true,
+      },
+    ],
     "releaseSemvers": [
       "0.0.1",
     ],

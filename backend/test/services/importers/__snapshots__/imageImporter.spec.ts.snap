@@ -30,16 +30,6 @@ exports[`services > importers > imageImporter > importCompressedRegistryImage > 
 }
 `;
 
-exports[`services > importers > imageImporter > importCompressedRegistryImage > manifest.json success 2`] = `
-{
-  "image": {
-    "imageName": "path",
-    "imageTag": "tag",
-    "modelId": "modelId",
-  },
-}
-`;
-
 exports[`services > importers > imageImporter > importCompressedRegistryImage > skip non-file entry 1`] = `
 {
   "image": {

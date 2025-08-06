@@ -1,6 +1,7 @@
 import { Readable } from 'stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
+import authorisation from '../../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../../src/models/User.js'
 import { importDocuments } from '../../../src/services/importers/documentImporter.js'
 import { MockReadable, MockWritable } from '../../testUtils/streams.js'
@@ -38,13 +39,13 @@ vi.mock('../../../src/utils/tarball.js', async () => tarballMock)
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } }, card: { schemaId: 'test' } })),
-  saveImportedModelCard: vi.fn(),
+  saveImportedModelCard: vi.fn(() => Promise.resolve({ completed: true })),
   setLatestImportedModelCard: vi.fn(),
 }))
 vi.mock('../../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
-  saveImportedRelease: vi.fn(),
+  saveImportedRelease: vi.fn(() => ({ completed: true })),
 }))
 vi.mock('../../../src/services/release.js', () => releaseMocks)
 
@@ -58,7 +59,13 @@ const registryMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/registry.js', () => registryMocks)
 
-vi.mock('../../../src/connectors/authorisation/index.js')
+const authMock = vi.hoisted(() => ({
+  model: vi.fn<() => Response>(() => ({ id: 'test', success: true }) as any),
+  releases: vi.fn<() => Response[]>(() => [{ id: 'test', success: true }] as any[]),
+}))
+vi.mock('../../../src/connectors/authorisation/index.js', async () => ({
+  default: authMock,
+}))
 
 describe('services > importers > documentImporter', () => {
   beforeEach(() => {
@@ -280,5 +287,45 @@ describe('services > importers > documentImporter', () => {
     expect(fileMocks.saveImportedFile).not.toBeCalled()
     expect(modelMocks.setLatestImportedModelCard).not.toBeCalled()
     expect(promise).rejects.toThrowError('Failed to parse compressed file - Unrecognised file contents.')
+  })
+
+  test('auth failure', async () => {
+    modelParserMock.parseRelease.mockReturnValueOnce({ semver: '0.0.1', images: [] })
+    vi.mocked(authorisation.releases).mockResolvedValueOnce([
+      {
+        id: '',
+        success: false,
+        info: 'User does not have access to release',
+      },
+    ])
+    tarballMock.extractTarGzStream.mockImplementation(
+      (
+        _tarGzStream,
+        entryListener,
+        errorListener = (err, _res, rej) => rej(err),
+        finishListener = (res, _rej) => res('ok'),
+      ) => {
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+          try {
+            await entryListener({ name: 'releases/0.json', type: 'file' }, {}, () => {})
+            finishListener(resolve, reject)
+          } catch (err) {
+            errorListener(err, resolve, reject)
+          }
+        })
+      },
+    )
+
+    const promise = importDocuments(
+      {} as UserInterface,
+      {} as Readable,
+      'mirroredModelId',
+      'sourceModelId',
+      'payloadUrl',
+      'importId',
+    )
+
+    await expect(promise).rejects.toThrowError(/^You do not have the necessary permissions to import these releases./)
   })
 })
