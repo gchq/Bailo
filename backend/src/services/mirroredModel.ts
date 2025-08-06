@@ -424,7 +424,7 @@ export async function uploadReleaseImages(
       }
     }
   }
-  log.debug({ user, modelId: model.id, semver: release.semver }, 'Finished adding release to gzip file of releases.')
+  log.debug({ user, modelId: model.id, semver: release.semver }, 'Finished adding release to tarball file of releases.')
 }
 
 async function addReleaseToTarball(
@@ -434,7 +434,7 @@ async function addReleaseToTarball(
   tarStream: Pack,
   mirroredModelId: string,
 ) {
-  log.debug({ user, modelId: model.id, semver: release.semver }, 'Adding release to gzip file of releases.')
+  log.debug({ user, modelId: model.id, semver: release.semver }, 'Adding release to tarball file of releases.')
   const files: FileWithScanResultsInterface[] = await getFilesByIds(user, release.modelId, release.fileIds)
 
   try {
@@ -442,7 +442,7 @@ async function addReleaseToTarball(
     const packerEntry = tarStream.entry({ name: `releases/${release.semver}.json`, size: releaseJson.length })
     await pipeStreamToTarEntry(Readable.from(releaseJson), packerEntry, { modelId: model.id })
   } catch (error: any) {
-    throw InternalError('Error when generating the gzip file.', { error })
+    throw InternalError('Error when generating the tarball file.', { error })
   }
 
   // Fire-and-forget upload of artefacts so that the endpoint is able to return without awaiting lots of uploads

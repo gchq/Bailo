@@ -26,7 +26,7 @@ registerPath({
   path: '/api/v2/model/{modelId}/export/s3',
   tags: ['model', 'mirror'],
   description:
-    'Request for all current model card revisions to be exported to S3 as a Zip file. Can also include releases specified by semver in the body.',
+    'Request for all current model card revisions to be exported to S3 as a Tarball file. Can also include releases specified by semver in the body.',
   schema: postRequestExportToS3Schema,
   responses: {
     200: {
