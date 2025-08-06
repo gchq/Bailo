@@ -13,6 +13,8 @@ import {
   ImportKind,
   ImportKindKeys,
   importModel,
+  uploadReleaseFiles,
+  uploadReleaseImages,
 } from '../../src/services/mirroredModel.js'
 
 const fileScanResult: FileScanResult = {
@@ -581,6 +583,89 @@ describe('services > mirroredModel', () => {
       )
 
       await expect(result).rejects.toThrowError(/^Unrecognised import kind/)
+    })
+  })
+
+  describe('uploadReleaseFiles', () => {
+    test('upload release files', async () => {
+      await uploadReleaseFiles(
+        {} as UserInterface,
+        { id: 'modelId' } as any,
+        { id: 'releaseId', semver: '1.2.3' } as any,
+        [{ id: 'fileId1' }, { id: 'fileId2' }] as any[],
+        'mirroredModelId',
+      )
+
+      expect(s3Mocks.uploadToS3).toBeCalledTimes(2)
+      expect(fileMocks.downloadFile).toBeCalledTimes(2)
+    })
+
+    test('error', async () => {
+      s3Mocks.uploadToS3.mockImplementationOnce(() => {
+        throw Error()
+      })
+      await uploadReleaseFiles(
+        {} as UserInterface,
+        { id: 'modelId' } as any,
+        { id: 'releaseId', semver: '1.2.3' } as any,
+        [{ id: 'fileId1' }] as any[],
+        'mirroredModelId',
+      )
+
+      expect(s3Mocks.uploadToS3).toBeCalledTimes(1)
+      expect(logMock.error).toHaveBeenCalledWith(
+        expect.objectContaining({ modelId: 'modelId' }),
+        'Error when uploading Release File to S3.',
+      )
+    })
+  })
+
+  describe('uploadReleaseImages', () => {
+    test('upload release images', async () => {
+      registryMocks.getImageManifest.mockResolvedValue({ layers: [] })
+
+      await uploadReleaseImages(
+        {} as UserInterface,
+        { id: 'modelId' } as any,
+        {
+          id: 'releaseId',
+          semver: '1.2.3',
+          images: [
+            { name: 'name', tag: 'tag', repository: 'repository' },
+            { name: 'name', tag: 'tag', repository: 'repository' },
+          ],
+        } as any,
+        'mirroredModelId',
+      )
+
+      expect(registryMocks.getImageManifest).toBeCalledTimes(2)
+      expect(tarballMocks.createTarGzStreams).toBeCalledTimes(2)
+      expect(s3Mocks.uploadToS3).toBeCalledTimes(2)
+    })
+
+    test('error', async () => {
+      registryMocks.getImageManifest.mockImplementationOnce(() => {
+        throw Error()
+      })
+
+      await uploadReleaseImages(
+        {} as UserInterface,
+        { id: 'modelId' } as any,
+        {
+          id: 'releaseId',
+          semver: '1.2.3',
+          images: [
+            { name: 'name', tag: 'tag', repository: 'repository' },
+            { name: 'name', tag: 'tag', repository: 'repository' },
+          ],
+        } as any,
+        'mirroredModelId',
+      )
+
+      expect(logMock.error).toHaveBeenCalledWith(
+        expect.objectContaining({ modelId: 'modelId' }),
+        'Error when uploading Release Image to S3.',
+      )
     })
   })
 

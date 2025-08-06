@@ -337,7 +337,7 @@ async function addReleasesToTarball(
   log.debug({ user, modelId: model.id, semvers }, 'Completed adding model releases to Tarball file.')
 }
 
-async function uploadReleaseFiles(
+export async function uploadReleaseFiles(
   user: UserInterface,
   model: ModelDoc,
   release: ReleaseDoc,
@@ -376,7 +376,12 @@ async function uploadReleaseFiles(
   }
 }
 
-async function uploadReleaseImages(user: UserInterface, model: ModelDoc, release: ReleaseDoc, mirroredModelId: string) {
+export async function uploadReleaseImages(
+  user: UserInterface,
+  model: ModelDoc,
+  release: ReleaseDoc,
+  mirroredModelId: string,
+) {
   if (Array.isArray(release.images)) {
     for (const image of release.images) {
       const imageLogData = {
