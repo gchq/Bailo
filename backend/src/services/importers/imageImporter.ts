@@ -28,7 +28,7 @@ export async function importCompressedRegistryImage(
 ) {
   const distributionPackageNameObject = splitDistributionPackageName(distributionPackageName)
   if (!('tag' in distributionPackageNameObject)) {
-    throw InternalError('Could not get tag from Distribution Package Name.', {
+    throw InternalError('Distribution Package Name must include a tag.', {
       distributionPackageNameObject,
       distributionPackageName,
     })
@@ -90,7 +90,7 @@ export async function importCompressedRegistryImage(
             next()
           }
         } else {
-          throw InternalError('Failed to parse compressed image - Unrecognised image contents.', {
+          throw InternalError('Cannot parse compressed image: unrecognised contents.', {
             importId,
           })
         }
@@ -114,7 +114,7 @@ export async function importCompressedRegistryImage(
         )
         resolve('ok')
       } else {
-        reject(InternalError('Could not find manifest.json in tarball'))
+        reject(InternalError('Manifest file (manifest.json) missing or invalid in Tarball file.'))
       }
     },
   )

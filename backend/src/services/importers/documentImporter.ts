@@ -72,7 +72,7 @@ export async function importDocuments(
         }
         const authResponse = await authorisation.releases(user, lazyMirroredModel, [release], ReleaseAction.Import)
         if (!authResponse[0]?.success) {
-          throw Forbidden('You do not have the necessary permissions to import these releases.', {
+          throw Forbidden('Insufficient permissions to import the specified releases.', {
             modelId: mirroredModelId,
             release: release.semver,
             user,
@@ -100,7 +100,7 @@ export async function importDocuments(
         fileIds.push(file._id)
         await saveImportedFile(file)
       } else {
-        throw InternalError('Failed to parse compressed file - Unrecognised file contents.', {
+        throw InternalError('Cannot parse compressed file: unrecognised contents.', {
           mirroredModelId,
           importId,
         })

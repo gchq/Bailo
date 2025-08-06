@@ -286,7 +286,7 @@ describe('services > importers > documentImporter', () => {
     expect(modelParserMock.parseFile).not.toBeCalled()
     expect(fileMocks.saveImportedFile).not.toBeCalled()
     expect(modelMocks.setLatestImportedModelCard).not.toBeCalled()
-    expect(promise).rejects.toThrowError('Failed to parse compressed file - Unrecognised file contents.')
+    expect(promise).rejects.toThrowError('Cannot parse compressed file: unrecognised contents.')
   })
 
   test('auth failure', async () => {
@@ -326,6 +326,6 @@ describe('services > importers > documentImporter', () => {
       'importId',
     )
 
-    await expect(promise).rejects.toThrowError(/^You do not have the necessary permissions to import these releases./)
+    await expect(promise).rejects.toThrowError(/^Insufficient permissions to import the specified releases./)
   })
 })

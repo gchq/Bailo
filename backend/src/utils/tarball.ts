@@ -24,7 +24,7 @@ export function defaultExtractTarGzErrorListener(
   _resolve: (reason?: unknown) => void,
   reject: (reason?: unknown) => void,
 ) {
-  reject(InternalError('Error while untarring blob.', { error: err }))
+  reject(InternalError('Error processing tarball during image import.', { error: err }))
 }
 
 export function defaultExtractTarGzFinishListener(

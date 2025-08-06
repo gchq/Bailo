@@ -191,7 +191,10 @@ export async function importModel(
     case ImportKind.File: {
       log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
       if (!fileId) {
-        throw BadReq('Missing File ID.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
+        throw BadReq('File ID must be specified for file import.', {
+          mirroredModelId,
+          sourceModelIdMeta: sourceModelId,
+        })
       }
       const result = await importModelFile(responseBody, fileId, mirroredModelId, importId)
       return {
@@ -234,7 +237,7 @@ export async function exportCompressedRegistryImage(
 ) {
   const distributionPackageNameObject = splitDistributionPackageName(distributionPackageName)
   if (!('tag' in distributionPackageNameObject)) {
-    throw InternalError('Could not get tag from Distribution Package Name.', {
+    throw InternalError('Distribution Package Name must include a tag.', {
       distributionPackageNameObject,
       distributionPackageName,
     })
@@ -265,7 +268,7 @@ export async function exportCompressedRegistryImage(
 
   // upload the manifest first as this is the starting point when later importing the blob
   const tagManifestJson = JSON.stringify(tagManifest)
-  const packerEntry = tarStream.entry({ name: 'manifest.json', size: tagManifestJson.length })
+  const packerEntry = tarStream.entry({ name: 'manifest.json', size: Buffer.byteLength(tagManifestJson, 'utf8') })
   await pipeStreamToTarEntry(Readable.from(tagManifestJson), packerEntry, { mediaType: tagManifest.mediaType })
 
   // fetch and compress one layer (including config) at a time to manage RAM usage
@@ -308,7 +311,7 @@ async function addModelCardRevisionsToTarball(user: UserInterface, model: ModelD
   const cards = await getModelCardRevisions(user, model.id)
   for (const card of cards) {
     const cardJson = JSON.stringify(card.toJSON())
-    const packerEntry = tarStream.entry({ name: `${card.version}.json`, size: cardJson.length })
+    const packerEntry = tarStream.entry({ name: `${card.version}.json`, size: Buffer.byteLength(cardJson, 'utf8') })
     await pipeStreamToTarEntry(Readable.from(cardJson), packerEntry, { modelId: model.id })
   }
   log.debug({ user, modelId: model.id }, 'Completed adding model card revisions to Tarball file.')
@@ -439,7 +442,10 @@ async function addReleaseToTarball(
 
   try {
     const releaseJson = JSON.stringify(release.toJSON())
-    const packerEntry = tarStream.entry({ name: `releases/${release.semver}.json`, size: releaseJson.length })
+    const packerEntry = tarStream.entry({
+      name: `releases/${release.semver}.json`,
+      size: Buffer.byteLength(releaseJson, 'utf8'),
+    })
     await pipeStreamToTarEntry(Readable.from(releaseJson), packerEntry, { modelId: model.id })
   } catch (error: any) {
     throw InternalError('Error when generating the tarball file.', { error })
@@ -502,7 +508,7 @@ export async function generateDigest(file: Readable) {
       file.on('error', (err) => {
         file.destroy?.()
         hash.destroy?.()
-        reject(InternalError('Error while generating digest.', { error: err }))
+        reject(InternalError('Error generating SHA256 digest for stream.', { error: err }))
       })
       file.on('end', () => {
         hash.end()
@@ -512,6 +518,6 @@ export async function generateDigest(file: Readable) {
     return messageDigest
   } catch (error: any) {
     file.destroy?.()
-    throw InternalError('Error while generating digest.', { error })
+    throw InternalError('Error generating SHA256 digest for stream.', { error })
   }
 }

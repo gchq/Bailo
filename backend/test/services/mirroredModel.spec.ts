@@ -675,7 +675,7 @@ describe('services > mirroredModel', () => {
 
       await expect(
         exportCompressedRegistryImage({} as UserInterface, 'modelId', 'distName', {} as any),
-      ).rejects.toThrow(/^Could not get tag from Distribution Package Name./)
+      ).rejects.toThrow(/^Distribution Package Name must include a tag./)
       expect(registryMocks.getImageManifest).not.toBeCalled()
     })
 
@@ -744,7 +744,7 @@ describe('services > mirroredModel', () => {
             throw new Error('fail')
           },
         } as any),
-      ).rejects.toThrow('Error while generating digest.')
+      ).rejects.toThrow('Error generating SHA256 digest for stream.')
     })
   })
 })

@@ -80,7 +80,7 @@ export async function parseFile(file: unknown, mirroredModelId: string, sourceMo
   try {
     file.complete = await objectExists(file.path)
   } catch (error) {
-    throw InternalError('Failed to check if file exists.', {
+    throw InternalError('Error checking existence of file in storage.', {
       path: file.path,
       mirroredModelId,
       sourceModelId,

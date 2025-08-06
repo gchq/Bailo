@@ -206,7 +206,7 @@ describe('services > importers > imageImporter', () => {
     expect(registryMocks.doesImageLayerExist).not.toBeCalled()
     expect(typeguardMocks.hasKeysOfType).toBeCalledTimes(1)
     expect(registryMocks.putImageManifest).not.toBeCalled()
-    expect(promise).rejects.toThrowError('Could not find manifest.json in tarball')
+    expect(promise).rejects.toThrowError('Manifest file (manifest.json) missing or invalid in Tarball file.')
   })
 
   test('importCompressedRegistryImage > invalid distributionPackageName', async () => {
@@ -226,7 +226,7 @@ describe('services > importers > imageImporter', () => {
     expect(registryMocks.doesImageLayerExist).not.toBeCalled()
     expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
     expect(registryMocks.putImageManifest).not.toBeCalled()
-    expect(promise).rejects.toThrowError('Could not get tag from Distribution Package Name.')
+    expect(promise).rejects.toThrowError('Distribution Package Name must include a tag.')
   })
 
   test('importDocuments > error on invalid file entry name', async () => {
@@ -263,6 +263,6 @@ describe('services > importers > imageImporter', () => {
     expect(registryMocks.doesImageLayerExist).not.toBeCalled()
     expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
     expect(registryMocks.putImageManifest).not.toBeCalled()
-    expect(promise).rejects.toThrowError('Failed to parse compressed image - Unrecognised image contents.')
+    expect(promise).rejects.toThrowError('Cannot parse compressed image: unrecognised contents.')
   })
 })

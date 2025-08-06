@@ -150,7 +150,7 @@ describe('services > parsers > modelParser', () => {
         'sourceModelId',
         'importId',
       ),
-    ).rejects.toThrowError('Failed to check if file exists.')
+    ).rejects.toThrowError('Error checking existence of file in storage.')
   })
 
   test('parseFile > bad sourceModelId', async () => {
