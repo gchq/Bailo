@@ -69,8 +69,8 @@ describe('services > importers > fileImporter', () => {
 
     expect(fileMocks.createFilePath).toBeCalledTimes(1)
     expect(fileModelMocks.findOne).toBeCalledTimes(1)
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(0)
-    expect(fileMocks.markFileAsCompleteAfterImport).toBeCalledTimes(0)
+    expect(s3Mocks.putObjectStream).not.toBeCalled()
+    expect(fileMocks.markFileAsCompleteAfterImport).not.toBeCalled()
     expect(result).toMatchSnapshot()
   })
 })
