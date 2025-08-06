@@ -493,14 +493,20 @@ export async function generateDigest(file: Readable) {
     const hash = createHash('sha256')
     hash.setEncoding('hex')
     file.pipe(hash)
-    messageDigest = await new Promise((resolve) =>
+    messageDigest = await new Promise((resolve, reject) => {
+      file.on('error', (err) => {
+        file.destroy?.()
+        hash.destroy?.()
+        reject(InternalError('Error while generating digest.', { error: err }))
+      })
       file.on('end', () => {
         hash.end()
         resolve(hash.read())
-      }),
-    )
+      })
+    })
     return messageDigest
   } catch (error: any) {
-    throw InternalError('Error when generating the digest for the gzip file.', { error })
+    file.destroy?.()
+    throw InternalError('Error while generating digest.', { error })
   }
 }
