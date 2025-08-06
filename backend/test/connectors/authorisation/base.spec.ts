@@ -6,7 +6,7 @@ import { ModelDoc } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
 import { SchemaDoc } from '../../../src/models/Schema.js'
 import { UserInterface } from '../../../src/models/User.js'
-import { testReviewerWithOwnerCollaboratorRole, testReviewRole } from '../../testUtils/testModels.js'
+import { testReviewerWithOwnerSystemRole, testReviewRole } from '../../testUtils/testModels.js'
 
 const mockAccessRequestService = vi.hoisted(() => ({
   getModelAccessRequestsForUser: vi.fn(),
@@ -211,7 +211,7 @@ describe('connectors > authorisation > base', () => {
   test('model > update model card as reviewer with owner permissions', async () => {
     const connector = new BasicAuthorisationConnector()
     mockModelService.getModelSystemRoles.mockReturnValueOnce(['reviewer'])
-    reviewRoleModelMock.find.mockResolvedValue([testReviewerWithOwnerCollaboratorRole])
+    reviewRoleModelMock.find.mockResolvedValue([testReviewerWithOwnerSystemRole])
 
     const result = await connector.model(
       user,
@@ -295,7 +295,7 @@ describe('connectors > authorisation > base', () => {
   test('model > update model as review role with owner permissions', async () => {
     const connector = new BasicAuthorisationConnector()
     mockModelService.getModelSystemRoles.mockReturnValueOnce(['reviewer'])
-    reviewRoleModelMock.find.mockResolvedValue([testReviewerWithOwnerCollaboratorRole])
+    reviewRoleModelMock.find.mockResolvedValue([testReviewerWithOwnerSystemRole])
 
     const result = await connector.model(
       user,

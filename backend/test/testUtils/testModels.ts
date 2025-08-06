@@ -113,16 +113,16 @@ export const testResponse = {
 export const testReviewRole = {
   name: 'Reviewer',
   shortName: 'reviewer',
-  collaboratorRole: 'Contributor',
+  systemRole: 'Contributor',
 }
 
-export const testReviewRoleNoCollaborator = {
+export const testReviewRoleNoSystemRole = {
   name: 'Reviewer',
   shortName: 'reviewer',
 }
 
-export const testReviewerWithOwnerCollaboratorRole = {
+export const testReviewerWithOwnerSystemRole = {
   name: 'Reviewer',
   shortName: 'reviewer',
-  collaboratorRole: 'owner',
+  systemRole: 'owner',
 }

@@ -422,7 +422,7 @@ export class BasicAuthorisationConnector {
 async function missingRequiredRole(user: UserInterface, model: ModelDoc, roles: Array<string>) {
   const modelRoles = await getModelSystemRoles(user, model)
   const reviewRoles = await ReviewRoleModel.find({ shortName: modelRoles })
-  const collaboratorRoles = reviewRoles.map((role) => role.collaboratorRole)
+  const collaboratorRoles = reviewRoles.map((role) => role.systemRole)
   return (
     !modelRoles.some((value) => roles.includes(value)) &&
     !collaboratorRoles.some((value) => value && roles.includes(value))

@@ -2,18 +2,18 @@
 
 exports[`routes > review > postReviewRole > audit > expected call 1`] = `
 {
-  "collaboratorRole": "Contributor",
   "name": "Reviewer",
   "shortName": "reviewer",
+  "systemRole": "Contributor",
 }
 `;
 
 exports[`routes > review > postReviewRole > creates and returns new review role 1`] = `
 {
   "reviewRole": {
-    "collaboratorRole": "Contributor",
     "name": "Reviewer",
     "shortName": "reviewer",
+    "systemRole": "Contributor",
   },
 }
 `;
