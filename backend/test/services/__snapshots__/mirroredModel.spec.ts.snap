@@ -1,5 +1,19 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`services > mirroredModel > importModel > call Readable.fromWeb when res.body is not a Readable 1`] = `
+{
+  "importResult": {
+    "fileIds": [],
+    "imageIds": [],
+    "modelCardVersions": [],
+    "newModelCards": [],
+    "newReleases": [],
+    "releaseSemvers": [],
+  },
+  "mirroredModel": "updatedMirroredModel",
+}
+`;
+
 exports[`services > mirroredModel > importModel > importCompressedRegistryImage on image success 1`] = `
 {
   "importResult": {

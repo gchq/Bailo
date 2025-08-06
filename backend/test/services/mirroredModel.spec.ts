@@ -1,4 +1,4 @@
-import { PassThrough } from 'stream'
+import { PassThrough, Readable } from 'stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { Response } from '../../src/connectors/authorisation/base.js'
@@ -304,7 +304,7 @@ describe('services > mirroredModel', () => {
       )
     })
 
-    test('export contains incomplete file scan', async () => {
+    test('skip export contains incomplete file scan', async () => {
       fileMocks.getFilesByIds.mockReturnValueOnce([
         {
           _id: '123',
@@ -316,6 +316,21 @@ describe('services > mirroredModel', () => {
           avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '321', state: 'complete', isInfected: false }],
           toJSON: vi.fn(),
         },
+      ])
+
+      const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+
+      await expect(promise).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+    })
+
+    test('skip export missing file scans', async () => {
+      fileMocks.getFilesByIds.mockReturnValueOnce([
+        {
+          _id: '123',
+          avScan: [],
+          toJSON: vi.fn(),
+        } as any,
       ])
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
@@ -475,6 +490,28 @@ describe('services > mirroredModel', () => {
       expect(documentImporterMocks.importDocuments).toHaveBeenCalled()
     })
 
+    test('call Readable.fromWeb when res.body is not a Readable', async () => {
+      fetchMock.default.mockResolvedValueOnce({
+        ok: true,
+        body: Readable.toWeb(new Readable()),
+        text: vi.fn(),
+      } as any)
+
+      const result = await importModel(
+        {} as UserInterface,
+        'mirrored-model-id',
+        'source-model-id',
+        'https://test.com',
+        ImportKind.Documents,
+      )
+
+      expect(result).toMatchSnapshot()
+      expect(modelMocks.validateMirroredModel).toHaveBeenCalled()
+      expect(authMock.model).toHaveBeenCalled()
+      expect(fetchMock.default).toHaveBeenCalled()
+      expect(documentImporterMocks.importDocuments).toHaveBeenCalled()
+    })
+
     test('missing file path for file imports', async () => {
       const result = importModel(
         {} as UserInterface,
@@ -511,7 +548,6 @@ describe('services > mirroredModel', () => {
         'source-model-id',
         'https://test.com',
         ImportKind.Image,
-        undefined,
       )
 
       await expect(result).rejects.toThrowError(/^Missing Distribution Package Name./)
