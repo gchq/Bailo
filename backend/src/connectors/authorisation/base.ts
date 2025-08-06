@@ -8,6 +8,7 @@ import { SchemaDoc } from '../../models/Schema.js'
 import { UserInterface } from '../../models/User.js'
 import { Access } from '../../routes/v1/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../services/accessRequest.js'
+import { getModelSystemRoles } from '../../services/model.js'
 import { checkAccessRequestsApproved } from '../../services/response.js'
 import { validateTokenForModel, validateTokenForUse } from '../../services/token.js'
 import { toEntity } from '../../utils/entity.js'
@@ -41,7 +42,7 @@ export class BasicAuthorisationConnector {
       return true
     }
 
-    const roles = await authentication.getUserModelRoles(user, model)
+    const roles = await getModelSystemRoles(user, model)
     if (roles.length === 0) return false
 
     return true
@@ -419,7 +420,7 @@ export class BasicAuthorisationConnector {
 }
 
 async function missingRequiredRole(user: UserInterface, model: ModelDoc, roles: Array<string>) {
-  const modelRoles = await authentication.getUserModelRoles(user, model)
+  const modelRoles = await getModelSystemRoles(user, model)
   const reviewRoles = await ReviewRoleModel.find({ shortName: modelRoles })
   const collaboratorRoles = reviewRoles.map((role) => role.collaboratorRole)
   return (
