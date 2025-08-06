@@ -493,7 +493,7 @@ describe('services > mirroredModel', () => {
     test('call Readable.fromWeb when res.body is not a Readable', async () => {
       fetchMock.default.mockResolvedValueOnce({
         ok: true,
-        body: Readable.toWeb(new Readable()),
+        body: Readable.toWeb(new PassThrough()),
         text: vi.fn(),
       } as any)
 
