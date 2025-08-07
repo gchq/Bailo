@@ -1,12 +1,22 @@
 import FileModel from '../models/File.js'
 import ModelModel, { EntryKind } from '../models/Model.js'
 import ReleaseModel from '../models/Release.js'
+import { getAccessToken } from '../routes/v1/registryAuth.js'
+import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
+import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
 async function script() {
   // setup
   await connectToMongoose()
+
+  const registry = config.registry.connection.internal
+  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', class: '', name: 'catalog', actions: ['*'] }])
+  const authorisation = `Bearer ${token}`
+  const agent = getHttpsUndiciAgent({
+    connect: { rejectUnauthorized: !config.registry.connection.insecure },
+  })
 
   // main functionality
   const modelsWithReleasesAndFiles = await ModelModel.aggregate([
@@ -87,7 +97,7 @@ async function script() {
       },
     },
   ])
-  log.info('Found files per release:', { distribution: filesPerReleaseStats[0].distribution })
+  log.info('Found files per release:', { distribution: filesPerReleaseStats[0]?.distribution })
 
   const fileSizeDistribution = await FileModel.aggregate([
     {
@@ -138,6 +148,93 @@ async function script() {
     }).map(async ([k, v]) => [k, await v]),
   ).then(Object.fromEntries)
   log.info('Summary stats:', stats)
+
+  // Get the catalog of repositories
+  const catalogResponse = await fetch(`${registry}/v2/_catalog`, {
+    headers: {
+      Authorization: authorisation,
+    },
+    dispatcher: agent,
+  })
+  const catalog = (await catalogResponse.json()) as any
+  const repositories = catalog.repositories // Array of repository names
+
+  const releasesWithImages = await ReleaseModel.aggregate([
+    {
+      $project: {
+        _id: 1,
+        images: { $size: '$images' },
+      },
+    },
+    {
+      $match: { images: { $gt: 0 } }, // Only releases with images
+    },
+    {
+      $group: {
+        _id: null,
+        count: { $sum: 1 },
+      },
+    },
+  ])
+  log.info('Found models with releases:', {
+    totalRepositories: repositories.length,
+    releasesWithImagesCount: releasesWithImages.length,
+  })
+
+  const imagesPerReleaseStats = await ReleaseModel.aggregate([
+    { $match: { images: { $exists: true, $ne: [] } } }, // Only releases with images
+    {
+      $addFields: {
+        imageCount: { $size: '$images' },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        imageCounts: { $push: '$imageCount' },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        distribution: '$imageCounts',
+      },
+    },
+  ])
+  log.info('Found images per release:', { distribution: imagesPerReleaseStats[0]?.distribution })
+
+  const allImageSizes: any[] = []
+  for (const repo of repositories) {
+    const repositoryToken = await getAccessToken({ dn: 'user' }, [
+      { type: 'repository', class: '', name: repo, actions: ['*'] },
+    ])
+    const repositoryAuthorisation = `Bearer ${repositoryToken}`
+
+    const repoTagsResponse = await fetch(`${registry}/v2/${repo}/tags/list`, {
+      headers: {
+        Authorization: repositoryAuthorisation,
+      },
+      dispatcher: agent,
+    })
+    const repoTags = (await repoTagsResponse.json()) as any
+
+    if (Array.isArray(repoTags.tags)) {
+      for (const tag of repoTags.tags) {
+        const imageManifestResponse = await fetch(`${registry}/v2/${repo}/manifests/${tag}`, {
+          headers: {
+            Authorization: repositoryAuthorisation,
+          },
+          dispatcher: agent,
+        })
+        const imageManifest = (await imageManifestResponse.json()) as any
+        // Extract size from the manifest
+        if (Array.isArray(imageManifest.layers)) {
+          imageManifest.layers.forEach((layer) => allImageSizes.push(layer.size))
+        }
+      }
+    }
+  }
+  log.info('Image size distribution:', allImageSizes)
 
   // cleanup
   setTimeout(disconnectFromMongoose, 50)
