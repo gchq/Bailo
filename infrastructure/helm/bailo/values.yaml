@@ -257,7 +257,7 @@ config:
       states: []
 
     roleDisplayNames:
-      owner: 'Owner'
+      owner: 'Model Developer'
       consumer: 'Consumer'
       contributor: 'Contributor'
 

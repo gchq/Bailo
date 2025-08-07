@@ -248,7 +248,7 @@ module.exports = {
     },
 
     roleDisplayNames: {
-      owner: 'Owner',
+      owner: 'Model Developer',
       contributor: 'Contributor',
       consumer: 'Consumer',
     },

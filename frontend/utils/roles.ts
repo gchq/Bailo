@@ -1,9 +1,22 @@
-import { EntryInterface, SystemRole, User } from 'types/types'
+import { EntryInterface, SystemRole, SystemRoles, UiConfig, User } from 'types/types'
 
-export function getRoleDisplayName(roleShortName: string, entryRoles: SystemRole[]) {
-  const role = entryRoles.find((role) => role.shortName === roleShortName)
-  if (role) {
-    return role.name
+export function getRoleDisplayName(roleShortName: string, entryRoles: SystemRole[], uiConfig: UiConfig) {
+  if (
+    roleShortName !== SystemRoles.Consumer &&
+    roleShortName !== SystemRoles.Contributor &&
+    roleShortName !== SystemRoles.Owner
+  ) {
+    const role = entryRoles.find((role) => role.shortName === roleShortName)
+    if (role) {
+      return role.name
+    }
+  } else {
+    if (uiConfig) {
+      const dn = uiConfig.roleDisplayNames?.[roleShortName]
+      if (dn) {
+        return dn
+      }
+    }
   }
   return roleShortName
 }
