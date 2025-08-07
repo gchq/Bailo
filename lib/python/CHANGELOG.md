@@ -14,6 +14,8 @@ All dates are formatted dd/mm/yyyy.
 - Add required `Schema.review_roles` property and add associated parameter `review_roles` to helper `Schema.__init__`,
   `Schema.create` and core `Client.post_schema`
 - API endpoint for `get_user_roles` has been removed as it was never fully implemented and is no longer needed.
+- Removed "MODEL_SENIOR_RESPONSIBLE_OFFICER" and "MODEL_TECHNICAL_REVIEWER" from the `core/enums` file as they are no
+  longer hard-coded roles.
 
 ## 3.0.0 - 02/04/2025
 

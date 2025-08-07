@@ -183,7 +183,7 @@ export default function ReviewRolesForm() {
                 />
               </LabelledInput>
               <FormControl size='small'>
-                <LabelledInput fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
+                <LabelledInput fullWidth label='System Role' htmlFor='role-system-input'>
                   <Select value={formData.systemRole} onChange={handleSystemRoleChange}>
                     <MenuItem value=''>
                       <em>None</em>

@@ -4,7 +4,7 @@ import * as _ from 'lodash-es'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
+import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
@@ -599,4 +599,13 @@ export async function getCurrentUserPermissionsByModel(
 
     exportMirroredModel: authResponseToUserPermission(exportMirroredModelAuth),
   }
+}
+
+export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) {
+  const entities = await authentication.getEntities(user)
+
+  return model.collaborators
+    .filter((collaborator) => entities.includes(collaborator.entity))
+    .map((collaborator) => collaborator.roles)
+    .flat()
 }

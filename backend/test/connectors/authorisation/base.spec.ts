@@ -6,13 +6,16 @@ import { ModelDoc } from '../../../src/models/Model.js'
 import { ReleaseDoc } from '../../../src/models/Release.js'
 import { SchemaDoc } from '../../../src/models/Schema.js'
 import { UserInterface } from '../../../src/models/User.js'
+import { testReviewerWithOwnerSystemRole, testReviewRole } from '../../testUtils/testModels.js'
 
 const mockAccessRequestService = vi.hoisted(() => ({
   getModelAccessRequestsForUser: vi.fn(),
 }))
 vi.mock('../../../src/services/accessRequest.js', () => mockAccessRequestService)
 
-const mockModelService = vi.hoisted(() => ({}))
+const mockModelService = vi.hoisted(() => ({
+  getModelSystemRoles: vi.fn(),
+}))
 vi.mock('../../../src/services/model.js', () => mockModelService)
 
 const mockResponseService = vi.hoisted(() => ({
@@ -21,10 +24,28 @@ const mockResponseService = vi.hoisted(() => ({
 vi.mock('../../../src/services/response.js', () => mockResponseService)
 
 const mockAuthentication = vi.hoisted(() => ({
-  getUserModelRoles: vi.fn(() => [] as Array<string>),
   hasRole: vi.fn(),
 }))
 vi.mock('../../../src/connectors/authentication/index.js', async () => ({ default: mockAuthentication }))
+
+const reviewRoleModelMock = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.findOne = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.limit = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../../src/models/ReviewRole.js', () => ({
+  default: reviewRoleModelMock,
+}))
 
 describe('connectors > authorisation > base', () => {
   const user = { dn: 'testUser' } as UserInterface
@@ -60,6 +81,8 @@ describe('connectors > authorisation > base', () => {
 
   test('hasModelVisibilityAccess > private model with no roles', async () => {
     const connector = new BasicAuthorisationConnector()
+    reviewRoleModelMock.find.mockResolvedValue([])
+    mockModelService.getModelSystemRoles.mockReturnValue([])
 
     const result = await connector.hasModelVisibilityAccess(user, {
       id: 'testModel',
@@ -71,7 +94,8 @@ describe('connectors > authorisation > base', () => {
 
   test('hasModelVisibilityAccess > private model with roles', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    mockModelService.getModelSystemRoles.mockReturnValue(['owner'])
+    reviewRoleModelMock.find.mockResolvedValue([testReviewRole])
 
     const result = await connector.hasModelVisibilityAccess(user, {
       id: 'testModel',
@@ -83,6 +107,7 @@ describe('connectors > authorisation > base', () => {
 
   test('model > private model with no roles', async () => {
     const connector = new BasicAuthorisationConnector()
+    mockModelService.getModelSystemRoles.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -102,10 +127,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > private model with roles', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['owner'])
+    reviewRoleModelMock.find.mockResolvedValue([testReviewRole])
 
     const result = await connector.model(
       user,
@@ -126,7 +149,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > update model card as owner', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    reviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['owner'])
 
     const result = await connector.model(
       user,
@@ -145,7 +169,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > update model card as contributor', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['contributor'])
+    reviewRoleModelMock.find.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -164,7 +189,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > update model card as consumer', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['consumer'])
+    reviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['consumer'])
 
     const result = await connector.model(
       user,
@@ -182,28 +208,10 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('model > update model card as mtr', async () => {
+  test('model > update model card as reviewer with owner permissions', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['mtr'])
-
-    const result = await connector.model(
-      user,
-      {
-        id: 'testModel',
-        visibility: 'public',
-      } as ModelDoc,
-      ModelAction.Write,
-    )
-
-    expect(result).toStrictEqual({
-      id: 'testModel',
-      success: true,
-    })
-  })
-
-  test('model > update model card as msro', async () => {
-    const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['msro'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['reviewer'])
+    reviewRoleModelMock.find.mockResolvedValue([testReviewerWithOwnerSystemRole])
 
     const result = await connector.model(
       user,
@@ -224,7 +232,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > update model as owner', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['owner'])
+    reviewRoleModelMock.find.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -243,7 +252,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > update model as contributor', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['contributor'])
+    reviewRoleModelMock.find.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -263,7 +273,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > update model as consumer', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['consumer'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['consumer'])
+    reviewRoleModelMock.find.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -281,28 +292,10 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('model > update model as mtr', async () => {
+  test('model > update model as review role with owner permissions', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['mtr'])
-
-    const result = await connector.model(
-      user,
-      {
-        id: 'testModel',
-        visibility: 'public',
-      } as ModelDoc,
-      ModelAction.Update,
-    )
-
-    expect(result).toStrictEqual({
-      id: 'testModel',
-      success: true,
-    })
-  })
-
-  test('model > update model as msro', async () => {
-    const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['msro'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['reviewer'])
+    reviewRoleModelMock.find.mockResolvedValue([testReviewerWithOwnerSystemRole])
 
     const result = await connector.model(
       user,
@@ -323,7 +316,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > import model as owner', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['owner'])
+    reviewRoleModelMock.find.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -342,7 +336,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > import model as contributor', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['contributor'])
+    reviewRoleModelMock.find.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -362,7 +357,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > import model as consumer', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['consumer'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['consumer'])
+    reviewRoleModelMock.find.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -380,29 +376,10 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('model > import model as mtr', async () => {
+  test('model > import model as reviewer without owner permissions', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['mtr'])
-
-    const result = await connector.model(
-      user,
-      {
-        id: 'testModel',
-        visibility: 'public',
-      } as ModelDoc,
-      ModelAction.Import,
-    )
-
-    expect(result).toStrictEqual({
-      id: 'testModel',
-      info: 'You do not have permission to import a model.',
-      success: false,
-    })
-  })
-
-  test('model > import model as msro', async () => {
-    const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['msro'])
+    mockModelService.getModelSystemRoles.mockReturnValue(['reviewer'])
+    reviewRoleModelMock.find.mockResolvedValue([testReviewRole])
 
     const result = await connector.model(
       user,
@@ -424,7 +401,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > export model as owner', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['owner'])
+    reviewRoleModelMock.find.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -443,7 +421,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > export model as contributor', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['contributor'])
+    reviewRoleModelMock.find.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -463,7 +442,8 @@ describe('connectors > authorisation > base', () => {
 
   test('model > export model as consumer', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['consumer'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['consumer'])
+    reviewRoleModelMock.find.mockResolvedValue([])
 
     const result = await connector.model(
       user,
@@ -481,29 +461,10 @@ describe('connectors > authorisation > base', () => {
     })
   })
 
-  test('model > export model as mtr', async () => {
+  test('model > export model as reviewer without owner permissions', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['mtr'])
-
-    const result = await connector.model(
-      user,
-      {
-        id: 'testModel',
-        visibility: 'public',
-      } as ModelDoc,
-      ModelAction.Export,
-    )
-
-    expect(result).toStrictEqual({
-      id: 'testModel',
-      info: 'You do not have permission to export a model.',
-      success: false,
-    })
-  })
-
-  test('model > export model as msro', async () => {
-    const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['msro'])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['reviewer'])
+    reviewRoleModelMock.find.mockResolvedValue([testReviewRole])
 
     const result = await connector.model(
       user,
@@ -548,10 +509,8 @@ describe('connectors > authorisation > base', () => {
 
   test('release > private model with roles', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    mockModelService.getModelSystemRoles.mockResolvedValue(['owner'])
+    reviewRoleModelMock.find.mockResolvedValue([testReviewRole])
 
     const result = await connector.release(
       user,
@@ -571,7 +530,7 @@ describe('connectors > authorisation > base', () => {
 
   test('release > private model with no roles', async () => {
     const connector = new BasicAuthorisationConnector()
-
+    mockModelService.getModelSystemRoles.mockResolvedValue([])
     const result = await connector.release(
       user,
       {
@@ -591,7 +550,8 @@ describe('connectors > authorisation > base', () => {
 
   test('release > import model with a release as non-owner', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
+    reviewRoleModelMock.find.mockResolvedValue([])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['contributor'])
 
     const result = await connector.release(
       user,
@@ -611,7 +571,8 @@ describe('connectors > authorisation > base', () => {
 
   test('release > import model with a release as owner', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    reviewRoleModelMock.find.mockResolvedValue([])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['owner'])
 
     const result = await connector.release(
       user,
@@ -630,7 +591,8 @@ describe('connectors > authorisation > base', () => {
 
   test('release > export model with a release as non-owner', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['contributor'])
+    reviewRoleModelMock.find.mockResolvedValue([])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['contributor'])
 
     const result = await connector.release(
       user,
@@ -650,7 +612,8 @@ describe('connectors > authorisation > base', () => {
 
   test('release > export model with a release as owner', async () => {
     const connector = new BasicAuthorisationConnector()
-    mockAuthentication.getUserModelRoles.mockReturnValueOnce(['owner'])
+    reviewRoleModelMock.find.mockResolvedValue([])
+    mockModelService.getModelSystemRoles.mockReturnValueOnce(['owner'])
 
     const result = await connector.release(
       user,
@@ -669,7 +632,8 @@ describe('connectors > authorisation > base', () => {
 
   test('image > push with no roles', async () => {
     const connector = new BasicAuthorisationConnector()
-
+    reviewRoleModelMock.find.mockResolvedValue([testReviewRole])
+    mockModelService.getModelSystemRoles.mockReturnValue([])
     mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([])
 
     const result = await connector.images(
@@ -697,7 +661,8 @@ describe('connectors > authorisation > base', () => {
 
   test('image > pull with no roles', async () => {
     const connector = new BasicAuthorisationConnector()
-
+    reviewRoleModelMock.find.mockResolvedValue([testReviewRole])
+    mockModelService.getModelSystemRoles.mockReturnValue([])
     mockAccessRequestService.getModelAccessRequestsForUser.mockReturnValueOnce([])
 
     const result = await connector.images(
