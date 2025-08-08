@@ -1,10 +1,10 @@
 import { Readable } from 'stream'
 
-import { putObjectStream } from '../../clients/s3.js'
-import FileModel from '../../models/File.js'
-import config from '../../utils/config.js'
-import { createFilePath, markFileAsCompleteAfterImport } from '../file.js'
-import log from '../log.js'
+import { putObjectStream } from '../../../clients/s3.js'
+import FileModel from '../../../models/File.js'
+import config from '../../../utils/config.js'
+import { createFilePath, markFileAsCompleteAfterImport } from '../../file.js'
+import log from '../../log.js'
 
 export async function importModelFile(body: Readable, fileId: string, mirroredModelId: string, importId: string) {
   const bucket = config.s3.buckets.uploads

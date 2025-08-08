@@ -1,9 +1,9 @@
 import { Readable } from 'stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { UserInterface } from '../../../src/models/User.js'
-import { importCompressedRegistryImage } from '../../../src/services/importers/imageImporter.js'
-import { MockReadable, MockWritable } from '../../testUtils/streams.js'
+import { UserInterface } from '../../../../src/models/User.js'
+import { importCompressedRegistryImage } from '../../../../src/services/mirroredModel/importers/imageImporter.js'
+import { MockReadable, MockWritable } from '../../../testUtils/streams.js'
 
 const mockTarStream = {
   entry: vi.fn(({ _name, _size }) => {
@@ -32,12 +32,12 @@ vi.mock('stream/promises', () => streamPromisesMocks)
 const tarballMock = vi.hoisted(() => ({
   extractTarGzStream: vi.fn(),
 }))
-vi.mock('../../../src/utils/tarball.js', async () => tarballMock)
+vi.mock('../../../../src/utils/tarball.js', async () => tarballMock)
 
 const typeguardMocks = vi.hoisted(() => ({
   hasKeysOfType: vi.fn(() => true),
 }))
-vi.mock('../../../src/utils/typeguards.js', () => typeguardMocks)
+vi.mock('../../../../src/utils/typeguards.js', () => typeguardMocks)
 
 const registryMocks = vi.hoisted(() => ({
   doesImageLayerExist: vi.fn(() => Promise.resolve(false)),
@@ -46,7 +46,7 @@ const registryMocks = vi.hoisted(() => ({
   putImageManifest: vi.fn(),
   splitDistributionPackageName: vi.fn(() => ({ domain: 'domain', path: 'path', tag: 'tag' }) as any),
 }))
-vi.mock('../../../src/services/registry.js', () => registryMocks)
+vi.mock('../../../../src/services/registry.js', () => registryMocks)
 
 describe('services > importers > imageImporter', () => {
   beforeEach(() => {

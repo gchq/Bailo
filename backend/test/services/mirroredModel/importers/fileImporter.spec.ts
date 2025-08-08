@@ -1,7 +1,7 @@
 import { Readable } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
-import { importModelFile } from '../../../src/services/importers/fileImporter.js'
+import { importModelFile } from '../../../../src/services/mirroredModel/importers/fileImporter.js'
 
 const configMock = vi.hoisted(
   () =>
@@ -13,7 +13,7 @@ const configMock = vi.hoisted(
       },
     }) as any,
 )
-vi.mock('../../../src/utils/config.js', () => ({
+vi.mock('../../../../src/utils/config.js', () => ({
   __esModule: true,
   default: configMock,
 }))
@@ -24,20 +24,20 @@ const logMock = vi.hoisted(() => ({
   warn: vi.fn(),
   error: vi.fn(),
 }))
-vi.mock('../../../src/services/log.js', async () => ({
+vi.mock('../../../../src/services/log.js', async () => ({
   default: logMock,
 }))
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(),
 }))
-vi.mock('../../../src/clients/s3.js', () => s3Mocks)
+vi.mock('../../../../src/clients/s3.js', () => s3Mocks)
 
 const fileMocks = vi.hoisted(() => ({
   createFilePath: vi.fn(() => 'file/path'),
   markFileAsCompleteAfterImport: vi.fn(),
 }))
-vi.mock('../../../src/services/file.js', () => fileMocks)
+vi.mock('../../../../src/services/file.js', () => fileMocks)
 
 const fileModelMocks = vi.hoisted(() => {
   const obj: any = {}
@@ -49,7 +49,7 @@ const fileModelMocks = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../../src/models/File.js', () => ({ default: fileModelMocks }))
+vi.mock('../../../../src/models/File.js', () => ({ default: fileModelMocks }))
 
 describe('services > importers > fileImporter', () => {
   test('importModelFile > success', async () => {

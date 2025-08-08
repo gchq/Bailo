@@ -3,18 +3,18 @@ import { json } from 'node:stream/consumers'
 import { Readable } from 'stream'
 import { finished } from 'stream/promises'
 
-import { UserInterface } from '../../models/User.js'
-import { InternalError } from '../../utils/error.js'
-import { extractTarGzStream } from '../../utils/tarball.js'
-import { hasKeysOfType } from '../../utils/typeguards.js'
-import log from '../log.js'
+import { UserInterface } from '../../../models/User.js'
+import { InternalError } from '../../../utils/error.js'
+import { extractTarGzStream } from '../../../utils/tarball.js'
+import { hasKeysOfType } from '../../../utils/typeguards.js'
+import log from '../../log.js'
 import {
   doesImageLayerExist,
   initialiseImageUpload,
   putImageBlob,
   putImageManifest,
   splitDistributionPackageName,
-} from '../registry.js'
+} from '../../registry.js'
 
 const manifestRegex = /^manifest\.json$/
 const blobRegex = /^blobs\/sha256\/[0-9a-f]{64}$/

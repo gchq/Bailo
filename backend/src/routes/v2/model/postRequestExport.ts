@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { exportModel } from '../../../services/mirroredModel.js'
+import { exportModel } from '../../../services/mirroredModel/mirroredModel.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 

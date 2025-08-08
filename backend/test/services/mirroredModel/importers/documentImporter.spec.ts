@@ -1,10 +1,10 @@
 import { Readable } from 'stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import authorisation from '../../../src/connectors/authorisation/index.js'
-import { UserInterface } from '../../../src/models/User.js'
-import { importDocuments } from '../../../src/services/importers/documentImporter.js'
-import { MockReadable, MockWritable } from '../../testUtils/streams.js'
+import authorisation from '../../../../src/connectors/authorisation/index.js'
+import { UserInterface } from '../../../../src/models/User.js'
+import { importDocuments } from '../../../../src/services/mirroredModel/importers/documentImporter.js'
+import { MockReadable, MockWritable } from '../../../testUtils/streams.js'
 
 const mockTarStream = {
   entry: vi.fn(({ _name, _size }) => {
@@ -30,40 +30,40 @@ const modelParserMock = vi.hoisted(() => ({
   parseModelCard: vi.fn(() => ({}) as any),
   parseRelease: vi.fn(() => ({}) as any),
 }))
-vi.mock('../../../src/services/parsers/modelParser.js', async () => modelParserMock)
+vi.mock('../../../../src/services/mirroredModel/parsers/modelParser.js', async () => modelParserMock)
 
 const tarballMock = vi.hoisted(() => ({
   extractTarGzStream: vi.fn(),
 }))
-vi.mock('../../../src/utils/tarball.js', async () => tarballMock)
+vi.mock('../../../../src/utils/tarball.js', async () => tarballMock)
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({ settings: { mirror: { destinationModelId: '123' } }, card: { schemaId: 'test' } })),
   saveImportedModelCard: vi.fn(() => Promise.resolve({ completed: true })),
   setLatestImportedModelCard: vi.fn(),
 }))
-vi.mock('../../../src/services/model.js', () => modelMocks)
+vi.mock('../../../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
   saveImportedRelease: vi.fn(() => ({ completed: true })),
 }))
-vi.mock('../../../src/services/release.js', () => releaseMocks)
+vi.mock('../../../../src/services/release.js', () => releaseMocks)
 
 const fileMocks = vi.hoisted(() => ({
   saveImportedFile: vi.fn(),
 }))
-vi.mock('../../../src/services/file.js', () => fileMocks)
+vi.mock('../../../../src/services/file.js', () => fileMocks)
 
 const registryMocks = vi.hoisted(() => ({
   joinDistributionPackageName: vi.fn(),
 }))
-vi.mock('../../../src/services/registry.js', () => registryMocks)
+vi.mock('../../../../src/services/registry.js', () => registryMocks)
 
 const authMock = vi.hoisted(() => ({
   model: vi.fn<() => Response>(() => ({ id: 'test', success: true }) as any),
   releases: vi.fn<() => Response[]>(() => [{ id: 'test', success: true }] as any[]),
 }))
-vi.mock('../../../src/connectors/authorisation/index.js', async () => ({
+vi.mock('../../../../src/connectors/authorisation/index.js', async () => ({
   default: authMock,
 }))
 

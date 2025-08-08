@@ -1,6 +1,6 @@
 import { ensureBucketExists } from '../clients/s3.js'
 import log from '../services/log.js'
-import { exportCompressedRegistryImage, ImportKind } from '../services/mirroredModel.js'
+import { exportCompressedRegistryImage, ImportKind } from '../services/mirroredModel/mirroredModel.js'
 import { splitDistributionPackageName } from '../services/registry.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'

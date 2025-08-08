@@ -1,11 +1,11 @@
 import { PassThrough, Readable } from 'stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { Response } from '../../src/connectors/authorisation/base.js'
-import authorisation from '../../src/connectors/authorisation/index.js'
-import { FileScanResult } from '../../src/connectors/fileScanning/Base.js'
-import { ArtefactKind } from '../../src/models/Scan.js'
-import { UserInterface } from '../../src/models/User.js'
+import { Response } from '../../../src/connectors/authorisation/base.js'
+import authorisation from '../../../src/connectors/authorisation/index.js'
+import { FileScanResult } from '../../../src/connectors/fileScanning/Base.js'
+import { ArtefactKind } from '../../../src/models/Scan.js'
+import { UserInterface } from '../../../src/models/User.js'
 import {
   exportCompressedRegistryImage,
   exportModel,
@@ -15,7 +15,7 @@ import {
   importModel,
   uploadReleaseFiles,
   uploadReleaseImages,
-} from '../../src/services/mirroredModel.js'
+} from '../../../src/services/mirroredModel/mirroredModel.js'
 
 const fileScanResult: FileScanResult = {
   state: 'complete',
@@ -28,7 +28,7 @@ const fileScanningMock = vi.hoisted(() => ({
   info: vi.fn(() => []),
   scan: vi.fn(() => new Promise(() => [fileScanResult])),
 }))
-vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
+vi.mock('../../../src/connectors/fileScanning/index.js', async () => ({ default: fileScanningMock }))
 
 const fetchMock = vi.hoisted(() => ({
   default: vi.fn(() => ({ ok: true, body: ReadableStream.from('test'), text: vi.fn() })),
@@ -39,7 +39,7 @@ const authMock = vi.hoisted(() => ({
   model: vi.fn<() => Response>(() => ({ id: 'test', success: true })),
   releases: vi.fn<() => Response[]>(() => []),
 }))
-vi.mock('../../src/connectors/authorisation/index.js', async () => ({
+vi.mock('../../../src/connectors/authorisation/index.js', async () => ({
   default: authMock,
 }))
 
@@ -64,7 +64,7 @@ const configMock = vi.hoisted(
       },
     }) as any,
 )
-vi.mock('../../src/utils/config.js', () => ({
+vi.mock('../../../src/utils/config.js', () => ({
   __esModule: true,
   default: configMock,
 }))
@@ -73,7 +73,7 @@ const tarballMocks = vi.hoisted(() => ({
   createTarGzStreams: vi.fn(),
   pipeStreamToTarEntry: vi.fn(() => Promise.resolve('ok')),
 }))
-vi.mock('../../src/utils/tarball.js', () => tarballMocks)
+vi.mock('../../../src/utils/tarball.js', () => tarballMocks)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -81,7 +81,7 @@ const logMock = vi.hoisted(() => ({
   warn: vi.fn(),
   error: vi.fn(),
 }))
-vi.mock('../../src/services/log.js', async () => ({
+vi.mock('../../../src/services/log.js', async () => ({
   default: logMock,
 }))
 
@@ -97,7 +97,7 @@ const modelMocks = vi.hoisted(() => ({
     card: { schemaId: 'schemaId' },
   })),
 }))
-vi.mock('../../src/services/model.js', () => modelMocks)
+vi.mock('../../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
   getReleasesForExport: vi.fn(
@@ -113,12 +113,12 @@ const releaseMocks = vi.hoisted(() => ({
   ),
   getAllFileIds: vi.fn(() => [] as string[]),
 }))
-vi.mock('../../src/services/release.js', () => releaseMocks)
+vi.mock('../../../src/services/release.js', () => releaseMocks)
 
 const s3Mocks = vi.hoisted(() => ({
   uploadToS3: vi.fn(() => Promise.resolve()),
 }))
-vi.mock('../../src/services/s3.js', () => s3Mocks)
+vi.mock('../../../src/services/s3.js', () => s3Mocks)
 
 const documentImporterMocks = vi.hoisted(() => ({
   importDocuments: vi.fn(() =>
@@ -135,19 +135,19 @@ const documentImporterMocks = vi.hoisted(() => ({
     }),
   ),
 }))
-vi.mock('../../src/services/importers/documentImporter.js', () => documentImporterMocks)
+vi.mock('../../../src/services/mirroredModel/importers/documentImporter.js', () => documentImporterMocks)
 
 const fileImporterMocks = vi.hoisted(() => ({
   importModelFile: vi.fn(() => Promise.resolve({ sourcePath: '/source/path', newPath: '/new/path' })),
 }))
-vi.mock('../../src/services/importers/fileImporter.js', () => fileImporterMocks)
+vi.mock('../../../src/services/mirroredModel/importers/fileImporter.js', () => fileImporterMocks)
 
 const imageImporterMocks = vi.hoisted(() => ({
   importCompressedRegistryImage: vi.fn(() =>
     Promise.resolve({ image: { modelId: 'modelId', imageName: 'imageName', imageTag: 'imageTag' } }),
   ),
 }))
-vi.mock('../../src/services/importers/imageImporter.js', () => imageImporterMocks)
+vi.mock('../../../src/services/mirroredModel/importers/imageImporter.js', () => imageImporterMocks)
 
 const fileMocks = vi.hoisted(() => ({
   createFilePath: vi.fn(() => 'file/path'),
@@ -161,7 +161,7 @@ const fileMocks = vi.hoisted(() => ({
   ]),
   getTotalFileSize: vi.fn(() => 42),
 }))
-vi.mock('../../src/services/file.js', () => fileMocks)
+vi.mock('../../../src/services/file.js', () => fileMocks)
 
 const registryMocks = vi.hoisted(() => ({
   getImageBlob: vi.fn(() => ({ body: ReadableStream.from('test') })),
@@ -173,7 +173,7 @@ const registryMocks = vi.hoisted(() => ({
     tag: 'tag',
   })),
 }))
-vi.mock('../../src/services/registry.js', () => registryMocks)
+vi.mock('../../../src/services/registry.js', () => registryMocks)
 
 describe('services > mirroredModel', () => {
   beforeEach(() => {
