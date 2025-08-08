@@ -67,7 +67,7 @@ async function script() {
       },
     },
   ])
-  log.info('Found models with releases:', { ...(({ _id, ...all }) => all)(modelsWithReleasesAndFiles[0]) })
+  log.info('Found models with releases with Files:', { ...(({ _id, ...all }) => all)(modelsWithReleasesAndFiles[0]) })
 
   const filesPerReleaseStats = await ReleaseModel.aggregate([
     { $match: { fileIds: { $exists: true, $ne: [] } } }, // Releases with Files
@@ -97,7 +97,7 @@ async function script() {
       },
     },
   ])
-  log.info('Found files per release:', { distribution: filesPerReleaseStats[0]?.distribution })
+  log.info('Found Files per release:', { distribution: filesPerReleaseStats[0]?.distribution })
 
   const fileSizeDistribution = await FileModel.aggregate([
     {
@@ -147,7 +147,7 @@ async function script() {
       ]),
     }).map(async ([k, v]) => [k, await v]),
   ).then(Object.fromEntries)
-  log.info('Summary stats:', stats)
+  log.info('Summary File stats:', stats)
 
   // Get the catalog of repositories
   const catalogResponse = await fetch(`${registry}/v2/_catalog`, {
@@ -156,6 +156,7 @@ async function script() {
     },
     dispatcher: agent,
   })
+  log.debug({ catalogResponse })
   const catalog = (await catalogResponse.json()) as any
   const repositories = catalog.repositories // Array of repository names
 
@@ -176,7 +177,7 @@ async function script() {
       },
     },
   ])
-  log.info('Found models with releases:', {
+  log.info('Found models with releases with Files:', {
     totalRepositories: repositories.length,
     releasesWithImagesCount: releasesWithImages.length,
   })
@@ -201,7 +202,7 @@ async function script() {
       },
     },
   ])
-  log.info('Found images per release:', { distribution: imagesPerReleaseStats[0]?.distribution })
+  log.info('Found Images per release:', { distribution: imagesPerReleaseStats[0]?.distribution })
 
   const allImageSizes: any[] = []
   for (const repo of repositories) {
@@ -235,6 +236,15 @@ async function script() {
     }
   }
   log.info('Image size distribution:', allImageSizes)
+
+  const totalImageSize = allImageSizes.reduce((a, b) => a + b, 0)
+  log.info('Summary Image stats: ', {
+    minSize: Math.min(...allImageSizes),
+    maxSize: Math.max(...allImageSizes),
+    avgSize: totalImageSize / allImageSizes.length || 0,
+    totalSize: totalImageSize,
+    imageCount: allImageSizes.length,
+  })
 
   // cleanup
   setTimeout(disconnectFromMongoose, 50)
