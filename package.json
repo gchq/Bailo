@@ -1,21 +1,28 @@
 {
   "name": "bailo",
+  "private": true,
+  "description": "Meta-package for Bailo frontend/backend",
+  "license": "Apache-2.0",
   "version": "0.4.0",
   "scripts": {
-    "cy:open": "npm --prefix ./frontend/ run cy:open",
-    "cy:run": "npm --prefix ./frontend/ run cy:run",
-    "certs": "npm --prefix ./backend/ run certs",
-    "script": "npm --prefix ./backend/ run script",
-    "test": "npm --prefix ./backend/ test run && npm --prefix ./frontend/ run test run",
-    "lint": "npm --prefix ./backend/ run lint && npm --prefix ./frontend/ run lint",
+    "cy:open": "npm --workspace=frontend run cy:open",
+    "cy:run": "npm --workspace=frontend run cy:run",
+    "certs": "npm --workspace=backend run certs",
+    "script": "npm --workspace=backend run script",
+    "test": "npm --workspaces test run",
+    "lint": "npm --workspaces run lint",
     "style": "prettier --write .",
     "check-style": "prettier --check .",
-    "postinstall": "npm --prefix ./backend/ install ./backend/ && npm --prefix ./frontend/ install ./frontend/",
-    "prepare": "husky"
+    "prepare": "husky",
+    "seed": "npm --workspace=backend run seed"
   },
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^16.2.3",
     "prettier": "^3.6.2"
-  }
+  },
+  "workspaces": [
+    "backend/",
+    "frontend/"
+  ]
 }

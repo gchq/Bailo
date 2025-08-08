@@ -95,6 +95,7 @@ services:
       target: dev
     volumes:
       - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
     depends_on:
       - backend
     ports:
@@ -111,6 +112,7 @@ services:
       - ./backend/config:/app/config
       - ./backend/certs:/certs
       - ./backend/certs:/usr/local/share/ca-certificates
+      - backend_node_modules:/app/node_modules
     ports:
       - 3001:3001
       - 9229:9229
@@ -136,3 +138,5 @@ services:
 volumes:
   minioVolume:
   mongoVolume:
+  frontend_node_modules:
+  backend_node_modules:

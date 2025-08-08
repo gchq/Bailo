@@ -1,16 +1,18 @@
 {
   "name": "@bailo/frontend",
   "private": true,
+  "description": "Frontend UI for Bailo",
+  "license": "Apache-2.0",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "cy:open": "cypress open",
-    "cy:run": "cypress run --spec \"cypress/e2e/bailo/**/*\"",
-    "start": "next start",
-    "lint": "eslint --max-warnings 0 actions cypress pages src types utils",
+    "start": "npx next start",
+    "dev": "npx next dev",
+    "build": "npx next build",
+    "test": "vitest",
+    "lint": "npx next lint --max-warnings 0 actions cypress pages src types utils",
     "style": "prettier --write .",
     "check-style": "prettier --check .",
-    "test": "vitest"
+    "cy:open": "npx cypress open",
+    "cy:run": "npx cypress run --spec \"cypress/e2e/bailo/**/*\""
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",

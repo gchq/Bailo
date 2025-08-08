@@ -1,6 +1,8 @@
 {
   "name": "@bailo/backend",
-  "description": "",
+  "private": true,
+  "description": "Backend API for Bailo",
+  "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
@@ -14,9 +16,6 @@
     "certs": "mkdir -p certs && openssl genrsa -out certs/key.pem 2048 && openssl req -new -x509 -key certs/key.pem -out certs/cert.pem -config certs/san.cnf -extensions 'v3_req' -days 360 && tsx src/scripts/generateJWKS.ts",
     "seed": "tsx src/seeds/index.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.4",
     "@aws-sdk/client-cognito-identity-provider": "3.899.0",
