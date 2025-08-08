@@ -2,11 +2,13 @@ import { Done } from '@mui/icons-material'
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
 import { useGetModelRoles } from 'actions/model'
+import { useGetUiConfig } from 'actions/uiConfig'
 import { ReactNode, useCallback, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, RoleKind } from 'types/types'
+import { getRoleDisplayName } from 'utils/roles'
 import { toSentenceCase } from 'utils/stringUtils'
 
 interface EntryRolesInfoProps {
@@ -34,20 +36,28 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
     isModelRolesError: isEntryRolesError,
   } = useGetModelRoles(entry.id)
 
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+
   const getFilteredRoles = useCallback(
     (roleKind: string) =>
       entryRoles.reduce<ReactNode[]>((filteredRoles, entryRole) => {
-        if (entryRole.kind === roleKind) {
+        const systemRole =
+          entryRoles.find((role) => role.shortName === entryRole.systemRole)?.shortName || 'Unknown Role'
+        if (uiConfig && entryRole.kind === roleKind) {
           filteredRoles.push(
             <Box key={entryRole.shortName}>
               <Typography fontWeight='bold'>{entryRole.name}</Typography>
               <Typography>{entryRole.description}</Typography>
+              <em>
+                This role also shares permissions with the {getRoleDisplayName(systemRole, entryRoles, uiConfig)} system
+                role.
+              </em>
             </Box>,
           )
         }
         return filteredRoles
       }, []),
-    [entryRoles],
+    [entryRoles, uiConfig],
   )
 
   const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.REVIEW), [getFilteredRoles])
@@ -84,19 +94,24 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
     return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
   return (
     <>
-      {isEntryRolesLoading && <Loading />}
+      {(isEntryRolesLoading || isUiConfigLoading) && <Loading />}
       {!isEntryRolesLoading && (
         <Stack spacing={2}>
           <Typography>
-            Roles in Bailo are split into two categories; standard and dynamic. Standard roles are generic across
-            different schema and are used for determining {`${toSentenceCase(entry.kind)}`} permissions for general
-            purpose {`${toSentenceCase(entry.kind)}`} upkeep, whereas dynamic roles are created on a per schema basis
-            and used as part of the review process. The dynamic roles presented below are specified on the schema
-            selected for this {`${toSentenceCase(entry.kind)}`} and may not apply to other{' '}
-            {`${toSentenceCase(entry.kind)}s`} using a different schema.
+            Roles in Bailo are split into two categories; system and review. System roles are generic across different
+            schema and are used for determining {`${toSentenceCase(entry.kind)}`} permissions for general purpose{' '}
+            {`${toSentenceCase(entry.kind)}`} upkeep, whereas review roles are created on a per schema basis and used as
+            part of the review process. The review roles presented below are specified on the schema selected for this{' '}
+            {`${toSentenceCase(entry.kind)}`} and may not apply to other {`${toSentenceCase(entry.kind)}s`} using a
+            different schema.
           </Typography>
+          <Typography>Review roles can also optionally share permissions with system roles.</Typography>
           <Stack spacing={2}>
             <Stack spacing={1}>
               <Typography component='h3' variant='h6' fontWeight='bold'>

@@ -25,6 +25,7 @@ export async function getAllEntryRoles(user: UserInterface, modelId?: string) {
         kind: RoleKind.REVIEW,
         description: role.description,
         shortName: role.shortName,
+        systemRole: role.systemRole,
       }))
     } else {
       log.info({ modelId }, 'Schema has not been set on the model. Returning system roles.')

@@ -1,9 +1,12 @@
 import ClearIcon from '@mui/icons-material/Clear'
 import { Autocomplete, Chip, IconButton, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material'
+import { useGetUiConfig } from 'actions/uiConfig'
 import * as _ from 'lodash-es'
 import { SyntheticEvent, useMemo } from 'react'
+import Loading from 'src/common/Loading'
 import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
+import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, SystemRole } from 'types/types'
 import { getRoleDisplayName } from 'utils/roles'
 import { toSentenceCase } from 'utils/stringUtils'
@@ -25,6 +28,8 @@ export default function EntityItem({
 }: EntityItemProps) {
   const entryRoleOptions = useMemo(() => entryRoles.map((role) => role.shortName), [entryRoles])
 
+  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+
   function onRoleChange(_event: SyntheticEvent<Element, Event>, newValues: string[]) {
     const updatedAccessList = _.cloneDeep(collaborators)
     const index = updatedAccessList.findIndex((access) => access.entity === entity.entity)
@@ -36,6 +41,14 @@ export default function EntityItem({
     onCollaboratorsChange(collaborators.filter((access) => access.entity !== entity.entity))
   }
 
+  if (isUiConfigError) {
+    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
+  }
+
+  if (isUiConfigLoading) {
+    return <Loading />
+  }
+
   return (
     <TableRow>
       <TableCell>
@@ -45,7 +58,7 @@ export default function EntityItem({
         </Stack>
       </TableCell>
       <TableCell>
-        {entryRoles.length > 0 && (
+        {uiConfig && entryRoles.length > 0 && (
           <Autocomplete
             multiple
             size='small'
@@ -53,12 +66,16 @@ export default function EntityItem({
             value={entity.roles}
             data-test='accessListAutocomplete'
             options={entryRoleOptions}
-            getOptionLabel={(role) => getRoleDisplayName(role, entryRoles)}
+            getOptionLabel={(role) => getRoleDisplayName(role, entryRoles, uiConfig)}
             onChange={onRoleChange}
             renderInput={(params) => <TextField {...params} label='Select roles' />}
             renderTags={(value, getTagProps) =>
               value.map((option, index) => (
-                <Chip label={getRoleDisplayName(option, entryRoles)} {...getTagProps({ index })} key={option} />
+                <Chip
+                  label={getRoleDisplayName(option, entryRoles, uiConfig)}
+                  {...getTagProps({ index })}
+                  key={option}
+                />
               ))
             }
           />
