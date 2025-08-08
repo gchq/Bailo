@@ -24,21 +24,21 @@ jobs:
             tar: /tmp/bailo_backend.tar
             artifact: bailo_backend
             cache_scope: backend
-            tag: bailo_backend:latest
+            tag: bailo_backend:latest,bailo_backend:prod
           - name: frontend
             context: frontend
             dockerfile: frontend/Dockerfile
             tar: /tmp/bailo_frontend.tar
             artifact: bailo_frontend
             cache_scope: frontend
-            tag: bailo_frontend:latest
+            tag: bailo_frontend:latest,bailo_frontend:prod
           - name: modelscan
             context: lib/modelscan_api
             dockerfile: lib/modelscan_api/Dockerfile
             tar: /tmp/bailo_modelscan.tar
             artifact: bailo_modelscan
             cache_scope: modelscan
-            tag: bailo_modelscan:latest
+            tag: bailo_modelscan:latest,bailo_modelscan:prod
 
     steps:
       # Clone repository
