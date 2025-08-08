@@ -347,7 +347,12 @@ jobs:
           }
           EOT
 
-      - run: docker compose -f compose.yaml -f compose.prod.yaml --env-file prod.env up -d --wait --wait-timeout 60
+      - name: Start services
+        run: >
+          docker compose -f compose.yaml -f compose.prod.yaml
+          --env-file prod.env --progress=plain --parallel=-1
+          up -d
+          --wait --wait-timeout 60
 
       # e2e with Cypress
       - uses: cypress-io/github-action@v6
