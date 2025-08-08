@@ -1,0 +1,79 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`utils > tarball > createTarGzStreams > success 1`] = `
+{
+  "gzipStream": MockReadable {
+    "_events": {
+      "close": undefined,
+      "data": undefined,
+      "end": undefined,
+      "error": undefined,
+      "readable": undefined,
+    },
+    "_maxListeners": undefined,
+    "_readableState": ReadableState {
+      "awaitDrainWriters": null,
+      "buffer": [],
+      "bufferIndex": 0,
+      "highWaterMark": 65536,
+      "length": 0,
+      "pipes": [],
+      Symbol(kState): 1052940,
+    },
+    Symbol(shapeMode): true,
+    Symbol(kCapture): false,
+  },
+  "tarStream": {
+    "entry": [MockFunction spy],
+    "finalize": [MockFunction spy],
+    "pipe": [MockFunction spy],
+  },
+}
+`;
+
+exports[`utils > tarball > createUnTarGzStreams > success 1`] = `
+{
+  "ungzipStream": MockReadable {
+    "_events": {
+      "close": undefined,
+      "data": undefined,
+      "end": undefined,
+      "error": undefined,
+      "readable": undefined,
+    },
+    "_maxListeners": undefined,
+    "_readableState": ReadableState {
+      "awaitDrainWriters": null,
+      "buffer": [],
+      "bufferIndex": 0,
+      "highWaterMark": 65536,
+      "length": 0,
+      "pipes": [],
+      Symbol(kState): 1052940,
+    },
+    Symbol(shapeMode): true,
+    Symbol(kCapture): false,
+  },
+  "untarStream": MockReadable {
+    "_events": {
+      "close": undefined,
+      "data": undefined,
+      "end": undefined,
+      "error": undefined,
+      "readable": undefined,
+    },
+    "_maxListeners": undefined,
+    "_readableState": ReadableState {
+      "awaitDrainWriters": null,
+      "buffer": [],
+      "bufferIndex": 0,
+      "highWaterMark": 65536,
+      "length": 0,
+      "pipes": [],
+      Symbol(kState): 1052940,
+    },
+    Symbol(shapeMode): true,
+    Symbol(kCapture): false,
+  },
+}
+`;
