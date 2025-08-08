@@ -10,9 +10,7 @@ services:
     volumes:
       - mongoVolume:/bitnami/mongodb
     healthcheck:
-      test:
-        test $$(mongosh --port 27017 --quiet --eval "try
-        {rs.initiate({_id:'repl-set',members:[{_id:0,host:\"mongo:27017\"}]})} catch(e) {rs.status().ok}") -eq 1
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       start_period: 30s
 
