@@ -2,7 +2,6 @@ import { Done } from '@mui/icons-material'
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
 import { useGetModelRoles } from 'actions/model'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { ReactNode, useCallback, useMemo } from 'react'
 import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
@@ -36,28 +35,25 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
     isModelRolesError: isEntryRolesError,
   } = useGetModelRoles(entry.id)
 
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-
   const getFilteredRoles = useCallback(
     (roleKind: string) =>
       entryRoles.reduce<ReactNode[]>((filteredRoles, entryRole) => {
         const systemRole =
           entryRoles.find((role) => role.shortName === entryRole.systemRole)?.shortName || 'Unknown Role'
-        if (uiConfig && entryRole.kind === roleKind) {
+        if (entryRole.kind === roleKind) {
           filteredRoles.push(
             <Box key={entryRole.shortName}>
               <Typography fontWeight='bold'>{entryRole.name}</Typography>
               <Typography>{entryRole.description}</Typography>
               <em>
-                This role also shares permissions with the {getRoleDisplayName(systemRole, entryRoles, uiConfig)} system
-                role.
+                This role also shares permissions with the {getRoleDisplayName(systemRole, entryRoles)} system role.
               </em>
             </Box>,
           )
         }
         return filteredRoles
       }, []),
-    [entryRoles, uiConfig],
+    [entryRoles],
   )
 
   const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.REVIEW), [getFilteredRoles])
@@ -94,13 +90,9 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
     return <MessageAlert message={isEntryRolesError.info.message} severity='error' />
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
   return (
     <>
-      {(isEntryRolesLoading || isUiConfigLoading) && <Loading />}
+      {isEntryRolesLoading && <Loading />}
       {!isEntryRolesLoading && (
         <Stack spacing={2}>
           <Typography>

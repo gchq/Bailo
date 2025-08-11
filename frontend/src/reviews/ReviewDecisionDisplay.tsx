@@ -6,7 +6,6 @@ import { Box, Divider, IconButton, Menu, MenuItem, Stack, Typography } from '@mu
 import { useTheme } from '@mui/material/styles'
 import { useGetModelRoles } from 'actions/model'
 import { patchResponse } from 'actions/response'
-import { useGetUiConfig } from 'actions/uiConfig'
 import { useGetUserInformation } from 'actions/user'
 import { useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -44,7 +43,6 @@ export default function ReviewDecisionDisplay({
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
     response.entity.split(':')[1],
   )
-  const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
   const [entityKind, username] = useMemo(() => response.entity.split(':'), [response.entity])
 
@@ -92,11 +90,7 @@ export default function ReviewDecisionDisplay({
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
-  if (isUiConfigError) {
-    return <MessageAlert message={isUiConfigError.info.message} severity='error' />
-  }
-
-  if (isUserInformationLoading || isUiConfigLoading || isModelRolesLoading) {
+  if (isUserInformationLoading || isModelRolesLoading) {
     return <Loading />
   }
 
@@ -135,8 +129,8 @@ export default function ReviewDecisionDisplay({
                 </span>
                 <span>{response.decision === Decision.Undo && <Undo fontSize='small' />}</span>
               </Stack>
-              {uiConfig && response.role && (
-                <Typography variant='caption'>as {getRoleDisplayName(response.role, modelRoles, uiConfig)}</Typography>
+              {response.role && (
+                <Typography variant='caption'>as {getRoleDisplayName(response.role, modelRoles)}</Typography>
               )}
               <span>
                 {response.outdated && (
