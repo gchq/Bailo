@@ -37,6 +37,17 @@ export async function postReviewRole(reviewRole: ReviewRolesFormData) {
   })
 }
 
+export async function patchReviewRole(
+  reviewRoleShortName: string,
+  diff: Partial<Pick<ReviewRolesFormData, 'name' | 'description' | 'defaultEntities' | 'collaboratorRole'>>,
+) {
+  return fetch(`/api/v2/review/role/${reviewRoleShortName}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(diff),
+  })
+}
+
 export async function deleteReviewRole(reviewRoleShortName: string) {
   return fetch(`/api/v2/review/role/${reviewRoleShortName}`, {
     method: 'delete',

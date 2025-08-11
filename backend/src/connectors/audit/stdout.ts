@@ -376,6 +376,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  OnUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+    this.checkEventType(AuditInfo.UpdateReviewRole, req)
+    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
+    req.log.info(event, req.audit.description)
+  }
+
   onDeleteReviewRole(req: Request, reviewRoleId: string) {
     this.checkEventType(AuditInfo.DeleteReviewRole, req)
     const event = this.generateEvent(req, { reviewRoleId: reviewRoleId })

@@ -1,6 +1,7 @@
 import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
 
 interface EditableTextProps {
@@ -10,6 +11,7 @@ interface EditableTextProps {
   submitButtonText?: string
   multiline?: boolean
   richText?: boolean
+  loading?: boolean
 }
 
 export default function EditableText({
@@ -19,6 +21,7 @@ export default function EditableText({
   submitButtonText = 'Submit',
   multiline = false,
   richText = false,
+  loading = false,
 }: EditableTextProps) {
   const [isEditMode, setIsEditMode] = useState(false)
   const [newValue, setNewValue] = useState(value)
@@ -52,7 +55,7 @@ export default function EditableText({
         <Stack direction='row' spacing={1} alignItems='center'>
           <Tooltip title={tooltipText}>
             <IconButton onClick={() => setIsEditMode(true)}>
-              <EditIcon color='primary' fontSize='small' />
+              {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
             </IconButton>
           </Tooltip>
           <Typography>{value}</Typography>

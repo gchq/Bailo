@@ -61,6 +61,7 @@ import { patchResponseReaction } from './routes/v2/response/patchResponseReactio
 import { deleteReviewRole } from './routes/v2/review/deleteReviewRole.js'
 import { getReviewRoles } from './routes/v2/review/getReviewRoles.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
+import { patchReviewRole } from './routes/v2/review/patchReviewRole.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
 import { postReviewRole } from './routes/v2/review/postReviewRole.js'
@@ -206,6 +207,7 @@ server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileSc
 server.get('/api/v2/review/roles', ...getReviewRoles)
 server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
 server.post('/api/v2/review/role', ...postReviewRole)
+server.patch('/api/v2/review/role/:shortName', ...patchReviewRole)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

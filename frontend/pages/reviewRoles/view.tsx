@@ -1,9 +1,10 @@
 import { Box, Button, Container, Divider, List, ListItem, Paper, Stack, Typography } from '@mui/material'
-import { deleteReviewRole, useGetReviewRoles } from 'actions/reviewRoles'
+import { deleteReviewRole, patchReviewRole, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
 import { Fragment, useCallback, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
+import EditableText from 'src/common/EditableText'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
@@ -11,6 +12,8 @@ import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import { ReviewRolesFormData } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 import { plural, toTitleCase } from 'utils/stringUtils'
 
 export default function ReviewRoles() {
@@ -20,6 +23,7 @@ export default function ReviewRoles() {
   const [errorMessage, setErrorMessage] = useState('')
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
+  const [loading, setLoading] = useState(false)
 
   const listRoles = useMemo(
     () =>
@@ -33,6 +37,24 @@ export default function ReviewRoles() {
         </SimpleListItemButton>
       )),
     [reviewRoles, selectedRole],
+  )
+
+  const handleSubmit = useCallback(
+    async (
+      shortName: string,
+      diff: Partial<Pick<ReviewRolesFormData, 'name' | 'description' | 'defaultEntities' | 'collaboratorRole'>>,
+    ) => {
+      setErrorMessage('')
+      setLoading(true)
+      const res = await patchReviewRole(shortName, diff)
+
+      if (!res.ok) {
+        setErrorMessage(await getErrorMessage(res))
+      }
+
+      setLoading(false)
+    },
+    [],
   )
 
   const schemasLength = useCallback(
@@ -75,7 +97,14 @@ export default function ReviewRoles() {
                   <Typography color='primary' fontWeight='bold'>
                     Description
                   </Typography>
-                  <Typography>{reviewRole.description}</Typography>
+                  <EditableText
+                    value={reviewRole.description!}
+                    onSubmit={(newValue) => {
+                      handleSubmit(reviewRole.shortName, { description: newValue })
+                    }}
+                    tooltipText='Edit review role description'
+                    loading={loading}
+                  />
                 </Box>
                 <Box>
                   <Typography color='primary' fontWeight='bold'>
@@ -126,12 +155,13 @@ export default function ReviewRoles() {
     [
       reviewRoles,
       selectedRole,
-      setConfirmationOpen,
+      loading,
       handleOpenDeleteConfirmation,
-      handleDeleteReviewRole,
       confirmationOpen,
-      errorMessage,
       schemasLength,
+      errorMessage,
+      handleSubmit,
+      handleDeleteReviewRole,
     ],
   )
 
