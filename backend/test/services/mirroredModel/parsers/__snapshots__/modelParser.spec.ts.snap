@@ -1,0 +1,31 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > parsers > modelParser > parseFile > success 1`] = `Promise {}`;
+
+exports[`services > parsers > modelParser > parseModelCard > success 1`] = `
+{
+  "createdAt": "timestamp",
+  "createdBy": "user",
+  "modelId": "mirroredModelId",
+  "schemaId": "schemaId",
+  "updatedAt": "timestamp",
+  "version": 2,
+}
+`;
+
+exports[`services > parsers > modelParser > parseRelease > success 1`] = `
+{
+  "createdAt": "timestamp",
+  "createdBy": "user",
+  "deleted": false,
+  "draft": false,
+  "fileIds": [],
+  "images": [],
+  "minor": false,
+  "modelCardVersion": 1,
+  "modelId": "mirroredModelId",
+  "notes": "notes",
+  "semver": "0.0.1",
+  "updatedAt": "timestamp",
+}
+`;

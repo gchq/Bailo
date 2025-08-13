@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > importers > fileImporter > importModelFile > skip complete 1`] = `
+{
+  "newPath": "file/path",
+  "sourcePath": "fileId",
+}
+`;
+
+exports[`services > importers > fileImporter > importModelFile > success 1`] = `
+{
+  "newPath": "file/path",
+  "sourcePath": "fileId",
+}
+`;

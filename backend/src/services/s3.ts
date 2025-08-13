@@ -4,7 +4,7 @@ import { sign } from '../clients/kms.js'
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import config from '../utils/config.js'
 import log from './log.js'
-import { ExportMetadata, generateDigest } from './mirroredModel.js'
+import { ExportMetadata, generateDigest } from './mirroredModel/mirroredModel.js'
 
 export async function uploadToS3(
   fileName: string,

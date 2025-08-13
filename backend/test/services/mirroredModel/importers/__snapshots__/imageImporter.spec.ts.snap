@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > importers > imageImporter > importCompressedRegistryImage > blob skip existing success 1`] = `
+{
+  "image": {
+    "imageName": "path",
+    "imageTag": "tag",
+    "modelId": "modelId",
+  },
+}
+`;
+
+exports[`services > importers > imageImporter > importCompressedRegistryImage > blob upload success 1`] = `
+{
+  "image": {
+    "imageName": "path",
+    "imageTag": "tag",
+    "modelId": "modelId",
+  },
+}
+`;
+
+exports[`services > importers > imageImporter > importCompressedRegistryImage > manifest.json success 1`] = `
+{
+  "image": {
+    "imageName": "path",
+    "imageTag": "tag",
+    "modelId": "modelId",
+  },
+}
+`;
+
+exports[`services > importers > imageImporter > importCompressedRegistryImage > skip non-file entry 1`] = `
+{
+  "image": {
+    "imageName": "path",
+    "imageTag": "tag",
+    "modelId": "modelId",
+  },
+}
+`;
