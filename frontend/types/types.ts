@@ -236,6 +236,7 @@ export interface SystemRole {
   shortName: string
   kind?: RoleKindKeys
   description?: string
+  systemRole?: SystemRolesKeys
 }
 
 export const SchemaKindLabel = {

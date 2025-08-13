@@ -1,6 +1,7 @@
 import ModelModel from '../models/Model.js'
 import { UserInterface } from '../models/User.js'
 import { Role, RoleKind } from '../types/types.js'
+import config from '../utils/config.js'
 import { BadReq } from '../utils/error.js'
 import { getAccessRequestsByModel } from './accessRequest.js'
 import log from './log.js'
@@ -25,6 +26,7 @@ export async function getAllEntryRoles(user: UserInterface, modelId?: string) {
         kind: RoleKind.REVIEW,
         description: role.description,
         shortName: role.shortName,
+        systemRole: role.systemRole,
       }))
     } else {
       log.info({ modelId }, 'Schema has not been set on the model. Returning system roles.')
@@ -34,20 +36,20 @@ export async function getAllEntryRoles(user: UserInterface, modelId?: string) {
     ...schemaRoles,
     {
       shortName: 'consumer',
-      name: 'Consumer',
+      name: `${config.ui.roleDisplayNames.consumer}`,
       kind: RoleKind.SYSTEM,
       description:
         'This provides read only permissions for the model. If a model is private, these users will be able to view the model and create access requests.',
     },
     {
       shortName: 'contributor',
-      name: 'Contributor',
+      name: `${config.ui.roleDisplayNames.contributor}`,
       kind: RoleKind.SYSTEM,
       description: 'This role allows users edit the model card and draft releases.',
     },
     {
       shortName: 'owner',
-      name: 'Owner',
+      name: `${config.ui.roleDisplayNames.owner}`,
       kind: RoleKind.SYSTEM,
       description: 'This role includes all permissions, such as managing model access and model deletion.',
     },

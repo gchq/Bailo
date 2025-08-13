@@ -90,13 +90,12 @@ export default function ReviewDecisionDisplay({
     return <MessageAlert message={isModelRolesError.info.message} severity='error' />
   }
 
-  if (isUserInformationLoading) {
+  if (isUserInformationLoading || isModelRolesLoading) {
     return <Loading />
   }
 
   return (
     <>
-      {isModelRolesLoading && <Loading />}
       <Stack direction='row' spacing={2} alignItems='flex-start'>
         <Box sx={{ pt: 2, pl: 2 }}>
           <UserAvatar entity={{ kind: entityKind as EntityKind, id: username }} />
