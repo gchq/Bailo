@@ -53,7 +53,7 @@ export default function ReviewDecisionDisplay({
   const handleReplyOnClick = (value: string | undefined) => {
     setAnchorEl(null)
     if (value) {
-      const username = userInformation ? userInformation.name : 'Unknown user'
+      const username = userInformation ? userInformation.name : 'Unknown User'
       const originalComment = value.replace(/^/gm, '>')
       const quote = `> Replying to **${username}** on **${formatDateString(response.createdAt)}** \n>\n${originalComment}`
       onReplyButtonClick(quote)
