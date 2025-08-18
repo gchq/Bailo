@@ -34,7 +34,7 @@ mlflow = [
 test = [
     "black==25.1.0",
     "check-manifest==0.50",
-    "pre-commit==4.2.0",
+    "pre-commit==4.3.0",
     "pylint==3.3.7",
     "pylint_junit==0.3.5",
     "pytest-cov==6.2.1",
