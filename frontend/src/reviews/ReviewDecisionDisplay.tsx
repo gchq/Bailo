@@ -82,7 +82,7 @@ export default function ReviewDecisionDisplay({
     }
   }
 
-  if (isUserInformationError) {
+  if (isUserInformationError && isUserInformationError.status !== 404) {
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
   }
 
