@@ -14,7 +14,7 @@ import { Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getReleaseBySemver } from './release.js'
-import { findReviewForResponse, findReviewsForAccessRequests } from './review.js'
+import { findReviewForResponse, findReviews, findReviewsForAccessRequests } from './review.js'
 import { notifyReviewResponseForAccess, notifyReviewResponseForRelease } from './smtp/smtp.js'
 import { sendWebhooks } from './webhook.js'
 
@@ -38,6 +38,11 @@ export async function getResponsesByParentIds(parentIds: string[]) {
   }
 
   return responses
+}
+
+export async function getResponsesByUser(user: UserInterface) {
+  const reviews = await findReviews(user, true)
+  return await getResponsesByParentIds(reviews.map((review) => review['_id']))
 }
 
 export async function updateResponse(user: UserInterface, responseId: string, comment: string) {

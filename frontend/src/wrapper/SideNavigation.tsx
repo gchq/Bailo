@@ -13,7 +13,7 @@ import SchemaIcon from '@mui/icons-material/Schema'
 import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'
-import { useGetResponses } from 'actions/response'
+import { useGetUserResponses } from 'actions/response'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { CSSProperties, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -85,7 +85,7 @@ export default function SideNavigation({
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
-  const { responses, isResponsesLoading, isResponsesError } = useGetResponses(reviews.map((review) => review._id))
+  const { responses, isResponsesLoading, isResponsesError } = useGetUserResponses()
 
   useEffect(() => {
     async function fetchReviewCount() {
