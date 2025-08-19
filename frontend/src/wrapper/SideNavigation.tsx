@@ -84,21 +84,14 @@ export default function SideNavigation({
   pageTopStyling = {},
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
+  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser(true)
   const { responses, isResponsesLoading, isResponsesError } = useGetUserResponses()
 
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
       if (reviews) {
-        setReviewCount(
-          reviews.filter(
-            (review) =>
-              !responses.find(
-                (response) => response.entity === `user:${currentUser.dn}` && response.parentId === review._id,
-              ),
-          ).length,
-        )
+        setReviewCount(reviews.length)
       }
     }
     fetchReviewCount()

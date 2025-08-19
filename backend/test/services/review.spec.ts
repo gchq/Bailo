@@ -218,14 +218,14 @@ describe('services > review', () => {
   const user: any = { dn: 'test' }
 
   test('findReviews > all reviews for user', async () => {
-    await findReviews(user, true)
+    await findReviews(user, true, false)
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
   })
 
   test('findReviews > active reviews for a specific model', async () => {
-    await findReviews(user, false, 'modelId')
+    await findReviews(user, false, false, 'modelId')
 
     expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()

@@ -12,13 +12,17 @@ import { ErrorInfo, fetcher } from '../utils/fetcher'
 
 const emptyReviewList = []
 
-export function useGetReviewRequestsForUser() {
+export function useGetReviewRequestsForUser(open?: boolean) {
+  const queryParams = {
+    ...(open && { open }),
+  }
+
   const { data, isLoading, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]
     },
     ErrorInfo
-  >('/api/v2/reviews', fetcher)
+  >(`/api/v2/reviews?${qs.stringify(queryParams)}`, fetcher)
 
   return {
     mutateReviews: mutate,
