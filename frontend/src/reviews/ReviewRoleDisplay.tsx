@@ -23,13 +23,17 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
   if (isResponsesError) {
     return <MessageAlert message={isResponsesError.info.message} severity='error' />
   }
+
   if (responses.length > 0) {
     return <></>
   }
 
+  if (isModelRolesLoading || isResponsesLoading) {
+    return <Loading />
+  }
+
   return (
     <>
-      {(isModelRolesLoading || isResponsesLoading) && <Loading />}
       <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
         <NotificationsNoneOutlinedIcon sx={{ fontSize: 'medium' }} color='warning' />
         <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }}>

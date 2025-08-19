@@ -2,7 +2,7 @@ import { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import { AnyZodObject, z } from 'zod'
 
 import { ScanState } from '../connectors/fileScanning/Base.js'
-import { CollaboratorRoles } from '../models/Model.js'
+import { SystemRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
@@ -363,5 +363,5 @@ export const reviewRoleSchema = z.object({
   description: z.string().openapi({ example: 'This is an example review role' }),
   defaultEntities: z.array(z.string()).openapi({ example: ['user:user'] }),
   lockEntities: z.boolean().openapi({ example: false }),
-  collaboratorRole: z.string().optional().openapi({ example: CollaboratorRoles.Owner }),
+  systemRole: z.string().optional().openapi({ example: SystemRoles.Owner }),
 })
