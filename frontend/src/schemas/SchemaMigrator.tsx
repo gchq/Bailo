@@ -21,14 +21,21 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     for (const step of sourceSteps) {
       step.steps = sourceSteps
     }
+    setSplitSourceSchema({ reference: sourceSchema.id, steps: sourceSteps })
+
     for (const step of targetSteps) {
       step.steps = targetSteps
     }
-
-    setSplitSchema({ reference: schema.id, steps })
+    setSplitSourceSchema({ reference: targetSchema.id, steps: targetSteps })
   }, [schema, sourceSchema, targetSchema])
 
   return (
-    <Stack direction='row'>{sourceSchema ? <JsonSchemaForm /> : <Typography>No valid source schema</Typography>}</Stack>
+    <Stack direction='row'>
+      {sourceSchema ? (
+        <JsonSchemaForm splitSchema={splitSourceSchema} setSplitSchema={setSplitSourceSchema} />
+      ) : (
+        <Typography>No valid source schema</Typography>
+      )}
+    </Stack>
   )
 }
