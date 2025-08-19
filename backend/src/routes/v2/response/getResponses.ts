@@ -12,7 +12,7 @@ import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate
 export const getResponseSchema = z.object({
   query: z.object({
     parentIds: coerceArray(z.array(z.string())).optional(),
-    mine: strictCoerceBoolean(z.boolean().optional().default(true)),
+    mine: strictCoerceBoolean(z.boolean().optional()),
   }),
 })
 
