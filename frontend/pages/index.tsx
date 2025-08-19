@@ -216,7 +216,7 @@ export default function Marketplace() {
       setRoleOptions([
         ...defaultRoleOptions,
         ...reviewRoles.map((role) => {
-          return { key: role._id, label: `${role.shortName}` }
+          return { key: role.shortName, label: `${role.name}` }
         }),
       ])
     }
