@@ -5,13 +5,14 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { ResponseInterface } from '../../../models/Response.js'
-import { getResponsesByParentIds } from '../../../services/response.js'
+import { getResponsesByParentIds, getResponsesByUser } from '../../../services/response.js'
 import { registerPath, responseInterfaceSchema } from '../../../services/specification.js'
-import { coerceArray, parse } from '../../../utils/validate.js'
+import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
 
 export const getResponseSchema = z.object({
   query: z.object({
-    parentIds: coerceArray(z.array(z.string())),
+    parentIds: coerceArray(z.array(z.string())).optional(),
+    mine: strictCoerceBoolean(z.boolean().optional().default(true)),
   }),
 })
 
@@ -46,10 +47,15 @@ export const getResponses = [
   async (req: Request, res: Response<getResponsesResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewResponses
     const {
-      query: { parentIds },
+      query: { parentIds, mine },
     } = parse(req, getResponseSchema)
 
-    const responses = await getResponsesByParentIds(parentIds)
+    let responses: ResponseInterface[] = []
+    if (mine) {
+      responses = await getResponsesByUser(req.user)
+    } else {
+      responses = await getResponsesByParentIds(parentIds)
+    }
     await audit.onViewResponses(req, responses)
 
     res.json({
