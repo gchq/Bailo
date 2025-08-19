@@ -90,7 +90,7 @@ export default function SideNavigation({
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
-      if (reviews) {
+      if (Array.isArray(reviews)) {
         setReviewCount(reviews.length)
       }
     }

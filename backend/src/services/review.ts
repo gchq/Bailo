@@ -49,12 +49,6 @@ export async function findReviews(
     .unwind({ path: '$model' })
     .match({ ...(mine && (await findUserInCollaborators(user))) })
 
-  const auths = await authorisation.models(
-    user,
-    reviews.map((review) => review.model),
-    ModelAction.View,
-  )
-
   if (open) {
     const parentIds = reviews.map((review) => review._id)
     const responses = await getResponsesByParentIds(parentIds)
@@ -65,6 +59,12 @@ export async function findReviews(
         ),
     )
   }
+
+  const auths = await authorisation.models(
+    user,
+    reviews.map((review) => review.model),
+    ModelAction.View,
+  )
 
   return reviews.filter((_, i) => auths[i].success)
 }
