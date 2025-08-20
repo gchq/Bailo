@@ -14,7 +14,7 @@ import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar }
 import MuiDrawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'
 import { useGetUserResponses } from 'actions/response'
-import { useGetReviewRequestsForUser } from 'actions/review'
+import { useHeadReviewRequestsForUser } from 'actions/review'
 import { CSSProperties, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -84,18 +84,18 @@ export default function SideNavigation({
   pageTopStyling = {},
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser(true)
+  const { reviewCountHeader, isReviewsLoading, isReviewsError } = useHeadReviewRequestsForUser(true)
   const { responses, isResponsesLoading, isResponsesError } = useGetUserResponses()
 
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
-      if (Array.isArray(reviews)) {
-        setReviewCount(reviews.length)
+      if (reviewCountHeader) {
+        setReviewCount(reviewCountHeader)
       }
     }
     fetchReviewCount()
-  }, [onResetErrorMessage, reviews, responses, currentUser.dn])
+  }, [onResetErrorMessage, responses, currentUser.dn, reviewCountHeader])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />

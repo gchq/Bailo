@@ -14,6 +14,18 @@ type ErrorResponse = {
   error: Error
 }
 
+export const fetcherHead = async (url: string) => {
+  const res = await fetch(url, { method: 'head' })
+
+  if (!res.ok) {
+    await handleSWRError(res)
+  }
+
+  const headers = Object.fromEntries(res.headers)
+
+  return { headers }
+}
+
 export const fetcher = async (url: string) => {
   const res = await fetch(url)
 

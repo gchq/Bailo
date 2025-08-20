@@ -8,9 +8,29 @@ import {
   ReviewRequestInterface,
 } from 'types/types'
 
-import { ErrorInfo, fetcher } from '../utils/fetcher'
+import { ErrorInfo, fetcher, fetcherHead } from '../utils/fetcher'
 
 const emptyReviewList = []
+
+export function useHeadReviewRequestsForUser(open?: boolean) {
+  const queryParams = {
+    ...(open && { open }),
+  }
+
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      headers: any
+    },
+    ErrorInfo
+  >(`/api/v2/reviews?${qs.stringify(queryParams)}`, fetcherHead)
+
+  return {
+    mutateReviews: mutate,
+    reviewCountHeader: data?.headers['x-count'] ? parseInt(data.headers['x-count']) : 0,
+    isReviewsLoading: isLoading,
+    isReviewsError: error,
+  }
+}
 
 export function useGetReviewRequestsForUser(open?: boolean) {
   const queryParams = {
