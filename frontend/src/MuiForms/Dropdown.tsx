@@ -1,6 +1,6 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Fragment, SyntheticEvent, useMemo } from 'react'
+import { Fragment, SyntheticEvent, useEffect, useMemo, useRef } from 'react'
 
 interface DropdownProps {
   label?: string
@@ -13,14 +13,36 @@ interface DropdownProps {
   InputProps?: any
   options: { enumOptions?: { label: string; value: string }[] }
   rawErrors?: string[]
+  id?: string
 }
 
-export default function Dropdown({ label, formContext, value, onChange, options, required, rawErrors }: DropdownProps) {
+export default function Dropdown({
+  label,
+  formContext,
+  value,
+  onChange,
+  options,
+  required,
+  rawErrors,
+  id,
+}: DropdownProps) {
   const theme = useTheme()
+  const ref = useRef<HTMLDivElement>(null)
 
   const handleChange = (_event: SyntheticEvent<Element, Event>, newValue: string | null) => {
     onChange(newValue || '')
   }
+
+  useEffect(() => {
+    document.body.addEventListener('click', (event) => {
+      if (ref.current) {
+        const questionComponent = event.composedPath().includes(ref.current)
+        if (ref.current && questionComponent) {
+          formContext.onClickListener(id)
+        }
+      }
+    })
+  }, [formContext])
 
   const disabledWebkitTextFillColor = useMemo(() => {
     if (value) {
@@ -35,7 +57,7 @@ export default function Dropdown({ label, formContext, value, onChange, options,
   }, [options])
 
   return (
-    <Fragment key={label}>
+    <div ref={ref} key={label}>
       <Typography fontWeight='bold'>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -85,6 +107,6 @@ export default function Dropdown({ label, formContext, value, onChange, options,
           {value ? value : 'Unanswered'}
         </Typography>
       )}
-    </Fragment>
+    </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Stack, Typography } from '@mui/material'
+import { Grid2, Stack, Typography } from '@mui/material'
 import schema from 'pages/data-card/[dataCardId]/schema'
 import { useEffect, useState } from 'react'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
@@ -15,8 +15,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
 
   useEffect(() => {
     if (!sourceSchema || !targetSchema) return
-    const sourceSteps = getStepsFromSchema(sourceSchema, {}, ['properties.contacts'])
-    const targetSteps = getStepsFromSchema(targetSchema, {}, ['properties.contacts'])
+    const sourceSteps = getStepsFromSchema(sourceSchema, {}, [])
+    const targetSteps = getStepsFromSchema(targetSchema, {}, [])
 
     for (const step of sourceSteps) {
       step.steps = sourceSteps
@@ -26,16 +26,33 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     for (const step of targetSteps) {
       step.steps = targetSteps
     }
-    setSplitSourceSchema({ reference: targetSchema.id, steps: targetSteps })
+    setSplitTargetSchema({ reference: targetSchema.id, steps: targetSteps })
   }, [schema, sourceSchema, targetSchema])
 
+  console.log(splitSourceSchema)
+
   return (
-    <Stack direction='row'>
+    <Grid2 container spacing={2}>
       {sourceSchema ? (
-        <JsonSchemaForm splitSchema={splitSourceSchema} setSplitSchema={setSplitSourceSchema} />
+        <Grid2 size={{ sm: 12, md: 6 }}>
+          <Stack spacing={2}>
+            <Typography>Source Schema</Typography>
+            <JsonSchemaForm splitSchema={splitSourceSchema} setSplitSchema={setSplitSourceSchema} hideInputs />
+          </Stack>
+        </Grid2>
       ) : (
         <Typography>No valid source schema</Typography>
       )}
-    </Stack>
+      {targetSchema ? (
+        <Grid2 size={{ sm: 12, md: 6 }}>
+          <Stack spacing={2}>
+            <Typography>Target Schema</Typography>
+            <JsonSchemaForm splitSchema={splitTargetSchema} setSplitSchema={setSplitTargetSchema} hideInputs />
+          </Stack>
+        </Grid2>
+      ) : (
+        <Typography>No valid target schema</Typography>
+      )}
+    </Grid2>
   )
 }

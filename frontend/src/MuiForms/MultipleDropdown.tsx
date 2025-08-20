@@ -1,6 +1,6 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { Fragment, SyntheticEvent, useMemo } from 'react'
+import { SyntheticEvent, useEffect, useMemo, useRef } from 'react'
 
 interface MultipleDropdownProps {
   label?: string
@@ -13,6 +13,7 @@ interface MultipleDropdownProps {
   InputProps?: any
   options: { enumOptions?: { label: string; value: string }[] }
   rawErrors?: string[]
+  id?: string
 }
 
 export default function MultipleDropdown({
@@ -23,8 +24,10 @@ export default function MultipleDropdown({
   options,
   required,
   rawErrors,
+  id,
 }: MultipleDropdownProps) {
   const theme = useTheme()
+  const ref = useRef<HTMLDivElement>(null)
 
   const handleChange = (_event: SyntheticEvent<Element, Event>, newValue: string[]) => {
     onChange(newValue)
@@ -38,12 +41,23 @@ export default function MultipleDropdown({
     }
   }, [theme, value])
 
+  useEffect(() => {
+    document.body.addEventListener('click', (event) => {
+      if (ref.current) {
+        const questionComponent = event.composedPath().includes(ref.current)
+        if (ref.current && questionComponent) {
+          formContext.onClickListener(id)
+        }
+      }
+    })
+  }, [formContext])
+
   const multipleDropdownOptions = useMemo(() => {
     return options.enumOptions ? options.enumOptions.map((option) => option.value) : []
   }, [options])
 
   return (
-    <Fragment key={label}>
+    <div ref={ref} key={label}>
       <Typography fontWeight='bold'>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -110,6 +124,6 @@ export default function MultipleDropdown({
           )}
         </>
       )}
-    </Fragment>
+    </div>
   )
 }

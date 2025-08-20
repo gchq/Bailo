@@ -13,7 +13,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { FormContextType } from '@rjsf/utils'
 import * as _ from 'lodash-es'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import MetricItem from 'src/MuiForms/MetricItem'
 import { isValidNumber } from 'utils/stringUtils'
 import { v4 as uuidv4 } from 'uuid'
@@ -33,13 +33,15 @@ interface MetricsProps {
   onChange: (newValue: MetricValue[]) => void
   value: MetricValue[]
   label: string
-  formContext?: FormContextType
+  formContext?: any
   required?: boolean
+  id?: string
 }
 
-export default function Metrics({ onChange, value, label, formContext, required }: MetricsProps) {
+export default function Metrics({ onChange, value, label, formContext, required, id }: MetricsProps) {
   const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>([])
   const theme = useTheme()
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const updatedMetricsWithIds = value.map((metric) => ({
@@ -48,6 +50,17 @@ export default function Metrics({ onChange, value, label, formContext, required 
     }))
     setMetricsWithIds(updatedMetricsWithIds)
   }, [value])
+
+  useEffect(() => {
+    document.body.addEventListener('click', (event) => {
+      if (ref.current) {
+        const questionComponent = event.composedPath().includes(ref.current)
+        if (ref.current && questionComponent) {
+          formContext.onClickListener(id)
+        }
+      }
+    })
+  }, [formContext])
 
   const handleChange = useCallback(
     (newValues: MetricValue[]) => {
@@ -98,7 +111,7 @@ export default function Metrics({ onChange, value, label, formContext, required 
   }, [value])
 
   return (
-    <>
+    <div ref={ref}>
       {formContext && formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
           <Typography fontWeight='bold'>
@@ -128,6 +141,6 @@ export default function Metrics({ onChange, value, label, formContext, required 
           </TableContainer>
         </>
       )}
-    </>
+    </div>
   )
 }

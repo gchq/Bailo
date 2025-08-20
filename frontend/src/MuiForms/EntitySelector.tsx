@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { FormContextType } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
-import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import { EntityObject } from 'types/types'
 
@@ -17,12 +17,13 @@ interface EntitySelectorProps {
   required?: boolean
   value: string[]
   onChange: (newValue: string[]) => void
-  formContext?: FormContextType
+  formContext?: any
   rawErrors?: string[]
+  id?: string
 }
 
 export default function EntitySelector(props: EntitySelectorProps) {
-  const { onChange, value: currentValue, required, label, formContext, rawErrors } = props
+  const { onChange, value: currentValue, required, label, formContext, rawErrors, id } = props
 
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
@@ -32,6 +33,8 @@ export default function EntitySelector(props: EntitySelectorProps) {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
+  const ref = useRef<HTMLDivElement>(null)
+
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
   useEffect(() => {
@@ -39,6 +42,17 @@ export default function EntitySelector(props: EntitySelectorProps) {
       setSelectedEntities([{ id: currentUserId, kind: 'user' }])
     }
   }, [currentUserId, formContext])
+
+  useEffect(() => {
+    document.body.addEventListener('click', (event) => {
+      if (ref.current) {
+        const questionComponent = event.composedPath().includes(ref.current)
+        if (ref.current && questionComponent) {
+          formContext.onClickListener(id)
+        }
+      }
+    })
+  }, [formContext])
 
   useEffect(() => {
     if (currentValue) {
@@ -77,7 +91,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
   }
 
   return (
-    <>
+    <div ref={ref}>
       {isCurrentUserLoading && <Loading />}
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
@@ -160,6 +174,6 @@ export default function EntitySelector(props: EntitySelectorProps) {
           </Box>
         </>
       )}
-    </>
+    </div>
   )
 }

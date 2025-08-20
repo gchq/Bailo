@@ -38,7 +38,7 @@ export function DescriptionFieldTemplate() {
   return <></>
 }
 
-export function ObjectFieldTemplate({ title, properties, description }: ObjectFieldTemplateProps) {
+export function ObjectFieldTemplate({ title, properties, description, formContext }: ObjectFieldTemplateProps) {
   return (
     <Box sx={{ p: 2 }}>
       <Stack spacing={2}>
@@ -46,7 +46,7 @@ export function ObjectFieldTemplate({ title, properties, description }: ObjectFi
           <Typography fontWeight='bold' variant='h6' component='h3'>
             {title}
           </Typography>
-          <Typography variant='caption'>{description}</Typography>
+          {!formContext.hideInputs && <Typography variant='caption'>{description}</Typography>}
         </div>
         {properties.map((element) => (
           <div key={element.name} className='property-wrapper'>

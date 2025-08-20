@@ -17,12 +17,14 @@ export default function JsonSchemaForm({
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
+  hideInputs = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
+  hideInputs?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const theme = useTheme()
@@ -49,6 +51,10 @@ export default function JsonSchemaForm({
         Please make sure that all errors listed below have been resolved.
       </Typography>
     )
+  }
+
+  function handleOnClickListener(question: string) {
+    console.log(question)
   }
 
   return (
@@ -95,9 +101,11 @@ export default function JsonSchemaForm({
             editMode: canEdit,
             formSchema: currentStep.schema,
             defaultCurrentUser: defaultCurrentUserInEntityList,
+            hideInputs: hideInputs,
+            onClickListener: handleOnClickListener,
           }}
           templates={
-            !canEdit
+            !canEdit || hideInputs
               ? {
                   DescriptionFieldTemplate,
                   ArrayFieldTemplate,

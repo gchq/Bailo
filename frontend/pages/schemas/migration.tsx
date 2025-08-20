@@ -37,7 +37,6 @@ export default function SchemaMigrationSelector() {
 
   const handleSourceSchemaChange = (event: SelectChangeEvent) => {
     const schemaFromInput = schemas.find((schema) => schema.id === event.target.value)
-    console.log(schemaFromInput)
     setSourceSchema(schemaFromInput ? schemaFromInput.id : 'test')
   }
 
@@ -52,31 +51,33 @@ export default function SchemaMigrationSelector() {
   if (error) return error
 
   return (
-    <Container>
-      <Stack spacing={2} direction='row' sx={{ width: '100%' }}>
-        <Select
-          aria-label='toggle entry state menu'
-          size='small'
-          value={sourceSchema}
-          onChange={handleSourceSchemaChange}
-          id='source-schema-select'
-        >
-          {schemaOptions}
-        </Select>
-        <Select
-          aria-label='toggle entry state menu'
-          size='small'
-          value={targetSchema}
-          onChange={handleTargetSchemaChange}
-          id='target-schema-select'
-        >
-          {schemaOptions}
-        </Select>
+    <Container maxWidth='xl'>
+      <Stack spacing={8}>
+        <Stack spacing={2} direction='row' sx={{ width: '100%' }}>
+          <Select
+            aria-label='toggle entry state menu'
+            size='small'
+            value={sourceSchema}
+            onChange={handleSourceSchemaChange}
+            id='source-schema-select'
+          >
+            {schemaOptions}
+          </Select>
+          <Select
+            aria-label='toggle entry state menu'
+            size='small'
+            value={targetSchema}
+            onChange={handleTargetSchemaChange}
+            id='target-schema-select'
+          >
+            {schemaOptions}
+          </Select>
+        </Stack>
+        <SchemaMigrator
+          sourceSchema={schemas.find((schema) => schema.id === sourceSchema)}
+          targetSchema={schemas.find((schema) => schema.id === targetSchema)}
+        ></SchemaMigrator>
       </Stack>
-      <SchemaMigrator
-        sourceSchema={schemas.find((schema) => schema.id === sourceSchema)}
-        targetSchema={schemas.find((schema) => schema.id === targetSchema)}
-      ></SchemaMigrator>
     </Container>
   )
 }
