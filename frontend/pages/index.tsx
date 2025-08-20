@@ -140,6 +140,15 @@ export default function Marketplace() {
     selectedRolesFromQuery,
   ])
 
+  const updateQueryParams = useCallback(
+    (key: string, value: string | string[]) => {
+      router.replace({
+        query: { ...router.query, [key]: value },
+      })
+    },
+    [router],
+  )
+
   const handleSelectedRolesOnChange = useCallback(
     (selectedFilters: string[]) => {
       if (selectedFilters.length > 0) {
@@ -166,15 +175,6 @@ export default function Marketplace() {
   const stateList = useMemo(() => {
     return uiConfig ? uiConfig.modelDetails.states.map((stateItem) => stateItem) : []
   }, [uiConfig])
-
-  const updateQueryParams = useCallback(
-    (key: string, value: string | string[]) => {
-      router.replace({
-        query: { ...router.query, [key]: value },
-      })
-    },
-    [router],
-  )
 
   const handleFilterChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
