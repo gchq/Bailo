@@ -89,7 +89,6 @@ export default function Marketplace() {
     libraries: librariesFromQuery,
     organisations: organisationsFromQuery,
     states: statesFromQuery,
-    filters: selectedRolesFromQuery,
   } = router.query
 
   useEffect(() => {
@@ -122,23 +121,7 @@ export default function Marketplace() {
       }
       setSelectedStates([...statesAsArray])
     }
-    if (selectedRolesFromQuery) {
-      let rolesAsArray: string[] = []
-      if (typeof selectedRolesFromQuery === 'string') {
-        rolesAsArray.push(selectedRolesFromQuery)
-      } else {
-        rolesAsArray = [...rolesAsArray]
-      }
-      setSelectedRoles([...rolesAsArray])
-    }
-  }, [
-    filterFromQuery,
-    taskFromQuery,
-    librariesFromQuery,
-    organisationsFromQuery,
-    statesFromQuery,
-    selectedRolesFromQuery,
-  ])
+  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery, statesFromQuery])
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -160,12 +143,11 @@ export default function Marketplace() {
           }
         })
         setSelectedRoles(filters)
-        updateQueryParams('filters', selectedRoles)
       } else {
         setSelectedRoles([])
       }
     },
-    [roleOptions, selectedRoles, updateQueryParams],
+    [roleOptions],
   )
 
   const organisationList = useMemo(() => {
