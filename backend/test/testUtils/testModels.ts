@@ -113,4 +113,16 @@ export const testResponse = {
 export const testReviewRole = {
   name: 'Reviewer',
   shortName: 'reviewer',
+  systemRole: 'Contributor',
+}
+
+export const testReviewRoleNoSystemRole = {
+  name: 'Reviewer',
+  shortName: 'reviewer',
+}
+
+export const testReviewerWithOwnerSystemRole = {
+  name: 'Reviewer',
+  shortName: 'reviewer',
+  systemRole: 'owner',
 }

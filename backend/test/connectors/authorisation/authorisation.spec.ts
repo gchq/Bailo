@@ -3,11 +3,13 @@ import { describe, expect, test, vi } from 'vitest'
 import { getAuthorisationConnector } from '../../../src/connectors/authorisation/index.js'
 import { FileScanResult } from '../../../src/connectors/fileScanning/Base.js'
 
-vi.mock('../../../src/connectors/authentication/index.js', () => ({
+vi.mock('../../../src/services/model.js', () => ({
   default: {
-    getUserModelRoles: vi.fn(),
+    getModelSystemRoles: vi.fn(),
   },
 }))
+
+vi.mock('../../../src/connectors/authentication/index.js', () => ({}))
 
 const fileScanResult: FileScanResult = {
   state: 'complete',

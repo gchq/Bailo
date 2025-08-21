@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1
 
-FROM node:24.4.1-alpine AS base
+FROM node:24.6.0-alpine AS base
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN apk add --no-cache libc6-compat ca-certificates
-RUN apk update
+RUN apk add --no-cache libc6-compat ca-certificates && \
+    apk update
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 COPY package*.json ./
-RUN --mount=type=cache,target=/cache/npm npm install --omit=dev --cache=/cache/npm
+RUN --mount=type=cache,target=/cache/npm npm ci --omit=dev --cache=/cache/npm
 
 EXPOSE 3000
 
@@ -24,7 +24,7 @@ RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
 
 COPY . .
 
-RUN npm install sharp@0.33.5
+RUN --mount=type=cache,target=/cache/npm npm install sharp@0.33.5 --cache=/cache/npm
 
 CMD [ "npm", "run", "dev" ]
 

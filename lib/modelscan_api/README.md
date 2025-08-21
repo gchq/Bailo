@@ -19,7 +19,7 @@ This API is used as a filescanner and is not published to PyPI.
 
 Two Docker end-stages exist in [Dockerfile](./Dockerfile). These make deployment and running of the ModelScan REST API
 simpler. These Docker stages are used by the docker compose files in the root of the project, and can be built manually
-by using `--target dev` or `--target prod` respectively (targetting prod is optional and will be built by default)
+by using `--target dev` or `--target prod` respectively (targeting prod is optional and will be built by default)
 
 Note that the Docker containers run on port `3311` rather than `8000`, so adjust URLs accordingly.
 

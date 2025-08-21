@@ -34,8 +34,8 @@ mlflow = [
 test = [
     "black==25.1.0",
     "check-manifest==0.50",
-    "pre-commit==4.2.0",
-    "pylint==3.3.7",
+    "pre-commit==4.3.0",
+    "pylint==3.3.8",
     "pylint_junit==0.3.5",
     "pytest-cov==6.2.1",
     "pytest-mock==3.14.1",
@@ -43,7 +43,7 @@ test = [
     "pytest==8.4.1",
     "pytest-github-actions-annotate-failures==0.3.0",
     "requests_mock==1.12.1",
-    "shellcheck-py==0.10.0.1",
+    "shellcheck-py==0.11.0.1",
     "bailo[mlflow]"
 ]
 

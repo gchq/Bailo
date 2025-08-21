@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import ReviewRoleModel from '../../src/models/ReviewRole.js'
 import { getAllEntryRoles } from '../../src/services/roles.js'
-import { testAccessRequest, testReviewRole } from '../testUtils/testModels.js'
+import { testAccessRequest, testReviewRoleNoSystemRole } from '../testUtils/testModels.js'
 
 const modelModelMock = vi.hoisted(() => {
   const obj: any = { id: '123', card: {}, collaborators: [{ entity: 'user:user', roles: 'reviewer' }] }
@@ -45,10 +45,33 @@ vi.mock('../../src/services/accessRequest.js', () => accessRequestMock)
 
 const mockReviewService = vi.hoisted(() => {
   return {
-    findReviewRoles: vi.fn(() => [testReviewRole]),
+    findReviewRoles: vi.fn(() => [testReviewRoleNoSystemRole]),
   }
 })
 vi.mock('../../src/services/review.js', () => mockReviewService)
+
+const configMock = vi.hoisted(
+  () =>
+    ({
+      ui: {
+        roleDisplayNames: {
+          owner: 'Owner',
+          contributor: 'Contributor',
+          consumer: 'Consumer',
+        },
+      },
+      log: {
+        level: 'info',
+      },
+      instrumentation: {
+        enabled: true,
+      },
+    }) as any,
+)
+vi.mock('../../src/utils/config.js', () => ({
+  __esModule: true,
+  default: configMock,
+}))
 
 describe('services > review', () => {
   test('getAllEntryRoles > gets default entry roles', async () => {
@@ -73,7 +96,7 @@ describe('services > review', () => {
       collaborators: [{ entity: 'user:user', roles: 'reviewer' }],
     })
     const reviewRoleInterface = new ReviewRoleModel({
-      ...testReviewRole,
+      ...testReviewRoleNoSystemRole,
       _id: 'test',
     })
     accessRequestMock.getAccessRequestsByModel.mockResolvedValue([testAccessRequest])

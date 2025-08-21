@@ -2,7 +2,7 @@ import { model, Schema } from 'mongoose'
 import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { RoleKindKeys } from '../types/types.js'
-import { CollaboratorRolesKeys } from './Model.js'
+import { SystemRolesKeys } from './Model.js'
 
 export interface ReviewRoleInterface {
   name: string
@@ -11,7 +11,7 @@ export interface ReviewRoleInterface {
   description?: string
   defaultEntities?: string[]
   lockEntities?: boolean
-  collaboratorRole?: CollaboratorRolesKeys
+  systemRole?: SystemRolesKeys
 }
 
 export type ReviewRoleDoc = ReviewRoleInterface & SoftDeleteDocument
@@ -24,7 +24,7 @@ const ReviewRoleSchema = new Schema<ReviewRoleDoc>(
     description: { type: String },
     defaultEntities: [{ type: String }],
     lockEntities: { type: Boolean, default: false },
-    collaboratorRole: { type: String },
+    systemRole: { type: String },
   },
   {
     timestamps: true,

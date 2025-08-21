@@ -5,6 +5,7 @@ import Loading from 'src/common/Loading'
 import PageWithTabs, { PageTab } from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import UserPermissionsContext from 'src/contexts/userPermissionsContext'
+import OrganisationAndStateDetails from 'src/entry/model/OrganisationStateCollaboratorsDetails'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
@@ -63,6 +64,7 @@ export default function DataCard() {
           requiredUrlParams={{ dataCardId: dataCard.id }}
           titleToCopy={dataCard.name}
           subheadingToCopy={dataCard.id}
+          additionalHeaderDisplay={<OrganisationAndStateDetails entry={dataCard} />}
         />
       )}
     </>

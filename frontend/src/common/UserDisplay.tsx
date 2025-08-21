@@ -71,7 +71,7 @@ export default function UserDisplay({
             size={smallAvatars ? 'chip' : undefined}
           />
         ) : (
-          <div>{userInformation ? userInformation.name : dn.charAt(0).toUpperCase() + dn.slice(1)}</div>
+          <div>{userInformation ? userInformation.name : 'Unknown User'}</div>
         )}
       </Box>
       {!hidePopover && (

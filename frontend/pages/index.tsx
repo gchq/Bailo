@@ -216,7 +216,7 @@ export default function Marketplace() {
       setRoleOptions([
         ...defaultRoleOptions,
         ...reviewRoles.map((role) => {
-          return { key: role._id, label: `${role.shortName}` }
+          return { key: role.shortName, label: `${role.name}` }
         }),
       ])
     }
@@ -282,34 +282,38 @@ export default function Marketplace() {
                 />
               </FormControl>
               <Stack divider={<Divider flexItem />}>
-                <Box>
-                  <ChipSelector
-                    label='Organisations'
-                    chipTooltipTitle={'Filter by organisation'}
-                    options={organisationList}
-                    expandThreshold={10}
-                    multiple
-                    selectedChips={selectedOrganisations}
-                    onChange={handleOrganisationsOnChange}
-                    size='small'
-                    ariaLabel='add organisation to search filter'
-                    accordion
-                  />
-                </Box>
-                <Box>
-                  <ChipSelector
-                    label='States'
-                    chipTooltipTitle={'Filter by state'}
-                    options={stateList}
-                    expandThreshold={10}
-                    multiple
-                    selectedChips={selectedStates}
-                    onChange={handleStatesOnChange}
-                    size='small'
-                    ariaLabel='add state to search filter'
-                    accordion
-                  />
-                </Box>
+                {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
+                  <Box>
+                    <ChipSelector
+                      label='Organisations'
+                      chipTooltipTitle={'Filter by organisation'}
+                      options={organisationList}
+                      expandThreshold={10}
+                      multiple
+                      selectedChips={selectedOrganisations}
+                      onChange={handleOrganisationsOnChange}
+                      size='small'
+                      ariaLabel='add organisation to search filter'
+                      accordion
+                    />
+                  </Box>
+                )}
+                {uiConfig && uiConfig.modelDetails.states.length > 0 && (
+                  <Box>
+                    <ChipSelector
+                      label='States'
+                      chipTooltipTitle={'Filter by state'}
+                      options={stateList}
+                      expandThreshold={10}
+                      multiple
+                      selectedChips={selectedStates}
+                      onChange={handleStatesOnChange}
+                      size='small'
+                      ariaLabel='add state to search filter'
+                      accordion
+                    />
+                  </Box>
+                )}
                 <Box>
                   <ChipSelector
                     label='Tasks'
@@ -392,6 +396,8 @@ export default function Marketplace() {
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}
                     onSelectedStatesChange={handleStatesOnChange}
+                    displayOrganisation={uiConfig && uiConfig.modelDetails.organisations.length > 0}
+                    displayState={uiConfig && uiConfig.modelDetails.states.length > 0}
                   />
                 </div>
               )}
