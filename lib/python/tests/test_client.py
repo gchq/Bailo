@@ -8,8 +8,27 @@ import pytest
 
 from bailo import Client, ModelVisibility, SchemaKind
 from bailo.core.enums import EntryKind
+from bailo.core.exceptions import BailoException, ResponseException
 
 mock_result = {"success": True}
+
+
+def test_bailo_exception(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_model", status_code=400, json={"error": {"message": "Dummy error!"}}
+    )
+    client = Client("https://example.com")
+    with pytest.raises(BailoException) as bailo_exception:
+        client.get_model("test_model")
+
+        assert bailo_exception == "Dummy error!"
+
+
+def test_response_exception(requests_mock):
+    requests_mock.get("https://example.com/api/v2/model/test_model", status_code=400, json=None)
+    client = Client("https://example.com")
+    with pytest.raises(ResponseException):
+        client.get_model("test_model")
 
 
 def test_post_model(requests_mock):
