@@ -41,7 +41,7 @@ registerPath({
   },
 })
 
-interface GetReviewResponse {
+export interface GetReviewResponse {
   reviews: Array<ReviewInterface>
 }
 
