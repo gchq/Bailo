@@ -54,6 +54,9 @@ RUN npm run build
 FROM base AS prod
 ENV NODE_ENV=production
 
+# Remove unnecessary full installation
+RUN rm -rf node_modules
+
 COPY --from=build /app/config config
 COPY --from=build /app/dist .
 
