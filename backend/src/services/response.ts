@@ -41,7 +41,7 @@ export async function getResponsesByParentIds(parentIds: string[]) {
 }
 
 export async function getResponsesByUser(user: UserInterface) {
-  const reviews = await findReviews(user, true)
+  const reviews = await findReviews(user, true, false)
   return await getResponsesByParentIds(reviews.map((review) => review['_id']))
 }
 
