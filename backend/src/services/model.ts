@@ -145,10 +145,7 @@ export async function searchModels(
   }
 
   if (search) {
-    //query.$text = { $search: search }
-    //query.name = { $in: search }
-    //query.$or = [{ $text: { $search: search } }, { name: { $regex: search } }]
-    query.name = { $regex: search, options: 'i' }
+    query.$text = { $search: search }
   }
 
   if (schemaId) {
