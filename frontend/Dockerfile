@@ -21,10 +21,9 @@ FROM base AS dev
 
 # Pickup dev packages too
 RUN --mount=type=cache,target=/cache/npm npm install --cache=/cache/npm
+RUN --mount=type=cache,target=/cache/npm npm install sharp@0.33.5 --cache=/cache/npm
 
 COPY . .
-
-RUN --mount=type=cache,target=/cache/npm npm install sharp@0.33.5 --cache=/cache/npm
 
 CMD [ "npm", "run", "dev" ]
 
@@ -35,8 +34,12 @@ RUN npm run build
 
 FROM base AS prod
 ENV PORT=3000
-COPY --from=dev /app/next.config.mjs .
-COPY --from=dev /app/package.json .
+
+# Remove unnecessary full installation
+RUN rm -rf node_modules
+
+COPY --from=dev --chown=nextjs:0 /app/next.config.mjs .
+COPY --from=dev --chown=nextjs:0 /app/package.json .
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing

@@ -1,5 +1,11 @@
+Dockerfile
+.dockerignore
+npm-debug.log
 .next
 .swc
 .turbo
 coverage
+cache
 node_modules
+.git
+.gitignore
