@@ -158,7 +158,7 @@ export const testAccessRequestSchema: SchemaInterface = {
   kind: 'accessRequest',
   meta: {},
   uiSchema: {},
-  schema: {
+  jsonSchema: {
     $schema: 'http://json-schema.org/draft-07/schema#',
     type: 'object',
     properties: {
@@ -186,7 +186,7 @@ export const testAccessRequestSchema: SchemaInterface = {
 }
 
 export const testAccessRequestSchemaStepNoRender: StepNoRender = {
-  schema: testAccessRequestSchema.schema,
+  schema: testAccessRequestSchema.jsonSchema,
   state: {},
   index: 0,
   steps: [],

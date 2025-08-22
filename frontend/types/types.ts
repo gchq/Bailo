@@ -207,8 +207,8 @@ export interface SchemaInterface {
   hidden: boolean
   kind: SchemaKindKeys
   meta: unknown
+  jsonSchema: unknown
   uiSchema: unknown
-  schema: unknown
   reviewRoles: string[]
   createdAt: Date
   updatedAt: Date
