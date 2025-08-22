@@ -61,7 +61,6 @@ import { patchResponseReaction } from './routes/v2/response/patchResponseReactio
 import { deleteReviewRole } from './routes/v2/review/deleteReviewRole.js'
 import { getReviewRoles } from './routes/v2/review/getReviewRoles.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
-import { headReviews } from './routes/v2/review/headReview.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
 import { postReviewRole } from './routes/v2/review/postReviewRole.js'
@@ -180,7 +179,8 @@ server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/reviews', ...getReviews)
-server.get('/api/v2/reviews', ...headReviews)
+server.head('/api/v2/reviews', ...getReviews)
+// server.get('/api/v2/reviews', ...headReviews)
 server.get('/api/v2/responses', ...getResponses)
 server.patch('/api/v2/response/:responseId', ...patchResponse)
 server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReaction)

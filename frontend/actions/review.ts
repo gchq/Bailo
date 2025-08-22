@@ -8,7 +8,7 @@ import {
   ReviewRequestInterface,
 } from 'types/types'
 
-import { ErrorInfo, fetcher, fetcherHead } from '../utils/fetcher'
+import { ErrorInfo, fetcher, fetcherHeaders } from '../utils/fetcher'
 
 const emptyReviewList = []
 
@@ -22,7 +22,7 @@ export function useHeadReviewRequestsForUser(open?: boolean) {
       headers: any
     },
     ErrorInfo
-  >(`/api/v2/reviews?${qs.stringify(queryParams)}`, fetcherHead)
+  >(`/api/v2/reviews?${qs.stringify(queryParams)}`, fetcherHeaders)
 
   return {
     mutateReviews: mutate,

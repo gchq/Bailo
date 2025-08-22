@@ -14,7 +14,7 @@ type ErrorResponse = {
   error: Error
 }
 
-export const fetcherHead = async (url: string) => {
+export const fetcherHeaders = async (url: string) => {
   const res = await fetch(url, { method: 'head' })
 
   if (!res.ok) {
