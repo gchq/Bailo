@@ -1,5 +1,6 @@
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
+import SchemaMigrationSelector from 'src/schemas/SchemaMigrationSelector'
 import { useMemo } from 'react'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
@@ -39,7 +40,13 @@ export default function SchemasPage() {
 function Schemas() {
   const router = useRouter()
 
-  const tabs = useMemo(() => [{ title: 'Schemas', path: 'overview', view: <SchemaTab /> }], [])
+  const tabs = useMemo(
+    () => [
+      { title: 'Schemas', path: 'overview', view: <SchemaTab /> },
+      { title: 'Migrations', path: 'migrations', view: <SchemaMigrationSelector /> },
+    ],
+    [],
+  )
 
   return (
     <>
