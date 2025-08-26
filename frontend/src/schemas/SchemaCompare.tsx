@@ -10,8 +10,8 @@ import { SchemaInterface } from 'types/types'
 export default function SchemaCompare() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
 
-  const [beforeSchema, setBeforeSchema] = useState<SchemaInterface | null>()
-  const [afterSchema, setAfterSchema] = useState<SchemaInterface | null>()
+  const [beforeSchema, setBeforeSchema] = useState<SchemaInterface | null>(null)
+  const [afterSchema, setAfterSchema] = useState<SchemaInterface | null>(null)
 
   const handleBeforeSchemaChange = useCallback((_event: SyntheticEvent, newValue: SchemaInterface | null) => {
     setBeforeSchema(newValue)
