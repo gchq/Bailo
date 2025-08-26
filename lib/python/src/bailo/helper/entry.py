@@ -86,7 +86,7 @@ class Entry:
         logger.info("Card for ID %s successfully created using schema ID %s.", self.id, schema_id)
 
     def card_from_template(self, template_id: str) -> None:
-        """Create a card using a template (not yet implemented)."""
+        """Create a card using a template."""
         res = self.client.model_card_from_template(model_id=self.id, template_id=template_id)
         self.__unpack_card(res["card"])
 
