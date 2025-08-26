@@ -39,7 +39,7 @@ await addDefaultSchemas()
 
 const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {
-  log.info('Listening on port', config.api.port)
+  log.info(config.api.port, 'Listening on port')
 })
 // Set header timeout to 24H
 httpServer.headersTimeout = 86400000
