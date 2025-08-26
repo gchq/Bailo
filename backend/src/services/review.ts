@@ -14,6 +14,7 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
+import { getResponsesByParentIds } from './response.js'
 import { getSchemaById } from './schema.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
@@ -28,12 +29,13 @@ export interface DefaultReviewRole {
 export async function findReviews(
   user: UserInterface,
   mine: boolean,
+  open: boolean,
   modelId?: string,
   semver?: string,
   accessRequestId?: string,
   kind?: string,
 ): Promise<(ReviewInterface & { model: ModelInterface })[]> {
-  const reviews = await Review.aggregate()
+  let reviews = await Review.aggregate()
     .match({
       ...(modelId && { modelId }),
       ...(semver && { semver }),
@@ -46,6 +48,17 @@ export async function findReviews(
     // Populate model as value instead of array
     .unwind({ path: '$model' })
     .match({ ...(mine && (await findUserInCollaborators(user))) })
+
+  if (open) {
+    const parentIds = reviews.map((review) => review._id)
+    const responses = await getResponsesByParentIds(parentIds)
+    reviews = reviews.filter(
+      (review) =>
+        !responses.find(
+          (response) => response.entity === `user:${user.dn}` && response.parentId.toString() === review._id.toString(),
+        ),
+    )
+  }
 
   const auths = await authorisation.models(
     user,
