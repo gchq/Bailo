@@ -1,7 +1,7 @@
 import { Grid2, Stack, Typography } from '@mui/material'
 import schema from 'pages/data-card/[dataCardId]/schema'
 import { useEffect, useState } from 'react'
-import JsonSchemaForm from 'src/Form/JsonSchemaForm'
+import JsonSchemaViewer from 'src/Form/JsonSchemaViewer'
 import { SchemaInterface, SplitSchemaNoRender } from 'types/types'
 import { getStepsFromSchema } from 'utils/formUtils'
 
@@ -37,7 +37,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
         <Grid2 size={{ sm: 12, md: 6 }}>
           <Stack spacing={2}>
             <Typography>Source Schema</Typography>
-            <JsonSchemaForm splitSchema={splitSourceSchema} setSplitSchema={setSplitSourceSchema} hideInputs />
+            <JsonSchemaViewer splitSchema={splitSourceSchema} setSplitSchema={setSplitSourceSchema} hideInputs />
           </Stack>
         </Grid2>
       ) : (
@@ -47,7 +47,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
         <Grid2 size={{ sm: 12, md: 6 }}>
           <Stack spacing={2}>
             <Typography>Target Schema</Typography>
-            <JsonSchemaForm splitSchema={splitTargetSchema} setSplitSchema={setSplitTargetSchema} hideInputs />
+            <JsonSchemaViewer splitSchema={splitTargetSchema} setSplitSchema={setSplitTargetSchema} hideInputs />
           </Stack>
         </Grid2>
       ) : (

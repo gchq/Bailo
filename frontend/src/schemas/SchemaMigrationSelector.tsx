@@ -1,83 +1,82 @@
-import { Container, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material'
+import { Forward } from '@mui/icons-material'
+import {
+  Autocomplete,
+  Box,
+  Container,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
-import { useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import MessageAlert from 'src/MessageAlert'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
+import { SchemaInterface } from 'types/types'
 
 export default function SchemaMigrationSelector() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
 
-  const [sourceSchema, setSourceSchema] = useState<string>('')
-  const [targetSchema, setTargetSchema] = useState<string>('')
+  const [beforeSchema, setBeforeSchema] = useState<SchemaInterface | null>()
+  const [afterSchema, setAfterSchema] = useState<SchemaInterface | null>()
 
-  const schemaOptions = useMemo(() => {
-    if (schemas) {
-      return schemas.map((filteredSchema) => (
-        <MenuItem
-          key={filteredSchema.id}
-          value={filteredSchema.id}
-          disabled={filteredSchema.id === sourceSchema || filteredSchema.id === targetSchema}
-        >
-          {filteredSchema.name}
-        </MenuItem>
-      ))
-    } else {
-      return (
-        <MenuItem>
-          <em>No schemas found</em>
-        </MenuItem>
-      )
-    }
-  }, [schemas, sourceSchema, targetSchema])
+  const handleBeforeSchemaChange = useCallback((_event: SyntheticEvent, newValue: SchemaInterface | null) => {
+    setBeforeSchema(newValue)
+  }, [])
+
+  const handleAfterSchemaChange = useCallback((_event: SyntheticEvent, newValue: SchemaInterface | null) => {
+    setAfterSchema(newValue)
+  }, [])
+
+  if (isSchemasError) {
+    return <MessageAlert message={isSchemasError.info.message} severity='error' />
+  }
 
   if (isSchemasLoading) {
     return <Loading />
   }
 
-  const handleSourceSchemaChange = (event: SelectChangeEvent) => {
-    const schemaFromInput = schemas.find((schema) => schema.id === event.target.value)
-    setSourceSchema(schemaFromInput ? schemaFromInput.id : 'test')
-  }
-
-  const handleTargetSchemaChange = (event: SelectChangeEvent) => {
-    const schemaFromInput = schemas.find((schema) => schema.id === event.target.value)
-    setTargetSchema(schemaFromInput ? schemaFromInput.id : '')
-  }
-
-  const error = MultipleErrorWrapper(`Unable to load schema page`, {
-    isSchemasError,
-  })
-  if (error) return error
-
   return (
-    <Container maxWidth='xl'>
-      <Stack spacing={8}>
-        <Stack spacing={2} direction='row' sx={{ width: '100%' }}>
-          <Select
-            aria-label='toggle entry state menu'
+    <Box sx={{ p: 4 }}>
+      <Stack spacing={4}>
+        <Stack direction='row' spacing={12} justifyContent='center' alignItems='center'>
+          <Autocomplete
+            disablePortal
+            options={schemas}
+            fullWidth
             size='small'
-            value={sourceSchema}
-            onChange={handleSourceSchemaChange}
-            id='source-schema-select'
-          >
-            {schemaOptions}
-          </Select>
-          <Select
-            aria-label='toggle entry state menu'
+            getOptionDisabled={(option) => option.id === afterSchema?.id}
+            getOptionLabel={(option: SchemaInterface) => option.name}
+            sx={{ width: 300 }}
+            renderInput={(params) => <TextField {...params} label='Schema ' />}
+            onChange={handleBeforeSchemaChange}
+          />
+          <Forward color='primary' fontSize='large' />
+          <Autocomplete
+            disablePortal
+            options={schemas}
+            fullWidth
             size='small'
-            value={targetSchema}
-            onChange={handleTargetSchemaChange}
-            id='target-schema-select'
-          >
-            {schemaOptions}
-          </Select>
+            getOptionDisabled={(option) => option.id === beforeSchema?.id}
+            getOptionLabel={(option: SchemaInterface) => option.name}
+            sx={{ width: 300 }}
+            renderInput={(params) => <TextField {...params} label='Schema' />}
+            onChange={handleAfterSchemaChange}
+          />
         </Stack>
-        <SchemaMigrator
-          sourceSchema={schemas.find((schema) => schema.id === sourceSchema)}
-          targetSchema={schemas.find((schema) => schema.id === targetSchema)}
-        ></SchemaMigrator>
+        {beforeSchema && afterSchema ? (
+          <SchemaMigrator
+            sourceSchema={schemas.find((schema) => schema.id === beforeSchema.id)}
+            targetSchema={schemas.find((schema) => schema.id === afterSchema.id)}
+          ></SchemaMigrator>
+        ) : (
+          <Typography sx={{ textAlign: 'center' }}>Please select two schemas to migrate</Typography>
+        )}
       </Stack>
-    </Container>
+    </Box>
   )
 }

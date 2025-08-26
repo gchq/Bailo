@@ -1,7 +1,12 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { ArrayFieldTemplateProps, ObjectFieldTemplateProps } from '@rjsf/utils'
+import {
+  ArrayFieldTemplateProps,
+  BaseInputTemplateProps,
+  FieldTemplateProps,
+  ObjectFieldTemplateProps,
+} from '@rjsf/utils'
 
 export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   return (
@@ -44,7 +49,7 @@ export function ObjectFieldTemplate({ title, properties, description, formContex
       <Stack spacing={2}>
         <div>
           <Typography fontWeight='bold' variant='h6' component='h3'>
-            {title}
+            {title} + test
           </Typography>
           {!formContext.hideInputs && <Typography variant='caption'>{description}</Typography>}
         </div>
@@ -56,4 +61,8 @@ export function ObjectFieldTemplate({ title, properties, description, formContex
       </Stack>
     </Box>
   )
+}
+
+export function BaseInputTemplate({ title }: any) {
+  return <>{'test'}</>
 }
