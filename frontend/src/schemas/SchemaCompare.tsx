@@ -1,7 +1,7 @@
 import { Forward } from '@mui/icons-material'
 import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
-import { SyntheticEvent, useCallback, useState } from 'react'
+import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -20,6 +20,21 @@ export default function SchemaCompare() {
   const handleAfterSchemaChange = useCallback((_event: SyntheticEvent, newValue: SchemaInterface | null) => {
     setAfterSchema(newValue)
   }, [])
+
+  const schemaDiff = useMemo(() => {
+    if (beforeSchema && afterSchema) {
+      return (
+        <ReactDiffViewer
+          oldValue={JSON.stringify(beforeSchema, null, 2)}
+          newValue={JSON.stringify(afterSchema, null, 2)}
+          splitView={true}
+          compareMethod={DiffMethod.WORDS}
+        />
+      )
+    } else {
+      return <Typography sx={{ textAlign: 'center' }}>Please select two schemas to compare</Typography>
+    }
+  }, [beforeSchema, afterSchema])
 
   if (isSchemasError) {
     return <MessageAlert message={isSchemasError.info.message} severity='error' />
@@ -41,10 +56,10 @@ export default function SchemaCompare() {
             getOptionDisabled={(option) => option.id === afterSchema?.id}
             getOptionLabel={(option: SchemaInterface) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label='Schema ' />}
+            renderInput={(params) => <TextField {...params} label='Old schema' />}
             onChange={handleBeforeSchemaChange}
           />
-          <Forward color='primary' fontSize='large' />
+          <Forward color='primary' fontSize='large' aria-label='Compare arrow' />
           <Autocomplete
             disablePortal
             options={schemas}
@@ -53,20 +68,11 @@ export default function SchemaCompare() {
             getOptionDisabled={(option) => option.id === beforeSchema?.id}
             getOptionLabel={(option: SchemaInterface) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label='Schema' />}
+            renderInput={(params) => <TextField {...params} label='New schema' />}
             onChange={handleAfterSchemaChange}
           />
         </Stack>
-        {beforeSchema && afterSchema ? (
-          <ReactDiffViewer
-            oldValue={JSON.stringify(beforeSchema, null, 2)}
-            newValue={JSON.stringify(afterSchema, null, 2)}
-            splitView={true}
-            compareMethod={DiffMethod.WORDS}
-          />
-        ) : (
-          <Typography sx={{ textAlign: 'center' }}>Please select two schemas to compare</Typography>
-        )}
+        {schemaDiff}
       </Stack>
     </Box>
   )
