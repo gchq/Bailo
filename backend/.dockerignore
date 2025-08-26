@@ -4,5 +4,6 @@ npm-debug.log
 README.md
 node_modules
 .git
+.gitignore
 dist
 config/local.cjs
