@@ -75,7 +75,7 @@ def test_file_download_filter(example_model: Model, tmp_path: Path):
     downloads_path.mkdir()
     example_release.download_all(path=str(downloads_path.absolute()), include=["*.txt"], exclude=["to_exclude.txt"])
 
-    assert set(os.listdir(downloads_path)) == set(["test2.txt"])
+    assert set(os.listdir(downloads_path)) == {"test2.txt"}
 
 
 @pytest.mark.integration
