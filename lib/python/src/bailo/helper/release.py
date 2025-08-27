@@ -214,8 +214,8 @@ class Release:
     def download_all(
         self,
         path: str = os.getcwd(),
-        include: list | str = "",
-        exclude: list | str = "",
+        include: list | str | None = None,
+        exclude: list | str | None = None,
     ):
         """Writes all files in a release to disk at the given path, applying inclusion/exclusion filters.
 
