@@ -11,9 +11,8 @@ import {
   Typography,
 } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
-import { SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
-import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import MessageAlert from 'src/MessageAlert'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
 import { SchemaInterface } from 'types/types'
@@ -52,7 +51,7 @@ export default function SchemaMigrationSelector() {
             getOptionDisabled={(option) => option.id === afterSchema?.id}
             getOptionLabel={(option: SchemaInterface) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label='Schema ' />}
+            renderInput={(params) => <TextField {...params} label='Old schema ' />}
             onChange={handleBeforeSchemaChange}
           />
           <Forward color='primary' fontSize='large' />
@@ -64,7 +63,7 @@ export default function SchemaMigrationSelector() {
             getOptionDisabled={(option) => option.id === beforeSchema?.id}
             getOptionLabel={(option: SchemaInterface) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label='Schema' />}
+            renderInput={(params) => <TextField {...params} label='New schema' />}
             onChange={handleAfterSchemaChange}
           />
         </Stack>

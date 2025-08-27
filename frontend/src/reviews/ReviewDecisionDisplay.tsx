@@ -53,7 +53,7 @@ export default function ReviewDecisionDisplay({
   const handleReplyOnClick = (value: string | undefined) => {
     setAnchorEl(null)
     if (value) {
-      const username = userInformation ? userInformation.name : response.entity.split(':')[1]
+      const username = userInformation ? userInformation.name : 'Unknown User'
       const originalComment = value.replace(/^/gm, '>')
       const quote = `> Replying to **${username}** on **${formatDateString(response.createdAt)}** \n>\n${originalComment}`
       onReplyButtonClick(quote)
@@ -82,7 +82,7 @@ export default function ReviewDecisionDisplay({
     }
   }
 
-  if (isUserInformationError) {
+  if (isUserInformationError && isUserInformationError.status !== 404) {
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
   }
 

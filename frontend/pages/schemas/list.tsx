@@ -7,6 +7,7 @@ import Loading from 'src/common/Loading'
 import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
+import SchemaCompare from 'src/schemas/SchemaCompare'
 import SchemaTab from 'src/schemas/SchemaTab'
 
 export default function SchemasPage() {
@@ -43,6 +44,7 @@ function Schemas() {
   const tabs = useMemo(
     () => [
       { title: 'Schemas', path: 'overview', view: <SchemaTab /> },
+      { title: 'Compare', path: 'compare', view: <SchemaCompare /> },
       { title: 'Migrations', path: 'migrations', view: <SchemaMigrationSelector /> },
     ],
     [],
