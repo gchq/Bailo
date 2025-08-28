@@ -8,24 +8,29 @@ import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 async function script() {
   // process args
   const args = process.argv.slice(2)[0].split(',')
-  if (args.length != 2) {
-    log.error('Please use format "npm run script -- streamDockerRegistryToS3 <model-id> <image-name:image-tag>"')
+  if (args.length !== 3) {
+    log.error(
+      'Please use format "npm run script -- streamDockerRegistryToS3 <model-id> <image-name:image-tag> <output-filename>"',
+    )
+    log.error(
+      'e.g. "npm run script -- streamDockerRegistryToS3 sample-model-3ozoli alpine:latest sample-model-3ozoli_alpine_latest.tar.gz"',
+    )
     return
   }
-  const imageModel = args[0]
-  const imageDistributionPackageName = args[1]
-  log.info({ imageModel, imageDistributionPackageName })
+  const [imageModelId, imageDistributionPackageName, outputFilename] = args
+  log.info({ imageModelId, imageDistributionPackageName, outputFilename })
 
   // setup
   await connectToMongoose()
   ensureBucketExists(config.modelMirror.export.bucket)
+  const user = { dn: 'user' }
 
   // main functionality
   const distributionPackageNameObject = splitDistributionPackageName(imageDistributionPackageName)
-  await exportCompressedRegistryImage({ dn: 'user' }, imageModel, imageDistributionPackageName, {
+  await exportCompressedRegistryImage(user, imageModelId, imageDistributionPackageName, outputFilename, {
     exporter: 'user',
     sourceModelId: '',
-    mirroredModelId: imageModel,
+    mirroredModelId: imageModelId,
     importKind: ImportKind.Image,
     imageName: distributionPackageNameObject.path,
     imageTag: distributionPackageNameObject['tag'] ? distributionPackageNameObject['tag'] : '',
