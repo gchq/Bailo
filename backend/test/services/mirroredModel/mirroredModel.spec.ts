@@ -631,8 +631,8 @@ describe('services > mirroredModel', () => {
           id: 'releaseId',
           semver: '1.2.3',
           images: [
-            { name: 'name', tag: 'tag', repository: 'repository' },
-            { name: 'name', tag: 'tag', repository: 'repository' },
+            { name: 'name', tag: 'tag', repository: 'repository', _id: 'imageId' },
+            { name: 'name', tag: 'tag', repository: 'repository', _id: 'imageId' },
           ],
         } as any,
         'mirroredModelId',

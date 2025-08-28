@@ -8,7 +8,7 @@ import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 async function script() {
   // process args
   const args = process.argv.slice(2)[0].split(',')
-  if (args.length != 3) {
+  if (args.length !== 3) {
     log.error(
       'Please use format "npm run script -- streamDockerRegistryToS3 <model-id> <image-name:image-tag> <output-filename>"',
     )
@@ -17,10 +17,8 @@ async function script() {
     )
     return
   }
-  const imageModelId = args[0]
-  const imageDistributionPackageName = args[1]
-  const outputFilename = args[2]
-  log.info({ imageModelId, imageDistributionPackageName })
+  const [imageModelId, imageDistributionPackageName, outputFilename] = args
+  log.info({ imageModelId, imageDistributionPackageName, outputFilename })
 
   // setup
   await connectToMongoose()
