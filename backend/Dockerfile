@@ -15,7 +15,10 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
 WORKDIR /app/docs
 
 COPY docs .
-COPY --from=python . /app/python
+# Only get the required dirs & files (ignore tests etc.)
+COPY --from=python pyproject.toml /app/python/
+COPY --from=python README.md /app/python/
+COPY --from=python src /app/python/src
 
 RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
 
