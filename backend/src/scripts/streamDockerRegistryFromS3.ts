@@ -13,6 +13,9 @@ async function script() {
     log.error(
       'Please use format "npm run script -- streamDockerRegistryFromS3 <input-s3-path> <output-model-id> <output-image-name:output-image-tag>"',
     )
+    log.error(
+      'e.g. "npm run script -- streamDockerRegistryFromS3 https://localhost:8080/export/sample-model-3ozoli_alpine_latest.tar.gz new-model-abc123 new-model-abc123/alpine:latest"',
+    )
     return
   }
   const inputS3Path = args[0]

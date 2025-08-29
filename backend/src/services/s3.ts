@@ -12,7 +12,7 @@ export async function uploadToS3(
   metadata: ExportMetadata,
   logData?: Record<string, unknown>,
 ) {
-  const s3LogData = { ...metadata, ...logData }
+  const s3LogData = { metadata, ...logData }
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug(logData, 'Using signatures. Uploading to temporary S3 location first.')
     uploadToTemporaryS3Location(fileName, stream, s3LogData).then(() =>
@@ -65,6 +65,7 @@ async function uploadToTemporaryS3Location(
       {
         bucket,
         object,
+        ...(metadata && { metadata }),
         ...logData,
       },
       'Successfully uploaded export to temporary S3 location.',
@@ -74,6 +75,7 @@ async function uploadToTemporaryS3Location(
       {
         bucket,
         object,
+        ...(metadata && { metadata }),
         error,
         ...logData,
       },
@@ -150,6 +152,7 @@ async function uploadToExportS3Location(
       {
         bucket,
         object,
+        ...(metadata && { metadata }),
         ...logData,
       },
       'Successfully uploaded export to export S3 location.',
@@ -159,6 +162,7 @@ async function uploadToExportS3Location(
       {
         bucket,
         object,
+        ...(metadata && { metadata }),
         error,
         ...logData,
       },
