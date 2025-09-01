@@ -643,3 +643,9 @@ export const SystemRoles = {
 } as const
 
 export type SystemRolesKeys = (typeof SystemRoles)[keyof typeof SystemRoles]
+
+export interface QuestionMigration {
+  kind: string
+  sourcePath: string
+  targetPath?: string
+}

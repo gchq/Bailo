@@ -4,19 +4,17 @@ import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useState } from 'react'
-import {
-  ArrayFieldTemplate,
-  BaseInputTemplate,
-  DescriptionFieldTemplate,
-  ObjectFieldTemplate,
-} from 'src/Form/FormTemplates'
+import { DescriptionFieldTemplate, TitleFieldTemplate } from 'src/Form/FormTemplates'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
-import DataCardSelector from 'src/MuiForms/DataCardSelector'
 import Nothing from 'src/MuiForms/Nothing'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
-import TagSelector from 'src/MuiForms/TagSelector'
 import { SplitSchemaNoRender } from 'types/types'
 import { setStepState } from 'utils/formUtils'
+
+export interface QuestionSelection {
+  path: string
+  schema: any
+}
 
 // TODO - add validation BAI-866
 export default function JsonSchemaViewer({
@@ -26,6 +24,7 @@ export default function JsonSchemaViewer({
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
   hideInputs = false,
+  onQuestionClick,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -33,6 +32,7 @@ export default function JsonSchemaViewer({
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
   hideInputs?: boolean
+  onQuestionClick?: (selection: QuestionSelection) => void
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const theme = useTheme()
@@ -66,8 +66,11 @@ export default function JsonSchemaViewer({
   function handleListItemClick(index: number) {
     setActiveStep(index)
   }
-  function handleOnClickListener(question: string) {
-    console.log(question)
+
+  function handleOnClickListener(selection: QuestionSelection) {
+    if (onQuestionClick) {
+      onQuestionClick(selection)
+    }
   }
 
   return (
@@ -85,7 +88,6 @@ export default function JsonSchemaViewer({
                   <Typography
                     sx={{
                       wordBreak: 'break-word',
-                      color: !step.isComplete(step) ? theme.palette.error.main : theme.palette.common.black,
                     }}
                     width='100%'
                   >
@@ -106,7 +108,6 @@ export default function JsonSchemaViewer({
           validator={validator}
           widgets={widgets}
           uiSchema={currentStep.uiSchema}
-          liveValidate
           omitExtraData
           disabled={!canEdit}
           liveOmit
@@ -116,8 +117,9 @@ export default function JsonSchemaViewer({
             defaultCurrentUser: defaultCurrentUserInEntityList,
             hideInputs: hideInputs,
             onClickListener: handleOnClickListener,
+            rootSection: currentStep.section,
           }}
-          templates={{ DescriptionFieldTemplate, BaseInputTemplate }}
+          templates={{ DescriptionFieldTemplate, TitleFieldTemplate }}
         >
           <></>
         </Form>

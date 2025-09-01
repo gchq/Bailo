@@ -1,12 +1,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import {
-  ArrayFieldTemplateProps,
-  BaseInputTemplateProps,
-  FieldTemplateProps,
-  ObjectFieldTemplateProps,
-} from '@rjsf/utils'
+import { ArrayFieldTemplateProps, FieldHelpProps, ObjectFieldTemplateProps } from '@rjsf/utils'
 
 export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   return (
@@ -63,6 +58,15 @@ export function ObjectFieldTemplate({ title, properties, description, formContex
   )
 }
 
-export function BaseInputTemplate({ title }: any) {
-  return <>{'test'}</>
+export function TitleFieldTemplate() {
+  return <></>
+}
+
+export function GridTemplate(props) {
+  const { children, column, className, ...rest } = props
+  return (
+    <Grid2 item={column} {...rest} className={`${className} my-custom-grid-styling`}>
+      {children}
+    </Grid2>
+  )
 }
