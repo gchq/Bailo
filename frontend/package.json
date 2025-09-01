@@ -35,7 +35,7 @@
     "@vercel/otel": "^1.13.0",
     "axios": "^1.11.0",
     "clsx": "^2.1.1",
-    "dayjs": "^1.11.13",
+    "dayjs": "^1.11.18",
     "http-status-codes": "^2.3.0",
     "is-docker": "^3.0.0",
     "js-cookie": "^3.0.5",
