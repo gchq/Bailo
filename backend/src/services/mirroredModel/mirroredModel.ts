@@ -232,6 +232,7 @@ export async function exportCompressedRegistryImage(
   user: UserInterface,
   modelId: string,
   distributionPackageName: string,
+  filename: string,
   metadata: ExportMetadata,
   logData?: Record<string, unknown>,
 ) {
@@ -263,7 +264,7 @@ export async function exportCompressedRegistryImage(
 
   // setup gzip, stream to s3 to allow draining, and then pipe tar to gzip
   const { gzipStream, tarStream } = createTarGzStreams()
-  const s3Upload = uploadToS3(`${distributionPackageName}.tar.gz`, gzipStream, metadata, logData)
+  const s3Upload = uploadToS3(filename, gzipStream, metadata, logData)
   tarStream.pipe(gzipStream)
 
   // upload the manifest first as this is the starting point when later importing the blob
@@ -403,6 +404,7 @@ export async function uploadReleaseImages(
           user,
           model.id,
           distributionPackageName,
+          `${image._id.toString()}.tar.gz`,
           {
             exporter: user.dn,
             sourceModelId: model.id,

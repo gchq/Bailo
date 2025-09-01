@@ -631,8 +631,8 @@ describe('services > mirroredModel', () => {
           id: 'releaseId',
           semver: '1.2.3',
           images: [
-            { name: 'name', tag: 'tag', repository: 'repository' },
-            { name: 'name', tag: 'tag', repository: 'repository' },
+            { name: 'name', tag: 'tag', repository: 'repository', _id: 'imageId' },
+            { name: 'name', tag: 'tag', repository: 'repository', _id: 'imageId' },
           ],
         } as any,
         'mirroredModelId',
@@ -674,7 +674,7 @@ describe('services > mirroredModel', () => {
       registryMocks.splitDistributionPackageName.mockReturnValueOnce({ domain: 'domain', path: 'path' } as any)
 
       await expect(
-        exportCompressedRegistryImage({} as UserInterface, 'modelId', 'distName', {} as any),
+        exportCompressedRegistryImage({} as UserInterface, 'modelId', 'distName', 'filename', {} as any),
       ).rejects.toThrow(/^Distribution Package Name must include a tag./)
       expect(registryMocks.getImageManifest).not.toBeCalled()
     })
@@ -694,7 +694,7 @@ describe('services > mirroredModel', () => {
         ],
       })
 
-      await exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName:tag', {} as any)
+      await exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName:tag', 'filename', {} as any)
 
       expect(registryMocks.getImageManifest).toBeCalledTimes(1)
       expect(tarballMocks.createTarGzStreams).toBeCalledTimes(1)
@@ -711,7 +711,13 @@ describe('services > mirroredModel', () => {
         layers: [{ mediaType: 'application/vnd.docker.image.rootfs.diff.tar.gzip', size: 256, digest: '' }],
       })
 
-      const promise = exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName:tag', {} as any)
+      const promise = exportCompressedRegistryImage(
+        {} as UserInterface,
+        'modelId',
+        'imageName:tag',
+        'filename',
+        {} as any,
+      )
 
       await expect(promise).rejects.toThrow('Could not extract layer digest.')
       expect(registryMocks.getImageManifest).toBeCalledTimes(1)
