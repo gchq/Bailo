@@ -44,7 +44,7 @@ export function ObjectFieldTemplate({ title, properties, description, formContex
       <Stack spacing={2}>
         <div>
           <Typography fontWeight='bold' variant='h6' component='h3'>
-            {title} + test
+            {title}
           </Typography>
           {!formContext.hideInputs && <Typography variant='caption'>{description}</Typography>}
         </div>
