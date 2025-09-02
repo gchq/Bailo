@@ -1,6 +1,6 @@
 import { FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ChangeEvent } from 'react'
+import { ChangeEvent, Fragment } from 'react'
 
 interface CustomTextInputProps {
   label?: string
@@ -36,7 +36,7 @@ export default function CheckboxInput({ onChange, value, label, formContext, id,
   }
 
   return (
-    <div key={label}>
+    <Fragment key={label}>
       <Typography id={`${id}-label`} fontWeight='bold'>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -48,6 +48,6 @@ export default function CheckboxInput({ onChange, value, label, formContext, id,
         </RadioGroup>
       )}
       {!formContext.editMode && <Typography>{value ? 'Yes' : 'No'}</Typography>}
-    </div>
+    </Fragment>
   )
 }

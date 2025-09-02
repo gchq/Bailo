@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 
 interface CustomTextInputProps {
   label?: string
@@ -41,7 +41,7 @@ export default function CustomTextInput({
   }, [theme, value])
 
   return (
-    <div key={label}>
+    <Fragment key={label}>
       <Typography id={`${id}-label`} fontWeight='bold'>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -89,6 +89,6 @@ export default function CustomTextInput({
           },
         }}
       />
-    </div>
+    </Fragment>
   )
 }

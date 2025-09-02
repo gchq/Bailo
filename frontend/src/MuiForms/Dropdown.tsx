@@ -1,6 +1,6 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { SyntheticEvent, useMemo } from 'react'
+import { Fragment, SyntheticEvent, useMemo } from 'react'
 
 interface DropdownProps {
   label?: string
@@ -35,7 +35,7 @@ export default function Dropdown({ label, formContext, value, onChange, options,
   }, [options])
 
   return (
-    <div key={label}>
+    <Fragment key={label}>
       <Typography fontWeight='bold'>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
@@ -85,6 +85,6 @@ export default function Dropdown({ label, formContext, value, onChange, options,
           {value ? value : 'Unanswered'}
         </Typography>
       )}
-    </div>
+    </Fragment>
   )
 }

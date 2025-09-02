@@ -3,6 +3,7 @@ import 'dayjs/locale/en-gb'
 import { Button } from '@mui/material'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import { Fragment } from 'react'
 dayjs.extend(customParseFormat)
 
 interface QuestionViewProps {
@@ -19,10 +20,10 @@ export default function QuestionViewer({ label, id, schema, formContext }: Quest
   }
 
   return (
-    <div key={label}>
+    <Fragment key={label}>
       <Button sx={{ textTransform: 'none', textAlign: 'left' }} onClick={handleOnClick}>
         {label}
       </Button>
-    </div>
+    </Fragment>
   )
 }

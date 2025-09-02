@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs, { Dayjs } from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import { Fragment } from 'react'
 dayjs.extend(customParseFormat)
 
 interface DateSelectorProps {
@@ -30,7 +31,7 @@ export default function DateSelector({ onChange, value, label, formContext, requ
   }
 
   return (
-    <div key={label}>
+    <Fragment key={label}>
       <Typography fontWeight='bold'>
         {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
@@ -52,6 +53,6 @@ export default function DateSelector({ onChange, value, label, formContext, requ
           {value ? dayjs(value).format('DD-MM-YYYY') : 'Unanswered'}
         </Typography>
       )}
-    </div>
+    </Fragment>
   )
 }
