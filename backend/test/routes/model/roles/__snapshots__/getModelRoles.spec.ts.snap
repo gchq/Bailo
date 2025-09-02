@@ -6,6 +6,7 @@ exports[`routes > model > roles > getModelRoles > 200 > ok 1`] = `
     {
       "name": "Reviewer",
       "shortName": "reviewer",
+      "systemRole": "Contributor",
     },
   ],
 }
@@ -16,6 +17,7 @@ exports[`routes > model > roles > getModelRoles > audit > expected call 1`] = `
   {
     "name": "Reviewer",
     "shortName": "reviewer",
+    "systemRole": "Contributor",
   },
 ]
 `;

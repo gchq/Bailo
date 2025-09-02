@@ -123,6 +123,15 @@ export default function Marketplace() {
     }
   }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery, statesFromQuery])
 
+  const updateQueryParams = useCallback(
+    (key: string, value: string | string[]) => {
+      router.replace({
+        query: { ...router.query, [key]: value },
+      })
+    },
+    [router],
+  )
+
   const handleSelectedRolesOnChange = useCallback(
     (selectedFilters: string[]) => {
       if (selectedFilters.length > 0) {
@@ -148,15 +157,6 @@ export default function Marketplace() {
   const stateList = useMemo(() => {
     return uiConfig ? uiConfig.modelDetails.states.map((stateItem) => stateItem) : []
   }, [uiConfig])
-
-  const updateQueryParams = useCallback(
-    (key: string, value: string | string[]) => {
-      router.replace({
-        query: { ...router.query, [key]: value },
-      })
-    },
-    [router],
-  )
 
   const handleFilterChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -207,6 +207,7 @@ export default function Marketplace() {
     setSelectedLibraries([])
     setSelectedOrganisations([])
     setSelectedStates([])
+    setSelectedRoles([])
     setFilter('')
     router.replace('/', undefined, { shallow: true })
   }
@@ -216,7 +217,7 @@ export default function Marketplace() {
       setRoleOptions([
         ...defaultRoleOptions,
         ...reviewRoles.map((role) => {
-          return { key: role._id, label: `${role.shortName}` }
+          return { key: role.shortName, label: `${role.name}` }
         }),
       ])
     }

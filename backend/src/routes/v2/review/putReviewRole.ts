@@ -4,7 +4,7 @@ import z from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { CollaboratorRoles } from '../../../models/Model.js'
+import { SystemRoles } from '../../../models/Model.js'
 import { ReviewRoleInterface } from '../../../models/ReviewRole.js'
 import { updateReviewRole } from '../../../services/review.js'
 import { registerPath, reviewRoleSchema } from '../../../services/specification.js'
@@ -24,7 +24,7 @@ export const putReviewRoleSchema = z.object({
         .array(z.string())
         .openapi({ example: ['user:user'] })
         .optional(),
-      collaboratorRole: z.nativeEnum(CollaboratorRoles).optional().openapi({ example: CollaboratorRoles.Owner }),
+      systemRole: z.nativeEnum(SystemRoles).optional().openapi({ example: SystemRoles.Owner }),
     })
     .strict(),
 })

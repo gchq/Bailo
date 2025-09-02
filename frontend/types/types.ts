@@ -77,9 +77,6 @@ export interface UiConfig {
   }
 }
 
-//System roles
-export type CollaboratorRoleType = 'contributor' | 'consumer' | 'owner' | string
-
 export interface FileInterface {
   _id: string
   modelId: string
@@ -206,8 +203,8 @@ export interface SchemaInterface {
   hidden: boolean
   kind: SchemaKindKeys
   meta: unknown
+  jsonSchema: unknown
   uiSchema: unknown
-  schema: unknown
   reviewRoles: string[]
   createdAt: Date
   updatedAt: Date
@@ -229,6 +226,28 @@ export const RoleKind = {
 } as const
 
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
+
+export const SystemRole = {
+  None: 'none',
+  Owner: 'owner',
+  Contributor: 'contributor',
+  Consumer: 'consumer',
+} as const
+
+export type SystemRoleKeys = (typeof SystemRole)[keyof typeof SystemRole]
+
+export interface SystemRole {
+  name: string
+  shortName: string
+  kind?: RoleKindKeys
+  description?: string
+}
+
+export type ReviewRolesFormData = SystemRole & {
+  defaultEntities?: string[]
+  lockEntities: boolean
+  systemRole?: SystemRoleKeys
+}
 
 export const SchemaKindLabel = {
   model: 'model',
@@ -397,7 +416,7 @@ export interface EntryCardInterface {
 
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<CollaboratorRoleType | string>
+  roles: Array<SystemRoleKeys>
 }
 
 export const EntryKindLabel = {
@@ -607,19 +626,6 @@ export type FileUploadMetadata = {
   text: string
 }
 
-export interface SystemRole {
-  name: string
-  shortName: string
-  kind?: RoleKindKeys
-  description?: string
-}
-
-export type ReviewRolesFormData = SystemRole & {
-  defaultEntities?: string[]
-  lockEntities: boolean
-  collaboratorRole?: CollaboratorRoleType
-}
-
 export interface ReviewRoleInterface {
   _id: string
   name: string
@@ -628,16 +634,7 @@ export interface ReviewRoleInterface {
   description?: string
   defaultEntities?: string[]
   lockEntities?: boolean
-  collaboratorRole?: CollaboratorRolesKeys
+  systemRole?: SystemRoleKeys
   createdAt: string
   updatedAt: string
 }
-
-export const CollaboratorRoles = {
-  None: 'none',
-  Owner: 'owner',
-  Contributor: 'contributor',
-  Consumer: 'consumer',
-} as const
-
-export type CollaboratorRolesKeys = (typeof CollaboratorRoles)[keyof typeof CollaboratorRoles]

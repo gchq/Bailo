@@ -116,13 +116,12 @@ resourcesFrontend:
     memory: 800Mi
 
 resourcesBackend:
-    limits:
-      cpu: 800m
-      memory: 2Gi
-    requests:
-      cpu: 400m
-      memory: 1Gi
-
+  limits:
+    cpu: 800m
+    memory: 2Gi
+  requests:
+    cpu: 400m
+    memory: 1Gi
 
 # Pod placement
 nodeSelector: {}
@@ -160,7 +159,7 @@ mongodb:
   image:
     registry: docker.io
     repository: bitnami/mongodb
-    tag: 8.0.12
+    tag: 8.0.13
 
 # MinIO Dependencies
 minio:

@@ -35,7 +35,7 @@ export default function ReviewRoles() {
     name: '',
     shortName: '',
     description: '',
-    collaboratorRole: 'none',
+    systemRole: 'none',
     defaultEntities: [],
   })
 
@@ -53,7 +53,7 @@ export default function ReviewRoles() {
         name: reviewRole.name,
         description: reviewRole.description,
         defaultEntities: reviewRole.defaultEntities,
-        collaboratorRole: reviewRole.collaboratorRole,
+        systemRole: reviewRole.systemRole,
       }
     }
 
@@ -138,9 +138,7 @@ export default function ReviewRoles() {
                       System Role
                     </Typography>
                     <Typography>
-                      {formData?.collaboratorRole
-                        ? getRoleDisplayName(formData?.collaboratorRole, modelRoles)
-                        : 'No system role'}
+                      {formData?.systemRole ? getRoleDisplayName(formData?.systemRole, modelRoles) : 'No system role'}
                     </Typography>
                   </Box>
                   <Box>

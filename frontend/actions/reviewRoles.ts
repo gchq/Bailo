@@ -39,7 +39,7 @@ export async function postReviewRole(reviewRole: ReviewRolesFormData) {
 
 export type UpdateReviewRolesParams = Pick<
   ReviewRoleInterface,
-  'shortName' | 'name' | 'description' | 'defaultEntities' | 'collaboratorRole'
+  'shortName' | 'name' | 'description' | 'defaultEntities' | 'systemRole'
 >
 
 export function putReviewRole(reviewRole: UpdateReviewRolesParams) {

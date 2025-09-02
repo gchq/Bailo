@@ -6,7 +6,7 @@ files: ^(backend/docs/|lib/python/|lib/modelscan_api/)
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -26,7 +26,7 @@ repos:
         args: ['-a', 'from __future__ import annotations', '-l', '120']
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.19.1
+    rev: v3.20.0
     hooks:
       - id: pyupgrade
         name: pyupgrade 3.9

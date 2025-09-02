@@ -15,7 +15,7 @@ import {
   FileImportInformation,
   ImageImportInformation,
   MongoDocumentImportInformation,
-} from '../../services/mirroredModel.js'
+} from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 
 const AuditKind = {

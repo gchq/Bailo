@@ -15,13 +15,16 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
 WORKDIR /app/docs
 
 COPY docs .
-COPY --from=python . /app/python
+# Only get the required dirs & files (ignore tests etc.)
+COPY --from=python pyproject.toml /app/python/
+COPY --from=python README.md /app/python/
+COPY --from=python src /app/python/src
 
 RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r requirements.txt
 
 RUN make dirhtml
 
-FROM node:24.5.0-alpine AS base
+FROM node:24.7.0-alpine AS base
 
 RUN apk add --no-cache libc6-compat ca-certificates && \
     apk update

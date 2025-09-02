@@ -25,6 +25,22 @@ export function useGetResponses(parentIds: string[]) {
   }
 }
 
+export function useGetUserResponses() {
+  const { data, error, mutate, isLoading } = useSWR<
+    {
+      responses: ResponseInterface[]
+    },
+    ErrorInfo
+  >('/api/v2/responses?mine=true', fetcher)
+
+  return {
+    mutateResponses: mutate,
+    responses: data ? data.responses : emptyResponseList,
+    isResponsesLoading: isLoading,
+    isResponsesError: error,
+  }
+}
+
 export function patchResponse(responseId: string, comment: string) {
   return fetch(`/api/v2/response/${responseId}`, {
     method: 'PATCH',

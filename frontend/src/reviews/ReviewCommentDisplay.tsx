@@ -72,7 +72,7 @@ export default function ReviewCommentDisplay({
     }
   }
 
-  if (isUserInformationError) {
+  if (isUserInformationError && isUserInformationError.status !== 404) {
     return <MessageAlert message={isUserInformationError.info.message} severity='error' />
   }
 

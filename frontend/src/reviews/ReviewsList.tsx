@@ -1,5 +1,5 @@
 import { List } from '@mui/material'
-import { useGetResponses } from 'actions/response'
+import { useGetUserResponses } from 'actions/response'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { useGetCurrentUser } from 'actions/user'
 import { memoize } from 'lodash-es'
@@ -17,7 +17,7 @@ type ReviewsListProps = {
 
 export default function ReviewsList({ kind, status }: ReviewsListProps) {
   const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
-  const { responses, isResponsesLoading, isResponsesError } = useGetResponses(reviews.map((review) => review._id))
+  const { responses, isResponsesLoading, isResponsesError } = useGetUserResponses()
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const [filteredReviews, setFilteredReviews] = useState<ReviewRequestInterface[]>([])
 

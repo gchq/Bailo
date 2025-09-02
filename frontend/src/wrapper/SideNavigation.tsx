@@ -13,8 +13,8 @@ import SchemaIcon from '@mui/icons-material/Schema'
 import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'
-import { useGetResponses } from 'actions/response'
-import { useGetReviewRequestsForUser } from 'actions/review'
+import { useGetUserResponses } from 'actions/response'
+import { useHeadReviewRequestsForUser } from 'actions/review'
 import { CSSProperties, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -84,25 +84,18 @@ export default function SideNavigation({
   pageTopStyling = {},
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
-  const { responses, isResponsesLoading, isResponsesError } = useGetResponses(reviews.map((review) => review._id))
+  const { reviewCountHeader, isReviewsLoading, isReviewsError } = useHeadReviewRequestsForUser(true)
+  const { responses, isResponsesLoading, isResponsesError } = useGetUserResponses()
 
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
-      if (reviews) {
-        setReviewCount(
-          reviews.filter(
-            (review) =>
-              !responses.find(
-                (response) => response.entity === `user:${currentUser.dn}` && response.parentId === review._id,
-              ),
-          ).length,
-        )
+      if (reviewCountHeader) {
+        setReviewCount(reviewCountHeader)
       }
     }
     fetchReviewCount()
-  }, [onResetErrorMessage, reviews, responses, currentUser.dn])
+  }, [onResetErrorMessage, responses, currentUser.dn, reviewCountHeader])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />

@@ -29,13 +29,7 @@ import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr/dist/_internal/types'
-import {
-  CollaboratorEntry,
-  CollaboratorRoleType,
-  EntryKind,
-  ReviewRoleInterface,
-  ReviewRolesFormData,
-} from 'types/types'
+import { CollaboratorEntry, EntryKind, ReviewRoleInterface, ReviewRolesFormData, SystemRoleKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
 type ReviewRolesFormDataUnion = UpdateReviewRolesParams | ReviewRolesFormData
@@ -53,7 +47,7 @@ type ReviewRoleFormContainerProps = {
 
 export default function ReviewRoleFormContainer({
   providedData = false,
-  formData = { name: '', shortName: '', description: '', collaboratorRole: 'none', defaultEntities: [] },
+  formData = { name: '', shortName: '', description: '', systemRole: 'none', defaultEntities: [] },
   setFormData,
   setIsEdit = () => {},
   mutateReviewRoles,
@@ -87,13 +81,13 @@ export default function ReviewRoleFormContainer({
     }))
   }
 
-  const handleCollaboratorRoleChange = (event: SelectChangeEvent) => {
+  const handleSystemRoleChange = (event: SelectChangeEvent) => {
     if (event.target.value === '') {
-      delete formData.collaboratorRole
+      delete formData.systemRole
     } else {
       setFormData((prevFormData: UpdateReviewRolesParams) => ({
         ...prevFormData,
-        collaboratorRole: event.target.value.toLowerCase() as CollaboratorRoleType,
+        systemRole: event.target.value.toLowerCase() as SystemRoleKeys,
       }))
     }
   }
@@ -224,7 +218,7 @@ export default function ReviewRoleFormContainer({
             </LabelledInput>
             <FormControl size='small'>
               <LabelledInput fullWidth label='Collaborator Role' htmlFor='role-collaborator-input'>
-                <Select value={formData.collaboratorRole} onChange={handleCollaboratorRoleChange}>
+                <Select value={formData.systemRole} onChange={handleSystemRoleChange}>
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
