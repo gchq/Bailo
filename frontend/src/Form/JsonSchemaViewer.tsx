@@ -24,6 +24,7 @@ export default function JsonSchemaViewer({
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
   onQuestionClick,
+  activePath,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
@@ -31,6 +32,7 @@ export default function JsonSchemaViewer({
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
   onQuestionClick?: (selection: QuestionSelection) => void
+  activePath?: string
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const theme = useTheme()
@@ -115,6 +117,7 @@ export default function JsonSchemaViewer({
             defaultCurrentUser: defaultCurrentUserInEntityList,
             onClickListener: handleOnClickListener,
             rootSection: currentStep.section,
+            activePath,
           }}
           templates={{ DescriptionFieldTemplate, TitleFieldTemplate }}
         >

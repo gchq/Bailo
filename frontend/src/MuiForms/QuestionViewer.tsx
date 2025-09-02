@@ -20,14 +20,20 @@ export default function QuestionViewer({ label, id, schema, formContext }: Quest
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
+  const schemaPath = `${formContext.rootSection}.${id?.substring(4).replaceAll('_', 'properties.')}`
+
   const handleOnClick = () => {
-    const schemaPath = `${formContext.rootSection}.${id?.substring(4).replaceAll('_', 'properties.')}`
     formContext.onClickListener({ path: schemaPath, schema })
   }
 
   return (
     <Fragment key={label}>
-      <Button sx={{ textTransform: 'none', textAlign: 'left' }} onClick={handleOnClick}>
+      <Button
+        sx={{ textTransform: 'none', textAlign: 'left' }}
+        variant={formContext.activePath === schemaPath ? 'outlined' : 'text'}
+        onClick={handleOnClick}
+        size='small'
+      >
         {label}
       </Button>
     </Fragment>

@@ -140,6 +140,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               splitSchema={splitSourceSchema}
               setSplitSchema={setSplitSourceSchema}
               onQuestionClick={(selection: QuestionSelection) => handleSourceQuestionOnClick(selection)}
+              activePath={sourceSchemaQuestion?.path}
             />
           </Grid2>
         ) : (
@@ -151,6 +152,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               splitSchema={splitTargetSchema}
               setSplitSchema={setSplitTargetSchema}
               onQuestionClick={(selection: QuestionSelection) => handleTargetQuestionOnClick(selection)}
+              activePath={targetSchemaQuestion?.path}
             />
           </Grid2>
         ) : (
