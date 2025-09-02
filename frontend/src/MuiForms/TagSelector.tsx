@@ -1,12 +1,14 @@
 import { Box, Button, Chip, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { FormContextType } from '@rjsf/utils'
 import { useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 interface TagSelectorProps {
   onChange: (newValue: string[]) => void
   value: string[]
   label: string
-  formContext?: any
+  formContext?: FormContextType
   required?: boolean
 }
 
@@ -35,6 +37,10 @@ export default function TagSelector({ onChange, value, label, formContext, requi
   const handleChipOnDelete = (tag: string) => {
     const updatedArray = value.filter((e) => e !== tag)
     onChange(updatedArray)
+  }
+
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
   return (

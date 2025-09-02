@@ -2,6 +2,7 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
+import { FormContextType } from '@rjsf/utils'
 import { EntrySearchResult, useListModels } from 'actions/model'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
@@ -17,7 +18,7 @@ interface DataCardSelectorProps {
   required?: boolean
   value: string[]
   onChange: (newValue: string[]) => void
-  formContext?: any
+  formContext?: FormContextType
   rawErrors?: string[]
 }
 
@@ -72,6 +73,10 @@ export default function DataCardSelector({
 
   if (isDataCardsError) {
     return <MessageAlert message={isDataCardsError.info.message} severity='error' />
+  }
+
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
   return (

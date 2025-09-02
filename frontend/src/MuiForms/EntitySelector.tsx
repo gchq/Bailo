@@ -2,6 +2,7 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
+import { FormContextType } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
@@ -16,7 +17,7 @@ interface EntitySelectorProps {
   required?: boolean
   value: string[]
   onChange: (newValue: string[]) => void
-  formContext?: any
+  formContext?: FormContextType
   rawErrors?: string[]
 }
 
@@ -79,6 +80,10 @@ export default function EntitySelector({
     if (isUsersError.status !== 413) {
       return <MessageAlert message={isUsersError.info.message} severity='error' />
     }
+  }
+
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
   return (

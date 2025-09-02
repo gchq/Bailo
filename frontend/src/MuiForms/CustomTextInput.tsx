@@ -1,14 +1,16 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
+import { FormContextType } from '@rjsf/utils'
 import { Fragment, useMemo } from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 interface CustomTextInputProps {
   label?: string
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
-  formContext?: any
+  formContext?: FormContextType
   value: string
   onChange: (newValue: string) => void
   InputProps?: any
@@ -39,6 +41,10 @@ export default function CustomTextInput({
       return theme.palette.customTextInput.main
     }
   }, [theme, value])
+
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
 
   return (
     <Fragment key={label}>

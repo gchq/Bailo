@@ -3,9 +3,11 @@ import 'dayjs/locale/en-gb'
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
+import { FormContextType } from '@rjsf/utils'
 import dayjs, { Dayjs } from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Fragment } from 'react'
+import MessageAlert from 'src/MessageAlert'
 dayjs.extend(customParseFormat)
 
 interface DateSelectorProps {
@@ -13,7 +15,7 @@ interface DateSelectorProps {
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
-  formContext?: any
+  formContext?: FormContextType
   value: string
   onChange: (newValue: string | undefined) => void
   InputProps?: any
@@ -28,6 +30,10 @@ export default function DateSelector({ onChange, value, label, formContext, requ
     } else {
       onChange(undefined)
     }
+  }
+
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
   return (
