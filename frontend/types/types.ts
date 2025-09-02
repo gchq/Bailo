@@ -645,6 +645,8 @@ export const SystemRoles = {
 export type SystemRolesKeys = (typeof SystemRoles)[keyof typeof SystemRoles]
 
 export interface QuestionMigration {
+  // id is only used in the UI for uniqueness
+  id: string
   kind: string
   sourcePath: string
   targetPath?: string

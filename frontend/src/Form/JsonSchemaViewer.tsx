@@ -23,7 +23,6 @@ export default function JsonSchemaViewer({
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
-  hideInputs = false,
   onQuestionClick,
 }: {
   splitSchema: SplitSchemaNoRender
@@ -31,7 +30,6 @@ export default function JsonSchemaViewer({
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
-  hideInputs?: boolean
   onQuestionClick?: (selection: QuestionSelection) => void
 }) {
   const [activeStep, setActiveStep] = useState(0)
@@ -115,7 +113,6 @@ export default function JsonSchemaViewer({
             editMode: canEdit,
             formSchema: currentStep.schema,
             defaultCurrentUser: defaultCurrentUserInEntityList,
-            hideInputs: hideInputs,
             onClickListener: handleOnClickListener,
             rootSection: currentStep.section,
           }}

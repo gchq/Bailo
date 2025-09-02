@@ -1,15 +1,5 @@
 import { Forward } from '@mui/icons-material'
-import {
-  Autocomplete,
-  Box,
-  Container,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Autocomplete, Box, Stack, TextField, Typography } from '@mui/material'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'

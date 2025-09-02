@@ -1,6 +1,5 @@
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
-import SchemaMigrationSelector from 'src/schemas/SchemaMigrationSelector'
 import { useMemo } from 'react'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
@@ -8,6 +7,7 @@ import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import SchemaCompare from 'src/schemas/SchemaCompare'
+import SchemaMigrationSelector from 'src/schemas/SchemaMigrationSelector'
 import SchemaTab from 'src/schemas/SchemaTab'
 
 export default function SchemasPage() {

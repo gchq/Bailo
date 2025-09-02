@@ -5,12 +5,10 @@ import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
 import dayjs, { Dayjs } from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-import { Fragment, useEffect, useRef } from 'react'
 dayjs.extend(customParseFormat)
 
 interface DateSelectorProps {
   label?: string
-  id?: string
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
@@ -20,11 +18,8 @@ interface DateSelectorProps {
   InputProps?: any
 }
 
-export default function DateSelector(props: DateSelectorProps) {
-  const { onChange, value, label, formContext, required, id } = props
-
+export default function DateSelector({ onChange, value, label, formContext, required }: DateSelectorProps) {
   const theme = useTheme()
-  const ref = useRef<HTMLDivElement>(null)
 
   const handleChange = (dateInput: Dayjs | null) => {
     if (dateInput && dateInput.isValid()) {
@@ -34,19 +29,8 @@ export default function DateSelector(props: DateSelectorProps) {
     }
   }
 
-  useEffect(() => {
-    document.body.addEventListener('click', (event) => {
-      if (ref.current) {
-        const questionComponent = event.composedPath().includes(ref.current)
-        if (ref.current && questionComponent) {
-          formContext.onClickListener(id)
-        }
-      }
-    })
-  }, [formContext])
-
   return (
-    <div ref={ref} key={label}>
+    <div key={label}>
       <Typography fontWeight='bold'>
         {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>

@@ -15,8 +15,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import schema from 'pages/data-card/[dataCardId]/schema'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
 import { QuestionMigration, SchemaInterface, SplitSchemaNoRender } from 'types/types'
 import { getStepsFromSchema } from 'utils/formUtils'
@@ -51,14 +50,21 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       step.steps = targetSteps
     }
     setSplitTargetSchema({ reference: targetSchema.id, steps: targetSteps })
-  }, [schema, sourceSchema, targetSchema])
+  }, [sourceSchema, targetSchema])
+
+  const handleRemoveActionItem = useCallback(
+    (action: QuestionMigration) => {
+      setQuestionMigrations(questionMigrations.filter((questionMigration) => questionMigration.id !== action.id))
+    },
+    [questionMigrations],
+  )
 
   const actionsList = useMemo(() => {
     return questionMigrations.map((migrationAction) => {
       if (migrationAction.kind === 'mapping') {
         return (
-          <Stack direction='row' spacing={1} alignItems='center'>
-            <IconButton>
+          <Stack direction='row' spacing={1} alignItems='center' key={migrationAction.id}>
+            <IconButton onClick={() => handleRemoveActionItem(migrationAction)}>
               <Close color='error' />
             </IconButton>
             <Typography>
@@ -70,8 +76,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       }
       if (migrationAction.kind === 'delete') {
         return (
-          <Stack direction='row' spacing={1} alignItems='center'>
-            <IconButton>
+          <Stack direction='row' spacing={1} alignItems='center' key={migrationAction.id}>
+            <IconButton onClick={() => handleRemoveActionItem(migrationAction)}>
               <Close color='error' />
             </IconButton>
             <Typography>
@@ -81,7 +87,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
         )
       }
     })
-  }, [questionMigrations])
+  }, [questionMigrations, handleRemoveActionItem])
 
   const handleAddNewAction = () => {
     setErrorText('')
@@ -91,7 +97,12 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     if (!targetSchemaQuestion && questionMigrationKind !== 'delete') {
       return setErrorText('Please select a target question')
     }
+    const formId = `${questionMigrationKind}.${sourceSchemaQuestion.path}.${targetSchemaQuestion?.path}`
+    if (questionMigrations.some((questionMigration) => questionMigration.id === formId)) {
+      return setErrorText('This action already exists')
+    }
     const newQuestionMigration: QuestionMigration = {
+      id: formId,
       kind: questionMigrationKind,
       sourcePath: sourceSchemaQuestion.path,
       targetPath: targetSchemaQuestion?.path,
@@ -106,7 +117,9 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   }
 
   const handleTargetQuestionOnClick = (selection: QuestionSelection) => {
-    setTargetSchemaQuestion(selection)
+    if (questionMigrationKind !== 'delete') {
+      setTargetSchemaQuestion(selection)
+    }
   }
 
   const handleMigrationKindOnChange = (event: SelectChangeEvent) => {
@@ -116,74 +129,83 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     setQuestionMigrationKind(event.target.value as MigrationKind)
   }
 
+  const handleSubmitMigrationPlan = () => {}
+
   return (
-    <Grid2 container spacing={2}>
-      {sourceSchema ? (
-        <Grid2 size={{ sm: 12, md: 4 }}>
-          <JsonSchemaViewer
-            splitSchema={splitSourceSchema}
-            setSplitSchema={setSplitSourceSchema}
-            hideInputs
-            onQuestionClick={(selection: QuestionSelection) => handleSourceQuestionOnClick(selection)}
-          />
-        </Grid2>
-      ) : (
-        <Typography>No valid source schema</Typography>
-      )}
-      {targetSchema ? (
-        <Grid2 size={{ sm: 12, md: 4 }}>
-          <JsonSchemaViewer
-            splitSchema={splitTargetSchema}
-            setSplitSchema={setSplitTargetSchema}
-            hideInputs
-            onQuestionClick={(selection: QuestionSelection) => handleTargetQuestionOnClick(selection)}
-          />
-        </Grid2>
-      ) : (
-        <Typography>No valid target schema</Typography>
-      )}
-      <Grid2 size={{ sm: 12, md: 4 }}>
-        <Stack spacing={2}>
-          <Typography sx={{ textAlign: 'center' }} fontWeight='bold'>
-            Actions
-          </Typography>
-          <Stack sx={{ p: 2 }} spacing={2}>
-            <Select
-              defaultValue='mapping'
-              size='small'
-              value={questionMigrationKind}
-              onChange={handleMigrationKindOnChange}
-            >
-              <MenuItem value={'mapping'}>Mapping</MenuItem>
-              <MenuItem value={'delete'}>Delete</MenuItem>
-            </Select>
-            <TextField size='small' placeholder='Source question' value={sourceSchemaQuestion?.path || ''} />
-            <TextField
-              size='small'
-              placeholder='Target question'
-              value={targetSchemaQuestion?.path || ''}
-              disabled={questionMigrationKind === 'delete'}
+    <>
+      <Grid2 container spacing={2}>
+        {sourceSchema ? (
+          <Grid2 size={{ sm: 12, md: 4 }}>
+            <JsonSchemaViewer
+              splitSchema={splitSourceSchema}
+              setSplitSchema={setSplitSourceSchema}
+              onQuestionClick={(selection: QuestionSelection) => handleSourceQuestionOnClick(selection)}
             />
-            <Stack spacing={2}>
-              <Button sx={{ width: 'max-content' }} variant='contained' onClick={handleAddNewAction}>
-                Add action
-              </Button>
-              <Typography color='error'>{errorText}</Typography>
-              <Divider />
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
-                  <Typography fontWeight='bold'>View Actions</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Stack spacing={1} sx={{ mt: 1 }}>
-                    {actionsList}
-                  </Stack>
-                </AccordionDetails>
-              </Accordion>
+          </Grid2>
+        ) : (
+          <Typography>No valid source schema</Typography>
+        )}
+        {targetSchema ? (
+          <Grid2 size={{ sm: 12, md: 4 }}>
+            <JsonSchemaViewer
+              splitSchema={splitTargetSchema}
+              setSplitSchema={setSplitTargetSchema}
+              onQuestionClick={(selection: QuestionSelection) => handleTargetQuestionOnClick(selection)}
+            />
+          </Grid2>
+        ) : (
+          <Typography>No valid target schema</Typography>
+        )}
+        <Grid2 size={{ sm: 12, md: 4 }}>
+          <Stack spacing={2}>
+            <Typography sx={{ px: 2 }} fontWeight='bold'>
+              Actions
+            </Typography>
+            <Stack sx={{ px: 2 }} spacing={2}>
+              <Select
+                defaultValue='mapping'
+                size='small'
+                value={questionMigrationKind}
+                onChange={handleMigrationKindOnChange}
+              >
+                <MenuItem value={'mapping'}>Mapping</MenuItem>
+                <MenuItem value={'delete'}>Delete</MenuItem>
+              </Select>
+              <TextField size='small' placeholder='Source question' value={sourceSchemaQuestion?.path || ''} />
+              <TextField
+                size='small'
+                placeholder='Target question'
+                value={targetSchemaQuestion?.path || ''}
+                disabled={questionMigrationKind === 'delete'}
+              />
+              <Stack spacing={2}>
+                <Button sx={{ width: 'max-content' }} variant='contained' onClick={handleAddNewAction}>
+                  Add action
+                </Button>
+                <Typography color='error'>{errorText}</Typography>
+                <Divider />
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
+                    <Typography fontWeight='bold'>
+                      View Actions {questionMigrations.length > 0 ? `(${questionMigrations.length})` : ''}
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Stack spacing={1} sx={{ mt: 1 }}>
+                      {actionsList}
+                    </Stack>
+                  </AccordionDetails>
+                </Accordion>
+              </Stack>
             </Stack>
           </Stack>
-        </Stack>
+        </Grid2>
       </Grid2>
-    </Grid2>
+      <Box>
+        <Button variant='contained' sx={{ width: 'max-content', float: 'right' }} onClick={handleSubmitMigrationPlan}>
+          Submit migration plan
+        </Button>
+      </Box>
+    </>
   )
 }

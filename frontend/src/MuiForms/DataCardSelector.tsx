@@ -2,11 +2,10 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { FormContextType } from '@rjsf/utils'
 import { EntrySearchResult, useListModels } from 'actions/model'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
 import { EntryKind } from 'types/types'
 
 import Loading from '../common/Loading'
@@ -22,9 +21,15 @@ interface DataCardSelectorProps {
   rawErrors?: string[]
 }
 
-export default function DataCardSelector(props: DataCardSelectorProps) {
-  const { onChange, value: currentValue, required, label, id, formContext, rawErrors } = props
-
+export default function DataCardSelector({
+  onChange,
+  value: currentValue,
+  required,
+  label,
+  id,
+  formContext,
+  rawErrors,
+}: DataCardSelectorProps) {
   const [open, setOpen] = useState(false)
   const [dataCardListQuery, setDataCardListQuery] = useState('')
   const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
@@ -37,7 +42,6 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
 
   const theme = useTheme()
   const router = useRouter()
-  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (currentValue) {
@@ -49,17 +53,6 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
       setSelectedDataCards(updatedDataCards)
     }
   }, [currentValue, dataCards])
-
-  useEffect(() => {
-    document.body.addEventListener('click', (event) => {
-      if (ref.current) {
-        const questionComponent = event.composedPath().includes(ref.current)
-        if (ref.current && questionComponent) {
-          formContext.onClickListener(id)
-        }
-      }
-    })
-  }, [formContext])
 
   const handleSelectedDataCardsChange = useCallback(
     (_event: SyntheticEvent<Element, Event>, newValues: EntrySearchResult[]) => {
@@ -82,7 +75,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
   }
 
   return (
-    <div ref={ref}>
+    <>
       {isDataCardsLoading && <Loading />}
       {formContext && formContext.editMode && (
         <>
@@ -138,7 +131,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
-          {currentValue.length === 0 && !formContext.hideInputs && (
+          {currentValue.length === 0 && (
             <Typography
               sx={{
                 fontStyle: 'italic',
@@ -165,6 +158,6 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
           </Box>
         </>
       )}
-    </div>
+    </>
   )
 }

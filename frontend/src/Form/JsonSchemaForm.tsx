@@ -53,10 +53,6 @@ export default function JsonSchemaForm({
     )
   }
 
-  function handleOnClickListener(question: string) {
-    console.log(question)
-  }
-
   return (
     <Grid2 container spacing={2} sx={{ mt: 1 }}>
       <Grid2 size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
@@ -101,8 +97,6 @@ export default function JsonSchemaForm({
             editMode: canEdit,
             formSchema: currentStep.schema,
             defaultCurrentUser: defaultCurrentUserInEntityList,
-            hideInputs: hideInputs,
-            onClickListener: handleOnClickListener,
           }}
           templates={
             !canEdit || hideInputs

@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { ArrayFieldTemplateProps, FieldHelpProps, ObjectFieldTemplateProps } from '@rjsf/utils'
+import { ArrayFieldTemplateProps, ObjectFieldTemplateProps } from '@rjsf/utils'
 
 export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   return (

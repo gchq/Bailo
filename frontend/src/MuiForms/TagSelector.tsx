@@ -1,7 +1,6 @@
 import { Box, Button, Chip, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FormContextType } from '@rjsf/utils'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 interface TagSelectorProps {
   onChange: (newValue: string[]) => void
@@ -9,26 +8,13 @@ interface TagSelectorProps {
   label: string
   formContext?: any
   required?: boolean
-  id?: string
 }
 
-export default function TagSelector({ onChange, value, label, formContext, required, id }: TagSelectorProps) {
+export default function TagSelector({ onChange, value, label, formContext, required }: TagSelectorProps) {
   const theme = useTheme()
-  const ref = useRef<HTMLDivElement>(null)
 
   const [newTag, setNewTag] = useState('')
   const [errorText, setErrorText] = useState('')
-
-  useEffect(() => {
-    document.body.addEventListener('click', (event) => {
-      if (ref.current) {
-        const questionComponent = event.composedPath().includes(ref.current)
-        if (ref.current && questionComponent) {
-          formContext.onClickListener(id)
-        }
-      }
-    })
-  }, [formContext])
 
   const handleNewTagSubmit = () => {
     setErrorText('')
@@ -52,7 +38,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
   }
 
   return (
-    <div ref={ref}>
+    <>
       {formContext && formContext.editMode && (
         <Stack spacing={1}>
           <Typography fontWeight='bold'>
@@ -115,6 +101,6 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           </Box>
         </>
       )}
-    </div>
+    </>
   )
 }
