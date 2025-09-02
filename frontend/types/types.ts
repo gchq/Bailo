@@ -230,25 +230,12 @@ export const RoleKind = {
 
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
-export interface SystemRole {
-  name: string
-  shortName: string
-  kind?: RoleKindKeys
-  description?: string
-}
-
 export const SchemaKindLabel = {
   model: 'model',
   accessRequest: 'access request',
   dataCard: 'data card',
 }
 export type SchemaKindLabelKeys = (typeof SchemaKindLabel)[keyof typeof SchemaKindLabel]
-
-export type ReviewRolesFormData = SystemRole & {
-  defaultEntities?: string[]
-  lockEntities: boolean
-  collaboratorRole?: CollaboratorRoleType
-}
 
 export const SchemaKind = {
   MODEL: 'model',
@@ -618,6 +605,19 @@ export type FileUploadWithMetadata = {
 export type FileUploadMetadata = {
   tags: string[]
   text: string
+}
+
+export interface SystemRole {
+  name: string
+  shortName: string
+  kind?: RoleKindKeys
+  description?: string
+}
+
+export type ReviewRolesFormData = SystemRole & {
+  defaultEntities?: string[]
+  lockEntities: boolean
+  collaboratorRole?: CollaboratorRoleType
 }
 
 export interface ReviewRoleInterface {

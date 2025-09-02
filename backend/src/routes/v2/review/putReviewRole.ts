@@ -10,7 +10,7 @@ import { updateReviewRole } from '../../../services/review.js'
 import { registerPath, reviewRoleSchema } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
-export const patchReviewRoleSchema = z.object({
+export const putReviewRoleSchema = z.object({
   params: z.object({
     shortName: z.string({
       required_error: 'Must specify review role short name as URL parameter',
@@ -18,7 +18,7 @@ export const patchReviewRoleSchema = z.object({
   }),
   body: z
     .object({
-      name: z.string().openapi({ example: 'Reviewer' }).optional(),
+      name: z.string().openapi({ example: 'Reviewer' }),
       description: z.string().openapi({ example: 'This is an example review role' }).optional(),
       defaultEntities: z
         .array(z.string())
@@ -30,11 +30,11 @@ export const patchReviewRoleSchema = z.object({
 })
 
 registerPath({
-  method: 'patch',
+  method: 'put',
   path: '/api/v2/role/{shortName}',
   tags: ['reviewRole'],
   description: 'Update partial fields for an review role.',
-  schema: patchReviewRoleSchema,
+  schema: putReviewRoleSchema,
   responses: {
     200: {
       description: 'Object with review role properties',
@@ -49,15 +49,15 @@ registerPath({
   },
 })
 
-interface PatchReviewRoleResponse {
+interface PutReviewRoleResponse {
   reviewRole: ReviewRoleInterface
 }
 
-export const patchReviewRole = [
+export const putReviewRole = [
   bodyParser.json(),
-  async (req: Request, res: Response<PatchReviewRoleResponse>): Promise<void> => {
+  async (req: Request, res: Response<PutReviewRoleResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateReviewRole
-    const { body, params } = parse(req, patchReviewRoleSchema)
+    const { body, params } = parse(req, putReviewRoleSchema)
     const reviewRole = await updateReviewRole(req.user, params.shortName, body)
     await audit.onUpdateReviewRole(req, reviewRole)
 

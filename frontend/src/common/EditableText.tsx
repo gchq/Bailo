@@ -5,8 +5,8 @@ import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
 
 interface EditableTextProps {
-  value: string
-  onSubmit: (newValue: string) => void
+  value?: string
+  onSubmit: (newValue: string | undefined) => void
   tooltipText?: string
   submitButtonText?: string
   multiline?: boolean
@@ -33,7 +33,9 @@ export default function EditableText({
 
   const handleSubmit = () => {
     setIsEditMode(false)
-    onSubmit(newValue)
+    if (newValue !== value) {
+      onSubmit(newValue)
+    }
   }
 
   const submitButtons = useMemo(() => {
@@ -58,7 +60,7 @@ export default function EditableText({
               {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
             </IconButton>
           </Tooltip>
-          <Typography>{value}</Typography>
+          <Typography fontStyle={!value ? 'italic' : 'normal'}>{value || 'Empty'}</Typography>
         </Stack>
       )}
       {isEditMode && (
@@ -66,7 +68,7 @@ export default function EditableText({
           {richText ? (
             <Stack>
               <RichTextEditor
-                value={newValue}
+                value={newValue || ''}
                 onChange={(input) => setNewValue(input)}
                 aria-label='Schema description'
               />

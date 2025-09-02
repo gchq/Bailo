@@ -37,14 +37,17 @@ export async function postReviewRole(reviewRole: ReviewRolesFormData) {
   })
 }
 
-export async function patchReviewRole(
-  reviewRoleShortName: string,
-  diff: Partial<Pick<ReviewRolesFormData, 'name' | 'description' | 'defaultEntities' | 'collaboratorRole'>>,
-) {
-  return fetch(`/api/v2/review/role/${reviewRoleShortName}`, {
-    method: 'PATCH',
+export type UpdateReviewRolesParams = Pick<
+  ReviewRoleInterface,
+  'shortName' | 'name' | 'description' | 'defaultEntities' | 'collaboratorRole'
+>
+
+export function putReviewRole(reviewRole: UpdateReviewRolesParams) {
+  const { shortName, ...reviewRoleNoShort } = { ...reviewRole }
+  return fetch(`/api/v2/review/role/${shortName}`, {
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(diff),
+    body: JSON.stringify(reviewRoleNoShort),
   })
 }
 

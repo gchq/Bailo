@@ -1,10 +1,13 @@
-import { Box, Button, Container, Divider, List, ListItem, Paper, Stack, Typography } from '@mui/material'
-import { deleteReviewRole, patchReviewRole, useGetReviewRoles } from 'actions/reviewRoles'
+import { PersonAdd } from '@mui/icons-material'
+import GroupsIcon from '@mui/icons-material/Groups'
+import PersonIcon from '@mui/icons-material/Person'
+import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
+import { useGetModelRoles } from 'actions/model'
+import { deleteReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
-import { Fragment, useCallback, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
-import EditableText from 'src/common/EditableText'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
 import Loading from 'src/common/Loading'
@@ -12,18 +15,50 @@ import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
-import { ReviewRolesFormData } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
-import { plural, toTitleCase } from 'utils/stringUtils'
+import ReviewRoleFormContainer from 'src/reviewRoles/ReviewRoleFormContainer'
+import { ReviewRoleInterface } from 'types/types'
+import { getRoleDisplayName } from 'utils/roles'
+import { plural } from 'utils/stringUtils'
 
 export default function ReviewRoles() {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError, mutateReviewRoles } = useGetReviewRoles()
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
   const [selectedRole, setSelectedRole] = useState<number>(0)
   const [confirmationOpen, setConfirmationOpen] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
+
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
-  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const [isEdit, setIsEdit] = useState<boolean>(false)
+  const [formData, setFormData] = useState<UpdateReviewRolesParams>({
+    name: '',
+    shortName: '',
+    description: '',
+    collaboratorRole: 'none',
+    defaultEntities: [],
+  })
+
+  useEffect(() => {
+    if (reviewRoles) {
+      setFormData(removeExcessReviewRoleParams(reviewRoles[selectedRole]))
+    }
+  }, [reviewRoles, selectedRole])
+
+  function removeExcessReviewRoleParams(reviewRole: ReviewRoleInterface): UpdateReviewRolesParams {
+    let updateForm: UpdateReviewRolesParams = { shortName: '', name: '' }
+    if (reviewRole) {
+      updateForm = {
+        shortName: reviewRole.shortName,
+        name: reviewRole.name,
+        description: reviewRole.description,
+        defaultEntities: reviewRole.defaultEntities,
+        collaboratorRole: reviewRole.collaboratorRole,
+      }
+    }
+
+    return updateForm
+  }
 
   const listRoles = useMemo(
     () =>
@@ -37,24 +72,6 @@ export default function ReviewRoles() {
         </SimpleListItemButton>
       )),
     [reviewRoles, selectedRole],
-  )
-
-  const handleSubmit = useCallback(
-    async (
-      shortName: string,
-      diff: Partial<Pick<ReviewRolesFormData, 'name' | 'description' | 'defaultEntities' | 'collaboratorRole'>>,
-    ) => {
-      setErrorMessage('')
-      setLoading(true)
-      const res = await patchReviewRole(shortName, diff)
-
-      if (!res.ok) {
-        setErrorMessage(await getErrorMessage(res))
-      }
-
-      setLoading(false)
-    },
-    [],
   )
 
   const schemasLength = useCallback(
@@ -86,56 +103,94 @@ export default function ReviewRoles() {
     [setErrorMessage, setConfirmationOpen, mutateReviewRoles],
   )
 
+  const displayEntityIcon = (defaultEntity: string) => {
+    const isUser = defaultEntity.startsWith('user:')
+    return isUser ? <PersonIcon color='primary' /> : <GroupsIcon color='secondary' />
+  }
+
+  const displayReviewRoleDefaultEntities = useMemo(() => {
+    return formData?.defaultEntities && formData?.defaultEntities.length > 0
+      ? formData.defaultEntities.map((defaultEntity) => (
+          <Stack key={defaultEntity} direction='row' alignItems='center' spacing={1}>
+            {displayEntityIcon(defaultEntity)}
+            <UserDisplay dn={defaultEntity} />
+          </Stack>
+        ))
+      : 'No entities assigned'
+  }, [formData])
+
   const listRoleDescriptions = useMemo(
     () =>
       reviewRoles.map((reviewRole, index) => (
         <Fragment key={reviewRole._id}>
           {selectedRole === index && (
             <>
-              <Stack spacing={2}>
-                <Box>
-                  <Typography color='primary' fontWeight='bold'>
-                    Description
-                  </Typography>
-                  <EditableText
-                    value={reviewRole.description!}
-                    onSubmit={(newValue) => {
-                      handleSubmit(reviewRole.shortName, { description: newValue })
-                    }}
-                    tooltipText='Edit review role description'
-                    loading={loading}
-                  />
-                </Box>
-                <Box>
-                  <Typography color='primary' fontWeight='bold'>
-                    System Role
-                  </Typography>
-                  <Typography>{toTitleCase(reviewRole.collaboratorRole || '')}</Typography>
-                </Box>
-                <Box>
-                  <Typography color='primary' fontWeight='bold'>
-                    Default entities
-                  </Typography>
-                  <List>
-                    {!reviewRole.defaultEntities ||
-                      (reviewRole.defaultEntities.length === 0 && <Typography>No entities assigned</Typography>)}
-                    {reviewRole.defaultEntities &&
-                      reviewRole.defaultEntities.map((entity) => (
-                        <ListItem key={entity}>
-                          <UserDisplay dn={entity} />
-                        </ListItem>
-                      ))}
-                  </List>
-                </Box>
-                <Button
-                  color='error'
-                  sx={{ width: 'max-content' }}
-                  variant='contained'
-                  onClick={handleOpenDeleteConfirmation}
-                >
-                  Delete role
-                </Button>
-              </Stack>
+              {!isEdit ? (
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography color='primary' fontWeight='bold'>
+                      Description
+                    </Typography>
+                    <Typography>{formData?.description || 'No description'}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography color='primary' fontWeight='bold'>
+                      System Role
+                    </Typography>
+                    <Typography>
+                      {formData?.collaboratorRole
+                        ? getRoleDisplayName(formData?.collaboratorRole, modelRoles)
+                        : 'No system role'}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography color='primary' fontWeight='bold'>
+                      Default entities
+                    </Typography>
+                    <List>{displayReviewRoleDefaultEntities}</List>
+                  </Box>
+                  <Box display='flex'>
+                    <Box ml='auto'>
+                      <Stack direction='row' spacing={2}>
+                        <Button
+                          color='primary'
+                          sx={{ width: 'max-content' }}
+                          variant='outlined'
+                          onClick={() => setIsEdit(true)}
+                        >
+                          Edit Role
+                        </Button>
+                        <Button
+                          color='error'
+                          sx={{ width: 'max-content' }}
+                          variant='contained'
+                          onClick={handleOpenDeleteConfirmation}
+                        >
+                          Delete role
+                        </Button>
+                      </Stack>
+                    </Box>
+                  </Box>
+                </Stack>
+              ) : formData ? (
+                <ReviewRoleFormContainer
+                  formData={formData}
+                  setFormData={setFormData}
+                  setIsEdit={setIsEdit}
+                  mutateReviewRoles={mutateReviewRoles}
+                  providedData={true}
+                  headingComponent={
+                    <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
+                      <Typography variant='h6' component='h1'>
+                        Create new Role
+                      </Typography>
+                      <PersonAdd color='primary' fontSize='large' />
+                    </Stack>
+                  }
+                />
+              ) : (
+                <Loading />
+              )}
               <ConfirmationDialogue
                 open={confirmationOpen}
                 title='Deleting this role will remove it from any schemas it is attached to, and will also remove the role from any model collaborators assigned to that role.'
@@ -155,17 +210,20 @@ export default function ReviewRoles() {
     [
       reviewRoles,
       selectedRole,
-      loading,
+      isEdit,
+      formData,
+      modelRoles,
+      displayReviewRoleDefaultEntities,
       handleOpenDeleteConfirmation,
+      mutateReviewRoles,
       confirmationOpen,
       schemasLength,
       errorMessage,
-      handleSubmit,
       handleDeleteReviewRole,
     ],
   )
 
-  if (isCurrentUserLoading || isReviewRolesLoading || isSchemasLoading) {
+  if (isCurrentUserLoading || isReviewRolesLoading || isSchemasLoading || isModelRolesLoading) {
     return <Loading />
   }
 
@@ -179,6 +237,10 @@ export default function ReviewRoles() {
 
   if (isSchemasError) {
     return <ErrorWrapper message={isSchemasError.info.message} />
+  }
+
+  if (isModelRolesError) {
+    return <ErrorWrapper message={isModelRolesError.info.message} />
   }
 
   if (!currentUser || !currentUser.isAdmin) {
@@ -210,7 +272,7 @@ export default function ReviewRoles() {
               spacing={{ sm: 2 }}
               divider={<Divider orientation='vertical' flexItem />}
             >
-              <List sx={{ width: '200px' }}>{listRoles}</List>
+              {!isEdit && <List sx={{ width: '200px' }}>{listRoles}</List>}
               <Container sx={{ my: 2 }}>{listRoleDescriptions}</Container>
             </Stack>
           ) : (

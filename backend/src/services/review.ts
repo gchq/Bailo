@@ -259,16 +259,20 @@ export type ReviewRoleInterfaceParams = Partial<
   Pick<ReviewRoleInterface, 'name' | 'description' | 'defaultEntities' | 'collaboratorRole'>
 >
 
-export async function updateReviewRole(user: UserInterface, shortName: string, diff: ReviewRoleInterfaceParams) {
+export async function updateReviewRole(
+  user: UserInterface,
+  shortName: string,
+  updatedReviewRole: ReviewRoleInterfaceParams,
+) {
   const reviewRole = await findReviewRole(user, shortName)
 
-  const auth = await authorisation.reviewRole(user, shortName, ReviewRoleAction.Create)
+  const auth = await authorisation.reviewRole(user, shortName, ReviewRoleAction.Update)
 
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, shortName })
   }
 
-  Object.assign(reviewRole, diff)
+  Object.assign(reviewRole, updatedReviewRole)
 
   await reviewRole.save()
 
