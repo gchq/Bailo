@@ -255,8 +255,9 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
   }
 }
 
-export type ReviewRoleInterfaceParams = Partial<
-  Pick<ReviewRoleInterface, 'name' | 'description' | 'defaultEntities' | 'collaboratorRole'>
+export type ReviewRoleInterfaceParams = Pick<
+  ReviewRoleInterface,
+  'name' | 'description' | 'defaultEntities' | 'collaboratorRole'
 >
 
 export async function updateReviewRole(

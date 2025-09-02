@@ -13,6 +13,7 @@ import {
   findReviewsForAccessRequests,
   removeAccessRequestReviews,
   removeReviewRole,
+  updateReviewRole,
 } from '../../src/services/review.js'
 import { RoleKind } from '../../src/types/types.js'
 import { testModelSchema, testReviewRole } from '../testUtils/testModels.js'
@@ -338,5 +339,33 @@ describe('services > review', () => {
 
     expect(reviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(schemaModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('updateReviewRole > successful', async () => {
+    const shortName = 'reviewer'
+    await updateReviewRole(user, shortName, {
+      name: 'reviewer',
+      description: 'existing description',
+      collaboratorRole: 'owner',
+      defaultEntities: ['user:user2'],
+    })
+
+    reviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
+
+    expect(reviewRoleModelMock.save).toBeCalled()
+  })
+
+  test('updateReviewRole > failure', async () => {
+    const shortName = 'reviewer'
+    await updateReviewRole(user, shortName, {
+      name: 'reviewer',
+      description: 'existing description',
+      collaboratorRole: 'owner',
+      defaultEntities: ['user:user2'],
+    })
+
+    reviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
+
+    expect(reviewRoleModelMock.save).not.toBeCalled()
   })
 })
