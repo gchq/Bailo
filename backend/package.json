@@ -52,7 +52,7 @@
     "lodash-es": "^4.17.21",
     "mjml": "5.0.0-alpha.6",
     "mongodb": "^6.18.0",
-    "mongoose": "8.17.0",
+    "mongoose": "8.18.0",
     "mongoose-delete": "^1.0.2",
     "morgan": "^1.10.1",
     "nanoid": "^5.1.5",
