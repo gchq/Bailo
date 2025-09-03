@@ -1,4 +1,4 @@
-import { PersonAdd } from '@mui/icons-material'
+import { Edit } from '@mui/icons-material'
 import GroupsIcon from '@mui/icons-material/Groups'
 import PersonIcon from '@mui/icons-material/Person'
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
@@ -180,9 +180,9 @@ export default function ReviewRoles() {
                   headingComponent={
                     <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
                       <Typography variant='h6' component='h1'>
-                        Create new Role
+                        Update Existing Role
                       </Typography>
-                      <PersonAdd color='primary' fontSize='large' />
+                      <Edit color='primary' fontSize='large' />
                     </Stack>
                   }
                 />
