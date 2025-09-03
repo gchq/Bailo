@@ -398,7 +398,7 @@ describe('services > review', () => {
   test('updateReviewRole > failure', async () => {
     const shortName = 'reviewer'
     await updateReviewRole(user, shortName, {
-      name: 'reviewer',
+      name: '',
       description: 'existing description',
       systemRole: 'owner',
       defaultEntities: ['user:user2'],
