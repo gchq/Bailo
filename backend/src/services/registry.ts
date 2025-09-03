@@ -18,7 +18,7 @@ import { getModelById } from './model.js'
 
 // derived from https://pkg.go.dev/github.com/distribution/reference#pkg-overview
 const imageRegex =
-  /^((?=[^:/]{1,253})(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(?:\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*(?::[0-9]{1,5})?)(?:\/)?((?![._-])(?:[a-z0-9._-]*)(?<![._-])(?:\/(?![._-])[a-z0-9._-]*(?<![._-]))*)(?:(?:@((?![+.\-_])[A-Za-z][a-zA-Z0-9+.\-_]*(?<![+.\-_]):[0-9a-fA-F]{32,}))|)(?:(?::((?![.-])[a-zA-Z0-9_.-]{1,128}))|)$/
+  /^((?:(?=[^:/]{1,253})(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(?:\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*(?::[0-9]{1,5})?\/)|)((?![._-])(?:[a-z0-9._-]*)(?<![._-])(?:\/(?![._-])[a-z0-9._-]*(?<![._-]))*)(?:(?:@((?![+.\-_])[A-Za-z][a-zA-Z0-9+.\-_]*(?<![+.\-_]):[0-9a-fA-F]{32,}))|)(?:(?::((?![.-])[a-zA-Z0-9_.-]{1,128}))|)$/
 export type DistributionPackageName =
   | { domain?: string; path: string; tag: string }
   | { domain?: string; path: string; digest: string }
@@ -28,6 +28,8 @@ export function splitDistributionPackageName(distributionPackageName: string): D
   if (!split || split.length != 5 || !(split[3]?.length ^ split[4]?.length)) {
     throw InternalError('Could not parse Distribution Package Name.', { distributionPackageName, split })
   }
+  // safely trim final / from domain
+  split[1] = split[1].slice(0, -1)
   // tag
   if (split[4] && split[4].length) {
     // `path` ends up in group 1 when there's no domain, otherwise is in group 2
