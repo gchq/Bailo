@@ -7,3 +7,8 @@ node_modules
 .gitignore
 dist
 config/local.cjs
+
+# Python Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class

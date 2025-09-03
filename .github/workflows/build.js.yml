@@ -42,7 +42,7 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -73,7 +73,7 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -108,7 +108,7 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -121,17 +121,17 @@ jobs:
 
       # Get Bailo Docker image
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_modelscan
           path: /tmp
@@ -272,7 +272,7 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -286,17 +286,17 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_modelscan
           path: /tmp

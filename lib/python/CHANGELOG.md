@@ -2,6 +2,13 @@
 
 All dates are formatted dd/mm/yyyy.
 
+## 3.1.1 - 27/08/2025
+
+### Changes
+
+- Fix `Release.download_all` method's bad `include` & `exclude` logic.
+- Update package dependencies.
+
 ## 3.1.0 - 21/08/2025
 
 ### Breaking Changes

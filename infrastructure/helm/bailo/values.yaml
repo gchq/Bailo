@@ -116,13 +116,12 @@ resourcesFrontend:
     memory: 800Mi
 
 resourcesBackend:
-    limits:
-      cpu: 800m
-      memory: 2Gi
-    requests:
-      cpu: 400m
-      memory: 1Gi
-
+  limits:
+    cpu: 800m
+    memory: 2Gi
+  requests:
+    cpu: 400m
+    memory: 1Gi
 
 # Pod placement
 nodeSelector: {}
