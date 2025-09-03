@@ -249,7 +249,7 @@ describe('services > registry', () => {
       'alpine@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c',
       'nginxinc/nginx-unprivileged@sha256:7b4316677e4015a53d326e657915340128d9fd506f826f676d9f169c0c8557f6',
       'localhost:8080/export-4lvt8w/alpine/sha256:ec1b05d1eac264d9204a57f4ad9d4dc35e9e756e9fedaea0674aefc7edb1d6a4',
-      'node:24.4.1-alpine'.
+      'node:24.4.1-alpine',
     ]
 
     for (const testString of testStrings) {
