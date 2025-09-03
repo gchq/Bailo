@@ -31,8 +31,8 @@ export const putReviewRoleSchema = z.object({
 
 registerPath({
   method: 'put',
-  path: '/api/v2/role/{shortName}',
-  tags: ['reviewRole'],
+  path: '/api/v2/review/role/{shortName}',
+  tags: ['review role'],
   description: 'Update partial fields for an review role.',
   schema: putReviewRoleSchema,
   responses: {

@@ -57,6 +57,11 @@ export const getSpecification = [
         name: 'user',
         description: 'A user represents an individual who has accessed this service.',
       },
+      {
+        name: 'review role',
+        description:
+          'High-level roles that are dynamically created and allocated. Have system roles (and their respective permission) attributed.',
+      },
     ]
 
     if (config.ui.inference?.enabled) {
