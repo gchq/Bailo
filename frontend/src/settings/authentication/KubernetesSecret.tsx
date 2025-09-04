@@ -75,7 +75,7 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           field. For example:
         </Typography>
         <CodeSnippet disableVisibilityButton disableCloseButton>
-          {getKubernetesImagePullSecretsExampleConfig(uiConfig.registry.host, configFileName)}
+          {getKubernetesImagePullSecretsExampleConfig(uiConfig.registry.host, token.description)}
         </CodeSnippet>
       </Stack>
     </Stack>
