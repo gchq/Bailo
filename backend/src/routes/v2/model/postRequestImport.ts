@@ -55,20 +55,25 @@ export const postRequestImportFromS3 = [
       body: { payloadUrl, sourceModelId, mirroredModelId, exporter, importKind, filePath, distributionPackageName },
     } = parse(req, postRequestImportFromS3Schema)
 
-    const { mirroredModel, importResult } = await importModel(
-      req.user,
-      mirroredModelId,
-      sourceModelId,
-      payloadUrl,
-      importKind,
-      filePath,
-      distributionPackageName,
-    )
-    await audit.onCreateImport(req, mirroredModel, sourceModelId, exporter, importResult)
-
-    res.json({
-      mirroredModelId: mirroredModel.id,
-      sourceModelId,
-    })
+    try {
+      const { mirroredModel, importResult } = await importModel(
+        req.user,
+        mirroredModelId,
+        sourceModelId,
+        payloadUrl,
+        importKind,
+        filePath,
+        distributionPackageName,
+      )
+      await audit.onCreateImport(req, mirroredModel, sourceModelId, exporter, importResult)
+  
+      res.json({
+        mirroredModelId: mirroredModel.id,
+        sourceModelId,
+      })
+    } catch (error) {
+      log.error({ error }, 'Error importing model')
+      res.status(500).json({ error: 'Internal Server Error' })
+    }
   },
 ]
