@@ -1,21 +1,21 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { ArrayFieldTemplateProps, ObjectFieldTemplateProps } from '@rjsf/utils'
+import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, TitleFieldProps } from '@rjsf/utils'
 
-export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
+export function ArrayFieldTemplate({ title, items, canAdd, formContext, onAddClick }: ArrayFieldTemplateProps) {
   return (
     <Card sx={{ p: 2 }}>
       <Typography fontWeight='bold' variant='h5' component='h3'>
-        {props.title}
+        {title}
       </Typography>
-      {props.items.map((element) => (
+      {items.map((element) => (
         <Grid2 key={element.key} container spacing={2}>
           <Grid2 size={{ xs: 11 }}>
             <Box>{element.children}</Box>
           </Grid2>
           <Grid2 size={{ xs: 1 }}>
-            {props.formContext.editMode && (
+            {formContext.editMode && (
               <Tooltip title='Remove item'>
                 <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
                   <CloseIcon color='error' />
@@ -25,8 +25,8 @@ export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
           </Grid2>
         </Grid2>
       ))}
-      {props.canAdd && props.formContext.editMode && (
-        <Button size='small' type='button' onClick={props.onAddClick} startIcon={<AddIcon />}>
+      {canAdd && formContext.editMode && (
+        <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />}>
           Add Item
         </Button>
       )}
@@ -58,12 +58,21 @@ export function ObjectFieldTemplate({ title, properties, description, formContex
   )
 }
 
-export function TitleFieldTemplate() {
-  return <></>
+export function TitleFieldTemplate({ title, id }: TitleFieldProps) {
+  return id === 'root__title' ? (
+    <Typography variant='h5' fontWeight='bold'>
+      {title}
+    </Typography>
+  ) : (
+    <Typography variant='h6' fontWeight='bold'>
+      {title}
+    </Typography>
+  )
 }
 
 export function GridTemplate(props) {
   const { children, column, className, ...rest } = props
+  console.log(props)
   return (
     <Grid2 item={column} {...rest} className={`${className} my-custom-grid-styling`}>
       {children}

@@ -160,26 +160,42 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
         )}
         <Grid2 size={{ sm: 12, md: 4 }}>
           <Stack spacing={2}>
-            <Typography sx={{ px: 2 }} fontWeight='bold'>
+            <Typography sx={{ px: 2 }} variant='h6' fontWeight='bold'>
               Actions
             </Typography>
             <Stack sx={{ px: 2 }} spacing={2}>
-              <Select
-                defaultValue='mapping'
-                size='small'
-                value={questionMigrationKind}
-                onChange={handleMigrationKindOnChange}
-              >
-                <MenuItem value={'mapping'}>Mapping</MenuItem>
-                <MenuItem value={'delete'}>Delete</MenuItem>
-              </Select>
-              <TextField size='small' placeholder='Source question' value={sourceSchemaQuestion?.path || ''} />
-              <TextField
-                size='small'
-                placeholder='Target question'
-                value={targetSchemaQuestion?.path || ''}
-                disabled={questionMigrationKind === 'delete'}
-              />
+              <Box>
+                <Typography fontWeight='bold'>Action type</Typography>
+                <Select
+                  defaultValue='mapping'
+                  size='small'
+                  sx={{ width: '100%' }}
+                  value={questionMigrationKind}
+                  onChange={handleMigrationKindOnChange}
+                >
+                  <MenuItem value={'mapping'}>Mapping</MenuItem>
+                  <MenuItem value={'delete'}>Delete</MenuItem>
+                </Select>
+              </Box>
+              <Box>
+                <Typography fontWeight='bold'>Source question path</Typography>
+                <TextField
+                  sx={{ width: '100%' }}
+                  size='small'
+                  placeholder='Source question'
+                  value={sourceSchemaQuestion?.path || ''}
+                />
+              </Box>
+              <Box>
+                <Typography fontWeight='bold'>Target question path</Typography>
+                <TextField
+                  sx={{ width: '100%' }}
+                  size='small'
+                  placeholder='Target question'
+                  value={targetSchemaQuestion?.path || ''}
+                  disabled={questionMigrationKind === 'delete'}
+                />
+              </Box>
               <Stack spacing={2}>
                 <Button sx={{ width: 'max-content' }} variant='contained' onClick={handleAddNewAction}>
                   Add action
