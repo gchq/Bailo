@@ -18,60 +18,65 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 })
 
-const eslintConfig = [{
-  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"]
-}, ...fixupConfigRules(
-  compat.extends(
-    'eslint:recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react/recommended',
-    'plugin:react/jsx-runtime',
-    'plugin:react-hooks/recommended',
-    'next/core-web-vitals',
+const eslintConfig = [
+  {
+    ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
+  },
+  ...fixupConfigRules(
+    compat.extends(
+      'eslint:recommended',
+      'plugin:@typescript-eslint/eslint-recommended',
+      'plugin:@typescript-eslint/recommended',
+      'plugin:react/recommended',
+      'plugin:react/jsx-runtime',
+      'plugin:react-hooks/recommended',
+      'next/core-web-vitals',
+    ),
   ),
-), {
-  plugins: {
-    '@typescript-eslint': fixupPluginRules(typescriptEslint),
-    prettier,
-    'simple-import-sort': simpleImportSort,
-  },
+  {
+    plugins: {
+      '@typescript-eslint': fixupPluginRules(typescriptEslint),
+      prettier,
+      'simple-import-sort': simpleImportSort,
+    },
 
-  languageOptions: {
-    parser: tsParser,
-  },
+    languageOptions: {
+      parser: tsParser,
+    },
 
-  rules: {
-    '@typescript-eslint/no-unused-vars': [
-      'warn',
-      {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_',
-      },
-    ],
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
 
-    '@typescript-eslint/no-extra-semi': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-extra-semi': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
 
-    'react/jsx-newline': [
-      1,
-      {
-        prevent: true,
-      },
-    ],
-    'simple-import-sort/imports': 'warn',
-    'simple-import-sort/exports': 'warn',
-    'no-console': 'warn',
+      'react/jsx-newline': [
+        1,
+        {
+          prevent: true,
+        },
+      ],
+      'simple-import-sort/imports': 'warn',
+      'simple-import-sort/exports': 'warn',
+      'no-console': 'warn',
+    },
   },
-}, {
-  files: ['cypress/**/*.cy.ts'],
-  plugins: {
-    cypress: pluginCypress,
+  {
+    files: ['cypress/**/*.cy.ts'],
+    plugins: {
+      cypress: pluginCypress,
+    },
+    rules: {
+      'func-names': 'off',
+    },
   },
-  rules: {
-    'func-names': 'off',
-  },
-}]
+]
 
 export default eslintConfig
