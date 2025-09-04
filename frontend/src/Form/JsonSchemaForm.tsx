@@ -17,14 +17,12 @@ export default function JsonSchemaForm({
   canEdit = false,
   displayLabelValidation = false,
   defaultCurrentUserInEntityList = false,
-  hideInputs = false,
 }: {
   splitSchema: SplitSchemaNoRender
   setSplitSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
   canEdit?: boolean
   displayLabelValidation?: boolean
   defaultCurrentUserInEntityList?: boolean
-  hideInputs?: boolean
 }) {
   const [activeStep, setActiveStep] = useState(0)
   const theme = useTheme()
@@ -99,7 +97,7 @@ export default function JsonSchemaForm({
             defaultCurrentUser: defaultCurrentUserInEntityList,
           }}
           templates={
-            !canEdit || hideInputs
+            !canEdit
               ? {
                   DescriptionFieldTemplate,
                   ArrayFieldTemplate,
