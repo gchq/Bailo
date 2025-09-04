@@ -10,20 +10,23 @@ export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
         {props.title}
       </Typography>
       {props.items.map((element) => (
-        <Grid2 key={element.key} container spacing={2}>
-          <Grid2 size={{ xs: 11 }}>
-            <Box>{element.children}</Box>
+        <>
+          <Grid2 key={element.key} container spacing={2}>
+            <Grid2 size={{ xs: 11 }}>
+              <Box>{element.children}</Box>
+            </Grid2>
+            <Grid2 size={{ xs: 1 }}>
+              {props.formContext.editMode && (
+                <Tooltip title='Remove item'>
+                  <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
+                    <CloseIcon color='error' />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Grid2>
           </Grid2>
-          <Grid2 size={{ xs: 1 }}>
-            {props.formContext.editMode && (
-              <Tooltip title='Remove item'>
-                <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
-                  <CloseIcon color='error' />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Grid2>
-        </Grid2>
+          <div>test</div>
+        </>
       ))}
       {props.canAdd && props.formContext.editMode && (
         <Button size='small' type='button' onClick={props.onAddClick} startIcon={<AddIcon />}>
