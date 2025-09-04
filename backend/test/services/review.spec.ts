@@ -394,18 +394,4 @@ describe('services > review', () => {
 
     expect(reviewRoleModelMock.save).toBeCalled()
   })
-
-  test('updateReviewRole > failure', async () => {
-    const shortName = 'reviewer'
-    const newRole = await updateReviewRole(user, shortName, {
-      name: '',
-      description: 'existing description',
-      systemRole: 'owner',
-      defaultEntities: ['user:user2'],
-    })
-
-    reviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
-
-    expect(newRole).resolves.toThrowError()
-  })
 })

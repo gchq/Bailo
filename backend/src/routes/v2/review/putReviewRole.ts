@@ -18,7 +18,7 @@ export const putReviewRoleSchema = z.object({
   }),
   body: z
     .object({
-      name: z.string().openapi({ example: 'Reviewer' }),
+      name: z.string().min(1).openapi({ example: 'Reviewer' }),
       description: z.string().openapi({ example: 'This is an example review role' }).optional(),
       defaultEntities: z
         .array(z.string())
@@ -33,7 +33,7 @@ registerPath({
   method: 'put',
   path: '/api/v2/review/role/{shortName}',
   tags: ['review role'],
-  description: 'Update partial fields for an review role.',
+  description: 'Update partial fields for a review role.',
   schema: putReviewRoleSchema,
   responses: {
     200: {
