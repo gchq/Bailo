@@ -25,7 +25,6 @@ export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
               )}
             </Grid2>
           </Grid2>
-          <div>test3</div>
         </>
       ))}
       {props.canAdd && props.formContext.editMode && (
