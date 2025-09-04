@@ -241,12 +241,12 @@ export interface SystemRole {
   shortName: string
   kind?: RoleKindKeys
   description?: string
+  systemRole?: SystemRoleKeys
 }
 
 export type ReviewRolesFormData = SystemRole & {
   defaultEntities?: string[]
   lockEntities: boolean
-  systemRole?: SystemRoleKeys
 }
 
 export const SchemaKindLabel = {
