@@ -62,6 +62,7 @@ export default function JsonSchemaForm({
                 disablePadding
                 sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}
               >
+                <div>test</div>
                 <ListItemButton selected={activeStep === index} onClick={() => handleListItemClick(index)}>
                   <Typography
                     sx={{
