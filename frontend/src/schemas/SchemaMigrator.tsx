@@ -12,6 +12,7 @@ import {
   Select,
   SelectChangeEvent,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -68,9 +69,11 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       if (migrationAction.kind === 'mapping') {
         return (
           <Stack direction='row' spacing={1} alignItems='center' key={migrationAction.id}>
-            <IconButton onClick={() => handleRemoveActionItem(migrationAction)}>
-              <Close color='error' />
-            </IconButton>
+            <Tooltip title='Remove action'>
+              <IconButton onClick={() => handleRemoveActionItem(migrationAction)}>
+                <Close color='error' />
+              </IconButton>
+            </Tooltip>
             <Typography>
               Source field <span style={{ fontWeight: 'bold' }}>{migrationAction.sourcePath}</span> mapped to target
               field <span style={{ fontWeight: 'bold' }}>{migrationAction.targetPath}</span>
@@ -176,20 +179,34 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               </Stack>
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Source question path</Typography>
-                <Button size='small' variant='outlined' sx={{ width: '100%' }} onClick={handleSelectSourceQuestion}>
+                <Button
+                  size='small'
+                  variant='outlined'
+                  sx={{ width: '100%' }}
+                  onClick={handleSelectSourceQuestion}
+                  aria-label='select source schema question'
+                >
                   {sourceSchemaQuestion?.path || 'Select source question'}
                 </Button>
               </Stack>
               {questionMigrationKind !== 'delete' && (
                 <Stack spacing={1}>
                   <Typography fontWeight='bold'>Target question path</Typography>
-                  <Button size='small' variant='outlined' sx={{ width: '100%' }} onClick={handleSelectTargetQuestion}>
+                  <Button
+                    size='small'
+                    variant='outlined'
+                    sx={{ width: '100%' }}
+                    onClick={handleSelectTargetQuestion}
+                    aria-label='select target schema question'
+                  >
                     {targetSchemaQuestion?.path || 'Select target question'}
                   </Button>
                 </Stack>
               )}
               <Stack spacing={2}>
-                <Button onClick={handleAddNewAction}>Add action</Button>
+                <Button onClick={handleAddNewAction} aria-label='add action'>
+                  Add action
+                </Button>
                 <Typography color='error'>{errorText}</Typography>
                 <Divider />
                 <Accordion>
@@ -206,7 +223,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 </Accordion>
               </Stack>
               <Divider />
-              <Button variant='contained' onClick={handleSubmitMigrationPlan}>
+              <Button variant='contained' onClick={handleSubmitMigrationPlan} aria-label='submit migration plan'>
                 Submit migration plan
               </Button>
             </Stack>
