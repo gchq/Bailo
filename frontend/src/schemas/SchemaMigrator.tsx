@@ -15,6 +15,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
 import { QuestionMigration, SchemaInterface, SplitSchemaNoRender } from 'types/types'
@@ -35,6 +36,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
   const [questionMigrationKind, setQuestionMigrationKind] = useState<MigrationKind>('mapping')
   const [errorText, setErrorText] = useState('')
+
+  const theme = useTheme()
 
   useEffect(() => {
     if (!sourceSchema || !targetSchema) return
@@ -135,35 +138,58 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     <>
       <Grid2 container spacing={2}>
         {sourceSchema ? (
-          <Grid2 size={{ sm: 12, md: 4 }}>
-            <JsonSchemaViewer
-              splitSchema={splitSourceSchema}
-              setSplitSchema={setSplitSourceSchema}
-              onQuestionClick={(selection: QuestionSelection) => handleSourceQuestionOnClick(selection)}
-              activePath={sourceSchemaQuestion?.path}
-            />
+          <Grid2
+            size={{ sm: 12, md: 4 }}
+            sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
+          >
+            {' '}
+            <Stack spacing={2}>
+              <Typography sx={{ px: 2 }} variant='h6' fontWeight='bold'>
+                Source Schema
+              </Typography>
+              <Divider />
+              <JsonSchemaViewer
+                splitSchema={splitSourceSchema}
+                setSplitSchema={setSplitSourceSchema}
+                onQuestionClick={(selection: QuestionSelection) => handleSourceQuestionOnClick(selection)}
+                activePath={sourceSchemaQuestion?.path}
+              />
+            </Stack>
           </Grid2>
         ) : (
           <Typography>No valid source schema</Typography>
         )}
         {targetSchema ? (
-          <Grid2 size={{ sm: 12, md: 4 }}>
-            <JsonSchemaViewer
-              splitSchema={splitTargetSchema}
-              setSplitSchema={setSplitTargetSchema}
-              onQuestionClick={(selection: QuestionSelection) => handleTargetQuestionOnClick(selection)}
-              activePath={targetSchemaQuestion?.path}
-            />
+          <Grid2
+            size={{ sm: 12, md: 4 }}
+            sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
+          >
+            <Stack spacing={2}>
+              <Typography sx={{ px: 2 }} variant='h6' fontWeight='bold'>
+                Target Schema
+              </Typography>
+              <Divider />
+              <JsonSchemaViewer
+                splitSchema={splitTargetSchema}
+                setSplitSchema={setSplitTargetSchema}
+                onQuestionClick={(selection: QuestionSelection) => handleTargetQuestionOnClick(selection)}
+                activePath={targetSchemaQuestion?.path}
+              />
+            </Stack>{' '}
           </Grid2>
         ) : (
           <Typography>No valid target schema</Typography>
         )}
-        <Grid2 size={{ sm: 12, md: 4 }}>
+        <Grid2
+          size={{ sm: 12, md: 4 }}
+          sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
+        >
           <Stack spacing={2}>
             <Typography sx={{ px: 2 }} variant='h6' fontWeight='bold'>
               Actions
             </Typography>
-            <Stack sx={{ px: 2 }} spacing={2}>
+            <Divider />
+            <Stack sx={{ p: 2 }} spacing={2}>
               <Box>
                 <Typography fontWeight='bold'>Action type</Typography>
                 <Select
@@ -219,7 +245,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
           </Stack>
         </Grid2>
       </Grid2>
-      <Box>
+      <Box paddingTop={2}>
         <Button variant='contained' sx={{ width: 'max-content', float: 'right' }} onClick={handleSubmitMigrationPlan}>
           Submit migration plan
         </Button>

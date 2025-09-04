@@ -1,10 +1,9 @@
 import 'dayjs/locale/en-gb'
 
-import { Button } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import { FormContextType } from '@rjsf/utils'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-import { Fragment } from 'react'
 import MessageAlert from 'src/MessageAlert'
 dayjs.extend(customParseFormat)
 
@@ -27,15 +26,15 @@ export default function QuestionViewer({ label, id, schema, formContext }: Quest
   }
 
   return (
-    <Fragment key={label}>
+    <Box key={label} sx={{ textAlign: 'left' }}>
       <Button
-        sx={{ textTransform: 'none', textAlign: 'left' }}
+        sx={{ textTransform: 'none' }}
         variant={formContext.activePath === schemaPath ? 'outlined' : 'text'}
         onClick={handleOnClick}
         size='small'
       >
         {label}
       </Button>
-    </Fragment>
+    </Box>
   )
 }
