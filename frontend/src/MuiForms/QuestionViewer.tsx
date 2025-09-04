@@ -19,7 +19,7 @@ export default function QuestionViewer({ label, id, schema, formContext }: Quest
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const schemaPath = `${formContext.rootSection}${id?.substring(4).replaceAll('_', '.properties.')}`
+  const schemaPath = `${formContext.rootSection}${id?.substring(4).replaceAll('_', '.')}`
 
   const handleOnClick = () => {
     formContext.onClickListener({ path: schemaPath, schema })

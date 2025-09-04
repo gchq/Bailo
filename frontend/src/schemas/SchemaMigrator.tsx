@@ -12,7 +12,6 @@ import {
   Select,
   SelectChangeEvent,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -36,6 +35,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
   const [questionMigrationKind, setQuestionMigrationKind] = useState<MigrationKind>('mapping')
   const [errorText, setErrorText] = useState('')
+  const [isSourceSchemaActive, setIsSourceSchemaActive] = useState(false)
+  const [isTargetSchemaActive, setIsTargetSchemaActive] = useState(false)
 
   const theme = useTheme()
 
@@ -113,6 +114,18 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     setQuestionMigrations([...questionMigrations, newQuestionMigration])
     setSourceSchemaQuestion(undefined)
     setTargetSchemaQuestion(undefined)
+    setIsSourceSchemaActive(false)
+    setIsTargetSchemaActive(false)
+  }
+
+  const handleSelectSourceQuestion = () => {
+    setIsSourceSchemaActive(true)
+    setIsTargetSchemaActive(false)
+  }
+
+  const handleSelectTargetQuestion = () => {
+    setIsSourceSchemaActive(false)
+    setIsTargetSchemaActive(true)
   }
 
   const handleSourceQuestionOnClick = (selection: QuestionSelection) => {
@@ -128,6 +141,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   const handleMigrationKindOnChange = (event: SelectChangeEvent) => {
     if (event.target.value === 'delete') {
       setTargetSchemaQuestion(undefined)
+      setIsTargetSchemaActive(false)
     }
     setQuestionMigrationKind(event.target.value as MigrationKind)
   }
@@ -137,49 +151,6 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   return (
     <>
       <Grid2 container spacing={2}>
-        {sourceSchema ? (
-          <Grid2
-            size={{ sm: 12, md: 4 }}
-            sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
-          >
-            {' '}
-            <Stack spacing={2}>
-              <Typography sx={{ px: 2 }} variant='h6' fontWeight='bold'>
-                Source Schema
-              </Typography>
-              <Divider />
-              <JsonSchemaViewer
-                splitSchema={splitSourceSchema}
-                setSplitSchema={setSplitSourceSchema}
-                onQuestionClick={(selection: QuestionSelection) => handleSourceQuestionOnClick(selection)}
-                activePath={sourceSchemaQuestion?.path}
-              />
-            </Stack>
-          </Grid2>
-        ) : (
-          <Typography>No valid source schema</Typography>
-        )}
-        {targetSchema ? (
-          <Grid2
-            size={{ sm: 12, md: 4 }}
-            sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
-          >
-            <Stack spacing={2}>
-              <Typography sx={{ px: 2 }} variant='h6' fontWeight='bold'>
-                Target Schema
-              </Typography>
-              <Divider />
-              <JsonSchemaViewer
-                splitSchema={splitTargetSchema}
-                setSplitSchema={setSplitTargetSchema}
-                onQuestionClick={(selection: QuestionSelection) => handleTargetQuestionOnClick(selection)}
-                activePath={targetSchemaQuestion?.path}
-              />
-            </Stack>{' '}
-          </Grid2>
-        ) : (
-          <Typography>No valid target schema</Typography>
-        )}
         <Grid2
           size={{ sm: 12, md: 4 }}
           sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
@@ -190,7 +161,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
             </Typography>
             <Divider />
             <Stack sx={{ p: 2 }} spacing={2}>
-              <Box>
+              <Stack spacing={1}>
                 <Typography fontWeight='bold'>Action type</Typography>
                 <Select
                   defaultValue='mapping'
@@ -202,30 +173,23 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                   <MenuItem value={'mapping'}>Mapping</MenuItem>
                   <MenuItem value={'delete'}>Delete</MenuItem>
                 </Select>
-              </Box>
-              <Box>
+              </Stack>
+              <Stack spacing={1}>
                 <Typography fontWeight='bold'>Source question path</Typography>
-                <TextField
-                  sx={{ width: '100%' }}
-                  size='small'
-                  placeholder='Source question'
-                  value={sourceSchemaQuestion?.path || ''}
-                />
-              </Box>
-              <Box>
-                <Typography fontWeight='bold'>Target question path</Typography>
-                <TextField
-                  sx={{ width: '100%' }}
-                  size='small'
-                  placeholder='Target question'
-                  value={targetSchemaQuestion?.path || ''}
-                  disabled={questionMigrationKind === 'delete'}
-                />
-              </Box>
-              <Stack spacing={2}>
-                <Button sx={{ width: 'max-content' }} variant='contained' onClick={handleAddNewAction}>
-                  Add action
+                <Button size='small' variant='outlined' sx={{ width: '100%' }} onClick={handleSelectSourceQuestion}>
+                  {sourceSchemaQuestion?.path || 'Select source question'}
                 </Button>
+              </Stack>
+              {questionMigrationKind !== 'delete' && (
+                <Stack spacing={1}>
+                  <Typography fontWeight='bold'>Target question path</Typography>
+                  <Button size='small' variant='outlined' sx={{ width: '100%' }} onClick={handleSelectTargetQuestion}>
+                    {targetSchemaQuestion?.path || 'Select target question'}
+                  </Button>
+                </Stack>
+              )}
+              <Stack spacing={2}>
+                <Button onClick={handleAddNewAction}>Add action</Button>
                 <Typography color='error'>{errorText}</Typography>
                 <Divider />
                 <Accordion>
@@ -241,15 +205,57 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                   </AccordionDetails>
                 </Accordion>
               </Stack>
+              <Divider />
+              <Button variant='contained' onClick={handleSubmitMigrationPlan}>
+                Submit migration plan
+              </Button>
             </Stack>
           </Stack>
         </Grid2>
+        <Grid2 size={{ sm: 12, md: 8 }}>
+          {sourceSchema && isSourceSchemaActive && (
+            <Stack
+              spacing={2}
+              sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
+            >
+              <Box sx={{ px: 2 }}>
+                <Typography variant='h6' fontWeight='bold'>
+                  Source Schema
+                </Typography>
+                <Typography variant='caption'>{sourceSchema.name}</Typography>
+              </Box>
+              <Divider />
+              <JsonSchemaViewer
+                splitSchema={splitSourceSchema}
+                setSplitSchema={setSplitSourceSchema}
+                onQuestionClick={(selection: QuestionSelection) => handleSourceQuestionOnClick(selection)}
+                activePath={sourceSchemaQuestion?.path}
+              />
+            </Stack>
+          )}
+          {targetSchema && isTargetSchemaActive && (
+            <Stack
+              spacing={2}
+              sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
+            >
+              <Box sx={{ px: 2 }}>
+                <Typography variant='h6' fontWeight='bold'>
+                  Target Schema
+                </Typography>
+                <Typography variant='caption'>{targetSchema.name}</Typography>
+              </Box>
+              <Divider />
+              <JsonSchemaViewer
+                splitSchema={splitTargetSchema}
+                setSplitSchema={setSplitTargetSchema}
+                onQuestionClick={(selection: QuestionSelection) => handleTargetQuestionOnClick(selection)}
+                activePath={targetSchemaQuestion?.path}
+              />
+            </Stack>
+          )}
+        </Grid2>
       </Grid2>
-      <Box paddingTop={2}>
-        <Button variant='contained' sx={{ width: 'max-content', float: 'right' }} onClick={handleSubmitMigrationPlan}>
-          Submit migration plan
-        </Button>
-      </Box>
+      <Box paddingTop={2}></Box>
     </>
   )
 }
