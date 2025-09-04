@@ -16,7 +16,6 @@ export interface QuestionSelection {
   schema: any
 }
 
-// TODO - add validation BAI-866
 export default function JsonSchemaViewer({
   splitSchema,
   setSplitSchema,
