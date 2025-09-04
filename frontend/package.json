@@ -7,7 +7,7 @@
     "cy:open": "cypress open",
     "cy:run": "cypress run --spec \"cypress/e2e/bailo/**/*\"",
     "start": "next start",
-    "lint": "next lint --max-warnings 0 --dir actions --dir cypress --dir pages --dir src --dir types --dir utils",
+    "lint": "eslint --max-warnings 0 actions cypress pages src types utils",
     "style": "prettier --write .",
     "check-style": "prettier --check .",
     "test": "vitest"
@@ -86,7 +86,7 @@
     "jsdom": "^26.1.0",
     "next-router-mock": "^1.0.2",
     "prettier": "^3.6.2",
-    "vite-tsconfig-paths": "^4.3.2",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   }
 }
