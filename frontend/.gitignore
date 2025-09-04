@@ -22,9 +22,11 @@
 *.pem
 
 # debug
+logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
 .pnpm-debug.log*
 
 # local env files
