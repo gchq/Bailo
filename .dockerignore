@@ -1,10 +1,32 @@
-node_modules
+# Docker artefacts
+Dockerfile
+.dockerignore
+
+# Git artefacts
+.git
+.gitignore
+
+# Dependency directories
+node_modules/
+
+# Test artefacts
+.pytest_cache
+
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+**/*.py[cod]
+**$py.class
 
 backend/.git
+backend/coverage
 backend/dist
 backend/node_modules
 
 frontend/.git
 frontend/.next
 frontend/.swc
+frontend/.turbo
+frontend/coverage
+frontend/cypress/screenshots/
+frontend/cypress/downloads/
 frontend/node_modules

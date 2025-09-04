@@ -72,7 +72,6 @@ export function TitleFieldTemplate({ title, id }: TitleFieldProps) {
 
 export function GridTemplate(props) {
   const { children, column, className, ...rest } = props
-  console.log(props)
   return (
     <Grid2 item={column} {...rest} className={`${className} my-custom-grid-styling`}>
       {children}
