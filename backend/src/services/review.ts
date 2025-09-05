@@ -268,6 +268,45 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
   }
 }
 
+export type ReviewRoleInterfaceParams = Pick<
+  ReviewRoleInterface,
+  'name' | 'description' | 'defaultEntities' | 'systemRole'
+>
+
+export async function updateReviewRole(
+  user: UserInterface,
+  shortName: string,
+  updatedReviewRole: ReviewRoleInterfaceParams,
+) {
+  const reviewRole = await findReviewRole(user, shortName)
+  Object.assign(reviewRole, updatedReviewRole)
+  const auth = await authorisation.reviewRole(user, shortName, ReviewRoleAction.Update)
+
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, shortName })
+  }
+
+  await reviewRole.save()
+
+  return reviewRole
+}
+
+export async function findReviewRole(user: UserInterface, shortName: string) {
+  const reviewRole = await ReviewRoleModel.findOne({ shortName: shortName })
+
+  if (!reviewRole) {
+    throw NotFound(`The requested review role was not found`, { shortName })
+  }
+
+  const auth = await authorisation.reviewRole(user, shortName, ReviewRoleAction.View)
+
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, shortName })
+  }
+
+  return reviewRole
+}
+
 export async function findReviewRoles(schemaId?: string | string[]): Promise<ReviewRoleInterface[]> {
   let reviewRoles: ReviewRoleDoc[] = []
   let schemaIds: string[] = []
