@@ -55,6 +55,8 @@ export default function EntryListRow({
     href = getEntryUrl(peer.config, entry)
   }
 
+  const filteredTags = entry.tags.filter((t) => t.length < 15)
+
   return (
     <Box
       justifyContent='flex-start'
@@ -140,7 +142,7 @@ export default function EntryListRow({
           )}
           <ChipSelector
             chipTooltipTitle={'Filter by tag'}
-            options={entry.tags.slice(0, 10)}
+            options={filteredTags.slice(0, 10)}
             expandThreshold={10}
             multiple
             selectedChips={selectedChips}
