@@ -28,7 +28,7 @@ import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import MessageAlert from 'src/MessageAlert'
-import { KeyedMutator } from 'swr/dist/_internal/types'
+import { KeyedMutator } from 'swr'
 import { CollaboratorEntry, EntryKind, ReviewRoleInterface, ReviewRolesFormData, SystemRoleKeys } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 
