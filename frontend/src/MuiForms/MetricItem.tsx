@@ -14,6 +14,7 @@ interface MetricItemProps {
 
 export default function MetricItem({ metric, onChange, onDelete }: MetricItemProps) {
   const theme = useTheme()
+
   const [errorMessage, setErrorMessage] = useState('')
 
   const handleMetricValueOnChange = useCallback(

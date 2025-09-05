@@ -21,9 +21,14 @@ interface EntitySelectorProps {
   rawErrors?: string[]
 }
 
-export default function EntitySelector(props: EntitySelectorProps) {
-  const { onChange, value: currentValue, required, label, formContext, rawErrors } = props
-
+export default function EntitySelector({
+  onChange,
+  value: currentValue,
+  required,
+  label,
+  formContext,
+  rawErrors,
+}: EntitySelectorProps) {
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
   const [selectedEntities, setSelectedEntities] = useState<EntityObject[]>([])
@@ -32,6 +37,7 @@ export default function EntitySelector(props: EntitySelectorProps) {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
 
   const theme = useTheme()
+
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
   useEffect(() => {
@@ -74,6 +80,10 @@ export default function EntitySelector(props: EntitySelectorProps) {
     if (isUsersError.status !== 413) {
       return <MessageAlert message={isUsersError.info.message} severity='error' />
     }
+  }
+
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
   return (

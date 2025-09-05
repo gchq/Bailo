@@ -47,7 +47,7 @@ export default function SchemaCompare() {
   return (
     <Box sx={{ p: 4 }}>
       <Stack spacing={4}>
-        <Stack direction='row' spacing={12} justifyContent='center' alignItems='center'>
+        <Stack direction='row' spacing={6} justifyContent='center' alignItems='center'>
           <Autocomplete
             disablePortal
             options={schemas}
@@ -56,7 +56,7 @@ export default function SchemaCompare() {
             getOptionDisabled={(option) => option.id === afterSchema?.id}
             getOptionLabel={(option: SchemaInterface) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label='Old schema' />}
+            renderInput={(params) => <TextField {...params} label='Source schema' />}
             onChange={handleBeforeSchemaChange}
           />
           <Forward color='primary' fontSize='large' aria-label='Compare arrow' />
@@ -68,7 +68,7 @@ export default function SchemaCompare() {
             getOptionDisabled={(option) => option.id === beforeSchema?.id}
             getOptionLabel={(option: SchemaInterface) => option.name}
             sx={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label='New schema' />}
+            renderInput={(params) => <TextField {...params} label='Target schema' />}
             onChange={handleAfterSchemaChange}
           />
         </Stack>
