@@ -62,7 +62,7 @@ export async function uploadFile(
 ) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot upload files to a mirrored model.`)
+    throw BadReq('Cannot upload files to a mirrored model.')
   }
 
   const fileId = longId()
@@ -170,9 +170,9 @@ export async function finishUploadMultipartFile(
   parts: Array<{ ETag: string; PartNumber: number }>,
   tags?: string[],
 ) {
-  const file = await await FileModel.findById(fileId)
+  const file = await FileModel.findById(fileId)
   if (!file) {
-    throw BadReq('Specified file could not be found.')
+    throw BadReq('Specified file could not be found.', { fileId })
   }
 
   const model = await getModelById(user, modelId)
@@ -186,7 +186,7 @@ export async function finishUploadMultipartFile(
 
   const metadata = await headObject(file.path)
   if (!metadata.ContentLength) {
-    throw BadReq('Could not determine uploaded file size', { fileId })
+    throw BadReq('Could not determine uploaded file size.', { fileId })
   }
   file.size = metadata.ContentLength
   file.complete = true
