@@ -55,7 +55,7 @@ export default function Marketplace() {
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
-  const { peers } = useGetPeers()
+  const { peers, isPeersLoading, isPeersError } = useGetPeers()
 
   const { models, isModelsError, isModelsLoading } = useListModels(
     EntryKind.MODEL,
@@ -250,12 +250,12 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isReviewRolesLoading) {
+  if (isUiConfigLoading || isReviewRolesLoading || isPeersLoading) {
     return <Loading />
   }
 
-  if (isUiConfigLoading) {
-    return <Loading />
+  if (isPeersError) {
+    return <ErrorWrapper message={isPeersError.info.message} />
   }
 
   if (isReviewRolesError) {
@@ -345,7 +345,7 @@ export default function Marketplace() {
                 {peerList && peerList.length > 0 && (
                   <Box>
                     <ChipSelector
-                      label='Sources'
+                      label='External repos'
                       chipTooltipTitle={'Include external repostories'}
                       options={peerList}
                       expandThreshold={10}
@@ -353,7 +353,7 @@ export default function Marketplace() {
                       selectedChips={selectedPeers}
                       onChange={handlePeersOnChange}
                       size='small'
-                      ariaLabel='add peer to search filter'
+                      ariaLabel='add external repository to search filter'
                       accordion
                     />
                   </Box>
