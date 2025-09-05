@@ -1,4 +1,4 @@
-import { CloudQueue, CorporateFare } from '@mui/icons-material'
+import { CloudQueue, CorporateFare, LaunchOutlined } from '@mui/icons-material'
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
@@ -49,7 +49,8 @@ export default function EntryListRow({
 
   // Handle the case where the entry must be viewed on a different peer
   const peerId = entry.peerId
-  if (peerId && peers && peers[peerId]) {
+  const isFromExternal = peerId && peers && peers[peerId]
+  if (isFromExternal) {
     const peer: PeerConfigStatus = peers[peerId]
     // Override link for peer URL
     href = getEntryUrl(peer.config, entry)
@@ -74,19 +75,23 @@ export default function EntryListRow({
           <Link
             sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
             href={href}
+            target={isFromExternal ? '_blank' : '_self'}
           >
-            <Typography
-              variant='h5'
-              sx={{
-                fontWeight: '500',
-                textDecoration: 'none',
-                color: theme.palette.primary.main,
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-              }}
-            >
-              {entry.name}
-            </Typography>
+            <Stack direction='row' spacing={1} alignItems='center'>
+              <Typography
+                variant='h5'
+                sx={{
+                  fontWeight: '500',
+                  textDecoration: 'none',
+                  color: theme.palette.primary.main,
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                }}
+              >
+                {entry.name}
+              </Typography>
+              {isFromExternal && <LaunchOutlined />}
+            </Stack>
           </Link>
           {entry.peerId && (
             <ChipSelector
