@@ -16,6 +16,7 @@ import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
+import { useTransaction } from '../utils/transactions.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -277,11 +278,13 @@ export async function _setModelCard(
   }
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
-  await revision.save()
 
-  await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } })
+  const [savedRevision, _updatedModel] = await useTransaction([
+    (session) => revision.save({ session }),
+    (session) => ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session }),
+  ])
 
-  return revision
+  return savedRevision
 }
 
 export async function updateModelCard(
