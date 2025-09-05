@@ -19,7 +19,6 @@ describe('routes > review > putReviewRole', () => {
     const res = await testPut(`/api/v2/review/role/${fixture.params.shortName}`, fixture)
 
     expect(res.statusCode).toBe(200)
-    //matchsnapshotq
   })
 
   test('audit > expected call', async () => {
