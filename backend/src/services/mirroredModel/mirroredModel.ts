@@ -398,7 +398,7 @@ export async function uploadReleaseImages(
       // update the distributionPackageName to use the mirroredModelId
       const modelIdRe = new RegExp(String.raw`^${model.id}`)
       const distributionPackageName = joinDistributionPackageName({
-        domain: image.repository,
+        domain: '',
         path: image.name.replace(modelIdRe, mirroredModelId),
         tag: image.tag,
       })

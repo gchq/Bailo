@@ -34,7 +34,7 @@ jobs:
         run: sudo apt install pandoc
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
@@ -71,7 +71,7 @@ jobs:
           path: ./backend/docs/python-docs/html
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24.5.0
           cache: "npm"
