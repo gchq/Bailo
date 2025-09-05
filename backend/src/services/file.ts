@@ -159,7 +159,7 @@ export async function startUploadMultipartFile(
 
   await file.save()
 
-  return { file, chunks }
+  return { file, uploadId, chunks }
 }
 
 export async function finishUploadMultipartFile(

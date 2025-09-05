@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -5,6 +6,7 @@ import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { FileWithScanResultsInterface } from '../../../../models/File.js'
 import { finishUploadMultipartFile } from '../../../../services/file.js'
+import { fileWithScanInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { coerceArray, parse } from '../../../../utils/validate.js'
 
 export const postFinishMultipartUploadSchema = z.object({
@@ -24,11 +26,32 @@ export const postFinishMultipartUploadSchema = z.object({
   }),
 })
 
+registerPath({
+  method: 'post',
+  path: '/api/v2/model/{modelId}/files/upload/multipart/start',
+  tags: ['file'],
+  description: 'Finish uploading a multipart file.',
+  schema: postFinishMultipartUploadSchema,
+  responses: {
+    200: {
+      description: 'The newly finished file instance.',
+      content: {
+        'application/json': {
+          schema: z.object({
+            file: fileWithScanInterfaceSchema,
+          }),
+        },
+      },
+    },
+  },
+})
+
 interface PostFinishMultipartUpload {
   file: FileWithScanResultsInterface
 }
 
 export const postFinishMultipartUpload = [
+  bodyParser.json(),
   async (req: Request, res: Response<PostFinishMultipartUpload>): Promise<void> => {
     req.audit = AuditInfo.UpdateFile
     const {
