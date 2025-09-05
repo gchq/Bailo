@@ -51,11 +51,14 @@ export default function EntryListRow({
 
   // Handle the case where the entry must be viewed on a different peer
   const peerId = entry.peerId
-  const isFromExternal = peerId && peers && peers[peerId]
-  if (isFromExternal) {
-    const peer: PeerConfigStatus = peers[peerId]
-    // Override link for peer URL
-    href = getEntryUrl(peer.config, entry)
+  const isExternal = peerId !== undefined
+
+  if (isExternal && peers && peers.has(peerId)) {
+    const peer = peers.get(peerId)
+    if (peer) {
+      // Override link for peer URL
+      href = getEntryUrl(peer.config, entry)
+    }
   }
 
   const filteredTags = entry.tags.filter((t) => t.length < 15)
@@ -77,7 +80,7 @@ export default function EntryListRow({
           <Link
             sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
             href={href}
-            target={isFromExternal ? '_blank' : '_self'}
+            target={isExternal ? '_blank' : '_self'}
           >
             <Stack direction='row' spacing={1} alignItems='center'>
               <Typography
@@ -92,13 +95,13 @@ export default function EntryListRow({
               >
                 {entry.name}
               </Typography>
-              {isFromExternal && <LaunchOutlined />}
+              {isExternal && <LaunchOutlined />}
             </Stack>
           </Link>
-          {displayPeers && entry.peerId && (
+          {displayPeers && isExternal && (
             <ChipSelector
               chipTooltipTitle={'Filter by external repository'}
-              options={peers ? Object.keys(peers) : []}
+              options={peers ? Array.from(peers.keys()) : []}
               expandThreshold={10}
               variant='outlined'
               multiple
