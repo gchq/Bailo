@@ -74,7 +74,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Close color='error' />
               </IconButton>
             </Tooltip>
-            <Typography>
+            <Typography sx={{ overflow: 'hidde', wordBreak: 'break-word' }}>
               Source field <span style={{ fontWeight: 'bold' }}>{migrationAction.sourcePath}</span> mapped to target
               field <span style={{ fontWeight: 'bold' }}>{migrationAction.targetPath}</span>
             </Typography>
@@ -87,7 +87,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
             <IconButton onClick={() => handleRemoveActionItem(migrationAction)}>
               <Close color='error' />
             </IconButton>
-            <Typography>
+            <Typography sx={{ overflow: 'hidde', wordBreak: 'break-word' }}>
               Source field <span style={{ fontWeight: 'bold' }}>{migrationAction.sourcePath}</span> deleted
             </Typography>
           </Stack>
@@ -108,11 +108,15 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     if (questionMigrations.some((questionMigration) => questionMigration.id === formId)) {
       return setErrorText('This action already exists')
     }
+    if (questionMigrationKind === 'mapping' && sourceSchemaQuestion.schema.type !== targetSchemaQuestion?.schema.type) {
+      return setErrorText('You cannot map two questions with different value types')
+    }
     const newQuestionMigration: QuestionMigration = {
       id: formId,
       kind: questionMigrationKind,
       sourcePath: sourceSchemaQuestion.path,
       targetPath: targetSchemaQuestion?.path,
+      propertyType: sourceSchemaQuestion.schema.type,
     }
     setQuestionMigrations([...questionMigrations, newQuestionMigration])
     setSourceSchemaQuestion(undefined)
@@ -148,6 +152,17 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     }
     setErrorText('')
     setQuestionMigrationKind(event.target.value as MigrationKind)
+  }
+
+  const displayButtonText = (schemaQuestion: QuestionSelection | undefined, defaultText: string) => {
+    if (!schemaQuestion) {
+      return defaultText
+    }
+    if (schemaQuestion?.schema.type === 'array') {
+      return schemaQuestion.schema.items.title
+    } else {
+      return schemaQuestion?.schema.title
+    }
   }
 
   const handleSubmitMigrationPlan = () => {}
@@ -189,7 +204,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                   onClick={handleSelectSourceQuestion}
                   aria-label='select source schema question'
                 >
-                  {sourceSchemaQuestion?.schema.title || 'Select source question'}
+                  {displayButtonText(sourceSchemaQuestion, 'Select source question')}
                 </Button>
               </Stack>
               {questionMigrationKind !== 'delete' && (
@@ -202,7 +217,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                     onClick={handleSelectTargetQuestion}
                     aria-label='select target schema question'
                   >
-                    {targetSchemaQuestion?.schema.title || 'Select target question'}
+                    {displayButtonText(targetSchemaQuestion, 'Select target question')}
                   </Button>
                 </Stack>
               )}

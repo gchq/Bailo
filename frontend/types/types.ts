@@ -650,4 +650,5 @@ export interface QuestionMigration {
   kind: string
   sourcePath: string
   targetPath?: string
+  propertyType: string
 }

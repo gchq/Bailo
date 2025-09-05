@@ -1,6 +1,6 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
-import { Box, Button, Card, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Card, Divider, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, TitleFieldProps } from '@rjsf/utils'
 import { ReactNode } from 'react'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
@@ -98,11 +98,16 @@ export function ArrayFieldViewerTemplate({ title, formContext, schema, ...props 
     }
   }
 
+  const handleOnClick = () => {
+    formContext.onClickListener({ path: rootName, schema })
+  }
+
   return (
     <Card sx={{ p: 2 }}>
-      <Typography fontWeight='bold' variant='h5' component='h3'>
+      <Button size='large' onClick={handleOnClick} sx={{ textTransform: 'none' }}>
         {title}
-      </Typography>
+      </Button>
+      <Divider flexItem />
       <Stack sx={{ pt: 2 }} spacing={2}>
         {questions.map((question) => question)}
       </Stack>
