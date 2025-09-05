@@ -114,12 +114,13 @@ export async function startMultipartUpload(
   contentType: string,
   bucket: string = config.s3.buckets.uploads,
 ) {
+  const client = await getS3Client()
   const command = new CreateMultipartUploadCommand({
     Bucket: bucket,
     Key: key,
     ContentType: contentType,
   })
-  const result = await (await getS3Client()).send(command)
+  const result = await client.send(command)
   return { uploadId: result.UploadId }
 }
 
@@ -129,13 +130,14 @@ export async function createPresignedUploadUrl(
   partNumber: number,
   bucket: string = config.s3.buckets.uploads,
 ) {
+  const client = await getS3Client()
   const command = new UploadPartCommand({
     Bucket: bucket,
     Key: key,
     UploadId: uploadId,
     PartNumber: partNumber,
   })
-  return getSignedUrl(await getS3Client(), command, { expiresIn: 3600 })
+  return getSignedUrl(client, command, { expiresIn: 3600 })
 }
 
 export async function completeMultipartUpload(
@@ -144,13 +146,14 @@ export async function completeMultipartUpload(
   parts: Array<{ ETag: string; PartNumber: number }>,
   bucket: string = config.s3.buckets.uploads,
 ) {
+  const client = await getS3Client()
   const command = new CompleteMultipartUploadCommand({
     Bucket: bucket,
     Key: key,
     UploadId: uploadId,
     MultipartUpload: { Parts: parts },
   })
-  return (await getS3Client()).send(command)
+  return client.send(command)
 }
 
 export async function objectExists(key: string, bucket: string = config.s3.buckets.uploads) {
