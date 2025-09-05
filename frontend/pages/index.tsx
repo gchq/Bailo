@@ -19,7 +19,7 @@ import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { useGetReviewRoles } from 'actions/reviewRoles'
-import { useGetPeers } from 'actions/system'
+import { useGetPeers, useGetStatus } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -56,6 +56,7 @@ export default function Marketplace() {
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
   const { peers, isPeersLoading, isPeersError } = useGetPeers()
+  const { status, isStatusLoading, isStatusError } = useGetStatus()
 
   const { models, isModelsError, isModelsLoading } = useListModels(
     EntryKind.MODEL,
@@ -166,7 +167,10 @@ export default function Marketplace() {
   )
 
   const peerList = useMemo(() => {
-    return peers ? Object.keys(peers) : []
+    if (!peers) return []
+    return Array.from(peers.entries())
+      .filter(([, value]) => value.config.state !== 'disabled')
+      .map(([key]) => key)
   }, [peers])
 
   const organisationList = useMemo(() => {
@@ -251,12 +255,16 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isUiConfigLoading || isReviewRolesLoading || isPeersLoading) {
+  if (isUiConfigLoading || isReviewRolesLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
   }
 
   if (isPeersError) {
     return <ErrorWrapper message={isPeersError.info.message} />
+  }
+
+  if (isStatusError) {
+    return <ErrorWrapper message={isStatusError.info.message} />
   }
 
   if (isReviewRolesError) {
@@ -266,6 +274,9 @@ export default function Marketplace() {
   if (isUiConfigError) {
     return <ErrorWrapper message={isUiConfigError.info.message} />
   }
+
+  // Only show peer/sources when not actively disabled
+  const federationEnabled = 'disabled' != status?.federation?.state
 
   return (
     <>
@@ -343,7 +354,7 @@ export default function Marketplace() {
                     />
                   </Box>
                 )}
-                {peerList && peerList.length > 0 && (
+                {federationEnabled && peerList && peerList.length > 0 && (
                   <Box>
                     <ChipSelector
                       label='External repos'
@@ -445,6 +456,7 @@ export default function Marketplace() {
                     onSelectedPeersChange={handlePeersOnChange}
                     displayOrganisation={uiConfig && uiConfig.modelDetails.organisations.length > 0}
                     displayState={uiConfig && uiConfig.modelDetails.states.length > 0}
+                    displayPeers={federationEnabled}
                     peers={peers}
                   />
                 </div>

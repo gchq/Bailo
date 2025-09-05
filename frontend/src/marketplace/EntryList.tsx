@@ -21,6 +21,7 @@ interface EntryListProps {
   entriesErrorMessage?: string
   displayOrganisation?: boolean
   displayState?: boolean
+  displayPeers?: boolean
   peers?: Map<string, PeerConfigStatus>
 }
 
@@ -46,6 +47,7 @@ export default function EntryList({
   entriesErrorMessage,
   displayOrganisation = true,
   displayState = true,
+  displayPeers = true,
   peers,
 }: EntryListProps) {
   const [windowHeight, setWindowHeight] = useState(0)
@@ -85,6 +87,7 @@ export default function EntryList({
       style={{ padding: theme.spacing(2.5) }}
       displayOrganisation={displayOrganisation}
       displayState={displayState}
+      displayPeers={displayPeers}
       peers={peers}
     />
   )

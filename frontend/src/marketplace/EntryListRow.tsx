@@ -22,6 +22,7 @@ interface EntryListRowProps {
   style: CSSProperties
   displayOrganisation?: boolean
   displayState?: boolean
+  displayPeers?: boolean
   peers?: Map<string, PeerConfigStatus>
 }
 
@@ -39,6 +40,7 @@ export default function EntryListRow({
   style,
   displayOrganisation = true,
   displayState = true,
+  displayPeers = true,
   peers,
 }: EntryListRowProps) {
   const theme = useTheme()
@@ -93,7 +95,7 @@ export default function EntryListRow({
               {isFromExternal && <LaunchOutlined />}
             </Stack>
           </Link>
-          {entry.peerId && (
+          {displayPeers && entry.peerId && (
             <ChipSelector
               chipTooltipTitle={'Filter by external repository'}
               options={peers ? Object.keys(peers) : []}

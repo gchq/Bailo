@@ -11,9 +11,11 @@ export function useGetPeers() {
     ErrorInfo
   >('/api/v2/system/peers', fetcher)
 
+  const peers = data?.peers ? new Map(Object.entries(data.peers)) : new Map()
+
   return {
     mutatePeersConfig: mutate,
-    peers: data?.peers,
+    peers,
     isPeersLoading: isLoading,
     isPeersError: error,
   }
