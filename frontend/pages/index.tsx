@@ -33,6 +33,7 @@ import ErrorWrapper from 'src/errors/ErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
 import { EntryKind, EntryKindKeys } from 'types/types'
+import { isReachable } from 'utils/peerUtils'
 
 interface KeyAndLabel {
   key: string
@@ -166,10 +167,10 @@ export default function Marketplace() {
     [roleOptions],
   )
 
-  const peerList = useMemo(() => {
+  const reachablePeerList = useMemo(() => {
     if (!peers) return []
     return Array.from(peers.entries())
-      .filter(([, value]) => value.config.state !== 'disabled')
+      .filter(([, value]) => isReachable(value))
       .map(([key]) => key)
   }, [peers])
 
@@ -354,12 +355,12 @@ export default function Marketplace() {
                     />
                   </Box>
                 )}
-                {federationEnabled && peerList && peerList.length > 0 && (
+                {federationEnabled && reachablePeerList && reachablePeerList.length > 0 && (
                   <Box>
                     <ChipSelector
                       label='External repos'
                       chipTooltipTitle={'Include external repostories'}
-                      options={peerList}
+                      options={reachablePeerList}
                       expandThreshold={10}
                       multiple
                       selectedChips={selectedPeers}

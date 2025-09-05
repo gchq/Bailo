@@ -1,5 +1,5 @@
 import { EntrySearchResult } from 'actions/model'
-import { RemoteFederationConfig } from 'types/types'
+import { PeerConfigStatus, RemoteFederationConfig } from 'types/types'
 
 /**
  * Generates an absolute URL to a given entry
@@ -24,4 +24,14 @@ export function getEntryUrl(peer: RemoteFederationConfig, entry: EntrySearchResu
     default:
       return `${baseUrl}/${entry.kind}/${entry.id}`
   }
+}
+
+/**
+ * Given a peer's configuration status, is it reachable?
+ *
+ * @param peer to check
+ * @returns true if enabled/readOnly and successfully pinged
+ */
+export function isReachable(peer: PeerConfigStatus): boolean {
+  return peer.config.state !== 'disabled' && !peer.status.error && peer.status.ping === 'pong'
 }
