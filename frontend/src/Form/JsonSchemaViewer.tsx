@@ -4,7 +4,7 @@ import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useState } from 'react'
-import { DescriptionFieldTemplate, TitleFieldTemplate } from 'src/Form/FormTemplates'
+import { ArrayFieldViewerTemplate, DescriptionFieldTemplate, TitleFieldTemplate } from 'src/Form/FormTemplates'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import Nothing from 'src/MuiForms/Nothing'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
@@ -118,7 +118,11 @@ export default function JsonSchemaViewer({
             rootSection: currentStep.section,
             activePath,
           }}
-          templates={{ DescriptionFieldTemplate, TitleFieldTemplate }}
+          templates={{
+            DescriptionFieldTemplate,
+            TitleFieldTemplate,
+            ArrayFieldTemplate: ArrayFieldViewerTemplate,
+          }}
         >
           <></>
         </Form>

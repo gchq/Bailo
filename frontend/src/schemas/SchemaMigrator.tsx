@@ -146,6 +146,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       setTargetSchemaQuestion(undefined)
       setIsTargetSchemaActive(false)
     }
+    setErrorText('')
     setQuestionMigrationKind(event.target.value as MigrationKind)
   }
 
@@ -155,7 +156,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     <>
       <Grid2 container spacing={2}>
         <Grid2
-          size={{ sm: 12, md: 4 }}
+          size={{ sm: 12, md: 3 }}
           sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
         >
           <Stack spacing={2}>
@@ -178,20 +179,22 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 </Select>
               </Stack>
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Source question path</Typography>
+                <Typography fontWeight='bold'>Source question</Typography>
                 <Button
                   size='small'
                   variant='outlined'
-                  sx={{ width: '100%' }}
+                  sx={{
+                    width: '100%',
+                  }}
                   onClick={handleSelectSourceQuestion}
                   aria-label='select source schema question'
                 >
-                  {sourceSchemaQuestion?.path || 'Select source question'}
+                  {sourceSchemaQuestion?.schema.title || 'Select source question'}
                 </Button>
               </Stack>
               {questionMigrationKind !== 'delete' && (
                 <Stack spacing={1}>
-                  <Typography fontWeight='bold'>Target question path</Typography>
+                  <Typography fontWeight='bold'>Target question</Typography>
                   <Button
                     size='small'
                     variant='outlined'
@@ -199,7 +202,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                     onClick={handleSelectTargetQuestion}
                     aria-label='select target schema question'
                   >
-                    {targetSchemaQuestion?.path || 'Select target question'}
+                    {targetSchemaQuestion?.schema.title || 'Select target question'}
                   </Button>
                 </Stack>
               )}
@@ -229,7 +232,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
             </Stack>
           </Stack>
         </Grid2>
-        <Grid2 size={{ sm: 12, md: 8 }}>
+        <Grid2 size={{ sm: 12, md: 9 }}>
           {sourceSchema && isSourceSchemaActive && (
             <Stack
               spacing={2}

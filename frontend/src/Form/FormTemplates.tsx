@@ -2,6 +2,8 @@ import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, TitleFieldProps } from '@rjsf/utils'
+import { ReactNode } from 'react'
+import QuestionViewer from 'src/MuiForms/QuestionViewer'
 
 export function ArrayFieldTemplate({ title, items, canAdd, formContext, onAddClick }: ArrayFieldTemplateProps) {
   return (
@@ -76,5 +78,34 @@ export function GridTemplate(props) {
     <Grid2 item={column} {...rest} className={`${className} my-custom-grid-styling`}>
       {children}
     </Grid2>
+  )
+}
+
+export function ArrayFieldViewerTemplate({ title, formContext, schema, ...props }: ArrayFieldTemplateProps) {
+  const questions: ReactNode[] = []
+  const rootName = `${formContext.rootSection}.${props.idSchema.$id.replace('root_', '')}`
+  if (schema.items) {
+    const schemaQuestions = schema.items['properties']
+    for (const question in schemaQuestions) {
+      questions.push(
+        <QuestionViewer
+          schema={schemaQuestions[question]}
+          formContext={{ ...formContext, rootSection: rootName }}
+          label={schemaQuestions[question].title}
+          id={question}
+        />,
+      )
+    }
+  }
+
+  return (
+    <Card sx={{ p: 2 }}>
+      <Typography fontWeight='bold' variant='h5' component='h3'>
+        {title}
+      </Typography>
+      <Stack sx={{ pt: 2 }} spacing={2}>
+        {questions.map((question) => question)}
+      </Stack>
+    </Card>
   )
 }
