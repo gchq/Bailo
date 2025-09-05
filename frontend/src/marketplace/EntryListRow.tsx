@@ -1,5 +1,5 @@
 import { CloudQueue, CorporateFare } from '@mui/icons-material'
-import { Box, Chip, Divider, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
 import { CSSProperties } from 'react'
@@ -15,6 +15,8 @@ interface EntryListRowProps {
   onSelectedOrganisationsChange: (organisations: string[]) => void
   selectedStates: string[]
   onSelectedStatesChange: (states: string[]) => void
+  selectedPeers: string[]
+  onSelectedPeersChange: (peers: string[]) => void
   data: EntrySearchResult[]
   index: number
   style: CSSProperties
@@ -30,6 +32,8 @@ export default function EntryListRow({
   onSelectedOrganisationsChange,
   selectedStates,
   onSelectedStatesChange,
+  selectedPeers,
+  onSelectedPeersChange,
   data,
   index,
   style,
@@ -116,17 +120,19 @@ export default function EntryListRow({
               />
             )}
             {entry.peerId && (
-              <Stack direction='row' justifyContent='normal' alignItems='center' spacing={2}>
-                <Tooltip title={'Available from ' + entry.peerId}>
-                  <Chip
-                    size={'small'}
-                    color={'default'}
-                    sx={{ mx: 0.5, mb: 1, ...style }}
-                    label={entry.peerId}
-                    icon={<CloudQueue />}
-                  />
-                </Tooltip>
-              </Stack>
+              <ChipSelector
+                chipTooltipTitle={'Filter by external repository'}
+                options={peers ? Object.keys(peers) : []}
+                expandThreshold={10}
+                variant='outlined'
+                multiple
+                selectedChips={selectedPeers}
+                onChange={onSelectedPeersChange}
+                size='small'
+                ariaLabel='add external repository to search filter'
+                style={{ padding: 1 }}
+                icon={<CloudQueue />}
+              />
             )}
           </Stack>
           {(entry.state || entry.organisation) && (displayOrganisation || displayState) && entry.tags.length > 0 && (

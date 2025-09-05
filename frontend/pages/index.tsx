@@ -235,6 +235,7 @@ export default function Marketplace() {
     setSelectedOrganisations([])
     setSelectedStates([])
     setSelectedRoles([])
+    setSelectedPeers([])
     setFilter('')
     router.replace('/', undefined, { shallow: true })
   }
@@ -440,6 +441,8 @@ export default function Marketplace() {
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}
                     onSelectedStatesChange={handleStatesOnChange}
+                    selectedPeers={selectedPeers}
+                    onSelectedPeersChange={handlePeersOnChange}
                     displayOrganisation={uiConfig && uiConfig.modelDetails.organisations.length > 0}
                     displayState={uiConfig && uiConfig.modelDetails.states.length > 0}
                     peers={peers}
@@ -457,6 +460,8 @@ export default function Marketplace() {
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}
                     onSelectedStatesChange={handleStatesOnChange}
+                    selectedPeers={selectedPeers}
+                    onSelectedPeersChange={handlePeersOnChange}
                   />
                 </div>
               )}

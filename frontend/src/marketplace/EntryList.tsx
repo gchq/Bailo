@@ -16,6 +16,8 @@ interface EntryListProps {
   onSelectedOrganisationsChange: (chips: string[]) => void
   selectedStates: string[]
   onSelectedStatesChange: (chips: string[]) => void
+  selectedPeers: string[]
+  onSelectedPeersChange: (chips: string[]) => void
   entriesErrorMessage?: string
   displayOrganisation?: boolean
   displayState?: boolean
@@ -39,6 +41,8 @@ export default function EntryList({
   onSelectedOrganisationsChange,
   selectedStates,
   onSelectedStatesChange,
+  selectedPeers,
+  onSelectedPeersChange,
   entriesErrorMessage,
   displayOrganisation = true,
   displayState = true,
@@ -74,6 +78,8 @@ export default function EntryList({
       onSelectedOrganisationsChange={onSelectedOrganisationsChange}
       selectedStates={selectedStates}
       onSelectedStatesChange={onSelectedStatesChange}
+      selectedPeers={selectedPeers}
+      onSelectedPeersChange={onSelectedPeersChange}
       data={data}
       index={index}
       style={{ padding: theme.spacing(2.5) }}
