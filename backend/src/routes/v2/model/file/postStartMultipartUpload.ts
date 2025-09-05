@@ -1,7 +1,10 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../../utils/validate.js'
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
+import { startUploadMultipartFile } from '../../../../services/file.js'
+import { coerceArray, parse } from '../../../../utils/validate.js'
 
 export const postStartMultipartUploadSchema = z.object({
   params: z.object({
@@ -10,12 +13,12 @@ export const postStartMultipartUploadSchema = z.object({
   body: z.object({
     name: z.string(),
     mime: z.string().optional().default('application/octet-stream'),
-
-    size: z.number(),
+    size: z.number().positive(),
+    tags: coerceArray(z.array(z.string()).optional()),
   }),
 })
 
-interface PresignedChunk {
+export interface PresignedChunk {
   presignedUrl: string
   startByte: number
   endByte: number
@@ -28,17 +31,19 @@ interface PostStartMultipartUpload {
 
 export const postStartMultipartUpload = [
   async (req: Request, res: Response<PostStartMultipartUpload>): Promise<void> => {
-    const _ = parse(req, postStartMultipartUploadSchema)
+    req.audit = AuditInfo.CreateFile
+    // Does user have permission to upload a file?
+    const {
+      params: { modelId },
+      body: { name, mime, size, tags },
+    } = parse(req, postStartMultipartUploadSchema)
+
+    const { file, chunks } = await startUploadMultipartFile(req.user, modelId, name, mime, size, tags)
+    await audit.onCreateFile(req, file)
 
     res.json({
-      fileId: 'random_hash',
-      chunks: [
-        {
-          presignedUrl: 'https://example.com/',
-          startByte: 0,
-          endByte: 49392,
-        },
-      ],
+      fileId: file.id,
+      chunks,
     })
   },
 ]

@@ -1,6 +1,8 @@
 import {
+  CompleteMultipartUploadCommand,
   CreateBucketCommand,
   CreateBucketRequest,
+  CreateMultipartUploadCommand,
   GetObjectCommand,
   GetObjectRequest,
   HeadBucketCommand,
@@ -9,8 +11,10 @@ import {
   HeadObjectRequest,
   S3Client,
   S3ServiceException,
+  UploadPartCommand,
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
 import prettyBytes from 'pretty-bytes'
 import { PassThrough, Readable } from 'stream'
@@ -105,10 +109,54 @@ export async function getObjectStream(
   }
 }
 
+export async function startMultipartUpload(
+  key: string,
+  contentType: string,
+  bucket: string = config.s3.buckets.uploads,
+) {
+  const command = new CreateMultipartUploadCommand({
+    Bucket: bucket,
+    Key: key,
+    ContentType: contentType,
+  })
+  const result = await (await getS3Client()).send(command)
+  return { uploadId: result.UploadId }
+}
+
+export async function createPresignedUploadUrl(
+  key: string,
+  uploadId: string,
+  partNumber: number,
+  bucket: string = config.s3.buckets.uploads,
+) {
+  const command = new UploadPartCommand({
+    Bucket: bucket,
+    Key: key,
+    UploadId: uploadId,
+    PartNumber: partNumber,
+  })
+  return getSignedUrl(await getS3Client(), command, { expiresIn: 3600 })
+}
+
+export async function completeMultipartUpload(
+  key: string,
+  uploadId: string,
+  parts: Array<{ ETag: string; PartNumber: number }>,
+  bucket: string = config.s3.buckets.uploads,
+) {
+  const command = new CompleteMultipartUploadCommand({
+    Bucket: bucket,
+    Key: key,
+    UploadId: uploadId,
+    MultipartUpload: { Parts: parts },
+  })
+  return (await getS3Client()).send(command)
+}
+
 export async function objectExists(key: string, bucket: string = config.s3.buckets.uploads) {
   try {
     log.info({ bucket, key }, `Searching for ${key} in ${bucket}`)
-    await headObject(bucket, key)
+    await headObject(key, bucket)
     return true
   } catch (error) {
     if (isS3ServiceException(error) && error.$metadata.httpStatusCode === 404) {
@@ -138,7 +186,7 @@ export async function ensureBucketExists(bucket: string) {
   }
 }
 
-async function headObject(bucket: string, key: string) {
+export async function headObject(key: string, bucket: string = config.s3.buckets.uploads) {
   const client = await getS3Client()
 
   const input: HeadObjectRequest = {

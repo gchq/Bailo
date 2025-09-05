@@ -143,7 +143,7 @@ export const fileWithScanInterfaceSchema = z.object({
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
 
   name: z.string().openapi({ example: 'yolo.tar.gz' }),
-  size: z.number().openapi({ example: 1024 }),
+  size: z.number().positive().openapi({ example: 1024 }),
   mime: z.string().openapi({ example: 'application/tar' }),
 
   path: z.string().openapi({ example: '/model/yolo-v4-abcdef/files/abcdef' }),

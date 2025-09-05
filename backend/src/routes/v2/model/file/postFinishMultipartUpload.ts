@@ -1,7 +1,11 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { parse } from '../../../../utils/validate.js'
+import { AuditInfo } from '../../../../connectors/audit/Base.js'
+import audit from '../../../../connectors/audit/index.js'
+import { FileWithScanResultsInterface } from '../../../../models/File.js'
+import { finishUploadMultipartFile } from '../../../../services/file.js'
+import { coerceArray, parse } from '../../../../utils/validate.js'
 
 export const postFinishMultipartUploadSchema = z.object({
   params: z.object({
@@ -9,20 +13,34 @@ export const postFinishMultipartUploadSchema = z.object({
   }),
   body: z.object({
     fileId: z.string(),
-    parts: z.array(z.unknown()),
+    uploadId: z.string(),
+    parts: z.array(
+      z.object({
+        ETag: z.string(),
+        PartNumber: z.number(),
+      }),
+    ),
+    tags: coerceArray(z.array(z.string()).optional()),
   }),
 })
 
 interface PostFinishMultipartUpload {
-  message: string
+  file: FileWithScanResultsInterface
 }
 
 export const postFinishMultipartUpload = [
   async (req: Request, res: Response<PostFinishMultipartUpload>): Promise<void> => {
-    const _ = parse(req, postFinishMultipartUploadSchema)
+    req.audit = AuditInfo.UpdateFile
+    const {
+      params: { modelId },
+      body: { fileId, uploadId, parts, tags },
+    } = parse(req, postFinishMultipartUploadSchema)
+
+    const file = await finishUploadMultipartFile(req.user, modelId, fileId, uploadId, parts, tags)
+    await audit.onUpdateFile(req, modelId, fileId)
 
     res.json({
-      message: 'Successfully finished multipart upload.',
+      file,
     })
   },
 ]
