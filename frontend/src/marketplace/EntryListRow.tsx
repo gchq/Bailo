@@ -70,23 +70,40 @@ export default function EntryListRow({
       key={entry.id}
     >
       <Stack spacing={1}>
-        <Link
-          sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-          href={href}
-        >
-          <Typography
-            variant='h5'
-            sx={{
-              fontWeight: '500',
-              textDecoration: 'none',
-              color: theme.palette.primary.main,
-              textOverflow: 'ellipsis',
-              overflow: 'hidden',
-            }}
+        <Stack direction='row'>
+          <Link
+            sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
+            href={href}
           >
-            {entry.name}
-          </Typography>
-        </Link>
+            <Typography
+              variant='h5'
+              sx={{
+                fontWeight: '500',
+                textDecoration: 'none',
+                color: theme.palette.primary.main,
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+              }}
+            >
+              {entry.name}
+            </Typography>
+          </Link>
+          {entry.peerId && (
+            <ChipSelector
+              chipTooltipTitle={'Filter by external repository'}
+              options={peers ? Object.keys(peers) : []}
+              expandThreshold={10}
+              variant='outlined'
+              multiple
+              selectedChips={selectedPeers}
+              onChange={onSelectedPeersChange}
+              size='small'
+              ariaLabel='add external repository to search filter'
+              style={{ padding: 1, marginLeft: 'auto' }}
+              icon={<CloudQueue />}
+            />
+          )}
+        </Stack>
         <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
           {entry.description}
         </Typography>
@@ -119,21 +136,6 @@ export default function EntryListRow({
                 size='small'
                 ariaLabel='add tag to search filter'
                 style={{ padding: 1 }}
-              />
-            )}
-            {entry.peerId && (
-              <ChipSelector
-                chipTooltipTitle={'Filter by external repository'}
-                options={peers ? Object.keys(peers) : []}
-                expandThreshold={10}
-                variant='outlined'
-                multiple
-                selectedChips={selectedPeers}
-                onChange={onSelectedPeersChange}
-                size='small'
-                ariaLabel='add external repository to search filter'
-                style={{ padding: 1 }}
-                icon={<CloudQueue />}
               />
             )}
           </Stack>
