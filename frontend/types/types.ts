@@ -236,6 +236,8 @@ export const SystemRole = {
 
 export type SystemRoleKeys = (typeof SystemRole)[keyof typeof SystemRole]
 
+export type CollaboratorRoleType = SystemRoleKeys | string
+
 export interface SystemRole {
   name: string
   shortName: string
@@ -416,7 +418,7 @@ export interface EntryCardInterface {
 
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<SystemRoleKeys>
+  roles: Array<CollaboratorRoleType>
 }
 
 export const EntryKindLabel = {
