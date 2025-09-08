@@ -308,6 +308,11 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               />
             </Stack>
           )}
+          {(!isTargetSchemaActive || !isSourceSchemaActive) && (
+            <Stack sx={{ height: '100%' }} justifyContent='center' alignItems='center'>
+              <em>Select source or target question on the actions menu to view the schema</em>
+            </Stack>
+          )}
         </Grid2>
       </Grid2>
       <Box paddingTop={2}></Box>

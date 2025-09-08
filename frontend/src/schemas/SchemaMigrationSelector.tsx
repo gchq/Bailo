@@ -119,15 +119,15 @@ export default function SchemaMigrationSelector() {
               <Stack direction='row' alignItems='center' spacing={2}>
                 <Delete fontSize='large' color='primary' />
                 <Typography>
-                  {`Questions on an older schema can be mapped to a new question (using the the "Move" action) so that
+                  {`Questions on an older schema can be mapped to a new question (using the the "Move" action type) so that
                   existing data is not lost when a question is moved from one section on the form to another.`}
                 </Typography>
               </Stack>
               <Stack direction='row' alignItems='center' spacing={2}>
                 <MoveDown fontSize='large' color='primary' />
                 <Typography>
-                  Questions can also be marked as deleted so that data that is no longer needed on the new schema can be
-                  removed from the model card.
+                  {`Questions can also be marked as deleted (using the "Delete" action type) so that data that is no longer needed on the new schema can be
+                  removed from the model card.`}
                 </Typography>
               </Stack>
             </Stack>
