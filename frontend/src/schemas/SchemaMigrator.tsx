@@ -69,6 +69,9 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   )
 
   const actionsList = useMemo(() => {
+    if (questionMigrations.length === 0) {
+      return <Typography>No actions</Typography>
+    }
     return questionMigrations.map((migrationAction) => {
       if (migrationAction.kind === MigrationKind.DELETE) {
         return (
