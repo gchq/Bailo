@@ -1,5 +1,6 @@
-import { ArrowBack, Forward } from '@mui/icons-material'
-import { Autocomplete, Box, Button, Stack, TextField, Typography } from '@mui/material'
+import { ArrowBack, Delete, Forward, InfoOutlined, MoveDown } from '@mui/icons-material'
+import { Autocomplete, Box, Button, Divider, Stack, TextField, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
@@ -13,6 +14,8 @@ export default function SchemaMigrationSelector() {
   const [sourceSchema, setSourceSchema] = useState<SchemaInterface | null>()
   const [targetSchema, setTargetSchema] = useState<SchemaInterface | null>()
   const [isMigrationPlannerActive, setIsMigrationPlannerActive] = useState(false)
+
+  const theme = useTheme()
 
   const handleSourceSchemaChange = useCallback((_event: SyntheticEvent, newValue: SchemaInterface | null) => {
     setSourceSchema(newValue)
@@ -55,7 +58,7 @@ export default function SchemaMigrationSelector() {
           ></SchemaMigrator>
         </Stack>
       ) : (
-        <Stack spacing={4}>
+        <Stack spacing={4} alignItems='center'>
           <Stack direction='row' spacing={6} justifyContent='center' alignItems='center'>
             <Autocomplete
               disablePortal
@@ -92,6 +95,42 @@ export default function SchemaMigrationSelector() {
             >
               Begin migration
             </Button>
+          </Box>
+          <Box
+            sx={{
+              borderStyle: 'solid',
+              borderWidth: '1px',
+              borderColor: theme.palette.divider,
+              p: 2,
+              maxWidth: '730px',
+            }}
+          >
+            <Stack spacing={2}>
+              <Stack direction='row' alignItems='center' spacing={2}>
+                <Box sx={{ textAlign: 'center' }}>
+                  <InfoOutlined fontSize='large' color='primary' />
+                </Box>
+                <Typography>
+                  This page allows you to create a migration plan so that users can easily move from one schema to
+                  another at the click of the button.
+                </Typography>
+              </Stack>
+              <Divider flexItem />
+              <Stack direction='row' alignItems='center' spacing={2}>
+                <Delete fontSize='large' color='primary' />
+                <Typography>
+                  {`Questions on an older schema can be mapped to a new question (using the the "Move" action) so that
+                  existing data is not lost when a question is moved from one section on the form to another.`}
+                </Typography>
+              </Stack>
+              <Stack direction='row' alignItems='center' spacing={2}>
+                <MoveDown fontSize='large' color='primary' />
+                <Typography>
+                  Questions can also be marked as deleted so that data that is no longer needed on the new schema can be
+                  removed from the model card.
+                </Typography>
+              </Stack>
+            </Stack>
           </Box>
         </Stack>
       )}

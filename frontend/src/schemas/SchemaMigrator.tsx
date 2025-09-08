@@ -209,7 +209,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                   value={questionMigrationKind}
                   onChange={handleMigrationKindOnChange}
                 >
-                  <MenuItem value={MigrationKind.MOVE}>Mapping</MenuItem>
+                  <MenuItem value={MigrationKind.MOVE}>Move</MenuItem>
                   <MenuItem value={MigrationKind.DELETE}>Delete</MenuItem>
                 </Select>
               </Stack>
