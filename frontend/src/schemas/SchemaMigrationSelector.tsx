@@ -45,6 +45,7 @@ export default function SchemaMigrationSelector() {
             sx={{ width: 'fit-content', pb: 2 }}
             startIcon={<ArrowBack />}
             onClick={handleReturnToSelection}
+            aria-label={'Return to schema select button'}
           >
             Back to schema selection
           </Button>
@@ -87,6 +88,7 @@ export default function SchemaMigrationSelector() {
               sx={{ width: 'max-content' }}
               onClick={() => setIsMigrationPlannerActive(true)}
               disabled={!sourceSchema || !targetSchema}
+              aria-label={'Being schema migration button'}
             >
               Begin migration
             </Button>

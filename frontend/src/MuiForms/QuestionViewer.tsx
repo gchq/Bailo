@@ -19,7 +19,11 @@ export default function QuestionViewer({ label, id, schema, formContext }: Quest
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  const schemaPath = `${formContext.rootSection}.${id?.replace('root_', '').replaceAll('_', '.')}`
+  if (!id) {
+    return <MessageAlert message='Unable to render widget due to missing ID' severity='error' />
+  }
+
+  const schemaPath = `${formContext.rootSection}.${id.replace('root_', '').replaceAll('_', '.')}`
 
   const handleOnClick = () => {
     formContext.onClickListener({ path: schemaPath, schema })
@@ -31,6 +35,7 @@ export default function QuestionViewer({ label, id, schema, formContext }: Quest
         sx={{ textTransform: 'none', textAlign: 'left' }}
         variant={formContext.activePath === schemaPath ? 'outlined' : 'text'}
         onClick={handleOnClick}
+        aria-label={`Select question ${label}`}
       >
         {label}
       </Button>

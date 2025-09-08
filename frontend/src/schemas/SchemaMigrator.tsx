@@ -73,11 +73,14 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       return <Typography>No actions</Typography>
     }
     return questionMigrations.map((migrationAction) => {
-      if (migrationAction.kind === MigrationKind.DELETE) {
+      if (migrationAction.kind === MigrationKind.MOVE) {
         return (
           <Stack direction='row' spacing={1} alignItems='center' key={migrationAction.id}>
             <Tooltip title='Remove action'>
-              <IconButton onClick={() => handleRemoveActionItem(migrationAction)}>
+              <IconButton
+                onClick={() => handleRemoveActionItem(migrationAction)}
+                aria-label={`Remove action ${migrationAction.id}`}
+              >
                 <Close color='error' />
               </IconButton>
             </Tooltip>
@@ -91,7 +94,10 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       if (migrationAction.kind === MigrationKind.DELETE) {
         return (
           <Stack direction='row' spacing={1} alignItems='center' key={migrationAction.id}>
-            <IconButton onClick={() => handleRemoveActionItem(migrationAction)}>
+            <IconButton
+              onClick={() => handleRemoveActionItem(migrationAction)}
+              aria-label={`Remove action ${migrationAction.id}`}
+            >
               <Close color='error' />
             </IconButton>
             <Typography sx={{ overflow: 'hidde', wordBreak: 'break-word' }}>
@@ -178,6 +184,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     }
   }
 
+  // TODO After the API is implemented we should POST the migration plan to the backend
   const handleSubmitMigrationPlan = () => {}
 
   return (
