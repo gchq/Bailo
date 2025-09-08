@@ -26,7 +26,11 @@ interface SchemaMigratorProps {
   targetSchema: SchemaInterface | undefined
 }
 
-type MigrationKind = 'mapping' | 'delete'
+export const MigrationKind = {
+  MOVE: 'move',
+  DELETE: 'delete',
+} as const
+export type MigrationKindKeys = (typeof MigrationKind)[keyof typeof MigrationKind]
 
 export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMigratorProps) {
   const [splitSourceSchema, setSplitSourceSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
@@ -34,7 +38,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   const [sourceSchemaQuestion, setSourceSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
   const [targetSchemaQuestion, setTargetSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
   const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
-  const [questionMigrationKind, setQuestionMigrationKind] = useState<MigrationKind>('mapping')
+  const [questionMigrationKind, setQuestionMigrationKind] = useState<MigrationKindKeys>(MigrationKind.MOVE)
   const [errorText, setErrorText] = useState('')
   const [isSourceSchemaActive, setIsSourceSchemaActive] = useState(false)
   const [isTargetSchemaActive, setIsTargetSchemaActive] = useState(false)
@@ -66,7 +70,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
 
   const actionsList = useMemo(() => {
     return questionMigrations.map((migrationAction) => {
-      if (migrationAction.kind === 'mapping') {
+      if (migrationAction.kind === MigrationKind.DELETE) {
         return (
           <Stack direction='row' spacing={1} alignItems='center' key={migrationAction.id}>
             <Tooltip title='Remove action'>
@@ -81,7 +85,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
           </Stack>
         )
       }
-      if (migrationAction.kind === 'delete') {
+      if (migrationAction.kind === MigrationKind.DELETE) {
         return (
           <Stack direction='row' spacing={1} alignItems='center' key={migrationAction.id}>
             <IconButton onClick={() => handleRemoveActionItem(migrationAction)}>
@@ -101,14 +105,17 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     if (!sourceSchemaQuestion) {
       return setErrorText('Please select a source question')
     }
-    if (!targetSchemaQuestion && questionMigrationKind !== 'delete') {
+    if (!targetSchemaQuestion && questionMigrationKind !== MigrationKind.DELETE) {
       return setErrorText('Please select a target question')
     }
     const formId = `${questionMigrationKind}.${sourceSchemaQuestion.path}.${targetSchemaQuestion?.path}`
     if (questionMigrations.some((questionMigration) => questionMigration.id === formId)) {
       return setErrorText('This action already exists')
     }
-    if (questionMigrationKind === 'mapping' && sourceSchemaQuestion.schema.type !== targetSchemaQuestion?.schema.type) {
+    if (
+      questionMigrationKind === MigrationKind.MOVE &&
+      sourceSchemaQuestion.schema.type !== targetSchemaQuestion?.schema.type
+    ) {
       return setErrorText('You cannot map two questions with different value types')
     }
     const newQuestionMigration: QuestionMigration = {
@@ -136,22 +143,24 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   }
 
   const handleSourceQuestionOnClick = (selection: QuestionSelection) => {
+    setErrorText('')
     setSourceSchemaQuestion(selection)
   }
 
   const handleTargetQuestionOnClick = (selection: QuestionSelection) => {
-    if (questionMigrationKind !== 'delete') {
+    setErrorText('')
+    if (questionMigrationKind !== MigrationKind.DELETE) {
       setTargetSchemaQuestion(selection)
     }
   }
 
   const handleMigrationKindOnChange = (event: SelectChangeEvent) => {
-    if (event.target.value === 'delete') {
+    if (event.target.value === MigrationKind.DELETE) {
       setTargetSchemaQuestion(undefined)
       setIsTargetSchemaActive(false)
     }
     setErrorText('')
-    setQuestionMigrationKind(event.target.value as MigrationKind)
+    setQuestionMigrationKind(event.target.value as MigrationKindKeys)
   }
 
   const displayButtonText = (schemaQuestion: QuestionSelection | undefined, defaultText: string) => {
@@ -184,14 +193,14 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               <Stack spacing={1}>
                 <Typography fontWeight='bold'>Action type</Typography>
                 <Select
-                  defaultValue='mapping'
+                  defaultValue={MigrationKind.MOVE}
                   size='small'
                   sx={{ width: '100%' }}
                   value={questionMigrationKind}
                   onChange={handleMigrationKindOnChange}
                 >
-                  <MenuItem value={'mapping'}>Mapping</MenuItem>
-                  <MenuItem value={'delete'}>Delete</MenuItem>
+                  <MenuItem value={MigrationKind.MOVE}>Mapping</MenuItem>
+                  <MenuItem value={MigrationKind.DELETE}>Delete</MenuItem>
                 </Select>
               </Stack>
               <Stack spacing={1}>
@@ -208,7 +217,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                   {displayButtonText(sourceSchemaQuestion, 'Select source question')}
                 </Button>
               </Stack>
-              {questionMigrationKind !== 'delete' && (
+              {questionMigrationKind !== MigrationKind.DELETE && (
                 <Stack spacing={1}>
                   <Typography fontWeight='bold'>Target question</Typography>
                   <Button
