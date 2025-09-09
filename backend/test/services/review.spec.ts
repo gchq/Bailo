@@ -16,6 +16,7 @@ import {
   updateReviewRole,
 } from '../../src/services/review.js'
 import { RoleKind } from '../../src/types/types.js'
+import { NotFound } from '../../src/utils/error.js'
 import { testModelSchema, testReviewRole } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js', async () => ({
@@ -383,6 +384,7 @@ describe('services > review', () => {
 
   test('updateReviewRole > successful', async () => {
     const shortName = 'reviewer'
+
     await updateReviewRole(user, shortName, {
       name: 'reviewer',
       description: 'existing description',
@@ -390,8 +392,22 @@ describe('services > review', () => {
       defaultEntities: ['user:user2'],
     })
 
-    reviewRoleModelMock.find.mockResolvedValueOnce([testReviewRole])
-
     expect(reviewRoleModelMock.save).toBeCalled()
+  })
+
+  test('updateReviewRole > failure', async () => {
+    //make sure find works
+    const shortName = 'badShortName'
+    reviewRoleModelMock.findOne.mockImplementation(() => {
+      throw NotFound(`The requested review role was not found`, { shortName })
+    })
+    const res = updateReviewRole(user, shortName, {
+      name: 'reviewer',
+      description: 'description',
+      systemRole: 'owner',
+      defaultEntities: ['user:user2'],
+    })
+
+    await expect(res).rejects.toThrowError(/^The requested review role was not found/)
   })
 })
