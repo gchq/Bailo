@@ -81,7 +81,7 @@ export function GridTemplate(props) {
   )
 }
 
-export function ArrayFieldViewerTemplate({ title, formContext, schema, ...props }: ArrayFieldTemplateProps) {
+export function ArrayFieldTemplateForQuestionViewer({ title, formContext, schema, ...props }: ArrayFieldTemplateProps) {
   const questions: ReactNode[] = []
   const rootName = `${formContext.rootSection}.${props.idSchema.$id.replace('root_', '')}`
   if (typeof schema.items === 'object' && !Array.isArray(schema.items) && schema.items !== null) {

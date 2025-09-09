@@ -16,14 +16,15 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
-import { QuestionMigration, SchemaInterface, SplitSchemaNoRender } from 'types/types'
-import { getStepsFromSchema } from 'utils/formUtils'
+import { QuestionMigration, SplitSchemaNoRender } from 'types/types'
 
 interface SchemaMigratorProps {
-  sourceSchema: SchemaInterface | undefined
-  targetSchema: SchemaInterface | undefined
+  sourceSchema: SplitSchemaNoRender
+  targetSchema: SplitSchemaNoRender
+  setSourceSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
+  setTargetSchema: Dispatch<SetStateAction<SplitSchemaNoRender>>
 }
 
 export const MigrationKind = {
@@ -32,9 +33,12 @@ export const MigrationKind = {
 } as const
 export type MigrationKindKeys = (typeof MigrationKind)[keyof typeof MigrationKind]
 
-export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMigratorProps) {
-  const [splitSourceSchema, setSplitSourceSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const [splitTargetSchema, setSplitTargetSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+export default function SchemaMigrator({
+  sourceSchema,
+  targetSchema,
+  setSourceSchema,
+  setTargetSchema,
+}: SchemaMigratorProps) {
   const [sourceSchemaQuestion, setSourceSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
   const [targetSchemaQuestion, setTargetSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
   const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
@@ -44,22 +48,6 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   const [isTargetSchemaActive, setIsTargetSchemaActive] = useState(false)
 
   const theme = useTheme()
-
-  useEffect(() => {
-    if (!sourceSchema || !targetSchema) return
-    const sourceSteps = getStepsFromSchema(sourceSchema, {}, [])
-    const targetSteps = getStepsFromSchema(targetSchema, {}, [])
-
-    for (const step of sourceSteps) {
-      step.steps = sourceSteps
-    }
-    setSplitSourceSchema({ reference: sourceSchema.id, steps: sourceSteps })
-
-    for (const step of targetSteps) {
-      step.steps = targetSteps
-    }
-    setSplitTargetSchema({ reference: targetSchema.id, steps: targetSteps })
-  }, [sourceSchema, targetSchema])
 
   const handleRemoveActionItem = useCallback(
     (action: QuestionMigration) => {
@@ -277,12 +265,12 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Typography variant='h6' fontWeight='bold'>
                   Source Schema
                 </Typography>
-                <Typography variant='caption'>{sourceSchema.name}</Typography>
+                <Typography variant='caption'>{sourceSchema.reference}</Typography>
               </Box>
               <Divider />
               <JsonSchemaViewer
-                splitSchema={splitSourceSchema}
-                setSplitSchema={setSplitSourceSchema}
+                splitSchema={sourceSchema}
+                setSplitSchema={setSourceSchema}
                 onQuestionClick={(selection: QuestionSelection) => handleSourceQuestionOnClick(selection)}
                 activePath={sourceSchemaQuestion?.path}
               />
@@ -297,12 +285,12 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Typography variant='h6' fontWeight='bold'>
                   Target Schema
                 </Typography>
-                <Typography variant='caption'>{targetSchema.name}</Typography>
+                <Typography variant='caption'>{targetSchema.reference}</Typography>
               </Box>
               <Divider />
               <JsonSchemaViewer
-                splitSchema={splitTargetSchema}
-                setSplitSchema={setSplitTargetSchema}
+                splitSchema={targetSchema}
+                setSplitSchema={setTargetSchema}
                 onQuestionClick={(selection: QuestionSelection) => handleTargetQuestionOnClick(selection)}
                 activePath={targetSchemaQuestion?.path}
               />

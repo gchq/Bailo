@@ -2,33 +2,72 @@ import { ArrowBack, Delete, Forward, InfoOutlined, MoveDown } from '@mui/icons-m
 import { Autocomplete, Box, Button, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
-import { SyntheticEvent, useCallback, useState } from 'react'
+import { SyntheticEvent, useCallback, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
-import { SchemaInterface } from 'types/types'
+import { SchemaInterface, SplitSchemaNoRender } from 'types/types'
+import { getStepsFromSchema } from 'utils/formUtils'
 
 export default function SchemaMigrationSelector() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
 
-  const [sourceSchema, setSourceSchema] = useState<SchemaInterface | null>()
-  const [targetSchema, setTargetSchema] = useState<SchemaInterface | null>()
+  const [sourceSchema, setSourceSchema] = useState<SchemaInterface | undefined>()
+  const [targetSchema, setTargetSchema] = useState<SchemaInterface | undefined>()
   const [isMigrationPlannerActive, setIsMigrationPlannerActive] = useState(false)
+  const [splitSourceSchema, setSplitSourceSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [splitTargetSchema, setSplitTargetSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [errorText, setErrorText] = useState('')
 
   const theme = useTheme()
 
-  const handleSourceSchemaChange = useCallback((_event: SyntheticEvent, newValue: SchemaInterface | null) => {
-    setSourceSchema(newValue)
-  }, [])
+  const handleSourceSchemaChange = useCallback(
+    (_event: SyntheticEvent, newValue: SchemaInterface | undefined | null) => {
+      setErrorText('')
+      return newValue ? setSourceSchema(newValue) : setSourceSchema(undefined)
+    },
+    [],
+  )
 
-  const handleTargetSchemaChange = useCallback((_event: SyntheticEvent, newValue: SchemaInterface | null) => {
-    setTargetSchema(newValue)
-  }, [])
+  const handleTargetSchemaChange = useCallback(
+    (_event: SyntheticEvent, newValue: SchemaInterface | undefined | null) => {
+      setErrorText('')
+      return newValue ? setTargetSchema(newValue) : setTargetSchema(undefined)
+    },
+    [],
+  )
+
+  useEffect(() => {
+    if (!sourceSchema || !targetSchema) return
+    const sourceSteps = getStepsFromSchema(sourceSchema, {}, [])
+    const targetSteps = getStepsFromSchema(targetSchema, {}, [])
+
+    for (const step of sourceSteps) {
+      step.steps = sourceSteps
+    }
+    setSplitSourceSchema({ reference: sourceSchema.name, steps: sourceSteps })
+
+    for (const step of targetSteps) {
+      step.steps = targetSteps
+    }
+    setSplitTargetSchema({ reference: targetSchema.name, steps: targetSteps })
+  }, [sourceSchema, targetSchema])
 
   const handleReturnToSelection = () => {
     setIsMigrationPlannerActive(false)
-    setTargetSchema(null)
-    setSourceSchema(null)
+    setTargetSchema(undefined)
+    setSourceSchema(undefined)
+  }
+
+  const beginMigration = () => {
+    if (!targetSchema || !sourceSchema) {
+      return setErrorText('You need to select both a source and target schema to start a migration')
+    }
+    if (sourceSchema.kind !== targetSchema.kind) {
+      return setErrorText('You can only migrate schemas of the same type')
+    } else {
+      setIsMigrationPlannerActive(true)
+    }
   }
 
   if (isSchemasError) {
@@ -41,7 +80,7 @@ export default function SchemaMigrationSelector() {
 
   return (
     <Box sx={{ p: 4 }}>
-      {isMigrationPlannerActive ? (
+      {isMigrationPlannerActive && sourceSchema && targetSchema ? (
         <Stack spacing={1}>
           <Button
             size='small'
@@ -53,9 +92,11 @@ export default function SchemaMigrationSelector() {
             Back to schema selection
           </Button>
           <SchemaMigrator
-            sourceSchema={schemas.find((schema) => sourceSchema && schema.id === sourceSchema.id)}
-            targetSchema={schemas.find((schema) => targetSchema && schema.id === targetSchema.id)}
-          ></SchemaMigrator>
+            sourceSchema={splitSourceSchema}
+            targetSchema={splitTargetSchema}
+            setSourceSchema={setSplitSourceSchema}
+            setTargetSchema={setSplitTargetSchema}
+          />
         </Stack>
       ) : (
         <Stack spacing={4} alignItems='center'>
@@ -89,12 +130,15 @@ export default function SchemaMigrationSelector() {
             <Button
               variant='contained'
               sx={{ width: 'max-content' }}
-              onClick={() => setIsMigrationPlannerActive(true)}
+              onClick={beginMigration}
               disabled={!sourceSchema || !targetSchema}
               aria-label={'Being schema migration button'}
             >
               Begin migration
             </Button>
+            <Typography sx={{ pt: 1 }} color='error'>
+              {errorText}
+            </Typography>
           </Box>
           <Box
             sx={{
