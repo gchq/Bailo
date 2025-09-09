@@ -2,7 +2,7 @@ import { ArrowBack, Delete, Forward, InfoOutlined, MoveDown } from '@mui/icons-m
 import { Autocomplete, Box, Button, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
-import { SyntheticEvent, useCallback, useEffect, useState } from 'react'
+import { SyntheticEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
@@ -24,6 +24,13 @@ export default function SchemaMigrationSelector() {
   const handleSourceSchemaChange = useCallback(
     (_event: SyntheticEvent, newValue: SchemaInterface | undefined | null) => {
       setErrorText('')
+      if (newValue) {
+        const sourceSteps = getStepsFromSchema(newValue, {}, [])
+        for (const step of sourceSteps) {
+          step.steps = sourceSteps
+        }
+        setSplitSourceSchema({ reference: newValue.name, steps: sourceSteps })
+      }
       return newValue ? setSourceSchema(newValue) : setSourceSchema(undefined)
     },
     [],
@@ -32,26 +39,17 @@ export default function SchemaMigrationSelector() {
   const handleTargetSchemaChange = useCallback(
     (_event: SyntheticEvent, newValue: SchemaInterface | undefined | null) => {
       setErrorText('')
+      if (newValue) {
+        const targetSteps = getStepsFromSchema(newValue, {}, [])
+        for (const step of targetSteps) {
+          step.steps = targetSteps
+        }
+        setSplitTargetSchema({ reference: newValue.name, steps: targetSteps })
+      }
       return newValue ? setTargetSchema(newValue) : setTargetSchema(undefined)
     },
     [],
   )
-
-  useEffect(() => {
-    if (!sourceSchema || !targetSchema) return
-    const sourceSteps = getStepsFromSchema(sourceSchema, {}, [])
-    const targetSteps = getStepsFromSchema(targetSchema, {}, [])
-
-    for (const step of sourceSteps) {
-      step.steps = sourceSteps
-    }
-    setSplitSourceSchema({ reference: sourceSchema.name, steps: sourceSteps })
-
-    for (const step of targetSteps) {
-      step.steps = targetSteps
-    }
-    setSplitTargetSchema({ reference: targetSchema.name, steps: targetSteps })
-  }, [sourceSchema, targetSchema])
 
   const handleReturnToSelection = () => {
     setIsMigrationPlannerActive(false)
