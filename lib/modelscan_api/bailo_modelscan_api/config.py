@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     Bailo ModelScan API allows for easy programmatic interfacing with ProtectAI's ModelScan package to scan and detect potential threats within files stored in Bailo.
 
     You can upload files and view modelscan's result."""
-    app_version: str = "2.0.1"
+    app_version: str = "2.0.2"
     modelscan_settings: dict[str, Any] = DEFAULT_SETTINGS
     block_size: int = 1024
     maximum_filesize: int = 4 * 1024**3  # 4GB
