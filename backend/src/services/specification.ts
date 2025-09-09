@@ -263,6 +263,8 @@ export const schemaInterfaceSchema = z.object({
 export const schemaMigrationInterfaceSchema = z.object({
   name: z.string().openapi({ example: 'My Schema Migration' }),
   description: z.string().openapi({ example: 'An example schema migration' }),
+  sourceSchema: z.string().openapi({ example: 'v1' }),
+  targetSchema: z.string().openapi({ example: 'v2' }),
 
   questionMigrations: z.array(
     z.object({

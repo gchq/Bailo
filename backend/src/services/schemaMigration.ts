@@ -27,6 +27,6 @@ export async function createSchemaMigrationPlan(
   }
 }
 
-export async function getSchemaMigrations() {
+export async function searchSchemaMigrations() {
   return await SchemaMigration.find()
 }

@@ -18,6 +18,9 @@ export interface SchemaMigrationInterface {
   name: string
   description?: string
 
+  sourceSchema: string
+  targetSchema: string
+
   questionMigrations: QuestionMigration[]
 
   createdAt: Date
@@ -30,6 +33,9 @@ const SchemaMigrationSchema = new Schema<SchemaMigrationInterface>(
   {
     name: { type: String, unique: true, required: true },
     description: { type: String, required: false, default: '' },
+
+    sourceSchema: { type: String, required: true },
+    targetSchema: { type: String, required: true },
 
     questionMigrations: [
       {
@@ -48,6 +54,6 @@ const SchemaMigrationSchema = new Schema<SchemaMigrationInterface>(
   },
 )
 
-const SchemaModel = model<SchemaMigrationInterface>('v2_Schema_Migrations', SchemaMigrationSchema)
+const SchemaMigrationModel = model<SchemaMigrationInterface>('v2_Schema_Migrations', SchemaMigrationSchema)
 
-export default SchemaModel
+export default SchemaMigrationModel

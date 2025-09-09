@@ -66,9 +66,11 @@ import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewR
 import { postReviewRole } from './routes/v2/review/postReviewRole.js'
 import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
 import { getSchema } from './routes/v2/schema/getSchema.js'
+import { getSchemaMigrations } from './routes/v2/schema/getSchemaMigration.js'
 import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'
+import { postSchemaMigration } from './routes/v2/schema/postSchemaMigration.js'
 import { getSpecification } from './routes/v2/specification.js'
 import { getPeerStatus } from './routes/v2/system/peers.js'
 import { getSystemStatus } from './routes/v2/system/status.js'
@@ -78,7 +80,6 @@ import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
 import config from './utils/config.js'
-import { postSchemaMigrationPlan } from './routes/v2/schema/postSchemaMigrationPlan.js'
 
 export const server = express()
 
@@ -179,8 +180,8 @@ server.post('/api/v2/schemas', ...postSchema)
 server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
-server.get('/api/v2/schema/migrations', ...postSchemaMigrationPlan)
-server.post('/api/v2/schema/migration', ...postSchemaMigrationPlan)
+server.get('/api/v2/schema-migrations', ...getSchemaMigrations)
+server.post('/api/v2/schema-migration', ...postSchemaMigration)
 
 server.get('/api/v2/reviews', ...getReviews)
 server.head('/api/v2/reviews', ...getReviews)

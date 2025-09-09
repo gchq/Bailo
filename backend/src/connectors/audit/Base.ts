@@ -9,6 +9,7 @@ import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
+import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import {
@@ -17,7 +18,6 @@ import {
   MongoDocumentImportInformation,
 } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
-import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 
 const AuditKind = {
   Create: 'Create',
