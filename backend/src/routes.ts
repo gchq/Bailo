@@ -78,6 +78,7 @@ import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
 import config from './utils/config.js'
+import { postSchemaMigrationPlan } from './routes/v2/schema/postSchemaMigrationPlan.js'
 
 export const server = express()
 
@@ -177,6 +178,9 @@ server.get('/api/v2/schema/:schemaId', ...getSchema)
 server.post('/api/v2/schemas', ...postSchema)
 server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
+
+server.get('/api/v2/schema/migrations', ...postSchemaMigrationPlan)
+server.post('/api/v2/schema/migration', ...postSchemaMigrationPlan)
 
 server.get('/api/v2/reviews', ...getReviews)
 server.head('/api/v2/reviews', ...getReviews)

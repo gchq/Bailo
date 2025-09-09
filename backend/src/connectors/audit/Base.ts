@@ -17,6 +17,7 @@ import {
   MongoDocumentImportInformation,
 } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 
 const AuditKind = {
   Create: 'Create',
@@ -101,6 +102,17 @@ export const AuditInfo = {
   ViewSchema: { typeId: 'ViewSchema', description: 'Schema Viewed', auditKind: AuditKind.View },
   DeleteSchema: { typeId: 'DeleteSchema', description: 'Schema Deleted', auditKind: AuditKind.Delete },
   UpdateSchema: { typeId: 'UpdateSchema', description: 'Schema Updated', auditKind: AuditKind.Update },
+
+  CreateSchemaMigration: {
+    typeId: 'CreateSchemaMigration',
+    description: 'Schema Migration Plan Created',
+    auditKind: AuditKind.Create,
+  },
+  ViewSchemaMigrations: {
+    typeId: 'ViewSchemaMigrations',
+    description: 'Schemas Migration Plans viewed',
+    auditKind: AuditKind.View,
+  },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
 
@@ -191,6 +203,9 @@ export abstract class BaseAuditConnector {
   abstract onViewSchema(req: Request, schema: SchemaInterface)
   abstract onDeleteSchema(req: Request, schemaId: string)
   abstract onUpdateSchema(req: Request, schema: SchemaDoc)
+
+  abstract onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
+  abstract onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[])
 
   abstract onCreateInference(req: Request, inference: InferenceDoc)
   abstract onUpdateInference(req: Request, inference: InferenceDoc)
