@@ -56,7 +56,7 @@ export default function ReviewRoleFormContainer({
   const [defaultEntitiesEntry, setDefaultEntities] = useState<Array<CollaboratorEntry>>(
     formData.defaultEntities
       ? formData.defaultEntities.map((defaultEntity) => ({ entity: defaultEntity, roles: [] }))
-      : [{ entity: '', roles: [] }],
+      : [],
   )
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
 
@@ -262,7 +262,7 @@ export default function ReviewRoleFormContainer({
                   type='submit'
                   variant='contained'
                   color='primary'
-                  disabled={!(formData.name && formData.shortName && formData.description)}
+                  disabled={!(formData.name && formData.shortName)}
                 >
                   Submit
                 </Button>

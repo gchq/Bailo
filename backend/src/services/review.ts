@@ -279,12 +279,14 @@ export async function updateReviewRole(
   updatedReviewRole: ReviewRoleInterfaceParams,
 ) {
   const reviewRole = await findReviewRole(user, shortName)
-  Object.assign(reviewRole, updatedReviewRole)
+
   const auth = await authorisation.reviewRole(user, shortName, ReviewRoleAction.Update)
 
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, shortName })
   }
+
+  Object.assign(reviewRole, updatedReviewRole)
 
   await reviewRole.save()
 
