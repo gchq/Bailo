@@ -15,6 +15,11 @@ jobs:
   build_images:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
 
     strategy:
       matrix:
