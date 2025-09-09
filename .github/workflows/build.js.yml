@@ -106,7 +106,7 @@ jobs:
         run: |
           docker load -i ${{ matrix.component.tar }}
           IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
-          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.version_changed.outputs.version }}"
+          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.modelscan_version_changed.outputs.version }}"
           LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
 
           docker tag $IMAGE_ID $VERSION_TAG
