@@ -5,6 +5,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  release:
+    types: [published]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -58,6 +60,59 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
           cache-to: type=gha,mode=max,scope=${{ matrix.component.cache_scope }}
           outputs: type=docker,dest=${{ matrix.component.tar }}
+
+      # modelscan version check (separate to release versions)
+      - name: Check if modelscan_api version changed
+        if: github.ref == 'refs/head/main' && matrix.component.name == 'modelscan'
+        id: modelscan_version_changed
+        run: |
+          git fetch origin main --depth=2
+          OLD_VERSION=$(git show HEAD^:lib/modelscan_api/bailo_modelscan_api/config.py | grep 'app_version' | head -n1 | cut -d'"' -f2)
+          NEW_VERSION=$(grep 'app_version' lib/modelscan_api/bailo_modelscan_api/config.py | head -n1 | cut -d'"' -f2)
+
+          if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Log in to GHCR if release made or modelscan_api version changed
+      - name: Log in to GHCR
+        if: (github.event_name == 'release' && matrix.component.name != 'modelscan') || (github.ref == 'refs/head/main' && matrix.component.name == 'modelscan' && steps.modelscan_version_changed.outputs.changed == 'true')
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Push backend & frontend to GHCR if release made (ignoring modelscan_api which is published separately)
+      - name: Tag & push backend & frontend images to GHCR
+        if: github.event_name == 'release' && matrix.component.name != 'modelscan'
+        run: |
+          docker load -i ${{ matrix.component.tar }}
+          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
+          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ github.event.release.tag_name }}"
+          LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
+
+          docker tag $IMAGE_ID $VERSION_TAG
+          docker tag $IMAGE_ID $LATEST_TAG
+          docker push $VERSION_TAG
+          docker push $LATEST_TAG
+
+      # Push modelscan_api to GHCR if version bumped
+      - name: Tag & push modelscan image to GHCR
+        if: github.ref == 'refs/head/main' && matrix.component.name == 'modelscan' && steps.modelscan_version_changed.outputs.changed == 'true'
+        run: |
+          docker load -i ${{ matrix.component.tar }}
+          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
+          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.version_changed.outputs.version }}"
+          LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
+
+          docker tag $IMAGE_ID $VERSION_TAG
+          docker tag $IMAGE_ID $LATEST_TAG
+          docker push $VERSION_TAG
+          docker push $LATEST_TAG
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
