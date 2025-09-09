@@ -30,8 +30,11 @@ export default function SchemaMigrationSelector() {
           step.steps = sourceSteps
         }
         setSplitSourceSchema({ reference: newValue.name, steps: sourceSteps })
+        setSourceSchema(newValue)
+        return
+      } else {
+        setSourceSchema(undefined)
       }
-      return newValue ? setSourceSchema(newValue) : setSourceSchema(undefined)
     },
     [],
   )
@@ -45,8 +48,10 @@ export default function SchemaMigrationSelector() {
           step.steps = targetSteps
         }
         setSplitTargetSchema({ reference: newValue.name, steps: targetSteps })
+        setTargetSchema(newValue)
+      } else {
+        setTargetSchema(undefined)
       }
-      return newValue ? setTargetSchema(newValue) : setTargetSchema(undefined)
     },
     [],
   )
