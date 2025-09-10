@@ -9,14 +9,17 @@ import SchemaMigrator from 'src/schemas/SchemaMigrator'
 import { SchemaInterface, SplitSchemaNoRender } from 'types/types'
 import { getStepsFromSchema } from 'utils/formUtils'
 
+interface CombinedSchema {
+  schema: SchemaInterface
+  splitSchema: SplitSchemaNoRender
+}
+
 export default function SchemaMigrationSelector() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
 
-  const [sourceSchema, setSourceSchema] = useState<SchemaInterface | undefined>()
-  const [targetSchema, setTargetSchema] = useState<SchemaInterface | undefined>()
   const [isMigrationPlannerActive, setIsMigrationPlannerActive] = useState(false)
-  const [splitSourceSchema, setSplitSourceSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
-  const [splitTargetSchema, setSplitTargetSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
+  const [sourceSchema, setSourceSchema] = useState<CombinedSchema>()
+  const [targetSchema, setTargetSchema] = useState<CombinedSchema>()
   const [errorText, setErrorText] = useState('')
 
   const theme = useTheme()
@@ -29,11 +32,7 @@ export default function SchemaMigrationSelector() {
         for (const step of sourceSteps) {
           step.steps = sourceSteps
         }
-        setSplitSourceSchema({ reference: newValue.name, steps: sourceSteps })
-        setSourceSchema(newValue)
-        return
-      } else {
-        setSourceSchema(undefined)
+        setSourceSchema({ schema: newValue, splitSchema: { reference: newValue.name, steps: sourceSteps } })
       }
     },
     [],
@@ -47,10 +46,7 @@ export default function SchemaMigrationSelector() {
         for (const step of targetSteps) {
           step.steps = targetSteps
         }
-        setSplitTargetSchema({ reference: newValue.name, steps: targetSteps })
-        setTargetSchema(newValue)
-      } else {
-        setTargetSchema(undefined)
+        setTargetSchema({ schema: newValue, splitSchema: { reference: newValue.name, steps: targetSteps } })
       }
     },
     [],
@@ -58,16 +54,11 @@ export default function SchemaMigrationSelector() {
 
   const handleReturnToSelection = () => {
     setIsMigrationPlannerActive(false)
-    setTargetSchema(undefined)
-    setSourceSchema(undefined)
   }
 
   const beginMigration = () => {
     if (!targetSchema || !sourceSchema) {
       return setErrorText('You need to select both a source and target schema to start a migration')
-    }
-    if (sourceSchema.kind !== targetSchema.kind) {
-      return setErrorText('You can only migrate schemas of the same type')
     } else {
       setIsMigrationPlannerActive(true)
     }
@@ -94,12 +85,7 @@ export default function SchemaMigrationSelector() {
           >
             Back to schema selection
           </Button>
-          <SchemaMigrator
-            sourceSchema={splitSourceSchema}
-            targetSchema={splitTargetSchema}
-            setSourceSchema={setSplitSourceSchema}
-            setTargetSchema={setSplitTargetSchema}
-          />
+          <SchemaMigrator sourceSchema={sourceSchema.splitSchema} targetSchema={targetSchema.splitSchema} />
         </Stack>
       ) : (
         <Stack spacing={4} alignItems='center'>
@@ -109,7 +95,7 @@ export default function SchemaMigrationSelector() {
               options={schemas}
               fullWidth
               size='small'
-              getOptionDisabled={(option) => option.id === targetSchema?.id}
+              getOptionDisabled={(option) => option.name === targetSchema?.schema.name}
               getOptionLabel={(option: SchemaInterface) => option.name}
               sx={{ width: 300 }}
               renderInput={(params) => <TextField {...params} label='Source schema ' />}
@@ -121,7 +107,7 @@ export default function SchemaMigrationSelector() {
               options={schemas}
               fullWidth
               size='small'
-              getOptionDisabled={(option) => option.id === sourceSchema?.id}
+              getOptionDisabled={(option) => option.id === sourceSchema?.schema.name}
               getOptionLabel={(option: SchemaInterface) => option.name}
               sx={{ width: 300 }}
               renderInput={(params) => <TextField {...params} label='Target schema' />}
