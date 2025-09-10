@@ -157,7 +157,11 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     if (!schemaQuestion) {
       return defaultText
     }
-    if (schemaQuestion?.schema.type === 'array' && schemaQuestion.schema.items) {
+    if (
+      schemaQuestion?.schema.type === 'array' &&
+      schemaQuestion.schema.items &&
+      schemaQuestion.schema.items['title']
+    ) {
       // The title can be defined either inside the items child-object, or  at the root of the property
       return schemaQuestion.schema.items['title']
     } else {
