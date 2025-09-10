@@ -1,7 +1,7 @@
 import 'dayjs/locale/en-gb'
 
 import { Box, Button } from '@mui/material'
-import { FormContextType } from '@rjsf/utils'
+import { FormContextType, RJSFSchema } from '@rjsf/utils'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import MessageAlert from 'src/MessageAlert'
@@ -11,7 +11,7 @@ interface QuestionViewProps {
   label?: string
   id?: string
   formContext?: FormContextType
-  schema?: any
+  schema?: RJSFSchema
 }
 
 export default function QuestionViewer({ label, id, schema, formContext }: QuestionViewProps) {

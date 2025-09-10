@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Divider, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, TitleFieldProps } from '@rjsf/utils'
+import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema, TitleFieldProps } from '@rjsf/utils'
 import { ReactNode } from 'react'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
 
@@ -89,7 +89,7 @@ export function ArrayFieldTemplateForQuestionViewer({ title, formContext, schema
     for (const question in schemaQuestions) {
       questions.push(
         <QuestionViewer
-          schema={schemaQuestions[question]}
+          schema={schemaQuestions[question] as RJSFSchema}
           formContext={{ ...formContext, rootSection: rootName }}
           label={schemaQuestions[question]['title']}
           id={question}
