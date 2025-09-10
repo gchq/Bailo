@@ -104,8 +104,6 @@ export default function ReviewRoleFormContainer({
     setLoading(true)
 
     if (providedData) {
-      //Existing data (view.tsx)
-
       const res = await putReviewRole({
         ...formData,
         defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
@@ -121,8 +119,6 @@ export default function ReviewRoleFormContainer({
         setIsEdit(false)
       }
     } else {
-      //New data (new.tsx)
-
       const res = await postReviewRole({
         ...formData,
         defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),

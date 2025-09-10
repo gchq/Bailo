@@ -6,7 +6,7 @@ import { useGetModelRoles } from 'actions/model'
 import { deleteReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
-import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
@@ -14,6 +14,7 @@ import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import Title from 'src/common/Title'
 import UserDisplay from 'src/common/UserDisplay'
+import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import ReviewRoleFormContainer from 'src/reviewRoles/ReviewRoleFormContainer'
 import { ReviewRoleInterface } from 'types/types'
@@ -30,6 +31,8 @@ export default function ReviewRoles() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
   const [errorMessage, setErrorMessage] = useState('')
 
+  const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+
   const [isEdit, setIsEdit] = useState<boolean>(false)
   const [formData, setFormData] = useState<UpdateReviewRolesParams>({
     name: '',
@@ -38,6 +41,10 @@ export default function ReviewRoles() {
     systemRole: 'none',
     defaultEntities: [],
   })
+
+  useEffect(() => {
+    setUnsavedChanges(isEdit)
+  }, [isEdit, setUnsavedChanges])
 
   useEffect(() => {
     if (reviewRoles) {
@@ -147,27 +154,25 @@ export default function ReviewRoles() {
                     </Typography>
                     <List>{displayReviewRoleDefaultEntities}</List>
                   </Box>
-                  <Box display='flex'>
-                    <Box ml='auto'>
-                      <Stack direction='row' spacing={2}>
-                        <Button
-                          color='primary'
-                          sx={{ width: 'max-content' }}
-                          variant='outlined'
-                          onClick={() => setIsEdit(true)}
-                        >
-                          Edit Role
-                        </Button>
-                        <Button
-                          color='error'
-                          sx={{ width: 'max-content' }}
-                          variant='contained'
-                          onClick={handleOpenDeleteConfirmation}
-                        >
-                          Delete role
-                        </Button>
-                      </Stack>
-                    </Box>
+                  <Box display='flex' ml='auto'>
+                    <Stack direction='row' spacing={2}>
+                      <Button
+                        color='primary'
+                        sx={{ width: 'max-content' }}
+                        variant='outlined'
+                        onClick={() => setIsEdit(true)}
+                      >
+                        Edit Role
+                      </Button>
+                      <Button
+                        color='error'
+                        sx={{ width: 'max-content' }}
+                        variant='contained'
+                        onClick={handleOpenDeleteConfirmation}
+                      >
+                        Delete role
+                      </Button>
+                    </Stack>
                   </Box>
                 </Stack>
               ) : formData ? (
@@ -270,7 +275,7 @@ export default function ReviewRoles() {
               spacing={{ sm: 2 }}
               divider={<Divider orientation='vertical' flexItem />}
             >
-              {!isEdit && <List sx={{ width: '200px' }}>{listRoles}</List>}
+              <List sx={{ width: '200px' }}>{listRoles}</List>
               <Container sx={{ my: 2 }}>{listRoleDescriptions}</Container>
             </Stack>
           ) : (

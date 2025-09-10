@@ -33,7 +33,7 @@ registerPath({
   method: 'put',
   path: '/api/v2/review/role/{shortName}',
   tags: ['review role'],
-  description: 'Update partial fields for a review role.',
+  description: 'Update an existing review role.',
   schema: putReviewRoleSchema,
   responses: {
     200: {
