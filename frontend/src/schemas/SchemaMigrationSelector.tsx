@@ -59,6 +59,8 @@ export default function SchemaMigrationSelector() {
   const beginMigration = () => {
     if (!targetSchema || !sourceSchema) {
       return setErrorText('You need to select both a source and target schema to start a migration')
+    } else if (targetSchema.schema.kind !== sourceSchema.schema.kind) {
+      return setErrorText('You can only migrate schemas of the same kind')
     } else {
       setIsMigrationPlannerActive(true)
     }
