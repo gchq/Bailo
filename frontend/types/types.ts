@@ -652,3 +652,8 @@ export interface QuestionMigration {
   targetPath?: string
   propertyType: string
 }
+
+export interface CombinedSchema {
+  schema: SchemaInterface
+  splitSchema: SplitSchemaNoRender
+}

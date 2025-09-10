@@ -6,13 +6,8 @@ import { SyntheticEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
-import { SchemaInterface, SplitSchemaNoRender } from 'types/types'
+import { CombinedSchema, SchemaInterface } from 'types/types'
 import { getStepsFromSchema } from 'utils/formUtils'
-
-interface CombinedSchema {
-  schema: SchemaInterface
-  splitSchema: SplitSchemaNoRender
-}
 
 export default function SchemaMigrationSelector() {
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
@@ -87,7 +82,7 @@ export default function SchemaMigrationSelector() {
           >
             Back to schema selection
           </Button>
-          <SchemaMigrator sourceSchema={sourceSchema.splitSchema} targetSchema={targetSchema.splitSchema} />
+          <SchemaMigrator sourceSchema={sourceSchema} targetSchema={targetSchema} />
         </Stack>
       ) : (
         <Stack spacing={4} alignItems='center'>

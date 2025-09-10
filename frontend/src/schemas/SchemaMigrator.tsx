@@ -17,13 +17,16 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { postSchemaMigration } from 'actions/schemaMigration'
+import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
 import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
-import { QuestionMigration, SplitSchemaNoRender } from 'types/types'
+import { CombinedSchema, QuestionMigration } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 
 interface SchemaMigratorProps {
-  sourceSchema: SplitSchemaNoRender
-  targetSchema: SplitSchemaNoRender
+  sourceSchema: CombinedSchema
+  targetSchema: CombinedSchema
 }
 
 export const MigrationKind = {
@@ -45,6 +48,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   const [migrationDescription, setMigrationDescription] = useState('')
 
   const theme = useTheme()
+  const router = useRouter()
 
   const handleRemoveActionItem = useCallback(
     (action: QuestionMigration) => {
@@ -174,10 +178,25 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   }
 
   // TODO After the API is implemented we should POST the migration plan to the backend
-  const handleSubmitMigrationPlan = () => {
+  const handleSubmitMigrationPlan = async () => {
     setSubmitErrorText('')
     if (migrationName === '') {
-      setSubmitErrorText('You must set a name for this migration plan')
+      return setSubmitErrorText('You must set a name for this migration plan')
+    }
+    if (questionMigrations.length === 0) {
+      return setSubmitErrorText('You must have at least one action before submitting a migration plan.')
+    }
+    const res = await postSchemaMigration({
+      name: migrationName,
+      description: migrationDescription,
+      sourceSchema: sourceSchema.schema.id,
+      targetSchema: targetSchema.schema.id,
+      questionMigrations: questionMigrations,
+    })
+    if (!res.ok) {
+      setSubmitErrorText(await getErrorMessage(res))
+    } else {
+      router.push('/schemas/list')
     }
   }
 
@@ -286,11 +305,11 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Typography variant='h6' fontWeight='bold'>
                   Source Schema
                 </Typography>
-                <Typography variant='caption'>{sourceSchema.reference}</Typography>
+                <Typography variant='caption'>{sourceSchema.splitSchema.reference}</Typography>
               </Box>
               <Divider />
               <JsonSchemaViewer
-                splitSchema={sourceSchema}
+                splitSchema={sourceSchema.splitSchema}
                 setSplitSchema={() => {}}
                 onQuestionClick={(selection: QuestionSelection) => handleSourceQuestionOnClick(selection)}
                 activePath={sourceSchemaQuestion?.path}
@@ -306,11 +325,11 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Typography variant='h6' fontWeight='bold'>
                   Target Schema
                 </Typography>
-                <Typography variant='caption'>{targetSchema.reference}</Typography>
+                <Typography variant='caption'>{targetSchema.splitSchema.reference}</Typography>
               </Box>
               <Divider />
               <JsonSchemaViewer
-                splitSchema={targetSchema}
+                splitSchema={targetSchema.splitSchema}
                 setSplitSchema={() => {}}
                 onQuestionClick={(selection: QuestionSelection) => handleTargetQuestionOnClick(selection)}
                 activePath={targetSchemaQuestion?.path}
