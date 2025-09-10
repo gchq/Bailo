@@ -12,6 +12,7 @@ import {
   Select,
   SelectChangeEvent,
   Stack,
+  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -36,9 +37,12 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   const [targetSchemaQuestion, setTargetSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
   const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
   const [questionMigrationKind, setQuestionMigrationKind] = useState<MigrationKindKeys>(MigrationKind.MOVE)
-  const [errorText, setErrorText] = useState('')
+  const [actionErrorText, setActionErrorText] = useState('')
+  const [submitErrorText, setSubmitErrorText] = useState('')
   const [isSourceSchemaActive, setIsSourceSchemaActive] = useState(false)
   const [isTargetSchemaActive, setIsTargetSchemaActive] = useState(false)
+  const [migrationName, setMigrationName] = useState('')
+  const [migrationDescription, setMigrationDescription] = useState('')
 
   const theme = useTheme()
 
@@ -91,22 +95,22 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   }, [questionMigrations, handleRemoveActionItem])
 
   const handleAddNewAction = () => {
-    setErrorText('')
+    setActionErrorText('')
     if (!sourceSchemaQuestion) {
-      return setErrorText('Please select a source question')
+      return setActionErrorText('Please select a source question')
     }
     if (!targetSchemaQuestion && questionMigrationKind !== MigrationKind.DELETE) {
-      return setErrorText('Please select a target question')
+      return setActionErrorText('Please select a target question')
     }
     const formId = `${questionMigrationKind}.${sourceSchemaQuestion.path}.${targetSchemaQuestion?.path}`
     if (questionMigrations.some((questionMigration) => questionMigration.id === formId)) {
-      return setErrorText('This action already exists')
+      return setActionErrorText('This action already exists')
     }
     if (
       questionMigrationKind === MigrationKind.MOVE &&
       sourceSchemaQuestion.schema.type !== targetSchemaQuestion?.schema.type
     ) {
-      return setErrorText('You cannot map two questions with different value types')
+      return setActionErrorText('You cannot map two questions with different value types')
     }
     const newQuestionMigration: QuestionMigration = {
       id: formId,
@@ -133,12 +137,12 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   }
 
   const handleSourceQuestionOnClick = (selection: QuestionSelection) => {
-    setErrorText('')
+    setActionErrorText('')
     setSourceSchemaQuestion(selection)
   }
 
   const handleTargetQuestionOnClick = (selection: QuestionSelection) => {
-    setErrorText('')
+    setActionErrorText('')
     if (questionMigrationKind !== MigrationKind.DELETE) {
       setTargetSchemaQuestion(selection)
     }
@@ -149,7 +153,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       setTargetSchemaQuestion(undefined)
       setIsTargetSchemaActive(false)
     }
-    setErrorText('')
+    setActionErrorText('')
     setQuestionMigrationKind(event.target.value as MigrationKindKeys)
   }
 
@@ -170,7 +174,12 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   }
 
   // TODO After the API is implemented we should POST the migration plan to the backend
-  const handleSubmitMigrationPlan = () => {}
+  const handleSubmitMigrationPlan = () => {
+    setSubmitErrorText('')
+    if (migrationName === '') {
+      setSubmitErrorText('You must set a name for this migration plan')
+    }
+  }
 
   return (
     <>
@@ -230,7 +239,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Button onClick={handleAddNewAction} aria-label='add action'>
                   Add action
                 </Button>
-                <Typography color='error'>{errorText}</Typography>
+                <Typography color='error'>{actionErrorText}</Typography>
                 <Divider />
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
@@ -246,9 +255,24 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 </Accordion>
               </Stack>
               <Divider />
-              <Button variant='contained' onClick={handleSubmitMigrationPlan} aria-label='submit migration plan'>
-                Submit migration plan
-              </Button>
+              <Stack spacing={2}>
+                <Stack spacing={1}>
+                  <Typography fontWeight='bold'>Migration name</Typography>
+                  <TextField size='small' value={migrationName} onChange={(e) => setMigrationName(e.target.value)} />
+                </Stack>
+                <Stack spacing={1}>
+                  <Typography fontWeight='bold'>Migration description (optional)</Typography>
+                  <TextField
+                    size='small'
+                    value={migrationDescription}
+                    onChange={(e) => setMigrationDescription(e.target.value)}
+                  />
+                </Stack>
+                <Button variant='contained' onClick={handleSubmitMigrationPlan} aria-label='submit migration plan'>
+                  Submit migration plan
+                </Button>
+                <Typography color='error'>{submitErrorText}</Typography>
+              </Stack>
             </Stack>
           </Stack>
         </Grid2>
