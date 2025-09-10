@@ -113,7 +113,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       kind: questionMigrationKind,
       sourcePath: sourceSchemaQuestion.path,
       targetPath: targetSchemaQuestion?.path,
-      propertyType: sourceSchemaQuestion.schema.type,
+      propertyType: sourceSchemaQuestion.schema.type as string,
     }
     setQuestionMigrations([...questionMigrations, newQuestionMigration])
     setSourceSchemaQuestion(undefined)
@@ -157,9 +157,9 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     if (!schemaQuestion) {
       return defaultText
     }
-    if (schemaQuestion?.schema.type === 'array') {
+    if (schemaQuestion?.schema.type === 'array' && schemaQuestion.schema.items) {
       // The title can be defined either inside the items child-object, or  at the root of the property
-      return schemaQuestion.schema.title || schemaQuestion.schema.items.title
+      return schemaQuestion.schema.items['title']
     } else {
       return schemaQuestion?.schema.title
     }

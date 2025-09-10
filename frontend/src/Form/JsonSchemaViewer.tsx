@@ -17,7 +17,7 @@ import { setStepState } from 'utils/formUtils'
 
 export interface QuestionSelection {
   path: string
-  schema: any
+  schema: RJSFSchema
 }
 
 export default function JsonSchemaViewer({
