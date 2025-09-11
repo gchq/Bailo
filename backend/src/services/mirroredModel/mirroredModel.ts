@@ -236,7 +236,7 @@ export async function importModel(
         mirroredModelId,
         sourceModelIdMeta: sourceModelId,
         importKind,
-        importId
+        importId,
       })
   }
 }
