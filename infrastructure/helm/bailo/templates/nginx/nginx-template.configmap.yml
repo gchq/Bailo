@@ -106,6 +106,7 @@ data:
                 proxy_pass http://{{ include "bailo.fullname" . }}-backend:{{ .Values.service.backendPort }};
             }
             location /v2 {
+                proxy_http_version 1.1;
                 proxy_hide_header WWW-Authenticate;
                 add_header WWW-Authenticate $new_www_authenticate always;
 
@@ -119,6 +120,7 @@ data:
                 proxy_read_timeout 900;
 
                 client_max_body_size 0;
+                proxy_request_buffering off;
                 chunked_transfer_encoding on;
            }
         }

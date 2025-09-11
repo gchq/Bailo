@@ -639,3 +639,12 @@ export interface ReviewRoleInterface {
   createdAt: string
   updatedAt: string
 }
+
+export interface QuestionMigration {
+  // id is only used in the UI for uniqueness
+  id: string
+  kind: string
+  sourcePath: string
+  targetPath?: string
+  propertyType: string
+}

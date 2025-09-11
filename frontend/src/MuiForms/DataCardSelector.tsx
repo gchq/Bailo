@@ -22,9 +22,15 @@ interface DataCardSelectorProps {
   rawErrors?: string[]
 }
 
-export default function DataCardSelector(props: DataCardSelectorProps) {
-  const { onChange, value: currentValue, required, label, id, formContext, rawErrors } = props
-
+export default function DataCardSelector({
+  onChange,
+  value: currentValue,
+  required,
+  label,
+  id,
+  formContext,
+  rawErrors,
+}: DataCardSelectorProps) {
   const [open, setOpen] = useState(false)
   const [dataCardListQuery, setDataCardListQuery] = useState('')
   const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
@@ -67,6 +73,10 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
 
   if (isDataCardsError) {
     return <MessageAlert message={isDataCardsError.info.message} severity='error' />
+  }
+
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
   return (
