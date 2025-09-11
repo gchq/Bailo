@@ -1,9 +1,12 @@
 import { PersonAdd } from '@mui/icons-material'
 import { Stack, Typography } from '@mui/material'
-import { useState } from 'react'
+import { postReviewRole } from 'actions/reviewRoles'
+import router from 'next/router'
+import { FormEvent, useState } from 'react'
 import Title from 'src/common/Title'
 import ReviewRoleFormContainer from 'src/reviewRoles/ReviewRoleFormContainer'
-import { ReviewRolesFormData, RoleKind } from 'types/types'
+import { CollaboratorEntry, ReviewRolesFormData, RoleKind } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 
 export default function ReviewRolesForm() {
   const [formData, setFormData] = useState<ReviewRolesFormData>({
@@ -14,6 +17,14 @@ export default function ReviewRolesForm() {
     defaultEntities: [],
     lockEntities: false,
   })
+  const [defaultEntitiesEntry, setDefaultEntitiesEntry] = useState<Array<CollaboratorEntry>>(
+    formData.defaultEntities
+      ? formData.defaultEntities.map((defaultEntity) => ({ entity: defaultEntity, roles: [] }))
+      : [],
+  )
+
+  const [errorMessage, setErrorMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const newReviewRoleHeading = (
     <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
@@ -24,6 +35,25 @@ export default function ReviewRolesForm() {
     </Stack>
   )
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setErrorMessage('')
+    setLoading(true)
+
+    const res = await postReviewRole({
+      ...formData,
+      defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
+    } as ReviewRolesFormData)
+
+    if (!res.ok) {
+      setErrorMessage(await getErrorMessage(res))
+    } else {
+      router.push(`/reviewRoles/view`)
+    }
+
+    setLoading(false)
+  }
+
   return (
     <>
       <Title text='Create new Review Role' />
@@ -32,6 +62,11 @@ export default function ReviewRolesForm() {
         formData={formData}
         setFormData={setFormData}
         headingComponent={newReviewRoleHeading}
+        loading={loading}
+        errorMessage={errorMessage}
+        defaultEntitiesEntry={defaultEntitiesEntry}
+        setDefaultEntities={setDefaultEntitiesEntry}
+        handleSubmit={handleSubmit}
       />
     </>
   )

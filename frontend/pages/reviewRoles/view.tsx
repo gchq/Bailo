@@ -3,10 +3,10 @@ import GroupsIcon from '@mui/icons-material/Groups'
 import PersonIcon from '@mui/icons-material/Person'
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
-import { deleteReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
+import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
-import { Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { FormEvent, Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
@@ -17,7 +17,8 @@ import UserDisplay from 'src/common/UserDisplay'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import ReviewRoleFormContainer from 'src/reviewRoles/ReviewRoleFormContainer'
-import { ReviewRoleInterface } from 'types/types'
+import { CollaboratorEntry, ReviewRoleInterface } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 import { getRoleDisplayName } from 'utils/roles'
 import { plural } from 'utils/stringUtils'
 
@@ -30,6 +31,7 @@ export default function ReviewRoles() {
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { schemas, isSchemasLoading, isSchemasError } = useGetSchemas()
   const [errorMessage, setErrorMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
 
@@ -41,6 +43,12 @@ export default function ReviewRoles() {
     systemRole: 'none',
     defaultEntities: [],
   })
+
+  const [defaultEntitiesEntry, setDefaultEntitiesEntry] = useState<Array<CollaboratorEntry>>(
+    formData.defaultEntities
+      ? formData.defaultEntities.map((defaultEntity) => ({ entity: defaultEntity, roles: [] }))
+      : [],
+  )
 
   useEffect(() => {
     setUnsavedChanges(isEdit)
@@ -108,6 +116,29 @@ export default function ReviewRoles() {
       }
     },
     [setErrorMessage, setConfirmationOpen, mutateReviewRoles],
+  )
+
+  const handleSubmit = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      setErrorMessage('')
+      setLoading(true)
+
+      const res = await putReviewRole({
+        ...formData,
+        defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
+      } as UpdateReviewRolesParams)
+
+      if (!res.ok) {
+        setErrorMessage(await getErrorMessage(res))
+      } else {
+        mutateReviewRoles()
+        setIsEdit(false)
+      }
+
+      setLoading(false)
+    },
+    [defaultEntitiesEntry, formData, mutateReviewRoles],
   )
 
   const displayEntityIcon = (defaultEntity: string) => {
@@ -180,7 +211,6 @@ export default function ReviewRoles() {
                   formData={formData}
                   setFormData={setFormData}
                   setIsEdit={setIsEdit}
-                  mutateReviewRoles={mutateReviewRoles}
                   providedData={true}
                   headingComponent={
                     <Stack alignItems='center' justifyContent='center' spacing={2} sx={{ mb: 4 }}>
@@ -190,6 +220,11 @@ export default function ReviewRoles() {
                       <Edit color='primary' fontSize='large' />
                     </Stack>
                   }
+                  handleSubmit={handleSubmit}
+                  loading={loading}
+                  errorMessage={errorMessage}
+                  defaultEntitiesEntry={defaultEntitiesEntry}
+                  setDefaultEntities={setDefaultEntitiesEntry}
                 />
               ) : (
                 <Loading />
@@ -218,10 +253,12 @@ export default function ReviewRoles() {
       modelRoles,
       displayReviewRoleDefaultEntities,
       handleOpenDeleteConfirmation,
-      mutateReviewRoles,
+      handleSubmit,
+      loading,
+      errorMessage,
+      defaultEntitiesEntry,
       confirmationOpen,
       schemasLength,
-      errorMessage,
       handleDeleteReviewRole,
     ],
   )
