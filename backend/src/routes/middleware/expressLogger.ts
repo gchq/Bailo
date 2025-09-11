@@ -42,7 +42,7 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
       requestId: req.reqId,
       ...(req.headers['user-agent'] && { agent: req.headers['user-agent'] }),
       // trim each value in body to 128 characters maximum
-      ...(req.body && { body: Object.keys(req.body).forEach(k => req.body[k] = req.body[k].substring(0, 128)) }),
+      ...(req.body && { body: Object.keys(req.body).forEach(k => req.body[k] = typeof req.body[k] === 'string' ? req.body[k].substring(0, 128)) : JSON.stringify(req.body[k]).substring(0, 128)) }),
     },
     'Request received.',
   )
