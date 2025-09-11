@@ -228,7 +228,6 @@ export const RoleKind = {
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
 export const SystemRole = {
-  None: 'none',
   Owner: 'owner',
   Contributor: 'contributor',
   Consumer: 'consumer',

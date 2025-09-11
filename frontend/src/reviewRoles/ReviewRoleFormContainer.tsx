@@ -46,7 +46,7 @@ type ReviewRoleFormContainerProps = {
 
 export default function ReviewRoleFormContainer({
   providedData = false,
-  formData = { name: '', shortName: '', description: '', systemRole: 'none', defaultEntities: [] },
+  formData = { name: '', shortName: '', description: '', defaultEntities: [] },
   setFormData,
   setIsEdit = () => {},
   headingComponent,
