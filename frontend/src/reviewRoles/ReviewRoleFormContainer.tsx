@@ -51,26 +51,26 @@ export default function ReviewRoleFormContainer({
   setIsEdit = () => {},
   headingComponent,
   handleSubmit,
-  loading,
-  errorMessage,
-  defaultEntitiesEntry,
+  loading = false,
+  errorMessage = '',
+  defaultEntitiesEntry = [],
   setDefaultEntities,
 }: ReviewRoleFormContainerProps) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: UpdateReviewRolesParams) => ({ ...prevFormData, name: event.target.value as string }))
+    setFormData((prevFormData: ReviewRolesFormDataUnion) => ({ ...prevFormData, name: event.target.value as string }))
   }
 
   const handleShortNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: UpdateReviewRolesParams) => ({
+    setFormData((prevFormData: ReviewRolesFormDataUnion) => ({
       ...prevFormData,
       shortName: event.target.value as string,
     }))
   }
 
   const handleDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: UpdateReviewRolesParams) => ({
+    setFormData((prevFormData: ReviewRolesFormDataUnion) => ({
       ...prevFormData,
       description: event.target.value as string,
     }))
@@ -80,7 +80,7 @@ export default function ReviewRoleFormContainer({
     if (event.target.value === '') {
       delete formData.systemRole
     } else {
-      setFormData((prevFormData: UpdateReviewRolesParams) => ({
+      setFormData((prevFormData: ReviewRolesFormDataUnion) => ({
         ...prevFormData,
         systemRole: event.target.value.toLowerCase() as SystemRoleKeys,
       }))
@@ -92,42 +92,6 @@ export default function ReviewRoleFormContainer({
       setDefaultEntities(newValue)
     }
   }, [setDefaultEntities])
-
-  // const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-  //   event.preventDefault()
-  //   setErrorMessage('')
-  //   setLoading(true)
-
-  //   if (providedData) {
-  //     const res = await putReviewRole({
-  //       ...formData,
-  //       defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
-  //     } as UpdateReviewRolesParams)
-
-  //     if (!res.ok) {
-  //       setErrorMessage(await getErrorMessage(res))
-  //     } else {
-  //       if (mutateReviewRoles) {
-  //         mutateReviewRoles()
-  //       }
-
-  //       setIsEdit(false)
-  //     }
-  //   } else {
-  //     const res = await postReviewRole({
-  //       ...formData,
-  //       defaultEntities: defaultEntitiesEntry.map((entity) => entity.entity),
-  //     } as ReviewRolesFormData)
-
-  //     if (!res.ok) {
-  //       setErrorMessage(await getErrorMessage(res))
-  //     } else {
-  //       router.push(`/reviewRoles/view`)
-  //     }
-  //   }
-
-  //   setLoading(false)
-  // }
 
   const displayDefaultEntitiesList = useMemo(() => {
     return (

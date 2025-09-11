@@ -39,9 +39,6 @@ export default function ReviewRoles() {
   const [formData, setFormData] = useState<UpdateReviewRolesParams>({
     name: '',
     shortName: '',
-    description: '',
-    systemRole: 'none',
-    defaultEntities: [],
   })
 
   const [defaultEntitiesEntry, setDefaultEntitiesEntry] = useState<Array<CollaboratorEntry>>(
@@ -106,7 +103,7 @@ export default function ReviewRoles() {
   }, [setErrorMessage, setConfirmationOpen])
 
   const handleDeleteReviewRole = useCallback(
-    async (reviewRoleShortName) => {
+    async (reviewRoleShortName: string) => {
       const res = await deleteReviewRole(reviewRoleShortName)
       if (res.status !== 200) {
         setErrorMessage('There was a problem deleting this role.')
@@ -176,7 +173,7 @@ export default function ReviewRoles() {
                       System Role
                     </Typography>
                     <Typography>
-                      {formData?.systemRole ? getRoleDisplayName(formData?.systemRole, modelRoles) : 'No system role'}
+                      {formData.systemRole ? getRoleDisplayName(formData?.systemRole, modelRoles) : 'No system role'}
                     </Typography>
                   </Box>
                   <Box>
