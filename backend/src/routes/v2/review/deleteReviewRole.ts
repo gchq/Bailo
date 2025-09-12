@@ -17,7 +17,7 @@ export const deleteReviewRoleSchema = z.object({
 registerPath({
   method: 'delete',
   path: '/api/v2/review/role/{reviewRoleId}',
-  tags: ['review'],
+  tags: ['review role'],
   description: 'Used for deleting a review role.',
   schema: deleteReviewRoleSchema,
   responses: {
