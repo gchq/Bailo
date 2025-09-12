@@ -366,7 +366,7 @@ export async function uploadReleaseFiles(
           fileId: file.id,
         },
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       log.error(
         {
           error,
@@ -417,7 +417,7 @@ export async function uploadReleaseImages(
           },
           imageLogData,
         )
-      } catch (error: any) {
+      } catch (error: unknown) {
         log.error(
           {
             error,
@@ -451,7 +451,7 @@ async function addReleaseToTarball(
       size: Buffer.byteLength(releaseJson, 'utf8'),
     })
     await pipeStreamToTarEntry(Readable.from(releaseJson), packerEntry, { modelId: model.id })
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw InternalError('Error when generating the tarball file.', {
       error,
       modelId: model.id,
@@ -478,7 +478,7 @@ async function addFilesToTarball(files: FileWithScanResultsInterface[], tarStrea
         size: Buffer.byteLength(fileJson, 'utf8'),
       })
       await pipeStreamToTarEntry(Readable.from(fileJson), packerEntry, { modelId })
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw InternalError('Error when generating the tarball file.', { error, modelId, file })
     }
   }
@@ -544,7 +544,7 @@ export async function generateDigest(file: Readable) {
       })
     })
     return messageDigest
-  } catch (error: any) {
+  } catch (error: unknown) {
     file.destroy?.()
     throw InternalError('Error generating SHA256 digest for stream.', { error })
   }
