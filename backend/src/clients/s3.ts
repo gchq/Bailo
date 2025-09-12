@@ -75,6 +75,9 @@ export async function putObjectStream(
     throw InternalError('Unable to upload the object to the S3 service.', {
       internal: { error, bucket, key, metadata },
     })
+  } finally {
+    // always cleanup the stream
+    body.destroy()
   }
 }
 
