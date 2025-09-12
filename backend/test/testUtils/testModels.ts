@@ -126,3 +126,19 @@ export const testReviewerWithOwnerSystemRole = {
   shortName: 'reviewer',
   systemRole: 'owner',
 }
+
+export const testSchemaMigration = {
+  name: 'my migration plan',
+  description: 'This is a test migration plan',
+  sourceSchema: 'v1',
+  targetSchema: 'v2',
+  questionMigrations: [
+    {
+      id: 'test',
+      kind: 'move',
+      sourcePath: 's1.q1',
+      targetPath: 's2.q1',
+      propertyType: 'string',
+    },
+  ],
+}

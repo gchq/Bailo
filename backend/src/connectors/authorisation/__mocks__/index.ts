@@ -10,6 +10,9 @@ const auth = {
   schema: vi.fn(() => ({ success: true })),
   schemas: vi.fn(() => [{ success: true }]),
 
+  schemaMigration: vi.fn(() => ({ success: true })),
+  schemaMigrations: vi.fn(() => ({ success: true })),
+
   accessRequest: vi.fn(() => ({ success: true })),
   accessRequests: vi.fn(() => [{ success: true }]),
 

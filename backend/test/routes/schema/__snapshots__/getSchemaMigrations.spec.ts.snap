@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > schema > getSchemaMigrations > audit > expected call 1`] = `
+[
+  {
+    "description": "This is a test migration plan",
+    "name": "my migration plan",
+    "questionMigrations": [
+      {
+        "id": "test",
+        "kind": "move",
+        "propertyType": "string",
+        "sourcePath": "s1.q1",
+        "targetPath": "s2.q1",
+      },
+    ],
+    "sourceSchema": "v1",
+    "targetSchema": "v2",
+  },
+]
+`;
+
+exports[`routes > schema > getSchemaMigrations > returns the schema with the matching ID 1`] = `
+{
+  "schemaMigrations": [
+    {
+      "description": "This is a test migration plan",
+      "name": "my migration plan",
+      "questionMigrations": [
+        {
+          "id": "test",
+          "kind": "move",
+          "propertyType": "string",
+          "sourcePath": "s1.q1",
+          "targetPath": "s2.q1",
+        },
+      ],
+      "sourceSchema": "v1",
+      "targetSchema": "v2",
+    },
+  ],
+}
+`;

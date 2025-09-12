@@ -35,6 +35,12 @@ export const SchemaAction = {
 } as const
 export type SchemaActionKeys = (typeof SchemaAction)[keyof typeof SchemaAction]
 
+export const SchemaMigrationAction = {
+  Create: 'schema:create',
+  View: 'schema:view',
+} as const
+export type SchemaMigrationActionKeys = (typeof SchemaMigrationAction)[keyof typeof SchemaMigrationAction]
+
 export const FileAction = {
   Delete: 'file:delete',
   Upload: 'file:upload',

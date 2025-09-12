@@ -260,6 +260,26 @@ export const schemaInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+export const schemaMigrationInterfaceSchema = z.object({
+  name: z.string().openapi({ example: 'My Schema Migration' }),
+  description: z.string().openapi({ example: 'An example schema migration' }),
+  sourceSchema: z.string().openapi({ example: 'v1' }),
+  targetSchema: z.string().openapi({ example: 'v2' }),
+
+  questionMigrations: z.array(
+    z.object({
+      id: z.string(),
+      kind: z.string().openapi({ example: 'move' }),
+      sourcePath: z.string().openapi({ example: 'section1.question1' }),
+      targetPath: z.string().optional().openapi({ example: 'section2.question1' }),
+      propertyType: z.string().openapi({ example: 'string' }),
+    }),
+  ),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
 export const inferenceInterfaceSchema = z.object({
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   image: z.string().openapi({ example: 'yolov4' }),

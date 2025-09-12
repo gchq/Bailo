@@ -1,0 +1,81 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > schema > postSchemaMigration > audit > expected call 1`] = `
+{
+  "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
+  "name": "Dr. Garry Cummerata",
+  "questionMigrations": [
+    {
+      "id": "expedita",
+      "kind": "delete",
+      "propertyType": "expedita",
+      "sourcePath": "expedita",
+      "targetPath": "expedita",
+    },
+    {
+      "id": "expedita",
+      "kind": "delete",
+      "propertyType": "expedita",
+      "sourcePath": "expedita",
+      "targetPath": "expedita",
+    },
+    {
+      "id": "expedita",
+      "kind": "delete",
+      "propertyType": "expedita",
+      "sourcePath": "expedita",
+      "targetPath": "expedita",
+    },
+    {
+      "id": "expedita",
+      "kind": "delete",
+      "propertyType": "expedita",
+      "sourcePath": "expedita",
+      "targetPath": "expedita",
+    },
+  ],
+  "sourceSchema": "expedita",
+  "targetSchema": "expedita",
+}
+`;
+
+exports[`routes > schema > postSchemaMigration > successfully stores the schema migration 1`] = `
+{
+  "schemaMigration": {
+    "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
+    "name": "Dr. Garry Cummerata",
+    "questionMigrations": [
+      {
+        "id": "expedita",
+        "kind": "delete",
+        "propertyType": "expedita",
+        "sourcePath": "expedita",
+        "targetPath": "expedita",
+      },
+      {
+        "id": "expedita",
+        "kind": "delete",
+        "propertyType": "expedita",
+        "sourcePath": "expedita",
+        "targetPath": "expedita",
+      },
+      {
+        "id": "expedita",
+        "kind": "delete",
+        "propertyType": "expedita",
+        "sourcePath": "expedita",
+        "targetPath": "expedita",
+      },
+      {
+        "id": "expedita",
+        "kind": "delete",
+        "propertyType": "expedita",
+        "sourcePath": "expedita",
+        "targetPath": "expedita",
+      },
+    ],
+    "sourceSchema": "expedita",
+    "targetSchema": "expedita",
+  },
+}
+`;

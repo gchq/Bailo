@@ -9,6 +9,7 @@ import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
+import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import {
@@ -102,6 +103,17 @@ export const AuditInfo = {
   DeleteSchema: { typeId: 'DeleteSchema', description: 'Schema Deleted', auditKind: AuditKind.Delete },
   UpdateSchema: { typeId: 'UpdateSchema', description: 'Schema Updated', auditKind: AuditKind.Update },
 
+  CreateSchemaMigration: {
+    typeId: 'CreateSchemaMigration',
+    description: 'Schema Migration Plan Created',
+    auditKind: AuditKind.Create,
+  },
+  ViewSchemaMigrations: {
+    typeId: 'ViewSchemaMigrations',
+    description: 'Schemas Migration Plans viewed',
+    auditKind: AuditKind.View,
+  },
+
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
 
   CreateInference: { typeId: 'CreateInference', description: 'Inference Service Created', auditKind: AuditKind.Create },
@@ -191,6 +203,9 @@ export abstract class BaseAuditConnector {
   abstract onViewSchema(req: Request, schema: SchemaInterface)
   abstract onDeleteSchema(req: Request, schemaId: string)
   abstract onUpdateSchema(req: Request, schema: SchemaDoc)
+
+  abstract onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
+  abstract onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[])
 
   abstract onCreateInference(req: Request, inference: InferenceDoc)
   abstract onUpdateInference(req: Request, inference: InferenceDoc)
