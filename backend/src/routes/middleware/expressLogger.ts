@@ -43,12 +43,11 @@ export async function expressLogger(req: Request, res: Response, next: NextFunct
       ...(req.headers['user-agent'] && { agent: req.headers['user-agent'] }),
       // trim each value in body to 128 characters maximum
       ...(req.body && {
-        body: Object.keys(req.body).forEach(
-          (k) =>
-            (req.body[k] =
-              typeof req.body[k] === 'string'
-                ? req.body[k].substring(0, 128)
-                : JSON.stringify(req.body[k]).substring(0, 128)),
+        body: Object.fromEntries(
+          Object.entries(req.body).map(([k, v]) => [
+            k,
+            typeof v === 'string' ? v.substring(0, 128) : JSON.stringify(v).substring(0, 128),
+          ]),
         ),
       }),
     },

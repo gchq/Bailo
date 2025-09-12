@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -39,7 +38,6 @@ interface DeleteReviewRoleResponse {
 }
 
 export const deleteReviewRole = [
-  bodyParser.json(),
   async (req: Request, res: Response<DeleteReviewRoleResponse>) => {
     req.audit = AuditInfo.DeleteReviewRole
 
