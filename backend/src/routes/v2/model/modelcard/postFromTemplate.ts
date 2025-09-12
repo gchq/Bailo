@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -47,7 +46,6 @@ interface PostFromTemplateResponse {
 }
 
 export const postFromTemplate = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostFromTemplateResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateModelCard
     const {

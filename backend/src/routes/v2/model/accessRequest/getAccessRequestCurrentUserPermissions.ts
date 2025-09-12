@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -39,7 +38,6 @@ interface GetAccessRequestCurrentUserPermissionsResponse {
 }
 
 export const getAccessRequestCurrentUserPermissions = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetAccessRequestCurrentUserPermissionsResponse>): Promise<void> => {
     const {
       params: { accessRequestId },

@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -36,7 +35,6 @@ interface GetUserTokensResponse {
 }
 
 export const getUserTokens = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetUserTokensResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewUserTokens
     const _ = parse(req, getUserTokensSchema)

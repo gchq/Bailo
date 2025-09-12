@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -48,7 +47,6 @@ interface PostRequestImportResponse {
 }
 
 export const postRequestImportFromS3 = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostRequestImportResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateImport
     const {

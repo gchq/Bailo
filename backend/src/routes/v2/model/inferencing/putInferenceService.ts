@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -50,7 +49,6 @@ interface PutInferenceService {
 }
 
 export const putInference = [
-  bodyParser.json(),
   async (req: Request, res: Response<PutInferenceService>): Promise<void> => {
     req.audit = AuditInfo.UpdateInference
     const {

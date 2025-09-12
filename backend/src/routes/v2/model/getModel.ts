@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -41,7 +40,6 @@ interface GetModelResponse {
 }
 
 export const getModel = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetModelResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewModel
     const { params, query } = parse(req, getModelSchema)

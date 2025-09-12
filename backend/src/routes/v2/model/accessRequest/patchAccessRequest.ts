@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -45,7 +44,6 @@ interface PatchAccessRequestResponse {
 }
 
 export const patchAccessRequest = [
-  bodyParser.json(),
   async (req: Request, res: Response<PatchAccessRequestResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateAccessRequest
     const {

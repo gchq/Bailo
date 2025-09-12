@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -27,7 +26,6 @@ registerPath({
 })
 
 export const getSystemStatus = [
-  bodyParser.json(),
   async (_req: Request, res: Response<SystemStatus>): Promise<void> => {
     const federation = {
       state: config.federation.state,

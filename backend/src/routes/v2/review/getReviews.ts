@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -46,7 +45,6 @@ export interface GetReviewResponse {
 }
 
 export const getReviews = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetReviewResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchReviews
     const {

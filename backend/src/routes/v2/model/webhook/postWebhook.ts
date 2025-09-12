@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -46,7 +45,6 @@ interface PostWebhookResponse {
 }
 
 export const postWebhook = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostWebhookResponse>): Promise<void> => {
     const {
       params: { modelId },

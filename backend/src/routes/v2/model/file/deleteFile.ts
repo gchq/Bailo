@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -40,7 +39,6 @@ interface DeleteFileResponse {
 }
 
 export const deleteFile = [
-  bodyParser.json(),
   async (req: Request, res: Response<DeleteFileResponse>): Promise<void> => {
     req.audit = AuditInfo.DeleteFile
     const {

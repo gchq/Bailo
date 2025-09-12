@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -37,7 +36,6 @@ interface GetEntityLookup {
 }
 
 export const getEntityLookup = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetEntityLookup>): Promise<void> => {
     const {
       params: { dn },

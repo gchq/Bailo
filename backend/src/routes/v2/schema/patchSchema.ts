@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -54,7 +53,6 @@ interface PatchSchemaResponse {
 }
 
 export const patchSchema = [
-  bodyParser.json(),
   async (req: Request, res: Response<PatchSchemaResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateSchema
     const { body, params } = parse(req, patchSchemaSchema)

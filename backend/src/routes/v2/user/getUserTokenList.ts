@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -30,7 +29,6 @@ registerPath({
 })
 
 export const getUserTokenList = [
-  bodyParser.json(),
   async (_req: Request, res: Response): Promise<void> => {
     res.json({
       tokenActionMap,

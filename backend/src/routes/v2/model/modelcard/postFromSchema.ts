@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -47,7 +46,6 @@ interface PostFromSchemaResponse {
 }
 
 export const postFromSchema = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostFromSchemaResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateModelCard
     const {
