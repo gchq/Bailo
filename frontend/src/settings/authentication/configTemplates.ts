@@ -19,7 +19,7 @@ data:
 type: kubernetes.io/dockerconfigjson`
 }
 
-export function getKubernetesImagePullSecretsExampleConfig(registryUrl: string, secretFileName: string) {
+export function getKubernetesImagePullSecretsExampleConfig(registryUrl: string, description: string) {
   return `apiVersion: v1
 kind: Pod
 metadata:
@@ -31,7 +31,7 @@ spec:
       image: ${registryUrl}/some-model-id/some-repo-id
 
   imagePullSecrets:
-    - name: ${secretFileName}`
+    - name: ${toKebabCase(description)}-secret`
 }
 
 export function getRktCredentialsConfig(registryUrl: string, accessKey: string, secretKey: string) {
