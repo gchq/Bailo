@@ -156,44 +156,47 @@ export async function importModel(
 
   const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, importId })
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, importKind, importId })
   }
 
   let res: Response
   try {
     res = await fetch(payloadUrl, { agent: getHttpsAgent() })
   } catch (err) {
-    throw InternalError('Unable to get the file.', { err, payloadUrl, importId })
+    throw InternalError('Unable to get the file.', { err, payloadUrl, importKind, importId })
   }
   if (!res.ok) {
     throw InternalError('Unable to get the file.', {
       payloadUrl,
       response: { status: res.status, body: await res.text() },
+      importKind,
       importId,
     })
   }
 
   if (!res.body) {
-    throw InternalError('Unable to get the file.', { payloadUrl, importId })
+    throw InternalError('Unable to get the file.', { payloadUrl, importKind, importId })
   }
   // type cast `NodeJS.ReadableStream` to `'stream/web'.ReadableStream`
   // as per https://stackoverflow.com/questions/63630114/argument-of-type-readablestreamany-is-not-assignable-to-parameter-of-type-r/66629140#66629140
   // and https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js/74722818#comment133510726_74722818
   const responseBody = res.body instanceof Readable ? res.body : Readable.fromWeb(res.body as unknown as ReadableStream)
 
-  log.info({ mirroredModelId, payloadUrl, importId }, 'Obtained the file from the payload URL.')
+  log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Obtained the file from the payload URL.')
 
   switch (importKind) {
     case ImportKind.Documents: {
-      log.info({ mirroredModelId, payloadUrl, importId }, 'Importing collection of documents.')
+      log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Importing collection of documents.')
       return await importDocuments(user, responseBody, mirroredModelId, sourceModelId, payloadUrl, importId)
     }
     case ImportKind.File: {
-      log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
+      log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Importing file data.')
       if (!fileId) {
         throw BadReq('File ID must be specified for file import.', {
           mirroredModelId,
           sourceModelIdMeta: sourceModelId,
+          importKind,
+          importId,
         })
       }
       const result = await importModelFile(responseBody, fileId, mirroredModelId, importId)
@@ -205,9 +208,14 @@ export async function importModel(
       }
     }
     case ImportKind.Image: {
-      log.info({ mirroredModelId, payloadUrl }, 'Importing image data.')
+      log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Importing image data.')
       if (!distributionPackageName) {
-        throw BadReq('Missing Distribution Package Name.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
+        throw BadReq('Missing Distribution Package Name.', {
+          mirroredModelId,
+          sourceModelIdMeta: sourceModelId,
+          importKind,
+          importId,
+        })
       }
       const result = await importCompressedRegistryImage(
         user,
@@ -224,7 +232,12 @@ export async function importModel(
       }
     }
     default:
-      throw BadReq('Unrecognised import kind', { importKind, importId })
+      throw BadReq('Unrecognised import kind', {
+        mirroredModelId,
+        sourceModelIdMeta: sourceModelId,
+        importKind,
+        importId,
+      })
   }
 }
 
