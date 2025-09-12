@@ -154,7 +154,7 @@ const fileMocks = vi.hoisted(() => ({
   downloadFile: vi.fn(() => ({ Body: 'test' })),
   getFilesByIds: vi.fn(() => [
     {
-      _id: 'fileId',
+      _id: { toString: vi.fn(() => 'fileId') },
       avScan: [{ ArtefactKind: ArtefactKind.File, fileId: 'fileId', state: 'complete', isInfected: false }],
       toJSON: vi.fn(),
     },
@@ -198,17 +198,17 @@ describe('services > mirroredModel', () => {
 
       const promise = exportModel({} as UserInterface, 'modelId', true)
 
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalledTimes(0)
       await expect(promise).rejects.toThrowError('Exporting models has not been enabled.')
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
     })
 
     test('missing disclaimer agreement', async () => {
       const promise = exportModel({} as UserInterface, 'modelId', false)
 
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalledTimes(0)
       await expect(promise).rejects.toThrowError(
         /^You must agree to the disclaimer agreement before being able to export a model./,
       )
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
     })
 
     test('missing mirrored model ID', async () => {
@@ -220,8 +220,8 @@ describe('services > mirroredModel', () => {
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalledTimes(0)
       await expect(promise).rejects.toThrowError(/^The 'Destination Model ID' has not been set on this model./)
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
     })
 
     test('missing mirrored model card schemaId', async () => {
@@ -233,10 +233,10 @@ describe('services > mirroredModel', () => {
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalledTimes(0)
       await expect(promise).rejects.toThrowError(
         /^You must select a schema for your model before you can start the export process./,
       )
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
     })
 
     test('bad authorisation', async () => {
@@ -248,14 +248,14 @@ describe('services > mirroredModel', () => {
 
       const promise = exportModel({} as UserInterface, 'modelId', true)
 
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalledTimes(0)
       await expect(promise).rejects.toThrowError(/^You do not have permission/)
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
     })
 
     test('successful export if no files exist', async () => {
       releaseMocks.getAllFileIds.mockResolvedValueOnce([])
       modelMocks.getModelCardRevisions.mockResolvedValueOnce([])
-      fileMocks.getFilesByIds.mockResolvedValueOnce([])
+      fileMocks.getFilesByIds.mockResolvedValue([])
 
       await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
@@ -309,15 +309,13 @@ describe('services > mirroredModel', () => {
     test('skip export contains incomplete file scan', async () => {
       fileMocks.getFilesByIds.mockReturnValueOnce([
         {
-          _id: '123',
           avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '123', state: 'inProgress' }],
           toJSON: vi.fn(),
         } as any,
         {
-          _id: '321',
           avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '321', state: 'complete', isInfected: false }],
           toJSON: vi.fn(),
-        },
+        } as any,
       ])
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
@@ -344,15 +342,13 @@ describe('services > mirroredModel', () => {
     test('export contains infected file', async () => {
       fileMocks.getFilesByIds.mockReturnValueOnce([
         {
-          _id: '123',
           avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '123', state: 'complete', isInfected: true }],
           toJSON: vi.fn(),
-        },
+        } as any,
         {
-          _id: '321',
           avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '321', state: 'complete', isInfected: false }],
           toJSON: vi.fn(),
-        },
+        } as any,
       ])
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])

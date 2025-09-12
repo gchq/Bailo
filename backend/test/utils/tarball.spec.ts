@@ -7,7 +7,7 @@ import {
   extractTarGzStream,
   pipeStreamToTarEntry,
 } from '../../src/utils/tarball.js'
-import { MockReadable, MockWritable } from '../testUtils/streams.js'
+import { makeReadable, MockReadable, MockWritable } from '../testUtils/streams.js'
 
 const zlibMocks = vi.hoisted(() => ({
   createGunzip: vi.fn((_options) => {
@@ -28,7 +28,7 @@ const mockTarStream = {
   finalize: vi.fn(),
 }
 const tarMocks = vi.hoisted(() => ({
-  extract: vi.fn(() => new MockReadable()),
+  extract: vi.fn(() => new MockReadable() as any),
   pack: vi.fn(() => mockTarStream),
   constants: { Z_BEST_SPEED: 1 },
 }))
@@ -102,11 +102,8 @@ describe('utils > tarball', () => {
   })
 
   test('pipeStreamToTarEntry > success', async () => {
-    const inputStream = new MockReadable()
+    const inputStream = makeReadable({ chunks: [Buffer.from('test-data')] })
     const tarEntry = new MockWritable()
-    setImmediate(() => {
-      tarEntry.emit('finish')
-    })
 
     const promise = pipeStreamToTarEntry(inputStream, tarEntry, { test: 'data' })
 
@@ -115,11 +112,8 @@ describe('utils > tarball', () => {
   })
 
   test('pipeStreamToTarEntry > inputStream error', async () => {
-    const inputStream = new MockReadable()
+    const inputStream = makeReadable({ failWith: new Error('input stream error') })
     const tarEntry = new MockWritable()
-    setImmediate(() => {
-      inputStream.emit('error', new Error('input stream error'))
-    })
 
     const promise = pipeStreamToTarEntry(inputStream, tarEntry, { test: 'errorInput' })
 
@@ -127,10 +121,11 @@ describe('utils > tarball', () => {
   })
 
   test('pipeStreamToTarEntry > tarEntry error', async () => {
-    const inputStream = new MockReadable()
+    const inputStream = makeReadable({ autoEnd: false })
     const tarEntry = new MockWritable()
     setImmediate(() => {
-      tarEntry.emit('error', new Error('input stream error'))
+      tarEntry.triggerError(new Error('tar write error'))
+      inputStream.endNow() // end stream after error triggered
     })
 
     const promise = pipeStreamToTarEntry(inputStream, tarEntry, { test: 'errorPacker' })

@@ -379,7 +379,7 @@ export async function uploadReleaseFiles(
           fileId: file.id,
         },
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       log.error(
         {
           error,
@@ -430,7 +430,7 @@ export async function uploadReleaseImages(
           },
           imageLogData,
         )
-      } catch (error: any) {
+      } catch (error: unknown) {
         log.error(
           {
             error,
@@ -464,13 +464,37 @@ async function addReleaseToTarball(
       size: Buffer.byteLength(releaseJson, 'utf8'),
     })
     await pipeStreamToTarEntry(Readable.from(releaseJson), packerEntry, { modelId: model.id })
-  } catch (error: any) {
-    throw InternalError('Error when generating the tarball file.', { error })
+  } catch (error: unknown) {
+    throw InternalError('Error when generating the tarball file.', {
+      error,
+      modelId: model.id,
+      mirroredModelId,
+      releaseId: release.id,
+    })
+  }
+
+  if (files.length > 0) {
+    await addFilesToTarball(files, tarStream, model.id)
   }
 
   // Fire-and-forget upload of artefacts so that the endpoint is able to return without awaiting lots of uploads
   uploadReleaseFiles(user, model, release, files, mirroredModelId)
   uploadReleaseImages(user, model, release, mirroredModelId)
+}
+
+async function addFilesToTarball(files: FileWithScanResultsInterface[], tarStream: Pack, modelId: string) {
+  for (const file of files) {
+    try {
+      const fileJson = JSON.stringify(file)
+      const packerEntry = tarStream.entry({
+        name: `files/${file._id.toString()}.json`,
+        size: Buffer.byteLength(fileJson, 'utf8'),
+      })
+      await pipeStreamToTarEntry(Readable.from(fileJson), packerEntry, { modelId })
+    } catch (error: unknown) {
+      throw InternalError('Error when generating the tarball file.', { error, modelId, file })
+    }
+  }
 }
 
 async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: string[]) {
@@ -533,7 +557,7 @@ export async function generateDigest(file: Readable) {
       })
     })
     return messageDigest
-  } catch (error: any) {
+  } catch (error: unknown) {
     file.destroy?.()
     throw InternalError('Error generating SHA256 digest for stream.', { error })
   }

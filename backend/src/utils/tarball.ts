@@ -1,10 +1,13 @@
 import zlib from 'node:zlib'
 
-import { PassThrough, Readable, Writable } from 'stream'
+import { PassThrough, pipeline, Readable, Writable } from 'stream'
 import { extract, Headers, pack } from 'tar-stream'
+import { promisify } from 'util'
 
 import log from '../services/log.js'
 import { InternalError } from './error.js'
+
+const promisifyPipeline = promisify(pipeline)
 
 export type ExtractTarGzEntryListener = (entry: Headers, stream: PassThrough, next: (error?: unknown) => void) => void
 
@@ -71,25 +74,16 @@ export async function extractTarGzStream(
 export async function pipeStreamToTarEntry(
   inputStream: Readable,
   tarEntry: Writable,
-  logData: { [key: string]: string } = {},
-) {
-  return new Promise((resolve, reject) => {
-    const onError = (err: any) => {
-      inputStream.destroy?.()
-      tarEntry.destroy?.()
-      reject(
-        InternalError('Stream error during tar operation', {
-          error: err,
-          ...logData,
-        }),
-      )
-    }
-    inputStream.pipe(tarEntry)
-    tarEntry.on('finish', () => {
-      log.debug({ ...logData }, 'Finished fetching stream')
-      resolve('ok')
+  logData: Record<string, string> = {},
+): Promise<'ok'> {
+  try {
+    await promisifyPipeline(inputStream, tarEntry)
+    log.debug({ ...logData }, 'Finished fetching stream')
+    return 'ok'
+  } catch (error: unknown) {
+    throw InternalError('Stream error during tar operation', {
+      error,
+      ...logData,
     })
-    tarEntry.on('error', onError)
-    inputStream.on('error', onError)
-  })
+  }
 }
