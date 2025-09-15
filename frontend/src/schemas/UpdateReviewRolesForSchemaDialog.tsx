@@ -16,6 +16,7 @@ import { useTheme } from '@mui/material/styles'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { patchSchema } from 'actions/schema'
 import { useCallback, useMemo, useState } from 'react'
+import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { SchemaInterface } from 'types/types'
@@ -38,6 +39,7 @@ export default function UpdateReviewRolesForSchemaDialog({
 
   const [checked, setChecked] = useState<string[]>(schema.reviewRoles)
   const [errorMessage, setErrorMessage] = useState('')
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
 
   const theme = useTheme()
 
@@ -103,10 +105,17 @@ export default function UpdateReviewRolesForSchemaDialog({
         <List>{reviewRoleList}</List>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleOnSave}>Save</Button>
+        <Button onClick={() => setConfirmationDialogOpen(true)}>Save</Button>
         <Typography variant='caption' color={theme.palette.error.main}>
           {errorMessage}
         </Typography>
+        <ConfirmationDialogue
+          open={confirmationDialogOpen}
+          title='Please read if you are about to remove a role!'
+          dialogMessage='Removing roles from a schema will remove those roles from any user currently assigned to any model using that schema. If you are happy with this, or you are just adding new roles, then please confirm below. '
+          onConfirm={handleOnSave}
+          onCancel={() => setConfirmationDialogOpen(false)}
+        />
       </DialogActions>
     </Dialog>
   )
