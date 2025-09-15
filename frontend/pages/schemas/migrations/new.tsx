@@ -136,7 +136,7 @@ export default function SchemaMigrationSelector() {
                   sx={{ width: 'max-content' }}
                   onClick={beginMigration}
                   disabled={!sourceSchema || !targetSchema}
-                  aria-label={'Being schema migration button'}
+                  aria-label={'Begin schema migration button'}
                 >
                   Begin migration
                 </Button>
