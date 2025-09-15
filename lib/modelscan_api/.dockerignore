@@ -19,8 +19,10 @@ Dockerfile
 
 # Test files
 .pytest_cache/
+tests/
 
 # Misc
 README.md
 .pre-commit-config.yaml
 requirements-dev.txt
+pytest.ini

@@ -5,7 +5,6 @@ import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry } from '../models/Model.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import Schema, { SchemaInterface } from '../models/Schema.js'
-import SchemaModel from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
 import config from '../utils/config.js'
@@ -168,46 +167,37 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
 export async function addDefaultSchemas() {
   for (const schema of config.defaultSchemas.modelCards) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const existingSchema = await SchemaModel.findOne({ id: schema.id })
-    if (!existingSchema) {
-      const modelSchema = new Schema({
-        ...schema,
-        kind: SchemaKind.Model,
-        active: true,
-        hidden: false,
-      })
-      await Schema.deleteOne({ id: schema.id })
-      await modelSchema.save()
-    }
+    const modelSchema = new Schema({
+      ...schema,
+      kind: SchemaKind.Model,
+      active: true,
+      hidden: false,
+    })
+    await Schema.deleteOne({ id: schema.id })
+    await modelSchema.save()
   }
 
   for (const schema of config.defaultSchemas.dataCards) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const existingSchema = await SchemaModel.findOne({ id: schema.id })
-    if (!existingSchema) {
-      const dataCardSchema = new Schema({
-        ...schema,
-        kind: SchemaKind.DataCard,
-        active: true,
-        hidden: false,
-      })
-      await Schema.deleteOne({ id: schema.id })
-      await dataCardSchema.save()
-    }
+    const dataCardSchema = new Schema({
+      ...schema,
+      kind: SchemaKind.DataCard,
+      active: true,
+      hidden: false,
+    })
+    await Schema.deleteOne({ id: schema.id })
+    await dataCardSchema.save()
   }
 
   for (const schema of config.defaultSchemas.accessRequests) {
     log.info({ name: schema.name, reference: schema.id }, `Ensuring schema ${schema.id} exists`)
-    const existingSchema = await SchemaModel.findOne({ id: schema.id })
-    if (!existingSchema) {
-      const modelSchema = new Schema({
-        ...schema,
-        kind: SchemaKind.AccessRequest,
-        active: true,
-        hidden: false,
-      })
-      await Schema.deleteOne({ id: schema.id })
-      await modelSchema.save()
-    }
+    const modelSchema = new Schema({
+      ...schema,
+      kind: SchemaKind.AccessRequest,
+      active: true,
+      hidden: false,
+    })
+    await Schema.deleteOne({ id: schema.id })
+    await modelSchema.save()
   }
 }

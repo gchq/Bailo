@@ -207,8 +207,8 @@ export interface SchemaInterface {
   hidden: boolean
   kind: SchemaKindKeys
   meta: unknown
+  jsonSchema: unknown
   uiSchema: unknown
-  schema: unknown
   reviewRoles: string[]
   createdAt: Date
   updatedAt: Date
@@ -236,6 +236,7 @@ export interface SystemRole {
   shortName: string
   kind?: RoleKindKeys
   description?: string
+  systemRole?: SystemRolesKeys
 }
 
 export const SchemaKindLabel = {
@@ -642,3 +643,12 @@ export const SystemRoles = {
 } as const
 
 export type SystemRolesKeys = (typeof SystemRoles)[keyof typeof SystemRoles]
+
+export interface QuestionMigration {
+  // id is only used in the UI for uniqueness
+  id: string
+  kind: string
+  sourcePath: string
+  targetPath?: string
+  propertyType: string
+}
