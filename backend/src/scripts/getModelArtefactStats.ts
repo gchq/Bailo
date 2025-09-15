@@ -90,7 +90,7 @@ async function script() {
     }
     log.info('File size stats', fileStats)
   } else {
-    log.warn('No image size data collected from registry')
+    log.warn('No File size data collected from mongodb')
   }
   // number of Files per Release (Releases with Files only)
   if (fileSizesArray.length > 0) {
