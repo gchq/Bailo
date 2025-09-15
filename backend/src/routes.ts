@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser'
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -84,6 +85,7 @@ import config from './utils/config.js'
 export const server = express()
 
 server.use('/api/v2', requestId)
+server.use('/api/v2', bodyParser.json())
 server.use('/api/v2', expressLogger)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
