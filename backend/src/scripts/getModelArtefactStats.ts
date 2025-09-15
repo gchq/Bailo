@@ -1,16 +1,53 @@
+/**
+ * Get the following statistics:
+ *    Number of Models;
+ *    Number of Models with any Releases, and number of Models with no Releases;
+ *    Number of Releases with any Files, and number of Releases with no Files;
+ *    For all Files, the mean, median, standard deviation, minimum, maximum, 5th percentile, 10th percentile, 25th percentile, 75th percentile, 90th percentile and 95th percentile of the `size` across all Files;
+ *    For Releases with Files, the mean, median, standard deviation, minimum, maximum, 5th percentile, 10th percentile, 25th percentile, 75th percentile, 90th percentile and 95th percentile of the number of Files per Release;
+ *    For Releases with Files, the mean, median, standard deviation, minimum, maximum, 5th percentile, 10th percentile, 25th percentile, 75th percentile, 90th percentile and 95th percentile of the total (summed) `size` of all Files in the Release;
+ *    Number of Releases with any Images, and number of Releases with no Images;
+ *    For all Images, the mean, median, standard deviation, minimum, maximum, 5th percentile, 10th percentile, 25th percentile, 75th percentile, 90th percentile and 95th percentile of the `size` across all Images;
+ *    For Releases with Images, the mean, median, standard deviation, minimum, maximum, 5th percentile, 10th percentile, 25th percentile, 75th percentile, 90th percentile and 95th percentile of the number of Images per Release;
+ *    For Releases with Images, the mean, median, standard deviation, minimum, maximum, 5th percentile, 10th percentile, 25th percentile, 75th percentile, 90th percentile and 95th percentile of the total (summed) `size` of all Images in the Release;
+ */
+import prettyBytes from 'pretty-bytes'
+
 import FileModel from '../models/File.js'
 import ModelModel, { EntryKind } from '../models/Model.js'
 import ReleaseModel from '../models/Release.js'
 import { getAccessToken } from '../routes/v1/registryAuth.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
+import { joinDistributionPackageName } from '../services/registry.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
+function calculateAverages(values: number[]) {
+  const mean = values.reduce((a, b) => a + b, 0) / values.length
+  const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length
+  const stdDev = Math.sqrt(variance)
+  return { mean, stdDev, variance }
+}
+
+function percentile(values: number[], p: number, average: boolean = true) {
+  if (!values.length) {
+    return 0
+  }
+  const sorted = [...values].sort((a, b) => a - b)
+  const idx = (p / 100) * (sorted.length - 1)
+  const lower = Math.floor(idx)
+  const upper = Math.ceil(idx)
+  if (lower === upper || !average) {
+    return sorted[lower]
+  }
+  return sorted[lower] + (sorted[upper] - sorted[lower]) * (idx - lower)
+}
+
+// npm run script -- getModelArtefactStats
 async function script() {
   // setup
   await connectToMongoose()
-
   const registry = config.registry.connection.internal
   const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', class: '', name: 'catalog', actions: ['*'] }])
   const authorisation = `Bearer ${token}`
@@ -19,58 +56,59 @@ async function script() {
   })
 
   // main functionality
-  const modelsWithReleasesAndFiles = await ModelModel.aggregate([
-    { $match: { kind: EntryKind.Model } },
-    {
-      $lookup: {
-        from: 'v2_releases',
-        localField: 'id',
-        foreignField: 'modelId',
-        as: 'releases',
-      },
-    },
-    {
-      $lookup: {
-        from: 'v2_files',
-        localField: 'releases.fileIds',
-        foreignField: '_id',
-        as: 'files',
-      },
-    },
-    {
-      $addFields: {
-        releasesWithFilesCount: {
-          $size: {
-            $filter: {
-              input: '$releases',
-              as: 'release',
-              cond: { $gt: [{ $size: '$$release.fileIds' }, 0] },
-            },
-          },
-        },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        modelsWithReleasesWithFiles: {
-          $sum: { $cond: [{ $gt: ['$releasesWithFilesCount', 0] }, 1, 0] },
-        },
-        modelsWithReleasesNoFiles: {
-          $sum: {
-            $cond: [{ $and: [{ $gt: [{ $size: '$releases' }, 0] }, { $eq: ['$releasesWithFilesCount', 0] }] }, 1, 0],
-          },
-        },
-        modelsWithNoReleases: {
-          $sum: { $cond: [{ $eq: [{ $size: '$releases' }, 0] }, 1, 0] },
-        },
-      },
-    },
-  ])
-  log.info('Found models with releases with Files:', { ...(({ _id, ...all }) => all)(modelsWithReleasesAndFiles[0]) })
 
-  const filesPerReleaseStats = await ReleaseModel.aggregate([
-    { $match: { fileIds: { $exists: true, $ne: [] } } }, // Releases with Files
+  // Number of Models
+  const numModels = await ModelModel.countDocuments({ kind: EntryKind.Model })
+  // Models with any/no Releases
+  const modelsWithReleases = await ReleaseModel.distinct('modelId')
+  const numModelsWithReleases = modelsWithReleases.length
+  const numModelsWithoutReleases = numModels - numModelsWithReleases
+  // Releases with any/no Files
+  const numReleasesWithFiles = await ReleaseModel.countDocuments({ fileIds: { $exists: true, $ne: [] } })
+  const totalReleases = await ReleaseModel.countDocuments()
+  const numReleasesWithoutFiles = totalReleases - numReleasesWithFiles
+  // File size statistics
+  const fileSizes = await FileModel.find({}, { size: 1, _id: 0 }).lean()
+  const fileSizesArray = fileSizes.map((f) => f.size || 0)
+  const fileZ = calculateAverages(fileSizesArray)
+  const fileStats = {
+    min: prettyBytes(Math.min(...fileSizesArray)),
+    max: prettyBytes(Math.max(...fileSizesArray)),
+    p5: prettyBytes(percentile(fileSizesArray, 5)),
+    p10: prettyBytes(percentile(fileSizesArray, 10)),
+    p25: prettyBytes(percentile(fileSizesArray, 25)),
+    p75: prettyBytes(percentile(fileSizesArray, 75)),
+    p90: prettyBytes(percentile(fileSizesArray, 90)),
+    p95: prettyBytes(percentile(fileSizesArray, 95)),
+    mean: prettyBytes(fileZ.mean),
+    median: prettyBytes(percentile(fileSizesArray, 50)),
+    stdDev: prettyBytes(fileZ.stdDev),
+    variance: `${prettyBytes(fileZ.variance)}^2`,
+  }
+  // number of Files per Release (Releases with Files only)
+  const releasesWithFileCounts = await ReleaseModel.aggregate([
+    { $match: { fileIds: { $exists: true, $ne: [] } } },
+    { $project: { fileCount: { $size: '$fileIds' } } },
+  ])
+  const fileCountsArray = releasesWithFileCounts.map((r) => r.fileCount)
+  const fileCountZ = calculateAverages(fileCountsArray)
+  const fileCountStats = {
+    min: Math.min(...fileCountsArray),
+    max: Math.max(...fileCountsArray),
+    p5: percentile(fileCountsArray, 5),
+    p10: percentile(fileCountsArray, 10),
+    p25: percentile(fileCountsArray, 25),
+    p75: percentile(fileCountsArray, 75),
+    p90: percentile(fileCountsArray, 90),
+    p95: percentile(fileCountsArray, 95),
+    mean: fileCountZ.mean,
+    median: percentile(fileCountsArray, 50),
+    stdDev: fileCountZ.stdDev,
+    variance: fileCountZ.variance,
+  }
+  // total File size per Release
+  const releaseFileSizesAgg = await ReleaseModel.aggregate([
+    { $match: { fileIds: { $exists: true, $ne: [] } } },
     {
       $lookup: {
         from: 'v2_files',
@@ -80,171 +118,180 @@ async function script() {
       },
     },
     {
-      $addFields: {
-        fileCount: { $size: '$files' },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        filesPerRelease: { $push: '$fileCount' },
-      },
-    },
-    {
       $project: {
-        _id: 0,
-        distribution: '$filesPerRelease',
+        totalSize: { $sum: '$files.size' },
       },
     },
   ])
-  log.info('Found Files per release:', { distribution: filesPerReleaseStats[0]?.distribution })
-
-  const fileSizeDistribution = await FileModel.aggregate([
-    {
-      $match: {
-        size: { $exists: true, $ne: null },
-      },
-    },
-    {
-      $bucket: {
-        groupBy: '$size',
-        boundaries: Array.from({ length: 7 }, (_, i) => 1024 ** i), // Boundaries in bytes
-        default: 'Other',
-        output: {
-          count: { $sum: 1 },
-        },
-      },
-    },
-  ])
-  log.info('File size distribution:', fileSizeDistribution)
-
-  const stats = await Promise.all(
-    Object.entries({
-      totalModels: ModelModel.countDocuments({ kind: EntryKind.Model }),
-      totalReleases: ReleaseModel.countDocuments({}),
-      totalFiles: FileModel.countDocuments({}),
-      releasesWithFiles: ReleaseModel.aggregate([
-        { $match: { fileIds: { $exists: true, $ne: [] } } },
-        { $lookup: { from: 'v2_files', localField: 'fileIds', foreignField: '_id', as: 'files' } },
-        {
-          $group: {
-            _id: null,
-            totalFileSize: { $sum: { $sum: '$files.size' } },
-            fileCount: { $sum: { $size: '$files' } },
-          },
-        },
-      ]),
-      fileSizesDistribution: FileModel.aggregate([
-        {
-          $group: {
-            _id: null,
-            minSize: { $min: '$size' },
-            maxSize: { $max: '$size' },
-            avgSize: { $avg: '$size' },
-            totalSize: { $sum: '$size' },
-          },
-        },
-      ]),
-    }).map(async ([k, v]) => [k, await v]),
-  ).then(Object.fromEntries)
-  log.info('Summary File stats:', stats)
-
-  // Get the catalog of repositories
-  const catalogResponse = await fetch(`${registry}/v2/_catalog`, {
-    headers: {
-      Authorization: authorisation,
-    },
-    dispatcher: agent,
-  })
-  log.debug({ catalogResponse })
-  const catalog = (await catalogResponse.json()) as any
-  const repositories = catalog.repositories // Array of repository names
-
-  const releasesWithImages = await ReleaseModel.aggregate([
-    {
-      $project: {
-        _id: 1,
-        images: { $size: '$images' },
-      },
-    },
-    {
-      $match: { images: { $gt: 0 } }, // Only releases with images
-    },
-    {
-      $group: {
-        _id: null,
-        count: { $sum: 1 },
-      },
-    },
-  ])
-  log.info('Found models with releases with Files:', {
-    totalRepositories: repositories.length,
-    releasesWithImagesCount: releasesWithImages.length,
-  })
-
-  const imagesPerReleaseStats = await ReleaseModel.aggregate([
-    { $match: { images: { $exists: true, $ne: [] } } }, // Only releases with images
-    {
-      $addFields: {
-        imageCount: { $size: '$images' },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        imageCounts: { $push: '$imageCount' },
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        distribution: '$imageCounts',
-      },
-    },
-  ])
-  log.info('Found Images per release:', { distribution: imagesPerReleaseStats[0]?.distribution })
-
-  const allImageSizes: any[] = []
-  for (const repo of repositories) {
-    const repositoryToken = await getAccessToken({ dn: 'user' }, [
-      { type: 'repository', class: '', name: repo, actions: ['*'] },
-    ])
-    const repositoryAuthorisation = `Bearer ${repositoryToken}`
-
-    const repoTagsResponse = await fetch(`${registry}/v2/${repo}/tags/list`, {
-      headers: {
-        Authorization: repositoryAuthorisation,
-      },
-      dispatcher: agent,
-    })
-    const repoTags = (await repoTagsResponse.json()) as any
-
-    if (Array.isArray(repoTags.tags)) {
-      for (const tag of repoTags.tags) {
-        const imageManifestResponse = await fetch(`${registry}/v2/${repo}/manifests/${tag}`, {
-          headers: {
-            Authorization: repositoryAuthorisation,
-          },
-          dispatcher: agent,
-        })
-        const imageManifest = (await imageManifestResponse.json()) as any
-        // Extract size from the manifest
-        if (Array.isArray(imageManifest.layers)) {
-          imageManifest.layers.forEach((layer) => allImageSizes.push(layer.size))
-        }
-      }
-    }
+  const totalSizesArray = releaseFileSizesAgg.map((r) => r.totalSize || 0)
+  const totalSizeZ = calculateAverages(totalSizesArray)
+  const totalSizeStats = {
+    min: prettyBytes(Math.min(...totalSizesArray)),
+    max: prettyBytes(Math.max(...totalSizesArray)),
+    p5: prettyBytes(percentile(totalSizesArray, 5)),
+    p10: prettyBytes(percentile(totalSizesArray, 10)),
+    p25: prettyBytes(percentile(totalSizesArray, 25)),
+    p75: prettyBytes(percentile(totalSizesArray, 75)),
+    p90: prettyBytes(percentile(totalSizesArray, 90)),
+    p95: prettyBytes(percentile(totalSizesArray, 95)),
+    mean: prettyBytes(totalSizeZ.mean),
+    median: prettyBytes(percentile(totalSizesArray, 50)),
+    stdDev: prettyBytes(totalSizeZ.stdDev),
+    variance: `${prettyBytes(totalSizeZ.variance)}^2`,
   }
-  log.info('Image size distribution:', allImageSizes)
+  // results
+  log.info('Model stats', { numModels, numModelsWithReleases, numModelsWithoutReleases })
+  log.info('File Release stats', { totalReleases, numReleasesWithFiles, numReleasesWithoutFiles })
+  log.info('File size stats', fileStats)
+  log.info('Files per release stats', fileCountStats)
+  log.info('Total file size per release stats', totalSizeStats)
 
-  const totalImageSize = allImageSizes.reduce((a, b) => a + b, 0)
-  log.info('Summary Image stats: ', {
-    minSize: Math.min(...allImageSizes),
-    maxSize: Math.max(...allImageSizes),
-    avgSize: totalImageSize / allImageSizes.length || 0,
-    totalSize: totalImageSize,
-    imageCount: allImageSizes.length,
+  // Releases with any/no Images
+  const numReleasesWithImages = await ReleaseModel.countDocuments({
+    images: { $exists: true, $ne: [] },
   })
+  const numReleasesWithoutImages = totalReleases - numReleasesWithImages
+
+  log.info('Image release stats', {
+    totalReleases,
+    numReleasesWithImages,
+    numReleasesWithoutImages,
+  })
+
+  const releasesWithImages = await ReleaseModel.find(
+    { images: { $exists: true, $ne: [] } },
+    { _id: 1, images: 1 },
+  ).lean()
+
+  const imagesPerRelease: Record<string, number[]> = {}
+  const releaseImageNames: Record<string, string[]> = {}
+
+  for (const rel of releasesWithImages) {
+    const releaseId = rel._id.toString()
+    imagesPerRelease[releaseId] = []
+    releaseImageNames[releaseId] = (rel.images || []).map((i) =>
+      joinDistributionPackageName({ domain: i.repository, path: i.name, tag: i.tag }),
+    )
+  }
+
+  // fetch all repository names from the registry
+  const catalog = (await fetch(`${registry}/v2/_catalog`, {
+    headers: { Authorization: authorisation },
+    dispatcher: agent,
+  }).then((res) => res.json())) as { repositories: string[] }
+
+  const imageSizesArray: number[] = []
+
+  // iterate over all repositories in the catalog
+  await Promise.all(
+    catalog.repositories.map(async (repositoryName) => {
+      const repositoryToken = await getAccessToken({ dn: 'user' }, [
+        { type: 'repository', class: '', name: repositoryName, actions: ['*'] },
+      ])
+      const repositoryAuthorisation = `Bearer ${repositoryToken}`
+
+      const tagsList = (await fetch(`${registry}/v2/${repositoryName}/tags/list`, {
+        headers: { Authorization: repositoryAuthorisation },
+        dispatcher: agent,
+      }).then((res) => res.json())) as { name: string; tags: string[] }
+
+      if (!tagsList.tags) return // no tags = skip
+
+      // 5️⃣ Process each tag
+      await Promise.all(
+        tagsList.tags.map(async (tag) => {
+          // Pull manifest
+          const manifest = (await fetch(`${registry}/v2/${repositoryName}/manifests/${tag}`, {
+            headers: {
+              Authorization: repositoryAuthorisation,
+              Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+            },
+            dispatcher: agent,
+          }).then((res) => res.json())) as { layers?: { size: number }[] }
+
+          if (!manifest.layers) return
+
+          // Calculate total image size for this image (sum of layer sizes)
+          const totalImageSize = manifest.layers.reduce((sum, layer) => sum + (layer.size || 0), 0)
+
+          imageSizesArray.push(totalImageSize)
+
+          // Match to releases by checking repository:tag or repository name
+          const imageKeyWithTag = `${repositoryName}:${tag}`.toLowerCase()
+          const imageKeyNoTag = repositoryName.toLowerCase()
+
+          for (const [releaseId, imgNames] of Object.entries(releaseImageNames)) {
+            if (imgNames.includes(imageKeyWithTag) || imgNames.includes(imageKeyNoTag)) {
+              imagesPerRelease[releaseId].push(totalImageSize)
+            }
+          }
+        }),
+      )
+    }),
+  )
+
+  // Image size statistics
+  if (imageSizesArray.length > 0) {
+    const imgZ = calculateAverages(imageSizesArray)
+    const imageStats = {
+      min: prettyBytes(Math.min(...imageSizesArray)),
+      max: prettyBytes(Math.max(...imageSizesArray)),
+      p5: prettyBytes(percentile(imageSizesArray, 5)),
+      p10: prettyBytes(percentile(imageSizesArray, 10)),
+      p25: prettyBytes(percentile(imageSizesArray, 25)),
+      p75: prettyBytes(percentile(imageSizesArray, 75)),
+      p90: prettyBytes(percentile(imageSizesArray, 90)),
+      p95: prettyBytes(percentile(imageSizesArray, 95)),
+      mean: prettyBytes(imgZ.mean),
+      median: prettyBytes(percentile(imageSizesArray, 50, false)),
+      stdDev: prettyBytes(imgZ.stdDev),
+      variance: `${prettyBytes(imgZ.variance)}^2`,
+    }
+    log.info('Image size stats (all images)', imageStats)
+  } else {
+    log.warn('No image size data collected from registry')
+  }
+  // number of Images per Release (Releases with Images only)
+  const imageCountsArray = Object.values(imagesPerRelease).map((imgs) => imgs.length)
+  if (imageCountsArray.length > 0) {
+    const imgCountZ = calculateAverages(imageCountsArray)
+    const imageCountStats = {
+      min: Math.min(...imageCountsArray),
+      max: Math.max(...imageCountsArray),
+      p5: percentile(imageCountsArray, 5),
+      p10: percentile(imageCountsArray, 10),
+      p25: percentile(imageCountsArray, 25),
+      p75: percentile(imageCountsArray, 75),
+      p90: percentile(imageCountsArray, 90),
+      p95: percentile(imageCountsArray, 95),
+      mean: imgCountZ.mean,
+      median: percentile(imageCountsArray, 50, false),
+      stdDev: imgCountZ.stdDev,
+      variance: imgCountZ.variance,
+    }
+    log.info('Images per release stats', imageCountStats)
+  }
+
+  // total Image size per Release
+  const totalImageSizesArray = Object.values(imagesPerRelease).map((imgs) => imgs.reduce((sum, s) => sum + s, 0))
+  if (totalImageSizesArray.length > 0) {
+    const totalImgSizeZ = calculateAverages(totalImageSizesArray)
+    const totalImageSizeStats = {
+      min: prettyBytes(Math.min(...totalImageSizesArray)),
+      max: prettyBytes(Math.max(...totalImageSizesArray)),
+      p5: prettyBytes(percentile(totalImageSizesArray, 5)),
+      p10: prettyBytes(percentile(totalImageSizesArray, 10)),
+      p25: prettyBytes(percentile(totalImageSizesArray, 25)),
+      p75: prettyBytes(percentile(totalImageSizesArray, 75)),
+      p90: prettyBytes(percentile(totalImageSizesArray, 90)),
+      p95: prettyBytes(percentile(totalImageSizesArray, 95)),
+      mean: prettyBytes(totalImgSizeZ.mean),
+      median: prettyBytes(percentile(totalImageSizesArray, 50, false)),
+      stdDev: prettyBytes(totalImgSizeZ.stdDev),
+      variance: `${prettyBytes(totalImgSizeZ.variance)}^2`,
+    }
+    log.info('Total image size per release stats', totalImageSizeStats)
+  }
 
   // cleanup
   setTimeout(disconnectFromMongoose, 50)
