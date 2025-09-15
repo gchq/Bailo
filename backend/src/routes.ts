@@ -66,7 +66,7 @@ import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewR
 import { postReviewRole } from './routes/v2/review/postReviewRole.js'
 import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
 import { getSchema } from './routes/v2/schema/getSchema.js'
-import { getSchemaMigrations } from './routes/v2/schema/getSchemaMigration.js'
+import { getSchemaMigrations } from './routes/v2/schema/getSchemaMigrations.js'
 import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'

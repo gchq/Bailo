@@ -10,7 +10,7 @@ import { registerPath, schemaMigrationInterfaceSchema } from '../../../services/
 import { parse } from '../../../utils/validate.js'
 
 export const getSchemaMigrationsSchema = z.object({
-  params: z.object({
+  query: z.object({
     name: z.string().optional().openapi({ example: 'My Schema Migration' }),
   }),
 })
@@ -43,9 +43,9 @@ export const getSchemaMigrations = [
   bodyParser.json(),
   async (req: Request, res: Response<GetSchemaMigrationsResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewSchemaMigrations
-    const { params } = parse(req, getSchemaMigrationsSchema)
+    const { query } = parse(req, getSchemaMigrationsSchema)
 
-    const schemaMigrations = await searchSchemaMigrations(params.name)
+    const schemaMigrations = await searchSchemaMigrations(query.name)
     await audit.onViewSchemaMigrations(req, schemaMigrations)
 
     res.json({
