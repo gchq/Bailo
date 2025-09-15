@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -59,7 +58,6 @@ interface PutModelCardResponse {
 }
 
 export const putModelCard = [
-  bodyParser.json(),
   async (req: Request, res: Response<PutModelCardResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateModelCard
     const {

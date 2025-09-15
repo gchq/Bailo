@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -43,7 +42,6 @@ interface GetInferenceService {
 }
 
 export const getInference = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetInferenceService>): Promise<void> => {
     req.audit = AuditInfo.ViewInference
     const {
