@@ -57,94 +57,101 @@ async function script() {
 
   // main functionality
 
-  // Number of Models
+  // number of Models
   const numModels = await ModelModel.countDocuments({ kind: EntryKind.Model })
   // Models with any/no Releases
   const modelsWithReleases = await ReleaseModel.distinct('modelId')
   const numModelsWithReleases = modelsWithReleases.length
   const numModelsWithoutReleases = numModels - numModelsWithReleases
+  log.info('Model stats', { numModels, numModelsWithReleases, numModelsWithoutReleases })
   // Releases with any/no Files
   const numReleasesWithFiles = await ReleaseModel.countDocuments({ fileIds: { $exists: true, $ne: [] } })
   const totalReleases = await ReleaseModel.countDocuments()
   const numReleasesWithoutFiles = totalReleases - numReleasesWithFiles
+  log.info('File Release stats', { totalReleases, numReleasesWithFiles, numReleasesWithoutFiles })
   // File size statistics
   const fileSizes = await FileModel.find({}, { size: 1, _id: 0 }).lean()
   const fileSizesArray = fileSizes.map((f) => f.size || 0)
-  const fileZ = calculateAverages(fileSizesArray)
-  const fileStats = {
-    min: prettyBytes(Math.min(...fileSizesArray)),
-    max: prettyBytes(Math.max(...fileSizesArray)),
-    p5: prettyBytes(percentile(fileSizesArray, 5)),
-    p10: prettyBytes(percentile(fileSizesArray, 10)),
-    p25: prettyBytes(percentile(fileSizesArray, 25)),
-    p75: prettyBytes(percentile(fileSizesArray, 75)),
-    p90: prettyBytes(percentile(fileSizesArray, 90)),
-    p95: prettyBytes(percentile(fileSizesArray, 95)),
-    mean: prettyBytes(fileZ.mean),
-    median: prettyBytes(percentile(fileSizesArray, 50)),
-    stdDev: prettyBytes(fileZ.stdDev),
-    variance: `${prettyBytes(fileZ.variance)}^2`,
+  if (fileSizesArray.length > 0) {
+    const fileZ = calculateAverages(fileSizesArray)
+    const fileStats = {
+      min: prettyBytes(Math.min(...fileSizesArray)),
+      max: prettyBytes(Math.max(...fileSizesArray)),
+      p5: prettyBytes(percentile(fileSizesArray, 5)),
+      p10: prettyBytes(percentile(fileSizesArray, 10)),
+      p25: prettyBytes(percentile(fileSizesArray, 25)),
+      p75: prettyBytes(percentile(fileSizesArray, 75)),
+      p90: prettyBytes(percentile(fileSizesArray, 90)),
+      p95: prettyBytes(percentile(fileSizesArray, 95)),
+      mean: prettyBytes(fileZ.mean),
+      median: prettyBytes(percentile(fileSizesArray, 50)),
+      stdDev: prettyBytes(fileZ.stdDev),
+      variance: `${prettyBytes(fileZ.variance)}^2`,
+    }
+    log.info('File size stats', fileStats)
+  } else {
+    log.warn('No image size data collected from registry')
   }
   // number of Files per Release (Releases with Files only)
-  const releasesWithFileCounts = await ReleaseModel.aggregate([
-    { $match: { fileIds: { $exists: true, $ne: [] } } },
-    { $project: { fileCount: { $size: '$fileIds' } } },
-  ])
-  const fileCountsArray = releasesWithFileCounts.map((r) => r.fileCount)
-  const fileCountZ = calculateAverages(fileCountsArray)
-  const fileCountStats = {
-    min: Math.min(...fileCountsArray),
-    max: Math.max(...fileCountsArray),
-    p5: percentile(fileCountsArray, 5),
-    p10: percentile(fileCountsArray, 10),
-    p25: percentile(fileCountsArray, 25),
-    p75: percentile(fileCountsArray, 75),
-    p90: percentile(fileCountsArray, 90),
-    p95: percentile(fileCountsArray, 95),
-    mean: fileCountZ.mean,
-    median: percentile(fileCountsArray, 50),
-    stdDev: fileCountZ.stdDev,
-    variance: fileCountZ.variance,
+  if (fileSizesArray.length > 0) {
+    const releasesWithFileCounts = await ReleaseModel.aggregate([
+      { $match: { fileIds: { $exists: true, $ne: [] } } },
+      { $project: { fileCount: { $size: '$fileIds' } } },
+    ])
+    const fileCountsArray = releasesWithFileCounts.map((r) => r.fileCount)
+    const fileCountZ = calculateAverages(fileCountsArray)
+    const fileCountStats = {
+      min: Math.min(...fileCountsArray),
+      max: Math.max(...fileCountsArray),
+      p5: percentile(fileCountsArray, 5),
+      p10: percentile(fileCountsArray, 10),
+      p25: percentile(fileCountsArray, 25),
+      p75: percentile(fileCountsArray, 75),
+      p90: percentile(fileCountsArray, 90),
+      p95: percentile(fileCountsArray, 95),
+      mean: fileCountZ.mean,
+      median: percentile(fileCountsArray, 50),
+      stdDev: fileCountZ.stdDev,
+      variance: fileCountZ.variance,
+    }
+    log.info('Files per release stats', fileCountStats)
   }
   // total File size per Release
-  const releaseFileSizesAgg = await ReleaseModel.aggregate([
-    { $match: { fileIds: { $exists: true, $ne: [] } } },
-    {
-      $lookup: {
-        from: 'v2_files',
-        localField: 'fileIds',
-        foreignField: '_id',
-        as: 'files',
+  if (fileSizesArray.length > 0) {
+    const releaseFileSizesAgg = await ReleaseModel.aggregate([
+      { $match: { fileIds: { $exists: true, $ne: [] } } },
+      {
+        $lookup: {
+          from: 'v2_files',
+          localField: 'fileIds',
+          foreignField: '_id',
+          as: 'files',
+        },
       },
-    },
-    {
-      $project: {
-        totalSize: { $sum: '$files.size' },
+      {
+        $project: {
+          totalSize: { $sum: '$files.size' },
+        },
       },
-    },
-  ])
-  const totalSizesArray = releaseFileSizesAgg.map((r) => r.totalSize || 0)
-  const totalSizeZ = calculateAverages(totalSizesArray)
-  const totalSizeStats = {
-    min: prettyBytes(Math.min(...totalSizesArray)),
-    max: prettyBytes(Math.max(...totalSizesArray)),
-    p5: prettyBytes(percentile(totalSizesArray, 5)),
-    p10: prettyBytes(percentile(totalSizesArray, 10)),
-    p25: prettyBytes(percentile(totalSizesArray, 25)),
-    p75: prettyBytes(percentile(totalSizesArray, 75)),
-    p90: prettyBytes(percentile(totalSizesArray, 90)),
-    p95: prettyBytes(percentile(totalSizesArray, 95)),
-    mean: prettyBytes(totalSizeZ.mean),
-    median: prettyBytes(percentile(totalSizesArray, 50)),
-    stdDev: prettyBytes(totalSizeZ.stdDev),
-    variance: `${prettyBytes(totalSizeZ.variance)}^2`,
+    ])
+    const totalSizesArray = releaseFileSizesAgg.map((r) => r.totalSize || 0)
+    const totalSizeZ = calculateAverages(totalSizesArray)
+    const totalSizeStats = {
+      min: prettyBytes(Math.min(...totalSizesArray)),
+      max: prettyBytes(Math.max(...totalSizesArray)),
+      p5: prettyBytes(percentile(totalSizesArray, 5)),
+      p10: prettyBytes(percentile(totalSizesArray, 10)),
+      p25: prettyBytes(percentile(totalSizesArray, 25)),
+      p75: prettyBytes(percentile(totalSizesArray, 75)),
+      p90: prettyBytes(percentile(totalSizesArray, 90)),
+      p95: prettyBytes(percentile(totalSizesArray, 95)),
+      mean: prettyBytes(totalSizeZ.mean),
+      median: prettyBytes(percentile(totalSizesArray, 50)),
+      stdDev: prettyBytes(totalSizeZ.stdDev),
+      variance: `${prettyBytes(totalSizeZ.variance)}^2`,
+    }
+    log.info('Total file size per release stats', totalSizeStats)
   }
-  // results
-  log.info('Model stats', { numModels, numModelsWithReleases, numModelsWithoutReleases })
-  log.info('File Release stats', { totalReleases, numReleasesWithFiles, numReleasesWithoutFiles })
-  log.info('File size stats', fileStats)
-  log.info('Files per release stats', fileCountStats)
-  log.info('Total file size per release stats', totalSizeStats)
 
   // Releases with any/no Images
   const numReleasesWithImages = await ReleaseModel.countDocuments({
