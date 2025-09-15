@@ -27,6 +27,10 @@ export async function createSchemaMigrationPlan(
   }
 }
 
-export async function searchSchemaMigrations() {
-  return await SchemaMigration.find()
+export async function searchSchemaMigrations(name?: string) {
+  if (!name) {
+    return await SchemaMigration.find()
+  } else {
+    return await SchemaMigration.find({ name })
+  }
 }

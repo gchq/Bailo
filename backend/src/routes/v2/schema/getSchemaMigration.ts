@@ -7,8 +7,13 @@ import audit from '../../../connectors/audit/index.js'
 import { SchemaMigrationInterface } from '../../../models/SchemaMigration.js'
 import { searchSchemaMigrations } from '../../../services/schemaMigration.js'
 import { registerPath, schemaMigrationInterfaceSchema } from '../../../services/specification.js'
+import { parse } from '../../../utils/validate.js'
 
-export const getSchemaMigrationsSchema = z.object({})
+export const getSchemaMigrationsSchema = z.object({
+  params: z.object({
+    name: z.string(),
+  }),
+})
 
 registerPath({
   method: 'get',
@@ -38,8 +43,9 @@ export const getSchemaMigrations = [
   bodyParser.json(),
   async (req: Request, res: Response<GetSchemaMigrationsResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewSchemaMigrations
+    const { params } = parse(req, getSchemaMigrationsSchema)
 
-    const schemaMigrations = await searchSchemaMigrations()
+    const schemaMigrations = await searchSchemaMigrations(params.name)
     await audit.onViewSchemaMigrations(req, schemaMigrations)
 
     res.json({

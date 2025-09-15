@@ -42,7 +42,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            schema: postSchemaMigrationSchema,
+            schemaMigration: postSchemaMigrationSchema,
           }),
         },
       },

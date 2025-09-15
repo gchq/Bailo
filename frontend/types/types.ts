@@ -657,3 +657,13 @@ export interface CombinedSchema {
   schema: SchemaInterface
   splitSchema: SplitSchemaNoRender
 }
+
+export interface SchemaMigrationInterface {
+  name: string
+  description?: string
+  questionMigrationss: QuestionMigration[]
+  sourceSchema: string
+  targetSchema: string
+  createdAt: string
+  updatedAt: string
+}
