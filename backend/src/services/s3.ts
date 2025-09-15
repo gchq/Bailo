@@ -15,14 +15,19 @@ export async function uploadToS3(
   const s3LogData = { metadata, ...logData }
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug(logData, 'Using signatures. Uploading to temporary S3 location first.')
-    uploadToTemporaryS3Location(fileName, stream, s3LogData).then(() =>
-      copyToExportBucketWithSignatures(fileName, s3LogData, metadata).catch((error) =>
-        log.error({ error, ...logData }, 'Failed to upload export to export location with signatures'),
-      ),
-    )
+    try {
+      await uploadToTemporaryS3Location(fileName, stream, s3LogData)
+      await copyToExportBucketWithSignatures(fileName, s3LogData, metadata)
+    } catch (error) {
+      log.error({ error, ...logData }, 'Failed to upload export to export location with signatures')
+    }
   } else {
     log.debug(logData, 'Signatures not enabled. Uploading to export S3 location.')
-    uploadToExportS3Location(fileName, stream, s3LogData, metadata)
+    try {
+      await uploadToExportS3Location(fileName, stream, s3LogData, metadata)
+    } catch (error) {
+      log.error({ error, ...logData }, 'Failed to upload export to export location without signatures')
+    }
   }
 }
 
