@@ -1,4 +1,4 @@
-import { Box, Button, Container, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Divider, Stack, Typography } from '@mui/material'
 import { useGetSchemaMigrations } from 'actions/schemaMigration'
 import { memoize } from 'lodash-es'
 import Link from 'next/link'
@@ -11,7 +11,7 @@ export default function SchemaMigrationList() {
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations()
 
   const SchemaMigrationList = memoize(({ data, index }) => (
-    <Stack sx={{ p: 2 }}>
+    <Stack sx={{ p: 2 }} spacing={1}>
       <Stack direction='row' spacing={2} justifyContent='space-between'>
         <Typography fontWeight='bold' color='primary'>
           {data[index].name}
@@ -20,7 +20,16 @@ export default function SchemaMigrationList() {
           Created on <span style={{ fontWeight: 'bold' }}>{formatDateString(data[index].createdAt)}</span>
         </Typography>
       </Stack>
-      <Typography variant='caption'>{`Plan for migrating ${data[index].sourceSchema} to ${data[index].targetSchema}`}</Typography>
+      <Typography variant='caption'>
+        Plan for migrating <span style={{ fontWeight: 'bold' }}>{data[index].sourceSchema}</span> to{' '}
+        <span style={{ fontWeight: 'bold' }}>{data[index].targetSchema}</span>
+      </Typography>
+      {data[index].description && (
+        <>
+          <Divider flexItem />
+          <Typography>{data[index].description}</Typography>
+        </>
+      )}
     </Stack>
   ))
 

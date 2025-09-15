@@ -196,7 +196,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     if (!res.ok) {
       setSubmitErrorText(await getErrorMessage(res))
     } else {
-      router.push('/schemas/list')
+      router.push('/schemas/list?tab=migrations')
     }
   }
 

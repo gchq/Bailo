@@ -11,7 +11,7 @@ import { parse } from '../../../utils/validate.js'
 
 export const getSchemaMigrationsSchema = z.object({
   params: z.object({
-    name: z.string(),
+    name: z.string().optional().openapi({ example: 'My Schema Migration' }),
   }),
 })
 
