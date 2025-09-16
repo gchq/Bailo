@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -33,7 +32,6 @@ interface GetCurrentUserResponses {
 }
 
 export const getCurrentUser = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetCurrentUserResponses>): Promise<void> => {
     const _ = parse(req, getCurrentUserSchema)
     const isAdmin = await authentication.hasRole(req.user, Roles.Admin)
