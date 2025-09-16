@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -40,12 +39,13 @@ interface GetSchemaMigrationsResponse {
 }
 
 export const getSchemaMigrations = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetSchemaMigrationsResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewSchemaMigrations
-    const { query } = parse(req, getSchemaMigrationsSchema)
+    const {
+      query: { name },
+    } = parse(req, getSchemaMigrationsSchema)
 
-    const schemaMigrations = await searchSchemaMigrations(query.name)
+    const schemaMigrations = await searchSchemaMigrations(name)
     await audit.onViewSchemaMigrations(req, schemaMigrations)
 
     res.json({

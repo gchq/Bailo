@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -55,7 +54,6 @@ interface PostSchemaMigrationPlanResponse {
 }
 
 export const postSchemaMigration = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostSchemaMigrationPlanResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateSchemaMigration
     const { body } = parse(req, postSchemaMigrationSchema)

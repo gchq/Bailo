@@ -15,7 +15,7 @@ export async function createSchemaMigrationPlan(
   if (!auth.success) {
     throw Forbidden(auth.info, {
       userDn: user.dn,
-      schemaMigrationNameId: schemaMigrationDoc.name,
+      schemaMigrationName: schemaMigrationDoc.name,
     })
   }
 
@@ -28,9 +28,5 @@ export async function createSchemaMigrationPlan(
 }
 
 export async function searchSchemaMigrations(name?: string) {
-  if (!name) {
-    return await SchemaMigration.find()
-  } else {
-    return await SchemaMigration.find({ name })
-  }
+  return await SchemaMigration.find({ ...(name && { name }) })
 }
