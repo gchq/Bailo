@@ -284,6 +284,8 @@ export async function uploadLayerMonolithic(
       method: 'PUT',
       body: blob,
       duplex: 'half',
+      window: null,
+      redirect: 'error',
     },
     {
       'content-length': size,

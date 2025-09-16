@@ -208,6 +208,7 @@ exports[`clients > registry > uploadLayerMonolithic > success 1`] = `
         "content-type": "application/octet-stream",
       },
       "method": "PUT",
+      "redirect": "error",
       "signal": AbortSignal {
         Symbol(kEvents): Map {},
         Symbol(events.maxEventTargetListeners): 0,
@@ -217,6 +218,7 @@ exports[`clients > registry > uploadLayerMonolithic > success 1`] = `
         Symbol(kReason): undefined,
         Symbol(kComposite): false,
       },
+      "window": null,
     },
   ],
 ]
