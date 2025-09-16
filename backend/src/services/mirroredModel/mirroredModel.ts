@@ -31,10 +31,10 @@ import {
   splitDistributionPackageName,
 } from '../registry.js'
 import { getAllFileIds, getReleasesForExport } from '../release.js'
-import { uploadToS3 } from '../s3.js'
 import { importDocuments } from './importers/documentImporter.js'
 import { importModelFile } from './importers/fileImporter.js'
 import { importCompressedRegistryImage } from './importers/imageImporter.js'
+import { uploadToS3 } from './s3.js'
 
 export async function exportModel(
   user: UserInterface,
