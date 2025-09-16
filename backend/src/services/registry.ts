@@ -85,7 +85,7 @@ export async function listModelImages(user: UserInterface, modelId: string) {
     { type: 'registry', class: '', name: 'catalog', actions: ['*'] },
   ])
   const repos = await listModelRepos(registryToken, modelId)
-  const versions = await Promise.all(
+  return await Promise.all(
     repos.map(async (repo) => {
       const [namespace, image] = repo.split(/\/(.*)/s)
       const repositoryToken = await getAccessToken({ dn: user.dn }, [
@@ -94,8 +94,6 @@ export async function listModelImages(user: UserInterface, modelId: string) {
       return { repository: namespace, name: image, tags: await listImageTags(repositoryToken, { namespace, image }) }
     }),
   )
-
-  return versions
 }
 
 export async function getImageManifest(user: UserInterface, modelId: string, imageName: string, imageTag: string) {
@@ -106,9 +104,7 @@ export async function getImageManifest(user: UserInterface, modelId: string, ima
   ])
 
   // get which layers exist for the model
-  const manifest = await getImageTagManifest(repositoryToken, { namespace: modelId, image: imageName }, imageTag)
-
-  return manifest
+  return await getImageTagManifest(repositoryToken, { namespace: modelId, image: imageName }, imageTag)
 }
 
 export async function getImageBlob(user: UserInterface, modelId: string, imageName: string, digest: string) {
@@ -117,9 +113,8 @@ export async function getImageBlob(user: UserInterface, modelId: string, imageNa
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['pull'] },
   ])
-  const responseBody = await getRegistryLayerStream(repositoryToken, { namespace: modelId, image: imageName }, digest)
 
-  return responseBody
+  return await getRegistryLayerStream(repositoryToken, { namespace: modelId, image: imageName }, digest)
 }
 
 export async function doesImageLayerExist(user: UserInterface, modelId: string, imageName: string, digest: string) {
@@ -128,9 +123,7 @@ export async function doesImageLayerExist(user: UserInterface, modelId: string, 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['pull'] },
   ])
-  const responseBody = await doesLayerExist(repositoryToken, { namespace: modelId, image: imageName }, digest)
-
-  return responseBody
+  return await doesLayerExist(repositoryToken, { namespace: modelId, image: imageName }, digest)
 }
 
 export async function initialiseImageUpload(user: UserInterface, modelId: string, imageName: string) {
@@ -139,9 +132,7 @@ export async function initialiseImageUpload(user: UserInterface, modelId: string
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
   ])
-  const responseBody = await initialiseUpload(repositoryToken, { namespace: modelId, image: imageName })
-
-  return responseBody
+  return await initialiseUpload(repositoryToken, { namespace: modelId, image: imageName })
 }
 
 export async function putImageBlob(
@@ -158,9 +149,7 @@ export async function putImageBlob(
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
   ])
-  const responseBody = await uploadLayerMonolithic(repositoryToken, uploadURL, digest, blob, size)
-
-  return responseBody
+  return await uploadLayerMonolithic(repositoryToken, uploadURL, digest, blob, size)
 }
 
 export async function putImageManifest(
@@ -176,13 +165,11 @@ export async function putImageManifest(
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
     { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
   ])
-  const responseBody = await putManifest(
+  return await putManifest(
     repositoryToken,
     { namespace: modelId, image: imageName },
     imageTag,
     manifestText,
     contentType,
   )
-
-  return responseBody
 }
