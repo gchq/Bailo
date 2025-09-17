@@ -71,7 +71,8 @@ async function registryRequest(
 
   if (returnRawBody) {
     stream = res.body as any
-  } else if (contentType.includes('application/json')) {
+  } else if (contentType.endsWith('json')) {
+    // e.g. 'application/json', 'application/vnd.docker.distribution.manifest.v2+json'
     try {
       body = await res.json()
     } catch (err) {
