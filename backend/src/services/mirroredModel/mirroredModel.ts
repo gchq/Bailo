@@ -303,16 +303,21 @@ export async function exportCompressedRegistryImage(
       },
       'Fetching image layer',
     )
-    const responseBody = await getImageBlob(user, modelId, imageName, layerDigest)
+    const { stream: responseStream, abort } = await getImageBlob(user, modelId, imageName, layerDigest)
 
-    // pipe the body to tar using streams
-    const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
-    const packerEntry = tarStream.entry({ name: entryName, size: layer.size })
-    // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
-    await pipeStreamToTarEntry(Readable.fromWeb(responseBody.body), packerEntry, {
-      layerDigest,
-      mediaType: layer.mediaType,
-    })
+    try {
+      // pipe the body to tar using streams
+      const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
+      const packerEntry = tarStream.entry({ name: entryName, size: layer.size })
+      // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
+      await pipeStreamToTarEntry(Readable.fromWeb(responseStream as ReadableStream), packerEntry, {
+        layerDigest,
+        mediaType: layer.mediaType,
+      })
+    } catch (err) {
+      abort()
+      throw err
+    }
   }
   // no more data to write
   tarStream.finalize()
