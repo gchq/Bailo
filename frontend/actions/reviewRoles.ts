@@ -37,6 +37,20 @@ export async function postReviewRole(reviewRole: ReviewRolesFormData) {
   })
 }
 
+export type UpdateReviewRolesParams = Pick<
+  ReviewRoleInterface,
+  'shortName' | 'name' | 'description' | 'defaultEntities' | 'systemRole'
+>
+
+export function putReviewRole(reviewRole: UpdateReviewRolesParams) {
+  const { shortName, ...reviewRoleNoShort } = { ...reviewRole }
+  return fetch(`/api/v2/review/role/${shortName}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(reviewRoleNoShort),
+  })
+}
+
 export async function deleteReviewRole(reviewRoleShortName: string) {
   return fetch(`/api/v2/review/role/${reviewRoleShortName}`, {
     method: 'delete',

@@ -29,7 +29,7 @@ export const postReviewRoleSchema = z.object({
 registerPath({
   method: 'post',
   path: '/api/v2/review/role',
-  tags: ['review'],
+  tags: ['review role'],
   description:
     'Used for creating a new review role. Note - dynamic review roles are currently WIP and might not be fully functional.',
   schema: postReviewRoleSchema,
