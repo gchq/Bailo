@@ -68,6 +68,7 @@ const reviewRoleModelMocks = vi.hoisted(() => {
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.findByIdAndUpdate = vi.fn(() => obj)
+  obj.toObject = vi.fn(() => obj)
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -160,7 +161,7 @@ test('that we update review roles if they are changed on a schema', async () => 
       save: vi.fn(),
     },
   ])
-  reviewRoleModelMocks.find.mockResolvedValueOnce([{ shortName: testReviewer, name: testReviewer }])
+  reviewRoleModelMocks.find.mockResolvedValueOnce([{ shortName: testReviewer, name: testReviewer, toObject: () => {} }])
 
   const updatedSchema = await updateSchema({} as any, 'schema-123', diff)
 

@@ -11,6 +11,7 @@ import config from '../utils/config.js'
 import { Forbidden, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
+import { addReviewsForNewRole } from './review.js'
 
 export interface DefaultSchema {
   name: string
@@ -122,6 +123,9 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
       const updatedCollaborators: CollaboratorEntry[] = [...model.collaborators]
       for (const reviewRoleDiff of diff.reviewRoles) {
         const reviewRole = roleMap.get(reviewRoleDiff)
+        if (reviewRole) {
+          addReviewsForNewRole(user, reviewRole.toObject(), model)
+        }
         if (reviewRole && reviewRole.defaultEntities) {
           for (const defaultEntity of reviewRole.defaultEntities) {
             const existingUser = model.collaborators.find((collaborator) => collaborator.entity === defaultEntity)
