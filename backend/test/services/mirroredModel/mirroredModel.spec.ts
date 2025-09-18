@@ -164,7 +164,7 @@ const fileMocks = vi.hoisted(() => ({
 vi.mock('../../../src/services/file.js', () => fileMocks)
 
 const registryMocks = vi.hoisted(() => ({
-  getImageBlob: vi.fn(() => ({ body: ReadableStream.from('test') })),
+  getImageBlob: vi.fn(() => ({ stream: ReadableStream.from('test'), abort: vi.fn() })),
   getImageManifest: vi.fn(),
   joinDistributionPackageName: vi.fn(() => 'localhost:8080/imageName:tag'),
   splitDistributionPackageName: vi.fn(() => ({
@@ -677,9 +677,9 @@ describe('services > mirroredModel', () => {
 
     test('export compressed registry image', async () => {
       registryMocks.getImageBlob
-        .mockResolvedValueOnce({ body: ReadableStream.from('test') })
-        .mockResolvedValueOnce({ body: ReadableStream.from('x'.repeat(256)) })
-        .mockResolvedValueOnce({ body: ReadableStream.from('a'.repeat(512)) })
+        .mockResolvedValueOnce({ stream: ReadableStream.from('test'), abort: vi.fn() })
+        .mockResolvedValueOnce({ stream: ReadableStream.from('x'.repeat(256)), abort: vi.fn() })
+        .mockResolvedValueOnce({ stream: ReadableStream.from('a'.repeat(512)), abort: vi.fn() })
       registryMocks.getImageManifest.mockResolvedValueOnce({
         schemaVersion: 2,
         mediaType: 'application/vnd.docker.distribution.manifest.v2+json',

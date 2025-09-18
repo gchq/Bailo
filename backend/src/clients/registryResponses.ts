@@ -6,10 +6,6 @@ export type RegistryErrorResponse = {
 
 export type ErrorInfo = { code: string; message: string; detail: string }
 
-export type StreamResponse = Response & {
-  body: ReadableStream
-}
-
 type ListImageTagResponse = { tags: Array<string> }
 
 type ListModelReposResponse = { repositories: Array<string> }
@@ -59,16 +55,6 @@ export function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorRes
       detail: 'object',
     }) &&
     resp['errors'].every((e) => Array.isArray(e['detail']))
-  )
-}
-
-export function isStreamResponse(resp: unknown): resp is StreamResponse {
-  return (
-    typeof resp === 'object' &&
-    resp !== null &&
-    resp instanceof Response &&
-    resp['body'] !== null &&
-    resp['body'] instanceof ReadableStream
   )
 }
 

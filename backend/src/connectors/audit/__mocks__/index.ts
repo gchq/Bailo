@@ -37,6 +37,9 @@ const audit = {
   onDeleteSchema: vi.fn(),
   onSearchSchemas: vi.fn(),
 
+  onViewSchemaMigrations: vi.fn(),
+  onCreateSchemaMigration: vi.fn(),
+
   onCreateInference: vi.fn(),
   onViewInference: vi.fn(),
   onUpdateInference: vi.fn(),
