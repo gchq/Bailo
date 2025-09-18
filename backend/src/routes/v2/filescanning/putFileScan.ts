@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -41,7 +40,6 @@ interface PutFileScanResponse {
 }
 
 export const putFileScan = [
-  bodyParser.json(),
   async (req: Request, res: Response<PutFileScanResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateFile
     const {

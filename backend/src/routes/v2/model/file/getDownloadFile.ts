@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import contentDisposition from 'content-disposition'
 import { Request, Response } from 'express'
 import stream from 'stream'
@@ -88,7 +87,6 @@ interface GetDownloadFileResponse {
 }
 
 export const getDownloadFile = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetDownloadFileResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewFile
     const { params } = parse(req, getDownloadFileSchema)

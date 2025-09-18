@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -44,7 +43,6 @@ interface PostRequestCommentResponse {
 }
 
 export const postAccessRequestComment = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostRequestCommentResponse>): Promise<void> => {
     req.audit = AuditInfo.UpdateAccessRequest
     const {
