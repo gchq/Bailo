@@ -1,13 +1,15 @@
 import { FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { FormContextType } from '@rjsf/utils'
 import { ChangeEvent, Fragment } from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 interface CustomTextInputProps {
   label?: string
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
-  formContext?: any
+  formContext?: FormContextType
   value: boolean
   onChange: (newValue: boolean) => void
   InputProps?: any
@@ -15,13 +17,15 @@ interface CustomTextInputProps {
   rawErrors?: string[]
 }
 
-export default function CheckboxInput(props: CustomTextInputProps) {
-  const { onChange, value, label, formContext, id, required } = props
-
+export default function CheckboxInput({ onChange, value, label, formContext, id, required }: CustomTextInputProps) {
   const theme = useTheme()
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value === 'true')
+  }
+
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
   if (!formContext.editMode && value == undefined) {

@@ -7,6 +7,7 @@ import PageWithTabs from 'src/common/PageWithTabs'
 import Title from 'src/common/Title'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import SchemaCompare from 'src/schemas/SchemaCompare'
+import SchemaMigrationSelector from 'src/schemas/SchemaMigrationSelector'
 import SchemaTab from 'src/schemas/SchemaTab'
 
 export default function SchemasPage() {
@@ -44,6 +45,7 @@ function Schemas() {
     () => [
       { title: 'Schemas', path: 'overview', view: <SchemaTab /> },
       { title: 'Compare', path: 'compare', view: <SchemaCompare /> },
+      { title: 'Migrations', path: 'migrations', view: <SchemaMigrationSelector /> },
     ],
     [],
   )
