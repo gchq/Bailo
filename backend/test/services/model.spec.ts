@@ -84,6 +84,10 @@ const modelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
 
+vi.mock('../../src/utils/database.ts', async () => ({
+  useTransactions: vi.fn(() => false),
+}))
+
 const reviewRoleModelMocks = vi.hoisted(() => {
   const obj: any = {}
 
