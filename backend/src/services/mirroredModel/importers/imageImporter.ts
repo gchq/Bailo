@@ -103,9 +103,7 @@ export async function importCompressedRegistryImage(
             next(err)
           }
         } else {
-          throw InternalError('Cannot parse compressed image: unrecognised contents.', {
-            importId,
-          })
+          throw InternalError('Cannot parse compressed image: unrecognised contents.', { importId })
         }
       } else {
         // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
