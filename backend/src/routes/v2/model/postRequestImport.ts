@@ -8,15 +8,22 @@ import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postRequestImportFromS3Schema = z.object({
-  body: z.object({
-    payloadUrl: z.string(),
-    mirroredModelId: z.string(),
-    sourceModelId: z.string(),
-    exporter: z.string(),
-    importKind: z.nativeEnum(ImportKind),
-    filePath: z.string().optional(),
-    distributionPackageName: z.string().optional(),
-  }),
+  body: z
+    .object({
+      payloadUrl: z.string(),
+      mirroredModelId: z.string(),
+      sourceModelId: z.string(),
+      exporter: z.string(),
+      importKind: z.nativeEnum(ImportKind),
+      filePath: z.string().optional(),
+      distributionPackageName: z.string().optional(),
+    })
+    .refine((data) => data.importKind !== ImportKind.Image || !!data.distributionPackageName, {
+      message: 'distributionPackageName is required for Image import',
+    })
+    .refine((data) => data.importKind !== ImportKind.File || !!data.filePath, {
+      message: 'filePath is required for File import',
+    }),
 })
 
 registerPath({
