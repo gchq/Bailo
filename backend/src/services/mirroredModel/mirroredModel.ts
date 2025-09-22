@@ -397,6 +397,7 @@ export async function uploadReleaseImages(
   model: ModelDoc,
   release: ReleaseDoc,
   mirroredModelId: string,
+  queue: PQueue,
 ) {
   if (Array.isArray(release.images)) {
     for (const image of release.images) {
@@ -413,36 +414,41 @@ export async function uploadReleaseImages(
         path: image.name.replace(modelIdRe, mirroredModelId),
         tag: image.tag,
       })
-      try {
-        await exportCompressedRegistryImage(
-          user,
-          model.id,
-          distributionPackageName,
-          `${image._id.toString()}.tar.gz`,
-          {
-            exporter: user.dn,
-            sourceModelId: model.id,
-            mirroredModelId,
-            importKind: ImportKind.Image,
+      queue
+        .add(() =>
+          exportCompressedRegistryImage(
+            user,
+            model.id,
             distributionPackageName,
-          },
-          imageLogData,
+            `${image._id.toString()}.tar.gz`,
+            {
+              exporter: user.dn,
+              sourceModelId: model.id,
+              mirroredModelId,
+              importKind: ImportKind.Image,
+              distributionPackageName,
+            },
+            imageLogData,
+          ),
         )
-      } catch (error: unknown) {
-        log.error(
-          {
-            error,
-            modelId: model.id,
-            releaseSemver: release.semver,
-            distributionPackageName,
-            mirroredModelId,
-          },
-          'Error when uploading Release Image to S3.',
+        .catch((error) =>
+          log.error(
+            {
+              error,
+              modelId: model.id,
+              releaseSemver: release.semver,
+              distributionPackageName,
+              mirroredModelId,
+            },
+            'Error when uploading Release Image to S3.',
+          ),
         )
-      }
     }
+    log.debug(
+      { user, modelId: model.id, semver: release.semver },
+      'Finished adding release to tarball file of releases.',
+    )
   }
-  log.debug({ user, modelId: model.id, semver: release.semver }, 'Finished adding release to tarball file of releases.')
 }
 
 async function addReleaseToTarball(
@@ -480,7 +486,7 @@ async function addReleaseToTarball(
   log.debug({ semver: release.semver }, 'Adding files to be exported to queue')
   await uploadReleaseFiles(user, model, release, files, mirroredModelId, queue)
   log.debug({ semver: release.semver }, 'Finished adding files to be exported to queue')
-  uploadReleaseImages(user, model, release, mirroredModelId)
+  await uploadReleaseImages(user, model, release, mirroredModelId, queue)
 }
 
 async function addFilesToTarball(files: FileWithScanResultsInterface[], tarStream: Pack, modelId: string) {

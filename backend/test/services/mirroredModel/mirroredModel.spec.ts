@@ -623,11 +623,13 @@ describe('services > mirroredModel', () => {
           ],
         } as any,
         'mirroredModelId',
+        queueMock as unknown as PQueue,
       )
 
       expect(registryMocks.getImageManifest).toBeCalledTimes(2)
       expect(tarballMocks.createTarGzStreams).toBeCalledTimes(2)
       expect(s3Mocks.uploadToS3).toBeCalledTimes(2)
+      expect(queueMock.add).toBeCalledTimes(2)
     })
 
     test('error', async () => {
@@ -647,6 +649,7 @@ describe('services > mirroredModel', () => {
           ],
         } as any,
         'mirroredModelId',
+        queueMock as unknown as PQueue,
       )
 
       expect(logMock.error).toHaveBeenCalledWith(
