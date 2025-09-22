@@ -648,3 +648,18 @@ export interface QuestionMigration {
   targetPath?: string
   propertyType: string
 }
+
+export interface CombinedSchema {
+  schema: SchemaInterface
+  splitSchema: SplitSchemaNoRender
+}
+
+export interface SchemaMigrationInterface {
+  name: string
+  description?: string
+  questionMigrations: QuestionMigration[]
+  sourceSchema: string
+  targetSchema: string
+  createdAt: string
+  updatedAt: string
+}

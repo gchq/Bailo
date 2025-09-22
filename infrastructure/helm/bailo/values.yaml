@@ -158,7 +158,7 @@ mongodb:
     enabled: false
   image:
     registry: docker.io
-    repository: bitnami/mongodb
+    repository: bitnamilegacy/mongodb
     tag: 8.0.13
 
 # MinIO Dependencies
@@ -195,7 +195,7 @@ minio:
   partSizeMB: 64
   image:
     registry: docker.io
-    repository: bitnami/minio
+    repository: bitnamilegacy/minio
     tag: 2025.7.23
     debug: true
 

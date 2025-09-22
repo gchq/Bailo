@@ -154,7 +154,7 @@ const fileMocks = vi.hoisted(() => ({
   downloadFile: vi.fn(() => ({ Body: 'test' })),
   getFilesByIds: vi.fn(() => [
     {
-      _id: 'fileId',
+      _id: { toString: vi.fn(() => 'fileId') },
       avScan: [{ ArtefactKind: ArtefactKind.File, fileId: 'fileId', state: 'complete', isInfected: false }],
       toJSON: vi.fn(),
     },
@@ -164,7 +164,7 @@ const fileMocks = vi.hoisted(() => ({
 vi.mock('../../../src/services/file.js', () => fileMocks)
 
 const registryMocks = vi.hoisted(() => ({
-  getImageBlob: vi.fn(() => ({ body: ReadableStream.from('test') })),
+  getImageBlob: vi.fn(() => ({ stream: ReadableStream.from('test'), abort: vi.fn() })),
   getImageManifest: vi.fn(),
   joinDistributionPackageName: vi.fn(() => 'localhost:8080/imageName:tag'),
   splitDistributionPackageName: vi.fn(() => ({
@@ -198,17 +198,17 @@ describe('services > mirroredModel', () => {
 
       const promise = exportModel({} as UserInterface, 'modelId', true)
 
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalledTimes(0)
       await expect(promise).rejects.toThrowError('Exporting models has not been enabled.')
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
     })
 
     test('missing disclaimer agreement', async () => {
       const promise = exportModel({} as UserInterface, 'modelId', false)
 
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalledTimes(0)
       await expect(promise).rejects.toThrowError(
         /^You must agree to the disclaimer agreement before being able to export a model./,
       )
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
     })
 
     test('missing mirrored model ID', async () => {
@@ -220,8 +220,8 @@ describe('services > mirroredModel', () => {
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalledTimes(0)
       await expect(promise).rejects.toThrowError(/^The 'Destination Model ID' has not been set on this model./)
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
     })
 
     test('missing mirrored model card schemaId', async () => {
@@ -233,10 +233,10 @@ describe('services > mirroredModel', () => {
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalledTimes(0)
       await expect(promise).rejects.toThrowError(
         /^You must select a schema for your model before you can start the export process./,
       )
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
     })
 
     test('bad authorisation', async () => {
@@ -248,14 +248,14 @@ describe('services > mirroredModel', () => {
 
       const promise = exportModel({} as UserInterface, 'modelId', true)
 
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalledTimes(0)
       await expect(promise).rejects.toThrowError(/^You do not have permission/)
+      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
     })
 
     test('successful export if no files exist', async () => {
       releaseMocks.getAllFileIds.mockResolvedValueOnce([])
       modelMocks.getModelCardRevisions.mockResolvedValueOnce([])
-      fileMocks.getFilesByIds.mockResolvedValueOnce([])
+      fileMocks.getFilesByIds.mockResolvedValue([])
 
       await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
@@ -309,15 +309,13 @@ describe('services > mirroredModel', () => {
     test('skip export contains incomplete file scan', async () => {
       fileMocks.getFilesByIds.mockReturnValueOnce([
         {
-          _id: '123',
           avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '123', state: 'inProgress' }],
           toJSON: vi.fn(),
         } as any,
         {
-          _id: '321',
           avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '321', state: 'complete', isInfected: false }],
           toJSON: vi.fn(),
-        },
+        } as any,
       ])
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
@@ -344,15 +342,13 @@ describe('services > mirroredModel', () => {
     test('export contains infected file', async () => {
       fileMocks.getFilesByIds.mockReturnValueOnce([
         {
-          _id: '123',
           avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '123', state: 'complete', isInfected: true }],
           toJSON: vi.fn(),
-        },
+        } as any,
         {
-          _id: '321',
           avScan: [{ ArtefactKind: ArtefactKind.File, fileId: '321', state: 'complete', isInfected: false }],
           toJSON: vi.fn(),
-        },
+        } as any,
       ])
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
@@ -681,9 +677,9 @@ describe('services > mirroredModel', () => {
 
     test('export compressed registry image', async () => {
       registryMocks.getImageBlob
-        .mockResolvedValueOnce({ body: ReadableStream.from('test') })
-        .mockResolvedValueOnce({ body: ReadableStream.from('x'.repeat(256)) })
-        .mockResolvedValueOnce({ body: ReadableStream.from('a'.repeat(512)) })
+        .mockResolvedValueOnce({ stream: ReadableStream.from('test'), abort: vi.fn() })
+        .mockResolvedValueOnce({ stream: ReadableStream.from('x'.repeat(256)), abort: vi.fn() })
+        .mockResolvedValueOnce({ stream: ReadableStream.from('a'.repeat(512)), abort: vi.fn() })
       registryMocks.getImageManifest.mockResolvedValueOnce({
         schemaVersion: 2,
         mediaType: 'application/vnd.docker.distribution.manifest.v2+json',

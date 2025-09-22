@@ -10,7 +10,7 @@ describe('services > registry', () => {
 
     expect(splitDistributionPackageName('localhost:8080/name:tag')).toMatchSnapshot()
     expect(splitDistributionPackageName('clamav/clamav:1.4.2_base')).toMatchSnapshot()
-    expect(splitDistributionPackageName('bitnami/minio:2025.4.22')).toMatchSnapshot()
+    expect(splitDistributionPackageName('bitnamilegacy/minio:2025.4.22')).toMatchSnapshot()
     expect(splitDistributionPackageName('tarampampam/webhook-tester:latest')).toMatchSnapshot()
     expect(splitDistributionPackageName('marlonb/mailcrab:v1.5.0')).toMatchSnapshot()
     expect(splitDistributionPackageName('localhost:8080/export-4lvt8w/alpine:latest')).toMatchSnapshot()
@@ -37,7 +37,7 @@ describe('services > registry', () => {
     ).toMatchSnapshot()
     expect(
       splitDistributionPackageName(
-        'bitnami/minio@sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab',
+        'bitnamilegacy/minio@sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab',
       ),
     ).toMatchSnapshot()
     expect(
@@ -104,7 +104,7 @@ describe('services > registry', () => {
 
     expect(joinDistributionPackageName({ domain: 'localhost:8080', path: 'name', tag: 'tag' })).toMatchSnapshot()
     expect(joinDistributionPackageName({ domain: 'clamav', path: 'clamav', tag: '1.4.2_base' })).toMatchSnapshot()
-    expect(joinDistributionPackageName({ domain: 'bitnami', path: 'minio', tag: '2025.4.22' })).toMatchSnapshot()
+    expect(joinDistributionPackageName({ domain: 'bitnamilegacy', path: 'minio', tag: '2025.4.22' })).toMatchSnapshot()
     expect(
       joinDistributionPackageName({ domain: 'tarampampam', path: 'webhook-tester', tag: 'latest' }),
     ).toMatchSnapshot()
@@ -139,7 +139,7 @@ describe('services > registry', () => {
     ).toMatchSnapshot()
     expect(
       joinDistributionPackageName({
-        domain: 'bitnami',
+        domain: 'bitnamilegacy',
         path: 'minio',
         digest: 'sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab',
       }),
