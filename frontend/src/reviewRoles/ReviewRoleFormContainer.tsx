@@ -34,7 +34,7 @@ type ReviewRolesFormDataUnion = UpdateReviewRolesParams | ReviewRolesFormData
 type ReviewRoleFormContainerProps = {
   providedData: boolean
   formData?: ReviewRolesFormDataUnion
-  setFormData: (prevFormData: any) => void
+  setFormData: Dispatch<SetStateAction<ReviewRolesFormDataUnion>>
   setIsEdit?: (state: boolean) => void
   headingComponent: ReactElement
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void

@@ -294,16 +294,15 @@ export async function updateReviewRole(
 }
 
 export async function findReviewRole(user: UserInterface, shortName: string) {
-  const reviewRole = await ReviewRoleModel.findOne({ shortName: shortName })
-
-  if (!reviewRole) {
-    throw NotFound(`The requested review role was not found`, { shortName })
-  }
-
   const auth = await authorisation.reviewRole(user, shortName, ReviewRoleAction.View)
 
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, shortName })
+  }
+  const reviewRole = await ReviewRoleModel.findOne({ shortName: shortName })
+
+  if (!reviewRole) {
+    throw NotFound(`The requested review role was not found`, { shortName })
   }
 
   return reviewRole

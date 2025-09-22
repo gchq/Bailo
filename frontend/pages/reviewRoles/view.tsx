@@ -1,4 +1,4 @@
-import { Edit } from '@mui/icons-material'
+import Edit from '@mui/icons-material/Edit'
 import GroupsIcon from '@mui/icons-material/Groups'
 import PersonIcon from '@mui/icons-material/Person'
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
@@ -58,18 +58,17 @@ export default function ReviewRoles() {
   }, [reviewRoles, selectedRole])
 
   function removeExcessReviewRoleParams(reviewRole: ReviewRoleInterface): UpdateReviewRolesParams {
-    let updateForm: UpdateReviewRolesParams = { shortName: '', name: '' }
     if (reviewRole) {
-      updateForm = {
+      return {
         shortName: reviewRole.shortName,
         name: reviewRole.name,
         description: reviewRole.description,
         defaultEntities: reviewRole.defaultEntities,
         systemRole: reviewRole.systemRole,
       }
+    } else {
+      return { shortName: '', name: '' }
     }
-
-    return updateForm
   }
 
   const listRoles = useMemo(
@@ -78,10 +77,7 @@ export default function ReviewRoles() {
         <SimpleListItemButton
           selected={selectedRole === index}
           key={reviewRole._id}
-          onClick={() => {
-            setIsEdit(false)
-            setSelectedRole(index)
-          }}
+          onClick={() => setSelectedRole(index)}
           disabled={isEdit}
         >
           {reviewRole.name}
