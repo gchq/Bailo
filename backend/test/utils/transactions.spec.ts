@@ -12,12 +12,12 @@ const errorCallback = async (_: any) => {
 }
 
 const utilsDb = vi.hoisted(() => {
-  return { useTransactions: vi.fn() }
+  return { isTransactionsEnabled: vi.fn() }
 })
 
 vi.mock('../../src/utils/database.ts', () => {
   return {
-    useTransactions: utilsDb.useTransactions,
+    isTransactionsEnabled: utilsDb.isTransactionsEnabled,
   }
 })
 
@@ -27,12 +27,12 @@ describe('utils => transactions', () => {
     vi.spyOn(mongoose.Connection.prototype, 'transaction').mockImplementation(async function (fn) {
       return await fn({} as ClientSession)
     })
-    utilsDb.useTransactions.mockReturnValue(false)
+    utilsDb.isTransactionsEnabled.mockReturnValue(false)
   })
 
   afterEach(() => {
-    if (utilsDb.useTransactions.mockRestore) {
-      utilsDb.useTransactions.mockRestore()
+    if (utilsDb.isTransactionsEnabled.mockRestore) {
+      utilsDb.isTransactionsEnabled.mockRestore()
     }
     vi.restoreAllMocks()
   })
@@ -72,7 +72,7 @@ describe('utils => transactions', () => {
   })
 
   it('runs actions inside a transaction when enabled', async () => {
-    utilsDb.useTransactions.mockReturnValue(true)
+    utilsDb.isTransactionsEnabled.mockReturnValue(true)
     const results = await useTransaction([(_) => callback(true), (_) => callback(false), (_) => callback(undefined)])
     const [trueResult, falseResult, undefinedResult] = results
     expect(trueResult).toBe(true)
@@ -83,7 +83,7 @@ describe('utils => transactions', () => {
   })
 
   it('throws error when running actions inside a transaction', async () => {
-    utilsDb.useTransactions.mockReturnValue(true)
+    utilsDb.isTransactionsEnabled.mockReturnValue(true)
     await expect(
       useTransaction([
         (_) => callback(true),
