@@ -32,7 +32,7 @@ mlflow = [
     "mlflow-skinny[mlserver]==3.1.4"
 ]
 test = [
-    "black==25.1.0",
+    "black==25.9.0",
     "check-manifest==0.50",
     "pre-commit==4.3.0",
     "pylint==3.3.8",
