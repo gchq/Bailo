@@ -371,23 +371,36 @@ export async function uploadReleaseFiles(
   queue: PQueue,
 ) {
   for (const file of files) {
-    queue.add(async () =>
-      uploadToS3(
-        file.id,
-        (await downloadFile(user, file.id)).Body as stream.Readable,
-        {
-          exporter: user.dn,
-          sourceModelId: model.id,
-          mirroredModelId,
-          filePath: file.id,
-          importKind: ImportKind.File,
-        },
-        {
-          releaseId: release.id,
-          fileId: file.id,
-        },
-      ),
-    )
+    queue
+      .add(async () =>
+        uploadToS3(
+          file.id,
+          (await downloadFile(user, file.id)).Body as stream.Readable,
+          {
+            exporter: user.dn,
+            sourceModelId: model.id,
+            mirroredModelId,
+            filePath: file.id,
+            importKind: ImportKind.File,
+          },
+          {
+            releaseId: release.id,
+            fileId: file.id,
+          },
+        ),
+      )
+      .catch((error) =>
+        log.error(
+          {
+            error,
+            modelId: model.id,
+            releaseSemver: release.semver,
+            fileId: file.id,
+            mirroredModelId,
+          },
+          'Error when uploading Release File to S3.',
+        ),
+      )
     log.debug({ fileId: file.id, releaseId: release.id, modelId: model.id }, 'Added file to be exported to queue')
   }
 }
