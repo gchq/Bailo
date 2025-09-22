@@ -348,7 +348,7 @@ async function addReleasesToTarball(
   const semvers = releases.map((release) => release.semver)
   log.debug({ user, modelId: model.id, semvers }, 'Adding model releases to Tarball file.')
 
-  const queue = new PQueue({ concurrency: 1 })
+  const queue = new PQueue({ concurrency: config.modelMirror.export.concurrency })
   const errors: any[] = []
   // Using a .catch here to ensure all errors are returned, rather than just the first error.
   await Promise.all(
