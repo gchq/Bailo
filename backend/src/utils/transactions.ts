@@ -1,7 +1,7 @@
 import mongoose, { ClientSession } from 'mongoose'
 
 import log from '../services/log.js'
-import { useTransactions } from './database.js'
+import { isTransactionsEnabled } from './database.js'
 
 export interface TransactionCallback<T> {
   (session?: ClientSession): Promise<T>
@@ -39,7 +39,7 @@ const transactionsNotEnabled = 'Database is not in replica set mode, cannot use 
 export async function useTransaction<T extends any[]>(actions: {
   [K in keyof T]: TransactionCallback<T[K]>
 }): Promise<T> {
-  if (!useTransactions()) {
+  if (!isTransactionsEnabled()) {
     log.trace(transactionsNotEnabled)
     return execute(actions)
   } else {

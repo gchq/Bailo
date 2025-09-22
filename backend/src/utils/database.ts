@@ -77,6 +77,6 @@ export function isObjectId(value: unknown): value is Types.ObjectId {
  *
  * @returns true if configuration allows transactions, otherwise false
  */
-export function useTransactions(): boolean {
+export function isTransactionsEnabled(): boolean {
   return config.mongo.transactions
 }
