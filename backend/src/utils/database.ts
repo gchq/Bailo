@@ -71,3 +71,12 @@ export async function runMigrations() {
 export function isObjectId(value: unknown): value is Types.ObjectId {
   return value instanceof Types.ObjectId
 }
+
+/**
+ * Check if app configuration allows the use of transactions
+ *
+ * @returns true if configuration allows transactions, otherwise false
+ */
+export function isTransactionsEnabled(): boolean {
+  return config.mongo.transactions
+}

@@ -16,7 +16,7 @@ exports[`services > registry > joinDistributionPackageName > success 7`] = `"loc
 
 exports[`services > registry > joinDistributionPackageName > success 8`] = `"clamav/clamav:1.4.2_base"`;
 
-exports[`services > registry > joinDistributionPackageName > success 9`] = `"bitnami/minio:2025.4.22"`;
+exports[`services > registry > joinDistributionPackageName > success 9`] = `"bitnamilegacy/minio:2025.4.22"`;
 
 exports[`services > registry > joinDistributionPackageName > success 10`] = `"tarampampam/webhook-tester:latest"`;
 
@@ -32,7 +32,7 @@ exports[`services > registry > joinDistributionPackageName > success 15`] = `"lo
 
 exports[`services > registry > joinDistributionPackageName > success 16`] = `"clamav/clamav@sha256:e7d108f30ea8f16935dbd12e4b58665f1bc148ce3dd59028cf04088330216910"`;
 
-exports[`services > registry > joinDistributionPackageName > success 17`] = `"bitnami/minio@sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab"`;
+exports[`services > registry > joinDistributionPackageName > success 17`] = `"bitnamilegacy/minio@sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab"`;
 
 exports[`services > registry > joinDistributionPackageName > success 18`] = `"tarampampam/webhook-tester@sha256:958a70683cbfdc8b150207b3f3732d0087df1c1a260e8b2f9cf0ec77dbedead3"`;
 
@@ -86,7 +86,7 @@ exports[`services > registry > splitDistributionPackageName > success 5`] = `
 
 exports[`services > registry > splitDistributionPackageName > success 6`] = `
 {
-  "domain": "bitnami",
+  "domain": "bitnamilegacy",
   "path": "minio",
   "tag": "2025.4.22",
 }
@@ -175,7 +175,7 @@ exports[`services > registry > splitDistributionPackageName > success 16`] = `
 exports[`services > registry > splitDistributionPackageName > success 17`] = `
 {
   "digest": "sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab",
-  "domain": "bitnami",
+  "domain": "bitnamilegacy",
   "path": "minio",
 }
 `;

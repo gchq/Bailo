@@ -111,6 +111,7 @@ const config: PartialDeep<Config> = {
     uri: 'mongodb://localhost:27017/bailo?directConnection=true',
     user: undefined,
     pass: undefined,
+    transactions: false,
   },
   ui: {
     inference: {
