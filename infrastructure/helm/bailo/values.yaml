@@ -196,7 +196,7 @@ minio:
   image:
     registry: docker.io
     repository: bitnamilegacy/minio
-    tag: 2025.7.23
+    tag: 2025.12
     debug: true
 
 # Registry Dependencies
