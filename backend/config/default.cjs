@@ -43,6 +43,9 @@ module.exports = {
     // Authentication details
     user: undefined,
     pass: undefined,
+
+    // Whether to use transactions. Requires a replica set to be enabled
+    transactions: false,
   },
 
   registry: {
