@@ -77,14 +77,10 @@ export default function ReviewRoleFormContainer({
   }
 
   const handleSystemRoleChange = (event: SelectChangeEvent) => {
-    if (event.target.value === '') {
-      delete formData.systemRole
-    } else {
-      setFormData((prevFormData: ReviewRolesFormDataUnion) => ({
-        ...prevFormData,
-        systemRole: event.target.value.toLowerCase() as SystemRoleKeys,
-      }))
-    }
+    setFormData((prevFormData: ReviewRolesFormDataUnion) => ({
+      ...prevFormData,
+      systemRole: event.target.value.toLowerCase() as SystemRoleKeys,
+    }))
   }
 
   const handleDefaultEntitiesChange = useMemo(() => {

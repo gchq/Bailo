@@ -78,12 +78,16 @@ export default function ReviewRoles() {
         <SimpleListItemButton
           selected={selectedRole === index}
           key={reviewRole._id}
-          onClick={() => setSelectedRole(index)}
+          onClick={() => {
+            setIsEdit(false)
+            setSelectedRole(index)
+          }}
+          disabled={isEdit}
         >
           {reviewRole.name}
         </SimpleListItemButton>
       )),
-    [reviewRoles, selectedRole],
+    [isEdit, reviewRoles, selectedRole],
   )
 
   const schemasLength = useCallback(
@@ -162,6 +166,12 @@ export default function ReviewRoles() {
             <>
               {!isEdit ? (
                 <Stack spacing={2}>
+                  <Box>
+                    <Typography color='primary' fontWeight='bold'>
+                      Name
+                    </Typography>
+                    <Typography>{formData.name}</Typography>
+                  </Box>
                   <Box>
                     <Typography color='primary' fontWeight='bold'>
                       Description
@@ -304,13 +314,9 @@ export default function ReviewRoles() {
       {reviewRoles ? (
         <Paper sx={{ p: 4, my: 4 }}>
           {reviewRoles.length > 0 ? (
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={{ sm: 2 }}
-              divider={<Divider orientation='vertical' flexItem />}
-            >
-              <List sx={{ width: '200px' }}>{listRoles}</List>
-              <Container sx={{ my: 2 }}>{listRoleDescriptions}</Container>
+            <Stack direction={{ xs: 'column', sm: 'row' }} divider={<Divider orientation='vertical' flexItem />}>
+              <List>{listRoles}</List>
+              <Container sx={{ m: 2 }}>{listRoleDescriptions}</Container>
             </Stack>
           ) : (
             <EmptyBlob text='No review roles found. Press button in top-right to create new review role.' />
