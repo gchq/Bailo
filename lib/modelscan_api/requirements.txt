@@ -3,4 +3,4 @@ fastapi[standard-no-fastapi-cloud-cli]==0.116.1
 modelscan[tensorflow,h5py]==0.8.6
 pydantic_settings==2.10.1
 python-multipart==0.0.20
-uvicorn==0.35.0
+uvicorn==0.36.0
