@@ -43,6 +43,9 @@ module.exports = {
     // Authentication details
     user: undefined,
     pass: undefined,
+
+    // Whether to use transactions. Requires a replica set to be enabled
+    transactions: false,
   },
 
   registry: {
@@ -304,6 +307,7 @@ module.exports = {
 
   modelMirror: {
     export: {
+      concurrency: 5,
       maxSize: 100 * 1024 * 1024 * 1024,
       bucket: 'exports',
       kmsSignature: {

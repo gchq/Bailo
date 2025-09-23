@@ -183,7 +183,8 @@ data:
           },
           export: {
             enabled: {{ .Values.modelMirror.export.enabled }},
-            disclaimer: '{{ .Values.modelMirror.export.disclaimer }}'
+            disclaimer: '{{ .Values.modelMirror.export.disclaimer }}',
+            concurrency: '{{ .Values.modelMirror.export.concurrency }}'
           }
         },
 

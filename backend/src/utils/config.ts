@@ -107,6 +107,8 @@ export interface Config {
 
     user: string
     pass: string
+
+    transactions: boolean
   }
 
   registry: {
@@ -169,6 +171,7 @@ export interface Config {
 
   modelMirror: {
     export: {
+      concurrency: number
       maxSize: number
       bucket: string
       kmsSignature: {
