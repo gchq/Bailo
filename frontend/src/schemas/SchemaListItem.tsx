@@ -1,6 +1,7 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Button, Chip, ListItem, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
+import { useGetSchemas } from 'actions/schema'
 import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
@@ -16,7 +17,6 @@ interface SchemaListItemProps {
   onOpenMenuClick: (event, schemaId: string) => void
   onEditSchemaClick: (schemaId: string, partialSchema: Partial<SchemaInterface>) => void
   onDeleteSchemaClick: (schemaId: string) => void
-  mutateSchemas: () => void
 }
 export default function SchemaListItem({
   schema,
@@ -28,9 +28,14 @@ export default function SchemaListItem({
   onDeleteSchemaClick,
   onOpenMenuClick,
   onEditSchemaClick,
-  mutateSchemas,
 }: SchemaListItemProps) {
   const [reviewRoleSelectorIsOpen, setReviewRoleSelectorIsOpen] = useState(false)
+  const { mutateSchemas } = useGetSchemas('model')
+
+  const handleDialogClose = (isClosed: boolean) => {
+    mutateSchemas()
+    setReviewRoleSelectorIsOpen(isClosed)
+  }
 
   return (
     <ListItem divider={index < schemasLength - 1} key={schema.id}>
@@ -97,12 +102,7 @@ export default function SchemaListItem({
           <MenuItem onClick={() => onDeleteSchemaClick(schema.id)}>Delete</MenuItem>
         </Menu>
       </Stack>
-      <UpdateReviewRolesForSchemaDialog
-        open={reviewRoleSelectorIsOpen}
-        onClose={(value) => setReviewRoleSelectorIsOpen(value)}
-        schema={schema}
-        mutateSchemas={mutateSchemas}
-      />
+      <UpdateReviewRolesForSchemaDialog open={reviewRoleSelectorIsOpen} onClose={handleDialogClose} schema={schema} />
     </ListItem>
   )
 }

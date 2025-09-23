@@ -15,7 +15,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { patchSchema } from 'actions/schema'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -26,14 +26,12 @@ interface UpdateReviewRolesForSchemaDialogProps {
   open: boolean
   onClose: (value: boolean) => void
   schema: SchemaInterface
-  mutateSchemas: () => void
 }
 
 export default function UpdateReviewRolesForSchemaDialog({
   open,
   onClose,
   schema,
-  mutateSchemas,
 }: UpdateReviewRolesForSchemaDialogProps) {
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
 
@@ -42,6 +40,12 @@ export default function UpdateReviewRolesForSchemaDialog({
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
 
   const theme = useTheme()
+
+  useEffect(() => {
+    if (schema) {
+      setChecked(schema.reviewRoles)
+    }
+  }, [schema])
 
   const handleToggle = useCallback(
     (value: string) => () => {
@@ -59,8 +63,8 @@ export default function UpdateReviewRolesForSchemaDialog({
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
     } else {
-      mutateSchemas()
       handleOnClose()
+      setConfirmationDialogOpen(false)
     }
   }
 

@@ -71,14 +71,16 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>, schemaId: SchemaInterface['id']) => {
       setAnchorEl(event.currentTarget)
       setOpenMenuSchemaId(schemaId)
+      mutateSchemas()
     },
-    [],
+    [mutateSchemas],
   )
 
   const handleCloseMenu = useCallback(() => {
     setAnchorEl(null)
     setOpenMenuSchemaId(null)
-  }, [])
+    mutateSchemas()
+  }, [mutateSchemas])
 
   const handleEditSchema = useCallback(
     async (schemaId: SchemaInterface['id'], diff: Partial<SchemaInterface>) => {
@@ -133,20 +135,10 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
             onDeleteSchemaClick={handleDeleteSchema}
             onOpenMenuClick={handleOpenMenu}
             onEditSchemaClick={handleEditSchema}
-            mutateSchemas={mutateSchemas}
           />
         )
       }),
-    [
-      schemas,
-      anchorEl,
-      openMenuSchemaId,
-      handleCloseMenu,
-      handleDeleteSchema,
-      handleOpenMenu,
-      handleEditSchema,
-      mutateSchemas,
-    ],
+    [schemas, anchorEl, openMenuSchemaId, handleCloseMenu, handleDeleteSchema, handleOpenMenu, handleEditSchema],
   )
 
   const objectsToDeleteList = useMemo(() => {
