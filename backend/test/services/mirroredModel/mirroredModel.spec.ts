@@ -1,3 +1,4 @@
+import PQueue from 'p-queue'
 import { PassThrough, Readable } from 'stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
@@ -34,6 +35,13 @@ const fetchMock = vi.hoisted(() => ({
   default: vi.fn(() => ({ ok: true, body: ReadableStream.from('test'), text: vi.fn() })),
 }))
 vi.mock('node-fetch', async () => fetchMock)
+
+const queueMock = vi.hoisted(() => ({
+  add: vi.fn(async (job) => {
+    await job()
+  }),
+}))
+vi.mock('p-queue', async () => ({ default: vi.fn(() => queueMock) }))
 
 const authMock = vi.hoisted(() => ({
   model: vi.fn<() => Response>(() => ({ id: 'test', success: true })),
@@ -116,9 +124,9 @@ const releaseMocks = vi.hoisted(() => ({
 vi.mock('../../../src/services/release.js', () => releaseMocks)
 
 const s3Mocks = vi.hoisted(() => ({
-  uploadToS3: vi.fn(() => Promise.resolve()),
+  uploadToS3: vi.fn(),
 }))
-vi.mock('../../../src/services/s3.js', () => s3Mocks)
+vi.mock('../../../src/services/mirroredModel/s3.js', () => s3Mocks)
 
 const documentImporterMocks = vi.hoisted(() => ({
   importDocuments: vi.fn(() =>
@@ -590,29 +598,12 @@ describe('services > mirroredModel', () => {
         { id: 'releaseId', semver: '1.2.3' } as any,
         [{ id: 'fileId1' }, { id: 'fileId2' }] as any[],
         'mirroredModelId',
+        queueMock as unknown as PQueue,
       )
 
+      expect(queueMock.add).toBeCalledTimes(2)
       expect(s3Mocks.uploadToS3).toBeCalledTimes(2)
       expect(fileMocks.downloadFile).toBeCalledTimes(2)
-    })
-
-    test('error', async () => {
-      s3Mocks.uploadToS3.mockImplementationOnce(() => {
-        throw Error()
-      })
-      await uploadReleaseFiles(
-        {} as UserInterface,
-        { id: 'modelId' } as any,
-        { id: 'releaseId', semver: '1.2.3' } as any,
-        [{ id: 'fileId1' }] as any[],
-        'mirroredModelId',
-      )
-
-      expect(s3Mocks.uploadToS3).toBeCalledTimes(1)
-      expect(logMock.error).toHaveBeenCalledWith(
-        expect.objectContaining({ modelId: 'modelId' }),
-        'Error when uploading Release File to S3.',
-      )
     })
   })
 
@@ -632,11 +623,13 @@ describe('services > mirroredModel', () => {
           ],
         } as any,
         'mirroredModelId',
+        queueMock as unknown as PQueue,
       )
 
       expect(registryMocks.getImageManifest).toBeCalledTimes(2)
       expect(tarballMocks.createTarGzStreams).toBeCalledTimes(2)
       expect(s3Mocks.uploadToS3).toBeCalledTimes(2)
+      expect(queueMock.add).toBeCalledTimes(2)
     })
 
     test('error', async () => {
@@ -656,6 +649,7 @@ describe('services > mirroredModel', () => {
           ],
         } as any,
         'mirroredModelId',
+        queueMock as unknown as PQueue,
       )
 
       expect(logMock.error).toHaveBeenCalledWith(

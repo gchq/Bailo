@@ -171,6 +171,7 @@ export interface Config {
 
   modelMirror: {
     export: {
+      concurrency: number
       maxSize: number
       bucket: string
       kmsSignature: {
