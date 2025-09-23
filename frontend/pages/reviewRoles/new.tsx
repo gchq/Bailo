@@ -12,6 +12,7 @@ export default function ReviewRolesForm() {
   const [formData, setFormData] = useState<ReviewRolesFormData>({
     name: '',
     shortName: '',
+    systemRole: '',
     kind: RoleKind.REVIEW,
     description: '',
     defaultEntities: [],

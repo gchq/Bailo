@@ -39,6 +39,7 @@ export default function ReviewRoles() {
   const [formData, setFormData] = useState<UpdateReviewRolesParams>({
     name: '',
     shortName: '',
+    systemRole: '',
   })
 
   const [defaultEntitiesEntry, setDefaultEntitiesEntry] = useState<Array<CollaboratorEntry>>(
@@ -67,7 +68,7 @@ export default function ReviewRoles() {
         systemRole: reviewRole.systemRole,
       }
     } else {
-      return { shortName: '', name: '' }
+      return { shortName: '', name: '', systemRole: '' }
     }
   }
 

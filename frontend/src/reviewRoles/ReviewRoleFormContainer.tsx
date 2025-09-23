@@ -19,7 +19,6 @@ import {
 } from '@mui/material'
 import { ClearIcon } from '@mui/x-date-pickers'
 import { useGetModelRoles } from 'actions/model'
-import { UpdateReviewRolesParams } from 'actions/reviewRoles'
 import { ChangeEvent, Dispatch, FormEvent, ReactElement, SetStateAction, useMemo } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Loading from 'src/common/Loading'
@@ -27,14 +26,20 @@ import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import MessageAlert from 'src/MessageAlert'
-import { CollaboratorEntry, EntryKind, ReviewRolesFormData, SystemRoleKeys } from 'types/types'
+import { CollaboratorEntry, EntryKind, SystemRoleKeys } from 'types/types'
 
-type ReviewRolesFormDataUnion = UpdateReviewRolesParams | ReviewRolesFormData
+type ReviewRoleFormMinimal = {
+  shortName: string
+  name: string
+  systemRole: SystemRoleKeys
+  defaultEntities?: Array<string>
+  description?: string
+}
 
-type ReviewRoleFormContainerProps = {
+type ReviewRoleFormContainerProps<T extends ReviewRoleFormMinimal> = {
   providedData: boolean
-  formData?: ReviewRolesFormDataUnion
-  setFormData: Dispatch<SetStateAction<ReviewRolesFormDataUnion>>
+  formData: T
+  setFormData: Dispatch<SetStateAction<T>>
   setIsEdit?: (state: boolean) => void
   headingComponent: ReactElement
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void
@@ -44,9 +49,9 @@ type ReviewRoleFormContainerProps = {
   setDefaultEntities: Dispatch<SetStateAction<CollaboratorEntry[]>>
 }
 
-export default function ReviewRoleFormContainer({
+export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>({
   providedData = false,
-  formData = { name: '', shortName: '', description: '', defaultEntities: [] },
+  formData,
   setFormData,
   setIsEdit = () => {},
   headingComponent,
@@ -55,29 +60,29 @@ export default function ReviewRoleFormContainer({
   errorMessage = '',
   defaultEntitiesEntry = [],
   setDefaultEntities,
-}: ReviewRoleFormContainerProps) {
+}: ReviewRoleFormContainerProps<T>) {
   const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: ReviewRolesFormDataUnion) => ({ ...prevFormData, name: event.target.value as string }))
+    setFormData((prevFormData: T) => ({ ...prevFormData, name: event.target.value as string }))
   }
 
   const handleShortNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: ReviewRolesFormDataUnion) => ({
+    setFormData((prevFormData: T) => ({
       ...prevFormData,
       shortName: event.target.value as string,
     }))
   }
 
   const handleDescriptionChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prevFormData: ReviewRolesFormDataUnion) => ({
+    setFormData((prevFormData: T) => ({
       ...prevFormData,
       description: event.target.value as string,
     }))
   }
 
   const handleSystemRoleChange = (event: SelectChangeEvent) => {
-    setFormData((prevFormData: ReviewRolesFormDataUnion) => ({
+    setFormData((prevFormData: T) => ({
       ...prevFormData,
       systemRole: event.target.value.toLowerCase() as SystemRoleKeys,
     }))

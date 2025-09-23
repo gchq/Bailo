@@ -231,6 +231,7 @@ export const SystemRole = {
   Owner: 'owner',
   Contributor: 'contributor',
   Consumer: 'consumer',
+  None: '',
 } as const
 
 export type SystemRoleKeys = (typeof SystemRole)[keyof typeof SystemRole]
@@ -242,7 +243,7 @@ export interface SystemRole {
   shortName: string
   kind?: RoleKindKeys
   description?: string
-  systemRole?: SystemRoleKeys
+  systemRole: SystemRoleKeys
 }
 
 export type ReviewRolesFormData = SystemRole & {
@@ -635,7 +636,7 @@ export interface ReviewRoleInterface {
   description?: string
   defaultEntities?: string[]
   lockEntities?: boolean
-  systemRole?: SystemRoleKeys
+  systemRole: SystemRoleKeys
   createdAt: string
   updatedAt: string
 }
