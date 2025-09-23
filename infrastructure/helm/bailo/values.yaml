@@ -301,6 +301,7 @@ modelMirror:
   import:
     enabled: false
   export:
+    concurrency: 5
     enabled: false
     disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting'
     kmsSignature:
