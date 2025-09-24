@@ -122,7 +122,7 @@ async function registryRequest(
     }
 
     // BAI-1992: should be a better place for these, but unsure at present
-    if (body.repositories) {
+    if (body?.repositories) {
       allRepositories.push(...body.repositories)
     }
   } while (headersObject?.link)
@@ -148,7 +148,6 @@ async function registryRequest(
 // Currently limited to a maximum 100 image names
 export async function listModelRepos(token: string, modelId: string) {
   const { body } = await registryRequest(token, `_catalog?n=100&last=${modelId}`)
-
   if (!isListModelReposResponse(body)) {
     throw InternalError('Unrecognised response body when listing model repositories.', { body })
   }
