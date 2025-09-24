@@ -184,11 +184,13 @@ module.exports = {
 
   avScanning: {
     clamdscan: {
+      concurrency: 4,
       host: '127.0.0.1',
       port: 3310,
     },
 
     modelscan: {
+      concurrency: 4,
       protocol: 'http',
       host: '127.0.0.1',
       port: 3311,
