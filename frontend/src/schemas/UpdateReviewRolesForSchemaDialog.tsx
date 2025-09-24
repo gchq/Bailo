@@ -21,6 +21,7 @@ import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { SchemaInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { plural } from 'utils/stringUtils'
 
 interface UpdateReviewRolesForSchemaDialogProps {
   open: boolean
@@ -38,6 +39,7 @@ export default function UpdateReviewRolesForSchemaDialog({
   const [checked, setChecked] = useState<string[]>(schema.reviewRoles)
   const [errorMessage, setErrorMessage] = useState('')
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
+  const [warningDialogMessage, setWarningDialogMessage] = useState('')
 
   const theme = useTheme()
 
@@ -59,6 +61,7 @@ export default function UpdateReviewRolesForSchemaDialog({
   )
 
   const handleOnSave = async () => {
+    schema.reviewRoles.filter((reviewRole) => !checked.includes(reviewRole))
     const res = await patchSchema(schema.id, { reviewRoles: checked })
     if (!res.ok) {
       setErrorMessage(await getErrorMessage(res))
@@ -71,6 +74,21 @@ export default function UpdateReviewRolesForSchemaDialog({
   const handleOnClose = () => {
     setChecked(schema.reviewRoles)
     onClose(false)
+  }
+
+  const handleOpenDialog = () => {
+    setConfirmationDialogOpen(true)
+    const removedRoles = schema.reviewRoles.filter((reviewRole) => !checked.includes(reviewRole))
+    const addedRoles = checked.filter((checkedRole) => !schema.reviewRoles.includes(checkedRole))
+    let warningMessageText = ''
+    if (removedRoles.length > 0) {
+      warningMessageText += `You are about to remove the following ${plural(removedRoles.length, 'role')} from the schema: ${removedRoles.join(', ')}. Removing roles from a schema will remove those roles from any user currently assigned to any model using that schema. `
+    }
+    if (addedRoles.length > 0) {
+      warningMessageText += `You are about to add the following ${plural(addedRoles.length, 'role')} to the schema: ${addedRoles.join(', ')}. `
+    }
+    warningMessageText += 'Please confirm below that you are happy with these changes.'
+    setWarningDialogMessage(warningMessageText)
   }
 
   const reviewRoleList = useMemo(
@@ -109,14 +127,14 @@ export default function UpdateReviewRolesForSchemaDialog({
         <List>{reviewRoleList}</List>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setConfirmationDialogOpen(true)}>Save</Button>
+        <Button onClick={handleOpenDialog}>Save</Button>
         <Typography variant='caption' color={theme.palette.error.main}>
           {errorMessage}
         </Typography>
         <ConfirmationDialogue
           open={confirmationDialogOpen}
-          title='Please read if you are about to remove a role!'
-          dialogMessage='Removing roles from a schema will remove those roles from any user currently assigned to any model using that schema. If you are happy with this, or you are just adding new roles, then please confirm below. '
+          title='Please read before confirming your changes!'
+          dialogMessage={warningDialogMessage}
           onConfirm={handleOnSave}
           onCancel={() => setConfirmationDialogOpen(false)}
         />
