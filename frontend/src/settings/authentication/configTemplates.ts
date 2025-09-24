@@ -20,7 +20,7 @@ data:
 type: kubernetes.io/dockerconfigjson`
 }
 
-export function getKubernetesImagePullSecretsExampleConfig(registryUrl: string, description: string) {
+export function getKubernetesImagePullSecretsExampleConfig(registryUrl: string, description: string, secretName: string) {
   return `apiVersion: v1
 kind: Pod
 metadata:
