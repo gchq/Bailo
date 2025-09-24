@@ -1,13 +1,15 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { FormContextType } from '@rjsf/utils'
 import { Fragment, SyntheticEvent, useMemo } from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 interface DropdownProps {
   label?: string
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
-  formContext?: any
+  formContext?: FormContextType
   value: string
   onChange: (newValue: string) => void
   InputProps?: any
@@ -33,6 +35,10 @@ export default function Dropdown({ label, formContext, value, onChange, options,
   const dropdownOptions = useMemo(() => {
     return options.enumOptions ? options.enumOptions.map((option) => option.value) : []
   }, [options])
+
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
 
   return (
     <Fragment key={label}>

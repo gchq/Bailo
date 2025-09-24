@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser'
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -64,11 +65,14 @@ import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
 import { postReviewRole } from './routes/v2/review/postReviewRole.js'
+import { putReviewRole } from './routes/v2/review/putReviewRole.js'
 import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
 import { getSchema } from './routes/v2/schema/getSchema.js'
+import { getSchemaMigrations } from './routes/v2/schema/getSchemaMigrations.js'
 import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'
+import { postSchemaMigration } from './routes/v2/schema/postSchemaMigration.js'
 import { getSpecification } from './routes/v2/specification.js'
 import { getPeerStatus } from './routes/v2/system/peers.js'
 import { getSystemStatus } from './routes/v2/system/status.js'
@@ -82,6 +86,7 @@ import config from './utils/config.js'
 export const server = express()
 
 server.use('/api/v2', requestId)
+server.use('/api/v2', bodyParser.json())
 server.use('/api/v2', expressLogger)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
@@ -178,6 +183,9 @@ server.post('/api/v2/schemas', ...postSchema)
 server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
+server.get('/api/v2/schema-migrations', ...getSchemaMigrations)
+server.post('/api/v2/schema-migration', ...postSchemaMigration)
+
 server.get('/api/v2/reviews', ...getReviews)
 server.head('/api/v2/reviews', ...getReviews)
 server.get('/api/v2/responses', ...getResponses)
@@ -207,6 +215,7 @@ server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileSc
 server.get('/api/v2/review/roles', ...getReviewRoles)
 server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
 server.post('/api/v2/review/role', ...postReviewRole)
+server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

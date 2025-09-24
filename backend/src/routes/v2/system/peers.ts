@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -31,7 +30,6 @@ interface GetPeerStatusResponse {
 }
 
 export const getPeerStatus = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetPeerStatusResponse>): Promise<void> => {
     const _ = parse(req, getPeerStatusSchema)
     const peersWrapper = await peers()

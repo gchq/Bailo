@@ -10,7 +10,6 @@ import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
 import { setStepState, widgets } from 'utils/formUtils'
 
-// TODO - add validation BAI-866
 export default function JsonSchemaForm({
   splitSchema,
   setSplitSchema,

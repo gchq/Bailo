@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -30,7 +29,7 @@ export const postReviewRoleSchema = z.object({
 registerPath({
   method: 'post',
   path: '/api/v2/review/role',
-  tags: ['review'],
+  tags: ['review role'],
   description:
     'Used for creating a new review role. Note - dynamic review roles are currently WIP and might not be fully functional.',
   schema: postReviewRoleSchema,
@@ -53,7 +52,6 @@ interface PostReviewRoleResponse {
 }
 
 export const postReviewRole = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostReviewRoleResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateReviewRole
 

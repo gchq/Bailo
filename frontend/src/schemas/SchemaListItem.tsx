@@ -38,14 +38,14 @@ export default function SchemaListItem({
         primary={
           <EditableText
             value={schema.name}
-            onSubmit={(newValue) => onEditSchemaClick(schema.id, { name: newValue })}
+            onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { name: newValue })}
             tooltipText='Edit schema name'
           />
         }
         secondary={
           <EditableText
             value={schema.description}
-            onSubmit={(newValue) => onEditSchemaClick(schema.id, { description: newValue })}
+            onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { description: newValue })}
             tooltipText='Edit schema description'
             richText
           />

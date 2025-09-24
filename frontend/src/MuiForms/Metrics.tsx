@@ -14,6 +14,7 @@ import { useTheme } from '@mui/material/styles'
 import { FormContextType } from '@rjsf/utils'
 import * as _ from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
 import MetricItem from 'src/MuiForms/MetricItem'
 import { isValidNumber } from 'utils/stringUtils'
 import { v4 as uuidv4 } from 'uuid'
@@ -96,6 +97,10 @@ export default function Metrics({ onChange, value, label, formContext, required 
       </TableRow>
     ))
   }, [value])
+
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
 
   return (
     <>
