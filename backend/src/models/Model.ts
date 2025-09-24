@@ -19,6 +19,7 @@ export const SystemRoles = {
   Owner: 'owner',
   Contributor: 'contributor',
   Consumer: 'consumer',
+  None: '',
 } as const
 
 export type SystemRolesKeys = (typeof SystemRoles)[keyof typeof SystemRoles]
