@@ -34,7 +34,7 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
     this.av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
     const scannerVersion = await this.av.getVersion()
     this.version = safeParseVersion(scannerVersion)
-    log.debug({ version: this.version }, 'Initialised Clam AV scanner')
+    log.debug({ ...this.info() }, 'Initialised Clam AV scanner')
     return this
   }
 
@@ -46,13 +46,13 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
     const getObjectStreamResponse = await getObjectStream(file.path)
     const s3Stream = getObjectStreamResponse.Body as Readable | null
     if (!s3Stream) {
-      return await this.scanError(`Stream for file ${file.path} is not available`)
+      return await this.scanError(`Stream for file ${file.path} is not available`, { file })
     }
 
     try {
       const { isInfected, viruses } = await this.av.scanStream(s3Stream)
       log.info(
-        { modelId: file.modelId, fileId: file._id.toString(), name: file.name, result: { isInfected, viruses } },
+        { file, result: { isInfected, viruses }, ...this.info() },
         'Scan complete.',
       )
       return [
