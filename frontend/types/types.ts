@@ -77,10 +77,6 @@ export interface UiConfig {
   }
 }
 
-//System roles
-export type SystemRoleKeys = 'contributor' | 'consumer' | 'owner'
-export type CollaboratorRoleType = SystemRoleKeys | string
-
 export interface FileInterface {
   _id: string
   modelId: string
@@ -231,12 +227,28 @@ export const RoleKind = {
 
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
+export const SystemRole = {
+  Owner: 'owner',
+  Contributor: 'contributor',
+  Consumer: 'consumer',
+  None: '',
+} as const
+
+export type SystemRoleKeys = (typeof SystemRole)[keyof typeof SystemRole]
+
+export type CollaboratorRoleType = SystemRoleKeys | string
+
 export interface SystemRole {
   name: string
   shortName: string
   kind?: RoleKindKeys
   description?: string
-  systemRole?: SystemRolesKeys
+  systemRole: SystemRoleKeys
+}
+
+export type ReviewRolesFormData = SystemRole & {
+  defaultEntities?: string[]
+  lockEntities: boolean
 }
 
 export const SchemaKindLabel = {
@@ -245,12 +257,6 @@ export const SchemaKindLabel = {
   dataCard: 'data card',
 }
 export type SchemaKindLabelKeys = (typeof SchemaKindLabel)[keyof typeof SchemaKindLabel]
-
-export type ReviewRolesFormData = SystemRole & {
-  defaultEntities?: string[]
-  lockEntities: boolean
-  systemRole?: SystemRoleKeys
-}
 
 export const SchemaKind = {
   MODEL: 'model',
@@ -630,19 +636,10 @@ export interface ReviewRoleInterface {
   description?: string
   defaultEntities?: string[]
   lockEntities?: boolean
-  systemRole?: SystemRoleKeys
+  systemRole: SystemRoleKeys
   createdAt: string
   updatedAt: string
 }
-
-export const SystemRoles = {
-  None: 'none',
-  Owner: 'owner',
-  Contributor: 'contributor',
-  Consumer: 'consumer',
-} as const
-
-export type SystemRolesKeys = (typeof SystemRoles)[keyof typeof SystemRoles]
 
 export interface QuestionMigration {
   // id is only used in the UI for uniqueness
