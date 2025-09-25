@@ -45,9 +45,9 @@ export async function putObjectStream(
       client: await getS3Client(),
       params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
       queueSize: 4,
-      partSize: 1024 * 1024 * 64,
       leavePartsOnError: false,
     })
+    log.debug({ key, bucket, metadata }, 'Upload created.')
 
     let fileSize = 0
 
