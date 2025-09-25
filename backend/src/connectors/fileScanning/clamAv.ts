@@ -41,7 +41,9 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
   async _scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
     const scannerInfo = this.info()
     if (!this.av) {
-      return await this.scanError(`Could not use ${this.toolName} as it is not been correctly initialised.`, { ...scannerInfo })
+      return await this.scanError(`Could not use ${this.toolName} as it is not been correctly initialised.`, {
+        ...scannerInfo,
+      })
     }
 
     const getObjectStreamResponse = await getObjectStream(file.path)
@@ -52,10 +54,7 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
 
     try {
       const { isInfected, viruses } = await this.av.scanStream(s3Stream)
-      log.debug(
-        { file, result: { isInfected, viruses }, ...scannerInfo },
-        'Scan complete.',
-      )
+      log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
       return [
         {
           ...scannerInfo,

@@ -52,10 +52,7 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
       const viruses: string[] = isInfected
         ? scanResults.issues.map((issue) => `${issue.severity}: ${issue.description}. ${issue.scanner}`)
         : []
-      log.debug(
-        { file, result: { isInfected, viruses }, ...scannerInfo },
-        'Scan complete.',
-      )
+      log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
       return [
         {
           ...scannerInfo,
