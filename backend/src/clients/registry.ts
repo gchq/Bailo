@@ -47,22 +47,21 @@ async function registryRequest(
 ): Promise<RegistryRequestResult> {
   const controller = new AbortController()
 
-  // initialise set of initial necessary variables for future assignment
-  let subString = ''
-  let res: Response
   const allRepositories: string[] = []
+  let paginateParameter = ''
   let headersObject: {
     [k: string]: string
   }
   let contentType: string
-  let body: any //BAI-1992: hacky workaround!! any nicer way of typing "unknown" JSON?
+  let res: Response
+  let body: any
   let stream: ReadableStream | Readable | undefined
 
   do {
     try {
       // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
       // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
-      res = await fetch(`${registry}/v2/${endpoint}${subString}`, {
+      res = await fetch(`${registry}/v2/${endpoint}${paginateParameter}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           ...extraHeaders,
@@ -79,7 +78,10 @@ async function registryRequest(
     contentType = res.headers.get('content-type') || ''
 
     if (headersObject.link) {
-      subString = headersObject.link.substring(headersObject.link.indexOf('%'), headersObject.link.lastIndexOf('>')) // extract to a regex?
+      paginateParameter = headersObject.link.substring(
+        headersObject.link.indexOf('%'),
+        headersObject.link.lastIndexOf('>'),
+      )
     }
 
     if (returnRawBody) {
@@ -121,13 +123,11 @@ async function registryRequest(
       }
     }
 
-    // BAI-1992: should be a better place for these, but unsure at present
     if (body?.repositories) {
       allRepositories.push(...body.repositories)
     }
   } while (headersObject?.link)
 
-  // BAI-1992: again, better place for this?
   if (allRepositories.length) {
     body = {
       repositories: allRepositories,
@@ -145,7 +145,6 @@ async function registryRequest(
   }
 }
 
-// Currently limited to a maximum 100 image names
 export async function listModelRepos(token: string, modelId: string) {
   const { body } = await registryRequest(token, `_catalog?n=100&last=${modelId}`)
   if (!isListModelReposResponse(body)) {
