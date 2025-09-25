@@ -7,6 +7,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestInterface } from '../models/AccessRequest.js'
 import AccessRequest from '../models/AccessRequest.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
+import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { AccessRequestUserPermissions } from '../types/types.js'
@@ -15,6 +16,7 @@ import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
+import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
@@ -89,9 +91,19 @@ export async function removeAccessRequest(user: UserInterface, accessRequestId: 
     throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
   }
 
-  await accessRequest.delete()
+  const reviewsForAccessRequest = await ReviewModel.find({ accessRequestId })
 
-  await removeAccessRequestReviews(accessRequestId)
+  await useTransaction([
+    (session) => accessRequest.delete(session),
+    (session) => removeAccessRequestReviews(accessRequestId, session),
+    (session) => ReviewModel.updateMany({ accessRequestId }, { deleted: true }, { session }),
+    (session) =>
+      ResponseModel.updateMany(
+        { parentId: [...reviewsForAccessRequest.map((review) => review['_id']), accessRequest._id] },
+        { deleted: true },
+        { session },
+      ),
+  ])
 
   return { accessRequestId }
 }

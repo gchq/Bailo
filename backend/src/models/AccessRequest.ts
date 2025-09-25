@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
+
+import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
 
 export interface AccessRequestMetadata {
   overview: {
@@ -52,12 +53,7 @@ const AccessRequestSchema = new Schema<AccessRequestDoc>(
   },
 )
 
-AccessRequestSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: String,
-  deletedAt: true,
-})
+AccessRequestSchema.plugin(softDeletionPlugin)
 
 const AccessRequestModel = model<AccessRequestDoc>('v2_Access_Request', AccessRequestSchema)
 
