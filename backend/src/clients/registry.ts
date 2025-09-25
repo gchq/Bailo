@@ -44,6 +44,7 @@ async function registryRequest(
   returnRawBody: boolean = false,
   extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>> = {},
   extraHeaders: HeadersInit = {},
+  traverseLinks: boolean = true,
 ): Promise<RegistryRequestResult> {
   const controller = new AbortController()
 
@@ -126,7 +127,7 @@ async function registryRequest(
     if (body?.repositories) {
       allRepositories.push(...body.repositories)
     }
-  } while (headersObject?.link)
+  } while (traverseLinks && headersObject?.link)
 
   if (allRepositories.length) {
     body = {
