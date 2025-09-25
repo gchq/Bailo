@@ -158,11 +158,13 @@ export interface Config {
 
   avScanning: {
     clamdscan: {
+      concurrency: number
       host: string
       port: number
     }
 
     modelscan: {
+      concurrency: number
       protocol: string
       host: string
       port: number

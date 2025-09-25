@@ -200,6 +200,7 @@ export const testAccessRequestSchemaStepNoRender: StepNoRender = {
 export const testManagerRole: SystemRole = {
   name: 'Manager',
   shortName: 'manager',
+  systemRole: 'owner',
 }
 
 export const testManagerRoleInterface: ReviewRoleInterface = {

@@ -5,11 +5,17 @@ type SimpleListItemButtonProps = {
   selected: boolean
   onClick: MouseEventHandler<HTMLDivElement>
   children: ReactNode
+  disabled?: boolean
 }
-export default function SimpleListItemButton({ selected, onClick, children }: SimpleListItemButtonProps) {
+export default function SimpleListItemButton({
+  selected,
+  onClick,
+  children,
+  disabled = false,
+}: SimpleListItemButtonProps) {
   return (
     <ListItem disablePadding>
-      <ListItemButton selected={selected} onClick={onClick}>
+      <ListItemButton disabled={disabled} selected={selected} onClick={onClick}>
         {children}
       </ListItemButton>
     </ListItem>
