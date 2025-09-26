@@ -14,12 +14,14 @@ import { findDuplicates } from '../utils/array.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
+import { useTransaction } from '../utils/transactions.js'
 import { arrayOfObjectsHasKeysOfType, hasKeysOfType } from '../utils/typeguards.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
-import { createReleaseReviews } from './review.js'
+import { getResponsesByParentIds } from './response.js'
+import { createReleaseReviews, findReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
 export function isReleaseDoc(data: unknown): data is ReleaseDoc {
@@ -532,8 +534,21 @@ export async function deleteRelease(user: UserInterface, modelId: string, semver
     throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }
 
-  await release.delete()
-
+  /**
+   * get reviews
+   * get responses
+   * get parentIds
+   */
+  const reviews = await findReviews(user, true, false, modelId, semver)
+  const responses = await getResponsesByParentIds(reviews.map((review) => review._id.toString()))
+  const parentIds = responses.map((response) => response.parentId)
+  //TODO - find out if theres is a way to maintain a sesion when soft deleting
+  await useTransaction([
+    (session) => ResponseModel.updateMany({ parentId: { $in: parentIds } }, { $set: { deleted: true } }, { session }),
+    // (session) => release.updateOne({ $set: { deleted: true } }, { session }),
+  ])
+  //TODO - investigate if something else should be returned as this is just returning func args
+  //possibly return something from transaction and use those values to confirm how funciton has run
   return { modelId, semver }
 }
 

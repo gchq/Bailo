@@ -26,7 +26,7 @@ export interface DefaultReviewRole {
   systemRole: string
 }
 
-export async function findReviews(
+export async function findReviews( // do open and mine need to be mandatory
   user: UserInterface,
   mine: boolean,
   open: boolean,

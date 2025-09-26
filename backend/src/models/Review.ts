@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose'
+import { model, ObjectId, Schema } from 'mongoose'
 import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
@@ -7,6 +7,7 @@ import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
 // It should be used for plain object representations, e.g. for sending to the
 // client.
 export interface ReviewInterface {
+  _id: ObjectId
   semver?: string
   accessRequestId?: string
   modelId: string
