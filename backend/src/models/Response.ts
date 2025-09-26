@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
+
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const Decision = {
   RequestChanges: 'request_changes',
@@ -68,12 +69,7 @@ const ResponseSchema = new Schema<ResponseDoc>(
   },
 )
 
-ResponseSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: String,
-  deletedAt: true,
-})
+ResponseSchema.plugin(softDeletionPlugin)
 
 const ResponseModel = model<ResponseDoc>('v2_response', ResponseSchema)
 

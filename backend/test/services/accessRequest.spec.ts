@@ -39,6 +39,39 @@ const accessRequestModelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/AccessRequest.js', () => ({ default: accessRequestModelMocks }))
 
+const responseModelMocks = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.find = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.updateMany = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/Response.js', () => ({ default: responseModelMocks }))
+
+const reviewModelMocks = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.find = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.delete = vi.fn(() => obj)
+  obj.updateMany = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/Review.js', () => ({ default: reviewModelMocks }))
+
 const mockReviewService = vi.hoisted(() => {
   return {
     createAccessRequestReviews: vi.fn(),
@@ -103,6 +136,8 @@ describe('services > accessRequest', () => {
   })
 
   test('removeAccessRequest > success', async () => {
+    reviewModelMocks.find.mockResolvedValue([])
+    responseModelMocks.find.mockResolvedValue([])
     expect(await removeAccessRequest({} as any, 'test')).toStrictEqual({ accessRequestId: 'test' })
   })
 

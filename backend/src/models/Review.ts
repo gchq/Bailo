@@ -1,7 +1,7 @@
 import { model, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { ReviewKind, ReviewKindKeys } from '../types/enums.js'
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the
@@ -60,12 +60,7 @@ const ReviewSchema = new Schema<ReviewDoc>(
   },
 )
 
-ReviewSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: String,
-  deletedAt: true,
-})
+ReviewSchema.plugin(softDeletionPlugin)
 
 const ReviewModel = model<ReviewDoc>('v2_Review', ReviewSchema)
 
