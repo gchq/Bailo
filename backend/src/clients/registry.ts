@@ -44,7 +44,6 @@ async function registryRequest(
   returnRawBody: boolean = false,
   extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>> = {},
   extraHeaders: HeadersInit = {},
-  useSeparateConnection: boolean = false,
 ): Promise<RegistryRequestResult> {
   const controller = new AbortController()
   let res: Response
@@ -56,13 +55,7 @@ async function registryRequest(
         Authorization: `Bearer ${token}`,
         ...extraHeaders,
       },
-      dispatcher: useSeparateConnection
-        ? getHttpsUndiciAgent({
-            connect: { rejectUnauthorized: !config.registry.connection.insecure },
-            connections: 1,
-            pipelining: 0,
-          })
-        : agent,
+      dispatcher: agent,
       signal: controller.signal,
       ...extraFetchOptions,
     })
@@ -191,7 +184,6 @@ export async function getRegistryLayerStream(
     {
       Accept: 'application/vnd.docker.distribution.manifest.v2+json',
     },
-    true,
   )
 
   if (!stream || !(stream instanceof ReadableStream || stream instanceof Readable)) {
