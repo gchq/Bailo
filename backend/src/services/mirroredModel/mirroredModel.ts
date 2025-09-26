@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { PassThrough } from 'node:stream'
 
 import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
@@ -25,7 +26,7 @@ import { getHttpsAgent } from '../http.js'
 import log from '../log.js'
 import { getModelById, getModelCardRevisions, validateMirroredModel } from '../model.js'
 import {
-  getImageBlobHandle,
+  getImageBlob,
   getImageManifest,
   joinDistributionPackageName,
   splitDistributionPackageName,
@@ -242,6 +243,30 @@ export async function importModel(
   }
 }
 
+async function prefetchToPassThrough(
+  user: UserInterface,
+  modelId: string,
+  imageName: string,
+  digest: string,
+  highWaterMark = 1024 * 1024, // 1 MB to hold small layers completely
+): Promise<{ stream: Readable; abort: () => void }> {
+  return (async () => {
+    const { stream, abort } = await getImageBlob(user, modelId, imageName, digest)
+
+    const passthrough = new PassThrough({ highWaterMark })
+
+    // Pipe registry stream into our passthrough buffer immediately
+    ;(stream instanceof Readable ? stream : Readable.fromWeb(stream as ReadableStream))
+      .pipe(passthrough)
+      .on('error', (err) => {
+        abort()
+        passthrough.destroy(err)
+      })
+
+    return { stream: passthrough, abort }
+  })()
+}
+
 export async function exportCompressedRegistryImage(
   user: UserInterface,
   modelId: string,
@@ -289,8 +314,9 @@ export async function exportCompressedRegistryImage(
   const layers = [tagManifest.config, ...tagManifest.layers]
   // tar can only process one pipe at a time so compress one layer (including config) at a time
   // but prefetch the next layer to avoid waiting on HTTP connections
-  let prefetchStream: Awaited<ReturnType<typeof getImageBlobHandle>> | null = null
+  let prefetchPromise: Promise<{ stream: Readable | ReadableStream<any>; abort: () => void }> | null = null
   for (let i = 0; i < layers.length; i++) {
+    log.debug(`Layer ${i + 1}/${layers.length}`)
     const currentLayer = layers[i]
     const nextLayer = i + 1 < layers.length ? layers[i + 1] : null
 
@@ -299,26 +325,7 @@ export async function exportCompressedRegistryImage(
       throw InternalError('Could not extract layer digest.', { currentLayer, modelId, imageName, imageTag, ...logData })
     }
 
-    // kick off next layer fetch without awaiting, so it can warm-up
-    let nextLayerHandle: Awaited<ReturnType<typeof getImageBlobHandle>> | null = null
-    if (nextLayer) {
-      log.debug(
-        {
-          modelId,
-          imageName,
-          imageTag,
-          layerDigest: nextLayer.digest,
-          ...logData,
-        },
-        'Prefetch warming next image layer',
-      )
-      // cannot directly use getImageBlob as very small layers' stream will close before reading, leading to tar entry size mismatch
-      nextLayerHandle = await getImageBlobHandle(user, modelId, imageName, nextLayer.digest)
-      // this warms connection without reading body
-      void nextLayerHandle.warm()
-    }
-
-    if (!prefetchStream) {
+    if (!prefetchPromise) {
       log.debug(
         {
           modelId,
@@ -330,15 +337,30 @@ export async function exportCompressedRegistryImage(
         'Fetching image layer',
       )
     }
-    // open stream only when needed
-    const { stream: responseStream, abort } = prefetchStream
-      ? await prefetchStream.open()
-      : await (await getImageBlobHandle(user, modelId, imageName, layerDigest)).open()
+    const { stream: responseStream, abort } =
+      prefetchPromise && i > 0 ? await prefetchPromise : await getImageBlob(user, modelId, imageName, layerDigest)
+
+    if (nextLayer) {
+      log.debug(
+        {
+          modelId,
+          imageName,
+          imageTag,
+          layerDigest: nextLayer.digest,
+          ...logData,
+        },
+        'Prefetching next image layer',
+      )
+      // small layers are fully consumed by undici before the previous layer has finished, causing problems
+      // use a PassThrough to workaround this
+      prefetchPromise = prefetchToPassThrough(user, modelId, imageName, nextLayer.digest)
+    }
 
     try {
       // pipe the body to tar using streams
       const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
       const packerEntry = tarStream.entry({ name: entryName, size: currentLayer.size })
+      log.debug({ name: entryName, size: currentLayer.size }, 'Packer Entry')
 
       // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
       await pipeStreamToTarEntry(
@@ -354,8 +376,6 @@ export async function exportCompressedRegistryImage(
       abort()
       throw err
     }
-
-    prefetchStream = nextLayerHandle
   }
   // no more data to write
   tarStream.finalize()

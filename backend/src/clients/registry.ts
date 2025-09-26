@@ -44,6 +44,7 @@ async function registryRequest(
   returnRawBody: boolean = false,
   extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>> = {},
   extraHeaders: HeadersInit = {},
+  useSeparateConnection: boolean = false,
 ): Promise<RegistryRequestResult> {
   const controller = new AbortController()
   let res: Response
@@ -55,7 +56,13 @@ async function registryRequest(
         Authorization: `Bearer ${token}`,
         ...extraHeaders,
       },
-      dispatcher: agent,
+      dispatcher: useSeparateConnection
+        ? getHttpsUndiciAgent({
+            connect: { rejectUnauthorized: !config.registry.connection.insecure },
+            connections: 1,
+            pipelining: 0,
+          })
+        : agent,
       signal: controller.signal,
       ...extraFetchOptions,
     })
@@ -171,18 +178,6 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
   return body
 }
 
-export async function headRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
-  const { headers } = await registryRequest(
-    token,
-    `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
-    false,
-    {
-      method: 'HEAD',
-    },
-  )
-  return headers
-}
-
 export async function getRegistryLayerStream(
   token: string,
   imageRef: RepoRef,
@@ -196,6 +191,7 @@ export async function getRegistryLayerStream(
     {
       Accept: 'application/vnd.docker.distribution.manifest.v2+json',
     },
+    true,
   )
 
   if (!stream || !(stream instanceof ReadableStream || stream instanceof Readable)) {
