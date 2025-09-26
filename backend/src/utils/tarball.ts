@@ -59,14 +59,48 @@ export async function extractTarGzStream(
   tarGzStream.pipe(ungzipStream).pipe(untarStream)
 
   return new Promise((resolve, reject) => {
-    untarStream.on('entry', entryListener)
+    let aborted = false
+    const abort = (err?: unknown) => {
+      if (aborted) {
+        return
+      }
+      aborted = true
+      // destroy underlying streams immediately
+      tarGzStream.destroy()
+      ungzipStream.destroy()
+      untarStream.destroy()
+      if (err) {
+        errorListener(err, resolve, reject)
+      }
+    }
 
-    untarStream.on('error', (err) => {
-      errorListener(err, resolve, reject)
+    untarStream.on('entry', async (entry, stream, next) => {
+      if (aborted) {
+        stream.resume()
+        return
+      }
+
+      // Wrap original `next`
+      const safeNext = (err?: unknown) => {
+        if (err) {
+          return abort(err)
+        }
+        next() // Let tar-stream proceed to next entry
+      }
+
+      try {
+        await Promise.resolve(entryListener(entry, stream, safeNext))
+      } catch (err) {
+        safeNext(err)
+      }
     })
 
+    untarStream.on('error', (err) => abort(err))
+
     untarStream.on('finish', () => {
-      finishListener(resolve, reject)
+      if (!aborted) {
+        finishListener(resolve, reject)
+      }
     })
   })
 }

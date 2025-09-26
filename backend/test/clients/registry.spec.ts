@@ -495,6 +495,6 @@ describe('clients > registry', () => {
 
     const response = uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
 
-    await expect(response).rejects.toThrowError('Unrecognised response headers when putting image manifest.')
+    await expect(response).rejects.toThrowError('Unrecognised response headers when putting image blob.')
   })
 })
