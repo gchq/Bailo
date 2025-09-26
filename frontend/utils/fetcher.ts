@@ -14,26 +14,29 @@ type ErrorResponse = {
   error: Error
 }
 
-export const fetcherHeaders = async (url: string) => {
-  const res = await fetch(url, { method: 'head' })
+export const fetcher = async <TMethod extends 'head' | 'get'>(
+  url: string,
+  method?: TMethod,
+): Promise<
+  TMethod extends 'head'
+    ? {
+        headers: {
+          [k: string]: string
+        }
+      }
+    : any
+> => {
+  const res = await fetch(url, { method })
 
   if (!res.ok) {
     await handleSWRError(res)
   }
 
-  const headers = Object.fromEntries(res.headers)
-
-  return { headers }
-}
-
-export const fetcher = async (url: string) => {
-  const res = await fetch(url)
-
-  if (!res.ok) {
-    await handleSWRError(res)
+  if (method === 'head') {
+    return { headers: Object.fromEntries(res.headers) }
+  } else {
+    return res.json()
   }
-
-  return res.json()
 }
 
 export const getErrorMessage = async (res: Response) => {
