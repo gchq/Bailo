@@ -1,7 +1,7 @@
 import { model, Schema } from 'mongoose'
 
-import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
 import { ModelCardInterface } from './Model.js'
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 // This interface stores information about the properties on the base object.
 // It should be used for plain object representations, e.g. for sending to the

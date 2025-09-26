@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose'
 
-import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export interface AccessRequestMetadata {
   overview: {

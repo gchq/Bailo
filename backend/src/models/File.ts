@@ -1,6 +1,6 @@
 import { model, ObjectId, Schema } from 'mongoose'
 
-import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 import { ScanInterface } from './Scan.js'
 
 // This interface stores information about the properties on the base object.

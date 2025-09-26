@@ -1,7 +1,7 @@
 import { model, ObjectId, Schema } from 'mongoose'
 
 import { ScanState, ScanStateKeys } from '../connectors/fileScanning/Base.js'
-import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export type ScanInterface = {
   _id: ObjectId

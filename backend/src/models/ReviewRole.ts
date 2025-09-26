@@ -1,8 +1,8 @@
 import { model, Schema } from 'mongoose'
 
-import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
 import { RoleKindKeys } from '../types/types.js'
 import { SystemRolesKeys } from './Model.js'
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export interface ReviewRoleInterface {
   name: string

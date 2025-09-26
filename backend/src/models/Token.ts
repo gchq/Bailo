@@ -2,8 +2,8 @@ import bcrypt from 'bcryptjs'
 import { createHash } from 'crypto'
 import { model, ObjectId, Schema } from 'mongoose'
 
-import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
 import { BadReq } from '../utils/error.js'
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const TokenScope = {
   All: 'all',
