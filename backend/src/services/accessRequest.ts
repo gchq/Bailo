@@ -99,7 +99,7 @@ export async function removeAccessRequest(user: UserInterface, accessRequestId: 
     (session) => removeAccessRequestReviews(accessRequestId, session),
     (session) =>
       removeResponsesByParentIds(
-        [...reviewsForAccessRequest.map((review) => review['_id']), accessRequestId] as string[],
+        [...reviewsForAccessRequest.map((review) => review['_id']), accessRequest['_id']] as string[],
         session,
       ),
   ])

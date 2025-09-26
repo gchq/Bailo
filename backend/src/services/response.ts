@@ -174,7 +174,7 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
 }
 
 export async function removeResponsesByParentIds(parentIds: string[], session: ClientSession | undefined) {
-  const responses = await ResponseModel.find({ parentId: parentIds }, { session })
+  const responses = await ResponseModel.find({ parentId: parentIds })
 
   const deletions: ResponseDoc[] = []
   for (const response of responses) {
