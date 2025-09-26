@@ -145,7 +145,7 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     releaseParams.modelCardVersion = model.card?.version
   }
 
-  const deletedRelease = await Release.find({
+  const deletedRelease = await Release.findOne({
     modelId: releaseParams.modelId,
     semver: releaseParams.semver,
     deleted: true,

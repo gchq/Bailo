@@ -96,7 +96,6 @@ export async function removeAccessRequest(user: UserInterface, accessRequestId: 
   await useTransaction([
     (session) => accessRequest.delete(session),
     (session) => removeAccessRequestReviews(accessRequestId, session),
-    (session) => ReviewModel.updateMany({ accessRequestId }, { deleted: true }, { session }),
     (session) =>
       ResponseModel.updateMany(
         { parentId: [...reviewsForAccessRequest.map((review) => review['_id']), accessRequest._id] },
