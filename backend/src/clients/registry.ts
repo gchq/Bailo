@@ -171,6 +171,18 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
   return body
 }
 
+export async function headRegistryLayerStream(token: string, imageRef: RepoRef, layerDigest: string) {
+  const { headers } = await registryRequest(
+    token,
+    `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
+    false,
+    {
+      method: 'HEAD',
+    },
+  )
+  return headers
+}
+
 export async function getRegistryLayerStream(
   token: string,
   imageRef: RepoRef,

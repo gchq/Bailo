@@ -25,7 +25,7 @@ import { getHttpsAgent } from '../http.js'
 import log from '../log.js'
 import { getModelById, getModelCardRevisions, validateMirroredModel } from '../model.js'
 import {
-  getImageBlob,
+  getImageBlobHandle,
   getImageManifest,
   joinDistributionPackageName,
   splitDistributionPackageName,
@@ -286,39 +286,76 @@ export async function exportCompressedRegistryImage(
   const packerEntry = tarStream.entry({ name: 'manifest.json', size: Buffer.byteLength(tagManifestJson, 'utf8') })
   await pipeStreamToTarEntry(Readable.from(tagManifestJson), packerEntry, { mediaType: tagManifest.mediaType })
 
-  // fetch and compress one layer (including config) at a time to manage RAM usage
-  // also, tar can only handle one pipe at a time
-  for (const layer of [tagManifest.config, ...tagManifest.layers]) {
-    const layerDigest = layer['digest']
+  const layers = [tagManifest.config, ...tagManifest.layers]
+  // tar can only process one pipe at a time so compress one layer (including config) at a time
+  // but prefetch the next layer to avoid waiting on HTTP connections
+  let prefetchStream: Awaited<ReturnType<typeof getImageBlobHandle>> | null = null
+  for (let i = 0; i < layers.length; i++) {
+    const currentLayer = layers[i]
+    const nextLayer = i + 1 < layers.length ? layers[i + 1] : null
+
+    const layerDigest = currentLayer['digest']
     if (!layerDigest || layerDigest.length === 0) {
-      throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
+      throw InternalError('Could not extract layer digest.', { currentLayer, modelId, imageName, imageTag, ...logData })
     }
 
-    log.debug(
-      {
-        modelId,
-        imageName,
-        imageTag,
-        layerDigest,
-        ...logData,
-      },
-      'Fetching image layer',
-    )
-    const { stream: responseStream, abort } = await getImageBlob(user, modelId, imageName, layerDigest)
+    // kick off next layer fetch without awaiting, so it can warm-up
+    let nextLayerHandle: Awaited<ReturnType<typeof getImageBlobHandle>> | null = null
+    if (nextLayer) {
+      log.debug(
+        {
+          modelId,
+          imageName,
+          imageTag,
+          layerDigest: nextLayer.digest,
+          ...logData,
+        },
+        'Prefetch warming next image layer',
+      )
+      // cannot directly use getImageBlob as very small layers' stream will close before reading, leading to tar entry size mismatch
+      nextLayerHandle = await getImageBlobHandle(user, modelId, imageName, nextLayer.digest)
+      // this warms connection without reading body
+      void nextLayerHandle.warm()
+    }
+
+    if (!prefetchStream) {
+      log.debug(
+        {
+          modelId,
+          imageName,
+          imageTag,
+          layerDigest,
+          ...logData,
+        },
+        'Fetching image layer',
+      )
+    }
+    // open stream only when needed
+    const { stream: responseStream, abort } = prefetchStream
+      ? await prefetchStream.open()
+      : await (await getImageBlobHandle(user, modelId, imageName, layerDigest)).open()
 
     try {
       // pipe the body to tar using streams
       const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
-      const packerEntry = tarStream.entry({ name: entryName, size: layer.size })
+      const packerEntry = tarStream.entry({ name: entryName, size: currentLayer.size })
+
       // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
-      await pipeStreamToTarEntry(Readable.fromWeb(responseStream as ReadableStream), packerEntry, {
-        layerDigest,
-        mediaType: layer.mediaType,
-      })
+      await pipeStreamToTarEntry(
+        // avoid Readable.fromWeb if possible as the registry stream may already be Node-readable
+        responseStream instanceof Readable ? responseStream : Readable.fromWeb(responseStream as ReadableStream),
+        packerEntry,
+        {
+          layerDigest,
+          mediaType: currentLayer.mediaType,
+        },
+      )
     } catch (err) {
       abort()
       throw err
     }
+
+    prefetchStream = nextLayerHandle
   }
   // no more data to write
   tarStream.finalize()

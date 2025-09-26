@@ -4,6 +4,7 @@ import {
   doesLayerExist,
   getImageTagManifest,
   getRegistryLayerStream,
+  headRegistryLayerStream,
   initialiseUpload,
   listImageTags,
   listModelRepos,
@@ -14,6 +15,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken } from '../routes/v1/registryAuth.js'
 import { Forbidden, InternalError } from '../utils/error.js'
+import log from './log.js'
 import { getModelById } from './model.js'
 
 // derived from https://pkg.go.dev/github.com/distribution/reference#pkg-overview
@@ -115,6 +117,37 @@ export async function getImageBlob(user: UserInterface, modelId: string, imageNa
   ])
 
   return await getRegistryLayerStream(repositoryToken, { namespace: modelId, image: imageName }, digest)
+}
+
+export async function getImageBlobHandle(
+  user: UserInterface,
+  modelId: string,
+  imageName: string,
+  digest: string,
+): Promise<{
+  open: () => Promise<{ stream: Readable | ReadableStream; abort: () => void }>
+  warm: () => Promise<void>
+}> {
+  await checkUserAuth(user, modelId, ['pull'])
+
+  const repositoryToken = await getAccessToken({ dn: user.dn }, [
+    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['pull'] },
+  ])
+
+  return {
+    // Does a quick HEAD to warm connection, doesn’t fetch body
+    warm: async () => {
+      try {
+        await headRegistryLayerStream(repositoryToken, { namespace: modelId, image: imageName }, digest)
+      } catch (err) {
+        log.warn({ digest, err }, 'HEAD warmup failed')
+      }
+    },
+    // Actually opens the registry stream
+    open: async () => {
+      return getRegistryLayerStream(repositoryToken, { namespace: modelId, image: imageName }, digest)
+    },
+  }
 }
 
 export async function doesImageLayerExist(user: UserInterface, modelId: string, imageName: string, digest: string) {
