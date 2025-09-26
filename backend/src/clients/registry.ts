@@ -50,9 +50,7 @@ async function registryRequest(
 
   const allRepositories: string[] = []
   let paginateParameter = ''
-  let headersObject: {
-    [k: string]: string
-  }
+  let link: string | null
   let contentType: string
   let res: Response
   let body: any
@@ -75,14 +73,11 @@ async function registryRequest(
       throw InternalError('Unable to communicate with the registry.', { err })
     }
 
-    headersObject = res.headers ? Object.fromEntries(res.headers) : {}
+    link = res.headers.get('link')
     contentType = res.headers.get('content-type') || ''
 
-    if (headersObject.link) {
-      paginateParameter = headersObject.link.substring(
-        headersObject.link.indexOf('%'),
-        headersObject.link.lastIndexOf('>'),
-      )
+    if (link) {
+      paginateParameter = link.substring(link.indexOf('%'), link.lastIndexOf('>'))
     }
 
     if (returnRawBody) {
@@ -127,7 +122,7 @@ async function registryRequest(
     if (body?.repositories) {
       allRepositories.push(...body.repositories)
     }
-  } while (traverseLinks && headersObject?.link)
+  } while (traverseLinks && link)
 
   if (allRepositories.length) {
     body = {
@@ -136,7 +131,7 @@ async function registryRequest(
   }
 
   return {
-    headers: headersObject,
+    headers: res.headers ? Object.fromEntries(res.headers) : {},
     body: returnRawBody ? undefined : body,
     stream: returnRawBody ? stream : undefined,
     abort: () => controller.abort(),
