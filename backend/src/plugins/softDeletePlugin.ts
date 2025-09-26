@@ -1,8 +1,8 @@
 import { Callback, CallbackWithoutResultAndOptionalError, ClientSession, Document, Schema, Types } from 'mongoose'
 
 export interface SoftDeleteDocument extends Omit<Document, 'delete' | 'restore'>, SoftDeleteInterface {
-  delete(session: ClientSession | undefined, fn?: Callback<this>): Promise<this>
-  restore(session: ClientSession | undefined, fn?: Callback<this>): Promise<this>
+  delete(session?: ClientSession | undefined, fn?: Callback<this>): Promise<this>
+  restore(session?: ClientSession | undefined, fn?: Callback<this>): Promise<this>
 }
 
 export interface SoftDeleteInterface {

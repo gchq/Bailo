@@ -138,7 +138,7 @@ export async function createAccessRequestReviews(model: ModelDoc, accessRequest:
   await Promise.all(createReviews)
 }
 
-export async function removeAccessRequestReviews(accessRequestId: string, session: ClientSession | undefined) {
+export async function removeAccessRequestReviews(accessRequestId: string, session?: ClientSession | undefined) {
   // finding and then calling potentially multiple deletes is inefficient but the mongoose-softdelete
   // plugin doesn't cover bulkDelete
   const accessRequestReviews = await findReviewsForAccessRequests([accessRequestId])
