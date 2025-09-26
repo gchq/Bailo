@@ -49,6 +49,7 @@ async function registryRequest(
   const controller = new AbortController()
 
   const allRepositories: string[] = []
+  let paginateParameter = ''
   let link: string | null
   let contentType: string
   let res: Response
@@ -56,7 +57,6 @@ async function registryRequest(
   let stream: ReadableStream | Readable | undefined
 
   do {
-    let paginateParameter = ''
     try {
       // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
       // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
