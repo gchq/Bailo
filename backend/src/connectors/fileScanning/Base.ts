@@ -49,7 +49,7 @@ export abstract class BaseQueueFileScanningConnector extends BaseFileScanningCon
   abstract _scan(file: FileInterface): Promise<FileScanResult[]>
 
   async scan(file: FileInterface): Promise<FileScanResult[]> {
-    log.debug({ file, toolName: this.toolName, ...(this.version && { version: this.version }) }, 'Queueing scan.')
+    log.debug({ file, ...this.info(), queueSize: this.queue.size }, 'Queueing scan.')
     const scanResult = await this.queue
       .add(async () => this._scan(file))
       .catch((error) => {

@@ -27,13 +27,13 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
     await this.init()
     const scannerInfo = this.info()
     if (!scannerInfo.scannerVersion) {
-      return await this.scanError('Could not use ModelScan as it is not running.')
+      return await this.scanError('Could not use ModelScan as it is not running.', { ...scannerInfo })
     }
 
     const getObjectStreamResponse = await getObjectStream(file.path)
     const s3Stream = getObjectStreamResponse.Body as Readable | null
     if (!s3Stream) {
-      return await this.scanError(`Stream for file ${file.path} is not available`)
+      return await this.scanError(`Stream for file ${file.path} is not available`, { file, ...scannerInfo })
     }
 
     try {
@@ -43,6 +43,7 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
         return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
           errors: scanResults.errors,
           file,
+          ...scannerInfo,
         })
       }
 
@@ -51,10 +52,7 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
       const viruses: string[] = isInfected
         ? scanResults.issues.map((issue) => `${issue.severity}: ${issue.description}. ${issue.scanner}`)
         : []
-      log.info(
-        { modelId: file.modelId, fileId: file._id.toString(), name: file.name, result: { isInfected, viruses } },
-        'Scan complete.',
-      )
+      log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
       return [
         {
           ...scannerInfo,
