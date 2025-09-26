@@ -16,7 +16,7 @@ export function softDeletionPlugin(schema: Schema) {
   schema.add({ deletedBy: { type: String, default: '' } })
   schema.add({ deletedAt: { type: String, default: '' } })
 
-  schema.methods.delete = async function (session: ClientSession | undefined, user?: string) {
+  schema.methods.delete = async function (session?: ClientSession | undefined, user?: string) {
     this.deleted = true
     this.deletedAt = new Date().toISOString()
     if (user) {

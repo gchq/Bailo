@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
+import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
 import { RoleKindKeys } from '../types/types.js'
 import { SystemRolesKeys } from './Model.js'
 
@@ -32,12 +32,7 @@ const ReviewRoleSchema = new Schema<ReviewRoleDoc>(
   },
 )
 
-ReviewRoleSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: Schema.Types.ObjectId,
-  deletedAt: true,
-})
+ReviewRoleSchema.plugin(softDeletionPlugin)
 
 const ReviewRoleModel = model<ReviewRoleDoc>('v2_Review_Role', ReviewRoleSchema)
 

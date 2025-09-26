@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
+
+import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
 
 export const WebhookEvent = {
   CreateRelease: 'createRelease',
@@ -41,12 +42,7 @@ const WebhookSchema = new Schema<WebhookDoc>(
   },
 )
 
-WebhookSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: Schema.Types.ObjectId,
-  deletedAt: true,
-})
+WebhookSchema.plugin(softDeletionPlugin)
 
 const WebhookModel = model<WebhookDoc>('v3_Webhook', WebhookSchema)
 

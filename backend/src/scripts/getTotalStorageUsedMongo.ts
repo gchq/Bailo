@@ -8,8 +8,7 @@ async function main() {
   await connectToMongoose()
 
   const existingResults = await FileModel.find({})
-  // mongoose-delete plugin doesn't have correct typing so cast to any
-  const deletedResults = await (FileModel as any).findDeleted()
+  const deletedResults = await FileModel.find({ deleted: true })
 
   setTimeout(disconnectFromMongoose, 50)
 

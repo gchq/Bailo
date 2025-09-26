@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
+import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
 import { semverObjectToString, semverStringToObject } from '../services/release.js'
 
 // This interface stores information about the properties on the base object.
@@ -88,12 +88,7 @@ const ReleaseSchema = new Schema<ReleaseDoc & { semver: string | SemverObject }>
   },
 )
 
-ReleaseSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: Schema.Types.ObjectId,
-  deletedAt: true,
-})
+ReleaseSchema.plugin(softDeletionPlugin)
 ReleaseSchema.index({ modelId: 1, semver: 1 }, { unique: true })
 
 const ReleaseModel = model<ReleaseDoc>('v2_Release', ReleaseSchema)

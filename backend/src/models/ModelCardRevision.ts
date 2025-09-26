@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
+import { SoftDeleteDocument, softDeletionPlugin } from '../plugins/softDeletePlugin.js'
 import { ModelCardInterface } from './Model.js'
 
 // This interface stores information about the properties on the base object.
@@ -38,12 +38,7 @@ const ModelCardRevisionSchema = new Schema<ModelCardRevisionDoc>(
 // to learn more.
 ModelCardRevisionSchema.index({ modelId: 1, version: 1 }, { unique: true })
 
-ModelCardRevisionSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: String,
-  deletedAt: true,
-})
+ModelCardRevisionSchema.plugin(softDeletionPlugin)
 
 const ModelCardRevisionModel = model<ModelCardRevisionDoc>('v2_Model_Card_Revision', ModelCardRevisionSchema)
 
