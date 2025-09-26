@@ -61,7 +61,9 @@ export async function extractTarGzStream(
   return new Promise((resolve, reject) => {
     let aborted = false
     const abort = (err?: unknown) => {
-      if (aborted) return
+      if (aborted) {
+        return
+      }
       aborted = true
       // destroy underlying streams immediately
       tarGzStream.destroy()
