@@ -31,6 +31,7 @@ import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
+import { deleteInference } from './routes/v2/model/inferencing/deleteInferenceService.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
 import { getInferences } from './routes/v2/model/inferencing/getInferenceServices.js'
 import { postInference } from './routes/v2/model/inferencing/postInferenceService.js'
@@ -171,6 +172,7 @@ if (!config.ui?.inference || config.ui.inference?.enabled) {
   server.get('/api/v2/model/:modelId/inference/:image/:tag', ...getInference)
   server.post('/api/v2/model/:modelId/inference', ...postInference)
   server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
+  server.delete('/api/v2/model/:modelId/inference/:image/:tag', ...deleteInference)
 }
 
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
