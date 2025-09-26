@@ -43,7 +43,13 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           options={[`${showFilePreview ? 'Close file preview' : 'Preview file'}`]}
           onPrimaryButtonClick={() =>
             downloadFile(
-              getKubernetesSecretConfig(token.description, uiConfig.registry.host, token.accessKey, token.secretKey, secretName),
+              getKubernetesSecretConfig(
+                token.description,
+                uiConfig.registry.host,
+                token.accessKey,
+                token.secretKey,
+                secretName,
+              ),
               configFileName,
             )
           }
@@ -53,7 +59,13 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
         </SplitButton>
         {showFilePreview && (
           <CodeSnippet disableVisibilityButton fileName={configFileName} onClose={() => setShowFilePreview(false)}>
-            {getKubernetesSecretConfig(token.description, uiConfig.registry.host, token.accessKey, token.secretKey, secretName)}
+            {getKubernetesSecretConfig(
+              token.description,
+              uiConfig.registry.host,
+              token.accessKey,
+              token.secretKey,
+              secretName,
+            )}
           </CodeSnippet>
         )}
       </Stack>
