@@ -19,6 +19,7 @@ import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
+import { removeResponsesByParentIds } from './response.js'
 import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
 import { getSchemaById } from './schema.js'
 import { sendWebhooks } from './webhook.js'
@@ -97,10 +98,9 @@ export async function removeAccessRequest(user: UserInterface, accessRequestId: 
     (session) => accessRequest.delete(session),
     (session) => removeAccessRequestReviews(accessRequestId, session),
     (session) =>
-      ResponseModel.updateMany(
-        { parentId: [...reviewsForAccessRequest.map((review) => review['_id']), accessRequest._id] },
-        { deleted: true },
-        { session },
+      removeResponsesByParentIds(
+        [...reviewsForAccessRequest.map((review) => review['_id']), accessRequestId] as string[],
+        session,
       ),
   ])
 
