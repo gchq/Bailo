@@ -22,7 +22,7 @@ export function useHeadReviewRequestsForUser(open?: boolean) {
       headers: any
     },
     ErrorInfo
-  >(`/api/v2/reviews?${qs.stringify(queryParams)}`, fetcherHeaders)
+  >(['head', `/api/v2/reviews?${qs.stringify(queryParams)}`], ([, url]: string) => fetcherHeaders(url))
 
   return {
     mutateReviews: mutate,
@@ -33,8 +33,16 @@ export function useHeadReviewRequestsForUser(open?: boolean) {
 }
 
 export function useGetReviewRequestsForUser(open?: boolean) {
-  const queryParams = {
-    ...(open && { open }),
+  let queryParams: { open?: boolean }
+  switch (open) {
+    case true:
+      queryParams = { open: true }
+      break
+    case false:
+      queryParams = { open: false }
+      break
+    default:
+      queryParams = {}
   }
 
   const { data, isLoading, error, mutate } = useSWR<
