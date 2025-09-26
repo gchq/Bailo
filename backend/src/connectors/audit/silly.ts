@@ -63,6 +63,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onViewInference(_req: Request, _inferences: InferenceDoc) {}
   onUpdateInference(_req: Request, _inferences: InferenceDoc) {}
   onCreateInference(_req: Request, _inferences: InferenceDoc) {}
+  onDeleteInference(_req: Request, _inferences: InferenceDoc) {}
   onCreateS3Export(_req: Request, _modelId: string, _semvers?: string[]) {}
   onCreateImport(
     _req: Request,

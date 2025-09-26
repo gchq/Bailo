@@ -1,4 +1,4 @@
-import { createInferenceService, updateInferenceService } from '../clients/inferencing.js'
+import { createInferenceService, deleteInferencingService, updateInferenceService } from '../clients/inferencing.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import InferenceModel, { InferenceDoc, InferenceInterface } from '../models/Inference.js'
@@ -135,4 +135,22 @@ export async function updateInference(
   }
 
   return updatedInference
+}
+
+export async function removeInference(user: UserInterface, modelId: string, image: string, tag: string) {
+  const model = await getModelById(user, modelId)
+
+  const auth = await authorisation.model(user, model, ModelAction.Delete)
+
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
+
+  const inference = await getInferenceByImage(user, modelId, image, tag)
+
+  await deleteInferencingService(image)
+
+  await inference.delete()
+
+  return inference
 }

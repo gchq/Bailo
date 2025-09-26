@@ -7,6 +7,7 @@ export const ModelAction = {
   Write: 'model:write',
   Import: 'model:import',
   Export: 'model:export',
+  Delete: 'model:delete',
 } as const
 export type ModelActionKeys = (typeof ModelAction)[keyof typeof ModelAction]
 
@@ -80,6 +81,7 @@ export const ActionLookup = {
   [ModelAction.View]: TokenActions.ModelRead.id,
   [ModelAction.Update]: TokenActions.ModelWrite.id,
   [ModelAction.Write]: TokenActions.ModelWrite.id,
+  [ModelAction.Delete]: TokenActions.ModelWrite.id,
 
   [ReleaseAction.Create]: TokenActions.ReleaseWrite.id,
   [ReleaseAction.View]: TokenActions.ReleaseRead.id,
