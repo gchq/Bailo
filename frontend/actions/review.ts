@@ -13,10 +13,7 @@ import { ErrorInfo, fetcher, fetcherHeaders } from '../utils/fetcher'
 const emptyReviewList = []
 
 export function useHeadReviewRequestsForUser(open?: boolean) {
-  let queryParams: { open?: boolean } = {}
-  if (open !== undefined) {
-    queryParams = { open }
-  }
+  const queryParams = { ...(open !== undefined && { open }) }
 
   const { data, isLoading, error, mutate } = useSWR<
     {
@@ -34,10 +31,7 @@ export function useHeadReviewRequestsForUser(open?: boolean) {
 }
 
 export function useGetReviewRequestsForUser(open?: boolean) {
-  let queryParams: { open?: boolean } = {}
-  if (open !== undefined) {
-    queryParams = { open }
-  }
+  const queryParams = { ...(open !== undefined && { open }) }
   const { data, isLoading, error, mutate } = useSWR<
     {
       reviews: ReviewRequestInterface[]
