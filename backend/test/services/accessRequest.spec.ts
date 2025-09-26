@@ -137,7 +137,7 @@ describe('services > accessRequest', () => {
 
   test('removeAccessRequest > success', async () => {
     reviewModelMocks.find.mockResolvedValue([])
-    responseModelMocks.updateMany.mockResolvedValue([])
+    responseModelMocks.find.mockResolvedValue([])
     expect(await removeAccessRequest({} as any, 'test')).toStrictEqual({ accessRequestId: 'test' })
   })
 
