@@ -200,13 +200,13 @@ describe('services > importers > imageImporter', () => {
       'importId',
     )
 
+    await expect(promise).rejects.toThrowError('Manifest file (manifest.json) missing or invalid in Tarball file.')
     expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
     expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
     expect(mockJson.json).not.toBeCalled()
     expect(registryMocks.doesImageLayerExist).not.toBeCalled()
     expect(typeguardMocks.hasKeysOfType).toBeCalledTimes(1)
     expect(registryMocks.putImageManifest).not.toBeCalled()
-    expect(promise).rejects.toThrowError('Manifest file (manifest.json) missing or invalid in Tarball file.')
   })
 
   test('importCompressedRegistryImage > invalid distributionPackageName', async () => {
@@ -220,13 +220,13 @@ describe('services > importers > imageImporter', () => {
       'importId',
     )
 
+    await expect(promise).rejects.toThrowError('Distribution Package Name must include a tag.')
     expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
     expect(tarballMock.extractTarGzStream).not.toBeCalled()
     expect(mockJson.json).not.toBeCalled()
     expect(registryMocks.doesImageLayerExist).not.toBeCalled()
     expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
     expect(registryMocks.putImageManifest).not.toBeCalled()
-    expect(promise).rejects.toThrowError('Distribution Package Name must include a tag.')
   })
 
   test('importDocuments > error on invalid file entry name', async () => {
@@ -257,12 +257,12 @@ describe('services > importers > imageImporter', () => {
       'importId',
     )
 
+    await expect(promise).rejects.toThrowError('Cannot parse compressed image: unrecognised contents.')
     expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
     expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
     expect(mockJson.json).not.toBeCalled()
     expect(registryMocks.doesImageLayerExist).not.toBeCalled()
     expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
     expect(registryMocks.putImageManifest).not.toBeCalled()
-    expect(promise).rejects.toThrowError('Cannot parse compressed image: unrecognised contents.')
   })
 })
