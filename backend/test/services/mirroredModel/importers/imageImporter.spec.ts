@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { UserInterface } from '../../../../src/models/User.js'
 import { importCompressedRegistryImage } from '../../../../src/services/mirroredModel/importers/imageImporter.js'
+import { InternalError } from '../../../../src/utils/error.js'
 import { MockReadable, MockWritable } from '../../../testUtils/streams.js'
 
 const mockTarStream = {
@@ -229,7 +230,7 @@ describe('services > importers > imageImporter', () => {
     expect(registryMocks.putImageManifest).not.toBeCalled()
   })
 
-  test('importDocuments > error on invalid file entry name', async () => {
+  test('importCompressedRegistryImage > error on invalid file entry name', async () => {
     tarballMock.extractTarGzStream.mockImplementation(
       (
         _tarGzStream,
@@ -262,6 +263,59 @@ describe('services > importers > imageImporter', () => {
     expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
     expect(mockJson.json).not.toBeCalled()
     expect(registryMocks.doesImageLayerExist).not.toBeCalled()
+    expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
+    expect(registryMocks.putImageManifest).not.toBeCalled()
+  })
+
+  test('importCompressedRegistryImage > handle registry error', async () => {
+    registryMocks.putImageBlob.mockImplementationOnce(async () => {
+      throw InternalError('Unrecognised response headers when putting image blob.')
+    })
+    tarballMock.extractTarGzStream.mockImplementation(
+      async (_tarGzStream, entryListener, errorListener = (err, _resolve, reject) => reject(err), _finishListener) => {
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise(async (resolve, reject) => {
+          const next = (err?: unknown) => {
+            if (err) {
+              // simulate tar-stream propagating error from next()
+              throw err
+            }
+          }
+
+          try {
+            await entryListener(
+              {
+                name: 'blobs/sha256/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+                type: 'file',
+                size: 123,
+              },
+              {},
+              next,
+            )
+            resolve('ok')
+          } catch (err) {
+            errorListener(err, resolve, reject)
+          }
+        })
+      },
+    )
+
+    const promise = importCompressedRegistryImage(
+      {} as UserInterface,
+      {} as Readable,
+      'modelId',
+      'distributionPackageName',
+      'importId',
+    )
+
+    await expect(promise).rejects.toThrowError('Unrecognised response headers when putting image blob.')
+    expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
+    expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
+    expect(mockJson.json).not.toBeCalled()
+    expect(registryMocks.doesImageLayerExist).toBeCalledTimes(1)
+    expect(registryMocks.initialiseImageUpload).toBeCalledTimes(1)
+    expect(registryMocks.putImageBlob).toBeCalledTimes(1)
+    expect(streamPromisesMocks.finished).not.toBeCalled()
     expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
     expect(registryMocks.putImageManifest).not.toBeCalled()
   })
