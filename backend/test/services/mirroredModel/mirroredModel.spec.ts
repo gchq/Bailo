@@ -1,5 +1,6 @@
+import { PassThrough, Readable } from 'node:stream'
+
 import PQueue from 'p-queue'
-import { PassThrough, Readable } from 'stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { Response } from '../../../src/connectors/authorisation/base.js'
