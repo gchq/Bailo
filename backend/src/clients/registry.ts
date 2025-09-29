@@ -317,7 +317,7 @@ export async function uploadLayerMonolithic(
 
   if (!isUploadLayerMonolithicResponse(headers)) {
     abort()
-    throw InternalError('Unrecognised response headers when putting image manifest.', {
+    throw InternalError('Unrecognised response headers when putting image blob.', {
       headers,
       uploadURL,
       digest,
