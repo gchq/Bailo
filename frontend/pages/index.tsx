@@ -78,6 +78,20 @@ export default function Marketplace() {
     debouncedFilter,
   )
 
+  const {
+    models: mirroredModels,
+    isModelsError: isMirroredModelsError,
+    isModelsLoading: isMirroredModelsLoading,
+  } = useListModels(
+    EntryKind.MIRRORED_MODEL,
+    selectedRoles,
+    selectedTask,
+    selectedLibraries,
+    selectedOrganisations,
+    selectedStates,
+    debouncedFilter,
+  )
+
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
 
   const theme = useTheme()
@@ -223,11 +237,7 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isReviewRolesLoading) {
-    return <Loading />
-  }
-
-  if (isUiConfigLoading) {
+  if (isReviewRolesLoading || isUiConfigLoading) {
     return <Loading />
   }
 
@@ -385,12 +395,12 @@ export default function Marketplace() {
                   />
                 </Tabs>
               </Box>
-              {isModelsLoading && <Loading />}
+              {isModelsLoading || (isMirroredModelsLoading && <Loading />)}
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
-                    entries={models}
-                    entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
+                    entries={[...models, ...mirroredModels]}
+                    entriesErrorMessage={`${isModelsError ? isModelsError.info.message : ''} ${isMirroredModelsError ? isMirroredModelsError.info.message : ''}`}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
                     selectedOrganisations={selectedOrganisations}

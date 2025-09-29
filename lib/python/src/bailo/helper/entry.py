@@ -77,6 +77,8 @@ class Entry:
                 schema_id = MinimalSchema.MODEL
             elif self.kind == EntryKind.DATACARD:
                 schema_id = MinimalSchema.DATACARD
+            elif self.kind == EntryKind.MIRRORED_MODEL:
+                schema_id = MinimalSchema.MODEL
             else:
                 raise NotImplementedError(f"No default schema set for {self.kind=}")
 

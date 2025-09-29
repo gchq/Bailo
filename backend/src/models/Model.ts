@@ -11,6 +11,7 @@ export type EntryVisibilityKeys = (typeof EntryVisibility)[keyof typeof EntryVis
 export const EntryKind = {
   Model: 'model',
   DataCard: 'data-card',
+  MirroredModel: 'mirrored-model',
 } as const
 
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
