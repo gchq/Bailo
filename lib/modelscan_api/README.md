@@ -13,7 +13,8 @@ This directory provides all of the necessary functionality to interact with
 > model formats. ModelScan currently supports: H5, Pickle, and SavedModel formats. This protects you when using PyTorch,
 > TensorFlow, Keras, Sklearn, XGBoost, with more on the way.
 
-This API is used as a filescanner and is not published to PyPI.
+This API is used as a filescanner and is not published to PyPI. The built image is published to
+[GHCR bailo_modelscan](https://github.com/gchq/Bailo/pkgs/container/bailo_modelscan).
 
 ## Docker
 
@@ -49,21 +50,21 @@ Optionally, create and populate a `.env` file to override and set any [Settings]
 variables, including sensitive properties as per
 [FastAPI's Reading a .env file docs](https://fastapi.tiangolo.com/advanced/settings/#reading-a-env-file).
 
-Run:
+Build and run [Dockerfile](./Dockerfile).
 
 ```bash
-fastapi run bailo_modelscan_api/main.py
+docker build -t modelscan_rest_api:latest .
+docker run -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
 ```
 
 Connect via the local endpoint: `http://127.0.0.1:8000`
 
 View the swagger docs: `http://127.0.0.1:8000/docs`
 
-Alternatively, build and run [Dockerfile](./Dockerfile).
+Alternatively, run:
 
 ```bash
-docker build -t modelscan_rest_api:latest .
-docker run -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
+fastapi run bailo_modelscan_api/main.py
 ```
 
 ## Development
@@ -98,16 +99,18 @@ refer to [test_integration](./tests/test_integration/README.md) for details.
 
 To run in [dev mode](https://fastapi.tiangolo.com/fastapi-cli/#fastapi-dev):
 
-```bash
-fastapi dev bailo_modelscan_api/main.py
-```
-
-Alternatively, build and run [Dockerfile](./Dockerfile) using `--target dev` which mounts the `bailo_modelscan_api`
-directory as a volume, so allows for real-time changes with FastAPI running in dev mode.
+Build and run [Dockerfile](./Dockerfile) using `--target dev` which mounts the `bailo_modelscan_api` directory as a
+volume, so allows for real-time changes with FastAPI running in dev mode.
 
 ```bash
 docker build -t modelscan_rest_api:latest --target dev .
 docker run -v ./bailo_modelscan_api:/app/bailo_modelscan_api -p 0.0.0.0:3311:3311 modelscan_rest_api:latest
+```
+
+Alternatively, run:
+
+```bash
+fastapi dev bailo_modelscan_api/main.py
 ```
 
 <!-- MARKDOWN LINKS & IMAGES -->
