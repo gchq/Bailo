@@ -226,6 +226,17 @@ export default function Marketplace() {
     router.replace('/', undefined, { shallow: true })
   }
 
+  const combinedModelErrorMessage = useMemo(() => {
+    let errorMessage = ''
+    if (isModelsError) {
+      errorMessage += `${isModelsError.info.message}. `
+    }
+    if (isMirroredModelsError) {
+      errorMessage += `${isMirroredModelsError.info.message}. `
+    }
+    return errorMessage
+  }, [isMirroredModelsError, isModelsError])
+
   useEffect(() => {
     if (reviewRoles) {
       setRoleOptions([
@@ -400,7 +411,7 @@ export default function Marketplace() {
                 <div data-test='modelListBox'>
                   <EntryList
                     entries={[...models, ...mirroredModels]}
-                    entriesErrorMessage={`${isModelsError ? isModelsError.info.message : ''} ${isMirroredModelsError ? isMirroredModelsError.info.message : ''}`}
+                    entriesErrorMessage={combinedModelErrorMessage || ''}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
                     selectedOrganisations={selectedOrganisations}
