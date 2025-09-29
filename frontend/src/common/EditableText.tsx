@@ -1,15 +1,17 @@
 import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
+import Loading from 'src/common/Loading'
 import RichTextEditor from 'src/common/RichTextEditor'
 
 interface EditableTextProps {
-  value: string
-  onSubmit: (newValue: string) => void
+  value?: string
+  onSubmit: (newValue: string | undefined) => void
   tooltipText?: string
   submitButtonText?: string
   multiline?: boolean
   richText?: boolean
+  loading?: boolean
 }
 
 export default function EditableText({
@@ -19,6 +21,7 @@ export default function EditableText({
   submitButtonText = 'Submit',
   multiline = false,
   richText = false,
+  loading = false,
 }: EditableTextProps) {
   const [isEditMode, setIsEditMode] = useState(false)
   const [newValue, setNewValue] = useState(value)
@@ -30,7 +33,9 @@ export default function EditableText({
 
   const handleSubmit = () => {
     setIsEditMode(false)
-    onSubmit(newValue)
+    if (newValue !== value) {
+      onSubmit(newValue)
+    }
   }
 
   const submitButtons = useMemo(() => {
@@ -52,10 +57,10 @@ export default function EditableText({
         <Stack direction='row' spacing={1} alignItems='center'>
           <Tooltip title={tooltipText}>
             <IconButton onClick={() => setIsEditMode(true)}>
-              <EditIcon color='primary' fontSize='small' />
+              {loading ? <Loading /> : <EditIcon color='primary' fontSize='small' />}
             </IconButton>
           </Tooltip>
-          <Typography>{value}</Typography>
+          <Typography fontStyle={!value ? 'italic' : 'normal'}>{value || 'Empty'}</Typography>
         </Stack>
       )}
       {isEditMode && (
@@ -63,7 +68,7 @@ export default function EditableText({
           {richText ? (
             <Stack>
               <RichTextEditor
-                value={newValue}
+                value={newValue || ''}
                 onChange={(input) => setNewValue(input)}
                 aria-label='Schema description'
               />

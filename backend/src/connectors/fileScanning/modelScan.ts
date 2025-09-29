@@ -1,12 +1,15 @@
+import PQueue from 'p-queue'
 import { Readable } from 'stream'
 
 import { getModelScanInfo, scanStream } from '../../clients/modelScan.js'
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
-import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
+import config from '../../utils/config.js'
+import { BaseQueueFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
-export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
+export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnector {
+  queue: PQueue = new PQueue({ concurrency: config.avScanning.modelscan.concurrency })
   toolName: string = 'ModelScan'
   version: string | undefined = undefined
 
@@ -20,17 +23,17 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
     return this
   }
 
-  async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
+  async _scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
     await this.init()
     const scannerInfo = this.info()
     if (!scannerInfo.scannerVersion) {
-      return await this.scanError('Could not use ModelScan as it is not running.')
+      return await this.scanError('Could not use ModelScan as it is not running.', { ...scannerInfo })
     }
 
     const getObjectStreamResponse = await getObjectStream(file.path)
     const s3Stream = getObjectStreamResponse.Body as Readable | null
     if (!s3Stream) {
-      return await this.scanError(`Stream for file ${file.path} is not available`)
+      return await this.scanError(`Stream for file ${file.path} is not available`, { file, ...scannerInfo })
     }
 
     try {
@@ -40,6 +43,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
         return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
           errors: scanResults.errors,
           file,
+          ...scannerInfo,
         })
       }
 
@@ -48,10 +52,7 @@ export class ModelScanFileScanningConnector extends BaseFileScanningConnector {
       const viruses: string[] = isInfected
         ? scanResults.issues.map((issue) => `${issue.severity}: ${issue.description}. ${issue.scanner}`)
         : []
-      log.info(
-        { modelId: file.modelId, fileId: file._id.toString(), name: file.name, result: { isInfected, viruses } },
-        'Scan complete.',
-      )
+      log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
       return [
         {
           ...scannerInfo,

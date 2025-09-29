@@ -52,13 +52,9 @@ export default function SchemaTab() {
   )
 
   return (
-    <Stack
-      direction={{ xs: 'column', sm: 'row' }}
-      spacing={{ sm: 2 }}
-      divider={<Divider orientation='vertical' flexItem />}
-    >
+    <Stack direction={{ xs: 'column', sm: 'row' }} divider={<Divider orientation='vertical' flexItem />}>
       <List sx={{ width: '200px' }}>{listButtons}</List>
-      <Container sx={{ my: 2 }}>{schemaLists}</Container>
+      <Container sx={{ m: 2 }}>{schemaLists}</Container>
     </Stack>
   )
 }

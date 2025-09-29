@@ -1,6 +1,9 @@
+import PQueue from 'p-queue'
+
 import { FileInterface } from '../../models/File.js'
 import { ScanInterface } from '../../models/Scan.js'
 import log from '../../services/log.js'
+
 export type FileScanResult = Pick<
   ScanInterface,
   'toolName' | 'scannerVersion' | 'state' | 'isInfected' | 'viruses' | 'lastRunAt'
@@ -37,5 +40,25 @@ export abstract class BaseFileScanningConnector {
         lastRunAt: new Date(),
       },
     ]
+  }
+}
+
+export abstract class BaseQueueFileScanningConnector extends BaseFileScanningConnector {
+  abstract readonly queue: PQueue
+
+  abstract _scan(file: FileInterface): Promise<FileScanResult[]>
+
+  async scan(file: FileInterface): Promise<FileScanResult[]> {
+    log.debug({ file, ...this.info(), queueSize: this.queue.size }, 'Queueing scan.')
+    const scanResult = await this.queue
+      .add(async () => this._scan(file))
+      .catch((error) => {
+        return this.scanError('Queued scan threw an error.', { error, file })
+      })
+    // return type of `queue.add()` is Promise<void | ...> so reject void responses
+    if (scanResult === null || typeof scanResult !== 'object') {
+      return this.scanError('Queued scan failed to correctly return.', { file })
+    }
+    return scanResult
   }
 }
