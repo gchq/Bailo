@@ -11,11 +11,12 @@ import { parse } from '../../../../utils/validate.js'
 
 export const deleteInferenceSchema = z.object({
   params: z.object({
-    modelId: z.string(),
-    image: z.string(),
-    tag: z.string(),
+    modelId: z.string().min(1),
+    image: z.string().min(1),
+    tag: z.string().min(1),
   }),
 })
+
 if (config.ui?.inference?.enabled) {
   registerPath({
     method: 'delete',

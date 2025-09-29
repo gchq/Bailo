@@ -1,4 +1,4 @@
-import { createInferenceService, deleteInferencingService, updateInferenceService } from '../clients/inferencing.js'
+import { createInferenceService, deleteInferenceService, updateInferenceService } from '../clients/inferencing.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import InferenceModel, { InferenceDoc, InferenceInterface } from '../models/Inference.js'
@@ -148,7 +148,7 @@ export async function removeInference(user: UserInterface, modelId: string, imag
 
   const inference = await getInferenceByImage(user, modelId, image, tag)
 
-  await deleteInferencingService(image)
+  await deleteInferenceService(image)
 
   await inference.delete()
 

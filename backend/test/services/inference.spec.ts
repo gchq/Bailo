@@ -6,6 +6,7 @@ import {
   createInference,
   getInferenceByImage,
   getInferencesByModel,
+  removeInference,
   updateInference,
 } from '../../src/services/inference.js'
 
@@ -47,6 +48,7 @@ const inference = {
 const inferenceServiceMocks = vi.hoisted(() => ({
   createInferenceService: vi.fn(() => ({ ok: true, text: vi.fn(), json: vi.fn() })),
   updateInferenceService: vi.fn(() => ({ ok: true, text: vi.fn(), json: vi.fn() })),
+  deleteInferenceService: vi.fn(() => ({ ok: true, text: vi.fn(), json: vi.fn() })),
 }))
 
 vi.mock('../../src/clients/inferencing.js', () => inferenceServiceMocks)
@@ -150,6 +152,33 @@ describe('services > inference', () => {
         },
       }),
     ).rejects.toThrowError(/^You do not have permission/)
+  })
+
+  test('removeInference > success', async () => {
+    //mock
+    //call
+    //expect delete to be called
+    await removeInference({} as any, 'model', 'image', 'tag')
+    expect(inferenceModelMocks.delete).toBeCalled()
+  })
+
+  test('removeInference > inferencing service does not exist', async () => {
+    //mock
+    //call
+    //expect error to be thrown
+    vi.mocked(inferenceModelMocks.findOne).mockResolvedValueOnce()
+
+    await expect(removeInference({} as any, 'model', 'image', 'tag')).rejects.toThrowError(
+      'The requested inferencing service was not found.',
+    )
+  })
+
+  test('removeInference > no perms', async () => {
+    //mock
+    //call
+    //expect error to be thrown
+    vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
+    await expect(removeInference({} as any, 'model', 'image', 'tag')).rejects.toThrowError('You do not have permission')
   })
 
   test('getInferenceByImage > good', async () => {

@@ -60,7 +60,7 @@ export async function updateInferenceService(inferenceServiceParams: InferenceSe
   return res.json()
 }
 
-export async function deleteInferencingService(image: string) {
+export async function deleteInferenceService(image: string) {
   const authorisationToken = config.inference.authorisationToken
 
   if (authorisationToken === '') {
