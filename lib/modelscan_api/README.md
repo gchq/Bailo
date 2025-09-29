@@ -1,6 +1,6 @@
 # ModelScan REST API
 
-![Python](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue.svg?style=for-the-badge)
+![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue.svg?style=for-the-badge)
 ![Python](https://img.shields.io/badge/version-1.0.0-orange.svg?style=for-the-badge)
 [![License][license-shield]][license-url] [![Contributor Covenant][code-of-conduct-shield]][code-of-conduct-url]
 
@@ -28,7 +28,7 @@ Note that the Docker containers run on port `3311` rather than `8000`, so adjust
 
 <!-- prettier-ignore-start -->
 > [!IMPORTANT]
-> Python 3.9 to 3.12 is required
+> Python 3.10 to 3.12 is required
 <!-- prettier-ignore-end -->
 
 Create and activate a virtual environment
