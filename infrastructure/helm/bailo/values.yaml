@@ -301,6 +301,7 @@ modelMirror:
   import:
     enabled: false
   export:
+    concurrency: 5
     enabled: false
     disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting'
     kmsSignature:
@@ -327,6 +328,7 @@ clamav:
   enabled: false
   runAsUser: 1002
   image: clamav/clamav:1.4.3_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
+  concurrency: 2
   port: 3310
   accessModes:
     - ReadWriteOnce
@@ -334,6 +336,7 @@ clamav:
 
 modelscan:
   enabled: false
+  concurrency: 2
   protocol: http
   port: 3311
   accessModes:

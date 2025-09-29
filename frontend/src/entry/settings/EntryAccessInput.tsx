@@ -1,10 +1,19 @@
-import { Autocomplete, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField } from '@mui/material'
+import {
+  Autocomplete,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
 import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import EntityItem from 'src/entry/settings/EntityItem'
 import ManualEntityInput from 'src/entry/settings/ManualEntityInput'
-import MessageAlert from 'src/MessageAlert'
 import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, SystemRole } from 'types/types'
 import { toSentenceCase } from 'utils/stringUtils'
 
@@ -96,36 +105,37 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
 
   return (
     <Stack spacing={2}>
-      {isUsersError && isUsersError.status !== 413 ? (
-        <MessageAlert message={isUsersError.info.message} severity='error' />
-      ) : (
-        <Autocomplete
-          open={open}
-          onOpen={() => setOpen(true)}
-          onClose={() => setOpen(false)}
-          size='small'
-          noOptionsText={noOptionsText}
-          onInputChange={debounceOnInputChange}
-          groupBy={(option) => option.kind.toUpperCase()}
-          getOptionLabel={(option) => option.id}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          onChange={onUserChange}
-          options={users}
-          filterOptions={(options) =>
-            options.filter(
-              (option) => !collaborators.find((collaborator) => collaborator.entity === `${option.kind}:${option.id}`),
-            )
-          }
-          loading={isUsersLoading && userListQuery.length >= 3}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              autoFocus
-              label={`Add a user or group to the ${toSentenceCase(entryKind)} access list`}
-            />
-          )}
-        />
+      {isUsersError && isUsersError.status !== 413 && (
+        <Typography variant='caption' color='error'>
+          {isUsersError.info.message}
+        </Typography>
       )}
+      <Autocomplete
+        open={open}
+        onOpen={() => setOpen(true)}
+        onClose={() => setOpen(false)}
+        size='small'
+        noOptionsText={noOptionsText}
+        onInputChange={debounceOnInputChange}
+        groupBy={(option) => option.kind.toUpperCase()}
+        getOptionLabel={(option) => option.id}
+        isOptionEqualToValue={(option, value) => option.id === value.id}
+        onChange={onUserChange}
+        options={users}
+        filterOptions={(options) =>
+          options.filter(
+            (option) => !collaborators.find((collaborator) => collaborator.entity === `${option.kind}:${option.id}`),
+          )
+        }
+        loading={isUsersLoading && userListQuery.length >= 3}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            autoFocus
+            label={`Add a user or group to the ${toSentenceCase(entryKind)} access list`}
+          />
+        )}
+      />
       <ManualEntityInput onAddEntityManually={handleAddEntityManually} errorMessage={manualEntityInputErrorMessage} />
       {entryRoles && (
         <Table>

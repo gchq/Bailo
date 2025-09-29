@@ -1,9 +1,10 @@
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { AccessRequestDoc } from '../models/AccessRequest.js'
+import AccessRequestModel, { AccessRequestDoc } from '../models/AccessRequest.js'
 import ModelModel, { CollaboratorEntry, ModelDoc, ModelInterface } from '../models/Model.js'
-import { ReleaseDoc } from '../models/Release.js'
+import ReleaseModel, { ReleaseDoc } from '../models/Release.js'
+import ReviewModel from '../models/Review.js'
 import Review, { ReviewDoc, ReviewInterface } from '../models/Review.js'
 import ReviewRoleModel, { ReviewRoleDoc, ReviewRoleInterface } from '../models/ReviewRole.js'
 import SchemaModel from '../models/Schema.js'
@@ -268,6 +269,46 @@ export async function createReviewRole(user: UserInterface, newReviewRole: Revie
   }
 }
 
+export type ReviewRoleInterfaceParams = Pick<
+  ReviewRoleInterface,
+  'name' | 'description' | 'defaultEntities' | 'systemRole'
+>
+
+export async function updateReviewRole(
+  user: UserInterface,
+  shortName: string,
+  updatedReviewRole: ReviewRoleInterfaceParams,
+) {
+  const reviewRole = await findReviewRole(user, shortName)
+
+  const auth = await authorisation.reviewRole(user, shortName, ReviewRoleAction.Update)
+
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, shortName })
+  }
+
+  Object.assign(reviewRole, updatedReviewRole)
+
+  await reviewRole.save()
+
+  return reviewRole
+}
+
+export async function findReviewRole(user: UserInterface, shortName: string) {
+  const auth = await authorisation.reviewRole(user, shortName, ReviewRoleAction.View)
+
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, shortName })
+  }
+  const reviewRole = await ReviewRoleModel.findOne({ shortName: shortName })
+
+  if (!reviewRole) {
+    throw NotFound(`The requested review role was not found`, { shortName })
+  }
+
+  return reviewRole
+}
+
 export async function findReviewRoles(schemaId?: string | string[]): Promise<ReviewRoleInterface[]> {
   let reviewRoles: ReviewRoleDoc[] = []
   let schemaIds: string[] = []
@@ -337,4 +378,44 @@ export async function removeReviewRole(user: UserInterface, reviewRoleShortName:
   }
 
   await reviewRole.delete()
+}
+
+export async function addReviewsForNewRole(user: UserInterface, newReviewRole: ReviewRoleInterface, model: ModelDoc) {
+  const releases = await ReleaseModel.find({ modelId: model.id })
+  const accessRequests = await AccessRequestModel.find({ modelId: model.id })
+  const reviews = await ReviewModel.find()
+
+  for (const release of releases) {
+    const validReviews = reviews.find(
+      (review) =>
+        review.role === newReviewRole.shortName && review.modelId === model.id && review.semver === release.semver,
+    )
+    if (!Array.isArray(validReviews) || validReviews.length === 0) {
+      const review = new Review({
+        semver: release.semver,
+        modelId: model.id,
+        kind: ReviewKind.Release,
+        role: newReviewRole.shortName,
+      })
+      await review.save()
+    }
+  }
+
+  for (const accessRequest of accessRequests) {
+    const validReviews = reviews.find(
+      (review) =>
+        review.role === newReviewRole.shortName &&
+        review.modelId === model.id &&
+        review.accessRequestId === accessRequest.id,
+    )
+    if (!Array.isArray(validReviews) || validReviews.length === 0) {
+      const review = new Review({
+        accessRequestId: accessRequest.id,
+        modelId: model.id,
+        kind: ReviewKind.Access,
+        role: newReviewRole.shortName,
+      })
+      await review.save()
+    }
+  }
 }
