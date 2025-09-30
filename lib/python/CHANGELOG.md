@@ -2,6 +2,11 @@
 
 All dates are formatted dd/mm/yyyy.
 
+## 3.1.2 30/09/2025
+
+- Fix broken `Client.put_file_scan` method.
+- Update package dependencies.
+
 ## 3.1.1 - 27/08/2025
 
 ### Changes
