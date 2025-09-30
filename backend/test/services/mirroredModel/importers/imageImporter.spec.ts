@@ -1,4 +1,5 @@
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
+
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { UserInterface } from '../../../../src/models/User.js'

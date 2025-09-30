@@ -632,9 +632,7 @@ class Client:
         :param file_id: Unique file ID
         :return: JSON response object
         """
-        return self.agent.put(
-            f"{self.url}/v2/filescanning/model/{model_id}/file/{file_id}/scan",
-        ).json()
+        return self.agent.put(f"{self.url}/v2/filescanning/model/{model_id}/file/{file_id}/scan", json={}).json()
 
     def post_access_request_review(
         self,

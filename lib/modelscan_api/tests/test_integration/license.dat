@@ -1,0 +1,7 @@
+SERVER pat   17003456 1700
+SERVER lee   17004355 1700
+SERVER terry 17007ea8 1700
+DAEMON GSI /etc/mydaemon
+FEATURE great_program gsi 1.000 01-jan-1989 10 1EF890030EABF324 ""
+FEATURE greater_program gsi 1.000 01-jan-1989 10 0784561FE98BA073 ""
+# from https://public.dhe.ibm.com/software/rational/docs/documentation/manuals/man_47/man5html/license.dat.htm#:~:text=SERVER%20pat%2017003456%201700%20SERVER,%2C%20license.options(5)

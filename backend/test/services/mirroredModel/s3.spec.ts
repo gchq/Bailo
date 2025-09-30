@@ -1,4 +1,5 @@
-import { PassThrough, Readable } from 'stream'
+import { PassThrough, Readable } from 'node:stream'
+
 import { describe, expect, test, vi } from 'vitest'
 
 import { uploadToS3 } from '../../../src/services/mirroredModel/s3.js'

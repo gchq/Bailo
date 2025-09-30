@@ -18,31 +18,28 @@ import { getModelById } from './model.js'
 
 // derived from https://pkg.go.dev/github.com/distribution/reference#pkg-overview
 const imageRegex =
-  /^((?:(?=[^:/]{1,253})(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(?:\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*(?::[0-9]{1,5})?\/)|)((?![._-])(?:[a-z0-9._-]*)(?<![._-])(?:\/(?![._-])[a-z0-9._-]*(?<![._-]))*)(?:(?:@((?![+.\-_])[A-Za-z][a-zA-Z0-9+.\-_]*(?<![+.\-_]):[0-9a-fA-F]{32,}))|)(?:(?::((?![.-])[a-zA-Z0-9_.-]{1,128}))|)$/
+  /^(?:(?<domain>(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)|(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(?::\d{1,5})|(?:\d{1,3}\.){3}\d{1,3}|\[(?:[0-9A-Fa-f:.]+)\])(?::\d{1,5})?)\/)?(?<path>[a-z0-9]+(?:(?:[_.]|__|-+)[a-z0-9]+)*(?:\/[a-z0-9]+(?:(?:[_.]|__|-+)[a-z0-9]+)*)*)(?::(?<tag>[\w][\w.-]{0,127}))?(?:@(?<digest>[A-Za-z][A-Za-z0-9]*(?:[+.\-_][A-Za-z][A-Za-z0-9]*)*:[0-9a-fA-F]{32,}))?$/
+
 export type DistributionPackageName =
   | { domain?: string; path: string; tag: string }
   | { domain?: string; path: string; digest: string }
+
 export function splitDistributionPackageName(distributionPackageName: string): DistributionPackageName {
   const split = imageRegex.exec(distributionPackageName)
-  // Group 3 is tag and 4 is digest. These can be empty strings to preserve indexing, but at least one must be present.
-  if (!split || split.length != 5 || !(split[3]?.length ^ split[4]?.length)) {
-    throw InternalError('Could not parse Distribution Package Name.', { distributionPackageName, split })
+  if (!split?.groups || !(split.groups.tag ? !split.groups.digest : split.groups.digest)) {
+    throw InternalError('Could not parse Distribution Package Name.', {
+      distributionPackageName,
+      split,
+    })
   }
-  // safely trim final / from domain
-  split[1] = split[1].slice(0, -1)
-  // tag
-  if (split[4] && split[4].length) {
-    // `path` ends up in group 1 when there's no domain, otherwise is in group 2
-    if (split[2].length) {
-      return { domain: split[1], path: split[2], tag: split[4] }
-    }
-    return { domain: '', path: split[1], tag: split[4] }
+
+  const domain = split.groups.domain ?? undefined
+  const path = split.groups.path
+  if (split.groups.tag) {
+    return { ...(domain && { domain }), path, tag: split.groups.tag }
+  } else {
+    return { ...(domain && { domain }), path, digest: split.groups.digest }
   }
-  // digest
-  if (split[2].length) {
-    return { domain: split[1], path: split[2], digest: split[3] }
-  }
-  return { domain: '', path: split[1], digest: split[3] }
 }
 
 export function joinDistributionPackageName(distributionPackageName: DistributionPackageName) {
