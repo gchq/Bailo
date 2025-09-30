@@ -127,6 +127,10 @@ export class BasicAuthorisationConnector {
           return { id: model.id, success: false, info: 'You do not have permission to update a model card.' }
         }
 
+        if (ModelAction.Delete === action && (await missingRequiredRole(user, model, ['owner']))) {
+          return { id: model.id, success: false, info: 'You do not have permission to delete a model card.' }
+        }
+
         if (
           ModelAction.Update === action &&
           (await missingRequiredRole(user, model, ['owner'])) &&

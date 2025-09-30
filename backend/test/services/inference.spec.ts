@@ -155,17 +155,11 @@ describe('services > inference', () => {
   })
 
   test('removeInference > success', async () => {
-    //mock
-    //call
-    //expect delete to be called
     await removeInference({} as any, 'model', 'image', 'tag')
     expect(inferenceModelMocks.delete).toBeCalled()
   })
 
   test('removeInference > inferencing service does not exist', async () => {
-    //mock
-    //call
-    //expect error to be thrown
     vi.mocked(inferenceModelMocks.findOne).mockResolvedValueOnce()
 
     await expect(removeInference({} as any, 'model', 'image', 'tag')).rejects.toThrowError(
@@ -174,9 +168,6 @@ describe('services > inference', () => {
   })
 
   test('removeInference > no perms', async () => {
-    //mock
-    //call
-    //expect error to be thrown
     vi.mocked(authorisation.model).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
     await expect(removeInference({} as any, 'model', 'image', 'tag')).rejects.toThrowError('You do not have permission')
   })
