@@ -1,6 +1,6 @@
+import { PassThrough, pipeline, Readable, Writable } from 'node:stream'
 import zlib from 'node:zlib'
 
-import { PassThrough, pipeline, Readable, Writable } from 'stream'
 import { extract, Headers, pack } from 'tar-stream'
 import { promisify } from 'util'
 

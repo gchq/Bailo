@@ -1,6 +1,6 @@
+import { Readable } from 'node:stream'
 import { json } from 'node:stream/consumers'
 
-import { Readable } from 'stream'
 import { finished } from 'stream/promises'
 
 import { UserInterface } from '../../../models/User.js'
