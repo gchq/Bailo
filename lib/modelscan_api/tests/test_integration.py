@@ -34,8 +34,9 @@ app.add_middleware(
 client = TestClient(app)
 
 
-BIG_CONTENTS = b"\0" * 1024
+BIG_CONTENTS = b"\0" * 1001
 H5_MIME_TYPE = "application/x-hdf5"
+TXT_MIME_TYPE = "text/plain"
 OCTET_STREAM_TYPE = "application/octet-stream"
 
 
@@ -46,7 +47,7 @@ OCTET_STREAM_TYPE = "application/octet-stream"
         (
             "empty.txt",
             rb"",
-            "text/plain",
+            TXT_MIME_TYPE,
             {
                 "errors": [],
                 "issues": [],
@@ -176,6 +177,39 @@ OCTET_STREAM_TYPE = "application/octet-stream"
                     },
                 ],
                 "errors": [],
+            },
+        ),
+        (
+            "license.dat",
+            Path().cwd().joinpath("tests/test_integration/license.dat"),
+            TXT_MIME_TYPE,
+            {
+                "errors": [],
+                "issues": [],
+                "summary": {
+                    "absolute_path": ANY,
+                    "input_path": ANY,
+                    "modelscan_version": modelscan.__version__,
+                    "scanned": {"total_scanned": 0},
+                    "skipped": {
+                        "skipped_files": [
+                            {
+                                "category": "SCAN_NOT_SUPPORTED",
+                                "description": "Model Scan did not scan file",
+                                "source": ANY,
+                            }
+                        ],
+                        "total_skipped": 1,
+                    },
+                    "timestamp": ANY,
+                    "total_issues": 0,
+                    "total_issues_by_severity": {
+                        "CRITICAL": 0,
+                        "HIGH": 0,
+                        "LOW": 0,
+                        "MEDIUM": 0,
+                    },
+                },
             },
         ),
     ],
