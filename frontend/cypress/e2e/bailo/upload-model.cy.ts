@@ -57,6 +57,7 @@ describe('Create new model', () => {
       force: true,
     })
     cy.url().should('not.contain', '/schema')
+    cy.visit(`/model/${modelUuid}`)
     cy.contains('Edit model card', { timeout: 5000 })
   })
 
