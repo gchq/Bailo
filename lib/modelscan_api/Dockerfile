@@ -34,7 +34,9 @@ CMD ["python3", "/venv/bin/fastapi", "run", "bailo_modelscan_api/main.py", "--po
 FROM base AS dev
 
 COPY --from=build /venv /venv
-CMD ["python3", "/venv/bin/fastapi", "dev", "bailo_modelscan_api/main.py", "--port", "3311"]
+# Ensure app dir exists before mounting
+RUN mkdir -p /app/bailo_modelscan_api
+CMD ["python3", "/venv/bin/fastapi", "dev", "bailo_modelscan_api/main.py", "--host", "0.0.0.0", "--port", "3311"]
 
 FROM base AS prod
 
