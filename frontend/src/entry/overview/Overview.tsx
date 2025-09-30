@@ -23,6 +23,10 @@ export default function Overview({ entry, readOnly = false }: OverviewProps) {
     [entry.card],
   )
 
+  /* eslint-disable no-console */
+  console.log(page)
+  /* eslint-enable no-console */
+
   return entry.kind === EntryKind.MIRRORED_MODEL && !entry.card ? (
     <>
       {entry.kind === EntryKind.MIRRORED_MODEL && (
