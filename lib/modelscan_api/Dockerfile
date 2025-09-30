@@ -7,11 +7,12 @@ ARG PYTHONPATH
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-COPY requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m venv /venv && \
-    /venv/bin/pip install --upgrade pip setuptools wheel && \
-    /venv/bin/pip install -r /requirements.txt
+    /venv/bin/pip install --upgrade pip setuptools wheel
+
+COPY requirements.txt /requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip /venv/bin/pip install -r /requirements.txt
 
 FROM ubuntu:24.04 AS base
 ARG PYTHONPATH
