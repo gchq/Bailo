@@ -1,5 +1,6 @@
+import { PassThrough, Readable } from 'node:stream'
+
 import PQueue from 'p-queue'
-import { PassThrough, Readable } from 'stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { Response } from '../../../src/connectors/authorisation/base.js'
@@ -714,7 +715,8 @@ describe('services > mirroredModel', () => {
       expect(tarballMocks.createTarGzStreams).toBeCalledTimes(1)
       expect(s3Mocks.uploadToS3).toBeCalledTimes(1)
       expect(tarballMocks.pipeStreamToTarEntry).toBeCalledTimes(2)
-      expect(registryMocks.getImageBlob).toBeCalledTimes(1)
+      // 2 times due to layer prefetching
+      expect(registryMocks.getImageBlob).toBeCalledTimes(2)
     })
   })
 

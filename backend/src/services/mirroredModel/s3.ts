@@ -1,4 +1,4 @@
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
 
 import { sign } from '../../clients/kms.js'
 import { getObjectStream, putObjectStream } from '../../clients/s3.js'
