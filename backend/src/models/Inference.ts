@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
+
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export interface InferenceSetting {
   processorType: string
@@ -58,12 +59,7 @@ const InferenceSchema = new Schema<InferenceDoc>(
   },
 )
 
-InferenceSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: String,
-  deletedAt: true,
-})
+InferenceSchema.plugin(softDeletionPlugin)
 
 InferenceSchema.index({ modelId: 1, image: 1, tag: 1 }, { unique: true })
 

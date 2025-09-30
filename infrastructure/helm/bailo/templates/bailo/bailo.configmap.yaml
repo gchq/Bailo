@@ -64,13 +64,13 @@ data:
 
       avScanning: {
         clamdscan: {
-          concurrency: '{{ .Values.clamav.concurrency }}'
+          concurrency: {{ .Values.clamav.concurrency }},
           host: '{{ include "bailo.fullname" . }}-clamav',
           port: {{ .Values.clamav.port }},
         },
 
         modelscan: {
-          concurrency: '{{ .Values.modelscan.concurrency }}'
+          concurrency: {{ .Values.modelscan.concurrency }},
           host: '{{ include "bailo.fullname" . }}-modelscan',
           port: {{ .Values.modelscan.port }},
           protocol: '{{ .Values.modelscan.protocol }}',
@@ -148,7 +148,7 @@ data:
           enabled: {{ .Values.config.ui.banner.enabled }},
           text: '{{ .Values.config.ui.banner.text }}',
           colour: '{{ .Values.config.ui.banner.colour }}',
-          textColor: '{{ .Values.config.ui.banner.textColor}}'
+          textColor: '{{ .Values.config.ui.banner.textColor}}',
         },
 
         // Show announcement banner at the bottom of the screen
@@ -176,7 +176,7 @@ data:
             host: '{{ .Values.inference.host}}',
           },
           gpus: '{{ .Values.inference.gpus }}',
-          authorizationTokenName: '{{ .Values.inference.authorizationTokenName }}'
+          authorizationTokenName: '{{ .Values.inference.authorizationTokenName }}',
         },
 
         modelMirror: {
@@ -186,12 +186,12 @@ data:
           export: {
             enabled: {{ .Values.modelMirror.export.enabled }},
             disclaimer: '{{ .Values.modelMirror.export.disclaimer }}',
-            concurrency: '{{ .Values.modelMirror.export.concurrency }}'
-          }
+            concurrency: {{ .Values.modelMirror.export.concurrency }},
+          },
         },
 
         helpPopoverText: {
-          manualEntryAccess: '{{ .Values.config.ui.helpPopoverText.manualEntryAccess }}'
+          manualEntryAccess: '{{ .Values.config.ui.helpPopoverText.manualEntryAccess }}',
         },
 
         modelDetails: {
@@ -234,7 +234,7 @@ data:
       instrumentation: {
         enabled: {{ .Values.instrumentation.enabled }},
         endpoint: '{{ .Values.instrumentation.endpoint }}',
-        debug: {{ .Values.instrumentation.debug }}
+        debug: '{{ .Values.instrumentation.debug }}',
       },
 
       s3: {
