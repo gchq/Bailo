@@ -44,6 +44,7 @@ const audit = {
   onViewInference: vi.fn(),
   onUpdateInference: vi.fn(),
   onViewInferences: vi.fn(),
+  onDeleteInference: vi.fn(),
 
   onViewModelImages: vi.fn(),
 

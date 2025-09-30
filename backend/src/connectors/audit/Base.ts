@@ -120,6 +120,7 @@ export const AuditInfo = {
   UpdateInference: { typeId: 'UpdateInference', description: 'Inference Service Updated', auditKind: AuditKind.Update },
   ViewInference: { typeId: 'ViewInference', description: 'Inference Service Viewed', auditKind: AuditKind.View },
   ViewInferences: { typeId: 'ViewInferences', description: 'Inferences Viewed', auditKind: AuditKind.View },
+  DeleteInference: { typeId: 'DeleteInferences', description: 'Inferences Deleted', auditKind: AuditKind.Delete },
 
   CreateExport: { typeId: 'CreateExport', description: 'Model Exported', auditKind: AuditKind.Create },
   CreateImport: { typeId: 'CreateImport', description: 'Model Imported', auditKind: AuditKind.Create },
@@ -216,6 +217,7 @@ export abstract class BaseAuditConnector {
   abstract onUpdateInference(req: Request, inference: InferenceDoc)
   abstract onViewInference(req: Request, inference: InferenceDoc)
   abstract onViewInferences(req: Request, inference: InferenceDoc[])
+  abstract onDeleteInference(req: Request, inference: InferenceDoc)
 
   abstract onViewModelImages(
     req: Request,
