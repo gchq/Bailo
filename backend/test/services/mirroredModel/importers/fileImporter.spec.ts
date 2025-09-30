@@ -1,4 +1,5 @@
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
+
 import { describe, expect, test, vi } from 'vitest'
 
 import { importModelFile } from '../../../../src/services/mirroredModel/importers/fileImporter.js'
