@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs'
 import { createHash } from 'crypto'
 import { model, ObjectId, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { BadReq } from '../utils/error.js'
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const TokenScope = {
   All: 'all',
@@ -170,7 +170,7 @@ TokenSchema.methods.compareToken = function compareToken(candidateToken: string)
   })
 }
 
-TokenSchema.plugin(MongooseDelete, { overrideMethods: 'all', deletedAt: true })
+TokenSchema.plugin(softDeletionPlugin)
 
 const TokenModel = model<TokenDoc>('v2_Token', TokenSchema)
 

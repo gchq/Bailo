@@ -7,6 +7,7 @@ export const ModelAction = {
   Write: 'model:write',
   Import: 'model:import',
   Export: 'model:export',
+  Delete: 'model:delete',
 } as const
 export type ModelActionKeys = (typeof ModelAction)[keyof typeof ModelAction]
 
@@ -34,6 +35,12 @@ export const SchemaAction = {
   Update: 'schema:update',
 } as const
 export type SchemaActionKeys = (typeof SchemaAction)[keyof typeof SchemaAction]
+
+export const SchemaMigrationAction = {
+  Create: 'schema:create',
+  View: 'schema:view',
+} as const
+export type SchemaMigrationActionKeys = (typeof SchemaMigrationAction)[keyof typeof SchemaMigrationAction]
 
 export const FileAction = {
   Delete: 'file:delete',
@@ -65,6 +72,7 @@ export const ReviewRoleAction = {
   Create: 'reviewRole:create',
   View: 'reviewRole:view',
   Delete: 'reviewRole:delete',
+  Update: 'reviewRole:update',
 } as const
 export type ReviewRoleActionKeys = (typeof ReviewRoleAction)[keyof typeof ReviewRoleAction]
 
@@ -73,6 +81,7 @@ export const ActionLookup = {
   [ModelAction.View]: TokenActions.ModelRead.id,
   [ModelAction.Update]: TokenActions.ModelWrite.id,
   [ModelAction.Write]: TokenActions.ModelWrite.id,
+  [ModelAction.Delete]: TokenActions.ModelWrite.id,
 
   [ReleaseAction.Create]: TokenActions.ReleaseWrite.id,
   [ReleaseAction.View]: TokenActions.ReleaseRead.id,

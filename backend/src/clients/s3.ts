@@ -1,3 +1,5 @@
+import { PassThrough, Readable } from 'node:stream'
+
 import {
   CompleteMultipartUploadCommand,
   CreateBucketCommand,
@@ -17,7 +19,6 @@ import { Upload } from '@aws-sdk/lib-storage'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
 import prettyBytes from 'pretty-bytes'
-import { PassThrough, Readable } from 'stream'
 
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'
@@ -49,9 +50,9 @@ export async function putObjectStream(
       client: await getS3Client(),
       params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
       queueSize: 4,
-      partSize: 1024 * 1024 * 64,
       leavePartsOnError: false,
     })
+    log.debug({ key, bucket, metadata }, 'Upload created.')
 
     let fileSize = 0
 
@@ -79,6 +80,9 @@ export async function putObjectStream(
     throw InternalError('Unable to upload the object to the S3 service.', {
       internal: { error, bucket, key, metadata },
     })
+  } finally {
+    // always cleanup the stream
+    body.destroy()
   }
 }
 

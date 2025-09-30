@@ -1,5 +1,6 @@
+import { Readable } from 'node:stream'
+
 import { Schema, Types } from 'mongoose'
-import { Readable } from 'stream'
 
 import {
   completeMultipartUpload,

@@ -9,6 +9,7 @@ import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
+import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import {
@@ -62,6 +63,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onViewInference(_req: Request, _inferences: InferenceDoc) {}
   onUpdateInference(_req: Request, _inferences: InferenceDoc) {}
   onCreateInference(_req: Request, _inferences: InferenceDoc) {}
+  onDeleteInference(_req: Request, _inferences: InferenceDoc) {}
   onCreateS3Export(_req: Request, _modelId: string, _semvers?: string[]) {}
   onCreateImport(
     _req: Request,
@@ -76,5 +78,8 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onUpdateResponse(_req: Request, _responseId: string) {}
   onCreateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
   onViewReviewRoles(_req: Request) {}
+  onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
   onDeleteReviewRole(_req: Request, _reviewRoleId: string) {}
+  onCreateSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
+  onViewSchemaMigrations(_req: Request, _schemaMigrations: SchemaMigrationInterface[]) {}
 }

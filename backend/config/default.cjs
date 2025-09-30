@@ -43,6 +43,9 @@ module.exports = {
     // Authentication details
     user: undefined,
     pass: undefined,
+
+    // Whether to use transactions. Requires a replica set to be enabled
+    transactions: false,
   },
 
   registry: {
@@ -181,11 +184,13 @@ module.exports = {
 
   avScanning: {
     clamdscan: {
+      concurrency: 2,
       host: '127.0.0.1',
       port: 3310,
     },
 
     modelscan: {
+      concurrency: 2,
       protocol: 'http',
       host: '127.0.0.1',
       port: 3311,
@@ -304,6 +309,7 @@ module.exports = {
 
   modelMirror: {
     export: {
+      concurrency: 5,
       maxSize: 100 * 1024 * 1024 * 1024,
       bucket: 'exports',
       kmsSignature: {

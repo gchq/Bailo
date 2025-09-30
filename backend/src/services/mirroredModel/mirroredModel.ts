@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto'
+import stream, { PassThrough, Readable } from 'node:stream'
 
 import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
+import PQueue from 'p-queue'
 import prettyBytes from 'pretty-bytes'
-import stream, { Readable } from 'stream'
 import { Pack } from 'tar-stream'
 
 import { ModelAction } from '../../connectors/authorisation/actions.js'
@@ -30,10 +31,10 @@ import {
   splitDistributionPackageName,
 } from '../registry.js'
 import { getAllFileIds, getReleasesForExport } from '../release.js'
-import { uploadToS3 } from '../s3.js'
 import { importDocuments } from './importers/documentImporter.js'
 import { importModelFile } from './importers/fileImporter.js'
 import { importCompressedRegistryImage } from './importers/imageImporter.js'
+import { uploadToS3 } from './s3.js'
 
 export async function exportModel(
   user: UserInterface,
@@ -58,6 +59,7 @@ export async function exportModel(
   if (!modelAuth.success) {
     throw Forbidden(modelAuth.info, { userDn: user.dn, modelId })
   }
+
   const mirroredModelId = model.settings.mirror.destinationModelId
   const releases: ReleaseDoc[] = []
   if (semvers && semvers.length > 0) {
@@ -67,7 +69,7 @@ export async function exportModel(
   log.debug('Request checks complete')
 
   const { gzipStream, tarStream } = createTarGzStreams()
-  const s3Upload = uploadToS3(
+  uploadToS3(
     `${modelId}.tar.gz`,
     gzipStream,
     { exporter: user.dn, sourceModelId: modelId, mirroredModelId, importKind: ImportKind.Documents },
@@ -89,7 +91,6 @@ export async function exportModel(
   }
   // no more data to write
   tarStream.finalize()
-  await s3Upload
 
   log.debug({ modelId, semvers }, 'Successfully finalized Tarball file.')
 }
@@ -156,44 +157,47 @@ export async function importModel(
 
   const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
   if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, importId })
+    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, importKind, importId })
   }
 
   let res: Response
   try {
     res = await fetch(payloadUrl, { agent: getHttpsAgent() })
   } catch (err) {
-    throw InternalError('Unable to get the file.', { err, payloadUrl, importId })
+    throw InternalError('Unable to get the file.', { err, payloadUrl, importKind, importId })
   }
   if (!res.ok) {
     throw InternalError('Unable to get the file.', {
       payloadUrl,
       response: { status: res.status, body: await res.text() },
+      importKind,
       importId,
     })
   }
 
   if (!res.body) {
-    throw InternalError('Unable to get the file.', { payloadUrl, importId })
+    throw InternalError('Unable to get the file.', { payloadUrl, importKind, importId })
   }
   // type cast `NodeJS.ReadableStream` to `'stream/web'.ReadableStream`
   // as per https://stackoverflow.com/questions/63630114/argument-of-type-readablestreamany-is-not-assignable-to-parameter-of-type-r/66629140#66629140
   // and https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js/74722818#comment133510726_74722818
   const responseBody = res.body instanceof Readable ? res.body : Readable.fromWeb(res.body as unknown as ReadableStream)
 
-  log.info({ mirroredModelId, payloadUrl, importId }, 'Obtained the file from the payload URL.')
+  log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Obtained the file from the payload URL.')
 
   switch (importKind) {
     case ImportKind.Documents: {
-      log.info({ mirroredModelId, payloadUrl, importId }, 'Importing collection of documents.')
+      log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Importing collection of documents.')
       return await importDocuments(user, responseBody, mirroredModelId, sourceModelId, payloadUrl, importId)
     }
     case ImportKind.File: {
-      log.info({ mirroredModelId, payloadUrl }, 'Importing file data.')
+      log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Importing file data.')
       if (!fileId) {
         throw BadReq('File ID must be specified for file import.', {
           mirroredModelId,
           sourceModelIdMeta: sourceModelId,
+          importKind,
+          importId,
         })
       }
       const result = await importModelFile(responseBody, fileId, mirroredModelId, importId)
@@ -205,9 +209,14 @@ export async function importModel(
       }
     }
     case ImportKind.Image: {
-      log.info({ mirroredModelId, payloadUrl }, 'Importing image data.')
+      log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Importing image data.')
       if (!distributionPackageName) {
-        throw BadReq('Missing Distribution Package Name.', { mirroredModelId, sourceModelIdMeta: sourceModelId })
+        throw BadReq('Missing Distribution Package Name.', {
+          mirroredModelId,
+          sourceModelIdMeta: sourceModelId,
+          importKind,
+          importId,
+        })
       }
       const result = await importCompressedRegistryImage(
         user,
@@ -224,8 +233,37 @@ export async function importModel(
       }
     }
     default:
-      throw BadReq('Unrecognised import kind', { importKind, importId })
+      throw BadReq('Unrecognised import kind', {
+        mirroredModelId,
+        sourceModelIdMeta: sourceModelId,
+        importKind,
+        importId,
+      })
   }
+}
+
+async function prefetchToPassThrough(
+  user: UserInterface,
+  modelId: string,
+  imageName: string,
+  digest: string,
+  highWaterMark = 1024 * 1024, // 1 MB to hold small layers completely
+): Promise<{ stream: Readable; abort: () => void }> {
+  return (async () => {
+    const { stream, abort } = await getImageBlob(user, modelId, imageName, digest)
+
+    const passthrough = new PassThrough({ highWaterMark })
+
+    // Pipe registry stream into our passthrough buffer immediately
+    ;(stream instanceof Readable ? stream : Readable.fromWeb(stream as ReadableStream))
+      .pipe(passthrough)
+      .on('error', (err) => {
+        abort()
+        passthrough.destroy(err)
+      })
+
+    return { stream: passthrough, abort }
+  })()
 }
 
 export async function exportCompressedRegistryImage(
@@ -272,34 +310,71 @@ export async function exportCompressedRegistryImage(
   const packerEntry = tarStream.entry({ name: 'manifest.json', size: Buffer.byteLength(tagManifestJson, 'utf8') })
   await pipeStreamToTarEntry(Readable.from(tagManifestJson), packerEntry, { mediaType: tagManifest.mediaType })
 
-  // fetch and compress one layer (including config) at a time to manage RAM usage
-  // also, tar can only handle one pipe at a time
-  for (const layer of [tagManifest.config, ...tagManifest.layers]) {
-    const layerDigest = layer['digest']
+  const layers = [tagManifest.config, ...tagManifest.layers]
+  // tar can only process one pipe at a time so compress one layer (including config) at a time
+  // but prefetch the next layer to avoid waiting on HTTP connections
+  let prefetchPromise: Promise<{ stream: Readable | ReadableStream<any>; abort: () => void }> | null = null
+  for (let i = 0; i < layers.length; i++) {
+    log.debug(`Layer ${i + 1}/${layers.length}`)
+    const currentLayer = layers[i]
+    const nextLayer = i + 1 < layers.length ? layers[i + 1] : null
+
+    const layerDigest = currentLayer['digest']
     if (!layerDigest || layerDigest.length === 0) {
-      throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag, ...logData })
+      throw InternalError('Could not extract layer digest.', { currentLayer, modelId, imageName, imageTag, ...logData })
     }
 
-    log.debug(
-      {
-        modelId,
-        imageName,
-        imageTag,
-        layerDigest,
-        ...logData,
-      },
-      'Fetching image layer',
-    )
-    const responseBody = await getImageBlob(user, modelId, imageName, layerDigest)
+    if (!prefetchPromise) {
+      log.debug(
+        {
+          modelId,
+          imageName,
+          imageTag,
+          layerDigest,
+          ...logData,
+        },
+        'Fetching image layer',
+      )
+    }
+    const { stream: responseStream, abort } =
+      prefetchPromise && i > 0 ? await prefetchPromise : await getImageBlob(user, modelId, imageName, layerDigest)
 
-    // pipe the body to tar using streams
-    const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
-    const packerEntry = tarStream.entry({ name: entryName, size: layer.size })
-    // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
-    await pipeStreamToTarEntry(Readable.fromWeb(responseBody.body), packerEntry, {
-      layerDigest,
-      mediaType: layer.mediaType,
-    })
+    if (nextLayer) {
+      log.debug(
+        {
+          modelId,
+          imageName,
+          imageTag,
+          layerDigest: nextLayer.digest,
+          ...logData,
+        },
+        'Prefetching next image layer',
+      )
+      // small layers are fully consumed by undici before the previous layer has finished, causing problems
+      // use a PassThrough to workaround this
+      prefetchPromise = prefetchToPassThrough(user, modelId, imageName, nextLayer.digest)
+    }
+
+    try {
+      // pipe the body to tar using streams
+      const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
+      const packerEntry = tarStream.entry({ name: entryName, size: currentLayer.size })
+      log.debug({ name: entryName, size: currentLayer.size }, 'Packer Entry')
+
+      // it's only possible to process one stream at a time as per https://github.com/mafintosh/tar-stream/issues/24
+      await pipeStreamToTarEntry(
+        // avoid Readable.fromWeb if possible as the registry stream may already be Node-readable
+        responseStream instanceof Readable ? responseStream : Readable.fromWeb(responseStream as ReadableStream),
+        packerEntry,
+        {
+          layerDigest,
+          mediaType: currentLayer.mediaType,
+        },
+      )
+    } catch (err) {
+      abort()
+      throw err
+    }
   }
   // no more data to write
   tarStream.finalize()
@@ -329,11 +404,12 @@ async function addReleasesToTarball(
   const semvers = releases.map((release) => release.semver)
   log.debug({ user, modelId: model.id, semvers }, 'Adding model releases to Tarball file.')
 
+  const queue = new PQueue({ concurrency: config.modelMirror.export.concurrency })
   const errors: any[] = []
   // Using a .catch here to ensure all errors are returned, rather than just the first error.
   await Promise.all(
     releases.map((release) =>
-      addReleaseToTarball(user, model, release, tarStream, mirroredModelId).catch((e) => errors.push(e)),
+      addReleaseToTarball(user, model, release, tarStream, mirroredModelId, queue).catch((e) => errors.push(e)),
     ),
   )
   if (errors.length > 0) {
@@ -348,36 +424,40 @@ export async function uploadReleaseFiles(
   release: ReleaseDoc,
   files: FileWithScanResultsInterface[],
   mirroredModelId: string,
+  queue: PQueue,
 ) {
   for (const file of files) {
-    try {
-      await uploadToS3(
-        file.id,
-        (await downloadFile(user, file.id)).Body as stream.Readable,
-        {
-          exporter: user.dn,
-          sourceModelId: model.id,
-          mirroredModelId,
-          filePath: file.id,
-          importKind: ImportKind.File,
-        },
-        {
-          releaseId: release.id,
-          fileId: file.id,
-        },
+    queue
+      .add(async () =>
+        uploadToS3(
+          file.id,
+          (await downloadFile(user, file.id)).Body as stream.Readable,
+          {
+            exporter: user.dn,
+            sourceModelId: model.id,
+            mirroredModelId,
+            filePath: file.id,
+            importKind: ImportKind.File,
+          },
+          {
+            releaseId: release.id,
+            fileId: file.id,
+          },
+        ),
       )
-    } catch (error: any) {
-      log.error(
-        {
-          error,
-          modelId: model.id,
-          releaseSemver: release.semver,
-          fileId: file.id,
-          mirroredModelId,
-        },
-        'Error when uploading Release File to S3.',
+      .catch((error) =>
+        log.error(
+          {
+            error,
+            modelId: model.id,
+            releaseSemver: release.semver,
+            fileId: file.id,
+            mirroredModelId,
+          },
+          'Error when uploading Release File to S3.',
+        ),
       )
-    }
+    log.debug({ fileId: file.id, releaseId: release.id, modelId: model.id }, 'Added file to be exported to queue')
   }
 }
 
@@ -386,6 +466,7 @@ export async function uploadReleaseImages(
   model: ModelDoc,
   release: ReleaseDoc,
   mirroredModelId: string,
+  queue: PQueue,
 ) {
   if (Array.isArray(release.images)) {
     for (const image of release.images) {
@@ -402,36 +483,41 @@ export async function uploadReleaseImages(
         path: image.name.replace(modelIdRe, mirroredModelId),
         tag: image.tag,
       })
-      try {
-        await exportCompressedRegistryImage(
-          user,
-          model.id,
-          distributionPackageName,
-          `${image._id.toString()}.tar.gz`,
-          {
-            exporter: user.dn,
-            sourceModelId: model.id,
-            mirroredModelId,
-            importKind: ImportKind.Image,
+      queue
+        .add(() =>
+          exportCompressedRegistryImage(
+            user,
+            model.id,
             distributionPackageName,
-          },
-          imageLogData,
+            `${image._id.toString()}.tar.gz`,
+            {
+              exporter: user.dn,
+              sourceModelId: model.id,
+              mirroredModelId,
+              importKind: ImportKind.Image,
+              distributionPackageName,
+            },
+            imageLogData,
+          ),
         )
-      } catch (error: any) {
-        log.error(
-          {
-            error,
-            modelId: model.id,
-            releaseSemver: release.semver,
-            distributionPackageName,
-            mirroredModelId,
-          },
-          'Error when uploading Release Image to S3.',
+        .catch((error) =>
+          log.error(
+            {
+              error,
+              modelId: model.id,
+              releaseSemver: release.semver,
+              distributionPackageName,
+              mirroredModelId,
+            },
+            'Error when uploading Release Image to S3.',
+          ),
         )
-      }
     }
+    log.debug(
+      { user, modelId: model.id, semver: release.semver },
+      'Finished adding release to tarball file of releases.',
+    )
   }
-  log.debug({ user, modelId: model.id, semver: release.semver }, 'Finished adding release to tarball file of releases.')
 }
 
 async function addReleaseToTarball(
@@ -440,6 +526,7 @@ async function addReleaseToTarball(
   release: ReleaseDoc,
   tarStream: Pack,
   mirroredModelId: string,
+  queue: PQueue,
 ) {
   log.debug({ user, modelId: model.id, semver: release.semver }, 'Adding release to tarball file of releases.')
   const files: FileWithScanResultsInterface[] = await getFilesByIds(user, release.modelId, release.fileIds)
@@ -451,13 +538,39 @@ async function addReleaseToTarball(
       size: Buffer.byteLength(releaseJson, 'utf8'),
     })
     await pipeStreamToTarEntry(Readable.from(releaseJson), packerEntry, { modelId: model.id })
-  } catch (error: any) {
-    throw InternalError('Error when generating the tarball file.', { error })
+  } catch (error: unknown) {
+    throw InternalError('Error when generating the tarball file.', {
+      error,
+      modelId: model.id,
+      mirroredModelId,
+      releaseId: release.id,
+    })
+  }
+
+  if (files.length > 0) {
+    await addFilesToTarball(files, tarStream, model.id)
   }
 
   // Fire-and-forget upload of artefacts so that the endpoint is able to return without awaiting lots of uploads
-  uploadReleaseFiles(user, model, release, files, mirroredModelId)
-  uploadReleaseImages(user, model, release, mirroredModelId)
+  log.debug({ semver: release.semver }, 'Adding files to be exported to queue')
+  await uploadReleaseFiles(user, model, release, files, mirroredModelId, queue)
+  log.debug({ semver: release.semver }, 'Finished adding files to be exported to queue')
+  await uploadReleaseImages(user, model, release, mirroredModelId, queue)
+}
+
+async function addFilesToTarball(files: FileWithScanResultsInterface[], tarStream: Pack, modelId: string) {
+  for (const file of files) {
+    try {
+      const fileJson = JSON.stringify(file)
+      const packerEntry = tarStream.entry({
+        name: `files/${file._id.toString()}.json`,
+        size: Buffer.byteLength(fileJson, 'utf8'),
+      })
+      await pipeStreamToTarEntry(Readable.from(fileJson), packerEntry, { modelId })
+    } catch (error: unknown) {
+      throw InternalError('Error when generating the tarball file.', { error, modelId, file })
+    }
+  }
 }
 
 async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: string[]) {
@@ -520,7 +633,7 @@ export async function generateDigest(file: Readable) {
       })
     })
     return messageDigest
-  } catch (error: any) {
+  } catch (error: unknown) {
     file.destroy?.()
     throw InternalError('Error generating SHA256 digest for stream.', { error })
   }

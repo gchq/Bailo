@@ -1,6 +1,6 @@
 import { model, ObjectId, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 import { ScanInterface } from './Scan.js'
 
 // This interface stores information about the properties on the base object.
@@ -52,12 +52,7 @@ const FileSchema = new Schema<FileInterfaceDoc>(
   },
 )
 
-FileSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: Schema.Types.ObjectId,
-  deletedAt: true,
-})
+FileSchema.plugin(softDeletionPlugin)
 
 const FileModel = model<FileInterfaceDoc>('v2_File', FileSchema)
 
