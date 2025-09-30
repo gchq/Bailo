@@ -20,7 +20,7 @@ export async function up() {
   ]
 
   for (const modelTypeToUpdate of modelTypesToUpdate) {
-    await (modelTypeToUpdate as any).updateManyDeleted({ deletedAt: { $exists: false } }, [
+    await (modelTypeToUpdate as any).updateMany({ deletedAt: { $exists: false } }, [
       { $set: { deletedAt: '$updatedAt' } },
     ])
   }

@@ -1,7 +1,7 @@
 import { model, ObjectId, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
 
 import { ScanState, ScanStateKeys } from '../connectors/fileScanning/Base.js'
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export type ScanInterface = {
   _id: ObjectId
@@ -58,12 +58,7 @@ const ScanSchema = new Schema<ScanInterfaceDoc>(
   },
 )
 
-ScanSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: Schema.Types.ObjectId,
-  deletedAt: true,
-})
+ScanSchema.plugin(softDeletionPlugin)
 
 const ScanModel = model<ScanInterfaceDoc>('v2_Scan', ScanSchema)
 
