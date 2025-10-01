@@ -186,7 +186,6 @@ data:
           export: {
             enabled: {{ .Values.modelMirror.export.enabled }},
             disclaimer: '{{ .Values.modelMirror.export.disclaimer }}',
-            concurrency: {{ .Values.modelMirror.export.concurrency }},
           },
         },
 
@@ -252,6 +251,7 @@ data:
       modelMirror: {
         export: {
           bucket: '{{ .Values.modelMirror.export.bucket }}',
+          concurrency: {{ .Values.modelMirror.export.concurrency }},
           kmsSignature: {
             enabled: {{ .Values.modelMirror.export.kmsSignature.enabled }},
             keyId: '{{ .Values.modelMirror.export.kmsSignature.keyId }}',
