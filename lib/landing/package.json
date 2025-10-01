@@ -34,7 +34,7 @@
     "react-dom": "18.2.0",
     "rehype-highlight": "^7.0.2",
     "remark-frontmatter": "^5.0.0",
-    "remark-gfm": "^3.0.1",
+    "remark-gfm": "^4.0.1",
     "shelljs": "^0.10.0",
     "styled-components": "^6.1.19",
     "swiper": "^8.4.5"
