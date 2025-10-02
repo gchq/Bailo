@@ -30,8 +30,7 @@ export default function NewEntry() {
           description:
             'Mirrored models allow models to be copied from other deployments using an external model ID. These are imported as read only models and should be updated via the source.',
           handleClick: () => setCreateEntryKind(EntryKind.MIRRORED_MODEL),
-          dataTest: 'createDataCardButton',
-          disabled: uiConfig?.modelMirror.import.enabled,
+          disabled: uiConfig?.modelMirror.import.enabled === false,
         },
         {
           title: 'Create Data Card',
