@@ -20,6 +20,7 @@ interface DataCardSelectorProps {
   onChange: (newValue: string[]) => void
   formContext?: FormContextType
   rawErrors?: string[]
+  InputProps?: any
 }
 
 export default function DataCardSelector({
@@ -30,6 +31,7 @@ export default function DataCardSelector({
   id,
   formContext,
   rawErrors,
+  InputProps,
 }: DataCardSelectorProps) {
   const [open, setOpen] = useState(false)
   const [dataCardListQuery, setDataCardListQuery] = useState('')
@@ -84,7 +86,13 @@ export default function DataCardSelector({
       {isDataCardsLoading && <Loading />}
       {formContext && formContext.editMode && (
         <>
-          <Typography id={`${id}-label`} fontWeight='bold' aria-label={`label for ${label}`}>
+          <Typography
+            id={`${id}-label`}
+            fontWeight='bold'
+            aria-label={`label for ${label}`}
+            component='label'
+            htmlFor={id}
+          >
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
@@ -118,13 +126,21 @@ export default function DataCardSelector({
             renderInput={(params) => (
               <TextField
                 {...params}
-                aria-label={`input field for ${label}`}
                 placeholder='Data card name'
                 error={rawErrors && rawErrors.length > 0}
                 onKeyDown={(event: KeyboardEvent) => {
                   if (event.key === 'Backspace') {
                     event.stopPropagation()
                   }
+                }}
+                slotProps={{
+                  input: {
+                    ...InputProps,
+                    ...(!formContext.editMode && { disableUnderline: true }),
+                    'data-test': id,
+                    'aria-label': `input field for ${label}`,
+                    id: id,
+                  },
                 }}
               />
             )}

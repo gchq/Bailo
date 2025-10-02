@@ -10,9 +10,10 @@ interface TagSelectorProps {
   label: string
   formContext?: FormContextType
   required?: boolean
+  id: string
 }
 
-export default function TagSelector({ onChange, value, label, formContext, required }: TagSelectorProps) {
+export default function TagSelector({ onChange, value, label, formContext, required, id }: TagSelectorProps) {
   const theme = useTheme()
 
   const [newTag, setNewTag] = useState('')
@@ -47,7 +48,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     <>
       {formContext && formContext.editMode && (
         <Stack spacing={1}>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
@@ -60,6 +61,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
                   handleNewTagSubmit()
                 }
               }}
+              id={id}
               aria-label={`input field for ${label}`}
               onChange={(e) => setNewTag(e.target.value)}
             />

@@ -15,9 +15,19 @@ interface DropdownProps {
   InputProps?: any
   options: { enumOptions?: { label: string; value: string }[] }
   rawErrors?: string[]
+  id: string
 }
 
-export default function Dropdown({ label, formContext, value, onChange, options, required, rawErrors }: DropdownProps) {
+export default function Dropdown({
+  label,
+  formContext,
+  value,
+  onChange,
+  options,
+  required,
+  rawErrors,
+  id,
+}: DropdownProps) {
   const theme = useTheme()
 
   const handleChange = (_event: SyntheticEvent<Element, Event>, newValue: string | null) => {
@@ -42,7 +52,7 @@ export default function Dropdown({ label, formContext, value, onChange, options,
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
@@ -56,6 +66,7 @@ export default function Dropdown({ label, formContext, value, onChange, options,
               ...theme.applyStyles('light', {
                 color: theme.palette.common.black,
               }),
+              id: id,
             },
             label: {
               WebkitTextFillColor: theme.palette.common.white,
