@@ -50,7 +50,7 @@ export default function MultipleDropdown({
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>
+      <Typography fontWeight='bold' aria-label={`label for ${label}`}>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
@@ -84,6 +84,7 @@ export default function MultipleDropdown({
               {...params}
               label='Select an option below'
               size='small'
+              aria-label={`input field for ${label}`}
               placeholder={value.length ? undefined : 'Unanswered'}
               error={rawErrors && rawErrors.length > 0}
             />

@@ -38,12 +38,13 @@ export default function DateSelector({ onChange, value, label, formContext, requ
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>
+      <Typography fontWeight='bold' aria-label={`label for ${label}`}>
         {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
       {formContext.editMode && (
         <DatePicker
           value={value ? dayjs(value) : undefined}
+          aria-label={`date input field for ${label}`}
           onChange={handleChange}
           format='DD-MM-YYYY'
           sx={{ '.MuiInputBase-input': { p: '10px' } }}

@@ -84,7 +84,7 @@ export default function DataCardSelector({
       {isDataCardsLoading && <Loading />}
       {formContext && formContext.editMode && (
         <>
-          <Typography id={`${id}-label`} fontWeight='bold'>
+          <Typography id={`${id}-label`} fontWeight='bold' aria-label={`label for ${label}`}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
@@ -118,6 +118,7 @@ export default function DataCardSelector({
             renderInput={(params) => (
               <TextField
                 {...params}
+                aria-label={`input field for ${label}`}
                 placeholder='Data card name'
                 error={rawErrors && rawErrors.length > 0}
                 onKeyDown={(event: KeyboardEvent) => {
@@ -132,7 +133,7 @@ export default function DataCardSelector({
       )}
       {formContext && !formContext.editMode && (
         <>
-          <Typography fontWeight='bold'>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>

@@ -47,7 +47,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     <>
       {formContext && formContext.editMode && (
         <Stack spacing={1}>
-          <Typography fontWeight='bold'>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
@@ -60,6 +60,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
                   handleNewTagSubmit()
                 }
               }}
+              aria-label={`input field for ${label}`}
               onChange={(e) => setNewTag(e.target.value)}
             />
             <Button size='small' onClick={handleNewTagSubmit}>
@@ -87,7 +88,9 @@ export default function TagSelector({ onChange, value, label, formContext, requi
       )}
       {formContext && !formContext.editMode && (
         <>
-          <Typography fontWeight='bold'>{label}</Typography>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+            {label}
+          </Typography>
           {value.length === 0 && (
             <Typography
               sx={{

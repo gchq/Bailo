@@ -42,7 +42,7 @@ export default function Dropdown({ label, formContext, value, onChange, options,
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>
+      <Typography fontWeight='bold' aria-label={`label for ${label}`}>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
@@ -76,6 +76,7 @@ export default function Dropdown({ label, formContext, value, onChange, options,
               label='Select an option below'
               size='small'
               placeholder='Unanswered'
+              aria-label={`input field for ${label}`}
               error={rawErrors && rawErrors.length > 0}
             />
           )}

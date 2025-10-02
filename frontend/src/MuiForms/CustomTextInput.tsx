@@ -48,7 +48,7 @@ export default function CustomTextInput({
 
   return (
     <Fragment key={label}>
-      <Typography id={`${id}-label`} fontWeight='bold'>
+      <Typography id={`${id}-label`} fontWeight='bold' aria-label={`Label for ${label}`}>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
@@ -92,6 +92,7 @@ export default function CustomTextInput({
             ...InputProps,
             ...(!formContext.editMode && { disableUnderline: true }),
             'data-test': id,
+            'aria-label': `text input field for ${label}`,
           },
         }}
       />
