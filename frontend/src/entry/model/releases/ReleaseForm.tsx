@@ -131,7 +131,7 @@ export default function ReleaseForm({
   )
 
   const releaseNotesLabel = (
-    <Typography component='label' fontWeight='bold' htmlFor={'new-model-description'}>
+    <Typography fontWeight='bold' component='label' htmlFor='release-notes-input'>
       Release notes {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
     </Typography>
   )
@@ -210,13 +210,14 @@ export default function ReleaseForm({
       )}
       <Stack overflow='hidden' spacing={2}>
         <Stack sx={{ width: '100%' }}>
-          <Typography fontWeight='bold'>
+          <Typography fontWeight='bold' component='label' htmlFor='semantic-version-input'>
             Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
           </Typography>
           {isReadOnly || isEdit ? (
             <ReadOnlyAnswer value={formData.semver} />
           ) : (
             <TextField
+              id='semantic-version-input'
               required
               size='small'
               autoFocus={!isEdit}
@@ -232,7 +233,7 @@ export default function ReleaseForm({
         </Stack>
         <Stack sx={{ width: '100%' }}>
           <Stack direction='row' spacing={1}>
-            <Typography fontWeight='bold'>
+            <Typography fontWeight='bold' component='label' htmlFor='model-card-version-input'>
               Model card version {!isReadOnly && <span style={{ color: theme.palette.error.main }}>*</span>}
             </Typography>
             {!isReadOnly && <HelpPopover>Leave this as default if you want the latest available version</HelpPopover>}
@@ -253,6 +254,9 @@ export default function ReleaseForm({
                     size='small'
                     value={formData.modelCardVersion.toString()}
                     onChange={handleModelCardVersionChange}
+                    inputProps={{
+                      id: 'model-card-version-input',
+                    }}
                   >
                     {modelCardVersionList}
                   </Select>
@@ -274,7 +278,7 @@ export default function ReleaseForm({
             onChange={onReleaseNotesChange}
             aria-label='Release notes'
             label={releaseNotesLabel}
-            textareaProps={{ autoFocus: isEdit }}
+            textareaProps={{ autoFocus: isEdit, id: 'release-notes-input' }}
             dataTest='releaseNotesInput'
           />
         )}
@@ -376,7 +380,11 @@ export default function ReleaseForm({
       <Box>
         <Accordion defaultExpanded sx={{ p: 0 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ p: 0 }}>
-            <Typography fontWeight='bold'>{`Images (${formData.imageList.length})`}</Typography>
+            <Typography
+              fontWeight='bold'
+              component='label'
+              htmlFor='image-input'
+            >{`Images (${formData.imageList.length})`}</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <ModelImageList
@@ -386,6 +394,7 @@ export default function ReleaseForm({
               readOnly={isReadOnly}
               onChange={onImageListChange}
               onRegistryError={onRegistryError}
+              id='image-input'
             />
             {isReadOnly && formData.imageList.length === 0 && <ReadOnlyAnswer value='No images' />}
           </AccordionDetails>
