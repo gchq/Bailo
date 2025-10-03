@@ -65,6 +65,7 @@
     "semver": "^7.7.2",
     "shelljs": "^0.10.0",
     "showdown": "^2.1.0",
+    "swagger-ui-express": "^5.0.1",
     "tar-stream": "^3.1.7",
     "tsx": "^4.20.6",
     "undici": "^7.16.0",

@@ -45,6 +45,7 @@ export type LinkProps = {
   linkAs?: NextLinkProps['as'] // Useful when the as prop is shallow by styled().
   noLinkStyle?: boolean
   noWrap?: boolean
+  newTab?: boolean
 } & Omit<NextLinkComposedProps, 'to' | 'linkAs' | 'href'> &
   Omit<MuiLinkProps, 'href'>
 
@@ -65,6 +66,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
     role: _role, // Link don't have roles.
     scroll,
     shallow,
+    newTab = false,
     ...other
   } = props
 
@@ -116,6 +118,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
       component={NextLinkComposed}
       className={className}
       ref={ref}
+      target={newTab ? '_blank' : ''}
       style={noWrap ? { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' } : {}}
       {...nextjsProps}
       {...other}
