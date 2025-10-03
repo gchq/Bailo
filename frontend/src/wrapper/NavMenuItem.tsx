@@ -12,6 +12,7 @@ interface NavMenuItemProps {
   primaryText: string
   title: string
   badgeCount?: number
+  openLinkInNewTab?: boolean
 }
 export function NavMenuItem({
   menuPage,
@@ -22,11 +23,12 @@ export function NavMenuItem({
   selectedPage,
   title,
   badgeCount = 0,
+  openLinkInNewTab = false,
 }: NavMenuItemProps) {
   const theme = useTheme()
   return (
     <ListItem disablePadding>
-      <ListItemButton LinkComponent={Link} href={href} selected={selectedPage === menuPage}>
+      <ListItemButton LinkComponent={Link} href={href} selected={selectedPage === menuPage} newTab={openLinkInNewTab}>
         <ListItemIcon>
           {!drawerOpen ? (
             <Tooltip arrow title={title} placement='right'>
