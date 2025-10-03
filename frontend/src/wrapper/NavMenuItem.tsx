@@ -28,24 +28,26 @@ export function NavMenuItem({
   const theme = useTheme()
   return (
     <ListItem disablePadding>
-      <ListItemButton LinkComponent={Link} href={href} selected={selectedPage === menuPage} newTab={openLinkInNewTab}>
-        <ListItemIcon>
-          {!drawerOpen ? (
-            <Tooltip arrow title={title} placement='right'>
-              <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
-                {icon}
-              </Badge>
-            </Tooltip>
-          ) : (
-            <>
-              <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
-                {icon}
-              </Badge>
-            </>
-          )}
-        </ListItemIcon>
-        <ListItemText primary={primaryText} sx={{ textDecoration: 'none', color: theme.palette.primary.main }} />
-      </ListItemButton>
+      <Link href={href} newTab={openLinkInNewTab}>
+        <ListItemButton selected={selectedPage === menuPage}>
+          <ListItemIcon>
+            {!drawerOpen ? (
+              <Tooltip arrow title={title} placement='right'>
+                <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
+                  {icon}
+                </Badge>
+              </Tooltip>
+            ) : (
+              <>
+                <Badge badgeContent={badgeCount} color='secondary' invisible={badgeCount === 0}>
+                  {icon}
+                </Badge>
+              </>
+            )}
+          </ListItemIcon>
+          <ListItemText primary={primaryText} sx={{ textDecoration: 'none', color: theme.palette.primary.main }} />
+        </ListItemButton>
+      </Link>
     </ListItem>
   )
 }
