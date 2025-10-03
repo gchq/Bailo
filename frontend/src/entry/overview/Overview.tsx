@@ -25,9 +25,6 @@ export default function Overview({ entry, readOnly = false }: OverviewProps) {
 
   return entry.kind === EntryKind.MIRRORED_MODEL && !entry.card ? (
     <>
-      {entry.kind === EntryKind.MIRRORED_MODEL && (
-        <MessageAlert message={`Mirrored from ${entry.settings.mirror?.sourceModelId} (read-only)`} severity='info' />
-      )}
       <MessageAlert
         severity='warning'
         message='This mirrored model has no model card. Please export the model card from the source model.'
@@ -35,6 +32,9 @@ export default function Overview({ entry, readOnly = false }: OverviewProps) {
     </>
   ) : (
     <Container sx={{ my: 2 }}>
+      {entry.kind === EntryKind.MIRRORED_MODEL && (
+        <MessageAlert message={`Mirrored from ${entry.settings.mirror?.sourceModelId} (read-only)`} severity='info' />
+      )}
       {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
       {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} />}
     </Container>

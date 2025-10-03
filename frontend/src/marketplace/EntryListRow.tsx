@@ -41,6 +41,12 @@ export default function EntryListRow({
     return entry.kind === EntryKind.MODEL || entry.kind === EntryKind.MIRRORED_MODEL ? EntryKind.MODEL : entry.kind
   }, [entry])
 
+  const mirroredLabel = useMemo(() => {
+    if (entry.kind === EntryKind.MIRRORED_MODEL) {
+      return <Typography>(Mirrored)</Typography>
+    }
+  }, [entry])
+
   return (
     <Box
       justifyContent='flex-start'
@@ -58,19 +64,22 @@ export default function EntryListRow({
           sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
           href={`${entryKindForRedirect}/${entry.id}`}
         >
-          <Typography
-            variant='h5'
-            component='h4'
-            sx={{
-              fontWeight: '500',
-              textDecoration: 'none',
-              color: theme.palette.primary.main,
-              textOverflow: 'ellipsis',
-              overflow: 'hidden',
-            }}
-          >
-            {entry.name}
-          </Typography>
+          <Stack spacing={1} alignItems='center' direction='row'>
+            <Typography
+              variant='h5'
+              component='h4'
+              sx={{
+                fontWeight: '500',
+                textDecoration: 'none',
+                color: theme.palette.primary.main,
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+              }}
+            >
+              {entry.name}
+            </Typography>
+            {mirroredLabel}
+          </Stack>
         </Link>
         <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
           {entry.description}
