@@ -7,6 +7,6 @@ describe('Check A11y violations', () => {
   it('Check A11y violations', () => {
     cy.visit('/')
     cy.injectAxe()
-    cy.checkA11y(null, null, terminalLog, true)
+    cy.checkA11y(undefined, undefined, terminalLog, true)
   })
 })
