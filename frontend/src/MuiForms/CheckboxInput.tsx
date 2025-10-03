@@ -35,6 +35,7 @@ export default function CheckboxInput({ onChange, value, label, formContext, id,
           fontStyle: value ? 'unset' : 'italic',
           color: value ? theme.palette.common.black : theme.palette.customTextInput.main,
         }}
+        aria-label={`Label for ${label}`}
       >
         Unanswered
       </Typography>
@@ -43,12 +44,12 @@ export default function CheckboxInput({ onChange, value, label, formContext, id,
 
   return (
     <Fragment key={label}>
-      <Typography id={`${id}-label`} fontWeight='bold'>
+      <Typography id={`${id}-label`} fontWeight='bold' aria-label={`Label for ${label}`} component='label' htmlFor={id}>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
       {formContext.editMode && (
-        <RadioGroup onChange={handleChange} value={value}>
+        <RadioGroup onChange={handleChange} value={value} aria-label={`radio input field for ${label}`} id={id}>
           <FormControlLabel value={true} control={<Radio data-test={`${id}-yes-option`} />} label='Yes' />
           <FormControlLabel value={false} control={<Radio data-test={`${id}-no-option`} />} label='No' />
         </RadioGroup>

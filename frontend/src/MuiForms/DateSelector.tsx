@@ -19,9 +19,10 @@ interface DateSelectorProps {
   value: string
   onChange: (newValue: string | undefined) => void
   InputProps?: any
+  id: string
 }
 
-export default function DateSelector({ onChange, value, label, formContext, required }: DateSelectorProps) {
+export default function DateSelector({ onChange, value, label, formContext, required, id }: DateSelectorProps) {
   const theme = useTheme()
 
   const handleChange = (dateInput: Dayjs | null) => {
@@ -38,12 +39,13 @@ export default function DateSelector({ onChange, value, label, formContext, requ
 
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>
+      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
         {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
       {formContext.editMode && (
         <DatePicker
           value={value ? dayjs(value) : undefined}
+          aria-label={`date input field for ${label}`}
           onChange={handleChange}
           format='DD-MM-YYYY'
           sx={{ '.MuiInputBase-input': { p: '10px' } }}
