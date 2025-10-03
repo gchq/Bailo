@@ -106,12 +106,14 @@ export default function Metrics({ onChange, value, label, formContext, required 
     <>
       {formContext && formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
-          <Typography fontWeight='bold'>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
           <Stack spacing={2}>{metricItems}</Stack>
-          <Button onClick={() => handleChange([...value, { name: '', value: 0 }])}>Add item</Button>
+          <Button onClick={() => handleChange([...value, { name: '', value: 0 }])} aria-label='add metric button'>
+            Add item
+          </Button>
         </Stack>
       )}
       {formContext && !formContext.editMode && (

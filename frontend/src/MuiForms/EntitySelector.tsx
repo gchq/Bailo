@@ -19,6 +19,7 @@ interface EntitySelectorProps {
   onChange: (newValue: string[]) => void
   formContext?: FormContextType
   rawErrors?: string[]
+  id: string
 }
 
 export default function EntitySelector({
@@ -28,6 +29,7 @@ export default function EntitySelector({
   label,
   formContext,
   rawErrors,
+  id,
 }: EntitySelectorProps) {
   const [open, setOpen] = useState(false)
   const [userListQuery, setUserListQuery] = useState('')
@@ -94,7 +96,7 @@ export default function EntitySelector({
       )}
       {currentUser && formContext && formContext.editMode && (
         <>
-          <Typography fontWeight='bold'>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
@@ -134,7 +136,9 @@ export default function EntitySelector({
               <TextField
                 {...params}
                 placeholder='Username or group name'
+                aria-label={`input field for ${label}`}
                 error={rawErrors && rawErrors.length > 0}
+                id={id}
                 onKeyDown={(event: KeyboardEvent) => {
                   if (event.key === 'Backspace') {
                     event.stopPropagation()
@@ -147,7 +151,7 @@ export default function EntitySelector({
       )}
       {formContext && !formContext.editMode && (
         <>
-          <Typography fontWeight='bold'>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
