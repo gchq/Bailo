@@ -26,7 +26,7 @@ const mockedFetchBodyStream = new ReadableStream()
 const fetchMockResponse = new Response(mockedFetchBodyStream, {
   status: 200,
   statusText: 'ok',
-  headers: new Headers(),
+  headers: new Headers({ 'content-type': 'application/json' }),
 })
 global.fetch = vi.fn()
 // workaround TS being difficult
@@ -59,6 +59,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => mockManifest),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = await getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
@@ -79,6 +80,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: false,
       body: {},
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
@@ -90,13 +92,14 @@ describe('clients > registry', () => {
       ok: false,
       text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
+      headers: new Headers({}),
     })
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
     await expect(response).rejects.toThrowError('Unrecognised response returned by the registry.')
   })
 
-  test('getImageTagManifest > unrecognised error response', async () => {
+  test('getImageTagManifest > registry error response', async () => {
     fetchMock.mockReturnValueOnce({
       ok: false,
       text: vi.fn(() => 'Unrecognised response'),
@@ -109,6 +112,7 @@ describe('clients > registry', () => {
           },
         ],
       })),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
 
@@ -119,6 +123,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => 'wrong'),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
@@ -130,6 +135,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => ({ fake: 'info' })),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
@@ -149,6 +155,7 @@ describe('clients > registry', () => {
           },
         ],
       })),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = getImageTagManifest('token', { namespace: 'modelId', image: 'image' }, 'tag1')
@@ -161,7 +168,7 @@ describe('clients > registry', () => {
 
     expect(fetchMock).toBeCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
-    expect(response.body).toStrictEqual(mockedFetchBodyStream)
+    expect(response.stream).toStrictEqual(mockedFetchBodyStream)
   })
 
   test('getRegistryLayerStream > cannot reach registry', async () => {
@@ -175,6 +182,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: false,
       text: vi.fn(() => 'Unrecognised response'),
+      headers: new Headers({}),
     })
     const response = getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
 
@@ -186,6 +194,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       body: mockStream,
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = getRegistryLayerStream('token', { namespace: 'modelId', image: 'image' }, 'sha256:digest1')
@@ -198,6 +207,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => ({ repositories: [`${modelId}/repo`, 'wrong/repo'] })),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
     const response = await listModelRepos('token', modelId)
 
@@ -218,6 +228,7 @@ describe('clients > registry', () => {
       ok: false,
       text: vi.fn(() => 'Unrecognised response'),
       json: vi.fn(),
+      headers: new Headers({}),
     })
     const response = listModelRepos('token', 'modelId')
 
@@ -237,6 +248,7 @@ describe('clients > registry', () => {
           },
         ],
       })),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
     const response = listModelRepos('token', 'modelId')
 
@@ -247,6 +259,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => 'wrong'),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
     const response = listModelRepos('token', 'modelId')
 
@@ -257,6 +270,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => ({ fake: 'info' })),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
     const response = listModelRepos('token', 'modelId')
 
@@ -268,6 +282,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => ({ tags })),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = await listImageTags('token', { namespace: 'modelId', image: 'image' })
@@ -281,6 +296,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => 'wrong'),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
@@ -292,6 +308,7 @@ describe('clients > registry', () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
       json: vi.fn(() => ({ fake: 'info' })),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
@@ -311,6 +328,7 @@ describe('clients > registry', () => {
           },
         ],
       })),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = await listImageTags('token', { namespace: 'modelId', image: 'image' })
@@ -330,6 +348,7 @@ describe('clients > registry', () => {
           },
         ],
       })),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = listImageTags('token', { namespace: 'modelId', image: 'image' })
@@ -341,7 +360,7 @@ describe('clients > registry', () => {
     const mockHeaders = new Headers({
       'accept-ranges': 'string',
       'content-length': 'string',
-      'content-type': 'string',
+      'content-type': 'json',
       date: 'string',
       'docker-content-digest': 'string',
       'docker-distribution-api-version': 'string',
@@ -364,6 +383,7 @@ describe('clients > registry', () => {
       ok: false,
       status: 404,
       statusText: '',
+      headers: new Headers({}),
     })
 
     const response = await doesLayerExist('token', { namespace: 'modelId', image: 'image' }, 'digest')
@@ -376,7 +396,7 @@ describe('clients > registry', () => {
   test('doesLayerExist > malformed response', async () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
-      headers: new Headers({}),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = doesLayerExist('token', { namespace: 'modelId', image: 'image' }, 'digest')
@@ -408,7 +428,7 @@ describe('clients > registry', () => {
   test('initialiseUpload > malformed response', async () => {
     fetchMock.mockReturnValueOnce({
       ok: true,
-      headers: new Headers({}),
+      headers: new Headers({ 'content-type': 'application/json' }),
     })
 
     const response = initialiseUpload('token', { namespace: 'modelId', image: 'image' })
@@ -475,6 +495,6 @@ describe('clients > registry', () => {
 
     const response = uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
 
-    await expect(response).rejects.toThrowError('Unrecognised response headers when putting image manifest.')
+    await expect(response).rejects.toThrowError('Unrecognised response headers when putting image blob.')
   })
 })

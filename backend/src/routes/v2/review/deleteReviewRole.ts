@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -17,7 +16,7 @@ export const deleteReviewRoleSchema = z.object({
 registerPath({
   method: 'delete',
   path: '/api/v2/review/role/{reviewRoleId}',
-  tags: ['review'],
+  tags: ['review role'],
   description: 'Used for deleting a review role.',
   schema: deleteReviewRoleSchema,
   responses: {
@@ -39,7 +38,6 @@ interface DeleteReviewRoleResponse {
 }
 
 export const deleteReviewRole = [
-  bodyParser.json(),
   async (req: Request, res: Response<DeleteReviewRoleResponse>) => {
     req.audit = AuditInfo.DeleteReviewRole
 

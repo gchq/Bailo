@@ -7,11 +7,12 @@ ARG PYTHONPATH
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-COPY requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m venv /venv && \
-    /venv/bin/pip install --upgrade pip setuptools wheel && \
-    /venv/bin/pip install -r /requirements.txt
+    /venv/bin/pip install --upgrade pip setuptools wheel
+
+COPY requirements.txt /requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip /venv/bin/pip install -r /requirements.txt
 
 FROM ubuntu:24.04 AS base
 ARG PYTHONPATH
@@ -33,6 +34,9 @@ CMD ["python3", "/venv/bin/fastapi", "run", "bailo_modelscan_api/main.py", "--po
 FROM base AS dev
 
 COPY --from=build /venv /venv
+# Ensure app dir exists before mounting
+RUN mkdir -p /app/bailo_modelscan_api
+CMD ["python3", "/venv/bin/fastapi", "dev", "bailo_modelscan_api/main.py", "--host", "0.0.0.0", "--port", "3311"]
 
 FROM base AS prod
 

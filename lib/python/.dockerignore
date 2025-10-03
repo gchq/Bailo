@@ -1,7 +1,7 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+**/__pycache__/
+**/*.py[cod]
+**$py.class
 
 # C extensions
 *.so
@@ -134,3 +134,7 @@ dmypy.json
 
 #resnet
 resnet50_weights.pth
+
+# MLFlow
+mlartifacts/
+mlruns/

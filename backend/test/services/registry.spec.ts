@@ -10,7 +10,7 @@ describe('services > registry', () => {
 
     expect(splitDistributionPackageName('localhost:8080/name:tag')).toMatchSnapshot()
     expect(splitDistributionPackageName('clamav/clamav:1.4.2_base')).toMatchSnapshot()
-    expect(splitDistributionPackageName('bitnami/minio:2025.4.22')).toMatchSnapshot()
+    expect(splitDistributionPackageName('bitnamilegacy/minio:2025.4.22')).toMatchSnapshot()
     expect(splitDistributionPackageName('tarampampam/webhook-tester:latest')).toMatchSnapshot()
     expect(splitDistributionPackageName('marlonb/mailcrab:v1.5.0')).toMatchSnapshot()
     expect(splitDistributionPackageName('localhost:8080/export-4lvt8w/alpine:latest')).toMatchSnapshot()
@@ -37,7 +37,7 @@ describe('services > registry', () => {
     ).toMatchSnapshot()
     expect(
       splitDistributionPackageName(
-        'bitnami/minio@sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab',
+        'bitnamilegacy/minio@sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab',
       ),
     ).toMatchSnapshot()
     expect(
@@ -80,23 +80,21 @@ describe('services > registry', () => {
   })
 
   test('joinDistributionPackageName > success', () => {
-    expect(joinDistributionPackageName({ domain: '', path: 'name', tag: 'tag' })).toMatchSnapshot()
-    expect(joinDistributionPackageName({ domain: '', path: 'registry', tag: '3.0.0' })).toMatchSnapshot()
-    expect(joinDistributionPackageName({ domain: '', path: 'alpine', tag: 'latest' })).toMatchSnapshot()
+    expect(joinDistributionPackageName({ path: 'name', tag: 'tag' })).toMatchSnapshot()
+    expect(joinDistributionPackageName({ path: 'registry', tag: '3.0.0' })).toMatchSnapshot()
+    expect(joinDistributionPackageName({ path: 'alpine', tag: 'latest' })).toMatchSnapshot()
 
     expect(
-      joinDistributionPackageName({ domain: '', path: 'name', digest: 'digest:0123456789abcdef0123456789abcdef' }),
+      joinDistributionPackageName({ path: 'name', digest: 'digest:0123456789abcdef0123456789abcdef' }),
     ).toMatchSnapshot()
     expect(
       joinDistributionPackageName({
-        domain: '',
         path: 'registry',
         digest: 'sha256:1fc7de654f2ac1247f0b67e8a459e273b0993be7d2beda1f3f56fbf1001ed3e7',
       }),
     ).toMatchSnapshot()
     expect(
       joinDistributionPackageName({
-        domain: '',
         path: 'alpine',
         digest: 'sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c',
       }),
@@ -104,7 +102,7 @@ describe('services > registry', () => {
 
     expect(joinDistributionPackageName({ domain: 'localhost:8080', path: 'name', tag: 'tag' })).toMatchSnapshot()
     expect(joinDistributionPackageName({ domain: 'clamav', path: 'clamav', tag: '1.4.2_base' })).toMatchSnapshot()
-    expect(joinDistributionPackageName({ domain: 'bitnami', path: 'minio', tag: '2025.4.22' })).toMatchSnapshot()
+    expect(joinDistributionPackageName({ domain: 'bitnamilegacy', path: 'minio', tag: '2025.4.22' })).toMatchSnapshot()
     expect(
       joinDistributionPackageName({ domain: 'tarampampam', path: 'webhook-tester', tag: 'latest' }),
     ).toMatchSnapshot()
@@ -120,7 +118,7 @@ describe('services > registry', () => {
       }),
     ).toMatchSnapshot()
     expect(
-      joinDistributionPackageName({ domain: 'nginxinc', path: 'nginx-unprivileged', tag: '1.25.4-alpine3.18' }),
+      joinDistributionPackageName({ path: 'nginxinc/nginx-unprivileged', tag: '1.25.4-alpine3.18' }),
     ).toMatchSnapshot()
 
     expect(
@@ -139,7 +137,7 @@ describe('services > registry', () => {
     ).toMatchSnapshot()
     expect(
       joinDistributionPackageName({
-        domain: 'bitnami',
+        domain: 'bitnamilegacy',
         path: 'minio',
         digest: 'sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab',
       }),
@@ -174,26 +172,25 @@ describe('services > registry', () => {
     ).toMatchSnapshot()
     expect(
       joinDistributionPackageName({
-        domain: 'nginxinc',
-        path: 'nginx-unprivileged',
+        path: 'nginxinc/nginx-unprivileged',
         digest: 'sha256:7b4316677e4015a53d326e657915340128d9fd506f826f676d9f169c0c8557f6',
       }),
     ).toMatchSnapshot()
   })
 
   test('joinDistributionPackageName > error', () => {
-    expect(() => joinDistributionPackageName({ domain: '', path: 'bad-name', tag: '' })).toThrowError(
+    expect(() => joinDistributionPackageName({ path: 'bad-name', tag: '' })).toThrowError(
       'Could not join Distribution Package Name.',
     )
-    expect(() => joinDistributionPackageName({ domain: '', path: '', tag: 'foo:bar:baz' })).toThrowError(
+    expect(() => joinDistributionPackageName({ path: '', tag: 'foo:bar:baz' })).toThrowError(
       'Could not join Distribution Package Name.',
     )
-    expect(() => joinDistributionPackageName({ domain: '', path: '', tag: '' })).toThrowError(
+    expect(() => joinDistributionPackageName({ path: '', tag: '' })).toThrowError(
       'Could not join Distribution Package Name.',
     )
-    expect(() =>
-      joinDistributionPackageName({ domain: '', path: '', digest: ':0123456789abcdef0123456789abcdef' }),
-    ).toThrowError('Could not join Distribution Package Name.')
+    expect(() => joinDistributionPackageName({ path: '', digest: ':0123456789abcdef0123456789abcdef' })).toThrowError(
+      'Could not join Distribution Package Name.',
+    )
     expect(() => joinDistributionPackageName({ domain: 'bad-name', path: '', digest: 'sha256:0' })).toThrowError(
       'Could not join Distribution Package Name.',
     )
@@ -201,25 +198,40 @@ describe('services > registry', () => {
 
   test('joinDistributionPackageName -> splitDistributionPackageName > success', () => {
     const testObjects = [
-      { domain: '', path: 'name', tag: 'tag' },
-      { domain: '', path: 'registry', tag: '3.0.0' },
-      { domain: '', path: 'alpine', tag: 'latest' },
-      { domain: 'nginxinc', path: 'nginx-unprivileged', tag: '1.25.4-alpine3.18' },
-      { domain: '', path: 'name', digest: 'digest:0123456789abcdef0123456789abcdef' },
+      { path: 'name', tag: 'tag' },
+      { path: 'registry', tag: '3.0.0' },
+      { path: 'alpine', tag: 'latest' },
+      { path: 'nginxinc/nginx-unprivileged', tag: '1.25.4-alpine3.18' },
+      { path: 'name', digest: 'digest:0123456789abcdef0123456789abcdef' },
       {
-        domain: '',
         path: 'registry',
         digest: 'sha256:1fc7de654f2ac1247f0b67e8a459e273b0993be7d2beda1f3f56fbf1001ed3e7',
       },
       {
-        domain: '',
         path: 'alpine',
         digest: 'sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c',
       },
       {
-        domain: 'nginxinc',
-        path: 'nginx-unprivileged',
+        path: 'nginxinc/nginx-unprivileged',
         digest: 'sha256:7b4316677e4015a53d326e657915340128d9fd506f826f676d9f169c0c8557f6',
+      },
+      {
+        domain: 'localhost:8080',
+        path: 'export-4lvt8w/alpine',
+        digest: 'sha256:ec1b05d1eac264d9204a57f4ad9d4dc35e9e756e9fedaea0674aefc7edb1d6a4',
+      },
+      {
+        path: 'node',
+        tag: '24.4.1-alpine',
+      },
+      {
+        domain: 'localhost:8080',
+        path: 's-3l1kaq/tensorflow/tensorflow',
+        tag: 'latest-gpu-jupyter',
+      },
+      {
+        path: 'tensorflow/tensorflow',
+        tag: 'latest-gpu-jupyter',
       },
     ]
 
@@ -238,6 +250,10 @@ describe('services > registry', () => {
       'registry@sha256:1fc7de654f2ac1247f0b67e8a459e273b0993be7d2beda1f3f56fbf1001ed3e7',
       'alpine@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c',
       'nginxinc/nginx-unprivileged@sha256:7b4316677e4015a53d326e657915340128d9fd506f826f676d9f169c0c8557f6',
+      'localhost:8080/export-4lvt8w/alpine/sha256:ec1b05d1eac264d9204a57f4ad9d4dc35e9e756e9fedaea0674aefc7edb1d6a4',
+      'node:24.4.1-alpine',
+      'localhost:8080/s-3l1kaq/tensorflow/tensorflow:latest-gpu-jupyter',
+      'tensorflow/tensorflow:latest-gpu-jupyter',
     ]
 
     for (const testString of testStrings) {

@@ -1,7 +1,6 @@
 import { ensureBucketExists } from '../clients/s3.js'
 import log from '../services/log.js'
 import { exportCompressedRegistryImage, ImportKind } from '../services/mirroredModel/mirroredModel.js'
-import { splitDistributionPackageName } from '../services/registry.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
@@ -26,14 +25,12 @@ async function script() {
   const user = { dn: 'user' }
 
   // main functionality
-  const distributionPackageNameObject = splitDistributionPackageName(imageDistributionPackageName)
   await exportCompressedRegistryImage(user, imageModelId, imageDistributionPackageName, outputFilename, {
     exporter: 'user',
-    sourceModelId: '',
-    mirroredModelId: imageModelId,
+    sourceModelId: imageModelId,
+    mirroredModelId: '',
     importKind: ImportKind.Image,
-    imageName: distributionPackageNameObject.path,
-    imageTag: distributionPackageNameObject['tag'] ? distributionPackageNameObject['tag'] : '',
+    distributionPackageName: '',
   })
 
   // cleanup

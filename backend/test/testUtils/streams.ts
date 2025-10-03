@@ -1,4 +1,4 @@
-import { Readable, Writable } from 'stream'
+import { Readable, Writable } from 'node:stream'
 
 export class MockReadable extends Readable {
   _read(_size: number) {}
@@ -17,4 +17,41 @@ export class MockWritable extends Writable {
   triggerFinish() {
     this.emit('finish')
   }
+}
+
+export function makeReadable({
+  chunks = [Buffer.from('default')],
+  failWith,
+  autoEnd = true,
+}: {
+  chunks?: any[]
+  failWith?: Error
+  autoEnd?: boolean
+} = {}) {
+  let endCalled = false
+
+  class ControlledReadable extends Readable {
+    idx = 0
+    _read() {
+      if (failWith) {
+        this.destroy(failWith)
+        return
+      }
+      if (this.idx < chunks.length) {
+        this.push(chunks[this.idx++])
+      } else if (autoEnd && !endCalled) {
+        endCalled = true
+        // Signal end of stream
+        this.push(null)
+      }
+    }
+    endNow() {
+      if (!endCalled) {
+        endCalled = true
+        this.push(null)
+      }
+    }
+  }
+
+  return new ControlledReadable()
 }

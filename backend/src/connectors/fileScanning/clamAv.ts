@@ -1,11 +1,13 @@
+import { Readable } from 'node:stream'
+
 import NodeClam from 'clamscan'
-import { Readable } from 'stream'
+import PQueue from 'p-queue'
 
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'
 import log from '../../services/log.js'
 import config from '../../utils/config.js'
-import { BaseFileScanningConnector, FileScanResult, ScanState } from './Base.js'
+import { BaseQueueFileScanningConnector, FileScanResult, ScanState } from './Base.js'
 
 function safeParseVersion(versionStr: string): string {
   try {
@@ -19,7 +21,8 @@ function safeParseVersion(versionStr: string): string {
   }
 }
 
-export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
+export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector {
+  queue: PQueue = new PQueue({ concurrency: config.avScanning.clamdscan.concurrency })
   toolName = 'Clam AV'
   version: string | undefined = undefined
   av: NodeClam | undefined = undefined
@@ -32,30 +35,30 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
     this.av = await new NodeClam().init({ clamdscan: config.avScanning.clamdscan })
     const scannerVersion = await this.av.getVersion()
     this.version = safeParseVersion(scannerVersion)
-    log.debug({ version: this.version }, 'Initialised Clam AV scanner')
+    log.debug({ ...this.info() }, 'Initialised Clam AV scanner')
     return this
   }
 
-  async scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
+  async _scan(file: FileInterfaceDoc): Promise<FileScanResult[]> {
+    const scannerInfo = this.info()
     if (!this.av) {
-      return await this.scanError(`Could not use ${this.toolName} as it is not been correctly initialised.`)
+      return await this.scanError(`Could not use ${this.toolName} as it is not been correctly initialised.`, {
+        ...scannerInfo,
+      })
     }
 
     const getObjectStreamResponse = await getObjectStream(file.path)
     const s3Stream = getObjectStreamResponse.Body as Readable | null
     if (!s3Stream) {
-      return await this.scanError(`Stream for file ${file.path} is not available`)
+      return await this.scanError(`Stream for file ${file.path} is not available`, { file, ...scannerInfo })
     }
 
     try {
       const { isInfected, viruses } = await this.av.scanStream(s3Stream)
-      log.info(
-        { modelId: file.modelId, fileId: file._id.toString(), name: file.name, result: { isInfected, viruses } },
-        'Scan complete.',
-      )
+      log.debug({ file, result: { isInfected, viruses }, ...scannerInfo }, 'Scan complete.')
       return [
         {
-          ...this.info(),
+          ...scannerInfo,
           state: ScanState.Complete,
           isInfected,
           viruses,
@@ -66,6 +69,7 @@ export class ClamAvFileScanningConnector extends BaseFileScanningConnector {
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
         error,
         file,
+        ...scannerInfo,
       })
     } finally {
       if (s3Stream) {

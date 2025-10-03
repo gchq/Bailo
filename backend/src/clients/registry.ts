@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream'
+
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 
 import { getHttpsUndiciAgent } from '../services/http.js'
@@ -12,9 +14,7 @@ import {
   isListModelReposResponse,
   isPutManifestResponse,
   isRegistryErrorResponse,
-  isStreamResponse,
   isUploadLayerMonolithicResponse,
-  StreamResponse,
 } from './registryResponses.js'
 
 interface RepoRef {
@@ -28,72 +28,119 @@ const agent = getHttpsUndiciAgent({
   connect: { rejectUnauthorized: !config.registry.connection.insecure },
 })
 
+interface RegistryRequestResult<TBody = unknown> {
+  headers: Record<string, string>
+  body?: TBody
+  stream?: ReadableStream | Readable
+  abort: () => void
+  status: number
+  statusText: string
+  url: string
+}
+
 async function registryRequest(
   token: string,
   endpoint: string,
   returnRawBody: boolean = false,
-  extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher'>> = {},
+  extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>> = {},
   extraHeaders: HeadersInit = {},
-) {
+  traverseLinks: boolean = true,
+): Promise<RegistryRequestResult> {
+  const controller = new AbortController()
+
+  const allRepositories: string[] = []
+  let paginateParameter = ''
+  let link: string | null
+  let contentType: string
   let res: Response
-  try {
-    // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
-    // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
-    res = await fetch(`${registry}/v2/${endpoint}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...extraHeaders,
-      },
-      dispatcher: agent,
-      ...extraFetchOptions,
-    })
-  } catch (err) {
-    throw InternalError('Unable to communicate with the registry.', { err })
-  }
-  let body: unknown
-  const headers = res.headers
-  // don't get the json e.g. for a stream response
-  if (!returnRawBody) {
+  let body: any
+  let stream: ReadableStream | Readable | undefined
+
+  do {
     try {
-      body = await res.json()
+      // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
+      // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
+      res = await fetch(`${registry}/v2/${endpoint}${paginateParameter}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...extraHeaders,
+        },
+        dispatcher: agent,
+        signal: controller.signal,
+        ...extraFetchOptions,
+      })
     } catch (err) {
-      throw InternalError('Unable to parse response body JSON.', { err })
+      throw InternalError('Unable to communicate with the registry.', { err })
     }
-  }
-  if (!res.ok) {
-    const context = {
-      url: res.url,
-      status: res.status,
-      statusText: res.statusText,
+
+    link = res.headers.get('link')
+    contentType = res.headers.get('content-type') || ''
+
+    if (link) {
+      paginateParameter = link.substring(link.indexOf('%'), link.lastIndexOf('>'))
     }
-    if (body === undefined && returnRawBody && res.body !== null) {
-      // try to get the json if there's an error, even if we wanted the raw body
+
+    if (returnRawBody) {
+      stream = res.body as any
+    } else if (contentType.endsWith('json')) {
+      // e.g. 'application/json', 'application/vnd.docker.distribution.manifest.v2+json'
       try {
         body = await res.json()
-      } catch {
-        // the response may not have a json body
+      } catch (err) {
+        throw InternalError('Unable to parse response body JSON.', { err })
+      }
+    } else {
+      try {
+        body = await res.text()
+      } catch (err) {
+        throw InternalError('Unable to read non-JSON response body.', { err })
       }
     }
-    if (isRegistryErrorResponse(body)) {
-      throw RegistryError(body, context)
-    } else {
-      throw InternalError('Unrecognised response returned by the registry.', {
-        ...context,
-        body: JSON.stringify(body),
-      })
+
+    if (!res.ok) {
+      const context = {
+        url: res.url,
+        status: res.status,
+        statusText: res.statusText,
+      }
+
+      if (!body && contentType.includes('application/json')) {
+        // try to get the json if there's an error, even if we wanted the raw body
+        body = await res.json().catch(() => undefined)
+      }
+
+      if (isRegistryErrorResponse(body)) {
+        throw RegistryError(body, context)
+      } else {
+        throw InternalError('Unrecognised response returned by the registry.', {
+          ...context,
+          body: JSON.stringify(body),
+        })
+      }
+    }
+
+    if (body?.repositories) {
+      allRepositories.push(...body.repositories)
+    }
+  } while (traverseLinks && link)
+
+  if (allRepositories.length) {
+    body = {
+      repositories: allRepositories,
     }
   }
 
-  const headersObject = headers ? Object.fromEntries(headers) : {}
-
-  if (returnRawBody) {
-    return { res, headers: headersObject }
-  } else {
-    return { body, headers: headersObject }
+  return {
+    headers: res.headers ? Object.fromEntries(res.headers) : {},
+    body: returnRawBody ? undefined : body,
+    stream: returnRawBody ? stream : undefined,
+    abort: () => controller.abort(),
+    status: res.status,
+    statusText: res.statusText,
+    url: res.url,
   }
 }
 
-// Currently limited to a maximum 100 image names
 export async function listModelRepos(token: string, modelId: string) {
   const { body } = await registryRequest(token, `_catalog?n=100&last=${modelId}`)
   if (!isListModelReposResponse(body)) {
@@ -149,23 +196,28 @@ export async function getRegistryLayerStream(
   token: string,
   imageRef: RepoRef,
   layerDigest: string,
-): Promise<StreamResponse> {
-  const responseStream = (
-    await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`, true, undefined, {
+): Promise<{ stream: Readable | ReadableStream; abort: () => void }> {
+  const { stream, abort } = await registryRequest(
+    token,
+    `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
+    true,
+    undefined,
+    {
       Accept: 'application/vnd.docker.distribution.manifest.v2+json',
-    })
-  ).res
+    },
+  )
 
-  if (!isStreamResponse(responseStream)) {
+  if (!stream || !(stream instanceof ReadableStream || stream instanceof Readable)) {
+    abort()
     throw InternalError('Unrecognised response stream when getting image layer blob.', {
-      responseStream,
+      stream,
       namespace: imageRef.namespace,
       image: imageRef.image,
       layerDigest,
     })
   }
 
-  return responseStream
+  return { stream, abort }
 }
 
 export async function doesLayerExist(token: string, imageRef: RepoRef, digest: string) {
@@ -243,10 +295,10 @@ export async function uploadLayerMonolithic(
   token: string,
   uploadURL: string,
   digest: string,
-  blob: BodyInit,
+  blob: Readable | ReadableStream,
   size: string,
 ) {
-  const { headers } = await registryRequest(
+  const { headers, abort } = await registryRequest(
     token,
     `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''),
     true,
@@ -254,6 +306,8 @@ export async function uploadLayerMonolithic(
       method: 'PUT',
       body: blob,
       duplex: 'half',
+      window: null,
+      redirect: 'error',
     },
     {
       'content-length': size,
@@ -262,7 +316,8 @@ export async function uploadLayerMonolithic(
   )
 
   if (!isUploadLayerMonolithicResponse(headers)) {
-    throw InternalError('Unrecognised response headers when putting image manifest.', {
+    abort()
+    throw InternalError('Unrecognised response headers when putting image blob.', {
       headers,
       uploadURL,
       digest,

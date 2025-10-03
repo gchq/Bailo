@@ -13,8 +13,10 @@ import {
   findReviewsForAccessRequests,
   removeAccessRequestReviews,
   removeReviewRole,
+  updateReviewRole,
 } from '../../src/services/review.js'
 import { RoleKind } from '../../src/types/types.js'
+import { NotFound } from '../../src/utils/error.js'
 import { testModelSchema, testReviewRole } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js', async () => ({
@@ -282,8 +284,8 @@ describe('services > review', () => {
     reviewRoleModelMock.find.mockResolvedValueOnce([])
     const result: Promise<void> = createReleaseReviews(new Model(), new Release())
 
+    await expect(result).resolves.not.toThrowError()
     expect(smtpMock.requestReviewForRelease).not.toBeCalled()
-    expect(result).resolves.not.toThrowError()
     expect(reviewModelMock.save).not.toBeCalled()
   })
 
@@ -378,5 +380,34 @@ describe('services > review', () => {
 
     expect(reviewRoleModelMock.match.mock.calls.at(0)).toMatchSnapshot()
     expect(schemaModelMock.match.mock.calls.at(0)).toMatchSnapshot()
+  })
+
+  test('updateReviewRole > successful', async () => {
+    const shortName = 'reviewer'
+
+    await updateReviewRole(user, shortName, {
+      name: 'reviewer',
+      description: 'existing description',
+      systemRole: 'owner',
+      defaultEntities: ['user:user2'],
+    })
+
+    expect(reviewRoleModelMock.save).toBeCalled()
+  })
+
+  test('updateReviewRole > failure', async () => {
+    //make sure find works
+    const shortName = 'badShortName'
+    reviewRoleModelMock.findOne.mockImplementation(() => {
+      throw NotFound(`The requested review role was not found`, { shortName })
+    })
+    const res = updateReviewRole(user, shortName, {
+      name: 'reviewer',
+      description: 'description',
+      systemRole: 'owner',
+      defaultEntities: ['user:user2'],
+    })
+
+    await expect(res).rejects.toThrowError(/^The requested review role was not found/)
   })
 })

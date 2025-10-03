@@ -5,6 +5,7 @@ import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
 import ReviewRoleModel from '../../models/ReviewRole.js'
 import { SchemaDoc } from '../../models/Schema.js'
+import { SchemaMigrationDoc } from '../../models/SchemaMigration.js'
 import { UserInterface } from '../../models/User.js'
 import { Access } from '../../routes/v1/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../services/accessRequest.js'
@@ -32,6 +33,8 @@ import {
   ReviewRoleActionKeys,
   SchemaAction,
   SchemaActionKeys,
+  SchemaMigrationAction,
+  SchemaMigrationActionKeys,
 } from './actions.js'
 
 export type Response = { id: string; success: true } | { id: string; success: false; info: string }
@@ -62,6 +65,14 @@ export class BasicAuthorisationConnector {
 
   async schema(user: UserInterface, schema: SchemaDoc, action: SchemaActionKeys) {
     return (await this.schemas(user, [schema], action))[0]
+  }
+
+  async schemaMigration(
+    user: UserInterface,
+    schemaMigrationDoc: SchemaMigrationDoc,
+    action: SchemaMigrationActionKeys,
+  ) {
+    return (await this.schemaMigrations(user, [schemaMigrationDoc], action))[0]
   }
 
   async release(user: UserInterface, model: ModelDoc, action: ReleaseActionKeys, release?: ReleaseDoc) {
@@ -116,6 +127,10 @@ export class BasicAuthorisationConnector {
           return { id: model.id, success: false, info: 'You do not have permission to update a model card.' }
         }
 
+        if (ModelAction.Delete === action && (await missingRequiredRole(user, model, ['owner']))) {
+          return { id: model.id, success: false, info: 'You do not have permission to delete a model card.' }
+        }
+
         if (
           ModelAction.Update === action &&
           (await missingRequiredRole(user, model, ['owner'])) &&
@@ -168,6 +183,39 @@ export class BasicAuthorisationConnector {
               id: schema.id,
               success: false,
               info: 'You cannot upload or modify a schema if you are not an admin.',
+            }
+          }
+        }
+
+        return {
+          id: schema.id,
+          success: true,
+        }
+      }),
+    )
+  }
+
+  async schemaMigrations(
+    user: UserInterface,
+    schemaMigrations: Array<SchemaMigrationDoc>,
+    action: SchemaMigrationActionKeys,
+  ): Promise<Array<Response>> {
+    return Promise.all(
+      schemaMigrations.map(async (schema) => {
+        // Is this a constrained user token.
+        const tokenAuth = await validateTokenForUse(user.token, ActionLookup[action])
+        if (!tokenAuth.success) {
+          return tokenAuth
+        }
+
+        if (action === SchemaMigrationAction.Create) {
+          const isAdmin = await authentication.hasRole(user, Roles.Admin)
+
+          if (!isAdmin) {
+            return {
+              id: schema.id,
+              success: false,
+              info: 'You cannot upload a schema migration if you are not an admin.',
             }
           }
         }

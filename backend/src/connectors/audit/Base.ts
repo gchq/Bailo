@@ -9,6 +9,7 @@ import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
+import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import {
@@ -102,12 +103,24 @@ export const AuditInfo = {
   DeleteSchema: { typeId: 'DeleteSchema', description: 'Schema Deleted', auditKind: AuditKind.Delete },
   UpdateSchema: { typeId: 'UpdateSchema', description: 'Schema Updated', auditKind: AuditKind.Update },
 
+  CreateSchemaMigration: {
+    typeId: 'CreateSchemaMigration',
+    description: 'Schema Migration Plan Created',
+    auditKind: AuditKind.Create,
+  },
+  ViewSchemaMigrations: {
+    typeId: 'ViewSchemaMigrations',
+    description: 'Schemas Migration Plans viewed',
+    auditKind: AuditKind.View,
+  },
+
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
 
   CreateInference: { typeId: 'CreateInference', description: 'Inference Service Created', auditKind: AuditKind.Create },
   UpdateInference: { typeId: 'UpdateInference', description: 'Inference Service Updated', auditKind: AuditKind.Update },
   ViewInference: { typeId: 'ViewInference', description: 'Inference Service Viewed', auditKind: AuditKind.View },
   ViewInferences: { typeId: 'ViewInferences', description: 'Inferences Viewed', auditKind: AuditKind.View },
+  DeleteInference: { typeId: 'DeleteInferences', description: 'Inferences Deleted', auditKind: AuditKind.Delete },
 
   CreateExport: { typeId: 'CreateExport', description: 'Model Exported', auditKind: AuditKind.Create },
   CreateImport: { typeId: 'CreateImport', description: 'Model Imported', auditKind: AuditKind.Create },
@@ -131,6 +144,11 @@ export const AuditInfo = {
     typeId: 'CreateReviewRole',
     description: 'Created a new review role',
     auditKind: AuditKind.Create,
+  },
+  UpdateReviewRole: {
+    typeId: 'UpdateReviewRole',
+    description: 'Updated an existing review role',
+    auditKind: AuditKind.Update,
   },
   ViewReviewRoles: {
     typeId: 'ViewReviewRole',
@@ -192,10 +210,14 @@ export abstract class BaseAuditConnector {
   abstract onDeleteSchema(req: Request, schemaId: string)
   abstract onUpdateSchema(req: Request, schema: SchemaDoc)
 
+  abstract onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
+  abstract onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[])
+
   abstract onCreateInference(req: Request, inference: InferenceDoc)
   abstract onUpdateInference(req: Request, inference: InferenceDoc)
   abstract onViewInference(req: Request, inference: InferenceDoc)
   abstract onViewInferences(req: Request, inference: InferenceDoc[])
+  abstract onDeleteInference(req: Request, inference: InferenceDoc)
 
   abstract onViewModelImages(
     req: Request,
@@ -213,6 +235,7 @@ export abstract class BaseAuditConnector {
   )
 
   abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
+  abstract onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface)
   abstract onViewReviewRoles(req: Request, reviewRole: ReviewRoleInterface[])
   abstract onDeleteReviewRole(req: Request, reviewRoleId: string)
 
