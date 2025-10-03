@@ -165,6 +165,8 @@ mongodb:
 minio:
   enabled: true
   mode: standalone
+  console:
+    enabled: false
   auth:
     enable: true
     rootUser: ""
