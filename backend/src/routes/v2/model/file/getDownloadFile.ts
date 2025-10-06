@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import stream from 'node:stream'
 
 import contentDisposition from 'content-disposition'
@@ -10,7 +11,8 @@ import { FileInterface, FileWithScanResultsInterface } from '../../../../models/
 import { downloadFile, getFileById } from '../../../../services/file.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
 import { registerPath } from '../../../../services/specification.js'
-import { BadReq, InternalError } from '../../../../utils/error.js'
+import { InternalError } from '../../../../utils/error.js'
+import { parseRangeHeaders } from '../../../../utils/range.js'
 import { parse } from '../../../../utils/validate.js'
 
 export const getDownloadFileSchema = z
@@ -98,15 +100,15 @@ export const getDownloadFile = [
       file = await getFileById(req.user, params.fileId)
     }
 
-    if (req.headers.range) {
-      // TODO: support ranges
-      throw BadReq('Ranges are not supported', { fileId: file._id.toString() })
-    }
+    // Naive approach to generating an ETag - this is needed for some download tools to consider a file resumable
+    const etag = createHash('sha256').update(`${file.id}/${file.updatedAt.getTime()}`).digest('hex')
 
-    res.set('Content-Length', String(file.size))
-    // TODO: support ranges
-    // res.set('Accept-Ranges', 'bytes')
-    const stream = await downloadFile(req.user, file.id)
+    res.set('ETag', etag)
+    res.set('Accept-Ranges', 'bytes')
+
+    const fetchRange = parseRangeHeaders(req, res, file.size)
+
+    const stream = await downloadFile(req.user, file.id, fetchRange)
 
     if (!stream.Body) {
       throw InternalError('We were not able to retrieve the body of this file', { fileId: file._id.toString() })
@@ -119,7 +121,7 @@ export const getDownloadFile = [
     res.set('Content-Type', file.mime)
     res.set('Cache-Control', 'public, max-age=604800, immutable')
 
-    res.writeHead(200)
+    res.status(fetchRange ? 206 : 200)
 
     // The AWS library doesn't seem to properly type 'Body' as being pipeable?
     ;(stream.Body as stream.Readable).pipe(res)
