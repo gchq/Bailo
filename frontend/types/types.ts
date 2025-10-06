@@ -451,6 +451,7 @@ export interface EntryInterface {
   description: string
   state?: string
   organisation?: string
+  tags: string[]
   settings: {
     ungovernedAccess?: boolean
     allowTemplating?: boolean

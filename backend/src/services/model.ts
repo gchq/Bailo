@@ -134,14 +134,14 @@ export async function searchModels(
   }
 
   if (libraries.length) {
-    query['card.metadata.overview.tags'] = { $all: libraries }
+    query.tags = { $all: libraries }
   }
 
   if (task) {
-    if (query['card.metadata.overview.tags']) {
-      query['card.metadata.overview.tags'].$all.push(task)
+    if (query.tags) {
+      query.tags.$all.push(task)
     } else {
-      query['card.metadata.overview.tags'] = { $all: [task] }
+      query.tags = { $all: [task] }
     }
   }
 
@@ -318,7 +318,7 @@ export async function updateModelCard(
 
 export type UpdateModelParams = Pick<
   ModelInterface,
-  'name' | 'description' | 'visibility' | 'collaborators' | 'state' | 'organisation'
+  'name' | 'description' | 'visibility' | 'collaborators' | 'state' | 'organisation' | 'tags'
 > & {
   settings: Partial<ModelInterface['settings']>
 }
