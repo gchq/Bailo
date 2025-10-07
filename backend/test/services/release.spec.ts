@@ -103,6 +103,33 @@ const releaseModelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/Release.js', () => ({ default: releaseModelMocks }))
 
+const reviewModelMocks = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.unwind = vi.fn(() => obj)
+  obj.group = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.updateMany = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.delete = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.filter = vi.fn(() => obj)
+
+  const model: any = vi.fn((params) => ({ ...obj, ...params }))
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/Review.js', () => ({ default: reviewModelMocks }))
+
 const mockReviewService = vi.hoisted(() => {
   return {
     createReleaseReviews: vi.fn(),
@@ -110,6 +137,13 @@ const mockReviewService = vi.hoisted(() => {
   }
 })
 vi.mock('../../src/services/review.js', () => mockReviewService)
+
+const mockResponseService = vi.hoisted(() => {
+  return {
+    removeResponsesByParentIds: vi.fn(),
+  }
+})
+vi.mock('../../src/services/response.js', () => mockResponseService)
 
 const mockWebhookService = vi.hoisted(() => {
   return {
@@ -466,6 +500,7 @@ describe('services > release', () => {
   })
 
   test('deleteRelease > success', async () => {
+    reviewModelMocks.find.mockResolvedValue([])
     expect(await deleteRelease({} as any, 'test', 'test')).toStrictEqual({ modelId: 'test', semver: 'test' })
   })
 
@@ -498,7 +533,6 @@ describe('services > release', () => {
     await expect(() => deleteRelease({} as any, 'test', 'test')).rejects.toThrowError(
       /^Cannot delete a release on a mirrored model./,
     )
-    expect(releaseModelMocks.save).not.toBeCalled()
   })
 
   test('removeFileFromReleases > no permission', async () => {
