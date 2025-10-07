@@ -1,7 +1,10 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Button, Chip, ListItem, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
+import { useGetSchemas } from 'actions/schema'
+import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
+import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
 import { SchemaInterface } from 'types/types'
 
 interface SchemaListItemProps {
@@ -26,20 +29,28 @@ export default function SchemaListItem({
   onOpenMenuClick,
   onEditSchemaClick,
 }: SchemaListItemProps) {
+  const [reviewRoleSelectorIsOpen, setReviewRoleSelectorIsOpen] = useState(false)
+  const { mutateSchemas } = useGetSchemas('model')
+
+  const handleDialogClose = (isClosed: boolean) => {
+    mutateSchemas()
+    setReviewRoleSelectorIsOpen(isClosed)
+  }
+
   return (
     <ListItem divider={index < schemasLength - 1} key={schema.id}>
       <ListItemText
         primary={
           <EditableText
             value={schema.name}
-            onSubmit={(newValue) => onEditSchemaClick(schema.id, { name: newValue })}
+            onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { name: newValue })}
             tooltipText='Edit schema name'
           />
         }
         secondary={
           <EditableText
             value={schema.description}
-            onSubmit={(newValue) => onEditSchemaClick(schema.id, { description: newValue })}
+            onSubmit={(newValue: string | undefined) => onEditSchemaClick(schema.id, { description: newValue })}
             tooltipText='Edit schema description'
             richText
           />
@@ -87,9 +98,11 @@ export default function SchemaListItem({
           <MenuItem onClick={() => onEditSchemaClick(schema.id, { hidden: !schema.hidden })}>
             {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
           </MenuItem>
+          <MenuItem onClick={() => setReviewRoleSelectorIsOpen(true)}>Update review roles</MenuItem>
           <MenuItem onClick={() => onDeleteSchemaClick(schema.id)}>Delete</MenuItem>
         </Menu>
       </Stack>
+      <UpdateReviewRolesForSchemaDialog open={reviewRoleSelectorIsOpen} onClose={handleDialogClose} schema={schema} />
     </ListItem>
   )
 }

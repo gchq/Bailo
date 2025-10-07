@@ -1,9 +1,9 @@
 dependencies:
 - name: minio
   repository: https://charts.bitnami.com/bitnami
-  version: 14.2.1
+  version: 17.0.21
 - name: mongodb
   repository: https://charts.bitnami.com/bitnami
-  version: 15.1.7
-digest: sha256:c25ba37200fbc711247f68071bac1eba68fcfb5ac4fe6165939d46cc4d6711e4
-generated: "2025-07-01T12:07:12.285121767Z"
+  version: 16.5.45
+digest: sha256:785736818770c635ea76f8434268c071ceae3aa1e82dcbf38a51e3e87fa7fe12
+generated: "2025-08-25T11:26:55.109158445Z"

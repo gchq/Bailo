@@ -20,11 +20,19 @@ interface DataCardSelectorProps {
   onChange: (newValue: string[]) => void
   formContext?: FormContextType
   rawErrors?: string[]
+  InputProps?: any
 }
 
-export default function DataCardSelector(props: DataCardSelectorProps) {
-  const { onChange, value: currentValue, required, label, id, formContext, rawErrors } = props
-
+export default function DataCardSelector({
+  onChange,
+  value: currentValue,
+  required,
+  label,
+  id,
+  formContext,
+  rawErrors,
+  InputProps,
+}: DataCardSelectorProps) {
   const [open, setOpen] = useState(false)
   const [dataCardListQuery, setDataCardListQuery] = useState('')
   const [selectedDataCards, setSelectedDataCards] = useState<EntrySearchResult[]>([])
@@ -69,12 +77,22 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
     return <MessageAlert message={isDataCardsError.info.message} severity='error' />
   }
 
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
+
   return (
     <>
       {isDataCardsLoading && <Loading />}
       {formContext && formContext.editMode && (
         <>
-          <Typography id={`${id}-label`} fontWeight='bold'>
+          <Typography
+            id={`${id}-label`}
+            fontWeight='bold'
+            aria-label={`label for ${label}`}
+            component='label'
+            htmlFor={id}
+          >
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
@@ -115,6 +133,15 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
                     event.stopPropagation()
                   }
                 }}
+                slotProps={{
+                  input: {
+                    ...InputProps,
+                    ...(!formContext.editMode && { disableUnderline: true }),
+                    'data-test': id,
+                    'aria-label': `input field for ${label}`,
+                    id: id,
+                  },
+                }}
               />
             )}
           />
@@ -122,7 +149,7 @@ export default function DataCardSelector(props: DataCardSelectorProps) {
       )}
       {formContext && !formContext.editMode && (
         <>
-          <Typography fontWeight='bold'>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>

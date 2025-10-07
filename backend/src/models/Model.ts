@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
+
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const EntryVisibility = {
   Private: 'private',
@@ -15,19 +16,18 @@ export const EntryKind = {
 
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
-export const CollaboratorRoles = {
+export const SystemRoles = {
   Owner: 'owner',
   Contributor: 'contributor',
   Consumer: 'consumer',
-  MSRO: 'msro',
-  MTR: 'mtr',
+  None: '',
 } as const
 
-export type CollaboratorRolesKeys = (typeof CollaboratorRoles)[keyof typeof CollaboratorRoles]
+export type SystemRolesKeys = (typeof SystemRoles)[keyof typeof SystemRoles]
 
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<CollaboratorRolesKeys | string>
+  roles: Array<SystemRolesKeys | string>
 }
 
 export interface ModelMetadata {
@@ -131,12 +131,7 @@ const ModelSchema = new Schema<ModelDoc>(
   },
 )
 
-ModelSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: Schema.Types.ObjectId,
-  deletedAt: true,
-})
+ModelSchema.plugin(softDeletionPlugin)
 ModelSchema.index({ '$**': 'text' }, { weights: { name: 10, description: 5 } })
 
 const ModelModel = model<ModelDoc>('v2_Model', ModelSchema)

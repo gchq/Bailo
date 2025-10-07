@@ -116,13 +116,12 @@ resourcesFrontend:
     memory: 800Mi
 
 resourcesBackend:
-    limits:
-      cpu: 800m
-      memory: 2Gi
-    requests:
-      cpu: 400m
-      memory: 1Gi
-
+  limits:
+    cpu: 800m
+    memory: 2Gi
+  requests:
+    cpu: 400m
+    memory: 1Gi
 
 # Pod placement
 nodeSelector: {}
@@ -159,18 +158,21 @@ mongodb:
     enabled: false
   image:
     registry: docker.io
-    repository: bitnami/mongodb
-    tag: 7.0.15
+    repository: bitnamilegacy/mongodb
+    tag: 8.0.13
 
 # MinIO Dependencies
 minio:
   enabled: true
   mode: standalone
+  console:
+    enabled: false
   auth:
     enable: true
     rootUser: ""
     rootPassword: ""
     existingSecret: "bailo-minio" # Helm generated Secret
+    usePasswordFiles: false
   defaultBuckets: "uploads,registry"
   createBuckets: "false" # attempt to create buckets
   uploadBucket: uploads # required for Bailo
@@ -179,6 +181,10 @@ minio:
   service:
     ports:
       api: 31111 # default 9000
+  # skip the security verification check https://github.com/bitnami/charts/issues/30850
+  global:
+    security:
+      allowInsecureImages: true
   useSSL: false
   persistence:
     #enabled: false # Required for aws. EKS is not able to handle dynamic creation of PVC using this helm chart. Instead /templates/storage.yaml handles eks storage. Storage is not removed when deployed minio is removed.
@@ -191,8 +197,8 @@ minio:
   partSizeMB: 64
   image:
     registry: docker.io
-    repository: bitnami/minio
-    tag: 2025.5.24
+    repository: bitnamilegacy/minio
+    tag: 2025.7.23
     debug: true
 
 # Registry Dependencies
@@ -223,7 +229,7 @@ nginxAuth:
 # Mail
 mail:
   enabled: true
-  image: marlonb/mailcrab:v1.6.1
+  image: marlonb/mailcrab:v1.6.2
 
 # Openshift specific configuration
 openshift:
@@ -297,6 +303,7 @@ modelMirror:
   import:
     enabled: false
   export:
+    concurrency: 5
     enabled: false
     disclaimer: '## Example Agreement \n I agree that this model is suitable for exporting'
     kmsSignature:
@@ -323,6 +330,7 @@ clamav:
   enabled: false
   runAsUser: 1002
   image: clamav/clamav:1.4.3_base # https://docs.clamav.net/manual/Installing/Docker.html#the-official-images-on-docker-hub
+  concurrency: 2
   port: 3310
   accessModes:
     - ReadWriteOnce
@@ -330,6 +338,7 @@ clamav:
 
 modelscan:
   enabled: false
+  concurrency: 2
   protocol: http
   port: 3311
   accessModes:

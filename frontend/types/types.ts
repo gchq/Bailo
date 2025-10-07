@@ -77,9 +77,6 @@ export interface UiConfig {
   }
 }
 
-//System roles
-export type CollaboratorRoleType = 'contributor' | 'consumer' | 'owner' | string
-
 export interface FileInterface {
   _id: string
   modelId: string
@@ -206,8 +203,9 @@ export interface SchemaInterface {
   hidden: boolean
   kind: SchemaKindKeys
   meta: unknown
+  jsonSchema: unknown
   uiSchema: unknown
-  schema: unknown
+  reviewRoles: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -224,17 +222,33 @@ export interface EntryCardRevisionInterface {
 
 export const RoleKind = {
   ENTRY: 'entry',
-  SCHEMA: 'schema',
+  REVIEW: 'review',
 } as const
 
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
+export const SystemRole = {
+  Owner: 'owner',
+  Contributor: 'contributor',
+  Consumer: 'consumer',
+  None: '',
+} as const
+
+export type SystemRoleKeys = (typeof SystemRole)[keyof typeof SystemRole]
+
+export type CollaboratorRoleType = SystemRoleKeys | string
+
 export interface SystemRole {
-  id: string
   name: string
-  short?: string
+  shortName: string
   kind?: RoleKindKeys
   description?: string
+  systemRole: SystemRoleKeys
+}
+
+export type ReviewRolesFormData = SystemRole & {
+  defaultEntities?: string[]
+  lockEntities: boolean
 }
 
 export const SchemaKindLabel = {
@@ -243,12 +257,6 @@ export const SchemaKindLabel = {
   dataCard: 'data card',
 }
 export type SchemaKindLabelKeys = (typeof SchemaKindLabel)[keyof typeof SchemaKindLabel]
-
-export type ReviewRolesFormData = SystemRole & {
-  defaultEntities?: string[]
-  lockEntities: boolean
-  collaboratorRole?: CollaboratorRoleType
-}
 
 export const SchemaKind = {
   MODEL: 'model',
@@ -410,7 +418,7 @@ export interface EntryCardInterface {
 
 export interface CollaboratorEntry {
   entity: string
-  roles: Array<CollaboratorRoleType | string>
+  roles: Array<CollaboratorRoleType>
 }
 
 export const EntryKindLabel = {
@@ -618,4 +626,41 @@ export type FileUploadWithMetadata = {
 export type FileUploadMetadata = {
   tags: string[]
   text: string
+}
+
+export interface ReviewRoleInterface {
+  _id: string
+  name: string
+  shortName: string
+  kind: RoleKindKeys
+  description?: string
+  defaultEntities?: string[]
+  lockEntities?: boolean
+  systemRole: SystemRoleKeys
+  createdAt: string
+  updatedAt: string
+}
+
+export interface QuestionMigration {
+  // id is only used in the UI for uniqueness
+  id: string
+  kind: string
+  sourcePath: string
+  targetPath?: string
+  propertyType: string
+}
+
+export interface CombinedSchema {
+  schema: SchemaInterface
+  splitSchema: SplitSchemaNoRender
+}
+
+export interface SchemaMigrationInterface {
+  name: string
+  description?: string
+  questionMigrations: QuestionMigration[]
+  sourceSchema: string
+  targetSchema: string
+  createdAt: string
+  updatedAt: string
 }

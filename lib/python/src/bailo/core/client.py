@@ -16,6 +16,11 @@ class Client:
     """
 
     def __init__(self, url: str, agent: Agent = Agent()):
+        """Initialise a Client.
+
+        :param url: URL of the Bailo instance website.
+        :param agent: An agent object to handle requests, defaults to Agent().
+        """
         self.url = url.rstrip("/") + "/api"
         self.agent = agent
 
@@ -383,11 +388,12 @@ class Client:
             )
 
     def simple_upload(self, model_id: str, name: str, buffer: BytesIO):
-        """Create a simple file upload.
+        """Upload a file associated with a model.
 
-        :param model_id: Unique model ID
-        :param name: File name
-        :return: JSON response object
+        :param model_id: Unique model ID.
+        :param name: Name of the file to upload.
+        :param buffer: File-like BytesIO object containing the data to upload.
+        :return: Response object from the upload endpoint.
         """
         return self.agent.post(
             f"{self.url}/v2/model/{model_id}/files/upload/simple",
@@ -461,6 +467,7 @@ class Client:
         description: str,
         kind: SchemaKind,
         json_schema: dict[str, Any],
+        review_roles: list[str],
     ):
         """Create a schema.
 
@@ -469,6 +476,7 @@ class Client:
         :param description: Description for the schema
         :param kind: Enum to define schema kind (e.g. Model or AccessRequest)
         :param json_schema: JSON schema
+        :param review_roles: list made up of the "shortName" property from a Review Role object
         :return: JSON response object
         """
         return self.agent.post(
@@ -479,6 +487,7 @@ class Client:
                 "description": description,
                 "kind": str(kind),
                 "jsonSchema": json_schema,
+                "reviewRoles": review_roles,
             },
         ).json()
 
@@ -540,19 +549,6 @@ class Client:
         """
         return self.agent.get(
             f"{self.url}/v2/model/{model_id}/roles",
-        ).json()
-
-    def get_model_user_roles(
-        self,
-        model_id: str,
-    ):
-        """Get current users roles for a model.
-
-        :param model_id: Unique model ID
-        :return: JSON response object
-        """
-        return self.agent.get(
-            f"{self.url}/v2/model/{model_id}/roles/mine",
         ).json()
 
     def get_access_request(self, model_id: str, access_request_id: str):
@@ -636,9 +632,7 @@ class Client:
         :param file_id: Unique file ID
         :return: JSON response object
         """
-        return self.agent.put(
-            f"{self.url}/v2/filescanning/model/{model_id}/file/{file_id}/scan",
-        ).json()
+        return self.agent.put(f"{self.url}/v2/filescanning/model/{model_id}/file/{file_id}/scan", json={}).json()
 
     def post_access_request_review(
         self,

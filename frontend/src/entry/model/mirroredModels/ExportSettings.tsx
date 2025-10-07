@@ -1,10 +1,10 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { LoadingButton } from '@mui/lab'
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
+  Button,
   Card,
   Container,
   Divider,
@@ -100,7 +100,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
                 requiredRolesText={requiredRolesText}
               />
                */}
-                    <LoadingButton
+                    <Button
                       sx={{ width: 'fit-content' }}
                       variant='contained'
                       data-test='createAccessRequestButton'
@@ -108,7 +108,7 @@ export default function ExportSettings({ model }: ExportSettingsProps) {
                       type='submit'
                     >
                       Save
-                    </LoadingButton>
+                    </Button>
                     <MessageAlert message={errorMessage} severity='error' />
                   </Stack>
                 </AccordionDetails>

@@ -2,6 +2,7 @@ import { Box, Button, Chip, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FormContextType } from '@rjsf/utils'
 import { useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 interface TagSelectorProps {
   onChange: (newValue: string[]) => void
@@ -9,9 +10,10 @@ interface TagSelectorProps {
   label: string
   formContext?: FormContextType
   required?: boolean
+  id: string
 }
 
-export default function TagSelector({ onChange, value, label, formContext, required }: TagSelectorProps) {
+export default function TagSelector({ onChange, value, label, formContext, required, id }: TagSelectorProps) {
   const theme = useTheme()
 
   const [newTag, setNewTag] = useState('')
@@ -38,11 +40,15 @@ export default function TagSelector({ onChange, value, label, formContext, requi
     onChange(updatedArray)
   }
 
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
+
   return (
     <>
       {formContext && formContext.editMode && (
         <Stack spacing={1}>
-          <Typography fontWeight='bold'>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
@@ -55,6 +61,8 @@ export default function TagSelector({ onChange, value, label, formContext, requi
                   handleNewTagSubmit()
                 }
               }}
+              id={id}
+              aria-label={`input field for ${label}`}
               onChange={(e) => setNewTag(e.target.value)}
             />
             <Button size='small' onClick={handleNewTagSubmit}>
@@ -82,7 +90,9 @@ export default function TagSelector({ onChange, value, label, formContext, requi
       )}
       {formContext && !formContext.editMode && (
         <>
-          <Typography fontWeight='bold'>{label}</Typography>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+            {label}
+          </Typography>
           {value.length === 0 && (
             <Typography
               sx={{

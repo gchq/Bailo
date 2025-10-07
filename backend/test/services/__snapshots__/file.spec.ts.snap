@@ -134,33 +134,34 @@ exports[`services > file > uploadFile > success 1`] = `
   "avScan": {
     "aggregate": [MockFunction spy],
     "delete": [MockFunction spy],
+    "deleteMany": [MockFunction spy],
     "find": [MockFunction spy] {
       "calls": [
         [
           {
-            "fileId": "function(...args) {
-    let state2 = getInternalState(fn);
-    state2.called = !0, state2.callCount++, state2.calls.push(args);
-    let next = state2.next.shift();
-    if (next) {
-      state2.results.push(next);
-      let [type2, result2] = next;
-      if (type2 === "ok")
-        return result2;
-      throw result2;
+            "fileId": "function(...s) {
+    let n = T(t);
+    n.called = !0, n.callCount++, n.calls.push(s);
+    let d = n.next.shift();
+    if (d) {
+      n.results.push(d);
+      let [a, i] = d;
+      if (a === "ok")
+        return i;
+      throw i;
     }
-    let result, type = "ok", resultIndex = state2.results.length;
-    if (state2.impl)
+    let o, c = "ok", p = n.results.length;
+    if (n.impl)
       try {
-        new.target ? result = Reflect.construct(state2.impl, args, new.target) : result = state2.impl.apply(this, args), type = "ok";
-      } catch (err) {
-        throw result = err, type = "error", state2.results.push([type, err]), err;
+        new.target ? o = Reflect.construct(n.impl, s, new.target) : o = n.impl.apply(this, s), c = "ok";
+      } catch (a) {
+        throw o = a, c = "error", n.results.push([c, a]), a;
       }
-    let resultTuple = [type, result];
-    return isPromise(result) && result.then(
-      (r) => state2.resolves[resultIndex] = ["ok", r],
-      (e) => state2.resolves[resultIndex] = ["error", e]
-    ), state2.results.push(resultTuple), result;
+    let g = [c, o];
+    return w(o) && o.then(
+      (a) => n.resolves[p] = ["ok", a],
+      (a) => n.resolves[p] = ["error", a]
+    ), n.results.push(g), o;
   }",
           },
         ],
@@ -179,29 +180,29 @@ exports[`services > file > uploadFile > success 1`] = `
   "findOneAndDelete": [MockFunction spy],
   "findOneAndUpdate": [MockFunction spy],
   "group": [MockFunction spy],
-  "id": "function(...args) {
-    let state2 = getInternalState(fn);
-    state2.called = !0, state2.callCount++, state2.calls.push(args);
-    let next = state2.next.shift();
-    if (next) {
-      state2.results.push(next);
-      let [type2, result2] = next;
-      if (type2 === "ok")
-        return result2;
-      throw result2;
+  "id": "function(...s) {
+    let n = T(t);
+    n.called = !0, n.callCount++, n.calls.push(s);
+    let d = n.next.shift();
+    if (d) {
+      n.results.push(d);
+      let [a, i] = d;
+      if (a === "ok")
+        return i;
+      throw i;
     }
-    let result, type = "ok", resultIndex = state2.results.length;
-    if (state2.impl)
+    let o, c = "ok", p = n.results.length;
+    if (n.impl)
       try {
-        new.target ? result = Reflect.construct(state2.impl, args, new.target) : result = state2.impl.apply(this, args), type = "ok";
-      } catch (err) {
-        throw result = err, type = "error", state2.results.push([type, err]), err;
+        new.target ? o = Reflect.construct(n.impl, s, new.target) : o = n.impl.apply(this, s), c = "ok";
+      } catch (a) {
+        throw o = a, c = "error", n.results.push([c, a]), a;
       }
-    let resultTuple = [type, result];
-    return isPromise(result) && result.then(
-      (r) => state2.resolves[resultIndex] = ["ok", r],
-      (e) => state2.resolves[resultIndex] = ["error", e]
-    ), state2.results.push(resultTuple), result;
+    let g = [c, o];
+    return w(o) && o.then(
+      (a) => n.resolves[p] = ["ok", a],
+      (a) => n.resolves[p] = ["error", a]
+    ), n.results.push(g), o;
   }",
   "match": [MockFunction spy],
   "save": [MockFunction spy] {
@@ -301,33 +302,34 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
   "avScan": {
     "aggregate": [MockFunction spy],
     "delete": [MockFunction spy],
+    "deleteMany": [MockFunction spy],
     "find": [MockFunction spy] {
       "calls": [
         [
           {
-            "fileId": "function(...args) {
-    let state2 = getInternalState(fn);
-    state2.called = !0, state2.callCount++, state2.calls.push(args);
-    let next = state2.next.shift();
-    if (next) {
-      state2.results.push(next);
-      let [type2, result2] = next;
-      if (type2 === "ok")
-        return result2;
-      throw result2;
+            "fileId": "function(...s) {
+    let n = T(t);
+    n.called = !0, n.callCount++, n.calls.push(s);
+    let d = n.next.shift();
+    if (d) {
+      n.results.push(d);
+      let [a, i] = d;
+      if (a === "ok")
+        return i;
+      throw i;
     }
-    let result, type = "ok", resultIndex = state2.results.length;
-    if (state2.impl)
+    let o, c = "ok", p = n.results.length;
+    if (n.impl)
       try {
-        new.target ? result = Reflect.construct(state2.impl, args, new.target) : result = state2.impl.apply(this, args), type = "ok";
-      } catch (err) {
-        throw result = err, type = "error", state2.results.push([type, err]), err;
+        new.target ? o = Reflect.construct(n.impl, s, new.target) : o = n.impl.apply(this, s), c = "ok";
+      } catch (a) {
+        throw o = a, c = "error", n.results.push([c, a]), a;
       }
-    let resultTuple = [type, result];
-    return isPromise(result) && result.then(
-      (r) => state2.resolves[resultIndex] = ["ok", r],
-      (e) => state2.resolves[resultIndex] = ["error", e]
-    ), state2.results.push(resultTuple), result;
+    let g = [c, o];
+    return w(o) && o.then(
+      (a) => n.resolves[p] = ["ok", a],
+      (a) => n.resolves[p] = ["error", a]
+    ), n.results.push(g), o;
   }",
           },
         ],
@@ -346,29 +348,29 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
   "findOneAndDelete": [MockFunction spy],
   "findOneAndUpdate": [MockFunction spy],
   "group": [MockFunction spy],
-  "id": "function(...args) {
-    let state2 = getInternalState(fn);
-    state2.called = !0, state2.callCount++, state2.calls.push(args);
-    let next = state2.next.shift();
-    if (next) {
-      state2.results.push(next);
-      let [type2, result2] = next;
-      if (type2 === "ok")
-        return result2;
-      throw result2;
+  "id": "function(...s) {
+    let n = T(t);
+    n.called = !0, n.callCount++, n.calls.push(s);
+    let d = n.next.shift();
+    if (d) {
+      n.results.push(d);
+      let [a, i] = d;
+      if (a === "ok")
+        return i;
+      throw i;
     }
-    let result, type = "ok", resultIndex = state2.results.length;
-    if (state2.impl)
+    let o, c = "ok", p = n.results.length;
+    if (n.impl)
       try {
-        new.target ? result = Reflect.construct(state2.impl, args, new.target) : result = state2.impl.apply(this, args), type = "ok";
-      } catch (err) {
-        throw result = err, type = "error", state2.results.push([type, err]), err;
+        new.target ? o = Reflect.construct(n.impl, s, new.target) : o = n.impl.apply(this, s), c = "ok";
+      } catch (a) {
+        throw o = a, c = "error", n.results.push([c, a]), a;
       }
-    let resultTuple = [type, result];
-    return isPromise(result) && result.then(
-      (r) => state2.resolves[resultIndex] = ["ok", r],
-      (e) => state2.resolves[resultIndex] = ["error", e]
-    ), state2.results.push(resultTuple), result;
+    let g = [c, o];
+    return w(o) && o.then(
+      (a) => n.resolves[p] = ["ok", a],
+      (a) => n.resolves[p] = ["error", a]
+    ), n.results.push(g), o;
   }",
   "match": [MockFunction spy],
   "save": [MockFunction spy] {

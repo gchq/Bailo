@@ -1,5 +1,4 @@
 import { ArrowBack, FileCopy } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
 import { Autocomplete, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
 import { EntrySearchResult, useGetModel, useListModels } from 'actions/model'
 import { postFromTemplate } from 'actions/modelCard'
@@ -31,7 +30,7 @@ export default function ModelTemplateSelect() {
     models: entries,
     isModelsLoading: isEntriesLoading,
     isModelsError: isEntriesError,
-  } = useListModels(EntryKind.MODEL, [], '', [], [], '', true)
+  } = useListModels(EntryKind.MODEL, [], '', [], [], [], '', true)
 
   const handleChange = (_event: SyntheticEvent, newValue: EntrySearchResult | null) => {
     setSelectedModel(newValue)
@@ -98,14 +97,9 @@ export default function ModelTemplateSelect() {
                     <TextField {...params} size='small' placeholder='Search for a model to use a template' />
                   )}
                 />
-                <LoadingButton
-                  variant='contained'
-                  disabled={!selectedModel}
-                  onClick={handleSubmit}
-                  loading={isButtonLoading}
-                >
+                <Button variant='contained' disabled={!selectedModel} onClick={handleSubmit} loading={isButtonLoading}>
                   Create from template
-                </LoadingButton>
+                </Button>
                 <MessageAlert message={submissionErrorText} severity='error' />
               </Stack>
             </>

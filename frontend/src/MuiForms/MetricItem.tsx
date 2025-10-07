@@ -14,6 +14,7 @@ interface MetricItemProps {
 
 export default function MetricItem({ metric, onChange, onDelete }: MetricItemProps) {
   const theme = useTheme()
+
   const [errorMessage, setErrorMessage] = useState('')
 
   const handleMetricValueOnChange = useCallback(
@@ -32,6 +33,7 @@ export default function MetricItem({ metric, onChange, onDelete }: MetricItemPro
       <Stack direction='row' spacing={1}>
         <TextField
           size='small'
+          aria-label='metric name input'
           value={metric.name}
           onChange={(e) => onChange({ id: metric.id, name: e.target.value, value: metric.value })}
         />
@@ -39,6 +41,7 @@ export default function MetricItem({ metric, onChange, onDelete }: MetricItemPro
           error={errorMessage.length > 0}
           helperText={errorMessage}
           size='small'
+          aria-label='metric value input'
           value={metric.value}
           onChange={(e) => handleMetricValueOnChange(e.target.value)}
         />

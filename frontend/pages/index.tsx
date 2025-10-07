@@ -17,7 +17,8 @@ import {
 } from '@mui/material/'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { useGetAllModelReviewRoles, useListModels } from 'actions/model'
+import { useListModels } from 'actions/model'
+import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -46,6 +47,7 @@ export default function Marketplace() {
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
+  const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const debouncedFilter = useDebounce(filter, 250)
@@ -58,6 +60,7 @@ export default function Marketplace() {
     selectedTask,
     selectedLibraries,
     selectedOrganisations,
+    selectedStates,
     debouncedFilter,
   )
 
@@ -71,10 +74,11 @@ export default function Marketplace() {
     selectedTask,
     selectedLibraries,
     selectedOrganisations,
+    selectedStates,
     debouncedFilter,
   )
 
-  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetAllModelReviewRoles()
+  const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
 
   const theme = useTheme()
   const router = useRouter()
@@ -84,6 +88,7 @@ export default function Marketplace() {
     task: taskFromQuery,
     libraries: librariesFromQuery,
     organisations: organisationsFromQuery,
+    states: statesFromQuery,
   } = router.query
 
   useEffect(() => {
@@ -107,7 +112,25 @@ export default function Marketplace() {
       }
       setSelectedOrganisations([...organisationsAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery])
+    if (statesFromQuery) {
+      let statesAsArray: string[] = []
+      if (typeof statesFromQuery === 'string') {
+        statesAsArray.push(statesFromQuery)
+      } else {
+        statesAsArray = [...statesFromQuery]
+      }
+      setSelectedStates([...statesAsArray])
+    }
+  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery, statesFromQuery])
+
+  const updateQueryParams = useCallback(
+    (key: string, value: string | string[]) => {
+      router.replace({
+        query: { ...router.query, [key]: value },
+      })
+    },
+    [router],
+  )
 
   const handleSelectedRolesOnChange = useCallback(
     (selectedFilters: string[]) => {
@@ -131,14 +154,9 @@ export default function Marketplace() {
     return uiConfig ? uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem) : []
   }, [uiConfig])
 
-  const updateQueryParams = useCallback(
-    (key: string, value: string | string[]) => {
-      router.replace({
-        query: { ...router.query, [key]: value },
-      })
-    },
-    [router],
-  )
+  const stateList = useMemo(() => {
+    return uiConfig ? uiConfig.modelDetails.states.map((stateItem) => stateItem) : []
+  }, [uiConfig])
 
   const handleFilterChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -152,6 +170,14 @@ export default function Marketplace() {
     (organisations: string[]) => {
       setSelectedOrganisations(organisations)
       updateQueryParams('organisations', organisations)
+    },
+    [updateQueryParams],
+  )
+
+  const handleStatesOnChange = useCallback(
+    (states: string[]) => {
+      setSelectedStates(states)
+      updateQueryParams('states', states)
     },
     [updateQueryParams],
   )
@@ -180,22 +206,24 @@ export default function Marketplace() {
     setSelectedTask('')
     setSelectedLibraries([])
     setSelectedOrganisations([])
+    setSelectedStates([])
+    setSelectedRoles([])
     setFilter('')
     router.replace('/', undefined, { shallow: true })
   }
 
   useEffect(() => {
-    if (modelRoles) {
+    if (reviewRoles) {
       setRoleOptions([
         ...defaultRoleOptions,
-        ...modelRoles.map((role) => {
-          return { key: role.id, label: `${role.short}` }
+        ...reviewRoles.map((role) => {
+          return { key: role.shortName, label: `${role.name}` }
         }),
       ])
     }
-  }, [modelRoles])
+  }, [reviewRoles])
 
-  if (isModelRolesLoading) {
+  if (isReviewRolesLoading) {
     return <Loading />
   }
 
@@ -203,8 +231,8 @@ export default function Marketplace() {
     return <Loading />
   }
 
-  if (isModelRolesError) {
-    return <ErrorWrapper message={isModelRolesError.info.message} />
+  if (isReviewRolesError) {
+    return <ErrorWrapper message={isReviewRolesError.info.message} />
   }
 
   if (isUiConfigError) {
@@ -255,20 +283,38 @@ export default function Marketplace() {
                 />
               </FormControl>
               <Stack divider={<Divider flexItem />}>
-                <Box>
-                  <ChipSelector
-                    label='Organisations'
-                    chipTooltipTitle={'Filter by organisation'}
-                    options={organisationList}
-                    expandThreshold={10}
-                    multiple
-                    selectedChips={selectedOrganisations}
-                    onChange={handleOrganisationsOnChange}
-                    size='small'
-                    ariaLabel='add organisation to search filter'
-                    accordion
-                  />
-                </Box>
+                {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
+                  <Box>
+                    <ChipSelector
+                      label='Organisations'
+                      chipTooltipTitle={'Filter by organisation'}
+                      options={organisationList}
+                      expandThreshold={10}
+                      multiple
+                      selectedChips={selectedOrganisations}
+                      onChange={handleOrganisationsOnChange}
+                      size='small'
+                      ariaLabel='add organisation to search filter'
+                      accordion
+                    />
+                  </Box>
+                )}
+                {uiConfig && uiConfig.modelDetails.states.length > 0 && (
+                  <Box>
+                    <ChipSelector
+                      label='States'
+                      chipTooltipTitle={'Filter by state'}
+                      options={stateList}
+                      expandThreshold={10}
+                      multiple
+                      selectedChips={selectedStates}
+                      onChange={handleStatesOnChange}
+                      size='small'
+                      ariaLabel='add state to search filter'
+                      accordion
+                    />
+                  </Box>
+                )}
                 <Box>
                   <ChipSelector
                     label='Tasks'
@@ -349,6 +395,10 @@ export default function Marketplace() {
                     onSelectedChipsChange={handleLibrariesOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
+                    selectedStates={selectedStates}
+                    onSelectedStatesChange={handleStatesOnChange}
+                    displayOrganisation={uiConfig && uiConfig.modelDetails.organisations.length > 0}
+                    displayState={uiConfig && uiConfig.modelDetails.states.length > 0}
                   />
                 </div>
               )}
@@ -361,6 +411,8 @@ export default function Marketplace() {
                     onSelectedChipsChange={handleLibrariesOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
+                    selectedStates={selectedStates}
+                    onSelectedStatesChange={handleStatesOnChange}
                   />
                 </div>
               )}

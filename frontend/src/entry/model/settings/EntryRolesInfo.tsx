@@ -7,6 +7,7 @@ import HelpPopover from 'src/common/HelpPopover'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
 import { EntryInterface, RoleKind } from 'types/types'
+import { getRoleDisplayName } from 'utils/roles'
 import { toSentenceCase } from 'utils/stringUtils'
 
 interface EntryRolesInfoProps {
@@ -37,11 +38,16 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
   const getFilteredRoles = useCallback(
     (roleKind: string) =>
       entryRoles.reduce<ReactNode[]>((filteredRoles, entryRole) => {
+        const systemRole =
+          entryRoles.find((role) => role.shortName === entryRole.systemRole)?.shortName || 'Unknown Role'
         if (entryRole.kind === roleKind) {
           filteredRoles.push(
-            <Box key={entryRole.id}>
+            <Box key={entryRole.shortName}>
               <Typography fontWeight='bold'>{entryRole.name}</Typography>
               <Typography>{entryRole.description}</Typography>
+              <em>
+                This role also shares permissions with the {getRoleDisplayName(systemRole, entryRoles)} system role.
+              </em>
             </Box>,
           )
         }
@@ -50,7 +56,7 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
     [entryRoles],
   )
 
-  const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.SCHEMA), [getFilteredRoles])
+  const schemaRolesList = useMemo(() => getFilteredRoles(RoleKind.REVIEW), [getFilteredRoles])
 
   const permissionTableRows = useMemo(() => {
     return rows.map((row) => (
@@ -90,13 +96,14 @@ export default function EntryRolesInfo({ entry }: EntryRolesInfoProps) {
       {!isEntryRolesLoading && (
         <Stack spacing={2}>
           <Typography>
-            Roles in Bailo are split into two categories; standard and dynamic. Standard roles are generic across
-            different schema and are used for determining {`${toSentenceCase(entry.kind)}`} permissions for general
-            purpose {`${toSentenceCase(entry.kind)}`} upkeep, whereas dynamic roles are created on a per schema basis
-            and used as part of the review process. The dynamic roles presented below are specified on the schema
-            selected for this {`${toSentenceCase(entry.kind)}`} and may not apply to other{' '}
-            {`${toSentenceCase(entry.kind)}s`} using a different schema.
+            Roles in Bailo are split into two categories; system and review. System roles are generic across different
+            schema and are used for determining {`${toSentenceCase(entry.kind)}`} permissions for general purpose{' '}
+            {`${toSentenceCase(entry.kind)}`} upkeep, whereas review roles are created on a per schema basis and used as
+            part of the review process. The review roles presented below are specified on the schema selected for this{' '}
+            {`${toSentenceCase(entry.kind)}`} and may not apply to other {`${toSentenceCase(entry.kind)}s`} using a
+            different schema.
           </Typography>
+          <Typography>Review roles can also optionally share permissions with system roles.</Typography>
           <Stack spacing={2}>
             <Stack spacing={1}>
               <Typography component='h3' variant='h6' fontWeight='bold'>

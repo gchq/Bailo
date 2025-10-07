@@ -1,6 +1,5 @@
 import { ArrowBack, FileUpload, FolderCopy, Gavel, Lock, LockOpen } from '@mui/icons-material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import LoadingButton from '@mui/lab/LoadingButton'
 import {
   Accordion,
   AccordionDetails,
@@ -17,7 +16,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { postModel } from 'actions/model'
+import { postModel, useGetModelRoles } from 'actions/model'
 import { useGetCurrentUser } from 'actions/user'
 import { useRouter } from 'next/router'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
@@ -27,6 +26,7 @@ import EntryNameInput from 'src/entry/EntryNameInput'
 import EntryOrganisationInput from 'src/entry/EntryOrganisationInput'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import SourceModelInput from 'src/entry/SourceModelInput'
+import ErrorWrapper from 'src/errors/ErrorWrapper'
 import MessageAlert from 'src/MessageAlert'
 import {
   CollaboratorEntry,
@@ -57,6 +57,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [description, setDescription] = useState('')
   const [organisation, setOrganisation] = useState<string>('')
   const [visibility, setVisibility] = useState<EntryForm['visibility']>(EntryVisibility.Public)
+  const { modelRoles, isModelRolesLoading, isModelRolesError } = useGetModelRoles()
   const [collaborators, setCollaborators] = useState<CollaboratorEntry[]>(
     currentUser ? [{ entity: `${EntityKind.USER}:${currentUser?.dn}`, roles: ['owner'] }] : [],
   )
@@ -168,7 +169,11 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   }, [createEntryKind])
 
   if (isCurrentUserError) {
-    return <MessageAlert message={isCurrentUserError.info.message} severity='error' />
+    return <ErrorWrapper message={isCurrentUserError.info.message} />
+  }
+
+  if (isModelRolesError) {
+    return <ErrorWrapper message={isModelRolesError.info.message} />
   }
 
   return (
@@ -250,16 +255,16 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                   schema has been selected.
                 </Typography>
                 <Box sx={{ marginTop: 1 }}>
-                  <EntryAccessInput
-                    value={collaborators}
-                    onChange={handleCollaboratorsChange}
-                    entryKind={entryKind}
-                    entryRoles={[
-                      { id: 'owner', name: 'Owner' },
-                      { id: 'contributor', name: 'Contributor' },
-                      { id: 'consumer', name: 'Consumer' },
-                    ]}
-                  />
+                  {isModelRolesLoading ? (
+                    <Loading />
+                  ) : (
+                    <EntryAccessInput
+                      value={collaborators}
+                      onChange={handleCollaboratorsChange}
+                      entryKind={entryKind}
+                      entryRoles={modelRoles}
+                    />
+                  )}
                 </Box>
                 <Stack spacing={2}>
                   <Typography variant='h6' component='h2'>
@@ -291,7 +296,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
             <Box sx={{ textAlign: 'right' }}>
               <Tooltip title={!isFormValid ? 'Please make sure all required fields are filled out' : ''}>
                 <span>
-                  <LoadingButton
+                  <Button
                     variant='contained'
                     disabled={!isFormValid}
                     type='submit'
@@ -299,7 +304,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                     loading={loading}
                   >
                     {`Create ${EntryKindLabel[createEntryKind]}`}
-                  </LoadingButton>
+                  </Button>
                 </span>
               </Tooltip>
               <MessageAlert message={errorMessage} severity='error' />

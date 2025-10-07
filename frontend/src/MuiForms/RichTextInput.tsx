@@ -1,13 +1,15 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { FormContextType } from '@rjsf/utils'
 import MarkdownDisplay from 'src/common/MarkdownDisplay'
 import RichTextEditor from 'src/common/RichTextEditor'
+import MessageAlert from 'src/MessageAlert'
 
 interface RichTextInputProps {
   value: string
   onChange: (newValue: string) => void
   label?: string
-  formContext?: any
+  formContext?: FormContextType
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
@@ -27,10 +29,16 @@ export default function RichTextInput({
 }: RichTextInputProps) {
   const theme = useTheme()
 
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
+
   if (!formContext.editMode) {
     return (
       <>
-        <Typography fontWeight='bold'>{label}</Typography>
+        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+          {label}
+        </Typography>
         {value ? (
           <MarkdownDisplay>{value}</MarkdownDisplay>
         ) : (
@@ -48,18 +56,20 @@ export default function RichTextInput({
   }
 
   return (
-    <RichTextEditor
-      value={value}
-      onChange={onChange}
-      textareaProps={{ disabled, id }}
-      errors={rawErrors}
-      label={
-        <Typography fontWeight='bold'>
-          {label}
-          {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
-        </Typography>
-      }
-      key={label}
-    />
+    <>
+      <RichTextEditor
+        value={value}
+        onChange={onChange}
+        textareaProps={{ disabled, id }}
+        errors={rawErrors}
+        label={
+          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
+            {label}
+            {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
+          </Typography>
+        }
+        key={label}
+      />
+    </>
   )
 }

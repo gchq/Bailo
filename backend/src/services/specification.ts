@@ -1,13 +1,14 @@
-import { OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
+import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolutions/zod-to-openapi'
 import { AnyZodObject, z } from 'zod'
 
 import { ScanState } from '../connectors/fileScanning/Base.js'
-import { CollaboratorRoles } from '../models/Model.js'
+import { SystemRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind } from '../models/Scan.js'
 import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState } from '../types/types.js'
+import config from '../utils/config.js'
 
 export const registry = new OpenAPIRegistry()
 
@@ -260,6 +261,26 @@ export const schemaInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+export const schemaMigrationInterfaceSchema = z.object({
+  name: z.string().openapi({ example: 'My Schema Migration' }),
+  description: z.string().openapi({ example: 'An example schema migration' }),
+  sourceSchema: z.string().openapi({ example: 'v1' }),
+  targetSchema: z.string().openapi({ example: 'v2' }),
+
+  questionMigrations: z.array(
+    z.object({
+      id: z.string(),
+      kind: z.string().openapi({ example: 'move' }),
+      sourcePath: z.string().openapi({ example: 'section1.question1' }),
+      targetPath: z.string().optional().openapi({ example: 'section2.question1' }),
+      propertyType: z.string().openapi({ example: 'string' }),
+    }),
+  ),
+
+  createdAt: z.string().openapi({ example: new Date().toISOString() }),
+  updatedAt: z.string().openapi({ example: new Date().toISOString() }),
+})
+
 export const inferenceInterfaceSchema = z.object({
   modelId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
   image: z.string().openapi({ example: 'yolov4' }),
@@ -357,12 +378,88 @@ export const UserInformationSchema = z.object({
 })
 
 export const reviewRoleSchema = z.object({
-  id: z.string().openapi({ example: 'reviewer' }),
   name: z.string().openapi({ example: 'Reviewer' }),
-  short: z.string().openapi({ example: 'reviewer' }),
+  shortName: z.string().openapi({ example: 'reviewer' }),
   kind: z.string().openapi({ example: 'schema' }),
   description: z.string().openapi({ example: 'This is an example review role' }),
   defaultEntities: z.array(z.string()).openapi({ example: ['user:user'] }),
   lockEntities: z.boolean().openapi({ example: false }),
-  collaboratorRole: z.string().optional().openapi({ example: CollaboratorRoles.Owner }),
+  systemRole: z.string().optional().openapi({ example: SystemRoles.Owner }),
 })
+
+export const generateSwaggerSpec = () => {
+  const generator = new OpenApiGeneratorV3(registry.definitions)
+  const tags = [
+    {
+      name: 'model',
+      description:
+        'A model object is the primary object within Bailo.  It contains the modelcard, settings and high level details about the model.',
+    },
+    {
+      name: 'access-request',
+      description:
+        'An access request is required when attempting to download files and images associated with a model.  It tracks users requests to use a model.',
+    },
+    {
+      name: 'file',
+      description:
+        'A file represents an object kept in our storage.  It contains metadata about the file, as well as where it is stored.  These are usually attached to releases.',
+    },
+    {
+      name: 'image',
+      description:
+        'Image endpoints usually interact with our Docker registry, which includes a variety of images related to models.  Similarly to files, these are usually found attached to releases.',
+    },
+    {
+      name: 'modelcard',
+      description:
+        'A modelcard stores information about how a model was created, how to use it and more.  The contents of a model card is configurable by using different schemas.',
+    },
+    {
+      name: 'release',
+      description:
+        'A release contains includes files and images, a specific version of a model card and approval information.  It should be used to track the versioning of a model.',
+    },
+    {
+      name: 'review',
+      description:
+        'The review endpoints allow users to approve or reject releases and access requests.  Multiple different groups can be setup to approve each request.',
+    },
+    {
+      name: 'schema',
+      description:
+        'Schemas are used to define what contents a model card should contain.  They follow the JsonSchema specification.',
+    },
+    {
+      name: 'token',
+      description:
+        'Tokens are used to grant access to models.  They give constrained permissions to Bailo, allowing fine-grained permissions for deployments.',
+    },
+    {
+      name: 'user',
+      description: 'A user represents an individual who has accessed this service.',
+    },
+    {
+      name: 'review role',
+      description:
+        'High-level roles that are dynamically created and allocated. Have system roles (and their respective permission) attributed.',
+    },
+  ]
+
+  if (config.ui.inference?.enabled) {
+    tags.push({
+      name: 'inference',
+      description:
+        'An inference service is used to run models within Bailo. Each contains settings for a specific configuration',
+    })
+  }
+
+  return generator.generateDocument({
+    openapi: '3.0.0',
+    info: {
+      version: '2.0.0',
+      title: 'Bailo API',
+    },
+    tags: tags,
+  })
+}

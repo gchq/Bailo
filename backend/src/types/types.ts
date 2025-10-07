@@ -1,6 +1,7 @@
 import { ProxyAgentOptions } from 'proxy-agent'
 
 import { PeerKindKeys } from '../connectors/peer/index.js'
+import { SystemRolesKeys } from '../models/Model.js'
 import { BailoError } from './error.js'
 
 export type PartialDeep<T> = T extends object
@@ -10,8 +11,8 @@ export type PartialDeep<T> = T extends object
   : T
 
 export const RoleKind = {
-  ENTRY: 'entry',
-  SCHEMA: 'schema',
+  SYSTEM: 'system',
+  REVIEW: 'review',
 } as const
 
 export enum EntityKind {
@@ -22,11 +23,11 @@ export enum EntityKind {
 export type RoleKindKeys = (typeof RoleKind)[keyof typeof RoleKind]
 
 export interface Role {
-  id: string
   name: string
   kind: RoleKindKeys
-  short?: string
+  shortName: string
   description?: string
+  systemRole?: SystemRolesKeys
 }
 
 export type PermissionDetail =

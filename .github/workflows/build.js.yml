@@ -5,17 +5,28 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  release:
+    types: [published]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   build_images:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
 
     strategy:
       matrix:
         component:
           - name: backend
             context: backend
+            additional_contexts: python=./lib/python
             dockerfile: backend/Dockerfile
             tar: /tmp/bailo_backend.tar
             artifact: bailo_backend
@@ -38,7 +49,7 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Setup BuildX
       - name: Set up Docker Buildx
@@ -48,11 +59,65 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.component.context }}
-          file: ${{ matrix.component.file }}
+          build-contexts: ${{ matrix.component.additional_contexts || '' }}
+          file: ${{ matrix.component.dockerfile }}
           tags: ${{ matrix.component.tag }}
           cache-from: type=gha,scope=${{ matrix.component.cache_scope }}
           cache-to: type=gha,mode=max,scope=${{ matrix.component.cache_scope }}
           outputs: type=docker,dest=${{ matrix.component.tar }}
+
+      # modelscan version check (separate to release versions)
+      - name: Check if modelscan_api version changed
+        if: github.ref == 'refs/heads/main' && matrix.component.name == 'modelscan'
+        id: modelscan_version_changed
+        run: |
+          git fetch origin main --depth=2
+          OLD_VERSION=$(git show HEAD^:lib/modelscan_api/bailo_modelscan_api/config.py | grep 'app_version' | head -n1 | cut -d'"' -f2)
+          NEW_VERSION=$(grep 'app_version' lib/modelscan_api/bailo_modelscan_api/config.py | head -n1 | cut -d'"' -f2)
+
+          if [ "$OLD_VERSION" != "$NEW_VERSION" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Log in to GHCR if release made or modelscan_api version changed
+      - name: Log in to GHCR
+        if: (github.event_name == 'release' && matrix.component.name != 'modelscan') || (github.ref == 'refs/heads/main' && matrix.component.name == 'modelscan' && steps.modelscan_version_changed.outputs.changed == 'true')
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Push backend & frontend to GHCR if release made (ignoring modelscan_api which is published separately)
+      - name: Tag & push backend & frontend images to GHCR
+        if: github.event_name == 'release' && matrix.component.name != 'modelscan'
+        run: |
+          docker load -i ${{ matrix.component.tar }}
+          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
+          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ github.event.release.tag_name }}"
+          LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
+
+          docker tag $IMAGE_ID $VERSION_TAG
+          docker tag $IMAGE_ID $LATEST_TAG
+          docker push $VERSION_TAG
+          docker push $LATEST_TAG
+
+      # Push modelscan_api to GHCR if version bumped
+      - name: Tag & push modelscan image to GHCR
+        if: github.ref == 'refs/heads/main' && matrix.component.name == 'modelscan' && steps.modelscan_version_changed.outputs.changed == 'true'
+        run: |
+          docker load -i ${{ matrix.component.tar }}
+          IMAGE_ID=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -n 1)
+          VERSION_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:${{ steps.modelscan_version_changed.outputs.version }}"
+          LATEST_TAG="ghcr.io/${{ github.repository_owner }}/bailo_${{ matrix.component.name }}:latest"
+
+          docker tag $IMAGE_ID $VERSION_TAG
+          docker tag $IMAGE_ID $LATEST_TAG
+          docker push $VERSION_TAG
+          docker push $LATEST_TAG
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -68,12 +133,12 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 24.3.0
+          node-version: 24.5.0
           cache: "npm"
 
       - name: Cache npm dependencies
@@ -103,11 +168,11 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 24.3.0
+          node-version: 24.5.0
           cache: "npm"
 
       # Setup BuildX
@@ -116,17 +181,17 @@ jobs:
 
       # Get Bailo Docker image
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_modelscan
           path: /tmp
@@ -218,7 +283,7 @@ jobs:
         run: helm install --values ./local.yaml bailo .
 
       - name: Wait for all pods to be ready
-        run: kubectl wait --for=condition=Ready pods --all --timeout 120s
+        run: kubectl wait --for=condition=Ready pods -l app.kubernetes.io/instance=bailo --timeout=300s
 
       - name: List Certs
         run: kubectl describe secret bailo-certs
@@ -267,12 +332,12 @@ jobs:
 
     steps:
       # Clone repository
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 24.3.0
+          node-version: 24.5.0
           cache: "npm"
 
       # Setup BuildX
@@ -281,17 +346,17 @@ jobs:
 
       # Get Bailo Docker images
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_backend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_frontend
           path: /tmp
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: bailo_modelscan
           path: /tmp
@@ -366,7 +431,7 @@ jobs:
       # Python integration
       - name: Set up Python
         if: matrix.job_name == 'integration_python'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 

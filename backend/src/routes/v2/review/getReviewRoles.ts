@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -7,13 +6,21 @@ import audit from '../../../connectors/audit/index.js'
 import { ReviewRoleInterface } from '../../../models/ReviewRole.js'
 import { findReviewRoles } from '../../../services/review.js'
 import { registerPath, reviewRoleSchema } from '../../../services/specification.js'
+import { parse } from '../../../utils/validate.js'
 
-export const getReviewRolesSchema = z.object({})
+export const getReviewRolesSchema = z.object({
+  query: z.object({
+    schemaId: z
+      .string()
+      .optional()
+      .openapi({ example: 'Filter review roles to those only found within a specific schema.' }),
+  }),
+})
 
 registerPath({
   method: 'get',
   path: '/api/v2/review/roles',
-  tags: ['review'],
+  tags: ['review role'],
   description:
     'Fetch all review roles. Note - dynamic review roles are currently WIP and might not be fully functional.',
   schema: getReviewRolesSchema,
@@ -36,10 +43,12 @@ interface GetReviewRolesResponse {
 }
 
 export const getReviewRoles = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetReviewRolesResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewReviewRoles
-    const reviewRoles = await findReviewRoles()
+    const {
+      query: { schemaId },
+    } = parse(req, getReviewRolesSchema)
+    const reviewRoles = await findReviewRoles(schemaId)
     await audit.onViewReviewRoles(req, reviewRoles)
     res.setHeader('x-count', reviewRoles.length)
     res.json({ reviewRoles })

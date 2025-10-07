@@ -30,7 +30,7 @@ export default function FileTagSelector({
       }}
     >
       <Stack sx={{ p: 2 }}>
-        <TagSelector value={tags} onChange={onChange} label={''} formContext={{ editMode: true }} />
+        <TagSelector value={tags} onChange={onChange} label={''} formContext={{ editMode: true }} id='tag-selector' />
         <Typography variant='caption' color={theme.palette.error.main}>
           {errorText}
         </Typography>

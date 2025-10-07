@@ -13,8 +13,8 @@ import SchemaIcon from '@mui/icons-material/Schema'
 import { Divider, List, ListItem, ListItemButton, ListItemIcon, Stack, Toolbar } from '@mui/material'
 import MuiDrawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'
-import { useGetResponses } from 'actions/response'
-import { useGetReviewRequestsForUser } from 'actions/review'
+import { useGetUserResponses } from 'actions/response'
+import { useHeadReviewRequestsForUser } from 'actions/review'
 import { CSSProperties, useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import MessageAlert from 'src/MessageAlert'
@@ -84,25 +84,18 @@ export default function SideNavigation({
   pageTopStyling = {},
 }: SideNavigationProps) {
   const [reviewCount, setReviewCount] = useState(0)
-  const { reviews, isReviewsLoading, isReviewsError } = useGetReviewRequestsForUser()
-  const { responses, isResponsesLoading, isResponsesError } = useGetResponses(reviews.map((review) => review._id))
+  const { reviewCountHeader, isReviewsLoading, isReviewsError } = useHeadReviewRequestsForUser(true)
+  const { responses, isResponsesLoading, isResponsesError } = useGetUserResponses()
 
   useEffect(() => {
     async function fetchReviewCount() {
       onResetErrorMessage()
-      if (reviews) {
-        setReviewCount(
-          reviews.filter(
-            (review) =>
-              !responses.find(
-                (response) => response.entity === `user:${currentUser.dn}` && response.parentId === review._id,
-              ),
-          ).length,
-        )
+      if (reviewCountHeader) {
+        setReviewCount(reviewCountHeader)
       }
     }
     fetchReviewCount()
-  }, [onResetErrorMessage, reviews, responses, currentUser.dn])
+  }, [onResetErrorMessage, responses, currentUser.dn, reviewCountHeader])
 
   if (isReviewsError) {
     return <MessageAlert message={isReviewsError.info.message} severity='error' />
@@ -145,15 +138,16 @@ export default function SideNavigation({
               icon={<ListAltIcon />}
               badgeCount={reviewCount}
             />
-            <Divider />
+            <Divider aria-hidden='true' />
             <NavMenuItem
-              href='/docs/api'
+              href='/api/v2/docs'
               selectedPage={page}
               primaryText='API'
               drawerOpen={drawerOpen}
               menuPage='api'
               title='API'
               icon={<LinkIcon />}
+              openLinkInNewTab
             />
             <NavMenuItem
               href='/docs/python/index.html'
@@ -163,6 +157,7 @@ export default function SideNavigation({
               menuPage='pythonDocs'
               title='Python Client Docs'
               icon={<DescriptionIcon />}
+              openLinkInNewTab
             />
             <NavMenuItem
               href='/help'
@@ -173,7 +168,7 @@ export default function SideNavigation({
               title='Help & Support'
               icon={<ContactSupportIcon />}
             />
-            <Divider />
+            <Divider aria-hidden='true' />
             {currentUser.isAdmin && (
               <>
                 <NavMenuItem
@@ -200,7 +195,7 @@ export default function SideNavigation({
             )}
           </StyledList>
           <StyledList>
-            <Divider />
+            <Divider aria-hidden='true' />
             <NavMenuItem
               href='/settings'
               selectedPage={page}
@@ -210,9 +205,9 @@ export default function SideNavigation({
               title='User settings'
               icon={<SettingsIcon />}
             />
-            <Divider />
+            <Divider aria-hidden='true' />
             <ListItem disablePadding>
-              <ListItemButton onClick={toggleDrawer} sx={{ py: 2 }}>
+              <ListItemButton aria-label='toggle side drawer expansion' onClick={toggleDrawer} sx={{ py: 2 }}>
                 <ListItemIcon>{drawerOpen ? <KeyboardDoubleArrowLeft /> : <KeyboardDoubleArrowRight />}</ListItemIcon>
               </ListItemButton>
             </ListItem>

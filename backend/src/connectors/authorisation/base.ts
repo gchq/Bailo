@@ -3,11 +3,13 @@ import { FileInterface } from '../../models/File.js'
 import { EntryVisibility, ModelDoc } from '../../models/Model.js'
 import { ReleaseDoc, ReleaseInterface } from '../../models/Release.js'
 import { ResponseDoc } from '../../models/Response.js'
-import { ReviewRoleInterface } from '../../models/ReviewRole.js'
+import ReviewRoleModel from '../../models/ReviewRole.js'
 import { SchemaDoc } from '../../models/Schema.js'
+import { SchemaMigrationDoc } from '../../models/SchemaMigration.js'
 import { UserInterface } from '../../models/User.js'
 import { Access } from '../../routes/v1/registryAuth.js'
 import { getModelAccessRequestsForUser } from '../../services/accessRequest.js'
+import { getModelSystemRoles } from '../../services/model.js'
 import { checkAccessRequestsApproved } from '../../services/response.js'
 import { validateTokenForModel, validateTokenForUse } from '../../services/token.js'
 import { toEntity } from '../../utils/entity.js'
@@ -31,6 +33,8 @@ import {
   ReviewRoleActionKeys,
   SchemaAction,
   SchemaActionKeys,
+  SchemaMigrationAction,
+  SchemaMigrationActionKeys,
 } from './actions.js'
 
 export type Response = { id: string; success: true } | { id: string; success: false; info: string }
@@ -41,7 +45,7 @@ export class BasicAuthorisationConnector {
       return true
     }
 
-    const roles = await authentication.getUserModelRoles(user, model)
+    const roles = await getModelSystemRoles(user, model)
     if (roles.length === 0) return false
 
     return true
@@ -63,12 +67,20 @@ export class BasicAuthorisationConnector {
     return (await this.schemas(user, [schema], action))[0]
   }
 
+  async schemaMigration(
+    user: UserInterface,
+    schemaMigrationDoc: SchemaMigrationDoc,
+    action: SchemaMigrationActionKeys,
+  ) {
+    return (await this.schemaMigrations(user, [schemaMigrationDoc], action))[0]
+  }
+
   async release(user: UserInterface, model: ModelDoc, action: ReleaseActionKeys, release?: ReleaseDoc) {
     return (await this.releases(user, model, release ? [release] : [], action))[0]
   }
 
-  async reviewRole(user: UserInterface, reviewRole: ReviewRoleInterface, action: ReviewRoleActionKeys) {
-    return (await this.reviewRoles(user, [reviewRole], action))[0]
+  async reviewRole(user: UserInterface, reviewRoleShortName: string, action: ReviewRoleActionKeys) {
+    return (await this.reviewRoles(user, [reviewRoleShortName], action))[0]
   }
 
   async accessRequest(
@@ -111,16 +123,17 @@ export class BasicAuthorisationConnector {
         }
 
         // Check a user has a role before allowing write actions
-        if (
-          ModelAction.Write === action &&
-          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro', 'contributor']))
-        ) {
+        if (ModelAction.Write === action && (await missingRequiredRole(user, model, ['owner', 'contributor']))) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model card.' }
+        }
+
+        if (ModelAction.Delete === action && (await missingRequiredRole(user, model, ['owner']))) {
+          return { id: model.id, success: false, info: 'You do not have permission to delete a model card.' }
         }
 
         if (
           ModelAction.Update === action &&
-          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro'])) &&
+          (await missingRequiredRole(user, model, ['owner'])) &&
           !(await authentication.hasRole(user, Roles.Admin))
         ) {
           return { id: model.id, success: false, info: 'You do not have permission to update a model.' }
@@ -170,6 +183,39 @@ export class BasicAuthorisationConnector {
               id: schema.id,
               success: false,
               info: 'You cannot upload or modify a schema if you are not an admin.',
+            }
+          }
+        }
+
+        return {
+          id: schema.id,
+          success: true,
+        }
+      }),
+    )
+  }
+
+  async schemaMigrations(
+    user: UserInterface,
+    schemaMigrations: Array<SchemaMigrationDoc>,
+    action: SchemaMigrationActionKeys,
+  ): Promise<Array<Response>> {
+    return Promise.all(
+      schemaMigrations.map(async (schema) => {
+        // Is this a constrained user token.
+        const tokenAuth = await validateTokenForUse(user.token, ActionLookup[action])
+        if (!tokenAuth.success) {
+          return tokenAuth
+        }
+
+        if (action === SchemaMigrationAction.Create) {
+          const isAdmin = await authentication.hasRole(user, Roles.Admin)
+
+          if (!isAdmin) {
+            return {
+              id: schema.id,
+              success: false,
+              info: 'You cannot upload a schema migration if you are not an admin.',
             }
           }
         }
@@ -235,7 +281,7 @@ export class BasicAuthorisationConnector {
          */
         if (
           !isNamed &&
-          (await missingRequiredRole(user, model, ['owner', 'mtr', 'msro'])) &&
+          (await missingRequiredRole(user, model, ['owner'])) &&
           ([AccessRequestAction.Delete, AccessRequestAction.Update] as AccessRequestActionKeys[]).includes(action)
         ) {
           return { success: false, info: 'You cannot change an access request you do not own.', id: request.id }
@@ -361,10 +407,7 @@ export class BasicAuthorisationConnector {
         }
 
         // If they are not listed on the model, don't let them upload or delete images.
-        if (
-          (await missingRequiredRole(user, model, ['owner', 'msro', 'mtr', 'contributor'])) &&
-          actions.includes(ImageAction.Push)
-        ) {
+        if ((await missingRequiredRole(user, model, ['owner', 'contributor'])) && actions.includes(ImageAction.Push)) {
           return {
             success: false,
             info: 'You do not have permission to upload an image.',
@@ -374,7 +417,7 @@ export class BasicAuthorisationConnector {
 
         if (
           !hasAccessRequest &&
-          (await missingRequiredRole(user, model, ['owner', 'contributor', 'msro', 'mtr', 'consumer'])) &&
+          (await missingRequiredRole(user, model, ['owner', 'contributor', 'consumer'])) &&
           actions.includes(ImageAction.Pull) &&
           !model.settings.ungovernedAccess
         ) {
@@ -392,23 +435,23 @@ export class BasicAuthorisationConnector {
 
   async reviewRoles(
     user: UserInterface,
-    reviewRoles: Array<ReviewRoleInterface>,
+    reviewRoles: string[],
     action: ReviewRoleActionKeys,
   ): Promise<Array<Response>> {
     return Promise.all(
-      reviewRoles.map(async (reviewRole) => {
+      reviewRoles.map(async (reviewRoleShortName) => {
         // Is this a constrained user token.
         const tokenAuth = await validateTokenForUse(user.token, ActionLookup[action])
         if (!tokenAuth.success) {
           return tokenAuth
         }
 
-        if (action === ReviewRoleAction.Create) {
+        if (action === ReviewRoleAction.Create || action === ReviewRoleAction.Delete) {
           const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
           if (!isAdmin) {
             return {
-              id: reviewRole.id,
+              id: reviewRoleShortName,
               success: false,
               info: 'You cannot upload or modify a review role if you are not an admin.',
             }
@@ -416,7 +459,7 @@ export class BasicAuthorisationConnector {
         }
 
         return {
-          id: reviewRole.id,
+          id: reviewRoleShortName,
           success: true,
         }
       }),
@@ -425,8 +468,13 @@ export class BasicAuthorisationConnector {
 }
 
 async function missingRequiredRole(user: UserInterface, model: ModelDoc, roles: Array<string>) {
-  const modelRoles = await authentication.getUserModelRoles(user, model)
-  return !modelRoles.some((value) => roles.includes(value))
+  const modelRoles = await getModelSystemRoles(user, model)
+  const reviewRoles = await ReviewRoleModel.find({ shortName: modelRoles })
+  const collaboratorRoles = reviewRoles.map((role) => role.systemRole)
+  return (
+    !modelRoles.some((value) => roles.includes(value)) &&
+    !collaboratorRoles.some((value) => value && roles.includes(value))
+  )
 }
 
 export async function partials<T>(

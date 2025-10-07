@@ -43,6 +43,9 @@ module.exports = {
     // Authentication details
     user: undefined,
     pass: undefined,
+
+    // Whether to use transactions. Requires a replica set to be enabled
+    transactions: false,
   },
 
   registry: {
@@ -91,6 +94,23 @@ module.exports = {
     level: 'debug',
   },
 
+  defaultReviewRoles: [
+    {
+      name: 'Model Senior Responsible Officer',
+      shortName: 'msro',
+      kind: 'review',
+      description: 'Reviewer',
+      systemRole: 'owner',
+    },
+    {
+      name: 'Model Technical Reviewer',
+      shortName: 'mtr',
+      kind: 'review',
+      description: 'Reviewer',
+      systemRole: 'owner',
+    },
+  ],
+
   defaultSchemas: {
     modelCards: [
       {
@@ -99,6 +119,7 @@ module.exports = {
         description:
           "This is the latest version of the default model card. It complies with all requirements laid out in the [AI Policy](https://example.com) as well as best practices recommended by 'Science and Research'.\n\nIf you're unsure which model card to pick, you'll likely want this one!",
         jsonSchema: require('../src/scripts/example_schemas/minimal_model_schema.json'),
+        reviewRoles: ['msro', 'mtr'],
       },
     ],
     dataCards: [
@@ -117,6 +138,7 @@ module.exports = {
         description:
           'This access request should be used for models that are being deployed by the same organisation that created it and MAY be being used for operational use cases.\n\n ✔ Development Work  \n ✔ Operational Deployments  \n ✖ Second Party Sharing',
         jsonSchema: require('../src/scripts/example_schemas/minimal_access_request_schema.json'),
+        reviewRoles: ['msro'],
       },
     ],
   },
@@ -162,11 +184,13 @@ module.exports = {
 
   avScanning: {
     clamdscan: {
+      concurrency: 2,
       host: '127.0.0.1',
       port: 3310,
     },
 
     modelscan: {
+      concurrency: 2,
       protocol: 'http',
       host: '127.0.0.1',
       port: 3311,
@@ -285,6 +309,7 @@ module.exports = {
 
   modelMirror: {
     export: {
+      concurrency: 5,
       maxSize: 100 * 1024 * 1024 * 1024,
       bucket: 'exports',
       kmsSignature: {

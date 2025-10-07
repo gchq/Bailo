@@ -1,3 +1,5 @@
+import { ClientSession } from 'mongoose'
+
 import ResponseModel, {
   Decision,
   ReactionKindKeys,
@@ -15,7 +17,7 @@ import { Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { getAccessRequestById } from './accessRequest.js'
 import log from './log.js'
 import { getReleaseBySemver } from './release.js'
-import { findReviewForResponse, findReviewsForAccessRequests } from './review.js'
+import { findReviewForResponse, findReviews, findReviewsForAccessRequests } from './review.js'
 import { notifyReviewResponseForAccess, notifyReviewResponseForRelease } from './smtp/smtp.js'
 import { sendWebhooks } from './webhook.js'
 
@@ -39,6 +41,11 @@ export async function getResponsesByParentIds(parentIds: string[]) {
   }
 
   return responses
+}
+
+export async function getResponsesByUser(user: UserInterface) {
+  const reviews = await findReviews(user, true, false)
+  return await getResponsesByParentIds(reviews.map((review) => review['_id']))
 }
 
 export async function updateResponse(user: UserInterface, responseId: string, comment: string) {
@@ -180,4 +187,22 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
     decision: Decision.Approve,
   })
   return approvals.length > 0
+}
+
+export async function removeResponsesByParentIds(parentIds: string[], session: ClientSession | undefined) {
+  const responses = await ResponseModel.find({ parentId: parentIds })
+
+  const deletions: ResponseDoc[] = []
+  for (const response of responses) {
+    try {
+      deletions.push(await response.delete(session))
+    } catch (error) {
+      throw InternalError('The requested response could not be deleted.', {
+        responseId: response['_id'],
+        error,
+      })
+    }
+  }
+
+  return deletions
 }

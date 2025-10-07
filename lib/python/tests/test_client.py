@@ -8,8 +8,27 @@ import pytest
 
 from bailo import Client, ModelVisibility, SchemaKind
 from bailo.core.enums import EntryKind
+from bailo.core.exceptions import BailoException, ResponseException
 
 mock_result = {"success": True}
+
+
+def test_bailo_exception(requests_mock):
+    requests_mock.get(
+        "https://example.com/api/v2/model/test_model", status_code=400, json={"error": {"message": "Dummy error!"}}
+    )
+    client = Client("https://example.com")
+    with pytest.raises(BailoException) as bailo_exception:
+        client.get_model("test_model")
+
+        assert bailo_exception == "Dummy error!"
+
+
+def test_response_exception(requests_mock):
+    requests_mock.get("https://example.com/api/v2/model/test_model", status_code=400, json=None)
+    client = Client("https://example.com")
+    with pytest.raises(ResponseException):
+        client.get_model("test_model")
 
 
 def test_post_model(requests_mock):
@@ -217,6 +236,7 @@ def test_post_schema(requests_mock):
         description="example_description",
         kind=SchemaKind.MODEL,
         json_schema={"test": "test"},
+        review_roles=["test"],
     )
 
     assert result == {"success": True}
@@ -272,17 +292,6 @@ def test_get_model_roles(requests_mock):
 
     client = Client("https://example.com")
     result = client.get_model_roles(
-        model_id="test_id",
-    )
-
-    assert result == {"success": True}
-
-
-def test_get_model_user_roles(requests_mock):
-    requests_mock.get("https://example.com/api/v2/model/test_id/roles/mine", json={"success": True})
-
-    client = Client("https://example.com")
-    result = client.get_model_user_roles(
         model_id="test_id",
     )
 

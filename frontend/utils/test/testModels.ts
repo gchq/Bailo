@@ -8,6 +8,8 @@ import {
   ResponseInterface,
   ResponseKind,
   ReviewRequestInterface,
+  ReviewRoleInterface,
+  RoleKind,
   SchemaInterface,
   StepNoRender,
   SystemRole,
@@ -156,7 +158,7 @@ export const testAccessRequestSchema: SchemaInterface = {
   kind: 'accessRequest',
   meta: {},
   uiSchema: {},
-  schema: {
+  jsonSchema: {
     $schema: 'http://json-schema.org/draft-07/schema#',
     type: 'object',
     properties: {
@@ -178,12 +180,13 @@ export const testAccessRequestSchema: SchemaInterface = {
     required: ['overview'],
     additionalProperties: false,
   },
+  reviewRoles: ['msro'],
   createdAt: new Date(),
   updatedAt: new Date(),
 }
 
 export const testAccessRequestSchemaStepNoRender: StepNoRender = {
-  schema: testAccessRequestSchema.schema,
+  schema: testAccessRequestSchema.jsonSchema,
   state: {},
   index: 0,
   steps: [],
@@ -195,8 +198,18 @@ export const testAccessRequestSchemaStepNoRender: StepNoRender = {
 }
 
 export const testManagerRole: SystemRole = {
-  id: 'mngr',
   name: 'Manager',
+  shortName: 'manager',
+  systemRole: 'owner',
+}
+
+export const testManagerRoleInterface: ReviewRoleInterface = {
+  ...testManagerRole,
+  _id: '12415234234',
+  kind: RoleKind.REVIEW,
+  systemRole: 'consumer',
+  createdAt: '',
+  updatedAt: '',
 }
 
 export const testUiConfig: UiConfig = {

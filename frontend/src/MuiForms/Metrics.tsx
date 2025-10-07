@@ -14,6 +14,7 @@ import { useTheme } from '@mui/material/styles'
 import { FormContextType } from '@rjsf/utils'
 import * as _ from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import MessageAlert from 'src/MessageAlert'
 import MetricItem from 'src/MuiForms/MetricItem'
 import { isValidNumber } from 'utils/stringUtils'
 import { v4 as uuidv4 } from 'uuid'
@@ -97,16 +98,22 @@ export default function Metrics({ onChange, value, label, formContext, required 
     ))
   }, [value])
 
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
+
   return (
     <>
       {formContext && formContext.editMode && (
         <Stack spacing={2} sx={{ width: 'fit-content' }}>
-          <Typography fontWeight='bold'>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
           <Stack spacing={2}>{metricItems}</Stack>
-          <Button onClick={() => handleChange([...value, { name: '', value: 0 }])}>Add item</Button>
+          <Button onClick={() => handleChange([...value, { name: '', value: 0 }])} aria-label='add metric button'>
+            Add item
+          </Button>
         </Stack>
       )}
       {formContext && !formContext.editMode && (

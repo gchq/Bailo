@@ -7,6 +7,7 @@ import { z } from 'zod'
 
 import { ensureBucketExists } from './clients/s3.js'
 import log from './services/log.js'
+import { addDefaultReviewRoles } from './services/review.js'
 import { addDefaultSchemas } from './services/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
@@ -30,12 +31,15 @@ if (config.s3.automaticallyCreateBuckets) {
 await connectToMongoose()
 await runMigrations()
 
+// lazily add default dynamic review roles
+await addDefaultReviewRoles()
+
 // lazily add default schemas
-addDefaultSchemas()
+await addDefaultSchemas()
 
 const { server } = await import('./routes.js')
 const httpServer = server.listen(config.api.port, () => {
-  log.info('Listening on port', config.api.port)
+  log.info(config.api.port, 'Listening on port')
 })
 // Set header timeout to 24H
 httpServer.headersTimeout = 86400000

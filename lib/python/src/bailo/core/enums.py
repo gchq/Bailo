@@ -5,6 +5,10 @@ from enum import Enum
 
 class ValuedEnum(str, Enum):
     def __str__(self) -> str:
+        """Return the string representation of this enum's value.
+
+        :return: String value of the enum.
+        """
         return str(self.value)
 
 
@@ -26,8 +30,6 @@ class Role(ValuedEnum):
     """A reviewing role."""
 
     OWNER = "owner"
-    MODEL_TECHNICAL_REVIEWER = "mtr"
-    MODEL_SENIOR_RESPONSIBLE_OFFICER = "msro"
     CONTRIBUTOR = "contributor"
     CONSUMER = "consumer"
 
@@ -51,4 +53,9 @@ class CollaboratorEntry(dict):
     """A set of roles linked to a given entity (a.k.a. user)."""
 
     def __init__(self, entity: str, roles: list[Role | str]) -> None:
+        """Initialise a CollaboratorEntry.
+
+        :param entity: The entity (e.g. user) identifier.
+        :param roles: List of roles assigned to the entity.
+        """
         super().__init__(self, entity=entity, roles=roles)

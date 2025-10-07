@@ -1,5 +1,4 @@
-import { LoadingButton } from '@mui/lab'
-import { Box, Dialog, DialogContent, Divider, LinearProgress, Stack, styled, Typography } from '@mui/material'
+import { Box, Button, Dialog, DialogContent, Divider, LinearProgress, Stack, styled, Typography } from '@mui/material'
 import { postFileForModelId } from 'actions/file'
 import { AxiosProgressEvent } from 'axios'
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
@@ -143,9 +142,9 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
       <DialogContent>
         <Stack spacing={2}>
           <label htmlFor='add-files-button'>
-            <LoadingButton loading={isFilesUploading} component='span' variant='outlined' sx={{ width: '100%' }}>
+            <Button loading={isFilesUploading} component='span' variant='outlined' sx={{ width: '100%' }}>
               Select files
-            </LoadingButton>
+            </Button>
           </label>
           <Input multiple id='add-files-button' type='file' onInput={handleAddNewFiles} data-test='uploadFileButton' />
           {filesToBeUploaded.length > 0 && <Typography fontWeight='bold'>Files to upload</Typography>}
@@ -166,7 +165,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
             </>
           )}
           <Box sx={{ width: '100%' }}>
-            <LoadingButton
+            <Button
               loading={isFilesUploading}
               onClick={handleFileUpload}
               variant='contained'
@@ -174,7 +173,7 @@ export default function FileUploadDialog({ open, onDialogClose, model, mutateEnt
               sx={{ maxWidth: 'fit-content', float: 'right' }}
             >
               Upload files
-            </LoadingButton>
+            </Button>
           </Box>
           {failedFileList}
         </Stack>

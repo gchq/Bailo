@@ -1,5 +1,6 @@
+import { Readable } from 'node:stream'
+
 import { Schema, Types } from 'mongoose'
-import { Readable } from 'stream'
 
 import { getObjectStream, putObjectStream } from '../clients/s3.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
@@ -223,6 +224,9 @@ export async function removeFile(user: UserInterface, modelId: string, fileId: s
   }
 
   await removeFileFromReleases(user, model, fileId)
+
+  // TODO: use a transaction here once they're part of the codebase
+  await ScanModel.deleteMany({ fileId: { $eq: file.id } })
 
   // We don't actually remove the file from storage, we only hide all
   // references to it.  This makes the file not visible to the user.

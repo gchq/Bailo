@@ -12,9 +12,10 @@ export interface PostSchemaParams {
   description: string
   kind: SchemaKindKeys
   jsonSchema: any
+  reviewRoles?: string[]
 }
 
-export function useGetSchemas(kind: SchemaKindKeys, hidden?: boolean) {
+export function useGetSchemas(kind?: SchemaKindKeys, hidden?: boolean) {
   const queryParams = {
     kind,
     ...(hidden != undefined && { hidden }),

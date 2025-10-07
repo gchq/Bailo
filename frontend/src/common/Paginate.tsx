@@ -15,6 +15,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
 import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import semver from 'semver'
 import EmptyBlob from 'src/common/EmptyBlob'
 
 interface PaginateProps<T> {
@@ -196,7 +197,15 @@ export default function Paginate<T>({
   }, [sortingProperties, orderByMenuListItems])
 
   const listDisplay = useMemo(() => {
-    const sortedList = filteredList.sort(sortByValue).slice((page - 1) * pageSize, page * pageSize)
+    let sortedList
+    if (orderByValue === 'semver') {
+      const listSemvers = filteredList.map((item: T) => item['semver'])
+      const semverList = semver.sort(listSemvers)
+      sortedList = filteredList.sort((a, b) => semverList.indexOf(a) - semverList.indexOf(b))
+    } else {
+      sortedList = filteredList.sort(sortByValue)
+    }
+    sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
     if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
         <div key={item['key']} style={{ width: '100%' }}>
@@ -204,7 +213,7 @@ export default function Paginate<T>({
         </div>
       ))
     }
-  }, [pageSize, page, sortByValue, children, filteredList])
+  }, [orderByValue, page, pageSize, filteredList, sortByValue, children])
 
   if (list.length === 0) {
     return <EmptyBlob text={emptyListText} />

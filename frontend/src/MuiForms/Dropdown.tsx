@@ -1,21 +1,33 @@
 import { Autocomplete, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { FormContextType } from '@rjsf/utils'
 import { Fragment, SyntheticEvent, useMemo } from 'react'
+import MessageAlert from 'src/MessageAlert'
 
 interface DropdownProps {
   label?: string
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
-  formContext?: any
+  formContext?: FormContextType
   value: string
   onChange: (newValue: string) => void
   InputProps?: any
   options: { enumOptions?: { label: string; value: string }[] }
   rawErrors?: string[]
+  id: string
 }
 
-export default function Dropdown({ label, formContext, value, onChange, options, required, rawErrors }: DropdownProps) {
+export default function Dropdown({
+  label,
+  formContext,
+  value,
+  onChange,
+  options,
+  required,
+  rawErrors,
+  id,
+}: DropdownProps) {
   const theme = useTheme()
 
   const handleChange = (_event: SyntheticEvent<Element, Event>, newValue: string | null) => {
@@ -34,9 +46,13 @@ export default function Dropdown({ label, formContext, value, onChange, options,
     return options.enumOptions ? options.enumOptions.map((option) => option.value) : []
   }, [options])
 
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
+
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>
+      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
@@ -50,6 +66,7 @@ export default function Dropdown({ label, formContext, value, onChange, options,
               ...theme.applyStyles('light', {
                 color: theme.palette.common.black,
               }),
+              id: id,
             },
             label: {
               WebkitTextFillColor: theme.palette.common.white,
@@ -70,6 +87,7 @@ export default function Dropdown({ label, formContext, value, onChange, options,
               label='Select an option below'
               size='small'
               placeholder='Unanswered'
+              aria-label={`input field for ${label}`}
               error={rawErrors && rawErrors.length > 0}
             />
           )}

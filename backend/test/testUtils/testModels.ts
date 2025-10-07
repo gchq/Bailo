@@ -30,6 +30,8 @@ export const testModelSchema = {
     },
   },
 
+  reviewRoles: ['reviewer', 'msro'],
+
   createdAt: new Date('2023-07-28T10:50:00.928Z'),
   updatedAt: new Date('2023-07-28T10:50:00.928Z'),
 }
@@ -109,7 +111,34 @@ export const testResponse = {
 }
 
 export const testReviewRole = {
-  id: 'my-role-125',
   name: 'Reviewer',
-  short: 'reviewer',
+  shortName: 'reviewer',
+  systemRole: 'Contributor',
+}
+
+export const testReviewRoleNoSystemRole = {
+  name: 'Reviewer',
+  shortName: 'reviewer',
+}
+
+export const testReviewerWithOwnerSystemRole = {
+  name: 'Reviewer',
+  shortName: 'reviewer',
+  systemRole: 'owner',
+}
+
+export const testSchemaMigration = {
+  name: 'my migration plan',
+  description: 'This is a test migration plan',
+  sourceSchema: 'v1',
+  targetSchema: 'v2',
+  questionMigrations: [
+    {
+      id: 'test',
+      kind: 'move',
+      sourcePath: 's1.q1',
+      targetPath: 's2.q1',
+      propertyType: 'string',
+    },
+  ],
 }

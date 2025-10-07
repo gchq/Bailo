@@ -3,9 +3,11 @@ import 'dayjs/locale/en-gb'
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers'
+import { FormContextType } from '@rjsf/utils'
 import dayjs, { Dayjs } from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { Fragment } from 'react'
+import MessageAlert from 'src/MessageAlert'
 dayjs.extend(customParseFormat)
 
 interface DateSelectorProps {
@@ -13,16 +15,16 @@ interface DateSelectorProps {
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
-  formContext?: any
+  formContext?: FormContextType
   value: string
   onChange: (newValue: string | undefined) => void
   InputProps?: any
+  id: string
 }
 
-export default function DateSelector(props: DateSelectorProps) {
-  const { onChange, value, label, formContext, required } = props
-
+export default function DateSelector({ onChange, value, label, formContext, required, id }: DateSelectorProps) {
   const theme = useTheme()
+
   const handleChange = (dateInput: Dayjs | null) => {
     if (dateInput && dateInput.isValid()) {
       onChange(dateInput.format('YYYY-MM-DD'))
@@ -31,14 +33,19 @@ export default function DateSelector(props: DateSelectorProps) {
     }
   }
 
+  if (!formContext) {
+    return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
+  }
+
   return (
     <Fragment key={label}>
-      <Typography fontWeight='bold'>
+      <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
         {label} {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
       {formContext.editMode && (
         <DatePicker
           value={value ? dayjs(value) : undefined}
+          aria-label={`date input field for ${label}`}
           onChange={handleChange}
           format='DD-MM-YYYY'
           sx={{ '.MuiInputBase-input': { p: '10px' } }}

@@ -8,6 +8,7 @@ import { AuditKindKeys } from '../connectors/audit/index.js'
 import { AuthenticationKindKeys } from '../connectors/authentication/index.js'
 import { AuthorisationKindKeys } from '../connectors/authorisation/index.js'
 import { FileScanKindKeys } from '../connectors/fileScanning/index.js'
+import { DefaultReviewRole } from '../services/review.js'
 import { DefaultSchema } from '../services/schema.js'
 import { FederationStateKeys, RemoteFederationConfig, UiConfig } from '../types/types.js'
 import { deepFreeze } from './object.js'
@@ -106,6 +107,8 @@ export interface Config {
 
     user: string
     pass: string
+
+    transactions: boolean
   }
 
   registry: {
@@ -143,6 +146,8 @@ export interface Config {
     dataCards: Array<DefaultSchema>
   }
 
+  defaultReviewRoles: Array<DefaultReviewRole>
+
   instrumentation: {
     enabled: boolean
     serviceName: string
@@ -153,11 +158,13 @@ export interface Config {
 
   avScanning: {
     clamdscan: {
+      concurrency: number
       host: string
       port: number
     }
 
     modelscan: {
+      concurrency: number
       protocol: string
       host: string
       port: number
@@ -166,6 +173,7 @@ export interface Config {
 
   modelMirror: {
     export: {
+      concurrency: number
       maxSize: number
       bucket: string
       kmsSignature: {

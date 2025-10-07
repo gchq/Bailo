@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -25,6 +24,10 @@ export const postSchemaSchema = z.object({
       required_error: 'Must specify schema kind',
     }),
     jsonSchema: z.object({}).passthrough(),
+    reviewRoles: z.array(z.string()).openapi({
+      example: ['reviewer'],
+      description: 'This is an array made up of the "shortName" property from a Review Role object.',
+    }),
   }),
 })
 
@@ -53,7 +56,6 @@ interface PostSchemaResponse {
 }
 
 export const postSchema = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostSchemaResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateSchema
     const { body } = parse(req, postSchemaSchema)

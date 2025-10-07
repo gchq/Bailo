@@ -1,23 +1,29 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { ImportKind, importModel } from '../../../services/mirroredModel.js'
+import { ImportKind, importModel } from '../../../services/mirroredModel/mirroredModel.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postRequestImportFromS3Schema = z.object({
-  body: z.object({
-    payloadUrl: z.string(),
-    mirroredModelId: z.string(),
-    sourceModelId: z.string(),
-    exporter: z.string(),
-    importKind: z.nativeEnum(ImportKind),
-    filePath: z.string().optional(),
-    distributionPackageName: z.string().optional(),
-  }),
+  body: z
+    .object({
+      payloadUrl: z.string(),
+      mirroredModelId: z.string(),
+      sourceModelId: z.string(),
+      exporter: z.string(),
+      importKind: z.nativeEnum(ImportKind),
+      filePath: z.string().optional(),
+      distributionPackageName: z.string().optional(),
+    })
+    .refine((data) => data.importKind !== ImportKind.Image || !!data.distributionPackageName, {
+      message: 'distributionPackageName is required for Image import',
+    })
+    .refine((data) => data.importKind !== ImportKind.File || !!data.filePath, {
+      message: 'filePath is required for File import',
+    }),
 })
 
 registerPath({
@@ -48,7 +54,6 @@ interface PostRequestImportResponse {
 }
 
 export const postRequestImportFromS3 = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostRequestImportResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateImport
     const {

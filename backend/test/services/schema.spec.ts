@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
-import { createSchema, getSchemaById, searchSchemas } from '../../src/services/schema.js'
+import { createSchema, getSchemaById, searchSchemas, updateSchema } from '../../src/services/schema.js'
 import { testModelSchema } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -31,6 +31,51 @@ const mockSchema = vi.hoisted(() => {
 vi.mock('../../src/models/Schema.js', () => ({
   default: mockSchema.Schema,
 }))
+
+const modelMocks = vi.hoisted(() => {
+  const obj: any = { settings: { mirror: { sourceModelId: '' } } }
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
+
+const reviewRoleModelMocks = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
+  obj.toObject = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/ReviewRole.js', () => ({ default: reviewRoleModelMocks }))
 
 const mockMongoUtils = vi.hoisted(() => {
   return {
@@ -100,4 +145,25 @@ describe('services > schema', () => {
   test('that a schema cannot be retrieved by ID when schema does not exist', async () => {
     await expect(() => getSchemaById(testModelSchema.id)).rejects.toThrowError(/^The requested schema was not found/)
   })
+})
+
+test('that we update review roles if they are changed on a schema', async () => {
+  const testReviewer = 'reviewer2'
+  const diff = {
+    reviewRoles: [testReviewer],
+  }
+  mockSchema.findOne.mockResolvedValueOnce({ ...testModelSchema, save: vi.fn() })
+  modelMocks.find.mockResolvedValueOnce([
+    {
+      id: 'test-model',
+      card: { schemaId: 'schema-123' },
+      collaborators: [{ entity: 'user:user', roles: [testReviewer] }],
+      save: vi.fn(),
+    },
+  ])
+  reviewRoleModelMocks.find.mockResolvedValueOnce([{ shortName: testReviewer, name: testReviewer, toObject: () => {} }])
+
+  const updatedSchema = await updateSchema({} as any, 'schema-123', diff)
+
+  expect(updatedSchema.reviewRoles.includes(testReviewer))
 })

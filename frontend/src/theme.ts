@@ -88,7 +88,7 @@ export const lightTheme = createTheme({
       main: '#d62560',
     },
     error: {
-      main: red.A400,
+      main: red.A700,
     },
     container: {
       main: '#f3f1f1',
@@ -104,7 +104,7 @@ export const lightTheme = createTheme({
       light: '#e5f6fd',
     },
     warning: {
-      main: '#ed6c02',
+      main: '#C55302',
       light: '#ffd08b',
     },
     markdownBorder: {

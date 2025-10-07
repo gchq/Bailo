@@ -1,5 +1,7 @@
+import bodyParser from 'body-parser'
 import express from 'express'
 import path from 'path'
+import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
 
 import authentication from './connectors/authentication/index.js'
@@ -30,6 +32,7 @@ import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
+import { deleteInference } from './routes/v2/model/inferencing/deleteInferenceService.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
 import { getInferences } from './routes/v2/model/inferencing/getInferenceServices.js'
 import { postInference } from './routes/v2/model/inferencing/postInferenceService.js'
@@ -44,8 +47,6 @@ import { patchModel } from './routes/v2/model/patchModel.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
 import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
-import { getAllModelReviewRoles } from './routes/v2/model/roles/getAllModelReviewRoles.js'
-import { getModelCurrentUserRoles } from './routes/v2/model/roles/getModelCurrentUserRoles.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
 import { getWebhooks } from './routes/v2/model/webhook/getWebhooks.js'
@@ -60,16 +61,20 @@ import { putRelease } from './routes/v2/release/putRelease.js'
 import { getResponses } from './routes/v2/response/getResponses.js'
 import { patchResponse } from './routes/v2/response/patchResponse.js'
 import { patchResponseReaction } from './routes/v2/response/patchResponseReaction.js'
+import { deleteReviewRole } from './routes/v2/review/deleteReviewRole.js'
 import { getReviewRoles } from './routes/v2/review/getReviewRoles.js'
 import { getReviews } from './routes/v2/review/getReviews.js'
 import { postAccessRequestReviewResponse } from './routes/v2/review/postAccessRequestReviewResponse.js'
 import { postReleaseReviewResponse } from './routes/v2/review/postReleaseReviewResponse.js'
 import { postReviewRole } from './routes/v2/review/postReviewRole.js'
+import { putReviewRole } from './routes/v2/review/putReviewRole.js'
 import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
 import { getSchema } from './routes/v2/schema/getSchema.js'
+import { getSchemaMigrations } from './routes/v2/schema/getSchemaMigrations.js'
 import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'
+import { postSchemaMigration } from './routes/v2/schema/postSchemaMigration.js'
 import { getSpecification } from './routes/v2/specification.js'
 import { getPeerStatus } from './routes/v2/system/peers.js'
 import { getSystemStatus } from './routes/v2/system/status.js'
@@ -78,16 +83,20 @@ import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
+import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
 
 export const server = express()
 
 server.use('/api/v2', requestId)
+server.use('/api/v2', bodyParser.json())
 server.use('/api/v2', expressLogger)
 const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
+
+server.use('/api/v2/docs', swaggerUi.serve, swaggerUi.setup(generateSwaggerSpec()))
 
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
@@ -168,6 +177,7 @@ if (!config.ui?.inference || config.ui.inference?.enabled) {
   server.get('/api/v2/model/:modelId/inference/:image/:tag', ...getInference)
   server.post('/api/v2/model/:modelId/inference', ...postInference)
   server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
+  server.delete('/api/v2/model/:modelId/inference/:image/:tag', ...deleteInference)
 }
 
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
@@ -179,16 +189,17 @@ server.post('/api/v2/schemas', ...postSchema)
 server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
+server.get('/api/v2/schema-migrations', ...getSchemaMigrations)
+server.post('/api/v2/schema-migration', ...postSchemaMigration)
+
 server.get('/api/v2/reviews', ...getReviews)
+server.head('/api/v2/reviews', ...getReviews)
 server.get('/api/v2/responses', ...getResponses)
 server.patch('/api/v2/response/:responseId', ...patchResponse)
 server.patch('/api/v2/response/:responseId/reaction/:kind', ...patchResponseReaction)
 
-server.get('/api/v2/model/:modelId/roles/mine', ...getModelCurrentUserRoles)
-server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
-
-server.get('/api/v2/roles/review', ...getAllModelReviewRoles)
 server.get('/api/v2/roles', ...getModelRoles)
+server.get('/api/v2/model/:modelId/permissions/mine', ...getModelCurrentUserPermissions)
 
 server.get('/api/v2/entities', ...getEntities)
 server.get('/api/v2/entities/me', ...getCurrentUser)
@@ -208,7 +219,9 @@ server.get('/api/v2/filescanning/info', ...getFilescanningInfo)
 server.put('/api/v2/filescanning/model/:modelId/file/:fileId/scan', ...putFileScan)
 
 server.get('/api/v2/review/roles', ...getReviewRoles)
+server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
 server.post('/api/v2/review/role', ...postReviewRole)
+server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

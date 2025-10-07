@@ -2,6 +2,8 @@ import { Schema as JsonSchema } from 'jsonschema'
 
 import { SchemaAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import ModelModel, { CollaboratorEntry } from '../models/Model.js'
+import ReviewRoleModel from '../models/ReviewRole.js'
 import Schema, { SchemaInterface } from '../models/Schema.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaKind, SchemaKindKeys } from '../types/enums.js'
@@ -9,12 +11,14 @@ import config from '../utils/config.js'
 import { Forbidden, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
+import { addReviewsForNewRole } from './review.js'
 
 export interface DefaultSchema {
   name: string
   id: string
   description: string
   jsonSchema: JsonSchema
+  reviewRoles?: string[]
 }
 
 export async function searchSchemas(kind?: SchemaKindKeys, hidden?: boolean): Promise<SchemaInterface[]> {
@@ -82,7 +86,9 @@ export async function createSchema(user: UserInterface, schema: Partial<SchemaIn
   }
 }
 
-export type UpdateSchemaParams = Partial<Pick<SchemaInterface, 'active' | 'hidden' | 'name' | 'description'>>
+export type UpdateSchemaParams = Partial<
+  Pick<SchemaInterface, 'active' | 'hidden' | 'name' | 'description' | 'reviewRoles'>
+>
 
 export async function updateSchema(user: UserInterface, schemaId: string, diff: UpdateSchemaParams) {
   const schema = await getSchemaById(schemaId)
@@ -95,8 +101,69 @@ export async function updateSchema(user: UserInterface, schemaId: string, diff: 
     })
   }
 
+  // Check if any review roles have been removed
+  let removedRoles: string[] = []
+  if (diff.reviewRoles) {
+    removedRoles = schema.reviewRoles.filter((role) => !diff.reviewRoles?.includes(role))
+  }
+
   Object.assign(schema, diff)
   await schema.save()
+
+  if (diff.reviewRoles) {
+    const models = await ModelModel.find({ 'card.schemaId': schemaId })
+    const reviewRoles = await ReviewRoleModel.find({ shortName: { $in: diff.reviewRoles } })
+    const roleMap = new Map(reviewRoles.map((role) => [role.shortName, role]))
+    for (const model of models) {
+      // Remove any roles from model collaborators that have been removed from the schema
+      for (const collaborator of model.collaborators) {
+        collaborator.roles = collaborator.roles.filter((role) => !removedRoles.includes(role))
+      }
+      // Update add users/roles based on new defaultEntities
+      const updatedCollaborators: CollaboratorEntry[] = [...model.collaborators]
+      for (const reviewRoleDiff of diff.reviewRoles) {
+        const reviewRole = roleMap.get(reviewRoleDiff)
+        if (reviewRole) {
+          addReviewsForNewRole(user, reviewRole.toObject(), model)
+        }
+        if (reviewRole && reviewRole.defaultEntities) {
+          for (const defaultEntity of reviewRole.defaultEntities) {
+            const existingUser = model.collaborators.find((collaborator) => collaborator.entity === defaultEntity)
+            if (existingUser) {
+              const existingIndex = updatedCollaborators.findIndex(
+                (collaborator) => collaborator.entity === defaultEntity,
+              )
+              if (existingIndex > -1) {
+                updatedCollaborators[existingIndex] = {
+                  entity: defaultEntity,
+                  roles: [...new Set([...updatedCollaborators[existingIndex].roles, reviewRole.shortName])],
+                }
+              } else {
+                updatedCollaborators.push({
+                  entity: defaultEntity,
+                  roles: [...new Set([...existingUser.roles, reviewRole.shortName])],
+                })
+              }
+            } else {
+              const existingIndex = updatedCollaborators.findIndex(
+                (collaborator) => collaborator.entity === defaultEntity,
+              )
+              if (existingIndex > -1) {
+                updatedCollaborators[existingIndex] = {
+                  entity: defaultEntity,
+                  roles: [...new Set([...updatedCollaborators[existingIndex].roles, reviewRole.shortName])],
+                }
+              } else {
+                updatedCollaborators.push({ entity: defaultEntity, roles: [reviewRole.shortName] })
+              }
+            }
+          }
+        }
+      }
+      model.collaborators = updatedCollaborators
+      await model.save()
+    }
+  }
 
   return schema
 }

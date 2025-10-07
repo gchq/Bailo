@@ -40,6 +40,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     '',
     [],
     [],
+    [],
     '',
     false,
     schemaToBeDeleted,
@@ -70,14 +71,16 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     (event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>, schemaId: SchemaInterface['id']) => {
       setAnchorEl(event.currentTarget)
       setOpenMenuSchemaId(schemaId)
+      mutateSchemas()
     },
-    [],
+    [mutateSchemas],
   )
 
   const handleCloseMenu = useCallback(() => {
     setAnchorEl(null)
     setOpenMenuSchemaId(null)
-  }, [])
+    mutateSchemas()
+  }, [mutateSchemas])
 
   const handleEditSchema = useCallback(
     async (schemaId: SchemaInterface['id'], diff: Partial<SchemaInterface>) => {

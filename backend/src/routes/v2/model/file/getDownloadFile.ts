@@ -1,7 +1,7 @@
-import bodyParser from 'body-parser'
+import stream from 'node:stream'
+
 import contentDisposition from 'content-disposition'
 import { Request, Response } from 'express'
-import stream from 'stream'
 import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
@@ -88,7 +88,6 @@ interface GetDownloadFileResponse {
 }
 
 export const getDownloadFile = [
-  bodyParser.json(),
   async (req: Request, res: Response<GetDownloadFileResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewFile
     const { params } = parse(req, getDownloadFileSchema)

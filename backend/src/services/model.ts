@@ -4,9 +4,10 @@ import * as _ from 'lodash-es'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys } from '../models/Model.js'
+import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { EntityKind, EntryUserPermissions } from '../types/types.js'
@@ -15,6 +16,7 @@ import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
+import { useTransaction } from '../utils/transactions.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -110,6 +112,7 @@ export async function searchModels(
   kind: EntryKindKeys,
   libraries: Array<string>,
   organisations: Array<string>,
+  states: Array<string>,
   filters: Array<string>,
   search: string,
   task?: string,
@@ -124,6 +127,10 @@ export async function searchModels(
 
   if (organisations.length) {
     query.organisation = { $in: organisations }
+  }
+
+  if (states.length) {
+    query.state = { $in: states }
   }
 
   if (libraries.length) {
@@ -271,11 +278,13 @@ export async function _setModelCard(
   }
 
   const revision = new ModelCardRevisionModel({ ...newDocument, modelId, createdBy: user.dn })
-  await revision.save()
 
-  await ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } })
+  const [savedRevision, _updatedModel] = await useTransaction([
+    (session) => revision.save({ session }),
+    (session) => ModelModel.updateOne({ id: modelId }, { $set: { card: newDocument } }, { session }),
+  ])
 
-  return revision
+  return savedRevision
 }
 
 export async function updateModelCard(
@@ -410,6 +419,26 @@ export async function createModelCardFromSchema(
   if (schema.hidden) {
     throw BadReq('Cannot create a new Card using a hidden schema.', { schemaId, kind: schema.kind })
   }
+
+  // Check schema review roles for any default entities
+  const reviewRolesForSchema = await ReviewRoleModel.find({ shortName: schema.reviewRoles })
+  const updatedCollaborators: CollaboratorEntry[] = [...model.collaborators]
+  for (const reviewRole of reviewRolesForSchema) {
+    if (reviewRole.defaultEntities) {
+      reviewRole.defaultEntities.forEach((defaultEntity) => {
+        const existingDefault = updatedCollaborators.find(
+          (existingCollaborator) => existingCollaborator.entity === defaultEntity,
+        )
+        return existingDefault
+          ? existingDefault.roles.includes(reviewRole.shortName)
+            ? null
+            : existingDefault.roles.push(reviewRole.shortName)
+          : updatedCollaborators.push({ entity: defaultEntity, roles: [reviewRole.shortName] })
+      })
+    }
+  }
+  model.collaborators = updatedCollaborators
+  await model.save()
 
   const revision = await _setModelCard(user, modelId, schemaId, 1, {})
   return revision
@@ -573,4 +602,13 @@ export async function getCurrentUserPermissionsByModel(
 
     exportMirroredModel: authResponseToUserPermission(exportMirroredModelAuth),
   }
+}
+
+export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) {
+  const entities = await authentication.getEntities(user)
+
+  return model.collaborators
+    .filter((collaborator) => entities.includes(collaborator.entity))
+    .map((collaborator) => collaborator.roles)
+    .flat()
 }

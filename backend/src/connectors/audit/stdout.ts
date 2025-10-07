@@ -9,13 +9,14 @@ import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
+import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import {
   FileImportInformation,
   ImageImportInformation,
   MongoDocumentImportInformation,
-} from '../../services/mirroredModel.js'
+} from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
@@ -346,6 +347,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  onDeleteInference(req: Request, inference: InferenceDoc) {
+    this.checkEventType(AuditInfo.DeleteInference, req)
+    const event = this.generateEvent(req, { modelId: inference.modelId, image: inference.image, tag: inference.tag })
+    req.log.info(event, req.audit.description)
+  }
+
   onCreateS3Export(req: Request, modelId: string, semvers?: string[]) {
     this.checkEventType(AuditInfo.CreateExport, req)
     const event = this.generateEvent(req, { modelId: modelId, semvers })
@@ -366,13 +373,38 @@ export class StdoutAuditConnector extends BaseAuditConnector {
 
   onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
     this.checkEventType(AuditInfo.CreateReviewRole, req)
-    const event = this.generateEvent(req, { reviewRoleId: reviewRole.id })
+    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
     req.log.info(event, req.audit.description)
   }
 
   onViewReviewRoles(req: Request) {
     this.checkEventType(AuditInfo.ViewReviewRoles, req)
     const event = this.generateEvent(req, {})
+    req.log.info(event, req.audit.description)
+  }
+
+  onUpdateReviewRole(req: Request, reviewRole: ReviewRoleInterface) {
+    this.checkEventType(AuditInfo.UpdateReviewRole, req)
+    const event = this.generateEvent(req, { reviewRole: reviewRole.shortName })
+    req.log.info(event, req.audit.description)
+  }
+
+  onDeleteReviewRole(req: Request, reviewRoleId: string) {
+    this.checkEventType(AuditInfo.DeleteReviewRole, req)
+    const event = this.generateEvent(req, { reviewRoleId: reviewRoleId })
+    req.log.info(event, req.audit.description)
+  }
+
+  onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+    this.checkEventType(AuditInfo.CreateSchemaMigration, req)
+    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
+    req.log.info(event, req.audit.description)
+  }
+  onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[]) {
+    this.checkEventType(AuditInfo.ViewSchemaMigrations, req)
+    const event = this.generateEvent(req, {
+      results: schemaMigrations.map((schemaMigration) => schemaMigration.name),
+    })
     req.log.info(event, req.audit.description)
   }
 }

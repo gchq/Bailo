@@ -24,7 +24,7 @@ import { EntryUserPermissions } from '../../src/types/types.js'
 vi.mock('../../src/connectors/authorisation/index.js')
 
 const schemaMock = vi.hoisted(() => ({
-  getSchemaById: vi.fn(() => ({ jsonschema: {} })),
+  getSchemaById: vi.fn(() => ({ jsonschema: {}, reviewRoles: [] as string[] })),
 }))
 vi.mock('../../src/services/schema.js', async () => schemaMock)
 
@@ -83,6 +83,32 @@ const modelMocks = vi.hoisted(() => {
   return model
 })
 vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
+
+vi.mock('../../src/utils/database.ts', async () => ({
+  isTransactionsEnabled: vi.fn(() => false),
+}))
+
+const reviewRoleModelMocks = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/ReviewRole.js', () => ({ default: reviewRoleModelMocks }))
 
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
@@ -176,21 +202,30 @@ describe('services > model', () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, 'model', [], [], [], '', undefined)
+    await searchModels(user, 'model', [], [], [], [], '', undefined)
   })
 
   test('searchModels > all filters', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, 'model', ['library'], ['mine'], [], 'search', 'task')
+    await searchModels(
+      user,
+      'model',
+      ['library'],
+      ['mine'],
+      ['example organisation'],
+      ['development'],
+      'search',
+      'task',
+    )
   })
 
   test('searchModels > task no library', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, 'model', [], [], [], '', 'task')
+    await searchModels(user, 'model', [], [], [], [], '', 'task')
   })
 
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {

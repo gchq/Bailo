@@ -1,10 +1,9 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { exportModel } from '../../../services/mirroredModel.js'
+import { exportModel } from '../../../services/mirroredModel/mirroredModel.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
@@ -26,7 +25,7 @@ registerPath({
   path: '/api/v2/model/{modelId}/export/s3',
   tags: ['model', 'mirror'],
   description:
-    'Request for all current model card revisions to be exported to S3 as a Zip file. Can also include releases specified by semver in the body.',
+    'Request for all current model card revisions to be exported to S3 as a Tarball file. Can also include releases specified by semver in the body.',
   schema: postRequestExportToS3Schema,
   responses: {
     200: {
@@ -47,7 +46,6 @@ interface PostRequestExportResponse {
 }
 
 export const postRequestExportToS3 = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostRequestExportResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateExport
     const {

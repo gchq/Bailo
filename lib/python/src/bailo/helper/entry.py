@@ -86,7 +86,7 @@ class Entry:
         logger.info("Card for ID %s successfully created using schema ID %s.", self.id, schema_id)
 
     def card_from_template(self, template_id: str) -> None:
-        """Create a card using a template (not yet implemented)."""
+        """Create a card using a template."""
         res = self.client.model_card_from_template(model_id=self.id, template_id=template_id)
         self.__unpack_card(res["card"])
 
@@ -122,16 +122,11 @@ class Entry:
 
         return res["roles"]
 
-    def get_user_roles(self):
-        """Get all user roles for the entry.
-
-        :return: List of user roles
-        """
-        res = self.client.get_model_user_roles(model_id=self.id)
-
-        return res["roles"]
-
     def _update_card(self, card: dict[str, Any] | None = None) -> None:
+        """Update the card metadata for this entry on the Bailo server.
+
+        :param card: Metadata dictionary to update, defaults to None to use existing card.
+        """
         if card is None:
             card = self._card
 
@@ -141,6 +136,10 @@ class Entry:
         logger.info("Card for %s successfully updated on server.", self.id)
 
     def _unpack(self, res):
+        """Update entry attributes from API response.
+
+        :param res: Response dictionary containing entry information.
+        """
         self.id = res["id"]
         self.name = res["name"]
         self.description = res["description"]
@@ -153,6 +152,10 @@ class Entry:
         logger.info("Attributes for ID %s successfully unpacked.", self.id)
 
     def __unpack_card(self, res):
+        """Private method. Unpack card metadata, version, and schema ID from API response.
+
+        :param res: Card-related dictionary from the API response.
+        """
         self._card_version = res["version"]
         self._card_schema = res["schemaId"]
 

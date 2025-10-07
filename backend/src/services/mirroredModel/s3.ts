@@ -1,9 +1,10 @@
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
 
-import { sign } from '../clients/kms.js'
-import { getObjectStream, putObjectStream } from '../clients/s3.js'
-import config from '../utils/config.js'
-import log from './log.js'
+import { sign } from '../../clients/kms.js'
+import { getObjectStream, putObjectStream } from '../../clients/s3.js'
+import config from '../../utils/config.js'
+import { InternalError } from '../../utils/error.js'
+import log from '../log.js'
 import { ExportMetadata, generateDigest } from './mirroredModel.js'
 
 export async function uploadToS3(
@@ -12,17 +13,22 @@ export async function uploadToS3(
   metadata: ExportMetadata,
   logData?: Record<string, unknown>,
 ) {
-  const s3LogData = { ...metadata, ...logData }
+  const s3LogData = { metadata, ...logData }
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug(logData, 'Using signatures. Uploading to temporary S3 location first.')
-    uploadToTemporaryS3Location(fileName, stream, s3LogData).then(() =>
-      copyToExportBucketWithSignatures(fileName, s3LogData, metadata).catch((error) =>
-        log.error({ error, ...logData }, 'Failed to upload export to export location with signatures'),
-      ),
-    )
+    try {
+      await uploadToTemporaryS3Location(fileName, stream, s3LogData)
+      await copyToExportBucketWithSignatures(fileName, s3LogData, metadata)
+    } catch (error) {
+      log.error({ error, ...logData }, 'Failed to upload export to export location with signatures')
+    }
   } else {
     log.debug(logData, 'Signatures not enabled. Uploading to export S3 location.')
-    uploadToExportS3Location(fileName, stream, s3LogData, metadata)
+    try {
+      await uploadToExportS3Location(fileName, stream, s3LogData, metadata)
+    } catch (error) {
+      log.error({ error, ...logData }, 'Failed to upload export to export location without signatures')
+    }
   }
 }
 
@@ -65,20 +71,19 @@ async function uploadToTemporaryS3Location(
       {
         bucket,
         object,
+        ...(metadata && { metadata }),
         ...logData,
       },
       'Successfully uploaded export to temporary S3 location.',
     )
   } catch (error) {
-    log.error(
-      {
-        bucket,
-        object,
-        error,
-        ...logData,
-      },
-      'Failed to export to temporary S3 location.',
-    )
+    throw InternalError('Failed to export to temporary S3 location.', {
+      bucket,
+      object,
+      ...(metadata && { metadata }),
+      error,
+      ...logData,
+    })
   }
 }
 
@@ -97,16 +102,12 @@ async function getObjectFromTemporaryS3Location(fileName: string, logData: Recor
     )
     return stream
   } catch (error) {
-    log.error(
-      {
-        bucket,
-        object,
-        error,
-        ...logData,
-      },
-      'Failed to retrieve stream from temporary S3 location.',
-    )
-    throw error
+    throw InternalError('Failed to retrieve stream from temporary S3 location.', {
+      bucket,
+      object,
+      error,
+      ...logData,
+    })
   }
 }
 
@@ -150,6 +151,7 @@ async function uploadToExportS3Location(
       {
         bucket,
         object,
+        ...(metadata && { metadata }),
         ...logData,
       },
       'Successfully uploaded export to export S3 location.',
@@ -159,10 +161,18 @@ async function uploadToExportS3Location(
       {
         bucket,
         object,
+        ...(metadata && { metadata }),
         error,
         ...logData,
       },
       'Failed to export to export S3 location.',
     )
+    throw InternalError('Failed to export to export S3 location.', {
+      bucket,
+      object,
+      ...(metadata && { metadata }),
+      error,
+      ...logData,
+    })
   }
 }

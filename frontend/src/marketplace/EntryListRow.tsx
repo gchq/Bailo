@@ -11,9 +11,13 @@ interface EntryListRowProps {
   onSelectedChipsChange: (chips: string[]) => void
   selectedOrganisations: string[]
   onSelectedOrganisationsChange: (organisations: string[]) => void
+  selectedStates: string[]
+  onSelectedStatesChange: (states: string[]) => void
   data: EntrySearchResult[]
   index: number
   style: CSSProperties
+  displayOrganisation?: boolean
+  displayState?: boolean
 }
 
 export default function EntryListRow({
@@ -21,9 +25,13 @@ export default function EntryListRow({
   onSelectedChipsChange,
   selectedOrganisations,
   onSelectedOrganisationsChange,
+  selectedStates,
+  onSelectedStatesChange,
   data,
   index,
   style,
+  displayOrganisation = true,
+  displayState = true,
 }: EntryListRowProps) {
   const theme = useTheme()
   const entry = data[index]
@@ -47,6 +55,7 @@ export default function EntryListRow({
         >
           <Typography
             variant='h5'
+            component='h4'
             sx={{
               fontWeight: '500',
               textDecoration: 'none',
@@ -61,21 +70,40 @@ export default function EntryListRow({
         <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
           {entry.description}
         </Typography>
-        <Stack direction='row' spacing={1} divider={<Divider flexItem orientation='vertical' />} alignItems='center'>
-          {entry.organisation && (
-            <ChipSelector
-              chipTooltipTitle={'Filter by organisation'}
-              options={[entry.organisation]}
-              expandThreshold={10}
-              variant='outlined'
-              multiple
-              selectedChips={selectedOrganisations}
-              onChange={onSelectedOrganisationsChange}
-              size='small'
-              ariaLabel='add tag to search filter'
-              icon={<CorporateFare />}
-              style={{ padding: 1 }}
-            />
+        <Stack direction='row' spacing={1} alignItems='center'>
+          <Stack direction='row' spacing={1}>
+            {displayOrganisation && entry.organisation && (
+              <ChipSelector
+                chipTooltipTitle={'Filter by organisation'}
+                options={[entry.organisation]}
+                expandThreshold={10}
+                variant='outlined'
+                multiple
+                selectedChips={selectedOrganisations}
+                onChange={onSelectedOrganisationsChange}
+                size='small'
+                ariaLabel='add tag to search filter'
+                icon={<CorporateFare />}
+                style={{ padding: 1 }}
+              />
+            )}
+            {displayState && entry.state && (
+              <ChipSelector
+                chipTooltipTitle={'Filter by state'}
+                options={[entry.state]}
+                expandThreshold={10}
+                variant='outlined'
+                multiple
+                selectedChips={selectedStates}
+                onChange={onSelectedStatesChange}
+                size='small'
+                ariaLabel='add tag to search filter'
+                style={{ padding: 1 }}
+              />
+            )}
+          </Stack>
+          {(entry.state || entry.organisation) && (displayOrganisation || displayState) && entry.tags.length > 0 && (
+            <Divider flexItem orientation='vertical' />
           )}
           <ChipSelector
             chipTooltipTitle={'Filter by tag'}

@@ -1,5 +1,4 @@
-import { LoadingButton } from '@mui/lab'
-import { Autocomplete, Divider, Stack, TextField, Typography } from '@mui/material'
+import { Autocomplete, Button, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
@@ -171,7 +170,7 @@ export default function ReviewWithComment({
               <Stack spacing={2} direction={{ sm: 'row', xs: 'column' }}>
                 {showUndoButton && (
                   <>
-                    <LoadingButton
+                    <Button
                       onClick={() => submitForm(Decision.Undo)}
                       loading={loading}
                       variant='contained'
@@ -179,26 +178,26 @@ export default function ReviewWithComment({
                       data-test='undoReviewButton'
                     >
                       Undo Review
-                    </LoadingButton>
+                    </Button>
                     <Divider flexItem orientation='vertical' />
                   </>
                 )}
-                <LoadingButton
+                <Button
                   variant='outlined'
                   onClick={() => submitForm(Decision.RequestChanges)}
                   loading={loading}
                   data-test='requestChangesReviewButton'
                 >
                   Request Changes
-                </LoadingButton>
-                <LoadingButton
+                </Button>
+                <Button
                   variant='contained'
                   onClick={() => submitForm(Decision.Approve)}
                   loading={loading}
                   data-test='approveReviewButton'
                 >
                   Approve
-                </LoadingButton>
+                </Button>
               </Stack>
             </Stack>
           </Stack>
