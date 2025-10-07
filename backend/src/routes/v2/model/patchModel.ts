@@ -20,7 +20,10 @@ export const patchModelSchema = z.object({
     visibility: z.nativeEnum(EntryVisibility).optional().openapi({ example: 'private' }),
     organisation: z.enum(organisationsList as [string, ...string[]]).optional(),
     state: z.enum(statesList as [string, ...string[]]).optional(),
-    tags: z.array(z.string()),
+    tags: z
+      .array(z.string())
+      .optional()
+      .openapi({ example: ['development'] }),
     settings: z
       .object({
         ungovernedAccess: z.boolean().optional().openapi({ example: true }),
