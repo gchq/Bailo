@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import UserDisplay from 'src/common/UserDisplay'
-import FileTagSelector from 'src/entry/model/releases/FileTagSelector'
+import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import { EntryInterface } from 'types/types'
@@ -96,7 +96,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
             {`Edit ${entry.kind} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
           </Button>
         </Restricted>
-        <FileTagSelector
+        <EntryTagSelector
           anchorEl={anchorEl}
           setAnchorEl={setAnchorEl}
           onChange={handleEntryTagOnChange}

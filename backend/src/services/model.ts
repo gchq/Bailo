@@ -1,5 +1,6 @@
 import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
+import { Optional } from 'utility-types'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
@@ -25,15 +26,24 @@ export function checkModelRestriction(model: ModelInterface) {
   }
 }
 
+type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
 export type CreateModelParams = Pick<
   ModelInterface,
   'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
->
+> &
+  OptionalCreateModelParams
 export async function createModel(user: UserInterface, modelParams: CreateModelParams) {
   const modelId = convertStringToId(modelParams.name)
 
   if (modelParams.collaborators) {
     await validateCollaborators(modelParams.collaborators)
+  }
+
+  if (modelParams.tags) {
+    const tagSet = new Set(modelParams.tags)
+    if (tagSet.size !== modelParams.tags.length) {
+      throw BadReq('You cannot have duplicate tags')
+    }
   }
 
   let collaborators: CollaboratorEntry[] = []
@@ -335,6 +345,12 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
   }
   if (modelDiff.collaborators) {
     await validateCollaborators(modelDiff.collaborators, model.collaborators)
+  }
+  if (modelDiff.tags) {
+    const tagSet = new Set(modelDiff.tags)
+    if (tagSet.size !== modelDiff.tags.length) {
+      throw BadReq('You cannot have duplicate tags')
+    }
   }
 
   const auth = await authorisation.model(user, model, ModelAction.Update)
