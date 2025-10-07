@@ -5,7 +5,7 @@ describe('Check that the documentation pages exist', () => {
   })
 
   it('checks that the Open API docs are accessible', () => {
-    cy.visit('/docs/api')
+    cy.visit('/api/v2/docs')
     cy.contains('Bailo API')
     cy.request('/api/v2/specification').its('body').its('info').should('include', { title: 'Bailo API' })
   })
