@@ -83,6 +83,7 @@ export const testV2Model: EntryInterface = {
   name: 'My Model',
   description: 'This is a test model',
   visibility: EntryVisibility.Public,
+  tags: [],
   collaborators: [
     {
       entity: testEntity,
