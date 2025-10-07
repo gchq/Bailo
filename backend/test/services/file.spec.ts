@@ -110,9 +110,30 @@ const fileModelMocks = vi.hoisted(() => {
   obj.findOneAndDelete = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
 
-  obj.toObject = vi.fn(() => obj)
+  obj._id = 'mockFileId'
+  obj.modelId = 'mockModelId'
+  obj.name = 'mockFileName'
+  obj.size = 100
+  obj.mime = 'mock/mime'
+  obj.path = '/mock/path'
+  obj.complete = true
+  obj.tags = []
+  obj.createdAt = new Date('2024-01-01T00:00:00Z')
+  obj.updatedAt = new Date('2024-01-02T00:00:00Z')
 
-  obj._id = vi.fn()
+  // Rewrite toObject: return only the relevant plain object
+  obj.toObject = vi.fn(() => ({
+    _id: obj._id,
+    modelId: obj.modelId,
+    name: obj.name,
+    size: obj.size,
+    mime: obj.mime,
+    path: obj.path,
+    complete: obj.complete,
+    tags: obj.tags,
+    createdAt: obj.createdAt,
+    updatedAt: obj.updatedAt,
+  }))
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -224,7 +245,7 @@ describe('services > file', () => {
     })
 
     await expect(() => uploadFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrowError(
-      /^Could not upload undefined as it is an empty file./,
+      /^Could not upload mockFileName as it is an empty file./,
     )
   })
 
