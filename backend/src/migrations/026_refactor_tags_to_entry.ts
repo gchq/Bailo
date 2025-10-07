@@ -18,5 +18,13 @@ export async function up() {
 }
 
 export async function down() {
-  /* NOOP */
+  const modelsWithTags = await ModelModel.find({ tags: { $exists: true } })
+  for (const model of modelsWithTags) {
+    if (!model.card || !model.card.metadata.overview) {
+      return
+    }
+    model.card.metadata.overview.tags = model.tags
+    await ModelModel.updateMany({}, { $unset: { tags: 1 } })
+    await model.save()
+  }
 }
