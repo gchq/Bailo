@@ -1,5 +1,3 @@
-import { PassThrough, Readable } from 'node:stream'
-
 import {
   CreateBucketCommand,
   CreateBucketRequest,
@@ -15,6 +13,7 @@ import {
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
 import prettyBytes from 'pretty-bytes'
+import { PassThrough, Readable } from 'stream'
 
 import { getHttpsAgent } from '../services/http.js'
 import log from '../services/log.js'

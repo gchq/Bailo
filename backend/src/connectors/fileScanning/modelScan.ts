@@ -1,6 +1,5 @@
-import { Readable } from 'node:stream'
-
 import PQueue from 'p-queue'
+import { Readable } from 'stream'
 
 import { getModelScanInfo, scanStream } from '../../clients/modelScan.js'
 import { getObjectStream } from '../../clients/s3.js'

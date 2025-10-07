@@ -284,8 +284,8 @@ describe('services > review', () => {
     reviewRoleModelMock.find.mockResolvedValueOnce([])
     const result: Promise<void> = createReleaseReviews(new Model(), new Release())
 
-    await expect(result).resolves.not.toThrowError()
     expect(smtpMock.requestReviewForRelease).not.toBeCalled()
+    expect(result).resolves.not.toThrowError()
     expect(reviewModelMock.save).not.toBeCalled()
   })
 

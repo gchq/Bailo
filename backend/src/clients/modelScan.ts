@@ -1,7 +1,6 @@
-import { Readable } from 'node:stream'
-
 import FormData from 'form-data'
 import fetch, { Response as FetchResponse } from 'node-fetch'
+import { Readable } from 'stream'
 
 import config from '../utils/config.js'
 import { BadReq, InternalError } from '../utils/error.js'

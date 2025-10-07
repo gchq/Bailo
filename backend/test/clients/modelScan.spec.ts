@@ -1,5 +1,4 @@
-import { Readable } from 'node:stream'
-
+import { Readable } from 'stream'
 import { describe, expect, test, vi } from 'vitest'
 
 import { getModelScanInfo, scanStream } from '../../src/clients/modelScan.js'

@@ -1,7 +1,6 @@
-import { Readable } from 'node:stream'
-
 import NodeClam from 'clamscan'
 import PQueue from 'p-queue'
+import { Readable } from 'stream'
 
 import { getObjectStream } from '../../clients/s3.js'
 import { FileInterfaceDoc } from '../../models/File.js'

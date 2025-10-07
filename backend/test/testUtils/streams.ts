@@ -1,4 +1,4 @@
-import { Readable, Writable } from 'node:stream'
+import { Readable, Writable } from 'stream'
 
 export class MockReadable extends Readable {
   _read(_size: number) {}
