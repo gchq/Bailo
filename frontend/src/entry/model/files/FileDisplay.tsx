@@ -27,7 +27,7 @@ import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
 import AssociatedReleasesDialog from 'src/entry/model/releases/AssociatedReleasesDialog'
 import AssociatedReleasesList from 'src/entry/model/releases/AssociatedReleasesList'
-import FileTagSelector from 'src/entry/model/releases/FileTagSelector'
+import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
 import { KeyedMutator } from 'swr'
@@ -454,7 +454,7 @@ export default function FileDisplay({
                     }
                   })}
                 </Box>
-                <FileTagSelector
+                <EntryTagSelector
                   anchorEl={anchorElFileTag}
                   setAnchorEl={setAnchorElFileTag}
                   onChange={handleFileTagSelectorOnChange}
