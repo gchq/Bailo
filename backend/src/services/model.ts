@@ -40,7 +40,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
   }
 
   if (modelParams.tags) {
-    const tagSet = new Set(modelParams.tags)
+    const tagSet = new Set(modelParams.tags.map((tag) => tag.trim().toLowerCase()))
     if (tagSet.size !== modelParams.tags.length) {
       throw BadReq('You cannot have duplicate tags')
     }
@@ -347,7 +347,7 @@ export async function updateModel(user: UserInterface, modelId: string, modelDif
     await validateCollaborators(modelDiff.collaborators, model.collaborators)
   }
   if (modelDiff.tags) {
-    const tagSet = new Set(modelDiff.tags)
+    const tagSet = new Set(modelDiff.tags.map((tag) => tag.trim().toLowerCase()))
     if (tagSet.size !== modelDiff.tags.length) {
       throw BadReq('You cannot have duplicate tags')
     }

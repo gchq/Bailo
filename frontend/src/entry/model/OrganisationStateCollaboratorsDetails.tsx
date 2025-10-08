@@ -12,6 +12,7 @@ import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import { EntryInterface } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { toSentenceCase } from 'utils/stringUtils'
 
 interface OrganisationAndStateDetailsProps {
   entry: EntryInterface
@@ -57,7 +58,10 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
 
   return (
     <Box>
-      <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' sx={{ mr: 0 }}>
+      <Stack spacing={2} sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 2 }}>
+        <Typography color='primary' variant='h6'>
+          {toSentenceCase(entry.kind)} Details
+        </Typography>
         <Stack spacing={1}>
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
             <Box>
