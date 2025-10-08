@@ -32,7 +32,6 @@ export interface CollaboratorEntry {
 
 export interface ModelMetadata {
   overview?: {
-    tags: Array<string>
     [x: string]: unknown
   }
 
@@ -66,6 +65,7 @@ export interface ModelInterface {
   card?: ModelCardInterface
   organisation: string
   state: string
+  tags: string[]
 
   collaborators: Array<CollaboratorEntry>
   settings: Settings
@@ -110,6 +110,7 @@ const ModelSchema = new Schema<ModelDoc>(
       },
       default: '',
     },
+    tags: [{ type: String }],
 
     collaborators: [
       {

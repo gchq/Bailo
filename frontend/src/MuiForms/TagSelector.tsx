@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FormContextType } from '@rjsf/utils'
 import { useState } from 'react'
@@ -52,37 +52,44 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>
-          <Stack direction='row' spacing={2}>
-            <TextField
-              size='small'
-              value={newTag}
-              onKeyUp={(e) => {
-                if (e.code === 'Enter') {
-                  handleNewTagSubmit()
-                }
-              }}
-              id={id}
-              aria-label={`input field for ${label}`}
-              onChange={(e) => setNewTag(e.target.value)}
-            />
-            <Button size='small' onClick={handleNewTagSubmit}>
-              Add tag
-            </Button>
-          </Stack>
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              <Box sx={{ whitespace: 'pre-wrap' }}>
-                {value.map((tag) => (
-                  <Chip
-                    label={tag}
-                    key={tag}
-                    sx={{ width: 'fit-content', m: 0.5 }}
-                    onDelete={() => handleChipOnDelete(tag)}
-                  />
-                ))}
-              </Box>
+          <Stack
+            direction={{ md: 'row', sm: 'column' }}
+            spacing={2}
+            alignItems='center'
+            divider={<Divider flexItem orientation='vertical' />}
+          >
+            <Stack direction='row' spacing={2} alignItems='center'>
+              <TextField
+                size='small'
+                value={newTag}
+                onKeyUp={(e) => {
+                  if (e.code === 'Enter') {
+                    handleNewTagSubmit()
+                  }
+                }}
+                id={id}
+                aria-label={`input field for ${label}`}
+                onChange={(e) => setNewTag(e.target.value)}
+              />
+              <Button size='small' onClick={handleNewTagSubmit}>
+                Add tag
+              </Button>
             </Stack>
-          </Box>
+            <Box sx={{ overflowX: 'auto', p: 1 }}>
+              <Stack spacing={1} direction='row'>
+                <Box sx={{ whitespace: 'pre-wrap' }}>
+                  {value.map((tag) => (
+                    <Chip
+                      label={tag}
+                      key={tag}
+                      sx={{ width: 'fit-content', m: 0.5 }}
+                      onDelete={() => handleChipOnDelete(tag)}
+                    />
+                  ))}
+                </Box>
+              </Stack>
+            </Box>
+          </Stack>
           <Typography variant='caption' color={theme.palette.error.main}>
             {errorText}
           </Typography>
