@@ -8,7 +8,7 @@ export type SchemaMigrationKindKeys = (typeof SchemaMigrationKind)[keyof typeof 
 
 export interface QuestionMigration {
   id: string
-  kind: string
+  kind: SchemaMigrationKindKeys
   sourcePath: string
   targetPath?: string
   propertyType: string
