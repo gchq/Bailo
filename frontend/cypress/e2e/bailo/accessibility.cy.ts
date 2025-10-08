@@ -6,6 +6,9 @@ describe('Check A11y violations', () => {
   beforeEach(() => {
     cy.visit('/')
     cy.injectAxe()
+    // expand sidebar to avoid cypress errors ("element cannot be interacted with")
+    // force: true HERE needed to click "behind" the dev next.js loading button
+    cy.get(`[aria-label="toggle side drawer expansion"]`).click({ force: true })
   })
 
   it('Check A11y violations, Front Page', () => {
@@ -17,15 +20,13 @@ describe('Check A11y violations', () => {
     cy.checkA11y(undefined, undefined, terminalLog, true)
   })
 
-  // todo - needs adjusting in light of swagger updates
   it('Check A11y violations, API Page', () => {
-    cy.get('a[href="/docs/api"]').click()
+    cy.get('a[href="/api/v2/docs"]').click()
     cy.checkA11y(undefined, undefined, terminalLog, true)
   })
 
   it('Check A11y violations, Python Docs Page', () => {
     cy.get('a[href="/docs/python/index.html"]').click()
-    cy.injectAxe() //needs re-injecting due to visiting a fresh page
     cy.checkA11y(undefined, undefined, terminalLog, true)
   })
 
