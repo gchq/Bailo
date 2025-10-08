@@ -1,4 +1,5 @@
 import { Readable } from 'node:stream'
+import { isNativeError } from 'node:util/types'
 
 import NodeClam from 'clamscan'
 import PQueue from 'p-queue'
@@ -67,7 +68,7 @@ export class ClamAvFileScanningConnector extends BaseQueueFileScanningConnector 
       ]
     } catch (error) {
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
-        error,
+        error: isNativeError(error) ? { name: error.name, stack: error.stack } : error,
         file,
         ...scannerInfo,
       })
