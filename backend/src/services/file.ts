@@ -2,7 +2,14 @@ import { Readable } from 'node:stream'
 
 import { Schema, Types } from 'mongoose'
 
-import { getObjectStream, putObjectStream } from '../clients/s3.js'
+import {
+  completeMultipartUpload,
+  getObjectStream,
+  headObject,
+  putObjectPartStream,
+  putObjectStream,
+  startMultipartUpload,
+} from '../clients/s3.js'
 import { FileAction, ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { FileScanResult, ScanState } from '../connectors/fileScanning/Base.js'
@@ -11,8 +18,9 @@ import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterfac
 import { ModelDoc } from '../models/Model.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
+import { ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
 import config from '../utils/config.js'
-import { BadReq, Forbidden, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { longId } from '../utils/id.js'
 import { plural } from '../utils/string.js'
 import log from './log.js'
@@ -55,7 +63,7 @@ export async function uploadFile(
 ) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot upload files to a mirrored model.`)
+    throw BadReq('Cannot upload files to a mirrored model.')
   }
 
   const fileId = longId()
@@ -81,8 +89,12 @@ export async function uploadFile(
 
   await file.save()
 
+  return await scanFile(file)
+}
+
+async function scanFile(file: FileInterfaceDoc) {
   const scannersInfo = scanners.info()
-  if (scannersInfo && scannersInfo.scannerNames && fileSize > 0) {
+  if (scannersInfo && scannersInfo.scannerNames && file.size > 0) {
     const resultsInprogress: FileScanResult[] = scannersInfo.scannerNames.map((scannerName) => ({
       toolName: scannerName,
       state: ScanState.InProgress,
@@ -100,6 +112,115 @@ export async function uploadFile(
   }
 
   return ret
+}
+
+export async function startUploadMultipartFile(
+  user: UserInterface,
+  modelId: string,
+  name: string,
+  mime: string,
+  size: number,
+  tags?: string[],
+) {
+  const model = await getModelById(user, modelId)
+  if (model.settings?.mirror?.sourceModelId) {
+    throw BadReq('Cannot upload files to a mirrored model.')
+  }
+
+  const fileId = longId()
+  const path = createFilePath(modelId, fileId)
+
+  const file: FileInterfaceDoc = new FileModel({ modelId, name, mime, path, complete: false })
+
+  const auth = await authorisation.file(user, model, file, FileAction.Upload)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, fileId: file._id.toString() })
+  }
+
+  const { uploadId } = await startMultipartUpload(path, mime)
+  if (!uploadId) {
+    throw InternalError('Failed to get uploadId from startMultipartUpload.')
+  }
+
+  // TODO: move this to config
+  const chunkSize = 5 * 1024 * 1024
+  const numChunks = Math.ceil(size / chunkSize)
+
+  const chunks: ChunkByteRange[] = []
+  for (let partNumber = 1; partNumber <= numChunks; partNumber++) {
+    const startByte = (partNumber - 1) * chunkSize
+    const endByte = Math.min(startByte + chunkSize, size) - 1
+    chunks.push({ startByte, endByte })
+  }
+
+  if (tags) {
+    file.tags = tags
+  }
+
+  await file.save()
+
+  return { file, uploadId, chunks }
+}
+
+export async function uploadMultipartFilePart(
+  user: UserInterface,
+  modelId: string,
+  fileId: string,
+  uploadId: string,
+  partNumber: number,
+  stream: Readable,
+) {
+  const file = await FileModel.findById(fileId)
+  if (!file) {
+    throw BadReq('Specified file could not be found.', { fileId })
+  }
+
+  const model = await getModelById(user, modelId)
+
+  const auth = await authorisation.file(user, model, file, FileAction.Upload)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, fileId })
+  }
+
+  return await putObjectPartStream(fileId, uploadId, partNumber, stream)
+}
+
+export async function finishUploadMultipartFile(
+  user: UserInterface,
+  modelId: string,
+  fileId: string,
+  uploadId: string,
+  parts: Array<{ ETag: string; PartNumber: number }>,
+  tags?: string[],
+) {
+  const file = await FileModel.findById(fileId)
+  if (!file) {
+    throw BadReq('Specified file could not be found.', { fileId })
+  }
+
+  const model = await getModelById(user, modelId)
+
+  const auth = await authorisation.file(user, model, file, FileAction.Upload)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, fileId })
+  }
+
+  await completeMultipartUpload(file.path, uploadId, parts)
+
+  const metadata = await headObject(file.path)
+  if (!metadata.ContentLength) {
+    throw BadReq('Could not determine uploaded file size.', { fileId })
+  }
+  file.size = metadata.ContentLength
+  file.complete = true
+
+  if (tags) {
+    file.tags = tags
+  }
+
+  file.save()
+
+  return await scanFile(file)
 }
 
 async function updateFileWithResults(_id: Schema.Types.ObjectId, results: FileScanResult[]) {
