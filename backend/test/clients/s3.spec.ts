@@ -4,7 +4,6 @@ import { describe, expect, test, vi } from 'vitest'
 
 import {
   completeMultipartUpload,
-  createPresignedUploadUrl,
   ensureBucketExists,
   getObjectStream,
   headObject,
@@ -123,41 +122,6 @@ describe('clients > s3', () => {
     s3Mocks.send.mockRejectedValueOnce({ name: '', message: '', $fault: {}, $metadata: { httpStatusCode: 404 } })
 
     const response = startMultipartUpload(key, contentType, bucket)
-
-    await expect(response).rejects.toThrowError()
-  })
-
-  test('createPresignedUploadUrl > success', async () => {
-    const bucket = 'test-bucket'
-    const key = 'test-key'
-    const uploadId = 'test-upload-id'
-    const partNumber = 1
-
-    const response = await createPresignedUploadUrl(key, uploadId, partNumber, bucket)
-
-    expect(s3Mocks.UploadPartCommand).toHaveBeenCalledWith({
-      Bucket: bucket,
-      Key: key,
-      UploadId: uploadId,
-      PartNumber: partNumber,
-    })
-    expect(s3RequestPresignerMocks.getSignedUrl).toHaveBeenCalled()
-    expect(response).toEqual('https://test.com/presigned/url')
-  })
-
-  test('createPresignedUploadUrl > error', async () => {
-    const bucket = 'test-bucket'
-    const key = 'test-key'
-    const uploadId = 'test-upload-id'
-    const partNumber = 1
-    s3RequestPresignerMocks.getSignedUrl.mockRejectedValueOnce({
-      name: '',
-      message: '',
-      $fault: {},
-      $metadata: { httpStatusCode: 404 },
-    })
-
-    const response = createPresignedUploadUrl(key, uploadId, partNumber, bucket)
 
     await expect(response).rejects.toThrowError()
   })

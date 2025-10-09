@@ -34,7 +34,7 @@ registerPath({
           schema: z.object({
             fileId: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
             uploadId: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
-            chunks: z.array(z.object({ presignedUrl: z.string(), startByte: z.number(), endByte: z.number() })),
+            chunks: z.array(z.object({ startByte: z.number(), endByte: z.number() })),
           }),
         },
       },
@@ -42,8 +42,7 @@ registerPath({
   },
 })
 
-export interface PresignedChunk {
-  presignedUrl: string
+export interface ChunkByteRange {
   startByte: number
   endByte: number
 }
@@ -51,7 +50,7 @@ export interface PresignedChunk {
 interface PostStartMultipartUpload {
   fileId: string
   uploadId: string
-  chunks: Array<PresignedChunk>
+  chunks: Array<ChunkByteRange>
 }
 
 export const postStartMultipartUpload = [

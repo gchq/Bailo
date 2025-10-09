@@ -16,7 +16,6 @@ import {
   UploadPartCommand,
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
 import prettyBytes from 'pretty-bytes'
 
@@ -86,6 +85,36 @@ export async function putObjectStream(
   }
 }
 
+export async function putObjectPartStream(
+  key: string,
+  uploadId: string,
+  partNumber: number,
+  body: PassThrough | Readable,
+  bucket: string = config.s3.buckets.uploads,
+) {
+  try {
+    const client = await getS3Client()
+    const command = new UploadPartCommand({
+      Bucket: bucket,
+      Key: key,
+      UploadId: uploadId,
+      PartNumber: Number(partNumber),
+      Body: body,
+    })
+    const upload = await client.send(command)
+    log.debug({ key, bucket, uploadId, partNumber }, 'Upload part completed.')
+
+    return upload
+  } catch (error) {
+    throw InternalError('Unable to upload the multipart object to the S3 service.', {
+      internal: { error, bucket, key, uploadId, partNumber },
+    })
+  } finally {
+    // always cleanup the stream
+    body.destroy()
+  }
+}
+
 export async function getObjectStream(
   key: string,
   bucket: string = config.s3.buckets.uploads,
@@ -126,22 +155,6 @@ export async function startMultipartUpload(
   })
   const result = await client.send(command)
   return { uploadId: result.UploadId }
-}
-
-export async function createPresignedUploadUrl(
-  key: string,
-  uploadId: string,
-  partNumber: number,
-  bucket: string = config.s3.buckets.uploads,
-) {
-  const client = await getS3Client()
-  const command = new UploadPartCommand({
-    Bucket: bucket,
-    Key: key,
-    UploadId: uploadId,
-    PartNumber: partNumber,
-  })
-  return getSignedUrl(client, command, { expiresIn: 3600 })
 }
 
 export async function completeMultipartUpload(

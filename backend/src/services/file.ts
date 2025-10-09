@@ -4,9 +4,9 @@ import { Schema, Types } from 'mongoose'
 
 import {
   completeMultipartUpload,
-  createPresignedUploadUrl,
   getObjectStream,
   headObject,
+  putObjectPartStream,
   putObjectStream,
   startMultipartUpload,
 } from '../clients/s3.js'
@@ -18,7 +18,7 @@ import FileModel, { FileInterface, FileInterfaceDoc, FileWithScanResultsInterfac
 import { ModelDoc } from '../models/Model.js'
 import ScanModel, { ArtefactKind } from '../models/Scan.js'
 import { UserInterface } from '../models/User.js'
-import { PresignedChunk } from '../routes/v2/model/file/postStartMultipartUpload.js'
+import { ChunkByteRange } from '../routes/v2/model/file/postStartMultipartUpload.js'
 import config from '../utils/config.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { longId } from '../utils/id.js'
@@ -146,12 +146,11 @@ export async function startUploadMultipartFile(
   const chunkSize = 5 * 1024 * 1024
   const numChunks = Math.ceil(size / chunkSize)
 
-  const chunks: PresignedChunk[] = []
+  const chunks: ChunkByteRange[] = []
   for (let partNumber = 1; partNumber <= numChunks; partNumber++) {
     const startByte = (partNumber - 1) * chunkSize
     const endByte = Math.min(startByte + chunkSize, size) - 1
-    const presignedUrl = await createPresignedUploadUrl(path, uploadId, partNumber)
-    chunks.push({ presignedUrl, startByte, endByte })
+    chunks.push({ startByte, endByte })
   }
 
   if (tags) {
@@ -161,6 +160,29 @@ export async function startUploadMultipartFile(
   await file.save()
 
   return { file, uploadId, chunks }
+}
+
+export async function uploadMultipartFilePart(
+  user: UserInterface,
+  modelId: string,
+  fileId: string,
+  uploadId: string,
+  partNumber: number,
+  stream: Readable,
+) {
+  const file = await FileModel.findById(fileId)
+  if (!file) {
+    throw BadReq('Specified file could not be found.', { fileId })
+  }
+
+  const model = await getModelById(user, modelId)
+
+  const auth = await authorisation.file(user, model, file, FileAction.Upload)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, fileId })
+  }
+
+  return await putObjectPartStream(fileId, uploadId, partNumber, stream)
 }
 
 export async function finishUploadMultipartFile(

@@ -119,12 +119,10 @@ exports[`services > file > startUploadMultipartFile > success 1`] = `
   "chunks": [
     {
       "endByte": 5242879,
-      "presignedUrl": "https://test.com/presigned/url",
       "startByte": 0,
     },
     {
       "endByte": 10485759,
-      "presignedUrl": "https://test.com/presigned/url",
       "startByte": 5242880,
     },
   ],

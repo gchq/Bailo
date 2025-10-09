@@ -78,7 +78,6 @@ const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
   getObjectStream: vi.fn(() => ({ Body: { pipe: vi.fn() } })),
   completeMultipartUpload: vi.fn(),
-  createPresignedUploadUrl: vi.fn(() => 'https://test.com/presigned/url'),
   headObject: vi.fn(() => ({ ContentLength: 100 })),
   startMultipartUpload: vi.fn(() => ({ uploadId: 'uploadId' })),
 }))
@@ -261,8 +260,6 @@ describe('services > file', () => {
     const result = await startUploadMultipartFile(user, modelId, name, mime, size, tags)
 
     expect(s3Mocks.startMultipartUpload).toBeCalled()
-    // TODO: update this depending on config
-    expect(s3Mocks.createPresignedUploadUrl).toBeCalledTimes(2)
     expect(fileModelMocks.save).toBeCalled()
     expect(result).toMatchSnapshot()
   })
