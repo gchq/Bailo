@@ -5,11 +5,12 @@ export function getKubernetesSecretConfig(
   registryUrl: string,
   accessKey: string,
   secretKey: string,
+  secretName: string,
 ) {
   return `apiVersion: v1
 kind: Secret
 metadata:
-  name:  ${toKebabCase(description)}-secret
+  name:  ${secretName}
 data:
   .dockerconfigjson: ${btoa(
     `{"auths":{"${registryUrl}":{"username":"${accessKey}","password":"${secretKey}","auth":"${btoa(
@@ -19,7 +20,7 @@ data:
 type: kubernetes.io/dockerconfigjson`
 }
 
-export function getKubernetesImagePullSecretsExampleConfig(registryUrl: string, secretFileName: string) {
+export function getKubernetesImagePullSecretsExampleConfig(registryUrl: string, secretName: string) {
   return `apiVersion: v1
 kind: Pod
 metadata:
@@ -31,7 +32,7 @@ spec:
       image: ${registryUrl}/some-model-id/some-repo-id
 
   imagePullSecrets:
-    - name: ${secretFileName}`
+    - name: ${secretName}`
 }
 
 export function getRktCredentialsConfig(registryUrl: string, accessKey: string, secretKey: string) {
