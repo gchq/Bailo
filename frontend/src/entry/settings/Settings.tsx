@@ -11,7 +11,7 @@ import DangerZone from 'src/entry/settings/DangerZone'
 import EntryAccessTab from 'src/entry/settings/EntryAccessTab'
 import EntryDetails from 'src/entry/settings/EntryDetails'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface, EntryKind, UiConfig } from 'types/types'
+import { EntryInterface, EntryKind } from 'types/types'
 import { toTitleCase } from 'utils/stringUtils'
 
 export const SettingsCategory = {
@@ -28,7 +28,6 @@ export type SettingsCategoryKeys = (typeof SettingsCategory)[keyof typeof Settin
 function isSettingsCategory(
   value: string | string[] | undefined,
   entry: EntryInterface,
-  uiConfig: UiConfig | undefined,
 ): value is SettingsCategoryKeys {
   switch (entry.kind) {
     case EntryKind.MODEL:
@@ -38,12 +37,16 @@ function isSettingsCategory(
         value === SettingsCategory.ACCESS_REQUESTS ||
         value === SettingsCategory.TEMPLATING ||
         value === SettingsCategory.DANGER ||
-        (value === SettingsCategory.MIRRORED_MODELS &&
-          !entry.settings.mirror?.sourceModelId &&
-          !!uiConfig?.modelMirror.export.enabled)
+        value === SettingsCategory.MIRRORED_MODELS
       )
     case EntryKind.DATA_CARD:
       return value === SettingsCategory.DETAILS || value === SettingsCategory.PERMISSIONS
+    case EntryKind.MIRRORED_MODEL:
+      return (
+        value === SettingsCategory.DETAILS ||
+        value === SettingsCategory.PERMISSIONS ||
+        value === SettingsCategory.DANGER
+      )
     default:
       return false
   }
@@ -63,7 +66,7 @@ export default function Settings({ entry }: SettingsProps) {
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
 
   useEffect(() => {
-    if (isSettingsCategory(category, entry, uiConfig)) {
+    if (isSettingsCategory(category, entry)) {
       setSelectedCategory(category)
     } else if (category) {
       setSelectedCategory(SettingsCategory.DETAILS)
@@ -71,7 +74,7 @@ export default function Settings({ entry }: SettingsProps) {
         query: { ...router.query, category: SettingsCategory.DETAILS },
       })
     }
-  }, [category, entry, router, uiConfig])
+  }, [category, entry, router])
 
   const handleListItemClick = (category: SettingsCategoryKeys) => {
     setSelectedCategory(category)

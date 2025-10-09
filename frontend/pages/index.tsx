@@ -78,6 +78,20 @@ export default function Marketplace() {
     debouncedFilter,
   )
 
+  const {
+    models: mirroredModels,
+    isModelsError: isMirroredModelsError,
+    isModelsLoading: isMirroredModelsLoading,
+  } = useListModels(
+    EntryKind.MIRRORED_MODEL,
+    selectedRoles,
+    selectedTask,
+    selectedLibraries,
+    selectedOrganisations,
+    selectedStates,
+    debouncedFilter,
+  )
+
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
 
   const theme = useTheme()
@@ -212,6 +226,17 @@ export default function Marketplace() {
     router.replace('/', undefined, { shallow: true })
   }
 
+  const combinedModelErrorMessage = useMemo(() => {
+    let errorMessage = ''
+    if (isModelsError) {
+      errorMessage += `${isModelsError.info.message}. `
+    }
+    if (isMirroredModelsError) {
+      errorMessage += `${isMirroredModelsError.info.message}. `
+    }
+    return errorMessage
+  }, [isMirroredModelsError, isModelsError])
+
   useEffect(() => {
     if (reviewRoles) {
       setRoleOptions([
@@ -223,11 +248,7 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isReviewRolesLoading) {
-    return <Loading />
-  }
-
-  if (isUiConfigLoading) {
+  if (isReviewRolesLoading || isUiConfigLoading) {
     return <Loading />
   }
 
@@ -385,12 +406,12 @@ export default function Marketplace() {
                   />
                 </Tabs>
               </Box>
-              {isModelsLoading && <Loading />}
+              {isModelsLoading || (isMirroredModelsLoading && <Loading />)}
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
-                    entries={models}
-                    entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
+                    entries={[...models, ...mirroredModels]}
+                    entriesErrorMessage={combinedModelErrorMessage || ''}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
                     selectedOrganisations={selectedOrganisations}

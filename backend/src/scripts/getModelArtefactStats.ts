@@ -59,11 +59,13 @@ async function script() {
 
   // number of Models
   const numModels = await ModelModel.countDocuments({ kind: EntryKind.Model })
+  const numMirroredModels = await ModelModel.countDocuments({ kind: EntryKind.MirroredModel })
+  const totalModels = numModels + numMirroredModels
   // Models with any/no Releases
   const modelsWithReleases = await ReleaseModel.distinct('modelId')
   const numModelsWithReleases = modelsWithReleases.length
-  const numModelsWithoutReleases = numModels - numModelsWithReleases
-  log.info('Model stats', { numModels, numModelsWithReleases, numModelsWithoutReleases })
+  const numModelsWithoutReleases = totalModels - numModelsWithReleases
+  log.info('Model stats', { totalModels, numModelsWithReleases, numModelsWithoutReleases })
   // Releases with any/no Files
   const numReleasesWithFiles = await ReleaseModel.countDocuments({ fileIds: { $exists: true, $ne: [] } })
   const totalReleases = await ReleaseModel.countDocuments()
