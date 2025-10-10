@@ -32,7 +32,7 @@ export interface DefaultReviewRole {
 export async function findReviews(
   user: UserInterface,
   mine: boolean,
-  open: boolean,
+  open?: boolean,
   modelId?: string,
   semver?: string,
   accessRequestId?: string,
@@ -52,7 +52,7 @@ export async function findReviews(
     .unwind({ path: '$model' })
     .match({ ...(mine && (await findUserInCollaborators(user))) })
 
-  if (open) {
+  if (open === true) {
     const parentIds = reviews.map((review) => review._id)
     const responses = await getResponsesByParentIds(parentIds)
     reviews = reviews.filter(
@@ -60,6 +60,16 @@ export async function findReviews(
         !responses.find(
           (response) => response.entity === `user:${user.dn}` && response.parentId.toString() === review._id.toString(),
         ),
+    )
+  }
+
+  if (open === false) {
+    const parentIds = reviews.map((review) => review._id)
+    const responses = await getResponsesByParentIds(parentIds)
+    reviews = reviews.filter((review) =>
+      responses.find(
+        (response) => response.entity === `user:${user.dn}` && response.parentId.toString() === review._id.toString(),
+      ),
     )
   }
 
