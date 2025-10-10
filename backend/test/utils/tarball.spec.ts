@@ -2,13 +2,8 @@ import { PassThrough } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import {
-  createTarGzStreams,
-  createUnTarGzStreams,
-  extractTarGzStream,
-  pipeStreamToTarEntry,
-} from '../../src/utils/tarball.js'
-import { makeReadable, MockReadable, MockWritable } from '../testUtils/streams.js'
+import { createTarGzStreams, createUnTarGzStreams, extractTarGzStream } from '../../src/utils/tarball.js'
+import { MockReadable, MockWritable } from '../testUtils/streams.js'
 
 const zlibMocks = vi.hoisted(() => ({
   createGunzip: vi.fn((_options) => {
@@ -100,37 +95,5 @@ describe('utils > tarball', () => {
 
     await expect(promise).rejects.toThrowError('fail')
     expect(errorListener).toHaveBeenCalled()
-  })
-
-  test('pipeStreamToTarEntry > success', async () => {
-    const inputStream = makeReadable({ chunks: [Buffer.from('test-data')] })
-    const tarEntry = new MockWritable()
-
-    const promise = pipeStreamToTarEntry(inputStream, tarEntry, { test: 'data' })
-
-    const result = await promise
-    expect(result).toBe('ok')
-  })
-
-  test('pipeStreamToTarEntry > inputStream error', async () => {
-    const inputStream = makeReadable({ failWith: new Error('input stream error') })
-    const tarEntry = new MockWritable()
-
-    const promise = pipeStreamToTarEntry(inputStream, tarEntry, { test: 'errorInput' })
-
-    await expect(promise).rejects.toThrow('Stream error during tar operation')
-  })
-
-  test('pipeStreamToTarEntry > tarEntry error', async () => {
-    const inputStream = makeReadable({ autoEnd: false })
-    const tarEntry = new MockWritable()
-    setImmediate(() => {
-      tarEntry.triggerError(new Error('tar write error'))
-      inputStream.endNow() // end stream after error triggered
-    })
-
-    const promise = pipeStreamToTarEntry(inputStream, tarEntry, { test: 'errorPacker' })
-
-    await expect(promise).rejects.toThrow('Stream error during tar operation')
   })
 })

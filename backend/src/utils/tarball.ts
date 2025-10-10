@@ -1,13 +1,11 @@
-import { PassThrough, pipeline, Readable, Writable } from 'node:stream'
+import { PassThrough, Readable } from 'node:stream'
 import zlib from 'node:zlib'
 
-import { extract, Headers, pack } from 'tar-stream'
-import { promisify } from 'util'
+import { extract, Headers, Pack, pack } from 'tar-stream'
 
-import log from '../services/log.js'
+import { ExportMetadata } from '../services/mirroredModel/mirroredModel.js'
+import { uploadToS3 } from '../services/mirroredModel/s3.js'
 import { InternalError } from './error.js'
-
-const promisifyPipeline = promisify(pipeline)
 
 export type ExtractTarGzEntryListener = (entry: Headers, stream: PassThrough, next: (error?: unknown) => void) => void
 
@@ -41,6 +39,66 @@ export function createTarGzStreams() {
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
   const tarStream = pack()
   return { gzipStream, tarStream }
+}
+
+export async function initialiseTarGzUpload(
+  fileName: string,
+  metadata: ExportMetadata,
+  logData?: Record<string, unknown>,
+) {
+  const { gzipStream, tarStream } = createTarGzStreams()
+  // It is safer to have an extra PassThrough for handling backpressure and explicitly closing on error(s)
+  const uploadStream = new PassThrough()
+  tarStream.pipe(gzipStream).pipe(uploadStream)
+
+  const uploadPromise = uploadToS3(fileName, uploadStream, logData)
+  try {
+    const metadataBuffer = Buffer.from(JSON.stringify(metadata), 'utf8')
+    tarStream.entry({ name: `metadata.json`, size: metadataBuffer.length, mode: 0o64, type: 'file' }, metadataBuffer)
+  } catch (error) {
+    // Ensure all streams are destroyed on error to prevent leaks
+    tarStream.destroy(error as Error)
+    gzipStream.destroy(error as Error)
+    uploadStream.destroy(error as Error)
+    throw error
+  }
+  return { tarStream, gzipStream, uploadStream, uploadPromise }
+}
+
+export async function finaliseTarGzUpload(tarStream: Pack, uploadPromise: Promise<void>) {
+  tarStream.finalize()
+  await uploadPromise
+}
+
+type TarEntry =
+  | { type: 'text'; filename: string; content: string }
+  | { type: 'stream'; filename: string; stream: Readable; size?: number }
+export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, logData?: Record<string, unknown>) {
+  if (entry.type === 'text') {
+    const contentBuffer = Buffer.from(entry.content, 'utf8')
+    tarStream.entry(
+      { name: `content/${entry.filename}`, size: contentBuffer.length, mode: 0o644, type: 'file' },
+      contentBuffer,
+    )
+  } else if (entry.type === 'stream') {
+    await new Promise<void>((resolve, reject) => {
+      const tarEntryStream = tarStream.entry(
+        { name: `content/${entry.filename}`, size: entry.size ?? undefined, mode: 0o644, type: 'file' },
+        (err) => {
+          if (err) {
+            reject(err)
+          }
+        },
+      )
+
+      entry.stream.pipe(tarEntryStream).on('finish', resolve).on('error', reject)
+    })
+  } else {
+    throw InternalError('Unable to handle entry for tar.gz packing stream', {
+      entry,
+      ...logData,
+    })
+  }
 }
 
 export function createUnTarGzStreams() {
@@ -103,21 +161,4 @@ export async function extractTarGzStream(
       }
     })
   })
-}
-
-export async function pipeStreamToTarEntry(
-  inputStream: Readable,
-  tarEntry: Writable,
-  logData: Record<string, string> = {},
-): Promise<'ok'> {
-  try {
-    await promisifyPipeline(inputStream, tarEntry)
-    log.debug({ ...logData }, 'Finished fetching stream')
-    return 'ok'
-  } catch (error: unknown) {
-    throw InternalError('Stream error during tar operation', {
-      error,
-      ...logData,
-    })
-  }
 }

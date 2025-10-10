@@ -9,7 +9,7 @@ import { FileScanResult } from '../../../src/connectors/fileScanning/Base.js'
 import { ArtefactKind } from '../../../src/models/Scan.js'
 import { UserInterface } from '../../../src/models/User.js'
 import {
-  exportCompressedRegistryImage,
+  addCompressedRegistryImageComponents,
   exportModel,
   generateDigest,
   ImportKind,
@@ -80,7 +80,6 @@ vi.mock('../../../src/utils/config.js', () => ({
 
 const tarballMocks = vi.hoisted(() => ({
   createTarGzStreams: vi.fn(),
-  pipeStreamToTarEntry: vi.fn(() => Promise.resolve('ok')),
 }))
 vi.mock('../../../src/utils/tarball.js', () => tarballMocks)
 
@@ -298,9 +297,6 @@ describe('services > mirroredModel', () => {
       releaseMocks.getAllFileIds.mockResolvedValueOnce([])
       modelMocks.getModelCardRevisions.mockResolvedValueOnce([])
       fileMocks.getFilesByIds.mockResolvedValueOnce([])
-      tarballMocks.pipeStreamToTarEntry.mockImplementationOnce(() => {
-        throw Error()
-      })
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
@@ -665,7 +661,7 @@ describe('services > mirroredModel', () => {
       registryMocks.splitDistributionPackageName.mockReturnValueOnce({ domain: 'domain', path: 'path' } as any)
 
       await expect(
-        exportCompressedRegistryImage({} as UserInterface, 'modelId', 'distName', 'filename', {} as any),
+        addCompressedRegistryImageComponents({} as UserInterface, 'modelId', 'distName', 'filename', {} as any),
       ).rejects.toThrow(/^Distribution Package Name must include a tag./)
       expect(registryMocks.getImageManifest).not.toBeCalled()
     })
@@ -685,12 +681,11 @@ describe('services > mirroredModel', () => {
         ],
       })
 
-      await exportCompressedRegistryImage({} as UserInterface, 'modelId', 'imageName:tag', 'filename', {} as any)
+      await addCompressedRegistryImageComponents({} as UserInterface, 'modelId', 'imageName:tag', 'filename', {} as any)
 
       expect(registryMocks.getImageManifest).toBeCalledTimes(1)
       expect(tarballMocks.createTarGzStreams).toBeCalledTimes(1)
       expect(s3Mocks.uploadToS3).toBeCalledTimes(1)
-      expect(tarballMocks.pipeStreamToTarEntry).toBeCalledTimes(4)
       expect(registryMocks.getImageBlob).toBeCalledTimes(3)
     })
 
@@ -702,7 +697,7 @@ describe('services > mirroredModel', () => {
         layers: [{ mediaType: 'application/vnd.docker.image.rootfs.diff.tar.gzip', size: 256, digest: '' }],
       })
 
-      const promise = exportCompressedRegistryImage(
+      const promise = addCompressedRegistryImageComponents(
         {} as UserInterface,
         'modelId',
         'imageName:tag',
@@ -714,7 +709,6 @@ describe('services > mirroredModel', () => {
       expect(registryMocks.getImageManifest).toBeCalledTimes(1)
       expect(tarballMocks.createTarGzStreams).toBeCalledTimes(1)
       expect(s3Mocks.uploadToS3).toBeCalledTimes(1)
-      expect(tarballMocks.pipeStreamToTarEntry).toBeCalledTimes(2)
       expect(registryMocks.getImageBlob).toBeCalledTimes(1)
     })
   })
