@@ -3,8 +3,10 @@
 FROM python:3.13-bookworm AS sphinx-docs
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
-RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
-    rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
+RUN --mount=type=cache,id=apt-cache,target=/var/cache/apt \
+    --mount=type=cache,id=apt-lists,target=/var/lib/apt \
+    rm -f /etc/apt/apt.conf.d/docker-clean && \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
     apt-get update && \
     apt-get install -y --no-install-recommends pandoc
 WORKDIR /app/docs
