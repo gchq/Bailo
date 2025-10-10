@@ -3,6 +3,7 @@ import { Readable } from 'node:stream'
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 
 import { getHttpsUndiciAgent } from '../services/http.js'
+import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
@@ -41,6 +42,7 @@ interface RegistryRequestResult<TBody = unknown> {
 async function registryRequest(
   token: string,
   endpoint: string,
+  paginateStart: string = '',
   returnRawBody: boolean = false,
   extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>> = {},
   extraHeaders: HeadersInit = {},
@@ -49,7 +51,7 @@ async function registryRequest(
   const controller = new AbortController()
 
   const allRepositories: string[] = []
-  let paginateParameter = ''
+  let paginateParameter = paginateStart
   let link: string | null
   let contentType: string
   let res: Response
@@ -57,10 +59,12 @@ async function registryRequest(
   let stream: ReadableStream | Readable | undefined
 
   do {
+    const url = `${registry}/v2/${endpoint}${paginateParameter}`
+    log.debug({ url }, 'Making request to the registry.')
     try {
       // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
       // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
-      res = await fetch(`${registry}/v2/${endpoint}${paginateParameter}`, {
+      res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           ...extraHeaders,
@@ -76,8 +80,10 @@ async function registryRequest(
     link = res.headers.get('link')
     contentType = res.headers.get('content-type') || ''
 
+    log.debug(Object.fromEntries(res.headers), 'Headers received from the registry.')
+
     if (link) {
-      paginateParameter = link.substring(link.indexOf('%'), link.lastIndexOf('>'))
+      paginateParameter = link.substring(link.indexOf('?'), link.lastIndexOf('>'))
     }
 
     if (returnRawBody) {
@@ -142,7 +148,7 @@ async function registryRequest(
 }
 
 export async function listModelRepos(token: string, modelId: string) {
-  const { body } = await registryRequest(token, `_catalog?n=100&last=${modelId}`)
+  const { body } = await registryRequest(token, '_catalog', `?n=100&last=${modelId}`)
   if (!isListModelReposResponse(body)) {
     throw InternalError('Unrecognised response body when listing model repositories.', { body })
   }
@@ -177,6 +183,7 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
     `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
     undefined,
     undefined,
+    undefined,
     {
       Accept: 'application/vnd.docker.distribution.manifest.v2+json',
     },
@@ -200,6 +207,7 @@ export async function getRegistryLayerStream(
   const { stream, abort } = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
+    undefined,
     true,
     undefined,
     {
@@ -222,9 +230,15 @@ export async function getRegistryLayerStream(
 
 export async function doesLayerExist(token: string, imageRef: RepoRef, digest: string) {
   try {
-    const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${digest}`, true, {
-      method: 'HEAD',
-    })
+    const { headers } = await registryRequest(
+      token,
+      `${imageRef.namespace}/${imageRef.image}/blobs/${digest}`,
+      undefined,
+      true,
+      {
+        method: 'HEAD',
+      },
+    )
 
     if (!isDoesLayerExistResponse(headers)) {
       throw InternalError('Unrecognised response headers when heading image layer.', {
@@ -247,9 +261,15 @@ export async function doesLayerExist(token: string, imageRef: RepoRef, digest: s
 }
 
 export async function initialiseUpload(token: string, imageRef: RepoRef) {
-  const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`, true, {
-    method: 'POST',
-  })
+  const { headers } = await registryRequest(
+    token,
+    `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`,
+    undefined,
+    true,
+    {
+      method: 'POST',
+    },
+  )
 
   if (!isInitialiseUploadObjectResponse(headers)) {
     throw InternalError('Unrecognised response headers when posting initialise image upload.', {
@@ -272,6 +292,7 @@ export async function putManifest(
   const { headers } = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
+    undefined,
     true,
     {
       method: 'PUT',
@@ -301,6 +322,7 @@ export async function uploadLayerMonolithic(
   const { headers, abort } = await registryRequest(
     token,
     `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''),
+    undefined,
     true,
     {
       method: 'PUT',
