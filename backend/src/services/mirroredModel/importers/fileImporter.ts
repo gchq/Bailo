@@ -39,7 +39,7 @@ export async function importModelFile(body: Readable, fileId: string, mirroredMo
         } else {
           await putObjectStream(updatedPath, stream, bucket)
           await markFileAsCompleteAfterImport(updatedPath)
-          log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
+          log.debug({ bucket, path: updatedPath, entry, importId }, 'Imported file successfully uploaded to S3.')
           extractedFile = true
         }
       } else {

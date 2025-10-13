@@ -55,7 +55,7 @@ export async function importDocuments(
       const fileContentsJson = await json(stream)
 
       if (modelCardRegex.test(entry.name)) {
-        log.debug({ name: entry.name, importId }, 'Processing compressed file as a Model Card')
+        log.debug({ name: entry.name, importId }, 'Processing compressed file as a Model Card.')
         const modelCard = parseModelCard(fileContentsJson, mirroredModelId, sourceModelId, importId)
         modelCardVersions.push(modelCard.version)
         const savedModelCard = await saveImportedModelCard(modelCard)
@@ -63,7 +63,7 @@ export async function importDocuments(
           newModelCards.push(savedModelCard)
         }
       } else if (releaseRegex.test(entry.name)) {
-        log.debug({ name: entry.name, importId }, 'Processing compressed file as a Release')
+        log.debug({ name: entry.name, importId }, 'Processing compressed file as a Release.')
         const release = parseRelease(fileContentsJson, mirroredModelId, sourceModelId, importId)
 
         // have to authorise per-release due to streaming, rather than do all releases at once
@@ -95,7 +95,7 @@ export async function importDocuments(
           newReleases.push(savedRelease)
         }
       } else if (fileRegex.test(entry.name)) {
-        log.debug({ name: entry.name, importId }, 'Processing compressed file as a File')
+        log.debug({ name: entry.name, importId }, 'Processing compressed file as a File.')
         const file = await parseFile(fileContentsJson, mirroredModelId, sourceModelId, importId)
         fileIds.push(file._id)
         await saveImportedFile(file)
@@ -107,11 +107,11 @@ export async function importDocuments(
       }
     } else {
       // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
-      log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry')
+      log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry.')
     }
     next()
   })
-  log.debug({ importId }, 'Completed extracting archive')
+  log.debug({ importId }, 'Completed extracting archive.')
 
   const updatedMirroredModel = await setLatestImportedModelCard(mirroredModelId)
 

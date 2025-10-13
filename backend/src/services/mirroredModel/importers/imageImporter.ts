@@ -54,7 +54,7 @@ export async function importCompressedRegistryImage(
         // Process file
         if (manifestRegex.test(entry.name)) {
           // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
-          log.debug({ importId }, 'Extracting un-tarred manifest')
+          log.debug({ importId }, 'Extracting un-tarred manifest.')
           manifestBody = await json(stream)
 
           next()
@@ -69,7 +69,7 @@ export async function importCompressedRegistryImage(
                   size: entry.size,
                   importId,
                 },
-                'Skipping blob as it already exists in the registry',
+                'Skipping blob as it already exists in the registry.',
               )
 
               // auto-drain the stream
@@ -82,7 +82,7 @@ export async function importCompressedRegistryImage(
                   size: entry.size,
                   importId,
                 },
-                'Initiating un-tarred blob upload',
+                'Initiating un-tarred blob upload.',
               )
               const res = await initialiseImageUpload(user, modelId, imageName)
 
@@ -107,13 +107,13 @@ export async function importCompressedRegistryImage(
         }
       } else {
         // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
-        log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry')
+        log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry.')
         next()
       }
     },
     undefined,
     async function (resolve: (reason?: any) => void, reject: (reason?: any) => void) {
-      log.debug({ importId }, 'Uploading manifest')
+      log.debug({ importId }, 'Uploading manifest.')
       if (hasKeysOfType<{ mediaType: 'string' }>(manifestBody, { mediaType: 'string' })) {
         await putImageManifest(
           user,

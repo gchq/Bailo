@@ -66,7 +66,7 @@ export async function exportModel(
     releases.push(...(await getReleasesForExport(user, model.id, semvers)))
     await checkReleaseFiles(user, model.id, semvers)
   }
-  log.debug('Request checks complete')
+  log.debug('Request checks complete.')
 
   let tarStream: Pack | undefined,
     gzipStream: zlib.Gzip | undefined,
@@ -433,7 +433,7 @@ export async function uploadReleaseFiles(
           'Error when uploading Release File to S3.',
         ),
       )
-    log.debug({ fileId: file.id, releaseId: release.id, modelId: model.id }, 'Added file to be exported to queue')
+    log.debug({ fileId: file.id, releaseId: release.id, modelId: model.id }, 'Added file to be exported to queue.')
   }
 }
 
@@ -541,9 +541,9 @@ async function addReleaseToTarball(
   }
 
   // Fire-and-forget upload of artefacts so that the endpoint is able to return without awaiting lots of uploads
-  log.debug({ semver: release.semver }, 'Adding files to be exported to queue')
+  log.debug({ semver: release.semver }, 'Adding files to be exported to queue.')
   await uploadReleaseFiles(user, model, release, files, mirroredModelId, queue)
-  log.debug({ semver: release.semver }, 'Finished adding files to be exported to queue')
+  log.debug({ semver: release.semver }, 'Finished adding files to be exported to queue.')
   await uploadReleaseImages(user, model, release, mirroredModelId, queue)
 }
 

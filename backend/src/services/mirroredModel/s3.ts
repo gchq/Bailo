@@ -14,14 +14,14 @@ export async function uploadToS3(fileName: string, stream: Readable, logData?: R
       await uploadToTemporaryS3Location(fileName, stream, logData)
       await copyToExportBucketWithSignatures(fileName, logData)
     } catch (error) {
-      log.error({ error, ...logData }, 'Failed to upload export to export location with signatures')
+      log.error({ error, ...logData }, 'Failed to upload export to export location with signatures.')
     }
   } else {
     log.debug(logData, 'Signatures not enabled. Uploading to export S3 location.')
     try {
       await uploadToExportS3Location(fileName, stream, logData)
     } catch (error) {
-      log.error({ error, ...logData }, 'Failed to upload export to export location without signatures')
+      log.error({ error, ...logData }, 'Failed to upload export to export location without signatures.')
     }
   }
 }
@@ -38,7 +38,7 @@ async function copyToExportBucketWithSignatures(fileName: string, logData?: Reco
     log.error(logData, 'Error generating signature for export.')
     throw e
   }
-  log.debug(logData, 'Successfully generated signatures')
+  log.debug(logData, 'Successfully generated signatures.')
   log.debug(logData, 'Getting stream from S3 to upload to export location.')
   const streamToCopy = await getObjectFromTemporaryS3Location(fileName, logData)
   await uploadToExportS3Location(fileName, streamToCopy, logData, signatures)
