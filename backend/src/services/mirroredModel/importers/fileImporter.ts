@@ -3,6 +3,8 @@ import { Readable } from 'node:stream'
 import { putObjectStream } from '../../../clients/s3.js'
 import FileModel from '../../../models/File.js'
 import config from '../../../utils/config.js'
+import { InternalError } from '../../../utils/error.js'
+import { extractTarGzStream } from '../../../utils/tarball.js'
 import { createFilePath, markFileAsCompleteAfterImport } from '../../file.js'
 import log from '../../log.js'
 
@@ -13,9 +15,40 @@ export async function importModelFile(body: Readable, fileId: string, mirroredMo
   if (foundFile) {
     log.debug({ bucket, path: updatedPath, importId }, 'Skipping imported file as it has already been uploaded to S3.')
   } else {
-    await putObjectStream(updatedPath, body, bucket)
-    log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
-    await markFileAsCompleteAfterImport(updatedPath)
+    let extractedFile = false
+    await extractTarGzStream(body, async function (entry, stream, next) {
+      log.debug(
+        {
+          name: entry.name,
+          type: entry.type,
+          size: entry.size,
+          importId,
+        },
+        'Processing un-tarred entry.',
+      )
+
+      if (entry.type === 'file') {
+        // Process file
+        if (extractedFile) {
+          throw InternalError('Cannot parse compressed file: multiple files found.', {
+            mirroredModelId,
+            fileId,
+            importId,
+            entry,
+          })
+        } else {
+          await putObjectStream(updatedPath, stream, bucket)
+          await markFileAsCompleteAfterImport(updatedPath)
+          log.debug({ bucket, path: updatedPath, importId }, 'Imported file successfully uploaded to S3.')
+          extractedFile = true
+        }
+      } else {
+        // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
+        log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry.')
+      }
+      next()
+    })
+    log.debug({ importId }, 'Completed extracting archive.')
   }
   return { sourcePath: fileId, newPath: updatedPath }
 }
