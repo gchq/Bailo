@@ -259,14 +259,9 @@ export async function doesLayerExist(token: string, imageRef: RepoRef, digest: s
 }
 
 export async function initialiseUpload(token: string, imageRef: RepoRef) {
-  const { headers } = await registryRequest(
-    token,
-    `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`,
-    undefined,
-    {
-      method: 'POST',
-    },
-  )
+  const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`, true, {
+    method: 'POST',
+  })
 
   if (!isInitialiseUploadObjectResponse(headers)) {
     throw InternalError('Unrecognised response headers when posting initialise image upload.', {
@@ -289,7 +284,7 @@ export async function putManifest(
   const { headers } = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
-    undefined,
+    true,
     {
       method: 'PUT',
       body: manifest,
