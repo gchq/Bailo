@@ -1,6 +1,7 @@
 import bodyParser from 'body-parser'
 import express from 'express'
 import path from 'path'
+import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
 
 import authentication from './connectors/authentication/index.js'
@@ -82,6 +83,7 @@ import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
+import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
 
 export const server = express()
@@ -93,6 +95,8 @@ const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
+
+server.use('/api/v2/docs', swaggerUi.serve, swaggerUi.setup(generateSwaggerSpec()))
 
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
