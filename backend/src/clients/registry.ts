@@ -42,16 +42,16 @@ interface RegistryRequestResult<TBody = unknown> {
 async function registryRequest(
   token: string,
   endpoint: string,
-  paginateStart: string = '',
   returnRawBody: boolean = false,
   extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>> = {},
   extraHeaders: HeadersInit = {},
-  traverseLinks: boolean = true,
+  pagination?: { traverseLinks?: boolean; start?: string; linkFilter?: string },
 ): Promise<RegistryRequestResult> {
   const controller = new AbortController()
 
   const allRepositories: string[] = []
-  let paginateParameter = paginateStart
+  let paginateParameter = pagination?.start ? pagination.start : ''
+  const linkFilter = pagination?.linkFilter ? pagination.linkFilter : ''
   let link: string | null
   let contentType: string
   let res: Response
@@ -128,7 +128,7 @@ async function registryRequest(
     if (body?.repositories) {
       allRepositories.push(...body.repositories)
     }
-  } while (traverseLinks && link)
+  } while (pagination?.traverseLinks && link && link.includes(linkFilter))
 
   if (allRepositories.length) {
     body = {
@@ -148,7 +148,11 @@ async function registryRequest(
 }
 
 export async function listModelRepos(token: string, modelId: string) {
-  const { body } = await registryRequest(token, '_catalog', `?n=100&last=${modelId}`)
+  const { body } = await registryRequest(token, '_catalog', undefined, undefined, undefined, {
+    traverseLinks: true,
+    start: `?n=100&last=${modelId}`,
+    linkFilter: modelId,
+  })
   if (!isListModelReposResponse(body)) {
     throw InternalError('Unrecognised response body when listing model repositories.', { body })
   }
@@ -162,7 +166,9 @@ export async function listImageTags(token: string, imageRef: RepoRef) {
 
   let body: unknown
   try {
-    ;({ body } = await registryRequest(token, `${repo}/tags/list`))
+    ;({ body } = await registryRequest(token, `${repo}/tags/list`, undefined, undefined, undefined, {
+      traverseLinks: true,
+    }))
   } catch (error) {
     if (isRegistryError(error) && error.errors.length === 1 && error.errors.at(0)?.code === 'NAME_UNKNOWN') {
       return []
@@ -181,7 +187,6 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
   const { body } = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
-    undefined,
     undefined,
     undefined,
     {
@@ -207,7 +212,6 @@ export async function getRegistryLayerStream(
   const { stream, abort } = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
-    undefined,
     true,
     undefined,
     {
@@ -230,15 +234,9 @@ export async function getRegistryLayerStream(
 
 export async function doesLayerExist(token: string, imageRef: RepoRef, digest: string) {
   try {
-    const { headers } = await registryRequest(
-      token,
-      `${imageRef.namespace}/${imageRef.image}/blobs/${digest}`,
-      undefined,
-      true,
-      {
-        method: 'HEAD',
-      },
-    )
+    const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${digest}`, true, {
+      method: 'HEAD',
+    })
 
     if (!isDoesLayerExistResponse(headers)) {
       throw InternalError('Unrecognised response headers when heading image layer.', {
@@ -265,7 +263,6 @@ export async function initialiseUpload(token: string, imageRef: RepoRef) {
     token,
     `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`,
     undefined,
-    true,
     {
       method: 'POST',
     },
@@ -293,7 +290,6 @@ export async function putManifest(
     token,
     `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
     undefined,
-    true,
     {
       method: 'PUT',
       body: manifest,
@@ -322,7 +318,6 @@ export async function uploadLayerMonolithic(
   const { headers, abort } = await registryRequest(
     token,
     `${uploadURL}&digest=${digest}`.replace(/^(\/v2\/)/, ''),
-    undefined,
     true,
     {
       method: 'PUT',
