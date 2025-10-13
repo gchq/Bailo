@@ -1,38 +1,45 @@
 import { PassThrough, Readable } from 'node:stream'
+import { json } from 'node:stream/consumers'
 import zlib from 'node:zlib'
 
-import { extract, Headers, Pack, pack } from 'tar-stream'
+import { extract, Pack, pack } from 'tar-stream'
 
-import { ExportMetadata } from '../services/mirroredModel/mirroredModel.js'
+import { ModelAction } from '../connectors/authorisation/actions.js'
+import authorisation from '../connectors/authorisation/index.js'
+import { UserInterface } from '../models/User.js'
+import log from '../services/log.js'
+import { BaseImporter } from '../services/mirroredModel/importers/baseImporter.js'
+import { DocumentsImporter } from '../services/mirroredModel/importers/documentImporter.js'
+import { FileImporter } from '../services/mirroredModel/importers/fileImporter.js'
+import { ImageImporter } from '../services/mirroredModel/importers/imageImporter.js'
+import {
+  ExportMetadata,
+  FileImportInformation,
+  ImageImportInformation,
+  ImportKind,
+  MongoDocumentImportInformation,
+} from '../services/mirroredModel/mirroredModel.js'
 import { uploadToS3 } from '../services/mirroredModel/s3.js'
-import { InternalError } from './error.js'
+import { validateMirroredModel } from '../services/model.js'
+import { Forbidden, InternalError } from './error.js'
 
-export type ExtractTarGzEntryListener = (entry: Headers, stream: PassThrough, next: (error?: unknown) => void) => void
-
-export type ExtractTarGzErrorListener = (
-  err: unknown,
-  resolve: (reason?: unknown) => void,
+function defaultExtractTarGzErrorListener(
+  error: unknown,
+  // use `any` as "real" types are not a subtype `unknown`
+  _resolve: (reason?: any) => void,
   reject: (reason?: unknown) => void,
-) => void
-
-export type ExtractTarGzFinishListener = (
-  resolve: (reason?: unknown) => void,
-  reject: (reason?: unknown) => void,
-) => void
-
-export function defaultExtractTarGzErrorListener(
-  err: unknown,
-  _resolve: (reason?: unknown) => void,
-  reject: (reason?: unknown) => void,
+  logData?: Record<string, unknown>,
 ) {
-  reject(InternalError('Error processing tarball during image import.', { error: err }))
+  reject(InternalError('Error processing tarball during import.', { error, ...logData }))
 }
 
-export function defaultExtractTarGzFinishListener(
-  resolve: (reason?: unknown) => void,
-  _reject: (reason?: unknown) => void,
+function defaultExtractTarGzFinishListener(
+  // use `any` as "real" types are not a subtype `unknown`
+  _resolve: (reason?: any) => void,
+  reject: (reason?: unknown) => void,
+  logData?: Record<string, unknown>,
 ) {
-  resolve('ok')
+  reject(InternalError('Tarball finished processing before expected.', { ...logData }))
 }
 
 export function createTarGzStreams() {
@@ -109,55 +116,87 @@ export function createUnTarGzStreams() {
 
 export async function extractTarGzStream(
   tarGzStream: Readable,
-  entryListener: ExtractTarGzEntryListener,
-  errorListener: ExtractTarGzErrorListener = defaultExtractTarGzErrorListener,
-  finishListener: ExtractTarGzFinishListener = defaultExtractTarGzFinishListener,
-) {
-  const { ungzipStream, untarStream } = createUnTarGzStreams()
-  tarGzStream.pipe(ungzipStream).pipe(untarStream)
-
+  user: UserInterface,
+  logData?: Record<string, unknown>,
+): Promise<MongoDocumentImportInformation | FileImportInformation | ImageImportInformation> {
   return new Promise((resolve, reject) => {
-    let aborted = false
-    const abort = (err?: unknown) => {
-      if (aborted) {
-        return
-      }
-      aborted = true
-      // destroy underlying streams immediately
-      tarGzStream.destroy()
-      ungzipStream.destroy()
-      untarStream.destroy()
-      if (err) {
-        errorListener(err, resolve, reject)
-      }
-    }
+    const { ungzipStream, untarStream } = createUnTarGzStreams()
+    tarGzStream.pipe(ungzipStream).pipe(untarStream)
 
-    untarStream.on('entry', async (entry, stream, next) => {
-      if (aborted) {
-        stream.resume()
-        return
-      }
+    let metadata: ExportMetadata
+    let importer: BaseImporter
+    let firstEntryProcessed = false
 
-      // Wrap original `next`
-      const safeNext = (err?: unknown) => {
-        if (err) {
-          return abort(err)
-        }
-        next() // Let tar-stream proceed to next entry
-      }
-
-      try {
-        await Promise.resolve(entryListener(entry, stream, safeNext))
-      } catch (err) {
-        safeNext(err)
+    untarStream.on('error', (err) => {
+      if (importer && importer.errorListener) {
+        importer.errorListener(err, resolve, reject)
+      } else {
+        defaultExtractTarGzErrorListener(err, resolve, reject, logData)
       }
     })
 
-    untarStream.on('error', (err) => abort(err))
-
     untarStream.on('finish', () => {
-      if (!aborted) {
-        finishListener(resolve, reject)
+      if (importer && importer.finishListener) {
+        importer.finishListener(resolve, reject)
+      } else {
+        defaultExtractTarGzFinishListener(resolve, reject, logData)
+      }
+    })
+
+    untarStream.on('entry', async (entry, stream, next) => {
+      try {
+        log.debug(
+          {
+            name: entry.name,
+            type: entry.type,
+            size: entry.size,
+            ...logData,
+          },
+          'Processing un-tarred entry.',
+        )
+
+        if (!firstEntryProcessed) {
+          if (entry.type !== 'file' || entry.name !== 'metadata.json') {
+            throw InternalError(`Expected 'metadata.json' as first entry, found '${entry.name}'`, { entry, ...logData })
+          }
+          metadata = (await json(stream)) as ExportMetadata
+
+          // Only check auth once we know what the model is
+          const mirroredModel = await validateMirroredModel(metadata.mirroredModelId, metadata.sourceModelId, logData)
+          const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
+          if (!auth.success) {
+            throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, ...logData })
+          }
+
+          switch (metadata.importKind) {
+            case ImportKind.Documents:
+              importer = new DocumentsImporter(user, metadata, logData)
+              break
+            case ImportKind.File:
+              importer = new FileImporter(metadata, logData)
+              break
+            case ImportKind.Image:
+              importer = new ImageImporter(user, metadata, logData)
+              break
+            default:
+              throw InternalError("Unknown importKind specified in 'metadata.json'.", { metadata, entry, ...logData })
+          }
+
+          // Drain and continue
+          firstEntryProcessed = true
+          next()
+          return
+        }
+        if (!metadata) {
+          throw InternalError('No metadata available before file processing.', { entry, ...logData })
+        }
+
+        importer.processEntry(entry, stream)
+        next()
+      } catch (err) {
+        reject(err)
+        // bubble error upstream to stop tar processing
+        untarStream.destroy(err as Error)
       }
     })
   })

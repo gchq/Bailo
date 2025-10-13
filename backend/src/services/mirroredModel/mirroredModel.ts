@@ -20,11 +20,16 @@ import { UserInterface } from '../../models/User.js'
 import config from '../../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
-import { addEntryToTarGzUpload, finaliseTarGzUpload, initialiseTarGzUpload } from '../../utils/tarball.js'
+import {
+  addEntryToTarGzUpload,
+  extractTarGzStream,
+  finaliseTarGzUpload,
+  initialiseTarGzUpload,
+} from '../../utils/tarball.js'
 import { downloadFile, getFilesByIds, getTotalFileSize } from '../file.js'
 import { getHttpsAgent } from '../http.js'
 import log from '../log.js'
-import { getModelById, getModelCardRevisions, validateMirroredModel } from '../model.js'
+import { getModelById, getModelCardRevisions } from '../model.js'
 import {
   getImageBlob,
   getImageManifest,
@@ -32,9 +37,6 @@ import {
   splitDistributionPackageName,
 } from '../registry.js'
 import { getAllFileIds, getReleasesForExport } from '../release.js'
-import { importDocuments } from './importers/documentImporter.js'
-import { importModelFile } from './importers/fileImporter.js'
-import { importCompressedRegistryImage } from './importers/imageImporter.js'
 
 export async function exportModel(
   user: UserInterface,
@@ -117,6 +119,7 @@ export type ImportKindKeys<T extends keyof typeof ImportKind | void = void> = T 
   : (typeof ImportKind)[keyof typeof ImportKind]
 
 export type MongoDocumentImportInformation = {
+  metadata: DocumentsExportMetadata
   modelCardVersions: ModelCardRevisionDoc['version'][]
   newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
   releaseSemvers: ReleaseDoc['semver'][]
@@ -125,31 +128,31 @@ export type MongoDocumentImportInformation = {
   imageIds: string[]
 }
 export type FileImportInformation = {
+  metadata: FileExportMetadata
   sourcePath: string
   newPath: string
 }
 export type ImageImportInformation = {
+  metadata: ImageExportMetadata
   image: { modelId: string; imageName: string; imageTag: string }
 }
 
-export type ExportMetadata = {
+type BaseExportMetadata = {
   sourceModelId: string
   mirroredModelId: string
   exporter: string
-} & (
-  | { importKind: ImportKindKeys<'Documents'> }
-  | { importKind: ImportKindKeys<'File'>; filePath: string }
-  | { importKind: ImportKindKeys<'Image'>; distributionPackageName: string }
-)
+}
+export type DocumentsExportMetadata = BaseExportMetadata & { importKind: ImportKindKeys<'Documents'> }
+export type FileExportMetadata = BaseExportMetadata & { importKind: ImportKindKeys<'File'>; filePath: string }
+export type ImageExportMetadata = BaseExportMetadata & {
+  importKind: ImportKindKeys<'Image'>
+  distributionPackageName: string
+}
+export type ExportMetadata = DocumentsExportMetadata | FileExportMetadata | ImageExportMetadata
 
 export async function importModel(
   user: UserInterface,
-  mirroredModelId: string,
-  sourceModelId: string,
   payloadUrl: string,
-  importKind: ImportKindKeys,
-  fileId?: string,
-  distributionPackageName?: string,
 ): Promise<{
   mirroredModel: ModelInterface
   importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation
@@ -158,98 +161,40 @@ export async function importModel(
     throw BadReq('Importing models has not been enabled.')
   }
 
-  if (mirroredModelId === '') {
-    throw BadReq('Missing mirrored model ID.')
-  }
-
   const importId = shortId()
-  log.info({ importId, mirroredModelId, payloadUrl }, 'Received a request to import a model.')
-  const mirroredModel = await validateMirroredModel(mirroredModelId, sourceModelId, importId)
-
-  const auth = await authorisation.model(user, mirroredModel, ModelAction.Import)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, importKind, importId })
-  }
+  log.info({ importId, payloadUrl }, 'Received a request to import a model.')
 
   let res: Response
   try {
     res = await fetch(payloadUrl, { agent: getHttpsAgent() })
   } catch (err) {
-    throw InternalError('Unable to get the file.', { err, payloadUrl, importKind, importId })
+    throw InternalError('Unable to get the file.', { err, payloadUrl, importId })
   }
   if (!res.ok) {
     throw InternalError('Unable to get the file.', {
       payloadUrl,
       response: { status: res.status, body: await res.text() },
-      importKind,
       importId,
     })
   }
-
   if (!res.body) {
-    throw InternalError('Unable to get the file.', { payloadUrl, importKind, importId })
+    throw InternalError('Unable to get the file.', { payloadUrl, importId })
   }
   // type cast `NodeJS.ReadableStream` to `'stream/web'.ReadableStream`
   // as per https://stackoverflow.com/questions/63630114/argument-of-type-readablestreamany-is-not-assignable-to-parameter-of-type-r/66629140#66629140
   // and https://stackoverflow.com/questions/37614649/how-can-i-download-and-save-a-file-using-the-fetch-api-node-js/74722818#comment133510726_74722818
   const responseBody = res.body instanceof Readable ? res.body : Readable.fromWeb(res.body as unknown as ReadableStream)
 
-  log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Obtained the file from the payload URL.')
+  log.info({ payloadUrl, importId }, 'Obtained the file from the payload URL.')
 
-  switch (importKind) {
-    case ImportKind.Documents: {
-      log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Importing collection of documents.')
-      return await importDocuments(user, responseBody, mirroredModelId, sourceModelId, payloadUrl, importId)
-    }
-    case ImportKind.File: {
-      log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Importing file data.')
-      if (!fileId) {
-        throw BadReq('File ID must be specified for file import.', {
-          mirroredModelId,
-          sourceModelIdMeta: sourceModelId,
-          importKind,
-          importId,
-        })
-      }
-      const result = await importModelFile(responseBody, fileId, mirroredModelId, importId)
-      return {
-        mirroredModel,
-        importResult: {
-          ...result,
-        },
-      }
-    }
-    case ImportKind.Image: {
-      log.info({ mirroredModelId, payloadUrl, importKind, importId }, 'Importing image data.')
-      if (!distributionPackageName) {
-        throw BadReq('Missing Distribution Package Name.', {
-          mirroredModelId,
-          sourceModelIdMeta: sourceModelId,
-          importKind,
-          importId,
-        })
-      }
-      const result = await importCompressedRegistryImage(
-        user,
-        responseBody,
-        mirroredModelId,
-        distributionPackageName,
-        importId,
-      )
-      return {
-        mirroredModel,
-        importResult: {
-          ...result,
-        },
-      }
-    }
-    default:
-      throw BadReq('Unrecognised import kind', {
-        mirroredModelId,
-        sourceModelIdMeta: sourceModelId,
-        importKind,
-        importId,
-      })
+  const importResult = await extractTarGzStream(responseBody, user, { importId })
+  log.debug({ importId }, 'Completed extracting archive.')
+
+  const mirroredModel = await getModelById(user, importResult.metadata.mirroredModelId)
+
+  return {
+    mirroredModel,
+    importResult,
   }
 }
 

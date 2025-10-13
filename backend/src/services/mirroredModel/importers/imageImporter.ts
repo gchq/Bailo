@@ -1,11 +1,11 @@
-import { Readable } from 'node:stream'
 import { json } from 'node:stream/consumers'
 
+import { PassThrough } from 'stream'
 import { finished } from 'stream/promises'
+import { Headers } from 'tar-stream'
 
 import { UserInterface } from '../../../models/User.js'
 import { InternalError } from '../../../utils/error.js'
-import { extractTarGzStream } from '../../../utils/tarball.js'
 import { hasKeysOfType } from '../../../utils/typeguards.js'
 import log from '../../log.js'
 import {
@@ -15,127 +15,138 @@ import {
   putImageManifest,
   splitDistributionPackageName,
 } from '../../registry.js'
+import { ImageExportMetadata, ImageImportInformation, ImportKind } from '../mirroredModel.js'
+import { BaseImporter } from './baseImporter.js'
 
 const manifestRegex = /^manifest\.json$/
 const blobRegex = /^blobs\/sha256\/[0-9a-f]{64}$/
 
-export async function importCompressedRegistryImage(
-  user: UserInterface,
-  body: Readable,
-  modelId: string,
-  distributionPackageName: string,
-  importId: string,
-) {
-  const distributionPackageNameObject = splitDistributionPackageName(distributionPackageName)
-  if (!('tag' in distributionPackageNameObject)) {
-    throw InternalError('Distribution Package Name must include a tag.', {
-      distributionPackageNameObject,
-      distributionPackageName,
-    })
+export class ImageImporter extends BaseImporter {
+  declare metadata: ImageExportMetadata
+
+  user: UserInterface
+  imageName: string
+  imageTag: string
+  manifestBody: unknown = null
+
+  constructor(user: UserInterface, metadata: ImageExportMetadata, logData?: Record<string, unknown>) {
+    super(metadata, logData)
+    if (this.metadata.importKind !== ImportKind.Image) {
+      throw InternalError('Cannot parse compressed Image: incorrect metadata specified.', {
+        metadata: this.metadata,
+        ...this.logData,
+      })
+    }
+
+    this.user = user
+    const distributionPackageNameObject = splitDistributionPackageName(this.metadata.distributionPackageName)
+    if (!('tag' in distributionPackageNameObject)) {
+      throw InternalError('Distribution Package Name must include a tag.', {
+        distributionPackageNameObject,
+        distributionPackageName: this.metadata.distributionPackageName,
+      })
+    }
+    ;({ path: this.imageName, tag: this.imageTag } = distributionPackageNameObject)
   }
-  const { path: imageName, tag: imageTag } = distributionPackageNameObject
 
-  let manifestBody: unknown
+  async processEntry(entry: Headers, stream: PassThrough) {
+    if (this.metadata.importKind !== ImportKind.Image) {
+      throw InternalError('Cannot parse compressed Image: incorrect metadata specified.', {
+        metadata: this.metadata,
+        ...this.logData,
+      })
+    }
 
-  await extractTarGzStream(
-    body,
-    async function (entry, stream, next) {
-      log.debug(
-        {
-          name: entry.name,
-          type: entry.type,
-          size: entry.size,
-          importId,
-        },
-        'Processing un-tarred entry',
-      )
-
-      if (entry.type === 'file') {
-        // Process file
-        if (manifestRegex.test(entry.name)) {
-          // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
-          log.debug({ importId }, 'Extracting un-tarred manifest.')
-          manifestBody = await json(stream)
-
-          next()
-        } else if (blobRegex.test(entry.name)) {
-          // convert filename to digest format
-          const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
-          try {
-            if (await doesImageLayerExist(user, modelId, imageName, layerDigest)) {
-              log.debug(
-                {
-                  name: entry.name,
-                  size: entry.size,
-                  importId,
-                },
-                'Skipping blob as it already exists in the registry.',
-              )
-
-              // auto-drain the stream
-              stream.resume()
-              next()
-            } else {
-              log.debug(
-                {
-                  name: entry.name,
-                  size: entry.size,
-                  importId,
-                },
-                'Initiating un-tarred blob upload.',
-              )
-              const res = await initialiseImageUpload(user, modelId, imageName)
-
-              await putImageBlob(user, modelId, imageName, res.location, layerDigest, stream, String(entry.size))
-              await finished(stream)
-              next()
-            }
-          } catch (err) {
-            log.error(
+    if (entry.type === 'file') {
+      // Process file
+      if (manifestRegex.test(entry.name)) {
+        // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
+        log.debug({ ...this.logData }, 'Extracting un-tarred manifest.')
+        this.manifestBody = await json(stream)
+      } else if (blobRegex.test(entry.name)) {
+        // convert filename to digest format
+        const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
+        try {
+          if (await doesImageLayerExist(this.user, this.metadata.mirroredModelId, this.imageName, layerDigest)) {
+            log.debug(
               {
-                err,
                 name: entry.name,
                 size: entry.size,
-                importId,
+                ...this.logData,
               },
-              'Failed to upload blob to registry.',
+              'Skipping blob as it already exists in the registry.',
             )
-            next(err)
+
+            // auto-drain the stream
+            stream.resume()
+          } else {
+            log.debug(
+              {
+                name: entry.name,
+                size: entry.size,
+                ...this.logData,
+              },
+              'Initiating un-tarred blob upload.',
+            )
+            const res = await initialiseImageUpload(this.user, this.metadata.mirroredModelId, this.imageName)
+
+            await putImageBlob(
+              this.user,
+              this.metadata.mirroredModelId,
+              this.imageName,
+              res.location,
+              layerDigest,
+              stream,
+              String(entry.size),
+            )
+            await finished(stream)
           }
-        } else {
-          throw InternalError('Cannot parse compressed image: unrecognised contents.', { importId })
+        } catch (err) {
+          throw InternalError('Failed to upload blob to registry.', {
+            err,
+            name: entry.name,
+            size: entry.size,
+            ...this.logData,
+          })
         }
       } else {
-        // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
-        log.warn({ name: entry.name, type: entry.type, importId }, 'Skipping non-file entry.')
-        next()
+        throw InternalError('Cannot parse compressed image: unrecognised contents.', { ...this.logData })
       }
-    },
-    undefined,
-    async function (resolve: (reason?: any) => void, reject: (reason?: any) => void) {
-      log.debug({ importId }, 'Uploading manifest.')
-      if (hasKeysOfType<{ mediaType: 'string' }>(manifestBody, { mediaType: 'string' })) {
-        await putImageManifest(
-          user,
-          modelId,
-          imageName,
-          imageTag,
-          JSON.stringify(manifestBody),
-          manifestBody['mediaType'],
-        )
-        resolve('ok')
-      } else {
-        reject(InternalError('Manifest file (manifest.json) missing or invalid in Tarball file.'))
-      }
-    },
-  )
-  log.debug(
-    {
-      image: { modelId, imageName, imageTag },
-      importId,
-    },
-    'Completed registry upload',
-  )
+    } else {
+      // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
+      log.warn({ name: entry.name, type: entry.type, ...this.logData }, 'Skipping non-file entry.')
+    }
+  }
 
-  return { image: { modelId, imageName, imageTag } }
+  async finishListener(
+    resolve: (reason?: ImageImportInformation) => void,
+    reject: (reason?: unknown) => void,
+    _logData?: Record<string, unknown>,
+  ) {
+    log.debug({ ...this.logData }, 'Uploading manifest.')
+    if (hasKeysOfType<{ mediaType: 'string' }>(this.manifestBody, { mediaType: 'string' })) {
+      await putImageManifest(
+        this.user,
+        this.metadata.mirroredModelId,
+        this.imageName,
+        this.imageTag,
+        JSON.stringify(this.manifestBody),
+        this.manifestBody['mediaType'],
+      )
+      log.debug(
+        {
+          image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
+          ...this.logData,
+        },
+        'Completed registry upload',
+      )
+
+      resolve({
+        metadata: this.metadata,
+        image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
+      })
+    } else {
+      reject(InternalError('Manifest file (manifest.json) missing or invalid in Tarball file.'))
+    }
+  }
 }
