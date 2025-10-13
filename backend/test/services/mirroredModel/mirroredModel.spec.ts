@@ -715,8 +715,7 @@ describe('services > mirroredModel', () => {
       expect(tarballMocks.createTarGzStreams).toBeCalledTimes(1)
       expect(s3Mocks.uploadToS3).toBeCalledTimes(1)
       expect(tarballMocks.pipeStreamToTarEntry).toBeCalledTimes(2)
-      // 2 times due to layer prefetching
-      expect(registryMocks.getImageBlob).toBeCalledTimes(2)
+      expect(registryMocks.getImageBlob).toBeCalledTimes(1)
     })
   })
 

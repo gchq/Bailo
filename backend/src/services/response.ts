@@ -69,6 +69,22 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   return response
 }
 
+export async function removeResponses(parentIds: string[]) {
+  const responses = await getResponsesByParentIds(parentIds)
+  const responseDeletions: ResponseDoc[] = []
+  for (const response of responses) {
+    try {
+      responseDeletions.push(await response.delete())
+    } catch (error) {
+      throw InternalError('The requested response could not be deleted.', {
+        responseId: response.id,
+        error,
+      })
+    }
+  }
+  return responseDeletions
+}
+
 export async function updateResponseReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
   const response = await ResponseModel.findOne({ _id: responseId })
 
