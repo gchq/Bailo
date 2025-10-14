@@ -3,6 +3,7 @@ import { Readable } from 'node:stream'
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 
 import { getHttpsUndiciAgent } from '../services/http.js'
+import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
@@ -44,12 +45,13 @@ async function registryRequest(
   returnRawBody: boolean = false,
   extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>> = {},
   extraHeaders: HeadersInit = {},
-  traverseLinks: boolean = true,
+  pagination?: { traverseLinks?: boolean; start?: string; linkFilter?: string },
 ): Promise<RegistryRequestResult> {
   const controller = new AbortController()
 
   const allRepositories: string[] = []
-  let paginateParameter = ''
+  let paginateParameter = pagination?.start ? pagination.start : ''
+  const linkFilter = pagination?.linkFilter ? pagination.linkFilter : ''
   let link: string | null
   let contentType: string
   let res: Response
@@ -57,10 +59,12 @@ async function registryRequest(
   let stream: ReadableStream | Readable | undefined
 
   do {
+    const url = `${registry}/v2/${endpoint}${paginateParameter}`
+    log.debug({ url }, 'Making request to the registry.')
     try {
       // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
       // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
-      res = await fetch(`${registry}/v2/${endpoint}${paginateParameter}`, {
+      res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           ...extraHeaders,
@@ -73,11 +77,15 @@ async function registryRequest(
       throw InternalError('Unable to communicate with the registry.', { err })
     }
 
-    link = res.headers.get('link')
+    link = res.headers.get('link') || ''
     contentType = res.headers.get('content-type') || ''
 
-    if (link) {
-      paginateParameter = link.substring(link.indexOf('%'), link.lastIndexOf('>'))
+    log.debug(Object.fromEntries(res.headers), 'Headers received from the registry.')
+
+    const linkQueryIndex = link.indexOf('?')
+    const linkEndIndex = link.lastIndexOf('>')
+    if (link && linkQueryIndex !== -1 && linkEndIndex > linkQueryIndex) {
+      paginateParameter = link.substring(linkQueryIndex, linkEndIndex)
     }
 
     if (returnRawBody) {
@@ -122,7 +130,7 @@ async function registryRequest(
     if (body?.repositories) {
       allRepositories.push(...body.repositories)
     }
-  } while (traverseLinks && link)
+  } while (pagination?.traverseLinks && link && link.includes(linkFilter))
 
   if (allRepositories.length) {
     body = {
@@ -142,7 +150,11 @@ async function registryRequest(
 }
 
 export async function listModelRepos(token: string, modelId: string) {
-  const { body } = await registryRequest(token, `_catalog?n=100&last=${modelId}`)
+  const { body } = await registryRequest(token, '_catalog', undefined, undefined, undefined, {
+    traverseLinks: true,
+    start: `?n=100&last=${modelId}`,
+    linkFilter: modelId,
+  })
   if (!isListModelReposResponse(body)) {
     throw InternalError('Unrecognised response body when listing model repositories.', { body })
   }
@@ -156,7 +168,9 @@ export async function listImageTags(token: string, imageRef: RepoRef) {
 
   let body: unknown
   try {
-    ;({ body } = await registryRequest(token, `${repo}/tags/list`))
+    ;({ body } = await registryRequest(token, `${repo}/tags/list`, undefined, undefined, undefined, {
+      traverseLinks: true,
+    }))
   } catch (error) {
     if (isRegistryError(error) && error.errors.length === 1 && error.errors.at(0)?.code === 'NAME_UNKNOWN') {
       return []
