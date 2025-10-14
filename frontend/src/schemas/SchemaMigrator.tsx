@@ -177,7 +177,6 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     }
   }
 
-  // TODO After the API is implemented we should POST the migration plan to the backend
   const handleSubmitMigrationPlan = async () => {
     setSubmitErrorText('')
     if (migrationName === '') {
