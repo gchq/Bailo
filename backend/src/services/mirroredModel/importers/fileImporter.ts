@@ -53,7 +53,7 @@ export class FileImporter extends BaseImporter {
           await putObjectStream(this.updatedPath, stream, this.bucket)
           await markFileAsCompleteAfterImport(this.updatedPath)
           log.debug(
-            { bucket: this.bucket, path: this.updatedPath, entry, ...this.logData },
+            { bucket: this.bucket, path: this.updatedPath, name: entry.name, ...this.logData },
             'Imported file successfully uploaded to S3.',
           )
         }
