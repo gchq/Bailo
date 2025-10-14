@@ -79,9 +79,17 @@ vi.mock('../../../src/utils/config.js', () => ({
 }))
 
 const tarballMocks = vi.hoisted(() => ({
-  createTarGzStreams: vi.fn(),
+  addEntryToTarGzUpload: vi.fn(),
+  extractTarGzStream: vi.fn(),
+  finaliseTarGzUpload: vi.fn(),
+  initialiseTarGzUpload: vi.fn(() => ({
+    tarStream: new PassThrough(),
+    gzipStream: new PassThrough(),
+    uploadStream: new PassThrough(),
+    uploadPromise: new Promise(() => {}),
+  })),
 }))
-vi.mock('../../../src/utils/tarball.js', () => tarballMocks)
+vi.mock('../../../src/services/mirroredModel/tarball.js', () => tarballMocks)
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
@@ -100,10 +108,6 @@ const modelMocks = vi.hoisted(() => ({
     card: { schemaId: 'schemaId' },
   })),
   getModelCardRevisions: vi.fn(() => [{ toJSON: vi.fn(() => ({})), version: 123 }] as any[]),
-  validateMirroredModel: vi.fn(() => ({
-    settings: { mirror: { destinationModelId: 'abc' } },
-    card: { schemaId: 'schemaId' },
-  })),
 }))
 vi.mock('../../../src/services/model.js', () => modelMocks)
 
@@ -123,42 +127,7 @@ const releaseMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/release.js', () => releaseMocks)
 
-const s3Mocks = vi.hoisted(() => ({
-  uploadToS3: vi.fn(),
-}))
-vi.mock('../../../src/services/mirroredModel/s3.js', () => s3Mocks)
-
-const documentImporterMocks = vi.hoisted(() => ({
-  importDocuments: vi.fn(() =>
-    Promise.resolve({
-      mirroredModel: 'updatedMirroredModel',
-      importResult: {
-        modelCardVersions: [],
-        newModelCards: [],
-        releaseSemvers: [],
-        newReleases: [],
-        fileIds: [],
-        imageIds: [],
-      },
-    }),
-  ),
-}))
-vi.mock('../../../src/services/mirroredModel/importers/documentImporter.js', () => documentImporterMocks)
-
-const fileImporterMocks = vi.hoisted(() => ({
-  importModelFile: vi.fn(() => Promise.resolve({ sourcePath: '/source/path', newPath: '/new/path' })),
-}))
-vi.mock('../../../src/services/mirroredModel/importers/fileImporter.js', () => fileImporterMocks)
-
-const imageImporterMocks = vi.hoisted(() => ({
-  importCompressedRegistryImage: vi.fn(() =>
-    Promise.resolve({ image: { modelId: 'modelId', imageName: 'imageName', imageTag: 'imageTag' } }),
-  ),
-}))
-vi.mock('../../../src/services/mirroredModel/importers/imageImporter.js', () => imageImporterMocks)
-
 const fileMocks = vi.hoisted(() => ({
-  createFilePath: vi.fn(() => 'file/path'),
   downloadFile: vi.fn(() => ({ Body: 'test' })),
   getFilesByIds: vi.fn(() => [
     {
@@ -186,18 +155,6 @@ vi.mock('../../../src/services/registry.js', () => registryMocks)
 describe('services > mirroredModel', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    const tarStreamMock = new PassThrough()
-    Object.assign(tarStreamMock, {
-      entry: vi.fn(() => {
-        const writable = new PassThrough()
-        // simulate finish event after some delay on write
-        setImmediate(() => writable.emit('finish'))
-        return writable
-      }),
-      pipe: vi.fn().mockReturnThis(),
-      finalize: vi.fn(),
-    })
-    tarballMocks.createTarGzStreams.mockReturnValue({ gzipStream: new PassThrough(), tarStream: tarStreamMock })
   })
 
   describe('exportModel', () => {
@@ -206,8 +163,8 @@ describe('services > mirroredModel', () => {
 
       const promise = exportModel({} as UserInterface, 'modelId', true)
 
-      await expect(promise).rejects.toThrowError('Exporting models has not been enabled.')
-      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+      await expect(promise).rejects.toThrowError(/^Exporting models has not been enabled./)
+      expect(tarballMocks.initialiseTarGzUpload).not.toHaveBeenCalled()
     })
 
     test('missing disclaimer agreement', async () => {
@@ -216,7 +173,7 @@ describe('services > mirroredModel', () => {
       await expect(promise).rejects.toThrowError(
         /^You must agree to the disclaimer agreement before being able to export a model./,
       )
-      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).not.toHaveBeenCalled()
     })
 
     test('missing mirrored model ID', async () => {
@@ -229,7 +186,7 @@ describe('services > mirroredModel', () => {
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
       await expect(promise).rejects.toThrowError(/^The 'Destination Model ID' has not been set on this model./)
-      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).not.toHaveBeenCalled()
     })
 
     test('missing mirrored model card schemaId', async () => {
@@ -244,7 +201,7 @@ describe('services > mirroredModel', () => {
       await expect(promise).rejects.toThrowError(
         /^You must select a schema for your model before you can start the export process./,
       )
-      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).not.toHaveBeenCalled()
     })
 
     test('bad authorisation', async () => {
@@ -257,7 +214,7 @@ describe('services > mirroredModel', () => {
       const promise = exportModel({} as UserInterface, 'modelId', true)
 
       await expect(promise).rejects.toThrowError(/^You do not have permission/)
-      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).not.toHaveBeenCalled()
     })
 
     test('successful export if no files exist', async () => {
@@ -269,8 +226,8 @@ describe('services > mirroredModel', () => {
 
       expect(authMock.model).toHaveBeenCalled()
       expect(releaseMocks.getReleasesForExport).toHaveBeenCalledWith({} as UserInterface, 'modelId', ['1.2.3'])
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalled()
-      expect(s3Mocks.uploadToS3).toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).toHaveBeenCalled()
+      expect(tarballMocks.finaliseTarGzUpload).toHaveBeenCalled()
       expect(logMock.debug).toHaveBeenCalledWith(
         { modelId: 'modelId', semvers: ['1.2.3'] },
         'Successfully finalized Tarball file.',
@@ -278,15 +235,17 @@ describe('services > mirroredModel', () => {
     })
 
     test('throw error when addModelCardRevisionsToTarball fails', async () => {
-      modelMocks.getModelCardRevisions.mockResolvedValueOnce([{ toJSON: vi.fn() }])
+      modelMocks.getModelCardRevisions.mockImplementationOnce(() => {
+        throw Error()
+      })
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
-      await expect(promise).rejects.toThrow('Error when adding the model card revision(s) to the Tarball file.')
+      await expect(promise).rejects.toThrowError('Error when adding the model card revision(s) to the Tarball file.')
       expect(authMock.model).toHaveBeenCalled()
       expect(releaseMocks.getReleasesForExport).toHaveBeenCalledWith({} as UserInterface, 'modelId', ['1.2.3'])
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalled()
-      expect(s3Mocks.uploadToS3).toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).toHaveBeenCalled()
+      expect(tarballMocks.finaliseTarGzUpload).not.toHaveBeenCalled()
       expect(logMock.debug).not.toHaveBeenCalledWith(
         { modelId: 'modelId', semvers: ['1.2.3'] },
         'Successfully finalized Tarball file.',
@@ -296,15 +255,21 @@ describe('services > mirroredModel', () => {
     test('throw error when addReleasesToTarball fails', async () => {
       releaseMocks.getAllFileIds.mockResolvedValueOnce([])
       modelMocks.getModelCardRevisions.mockResolvedValueOnce([])
-      fileMocks.getFilesByIds.mockResolvedValueOnce([])
+      fileMocks.getFilesByIds.mockResolvedValueOnce([]).mockResolvedValueOnce([
+        {
+          toJSON: vi.fn(() => {
+            throw Error()
+          }),
+        } as any,
+      ])
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
-      await expect(promise).rejects.toThrow('Error when adding the release(s) to the Tarball file.')
+      await expect(promise).rejects.toThrowError('Error when adding the release(s) to the Tarball file.')
       expect(authMock.model).toHaveBeenCalled()
       expect(releaseMocks.getReleasesForExport).toHaveBeenCalledWith({} as UserInterface, 'modelId', ['1.2.3'])
-      expect(tarballMocks.createTarGzStreams).toHaveBeenCalled()
-      expect(s3Mocks.uploadToS3).toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).toHaveBeenCalled()
+      expect(tarballMocks.finaliseTarGzUpload).not.toHaveBeenCalled()
       expect(logMock.debug).not.toHaveBeenCalledWith(
         { modelId: 'modelId', semvers: ['1.2.3'] },
         'Successfully finalized Tarball file.',
@@ -326,7 +291,7 @@ describe('services > mirroredModel', () => {
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
       await expect(promise).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
-      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).not.toHaveBeenCalled()
     })
 
     test('skip export missing file scans', async () => {
@@ -341,7 +306,7 @@ describe('services > mirroredModel', () => {
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
       await expect(promise).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
-      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).not.toHaveBeenCalled()
     })
 
     test('export contains infected file', async () => {
@@ -359,7 +324,7 @@ describe('services > mirroredModel', () => {
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
       await expect(promise).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
-      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).not.toHaveBeenCalled()
     })
 
     test('export missing file scan', async () => {
@@ -380,7 +345,7 @@ describe('services > mirroredModel', () => {
       const promise = exportModel({} as UserInterface, 'testmod', true, ['1.2.3'])
 
       await expect(promise).rejects.toThrowError('The releases contain file(s) that do not have a clean AV scan.')
-      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).not.toHaveBeenCalled()
     })
 
     test('release export size too large', async () => {
@@ -398,93 +363,41 @@ describe('services > mirroredModel', () => {
       await expect(promise).rejects.toThrowError(/^Requested export is too large./)
       expect(authMock.model).toHaveBeenCalled()
       expect(releaseMocks.getReleasesForExport).toHaveBeenCalledWith({} as UserInterface, 'modelId', ['1.2.3', '1.2.4'])
-      expect(tarballMocks.createTarGzStreams).not.toHaveBeenCalled()
+      expect(tarballMocks.initialiseTarGzUpload).not.toHaveBeenCalled()
     })
   })
 
   describe('importModel', () => {
     test('not enabled', async () => {
       vi.spyOn(configMock, 'ui', 'get').mockReturnValueOnce({ modelMirror: { import: { enabled: false } } })
-      const promise = importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.Documents,
-      )
+      const promise = importModel({} as UserInterface, 'https://test.com')
 
       await expect(promise).rejects.toThrowError('Importing models has not been enabled.')
     })
 
-    test('mirrored model ID empty', async () => {
-      const result = importModel({} as UserInterface, '', 'source-model-id', 'https://test.com', ImportKind.Documents)
-
-      await expect(result).rejects.toThrowError('Missing mirrored model ID.')
-    })
-
-    test('auth failure', async () => {
-      vi.mocked(authorisation.model).mockResolvedValueOnce({
-        id: '',
-        success: false,
-        info: 'User does not have access to model',
-      })
-      const promise = importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.Documents,
-      )
-      await expect(promise).rejects.toThrowError(/^User does not have access to model/)
-    })
-
     test('error when getting file', async () => {
       fetchMock.default.mockRejectedValueOnce('failure')
-      const result = importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.Documents,
-      )
+      const result = importModel({} as UserInterface, 'https://test.com')
 
       await expect(result).rejects.toThrowError('Unable to get the file.')
     })
 
     test('non-200 response when getting file', async () => {
       fetchMock.default.mockResolvedValueOnce({ ok: false, body: {}, text: vi.fn() } as any)
-      const result = importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.Documents,
-      )
+      const result = importModel({} as UserInterface, 'https://test.com')
 
       await expect(result).rejects.toThrowError('Unable to get the file.')
     })
 
     test('file missing from body', async () => {
       fetchMock.default.mockResolvedValueOnce({ ok: true, text: vi.fn() } as any)
-      const result = importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.Documents,
-      )
+      const result = importModel({} as UserInterface, 'https://test.com')
 
       await expect(result).rejects.toThrowError('Unable to get the file.')
     })
 
     test('importDocuments on document success', async () => {
-      const result = await importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.Documents,
-      )
+      const result = await importModel({} as UserInterface, 'https://test.com')
 
       expect(result).toMatchSnapshot()
       expect(modelMocks.validateMirroredModel).toHaveBeenCalled()
@@ -500,13 +413,7 @@ describe('services > mirroredModel', () => {
         text: vi.fn(),
       } as any)
 
-      const result = await importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.Documents,
-      )
+      const result = await importModel({} as UserInterface, 'https://test.com')
 
       expect(result).toMatchSnapshot()
       expect(modelMocks.validateMirroredModel).toHaveBeenCalled()
