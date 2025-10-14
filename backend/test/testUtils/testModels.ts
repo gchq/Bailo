@@ -1,3 +1,4 @@
+import { SchemaMigrationKind } from '../../src/models/SchemaMigration.js'
 import { ReviewKind, SchemaKind } from '../../src/types/enums.js'
 
 export const testModelSchema = {
@@ -135,7 +136,7 @@ export const testSchemaMigration = {
   questionMigrations: [
     {
       id: 'test',
-      kind: 'move',
+      kind: SchemaMigrationKind.Move,
       sourcePath: 's1.q1',
       targetPath: 's2.q1',
       propertyType: 'string',
