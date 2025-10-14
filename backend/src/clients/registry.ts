@@ -77,13 +77,15 @@ async function registryRequest(
       throw InternalError('Unable to communicate with the registry.', { err })
     }
 
-    link = res.headers.get('link')
+    link = res.headers.get('link') || ''
     contentType = res.headers.get('content-type') || ''
 
     log.debug(Object.fromEntries(res.headers), 'Headers received from the registry.')
 
-    if (link) {
-      paginateParameter = link.substring(link.indexOf('?'), link.lastIndexOf('>'))
+    const linkQueryIndex = link.indexOf('?')
+    const linkEndIndex = link.lastIndexOf('>')
+    if (link && linkQueryIndex !== -1 && linkEndIndex > linkQueryIndex) {
+      paginateParameter = link.substring(linkQueryIndex, linkEndIndex)
     }
 
     if (returnRawBody) {
