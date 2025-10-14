@@ -7,6 +7,7 @@ import { getChangedFields } from '@rjsf/utils'
 import { useGetModel } from 'actions/model'
 import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
+import { useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
 import React from 'react'
 import { useContext, useEffect, useState } from 'react'
@@ -17,6 +18,7 @@ import TextInputDialog from 'src/common/TextInputDialog'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 import EntryCardHistoryDialog from 'src/entry/overview/EntryCardHistoryDialog'
 import ExportEntryCardDialog from 'src/entry/overview/ExportEntryCardDialog'
+import MigrationListDialog from 'src/entry/overview/MigrationListDialog'
 import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
@@ -37,9 +39,14 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
+  const [migrationListDialogOpen, setMigrationListDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
+  const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations(
+    '',
+    entry.card.schemaId,
+  )
 
   function handleActionButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
@@ -116,14 +123,33 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
   }
+
   if (isEntryError) {
     return <MessageAlert message={isEntryError.info.message} severity='error' />
   }
 
+  if (isSchemaMigrationsError) {
+    return <MessageAlert message={isSchemaMigrationsError.info.message} severity='error' />
+  }
+
+  if (isSchemaMigrationsLoading || isSchemaLoading) {
+    return <Loading />
+  }
+
   return (
     <>
-      {isSchemaLoading && <Loading />}
       <Box sx={{ py: 1 }}>
+        {schemaMigrations.length > 0 && (
+          <Restricted action='editEntry' fallback={<></>}>
+            <MessageAlert
+              severity='info'
+              message='There is a schema available for this model, please consider migrating.'
+              buttonText='Run Migration'
+              buttonAction={() => setMigrationListDialogOpen(true)}
+              disableScrollToView
+            />
+          </Restricted>
+        )}
         <Stack
           direction={{ sm: 'column', md: 'row' }}
           justifyContent='space-between'
@@ -237,6 +263,12 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
         splitSchema={splitSchema}
         open={exportDialogOpen}
         setOpen={setExportDialogOpen}
+      />
+      <MigrationListDialog
+        open={migrationListDialogOpen}
+        onCancel={() => setMigrationListDialogOpen(false)}
+        migrations={schemaMigrations}
+        entry={entry}
       />
     </>
   )

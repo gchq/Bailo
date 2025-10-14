@@ -1,7 +1,8 @@
 import { Request, Response } from 'express'
-import { ObjectId } from 'mongodb'
 import { z } from 'zod'
 
+import { AuditInfo } from '../../../connectors/audit/Base.js'
+import audit from '../../../connectors/audit/index.js'
 import { runModelSchemaMigration } from '../../../services/schemaMigration.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
@@ -9,8 +10,9 @@ import { parse } from '../../../utils/validate.js'
 export const postMigrateModelSchemaSchema = z.object({
   params: z.object({
     modelId: z.string().openapi({ example: 'my-model-51fd4' }),
-    migrationId: z.string().openapi({ example: new ObjectId().toString() }),
+    migrationId: z.string().openapi({ example: 'my-plan-4f35g' }),
   }),
+  body: z.object({}).optional(),
 })
 
 registerPath({
@@ -39,13 +41,13 @@ interface postMigrateModelSchemaResponse {
 
 export const postMigrateModelSchema = [
   async (req: Request, res: Response<postMigrateModelSchemaResponse>): Promise<void> => {
-    //req.audit = AuditInfo.CreateSchemaMigration
+    req.audit = AuditInfo.UpdateModelCard
     const {
       params: { modelId, migrationId },
     } = parse(req, postMigrateModelSchemaSchema)
 
-    await runModelSchemaMigration(req.user, modelId, migrationId)
-    //await audit.onCreateSchemaMigration(req, schemaMigration)
+    const updatedModel = await runModelSchemaMigration(req.user, modelId, migrationId)
+    await audit.onUpdateModel(req, updatedModel)
 
     res.json({
       response: 'Successfully migrated model schema',

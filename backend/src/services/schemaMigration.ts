@@ -5,13 +5,15 @@ import SchemaMigration, { SchemaMigrationInterface, SchemaMigrationKind } from '
 import SchemaMigrationModel from '../models/SchemaMigration.js'
 import { UserInterface } from '../models/User.js'
 import { BadReq, Forbidden } from '../utils/error.js'
+import { convertStringToId } from '../utils/id.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 
 export async function createSchemaMigrationPlan(
   user: UserInterface,
   schemaMigration: Partial<SchemaMigrationInterface>,
 ) {
-  const schemaMigrationDoc = new SchemaMigration(schemaMigration)
+  const migrationId = convertStringToId(schemaMigration.name || '')
+  const schemaMigrationDoc = new SchemaMigration({ id: migrationId, ...schemaMigration })
 
   const auth = await authorisation.schemaMigration(user, schemaMigrationDoc, SchemaMigrationAction.Create)
   if (!auth.success) {
@@ -30,34 +32,38 @@ export async function createSchemaMigrationPlan(
 }
 
 export async function getSchemaMigrationById(id: string) {
-  return await SchemaMigrationModel.findOne({ _id: id })
+  return await SchemaMigrationModel.findOne({ id: id })
 }
 
-export async function searchSchemaMigrations(name?: string) {
-  return await SchemaMigration.find({ ...(name && { name }) })
+export async function searchSchemaMigrations(id?: string, sourceSchema?: string) {
+  return await SchemaMigration.find({ ...(id && { id }), ...(sourceSchema && { sourceSchema }) })
 }
 
 export async function runModelSchemaMigration(user: UserInterface, modelId: string, migrationPlanId: string) {
   const modelDoc = await ModelModel.findOne({ id: modelId })
 
   if (!modelDoc) {
-    return BadReq('Model cannot be found', { modelId })
+    throw BadReq('Model cannot be found', { modelId })
   }
 
   const model = modelDoc.toObject()
 
-  const recheckAuth = await authorisation.model(user, model, ModelAction.Update)
-  if (!recheckAuth.success) {
-    throw Forbidden(recheckAuth.info, { userDn: user.dn })
+  const auth = await authorisation.model(user, model, ModelAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn })
   }
 
   if (!model.card) {
-    return BadReq('Model cannot be migrated as it does not have a valid model card.', { modelId })
+    throw BadReq('Model cannot be migrated as it does not have a valid model card.', { modelId })
   }
 
   const migrationPlan = await getSchemaMigrationById(migrationPlanId)
   if (!migrationPlan) {
-    return BadReq('Cannot find specified schema migration plan.', { migrationPlanId })
+    throw BadReq('Cannot find specified schema migration plan.', { migrationPlanId })
+  }
+
+  if (model.card.schemaId !== migrationPlan.sourceSchema) {
+    throw BadReq(`The schema for this model does not match the migration plan's source schema.`)
   }
 
   try {
@@ -68,15 +74,15 @@ export async function runModelSchemaMigration(user: UserInterface, modelId: stri
 
   modelDoc.set('card.schemaId', migrationPlan.targetSchema)
   await modelDoc.save()
+  return modelDoc
 }
 
 function getPropValue(sourceObject: any, dotNotationPath: string) {
   let returnData = sourceObject
 
   dotNotationPath.split('.').forEach((subPath) => {
-    returnData = returnData[subPath] || `Property ${subPath} not found`
+    returnData = returnData[subPath] || ''
   })
-
   return returnData
 }
 
@@ -87,10 +93,12 @@ async function runMigrationPlan(model: ModelDoc, migrationPlan: SchemaMigrationI
         model.set(`card.metadata.${migrationQuestion.sourcePath}`, undefined, { strict: false })
         break
       case SchemaMigrationKind.Move:
-        model.set(
-          `card.metadata.${migrationQuestion.targetPath}`,
-          getPropValue(model, `card.metadata.${migrationQuestion.sourcePath}`),
-        )
+        if (getPropValue(model, `card.metadata.${migrationQuestion.sourcePath}`) !== '') {
+          model.set(
+            `card.metadata.${migrationQuestion.targetPath}`,
+            getPropValue(model, `card.metadata.${migrationQuestion.sourcePath}`),
+          )
+        }
         model.set(`card.metadata.${migrationQuestion.sourcePath}`, undefined, { strict: false })
         break
     }
