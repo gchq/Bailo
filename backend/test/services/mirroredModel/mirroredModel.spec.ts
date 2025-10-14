@@ -12,8 +12,6 @@ import {
   addCompressedRegistryImageComponents,
   exportModel,
   generateDigest,
-  ImportKind,
-  ImportKindKeys,
   importModel,
   uploadReleaseFiles,
   uploadReleaseImages,
@@ -37,9 +35,12 @@ const fetchMock = vi.hoisted(() => ({
 }))
 vi.mock('node-fetch', async () => fetchMock)
 
+const pendingJobs: Promise<any>[] = []
 const queueMock = vi.hoisted(() => ({
-  add: vi.fn(async (job) => {
-    await job()
+  add: vi.fn((job) => {
+    const p = job()
+    pendingJobs.push(p)
+    return p
   }),
 }))
 vi.mock('p-queue', async () => ({ default: vi.fn(() => queueMock) }))
@@ -80,7 +81,13 @@ vi.mock('../../../src/utils/config.js', () => ({
 
 const tarballMocks = vi.hoisted(() => ({
   addEntryToTarGzUpload: vi.fn(),
-  extractTarGzStream: vi.fn(),
+  extractTarGzStream: vi.fn(() => ({
+    metadata: {
+      sourceModelId: 'sourceModelId',
+      mirroredModelId: 'mirroredModelId',
+      exporter: 'exporter',
+    },
+  })),
   finaliseTarGzUpload: vi.fn(),
   initialiseTarGzUpload: vi.fn(() => ({
     tarStream: new PassThrough(),
@@ -396,14 +403,13 @@ describe('services > mirroredModel', () => {
       await expect(result).rejects.toThrowError('Unable to get the file.')
     })
 
-    test('importDocuments on document success', async () => {
+    test('success', async () => {
       const result = await importModel({} as UserInterface, 'https://test.com')
 
       expect(result).toMatchSnapshot()
-      expect(modelMocks.validateMirroredModel).toHaveBeenCalled()
-      expect(authMock.model).toHaveBeenCalled()
       expect(fetchMock.default).toHaveBeenCalled()
-      expect(documentImporterMocks.importDocuments).toHaveBeenCalled()
+      expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
+      expect(modelMocks.getModelById).toHaveBeenCalled()
     })
 
     test('call Readable.fromWeb when res.body is not a Readable', async () => {
@@ -416,81 +422,9 @@ describe('services > mirroredModel', () => {
       const result = await importModel({} as UserInterface, 'https://test.com')
 
       expect(result).toMatchSnapshot()
-      expect(modelMocks.validateMirroredModel).toHaveBeenCalled()
-      expect(authMock.model).toHaveBeenCalled()
       expect(fetchMock.default).toHaveBeenCalled()
-      expect(documentImporterMocks.importDocuments).toHaveBeenCalled()
-    })
-
-    test('missing file path for file imports', async () => {
-      const result = importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.File,
-      )
-
-      await expect(result).rejects.toThrowError(/^File ID must be specified for file import./)
-    })
-
-    test('importModelFile on file success', async () => {
-      const result = await importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.File,
-        '/s3/path/',
-      )
-
-      expect(result).toMatchSnapshot()
-      expect(modelMocks.validateMirroredModel).toHaveBeenCalled()
-      expect(authMock.model).toHaveBeenCalled()
-      expect(fetchMock.default).toHaveBeenCalled()
-      expect(fileImporterMocks.importModelFile).toHaveBeenCalled()
-    })
-
-    test('missing image name for image imports', async () => {
-      const result = importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.Image,
-      )
-
-      await expect(result).rejects.toThrowError(/^Missing Distribution Package Name./)
-    })
-
-    test('importCompressedRegistryImage on image success', async () => {
-      const result = await importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        ImportKind.Image,
-        undefined,
-        'image-name:image-tag',
-      )
-
-      expect(result).toMatchSnapshot()
-      expect(modelMocks.validateMirroredModel).toHaveBeenCalled()
-      expect(authMock.model).toHaveBeenCalled()
-      expect(fetchMock.default).toHaveBeenCalled()
-      expect(imageImporterMocks.importCompressedRegistryImage).toHaveBeenCalled()
-    })
-
-    test('importModel > unrecognised import kind', async () => {
-      const result = importModel(
-        {} as UserInterface,
-        'mirrored-model-id',
-        'source-model-id',
-        'https://test.com',
-        'blah' as ImportKindKeys,
-      )
-
-      await expect(result).rejects.toThrowError(/^Unrecognised import kind/)
+      expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
+      expect(modelMocks.getModelById).toHaveBeenCalled()
     })
   })
 
@@ -505,15 +439,18 @@ describe('services > mirroredModel', () => {
         queueMock as unknown as PQueue,
       )
 
+      await Promise.all(pendingJobs)
       expect(queueMock.add).toBeCalledTimes(2)
-      expect(s3Mocks.uploadToS3).toBeCalledTimes(2)
+      expect(tarballMocks.initialiseTarGzUpload).toBeCalledTimes(2)
       expect(fileMocks.downloadFile).toBeCalledTimes(2)
+      expect(tarballMocks.addEntryToTarGzUpload).toBeCalledTimes(2)
+      expect(tarballMocks.finaliseTarGzUpload).toBeCalledTimes(2)
     })
   })
 
   describe('uploadReleaseImages', () => {
     test('upload release images', async () => {
-      registryMocks.getImageManifest.mockResolvedValue({ layers: [] })
+      registryMocks.getImageManifest.mockResolvedValue({ layers: [], config: { digest: 'digest' } })
 
       await uploadReleaseImages(
         {} as UserInterface,
@@ -530,10 +467,13 @@ describe('services > mirroredModel', () => {
         queueMock as unknown as PQueue,
       )
 
-      expect(registryMocks.getImageManifest).toBeCalledTimes(2)
-      expect(tarballMocks.createTarGzStreams).toBeCalledTimes(2)
-      expect(s3Mocks.uploadToS3).toBeCalledTimes(2)
+      await Promise.all(pendingJobs)
+      expect(registryMocks.joinDistributionPackageName).toBeCalledTimes(2)
       expect(queueMock.add).toBeCalledTimes(2)
+      expect(tarballMocks.initialiseTarGzUpload).toBeCalledTimes(2)
+      expect(registryMocks.getImageManifest).toBeCalledTimes(2)
+      expect(tarballMocks.addEntryToTarGzUpload).toBeCalledTimes(4)
+      expect(tarballMocks.finaliseTarGzUpload).toBeCalledTimes(2)
     })
 
     test('error', async () => {
@@ -563,12 +503,12 @@ describe('services > mirroredModel', () => {
     })
   })
 
-  describe('exportCompressedRegistryImage', () => {
+  describe('addCompressedRegistryImageComponents', () => {
     test('throw if no tag in distributionPackageNameObject', async () => {
       registryMocks.splitDistributionPackageName.mockReturnValueOnce({ domain: 'domain', path: 'path' } as any)
 
       await expect(
-        addCompressedRegistryImageComponents({} as UserInterface, 'modelId', 'distName', 'filename', {} as any),
+        addCompressedRegistryImageComponents({} as UserInterface, 'modelId', 'distName', {} as any),
       ).rejects.toThrow(/^Distribution Package Name must include a tag./)
       expect(registryMocks.getImageManifest).not.toBeCalled()
     })
@@ -588,11 +528,10 @@ describe('services > mirroredModel', () => {
         ],
       })
 
-      await addCompressedRegistryImageComponents({} as UserInterface, 'modelId', 'imageName:tag', 'filename', {} as any)
+      await addCompressedRegistryImageComponents({} as UserInterface, 'modelId', 'imageName:tag', {} as any)
 
       expect(registryMocks.getImageManifest).toBeCalledTimes(1)
-      expect(tarballMocks.createTarGzStreams).toBeCalledTimes(1)
-      expect(s3Mocks.uploadToS3).toBeCalledTimes(1)
+      expect(tarballMocks.addEntryToTarGzUpload).toBeCalledTimes(4)
       expect(registryMocks.getImageBlob).toBeCalledTimes(3)
     })
 
@@ -604,18 +543,11 @@ describe('services > mirroredModel', () => {
         layers: [{ mediaType: 'application/vnd.docker.image.rootfs.diff.tar.gzip', size: 256, digest: '' }],
       })
 
-      const promise = addCompressedRegistryImageComponents(
-        {} as UserInterface,
-        'modelId',
-        'imageName:tag',
-        'filename',
-        {} as any,
-      )
+      const promise = addCompressedRegistryImageComponents({} as UserInterface, 'modelId', 'imageName:tag', {} as any)
 
       await expect(promise).rejects.toThrow('Could not extract layer digest.')
       expect(registryMocks.getImageManifest).toBeCalledTimes(1)
-      expect(tarballMocks.createTarGzStreams).toBeCalledTimes(1)
-      expect(s3Mocks.uploadToS3).toBeCalledTimes(1)
+      expect(tarballMocks.addEntryToTarGzUpload).toBeCalledTimes(2)
       expect(registryMocks.getImageBlob).toBeCalledTimes(1)
     })
   })
