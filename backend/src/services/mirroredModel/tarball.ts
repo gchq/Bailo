@@ -4,24 +4,25 @@ import zlib from 'node:zlib'
 
 import { extract, Pack, pack } from 'tar-stream'
 
-import { ModelAction } from '../connectors/authorisation/actions.js'
-import authorisation from '../connectors/authorisation/index.js'
-import { UserInterface } from '../models/User.js'
-import log from '../services/log.js'
-import { BaseImporter } from '../services/mirroredModel/importers/baseImporter.js'
-import { DocumentsImporter } from '../services/mirroredModel/importers/documentImporter.js'
-import { FileImporter } from '../services/mirroredModel/importers/fileImporter.js'
-import { ImageImporter } from '../services/mirroredModel/importers/imageImporter.js'
+import { ModelAction } from '../../connectors/authorisation/actions.js'
+import authorisation from '../../connectors/authorisation/index.js'
+import { UserInterface } from '../../models/User.js'
+import config from '../../utils/config.js'
+import { Forbidden, InternalError } from '../../utils/error.js'
+import log from '../log.js'
+import { validateMirroredModel } from '../model.js'
+import { BaseImporter } from './importers/baseImporter.js'
+import { DocumentsImporter } from './importers/documentsImporter.js'
+import { FileImporter } from './importers/fileImporter.js'
+import { ImageImporter } from './importers/imageImporter.js'
 import {
   ExportMetadata,
   FileImportInformation,
   ImageImportInformation,
   ImportKind,
   MongoDocumentImportInformation,
-} from '../services/mirroredModel/mirroredModel.js'
-import { uploadToS3 } from '../services/mirroredModel/s3.js'
-import { validateMirroredModel } from '../services/model.js'
-import { Forbidden, InternalError } from './error.js'
+} from './mirroredModel.js'
+import { uploadToS3 } from './s3.js'
 
 function defaultExtractTarGzErrorListener(
   error: unknown,
@@ -59,9 +60,18 @@ export async function initialiseTarGzUpload(
   tarStream.pipe(gzipStream).pipe(uploadStream)
 
   const uploadPromise = uploadToS3(fileName, uploadStream, logData)
+
   try {
     const metadataBuffer = Buffer.from(JSON.stringify(metadata), 'utf8')
-    tarStream.entry({ name: `metadata.json`, size: metadataBuffer.length, mode: 0o64, type: 'file' }, metadataBuffer)
+    log.debug(
+      { metadata, name: config.modelMirror.metadataFile, size: metadataBuffer.length },
+      'Creating metadata entry.',
+    )
+
+    tarStream.entry(
+      { name: config.modelMirror.metadataFile, size: metadataBuffer.length, mode: 0o64, type: 'file' },
+      metadataBuffer,
+    )
   } catch (error) {
     // Ensure all streams are destroyed on error to prevent leaks
     tarStream.destroy(error as Error)
@@ -81,16 +91,16 @@ type TarEntry =
   | { type: 'text'; filename: string; content: string }
   | { type: 'stream'; filename: string; stream: Readable; size?: number }
 export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, logData?: Record<string, unknown>) {
+  const entryName = `${config.modelMirror.contentDirectory}/${entry.filename}`
+  log.debug({ entryName, entry }, 'Adding entry to tarball.')
+
   if (entry.type === 'text') {
     const contentBuffer = Buffer.from(entry.content, 'utf8')
-    tarStream.entry(
-      { name: `content/${entry.filename}`, size: contentBuffer.length, mode: 0o644, type: 'file' },
-      contentBuffer,
-    )
+    tarStream.entry({ name: entryName, size: contentBuffer.length, mode: 0o644, type: 'file' }, contentBuffer)
   } else if (entry.type === 'stream') {
     await new Promise<void>((resolve, reject) => {
       const tarEntryStream = tarStream.entry(
-        { name: `content/${entry.filename}`, size: entry.size ?? undefined, mode: 0o644, type: 'file' },
+        { name: entryName, size: entry.size ?? undefined, mode: 0o644, type: 'file' },
         (err) => {
           if (err) {
             reject(err)
@@ -127,17 +137,17 @@ export async function extractTarGzStream(
     let importer: BaseImporter
     let firstEntryProcessed = false
 
-    untarStream.on('error', (err) => {
+    untarStream.on('error', async (err) => {
       if (importer && importer.errorListener) {
-        importer.errorListener(err, resolve, reject)
+        await importer.errorListener(err, resolve, reject)
       } else {
         defaultExtractTarGzErrorListener(err, resolve, reject, logData)
       }
     })
 
-    untarStream.on('finish', () => {
+    untarStream.on('finish', async () => {
       if (importer && importer.finishListener) {
-        importer.finishListener(resolve, reject)
+        await importer.finishListener(resolve, reject)
       } else {
         defaultExtractTarGzFinishListener(resolve, reject, logData)
       }
@@ -156,8 +166,11 @@ export async function extractTarGzStream(
         )
 
         if (!firstEntryProcessed) {
-          if (entry.type !== 'file' || entry.name !== 'metadata.json') {
-            throw InternalError(`Expected 'metadata.json' as first entry, found '${entry.name}'`, { entry, ...logData })
+          if (entry.type !== 'file' || entry.name !== config.modelMirror.metadataFile) {
+            throw InternalError(`Expected '${config.modelMirror.metadataFile}' as first entry, found '${entry.name}'`, {
+              entry,
+              ...logData,
+            })
           }
           metadata = (await json(stream)) as ExportMetadata
 
@@ -179,7 +192,11 @@ export async function extractTarGzStream(
               importer = new ImageImporter(user, metadata, logData)
               break
             default:
-              throw InternalError("Unknown importKind specified in 'metadata.json'.", { metadata, entry, ...logData })
+              throw InternalError(`Unknown importKind specified in '${config.modelMirror.metadataFile}'.`, {
+                metadata,
+                entry,
+                ...logData,
+              })
           }
 
           // Drain and continue
@@ -191,7 +208,10 @@ export async function extractTarGzStream(
           throw InternalError('No metadata available before file processing.', { entry, ...logData })
         }
 
-        importer.processEntry(entry, stream)
+        // Workaround `stream` sometimes being a reference rather than the stream itself
+        const passThrough = new PassThrough()
+        stream.pipe(passThrough)
+        await importer.processEntry(entry, passThrough)
         next()
       } catch (err) {
         reject(err)

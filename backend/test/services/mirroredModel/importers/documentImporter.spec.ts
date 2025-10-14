@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../../../src/models/User.js'
-import { importDocuments } from '../../../../src/services/mirroredModel/importers/documentImporter.js'
+import { importDocuments } from '../../../../src/services/mirroredModel/importers/documentsImporter.js'
 import { MockReadable, MockWritable } from '../../../testUtils/streams.js'
 
 const mockTarStream = {

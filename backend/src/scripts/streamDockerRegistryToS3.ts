@@ -1,9 +1,9 @@
 import { ensureBucketExists } from '../clients/s3.js'
 import log from '../services/log.js'
 import { addCompressedRegistryImageComponents, ImportKind } from '../services/mirroredModel/mirroredModel.js'
+import { finaliseTarGzUpload, initialiseTarGzUpload } from '../services/mirroredModel/tarball.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
-import { finaliseTarGzUpload, initialiseTarGzUpload } from '../utils/tarball.js'
 
 async function script() {
   // process args

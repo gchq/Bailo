@@ -5,6 +5,7 @@ import { finished } from 'stream/promises'
 import { Headers } from 'tar-stream'
 
 import { UserInterface } from '../../../models/User.js'
+import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { hasKeysOfType } from '../../../utils/typeguards.js'
 import log from '../../log.js'
@@ -18,8 +19,8 @@ import {
 import { ImageExportMetadata, ImageImportInformation, ImportKind } from '../mirroredModel.js'
 import { BaseImporter } from './baseImporter.js'
 
-const manifestRegex = /^manifest\.json$/
-const blobRegex = /^blobs\/sha256\/[0-9a-f]{64}$/
+const manifestRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/manifest\.json$`)
+const blobRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/blobs\/sha256\/[0-9a-f]{64}$`)
 
 export class ImageImporter extends BaseImporter {
   declare metadata: ImageExportMetadata
@@ -65,7 +66,7 @@ export class ImageImporter extends BaseImporter {
         this.manifestBody = await json(stream)
       } else if (blobRegex.test(entry.name)) {
         // convert filename to digest format
-        const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
+        const layerDigest = `${entry.name.replace(new RegExp(String.raw`^(${config.modelMirror.contentDirectory}/blobs\/sha256\/)`), 'sha256:')}`
         try {
           if (await doesImageLayerExist(this.user, this.metadata.mirroredModelId, this.imageName, layerDigest)) {
             log.debug(
@@ -90,6 +91,14 @@ export class ImageImporter extends BaseImporter {
             )
             const res = await initialiseImageUpload(this.user, this.metadata.mirroredModelId, this.imageName)
 
+            log.debug(
+              {
+                name: entry.name,
+                size: entry.size,
+                ...this.logData,
+              },
+              'Putting image blob.',
+            )
             await putImageBlob(
               this.user,
               this.metadata.mirroredModelId,

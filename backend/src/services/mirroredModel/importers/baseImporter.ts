@@ -1,4 +1,4 @@
-import { PassThrough } from 'node:stream'
+import { PassThrough, Readable } from 'node:stream'
 
 import { Headers } from 'tar-stream'
 
@@ -6,7 +6,7 @@ import { InternalError } from '../../../utils/error.js'
 import { ExportMetadata } from '../mirroredModel.js'
 
 export abstract class BaseImporter {
-  abstract processEntry(entry: Headers, stream: PassThrough): Promise<void> | void
+  abstract processEntry(entry: Headers, stream: PassThrough | Readable): Promise<void> | void
 
   metadata: ExportMetadata
   logData?: Record<string, unknown>
@@ -25,6 +25,6 @@ export abstract class BaseImporter {
 
   // use `any` as "real" types are not a subtype `unknown`
   finishListener(resolve: (reason?: any) => void, _reject: (reason?: unknown) => void) {
-    resolve(this.metadata)
+    resolve({ metadata: this.metadata })
   }
 }

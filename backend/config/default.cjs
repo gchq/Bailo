@@ -308,6 +308,8 @@ module.exports = {
   },
 
   modelMirror: {
+    metadataFile: 'metadata.json',
+    contentDirectory: 'content',
     export: {
       concurrency: 5,
       maxSize: 100 * 1024 * 1024 * 1024,

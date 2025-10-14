@@ -47,6 +47,8 @@ export class FileImporter extends BaseImporter {
             { bucket: this.bucket, path: this.updatedPath, ...this.logData },
             'Skipping imported file as it has already been uploaded to S3.',
           )
+          // auto-drain the stream
+          stream.resume()
         } else {
           await putObjectStream(this.updatedPath, stream, this.bucket)
           await markFileAsCompleteAfterImport(this.updatedPath)

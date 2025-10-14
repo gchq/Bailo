@@ -20,12 +20,6 @@ import { UserInterface } from '../../models/User.js'
 import config from '../../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
-import {
-  addEntryToTarGzUpload,
-  extractTarGzStream,
-  finaliseTarGzUpload,
-  initialiseTarGzUpload,
-} from '../../utils/tarball.js'
 import { downloadFile, getFilesByIds, getTotalFileSize } from '../file.js'
 import { getHttpsAgent } from '../http.js'
 import log from '../log.js'
@@ -37,6 +31,7 @@ import {
   splitDistributionPackageName,
 } from '../registry.js'
 import { getAllFileIds, getReleasesForExport } from '../release.js'
+import { addEntryToTarGzUpload, extractTarGzStream, finaliseTarGzUpload, initialiseTarGzUpload } from './tarball.js'
 
 export async function exportModel(
   user: UserInterface,
@@ -188,7 +183,7 @@ export async function importModel(
   log.info({ payloadUrl, importId }, 'Obtained the file from the payload URL.')
 
   const importResult = await extractTarGzStream(responseBody, user, { importId })
-  log.debug({ importId }, 'Completed extracting archive.')
+  log.debug({ importId, importResult }, 'Completed extracting archive.')
 
   const mirroredModel = await getModelById(user, importResult.metadata.mirroredModelId)
 

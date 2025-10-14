@@ -10,6 +10,7 @@ import { ModelDoc } from '../../../models/Model.js'
 import { ModelCardRevisionDoc } from '../../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
+import config from '../../../utils/config.js'
 import { Forbidden, InternalError } from '../../../utils/error.js'
 import { saveImportedFile } from '../../file.js'
 import log from '../../log.js'
@@ -20,9 +21,9 @@ import { DocumentsExportMetadata, ImportKind, MongoDocumentImportInformation } f
 import { parseFile, parseModelCard, parseRelease } from '../parsers/modelParser.js'
 import { BaseImporter } from './baseImporter.js'
 
-const modelCardRegex = /^[0-9]+\.json$/
-const releaseRegex = /^releases\/(.*)\.json$/
-const fileRegex = /^files\/(.*)\.json$/
+const modelCardRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/[0-9]+\.json$`)
+const releaseRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/releases\/(.*)\.json$`)
+const fileRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/files\/(.*)\.json$`)
 
 export class DocumentsImporter extends BaseImporter {
   declare metadata: DocumentsExportMetadata

@@ -2,7 +2,11 @@ import { PassThrough } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { createTarGzStreams, createUnTarGzStreams, extractTarGzStream } from '../../src/utils/tarball.js'
+import {
+  createTarGzStreams,
+  createUnTarGzStreams,
+  extractTarGzStream,
+} from '../../src/services/mirroredModel/tarball.js'
 import { MockReadable, MockWritable } from '../testUtils/streams.js'
 
 const zlibMocks = vi.hoisted(() => ({
