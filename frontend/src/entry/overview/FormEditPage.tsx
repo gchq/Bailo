@@ -139,17 +139,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   return (
     <>
       <Box sx={{ py: 1 }}>
-        {schemaMigrations.length > 0 && (
-          <Restricted action='editEntry' fallback={<></>}>
-            <MessageAlert
-              severity='info'
-              message='There is a schema available for this model, please consider migrating.'
-              buttonText='Run Migration'
-              buttonAction={() => setMigrationListDialogOpen(true)}
-              disableScrollToView
-            />
-          </Restricted>
-        )}
         <Stack
           direction={{ sm: 'column', md: 'row' }}
           justifyContent='space-between'
