@@ -1,10 +1,6 @@
 import { Document, model, Schema } from 'mongoose'
 
-export const SchemaMigrationKind = {
-  Move: 'move',
-  Delete: 'delete',
-} as const
-export type SchemaMigrationKindKeys = (typeof SchemaMigrationKind)[keyof typeof SchemaMigrationKind]
+import { SchemaMigrationKind, SchemaMigrationKindKeys } from '../types/enums.js'
 
 export interface QuestionMigration {
   id: string

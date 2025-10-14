@@ -1,5 +1,5 @@
-import { SchemaMigrationKind } from '../../src/models/SchemaMigration.js'
-import { ReviewKind, SchemaKind } from '../../src/types/enums.js'
+import {} from '../../src/models/SchemaMigration.js'
+import { ReviewKind, SchemaKind, SchemaMigrationKind } from '../../src/types/enums.js'
 
 export const testModelSchema = {
   id: 'example-model-schema-1',
@@ -130,9 +130,10 @@ export const testReviewerWithOwnerSystemRole = {
 
 export const testSchemaMigration = {
   name: 'my migration plan',
+  id: 'migration-plan-f2434',
   description: 'This is a test migration plan',
-  sourceSchema: 'v1',
-  targetSchema: 'v2',
+  sourceSchema: 'example-model-schema-1',
+  targetSchema: 'example-model-schema-2',
   questionMigrations: [
     {
       id: 'test',
