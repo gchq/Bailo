@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 
+import { HttpHeader } from '../types/enums.js'
 import { BadReq, NotImplemented, UnsatisfiableRange } from './error.js'
 
 /**
@@ -36,11 +37,11 @@ export function parseRangeHeaders(
   const rangeHeader = req.headers.range
 
   if (!ranges) {
-    res.set('Content-Length', String(maxSize))
+    res.set(HttpHeader.CONTENT_LENGTH, String(maxSize))
     return
   }
   if (ranges === -1) {
-    res.set('Content-Range', `bytes */${maxSize}`)
+    res.set(HttpHeader.CONTENT_RANGE, `bytes */${maxSize}`)
     throw UnsatisfiableRange('Unsatisfiable range', { rangeHeader, maxSize: maxSize })
   }
   if (ranges === -2) {
@@ -54,7 +55,7 @@ export function parseRangeHeaders(
   }
   const { start, end } = ranges[0]
   const length = 1 + end - start
-  res.set('Content-Length', String(length))
-  res.set('Content-Range', `bytes ${start}-${end}/${maxSize}`)
+  res.set(HttpHeader.CONTENT_LENGTH, String(length))
+  res.set(HttpHeader.CONTENT_RANGE, `bytes ${start}-${end}/${maxSize}`)
   return { start, end }
 }

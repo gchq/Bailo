@@ -17,3 +17,14 @@ export const GetModelCardVersionOptions = {
 } as const
 export type GetModelCardVersionOptionsKeys =
   (typeof GetModelCardVersionOptions)[keyof typeof GetModelCardVersionOptions]
+
+// HTTP headers
+export const HttpHeader = {
+  CONTENT_TYPE: 'Content-Type',
+  CONTENT_DISPOSITION: 'Content-Disposition',
+  CONTENT_LENGTH: 'Content-Length',
+  CACHE_CONTROL: 'Cache-Control',
+  ETAG: 'ETag',
+  ACCEPT_RANGES: 'Accept-Ranges',
+  CONTENT_RANGE: 'Content-Range',
+}
