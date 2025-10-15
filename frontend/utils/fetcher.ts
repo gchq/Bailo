@@ -14,11 +14,11 @@ type ErrorResponse = {
   error: Error
 }
 
-export const fetcher = async <TMethod extends 'head' | 'get'>(
+export const fetcher = async <THead extends boolean>(
   url: string,
-  method?: TMethod,
+  head?: THead,
 ): Promise<
-  TMethod extends 'head'
+  THead extends true
     ? {
         headers: {
           [k: string]: string
@@ -26,13 +26,15 @@ export const fetcher = async <TMethod extends 'head' | 'get'>(
       }
     : any
 > => {
-  const res = await fetch(url, { method })
+  const res = await fetch(url, {
+    ...(head && { method: 'head' }),
+  })
 
   if (!res.ok) {
     await handleSWRError(res)
   }
 
-  if (method === 'head') {
+  if (head) {
     return { headers: Object.fromEntries(res.headers) }
   } else {
     return res.json()

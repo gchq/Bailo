@@ -20,7 +20,7 @@ export function useHeadReviewRequestsForUser(open?: boolean) {
       headers: any
     },
     ErrorInfo
-  >(['head', `/api/v2/reviews?${qs.stringify(queryParams)}`], ([, url]: string) => fetcher(url, 'head'))
+  >(['head', `/api/v2/reviews?${qs.stringify(queryParams)}`], ([, url]: string) => fetcher(url, true))
 
   return {
     mutateReviews: mutate,
