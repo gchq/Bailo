@@ -113,6 +113,60 @@ describe('services > mirroredModel > s3', () => {
     expect(s3Mocks.getObjectStream).toHaveBeenCalled()
   })
 
+  test('uploadToS3 > handle sign error', async () => {
+    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
+      enabled: true,
+      export: {
+        maxSize: 10,
+        kmsSignature: {
+          enabled: true,
+        },
+      },
+    })
+    kmsMocks.sign.mockRejectedValueOnce('Error')
+
+    await uploadToS3('', {} as unknown as Readable, {
+      sourceModelId: '',
+      mirroredModelId: '',
+      exporter: '',
+      importKind: 'documents',
+    })
+
+    expect(logMock.error).toBeCalledWith(
+      expect.objectContaining({
+        exporter: expect.any(String),
+        importKind: expect.any(String),
+        mirroredModelId: expect.any(String),
+        sourceModelId: expect.any(String),
+      }),
+      'Error generating signature for export.',
+    )
+    expect(s3Mocks.getObjectStream).toHaveBeenCalled()
+  })
+
+  test('uploadToS3 > handle getObjectFromTemporaryS3Location error', async () => {
+    vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
+      enabled: true,
+      export: {
+        maxSize: 10,
+        kmsSignature: {
+          enabled: true,
+        },
+      },
+    })
+    s3Mocks.getObjectStream.mockRejectedValueOnce('Error')
+
+    await uploadToS3('', {} as unknown as Readable, {
+      sourceModelId: '',
+      mirroredModelId: '',
+      exporter: '',
+      importKind: 'documents',
+    })
+
+    expect(logMock.error).toMatchSnapshot()
+    expect(s3Mocks.getObjectStream).toHaveBeenCalled()
+  })
+
   test('uploadToS3 > Handle error when kms enabled', async () => {
     vi.spyOn(configMock, 'modelMirror', 'get').mockReturnValue({
       enabled: true,

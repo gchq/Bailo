@@ -1,0 +1,24 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > mirroredModel > s3 > uploadToS3 > handle getObjectFromTemporaryS3Location error 1`] = `
+[MockFunction spy] {
+  "calls": [
+    [
+      {
+        "error": [Bailo Error: Failed to retrieve stream from temporary S3 location.],
+        "exporter": "",
+        "importKind": "documents",
+        "mirroredModelId": "",
+        "sourceModelId": "",
+      },
+      "Failed to upload export to export location with signatures.",
+    ],
+  ],
+  "results": [
+    {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;

@@ -6,8 +6,8 @@ import {
   createTarGzStreams,
   createUnTarGzStreams,
   extractTarGzStream,
-} from '../../src/services/mirroredModel/tarball.js'
-import { MockReadable, MockWritable } from '../testUtils/streams.js'
+} from '../../../src/services/mirroredModel/tarball.js'
+import { MockReadable, MockWritable } from '../../testUtils/streams.js'
 
 const zlibMocks = vi.hoisted(() => ({
   createGunzip: vi.fn((_options) => {
