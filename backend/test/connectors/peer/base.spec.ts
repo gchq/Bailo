@@ -100,7 +100,9 @@ describe('BasePeerConnector', () => {
   })
 
   it('buildCacheKey returns namespaced key', () => {
-    expect(connector.buildCacheKey(user, 'foo')).toBe('alice+foo')
+    const b64Dn = Buffer.from('alice').toString('base64')
+    const b64Key = Buffer.from('foo').toString('base64')
+    expect(connector.buildCacheKey(user, 'foo')).toBe(`testId:${b64Dn}:${b64Key}`)
   })
 
   it('getHttpsAgent merges the right configs and returns from getHttpsAgent', () => {
