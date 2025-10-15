@@ -1,323 +1,223 @@
-import { Readable } from 'node:stream'
-
+import { PassThrough } from 'stream'
+import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { UserInterface } from '../../../../src/models/User.js'
-import { importCompressedRegistryImage } from '../../../../src/services/mirroredModel/importers/imageImporter.js'
-import { InternalError } from '../../../../src/utils/error.js'
-import { MockReadable, MockWritable } from '../../../testUtils/streams.js'
+import { ImageImporter } from '../../../../src/services/mirroredModel/importers/imageImporter.js'
+import { ImageExportMetadata, ImportKind } from '../../../../src/services/mirroredModel/mirroredModel.js'
 
-const mockTarStream = {
-  entry: vi.fn(({ _name, _size }) => {
-    return new MockWritable()
-  }),
-  pipe: vi.fn().mockReturnThis(),
-  finalize: vi.fn(),
-}
-const tarMocks = vi.hoisted(() => ({
-  extract: vi.fn(() => new MockReadable()),
-  pack: vi.fn(() => mockTarStream),
-  constants: { Z_BEST_SPEED: 1 },
-}))
-vi.mock('tar-stream', () => tarMocks)
+vi.mock('../../../../src/services/model.js', () => ({}))
+vi.mock('../../../../src/connectors/fileScanning/index.ts', () => ({}))
+vi.mock('../../../../src/services/accessRequest.js', () => ({}))
+vi.mock('../../../../src/services/review.js', () => ({}))
+vi.mock('../../../../src/services/release.js', () => ({}))
 
-const mockJson = vi.hoisted(() => ({
-  json: vi.fn(() => ({}) as any),
+const configMocks = vi.hoisted(() => ({
+  modelMirror: {
+    contentDirectory: 'content-dir',
+  },
 }))
-vi.mock('node:stream/consumers', async () => mockJson)
+vi.mock('../../../../src/utils/config.js', () => ({
+  __esModule: true,
+  default: configMocks,
+}))
 
-const streamPromisesMocks = vi.hoisted(() => ({
-  finished: vi.fn(() => Promise.resolve()),
+const authMocks = vi.hoisted(() => ({
+  default: {
+    releases: vi.fn(),
+  },
 }))
-vi.mock('stream/promises', () => streamPromisesMocks)
-
-const tarballMock = vi.hoisted(() => ({
-  extractTarGzStream: vi.fn(),
-}))
-vi.mock('../../../../src/utils/tarball.js', async () => tarballMock)
-
-const typeguardMocks = vi.hoisted(() => ({
-  hasKeysOfType: vi.fn(() => true),
-}))
-vi.mock('../../../../src/utils/typeguards.js', () => typeguardMocks)
+vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const registryMocks = vi.hoisted(() => ({
-  doesImageLayerExist: vi.fn(() => Promise.resolve(false)),
-  initialiseImageUpload: vi.fn(() => ({ location: 'location' })),
+  splitDistributionPackageName: vi.fn(() => ({ path: 'imageName', tag: 'tag' })),
+  doesImageLayerExist: vi.fn(),
+  initialiseImageUpload: vi.fn(() => ({ location: 'upload-location' })),
   putImageBlob: vi.fn(),
   putImageManifest: vi.fn(),
-  splitDistributionPackageName: vi.fn(() => ({ domain: 'domain', path: 'path', tag: 'tag' }) as any),
 }))
 vi.mock('../../../../src/services/registry.js', () => registryMocks)
 
-describe('services > importers > imageImporter', () => {
+const logMocks = vi.hoisted(() => ({
+  debug: vi.fn(),
+  warn: vi.fn(),
+}))
+vi.mock('../../../../src/services/log.js', () => ({
+  default: logMocks,
+}))
+
+const typeguardMocks = vi.hoisted(() => ({
+  hasKeysOfType: vi.fn(),
+}))
+vi.mock('../../../../src/utils/typeguards.js', () => typeguardMocks)
+
+const streamConsumersMocks = vi.hoisted(() => ({
+  json: vi.fn(),
+}))
+vi.mock('node:stream/consumers', () => streamConsumersMocks)
+
+vi.mock('stream/promises', () => ({
+  finished: vi.fn(() => Promise.resolve()),
+}))
+
+const mockUser = { dn: 'user' }
+const mockMetadata: ImageExportMetadata = {
+  importKind: ImportKind.Image,
+  mirroredModelId: 'model1',
+  distributionPackageName: 'domain/imageName:tag',
+} as ImageExportMetadata
+
+describe('ImageImporter', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  test('importCompressedRegistryImage > manifest.json success', async () => {
-    tarballMock.extractTarGzStream.mockImplementation(
-      async (_tarGzStream, entryListener, _errorListener, finishListener) => {
-        // eslint-disable-next-line no-async-promise-executor
-        return new Promise(async (resolve, reject) => {
-          await entryListener({ name: 'manifest.json', type: 'file', size: 123 }, {}, () => {})
-          finishListener(resolve, reject)
-        })
-      },
-    )
-
-    const result = await importCompressedRegistryImage(
-      {} as UserInterface,
-      {} as Readable,
-      'modelId',
-      'distributionPackageName',
-      'importId',
-    )
-
-    expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
-    expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
-    expect(mockJson.json).toBeCalledTimes(1)
-    expect(registryMocks.doesImageLayerExist).not.toBeCalled()
-    expect(typeguardMocks.hasKeysOfType).toBeCalledTimes(1)
-    expect(registryMocks.putImageManifest).toBeCalledTimes(1)
-    expect(result).toMatchSnapshot()
+  test('constructs successfully when importKind is Image', () => {
+    const importer = new ImageImporter(mockUser, mockMetadata)
+    expect(importer.user).toBe(mockUser)
+    expect(importer.imageName).toBe('imageName')
+    expect(importer.imageTag).toBe('tag')
   })
 
-  test('importCompressedRegistryImage > skip non-file entry', async () => {
-    tarballMock.extractTarGzStream.mockImplementation(
-      async (_tarGzStream, entryListener, _errorListener, _finishListener) => {
-        return new Promise((resolve, _reject) => {
-          entryListener({ name: 'dir', type: 'directory' }, {}, () => {})
-          resolve('ok')
-        })
-      },
+  test('throws when importKind is not Image in constructor', () => {
+    const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
+    expect(() => new ImageImporter(mockUser, badMetadata)).toThrowError(
+      /^Cannot parse compressed Image: incorrect metadata specified\./,
     )
-
-    const result = await importCompressedRegistryImage(
-      {} as UserInterface,
-      {} as Readable,
-      'modelId',
-      'distributionPackageName',
-      'importId',
-    )
-
-    expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
-    expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
-    expect(mockJson.json).not.toBeCalled()
-    expect(registryMocks.doesImageLayerExist).not.toBeCalled()
-    expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
-    expect(registryMocks.putImageManifest).not.toBeCalled()
-    expect(result).toMatchSnapshot()
   })
 
-  test('importCompressedRegistryImage > blob upload success', async () => {
-    tarballMock.extractTarGzStream.mockImplementation(
-      async (_tarGzStream, entryListener, _errorListener, _finishListener) => {
-        return new Promise((resolve, _reject) => {
-          entryListener(
-            { name: 'blobs/sha256/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', type: 'file' },
-            {},
-            () => {},
-          )
-          resolve('ok')
-        })
-      },
+  test('throws when splitDistributionPackageName result has no tag', () => {
+    registryMocks.splitDistributionPackageName.mockReturnValueOnce({ path: 'imageName' } as any)
+    expect(() => new ImageImporter(mockUser, mockMetadata)).toThrowError(
+      /^Distribution Package Name must include a tag\./,
     )
-
-    const result = await importCompressedRegistryImage(
-      {} as UserInterface,
-      {} as Readable,
-      'modelId',
-      'distributionPackageName',
-      'importId',
-    )
-
-    expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
-    expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
-    expect(mockJson.json).not.toBeCalled()
-    expect(registryMocks.doesImageLayerExist).toBeCalledTimes(1)
-    expect(registryMocks.initialiseImageUpload).toBeCalledTimes(1)
-    expect(registryMocks.putImageBlob).toBeCalledTimes(1)
-    expect(streamPromisesMocks.finished).toBeCalledTimes(1)
-    expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
-    expect(registryMocks.putImageManifest).not.toBeCalled()
-    expect(result).toMatchSnapshot()
   })
 
-  test('importCompressedRegistryImage > blob skip existing success', async () => {
-    registryMocks.doesImageLayerExist.mockResolvedValueOnce(true)
-    tarballMock.extractTarGzStream.mockImplementation(
-      async (_tarGzStream, entryListener, _errorListener, _finishListener) => {
-        return new Promise((resolve, _reject) => {
-          entryListener(
-            { name: 'blobs/sha256/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', type: 'file' },
-            { resume: vi.fn() },
-            () => {},
-          )
-          resolve('ok')
-        })
-      },
-    )
+  test('processEntry extracts manifest.json', async () => {
+    const importer = new ImageImporter(mockUser, mockMetadata)
+    const entry: Headers = { name: 'content-dir/manifest.json', type: 'file' } as Headers
+    const stream = new PassThrough()
+    streamConsumersMocks.json.mockResolvedValue({ manifest: true })
 
-    const result = await importCompressedRegistryImage(
-      {} as UserInterface,
-      {} as Readable,
-      'modelId',
-      'distributionPackageName',
-      'importId',
-    )
+    await importer.processEntry(entry, stream)
 
-    expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
-    expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
-    expect(mockJson.json).not.toBeCalled()
-    expect(registryMocks.doesImageLayerExist).toBeCalledTimes(1)
-    expect(registryMocks.initialiseImageUpload).not.toBeCalled()
-    expect(registryMocks.putImageBlob).not.toBeCalled()
-    expect(streamPromisesMocks.finished).not.toBeCalled()
-    expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
-    expect(registryMocks.putImageManifest).not.toBeCalled()
-    expect(result).toMatchSnapshot()
+    expect(streamConsumersMocks.json).toHaveBeenCalledWith(stream)
+    expect(importer.manifestBody).toEqual({ manifest: true })
   })
 
-  test('importCompressedRegistryImage > missing manifest.json', async () => {
-    typeguardMocks.hasKeysOfType.mockReturnValueOnce(false)
-    tarballMock.extractTarGzStream.mockImplementation(
-      async (_tarGzStream, _entryListener, errorListener, finishListener) => {
-        // eslint-disable-next-line no-async-promise-executor
-        return new Promise(async (resolve, reject) => {
-          try {
-            finishListener(resolve, reject)
-          } catch (err) {
-            errorListener(err, resolve, reject)
-          }
-        })
-      },
-    )
+  test('processEntry skips blob if it exists in registry', async () => {
+    registryMocks.doesImageLayerExist.mockResolvedValue(true)
+    const importer = new ImageImporter(mockUser, mockMetadata)
+    const entry: Headers = {
+      name: 'content-dir/blobs/sha256/' + 'a'.repeat(64),
+      type: 'file',
+      size: 10,
+    } as Headers
+    const stream = new PassThrough()
+    const resumeSpy = vi.spyOn(stream, 'resume')
 
-    const promise = importCompressedRegistryImage(
-      {} as UserInterface,
-      {} as Readable,
-      'modelId',
-      'distributionPackageName',
-      'importId',
-    )
+    await importer.processEntry(entry, stream)
 
-    await expect(promise).rejects.toThrowError('Manifest file (manifest.json) missing or invalid in Tarball file.')
-    expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
-    expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
-    expect(mockJson.json).not.toBeCalled()
-    expect(registryMocks.doesImageLayerExist).not.toBeCalled()
-    expect(typeguardMocks.hasKeysOfType).toBeCalledTimes(1)
-    expect(registryMocks.putImageManifest).not.toBeCalled()
+    expect(resumeSpy).toHaveBeenCalled()
+    expect(registryMocks.initialiseImageUpload).not.toHaveBeenCalled()
   })
 
-  test('importCompressedRegistryImage > invalid distributionPackageName', async () => {
-    registryMocks.splitDistributionPackageName.mockReturnValueOnce({ domain: 'domain', path: 'path', digest: 'digest' })
+  test('processEntry uploads blob if not in registry', async () => {
+    registryMocks.doesImageLayerExist.mockResolvedValue(false)
+    const importer = new ImageImporter(mockUser, mockMetadata)
+    const entry: Headers = {
+      name: 'content-dir/blobs/sha256/' + 'b'.repeat(64),
+      type: 'file',
+      size: 20,
+    } as Headers
+    const stream = new PassThrough()
 
-    const promise = importCompressedRegistryImage(
-      {} as UserInterface,
-      {} as Readable,
-      'modelId',
-      'distributionPackageName',
-      'importId',
+    await importer.processEntry(entry, stream)
+
+    expect(registryMocks.initialiseImageUpload).toHaveBeenCalled()
+    expect(registryMocks.putImageBlob).toHaveBeenCalledWith(
+      mockUser,
+      mockMetadata.mirroredModelId,
+      'imageName',
+      'upload-location',
+      expect.stringContaining('sha256:'),
+      stream,
+      String(entry.size),
     )
-
-    await expect(promise).rejects.toThrowError('Distribution Package Name must include a tag.')
-    expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
-    expect(tarballMock.extractTarGzStream).not.toBeCalled()
-    expect(mockJson.json).not.toBeCalled()
-    expect(registryMocks.doesImageLayerExist).not.toBeCalled()
-    expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
-    expect(registryMocks.putImageManifest).not.toBeCalled()
   })
 
-  test('importCompressedRegistryImage > error on invalid file entry name', async () => {
-    tarballMock.extractTarGzStream.mockImplementation(
-      (
-        _tarGzStream,
-        entryListener,
-        errorListener = (err, _res, rej) => rej(err),
-        finishListener = (res, _rej) => res('ok'),
-      ) => {
-        // eslint-disable-next-line no-async-promise-executor
-        return new Promise(async (resolve, reject) => {
-          try {
-            await entryListener({ name: 'bad', type: 'file' }, {}, () => {})
-            finishListener(resolve, reject)
-          } catch (err) {
-            errorListener(err, resolve, reject)
-          }
-        })
-      },
-    )
-
-    const promise = importCompressedRegistryImage(
-      {} as UserInterface,
-      {} as Readable,
-      'modelId',
-      'distributionPackageName',
-      'importId',
-    )
-
-    await expect(promise).rejects.toThrowError('Cannot parse compressed image: unrecognised contents.')
-    expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
-    expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
-    expect(mockJson.json).not.toBeCalled()
-    expect(registryMocks.doesImageLayerExist).not.toBeCalled()
-    expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
-    expect(registryMocks.putImageManifest).not.toBeCalled()
-  })
-
-  test('importCompressedRegistryImage > handle registry error', async () => {
-    registryMocks.putImageBlob.mockImplementationOnce(async () => {
-      throw InternalError('Unrecognised response headers when putting image blob.')
+  test('processEntry throws error when blob upload fails', async () => {
+    registryMocks.doesImageLayerExist.mockResolvedValue(false)
+    registryMocks.initialiseImageUpload.mockImplementation(() => {
+      throw new Error('init fail')
     })
-    tarballMock.extractTarGzStream.mockImplementation(
-      async (_tarGzStream, entryListener, errorListener = (err, _resolve, reject) => reject(err), _finishListener) => {
-        // eslint-disable-next-line no-async-promise-executor
-        return new Promise(async (resolve, reject) => {
-          const next = (err?: unknown) => {
-            if (err) {
-              // simulate tar-stream propagating error from next()
-              throw err
-            }
-          }
+    const importer = new ImageImporter(mockUser, mockMetadata)
+    const entry: Headers = {
+      name: 'content-dir/blobs/sha256/' + 'c'.repeat(64),
+      type: 'file',
+      size: 30,
+    } as Headers
+    const stream = new PassThrough()
 
-          try {
-            await entryListener(
-              {
-                name: 'blobs/sha256/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
-                type: 'file',
-                size: 123,
-              },
-              {},
-              next,
-            )
-            resolve('ok')
-          } catch (err) {
-            errorListener(err, resolve, reject)
-          }
-        })
-      },
+    await expect(importer.processEntry(entry, stream)).rejects.toThrowError(/^Failed to upload blob to registry\./)
+  })
+
+  test('processEntry throws error for unrecognised file path', async () => {
+    const importer = new ImageImporter(mockUser, mockMetadata)
+    const entry: Headers = { name: 'content-dir/invalid.json', type: 'file' } as Headers
+    const stream = new PassThrough()
+
+    await expect(importer.processEntry(entry, stream)).rejects.toThrowError(
+      /^Cannot parse compressed image: unrecognised contents\./,
     )
+  })
 
-    const promise = importCompressedRegistryImage(
-      {} as UserInterface,
-      {} as Readable,
-      'modelId',
-      'distributionPackageName',
-      'importId',
+  test('processEntry warns & skips non-file entries', async () => {
+    const importer = new ImageImporter(mockUser, mockMetadata)
+    const entry: Headers = { name: 'some-dir', type: 'directory' } as Headers
+    const stream = new PassThrough()
+
+    await importer.processEntry(entry, stream)
+
+    expect(logMocks.warn).toHaveBeenCalledWith({ name: 'some-dir', type: 'directory' }, 'Skipping non-file entry.')
+  })
+
+  test('finishListener uploads manifest successfully when valid', async () => {
+    typeguardMocks.hasKeysOfType.mockReturnValue(true)
+    const importer = new ImageImporter(mockUser, mockMetadata)
+    importer.manifestBody = { mediaType: 'mt' }
+    const resolve = vi.fn()
+    const reject = vi.fn()
+
+    await importer.finishListener(resolve, reject)
+
+    expect(registryMocks.putImageManifest).toHaveBeenCalledWith(
+      mockUser,
+      mockMetadata.mirroredModelId,
+      'imageName',
+      'tag',
+      JSON.stringify(importer.manifestBody),
+      'mt',
     )
+    expect(resolve).toHaveBeenCalledWith({
+      metadata: mockMetadata,
+      image: { modelId: mockMetadata.mirroredModelId, imageName: 'imageName', imageTag: 'tag' },
+    })
+  })
 
-    await expect(promise).rejects.toThrowError('Unrecognised response headers when putting image blob.')
-    expect(registryMocks.splitDistributionPackageName).toBeCalledTimes(1)
-    expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
-    expect(mockJson.json).not.toBeCalled()
-    expect(registryMocks.doesImageLayerExist).toBeCalledTimes(1)
-    expect(registryMocks.initialiseImageUpload).toBeCalledTimes(1)
-    expect(registryMocks.putImageBlob).toBeCalledTimes(1)
-    expect(streamPromisesMocks.finished).not.toBeCalled()
-    expect(typeguardMocks.hasKeysOfType).not.toBeCalled()
-    expect(registryMocks.putImageManifest).not.toBeCalled()
+  test('finishListener rejects when manifest invalid', async () => {
+    typeguardMocks.hasKeysOfType.mockReturnValue(false)
+    const importer = new ImageImporter(mockUser, mockMetadata)
+    importer.manifestBody = { bad: 'data' }
+    const resolve = vi.fn()
+    const reject = vi.fn()
+
+    await importer.finishListener(resolve, reject)
+
+    expect(resolve).not.toHaveBeenCalled()
+    expect(reject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringMatching(/^Manifest file \(manifest\.json\) missing or invalid/),
+      }),
+    )
   })
 })

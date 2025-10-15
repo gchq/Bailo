@@ -1,32 +1,42 @@
-import { Readable } from 'node:stream'
+import { PassThrough } from 'node:stream'
 
-import { describe, expect, test, vi } from 'vitest'
+import { Headers } from 'tar-stream'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { importModelFile } from '../../../../src/services/mirroredModel/importers/fileImporter.js'
+import { FileImporter } from '../../../../src/services/mirroredModel/importers/fileImporter.js'
+import { FileExportMetadata, ImportKind } from '../../../../src/services/mirroredModel/mirroredModel.js'
 
-const configMock = vi.hoisted(
-  () =>
-    ({
-      s3: {
-        buckets: {
-          uploads: 'uploads',
-        },
-      },
-    }) as any,
-)
+vi.mock('../../../../src/services/model.js', () => ({}))
+vi.mock('../../../../src/services/release.js', () => ({}))
+vi.mock('../../../../src/connectors/fileScanning/index.ts', () => ({}))
+
+const authMocks = vi.hoisted(() => ({
+  default: {
+    releases: vi.fn(),
+  },
+}))
+vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
+
+const configMocks = vi.hoisted(() => ({
+  s3: {
+    buckets: {
+      uploads: 'uploads-bucket',
+    },
+  },
+  modelMirror: {
+    contentDirectory: 'content-dir',
+  },
+}))
 vi.mock('../../../../src/utils/config.js', () => ({
   __esModule: true,
-  default: configMock,
+  default: configMocks,
 }))
 
-const logMock = vi.hoisted(() => ({
-  info: vi.fn(),
+const logMocks = vi.hoisted(() => ({
   debug: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
 }))
-vi.mock('../../../../src/services/log.js', async () => ({
-  default: logMock,
+vi.mock('../../../../src/services/log.js', () => ({
+  default: logMocks,
 }))
 
 const s3Mocks = vi.hoisted(() => ({
@@ -34,44 +44,115 @@ const s3Mocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/clients/s3.js', () => s3Mocks)
 
-const fileMocks = vi.hoisted(() => ({
-  createFilePath: vi.fn(() => 'file/path'),
+const fileModelMocks = vi.hoisted(() => ({
+  findOne: vi.fn(),
+}))
+vi.mock('../../../../src/models/File.js', () => ({
+  __esModule: true,
+  default: fileModelMocks,
+}))
+
+const fileServiceMocks = vi.hoisted(() => ({
+  createFilePath: vi.fn(() => 'updated/file/path'),
   markFileAsCompleteAfterImport: vi.fn(),
 }))
-vi.mock('../../../../src/services/file.js', () => fileMocks)
+vi.mock('../../../../src/services/file.js', () => fileServiceMocks)
 
-const fileModelMocks = vi.hoisted(() => {
-  const obj: any = {}
+const registryMocks = vi.hoisted(() => ({
+  joinDistributionPackageName: vi.fn(() => 'repo/path:tag'),
+}))
+vi.mock('../../../../src/services/registry.js', () => registryMocks)
 
-  obj.findOne = vi.fn()
+const mockMetadata: FileExportMetadata = {
+  importKind: ImportKind.File,
+  mirroredModelId: 'model123',
+  filePath: 'original/file/path',
+} as FileExportMetadata
 
-  const model: any = vi.fn(() => obj)
-  Object.assign(model, obj)
-
-  return model
-})
-vi.mock('../../../../src/models/File.js', () => ({ default: fileModelMocks }))
-
-describe('services > importers > fileImporter', () => {
-  test('importModelFile > success', async () => {
-    const result = await importModelFile({} as Readable, 'fileId', 'mirroredModelId', 'importId')
-
-    expect(fileMocks.createFilePath).toBeCalledTimes(1)
-    expect(fileModelMocks.findOne).toBeCalledTimes(1)
-    expect(s3Mocks.putObjectStream).toBeCalledTimes(1)
-    expect(fileMocks.markFileAsCompleteAfterImport).toBeCalledTimes(1)
-    expect(result).toMatchSnapshot()
+describe('FileImporter', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
   })
 
-  test('importModelFile > skip complete', async () => {
-    fileModelMocks.findOne.mockResolvedValue({ complete: true })
+  test('initialise when importKind is File success', () => {
+    const importer = new FileImporter(mockMetadata)
 
-    const result = await importModelFile({} as Readable, 'fileId', 'mirroredModelId', 'importId')
+    expect(importer.bucket).toBe(configMocks.s3.buckets.uploads)
+    expect(importer.updatedPath).toBe('updated/file/path')
+    expect(importer.extractedFile).toBe(false)
+  })
 
-    expect(fileMocks.createFilePath).toBeCalledTimes(1)
-    expect(fileModelMocks.findOne).toBeCalledTimes(1)
-    expect(s3Mocks.putObjectStream).not.toBeCalled()
-    expect(fileMocks.markFileAsCompleteAfterImport).not.toBeCalled()
-    expect(result).toMatchSnapshot()
+  test('initialise when importKind is not File failure', () => {
+    const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
+
+    expect(() => new FileImporter(badMetadata)).toThrowError(
+      /^Cannot parse compressed File: incorrect metadata specified./,
+    )
+  })
+
+  test('processEntry upload new file to S3', async () => {
+    fileModelMocks.findOne.mockResolvedValue(null)
+
+    const importer = new FileImporter(mockMetadata)
+    const entry: Headers = { name: 'file1', type: 'file' } as Headers
+    const stream = new PassThrough()
+    stream.end('file-contents')
+
+    await importer.processEntry(entry, stream)
+
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledWith('updated/file/path', stream, 'uploads-bucket')
+    expect(fileServiceMocks.markFileAsCompleteAfterImport).toHaveBeenCalledWith('updated/file/path')
+    expect(importer.extractedFile).toBe(true)
+  })
+
+  test('processEntry skip already existing file', async () => {
+    fileModelMocks.findOne.mockResolvedValue({ id: 'existingId' })
+
+    const importer = new FileImporter(mockMetadata)
+    const entry: Headers = { name: 'file1', type: 'file' } as Headers
+    const stream = new PassThrough()
+    stream.end('file-contents')
+    // spy on resume
+    const resumeSpy = vi.spyOn(stream, 'resume')
+
+    await importer.processEntry(entry, stream)
+
+    expect(resumeSpy).toHaveBeenCalled()
+    expect(s3Mocks.putObjectStream).not.toHaveBeenCalled()
+    expect(importer.extractedFile).toBe(true)
+  })
+
+  test('processEntry throw on multiple files', async () => {
+    fileModelMocks.findOne.mockResolvedValue(null)
+
+    const importer = new FileImporter(mockMetadata)
+    importer.extractedFile = true
+    const entry: Headers = { name: 'file1', type: 'file' } as Headers
+    const stream = new PassThrough()
+    stream.end('file-contents')
+
+    await expect(importer.processEntry(entry, stream)).rejects.toThrowError(
+      /^Cannot parse compressed file: multiple files found./,
+    )
+  })
+
+  test('processEntry skip non-file entries', async () => {
+    const importer = new FileImporter(mockMetadata)
+    const entry: Headers = { name: 'dir', type: 'directory' } as Headers
+    const stream = new PassThrough()
+
+    await importer.processEntry(entry, stream)
+
+    expect(logMocks.debug).toHaveBeenCalledWith({ name: 'dir', type: 'directory' }, 'Skipping non-file entry.')
+  })
+
+  test('finishListener calls BaseImporter behaviour', () => {
+    const importer = new FileImporter(mockMetadata)
+    const resolve = vi.fn()
+    const reject = vi.fn()
+
+    importer.finishListener(resolve, reject)
+
+    expect(resolve).toHaveBeenCalledWith({ metadata: mockMetadata })
   })
 })

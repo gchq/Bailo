@@ -6,6 +6,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { DocumentsImporter } from '../../../../src/services/mirroredModel/importers/documentsImporter.js'
 import { DocumentsExportMetadata, ImportKind } from '../../../../src/services/mirroredModel/mirroredModel.js'
 
+vi.mock('../../../../src/connectors/fileScanning/index.ts', () => ({}))
+
 const authMocks = vi.hoisted(() => ({
   default: {
     releases: vi.fn(),
@@ -13,19 +15,11 @@ const authMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
-const configMocks = vi.hoisted(
-  () =>
-    ({
-      modelMirror: {
-        contentDirectory: 'content-dir',
-      },
-      connectors: {
-        fileScanners: {
-          kinds: [],
-        },
-      },
-    }) as any,
-)
+const configMocks = vi.hoisted(() => ({
+  modelMirror: {
+    contentDirectory: 'content-dir',
+  },
+}))
 vi.mock('../../../../src/utils/config.js', () => ({
   __esModule: true,
   default: configMocks,

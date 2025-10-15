@@ -51,13 +51,6 @@ export class ImageImporter extends BaseImporter {
   }
 
   async processEntry(entry: Headers, stream: PassThrough) {
-    if (this.metadata.importKind !== ImportKind.Image) {
-      throw InternalError('Cannot parse compressed Image: incorrect metadata specified.', {
-        metadata: this.metadata,
-        ...this.logData,
-      })
-    }
-
     if (entry.type === 'file') {
       // Process file
       if (manifestRegex.test(entry.name)) {
