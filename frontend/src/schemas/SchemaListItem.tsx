@@ -48,7 +48,7 @@ export default function SchemaListItem({
 
   const [modelsListOpen, setModelsListOpen] = useState<boolean>(false)
 
-  const [reviewRoleSelectorIsOpen, setReviewRoleSelectorIsOpen] = useState(false)
+  const [reviewRoleSelectorIsOpen, setReviewRoleSelectorIsOpen] = useState<boolean>(false)
 
   const handleReviewRolesDialogClose = () => {
     mutateSchemas()
