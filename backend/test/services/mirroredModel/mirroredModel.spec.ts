@@ -600,6 +600,7 @@ describe('services > mirroredModel', () => {
         [{ id: 'fileId1' }, { id: 'fileId2' }] as any[],
         'mirroredModelId',
         queueMock as unknown as PQueue,
+        'export-123',
       )
 
       expect(queueMock.add).toBeCalledTimes(2)
@@ -625,6 +626,7 @@ describe('services > mirroredModel', () => {
         } as any,
         'mirroredModelId',
         queueMock as unknown as PQueue,
+        'export-123',
       )
 
       expect(registryMocks.getImageManifest).toBeCalledTimes(2)
@@ -651,6 +653,7 @@ describe('services > mirroredModel', () => {
         } as any,
         'mirroredModelId',
         queueMock as unknown as PQueue,
+        'export-123',
       )
 
       expect(logMock.error).toHaveBeenCalledWith(
