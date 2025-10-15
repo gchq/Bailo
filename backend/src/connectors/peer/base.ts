@@ -74,13 +74,17 @@ export abstract class BasePeerConnector {
   abstract queryModels(opts, user: UserInterface): Promise<Array<ModelSearchResult>>
 
   /**
-   * Namespace cache by user
+   * Provide a formatted key of: `peerId:userDn:key`
+   *
+   * Both userDn and key are independently Base64 encoded
    *
    * @param user to extract the DN from
    * @param key to use as the remainder of the key (such as a query string)
-   * @returns a user-specific cache key
+   * @returns a key based on peer ID, user DN, and provided key
    */
-  buildCacheKey(user: UserInterface, key: string) {
-    return `${user.dn}+${key}`
+  buildCacheKey(user: UserInterface, key: string): string {
+    const b64Dn = Buffer.from(user.dn).toString('base64')
+    const b64Key = Buffer.from(key).toString('base64')
+    return [this.id, b64Dn, b64Key].join(':')
   }
 }
