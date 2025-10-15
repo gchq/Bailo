@@ -140,13 +140,14 @@ export default function SideNavigation({
             />
             <Divider aria-hidden='true' />
             <NavMenuItem
-              href='/docs/api'
+              href='/api/v2/docs'
               selectedPage={page}
               primaryText='API'
               drawerOpen={drawerOpen}
               menuPage='api'
               title='API'
               icon={<LinkIcon />}
+              openLinkInNewTab
             />
             <NavMenuItem
               href='/docs/python/index.html'
@@ -156,6 +157,7 @@ export default function SideNavigation({
               menuPage='pythonDocs'
               title='Python Client Docs'
               icon={<DescriptionIcon />}
+              openLinkInNewTab
             />
             <NavMenuItem
               href='/help'

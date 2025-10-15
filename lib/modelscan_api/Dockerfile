@@ -7,11 +7,12 @@ ARG PYTHONPATH
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-COPY requirements.txt /requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m venv /venv && \
-    /venv/bin/pip install --upgrade pip setuptools wheel && \
-    /venv/bin/pip install -r /requirements.txt
+    /venv/bin/pip install --upgrade pip setuptools wheel
+
+COPY requirements.txt /requirements.txt
+RUN --mount=type=cache,target=/root/.cache/pip /venv/bin/pip install -r /requirements.txt
 
 FROM ubuntu:24.04 AS base
 ARG PYTHONPATH
@@ -20,8 +21,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=${PYTHONPATH}
 # Cache packages with run cache, set up nonroot user
 # Update system packages, install python3
-RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
-    rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean && \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
     groupadd -g 65532 nonroot && \
     useradd nonroot -u 65532 -g 65532 -M && \
     apt-get update && \
@@ -33,6 +35,9 @@ CMD ["python3", "/venv/bin/fastapi", "run", "bailo_modelscan_api/main.py", "--po
 FROM base AS dev
 
 COPY --from=build /venv /venv
+# Ensure app dir exists before mounting
+RUN mkdir -p /app/bailo_modelscan_api
+CMD ["python3", "/venv/bin/fastapi", "dev", "bailo_modelscan_api/main.py", "--host", "0.0.0.0", "--port", "3311"]
 
 FROM base AS prod
 

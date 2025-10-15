@@ -93,7 +93,7 @@ const releaseModelMocks = vi.hoisted(() => {
   obj.save = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
-  obj.findOneWithDeleted = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
   obj.filter = vi.fn(() => obj)
 
   const model: any = vi.fn((params) => ({ ...obj, ...params }))
@@ -103,12 +103,47 @@ const releaseModelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/Release.js', () => ({ default: releaseModelMocks }))
 
+const reviewModelMocks = vi.hoisted(() => {
+  const obj: any = {}
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.unwind = vi.fn(() => obj)
+  obj.group = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.updateMany = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.delete = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.filter = vi.fn(() => obj)
+
+  const model: any = vi.fn((params) => ({ ...obj, ...params }))
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/Review.js', () => ({ default: reviewModelMocks }))
+
 const mockReviewService = vi.hoisted(() => {
   return {
     createReleaseReviews: vi.fn(),
+    removeReleaseReviews: vi.fn(),
   }
 })
 vi.mock('../../src/services/review.js', () => mockReviewService)
+
+const mockResponseService = vi.hoisted(() => {
+  return {
+    removeResponsesByParentIds: vi.fn(),
+  }
+})
+vi.mock('../../src/services/response.js', () => mockResponseService)
 
 const mockWebhookService = vi.hoisted(() => {
   return {
@@ -119,7 +154,7 @@ vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
 describe('services > release', () => {
   test('createRelease > simple', async () => {
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
 
     await createRelease({} as any, { semver: 'v1.0.0', minor: false } as any)
 
@@ -130,7 +165,7 @@ describe('services > release', () => {
   })
 
   test('createRelease > minor release', async () => {
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
 
     await createRelease({} as any, { semver: 'v1.0.0', minor: true } as any)
 
@@ -143,7 +178,7 @@ describe('services > release', () => {
     const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
     registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
 
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
 
     await createRelease(
       {} as any,
@@ -161,7 +196,7 @@ describe('services > release', () => {
   test('createRelease > missing images in the registry', async () => {
     const existingImages = [{ repository: 'mockRep', name: 'image', tags: ['latest'] }]
     registryMocks.listModelImages.mockResolvedValueOnce(existingImages)
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
 
     await expect(() =>
       createRelease(
@@ -182,7 +217,7 @@ describe('services > release', () => {
 
   test('createRelease > release with bad files', async () => {
     fileMocks.getFileById.mockResolvedValueOnce({ modelId: 'random_model' })
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
 
     await expect(() =>
       createRelease(
@@ -200,7 +235,7 @@ describe('services > release', () => {
 
   test('createRelease > release with bailo error', async () => {
     fileMocks.getFileById.mockRejectedValueOnce(NotFound('File not found.'))
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
 
     await expect(() =>
       createRelease(
@@ -218,7 +253,7 @@ describe('services > release', () => {
 
   test('createRelease > release with generic error', async () => {
     fileMocks.getFileById.mockRejectedValueOnce(Error('File not found.'))
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
 
     await expect(() =>
       createRelease(
@@ -241,7 +276,7 @@ describe('services > release', () => {
       card: { version: 1 },
       settings: { mirror: { sourceModelId: '' } },
     })
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
 
     await expect(
       async () =>
@@ -259,7 +294,7 @@ describe('services > release', () => {
   })
 
   test('createRelease > release with bad semver', async () => {
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
     const result = createRelease(
       {} as any,
       {
@@ -275,7 +310,7 @@ describe('services > release', () => {
   test('createRelease > bad authorisation', async () => {
     vi.mocked(authorisation.release).mockResolvedValue({ info: 'You do not have permission', success: false, id: '' })
 
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
     await expect(() => createRelease({} as any, { semver: 'v1.0.0' } as any)).rejects.toThrowError(
       /^You do not have permission/,
     )
@@ -287,7 +322,7 @@ describe('services > release', () => {
       card: { version: 999 },
       settings: { mirror: { sourceModelId: '' } },
     })
-    releaseModelMocks.findOneWithDeleted.mockResolvedValue(null)
+    releaseModelMocks.findOne.mockResolvedValue(null)
 
     await createRelease({} as any, { semver: 'v1.0.0' } as any)
 
@@ -465,6 +500,7 @@ describe('services > release', () => {
   })
 
   test('deleteRelease > success', async () => {
+    reviewModelMocks.find.mockResolvedValue([])
     expect(await deleteRelease({} as any, 'test', 'test')).toStrictEqual({ modelId: 'test', semver: 'test' })
   })
 
@@ -497,7 +533,6 @@ describe('services > release', () => {
     await expect(() => deleteRelease({} as any, 'test', 'test')).rejects.toThrowError(
       /^Cannot delete a release on a mirrored model./,
     )
-    expect(releaseModelMocks.save).not.toBeCalled()
   })
 
   test('removeFileFromReleases > no permission', async () => {

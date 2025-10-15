@@ -46,9 +46,7 @@ module.exports = {
   registry: {
     connection: {
       internal: 'https://registry:5000',
-      host: 'registry:5000',
-      port: 5000,
-      protocol: 'https',
+      insecure: true,
     },
   },
 

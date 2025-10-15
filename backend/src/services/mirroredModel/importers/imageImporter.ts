@@ -1,6 +1,6 @@
+import { Readable } from 'node:stream'
 import { json } from 'node:stream/consumers'
 
-import { Readable } from 'stream'
 import { finished } from 'stream/promises'
 
 import { UserInterface } from '../../../models/User.js'
@@ -61,38 +61,49 @@ export async function importCompressedRegistryImage(
         } else if (blobRegex.test(entry.name)) {
           // convert filename to digest format
           const layerDigest = `${entry.name.replace(/^(blobs\/sha256\/)/, 'sha256:')}`
-          if (await doesImageLayerExist(user, modelId, imageName, layerDigest)) {
-            log.debug(
+          try {
+            if (await doesImageLayerExist(user, modelId, imageName, layerDigest)) {
+              log.debug(
+                {
+                  name: entry.name,
+                  size: entry.size,
+                  importId,
+                },
+                'Skipping blob as it already exists in the registry',
+              )
+
+              // auto-drain the stream
+              stream.resume()
+              next()
+            } else {
+              log.debug(
+                {
+                  name: entry.name,
+                  size: entry.size,
+                  importId,
+                },
+                'Initiating un-tarred blob upload',
+              )
+              const res = await initialiseImageUpload(user, modelId, imageName)
+
+              await putImageBlob(user, modelId, imageName, res.location, layerDigest, stream, String(entry.size))
+              await finished(stream)
+              next()
+            }
+          } catch (err) {
+            log.error(
               {
+                err,
                 name: entry.name,
                 size: entry.size,
                 importId,
               },
-              'Skipping blob as it already exists in the registry',
+              'Failed to upload blob to registry.',
             )
-
-            // auto-drain the stream
-            stream.resume()
-            next()
-          } else {
-            log.debug(
-              {
-                name: entry.name,
-                size: entry.size,
-                importId,
-              },
-              'Initiating un-tarred blob upload',
-            )
-            const res = await initialiseImageUpload(user, modelId, imageName)
-
-            await putImageBlob(user, modelId, imageName, res.location, layerDigest, stream, String(entry.size))
-            await finished(stream)
-            next()
+            next(err)
           }
         } else {
-          throw InternalError('Cannot parse compressed image: unrecognised contents.', {
-            importId,
-          })
+          throw InternalError('Cannot parse compressed image: unrecognised contents.', { importId })
         }
       } else {
         // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file

@@ -36,7 +36,9 @@ export default function RichTextInput({
   if (!formContext.editMode) {
     return (
       <>
-        <Typography fontWeight='bold'>{label}</Typography>
+        <Typography fontWeight='bold' aria-label={`label for ${label}`}>
+          {label}
+        </Typography>
         {value ? (
           <MarkdownDisplay>{value}</MarkdownDisplay>
         ) : (
@@ -61,7 +63,7 @@ export default function RichTextInput({
         textareaProps={{ disabled, id }}
         errors={rawErrors}
         label={
-          <Typography fontWeight='bold'>
+          <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
             {label}
             {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
           </Typography>

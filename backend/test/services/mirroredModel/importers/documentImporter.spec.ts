@@ -1,4 +1,5 @@
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
+
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import authorisation from '../../../../src/connectors/authorisation/index.js'
@@ -276,6 +277,7 @@ describe('services > importers > documentImporter', () => {
       'importId',
     )
 
+    await expect(promise).rejects.toThrowError('Cannot parse compressed file: unrecognised contents.')
     expect(tarballMock.extractTarGzStream).toBeCalledTimes(1)
     expect(mockJson.json).toBeCalledTimes(1)
     expect(modelParserMock.parseModelCard).not.toBeCalled()
@@ -286,7 +288,6 @@ describe('services > importers > documentImporter', () => {
     expect(modelParserMock.parseFile).not.toBeCalled()
     expect(fileMocks.saveImportedFile).not.toBeCalled()
     expect(modelMocks.setLatestImportedModelCard).not.toBeCalled()
-    expect(promise).rejects.toThrowError('Cannot parse compressed file: unrecognised contents.')
   })
 
   test('auth failure', async () => {

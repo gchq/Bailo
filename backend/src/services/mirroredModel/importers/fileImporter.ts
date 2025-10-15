@@ -1,4 +1,4 @@
-import { Readable } from 'stream'
+import { Readable } from 'node:stream'
 
 import { putObjectStream } from '../../../clients/s3.js'
 import FileModel from '../../../models/File.js'

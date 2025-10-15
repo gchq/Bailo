@@ -67,7 +67,7 @@ export default function RichTextEditor({
         preview='edit'
         hideToolbar={hideToolbar}
         height={150}
-        textareaProps={richTextareaProps}
+        textareaProps={{ ...richTextareaProps, 'aria-labelledby': 'rich-text-input' }}
         onChange={handleChange}
       />
     </>
