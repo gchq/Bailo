@@ -14,27 +14,26 @@ export class PeerConnectorWrapper {
   }
 
   async init() {
-    this.peers.forEach((peer) => peer.init())
+    await Promise.all(Array.from(this.peers.values()).map((peer) => peer.init()))
   }
 
   async status(peersToQuery: Array<string> = this.peerIds): Promise<Map<string, PeerConfigStatus>> {
-    const results = new Map<string, PeerConfigStatus>()
-    const validPeers = peersToQuery.every((q) => this.peers.has(q))
-    if (!validPeers) {
+    if (!peersToQuery.every((q) => this.peers.has(q))) {
       throw InternalError('Invalid peer IDs provided to wrapper')
     }
-    for (const id of peersToQuery) {
-      const peer = this.peers.get(id)
-      if (!peer) {
-        throw InternalError(`Peer connector not found: ${id}`)
-      }
-      results.set(id, {
-        status: await peer.getPeerStatus(),
-        config: peer.getConfig(),
-      })
-    }
-
-    return results
+    const entries = await Promise.all(
+      peersToQuery.map(async (id) => {
+        const peer = this.peers.get(id)!
+        return [
+          id,
+          {
+            status: await peer.getPeerStatus(),
+            config: peer.getConfig(),
+          } as PeerConfigStatus,
+        ] as [string, PeerConfigStatus]
+      }),
+    )
+    return new Map<string, PeerConfigStatus>(entries)
   }
 
   async queryModels(
@@ -44,20 +43,15 @@ export class PeerConnectorWrapper {
     user: UserInterface,
     peersToQuery: Array<string> = this.peerIds,
   ): Promise<Array<ModelSearchResult>> {
-    const results = new Array<ModelSearchResult>()
-    const validPeers = peersToQuery.every((q) => this.peers.has(q))
-    if (!validPeers) {
+    if (!peersToQuery.every((q) => this.peers.has(q))) {
       throw InternalError('Invalid peer IDs provided to wrapper')
     }
-    for (const id of peersToQuery) {
-      const peer = this.peers.get(id)
-      if (!peer) {
-        throw InternalError(`Peer connector not found: ${id}`)
-      }
-      const queryResponse = await peer.queryModels(opts, user)
-      results.push(...queryResponse)
-    }
-
-    return results
+    const results = await Promise.all(
+      peersToQuery.map((id) => {
+        const peer = this.peers.get(id)!
+        return peer.queryModels(opts, user)
+      }),
+    )
+    return results.flat()
   }
 }
