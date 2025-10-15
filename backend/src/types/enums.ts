@@ -27,4 +27,5 @@ export const HttpHeader = {
   ETAG: 'ETag',
   ACCEPT_RANGES: 'Accept-Ranges',
   CONTENT_RANGE: 'Content-Range',
+  IF_NONE_MATCH: 'If-None-Match',
 }
