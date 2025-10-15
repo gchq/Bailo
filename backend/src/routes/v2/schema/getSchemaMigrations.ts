@@ -10,7 +10,8 @@ import { parse } from '../../../utils/validate.js'
 
 export const getSchemaMigrationsSchema = z.object({
   query: z.object({
-    name: z.string().optional().openapi({ example: 'My Schema Migration' }),
+    id: z.string().optional().openapi({ example: 'My Schema Migration' }),
+    sourceSchema: z.string().optional().openapi({ example: 'source-schema-v1' }),
   }),
 })
 
@@ -42,10 +43,10 @@ export const getSchemaMigrations = [
   async (req: Request, res: Response<GetSchemaMigrationsResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewSchemaMigrations
     const {
-      query: { name },
+      query: { id, sourceSchema },
     } = parse(req, getSchemaMigrationsSchema)
 
-    const schemaMigrations = await searchSchemaMigrations(name)
+    const schemaMigrations = await searchSchemaMigrations(id, sourceSchema)
     await audit.onViewSchemaMigrations(req, schemaMigrations)
 
     res.json({

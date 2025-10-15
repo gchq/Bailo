@@ -17,3 +17,9 @@ export const GetModelCardVersionOptions = {
 } as const
 export type GetModelCardVersionOptionsKeys =
   (typeof GetModelCardVersionOptions)[keyof typeof GetModelCardVersionOptions]
+
+export const SchemaMigrationKind = {
+  Move: 'move',
+  Delete: 'delete',
+} as const
+export type SchemaMigrationKindKeys = (typeof SchemaMigrationKind)[keyof typeof SchemaMigrationKind]

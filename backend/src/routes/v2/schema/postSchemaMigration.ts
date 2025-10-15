@@ -3,9 +3,10 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { SchemaMigrationInterface, SchemaMigrationKind } from '../../../models/SchemaMigration.js'
+import { SchemaMigrationInterface } from '../../../models/SchemaMigration.js'
 import { createSchemaMigrationPlan } from '../../../services/schemaMigration.js'
 import { registerPath } from '../../../services/specification.js'
+import { SchemaMigrationKind } from '../../../types/enums.js'
 import { getEnumValues } from '../../../utils/enum.js'
 import { parse } from '../../../utils/validate.js'
 
