@@ -63,7 +63,10 @@ export async function exportModel(
     releases.push(...(await getReleasesForExport(user, model.id, semvers)))
     await checkReleaseFiles(user, model.id, semvers)
   }
-  log.debug('Request checks complete.')
+
+  const exportId = shortId()
+  const logData = { exportId, sourceModelId: modelId, mirroredModelId, semvers }
+  log.debug({ user, ...logData }, 'Request checks complete, starting export.')
 
   let tarStream: Pack | undefined,
     gzipStream: zlib.Gzip | undefined,
@@ -74,20 +77,20 @@ export async function exportModel(
     ;({ tarStream, gzipStream, uploadStream, uploadPromise } = await initialiseTarGzUpload(
       `${modelId}.tar.gz`,
       { exporter: user.dn, sourceModelId: modelId, mirroredModelId, importKind: ImportKind.Documents },
-      { semvers },
+      logData,
     ))
 
     try {
-      await addModelCardRevisionsToTarball(user, model, tarStream)
+      await addModelCardRevisionsToTarball(user, model, tarStream, logData)
     } catch (error) {
-      throw InternalError('Error when adding the model card revision(s) to the Tarball file.', { error })
+      throw InternalError('Error when adding the model card revision(s) to the Tarball file.', { error, ...logData })
     }
     try {
       if (releases.length > 0) {
-        await addReleasesToTarball(user, model, releases, tarStream, mirroredModelId)
+        await addReleasesToTarball(user, model, releases, tarStream, mirroredModelId, logData)
       }
     } catch (error) {
-      throw InternalError('Error when adding the release(s) to the Tarball file.', { error })
+      throw InternalError('Error when adding the release(s) to the Tarball file.', { error, ...logData })
     }
 
     // Don't await as this isn't queued and we want to return the endpoint
@@ -100,7 +103,7 @@ export async function exportModel(
     throw error
   }
 
-  log.debug({ modelId, semvers }, 'Successfully finalized Tarball file.')
+  log.debug({ ...logData }, 'Successfully finalized Tarball file.')
 }
 
 export const ImportKind = {
@@ -270,18 +273,26 @@ export async function addCompressedRegistryImageComponents(
   log.debug({ modelId, imageName, imageTag, ...logData }, 'Finished adding registry image.')
 }
 
-async function addModelCardRevisionsToTarball(user: UserInterface, model: ModelDoc, tarStream: Pack) {
-  log.debug({ user, modelId: model.id }, 'Adding model card revisions to Tarball file.')
+async function addModelCardRevisionsToTarball(
+  user: UserInterface,
+  model: ModelDoc,
+  tarStream: Pack,
+  logData?: Record<string, unknown>,
+) {
+  log.debug({ user, modelId: model.id, ...logData }, 'Adding model card revisions to Tarball file.')
   const cards = await getModelCardRevisions(user, model.id)
   for (const card of cards) {
     const cardJson = JSON.stringify(card.toJSON())
     await addEntryToTarGzUpload(
       tarStream,
       { type: 'text', filename: `${card.version}.json`, content: cardJson },
-      { modelId: model.id },
+      { modelId: model.id, ...logData },
     )
   }
-  log.debug({ user, modelId: model.id }, 'Completed adding model card revisions to Tarball file.')
+  log.debug(
+    { modelCards: cards.map((card) => card.version), ...logData },
+    'Completed adding model card revisions to Tarball file.',
+  )
 }
 
 async function addReleasesToTarball(
@@ -290,22 +301,25 @@ async function addReleasesToTarball(
   releases: ReleaseDoc[],
   tarStream: Pack,
   mirroredModelId: string,
+  logData?: Record<string, unknown>,
 ) {
   const semvers = releases.map((release) => release.semver)
-  log.debug({ user, modelId: model.id, semvers }, 'Adding model releases to Tarball file.')
+  log.debug({ ...logData }, 'Adding model releases to Tarball file.')
 
   const queue = new PQueue({ concurrency: config.modelMirror.export.concurrency })
   const errors: any[] = []
   // Using a .catch here to ensure all errors are returned, rather than just the first error.
   await Promise.all(
     releases.map((release) =>
-      addReleaseToTarball(user, model, release, tarStream, mirroredModelId, queue).catch((e) => errors.push(e)),
+      addReleaseToTarball(user, model, release, tarStream, mirroredModelId, queue, logData).catch((e) =>
+        errors.push(e),
+      ),
     ),
   )
   if (errors.length > 0) {
-    throw InternalError('Error when adding release(s) to Tarball file.', { errors })
+    throw InternalError('Error when adding release(s) to Tarball file.', { errors, ...logData })
   }
-  log.debug({ user, modelId: model.id, semvers }, 'Completed adding model releases to Tarball file.')
+  log.debug({ user, modelId: model.id, semvers, ...logData }, 'Completed adding model releases to Tarball file.')
 }
 
 export async function uploadReleaseFiles(
@@ -315,12 +329,14 @@ export async function uploadReleaseFiles(
   files: FileWithScanResultsInterface[],
   mirroredModelId: string,
   queue: PQueue,
+  logData?: Record<string, unknown>,
 ) {
   for (const file of files) {
     const fileLogData = {
-      releaseId: release.id,
       sourceModelId: model.id,
+      semver: release.semver,
       fileId: file.id,
+      ...logData,
     }
     queue
       .add(async () => {
@@ -365,15 +381,13 @@ export async function uploadReleaseFiles(
         log.error(
           {
             error,
-            modelId: model.id,
-            releaseSemver: release.semver,
-            fileId: file.id,
             mirroredModelId,
+            ...fileLogData,
           },
           'Error when uploading Release File to S3.',
         ),
       )
-    log.debug({ fileId: file.id, releaseId: release.id, modelId: model.id }, 'Added file to be exported to queue.')
+    log.debug({ ...fileLogData }, 'Added file to be exported to queue.')
   }
 }
 
@@ -383,14 +397,16 @@ export async function uploadReleaseImages(
   release: ReleaseDoc,
   mirroredModelId: string,
   queue: PQueue,
+  logData?: Record<string, unknown>,
 ) {
   if (Array.isArray(release.images)) {
     for (const image of release.images) {
       const imageLogData = {
-        releaseId: release.id,
         sourceModelId: model.id,
+        semver: release.semver,
         imageName: image.name,
         imageTag: image.tag,
+        ...logData,
       }
       // update the distributionPackageName to use the mirroredModelId
       const modelIdRe = new RegExp(String.raw`^${model.id}`)
@@ -437,15 +453,13 @@ export async function uploadReleaseImages(
               releaseSemver: release.semver,
               distributionPackageName,
               mirroredModelId,
+              ...imageLogData,
             },
             'Error when uploading Release Image to S3.',
           ),
         )
+      log.debug({ ...imageLogData }, 'Added image to be exported to queue.')
     }
-    log.debug(
-      { user, modelId: model.id, semver: release.semver },
-      'Finished adding release to tarball file of releases.',
-    )
   }
 }
 
@@ -456,8 +470,9 @@ async function addReleaseToTarball(
   tarStream: Pack,
   mirroredModelId: string,
   queue: PQueue,
+  logData?: Record<string, unknown>,
 ) {
-  log.debug({ user, modelId: model.id, semver: release.semver }, 'Adding release to tarball file of releases.')
+  log.debug({ semver: release.semver, ...logData }, 'Adding release to tarball file of releases.')
   const files: FileWithScanResultsInterface[] = await getFilesByIds(user, release.modelId, release.fileIds)
 
   try {
@@ -465,7 +480,7 @@ async function addReleaseToTarball(
     await addEntryToTarGzUpload(
       tarStream,
       { type: 'text', filename: `releases/${release.semver}.json`, content: releaseJson },
-      { modelId: model.id },
+      { modelId: model.id, ...logData },
     )
   } catch (error: unknown) {
     throw InternalError('Error when generating the tarball file.', {
@@ -473,6 +488,7 @@ async function addReleaseToTarball(
       modelId: model.id,
       mirroredModelId,
       releaseId: release.id,
+      ...logData,
     })
   }
 
@@ -481,10 +497,12 @@ async function addReleaseToTarball(
   }
 
   // Fire-and-forget upload of artefacts so that the endpoint is able to return without awaiting lots of uploads
-  log.debug({ semver: release.semver }, 'Adding files to be exported to queue.')
-  await uploadReleaseFiles(user, model, release, files, mirroredModelId, queue)
-  log.debug({ semver: release.semver }, 'Finished adding files to be exported to queue.')
-  await uploadReleaseImages(user, model, release, mirroredModelId, queue)
+  log.debug({ semver: release.semver, ...logData }, 'Adding files to be exported to queue.')
+  await uploadReleaseFiles(user, model, release, files, mirroredModelId, queue, logData)
+  log.debug({ semver: release.semver, ...logData }, 'Finished adding files to be exported to queue.')
+  log.debug({ semver: release.semver, ...logData }, 'Adding images to be exported to queue.')
+  await uploadReleaseImages(user, model, release, mirroredModelId, queue, logData)
+  log.debug({ semver: release.semver, ...logData }, 'Finished adding images to be exported to queue.')
 }
 
 async function addFilesToTarball(files: FileWithScanResultsInterface[], tarStream: Pack, modelId: string) {

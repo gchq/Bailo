@@ -236,7 +236,7 @@ describe('services > mirroredModel', () => {
       expect(tarballMocks.initialiseTarGzUpload).toHaveBeenCalled()
       expect(tarballMocks.finaliseTarGzUpload).toHaveBeenCalled()
       expect(logMock.debug).toHaveBeenCalledWith(
-        { modelId: 'modelId', semvers: ['1.2.3'] },
+        { exportId: expect.any(String), semvers: ['1.2.3'], mirroredModelId: 'abc', sourceModelId: 'modelId' },
         'Successfully finalized Tarball file.',
       )
     })
