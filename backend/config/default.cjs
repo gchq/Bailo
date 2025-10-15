@@ -52,9 +52,6 @@ module.exports = {
     // Registry connection information should be the internal connection to the registry.
     connection: {
       internal: 'https://localhost:5000',
-      host: 'localhost:5000',
-      port: 5000,
-      protocol: 'https',
       insecure: true,
     },
 
