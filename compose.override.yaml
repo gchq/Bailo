@@ -26,18 +26,16 @@ services:
       - ./backend/src:/app/src
     build:
       target: dev
+    image: bailo_backend:${INSTANCE_NAME}
+    pull_policy: build
 
   frontend:
     volumes:
       - ./frontend:/app
     build:
       target: dev
-
-  modelscan:
-    volumes:
-      - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
-    build:
-      target: dev
+    image: bailo_frontend:${INSTANCE_NAME}
+    pull_policy: build
 
   minio:
     environment:
