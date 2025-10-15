@@ -7,54 +7,90 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
-import { FileInterface, FileWithScanResultsInterface } from '../../../../models/File.js'
+import { FileWithScanResultsInterface } from '../../../../models/File.js'
 import { downloadFile, getFileById } from '../../../../services/file.js'
+import log from '../../../../services/log.js'
 import { getFileByReleaseFileName } from '../../../../services/release.js'
 import { registerPath } from '../../../../services/specification.js'
+import { HttpHeader } from '../../../../types/enums.js'
+import { BailoError } from '../../../../types/error.js'
 import { InternalError } from '../../../../utils/error.js'
 import { parseRangeHeaders } from '../../../../utils/range.js'
 import { parse } from '../../../../utils/validate.js'
 
-export const getDownloadFileSchema = z
-  .object({
-    params: z.object({
-      modelId: z.string(),
-      fileId: z.string(),
-    }),
-  })
-  .or(
-    z.object({
-      params: z.object({
-        modelId: z.string(),
-        semver: z.string(),
-        fileName: z.string(),
-      }),
-    }),
-  )
+// Default cache response header
+const cacheControl = 'public, max-age=604800, immutable'
+
+const responseHeaders = z.object({
+  [HttpHeader.CONTENT_DISPOSITION]: z
+    .string()
+    .describe('Content disposition header, ensures correct filename and attachment download')
+    .openapi({ example: 'attachment; filename="myfile.txt"' }),
+  [HttpHeader.CACHE_CONTROL]: z
+    .string()
+    .describe(`Cache policy for downloads. Set to "${cacheControl}".`)
+    .openapi({ example: cacheControl }),
+  [HttpHeader.CONTENT_TYPE]: z
+    .string()
+    .describe('The type of the returned content')
+    .openapi({ example: 'application/octet-stream' }),
+  [HttpHeader.ETAG]: z.string().describe('A SHA256 hash of the file ID and modification time'),
+  [HttpHeader.ACCEPT_RANGES]: z
+    .string()
+    .describe("Fixed to 'bytes' in this implementation.")
+    .openapi({ example: 'bytes' }),
+  [HttpHeader.CONTENT_LENGTH]: z.number().describe('Number of bytes in the file (or in the requested range)'),
+})
+
+const contentRangeResponseHeader = z.object({
+  [HttpHeader.CONTENT_RANGE]: z
+    .string()
+    .describe(
+      'Formatted string similar to bytes 0-10/1234 where bytes is the unit, 0-10 are the start and end bytes (inclusive), and 1234 is the max length',
+    ),
+})
+
+const rangeRequestHeader = z.object({
+  Range: z.string().optional().describe('Range of bytes to request from the content. Formatted like: bytes=0-10'),
+})
+
+const rangedResponseHeaders = responseHeaders.merge(contentRangeResponseHeader)
+
+// Binary response schema
+const binaryContent = {
+  'application/octet-stream': {
+    schema: z.string().openapi({ format: 'binary' }),
+  },
+}
+
+// Params
+const modelIdParam = z.object({ modelId: z.string() })
+const fileIdParam = z.object({ fileId: z.string() })
+const semverParam = z.object({ semver: z.string() })
+const fileNameParam = z.object({ fileName: z.string() })
+
+const modelIdWithSemverAndFileName = modelIdParam.merge(semverParam).merge(fileNameParam)
+const modelIdWithFileId = modelIdParam.merge(fileIdParam)
 
 registerPath({
   method: 'get',
   path: '/api/v2/model/{modelId}/release/{semver}/file/{fileName}/download',
   tags: ['file'],
-  description: 'Download a file by file name and release.',
+  description: 'Download a file by file name and release. Supports fetching parts via standard range headers.',
   schema: z.object({
-    params: z.object({
-      modelId: z.string(),
-      semver: z.string(),
-      fileName: z.string(),
-    }),
+    params: modelIdWithSemverAndFileName,
+    headers: rangeRequestHeader,
   }),
   responses: {
     200: {
-      description: 'The contents of the file.',
-      content: {
-        'application/octet-stream': {
-          schema: {
-            type: 'string',
-            format: 'binary',
-          },
-        },
-      },
+      description: 'The contents of the file, or the entire file if no range requested.',
+      content: binaryContent,
+      headers: responseHeaders,
+    },
+    206: {
+      description: 'Range of bytes specified by the incoming header',
+      content: binaryContent,
+      headers: rangedResponseHeaders,
     },
   },
 })
@@ -63,34 +99,31 @@ registerPath({
   method: 'get',
   path: '/api/v2/model/{modelId}/file/{fileId}/download',
   tags: ['file'],
-  description: 'Download a file by file ID.',
+  description: 'Download a file by file ID. Supports fetching parts via standard range headers.',
   schema: z.object({
-    params: z.object({
-      modelId: z.string(),
-      fileId: z.string(),
-    }),
+    params: modelIdWithFileId,
+    headers: rangeRequestHeader,
   }),
   responses: {
     200: {
       description: 'The contents of the file.',
-      content: {
-        'application/octet-stream': {
-          schema: {
-            type: 'string',
-            format: 'binary',
-          },
-        },
-      },
+      content: binaryContent,
+      headers: responseHeaders,
+    },
+    206: {
+      description: 'Range of bytes specified by the incoming header',
+      content: binaryContent,
+      headers: rangedResponseHeaders,
     },
   },
 })
 
-interface GetDownloadFileResponse {
-  files: Array<FileInterface>
-}
+export const getDownloadFileSchema = z
+  .object({ params: modelIdWithSemverAndFileName })
+  .or(z.object({ params: modelIdWithFileId }))
 
 export const getDownloadFile = [
-  async (req: Request, res: Response<GetDownloadFileResponse>): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     req.audit = AuditInfo.ViewFile
     const { params } = parse(req, getDownloadFileSchema)
     let file: FileWithScanResultsInterface
@@ -100,30 +133,64 @@ export const getDownloadFile = [
       file = await getFileById(req.user, params.fileId)
     }
 
-    // Naive approach to generating an ETag - this is needed for some download tools to consider a file resumable
-    const etag = createHash('sha256').update(`${file.id}/${file.updatedAt.getTime()}`).digest('hex')
+    const fileId = file._id.toString()
 
-    res.set('ETag', etag)
-    res.set('Accept-Ranges', 'bytes')
+    // Naive approach to generating an ETag - this is needed for some download tools to consider a file resumable
+    const etag = createHash('sha256').update(`${fileId}/${file.updatedAt.getTime()}`).digest('hex')
+
+    res.set(HttpHeader.ETAG, etag)
+    res.set(HttpHeader.ACCEPT_RANGES, 'bytes')
+    res.set(HttpHeader.CACHE_CONTROL, cacheControl)
+
+    // 304 support
+    const clientEtag = req.headers[HttpHeader.IF_NONE_MATCH]
+    if (clientEtag === etag) {
+      res.status(304).end()
+      return
+    }
 
     const fetchRange = parseRangeHeaders(req, res, file.size)
 
-    const stream = await downloadFile(req.user, file.id, fetchRange)
+    const stream = await downloadFile(req.user, fileId, fetchRange)
 
     if (!stream.Body) {
-      throw InternalError('We were not able to retrieve the body of this file', { fileId: file._id.toString() })
+      throw InternalError('We were not able to retrieve the body of this file', { fileId })
     }
 
     await audit.onViewFile(req, file)
 
-    // required to support utf-8 file names
-    res.set('Content-Disposition', contentDisposition(file.name, { type: 'attachment' }))
-    res.set('Content-Type', file.mime)
-    res.set('Cache-Control', 'public, max-age=604800, immutable')
+    // Required to support utf-8 file names
+    res.set(HttpHeader.CONTENT_DISPOSITION, contentDisposition(file.name, { type: 'attachment' }))
+    res.set(HttpHeader.CONTENT_TYPE, file.mime)
 
     res.status(fetchRange ? 206 : 200)
 
     // The AWS library doesn't seem to properly type 'Body' as being pipeable?
-    ;(stream.Body as stream.Readable).pipe(res)
+    const fileStream = stream.Body as stream.Readable
+
+    fileStream.on('error', (err) => {
+      if (!res.headersSent) {
+        const bailoError: BailoError = {
+          code: 500,
+          name: 'File download error',
+          message: 'Error occurred whilst streaming file',
+          status: 500,
+          cause: err?.message || String(err),
+          context: {
+            fileId,
+          },
+        }
+        res.status(500).json(bailoError)
+        log.error(bailoError, { fileId })
+      } else {
+        res.destroy(err)
+      }
+    })
+
+    fileStream.on('close', () => {
+      log.info('Client closed connection early', { fileId })
+    })
+
+    fileStream.pipe(res)
   },
 ]
