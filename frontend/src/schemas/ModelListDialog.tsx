@@ -9,7 +9,6 @@ import {
   ListItemButton,
   ListItemText,
   Typography,
-  useTheme,
 } from '@mui/material'
 import { EntrySearchResult } from 'actions/model'
 import { useMemo } from 'react'
@@ -35,24 +34,22 @@ export default function ModelListDialog({
   open = false,
   onClose,
 }: SchemaDialogProps) {
-  const theme = useTheme()
-
   const modelList = useMemo(
     () => (
       <List>
         {models.map((model) => (
           <ListItem key={model.id}>
             <Link href={`/model/${model.id}`} sx={{ textDecoration: 'none', width: '100%' }}>
-              <ListItemButton dense>
+              <ListItemButton dense aria-label={`go to the model: ${model.name} `}>
                 <ListItemText
                   primary={
                     <Typography
-                      variant='h5'
+                      variant='h6'
                       component='h4'
+                      color='primary'
                       sx={{
                         fontWeight: '500',
                         textDecoration: 'none',
-                        color: theme.palette.primary.main,
                         textOverflow: 'ellipsis',
                         overflow: 'hidden',
                       }}
@@ -63,11 +60,11 @@ export default function ModelListDialog({
                   secondary={
                     <Typography
                       variant='body1'
+                      color='textSecondary'
                       sx={{
                         whiteSpace: 'nowrap',
                         textOverflow: 'ellipsis',
                         overflow: 'hidden',
-                        color: theme.palette.text.secondary,
                       }}
                     >
                       {model.description}
@@ -80,7 +77,7 @@ export default function ModelListDialog({
         ))}
       </List>
     ),
-    [models, theme.palette.primary.main, theme.palette.text.secondary],
+    [models],
   )
 
   if (isModelsError) {
