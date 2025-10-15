@@ -31,21 +31,21 @@ jobs:
             tar: /tmp/bailo_backend.tar
             artifact: bailo_backend
             cache_scope: backend
-            tag: bailo_backend:latest
+            tag: bailo_backend:latest,bailo_backend:prod
           - name: frontend
             context: frontend
             dockerfile: frontend/Dockerfile
             tar: /tmp/bailo_frontend.tar
             artifact: bailo_frontend
             cache_scope: frontend
-            tag: bailo_frontend:latest
+            tag: bailo_frontend:latest,bailo_frontend:prod
           - name: modelscan
             context: lib/modelscan_api
             dockerfile: lib/modelscan_api/Dockerfile
             tar: /tmp/bailo_modelscan.tar
             artifact: bailo_modelscan
             cache_scope: modelscan
-            tag: bailo_modelscan:latest
+            tag: bailo_modelscan:latest,bailo_modelscan:prod
 
     steps:
       # Clone repository
@@ -407,17 +407,12 @@ jobs:
           }
           EOT
 
-      - run: docker compose -f docker-compose-prod.yml up -d
-
-      # wait for app to start
-      - run: |
-          chmod +x ./backend/src/scripts/waitForIt.sh
-          ./backend/src/scripts/waitForIt.sh localhost:8080 -t 10
-
-      # wait for mongo to start
-      - run: |
-          chmod +x ./backend/src/scripts/waitForIt.sh
-          ./backend/src/scripts/waitForIt.sh localhost:27017 -t 10
+      - name: Start services
+        run: >
+          docker compose -f compose.yaml -f compose.prod.yaml
+          --env-file prod.env --progress=plain --parallel=-1
+          up -d
+          --wait --wait-timeout 60
 
       # e2e with Cypress
       - uses: cypress-io/github-action@v6
@@ -451,14 +446,14 @@ jobs:
 
       - name: Start MLFlow
         if: matrix.job_name == 'integration_python'
-        run: |
-          mlflow server --host 127.0.0.1 --port 5050 &
+        run: mlflow server --port 5050 &
 
-      - name: Wait for mlflow to start
+      - name: Wait for MLFlow
         if: matrix.job_name == 'integration_python'
+        env:
+          MLFLOW_URL: http://localhost:5050/ajax-api/2.0/mlflow/experiments/search?max_results=1
         run: |
-          chmod +x ./backend/src/scripts/waitForIt.sh
-          ./backend/src/scripts/waitForIt.sh localhost:5050 -t 10
+          for c in {1..5}; do test $(curl -s -o /dev/null -w "%{http_code}" ${MLFLOW_URL}) -eq 200 && break; done
 
       - name: Test with pytest
         if: matrix.job_name == 'integration_python'
