@@ -231,7 +231,7 @@ export async function addCompressedRegistryImageComponents(
 
   // upload the manifest first as this is the starting point when later importing the blob
   const tagManifestJson = JSON.stringify(tagManifest)
-  addEntryToTarGzUpload(
+  await addEntryToTarGzUpload(
     tarStream,
     { type: 'text', filename: 'manifest.json', content: tagManifestJson },
     { ...logData, mediaType: tagManifest.mediaType },
@@ -260,7 +260,7 @@ export async function addCompressedRegistryImageComponents(
     try {
       // pipe the body to tar using streams
       const entryName = `blobs/sha256/${layerDigest.replace(/^(sha256:)/, '')}`
-      addEntryToTarGzUpload(
+      await addEntryToTarGzUpload(
         tarStream,
         { type: 'stream', filename: entryName, stream: responseStream, size: layer.size },
         { ...logData, layerDigest, mediaType: layer.mediaType },

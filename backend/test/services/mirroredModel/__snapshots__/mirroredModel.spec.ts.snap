@@ -23,6 +23,29 @@ exports[`services > mirroredModel > importModel > call Readable.fromWeb when res
 }
 `;
 
+exports[`services > mirroredModel > importModel > don't call Readable.fromWeb when res.body is a Readable 1`] = `
+{
+  "importResult": {
+    "metadata": {
+      "exporter": "exporter",
+      "mirroredModelId": "mirroredModelId",
+      "sourceModelId": "sourceModelId",
+    },
+  },
+  "mirroredModel": {
+    "card": {
+      "schemaId": "schemaId",
+    },
+    "id": "modelId",
+    "settings": {
+      "mirror": {
+        "destinationModelId": "abc",
+      },
+    },
+  },
+}
+`;
+
 exports[`services > mirroredModel > importModel > success 1`] = `
 {
   "importResult": {

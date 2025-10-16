@@ -35,7 +35,7 @@ const fetchMock = vi.hoisted(() => ({
 }))
 vi.mock('node-fetch', async () => fetchMock)
 
-const pendingJobs: Promise<any>[] = []
+let pendingJobs: Promise<any>[] = []
 const queueMock = vi.hoisted(() => ({
   add: vi.fn((job) => {
     const p = job()
@@ -89,12 +89,21 @@ const tarballMocks = vi.hoisted(() => ({
     },
   })),
   finaliseTarGzUpload: vi.fn(),
-  initialiseTarGzUpload: vi.fn(() => ({
-    tarStream: new PassThrough(),
-    gzipStream: new PassThrough(),
-    uploadStream: new PassThrough(),
-    uploadPromise: new Promise(() => {}),
-  })),
+  initialiseTarGzUpload: vi.fn(() => {
+    const tarStream = new PassThrough()
+    const gzipStream = new PassThrough()
+    const uploadStream = new PassThrough()
+    // prevent vitest viewing these as uncaught errors
+    tarStream.on('error', () => {})
+    gzipStream.on('error', () => {})
+    uploadStream.on('error', () => {})
+    return {
+      tarStream,
+      gzipStream,
+      uploadStream,
+      uploadPromise: new Promise(() => {}),
+    }
+  }),
 }))
 vi.mock('../../../src/services/mirroredModel/tarball.js', () => tarballMocks)
 
@@ -161,6 +170,7 @@ vi.mock('../../../src/services/registry.js', () => registryMocks)
 
 describe('services > mirroredModel', () => {
   beforeEach(() => {
+    pendingJobs = []
     vi.clearAllMocks()
   })
 
@@ -225,15 +235,33 @@ describe('services > mirroredModel', () => {
     })
 
     test('successful export if no files exist', async () => {
-      releaseMocks.getAllFileIds.mockResolvedValueOnce([])
-      modelMocks.getModelCardRevisions.mockResolvedValueOnce([])
+      releaseMocks.getAllFileIds.mockResolvedValue([])
+      modelMocks.getModelCardRevisions.mockResolvedValueOnce([{ toJSON: vi.fn(() => ({})) }])
       fileMocks.getFilesByIds.mockResolvedValue([])
+
+      await exportModel({} as UserInterface, 'modelId', true, ['1.2.3', '4.5.6'])
+
+      expect(authMock.model).toHaveBeenCalled()
+      expect(releaseMocks.getReleasesForExport).toHaveBeenCalledWith({} as UserInterface, 'modelId', ['1.2.3', '4.5.6'])
+      expect(tarballMocks.initialiseTarGzUpload).toHaveBeenCalled()
+      expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledTimes(2)
+      expect(tarballMocks.finaliseTarGzUpload).toHaveBeenCalled()
+      expect(logMock.debug).toHaveBeenCalledWith(
+        { exportId: expect.any(String), semvers: ['1.2.3', '4.5.6'], mirroredModelId: 'abc', sourceModelId: 'modelId' },
+        'Successfully finalized Tarball file.',
+      )
+    })
+
+    test('successful export if files exist', async () => {
+      releaseMocks.getAllFileIds.mockResolvedValueOnce([])
+      modelMocks.getModelCardRevisions.mockResolvedValueOnce([{ toJSON: vi.fn(() => ({})) }])
 
       await exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
       expect(authMock.model).toHaveBeenCalled()
       expect(releaseMocks.getReleasesForExport).toHaveBeenCalledWith({} as UserInterface, 'modelId', ['1.2.3'])
       expect(tarballMocks.initialiseTarGzUpload).toHaveBeenCalled()
+      expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalledTimes(4)
       expect(tarballMocks.finaliseTarGzUpload).toHaveBeenCalled()
       expect(logMock.debug).toHaveBeenCalledWith(
         { exportId: expect.any(String), semvers: ['1.2.3'], mirroredModelId: 'abc', sourceModelId: 'modelId' },
@@ -242,9 +270,7 @@ describe('services > mirroredModel', () => {
     })
 
     test('throw error when addModelCardRevisionsToTarball fails', async () => {
-      modelMocks.getModelCardRevisions.mockImplementationOnce(() => {
-        throw Error()
-      })
+      modelMocks.getModelCardRevisions.mockRejectedValue('Error')
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
@@ -269,6 +295,25 @@ describe('services > mirroredModel', () => {
           }),
         } as any,
       ])
+
+      const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
+
+      await expect(promise).rejects.toThrowError('Error when adding the release(s) to the Tarball file.')
+      expect(authMock.model).toHaveBeenCalled()
+      expect(releaseMocks.getReleasesForExport).toHaveBeenCalledWith({} as UserInterface, 'modelId', ['1.2.3'])
+      expect(tarballMocks.initialiseTarGzUpload).toHaveBeenCalled()
+      expect(tarballMocks.finaliseTarGzUpload).not.toHaveBeenCalled()
+      expect(logMock.debug).not.toHaveBeenCalledWith(
+        { modelId: 'modelId', semvers: ['1.2.3'] },
+        'Successfully finalized Tarball file.',
+      )
+    })
+
+    test('throw error when addReleaseToTarball fails', async () => {
+      releaseMocks.getAllFileIds.mockResolvedValueOnce([])
+      modelMocks.getModelCardRevisions.mockResolvedValueOnce([])
+      fileMocks.getFilesByIds.mockResolvedValue([])
+      tarballMocks.addEntryToTarGzUpload.mockRejectedValueOnce('Error')
 
       const promise = exportModel({} as UserInterface, 'modelId', true, ['1.2.3'])
 
@@ -412,10 +457,15 @@ describe('services > mirroredModel', () => {
       expect(modelMocks.getModelById).toHaveBeenCalled()
     })
 
-    test('call Readable.fromWeb when res.body is not a Readable', async () => {
+    test("don't call Readable.fromWeb when res.body is a Readable", async () => {
       fetchMock.default.mockResolvedValueOnce({
         ok: true,
-        body: Readable.toWeb(new PassThrough()),
+        body: new Readable({
+          read() {
+            this.push('node data')
+            this.push(null)
+          },
+        }),
         text: vi.fn(),
       } as any)
 
@@ -424,12 +474,34 @@ describe('services > mirroredModel', () => {
       expect(result).toMatchSnapshot()
       expect(fetchMock.default).toHaveBeenCalled()
       expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
+      expect(tarballMocks.extractTarGzStream.mock.calls.at(0)?.at(0)).toBeInstanceOf(Readable)
+      expect(modelMocks.getModelById).toHaveBeenCalled()
+    })
+
+    test('call Readable.fromWeb when res.body is not a Readable', async () => {
+      fetchMock.default.mockResolvedValueOnce({
+        ok: true,
+        body: new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode('web data'))
+            controller.close()
+          },
+        }),
+        text: vi.fn(),
+      } as any)
+
+      const result = await importModel({} as UserInterface, 'https://test.com')
+
+      expect(result).toMatchSnapshot()
+      expect(fetchMock.default).toHaveBeenCalled()
+      expect(tarballMocks.extractTarGzStream).toHaveBeenCalled()
+      expect(tarballMocks.extractTarGzStream.mock.calls.at(0)?.at(0)).toBeInstanceOf(Readable)
       expect(modelMocks.getModelById).toHaveBeenCalled()
     })
   })
 
   describe('uploadReleaseFiles', () => {
-    test('upload release files', async () => {
+    test('success', async () => {
       await uploadReleaseFiles(
         {} as UserInterface,
         { id: 'modelId' } as any,
@@ -446,10 +518,44 @@ describe('services > mirroredModel', () => {
       expect(tarballMocks.addEntryToTarGzUpload).toBeCalledTimes(2)
       expect(tarballMocks.finaliseTarGzUpload).toBeCalledTimes(2)
     })
+
+    test('handle error', async () => {
+      const tarStreamDestroyMock = vi.fn()
+      const gzipStreamDestroyMock = vi.fn()
+      const uploadStreamDestroyMock = vi.fn()
+      tarballMocks.initialiseTarGzUpload.mockResolvedValueOnce({
+        tarStream: { destroy: tarStreamDestroyMock },
+        gzipStream: { destroy: gzipStreamDestroyMock },
+        uploadStream: { destroy: uploadStreamDestroyMock },
+        uploadPromise: {},
+      } as any)
+      tarballMocks.addEntryToTarGzUpload.mockRejectedValueOnce('Error').mockResolvedValueOnce({})
+
+      await uploadReleaseFiles(
+        {} as UserInterface,
+        { id: 'modelId' } as any,
+        { id: 'releaseId', semver: '1.2.3' } as any,
+        [{ id: 'fileId1' }, { id: 'fileId2' }] as any[],
+        'mirroredModelId',
+        queueMock as unknown as PQueue,
+      )
+
+      // The queue wouldn't actually throw an error but we need to test how it is handled
+      await expect(Promise.all(pendingJobs)).rejects.toThrowError('Error')
+      expect(queueMock.add).toBeCalledTimes(2)
+      expect(tarballMocks.initialiseTarGzUpload).toBeCalledTimes(2)
+      expect(fileMocks.downloadFile).toBeCalledTimes(2)
+      expect(tarballMocks.addEntryToTarGzUpload).toBeCalledTimes(2)
+      expect(tarballMocks.finaliseTarGzUpload).toBeCalledTimes(1)
+      expect(tarStreamDestroyMock).toBeCalled()
+      expect(gzipStreamDestroyMock).toBeCalled()
+      expect(uploadStreamDestroyMock).toBeCalled()
+      expect(logMock.error).toBeCalled()
+    })
   })
 
   describe('uploadReleaseImages', () => {
-    test('upload release images', async () => {
+    test('success', async () => {
       registryMocks.getImageManifest.mockResolvedValue({ layers: [], config: { digest: 'digest' } })
 
       await uploadReleaseImages(
@@ -477,9 +583,16 @@ describe('services > mirroredModel', () => {
     })
 
     test('error', async () => {
-      registryMocks.getImageManifest.mockImplementationOnce(() => {
-        throw Error()
-      })
+      const tarStreamDestroyMock = vi.fn()
+      const gzipStreamDestroyMock = vi.fn()
+      const uploadStreamDestroyMock = vi.fn()
+      tarballMocks.initialiseTarGzUpload.mockResolvedValueOnce({
+        tarStream: { destroy: tarStreamDestroyMock },
+        gzipStream: { destroy: gzipStreamDestroyMock },
+        uploadStream: { destroy: uploadStreamDestroyMock },
+        uploadPromise: {},
+      } as any)
+      registryMocks.getImageManifest.mockRejectedValue('Error')
 
       await uploadReleaseImages(
         {} as UserInterface,
@@ -488,14 +601,19 @@ describe('services > mirroredModel', () => {
           id: 'releaseId',
           semver: '1.2.3',
           images: [
-            { name: 'name', tag: 'tag', repository: 'repository' },
-            { name: 'name', tag: 'tag', repository: 'repository' },
+            { name: 'name', tag: 'tag', repository: 'repository', _id: 'abc' },
+            { name: 'name', tag: 'tag', repository: 'repository', _id: '123' },
           ],
         } as any,
         'mirroredModelId',
         queueMock as unknown as PQueue,
       )
 
+      // The queue wouldn't actually throw an error but we need to test how it is handled
+      await expect(Promise.all(pendingJobs)).rejects.toThrowError('Error')
+      expect(tarStreamDestroyMock).toBeCalled()
+      expect(gzipStreamDestroyMock).toBeCalled()
+      expect(uploadStreamDestroyMock).toBeCalled()
       expect(logMock.error).toHaveBeenCalledWith(
         expect.objectContaining({ modelId: 'modelId' }),
         'Error when uploading Release Image to S3.',
@@ -550,6 +668,26 @@ describe('services > mirroredModel', () => {
       expect(tarballMocks.addEntryToTarGzUpload).toBeCalledTimes(2)
       expect(registryMocks.getImageBlob).toBeCalledTimes(1)
     })
+
+    test('throw on addEntryToTarGzUpload error', async () => {
+      const mockAbort = vi.fn()
+      registryMocks.getImageBlob.mockResolvedValueOnce({ stream: ReadableStream.from('test'), abort: mockAbort })
+      registryMocks.getImageManifest.mockResolvedValueOnce({
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+        config: { mediaType: 'application/vnd.docker.container.image.v1+json', size: 4, digest: 'sha256:0' },
+        layers: [],
+      })
+      tarballMocks.addEntryToTarGzUpload.mockResolvedValueOnce({}).mockRejectedValueOnce('Error')
+
+      const promise = addCompressedRegistryImageComponents({} as UserInterface, 'modelId', 'imageName:tag', {} as any)
+
+      await expect(promise).rejects.toThrowError('Error')
+      expect(registryMocks.getImageManifest).toBeCalledTimes(1)
+      expect(registryMocks.getImageBlob).toBeCalledTimes(1)
+      expect(tarballMocks.addEntryToTarGzUpload).toBeCalledTimes(2)
+      expect(mockAbort).toBeCalled()
+    })
   })
 
   describe('generateDigest', () => {
@@ -575,6 +713,17 @@ describe('services > mirroredModel', () => {
           },
         } as any),
       ).rejects.toThrow('Error generating SHA256 digest for stream.')
+    })
+
+    test('handle file error event', async () => {
+      const fileStream = new PassThrough()
+      setImmediate(() => {
+        fileStream.emit('error', new Error('error'))
+      })
+
+      const promise = generateDigest(fileStream)
+
+      await expect(promise).rejects.toThrow('Error generating SHA256 digest for stream.')
     })
   })
 })
