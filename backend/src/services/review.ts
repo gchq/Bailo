@@ -1,4 +1,4 @@
-import { ClientSession } from 'mongoose'
+import { ClientSession, PipelineStage } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ReviewRoleAction } from '../connectors/authorisation/actions.js'
@@ -17,7 +17,6 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import log from './log.js'
 import { getModelById } from './model.js'
-import { getResponsesByParentIds } from './response.js'
 import { getSchemaById } from './schema.js'
 import { requestReviewForAccessRequest, requestReviewForRelease } from './smtp/smtp.js'
 
@@ -32,36 +31,37 @@ export interface DefaultReviewRole {
 export async function findReviews(
   user: UserInterface,
   mine: boolean,
-  open: boolean,
+  open?: boolean,
   modelId?: string,
   semver?: string,
   accessRequestId?: string,
   kind?: string,
 ): Promise<(ReviewInterface & { model: ModelInterface })[]> {
-  let reviews = await Review.aggregate()
-    .match({
-      ...(modelId && { modelId }),
-      ...(semver && { semver }),
-      ...(accessRequestId && { accessRequestId }),
-      ...(kind && { kind }),
-    })
-    .sort({ createdAt: -1 })
-    // Populate model entries
-    .lookup({ from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' })
-    // Populate model as value instead of array
-    .unwind({ path: '$model' })
-    .match({ ...(mine && (await findUserInCollaborators(user))) })
+  const stages: PipelineStage[] = [
+    {
+      $match: {
+        ...(modelId && { modelId }),
+        ...(semver && { semver }),
+        ...(accessRequestId && { accessRequestId }),
+        ...(kind && { kind }),
+      },
+    },
+    {
+      $sort: { createdAt: -1 },
+    },
+    { $lookup: { from: 'v2_models', localField: 'modelId', foreignField: 'id', as: 'model' } },
+    { $unwind: { path: '$model' } },
+    { $match: { ...(mine && (await findUserInCollaborators(user))) } },
+  ]
 
-  if (open) {
-    const parentIds = reviews.map((review) => review._id)
-    const responses = await getResponsesByParentIds(parentIds)
-    reviews = reviews.filter(
-      (review) =>
-        !responses.find(
-          (response) => response.entity === `user:${user.dn}` && response.parentId.toString() === review._id.toString(),
-        ),
-    )
+  if (open != undefined) {
+    stages.push({ $lookup: { from: 'v2_responses', localField: '_id', foreignField: 'parentId', as: 'responses' } })
+    stages.push({ $addFields: { responseCount: { $size: '$responses' } } })
+    stages.push({ $match: { ...(open ? { responseCount: 0 } : { responseCount: { $gt: 0 } }) } })
+    stages.push({ $unset: ['responses', 'responseCount'] })
   }
+
+  const reviews = await Review.aggregate(stages)
 
   const auths = await authorisation.models(
     user,
