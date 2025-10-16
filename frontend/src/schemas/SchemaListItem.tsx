@@ -1,9 +1,11 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Button, Chip, ListItem, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
+import { useListModels } from 'actions/model'
 import { useGetSchemas } from 'actions/schema'
 import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
+import ModelListDialog from 'src/schemas/ModelListDialog'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
 import { SchemaInterface } from 'types/types'
 
@@ -29,12 +31,32 @@ export default function SchemaListItem({
   onOpenMenuClick,
   onEditSchemaClick,
 }: SchemaListItemProps) {
-  const [reviewRoleSelectorIsOpen, setReviewRoleSelectorIsOpen] = useState(false)
-  const { mutateSchemas } = useGetSchemas('model')
+  const { mutateSchemas } = useGetSchemas(schema.kind)
 
-  const handleDialogClose = (isClosed: boolean) => {
+  //TODO changes to this as blocked as no accessrequest endpoint
+  const { models, isModelsLoading, isModelsError } = useListModels(
+    schema.kind === 'dataCard' ? 'data card' : 'model',
+    [],
+    '',
+    [],
+    [],
+    [],
+    '',
+    undefined,
+    schema.id,
+  )
+
+  const [modelsListOpen, setModelsListOpen] = useState<boolean>(false)
+
+  const [reviewRoleSelectorIsOpen, setReviewRoleSelectorIsOpen] = useState<boolean>(false)
+
+  const handleReviewRolesDialogClose = () => {
     mutateSchemas()
-    setReviewRoleSelectorIsOpen(isClosed)
+    setReviewRoleSelectorIsOpen(false)
+  }
+
+  const handleModelsListDialogClose = () => {
+    setModelsListOpen(false)
   }
 
   return (
@@ -98,11 +120,28 @@ export default function SchemaListItem({
           <MenuItem onClick={() => onEditSchemaClick(schema.id, { hidden: !schema.hidden })}>
             {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
           </MenuItem>
+          {}
+          {schema.kind !== 'accessRequest' && (
+            <MenuItem onClick={() => setModelsListOpen(true)}>View schema usage</MenuItem>
+          )}
           <MenuItem onClick={() => setReviewRoleSelectorIsOpen(true)}>Update review roles</MenuItem>
           <MenuItem onClick={() => onDeleteSchemaClick(schema.id)}>Delete</MenuItem>
         </Menu>
       </Stack>
-      <UpdateReviewRolesForSchemaDialog open={reviewRoleSelectorIsOpen} onClose={handleDialogClose} schema={schema} />
+      <UpdateReviewRolesForSchemaDialog
+        open={reviewRoleSelectorIsOpen}
+        onClose={handleReviewRolesDialogClose}
+        schema={schema}
+      />
+      {schema.kind !== 'accessRequest' && (
+        <ModelListDialog
+          models={models}
+          isModelsLoading={isModelsLoading}
+          isModelsError={isModelsError}
+          open={modelsListOpen}
+          onClose={handleModelsListDialogClose}
+        />
+      )}
     </ListItem>
   )
 }

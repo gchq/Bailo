@@ -430,7 +430,7 @@ export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindL
 
 export const EntryKind = {
   MODEL: 'model',
-  DATA_CARD: 'data-card',
+  DATA_CARD: 'data card',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
