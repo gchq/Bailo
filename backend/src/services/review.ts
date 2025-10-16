@@ -57,7 +57,7 @@ export async function findReviews(
   if (open != undefined) {
     stages.push({ $lookup: { from: 'v2_responses', localField: '_id', foreignField: 'parentId', as: 'responses' } })
     stages.push({ $addFields: { responseCount: { $size: '$responses' } } })
-    stages.push({ $match: { responseCount: { ...(open ? { $size: 0 } : { $ne: { $size: 0 } }) } } })
+    stages.push({ $match: { ...(open ? { responseCount: 0 } : { responseCount: { $gt: 0 } }) } })
     stages.push({ $unset: ['responses', 'responseCount'] })
   }
 
