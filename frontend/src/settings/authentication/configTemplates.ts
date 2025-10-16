@@ -1,5 +1,3 @@
-import { toKebabCase } from 'utils/stringUtils'
-
 export function getKubernetesSecretConfig(
   description: string,
   registryUrl: string,
