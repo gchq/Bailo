@@ -69,7 +69,7 @@ export function useListModels(
   }
 }
 
-export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
+export function useGetModel(id: string | undefined, kind?: EntryKindKeys) {
   const queryParams = {
     kind,
   }

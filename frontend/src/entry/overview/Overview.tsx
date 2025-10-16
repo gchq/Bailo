@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import FormEditPage from 'src/entry/overview/FormEditPage'
 import TemplatePage from 'src/entry/overview/TemplatePage'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { EntryInterface, EntryKind } from 'types/types'
 
 const OverviewPage = {
   FORM: 'form',
@@ -23,13 +23,18 @@ export default function Overview({ entry, readOnly = false }: OverviewProps) {
     [entry.card],
   )
 
-  return readOnly && !entry.card ? (
-    <MessageAlert
-      severity='warning'
-      message='This mirrored model has no model card. Please export the model card from the source model.'
-    />
+  return entry.kind === EntryKind.MIRRORED_MODEL && !entry.card ? (
+    <>
+      <MessageAlert
+        severity='warning'
+        message='This mirrored model has no model card. Please export the model card from the source model.'
+      />
+    </>
   ) : (
     <Container sx={{ my: 2 }}>
+      {entry.kind === EntryKind.MIRRORED_MODEL && (
+        <MessageAlert message={`Mirrored from ${entry.settings.mirror?.sourceModelId} (read-only)`} severity='info' />
+      )}
       {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
       {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} />}
     </Container>

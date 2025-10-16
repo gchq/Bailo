@@ -120,7 +120,7 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
       <EntryAccessInput
         value={defaultEntitiesEntry}
         onChange={handleDefaultEntitiesChange}
-        entryKind={EntryKind.MODEL}
+        entryKind={EntryKind.MODEL || EntryKind.MIRRORED_MODEL}
       />
     )
   }, [defaultEntitiesEntry, handleDefaultEntitiesChange])

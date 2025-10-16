@@ -22,7 +22,7 @@ import { getCurrentUserRoles } from 'utils/roles'
 export default function Model() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { model, isModelLoading, isModelError } = useGetModel(modelId, EntryKind.MODEL)
+  const { model, isModelLoading, isModelError } = useGetModel(modelId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
@@ -39,7 +39,7 @@ export default function Model() {
             {
               title: 'Overview',
               path: 'overview',
-              view: <Overview entry={model} readOnly={!!model.settings.mirror?.sourceModelId} />,
+              view: <Overview entry={model} readOnly={model.kind === EntryKind.MIRRORED_MODEL} />,
             },
             {
               title: 'Releases',
@@ -118,7 +118,6 @@ export default function Model() {
           requiredUrlParams={{ modelId: model.id }}
           titleToCopy={model.name}
           subheadingToCopy={model.id}
-          sourceModelId={model.settings.mirror?.sourceModelId}
           additionalHeaderDisplay={<OrganisationAndStateDetails entry={model} />}
         />
       )}
