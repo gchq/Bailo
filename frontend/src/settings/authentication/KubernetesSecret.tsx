@@ -23,6 +23,7 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
   const [showFilePreview, setShowFilePreview] = useState(false)
 
   const configFileName = useMemo(() => `${toKebabCase(token.description)}-secret.yml`, [token.description])
+  const secretName = useMemo(() => `${toKebabCase(token.description)}`, [token.description])
 
   if (isUiConfigError) {
     return <MessageAlert message={isUiConfigError.info.message} severity='error' />
@@ -42,7 +43,13 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           options={[`${showFilePreview ? 'Close file preview' : 'Preview file'}`]}
           onPrimaryButtonClick={() =>
             downloadFile(
-              getKubernetesSecretConfig(token.description, uiConfig.registry.host, token.accessKey, token.secretKey),
+              getKubernetesSecretConfig(
+                token.description,
+                uiConfig.registry.host,
+                token.accessKey,
+                token.secretKey,
+                secretName,
+              ),
               configFileName,
             )
           }
@@ -52,7 +59,13 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
         </SplitButton>
         {showFilePreview && (
           <CodeSnippet disableVisibilityButton fileName={configFileName} onClose={() => setShowFilePreview(false)}>
-            {getKubernetesSecretConfig(token.description, uiConfig.registry.host, token.accessKey, token.secretKey)}
+            {getKubernetesSecretConfig(
+              token.description,
+              uiConfig.registry.host,
+              token.accessKey,
+              token.secretKey,
+              secretName,
+            )}
           </CodeSnippet>
         )}
       </Stack>
@@ -75,7 +88,7 @@ export default function KubernetesSecret({ token }: KubernetesSecretProps) {
           field. For example:
         </Typography>
         <CodeSnippet disableVisibilityButton disableCloseButton>
-          {getKubernetesImagePullSecretsExampleConfig(uiConfig.registry.host, configFileName)}
+          {getKubernetesImagePullSecretsExampleConfig(uiConfig.registry.host, token.description)}
         </CodeSnippet>
       </Stack>
     </Stack>
