@@ -44,21 +44,15 @@ async function copyToExportBucketWithSignatures(fileName: string, logData?: Reco
   await uploadToExportS3Location(fileName, streamToCopy, logData, signatures)
 }
 
-async function uploadToTemporaryS3Location(
-  fileName: string,
-  stream: Readable,
-  logData?: Record<string, unknown>,
-  metadata?: Record<string, string>,
-) {
+async function uploadToTemporaryS3Location(fileName: string, stream: Readable, logData?: Record<string, unknown>) {
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
-    await putObjectStream(object, stream, undefined, metadata)
+    await putObjectStream(object, stream)
     log.debug(
       {
         bucket,
         object,
-        ...(metadata && { metadata }),
         ...logData,
       },
       'Successfully uploaded export to temporary S3 location.',
@@ -67,7 +61,6 @@ async function uploadToTemporaryS3Location(
     throw InternalError('Failed to export to temporary S3 location.', {
       bucket,
       object,
-      ...(metadata && { metadata }),
       error,
       ...logData,
     })
@@ -108,7 +101,7 @@ export async function getObjectFromExportS3Location(object: string, logData?: Re
         object,
         ...logData,
       },
-      'Successfully retrieved stream from temporary S3 location.',
+      'Successfully retrieved stream from export S3 location.',
     )
     return stream
   } catch (error) {
@@ -119,7 +112,7 @@ export async function getObjectFromExportS3Location(object: string, logData?: Re
         error,
         ...logData,
       },
-      'Failed to retrieve stream from temporary S3 location.',
+      'Failed to retrieve stream from export S3 location.',
     )
     throw error
   }

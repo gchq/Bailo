@@ -2,7 +2,7 @@ import { PassThrough, Readable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { uploadToS3 } from '../../../src/services/mirroredModel/s3.js'
+import { getObjectFromExportS3Location, uploadToS3 } from '../../../src/services/mirroredModel/s3.js'
 
 const configMock = vi.hoisted(
   () =>
@@ -210,6 +210,23 @@ describe('services > mirroredModel > s3', () => {
     })
 
     expect(s3Mocks.putObjectStream).toHaveBeenCalledTimes(1)
+    expect(logMock.error).toHaveBeenCalled()
+  })
+
+  test('getObjectFromExportS3Location > success', async () => {
+    await getObjectFromExportS3Location('')
+
+    expect(s3Mocks.getObjectStream).toHaveBeenCalled()
+    expect(logMock.debug).toHaveBeenCalled()
+    expect(logMock.error).not.toHaveBeenCalled()
+  })
+
+  test('getObjectFromExportS3Location > throw error', async () => {
+    s3Mocks.getObjectStream.mockRejectedValueOnce('Error')
+
+    const promise = getObjectFromExportS3Location('')
+
+    await expect(promise).rejects.toThrowError('Error')
     expect(logMock.error).toHaveBeenCalled()
   })
 })
