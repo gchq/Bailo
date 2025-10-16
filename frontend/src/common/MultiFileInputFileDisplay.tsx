@@ -5,7 +5,7 @@ import { useGetModelFiles } from 'actions/model'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useState } from 'react'
 import Restricted from 'src/common/Restricted'
-import FileTagSelector from 'src/entry/model/releases/FileTagSelector'
+import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import { FileInterface, FileUploadMetadata, FileWithMetadataAndTags, isFileInterface } from 'types/types'
 
 interface MultiFileInputDisplayProps {
@@ -77,7 +77,7 @@ export default function MultiFileInputFileDisplay({
             {`Edit file tags ${fileTagCount > 0 ? `(${fileTagCount})` : ''}`}
           </Button>
         </Restricted>
-        <FileTagSelector
+        <EntryTagSelector
           anchorEl={anchorElFileTag}
           setAnchorEl={setAnchorElFileTag}
           onChange={handleFileTagSelectorOnChange}

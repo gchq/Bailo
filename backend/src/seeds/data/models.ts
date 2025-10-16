@@ -12,6 +12,7 @@ export const model: ModelInterface = {
     'This model has standard permissions and settings.  Use this model for testing generic new features and services.',
   organisation: 'Example',
   state: 'Development',
+  tags: ['development', 'ML'],
   collaborators: [
     {
       entity: 'user:user',

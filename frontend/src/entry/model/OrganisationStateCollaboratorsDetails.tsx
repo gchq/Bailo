@@ -1,12 +1,18 @@
+import { LocalOffer } from '@mui/icons-material'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { patchModel, useGetModel } from 'actions/model'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Restricted from 'src/common/Restricted'
 import UserDisplay from 'src/common/UserDisplay'
+import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import EntryRolesDialog from 'src/entry/overview/EntryRolesDialog'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import { EntryInterface } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
+import { toSentenceCase } from 'utils/stringUtils'
 
 interface OrganisationAndStateDetailsProps {
   entry: EntryInterface
@@ -14,6 +20,10 @@ interface OrganisationAndStateDetailsProps {
 
 export default function OrganisationStateCollaboratorsDetails({ entry }: OrganisationAndStateDetailsProps) {
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+  const [entryTagUpdateErrorMessage, setEntryTagUpdateErrorMessage] = useState('')
+
+  const { mutateModel } = useGetModel(entry.id, entry.kind)
 
   const theme = useTheme()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -29,6 +39,15 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
     )
   }, [entry])
 
+  const handleEntryTagOnChange = async (newTags: string[]) => {
+    const response = await patchModel(entry.id, { tags: newTags })
+    if (!response.ok) {
+      setEntryTagUpdateErrorMessage(await getErrorMessage(response))
+    } else {
+      mutateModel()
+    }
+  }
+
   if (isUiConfigLoading) {
     return <Loading />
   }
@@ -39,7 +58,10 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
 
   return (
     <Box>
-      <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} alignItems='center' sx={{ mr: 0 }}>
+      <Stack spacing={2} sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 2 }}>
+        <Typography color='primary' variant='h6'>
+          {toSentenceCase(entry.kind)} Details
+        </Typography>
         <Stack spacing={1}>
           {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
             <Box>
@@ -68,6 +90,23 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
           </Button>
           {collaboratorList}
         </Stack>
+        <Restricted action='editEntry' fallback={<></>}>
+          <Button
+            sx={{ width: 'fit-content' }}
+            size='small'
+            startIcon={<LocalOffer />}
+            onClick={(event) => setAnchorEl(event.currentTarget)}
+          >
+            {`Edit ${entry.kind} tags ${entry.tags.length > 0 ? `(${entry.tags.length})` : ''}`}
+          </Button>
+        </Restricted>
+        <EntryTagSelector
+          anchorEl={anchorEl}
+          setAnchorEl={setAnchorEl}
+          onChange={handleEntryTagOnChange}
+          tags={entry.tags}
+          errorText={entryTagUpdateErrorMessage}
+        />
       </Stack>
       <EntryRolesDialog entry={entry} open={rolesDialogOpen} onClose={() => setRolesDialogOpen(false)} />
     </Box>
