@@ -24,6 +24,7 @@ type ModelImageListProps = {
   model: EntryInterface
   onRegistryError: (value: boolean) => void
   readOnly?: boolean
+  id?: string
 } & PartialModelImageListProps
 
 export default function ModelImageList({
@@ -33,6 +34,7 @@ export default function ModelImageList({
   onRegistryError,
   readOnly = false,
   multiple,
+  id,
 }: ModelImageListProps) {
   const { modelImages, isModelImagesLoading, isModelImagesError } = useGetModelImages(model.id)
 
@@ -100,8 +102,8 @@ export default function ModelImageList({
   }
 
   return multiple ? (
-    <Autocomplete multiple value={value} {...partialAutocompleteProps} />
+    <Autocomplete multiple value={value} {...partialAutocompleteProps} id={id} />
   ) : (
-    <Autocomplete value={value} {...partialAutocompleteProps} />
+    <Autocomplete value={value} {...partialAutocompleteProps} id={id} />
   )
 }

@@ -55,6 +55,7 @@ export default function EntryListRow({
         >
           <Typography
             variant='h5'
+            component='h4'
             sx={{
               fontWeight: '500',
               textDecoration: 'none',
@@ -69,7 +70,7 @@ export default function EntryListRow({
         <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
           {entry.description}
         </Typography>
-        <Stack direction='row' spacing={1} alignItems='center'>
+        <Stack direction='row' spacing={1} alignItems='center' sx={{ flexWrap: 'wrap', rowGap: 1 }}>
           <Stack direction='row' spacing={1}>
             {displayOrganisation && entry.organisation && (
               <ChipSelector

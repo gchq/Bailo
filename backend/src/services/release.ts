@@ -7,6 +7,7 @@ import { FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import Release, { ImageRefInterface, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
+import Review, { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
 import { WebhookEvent } from '../models/Webhook.js'
 import { isBailoError } from '../types/error.js'
@@ -14,12 +15,14 @@ import { findDuplicates } from '../utils/array.js'
 import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
+import { useTransaction } from '../utils/transactions.js'
 import { arrayOfObjectsHasKeysOfType, hasKeysOfType } from '../utils/typeguards.js'
 import { getFileById, getFilesByIds } from './file.js'
 import log from './log.js'
 import { getModelById, getModelCardRevision } from './model.js'
 import { listModelImages } from './registry.js'
-import { createReleaseReviews } from './review.js'
+import { removeResponsesByParentIds } from './response.js'
+import { createReleaseReviews, removeReleaseReviews } from './review.js'
 import { sendWebhooks } from './webhook.js'
 
 export function isReleaseDoc(data: unknown): data is ReleaseDoc {
@@ -145,12 +148,10 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
     releaseParams.modelCardVersion = model.card?.version
   }
 
-  // There is a typing error whereby mongoose-delete plugin functions are not
-  // found by the TS compiler.
-  const ReleaseModelWithDelete = Release as any
-  const deletedRelease = await ReleaseModelWithDelete.findOneWithDeleted({
+  const deletedRelease = await Release.findOne({
     modelId: releaseParams.modelId,
     semver: releaseParams.semver,
+    deleted: true,
   })
   if (deletedRelease) {
     throw BadReq(
@@ -532,7 +533,20 @@ export async function deleteRelease(user: UserInterface, modelId: string, semver
     throw Forbidden(auth.info, { userDn: user.dn, release: release._id })
   }
 
-  await release.delete()
+  const reviewsForRelease: ReviewDoc[] = await Review.find({
+    modelId,
+    semver,
+  })
+
+  await useTransaction([
+    (session) => release.delete(session),
+    (session) => removeReleaseReviews(modelId, semver, session),
+    (session) =>
+      removeResponsesByParentIds(
+        [...reviewsForRelease.map((review) => review['_id']), release['_id']] as string[],
+        session,
+      ),
+  ])
 
   return { modelId, semver }
 }

@@ -8,7 +8,7 @@ import QuestionViewer from 'src/MuiForms/QuestionViewer'
 export function ArrayFieldTemplate({ title, items, canAdd, formContext, onAddClick }: ArrayFieldTemplateProps) {
   return (
     <Card sx={{ p: 2 }}>
-      <Typography fontWeight='bold' variant='h5' component='h3'>
+      <Typography fontWeight='bold' variant='h5' component='h2'>
         {title}
       </Typography>
       {items.map((element) => (

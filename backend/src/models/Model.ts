@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose'
-import MongooseDelete, { SoftDeleteDocument } from 'mongoose-delete'
+
+import { SoftDeleteDocument, softDeletionPlugin } from './plugins/softDeletePlugin.js'
 
 export const EntryVisibility = {
   Private: 'private',
@@ -130,12 +131,7 @@ const ModelSchema = new Schema<ModelDoc>(
   },
 )
 
-ModelSchema.plugin(MongooseDelete, {
-  overrideMethods: 'all',
-  deletedBy: true,
-  deletedByType: Schema.Types.ObjectId,
-  deletedAt: true,
-})
+ModelSchema.plugin(softDeletionPlugin)
 ModelSchema.index({ '$**': 'text' }, { weights: { name: 10, description: 5 } })
 
 const ModelModel = model<ModelDoc>('v2_Model', ModelSchema)

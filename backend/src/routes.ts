@@ -1,6 +1,7 @@
 import bodyParser from 'body-parser'
 import express from 'express'
 import path from 'path'
+import swaggerUi from 'swagger-ui-express'
 import { fileURLToPath } from 'url'
 
 import authentication from './connectors/authentication/index.js'
@@ -31,6 +32,7 @@ import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
+import { deleteInference } from './routes/v2/model/inferencing/deleteInferenceService.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
 import { getInferences } from './routes/v2/model/inferencing/getInferenceServices.js'
 import { postInference } from './routes/v2/model/inferencing/postInferenceService.js'
@@ -81,6 +83,7 @@ import { deleteUserToken } from './routes/v2/user/deleteUserToken.js'
 import { getUserTokenList } from './routes/v2/user/getUserTokenList.js'
 import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
+import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
 
 export const server = express()
@@ -92,6 +95,8 @@ const middlewareConfigs = authentication.authenticationMiddleware()
 for (const middlewareConf of middlewareConfigs) {
   server.use(middlewareConf?.path || '/', middlewareConf.middleware)
 }
+
+server.use('/api/v2/docs', swaggerUi.serve, swaggerUi.setup(generateSwaggerSpec()))
 
 server.get('/api/v1/registry_auth', ...getDockerRegistryAuth)
 
@@ -172,6 +177,7 @@ if (!config.ui?.inference || config.ui.inference?.enabled) {
   server.get('/api/v2/model/:modelId/inference/:image/:tag', ...getInference)
   server.post('/api/v2/model/:modelId/inference', ...postInference)
   server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
+  server.delete('/api/v2/model/:modelId/inference/:image/:tag', ...deleteInference)
 }
 
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)

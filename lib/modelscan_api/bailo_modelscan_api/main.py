@@ -6,6 +6,7 @@ import logging
 from functools import lru_cache
 from http import HTTPStatus
 from pathlib import Path
+from pickletools import genops
 from tempfile import NamedTemporaryFile
 from typing import Annotated, Any
 
@@ -258,7 +259,7 @@ async def scan_file(
     :raises HTTPException: failure to process the uploaded file in any way
     :return: `modelscan.scan` results
     """
-    logger.info("Called the API endpoint to scan an uploaded file")
+    logger.info("Called the API endpoint to scan uploaded file %s", in_file.filename)
     try:
         # Instantiate ModelScan
         modelscan_model = ModelScan(settings=settings.modelscan_settings)
@@ -266,6 +267,7 @@ async def scan_file(
         file_suffix = Path(str(in_file.filename).strip()).suffix
         with NamedTemporaryFile("wb", suffix=file_suffix, delete=False) as out_file:
             file_path = Path(out_file.name)
+            logger.debug("Writing file %s to disk as %s", in_file.filename, file_path)
             # Write the streamed in_file to disk.
             # This is a bit silly as modelscan will ultimately load this back into memory, but modelscan
             # doesn't currently support streaming directly from memory.
@@ -273,16 +275,33 @@ async def scan_file(
                 while content := in_file.file.read(settings.block_size):
                     out_file.write(content)
             except OSError as exception:
-                logger.exception("Failed writing the file to the disk.")
+                logger.exception("Failed to write file %s to disk as %s", in_file.filename, file_path)
                 raise HTTPException(
                     status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value,
                     detail=f"An error occurred while trying to write the uploaded file to the disk: {exception}",
                 ) from exception
 
+        if (
+            settings.modelscan_settings["scanners"]["modelscan.scanners.PickleUnsafeOpScan"]["enabled"]
+            and file_path.suffix
+            in settings.modelscan_settings["scanners"]["modelscan.scanners.PickleUnsafeOpScan"]["supported_extensions"]
+            and not is_valid_pickle(file_path)
+        ):
+            # false positive e.g. "license.dat"
+            new_file_path = file_path.with_suffix(".txt")
+            logger.info(
+                "File %s is not a pickle but extension is in the ModelScan config `scanners.PickleUnsafeOpScan.supported_extensions` "
+                "file extensions. Renaming from %s to %s",
+                in_file.filename,
+                file_path,
+                new_file_path,
+            )
+            file_path = file_path.rename(new_file_path)
+
         # Scan the uploaded file.
-        logger.info("Initiating ModelScan scan of %s", file_path)
+        logger.info("Initiating ModelScan scan of %s (%s)", file_path, in_file.filename)
         result = modelscan_model.scan(file_path)
-        logger.info("ModelScan result: %s", result)
+        logger.info("ModelScan result for %s (%s): %s", file_path, in_file.filename, result)
 
         # Finally, return the result.
         return result
@@ -303,11 +322,33 @@ async def scan_file(
         try:
             # Clean up the downloaded file as a background task to allow returning sooner.
             # The OS should handle this anyway, but it's safer to be explicit.
-            logger.info("Cleaning up downloaded file.")
+            logger.info("Cleaning up downloaded file %s (for %s)", file_path, in_file.filename)
             background_tasks.add_task(Path.unlink, file_path, missing_ok=True)
         except UnboundLocalError:
             # file_path may not be defined.
             logger.exception("An error occurred while trying to cleanup the downloaded file.")
+
+
+def is_valid_pickle(file_path: Path, max_bytes: int = 2 * 1024 * 1024) -> bool:
+    """Safely checks if a given file is a valid Pickle file.
+
+    :param file_path: file path to be scanned
+    :param max_bytes: maximum number of bytes to read in, defaults to 2*1024*1024
+    :return: whether the read bytes are a Pickle file (or not)
+    """
+    with open(file_path, "rb") as f:
+        data = f.read(max_bytes)
+
+    if not data:
+        return False
+
+    try:
+        # Attempt to iterate through all opcodes
+        for _ in genops(data):
+            pass
+        return True
+    except ValueError:
+        return False
 
 
 if __name__ == "__main__":

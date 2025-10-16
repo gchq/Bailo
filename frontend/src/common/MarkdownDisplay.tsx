@@ -9,9 +9,10 @@ import { useMemo } from 'react'
 
 export type MarkdownDisplayProps = {
   children: string
+  id?: string
 }
 
-export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
+export default function MarkdownDisplay({ children, id }: MarkdownDisplayProps) {
   const theme = useTheme()
 
   const options = useMemo(
@@ -117,5 +118,9 @@ export default function MarkdownDisplay({ children }: MarkdownDisplayProps) {
     [theme.palette.container.main, theme.palette.markdownBorder.main],
   )
 
-  return <ReactMarkdown options={options}>{children}</ReactMarkdown>
+  return (
+    <ReactMarkdown options={options} id={id}>
+      {children}
+    </ReactMarkdown>
+  )
 }

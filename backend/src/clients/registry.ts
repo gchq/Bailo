@@ -3,6 +3,7 @@ import { Readable } from 'node:stream'
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 
 import { getHttpsUndiciAgent } from '../services/http.js'
+import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
@@ -44,72 +45,101 @@ async function registryRequest(
   returnRawBody: boolean = false,
   extraFetchOptions: Partial<Omit<RequestInit, 'headers' | 'dispatcher' | 'signal'>> = {},
   extraHeaders: HeadersInit = {},
+  pagination?: { traverseLinks?: boolean; start?: string; linkFilter?: string },
 ): Promise<RegistryRequestResult> {
   const controller = new AbortController()
+
+  const allRepositories: string[] = []
+  let paginateParameter = pagination?.start ? pagination.start : ''
+  const linkFilter = pagination?.linkFilter ? pagination.linkFilter : ''
+  let link: string | null
+  let contentType: string
   let res: Response
-  try {
-    // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
-    // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
-    res = await fetch(`${registry}/v2/${endpoint}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...extraHeaders,
-      },
-      dispatcher: agent,
-      signal: controller.signal,
-      ...extraFetchOptions,
-    })
-  } catch (err) {
-    throw InternalError('Unable to communicate with the registry.', { err })
-  }
-
-  const headersObject = res.headers ? Object.fromEntries(res.headers) : {}
-  const contentType = res.headers.get('content-type') || ''
-
-  let body: unknown
+  let body: any
   let stream: ReadableStream | Readable | undefined
 
-  if (returnRawBody) {
-    stream = res.body as any
-  } else if (contentType.endsWith('json')) {
-    // e.g. 'application/json', 'application/vnd.docker.distribution.manifest.v2+json'
+  do {
+    const url = `${registry}/v2/${endpoint}${paginateParameter}`
+    log.debug({ url }, 'Making request to the registry.')
     try {
-      body = await res.json()
-    } catch (err) {
-      throw InternalError('Unable to parse response body JSON.', { err })
-    }
-  } else {
-    try {
-      body = await res.text()
-    } catch (err) {
-      throw InternalError('Unable to read non-JSON response body.', { err })
-    }
-  }
-
-  if (!res.ok) {
-    const context = {
-      url: res.url,
-      status: res.status,
-      statusText: res.statusText,
-    }
-
-    if (!body && contentType.includes('application/json')) {
-      // try to get the json if there's an error, even if we wanted the raw body
-      body = await res.json().catch(() => undefined)
-    }
-
-    if (isRegistryErrorResponse(body)) {
-      throw RegistryError(body, context)
-    } else {
-      throw InternalError('Unrecognised response returned by the registry.', {
-        ...context,
-        body: JSON.stringify(body),
+      // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
+      // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
+      res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ...extraHeaders,
+        },
+        dispatcher: agent,
+        signal: controller.signal,
+        ...extraFetchOptions,
       })
+    } catch (err) {
+      throw InternalError('Unable to communicate with the registry.', { err })
+    }
+
+    link = res.headers.get('link') || ''
+    contentType = res.headers.get('content-type') || ''
+
+    log.debug(Object.fromEntries(res.headers), 'Headers received from the registry.')
+
+    const linkQueryIndex = link.indexOf('?')
+    const linkEndIndex = link.lastIndexOf('>')
+    if (link && linkQueryIndex !== -1 && linkEndIndex > linkQueryIndex) {
+      paginateParameter = link.substring(linkQueryIndex, linkEndIndex)
+    }
+
+    if (returnRawBody) {
+      stream = res.body as any
+    } else if (contentType.endsWith('json')) {
+      // e.g. 'application/json', 'application/vnd.docker.distribution.manifest.v2+json'
+      try {
+        body = await res.json()
+      } catch (err) {
+        throw InternalError('Unable to parse response body JSON.', { err })
+      }
+    } else {
+      try {
+        body = await res.text()
+      } catch (err) {
+        throw InternalError('Unable to read non-JSON response body.', { err })
+      }
+    }
+
+    if (!res.ok) {
+      const context = {
+        url: res.url,
+        status: res.status,
+        statusText: res.statusText,
+      }
+
+      if (!body && contentType.includes('application/json')) {
+        // try to get the json if there's an error, even if we wanted the raw body
+        body = await res.json().catch(() => undefined)
+      }
+
+      if (isRegistryErrorResponse(body)) {
+        throw RegistryError(body, context)
+      } else {
+        throw InternalError('Unrecognised response returned by the registry.', {
+          ...context,
+          body: JSON.stringify(body),
+        })
+      }
+    }
+
+    if (body?.repositories) {
+      allRepositories.push(...body.repositories)
+    }
+  } while (pagination?.traverseLinks && link && link.includes(linkFilter))
+
+  if (allRepositories.length) {
+    body = {
+      repositories: allRepositories,
     }
   }
 
   return {
-    headers: headersObject,
+    headers: res.headers ? Object.fromEntries(res.headers) : {},
     body: returnRawBody ? undefined : body,
     stream: returnRawBody ? stream : undefined,
     abort: () => controller.abort(),
@@ -119,9 +149,12 @@ async function registryRequest(
   }
 }
 
-// Currently limited to a maximum 100 image names
 export async function listModelRepos(token: string, modelId: string) {
-  const { body } = await registryRequest(token, `_catalog?n=100&last=${modelId}`)
+  const { body } = await registryRequest(token, '_catalog', undefined, undefined, undefined, {
+    traverseLinks: true,
+    start: `?n=100&last=${modelId}`,
+    linkFilter: modelId,
+  })
   if (!isListModelReposResponse(body)) {
     throw InternalError('Unrecognised response body when listing model repositories.', { body })
   }
@@ -135,7 +168,9 @@ export async function listImageTags(token: string, imageRef: RepoRef) {
 
   let body: unknown
   try {
-    ;({ body } = await registryRequest(token, `${repo}/tags/list`))
+    ;({ body } = await registryRequest(token, `${repo}/tags/list`, undefined, undefined, undefined, {
+      traverseLinks: true,
+    }))
   } catch (error) {
     if (isRegistryError(error) && error.errors.length === 1 && error.errors.at(0)?.code === 'NAME_UNKNOWN') {
       return []
@@ -296,7 +331,7 @@ export async function uploadLayerMonolithic(
 
   if (!isUploadLayerMonolithicResponse(headers)) {
     abort()
-    throw InternalError('Unrecognised response headers when putting image manifest.', {
+    throw InternalError('Unrecognised response headers when putting image blob.', {
       headers,
       uploadURL,
       digest,

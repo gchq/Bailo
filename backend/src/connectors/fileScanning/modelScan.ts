@@ -1,5 +1,7 @@
+import { Readable } from 'node:stream'
+import { isNativeError } from 'node:util/types'
+
 import PQueue from 'p-queue'
-import { Readable } from 'stream'
 
 import { getModelScanInfo, scanStream } from '../../clients/modelScan.js'
 import { getObjectStream } from '../../clients/s3.js'
@@ -64,7 +66,7 @@ export class ModelScanFileScanningConnector extends BaseQueueFileScanningConnect
       ]
     } catch (error) {
       return this.scanError(`This file could not be scanned due to an error caused by ${this.toolName}`, {
-        error,
+        error: isNativeError(error) ? { name: error.name, stack: error.stack } : error,
         file,
       })
     } finally {

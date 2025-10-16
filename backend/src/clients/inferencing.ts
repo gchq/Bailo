@@ -59,3 +59,29 @@ export async function updateInferenceService(inferenceServiceParams: InferenceSe
   // TODO - Update return object. For now, we are just checking the status
   return res.json()
 }
+
+export async function deleteInferenceService(image: string) {
+  const authorisationToken = config.inference.authorisationToken
+
+  if (authorisationToken === '') {
+    throw Unauthorized('No authentication key exists.')
+  }
+
+  let res: Response
+
+  try {
+    res = await fetch(`${config.ui.inference.connection.host}/api/delete`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${authorisationToken}` },
+      body: JSON.stringify(image),
+    })
+  } catch (err) {
+    throw InternalError('Unable to communicate with the inferencing service.', { err })
+  }
+
+  if (!res.ok) {
+    throw BadReq('Unrecognised response returned by the inferencing service.')
+  }
+
+  return res.json()
+}

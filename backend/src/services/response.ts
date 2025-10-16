@@ -1,6 +1,9 @@
+import { ClientSession } from 'mongoose'
+
 import ResponseModel, {
   Decision,
   ReactionKindKeys,
+  ResponseDoc,
   ResponseInterface,
   ResponseKind,
   ResponseReaction,
@@ -64,6 +67,22 @@ export async function updateResponse(user: UserInterface, responseId: string, co
   response.save()
 
   return response
+}
+
+export async function removeResponses(parentIds: string[]) {
+  const responses = await getResponsesByParentIds(parentIds)
+  const responseDeletions: ResponseDoc[] = []
+  for (const response of responses) {
+    try {
+      responseDeletions.push(await response.delete())
+    } catch (error) {
+      throw InternalError('The requested response could not be deleted.', {
+        responseId: response.id,
+        error,
+      })
+    }
+  }
+  return responseDeletions
 }
 
 export async function updateResponseReaction(user: UserInterface, responseId: string, kind: ReactionKindKeys) {
@@ -168,4 +187,22 @@ export async function checkAccessRequestsApproved(accessRequestIds: string[]) {
     decision: Decision.Approve,
   })
   return approvals.length > 0
+}
+
+export async function removeResponsesByParentIds(parentIds: string[], session: ClientSession | undefined) {
+  const responses = await ResponseModel.find({ parentId: parentIds })
+
+  const deletions: ResponseDoc[] = []
+  for (const response of responses) {
+    try {
+      deletions.push(await response.delete(session))
+    } catch (error) {
+      throw InternalError('The requested response could not be deleted.', {
+        responseId: response['_id'],
+        error,
+      })
+    }
+  }
+
+  return deletions
 }
