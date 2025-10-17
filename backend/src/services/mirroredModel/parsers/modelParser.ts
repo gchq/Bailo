@@ -10,14 +10,14 @@ export function parseModelCard(
   modelCard: unknown,
   mirroredModelId: string,
   sourceModelId: string,
-  importId: string,
+  logData?: Record<string, unknown>,
 ): Omit<ModelCardRevisionDoc, '_id'> {
   if (!isModelCardRevisionDoc(modelCard)) {
     throw InternalError('Data cannot be converted into a model card.', {
       modelCard,
       mirroredModelId,
       sourceModelId,
-      importId,
+      ...logData,
     })
   }
   const modelId = modelCard.modelId
@@ -29,7 +29,7 @@ export function parseModelCard(
       {
         modelId,
         sourceModelId,
-        importId,
+        ...logData,
       },
     )
   }
@@ -40,14 +40,14 @@ export function parseRelease(
   release: unknown,
   mirroredModelId: string,
   sourceModelId: string,
-  importId: string,
+  logData?: Record<string, unknown>,
 ): Omit<ReleaseDoc, '_id'> {
   if (!isReleaseDoc(release)) {
     throw InternalError('Data cannot be converted into a release.', {
       release,
       mirroredModelId,
       sourceModelId,
-      importId,
+      ...logData,
     })
   }
 
@@ -62,7 +62,7 @@ export function parseRelease(
         release,
         mirroredModelId,
         sourceModelId,
-        importId,
+        ...logData,
       },
     )
   }
@@ -70,9 +70,14 @@ export function parseRelease(
   return release
 }
 
-export async function parseFile(file: unknown, mirroredModelId: string, sourceModelId: string, importId: string) {
+export async function parseFile(
+  file: unknown,
+  mirroredModelId: string,
+  sourceModelId: string,
+  logData?: Record<string, unknown>,
+) {
   if (!isFileInterfaceDoc(file)) {
-    throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, importId })
+    throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, ...logData })
   }
 
   file.path = createFilePath(mirroredModelId, file.id)
@@ -85,7 +90,7 @@ export async function parseFile(file: unknown, mirroredModelId: string, sourceMo
       mirroredModelId,
       sourceModelId,
       error,
-      importId,
+      ...logData,
     })
   }
 
@@ -97,7 +102,7 @@ export async function parseFile(file: unknown, mirroredModelId: string, sourceMo
         file,
         mirroredModelId,
         sourceModelId,
-        importId,
+        ...logData,
       },
     )
   }

@@ -44,7 +44,7 @@ export async function putObjectStream(
   try {
     const upload = new Upload({
       client: await getS3Client(),
-      params: { Bucket: bucket, Key: key, Body: body, Metadata: metadata },
+      params: { Bucket: bucket, Key: key, Body: body, ...(metadata && { Metadata: metadata }) },
       queueSize: 4,
       leavePartsOnError: false,
     })

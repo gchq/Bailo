@@ -1,23 +1,24 @@
 import { ensureBucketExists } from '../clients/s3.js'
 import log from '../services/log.js'
-import { exportCompressedRegistryImage, ImportKind } from '../services/mirroredModel/mirroredModel.js'
+import { addCompressedRegistryImageComponents, ImportKind } from '../services/mirroredModel/mirroredModel.js'
+import { finaliseTarGzUpload, initialiseTarGzUpload } from '../services/mirroredModel/tarball.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 
 async function script() {
   // process args
   const args = process.argv.slice(2)[0].split(',')
-  if (args.length !== 3) {
+  if (args.length !== 4) {
     log.error(
-      'Please use format "npm run script -- streamDockerRegistryToS3 <model-id> <image-name:image-tag> <output-filename>"',
+      'Please use format "npm run script -- streamDockerRegistryToS3 <source_model_id> <image_name:image_tag> <destination_model_id> <output_filename>"',
     )
     log.error(
-      'e.g. "npm run script -- streamDockerRegistryToS3 sample-model-3ozoli alpine:latest sample-model-3ozoli_alpine_latest.tar.gz"',
+      'e.g. "npm run script -- streamDockerRegistryToS3 source-model-3ozoli alpine:latest destination-model-liq76a source-model-3ozoli_alpine_latest.tar.gz"',
     )
     return
   }
-  const [imageModelId, imageDistributionPackageName, outputFilename] = args
-  log.info({ imageModelId, imageDistributionPackageName, outputFilename })
+  const [sourceModelId, imageDistributionPackageName, destinationModelId, outputFilename] = args
+  log.info({ sourceModelId, imageDistributionPackageName, destinationModelId, outputFilename }, 'Got args')
 
   // setup
   await connectToMongoose()
@@ -25,13 +26,15 @@ async function script() {
   const user = { dn: 'user' }
 
   // main functionality
-  await exportCompressedRegistryImage(user, imageModelId, imageDistributionPackageName, outputFilename, {
+  const { tarStream, uploadPromise } = await initialiseTarGzUpload(outputFilename, {
     exporter: 'user',
-    sourceModelId: imageModelId,
-    mirroredModelId: '',
+    sourceModelId,
+    mirroredModelId: destinationModelId,
     importKind: ImportKind.Image,
-    distributionPackageName: '',
+    distributionPackageName: imageDistributionPackageName.replace(sourceModelId, destinationModelId),
   })
+  await addCompressedRegistryImageComponents(user, sourceModelId, imageDistributionPackageName, tarStream)
+  await finaliseTarGzUpload(tarStream, uploadPromise)
 
   // cleanup
   setTimeout(disconnectFromMongoose, 50)

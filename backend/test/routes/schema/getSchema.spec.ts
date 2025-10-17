@@ -8,6 +8,7 @@ import { testModelSchema } from '../../testUtils/testModels.js'
 vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/connectors/audit/index.js')
 vi.mock('../../../src/connectors/authorisation/index.js')
+vi.mock('../../../src/services/mirroredModel/tarball.ts', () => ({}))
 
 const mockSchemaService = vi.hoisted(() => {
   return {

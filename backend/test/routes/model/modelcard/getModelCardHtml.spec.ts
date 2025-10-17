@@ -9,6 +9,7 @@ import { createFixture, testGet } from '../../../testUtils/routes.js'
 
 vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/audit/index.js')
+vi.mock('../../../../src/services/mirroredModel/tarball.ts', () => ({}))
 
 const mockModelCard: ModelCardInterface = {
   schemaId: 'schema123',

@@ -231,7 +231,7 @@ export abstract class BaseAuditConnector {
     mirroredModel: ModelInterface,
     sourceModelId: string,
     exporter: string,
-    importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation,
+    importResult: Omit<MongoDocumentImportInformation | FileImportInformation | ImageImportInformation, 'metadata'>,
   )
 
   abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface)

@@ -84,7 +84,7 @@ const modelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
 
-vi.mock('../../src/utils/database.ts', async () => ({
+vi.mock('../../src/utils/database.js', async () => ({
   isTransactionsEnabled: vi.fn(() => false),
 }))
 
