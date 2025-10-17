@@ -1,8 +1,10 @@
 import { PassThrough, Readable } from 'node:stream'
 
 import {
+  CompleteMultipartUploadCommand,
   CreateBucketCommand,
   CreateBucketRequest,
+  CreateMultipartUploadCommand,
   GetObjectCommand,
   GetObjectRequest,
   HeadBucketCommand,
@@ -11,6 +13,7 @@ import {
   HeadObjectRequest,
   S3Client,
   S3ServiceException,
+  UploadPartCommand,
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { NodeHttpHandler } from '@smithy/node-http-handler'
@@ -82,6 +85,36 @@ export async function putObjectStream(
   }
 }
 
+export async function putObjectPartStream(
+  key: string,
+  uploadId: string,
+  partNumber: number,
+  body: PassThrough | Readable,
+  bucket: string = config.s3.buckets.uploads,
+) {
+  try {
+    const client = await getS3Client()
+    const command = new UploadPartCommand({
+      Bucket: bucket,
+      Key: key,
+      UploadId: uploadId,
+      PartNumber: Number(partNumber),
+      Body: body,
+    })
+    const upload = await client.send(command)
+    log.debug({ key, bucket, uploadId, partNumber }, 'Upload part completed.')
+
+    return upload
+  } catch (error) {
+    throw InternalError('Unable to upload the multipart object to the S3 service.', {
+      internal: { error, bucket, key, uploadId, partNumber },
+    })
+  } finally {
+    // always cleanup the stream
+    body.destroy()
+  }
+}
+
 export async function getObjectStream(
   key: string,
   bucket: string = config.s3.buckets.uploads,
@@ -109,10 +142,41 @@ export async function getObjectStream(
   }
 }
 
+export async function startMultipartUpload(
+  key: string,
+  contentType: string,
+  bucket: string = config.s3.buckets.uploads,
+) {
+  const client = await getS3Client()
+  const command = new CreateMultipartUploadCommand({
+    Bucket: bucket,
+    Key: key,
+    ContentType: contentType,
+  })
+  const result = await client.send(command)
+  return { uploadId: result.UploadId }
+}
+
+export async function completeMultipartUpload(
+  key: string,
+  uploadId: string,
+  parts: Array<{ ETag: string; PartNumber: number }>,
+  bucket: string = config.s3.buckets.uploads,
+) {
+  const client = await getS3Client()
+  const command = new CompleteMultipartUploadCommand({
+    Bucket: bucket,
+    Key: key,
+    UploadId: uploadId,
+    MultipartUpload: { Parts: parts },
+  })
+  return client.send(command)
+}
+
 export async function objectExists(key: string, bucket: string = config.s3.buckets.uploads) {
   try {
     log.info({ bucket, key }, `Searching for ${key} in ${bucket}`)
-    await headObject(bucket, key)
+    await headObject(key, bucket)
     return true
   } catch (error) {
     if (isS3ServiceException(error) && error.$metadata.httpStatusCode === 404) {
@@ -142,7 +206,7 @@ export async function ensureBucketExists(bucket: string) {
   }
 }
 
-async function headObject(bucket: string, key: string) {
+export async function headObject(key: string, bucket: string = config.s3.buckets.uploads) {
   const client = await getS3Client()
 
   const input: HeadObjectRequest = {
