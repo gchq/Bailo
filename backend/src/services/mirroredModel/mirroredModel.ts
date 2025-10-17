@@ -97,9 +97,9 @@ export async function exportModel(
     finaliseTarGzUpload(tarStream, uploadPromise)
   } catch (error) {
     // Ensure all streams are destroyed on error to prevent leaks
-    tarStream?.destroy(error as Error)
-    gzipStream?.destroy(error as Error)
-    uploadStream?.destroy(error as Error)
+    tarStream?.destroy()
+    gzipStream?.destroy()
+    uploadStream?.destroy()
     throw error
   }
 
@@ -371,9 +371,9 @@ export async function uploadReleaseFiles(
           await finaliseTarGzUpload(tarStream, uploadPromise)
         } catch (error) {
           // Ensure all streams are destroyed on error to prevent leaks
-          tarStream?.destroy(error as Error)
-          gzipStream?.destroy(error as Error)
-          uploadStream?.destroy(error as Error)
+          tarStream?.destroy()
+          gzipStream?.destroy()
+          uploadStream?.destroy()
           throw error
         }
       })
@@ -439,9 +439,9 @@ export async function uploadReleaseImages(
             await finaliseTarGzUpload(tarStream, uploadPromise)
           } catch (error) {
             // Ensure all streams are destroyed on error to prevent leaks
-            tarStream?.destroy(error as Error)
-            gzipStream?.destroy(error as Error)
-            uploadStream?.destroy(error as Error)
+            tarStream?.destroy()
+            gzipStream?.destroy()
+            uploadStream?.destroy()
             throw error
           }
         })

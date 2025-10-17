@@ -7,6 +7,7 @@ import { extract, Pack, pack } from 'tar-stream'
 import { ModelAction } from '../../connectors/authorisation/actions.js'
 import authorisation from '../../connectors/authorisation/index.js'
 import { UserInterface } from '../../models/User.js'
+import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
 import { Forbidden, InternalError } from '../../utils/error.js'
 import log from '../log.js'
@@ -23,25 +24,6 @@ import {
   MongoDocumentImportInformation,
 } from './mirroredModel.js'
 import { uploadToS3 } from './s3.js'
-
-function defaultExtractTarGzErrorListener(
-  error: unknown,
-  // use `any` as "real" types are not a subtype `unknown`
-  _resolve: (reason?: any) => void,
-  reject: (reason?: unknown) => void,
-  logData?: Record<string, unknown>,
-) {
-  reject(InternalError('Error processing tarball during import.', { error, ...logData }))
-}
-
-function defaultExtractTarGzFinishListener(
-  // use `any` as "real" types are not a subtype `unknown`
-  _resolve: (reason?: any) => void,
-  reject: (reason?: unknown) => void,
-  logData?: Record<string, unknown>,
-) {
-  reject(InternalError('Tarball finished processing before expected.', { ...logData }))
-}
 
 export function createTarGzStreams() {
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
@@ -74,9 +56,9 @@ export async function initialiseTarGzUpload(
     )
   } catch (error) {
     // Ensure all streams are destroyed on error to prevent leaks
-    tarStream.destroy(error as Error)
-    gzipStream.destroy(error as Error)
-    uploadStream.destroy(error as Error)
+    tarStream.destroy()
+    gzipStream.destroy()
+    uploadStream.destroy()
     throw error
   }
   return { tarStream, gzipStream, uploadStream, uploadPromise }
@@ -111,7 +93,7 @@ export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, lo
       entry.stream.pipe(tarEntryStream).on('finish', resolve).on('error', reject)
     })
   } else {
-    throw InternalError('Unable to handle entry for tar.gz packing stream', {
+    throw InternalError('Unable to handle entry for tar.gz packing stream.', {
       entry,
       ...logData,
     })
@@ -130,26 +112,36 @@ export async function extractTarGzStream(
   logData?: Record<string, unknown>,
 ): Promise<MongoDocumentImportInformation | FileImportInformation | ImageImportInformation> {
   return new Promise((resolve, reject) => {
-    const { ungzipStream, untarStream } = createUnTarGzStreams()
-    tarGzStream.pipe(ungzipStream).pipe(untarStream)
-
     let metadata: ExportMetadata
     let importer: BaseImporter
     let firstEntryProcessed = false
+    const { ungzipStream, untarStream } = createUnTarGzStreams()
 
-    untarStream.on('error', async (err) => {
-      if (importer && importer.errorListener) {
-        await importer.errorListener(err, resolve, reject)
+    tarGzStream.pipe(ungzipStream).pipe(untarStream)
+
+    // this error event is expected to always call `reject`
+    async function onErrorHandler(error: unknown) {
+      if (importer?.errorListener) {
+        await importer.errorListener(error, resolve, reject)
       } else {
-        defaultExtractTarGzErrorListener(err, resolve, reject, logData)
+        if (isBailoError(error)) {
+          reject(error)
+        } else {
+          reject(InternalError('Error processing tarball during import.', { err: error, ...logData }))
+        }
       }
+    }
+
+    untarStream.on('error', async (error) => {
+      await onErrorHandler(error)
     })
 
     untarStream.on('finish', async () => {
-      if (importer && importer.finishListener) {
+      if (importer?.finishListener) {
         await importer.finishListener(resolve, reject)
       } else {
-        defaultExtractTarGzFinishListener(resolve, reject, logData)
+        // if the importer isn't set then the extract hasn't finished
+        reject(InternalError('Tarball finished processing before expected.', { ...logData }))
       }
     })
 
@@ -204,19 +196,15 @@ export async function extractTarGzStream(
           next()
           return
         }
-        if (!metadata) {
-          throw InternalError('No metadata available before file processing.', { entry, ...logData })
-        }
 
         // Workaround `stream` sometimes being a reference rather than the stream itself
         const passThrough = new PassThrough()
         stream.pipe(passThrough)
         await importer.processEntry(entry, passThrough)
         next()
-      } catch (err) {
-        reject(err)
-        // bubble error upstream to stop tar processing
-        untarStream.destroy(err as Error)
+      } catch (error) {
+        untarStream.destroy()
+        await onErrorHandler(error)
       }
     })
   })

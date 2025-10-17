@@ -2,6 +2,7 @@ import { PassThrough, Readable } from 'node:stream'
 
 import { Headers } from 'tar-stream'
 
+import { isBailoError } from '../../../types/error.js'
 import { InternalError } from '../../../utils/error.js'
 import { ExportMetadata } from '../mirroredModel.js'
 
@@ -18,9 +19,13 @@ export abstract class BaseImporter {
 
   // use `any` as "real" types are not a subtype `unknown`
   errorListener(error: unknown, _resolve: (reason?: any) => void, reject: (reason?: unknown) => void) {
-    reject(
-      InternalError('Error processing tarball during import.', { error, metadata: this.metadata, ...this.logData }),
-    )
+    if (isBailoError(error)) {
+      reject(error)
+    } else {
+      reject(
+        InternalError('Error processing tarball during import.', { error, metadata: this.metadata, ...this.logData }),
+      )
+    }
   }
 
   // use `any` as "real" types are not a subtype `unknown`

@@ -8,7 +8,7 @@ import { FileExportMetadata, ImportKind } from '../../../../src/services/mirrore
 
 vi.mock('../../../../src/services/model.js', () => ({}))
 vi.mock('../../../../src/services/release.js', () => ({}))
-vi.mock('../../../../src/connectors/fileScanning/index.ts', () => ({}))
+vi.mock('../../../../src/connectors/fileScanning/index.js', () => ({}))
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -69,12 +69,12 @@ const mockMetadata: FileExportMetadata = {
   filePath: 'original/file/path',
 } as FileExportMetadata
 
-describe('FileImporter', () => {
+describe('services > mirroredModel > importers > FileImporter', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  test('initialise when importKind is File success', () => {
+  test('constructor > success', () => {
     const importer = new FileImporter(mockMetadata)
 
     expect(importer.bucket).toBe(configMocks.s3.buckets.uploads)
@@ -82,7 +82,7 @@ describe('FileImporter', () => {
     expect(importer.extractedFile).toBe(false)
   })
 
-  test('initialise when importKind is not File failure', () => {
+  test('constructor > error importKind not File', () => {
     const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
 
     expect(() => new FileImporter(badMetadata)).toThrowError(
@@ -90,7 +90,7 @@ describe('FileImporter', () => {
     )
   })
 
-  test('processEntry upload new file to S3', async () => {
+  test('processEntry > success upload new file to S3', async () => {
     fileModelMocks.findOne.mockResolvedValue(null)
 
     const importer = new FileImporter(mockMetadata)
@@ -105,7 +105,7 @@ describe('FileImporter', () => {
     expect(importer.extractedFile).toBe(true)
   })
 
-  test('processEntry skip already existing file', async () => {
+  test('processEntry > success skip already existing file', async () => {
     fileModelMocks.findOne.mockResolvedValue({ id: 'existingId' })
 
     const importer = new FileImporter(mockMetadata)
@@ -122,7 +122,7 @@ describe('FileImporter', () => {
     expect(importer.extractedFile).toBe(true)
   })
 
-  test('processEntry throw on multiple files', async () => {
+  test('processEntry > error on multiple files', async () => {
     fileModelMocks.findOne.mockResolvedValue(null)
 
     const importer = new FileImporter(mockMetadata)
@@ -136,7 +136,7 @@ describe('FileImporter', () => {
     )
   })
 
-  test('processEntry skip non-file entries', async () => {
+  test('processEntry > success skip non-file entries', async () => {
     const importer = new FileImporter(mockMetadata)
     const entry: Headers = { name: 'dir', type: 'directory' } as Headers
     const stream = new PassThrough()
@@ -146,7 +146,7 @@ describe('FileImporter', () => {
     expect(logMocks.debug).toHaveBeenCalledWith({ name: 'dir', type: 'directory' }, 'Skipping non-file entry.')
   })
 
-  test('finishListener calls BaseImporter behaviour', () => {
+  test('finishListener > success calls BaseImporter behaviour', () => {
     const importer = new FileImporter(mockMetadata)
     const resolve = vi.fn()
     const reject = vi.fn()

@@ -10,12 +10,17 @@ vi.mock('../../../src/connectors/audit/index.js')
 describe('routes > model > postRequestImport', () => {
   test('200 > ok', async () => {
     vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => ({
-      ImportKind: { Documents: 'documents', File: 'file' } as const,
       importModel: vi.fn(() => ({
         mirroredModel: { id: 'abc' },
-        sourceModelId: 'cba',
-        modelCardVersions: [1, 2, 3],
-        newModelCards: [],
+        importResult: {
+          modelCardVersions: [1, 2, 3],
+          newModelCards: [],
+          releaseSemvers: ['1.2.3'],
+          newReleases: [],
+          fileIds: [],
+          imageIds: [],
+          metadata: { sourceModelId: 'expedita', exporter: 'user' },
+        },
       })),
     }))
 

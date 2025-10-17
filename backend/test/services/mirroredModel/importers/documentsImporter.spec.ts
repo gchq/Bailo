@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { DocumentsImporter } from '../../../../src/services/mirroredModel/importers/documentsImporter.js'
 import { DocumentsExportMetadata, ImportKind } from '../../../../src/services/mirroredModel/mirroredModel.js'
 
-vi.mock('../../../../src/connectors/fileScanning/index.ts', () => ({}))
+vi.mock('../../../../src/connectors/fileScanning/index.js', () => ({}))
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -70,24 +70,24 @@ const mockMetadata: DocumentsExportMetadata = {
   exporter: 'exporter',
 } as DocumentsExportMetadata
 
-describe('DocumentsImporter', () => {
+describe('services > mirroredModel > importers > DocumentsImporter', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  test('initialise when importKind is Documents success', () => {
+  test('constructor > success', () => {
     const importer = new DocumentsImporter(mockUser, mockMetadata)
     expect(importer.user).toEqual(mockUser)
   })
 
-  test('initialise when importKind is not Documents failure', () => {
+  test('constructor > error importKind not Documents', () => {
     const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
     expect(() => new DocumentsImporter(mockUser, badMetadata)).toThrowError(
       /^Cannot parse compressed Documents: incorrect metadata specified./,
     )
   })
 
-  test('processEntry handle modelCard file', async () => {
+  test('processEntry > success handle modelCard file', async () => {
     modelParserMocks.parseModelCard.mockReturnValue({ version: 1 })
     modelMocks.saveImportedModelCard.mockResolvedValue({ saved: true })
 
@@ -104,7 +104,7 @@ describe('DocumentsImporter', () => {
     expect(importer.newModelCards).toHaveLength(1)
   })
 
-  test('processEntry handle release file with auth success', async () => {
+  test('processEntry > success handle release file with auth success', async () => {
     modelParserMocks.parseRelease.mockReturnValue({
       semver: '1.0.0',
       images: [{ repository: 'repo', name: 'path', tag: 'tag' }],
@@ -130,7 +130,7 @@ describe('DocumentsImporter', () => {
     expect(importer.newReleases).toHaveLength(1)
   })
 
-  test('processEntry throw when auth fails', async () => {
+  test('processEntry > error auth failure', async () => {
     modelParserMocks.parseRelease.mockReturnValue({ semver: '2.0.0', images: [] })
     modelMocks.getModelById.mockResolvedValue({})
     authMocks.default.releases.mockResolvedValue([{ success: false }])
@@ -148,7 +148,7 @@ describe('DocumentsImporter', () => {
     )
   })
 
-  test('processEntry handle file entry', async () => {
+  test('processEntry > success handle file entry', async () => {
     modelParserMocks.parseFile.mockResolvedValue({ _id: 'file-id' })
     fileMocks.saveImportedFile.mockResolvedValue(true)
 
@@ -167,7 +167,7 @@ describe('DocumentsImporter', () => {
     expect(importer.fileIds).toContain('file-id')
   })
 
-  test('processEntry throw on unknown file path', async () => {
+  test('processEntry > error unknown file path', async () => {
     const importer = new DocumentsImporter(mockUser, mockMetadata)
     const entry: Headers = {
       name: 'content-dir/unknown/file.json',
@@ -181,7 +181,7 @@ describe('DocumentsImporter', () => {
     )
   })
 
-  test('processEntry skip non-file entry', async () => {
+  test('processEntry > success skip non-file entry', async () => {
     const importer = new DocumentsImporter(mockUser, mockMetadata)
     const entry: Headers = { name: 'dir', type: 'directory' } as Headers
     const stream = new PassThrough()
@@ -192,7 +192,7 @@ describe('DocumentsImporter', () => {
     expect(importer.fileIds).toHaveLength(0)
   })
 
-  test('finishListener resolve success', async () => {
+  test('finishListener > success', async () => {
     const importer = new DocumentsImporter(mockUser, mockMetadata)
     importer.modelCardVersions.push(1)
     importer.newModelCards.push({} as any)

@@ -20,14 +20,14 @@ const mockMetadata: ExportMetadata = {
 } as ExportMetadata
 const mockLogData = { extra: 'info' }
 
-describe('BaseImporter', () => {
-  test('initialise metadata and logData correctly', () => {
+describe('services > mirroredModel > importers > BaseImporter', () => {
+  test('constructor > success', () => {
     const importer = new TestImporter(mockMetadata, mockLogData)
     expect(importer.metadata).toEqual(mockMetadata)
     expect(importer.logData).toEqual(mockLogData)
   })
 
-  test('resolve finishListener with metadata', async () => {
+  test('finishListener > success with metadata', async () => {
     const importer = new TestImporter(mockMetadata)
     const resolve = vi.fn()
     const reject = vi.fn()
@@ -38,7 +38,7 @@ describe('BaseImporter', () => {
     expect(reject).not.toHaveBeenCalled()
   })
 
-  test('reject errorListener with InternalError containing metadata and logData', () => {
+  test('errorListener > error with generic Error containing metadata and logData', () => {
     const importer = new TestImporter(mockMetadata, mockLogData)
     const error = new Error('failure')
     const resolve = vi.fn()
@@ -58,7 +58,21 @@ describe('BaseImporter', () => {
     )
   })
 
-  test('processEntry implemented by subclass', () => {
+  test('errorListener > error with Bailo Error containing metadata and logData', () => {
+    const importer = new TestImporter(mockMetadata, mockLogData)
+    const error = InternalError('failure', { mockMetadata, mockLogData })
+    const resolve = vi.fn()
+    const reject = vi.fn()
+
+    importer.errorListener(error, resolve, reject)
+
+    expect(resolve).not.toHaveBeenCalled()
+    expect(reject).toHaveBeenCalledTimes(1)
+    const rejectedArg = reject.mock.calls[0][0]
+    expect(rejectedArg).toEqual(InternalError('failure', { mockMetadata, mockLogData }))
+  })
+
+  test('processEntry > success implemented by subclass', () => {
     const importer = new TestImporter(mockMetadata)
     const fakeEntry = {} as Headers
     const fakeStream = new PassThrough()

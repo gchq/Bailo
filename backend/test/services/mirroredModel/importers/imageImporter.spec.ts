@@ -6,7 +6,7 @@ import { ImageImporter } from '../../../../src/services/mirroredModel/importers/
 import { ImageExportMetadata, ImportKind } from '../../../../src/services/mirroredModel/mirroredModel.js'
 
 vi.mock('../../../../src/services/model.js', () => ({}))
-vi.mock('../../../../src/connectors/fileScanning/index.ts', () => ({}))
+vi.mock('../../../../src/connectors/fileScanning/index.js', () => ({}))
 vi.mock('../../../../src/services/accessRequest.js', () => ({}))
 vi.mock('../../../../src/services/review.js', () => ({}))
 vi.mock('../../../../src/services/release.js', () => ({}))
@@ -66,33 +66,33 @@ const mockMetadata: ImageExportMetadata = {
   distributionPackageName: 'domain/imageName:tag',
 } as ImageExportMetadata
 
-describe('ImageImporter', () => {
+describe('services > mirroredModel > importers > ImageImporter', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  test('constructs successfully when importKind is Image', () => {
+  test('constructor > success', () => {
     const importer = new ImageImporter(mockUser, mockMetadata)
     expect(importer.user).toBe(mockUser)
     expect(importer.imageName).toBe('imageName')
     expect(importer.imageTag).toBe('tag')
   })
 
-  test('throws when importKind is not Image in constructor', () => {
+  test('constructor > error when importKind is not Image', () => {
     const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
     expect(() => new ImageImporter(mockUser, badMetadata)).toThrowError(
       /^Cannot parse compressed Image: incorrect metadata specified\./,
     )
   })
 
-  test('throws when splitDistributionPackageName result has no tag', () => {
+  test('constructor > error when splitDistributionPackageName result has no tag', () => {
     registryMocks.splitDistributionPackageName.mockReturnValueOnce({ path: 'imageName' } as any)
     expect(() => new ImageImporter(mockUser, mockMetadata)).toThrowError(
       /^Distribution Package Name must include a tag\./,
     )
   })
 
-  test('processEntry extracts manifest.json', async () => {
+  test('processEntry > success extract manifest.json', async () => {
     const importer = new ImageImporter(mockUser, mockMetadata)
     const entry: Headers = { name: 'content-dir/manifest.json', type: 'file' } as Headers
     const stream = new PassThrough()
@@ -104,7 +104,7 @@ describe('ImageImporter', () => {
     expect(importer.manifestBody).toEqual({ manifest: true })
   })
 
-  test('processEntry skips blob if it exists in registry', async () => {
+  test('processEntry > success skips blob if it exists in registry', async () => {
     registryMocks.doesImageLayerExist.mockResolvedValue(true)
     const importer = new ImageImporter(mockUser, mockMetadata)
     const entry: Headers = {
@@ -121,7 +121,7 @@ describe('ImageImporter', () => {
     expect(registryMocks.initialiseImageUpload).not.toHaveBeenCalled()
   })
 
-  test('processEntry uploads blob if not in registry', async () => {
+  test('processEntry > success uploads blob if not in registry', async () => {
     registryMocks.doesImageLayerExist.mockResolvedValue(false)
     const importer = new ImageImporter(mockUser, mockMetadata)
     const entry: Headers = {
@@ -145,7 +145,7 @@ describe('ImageImporter', () => {
     )
   })
 
-  test('processEntry throws error when blob upload fails', async () => {
+  test('processEntry > error when blob upload fails', async () => {
     registryMocks.doesImageLayerExist.mockResolvedValue(false)
     registryMocks.initialiseImageUpload.mockImplementation(() => {
       throw new Error('init fail')
@@ -161,7 +161,7 @@ describe('ImageImporter', () => {
     await expect(importer.processEntry(entry, stream)).rejects.toThrowError(/^Failed to upload blob to registry\./)
   })
 
-  test('processEntry throws error for unrecognised file path', async () => {
+  test('processEntry > error for unrecognised file path', async () => {
     const importer = new ImageImporter(mockUser, mockMetadata)
     const entry: Headers = { name: 'content-dir/invalid.json', type: 'file' } as Headers
     const stream = new PassThrough()
@@ -171,7 +171,7 @@ describe('ImageImporter', () => {
     )
   })
 
-  test('processEntry warns & skips non-file entries', async () => {
+  test('processEntry > success warns & skips non-file entries', async () => {
     const importer = new ImageImporter(mockUser, mockMetadata)
     const entry: Headers = { name: 'some-dir', type: 'directory' } as Headers
     const stream = new PassThrough()
@@ -181,7 +181,7 @@ describe('ImageImporter', () => {
     expect(logMocks.warn).toHaveBeenCalledWith({ name: 'some-dir', type: 'directory' }, 'Skipping non-file entry.')
   })
 
-  test('finishListener uploads manifest successfully when valid', async () => {
+  test('finishListener > success upload manifest successfully when valid', async () => {
     typeguardMocks.hasKeysOfType.mockReturnValue(true)
     const importer = new ImageImporter(mockUser, mockMetadata)
     importer.manifestBody = { mediaType: 'mt' }
@@ -204,7 +204,7 @@ describe('ImageImporter', () => {
     })
   })
 
-  test('finishListener rejects when manifest invalid', async () => {
+  test('finishListener > error when manifest invalid', async () => {
     typeguardMocks.hasKeysOfType.mockReturnValue(false)
     const importer = new ImageImporter(mockUser, mockMetadata)
     importer.manifestBody = { bad: 'data' }
