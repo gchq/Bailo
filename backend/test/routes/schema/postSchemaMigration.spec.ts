@@ -7,6 +7,7 @@ import { createFixture, testPost } from '../../testUtils/routes.js'
 vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/connectors/audit/index.js')
 vi.mock('../../../src/connectors/authorisation/index.js')
+vi.mock('../../../src/services/mirroredModel/tarball.ts', () => ({}))
 
 const mockSchemaMigrationService = vi.hoisted(() => {
   return {

@@ -6,6 +6,7 @@ import { createFixture, testPatch } from '../../testUtils/routes.js'
 
 vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/connectors/audit/index.js')
+vi.mock('../../../src/services/mirroredModel/tarball.ts', () => ({}))
 
 describe('routes > model > patchModel', () => {
   test('200 > ok', async () => {
