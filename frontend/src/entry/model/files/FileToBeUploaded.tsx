@@ -3,7 +3,7 @@ import { Button, Chip, Grid2, TextField, Tooltip, Typography } from '@mui/materi
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useCallback, useState } from 'react'
 import Restricted from 'src/common/Restricted'
-import FileTagSelector from 'src/entry/model/releases/FileTagSelector'
+import EntryTagSelector from 'src/entry/model/releases/EntryTagSelector'
 import { FileUploadMetadata, FileUploadWithMetadata } from 'types/types'
 
 interface FileToBeUploadedProps {
@@ -69,7 +69,7 @@ export default function FileToBeUploaded({
             {`Edit file tags ${fileWithMetadata.metadata && fileWithMetadata.metadata.tags.length > 0 ? `(${fileWithMetadata.metadata.tags.length})` : ''}`}
           </Button>
         </Restricted>
-        <FileTagSelector
+        <EntryTagSelector
           anchorEl={anchorElFileTag}
           setAnchorEl={setAnchorElFileTag}
           onChange={handleFileTagSelectorOnChange}
