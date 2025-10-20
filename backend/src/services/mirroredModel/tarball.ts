@@ -185,6 +185,7 @@ export async function extractTarGzStream(
               importer = new ImageImporter(user, metadata, logData)
               break
             default:
+              // This should be unreachable due to the above `mirrorMetadataSchema.parse`
               throw InternalError(`Unknown importKind specified in '${config.modelMirror.metadataFile}'.`, {
                 metadata,
                 entry,

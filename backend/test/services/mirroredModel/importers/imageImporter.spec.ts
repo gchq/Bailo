@@ -10,6 +10,7 @@ vi.mock('../../../../src/connectors/fileScanning/index.js', () => ({}))
 vi.mock('../../../../src/services/accessRequest.js', () => ({}))
 vi.mock('../../../../src/services/review.js', () => ({}))
 vi.mock('../../../../src/services/release.js', () => ({}))
+vi.mock('../../../../src/services/mirroredModel/tarball.ts', () => ({}))
 
 const configMocks = vi.hoisted(() => ({
   modelMirror: {

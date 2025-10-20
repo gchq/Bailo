@@ -7,6 +7,7 @@ import { DocumentsImporter } from '../../../../src/services/mirroredModel/import
 import { DocumentsExportMetadata, ImportKind } from '../../../../src/services/mirroredModel/mirroredModel.js'
 
 vi.mock('../../../../src/connectors/fileScanning/index.js', () => ({}))
+vi.mock('../../../../src/services/mirroredModel/tarball.ts', () => ({}))
 
 const authMocks = vi.hoisted(() => ({
   default: {
