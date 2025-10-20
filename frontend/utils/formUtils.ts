@@ -15,6 +15,7 @@ import TagSelector from 'src/MuiForms/TagSelector'
 
 import { SplitSchemaNoRender, StepNoRender, StepType } from '../types/types'
 import { createUiSchema } from './uiSchemaUtils'
+import TestWidget from 'src/MuiForms/TestWidget'
 
 export const widgets = {
   TextWidget: CustomTextInput,
@@ -28,6 +29,7 @@ export const widgets = {
   dataCardSelector: DataCardSelector,
   metricsWidget: Metrics,
   nothing: Nothing,
+  testWidget: TestWidget,
 }
 
 export function createStep({
