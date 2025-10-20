@@ -5,10 +5,7 @@ import { postReviewRoleSchema } from '../../../src/routes/v2/review/postReviewRo
 import { createFixture, testPost } from '../../testUtils/routes.js'
 import { testReviewRole } from '../../testUtils/testModels.js'
 
-vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/connectors/audit/index.js')
-vi.mock('../../../src/services/mirroredModel/tarball.ts', () => ({}))
-vi.mock('../../../src/connectors/authorisation/index.js')
 
 const mockReviewService = vi.hoisted(() => {
   return {

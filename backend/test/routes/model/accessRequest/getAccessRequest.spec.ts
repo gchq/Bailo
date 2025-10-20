@@ -6,10 +6,7 @@ import { getAccessRequestSchema } from '../../../../src/routes/v2/model/accessRe
 import { createFixture, testGet } from '../../../testUtils/routes.js'
 import { testAccessRequest } from '../../../testUtils/testModels.js'
 
-vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/audit/index.js')
-vi.mock('../../../../src/connectors/authorisation/index.js')
-vi.mock('../../../../src/services/mirroredModel/tarball.ts', () => ({}))
 
 const accessRequestMock = vi.hoisted(() => {
   return {

@@ -4,9 +4,7 @@ import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { testGet } from '../../../testUtils/routes.js'
 import { testReviewRole } from '../../../testUtils/testModels.js'
 
-vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/audit/index.js')
-vi.mock('../../../../src/services/mirroredModel/tarball.ts', () => ({}))
 
 describe('routes > model > roles > getModelRoles', () => {
   test('200 > ok', async () => {

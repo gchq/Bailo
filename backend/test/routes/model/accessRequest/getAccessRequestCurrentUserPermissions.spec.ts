@@ -3,10 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { getAccessRequestCurrentUserPermissionsSchema } from '../../../../src/routes/v2/model/accessRequest/getAccessRequestCurrentUserPermissions.js'
 import { createFixture, testGet } from '../../../testUtils/routes.js'
 
-vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/audit/index.js')
-vi.mock('../../../../src/connectors/authorisation/index.js')
-vi.mock('../../../../src/services/mirroredModel/tarball.ts', () => ({}))
 
 describe('routes > model > accessRequest > getAccessRequestCurrentUserPermissions', () => {
   test('200 > ok', async () => {

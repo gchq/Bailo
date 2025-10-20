@@ -6,10 +6,7 @@ import { postAccessRequestReviewResponseSchema } from '../../../src/routes/v2/re
 import { createFixture, testPost } from '../../testUtils/routes.js'
 import { testReviewResponse } from '../../testUtils/testModels.js'
 
-vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/connectors/audit/index.js')
-vi.mock('../../../src/connectors/authorisation/index.js')
-vi.mock('../../../src/services/mirroredModel/tarball.ts', () => ({}))
 
 const mockResponseService = vi.hoisted(() => {
   return {
