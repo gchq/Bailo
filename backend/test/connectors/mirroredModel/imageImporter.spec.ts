@@ -2,22 +2,15 @@ import { PassThrough } from 'stream'
 import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ImageImporter } from '../../../../src/services/mirroredModel/importers/imageImporter.js'
-import { ImageExportMetadata, ImportKind } from '../../../../src/services/mirroredModel/mirroredModel.js'
-
-vi.mock('../../../../src/services/model.js', () => ({}))
-vi.mock('../../../../src/connectors/fileScanning/index.js', () => ({}))
-vi.mock('../../../../src/services/accessRequest.js', () => ({}))
-vi.mock('../../../../src/services/review.js', () => ({}))
-vi.mock('../../../../src/services/release.js', () => ({}))
-vi.mock('../../../../src/services/mirroredModel/tarball.ts', () => ({}))
+import { ImageImporter, ImageMirrorMetadata } from '../../../src/connectors/mirroredModel/image.js'
+import { MirrorKind } from '../../../src/connectors/mirroredModel/index.js'
 
 const configMocks = vi.hoisted(() => ({
   modelMirror: {
     contentDirectory: 'content-dir',
   },
 }))
-vi.mock('../../../../src/utils/config.js', () => ({
+vi.mock('../../../src/utils/config.js', () => ({
   __esModule: true,
   default: configMocks,
 }))
@@ -27,7 +20,7 @@ const authMocks = vi.hoisted(() => ({
     releases: vi.fn(),
   },
 }))
-vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
+vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const registryMocks = vi.hoisted(() => ({
   splitDistributionPackageName: vi.fn(() => ({ path: 'imageName', tag: 'tag' })),
@@ -36,20 +29,20 @@ const registryMocks = vi.hoisted(() => ({
   putImageBlob: vi.fn(),
   putImageManifest: vi.fn(),
 }))
-vi.mock('../../../../src/services/registry.js', () => registryMocks)
+vi.mock('../../../src/services/registry.js', () => registryMocks)
 
 const logMocks = vi.hoisted(() => ({
   debug: vi.fn(),
   warn: vi.fn(),
 }))
-vi.mock('../../../../src/services/log.js', () => ({
+vi.mock('../../../src/services/log.js', () => ({
   default: logMocks,
 }))
 
 const typeguardMocks = vi.hoisted(() => ({
   hasKeysOfType: vi.fn(),
 }))
-vi.mock('../../../../src/utils/typeguards.js', () => typeguardMocks)
+vi.mock('../../../src/utils/typeguards.js', () => typeguardMocks)
 
 const streamConsumersMocks = vi.hoisted(() => ({
   json: vi.fn(),
@@ -61,11 +54,11 @@ vi.mock('stream/promises', () => ({
 }))
 
 const mockUser = { dn: 'user' }
-const mockMetadata: ImageExportMetadata = {
-  importKind: ImportKind.Image,
+const mockMetadata: ImageMirrorMetadata = {
+  importKind: MirrorKind.Image,
   mirroredModelId: 'model1',
   distributionPackageName: 'domain/imageName:tag',
-} as ImageExportMetadata
+} as ImageMirrorMetadata
 
 describe('services > mirroredModel > importers > ImageImporter', () => {
   beforeEach(() => {

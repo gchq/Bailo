@@ -12,12 +12,8 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
-import {
-  FileImportInformation,
-  ImageImportInformation,
-  MongoDocumentImportInformation,
-} from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { MirrorInformation } from '../mirroredModel/index.js'
 
 const AuditKind = {
   Create: 'Create',
@@ -231,7 +227,7 @@ export abstract class BaseAuditConnector {
     mirroredModel: ModelInterface,
     sourceModelId: string,
     exporter: string,
-    importResult: Omit<MongoDocumentImportInformation | FileImportInformation | ImageImportInformation, 'metadata'>,
+    importResult: Omit<MirrorInformation, 'metadata'>,
   )
 
   abstract onCreateReviewRole(req: Request, reviewRole: ReviewRoleInterface)

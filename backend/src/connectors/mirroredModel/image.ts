@@ -4,35 +4,44 @@ import { PassThrough } from 'stream'
 import { finished } from 'stream/promises'
 import { Headers } from 'tar-stream'
 
-import { UserInterface } from '../../../models/User.js'
-import config from '../../../utils/config.js'
-import { InternalError } from '../../../utils/error.js'
-import { hasKeysOfType } from '../../../utils/typeguards.js'
-import log from '../../log.js'
+import { UserInterface } from '../../models/User.js'
+import log from '../../services/log.js'
 import {
   doesImageLayerExist,
   initialiseImageUpload,
   putImageBlob,
   putImageManifest,
   splitDistributionPackageName,
-} from '../../registry.js'
-import { ImageExportMetadata, ImageImportInformation, ImportKind } from '../mirroredModel.js'
-import { BaseImporter } from './baseImporter.js'
+} from '../../services/registry.js'
+import config from '../../utils/config.js'
+import { InternalError } from '../../utils/error.js'
+import { hasKeysOfType } from '../../utils/typeguards.js'
+import { BaseImporter, BaseMirrorMetadata } from './base.js'
+import { MirrorKind, MirrorKindKeys } from './index.js'
 
-const manifestRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/manifest\.json$`)
-const blobRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/blobs\/sha256\/[0-9a-f]{64}$`)
+export type ImageMirrorMetadata = BaseMirrorMetadata & {
+  importKind: MirrorKindKeys<'Image'>
+  distributionPackageName: string
+}
+export type ImageMirrorInformation = {
+  metadata: ImageMirrorMetadata
+  image: { modelId: string; imageName: string; imageTag: string }
+}
 
 export class ImageImporter extends BaseImporter {
-  declare metadata: ImageExportMetadata
+  declare protected metadata: ImageMirrorMetadata
 
-  user: UserInterface
-  imageName: string
-  imageTag: string
-  manifestBody: unknown = null
+  protected user: UserInterface
+  protected imageName: string
+  protected imageTag: string
+  protected manifestBody: unknown = null
 
-  constructor(user: UserInterface, metadata: ImageExportMetadata, logData?: Record<string, unknown>) {
+  protected manifestRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/manifest\.json$`)
+  protected blobRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/blobs\/sha256\/[0-9a-f]{64}$`)
+
+  constructor(user: UserInterface, metadata: ImageMirrorMetadata, logData?: Record<string, unknown>) {
     super(metadata, logData)
-    if (this.metadata.importKind !== ImportKind.Image) {
+    if (this.metadata.importKind !== MirrorKind.Image) {
       throw InternalError('Cannot parse compressed Image: incorrect metadata specified.', {
         metadata: this.metadata,
         ...this.logData,
@@ -53,11 +62,11 @@ export class ImageImporter extends BaseImporter {
   async processEntry(entry: Headers, stream: PassThrough) {
     if (entry.type === 'file') {
       // Process file
-      if (manifestRegex.test(entry.name)) {
+      if (this.manifestRegex.test(entry.name)) {
         // manifest.json must be uploaded after the other layers otherwise the registry will error as the referenced layers won't yet exist
         log.debug({ ...this.logData }, 'Extracting un-tarred manifest.')
         this.manifestBody = await json(stream)
-      } else if (blobRegex.test(entry.name)) {
+      } else if (this.blobRegex.test(entry.name)) {
         // convert filename to digest format
         const layerDigest = `${entry.name.replace(new RegExp(String.raw`^(${config.modelMirror.contentDirectory}/blobs\/sha256\/)`), 'sha256:')}`
         try {
@@ -121,7 +130,7 @@ export class ImageImporter extends BaseImporter {
   }
 
   async finishListener(
-    resolve: (reason?: ImageImportInformation) => void,
+    resolve: (reason?: ImageMirrorInformation) => void,
     reject: (reason?: unknown) => void,
     _logData?: Record<string, unknown>,
   ) {

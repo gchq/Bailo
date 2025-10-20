@@ -3,25 +3,22 @@ import { PassThrough } from 'node:stream'
 import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { DocumentsImporter } from '../../../../src/services/mirroredModel/importers/documentsImporter.js'
-import { DocumentsExportMetadata, ImportKind } from '../../../../src/services/mirroredModel/mirroredModel.js'
-
-vi.mock('../../../../src/connectors/fileScanning/index.js', () => ({}))
-vi.mock('../../../../src/services/mirroredModel/tarball.ts', () => ({}))
+import { DocumentsImporter, DocumentsMirrorMetadata } from '../../../src/connectors/mirroredModel/documents.js'
+import { MirrorKind } from '../../../src/connectors/mirroredModel/index.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
     releases: vi.fn(),
   },
 }))
-vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
+vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const configMocks = vi.hoisted(() => ({
   modelMirror: {
     contentDirectory: 'content-dir',
   },
 }))
-vi.mock('../../../../src/utils/config.js', () => ({
+vi.mock('../../../src/utils/config.js', () => ({
   __esModule: true,
   default: configMocks,
 }))
@@ -30,46 +27,46 @@ const logMocks = vi.hoisted(() => ({
   info: vi.fn(),
   debug: vi.fn(),
 }))
-vi.mock('../../../../src/services/log.js', async () => ({
+vi.mock('../../../src/services/log.js', async () => ({
   default: logMocks,
 }))
 
-const modelParserMocks = vi.hoisted(() => ({
+const entityParsersMocks = vi.hoisted(() => ({
   parseModelCard: vi.fn(),
   parseRelease: vi.fn(),
   parseFile: vi.fn(),
 }))
-vi.mock('../../../../src/services/mirroredModel/parsers/modelParser.js', () => modelParserMocks)
+vi.mock('../../../src/services/mirroredModel/entityParsers.js', () => entityParsersMocks)
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
   saveImportedModelCard: vi.fn(),
   setLatestImportedModelCard: vi.fn(),
 }))
-vi.mock('../../../../src/services/model.js', () => modelMocks)
+vi.mock('../../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
   saveImportedRelease: vi.fn(),
 }))
-vi.mock('../../../../src/services/release.js', () => releaseMocks)
+vi.mock('../../../src/services/release.js', () => releaseMocks)
 
 const fileMocks = vi.hoisted(() => ({
   saveImportedFile: vi.fn(),
 }))
-vi.mock('../../../../src/services/file.js', () => fileMocks)
+vi.mock('../../../src/services/file.js', () => fileMocks)
 
 const registryMocks = vi.hoisted(() => ({
   joinDistributionPackageName: vi.fn(() => 'repo/path:tag'),
 }))
-vi.mock('../../../../src/services/registry.js', () => registryMocks)
+vi.mock('../../../src/services/registry.js', () => registryMocks)
 
 const mockUser = { dn: 'user' }
-const mockMetadata: DocumentsExportMetadata = {
-  importKind: ImportKind.Documents,
+const mockMetadata: DocumentsMirrorMetadata = {
+  importKind: MirrorKind.Documents,
   mirroredModelId: 'mirroredModelId',
   sourceModelId: 'sourceModelId',
   exporter: 'exporter',
-} as DocumentsExportMetadata
+} as DocumentsMirrorMetadata
 
 describe('services > mirroredModel > importers > DocumentsImporter', () => {
   beforeEach(() => {
@@ -89,7 +86,7 @@ describe('services > mirroredModel > importers > DocumentsImporter', () => {
   })
 
   test('processEntry > success handle modelCard file', async () => {
-    modelParserMocks.parseModelCard.mockReturnValue({ version: 1 })
+    entityParsersMocks.parseModelCard.mockReturnValue({ version: 1 })
     modelMocks.saveImportedModelCard.mockResolvedValue({ saved: true })
 
     const importer = new DocumentsImporter(mockUser, mockMetadata)
@@ -99,14 +96,14 @@ describe('services > mirroredModel > importers > DocumentsImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    expect(modelParserMocks.parseModelCard).toHaveBeenCalled()
+    expect(entityParsersMocks.parseModelCard).toHaveBeenCalled()
     expect(modelMocks.saveImportedModelCard).toHaveBeenCalled()
     expect(importer.modelCardVersions).toContain(1)
     expect(importer.newModelCards).toHaveLength(1)
   })
 
   test('processEntry > success handle release file with auth success', async () => {
-    modelParserMocks.parseRelease.mockReturnValue({
+    entityParsersMocks.parseRelease.mockReturnValue({
       semver: '1.0.0',
       images: [{ repository: 'repo', name: 'path', tag: 'tag' }],
     })
@@ -124,7 +121,7 @@ describe('services > mirroredModel > importers > DocumentsImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    expect(modelParserMocks.parseRelease).toHaveBeenCalled()
+    expect(entityParsersMocks.parseRelease).toHaveBeenCalled()
     expect(authMocks.default.releases).toHaveBeenCalled()
     expect(importer.releaseSemvers).toContain('1.0.0')
     expect(importer.imageIds).toContain('repo/path:tag')
@@ -132,7 +129,7 @@ describe('services > mirroredModel > importers > DocumentsImporter', () => {
   })
 
   test('processEntry > error auth failure', async () => {
-    modelParserMocks.parseRelease.mockReturnValue({ semver: '2.0.0', images: [] })
+    entityParsersMocks.parseRelease.mockReturnValue({ semver: '2.0.0', images: [] })
     modelMocks.getModelById.mockResolvedValue({})
     authMocks.default.releases.mockResolvedValue([{ success: false }])
 
@@ -150,7 +147,7 @@ describe('services > mirroredModel > importers > DocumentsImporter', () => {
   })
 
   test('processEntry > success handle file entry', async () => {
-    modelParserMocks.parseFile.mockResolvedValue({ _id: 'file-id' })
+    entityParsersMocks.parseFile.mockResolvedValue({ _id: 'file-id' })
     fileMocks.saveImportedFile.mockResolvedValue(true)
 
     const importer = new DocumentsImporter(mockUser, mockMetadata)
@@ -163,7 +160,7 @@ describe('services > mirroredModel > importers > DocumentsImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    expect(modelParserMocks.parseFile).toHaveBeenCalled()
+    expect(entityParsersMocks.parseFile).toHaveBeenCalled()
     expect(fileMocks.saveImportedFile).toHaveBeenCalled()
     expect(importer.fileIds).toContain('file-id')
   })

@@ -1,6 +1,7 @@
 import { ensureBucketExists } from '../clients/s3.js'
+import { MirrorKind } from '../connectors/mirroredModel/index.js'
 import log from '../services/log.js'
-import { addCompressedRegistryImageComponents, ImportKind } from '../services/mirroredModel/mirroredModel.js'
+import { addCompressedRegistryImageComponents } from '../services/mirroredModel/mirroredModel.js'
 import { finaliseTarGzUpload, initialiseTarGzUpload } from '../services/mirroredModel/tarball.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
@@ -30,7 +31,7 @@ async function script() {
     exporter: 'user',
     sourceModelId,
     mirroredModelId: destinationModelId,
-    importKind: ImportKind.Image,
+    importKind: MirrorKind.Image,
     distributionPackageName: imageDistributionPackageName.replace(sourceModelId, destinationModelId),
   })
   await addCompressedRegistryImageComponents(user, sourceModelId, imageDistributionPackageName, tarStream)

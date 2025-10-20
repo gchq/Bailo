@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto'
 import stream, { PassThrough, Readable } from 'node:stream'
 import zlib from 'node:zlib'
 
-import { ObjectId } from 'mongoose'
 import fetch, { Response } from 'node-fetch'
 import PQueue from 'p-queue'
 import prettyBytes from 'pretty-bytes'
@@ -12,9 +11,12 @@ import { ModelAction } from '../../connectors/authorisation/actions.js'
 import authorisation from '../../connectors/authorisation/index.js'
 import { ScanState } from '../../connectors/fileScanning/Base.js'
 import scanners from '../../connectors/fileScanning/index.js'
+import { MongoDocumentMirrorInformation } from '../../connectors/mirroredModel/documents.js'
+import { FileMirrorInformation } from '../../connectors/mirroredModel/file.js'
+import { ImageMirrorInformation } from '../../connectors/mirroredModel/image.js'
+import { MirrorKind } from '../../connectors/mirroredModel/index.js'
 import { FileWithScanResultsInterface } from '../../models/File.js'
 import { ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ModelCardRevisionDoc } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
 import config from '../../utils/config.js'
@@ -76,7 +78,7 @@ export async function exportModel(
   try {
     ;({ tarStream, gzipStream, uploadStream, uploadPromise } = await initialiseTarGzUpload(
       `${modelId}.tar.gz`,
-      { exporter: user.dn, sourceModelId: modelId, mirroredModelId, importKind: ImportKind.Documents },
+      { exporter: user.dn, sourceModelId: modelId, mirroredModelId, importKind: MirrorKind.Documents },
       logData,
     ))
 
@@ -106,54 +108,12 @@ export async function exportModel(
   log.debug({ ...logData }, 'Successfully finalized Tarball file.')
 }
 
-export const ImportKind = {
-  Documents: 'documents',
-  File: 'file',
-  Image: 'image',
-} as const
-
-export type ImportKindKeys<T extends keyof typeof ImportKind | void = void> = T extends keyof typeof ImportKind
-  ? (typeof ImportKind)[T]
-  : (typeof ImportKind)[keyof typeof ImportKind]
-
-export type MongoDocumentImportInformation = {
-  metadata: DocumentsExportMetadata
-  modelCardVersions: ModelCardRevisionDoc['version'][]
-  newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
-  releaseSemvers: ReleaseDoc['semver'][]
-  newReleases: Omit<ReleaseDoc, '_id'>[]
-  fileIds: ObjectId[]
-  imageIds: string[]
-}
-export type FileImportInformation = {
-  metadata: FileExportMetadata
-  sourcePath: string
-  newPath: string
-}
-export type ImageImportInformation = {
-  metadata: ImageExportMetadata
-  image: { modelId: string; imageName: string; imageTag: string }
-}
-
-type BaseExportMetadata = {
-  sourceModelId: string
-  mirroredModelId: string
-  exporter: string
-}
-export type DocumentsExportMetadata = BaseExportMetadata & { importKind: ImportKindKeys<'Documents'> }
-export type FileExportMetadata = BaseExportMetadata & { importKind: ImportKindKeys<'File'>; filePath: string }
-export type ImageExportMetadata = BaseExportMetadata & {
-  importKind: ImportKindKeys<'Image'>
-  distributionPackageName: string
-}
-export type ExportMetadata = DocumentsExportMetadata | FileExportMetadata | ImageExportMetadata
-
 export async function importModel(
   user: UserInterface,
   payloadUrl: string,
 ): Promise<{
   mirroredModel: ModelInterface
-  importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation
+  importResult: MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation
 }> {
   if (!config.ui.modelMirror.import.enabled) {
     throw BadReq('Importing models has not been enabled.')
@@ -352,7 +312,7 @@ export async function uploadReleaseFiles(
               sourceModelId: model.id,
               mirroredModelId,
               filePath: file.id,
-              importKind: ImportKind.File,
+              importKind: MirrorKind.File,
             },
             fileLogData,
           ))
@@ -428,7 +388,7 @@ export async function uploadReleaseImages(
                 exporter: user.dn,
                 sourceModelId: model.id,
                 mirroredModelId,
-                importKind: ImportKind.Image,
+                importKind: MirrorKind.Image,
                 distributionPackageName,
               },
               imageLogData,

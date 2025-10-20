@@ -2,17 +2,22 @@ import { PassThrough, Readable } from 'node:stream'
 
 import { Headers } from 'tar-stream'
 
-import { isBailoError } from '../../../types/error.js'
-import { InternalError } from '../../../utils/error.js'
-import { ExportMetadata } from '../mirroredModel.js'
+import { isBailoError } from '../../types/error.js'
+import { InternalError } from '../../utils/error.js'
+
+export type BaseMirrorMetadata = {
+  sourceModelId: string
+  mirroredModelId: string
+  exporter: string
+}
 
 export abstract class BaseImporter {
   abstract processEntry(entry: Headers, stream: PassThrough | Readable): Promise<void> | void
 
-  metadata: ExportMetadata
-  logData?: Record<string, unknown>
+  protected metadata: BaseMirrorMetadata
+  protected logData?: Record<string, unknown>
 
-  constructor(metadata: ExportMetadata, logData?: Record<string, unknown>) {
+  constructor(metadata: BaseMirrorMetadata, logData?: Record<string, unknown>) {
     this.metadata = metadata
     this.logData = logData
   }

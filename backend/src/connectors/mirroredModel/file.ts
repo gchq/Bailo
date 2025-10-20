@@ -2,25 +2,32 @@ import { PassThrough } from 'node:stream'
 
 import { Headers } from 'tar-stream'
 
-import { putObjectStream } from '../../../clients/s3.js'
-import FileModel from '../../../models/File.js'
-import config from '../../../utils/config.js'
-import { InternalError } from '../../../utils/error.js'
-import { createFilePath, markFileAsCompleteAfterImport } from '../../file.js'
-import log from '../../log.js'
-import { FileExportMetadata, FileImportInformation, ImportKind } from '../mirroredModel.js'
-import { BaseImporter } from './baseImporter.js'
+import { putObjectStream } from '../../clients/s3.js'
+import FileModel from '../../models/File.js'
+import { createFilePath, markFileAsCompleteAfterImport } from '../../services/file.js'
+import log from '../../services/log.js'
+import config from '../../utils/config.js'
+import { InternalError } from '../../utils/error.js'
+import { BaseImporter, BaseMirrorMetadata } from './base.js'
+import { MirrorKind, MirrorKindKeys } from './index.js'
+
+export type FileMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'File'>; filePath: string }
+export type FileMirrorInformation = {
+  metadata: FileMirrorMetadata
+  sourcePath: string
+  newPath: string
+}
 
 export class FileImporter extends BaseImporter {
-  declare metadata: FileExportMetadata
+  declare protected metadata: FileMirrorMetadata
 
-  bucket: string
-  updatedPath: string
-  extractedFile: boolean = false
+  protected bucket: string
+  protected updatedPath: string
+  protected extractedFile: boolean = false
 
-  constructor(metadata: FileExportMetadata, logData?: Record<string, unknown>) {
+  constructor(metadata: FileMirrorMetadata, logData?: Record<string, unknown>) {
     super(metadata, logData)
-    if (this.metadata.importKind !== ImportKind.File) {
+    if (this.metadata.importKind !== MirrorKind.File) {
       throw InternalError('Cannot parse compressed File: incorrect metadata specified.', {
         metadata: this.metadata,
         ...this.logData,
@@ -66,7 +73,7 @@ export class FileImporter extends BaseImporter {
   }
 
   // Type resolve
-  finishListener(resolve: (reason?: FileImportInformation) => void, _reject: (reason?: unknown) => void) {
+  finishListener(resolve: (reason?: FileMirrorInformation) => void, _reject: (reason?: unknown) => void) {
     super.finishListener(resolve, _reject)
   }
 }

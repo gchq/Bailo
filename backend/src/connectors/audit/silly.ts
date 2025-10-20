@@ -12,12 +12,8 @@ import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
-import {
-  FileImportInformation,
-  ImageImportInformation,
-  MongoDocumentImportInformation,
-} from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { MirrorInformation } from '../mirroredModel/index.js'
 import { BaseAuditConnector } from './Base.js'
 
 export class SillyAuditConnector extends BaseAuditConnector {
@@ -70,7 +66,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
     _mirroredModel: ModelInterface,
     _sourceModelId: string,
     _exporter: string,
-    _importResult: MongoDocumentImportInformation | FileImportInformation | ImageImportInformation,
+    _importResult: MirrorInformation,
   ) {}
   onError(_req: Request, _error: BailoError) {}
   onCreateCommentResponse(_req: Request, _responseInterface: ResponseInterface) {}

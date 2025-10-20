@@ -3,9 +3,8 @@ import { PassThrough } from 'node:stream'
 import { Headers } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
-import { BaseImporter } from '../../../../src/services/mirroredModel/importers/baseImporter.js'
-import { ExportMetadata } from '../../../../src/services/mirroredModel/mirroredModel.js'
-import { InternalError } from '../../../../src/utils/error.js'
+import { BaseImporter, BaseMirrorMetadata } from '../../../src/connectors/mirroredModel/base.js'
+import { InternalError } from '../../../src/utils/error.js'
 
 class TestImporter extends BaseImporter {
   processEntry(_entry: Headers, _stream: PassThrough) {
@@ -13,11 +12,11 @@ class TestImporter extends BaseImporter {
   }
 }
 
-const mockMetadata: ExportMetadata = {
+const mockMetadata: BaseMirrorMetadata = {
   sourceModelId: 'sourceModelId',
   mirroredModelId: 'mirroredModelId',
   exporter: 'exporter',
-} as ExportMetadata
+} as BaseMirrorMetadata
 const mockLogData = { extra: 'info' }
 
 describe('services > mirroredModel > importers > BaseImporter', () => {

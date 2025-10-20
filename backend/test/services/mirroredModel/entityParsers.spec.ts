@@ -1,11 +1,11 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { parseFile, parseModelCard, parseRelease } from '../../../../src/services/mirroredModel/parsers/modelParser.js'
+import { parseFile, parseModelCard, parseRelease } from '../../../src/services/mirroredModel/entityParsers.js'
 
 const s3Mocks = vi.hoisted(() => ({
   objectExists: vi.fn(() => Promise.resolve(true)),
 }))
-vi.mock('../../../../src/clients/s3.js', () => s3Mocks)
+vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 
 describe('services > parsers > modelParser', () => {
   test('parseModelCard > success', () => {

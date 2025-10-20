@@ -2,6 +2,7 @@ import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolution
 import { AnyZodObject, z } from 'zod'
 
 import { ScanState } from '../connectors/fileScanning/Base.js'
+import { MirrorKind } from '../connectors/mirroredModel/index.js'
 import { SystemRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind } from '../models/Scan.js'
@@ -9,7 +10,6 @@ import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState } from '../types/types.js'
 import config from '../utils/config.js'
-import { ImportKind } from './mirroredModel/mirroredModel.js'
 
 export const registry = new OpenAPIRegistry()
 
@@ -301,20 +301,20 @@ export const inferenceInterfaceSchema = z.object({
 
 export const mirrorMetadataSchema = z.union([
   z.object({
-    importKind: z.literal(ImportKind.Documents),
+    importKind: z.literal(MirrorKind.Documents),
     sourceModelId: z.string(),
     mirroredModelId: z.string(),
     exporter: z.string(),
   }),
   z.object({
-    importKind: z.literal(ImportKind.File),
+    importKind: z.literal(MirrorKind.File),
     sourceModelId: z.string(),
     mirroredModelId: z.string(),
     filePath: z.string(),
     exporter: z.string(),
   }),
   z.object({
-    importKind: z.literal(ImportKind.Image),
+    importKind: z.literal(MirrorKind.Image),
     sourceModelId: z.string(),
     mirroredModelId: z.string(),
     distributionPackageName: z.string(),

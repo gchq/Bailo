@@ -3,20 +3,15 @@ import { PassThrough } from 'node:stream'
 import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { FileImporter } from '../../../../src/services/mirroredModel/importers/fileImporter.js'
-import { FileExportMetadata, ImportKind } from '../../../../src/services/mirroredModel/mirroredModel.js'
-
-vi.mock('../../../../src/services/model.js', () => ({}))
-vi.mock('../../../../src/services/release.js', () => ({}))
-vi.mock('../../../../src/connectors/fileScanning/index.js', () => ({}))
-vi.mock('../../../../src/services/mirroredModel/tarball.ts', () => ({}))
+import { FileImporter, FileMirrorMetadata } from '../../../src/connectors/mirroredModel/file.js'
+import { MirrorKind } from '../../../src/connectors/mirroredModel/index.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
     releases: vi.fn(),
   },
 }))
-vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
+vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const configMocks = vi.hoisted(() => ({
   s3: {
@@ -28,7 +23,7 @@ const configMocks = vi.hoisted(() => ({
     contentDirectory: 'content-dir',
   },
 }))
-vi.mock('../../../../src/utils/config.js', () => ({
+vi.mock('../../../src/utils/config.js', () => ({
   __esModule: true,
   default: configMocks,
 }))
@@ -36,19 +31,19 @@ vi.mock('../../../../src/utils/config.js', () => ({
 const logMocks = vi.hoisted(() => ({
   debug: vi.fn(),
 }))
-vi.mock('../../../../src/services/log.js', () => ({
+vi.mock('../../../src/services/log.js', () => ({
   default: logMocks,
 }))
 
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(),
 }))
-vi.mock('../../../../src/clients/s3.js', () => s3Mocks)
+vi.mock('../../../src/clients/s3.js', () => s3Mocks)
 
 const fileModelMocks = vi.hoisted(() => ({
   findOne: vi.fn(),
 }))
-vi.mock('../../../../src/models/File.js', () => ({
+vi.mock('../../../src/models/File.js', () => ({
   __esModule: true,
   default: fileModelMocks,
 }))
@@ -57,18 +52,18 @@ const fileServiceMocks = vi.hoisted(() => ({
   createFilePath: vi.fn(() => 'updated/file/path'),
   markFileAsCompleteAfterImport: vi.fn(),
 }))
-vi.mock('../../../../src/services/file.js', () => fileServiceMocks)
+vi.mock('../../../src/services/file.js', () => fileServiceMocks)
 
 const registryMocks = vi.hoisted(() => ({
   joinDistributionPackageName: vi.fn(() => 'repo/path:tag'),
 }))
-vi.mock('../../../../src/services/registry.js', () => registryMocks)
+vi.mock('../../../src/services/registry.js', () => registryMocks)
 
-const mockMetadata: FileExportMetadata = {
-  importKind: ImportKind.File,
+const mockMetadata: FileMirrorMetadata = {
+  importKind: MirrorKind.File,
   mirroredModelId: 'model123',
   filePath: 'original/file/path',
-} as FileExportMetadata
+} as FileMirrorMetadata
 
 describe('services > mirroredModel > importers > FileImporter', () => {
   beforeEach(() => {
@@ -101,7 +96,7 @@ describe('services > mirroredModel > importers > FileImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    expect(s3Mocks.putObjectStream).toHaveBeenCalledWith('updated/file/path', stream, 'uploads-bucket')
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledWith('updated/file/path', stream, configMocks.s3.buckets.uploads)
     expect(fileServiceMocks.markFileAsCompleteAfterImport).toHaveBeenCalledWith('updated/file/path')
     expect(importer.extractedFile).toBe(true)
   })

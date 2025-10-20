@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import {
   addEntryToTarGzUpload,
-  createTarGzStreams,
   createUnTarGzStreams,
   extractTarGzStream,
   finaliseTarGzUpload,
@@ -81,26 +80,21 @@ const ImporterMock = vi.hoisted(() => {
     errorListenerSpy,
   }
 })
-vi.mock('../../../src/services/mirroredModel/importers/documentsImporter.js', () => ImporterMock)
-vi.mock('../../../src/services/mirroredModel/importers/fileImporter.js', () => ImporterMock)
-vi.mock('../../../src/services/mirroredModel/importers/imageImporter.js', () => ImporterMock)
+vi.mock('../../../src/connectors/mirroredModel/documents.js', () => ImporterMock)
+vi.mock('../../../src/connectors/mirroredModel/file.js', () => ImporterMock)
+vi.mock('../../../src/connectors/mirroredModel/image.js', () => ImporterMock)
 
 function setUpExtractTarGzStreams() {
-  const { gzipStream, tarStream } = createTarGzStreams()
+  const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
+  const tarStream = pack()
   const passThrough = new PassThrough()
   tarStream.pipe(gzipStream).pipe(passThrough)
-  return { tarStream, passThrough }
+  return { gzipStream, tarStream, passThrough }
 }
 
 describe('service > mirroredModel > tarball', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-  })
-
-  test('createTarGzStreams > success', () => {
-    const { gzipStream, tarStream } = createTarGzStreams()
-    expect(gzipStream).toBeInstanceOf(zlib.createGzip().constructor)
-    expect(tarStream).toBeInstanceOf(pack().constructor)
   })
 
   test('initialiseTarGzUpload > success', async () => {
@@ -138,7 +132,7 @@ describe('service > mirroredModel > tarball', () => {
   })
 
   test('finaliseTarGzUpload > success', async () => {
-    const { tarStream } = createTarGzStreams()
+    const { tarStream } = setUpExtractTarGzStreams()
     const finalizeSpy = vi.spyOn(tarStream, 'finalize')
     const uploadPromise = Promise.resolve()
 
@@ -148,7 +142,7 @@ describe('service > mirroredModel > tarball', () => {
   })
 
   test('addEntryToTarGzUpload > success text entry', async () => {
-    const { tarStream } = createTarGzStreams()
+    const { tarStream } = setUpExtractTarGzStreams()
     const entrySpy = vi.spyOn(tarStream, 'entry')
 
     await addEntryToTarGzUpload(tarStream, { type: 'text', filename: 'test.txt', content: 'hello' })
@@ -157,7 +151,7 @@ describe('service > mirroredModel > tarball', () => {
   })
 
   test('addEntryToTarGzUpload > success stream entry', async () => {
-    const { tarStream } = createTarGzStreams()
+    const { tarStream } = setUpExtractTarGzStreams()
     // `cb: any` due to TS mis-inferring type
     const entrySpy = vi.spyOn(tarStream, 'entry').mockImplementation((_header, cb: any) => {
       cb?.()
@@ -172,7 +166,7 @@ describe('service > mirroredModel > tarball', () => {
   })
 
   test('addEntryToTarGzUpload > error on stream entry', async () => {
-    const { tarStream } = createTarGzStreams()
+    const { tarStream } = setUpExtractTarGzStreams()
     const tarEntryStream = new PassThrough()
     const entrySpy = vi.spyOn(tarStream, 'entry').mockImplementation((_header, cb: any) => {
       cb?.()
@@ -190,7 +184,7 @@ describe('service > mirroredModel > tarball', () => {
   })
 
   test('addEntryToTarGzUpload > reject when tarStream.entry callback receives error', async () => {
-    const { tarStream } = createTarGzStreams()
+    const { tarStream } = setUpExtractTarGzStreams()
     const entrySpy = vi.spyOn(tarStream, 'entry').mockImplementation((_header, cb: any) => {
       cb?.(new Error('cb-error')) // trigger the reject(err) code path
       const pt = new PassThrough()
@@ -206,7 +200,7 @@ describe('service > mirroredModel > tarball', () => {
   })
 
   test('addEntryToTarGzUpload > error on invalid type', async () => {
-    const { tarStream } = createTarGzStreams()
+    const { tarStream } = setUpExtractTarGzStreams()
 
     const promise = addEntryToTarGzUpload(tarStream, { type: 'bad' } as any)
 

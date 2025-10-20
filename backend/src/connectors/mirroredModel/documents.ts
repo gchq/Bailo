@@ -4,44 +4,54 @@ import { json } from 'node:stream/consumers'
 import { ObjectId } from 'mongoose'
 import { Headers } from 'tar-stream'
 
-import { ReleaseAction } from '../../../connectors/authorisation/actions.js'
-import authorisation from '../../../connectors/authorisation/index.js'
-import { ModelDoc } from '../../../models/Model.js'
-import { ModelCardRevisionDoc } from '../../../models/ModelCardRevision.js'
-import { ReleaseDoc } from '../../../models/Release.js'
-import { UserInterface } from '../../../models/User.js'
-import config from '../../../utils/config.js'
-import { Forbidden, InternalError } from '../../../utils/error.js'
-import { saveImportedFile } from '../../file.js'
-import log from '../../log.js'
-import { getModelById, saveImportedModelCard, setLatestImportedModelCard } from '../../model.js'
-import { DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
-import { saveImportedRelease } from '../../release.js'
-import { DocumentsExportMetadata, ImportKind, MongoDocumentImportInformation } from '../mirroredModel.js'
-import { parseFile, parseModelCard, parseRelease } from '../parsers/modelParser.js'
-import { BaseImporter } from './baseImporter.js'
+import { ReleaseAction } from '../../connectors/authorisation/actions.js'
+import authorisation from '../../connectors/authorisation/index.js'
+import { ModelDoc } from '../../models/Model.js'
+import { ModelCardRevisionDoc } from '../../models/ModelCardRevision.js'
+import { ReleaseDoc } from '../../models/Release.js'
+import { UserInterface } from '../../models/User.js'
+import { saveImportedFile } from '../../services/file.js'
+import log from '../../services/log.js'
+import { parseFile, parseModelCard, parseRelease } from '../../services/mirroredModel/entityParsers.js'
+import { getModelById, saveImportedModelCard, setLatestImportedModelCard } from '../../services/model.js'
+import { DistributionPackageName, joinDistributionPackageName } from '../../services/registry.js'
+import { saveImportedRelease } from '../../services/release.js'
+import config from '../../utils/config.js'
+import { Forbidden, InternalError } from '../../utils/error.js'
+import { BaseImporter, BaseMirrorMetadata } from './base.js'
+import { MirrorKind, MirrorKindKeys } from './index.js'
 
-const modelCardRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/[0-9]+\.json$`)
-const releaseRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/releases\/(.*)\.json$`)
-const fileRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/files\/(.*)\.json$`)
+export type DocumentsMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'Documents'> }
+export type MongoDocumentMirrorInformation = {
+  metadata: DocumentsMirrorMetadata
+  modelCardVersions: ModelCardRevisionDoc['version'][]
+  newModelCards: Omit<ModelCardRevisionDoc, '_id'>[]
+  releaseSemvers: ReleaseDoc['semver'][]
+  newReleases: Omit<ReleaseDoc, '_id'>[]
+  fileIds: ObjectId[]
+  imageIds: string[]
+}
 
 export class DocumentsImporter extends BaseImporter {
-  declare metadata: DocumentsExportMetadata
+  declare protected metadata: DocumentsMirrorMetadata
 
-  user: UserInterface
+  protected user: UserInterface
 
-  modelCardVersions: number[] = []
-  releaseSemvers: string[] = []
-  fileIds: ObjectId[] = []
-  imageIds: string[] = []
-  newModelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
-  newReleases: Omit<ReleaseDoc, '_id'>[] = []
+  protected modelCardVersions: number[] = []
+  protected releaseSemvers: string[] = []
+  protected fileIds: ObjectId[] = []
+  protected imageIds: string[] = []
+  protected newModelCards: Omit<ModelCardRevisionDoc, '_id'>[] = []
+  protected newReleases: Omit<ReleaseDoc, '_id'>[] = []
 
-  lazyMirroredModel: ModelDoc | null = null
+  protected lazyMirroredModel: ModelDoc | null = null
+  protected modelCardRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/[0-9]+\.json$`)
+  protected releaseRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/releases\/(.*)\.json$`)
+  protected fileRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/files\/(.*)\.json$`)
 
-  constructor(user: UserInterface, metadata: DocumentsExportMetadata, logData?: Record<string, unknown>) {
+  constructor(user: UserInterface, metadata: DocumentsMirrorMetadata, logData?: Record<string, unknown>) {
     super(metadata, logData)
-    if (this.metadata.importKind !== ImportKind.Documents) {
+    if (this.metadata.importKind !== MirrorKind.Documents) {
       throw InternalError('Cannot parse compressed Documents: incorrect metadata specified.', {
         metadata: this.metadata,
         ...this.logData,
@@ -54,7 +64,7 @@ export class DocumentsImporter extends BaseImporter {
     if (entry.type === 'file') {
       // Process file
       const fileContentsJson = await json(stream)
-      if (modelCardRegex.test(entry.name)) {
+      if (this.modelCardRegex.test(entry.name)) {
         log.debug(
           { name: entry.name, metadata: this.metadata, ...this.logData },
           'Processing compressed file as a Model Card.',
@@ -68,7 +78,7 @@ export class DocumentsImporter extends BaseImporter {
         if (savedModelCard) {
           this.newModelCards.push(savedModelCard)
         }
-      } else if (releaseRegex.test(entry.name)) {
+      } else if (this.releaseRegex.test(entry.name)) {
         log.debug(
           { name: entry.name, metadata: this.metadata, ...this.logData },
           'Processing compressed file as a Release.',
@@ -112,7 +122,7 @@ export class DocumentsImporter extends BaseImporter {
         if (savedRelease) {
           this.newReleases.push(savedRelease)
         }
-      } else if (fileRegex.test(entry.name)) {
+      } else if (this.fileRegex.test(entry.name)) {
         log.debug(
           { name: entry.name, metadata: this.metadata, ...this.logData },
           'Processing compressed file as a File.',
@@ -139,7 +149,7 @@ export class DocumentsImporter extends BaseImporter {
   }
 
   async finishListener(
-    resolve: (reason?: MongoDocumentImportInformation) => void,
+    resolve: (reason?: MongoDocumentMirrorInformation) => void,
     _reject: (reason?: unknown) => void,
     _logData?: Record<string, unknown>,
   ) {

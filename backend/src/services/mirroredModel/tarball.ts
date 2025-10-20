@@ -6,6 +6,11 @@ import { extract, Pack, pack } from 'tar-stream'
 
 import { ModelAction } from '../../connectors/authorisation/actions.js'
 import authorisation from '../../connectors/authorisation/index.js'
+import { BaseImporter } from '../../connectors/mirroredModel/base.js'
+import { DocumentsImporter } from '../../connectors/mirroredModel/documents.js'
+import { FileImporter } from '../../connectors/mirroredModel/file.js'
+import { ImageImporter } from '../../connectors/mirroredModel/image.js'
+import { MirrorInformation, MirrorKind, MirrorMetadata } from '../../connectors/mirroredModel/index.js'
 import { UserInterface } from '../../models/User.js'
 import { isBailoError } from '../../types/error.js'
 import config from '../../utils/config.js'
@@ -13,20 +18,9 @@ import { Forbidden, InternalError } from '../../utils/error.js'
 import log from '../log.js'
 import { validateMirroredModel } from '../model.js'
 import { mirrorMetadataSchema } from '../specification.js'
-import { BaseImporter } from './importers/baseImporter.js'
-import { DocumentsImporter } from './importers/documentsImporter.js'
-import { FileImporter } from './importers/fileImporter.js'
-import { ImageImporter } from './importers/imageImporter.js'
-import {
-  ExportMetadata,
-  FileImportInformation,
-  ImageImportInformation,
-  ImportKind,
-  MongoDocumentImportInformation,
-} from './mirroredModel.js'
 import { uploadToS3 } from './s3.js'
 
-export function createTarGzStreams() {
+function createTarGzStreams() {
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
   const tarStream = pack()
   return { gzipStream, tarStream }
@@ -34,7 +28,7 @@ export function createTarGzStreams() {
 
 export async function initialiseTarGzUpload(
   fileName: string,
-  metadata: ExportMetadata,
+  metadata: MirrorMetadata,
   logData?: Record<string, unknown>,
 ) {
   const { gzipStream, tarStream } = createTarGzStreams()
@@ -111,9 +105,9 @@ export async function extractTarGzStream(
   tarGzStream: Readable,
   user: UserInterface,
   logData?: Record<string, unknown>,
-): Promise<MongoDocumentImportInformation | FileImportInformation | ImageImportInformation> {
+): Promise<MirrorInformation> {
   return new Promise((resolve, reject) => {
-    let metadata: ExportMetadata
+    let metadata: MirrorMetadata
     let importer: BaseImporter
     let firstEntryProcessed = false
     const { ungzipStream, untarStream } = createUnTarGzStreams()
@@ -175,13 +169,13 @@ export async function extractTarGzStream(
           }
 
           switch (metadata.importKind) {
-            case ImportKind.Documents:
+            case MirrorKind.Documents:
               importer = new DocumentsImporter(user, metadata, logData)
               break
-            case ImportKind.File:
+            case MirrorKind.File:
               importer = new FileImporter(metadata, logData)
               break
-            case ImportKind.Image:
+            case MirrorKind.Image:
               importer = new ImageImporter(user, metadata, logData)
               break
             default:
