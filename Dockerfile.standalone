@@ -12,7 +12,7 @@ COPY backend/docs .
 RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade bailo -r requirements.txt
 RUN make dirhtml
 
-FROM node:24-alpine AS backend
+FROM node:25-alpine AS backend
 RUN apk add --no-cache libc6-compat && \
     apk update
 WORKDIR /app
@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/cache/npm npm ci --cache=/cache/npm
 COPY backend .
 RUN npm run build
 
-FROM node:24-alpine AS frontend
+FROM node:25-alpine AS frontend
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN apk add --no-cache libc6-compat && \
     apk update
