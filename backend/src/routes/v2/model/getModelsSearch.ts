@@ -93,7 +93,7 @@ export const getModelsSearch = [
       id: model.id,
       name: model.name,
       description: model.description,
-      tags: model.card?.metadata?.overview?.tags || [],
+      tags: model.tags,
       kind: model.kind,
       organisation: model.organisation,
       state: model.state,

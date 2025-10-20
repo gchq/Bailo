@@ -2,7 +2,7 @@ import { Popover, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TagSelector from 'src/MuiForms/TagSelector'
 
-interface FileTagSelectorProps {
+interface EntryTagSelectorProps {
   anchorEl: HTMLButtonElement | null
   setAnchorEl: (anchorEl: HTMLButtonElement | null) => void
   onChange: (newTag: string[]) => void
@@ -10,13 +10,13 @@ interface FileTagSelectorProps {
   errorText?: string
 }
 
-export default function FileTagSelector({
+export default function EntryTagSelector({
   anchorEl,
   setAnchorEl,
   onChange,
   tags,
   errorText = '',
-}: FileTagSelectorProps) {
+}: EntryTagSelectorProps) {
   const theme = useTheme()
 
   return (
