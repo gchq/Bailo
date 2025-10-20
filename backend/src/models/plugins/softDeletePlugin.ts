@@ -22,12 +22,12 @@ export function softDeletionPlugin(schema: Schema) {
     if (user) {
       this.deletedBy = user
     }
-    await this.save(session)
+    return await this.save(session)
   }
 
   schema.methods.restore = async function (session: ClientSession | undefined) {
     this.deleted = false
-    await this.save(session)
+    return await this.save(session)
   }
 
   schema.pre('find', function (next: CallbackWithoutResultAndOptionalError) {
