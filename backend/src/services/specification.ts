@@ -9,6 +9,7 @@ import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState } from '../types/types.js'
 import config from '../utils/config.js'
+import { ImportKind } from './mirroredModel/mirroredModel.js'
 
 export const registry = new OpenAPIRegistry()
 
@@ -297,6 +298,29 @@ export const inferenceInterfaceSchema = z.object({
   createdAt: z.string().openapi({ example: new Date().toISOString() }),
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
+
+export const mirrorMetadataSchema = z.union([
+  z.object({
+    importKind: z.literal(ImportKind.Documents),
+    sourceModelId: z.string(),
+    mirroredModelId: z.string(),
+    exporter: z.string(),
+  }),
+  z.object({
+    importKind: z.literal(ImportKind.File),
+    sourceModelId: z.string(),
+    mirroredModelId: z.string(),
+    filePath: z.string(),
+    exporter: z.string(),
+  }),
+  z.object({
+    importKind: z.literal(ImportKind.Image),
+    sourceModelId: z.string(),
+    mirroredModelId: z.string(),
+    distributionPackageName: z.string(),
+    exporter: z.string(),
+  }),
+])
 
 export const permissionDetailSchema = z.discriminatedUnion('hasPermission', [
   z.object({

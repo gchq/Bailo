@@ -12,6 +12,7 @@ import config from '../../utils/config.js'
 import { Forbidden, InternalError } from '../../utils/error.js'
 import log from '../log.js'
 import { validateMirroredModel } from '../model.js'
+import { mirrorMetadataSchema } from '../specification.js'
 import { BaseImporter } from './importers/baseImporter.js'
 import { DocumentsImporter } from './importers/documentsImporter.js'
 import { FileImporter } from './importers/fileImporter.js'
@@ -164,7 +165,7 @@ export async function extractTarGzStream(
               ...logData,
             })
           }
-          metadata = (await json(stream)) as ExportMetadata
+          metadata = mirrorMetadataSchema.parse(await json(stream))
 
           // Only check auth once we know what the model is
           const mirroredModel = await validateMirroredModel(metadata.mirroredModelId, metadata.sourceModelId, logData)
