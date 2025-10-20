@@ -57,7 +57,7 @@ to be used.
 
 <!-- prettier-ignore-start -->
 > [!IMPORTANT]
-> Python 3.9 or higher is required
+> Python 3.10 or higher is required
 <!-- prettier-ignore-end -->
 
 ```bash

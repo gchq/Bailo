@@ -428,7 +428,7 @@ jobs:
         if: matrix.job_name == 'integration_python'
         uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Cache python pip
         if: matrix.job_name == 'integration_python'
