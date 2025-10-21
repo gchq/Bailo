@@ -7,13 +7,14 @@ import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
 import ModelListDialog from 'src/schemas/ModelListDialog'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
-import { SchemaInterface } from 'types/types'
+import { EntryKind, SchemaInterface } from 'types/types'
 
 interface SchemaListItemProps {
   schema: SchemaInterface
   schemasLength: number
   index: number
   open: boolean
+  setOpenMenuSchemaId: (schemaId) => void
   anchorEl: null | HTMLElement
   onMenuClose: () => void
   onOpenMenuClick: (event, schemaId: string) => void
@@ -25,6 +26,7 @@ export default function SchemaListItem({
   schemasLength,
   index,
   open,
+  setOpenMenuSchemaId,
   anchorEl,
   onMenuClose,
   onDeleteSchemaClick,
@@ -35,7 +37,7 @@ export default function SchemaListItem({
 
   //TODO changes to this as blocked as no accessrequest endpoint
   const { models, isModelsLoading, isModelsError } = useListModels(
-    schema.kind === 'dataCard' ? 'data card' : 'model',
+    schema.kind === 'dataCard' ? EntryKind.DATA_CARD : EntryKind.MODEL,
     [],
     '',
     [],
@@ -113,6 +115,7 @@ export default function SchemaListItem({
             horizontal: 'center',
           }}
           onClose={onMenuClose}
+          onClick={(_event) => setOpenMenuSchemaId(null)}
         >
           <MenuItem onClick={() => onEditSchemaClick(schema.id, { active: !schema.active })}>
             {schema.active ? 'Mark as inactive' : 'Mark as active'}
