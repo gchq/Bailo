@@ -1,39 +1,24 @@
 import { createHash } from 'node:crypto'
-import stream, { PassThrough, Readable } from 'node:stream'
-import zlib from 'node:zlib'
+import { Readable } from 'node:stream'
 
 import fetch, { Response } from 'node-fetch'
-import PQueue from 'p-queue'
-import prettyBytes from 'pretty-bytes'
 import { Pack } from 'tar-stream'
 
-import { ModelAction } from '../../connectors/authorisation/actions.js'
-import authorisation from '../../connectors/authorisation/index.js'
-import { ScanState } from '../../connectors/fileScanning/Base.js'
-import scanners from '../../connectors/fileScanning/index.js'
-import { MongoDocumentMirrorInformation } from '../../connectors/mirroredModel/documents.js'
-import { FileMirrorInformation } from '../../connectors/mirroredModel/file.js'
-import { ImageMirrorInformation } from '../../connectors/mirroredModel/image.js'
-import { MirrorKind } from '../../connectors/mirroredModel/index.js'
-import { FileWithScanResultsInterface } from '../../models/File.js'
+import { DocumentsExporter, MongoDocumentMirrorInformation } from '../../connectors/mirroredModel/documents.js'
+import { FileExporter, FileMirrorInformation } from '../../connectors/mirroredModel/file.js'
+import { ImageExporter, ImageMirrorInformation } from '../../connectors/mirroredModel/image.js'
+import { exportQueue } from '../../connectors/mirroredModel/index.js'
 import { ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
 import config from '../../utils/config.js'
-import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
+import { BadReq, InternalError } from '../../utils/error.js'
 import { shortId } from '../../utils/id.js'
-import { downloadFile, getFilesByIds, getTotalFileSize } from '../file.js'
 import { getHttpsAgent } from '../http.js'
 import log from '../log.js'
-import { getModelById, getModelCardRevisions } from '../model.js'
-import {
-  getImageBlob,
-  getImageManifest,
-  joinDistributionPackageName,
-  splitDistributionPackageName,
-} from '../registry.js'
-import { getAllFileIds, getReleasesForExport } from '../release.js'
-import { addEntryToTarGzUpload, extractTarGzStream, finaliseTarGzUpload, initialiseTarGzUpload } from './tarball.js'
+import { getModelById } from '../model.js'
+import { getImageBlob, getImageManifest, splitDistributionPackageName } from '../registry.js'
+import { addEntryToTarGzUpload, extractTarGzStream } from './tarball.js'
 
 export async function exportModel(
   user: UserInterface,
@@ -47,65 +32,55 @@ export async function exportModel(
   if (!disclaimerAgreement) {
     throw BadReq('You must agree to the disclaimer agreement before being able to export a model.')
   }
-  const model = await getModelById(user, modelId)
-  if (!model.settings.mirror.destinationModelId) {
-    throw BadReq(`The 'Destination Model ID' has not been set on this model.`)
-  }
-  if (!model.card || !model.card.schemaId) {
-    throw BadReq('You must select a schema for your model before you can start the export process.')
-  }
-  const modelAuth = await authorisation.model(user, model, ModelAction.Export)
-  if (!modelAuth.success) {
-    throw Forbidden(modelAuth.info, { userDn: user.dn, modelId })
-  }
-
-  const mirroredModelId = model.settings.mirror.destinationModelId
-  const releases: ReleaseDoc[] = []
-  if (semvers && semvers.length > 0) {
-    releases.push(...(await getReleasesForExport(user, model.id, semvers)))
-    await checkReleaseFiles(user, model.id, semvers)
-  }
 
   const exportId = shortId()
-  const logData = { exportId, sourceModelId: modelId, mirroredModelId, semvers }
-  log.debug({ user, ...logData }, 'Request checks complete, starting export.')
 
-  let tarStream: Pack | undefined,
-    gzipStream: zlib.Gzip | undefined,
-    uploadStream: PassThrough | undefined,
-    uploadPromise: Promise<void> | undefined
+  let model: ModelDoc | undefined
+  let mirroredModelId: string | undefined
+  let releases: ReleaseDoc[] | undefined
 
-  try {
-    ;({ tarStream, gzipStream, uploadStream, uploadPromise } = await initialiseTarGzUpload(
-      `${modelId}.tar.gz`,
-      { exporter: user.dn, sourceModelId: modelId, mirroredModelId, importKind: MirrorKind.Documents },
-      logData,
-    ))
+  // Not `await`ed for fire-and-forget approach
+  exportQueue
+    .add(async () => {
+      const documentsExporter = new DocumentsExporter(user, modelId, semvers, {
+        exportId,
+        sourceModelId: modelId,
+        semvers,
+      })
+      documentsExporter.init()
+      model = documentsExporter.getModel()!
+      mirroredModelId = model.settings.mirror.destinationModelId
+      log.debug(
+        { user, exportId, sourceModelId: modelId, mirroredModelId, semvers },
+        'Request checks complete, starting export.',
+      )
 
-    try {
-      await addModelCardRevisionsToTarball(user, model, tarStream, logData)
-    } catch (error) {
-      throw InternalError('Error when adding the model card revision(s) to the Tarball file.', { error, ...logData })
-    }
-    try {
-      if (releases.length > 0) {
-        await addReleasesToTarball(user, model, releases, tarStream, mirroredModelId, logData)
+      await documentsExporter.addData()
+
+      documentsExporter.finalise()
+      log.debug({ exportId, sourceModelId: modelId, mirroredModelId, semvers }, 'Successfully finalized Tarball file.')
+
+      const releases = documentsExporter.getReleases()
+      for (const release of releases) {
+        uploadReleaseFiles(user, model!, release, documentsExporter.getFiles()!, { exportId })
+        uploadReleaseImages(user, model!, release, release.images, { exportId })
       }
-    } catch (error) {
-      throw InternalError('Error when adding the release(s) to the Tarball file.', { error, ...logData })
-    }
+    })
+    .catch((error) => {
+      log.error(
+        {
+          error,
+          modelId,
+          semvers,
+          ...(mirroredModelId && { mirroredModelId }),
+          ...(releases && { releases }),
+          exportId,
+        },
+        'Error when exporting mirrored model.',
+      )
+    })
 
-    // Don't await as this isn't queued and we want to return the endpoint
-    finaliseTarGzUpload(tarStream, uploadPromise)
-  } catch (error) {
-    // Ensure all streams are destroyed on error to prevent leaks
-    tarStream?.destroy()
-    gzipStream?.destroy()
-    uploadStream?.destroy()
-    throw error
-  }
-
-  log.debug({ ...logData }, 'Successfully finalized Tarball file.')
+  return exportId
 }
 
 export async function importModel(
@@ -233,292 +208,69 @@ export async function addCompressedRegistryImageComponents(
   log.debug({ modelId, imageName, imageTag, ...logData }, 'Finished adding registry image.')
 }
 
-async function addModelCardRevisionsToTarball(
-  user: UserInterface,
-  model: ModelDoc,
-  tarStream: Pack,
-  logData?: Record<string, unknown>,
-) {
-  log.debug({ user, modelId: model.id, ...logData }, 'Adding model card revisions to Tarball file.')
-  const cards = await getModelCardRevisions(user, model.id)
-  for (const card of cards) {
-    const cardJson = JSON.stringify(card.toJSON())
-    await addEntryToTarGzUpload(
-      tarStream,
-      { type: 'text', filename: `${card.version}.json`, content: cardJson },
-      { modelId: model.id, ...logData },
-    )
-  }
-  log.debug(
-    { modelCards: cards.map((card) => card.version), ...logData },
-    'Completed adding model card revisions to Tarball file.',
-  )
-}
-
-async function addReleasesToTarball(
-  user: UserInterface,
-  model: ModelDoc,
-  releases: ReleaseDoc[],
-  tarStream: Pack,
-  mirroredModelId: string,
-  logData?: Record<string, unknown>,
-) {
-  const semvers = releases.map((release) => release.semver)
-  log.debug({ ...logData }, 'Adding model releases to Tarball file.')
-
-  const queue = new PQueue({ concurrency: config.modelMirror.export.concurrency })
-  const errors: any[] = []
-  // Using a .catch here to ensure all errors are returned, rather than just the first error.
-  await Promise.all(
-    releases.map((release) =>
-      addReleaseToTarball(user, model, release, tarStream, mirroredModelId, queue, logData).catch((e) =>
-        errors.push(e),
-      ),
-    ),
-  )
-  if (errors.length > 0) {
-    throw InternalError('Error when adding release(s) to Tarball file.', { errors, ...logData })
-  }
-  log.debug({ user, modelId: model.id, semvers, ...logData }, 'Completed adding model releases to Tarball file.')
-}
-
-export async function uploadReleaseFiles(
+async function uploadReleaseFiles(
   user: UserInterface,
   model: ModelDoc,
   release: ReleaseDoc,
-  files: FileWithScanResultsInterface[],
-  mirroredModelId: string,
-  queue: PQueue,
+  files,
   logData?: Record<string, unknown>,
 ) {
   for (const file of files) {
-    const fileLogData = {
-      sourceModelId: model.id,
-      semver: release.semver,
-      fileId: file.id,
-      ...logData,
-    }
-    queue
+    // Not `await`ed for fire-and-forget approach
+    exportQueue
       .add(async () => {
-        let tarStream: Pack | undefined,
-          gzipStream: zlib.Gzip | undefined,
-          uploadStream: PassThrough | undefined,
-          uploadPromise: Promise<void> | undefined
-        try {
-          ;({ tarStream, gzipStream, uploadStream, uploadPromise } = await initialiseTarGzUpload(
-            `${file.id}.tar.gz`,
-            {
-              exporter: user.dn,
-              sourceModelId: model.id,
-              mirroredModelId,
-              filePath: file.id,
-              importKind: MirrorKind.File,
-            },
-            fileLogData,
-          ))
-
-          await addEntryToTarGzUpload(
-            tarStream,
-            {
-              type: 'stream',
-              filename: file.id,
-              stream: (await downloadFile(user, file.id)).Body as stream.Readable,
-              size: file.size,
-            },
-            fileLogData,
-          )
-
-          await finaliseTarGzUpload(tarStream, uploadPromise)
-        } catch (error) {
-          // Ensure all streams are destroyed on error to prevent leaks
-          tarStream?.destroy()
-          gzipStream?.destroy()
-          uploadStream?.destroy()
-          throw error
-        }
+        const fileExporter = new FileExporter(user, model, file, logData)
+        await fileExporter.init()
+        await fileExporter.addData()
+        await fileExporter.finalise()
       })
-      .catch((error) =>
+      .catch((error) => {
         log.error(
           {
             error,
-            mirroredModelId,
-            ...fileLogData,
+            modelId: model.id,
+            mirroredModelId: model.settings.mirror.destinationModelId,
+            release: release.semver,
+            fileId: file.id,
+            fileName: file.name,
+            logData,
           },
-          'Error when uploading Release File to S3.',
-        ),
-      )
-    log.debug({ ...fileLogData }, 'Added file to be exported to queue.')
-  }
-}
-
-export async function uploadReleaseImages(
-  user: UserInterface,
-  model: ModelDoc,
-  release: ReleaseDoc,
-  mirroredModelId: string,
-  queue: PQueue,
-  logData?: Record<string, unknown>,
-) {
-  if (Array.isArray(release.images)) {
-    for (const image of release.images) {
-      const imageLogData = {
-        sourceModelId: model.id,
-        semver: release.semver,
-        imageName: image.name,
-        imageTag: image.tag,
-        ...logData,
-      }
-      // update the distributionPackageName to use the mirroredModelId
-      const modelIdRe = new RegExp(String.raw`^${model.id}`)
-      const distributionPackageName = joinDistributionPackageName({
-        domain: '',
-        path: image.name.replace(modelIdRe, mirroredModelId),
-        tag: image.tag,
-      })
-      queue
-        .add(async () => {
-          let tarStream: Pack | undefined,
-            gzipStream: zlib.Gzip | undefined,
-            uploadStream: PassThrough | undefined,
-            uploadPromise: Promise<void> | undefined
-          try {
-            ;({ tarStream, gzipStream, uploadStream, uploadPromise } = await initialiseTarGzUpload(
-              `${image._id.toString()}.tar.gz`,
-              {
-                exporter: user.dn,
-                sourceModelId: model.id,
-                mirroredModelId,
-                importKind: MirrorKind.Image,
-                distributionPackageName,
-              },
-              imageLogData,
-            ))
-
-            await addCompressedRegistryImageComponents(user, model.id, distributionPackageName, tarStream, imageLogData)
-
-            await finaliseTarGzUpload(tarStream, uploadPromise)
-          } catch (error) {
-            // Ensure all streams are destroyed on error to prevent leaks
-            tarStream?.destroy()
-            gzipStream?.destroy()
-            uploadStream?.destroy()
-            throw error
-          }
-        })
-        .catch((error) =>
-          log.error(
-            {
-              error,
-              modelId: model.id,
-              releaseSemver: release.semver,
-              distributionPackageName,
-              mirroredModelId,
-              ...imageLogData,
-            },
-            'Error when uploading Release Image to S3.',
-          ),
+          'Error when exporting mirrored File.',
         )
-      log.debug({ ...imageLogData }, 'Added image to be exported to queue.')
-    }
+      })
   }
 }
 
-async function addReleaseToTarball(
+async function uploadReleaseImages(
   user: UserInterface,
   model: ModelDoc,
   release: ReleaseDoc,
-  tarStream: Pack,
-  mirroredModelId: string,
-  queue: PQueue,
+  images: ReleaseDoc['images'],
   logData?: Record<string, unknown>,
 ) {
-  log.debug({ semver: release.semver, ...logData }, 'Adding release to tarball file of releases.')
-  const files: FileWithScanResultsInterface[] = await getFilesByIds(user, release.modelId, release.fileIds)
-
-  try {
-    const releaseJson = JSON.stringify(release.toJSON())
-    await addEntryToTarGzUpload(
-      tarStream,
-      { type: 'text', filename: `releases/${release.semver}.json`, content: releaseJson },
-      { modelId: model.id, ...logData },
-    )
-  } catch (error: unknown) {
-    throw InternalError('Error when generating the tarball file.', {
-      error,
-      modelId: model.id,
-      mirroredModelId,
-      releaseId: release.id,
-      ...logData,
-    })
-  }
-
-  if (files.length > 0) {
-    await addFilesToTarball(files, tarStream, model.id)
-  }
-
-  // Fire-and-forget upload of artefacts so that the endpoint is able to return without awaiting lots of uploads
-  log.debug({ semver: release.semver, ...logData }, 'Adding files to be exported to queue.')
-  await uploadReleaseFiles(user, model, release, files, mirroredModelId, queue, logData)
-  log.debug({ semver: release.semver, ...logData }, 'Finished adding files to be exported to queue.')
-  log.debug({ semver: release.semver, ...logData }, 'Adding images to be exported to queue.')
-  await uploadReleaseImages(user, model, release, mirroredModelId, queue, logData)
-  log.debug({ semver: release.semver, ...logData }, 'Finished adding images to be exported to queue.')
-}
-
-async function addFilesToTarball(files: FileWithScanResultsInterface[], tarStream: Pack, modelId: string) {
-  for (const file of files) {
-    try {
-      const fileJson = JSON.stringify(file)
-      await addEntryToTarGzUpload(
-        tarStream,
-        { type: 'text', filename: `files/${file._id.toString()}.json`, content: fileJson },
-        { modelId },
-      )
-    } catch (error: unknown) {
-      throw InternalError('Error when generating the tarball file.', { error, modelId, file })
-    }
-  }
-}
-
-async function checkReleaseFiles(user: UserInterface, modelId: string, semvers: string[]) {
-  const fileIds = await getAllFileIds(modelId, semvers)
-  // Check the total size of the export if more than one release is being exported
-  if (semvers.length > 1) {
-    if (fileIds.length === 0) {
-      return
-    }
-    const totalFileSize = await getTotalFileSize(fileIds)
-    log.debug(
-      { modelId, semvers, size: prettyBytes(totalFileSize) },
-      'Calculated estimated total file size included in export.',
-    )
-    if (totalFileSize > config.modelMirror.export.maxSize) {
-      throw BadReq('Requested export is too large.', {
-        size: totalFileSize,
-        maxSize: config.modelMirror.export.maxSize,
+  for (const image of images) {
+    await exportQueue
+      .add(async () => {
+        const imageExporter = new ImageExporter(user, model, release, image, logData)
+        await imageExporter.init()
+        await imageExporter.addData()
+        await imageExporter.finalise()
       })
-    }
-  }
-
-  if (scanners.info()) {
-    const files = await getFilesByIds(user, modelId, fileIds)
-    const scanErrors: {
-      missingScan: Array<{ name: string; id: string }>
-      incompleteScan: Array<{ name: string; id: string }>
-      failedScan: Array<{ name: string; id: string }>
-    } = { missingScan: [], incompleteScan: [], failedScan: [] }
-    for (const file of files) {
-      if (!file.avScan || file.avScan.length === 0) {
-        scanErrors.missingScan.push({ name: file.name, id: file.id })
-      } else if (file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
-        scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-      } else if (file.avScan.some((scanResult) => scanResult.isInfected)) {
-        scanErrors.failedScan.push({ name: file.name, id: file.id })
-      }
-    }
-    if (scanErrors.missingScan.length > 0 || scanErrors.incompleteScan.length > 0 || scanErrors.failedScan.length > 0) {
-      throw BadReq('The releases contain file(s) that do not have a clean AV scan.', { scanErrors })
-    }
+      .catch((error) => {
+        log.error(
+          {
+            error,
+            modelId: model.id,
+            mirroredModelId: model.settings.mirror.destinationModelId,
+            release: release.semver,
+            imageId: image._id.toString(),
+            imageName: image.name,
+            imageTag: image.tag,
+            ...logData,
+          },
+          'Error when exporting mirrored Image.',
+        )
+      })
   }
 }
 
