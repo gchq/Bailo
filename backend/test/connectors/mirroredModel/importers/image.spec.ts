@@ -1,16 +1,18 @@
-import { PassThrough } from 'stream'
+import { PassThrough } from 'node:stream'
+
 import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ImageImporter, ImageMirrorMetadata } from '../../../src/connectors/mirroredModel/image.js'
-import { MirrorKind } from '../../../src/connectors/mirroredModel/index.js'
+import { ImageImporter, ImageMirrorMetadata } from '../../../../src/connectors/mirroredModel/importers/image.js'
+import { MirrorKind } from '../../../../src/connectors/mirroredModel/index.js'
 
 const configMocks = vi.hoisted(() => ({
   modelMirror: {
     contentDirectory: 'content-dir',
+    export: { concurrency: 1 },
   },
 }))
-vi.mock('../../../src/utils/config.js', () => ({
+vi.mock('../../../../src/utils/config.js', () => ({
   __esModule: true,
   default: configMocks,
 }))
@@ -20,7 +22,7 @@ const authMocks = vi.hoisted(() => ({
     releases: vi.fn(),
   },
 }))
-vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
+vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const registryMocks = vi.hoisted(() => ({
   splitDistributionPackageName: vi.fn(() => ({ path: 'imageName', tag: 'tag' })),
@@ -29,20 +31,20 @@ const registryMocks = vi.hoisted(() => ({
   putImageBlob: vi.fn(),
   putImageManifest: vi.fn(),
 }))
-vi.mock('../../../src/services/registry.js', () => registryMocks)
+vi.mock('../../../../src/services/registry.js', () => registryMocks)
 
 const logMocks = vi.hoisted(() => ({
   debug: vi.fn(),
   warn: vi.fn(),
 }))
-vi.mock('../../../src/services/log.js', () => ({
+vi.mock('../../../../src/services/log.js', () => ({
   default: logMocks,
 }))
 
 const typeguardMocks = vi.hoisted(() => ({
   hasKeysOfType: vi.fn(),
 }))
-vi.mock('../../../src/utils/typeguards.js', () => typeguardMocks)
+vi.mock('../../../../src/utils/typeguards.js', () => typeguardMocks)
 
 const streamConsumersMocks = vi.hoisted(() => ({
   json: vi.fn(),
@@ -60,16 +62,14 @@ const mockMetadata: ImageMirrorMetadata = {
   distributionPackageName: 'domain/imageName:tag',
 } as ImageMirrorMetadata
 
-describe('services > mirroredModel > importers > ImageImporter', () => {
+describe('connectors > mirroredModel > importers > ImageImporter', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   test('constructor > success', () => {
     const importer = new ImageImporter(mockUser, mockMetadata)
-    expect(importer.user).toBe(mockUser)
-    expect(importer.imageName).toBe('imageName')
-    expect(importer.imageTag).toBe('tag')
+    expect(importer).toMatchSnapshot()
   })
 
   test('constructor > error when importKind is not Image', () => {
@@ -95,7 +95,7 @@ describe('services > mirroredModel > importers > ImageImporter', () => {
     await importer.processEntry(entry, stream)
 
     expect(streamConsumersMocks.json).toHaveBeenCalledWith(stream)
-    expect(importer.manifestBody).toEqual({ manifest: true })
+    expect(importer).toMatchSnapshot()
   })
 
   test('processEntry > success skips blob if it exists in registry', async () => {
@@ -178,6 +178,7 @@ describe('services > mirroredModel > importers > ImageImporter', () => {
   test('finishListener > success upload manifest successfully when valid', async () => {
     typeguardMocks.hasKeysOfType.mockReturnValue(true)
     const importer = new ImageImporter(mockUser, mockMetadata)
+    // @ts-expect-error accessing protected property
     importer.manifestBody = { mediaType: 'mt' }
     const resolve = vi.fn()
     const reject = vi.fn()
@@ -189,6 +190,7 @@ describe('services > mirroredModel > importers > ImageImporter', () => {
       mockMetadata.mirroredModelId,
       'imageName',
       'tag',
+      // @ts-expect-error accessing protected property
       JSON.stringify(importer.manifestBody),
       'mt',
     )
@@ -201,7 +203,7 @@ describe('services > mirroredModel > importers > ImageImporter', () => {
   test('finishListener > error when manifest invalid', async () => {
     typeguardMocks.hasKeysOfType.mockReturnValue(false)
     const importer = new ImageImporter(mockUser, mockMetadata)
-    importer.manifestBody = { bad: 'data' }
+    // importer.manifestBody = { bad: 'data' }
     const resolve = vi.fn()
     const reject = vi.fn()
 

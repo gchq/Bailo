@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`connectors > mirroredModel > importers > BaseImporter > constructor > success 1`] = `
+TestImporter {
+  "logData": {
+    "extra": "info",
+  },
+  "metadata": {
+    "exporter": "exporter",
+    "mirroredModelId": "mirroredModelId",
+    "sourceModelId": "sourceModelId",
+  },
+}
+`;
+
+exports[`services > mirroredModel > importers > BaseImporter > constructor > success 1`] = `
+TestImporter {
+  "logData": {
+    "extra": "info",
+  },
+  "metadata": {
+    "exporter": "exporter",
+    "mirroredModelId": "mirroredModelId",
+    "sourceModelId": "sourceModelId",
+  },
+}
+`;

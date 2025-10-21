@@ -3,8 +3,8 @@ import { PassThrough } from 'node:stream'
 import { Headers } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
-import { BaseImporter, BaseMirrorMetadata } from '../../../src/connectors/mirroredModel/base.js'
-import { InternalError } from '../../../src/utils/error.js'
+import { BaseImporter, BaseMirrorMetadata } from '../../../../src/connectors/mirroredModel/importers/base.js'
+import { InternalError } from '../../../../src/utils/error.js'
 
 class TestImporter extends BaseImporter {
   processEntry(_entry: Headers, _stream: PassThrough) {
@@ -19,11 +19,12 @@ const mockMetadata: BaseMirrorMetadata = {
 } as BaseMirrorMetadata
 const mockLogData = { extra: 'info' }
 
-describe('services > mirroredModel > importers > BaseImporter', () => {
+describe('connectors > mirroredModel > importers > BaseImporter', () => {
   test('constructor > success', () => {
     const importer = new TestImporter(mockMetadata, mockLogData)
-    expect(importer.metadata).toEqual(mockMetadata)
-    expect(importer.logData).toEqual(mockLogData)
+
+    expect(importer.getMetadata()).toEqual(mockMetadata)
+    expect(importer).toMatchSnapshot()
   })
 
   test('finishListener > success with metadata', async () => {

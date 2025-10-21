@@ -1,22 +1,15 @@
-import { PassThrough, Readable } from 'node:stream'
+import { PassThrough } from 'node:stream'
 import zlib from 'node:zlib'
 
-import { Headers, Pack } from 'tar-stream'
+import { Pack } from 'tar-stream'
 
-import { ModelDoc } from '../../models/Model.js'
-import { UserInterface } from '../../models/User.js'
-import { finaliseTarGzUpload, initialiseTarGzUpload } from '../../services/mirroredModel/tarball.js'
-import { getModelById } from '../../services/model.js'
-import { isBailoError } from '../../types/error.js'
-import { BadReq, Forbidden, InternalError } from '../../utils/error.js'
-import { ModelAction } from '../authorisation/actions.js'
-import authorisation from '../authorisation/index.js'
-
-export type BaseMirrorMetadata = {
-  sourceModelId: string
-  mirroredModelId: string
-  exporter: string
-}
+import { ModelDoc } from '../../../models/Model.js'
+import { UserInterface } from '../../../models/User.js'
+import { finaliseTarGzUpload, initialiseTarGzUpload } from '../../../services/mirroredModel/tarball.js'
+import { getModelById } from '../../../services/model.js'
+import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
+import { ModelAction } from '../../authorisation/actions.js'
+import authorisation from '../../authorisation/index.js'
 
 export function requiresInit<M extends (this: BaseExporter, ...args: any[]) => any>(
   value: M,
@@ -143,33 +136,5 @@ export abstract class BaseExporter {
   async finalise() {
     // Non-null assertion operator used due to `requiresInit` performing assertion
     await finaliseTarGzUpload(this.tarStream!, this.uploadPromise!)
-  }
-}
-
-export abstract class BaseImporter {
-  abstract processEntry(entry: Headers, stream: PassThrough | Readable): Promise<void> | void
-
-  protected metadata: BaseMirrorMetadata
-  protected logData?: Record<string, unknown>
-
-  constructor(metadata: BaseMirrorMetadata, logData?: Record<string, unknown>) {
-    this.metadata = metadata
-    this.logData = logData
-  }
-
-  // use `any` as "real" types are not a subtype `unknown`
-  errorListener(error: unknown, _resolve: (reason?: any) => void, reject: (reason?: unknown) => void) {
-    if (isBailoError(error)) {
-      reject(error)
-    } else {
-      reject(
-        InternalError('Error processing tarball during import.', { error, metadata: this.metadata, ...this.logData }),
-      )
-    }
-  }
-
-  // use `any` as "real" types are not a subtype `unknown`
-  finishListener(resolve: (reason?: any) => void, _reject: (reason?: unknown) => void) {
-    resolve({ metadata: this.metadata })
   }
 }

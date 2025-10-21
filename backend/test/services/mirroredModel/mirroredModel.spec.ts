@@ -1,6 +1,5 @@
 import { PassThrough, Readable } from 'node:stream'
 
-import PQueue from 'p-queue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { Response } from '../../../src/connectors/authorisation/base.js'
@@ -507,8 +506,6 @@ describe('services > mirroredModel', () => {
         { id: 'modelId' } as any,
         { id: 'releaseId', semver: '1.2.3' } as any,
         [{ id: 'fileId1' }, { id: 'fileId2' }] as any[],
-        'mirroredModelId',
-        queueMock as unknown as PQueue,
       )
 
       await Promise.all(pendingJobs)
@@ -536,8 +533,6 @@ describe('services > mirroredModel', () => {
         { id: 'modelId' } as any,
         { id: 'releaseId', semver: '1.2.3' } as any,
         [{ id: 'fileId1' }, { id: 'fileId2' }] as any[],
-        'mirroredModelId',
-        queueMock as unknown as PQueue,
       )
 
       // The queue wouldn't actually throw an error but we need to test how it is handled
@@ -561,16 +556,11 @@ describe('services > mirroredModel', () => {
       await uploadReleaseImages(
         {} as UserInterface,
         { id: 'modelId' } as any,
-        {
-          id: 'releaseId',
-          semver: '1.2.3',
-          images: [
-            { name: 'name', tag: 'tag', repository: 'repository', _id: 'imageId' },
-            { name: 'name', tag: 'tag', repository: 'repository', _id: 'imageId' },
-          ],
-        } as any,
-        'mirroredModelId',
-        queueMock as unknown as PQueue,
+        { id: 'releaseId', semver: '1.2.3' } as any,
+        [
+          { name: 'name', tag: 'tag', repository: 'repository', _id: 'imageId' },
+          { name: 'name', tag: 'tag', repository: 'repository', _id: 'imageId' },
+        ] as any,
       )
 
       await Promise.all(pendingJobs)
@@ -597,16 +587,12 @@ describe('services > mirroredModel', () => {
       await uploadReleaseImages(
         {} as UserInterface,
         { id: 'modelId' } as any,
-        {
-          id: 'releaseId',
-          semver: '1.2.3',
-          images: [
-            { name: 'name', tag: 'tag', repository: 'repository', _id: 'abc' },
-            { name: 'name', tag: 'tag', repository: 'repository', _id: '123' },
-          ],
-        } as any,
-        'mirroredModelId',
-        queueMock as unknown as PQueue,
+        { id: 'releaseId', semver: '1.2.3' } as any,
+        [
+          { name: 'name', tag: 'tag', repository: 'repository', _id: 'abc' },
+          { name: 'name', tag: 'tag', repository: 'repository', _id: '123' },
+        ] as any,
+        { mirroredModelId: 'mirroredModelId' },
       )
 
       // The queue wouldn't actually throw an error but we need to test how it is handled

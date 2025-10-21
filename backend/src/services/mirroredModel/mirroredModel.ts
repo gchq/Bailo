@@ -4,9 +4,12 @@ import { Readable } from 'node:stream'
 import fetch, { Response } from 'node-fetch'
 import { Pack } from 'tar-stream'
 
-import { DocumentsExporter, MongoDocumentMirrorInformation } from '../../connectors/mirroredModel/documents.js'
-import { FileExporter, FileMirrorInformation } from '../../connectors/mirroredModel/file.js'
-import { ImageExporter, ImageMirrorInformation } from '../../connectors/mirroredModel/image.js'
+import { DocumentsExporter } from '../../connectors/mirroredModel/exporters/documents.js'
+import { FileExporter } from '../../connectors/mirroredModel/exporters/file.js'
+import { ImageExporter } from '../../connectors/mirroredModel/exporters/image.js'
+import { MongoDocumentMirrorInformation } from '../../connectors/mirroredModel/importers/documents.js'
+import { FileMirrorInformation } from '../../connectors/mirroredModel/importers/file.js'
+import { ImageMirrorInformation } from '../../connectors/mirroredModel/importers/image.js'
 import { exportQueue } from '../../connectors/mirroredModel/index.js'
 import { ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
@@ -208,7 +211,7 @@ export async function addCompressedRegistryImageComponents(
   log.debug({ modelId, imageName, imageTag, ...logData }, 'Finished adding registry image.')
 }
 
-async function uploadReleaseFiles(
+export async function uploadReleaseFiles(
   user: UserInterface,
   model: ModelDoc,
   release: ReleaseDoc,
@@ -241,7 +244,7 @@ async function uploadReleaseFiles(
   }
 }
 
-async function uploadReleaseImages(
+export async function uploadReleaseImages(
   user: UserInterface,
   model: ModelDoc,
   release: ReleaseDoc,

@@ -3,22 +3,26 @@ import { PassThrough } from 'node:stream'
 import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { DocumentsImporter, DocumentsMirrorMetadata } from '../../../src/connectors/mirroredModel/documents.js'
-import { MirrorKind } from '../../../src/connectors/mirroredModel/index.js'
+import {
+  DocumentsImporter,
+  DocumentsMirrorMetadata,
+} from '../../../../src/connectors/mirroredModel/importers/documents.js'
+import { MirrorKind } from '../../../../src/connectors/mirroredModel/index.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
     releases: vi.fn(),
   },
 }))
-vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
+vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const configMocks = vi.hoisted(() => ({
   modelMirror: {
     contentDirectory: 'content-dir',
+    export: { concurrency: 1 },
   },
 }))
-vi.mock('../../../src/utils/config.js', () => ({
+vi.mock('../../../../src/utils/config.js', () => ({
   __esModule: true,
   default: configMocks,
 }))
@@ -27,7 +31,7 @@ const logMocks = vi.hoisted(() => ({
   info: vi.fn(),
   debug: vi.fn(),
 }))
-vi.mock('../../../src/services/log.js', async () => ({
+vi.mock('../../../../src/services/log.js', async () => ({
   default: logMocks,
 }))
 
@@ -36,29 +40,29 @@ const entityParsersMocks = vi.hoisted(() => ({
   parseRelease: vi.fn(),
   parseFile: vi.fn(),
 }))
-vi.mock('../../../src/services/mirroredModel/entityParsers.js', () => entityParsersMocks)
+vi.mock('../../../../src/services/mirroredModel/entityParsers.js', () => entityParsersMocks)
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(),
   saveImportedModelCard: vi.fn(),
   setLatestImportedModelCard: vi.fn(),
 }))
-vi.mock('../../../src/services/model.js', () => modelMocks)
+vi.mock('../../../../src/services/model.js', () => modelMocks)
 
 const releaseMocks = vi.hoisted(() => ({
   saveImportedRelease: vi.fn(),
 }))
-vi.mock('../../../src/services/release.js', () => releaseMocks)
+vi.mock('../../../../src/services/release.js', () => releaseMocks)
 
 const fileMocks = vi.hoisted(() => ({
   saveImportedFile: vi.fn(),
 }))
-vi.mock('../../../src/services/file.js', () => fileMocks)
+vi.mock('../../../../src/services/file.js', () => fileMocks)
 
 const registryMocks = vi.hoisted(() => ({
   joinDistributionPackageName: vi.fn(() => 'repo/path:tag'),
 }))
-vi.mock('../../../src/services/registry.js', () => registryMocks)
+vi.mock('../../../../src/services/registry.js', () => registryMocks)
 
 const mockUser = { dn: 'user' }
 const mockMetadata: DocumentsMirrorMetadata = {
@@ -68,14 +72,14 @@ const mockMetadata: DocumentsMirrorMetadata = {
   exporter: 'exporter',
 } as DocumentsMirrorMetadata
 
-describe('services > mirroredModel > importers > DocumentsImporter', () => {
+describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   test('constructor > success', () => {
     const importer = new DocumentsImporter(mockUser, mockMetadata)
-    expect(importer.user).toEqual(mockUser)
+    expect(importer).toMatchSnapshot()
   })
 
   test('constructor > error importKind not Documents', () => {
@@ -98,8 +102,7 @@ describe('services > mirroredModel > importers > DocumentsImporter', () => {
 
     expect(entityParsersMocks.parseModelCard).toHaveBeenCalled()
     expect(modelMocks.saveImportedModelCard).toHaveBeenCalled()
-    expect(importer.modelCardVersions).toContain(1)
-    expect(importer.newModelCards).toHaveLength(1)
+    expect(importer).toMatchSnapshot()
   })
 
   test('processEntry > success handle release file with auth success', async () => {
@@ -123,9 +126,7 @@ describe('services > mirroredModel > importers > DocumentsImporter', () => {
 
     expect(entityParsersMocks.parseRelease).toHaveBeenCalled()
     expect(authMocks.default.releases).toHaveBeenCalled()
-    expect(importer.releaseSemvers).toContain('1.0.0')
-    expect(importer.imageIds).toContain('repo/path:tag')
-    expect(importer.newReleases).toHaveLength(1)
+    expect(importer).toMatchSnapshot()
   })
 
   test('processEntry > error auth failure', async () => {
@@ -162,7 +163,7 @@ describe('services > mirroredModel > importers > DocumentsImporter', () => {
 
     expect(entityParsersMocks.parseFile).toHaveBeenCalled()
     expect(fileMocks.saveImportedFile).toHaveBeenCalled()
-    expect(importer.fileIds).toContain('file-id')
+    expect(importer).toMatchSnapshot()
   })
 
   test('processEntry > error unknown file path', async () => {
@@ -185,18 +186,22 @@ describe('services > mirroredModel > importers > DocumentsImporter', () => {
     const stream = new PassThrough()
 
     await importer.processEntry(entry, stream)
-    expect(importer.modelCardVersions).toHaveLength(0)
-    expect(importer.releaseSemvers).toHaveLength(0)
-    expect(importer.fileIds).toHaveLength(0)
+    expect(importer).toMatchSnapshot()
   })
 
   test('finishListener > success', async () => {
     const importer = new DocumentsImporter(mockUser, mockMetadata)
+    // @ts-expect-error accessing protected property
     importer.modelCardVersions.push(1)
+    // @ts-expect-error accessing protected property
     importer.newModelCards.push({} as any)
+    // @ts-expect-error accessing protected property
     importer.releaseSemvers.push('1.0.0')
+    // @ts-expect-error accessing protected property
     importer.newReleases.push({} as any)
+    // @ts-expect-error accessing protected property
     importer.fileIds.push('fid' as any)
+    // @ts-expect-error accessing protected property
     importer.imageIds.push('iid')
 
     const resolve = vi.fn()

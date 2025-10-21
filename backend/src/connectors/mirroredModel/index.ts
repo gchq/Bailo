@@ -1,9 +1,9 @@
 import PQueue from 'p-queue'
 
 import config from '../../utils/config.js'
-import { DocumentsMirrorMetadata, MongoDocumentMirrorInformation } from './documents.js'
-import { FileMirrorInformation, FileMirrorMetadata } from './file.js'
-import { ImageMirrorInformation, ImageMirrorMetadata } from './image.js'
+import { DocumentsMirrorMetadata, MongoDocumentMirrorInformation } from './importers/documents.js'
+import { FileMirrorInformation, FileMirrorMetadata } from './importers/file.js'
+import { ImageMirrorInformation, ImageMirrorMetadata } from './importers/image.js'
 
 export const MirrorKind = {
   Documents: 'documents',
