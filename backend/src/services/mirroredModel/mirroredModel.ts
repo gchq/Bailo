@@ -11,7 +11,7 @@ import { exportQueue } from '../../connectors/mirroredModel/exporters/index.js'
 import { MongoDocumentMirrorInformation } from '../../connectors/mirroredModel/importers/documents.js'
 import { FileMirrorInformation } from '../../connectors/mirroredModel/importers/file.js'
 import { ImageMirrorInformation } from '../../connectors/mirroredModel/importers/image.js'
-import { ModelDoc, ModelInterface } from '../../models/Model.js'
+import { EntryKind, ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
 import config from '../../utils/config.js'
@@ -21,6 +21,7 @@ import { getHttpsAgent } from '../http.js'
 import log from '../log.js'
 import { getModelById } from '../model.js'
 import { getImageBlob, getImageManifest, splitDistributionPackageName } from '../registry.js'
+import { getReleasesForExport } from '../release.js'
 import { addEntryToTarGzUpload, extractTarGzStream } from './tarball.js'
 
 export async function exportModel(
@@ -37,17 +38,20 @@ export async function exportModel(
   }
 
   const exportId = shortId()
+  const model = await getModelById(user, modelId, EntryKind.Model)
+  const mirroredModelId = model.settings.mirror.destinationModelId
+  const releases: ReleaseDoc[] = []
+  if (semvers && semvers.length > 0) {
+    releases.push(...(await getReleasesForExport(user, modelId, semvers)))
+  }
 
-  const documentsExporter = new DocumentsExporter(user, modelId, semvers, {
+  const documentsExporter = new DocumentsExporter(user, model, releases, {
     exportId,
     sourceModelId: modelId,
     semvers,
   })
   await documentsExporter.init()
 
-  const model = documentsExporter.getModel()!
-  const mirroredModelId = model.settings.mirror.destinationModelId
-  const releases = documentsExporter.getReleases()
   log.debug(
     { user, exportId, sourceModelId: modelId, mirroredModelId, semvers },
     'Request checks complete, starting export.',
@@ -61,9 +65,11 @@ export async function exportModel(
       await documentsExporter.finalise()
       log.debug({ exportId, sourceModelId: modelId, mirroredModelId, semvers }, 'Successfully finalized Tarball file.')
 
-      for (const release of releases) {
-        uploadReleaseFiles(user, model!, release, documentsExporter.getFiles()!, { exportId })
-        uploadReleaseImages(user, model!, release, release.images, { exportId })
+      if (releases && releases.length > 0) {
+        for (const release of releases) {
+          uploadReleaseFiles(user, model!, release, documentsExporter.getFiles()!, { exportId })
+          uploadReleaseImages(user, model!, release, release.images, { exportId })
+        }
       }
     })
     .catch((error) => {

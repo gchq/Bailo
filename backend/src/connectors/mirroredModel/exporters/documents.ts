@@ -8,7 +8,7 @@ import { getFilesByIds, getTotalFileSize } from '../../../services/file.js'
 import log from '../../../services/log.js'
 import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../../../services/mirroredModel/tarball.js'
 import { getModelCardRevisions } from '../../../services/model.js'
-import { getAllFileIds, getReleasesForExport } from '../../../services/release.js'
+import { getAllFileIds } from '../../../services/release.js'
 import config from '../../../utils/config.js'
 import { BadReq, InternalError } from '../../../utils/error.js'
 import { ScanState } from '../../fileScanning/Base.js'
@@ -17,26 +17,12 @@ import { MirrorKind } from '../index.js'
 import { BaseExporter, requiresInit } from './base.js'
 
 export class DocumentsExporter extends BaseExporter {
-  protected readonly semvers: Array<string> = []
-  protected releases: ReleaseDoc[] = []
+  protected readonly releases: ReleaseDoc[]
   protected files: FileWithScanResultsInterface[] | undefined
 
-  constructor(
-    user: UserInterface,
-    model: string | ModelDoc,
-    releases?: Array<string> | ReleaseDoc[],
-    logData?: Record<string, unknown>,
-  ) {
+  constructor(user: UserInterface, model: ModelDoc, releases?: ReleaseDoc[], logData?: Record<string, unknown>) {
     super(user, model, logData)
-
-    if (releases && releases.length > 0) {
-      if (releases.every((release: unknown) => typeof release === 'string')) {
-        this.semvers = releases
-      } else {
-        this.releases = releases
-        this.semvers = releases.map((release: ReleaseDoc) => release.semver)
-      }
-    }
+    this.releases = releases ?? []
   }
 
   getReleases() {
@@ -47,29 +33,31 @@ export class DocumentsExporter extends BaseExporter {
     return this.files
   }
 
-  async _init() {
+  protected async _init() {
     await super._init()
 
-    if (this.semvers.length > 0) {
-      if (this.releases.length === 0) {
-        this.releases.push(...(await getReleasesForExport(this.user, this.modelId, this.semvers)))
-      }
+    if (this.releases.length > 0) {
       await this.checkReleaseFiles()
     }
   }
 
+  protected getSemvers() {
+    return this.releases.map((release) => release.semver)
+  }
+
   protected async checkReleaseFiles() {
-    const fileIds = await getAllFileIds(this.modelId, this.semvers)
-    this.files = await getFilesByIds(this.user, this.modelId, fileIds)
+    const semvers = this.getSemvers()
+    const fileIds = await getAllFileIds(this.model.id, semvers)
+    this.files = await getFilesByIds(this.user, this.model.id, fileIds)
 
     // Check the total size of the export if more than one release is being exported
-    if (this.semvers.length > 1) {
+    if (this.releases.length > 1) {
       if (fileIds.length === 0) {
         return
       }
       const totalFileSize = await getTotalFileSize(fileIds)
       log.debug(
-        { modelId: this.modelId, semvers: this.semvers, size: prettyBytes(totalFileSize) },
+        { modelId: this.model.id, semvers, size: prettyBytes(totalFileSize) },
         'Calculated estimated total file size included in export.',
       )
       if (totalFileSize > config.modelMirror.export.maxSize) {
@@ -112,10 +100,10 @@ export class DocumentsExporter extends BaseExporter {
       })
     }
     return [
-      `${this.modelId}.tar.gz`,
+      `${this.model.id}.tar.gz`,
       {
         exporter: this.user.dn,
-        sourceModelId: this.modelId,
+        sourceModelId: this.model.id,
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
         importKind: MirrorKind.Documents,
       },
@@ -146,16 +134,16 @@ export class DocumentsExporter extends BaseExporter {
   @requiresInit
   protected async addModelCardRevisionsToTarball() {
     log.debug(
-      { user: this.user, modelId: this.modelId, ...this.logData },
+      { user: this.user, modelId: this.model.id, ...this.logData },
       'Adding model card revisions to Tarball file.',
     )
-    const cards = await getModelCardRevisions(this.user, this.modelId)
+    const cards = await getModelCardRevisions(this.user, this.model.id)
     for (const card of cards) {
       const cardJson = JSON.stringify(card.toJSON())
       await addEntryToTarGzUpload(
         this.tarStream!, // Non-null assertion operator used due to `requiresInit` performing assertion
         { type: 'text', filename: `${card.version}.json`, content: cardJson },
-        { modelId: this.modelId, ...this.logData },
+        { modelId: this.model.id, ...this.logData },
       )
     }
     log.debug(
@@ -175,7 +163,7 @@ export class DocumentsExporter extends BaseExporter {
       throw InternalError('Error when adding release(s) to Tarball file.', { errors, ...this.logData })
     }
     log.debug(
-      { user: this.user, modelId: this.modelId, semvers: this.semvers, ...this.logData },
+      { user: this.user, modelId: this.model.id, semvers: this.getSemvers(), ...this.logData },
       'Completed adding model releases to Tarball file.',
     )
   }
@@ -190,12 +178,12 @@ export class DocumentsExporter extends BaseExporter {
       await addEntryToTarGzUpload(
         this.tarStream!,
         { type: 'text', filename: `releases/${release.semver}.json`, content: releaseJson },
-        { modelId: this.modelId, ...this.logData },
+        { modelId: this.model.id, ...this.logData },
       )
     } catch (error: unknown) {
       throw InternalError('Error when generating the tarball file.', {
         error,
-        modelId: this.modelId,
+        modelId: this.model.id,
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
         releaseId: release.id,
         ...this.logData,
@@ -215,12 +203,12 @@ export class DocumentsExporter extends BaseExporter {
         await addEntryToTarGzUpload(
           this.tarStream!,
           { type: 'text', filename: `files/${file._id.toString()}.json`, content: fileJson },
-          { modelId: this.modelId, ...this.logData },
+          { modelId: this.model.id, ...this.logData },
         )
       } catch (error: unknown) {
         throw InternalError('Error when generating the tarball file.', {
           error,
-          modelId: this.modelId,
+          modelId: this.model.id,
           file,
           ...this.logData,
         })

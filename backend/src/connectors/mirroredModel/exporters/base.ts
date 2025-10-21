@@ -6,7 +6,6 @@ import { Pack } from 'tar-stream'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
 import { finaliseTarGzUpload, initialiseTarGzUpload } from '../../../services/mirroredModel/tarball.js'
-import { getModelById } from '../../../services/model.js'
 import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
 import { ModelAction } from '../../authorisation/actions.js'
 import authorisation from '../../authorisation/index.js'
@@ -77,8 +76,7 @@ export abstract class BaseExporter {
   protected readonly logData?: Record<string, unknown>
 
   protected readonly user: UserInterface
-  protected readonly modelId: string
-  protected model: ModelDoc | undefined
+  protected readonly model: ModelDoc
 
   protected tarStream: Pack | undefined
   protected gzipStream: zlib.Gzip | undefined
@@ -86,14 +84,9 @@ export abstract class BaseExporter {
   protected uploadPromise: Promise<void> | undefined
   protected initialised: boolean = false
 
-  constructor(user: UserInterface, model: string | ModelDoc, logData?: Record<string, unknown>) {
+  constructor(user: UserInterface, model: ModelDoc, logData?: Record<string, unknown>) {
     this.user = user
-    if (typeof model === 'string') {
-      this.modelId = model
-    } else {
-      this.model = model
-      this.modelId = this.model.id
-    }
+    this.model = model
     this.logData = { exporterType: this.constructor.name, ...logData }
   }
 
@@ -102,9 +95,6 @@ export abstract class BaseExporter {
   }
 
   protected async _init() {
-    if (!this.model) {
-      this.model = await getModelById(this.user, this.modelId)
-    }
     if (!this.model.settings.mirror.destinationModelId) {
       throw BadReq("The 'Destination Model ID' has not been set on this model.", this.logData)
     }
@@ -113,7 +103,7 @@ export abstract class BaseExporter {
     }
     const modelAuth = await authorisation.model(this.user, this.model, ModelAction.Export)
     if (!modelAuth.success) {
-      throw Forbidden(modelAuth.info, { userDn: this.user.dn, modelId: this.modelId, ...this.logData })
+      throw Forbidden(modelAuth.info, { userDn: this.user.dn, modelId: this.model.id, ...this.logData })
     }
   }
 

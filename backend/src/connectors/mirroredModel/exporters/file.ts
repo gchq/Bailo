@@ -3,7 +3,7 @@ import { Readable } from 'node:stream'
 import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
-import { downloadFile, getFileById } from '../../../services/file.js'
+import { downloadFile } from '../../../services/file.js'
 import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../../../services/mirroredModel/tarball.js'
 import config from '../../../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
@@ -15,41 +15,31 @@ import { MirrorKind } from '../index.js'
 import { BaseExporter, requiresInit } from './base.js'
 
 export class FileExporter extends BaseExporter {
-  protected readonly fileId: string
-  protected file: FileWithScanResultsInterface | undefined
+  protected readonly file: FileWithScanResultsInterface
 
   constructor(
     user: UserInterface,
-    model: string | ModelDoc,
-    file: string | FileWithScanResultsInterface,
+    model: ModelDoc,
+    file: FileWithScanResultsInterface,
     logData?: Record<string, unknown>,
   ) {
     super(user, model, logData)
-
-    if (typeof file === 'string') {
-      this.fileId = file
-    } else {
-      this.file = file
-      this.fileId = this.file.id
-    }
+    this.file = file
   }
 
   getFile() {
     return this.file
   }
 
-  async _init() {
+  protected async _init() {
     await super._init()
 
-    if (!this.file) {
-      this.file = await getFileById(this.user, this.fileId, this.model)
-    }
     const fileAuth = await authorisation.file(this.user, this.model!, this.file, FileAction.Download)
     if (!fileAuth.success) {
       throw Forbidden(fileAuth.info, {
         userDn: this.user.dn,
-        modelId: this.modelId,
-        fileId: this.fileId,
+        modelId: this.model.id,
+        fileId: this.file.id,
         ...this.logData,
       })
     }
@@ -63,11 +53,11 @@ export class FileExporter extends BaseExporter {
 
     if (scanners.info()) {
       if (!this.file.avScan || this.file.avScan.length === 0) {
-        throw BadReq('The file is missing AV scan(s).', { filename: this.file.name, fileId: this.fileId })
+        throw BadReq('The file is missing AV scan(s).', { filename: this.file.name, fileId: this.file.id })
       } else if (this.file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
-        throw BadReq('The file has incomplete AV scan(s).', { filename: this.file.name, fileId: this.fileId })
+        throw BadReq('The file has incomplete AV scan(s).', { filename: this.file.name, fileId: this.file.id })
       } else if (this.file.avScan.some((scanResult) => scanResult.isInfected)) {
-        throw BadReq('The file has failed AV scan(s).', { filename: this.file.name, fileId: this.fileId })
+        throw BadReq('The file has failed AV scan(s).', { filename: this.file.name, fileId: this.file.id })
       }
     }
   }
@@ -79,12 +69,12 @@ export class FileExporter extends BaseExporter {
       })
     }
     return [
-      `${this.fileId}.tar.gz`,
+      `${this.file.id}.tar.gz`,
       {
         exporter: this.user.dn,
-        sourceModelId: this.modelId,
+        sourceModelId: this.model.id,
         mirroredModelId: this.model.settings.mirror.destinationModelId!,
-        filePath: this.fileId,
+        filePath: this.file.id,
         importKind: MirrorKind.File,
       },
       this.logData,
@@ -98,8 +88,8 @@ export class FileExporter extends BaseExporter {
       this.tarStream!,
       {
         type: 'stream',
-        filename: this.fileId,
-        stream: (await downloadFile(this.user, this.fileId)).Body as Readable,
+        filename: this.file.id,
+        stream: (await downloadFile(this.user, this.file.id)).Body as Readable,
         size: this.file!.size,
       },
       this.logData,

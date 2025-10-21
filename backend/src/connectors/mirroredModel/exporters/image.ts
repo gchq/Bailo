@@ -4,7 +4,6 @@ import { UserInterface } from '../../../models/User.js'
 import { addCompressedRegistryImageComponents } from '../../../services/mirroredModel/mirroredModel.js'
 import { initialiseTarGzUpload } from '../../../services/mirroredModel/tarball.js'
 import { joinDistributionPackageName } from '../../../services/registry.js'
-import { getReleaseBySemver } from '../../../services/release.js'
 import { Forbidden, InternalError } from '../../../utils/error.js'
 import { ReleaseAction } from '../../authorisation/actions.js'
 import authorisation from '../../authorisation/index.js'
@@ -12,33 +11,20 @@ import { MirrorKind } from '../index.js'
 import { BaseExporter, requiresInit } from './base.js'
 
 export class ImageExporter extends BaseExporter {
-  protected readonly semver: string
-  protected release: ReleaseDoc | undefined
-  protected readonly imageId: string
-  protected image: ReleaseDoc['images'][number] | undefined
+  protected readonly release: ReleaseDoc
+  protected readonly image: ReleaseDoc['images'][number]
   protected distributionPackageName: string | undefined
 
   constructor(
     user: UserInterface,
-    model: string | ModelDoc,
-    release: string | ReleaseDoc,
-    image: string | ReleaseDoc['images'][number],
+    model: ModelDoc,
+    release: ReleaseDoc,
+    image: ReleaseDoc['images'][number],
     logData?: Record<string, unknown>,
   ) {
     super(user, model, logData)
-
-    if (typeof release === 'string') {
-      this.semver = release
-    } else {
-      this.release = release
-      this.semver = this.release.semver
-    }
-    if (typeof image === 'string') {
-      this.imageId = image
-    } else {
-      this.image = image
-      this.imageId = this.image._id.toString()
-    }
+    this.release = release
+    this.image = image
   }
 
   getRelease() {
@@ -53,50 +39,45 @@ export class ImageExporter extends BaseExporter {
     return this.distributionPackageName
   }
 
-  async _init() {
+  protected async _init() {
     await super._init()
 
-    if (!this.release) {
-      this.release = await getReleaseBySemver(this.user, this.model!, this.semver)
-    }
     const releaseAuth = await authorisation.release(this.user, this.model!, ReleaseAction.View, this.release)
     if (!releaseAuth.success) {
       throw Forbidden(releaseAuth.info, {
         userDn: this.user.dn,
-        modelId: this.modelId,
-        semver: this.semver,
+        modelId: this.model.id,
+        semver: this.release.semver,
         ...this.logData,
       })
     }
 
-    if (!this.image) {
-      this.image = this.release.images.find((image) => image._id.toString() === this.imageId)
-      if (!this.image) {
-        throw InternalError('Could not find image associated with release.', {
-          modelId: this.modelId,
-          semver: this.semver,
-          imageId: this.imageId,
-          ...this.logData,
-        })
-      }
+    const imageCheck = this.release.images.find((image) => image._id.toString() === this.image._id.toString())
+    if (!imageCheck) {
+      throw InternalError('Could not find image associated with release.', {
+        modelId: this.model.id,
+        semver: this.release.semver,
+        imageId: this.image._id.toString(),
+        ...this.logData,
+      })
     }
     const imageAuth = await authorisation.image(this.user, this.model!, {
       type: 'repository',
-      name: this.modelId,
+      name: this.model.id,
       actions: ['pull'],
     })
     if (!imageAuth.success) {
       throw Forbidden(imageAuth.info, {
         userDn: this.user.dn,
-        modelId: this.modelId,
-        semver: this.semver,
-        imageId: this.imageId,
+        modelId: this.model.id,
+        semver: this.release.semver,
+        imageId: this.image._id.toString(),
         ...this.logData,
       })
     }
 
     // update the distributionPackageName to use the mirroredModelId
-    const modelIdRe = new RegExp(String.raw`^${this.modelId}`)
+    const modelIdRe = new RegExp(String.raw`^${this.model.id}`)
     this.distributionPackageName = joinDistributionPackageName({
       domain: '',
       path: this.image.name.replace(modelIdRe, this.model!.settings.mirror.destinationModelId!),
@@ -119,10 +100,10 @@ export class ImageExporter extends BaseExporter {
       )
     }
     return [
-      `${this.imageId}.tar.gz`,
+      `${this.image._id.toString()}.tar.gz`,
       {
         exporter: this.user.dn,
-        sourceModelId: this.modelId,
+        sourceModelId: this.model.id,
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
         distributionPackageName: this.distributionPackageName!,
         importKind: MirrorKind.Image,
@@ -136,7 +117,7 @@ export class ImageExporter extends BaseExporter {
     // Non-null assertion operator used due to `requiresInit` performing assertion
     await addCompressedRegistryImageComponents(
       this.user,
-      this.modelId,
+      this.model.id,
       this.distributionPackageName!,
       this.tarStream!,
       this.logData,

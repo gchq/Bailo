@@ -19,6 +19,23 @@ const configMock = vi.hoisted(() => ({
       export: { enabled: true },
     },
   },
+  connectors: {
+    authentication: {
+      kind: 'silly',
+    },
+    audit: {
+      kind: 'silly',
+    },
+    authorisation: {
+      kind: 'basic',
+    },
+    fileScanners: {
+      kinds: [],
+    },
+  },
+  app: {
+    protocol: '',
+  },
 }))
 vi.mock('../../../src/utils/config.js', () => ({ default: configMock }))
 
@@ -51,6 +68,11 @@ const registryMocks = vi.hoisted(() => ({
   getImageBlob: vi.fn(),
 }))
 vi.mock('../../../src/services/registry.js', () => registryMocks)
+
+const releaseMocks = vi.hoisted(() => ({
+  getReleasesForExport: vi.fn(() => Promise.resolve([{ id: 'rel1', semver: '1.0.0', images: [] }])),
+}))
+vi.mock('../../../src/services/release.js', () => releaseMocks)
 
 const DocumentsExporterMock = vi.hoisted(() =>
   vi.fn(() => ({
@@ -127,6 +149,15 @@ describe('services > mirroredModel', () => {
       const id = await exportModel({} as any, 'modelId', true)
       expect(id).toBe('shortId123')
       expect(DocumentsExporterMock).toHaveBeenCalled()
+      expect(exportQueueMock.add).toHaveBeenCalled()
+    })
+
+    test('success semvers', async () => {
+      configMock.ui.modelMirror.export.enabled = true
+      const id = await exportModel({} as any, 'modelId', true, ['1.0.0'])
+      expect(id).toBe('shortId123')
+      expect(DocumentsExporterMock).toHaveBeenCalled()
+      expect(releaseMocks.getReleasesForExport).toHaveBeenCalled()
       expect(exportQueueMock.add).toHaveBeenCalled()
     })
 
