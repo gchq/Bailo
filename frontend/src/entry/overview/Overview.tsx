@@ -30,16 +30,18 @@ export default function Overview({ entry, readOnly = false }: OverviewProps) {
       message='This mirrored model has no model card. Please export the model card from the source model.'
     />
   ) : (
-    <Container sx={{ my: 2 }} maxWidth='xl'>
+    <Box sx={{ my: 2 }}>
       <Stack spacing={4} direction={{ sm: 'column', md: 'row' }} sx={{ width: '100%' }}>
         <Box sx={{ p: 2 }}>
           <OrganisationAndStateDetails entry={entry} />
         </Box>
-        <Box sx={{ width: '100%', py: 2 }}>
-          {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
-          {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} />}
+        <Box width='100%'>
+          <Container sx={{ py: 2, m: 'auto' }} maxWidth='xl'>
+            {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
+            {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} />}
+          </Container>
         </Box>
       </Stack>
-    </Container>
+    </Box>
   )
 }
