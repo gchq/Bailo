@@ -365,9 +365,9 @@ export interface Step {
   section: string
   schemaRef: string
 
-  render: (RenderInterface) => JSX.Element | null
-  renderBasic: (RenderInterface) => JSX.Element | null
-  renderButtons: (RenderButtonsInterface) => JSX.Element | null
+  render: (RenderInterface) => React.JSX.Element | null
+  renderBasic: (RenderInterface) => React.JSX.Element | null
+  renderButtons: (RenderButtonsInterface) => React.JSX.Element | null
 
   shouldValidate: boolean
   isComplete: (step: Step) => boolean
