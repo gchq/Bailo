@@ -35,12 +35,12 @@ export default function Overview({ entry, readOnly = false }: OverviewProps) {
         <Box sx={{ p: 2 }}>
           <OrganisationAndStateDetails entry={entry} />
         </Box>
-        <Container maxWidth='xl'>
-          <Box sx={{ width: '100%', py: 2, m: 'auto' }}>
+        <Box width='100%'>
+          <Container sx={{ py: 2, m: 'auto' }} maxWidth='xl'>
             {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
             {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} />}
-          </Box>
-        </Container>
+          </Container>
+        </Box>
       </Stack>
     </Box>
   )
