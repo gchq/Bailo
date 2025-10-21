@@ -2,31 +2,41 @@ import DocsWrapper from 'src/docs/DocsWrapper'
 import Box from '@mui/material/Box'
 import Image from 'next/legacy/image'
 
-import bailoUploadFile from 'public/docs/bailo_upload_new_release_file.png'
-import bailoUploadedFile from 'public/docs/bailo_created_release_upload_file.png'
+import bailoUploadFileRelease from 'public/docs/bailo_release_file_upload.png'
+import bailoUploadedFileRelease from 'public/docs/bailo_created_release_upload_file.png'
+import bailoUploadFile from 'public/docs/bailo_file_upload.png'
 
 # Uploading files
 
 A file can be anything to do with the model data. This can be model binaries or other information that allows users of
 Bailo to build and use your prepared models.
 
+## Adding a file
+
+Files are primarily uploaded using the ADD NEW FILES button located in a model's File Management tab. By pressing the
+SELECT FILES button you are given the ability to choose files to upload. You can also adjust each file's associated
+tags.
+
+<Box sx={{ maxWidth: '75%', margin: 'auto' }}>
+  <Image alt='view of files being uploaded' src={bailoUploadFile} />
+</Box>
+
 ## Adding files to a new release
 
-Files are unique for each release. Therefore, if you decide to create a new release you can use the same file name, with
-the updated parameters or information. In this example we will be adding `yolov4.onnx` to a new release.
+When creating a new release, you can also attach new and pre-existing files.
 
 <br />
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='new release form with file attached' src={bailoUploadFile} />
+  <Image alt='new release form with file attached' src={bailoUploadFileRelease} />
 </Box>
 
 ## Adding files to an existing release
 
-Similarly, you can upload and delete a file to an existing release by editing an existing release.
+Similarly, you can upload and delete a file on an existing release by editing it.
 
 <Box sx={{ maxWidth: '75%', margin: 'auto' }}>
-  <Image alt='view of existing release with edit release button' src={bailoUploadedFile} />
+  <Image alt='view of existing release with edit release button' src={bailoUploadedFileRelease} />
 </Box>
 
 ## Uploading files programmatically
