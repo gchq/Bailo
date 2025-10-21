@@ -16,8 +16,9 @@ import TagSelector from 'src/MuiForms/TagSelector'
 import { SplitSchemaNoRender, StepNoRender, StepType } from '../types/types'
 import { createUiSchema } from './uiSchemaUtils'
 import TestWidget from 'src/MuiForms/TestWidget'
+import { RegistryWidgetsType } from '@rjsf/utils'
 
-export const widgets = {
+export const widgets: RegistryWidgetsType = {
   TextWidget: CustomTextInput,
   CheckboxWidget: CheckboxInput,
   TextareaWidget: RichTextInput,

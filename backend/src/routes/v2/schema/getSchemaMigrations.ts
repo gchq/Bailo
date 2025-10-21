@@ -10,7 +10,7 @@ import { parse } from '../../../utils/validate.js'
 
 export const getSchemaMigrationsSchema = z.object({
   query: z.object({
-    id: z.string().optional().openapi({ example: 'My Schema Migration' }),
+    id: z.string().optional().openapi({ example: 'schema-migration-4f3f5' }),
     sourceSchema: z.string().optional().openapi({ example: 'source-schema-v1' }),
   }),
 })

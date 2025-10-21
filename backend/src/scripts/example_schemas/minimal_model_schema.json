@@ -12,7 +12,6 @@
           "description": "A description of what the model does.",
           "type": "string",
           "minLength": 1,
-          "widget": "testWidget",
           "maxLength": 5000
         },
         "object": {

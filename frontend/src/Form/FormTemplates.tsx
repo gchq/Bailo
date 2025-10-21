@@ -72,22 +72,27 @@ export function ObjectFieldTemplateForQuestionViewer({
   const handleOnClick = () => {
     formContext.onClickListener({ path: rootName, schema })
   }
+  console.log(schema)
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ py: 1 }}>
       <Stack spacing={2}>
         <Stack>
           <Button size='large' sx={{ textTransform: 'none', textAlign: 'left', width: 'fit-content' }}>
-            <Typography color='secondary' fontWeight='bold' variant='h6' component='h3' onClick={handleOnClick}>
+            <Typography fontWeight='bold' variant='h6' component='h3' onClick={handleOnClick}>
               {title}
             </Typography>
           </Button>
-          <Typography variant='caption'>{description}</Typography>
+          <Typography variant='caption' sx={{ pl: 1.5 }}>
+            {description}
+          </Typography>
         </Stack>
-        {properties.map((element) => (
-          <div key={element.name} className='property-wrapper'>
-            {element.content}
-          </div>
-        ))}
+        <Box sx={{ px: 2 }}>
+          {properties.map((element) => (
+            <div key={element.name} className='property-wrapper'>
+              {element.content}
+            </div>
+          ))}
+        </Box>
       </Stack>
     </Box>
   )
