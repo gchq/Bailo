@@ -11,6 +11,7 @@ import {
   finaliseTarGzUpload,
   initialiseTarGzUpload,
 } from '../../../src/services/mirroredModel/tarball.js'
+import config from '../../../src/utils/__mocks__/config.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -18,22 +19,6 @@ const authMocks = vi.hoisted(() => ({
   },
 }))
 vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
-
-const configMocks = vi.hoisted(() => ({
-  connectors: { fileScanners: { kinds: [] }, audit: { kind: 'silly' }, authentication: { kind: 'silly' } },
-  app: {
-    protocol: 'http',
-  },
-  registry: { connection: { internal: '', insecure: true } },
-  modelMirror: {
-    metadataFile: 'meta.json',
-    contentDirectory: 'content-dir',
-  },
-}))
-vi.mock('../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMocks,
-}))
 
 const logMocks = vi.hoisted(() => ({
   info: vi.fn(),
@@ -80,9 +65,9 @@ const ImporterMock = vi.hoisted(() => {
     errorListenerSpy,
   }
 })
-vi.mock('../../../src/connectors/mirroredModel/documents.js', () => ImporterMock)
-vi.mock('../../../src/connectors/mirroredModel/file.js', () => ImporterMock)
-vi.mock('../../../src/connectors/mirroredModel/image.js', () => ImporterMock)
+vi.mock('../../../src/connectors/mirroredModel/importers/documents.js', () => ImporterMock)
+vi.mock('../../../src/connectors/mirroredModel/importers/file.js', () => ImporterMock)
+vi.mock('../../../src/connectors/mirroredModel/importers/image.js', () => ImporterMock)
 
 function setUpExtractTarGzStreams() {
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })
@@ -223,8 +208,8 @@ describe('service > mirroredModel > tarball', () => {
       exporter: 'user',
     }
     servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-    tarStream.entry({ name: configMocks.modelMirror.metadataFile, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-    tarStream.entry({ name: `${configMocks.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+    tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+    tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
     tarStream.finalize()
     authMocks.default.model.mockResolvedValue({ success: true })
 
@@ -245,8 +230,8 @@ describe('service > mirroredModel > tarball', () => {
       exporter: 'user',
     }
     servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-    tarStream.entry({ name: configMocks.modelMirror.metadataFile, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-    tarStream.entry({ name: `${configMocks.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+    tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+    tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
     tarStream.finalize()
     authMocks.default.model.mockResolvedValue({ success: true })
 
@@ -267,8 +252,8 @@ describe('service > mirroredModel > tarball', () => {
       exporter: 'user',
     }
     servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-    tarStream.entry({ name: configMocks.modelMirror.metadataFile, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-    tarStream.entry({ name: `${configMocks.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+    tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+    tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
     tarStream.finalize()
     authMocks.default.model.mockResolvedValue({ success: true })
 
@@ -298,7 +283,7 @@ describe('service > mirroredModel > tarball', () => {
       exporter: 'user',
     }
     servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-    tarStream.entry({ name: configMocks.modelMirror.metadataFile, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+    tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
     tarStream.finalize()
     authMocks.default.model.mockResolvedValue({ success: false, info: 'nope' })
 
@@ -311,8 +296,8 @@ describe('service > mirroredModel > tarball', () => {
     const { tarStream, passThrough } = setUpExtractTarGzStreams()
     const meta = { mirroredModelId: 'mid', sourceModelId: 'sid', importKind: mirroredModelMocks.ImportKind.Documents }
     servicesModelMocks.validateMirroredModel.mockRejectedValue('Error')
-    tarStream.entry({ name: configMocks.modelMirror.metadataFile, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-    tarStream.entry({ name: `${configMocks.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+    tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+    tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
     tarStream.finalize()
 
     const promise = extractTarGzStream(passThrough, { dn: 'user' })
@@ -329,8 +314,8 @@ describe('service > mirroredModel > tarball', () => {
       exporter: 'user',
     }
     servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
-    tarStream.entry({ name: configMocks.modelMirror.metadataFile, type: 'file' }, Buffer.from(JSON.stringify(meta)))
-    tarStream.entry({ name: `${configMocks.modelMirror.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
+    tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+    tarStream.entry({ name: `${config.modelMirror!.contentDirectory}/f1`, type: 'file' }, Buffer.from('abc'))
     tarStream.finalize()
     authMocks.default.model.mockResolvedValue({ success: true })
     ImporterMock.processEntrySpy.mockRejectedValueOnce('Error')

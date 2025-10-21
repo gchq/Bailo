@@ -1,6 +1,3 @@
-import PQueue from 'p-queue'
-
-import config from '../../utils/config.js'
 import { DocumentsMirrorMetadata, MongoDocumentMirrorInformation } from './importers/documents.js'
 import { FileMirrorInformation, FileMirrorMetadata } from './importers/file.js'
 import { ImageMirrorInformation, ImageMirrorMetadata } from './importers/image.js'
@@ -17,5 +14,3 @@ export type MirrorKindKeys<T extends keyof typeof MirrorKind | void = void> = T 
 
 export type MirrorMetadata = DocumentsMirrorMetadata | FileMirrorMetadata | ImageMirrorMetadata
 export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation
-
-export const exportQueue: PQueue = new PQueue({ concurrency: config.modelMirror.export.concurrency })

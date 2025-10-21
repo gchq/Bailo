@@ -16,17 +16,6 @@ const authMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
-const configMocks = vi.hoisted(() => ({
-  modelMirror: {
-    contentDirectory: 'content-dir',
-    export: { concurrency: 1 },
-  },
-}))
-vi.mock('../../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMocks,
-}))
-
 const logMocks = vi.hoisted(() => ({
   info: vi.fn(),
   debug: vi.fn(),

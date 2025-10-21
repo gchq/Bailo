@@ -2,7 +2,7 @@
 
 exports[`connectors > mirroredModel > importers > FileImporter > constructor > success 1`] = `
 FileImporter {
-  "bucket": "uploads-bucket",
+  "bucket": "uploads",
   "extractedFile": false,
   "logData": undefined,
   "metadata": {
@@ -16,7 +16,7 @@ FileImporter {
 
 exports[`connectors > mirroredModel > importers > FileImporter > processEntry > success skip already existing file 1`] = `
 FileImporter {
-  "bucket": "uploads-bucket",
+  "bucket": "uploads",
   "extractedFile": true,
   "logData": undefined,
   "metadata": {
@@ -30,49 +30,7 @@ FileImporter {
 
 exports[`connectors > mirroredModel > importers > FileImporter > processEntry > success upload new file to S3 1`] = `
 FileImporter {
-  "bucket": "uploads-bucket",
-  "extractedFile": true,
-  "logData": undefined,
-  "metadata": {
-    "filePath": "original/file/path",
-    "importKind": "file",
-    "mirroredModelId": "model123",
-  },
-  "updatedPath": "updated/file/path",
-}
-`;
-
-exports[`services > mirroredModel > importers > FileImporter > constructor > success 1`] = `
-FileImporter {
-  "bucket": "uploads-bucket",
-  "extractedFile": false,
-  "logData": undefined,
-  "metadata": {
-    "filePath": "original/file/path",
-    "importKind": "file",
-    "mirroredModelId": "model123",
-  },
-  "updatedPath": "updated/file/path",
-}
-`;
-
-exports[`services > mirroredModel > importers > FileImporter > processEntry > success skip already existing file 1`] = `
-FileImporter {
-  "bucket": "uploads-bucket",
-  "extractedFile": true,
-  "logData": undefined,
-  "metadata": {
-    "filePath": "original/file/path",
-    "importKind": "file",
-    "mirroredModelId": "model123",
-  },
-  "updatedPath": "updated/file/path",
-}
-`;
-
-exports[`services > mirroredModel > importers > FileImporter > processEntry > success upload new file to S3 1`] = `
-FileImporter {
-  "bucket": "uploads-bucket",
+  "bucket": "uploads",
   "extractedFile": true,
   "logData": undefined,
   "metadata": {

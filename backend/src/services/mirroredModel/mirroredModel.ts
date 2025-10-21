@@ -7,10 +7,10 @@ import { Pack } from 'tar-stream'
 import { DocumentsExporter } from '../../connectors/mirroredModel/exporters/documents.js'
 import { FileExporter } from '../../connectors/mirroredModel/exporters/file.js'
 import { ImageExporter } from '../../connectors/mirroredModel/exporters/image.js'
+import { exportQueue } from '../../connectors/mirroredModel/exporters/index.js'
 import { MongoDocumentMirrorInformation } from '../../connectors/mirroredModel/importers/documents.js'
 import { FileMirrorInformation } from '../../connectors/mirroredModel/importers/file.js'
 import { ImageMirrorInformation } from '../../connectors/mirroredModel/importers/image.js'
-import { exportQueue } from '../../connectors/mirroredModel/index.js'
 import { ModelDoc, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
@@ -38,32 +38,29 @@ export async function exportModel(
 
   const exportId = shortId()
 
-  let model: ModelDoc | undefined
-  let mirroredModelId: string | undefined
-  let releases: ReleaseDoc[] | undefined
+  const documentsExporter = new DocumentsExporter(user, modelId, semvers, {
+    exportId,
+    sourceModelId: modelId,
+    semvers,
+  })
+  await documentsExporter.init()
+
+  const model = documentsExporter.getModel()!
+  const mirroredModelId = model.settings.mirror.destinationModelId
+  const releases = documentsExporter.getReleases()
+  log.debug(
+    { user, exportId, sourceModelId: modelId, mirroredModelId, semvers },
+    'Request checks complete, starting export.',
+  )
 
   // Not `await`ed for fire-and-forget approach
   exportQueue
     .add(async () => {
-      const documentsExporter = new DocumentsExporter(user, modelId, semvers, {
-        exportId,
-        sourceModelId: modelId,
-        semvers,
-      })
-      documentsExporter.init()
-      model = documentsExporter.getModel()!
-      mirroredModelId = model.settings.mirror.destinationModelId
-      log.debug(
-        { user, exportId, sourceModelId: modelId, mirroredModelId, semvers },
-        'Request checks complete, starting export.',
-      )
-
       await documentsExporter.addData()
 
-      documentsExporter.finalise()
+      await documentsExporter.finalise()
       log.debug({ exportId, sourceModelId: modelId, mirroredModelId, semvers }, 'Successfully finalized Tarball file.')
 
-      const releases = documentsExporter.getReleases()
       for (const release of releases) {
         uploadReleaseFiles(user, model!, release, documentsExporter.getFiles()!, { exportId })
         uploadReleaseImages(user, model!, release, release.images, { exportId })
@@ -236,7 +233,7 @@ export async function uploadReleaseFiles(
             release: release.semver,
             fileId: file.id,
             fileName: file.name,
-            logData,
+            ...logData,
           },
           'Error when exporting mirrored File.',
         )
@@ -252,7 +249,7 @@ export async function uploadReleaseImages(
   logData?: Record<string, unknown>,
 ) {
   for (const image of images) {
-    await exportQueue
+    exportQueue
       .add(async () => {
         const imageExporter = new ImageExporter(user, model, release, image, logData)
         await imageExporter.init()

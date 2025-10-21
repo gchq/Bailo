@@ -5,11 +5,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { FileImporter, FileMirrorMetadata } from '../../../../src/connectors/mirroredModel/importers/file.js'
 import { MirrorKind } from '../../../../src/connectors/mirroredModel/index.js'
-
-vi.mock('../../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMocks,
-}))
+import config from '../../../../src/utils/__mocks__/config.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -17,22 +13,6 @@ const authMocks = vi.hoisted(() => ({
   },
 }))
 vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
-
-const configMocks = vi.hoisted(() => ({
-  s3: {
-    buckets: {
-      uploads: 'uploads-bucket',
-    },
-  },
-  modelMirror: {
-    contentDirectory: 'content-dir',
-    export: { concurrency: 1 },
-  },
-}))
-vi.mock('../../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMocks,
-}))
 
 const logMocks = vi.hoisted(() => ({
   debug: vi.fn(),
@@ -100,7 +80,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    expect(s3Mocks.putObjectStream).toHaveBeenCalledWith('updated/file/path', stream, configMocks.s3.buckets.uploads)
+    expect(s3Mocks.putObjectStream).toHaveBeenCalledWith('updated/file/path', stream, config?.s3?.buckets?.uploads)
     expect(fileServiceMocks.markFileAsCompleteAfterImport).toHaveBeenCalledWith('updated/file/path')
     expect(importer).toMatchSnapshot()
   })

@@ -6,17 +6,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { ImageImporter, ImageMirrorMetadata } from '../../../../src/connectors/mirroredModel/importers/image.js'
 import { MirrorKind } from '../../../../src/connectors/mirroredModel/index.js'
 
-const configMocks = vi.hoisted(() => ({
-  modelMirror: {
-    contentDirectory: 'content-dir',
-    export: { concurrency: 1 },
-  },
-}))
-vi.mock('../../../../src/utils/config.js', () => ({
-  __esModule: true,
-  default: configMocks,
-}))
-
 const authMocks = vi.hoisted(() => ({
   default: {
     releases: vi.fn(),
