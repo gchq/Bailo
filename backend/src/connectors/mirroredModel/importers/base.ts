@@ -6,6 +6,7 @@ import { isBailoError } from '../../../types/error.js'
 import { InternalError } from '../../../utils/error.js'
 
 export type BaseMirrorMetadata = {
+  schemaVersion: number
   sourceModelId: string
   mirroredModelId: string
   exporter: string

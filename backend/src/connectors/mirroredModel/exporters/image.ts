@@ -102,6 +102,7 @@ export class ImageExporter extends BaseExporter {
     return [
       `${this.image._id.toString()}.tar.gz`,
       {
+        schemaVersion: 1,
         exporter: this.user.dn,
         sourceModelId: this.model.id,
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,

@@ -301,12 +301,14 @@ export const inferenceInterfaceSchema = z.object({
 
 export const mirrorMetadataSchema = z.union([
   z.object({
+    schemaVersion: z.literal(1),
     importKind: z.literal(MirrorKind.Documents),
     sourceModelId: z.string(),
     mirroredModelId: z.string(),
     exporter: z.string(),
   }),
   z.object({
+    schemaVersion: z.literal(1),
     importKind: z.literal(MirrorKind.File),
     sourceModelId: z.string(),
     mirroredModelId: z.string(),
@@ -314,6 +316,7 @@ export const mirrorMetadataSchema = z.union([
     exporter: z.string(),
   }),
   z.object({
+    schemaVersion: z.literal(1),
     importKind: z.literal(MirrorKind.Image),
     sourceModelId: z.string(),
     mirroredModelId: z.string(),

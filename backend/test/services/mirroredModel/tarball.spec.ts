@@ -202,6 +202,7 @@ describe('service > mirroredModel > tarball', () => {
   test('extractTarGzStream > success DocumentsImporter', async () => {
     const { tarStream, passThrough } = setUpExtractTarGzStreams()
     const meta = {
+      schemaVersion: 1,
       mirroredModelId: 'mid',
       sourceModelId: 'sid',
       importKind: mirroredModelMocks.ImportKind.Documents,
@@ -223,6 +224,7 @@ describe('service > mirroredModel > tarball', () => {
   test('extractTarGzStream > success FileImporter', async () => {
     const { tarStream, passThrough } = setUpExtractTarGzStreams()
     const meta = {
+      schemaVersion: 1,
       mirroredModelId: 'mid',
       sourceModelId: 'sid',
       importKind: mirroredModelMocks.ImportKind.File,
@@ -245,6 +247,7 @@ describe('service > mirroredModel > tarball', () => {
   test('extractTarGzStream > success ImageImporter', async () => {
     const { tarStream, passThrough } = setUpExtractTarGzStreams()
     const meta = {
+      schemaVersion: 1,
       mirroredModelId: 'mid',
       sourceModelId: 'sid',
       importKind: mirroredModelMocks.ImportKind.Image,
@@ -274,9 +277,28 @@ describe('service > mirroredModel > tarball', () => {
     await expect(promise).rejects.toThrowError(/^Expected 'meta.json' as first entry, found 'wrong.txt'/)
   })
 
+  test('extractTarGzStream > error invalid schemaVersion', async () => {
+    const { tarStream, passThrough } = setUpExtractTarGzStreams()
+    const meta = {
+      schemaVersion: -1,
+      mirroredModelId: 'mid',
+      sourceModelId: 'sid',
+      importKind: mirroredModelMocks.ImportKind.Documents,
+      exporter: 'user',
+    }
+    servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
+    tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
+    tarStream.finalize()
+
+    const promise = extractTarGzStream(passThrough, { dn: 'user' })
+
+    await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+  })
+
   test('extractTarGzStream > error auth fails', async () => {
     const { tarStream, passThrough } = setUpExtractTarGzStreams()
     const meta = {
+      schemaVersion: 1,
       mirroredModelId: 'mid',
       sourceModelId: 'sid',
       importKind: mirroredModelMocks.ImportKind.Documents,
@@ -308,6 +330,7 @@ describe('service > mirroredModel > tarball', () => {
   test('extractTarGzStream > error DocumentsImporter', async () => {
     const { tarStream, passThrough } = setUpExtractTarGzStreams()
     const meta = {
+      schemaVersion: 1,
       mirroredModelId: 'mid',
       sourceModelId: 'sid',
       importKind: mirroredModelMocks.ImportKind.Documents,

@@ -102,6 +102,7 @@ export class DocumentsExporter extends BaseExporter {
     return [
       `${this.model.id}.tar.gz`,
       {
+        schemaVersion: 1,
         exporter: this.user.dn,
         sourceModelId: this.model.id,
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
