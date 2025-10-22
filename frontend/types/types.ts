@@ -1,5 +1,5 @@
 import { UiSchema } from '@rjsf/utils'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, JSX, SetStateAction } from 'react'
 
 export interface BailoError extends Error {
   id?: string
@@ -365,9 +365,9 @@ export interface Step {
   section: string
   schemaRef: string
 
-  render: (RenderInterface) => React.JSX.Element | null
-  renderBasic: (RenderInterface) => React.JSX.Element | null
-  renderButtons: (RenderButtonsInterface) => React.JSX.Element | null
+  render: (RenderInterface) => JSX.Element | null
+  renderBasic: (RenderInterface) => JSX.Element | null
+  renderButtons: (RenderButtonsInterface) => JSX.Element | null
 
   shouldValidate: boolean
   isComplete: (step: Step) => boolean
