@@ -119,7 +119,7 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
     const exporter = new TestExporter(mockUser, mockModel)
 
     expect(() => exporter.finalise()).toThrowError(
-      InternalError('Method `finalise` called before `init()`.', { exporterType: 'TestExporter' }),
+      InternalError('Method `TestExporter.finalise` called before `init()`.', { exporterType: 'TestExporter' }),
     )
   })
 
@@ -129,7 +129,9 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
     exporter['tarStream'] = undefined
 
     expect(() => exporter.finalise()).toThrowError(
-      InternalError('Method finalise streams not initialised before use.', { exporterType: 'TestExporter' }),
+      InternalError('Method `TestExporter.finalise` streams not initialised before use.', {
+        exporterType: 'TestExporter',
+      }),
     )
   })
 

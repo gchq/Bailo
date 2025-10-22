@@ -4,7 +4,9 @@ exports[`connectors > mirroredModel > importers > FileImporter > constructor > s
 FileImporter {
   "bucket": "uploads",
   "extractedFile": false,
-  "logData": undefined,
+  "logData": {
+    "importerType": "FileImporter",
+  },
   "metadata": {
     "filePath": "original/file/path",
     "importKind": "file",
@@ -18,7 +20,9 @@ exports[`connectors > mirroredModel > importers > FileImporter > processEntry > 
 FileImporter {
   "bucket": "uploads",
   "extractedFile": true,
-  "logData": undefined,
+  "logData": {
+    "importerType": "FileImporter",
+  },
   "metadata": {
     "filePath": "original/file/path",
     "importKind": "file",
@@ -32,7 +36,9 @@ exports[`connectors > mirroredModel > importers > FileImporter > processEntry > 
 FileImporter {
   "bucket": "uploads",
   "extractedFile": true,
-  "logData": undefined,
+  "logData": {
+    "importerType": "FileImporter",
+  },
   "metadata": {
     "filePath": "original/file/path",
     "importKind": "file",

@@ -1,6 +1,7 @@
 import { PassThrough } from 'node:stream'
 import { json } from 'node:stream/consumers'
 
+import { escapeRegExp } from 'lodash-es'
 import { finished } from 'stream/promises'
 import { Headers } from 'tar-stream'
 
@@ -36,9 +37,11 @@ export class ImageImporter extends BaseImporter {
   protected readonly imageTag: string
   protected manifestBody: unknown = null
 
-  static readonly manifestRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/manifest\.json$`)
+  static readonly manifestRegex = new RegExp(
+    String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/manifest\.json$`,
+  )
   static readonly blobRegex = new RegExp(
-    String.raw`^${config.modelMirror.contentDirectory}/blobs\/sha256\/[0-9a-f]{64}$`,
+    String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/blobs\/sha256\/[0-9a-f]{64}$`,
   )
 
   constructor(user: UserInterface, metadata: ImageMirrorMetadata, logData?: Record<string, unknown>) {
@@ -56,6 +59,8 @@ export class ImageImporter extends BaseImporter {
       throw InternalError('Distribution Package Name must include a tag.', {
         distributionPackageNameObject,
         distributionPackageName: this.metadata.distributionPackageName,
+        metadata: this.metadata,
+        ...this.logData,
       })
     }
     ;({ path: this.imageName, tag: this.imageTag } = distributionPackageNameObject)
@@ -119,11 +124,15 @@ export class ImageImporter extends BaseImporter {
             err,
             name: entry.name,
             size: entry.size,
+            metadata: this.metadata,
             ...this.logData,
           })
         }
       } else {
-        throw InternalError('Cannot parse compressed image: unrecognised contents.', { ...this.logData })
+        throw InternalError('Cannot parse compressed image: unrecognised contents.', {
+          metadata: this.metadata,
+          ...this.logData,
+        })
       }
     } else {
       // skip entry of type: link | symlink | directory | block-device | character-device | fifo | contiguous-file
@@ -159,7 +168,12 @@ export class ImageImporter extends BaseImporter {
         image: { modelId: this.metadata.mirroredModelId, imageName: this.imageName, imageTag: this.imageTag },
       })
     } else {
-      reject(InternalError('Manifest file (manifest.json) missing or invalid in Tarball file.'))
+      reject(
+        InternalError('Manifest file (manifest.json) missing or invalid in Tarball file.', {
+          metadata: this.metadata,
+          ...this.logData,
+        }),
+      )
     }
   }
 }

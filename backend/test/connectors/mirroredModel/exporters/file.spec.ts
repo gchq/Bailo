@@ -191,7 +191,7 @@ describe('connectors > mirroredModel > exporters > FileExporter', () => {
     const exporter = new FileExporter(mockUser, mockModel, mockFile)
 
     expect(() => exporter.addData()).toThrowError(
-      InternalError('Method `addData` called before `init()`.', { exporterType: 'FileExporter' }),
+      InternalError('Method `FileExporter.addData` called before `init()`.', { exporterType: 'FileExporter' }),
     )
   })
 

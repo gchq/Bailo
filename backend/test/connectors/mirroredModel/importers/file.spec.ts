@@ -123,7 +123,10 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    expect(logMocks.debug).toHaveBeenCalledWith({ name: 'dir', type: 'directory' }, 'Skipping non-file entry.')
+    expect(logMocks.debug).toHaveBeenCalledWith(
+      { name: 'dir', type: 'directory', importerType: 'FileImporter' },
+      'Skipping non-file entry.',
+    )
   })
 
   test('finishListener > success calls BaseImporter behaviour', () => {

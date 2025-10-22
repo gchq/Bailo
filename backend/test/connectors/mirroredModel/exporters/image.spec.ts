@@ -164,7 +164,7 @@ describe('connectors > mirroredModel > exporters > ImageExporter', () => {
     const exporter = new ImageExporter(mockUser, mockModel, mockRelease, mockImage, mockLogData)
 
     expect(() => exporter.addData()).toThrowError(
-      InternalError('Method `addData` called before `init()`.', mockLogData),
+      InternalError('Method `ImageExporter.addData` called before `init()`.', mockLogData),
     )
   })
 

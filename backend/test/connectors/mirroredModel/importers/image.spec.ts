@@ -161,7 +161,10 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    expect(logMocks.warn).toHaveBeenCalledWith({ name: 'some-dir', type: 'directory' }, 'Skipping non-file entry.')
+    expect(logMocks.warn).toHaveBeenCalledWith(
+      { name: 'some-dir', type: 'directory', importerType: 'ImageImporter' },
+      'Skipping non-file entry.',
+    )
   })
 
   test('finishListener > success upload manifest successfully when valid', async () => {

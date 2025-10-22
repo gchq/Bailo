@@ -19,7 +19,7 @@ export abstract class BaseImporter {
 
   constructor(metadata: BaseMirrorMetadata, logData?: Record<string, unknown>) {
     this.metadata = metadata
-    this.logData = logData
+    this.logData = { importerType: this.constructor.name, ...logData }
   }
 
   getMetadata() {

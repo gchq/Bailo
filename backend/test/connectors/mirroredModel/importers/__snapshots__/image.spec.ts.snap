@@ -4,7 +4,9 @@ exports[`connectors > mirroredModel > importers > ImageImporter > constructor > 
 ImageImporter {
   "imageName": "imageName",
   "imageTag": "tag",
-  "logData": undefined,
+  "logData": {
+    "importerType": "ImageImporter",
+  },
   "manifestBody": null,
   "metadata": {
     "distributionPackageName": "domain/imageName:tag",
@@ -21,7 +23,9 @@ exports[`connectors > mirroredModel > importers > ImageImporter > processEntry >
 ImageImporter {
   "imageName": "imageName",
   "imageTag": "tag",
-  "logData": undefined,
+  "logData": {
+    "importerType": "ImageImporter",
+  },
   "manifestBody": {
     "manifest": true,
   },

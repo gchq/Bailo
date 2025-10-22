@@ -227,7 +227,9 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
     const exporter = new DocumentsExporter(mockUser, mockModel)
 
     expect(() => exporter.addData()).toThrowError(
-      InternalError('Method `addData` called before `init()`.', { exporterType: 'DocumentsExporter' }),
+      InternalError('Method `DocumentsExporter.addData` called before `init()`.', {
+        exporterType: 'DocumentsExporter',
+      }),
     )
   })
 

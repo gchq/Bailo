@@ -16,10 +16,18 @@ export function requiresInit<M extends (this: BaseExporter, ...args: any[]) => a
 ): M {
   return function (this: BaseExporter, ...args: any[]) {
     if (!this.initialised) {
-      throw InternalError(`Method \`${String(context.name)}\` called before \`init()\`.`, { ...this.logData })
+      throw InternalError(
+        `Method \`${String(this.constructor.name)}.${String(context.name)}\` called before \`init()\`.`,
+        {
+          ...this.logData,
+        },
+      )
     }
     if (!this.tarStream || !this.gzipStream || !this.uploadStream || !this.uploadPromise) {
-      throw InternalError(`Method ${String(context.name)} streams not initialised before use.`, { ...this.logData })
+      throw InternalError(
+        `Method \`${String(this.constructor.name)}.${String(context.name)}\` streams not initialised before use.`,
+        { ...this.logData },
+      )
     }
     return value.apply(this, args)
   } as M

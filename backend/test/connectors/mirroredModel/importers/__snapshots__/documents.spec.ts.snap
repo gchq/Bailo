@@ -6,7 +6,9 @@ DocumentsImporter {
   "fileRegex": /\\^content-dir\\\\/files\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
   "imageIds": [],
   "lazyMirroredModel": null,
-  "logData": undefined,
+  "logData": {
+    "importerType": "DocumentsImporter",
+  },
   "metadata": {
     "exporter": "exporter",
     "importKind": "documents",
@@ -33,7 +35,9 @@ DocumentsImporter {
   "fileRegex": /\\^content-dir\\\\/files\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
   "imageIds": [],
   "lazyMirroredModel": null,
-  "logData": undefined,
+  "logData": {
+    "importerType": "DocumentsImporter",
+  },
   "metadata": {
     "exporter": "exporter",
     "importKind": "documents",
@@ -58,7 +62,9 @@ DocumentsImporter {
   "fileRegex": /\\^content-dir\\\\/files\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
   "imageIds": [],
   "lazyMirroredModel": null,
-  "logData": undefined,
+  "logData": {
+    "importerType": "DocumentsImporter",
+  },
   "metadata": {
     "exporter": "exporter",
     "importKind": "documents",
@@ -93,7 +99,9 @@ DocumentsImporter {
   "lazyMirroredModel": {
     "id": "mirroredModelId",
   },
-  "logData": undefined,
+  "logData": {
+    "importerType": "DocumentsImporter",
+  },
   "metadata": {
     "exporter": "exporter",
     "importKind": "documents",
@@ -124,7 +132,9 @@ DocumentsImporter {
   "fileRegex": /\\^content-dir\\\\/files\\\\/\\(\\.\\*\\)\\\\\\.json\\$/,
   "imageIds": [],
   "lazyMirroredModel": null,
-  "logData": undefined,
+  "logData": {
+    "importerType": "DocumentsImporter",
+  },
   "metadata": {
     "exporter": "exporter",
     "importKind": "documents",

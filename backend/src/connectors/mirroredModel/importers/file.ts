@@ -46,6 +46,7 @@ export class FileImporter extends BaseImporter {
           mirroredModelId: this.metadata.mirroredModelId,
           fileId: this.metadata.filePath,
           entry,
+          metadata: this.metadata,
           ...this.logData,
         })
       } else {

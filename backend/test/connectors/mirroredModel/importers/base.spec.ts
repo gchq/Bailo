@@ -52,6 +52,7 @@ describe('connectors > mirroredModel > importers > BaseImporter', () => {
     expect(rejectedArg).toEqual(
       InternalError('Error processing tarball during import.', {
         error,
+        importerType: 'TestImporter',
         metadata: mockMetadata,
         ...mockLogData,
       }),
