@@ -13,6 +13,8 @@ services:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       start_period: 30s
+    ports:
+      - 27017:27017
 
   minio:
     image: bitnamilegacy/minio:2025.7.23

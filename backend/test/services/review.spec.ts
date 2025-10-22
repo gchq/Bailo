@@ -37,10 +37,6 @@ const reviewModelMock = vi.hoisted(() => {
   const obj: any = { kind: 'access', accessRequestId: 'Hello', role: 'msro' }
 
   obj.aggregate = vi.fn(() => obj)
-  obj.match = vi.fn(() => obj)
-  obj.sort = vi.fn(() => obj)
-  obj.lookup = vi.fn(() => obj)
-  obj.append = vi.fn(() => obj)
   obj.find = vi.fn(() => [obj])
   obj.findOne = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
@@ -48,8 +44,6 @@ const reviewModelMock = vi.hoisted(() => {
   obj.updateOne = vi.fn(() => obj)
   obj.save = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
-  obj.limit = vi.fn(() => obj)
-  obj.unwind = vi.fn(() => obj)
   obj.at = vi.fn(() => obj)
   obj.map = vi.fn(() => [])
   obj.filter = vi.fn(() => [])
@@ -253,8 +247,7 @@ describe('services > review', () => {
   test('findReviews > all reviews for user', async () => {
     await findReviews(user, true, false)
 
-    expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(reviewModelMock.aggregate.mock.calls).toMatchSnapshot()
   })
 
   test('findReviews > all open reviews for user', async () => {
@@ -262,15 +255,13 @@ describe('services > review', () => {
     responseModelMock.find.mockResolvedValueOnce(mockResponses)
     await findReviews(user, true, true)
 
-    expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(reviewModelMock.aggregate.mock.calls).toMatchSnapshot()
   })
 
   test('findReviews > active reviews for a specific model', async () => {
     await findReviews(user, false, false, 'modelId')
 
-    expect(reviewModelMock.match.mock.calls.at(0)).toMatchSnapshot()
-    expect(reviewModelMock.match.mock.calls.at(1)).toMatchSnapshot()
+    expect(reviewModelMock.aggregate.mock.calls).toMatchSnapshot()
   })
 
   test('findReviewsForAccessRequests > success', async () => {

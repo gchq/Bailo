@@ -23,3 +23,14 @@ export const SchemaMigrationKind = {
   Delete: 'delete',
 } as const
 export type SchemaMigrationKindKeys = (typeof SchemaMigrationKind)[keyof typeof SchemaMigrationKind]
+
+export const HttpHeader = {
+  CONTENT_TYPE: 'Content-Type',
+  CONTENT_DISPOSITION: 'Content-Disposition',
+  CONTENT_LENGTH: 'Content-Length',
+  CACHE_CONTROL: 'Cache-Control',
+  ETAG: 'ETag',
+  ACCEPT_RANGES: 'Accept-Ranges',
+  CONTENT_RANGE: 'Content-Range',
+  IF_NONE_MATCH: 'If-None-Match',
+}
