@@ -48,8 +48,16 @@ export function ContentTooLarge(message: string, context?: BailoError['context']
   return GenericError(413, message, context, logger)
 }
 
+export function UnsatisfiableRange(message: string, context?: BailoError['context'], logger?: Logger) {
+  return GenericError(416, message, context, logger)
+}
+
 export function InternalError(message: string, context?: BailoError['context'], logger?: Logger) {
   return GenericError(500, message, context, logger)
+}
+
+export function NotImplemented(message: string, context?: BailoError['context'], logger?: Logger) {
+  return GenericError(501, message, context, logger)
 }
 
 export function ConfigurationError(message: string, context?: BailoError['context'], logger?: Logger) {
