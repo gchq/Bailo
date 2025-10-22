@@ -134,7 +134,7 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
     expect(tarballMocks.finaliseTarGzUpload).toHaveBeenCalledWith(exporter['tarStream'], exporter['uploadPromise'])
   })
 
-  test('withStreamCleanupClass > cleans up on error', async () => {
+  test('withStreamCleanupClass > cleans up on error', () => {
     class ErrorExporter extends BaseExporter {
       addData() {
         throw new Error('fail')
@@ -149,7 +149,8 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
     exporter['gzipStream'] = zlib.createGzip()
     exporter['uploadStream'] = new PassThrough()
 
-    await expect(exporter.addData.bind(exporter)()).rejects.toThrow('fail')
+    expect(() => exporter.addData()).toThrow('fail')
+
     // @ts-expect-error mocking streams
     expect(exporter['tarStream'].destroyed).toBe(true)
     expect(exporter['gzipStream'].destroyed).toBe(true)

@@ -50,9 +50,18 @@ function withStreamCleanupClass<T extends AbstractConstructor<BaseExporter>>(Bas
 
       for (const name of methodNames) {
         const original = (this as any)[name]
-        ;(this as any)[name] = async (...mArgs: any[]) => {
+        ;(this as any)[name] = (...mArgs: any[]) => {
           try {
-            return await original.apply(this, mArgs)
+            const result = original.apply(this, mArgs)
+            // if result is a Promise, attach cleanup to catch
+            if (result && typeof result.then === 'function') {
+              return result.catch((err: unknown) => {
+                this.cleanupStreams()
+                throw err
+              })
+            }
+            // otherwise synchronous execution, just return the value
+            return result
           } catch (err) {
             this.cleanupStreams()
             throw err

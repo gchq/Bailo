@@ -1,0 +1,44 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`connectors > mirroredModel > exporters > FileExporter > constructor > sets file and logData 1`] = `
+FileExporter {
+  "_init": [Function],
+  "addData": [Function],
+  "file": {
+    "avScan": [
+      {
+        "isInfected": false,
+        "state": "complete",
+      },
+    ],
+    "id": "fileId",
+    "name": "test.txt",
+    "size": 500,
+  },
+  "getFile": [Function],
+  "getInitialiseTarGzUploadParams": [Function],
+  "gzipStream": undefined,
+  "initialised": false,
+  "logData": {
+    "exporterType": "FileExporter",
+    "extra": "info",
+  },
+  "model": {
+    "card": {
+      "schemaId": "schemaId",
+    },
+    "id": "modelId",
+    "settings": {
+      "mirror": {
+        "destinationModelId": "destModelId",
+      },
+    },
+  },
+  "tarStream": undefined,
+  "uploadPromise": undefined,
+  "uploadStream": undefined,
+  "user": {
+    "dn": "userDN",
+  },
+}
+`;
