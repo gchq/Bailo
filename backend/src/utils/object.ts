@@ -14,11 +14,12 @@ export function deepFreeze(object) {
   return Object.freeze(object)
 }
 
-export function getPropValue(sourceObject: any, dotNotationPath: string) {
-  let returnData = sourceObject
-
-  dotNotationPath.split('.').forEach((subPath) => {
-    returnData = returnData[subPath] || undefined
-  })
-  return returnData
+export function getPropValue<T = unknown>(source: unknown, path: string): T | undefined {
+  const trimmedPath = path.trim()
+  if (!trimmedPath) {
+    return source as T
+  }
+  return trimmedPath.split('.').reduce<any>((acc, key) => {
+    return acc != null ? acc[key] : undefined
+  }, source)
 }

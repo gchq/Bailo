@@ -20,7 +20,7 @@ type MigrationListDialogProps = {
 }
 
 export default function MigrationListDialog({ open, migrations, onCancel, entry }: MigrationListDialogProps) {
-  const [selectedMigrationPlan, setSelectMigrationPlan] = useState<string | undefined>()
+  const [selectedMigrationPlan, setSelectMigrationPlan] = useState<SchemaMigrationInterface['id'] | undefined>()
   const [errorText, setErrorText] = useState('')
 
   const { mutateModel } = useGetModel(entry.id, entry.kind)

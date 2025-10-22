@@ -52,7 +52,7 @@ export const toKebabCase = (value: string): string => {
 
 export const truncateText = (text: string | undefined, limit: number = 100) => {
   if (!text) {
-    return
+    return ''
   }
   if (text.length <= limit) {
     return text
