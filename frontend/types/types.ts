@@ -1,5 +1,5 @@
 import { UiSchema } from '@rjsf/utils'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, JSX, SetStateAction } from 'react'
 
 export interface BailoError extends Error {
   id?: string
