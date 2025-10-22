@@ -113,7 +113,7 @@ export class BasicAuthorisationConnector {
           return tokenAuth
         }
 
-        // Prohibit non-collaborators from seeing private models
+        // Prohibit non-collaborators from interacting with private models
         if (ModelAction.Import !== action && !(await this.hasModelVisibilityAccess(user, model))) {
           return {
             id: model.id,

@@ -1,5 +1,6 @@
-import { Container } from '@mui/material'
+import { Box, Container, Stack } from '@mui/material'
 import { useMemo } from 'react'
+import OrganisationAndStateDetails from 'src/entry/model/OrganisationStateCollaboratorsDetails'
 import FormEditPage from 'src/entry/overview/FormEditPage'
 import TemplatePage from 'src/entry/overview/TemplatePage'
 import MessageAlert from 'src/MessageAlert'
@@ -31,12 +32,24 @@ export default function Overview({ entry, readOnly = false }: OverviewProps) {
       />
     </>
   ) : (
-    <Container sx={{ my: 2 }}>
-      {entry.kind === EntryKind.MIRRORED_MODEL && (
-        <MessageAlert message={`Mirrored from ${entry.settings.mirror?.sourceModelId} (read-only)`} severity='info' />
-      )}
-      {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
-      {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} />}
-    </Container>
+    <Box sx={{ my: 2 }}>
+      <Stack spacing={4} direction={{ sm: 'column', md: 'row' }} sx={{ width: '100%' }}>
+        <Box sx={{ p: 2 }}>
+          <OrganisationAndStateDetails entry={entry} />
+        </Box>
+        <Box width='100%'>
+          <Container sx={{ py: 2, m: 'auto' }} maxWidth='xl'>
+            {entry.kind === EntryKind.MIRRORED_MODEL && (
+              <MessageAlert
+                message={`Mirrored from ${entry.settings.mirror?.sourceModelId} (read-only)`}
+                severity='info'
+              />
+            )}
+            {page === OverviewPage.TEMPLATE && <TemplatePage entry={entry} />}
+            {page === OverviewPage.FORM && <FormEditPage entry={entry} readOnly={readOnly} />}
+          </Container>
+        </Box>
+      </Stack>
+    </Box>
   )
 }

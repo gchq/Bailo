@@ -28,6 +28,7 @@ import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import SourceModelInput from 'src/entry/SourceModelInput'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import MessageAlert from 'src/MessageAlert'
+import TagSelector from 'src/MuiForms/TagSelector'
 import {
   CollaboratorEntry,
   EntityKind,
@@ -63,6 +64,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [allowTemplating, setAllowTemplating] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [tags, setTags] = useState<string[]>([])
 
   const isFormValid = useMemo(
     () => name && description && (sourceModelId || createEntryKind !== EntryKind.MIRRORED_MODEL),
@@ -92,6 +94,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
       organisation,
       visibility,
       collaborators,
+      tags,
       settings: {
         ungovernedAccess,
         allowTemplating,
@@ -246,49 +249,65 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Typography variant='h6' component='h2'>
-                  Manage access list
-                </Typography>
-                <Typography variant='caption'>
-                  Please note that only entry roles can be added at this stage, and review roles should be added once a
-                  schema has been selected.
-                </Typography>
-                <Box sx={{ marginTop: 1 }}>
-                  {isModelRolesLoading ? (
-                    <Loading />
-                  ) : (
-                    <EntryAccessInput
-                      value={collaborators}
-                      onChange={handleCollaboratorsChange}
-                      entryKind={createEntryKind}
-                      entryRoles={modelRoles}
+                <Stack spacing={2} divider={<Divider flexItem />}>
+                  <Box>
+                    <Typography variant='h6' component='h2'>
+                      Manage access list
+                    </Typography>
+                    <Typography variant='caption'>
+                      Please note that only entry roles can be added at this stage, and review roles should be added
+                      once a schema has been selected.
+                    </Typography>
+                    <Box sx={{ my: 1 }}>
+                      {isModelRolesLoading ? (
+                        <Loading />
+                      ) : (
+                        <EntryAccessInput
+                          value={collaborators}
+                          onChange={handleCollaboratorsChange}
+                          entryKind={createEntryKind}
+                          entryRoles={modelRoles}
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                  <Stack spacing={2}>
+                    <Typography variant='h6' component='h2'>
+                      Tags
+                    </Typography>
+                    <TagSelector
+                      onChange={(newTags) => setTags(newTags)}
+                      value={tags}
+                      label=''
+                      id='entry-tag-selector'
+                      formContext={{ editMode: true }}
                     />
-                  )}
-                </Box>
-                <Stack spacing={2}>
-                  <Typography variant='h6' component='h2'>
-                    Additional settings
-                  </Typography>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        onChange={(e) => setUngovernedAccess(e.target.checked)}
-                        checked={ungovernedAccess}
-                        size='small'
-                      />
-                    }
-                    label={ungovernedAccessLabel}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        onChange={(event) => setAllowTemplating(event.target.checked)}
-                        checked={allowTemplating}
-                        size='small'
-                      />
-                    }
-                    label={allowTemplatingLabel}
-                  />
+                  </Stack>
+                  <Stack spacing={2}>
+                    <Typography variant='h6' component='h2'>
+                      Additional settings
+                    </Typography>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          onChange={(e) => setUngovernedAccess(e.target.checked)}
+                          checked={ungovernedAccess}
+                          size='small'
+                        />
+                      }
+                      label={ungovernedAccessLabel}
+                    />
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          onChange={(event) => setAllowTemplating(event.target.checked)}
+                          checked={allowTemplating}
+                          size='small'
+                        />
+                      }
+                      label={allowTemplatingLabel}
+                    />
+                  </Stack>
                 </Stack>
               </AccordionDetails>
             </Accordion>

@@ -11,7 +11,6 @@ import AccessRequests from 'src/entry/model/AccessRequests'
 import InferenceServices from 'src/entry/model/InferenceServices'
 import ModelFileManagement from 'src/entry/model/ModelFileManagement'
 import ModelImages from 'src/entry/model/ModelImages'
-import OrganisationAndStateDetails from 'src/entry/model/OrganisationStateCollaboratorsDetails'
 import Releases from 'src/entry/model/Releases'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
@@ -118,7 +117,6 @@ export default function Model() {
           requiredUrlParams={{ modelId: model.id }}
           titleToCopy={model.name}
           subheadingToCopy={model.id}
-          additionalHeaderDisplay={<OrganisationAndStateDetails entry={model} />}
         />
       )}
     </>

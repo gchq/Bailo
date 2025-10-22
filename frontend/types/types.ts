@@ -1,5 +1,5 @@
 import { UiSchema } from '@rjsf/utils'
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, JSX, SetStateAction } from 'react'
 
 export interface BailoError extends Error {
   id?: string
@@ -446,6 +446,7 @@ export interface EntryInterface {
   description: string
   state?: string
   organisation?: string
+  tags: string[]
   settings: {
     ungovernedAccess?: boolean
     allowTemplating?: boolean
@@ -467,6 +468,7 @@ export interface EntryForm {
   description: string
   state?: string
   organisation?: string
+  tags?: string[]
   visibility: EntryVisibilityKeys
   collaborators?: CollaboratorEntry[]
   settings?: {

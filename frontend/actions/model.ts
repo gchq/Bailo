@@ -177,7 +177,7 @@ export async function patchModel(
   delta: Partial<
     Pick<
       EntryInterface,
-      'name' | 'description' | 'collaborators' | 'visibility' | 'settings' | 'organisation' | 'state'
+      'name' | 'description' | 'collaborators' | 'visibility' | 'settings' | 'organisation' | 'state' | 'tags'
     >
   >,
 ) {
