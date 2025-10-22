@@ -5,6 +5,7 @@ import { addCompressedRegistryImageComponents } from '../services/mirroredModel/
 import { finaliseTarGzUpload, initialiseTarGzUpload } from '../services/mirroredModel/tarball.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
+import { shortId } from '../utils/id.js'
 
 async function script() {
   // process args
@@ -25,17 +26,22 @@ async function script() {
   await connectToMongoose()
   ensureBucketExists(config.modelMirror.export.bucket)
   const user = { dn: 'user' }
+  const logData = { exportId: `manual-${shortId()}` }
 
   // main functionality
-  const { tarStream, uploadPromise } = await initialiseTarGzUpload(outputFilename, {
-    schemaVersion: 1,
-    exporter: 'user',
-    sourceModelId,
-    mirroredModelId: destinationModelId,
-    importKind: MirrorKind.Image,
-    distributionPackageName: imageDistributionPackageName.replace(sourceModelId, destinationModelId),
-  })
-  await addCompressedRegistryImageComponents(user, sourceModelId, imageDistributionPackageName, tarStream)
+  const { tarStream, uploadPromise } = await initialiseTarGzUpload(
+    outputFilename,
+    {
+      schemaVersion: 1,
+      exporter: 'user',
+      sourceModelId,
+      mirroredModelId: destinationModelId,
+      importKind: MirrorKind.Image,
+      distributionPackageName: imageDistributionPackageName.replace(sourceModelId, destinationModelId),
+    },
+    logData,
+  )
+  await addCompressedRegistryImageComponents(user, sourceModelId, imageDistributionPackageName, tarStream, logData)
   await finaliseTarGzUpload(tarStream, uploadPromise)
 
   // cleanup

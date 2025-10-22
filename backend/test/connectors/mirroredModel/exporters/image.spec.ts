@@ -37,7 +37,7 @@ const mockModel = {
 } as any
 const mockImage = { _id: { toString: () => 'imageId' }, name: 'modelId/image', tag: 'latest' } as any
 const mockRelease = { semver: '1.0.0', images: [mockImage] } as any
-const mockLogData = { exporterType: 'ImageExporter' }
+const mockLogData = { exporterType: 'ImageExporter', exportId: 'exportId' }
 
 describe('connectors > mirroredModel > exporters > ImageExporter', () => {
   beforeEach(() => {
@@ -63,7 +63,7 @@ describe('connectors > mirroredModel > exporters > ImageExporter', () => {
   })
 
   test('_init > success sets distributionPackageName', async () => {
-    const exporter = new ImageExporter(mockUser, mockModel, mockRelease, mockImage)
+    const exporter = new ImageExporter(mockUser, mockModel, mockRelease, mockImage, mockLogData)
 
     // @ts-expect-error protected method
     await exporter._init()
@@ -83,7 +83,7 @@ describe('connectors > mirroredModel > exporters > ImageExporter', () => {
         userDn: mockUser.dn,
         modelId: mockModel.id,
         semver: mockRelease.semver,
-        exporterType: 'ImageExporter',
+        ...mockLogData,
       }),
     )
   })
@@ -99,7 +99,7 @@ describe('connectors > mirroredModel > exporters > ImageExporter', () => {
         modelId: mockModel.id,
         semver: mockRelease.semver,
         imageId: mockImage._id.toString(),
-        exporterType: 'ImageExporter',
+        ...mockLogData,
       }),
     )
   })
@@ -115,7 +115,7 @@ describe('connectors > mirroredModel > exporters > ImageExporter', () => {
         modelId: mockModel.id,
         semver: mockRelease.semver,
         imageId: mockImage._id.toString(),
-        exporterType: 'ImageExporter',
+        ...mockLogData,
       }),
     )
   })

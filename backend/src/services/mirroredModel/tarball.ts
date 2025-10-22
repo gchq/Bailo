@@ -18,6 +18,7 @@ import { Forbidden, InternalError } from '../../utils/error.js'
 import log from '../log.js'
 import { validateMirroredModel } from '../model.js'
 import { mirrorMetadataSchema } from '../specification.js'
+import { MirrorLogData } from './mirroredModel.js'
 import { uploadToS3 } from './s3.js'
 
 function createTarGzStreams() {
@@ -26,11 +27,7 @@ function createTarGzStreams() {
   return { gzipStream, tarStream }
 }
 
-export async function initialiseTarGzUpload(
-  fileName: string,
-  metadata: MirrorMetadata,
-  logData?: Record<string, unknown>,
-) {
+export async function initialiseTarGzUpload(fileName: string, metadata: MirrorMetadata, logData: MirrorLogData) {
   const { gzipStream, tarStream } = createTarGzStreams()
   // It is safer to have an extra PassThrough for handling backpressure and explicitly closing on error(s)
   const uploadStream = new PassThrough()
@@ -41,7 +38,7 @@ export async function initialiseTarGzUpload(
   try {
     const metadataBuffer = Buffer.from(JSON.stringify(metadata), 'utf8')
     log.debug(
-      { metadata, name: config.modelMirror.metadataFile, size: metadataBuffer.length },
+      { metadata, name: config.modelMirror.metadataFile, size: metadataBuffer.length, ...logData },
       'Creating metadata entry.',
     )
 
@@ -67,9 +64,9 @@ export async function finaliseTarGzUpload(tarStream: Pack, uploadPromise: Promis
 type TarEntry =
   | { type: 'text'; filename: string; content: string }
   | { type: 'stream'; filename: string; stream: Readable; size?: number }
-export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, logData?: Record<string, unknown>) {
+export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, logData: MirrorLogData) {
   const entryName = `${config.modelMirror.contentDirectory}/${entry.filename}`
-  log.debug({ entryName, entry }, 'Adding entry to tarball.')
+  log.debug({ entryName, entry, ...logData }, 'Adding entry to tarball.')
 
   if (entry.type === 'text') {
     const contentBuffer = Buffer.from(entry.content, 'utf8')
@@ -104,7 +101,7 @@ export function createUnTarGzStreams() {
 export async function extractTarGzStream(
   tarGzStream: Readable,
   user: UserInterface,
-  logData?: Record<string, unknown>,
+  logData: MirrorLogData,
 ): Promise<MirrorInformation> {
   return new Promise((resolve, reject) => {
     let metadata: MirrorMetadata

@@ -5,6 +5,7 @@ import { Pack } from 'tar-stream'
 
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
+import { MirrorLogData } from '../../../services/mirroredModel/mirroredModel.js'
 import { finaliseTarGzUpload, initialiseTarGzUpload } from '../../../services/mirroredModel/tarball.js'
 import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
 import { ModelAction } from '../../authorisation/actions.js'
@@ -90,7 +91,7 @@ export abstract class BaseExporter {
     | Promise<Parameters<typeof initialiseTarGzUpload>>
     | Parameters<typeof initialiseTarGzUpload>
 
-  protected readonly logData?: Record<string, unknown>
+  protected readonly logData: MirrorLogData
 
   protected readonly user: UserInterface
   protected readonly model: ModelDoc
@@ -101,7 +102,7 @@ export abstract class BaseExporter {
   protected uploadPromise: Promise<void> | undefined
   protected initialised: boolean = false
 
-  constructor(user: UserInterface, model: ModelDoc, logData?: Record<string, unknown>) {
+  constructor(user: UserInterface, model: ModelDoc, logData: MirrorLogData) {
     this.user = user
     this.model = model
     this.logData = { exporterType: this.constructor.name, ...logData }

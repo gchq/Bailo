@@ -4,6 +4,7 @@ import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
 import { downloadFile } from '../../../services/file.js'
+import { MirrorLogData } from '../../../services/mirroredModel/mirroredModel.js'
 import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../../../services/mirroredModel/tarball.js'
 import config from '../../../utils/config.js'
 import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
@@ -17,12 +18,7 @@ import { BaseExporter, requiresInit } from './base.js'
 export class FileExporter extends BaseExporter {
   protected readonly file: FileWithScanResultsInterface
 
-  constructor(
-    user: UserInterface,
-    model: ModelDoc,
-    file: FileWithScanResultsInterface,
-    logData?: Record<string, unknown>,
-  ) {
+  constructor(user: UserInterface, model: ModelDoc, file: FileWithScanResultsInterface, logData: MirrorLogData) {
     super(user, model, logData)
     this.file = file
   }

@@ -60,6 +60,7 @@ const mockMetadata: DocumentsMirrorMetadata = {
   sourceModelId: 'sourceModelId',
   exporter: 'exporter',
 } as DocumentsMirrorMetadata
+const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
   beforeEach(() => {
@@ -67,13 +68,13 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
   })
 
   test('constructor > success', () => {
-    const importer = new DocumentsImporter(mockUser, mockMetadata)
+    const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
     expect(importer).toMatchSnapshot()
   })
 
   test('constructor > error importKind not Documents', () => {
     const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
-    expect(() => new DocumentsImporter(mockUser, badMetadata)).toThrowError(
+    expect(() => new DocumentsImporter(mockUser, badMetadata, mockLogData)).toThrowError(
       /^Cannot parse compressed Documents: incorrect metadata specified./,
     )
   })
@@ -82,7 +83,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     entityParsersMocks.parseModelCard.mockReturnValue({ version: 1 })
     modelMocks.saveImportedModelCard.mockResolvedValue({ saved: true })
 
-    const importer = new DocumentsImporter(mockUser, mockMetadata)
+    const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
     const entry: Headers = { name: 'content-dir/1.json', type: 'file' } as Headers
     const stream = new PassThrough()
     stream.end(JSON.stringify({ some: 'data' }))
@@ -103,7 +104,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     releaseMocks.saveImportedRelease.mockResolvedValue({ saved: true })
     authMocks.default.releases.mockResolvedValue([{ success: true }])
 
-    const importer = new DocumentsImporter(mockUser, mockMetadata)
+    const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
     const entry: Headers = {
       name: 'content-dir/releases/release1.json',
       type: 'file',
@@ -123,7 +124,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     modelMocks.getModelById.mockResolvedValue({})
     authMocks.default.releases.mockResolvedValue([{ success: false }])
 
-    const importer = new DocumentsImporter(mockUser, mockMetadata)
+    const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
     const entry: Headers = {
       name: 'content-dir/releases/releaseFail.json',
       type: 'file',
@@ -140,7 +141,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
     entityParsersMocks.parseFile.mockResolvedValue({ _id: 'file-id' })
     fileMocks.saveImportedFile.mockResolvedValue(true)
 
-    const importer = new DocumentsImporter(mockUser, mockMetadata)
+    const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
     const entry: Headers = {
       name: 'content-dir/files/file1.json',
       type: 'file',
@@ -156,7 +157,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
   })
 
   test('processEntry > error unknown file path', async () => {
-    const importer = new DocumentsImporter(mockUser, mockMetadata)
+    const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
     const entry: Headers = {
       name: 'content-dir/unknown/file.json',
       type: 'file',
@@ -170,7 +171,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
   })
 
   test('processEntry > success skip non-file entry', async () => {
-    const importer = new DocumentsImporter(mockUser, mockMetadata)
+    const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
     const entry: Headers = { name: 'dir', type: 'directory' } as Headers
     const stream = new PassThrough()
 
@@ -179,7 +180,7 @@ describe('connectors > mirroredModel > importers > DocumentsImporter', () => {
   })
 
   test('finishListener > success', async () => {
-    const importer = new DocumentsImporter(mockUser, mockMetadata)
+    const importer = new DocumentsImporter(mockUser, mockMetadata, mockLogData)
     // @ts-expect-error accessing protected property
     importer.modelCardVersions.push(1)
     // @ts-expect-error accessing protected property

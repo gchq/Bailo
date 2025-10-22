@@ -50,6 +50,7 @@ const mockMetadata: FileMirrorMetadata = {
   mirroredModelId: 'model123',
   filePath: 'original/file/path',
 } as FileMirrorMetadata
+const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > FileImporter', () => {
   beforeEach(() => {
@@ -57,7 +58,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   })
 
   test('constructor > success', () => {
-    const importer = new FileImporter(mockMetadata)
+    const importer = new FileImporter(mockMetadata, mockLogData)
 
     expect(importer).toMatchSnapshot()
   })
@@ -65,7 +66,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   test('constructor > error importKind not File', () => {
     const badMetadata = { ...mockMetadata, importKind: 'OtherKind' } as any
 
-    expect(() => new FileImporter(badMetadata)).toThrowError(
+    expect(() => new FileImporter(badMetadata, mockLogData)).toThrowError(
       /^Cannot parse compressed File: incorrect metadata specified./,
     )
   })
@@ -73,7 +74,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   test('processEntry > success upload new file to S3', async () => {
     fileModelMocks.findOne.mockResolvedValue(null)
 
-    const importer = new FileImporter(mockMetadata)
+    const importer = new FileImporter(mockMetadata, mockLogData)
     const entry: Headers = { name: 'file1', type: 'file' } as Headers
     const stream = new PassThrough()
     stream.end('file-contents')
@@ -87,7 +88,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
   test('processEntry > success skip already existing file', async () => {
     fileModelMocks.findOne.mockResolvedValue({ id: 'existingId' })
-    const importer = new FileImporter(mockMetadata)
+    const importer = new FileImporter(mockMetadata, mockLogData)
     const entry: Headers = { name: 'file1', type: 'file' } as Headers
     const stream = new PassThrough()
     stream.end('file-contents')
@@ -102,7 +103,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
   test('processEntry > error on multiple files', async () => {
     fileModelMocks.findOne.mockResolvedValue(null)
-    const importer = new FileImporter(mockMetadata)
+    const importer = new FileImporter(mockMetadata, mockLogData)
     const entry: Headers = { name: 'file1', type: 'file' } as Headers
     const stream = new PassThrough()
     stream.end('file-contents')
@@ -117,20 +118,20 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
   })
 
   test('processEntry > success skip non-file entries', async () => {
-    const importer = new FileImporter(mockMetadata)
+    const importer = new FileImporter(mockMetadata, mockLogData)
     const entry: Headers = { name: 'dir', type: 'directory' } as Headers
     const stream = new PassThrough()
 
     await importer.processEntry(entry, stream)
 
     expect(logMocks.debug).toHaveBeenCalledWith(
-      { name: 'dir', type: 'directory', importerType: 'FileImporter' },
+      { name: 'dir', type: 'directory', importerType: 'FileImporter', ...mockLogData },
       'Skipping non-file entry.',
     )
   })
 
   test('finishListener > success calls BaseImporter behaviour', () => {
-    const importer = new FileImporter(mockMetadata)
+    const importer = new FileImporter(mockMetadata, mockLogData)
     const resolve = vi.fn()
     const reject = vi.fn()
 

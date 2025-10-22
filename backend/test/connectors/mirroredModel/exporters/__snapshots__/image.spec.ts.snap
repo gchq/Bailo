@@ -19,6 +19,7 @@ ImageExporter {
   },
   "initialised": false,
   "logData": {
+    "exportId": "exportId",
     "exporterType": "ImageExporter",
   },
   "model": {

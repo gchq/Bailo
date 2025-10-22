@@ -6,10 +6,6 @@ exports[`services > mirroredModel > s3 > uploadToS3 > handle getObjectFromTempor
     [
       {
         "error": [Bailo Error: Failed to retrieve stream from temporary S3 location.],
-        "exporter": "",
-        "importKind": "documents",
-        "mirroredModelId": "",
-        "sourceModelId": "",
       },
       "Failed to upload export to export location with signatures.",
     ],

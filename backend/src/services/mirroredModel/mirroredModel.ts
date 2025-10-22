@@ -24,6 +24,8 @@ import { getImageBlob, getImageManifest, splitDistributionPackageName } from '..
 import { getReleasesForExport } from '../release.js'
 import { addEntryToTarGzUpload, extractTarGzStream } from './tarball.js'
 
+export type MirrorLogData = Record<string, unknown> & ({ exportId: string } | { importId: string })
+
 export async function exportModel(
   user: UserInterface,
   modelId: string,
@@ -142,7 +144,7 @@ export async function addCompressedRegistryImageComponents(
   modelId: string,
   distributionPackageName: string,
   tarStream: Pack,
-  logData?: Record<string, unknown>,
+  logData: MirrorLogData,
 ) {
   const distributionPackageNameObject = splitDistributionPackageName(distributionPackageName)
   if (!('tag' in distributionPackageNameObject)) {
@@ -219,7 +221,7 @@ export async function uploadReleaseFiles(
   model: ModelDoc,
   release: ReleaseDoc,
   files,
-  logData?: Record<string, unknown>,
+  logData: MirrorLogData,
 ) {
   for (const file of files) {
     // Not `await`ed for fire-and-forget approach
@@ -252,7 +254,7 @@ export async function uploadReleaseImages(
   model: ModelDoc,
   release: ReleaseDoc,
   images: ReleaseDoc['images'],
-  logData?: Record<string, unknown>,
+  logData: MirrorLogData,
 ) {
   for (const image of images) {
     exportQueue

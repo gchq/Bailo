@@ -7,6 +7,7 @@ import { Headers } from 'tar-stream'
 
 import { UserInterface } from '../../../models/User.js'
 import log from '../../../services/log.js'
+import { MirrorLogData } from '../../../services/mirroredModel/mirroredModel.js'
 import {
   doesImageLayerExist,
   initialiseImageUpload,
@@ -44,7 +45,7 @@ export class ImageImporter extends BaseImporter {
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/blobs\/sha256\/[0-9a-f]{64}$`,
   )
 
-  constructor(user: UserInterface, metadata: ImageMirrorMetadata, logData?: Record<string, unknown>) {
+  constructor(user: UserInterface, metadata: ImageMirrorMetadata, logData: MirrorLogData) {
     super(metadata, logData)
     if (this.metadata.importKind !== MirrorKind.Image) {
       throw InternalError('Cannot parse compressed Image: incorrect metadata specified.', {
@@ -140,11 +141,7 @@ export class ImageImporter extends BaseImporter {
     }
   }
 
-  async finishListener(
-    resolve: (reason?: ImageMirrorInformation) => void,
-    reject: (reason?: unknown) => void,
-    _logData?: Record<string, unknown>,
-  ) {
+  async finishListener(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
     log.debug({ ...this.logData }, 'Uploading manifest.')
     if (hasKeysOfType<{ mediaType: 'string' }>(this.manifestBody, { mediaType: 'string' })) {
       await putImageManifest(

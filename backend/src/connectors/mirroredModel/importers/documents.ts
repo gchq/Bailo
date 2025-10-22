@@ -11,6 +11,7 @@ import { UserInterface } from '../../../models/User.js'
 import { saveImportedFile } from '../../../services/file.js'
 import log from '../../../services/log.js'
 import { parseFile, parseModelCard, parseRelease } from '../../../services/mirroredModel/entityParsers.js'
+import { MirrorLogData } from '../../../services/mirroredModel/mirroredModel.js'
 import { getModelById, saveImportedModelCard, setLatestImportedModelCard } from '../../../services/model.js'
 import { DistributionPackageName, joinDistributionPackageName } from '../../../services/registry.js'
 import { saveImportedRelease } from '../../../services/release.js'
@@ -49,7 +50,7 @@ export class DocumentsImporter extends BaseImporter {
   protected releaseRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/releases\/(.*)\.json$`)
   protected fileRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/files\/(.*)\.json$`)
 
-  constructor(user: UserInterface, metadata: DocumentsMirrorMetadata, logData?: Record<string, unknown>) {
+  constructor(user: UserInterface, metadata: DocumentsMirrorMetadata, logData: MirrorLogData) {
     super(metadata, logData)
     if (this.metadata.importKind !== MirrorKind.Documents) {
       throw InternalError('Cannot parse compressed Documents: incorrect metadata specified.', {
@@ -151,7 +152,6 @@ export class DocumentsImporter extends BaseImporter {
   async finishListener(
     resolve: (reason?: MongoDocumentMirrorInformation) => void,
     _reject: (reason?: unknown) => void,
-    _logData?: Record<string, unknown>,
   ) {
     log.debug({ metadata: this.metadata, ...this.logData }, 'Completed extracting archive.')
 

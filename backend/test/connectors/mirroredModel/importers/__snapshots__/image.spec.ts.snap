@@ -5,6 +5,8 @@ ImageImporter {
   "imageName": "imageName",
   "imageTag": "tag",
   "logData": {
+    "extra": "info",
+    "importId": "importId",
     "importerType": "ImageImporter",
   },
   "manifestBody": null,
@@ -24,6 +26,8 @@ ImageImporter {
   "imageName": "imageName",
   "imageTag": "tag",
   "logData": {
+    "extra": "info",
+    "importId": "importId",
     "importerType": "ImageImporter",
   },
   "manifestBody": {

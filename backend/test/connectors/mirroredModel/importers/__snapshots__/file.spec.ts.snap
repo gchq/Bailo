@@ -5,6 +5,8 @@ FileImporter {
   "bucket": "uploads",
   "extractedFile": false,
   "logData": {
+    "extra": "info",
+    "importId": "importId",
     "importerType": "FileImporter",
   },
   "metadata": {
@@ -21,6 +23,8 @@ FileImporter {
   "bucket": "uploads",
   "extractedFile": true,
   "logData": {
+    "extra": "info",
+    "importId": "importId",
     "importerType": "FileImporter",
   },
   "metadata": {
@@ -37,6 +41,8 @@ FileImporter {
   "bucket": "uploads",
   "extractedFile": true,
   "logData": {
+    "extra": "info",
+    "importId": "importId",
     "importerType": "FileImporter",
   },
   "metadata": {

@@ -4,6 +4,7 @@ exports[`connectors > mirroredModel > importers > BaseImporter > constructor > s
 TestImporter {
   "logData": {
     "extra": "info",
+    "importId": "importId",
     "importerType": "TestImporter",
   },
   "metadata": {

@@ -244,9 +244,9 @@ describe('services > mirroredModel', () => {
   describe('addCompressedRegistryImageComponents', () => {
     test('no tag throws', async () => {
       registryMocks.splitDistributionPackageName.mockReturnValueOnce({ path: 'img' } as any)
-      await expect(addCompressedRegistryImageComponents({} as any, 'modelId', 'name', {} as any)).rejects.toThrow(
-        /must include a tag/,
-      )
+      await expect(
+        addCompressedRegistryImageComponents({} as any, 'modelId', 'name', {} as any, {} as any),
+      ).rejects.toThrow(/must include a tag/)
     })
 
     test('export compressed image layers', async () => {
@@ -256,7 +256,7 @@ describe('services > mirroredModel', () => {
         mediaType: 'manifest',
       })
       registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['x']), abort: vi.fn() })
-      await addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any)
+      await addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any)
       expect(tarballMocks.addEntryToTarGzUpload).toHaveBeenCalled()
     })
 
@@ -266,9 +266,9 @@ describe('services > mirroredModel', () => {
         layers: [],
         mediaType: 'm',
       })
-      await expect(addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any)).rejects.toThrow(
-        /Could not extract layer digest/,
-      )
+      await expect(
+        addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any),
+      ).rejects.toThrow(/Could not extract layer digest/)
     })
 
     test('addEntry error aborts', async () => {
@@ -280,9 +280,9 @@ describe('services > mirroredModel', () => {
       })
       registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['']), abort: abortMock })
       tarballMocks.addEntryToTarGzUpload.mockResolvedValueOnce({}).mockRejectedValueOnce('err')
-      await expect(addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any)).rejects.toThrow(
-        'err',
-      )
+      await expect(
+        addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any),
+      ).rejects.toThrow('err')
       expect(abortMock).toHaveBeenCalled()
     })
   })
@@ -291,7 +291,7 @@ describe('services > mirroredModel', () => {
     test('calls FileExporter', async () => {
       const model = { id: 'modelId', settings: { mirror: { destinationModelId: 'dest123' } } }
 
-      uploadReleaseFiles({} as any, model as any, { semver: '1.0.0' } as any, [{ id: 'f1' }])
+      uploadReleaseFiles({} as any, model as any, { semver: '1.0.0' } as any, [{ id: 'f1' }], {} as any)
 
       await Promise.all(pendingJobs)
       expect(FileExporterMock).toHaveBeenCalled()
@@ -330,9 +330,13 @@ describe('services > mirroredModel', () => {
     test('calls ImageExporter', async () => {
       const model = { id: 'modelId', settings: { mirror: { destinationModelId: 'dest123' } } }
 
-      uploadReleaseImages({} as any, model as any, { semver: '1.0.0' } as any, [
-        { _id: 'i1', name: 'n', tag: 't' } as any,
-      ])
+      uploadReleaseImages(
+        {} as any,
+        model as any,
+        { semver: '1.0.0' } as any,
+        [{ _id: 'i1', name: 'n', tag: 't' } as any],
+        {} as any,
+      )
 
       await Promise.all(pendingJobs)
       expect(ImageExporterMock).toHaveBeenCalled()

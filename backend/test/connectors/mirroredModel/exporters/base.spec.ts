@@ -35,7 +35,7 @@ const mockModel = {
   settings: { mirror: { destinationModelId: 'destModelId' } },
   card: { schemaId: 'schemaId' },
 } as any
-const mockLogData = { extra: 'info' }
+const mockLogData = { extra: 'info', exportId: 'exportId', exporterType: 'TestExporter' }
 
 describe('connectors > mirroredModel > exporters > BaseExporter', () => {
   beforeEach(() => {
@@ -116,27 +116,25 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
   })
 
   test('finalise > throws if not initialised (sync throw from decorator)', () => {
-    const exporter = new TestExporter(mockUser, mockModel)
+    const exporter = new TestExporter(mockUser, mockModel, mockLogData)
 
     expect(() => exporter.finalise()).toThrowError(
-      InternalError('Method `TestExporter.finalise` called before `init()`.', { exporterType: 'TestExporter' }),
+      InternalError('Method `TestExporter.finalise` called before `init()`.', mockLogData),
     )
   })
 
   test('finalise > throws if streams missing (sync throw from decorator)', () => {
-    const exporter = new TestExporter(mockUser, mockModel)
+    const exporter = new TestExporter(mockUser, mockModel, mockLogData)
     exporter['initialised'] = true
     exporter['tarStream'] = undefined
 
     expect(() => exporter.finalise()).toThrowError(
-      InternalError('Method `TestExporter.finalise` streams not initialised before use.', {
-        exporterType: 'TestExporter',
-      }),
+      InternalError('Method `TestExporter.finalise` streams not initialised before use.', mockLogData),
     )
   })
 
   test('finalise > success calls finaliseTarGzUpload', async () => {
-    const exporter = new TestExporter(mockUser, mockModel)
+    const exporter = new TestExporter(mockUser, mockModel, mockLogData)
     exporter['initialised'] = true
     exporter['tarStream'] = {} as any
     exporter['gzipStream'] = {} as any
@@ -157,7 +155,7 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
         return [] as any
       }
     }
-    const exporter = new ErrorExporter(mockUser, mockModel)
+    const exporter = new ErrorExporter(mockUser, mockModel, mockLogData)
     // @ts-expect-error mocking streams
     exporter['tarStream'] = new PassThrough()
     exporter['gzipStream'] = zlib.createGzip()

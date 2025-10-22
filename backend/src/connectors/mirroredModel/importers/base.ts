@@ -2,6 +2,7 @@ import { PassThrough, Readable } from 'node:stream'
 
 import { Headers } from 'tar-stream'
 
+import { MirrorLogData } from '../../../services/mirroredModel/mirroredModel.js'
 import { isBailoError } from '../../../types/error.js'
 import { InternalError } from '../../../utils/error.js'
 
@@ -16,9 +17,9 @@ export abstract class BaseImporter {
   abstract processEntry(entry: Headers, stream: PassThrough | Readable): Promise<void> | void
 
   protected readonly metadata: BaseMirrorMetadata
-  protected readonly logData?: Record<string, unknown>
+  protected readonly logData: MirrorLogData
 
-  constructor(metadata: BaseMirrorMetadata, logData?: Record<string, unknown>) {
+  constructor(metadata: BaseMirrorMetadata, logData: MirrorLogData) {
     this.metadata = metadata
     this.logData = { importerType: this.constructor.name, ...logData }
   }

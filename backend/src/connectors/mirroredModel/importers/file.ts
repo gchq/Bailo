@@ -6,6 +6,7 @@ import { putObjectStream } from '../../../clients/s3.js'
 import FileModel from '../../../models/File.js'
 import { createFilePath, markFileAsCompleteAfterImport } from '../../../services/file.js'
 import log from '../../../services/log.js'
+import { MirrorLogData } from '../../../services/mirroredModel/mirroredModel.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { MirrorKind, MirrorKindKeys } from '../index.js'
@@ -26,7 +27,7 @@ export class FileImporter extends BaseImporter {
 
   protected extractedFile: boolean = false
 
-  constructor(metadata: FileMirrorMetadata, logData?: Record<string, unknown>) {
+  constructor(metadata: FileMirrorMetadata, logData: MirrorLogData) {
     super(metadata, logData)
     if (this.metadata.importKind !== MirrorKind.File) {
       throw InternalError('Cannot parse compressed File: incorrect metadata specified.', {

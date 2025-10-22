@@ -6,6 +6,7 @@ import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
 import { getFilesByIds, getTotalFileSize } from '../../../services/file.js'
 import log from '../../../services/log.js'
+import { MirrorLogData } from '../../../services/mirroredModel/mirroredModel.js'
 import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../../../services/mirroredModel/tarball.js'
 import { getModelCardRevisions } from '../../../services/model.js'
 import { getAllFileIds } from '../../../services/release.js'
@@ -20,9 +21,9 @@ export class DocumentsExporter extends BaseExporter {
   protected readonly releases: ReleaseDoc[]
   protected files: FileWithScanResultsInterface[] | undefined
 
-  constructor(user: UserInterface, model: ModelDoc, releases?: ReleaseDoc[], logData?: Record<string, unknown>) {
+  constructor(user: UserInterface, model: ModelDoc, releases: ReleaseDoc[], logData: MirrorLogData) {
     super(user, model, logData)
-    this.releases = releases ?? []
+    this.releases = releases
   }
 
   getReleases() {

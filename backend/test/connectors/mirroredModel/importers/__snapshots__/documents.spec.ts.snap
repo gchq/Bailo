@@ -7,6 +7,8 @@ DocumentsImporter {
   "imageIds": [],
   "lazyMirroredModel": null,
   "logData": {
+    "extra": "info",
+    "importId": "importId",
     "importerType": "DocumentsImporter",
   },
   "metadata": {
@@ -36,6 +38,8 @@ DocumentsImporter {
   "imageIds": [],
   "lazyMirroredModel": null,
   "logData": {
+    "extra": "info",
+    "importId": "importId",
     "importerType": "DocumentsImporter",
   },
   "metadata": {
@@ -63,6 +67,8 @@ DocumentsImporter {
   "imageIds": [],
   "lazyMirroredModel": null,
   "logData": {
+    "extra": "info",
+    "importId": "importId",
     "importerType": "DocumentsImporter",
   },
   "metadata": {
@@ -100,6 +106,8 @@ DocumentsImporter {
     "id": "mirroredModelId",
   },
   "logData": {
+    "extra": "info",
+    "importId": "importId",
     "importerType": "DocumentsImporter",
   },
   "metadata": {
@@ -133,6 +141,8 @@ DocumentsImporter {
   "imageIds": [],
   "lazyMirroredModel": null,
   "logData": {
+    "extra": "info",
+    "importId": "importId",
     "importerType": "DocumentsImporter",
   },
   "metadata": {

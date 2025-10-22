@@ -83,6 +83,8 @@ const mockFile = {
   avScan: [{ state: ScanState.Complete, isInfected: false }],
 } as any
 
+const mockLogData = { extra: 'info', exportId: 'exportId', exporterType: 'DocumentsExporter' }
+
 describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
   beforeEach(() => {
     tarballMocks.initialiseTarGzUpload.mockResolvedValue({
@@ -101,14 +103,14 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('constructor > sets releases and logData', () => {
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
 
     expect(exporter.getReleases()).toEqual([mockRelease])
     expect(exporter).toMatchSnapshot()
   })
 
   test('_init > success without releases', async () => {
-    const exporter = new DocumentsExporter(mockUser, mockModel)
+    const exporter = new DocumentsExporter(mockUser, mockModel, [], mockLogData)
 
     // @ts-expect-error protected method
     await exporter._init()
@@ -117,7 +119,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('_init > success with releases calls checkReleaseFiles', async () => {
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
 
     // @ts-expect-error protected method
     await exporter._init()
@@ -126,7 +128,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('checkReleaseFiles > returns early when multiple releases have no fileIds', async () => {
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease, mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease, mockRelease], mockLogData)
     releaseServiceMocks.getAllFileIds.mockResolvedValueOnce([])
 
     await expect(
@@ -139,7 +141,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
 
   test('checkReleaseFiles > throws BadReq if total size exceeds max', async () => {
     fileServiceMocks.getTotalFileSize.mockResolvedValueOnce(2000)
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease, mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease, mockRelease], mockLogData)
 
     await expect(
       // @ts-expect-error protected method
@@ -153,7 +155,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
     scannersMocks.default.info.mockReturnValue(true)
     const badFile = { id: 'f', name: 'name', avScan: [] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([badFile as any])
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
 
     await expect(
       // @ts-expect-error protected method
@@ -169,7 +171,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
     scannersMocks.default.info.mockReturnValue(true)
     const incompleteFile = { id: 'f', name: 'name', avScan: [{ state: ScanState.InProgress, isInfected: false }] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([incompleteFile as any])
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
 
     await expect(
       // @ts-expect-error protected
@@ -185,7 +187,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
     scannersMocks.default.info.mockReturnValue(true)
     const infectedFile = { id: 'f', name: 'name', avScan: [{ state: ScanState.Complete, isInfected: true }] }
     fileServiceMocks.getFilesByIds.mockResolvedValueOnce([infectedFile as any])
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
 
     await expect(
       // @ts-expect-error protected
@@ -198,7 +200,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('getInitialiseTarGzUploadParams > returns correct params', () => {
-    const exporter = new DocumentsExporter(mockUser, mockModel)
+    const exporter = new DocumentsExporter(mockUser, mockModel, [], mockLogData)
 
     // @ts-expect-error protected method
     const params = exporter.getInitialiseTarGzUploadParams()
@@ -213,28 +215,24 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('getInitialiseTarGzUploadParams > throws if model missing', () => {
-    const exporter = new DocumentsExporter(mockUser, undefined as any)
+    const exporter = new DocumentsExporter(mockUser, undefined as any, [], mockLogData)
 
     // @ts-expect-error protected method
     expect(() => exporter.getInitialiseTarGzUploadParams()).toThrowError(
-      InternalError('Method `getInitialiseTarGzUploadParams` called before `this.model` defined.', {
-        exporterType: 'DocumentsExporter',
-      }),
+      InternalError('Method `getInitialiseTarGzUploadParams` called before `this.model` defined.', mockLogData),
     )
   })
 
   test('addData > throws if not initialised', () => {
-    const exporter = new DocumentsExporter(mockUser, mockModel)
+    const exporter = new DocumentsExporter(mockUser, mockModel, [], mockLogData)
 
     expect(() => exporter.addData()).toThrowError(
-      InternalError('Method `DocumentsExporter.addData` called before `init()`.', {
-        exporterType: 'DocumentsExporter',
-      }),
+      InternalError('Method `DocumentsExporter.addData` called before `init()`.', mockLogData),
     )
   })
 
   test('addData > success calls addModelCardRevisionsToTarball and addReleasesToTarball', async () => {
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     exporter['initialised'] = true
     exporter['tarStream'] = new PassThrough() as any
     exporter['gzipStream'] = new PassThrough() as any
@@ -251,7 +249,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
     tarballMocks.addEntryToTarGzUpload.mockImplementationOnce(() => {
       throw new Error('fail')
     })
-    const exporter = new DocumentsExporter(mockUser, mockModel)
+    const exporter = new DocumentsExporter(mockUser, mockModel, [], mockLogData)
     exporter['initialised'] = true
     exporter['tarStream'] = new PassThrough() as any
     exporter['gzipStream'] = new PassThrough() as any
@@ -264,7 +262,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('addData > wraps error from addReleasesToTarball with InternalError message', async () => {
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     exporter['initialised'] = true
     exporter['tarStream'] = new PassThrough() as any
     exporter['gzipStream'] = new PassThrough() as any
@@ -283,7 +281,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
     tarballMocks.addEntryToTarGzUpload.mockImplementationOnce(() => {
       throw new Error('fail')
     })
-    const exporter = new DocumentsExporter(mockUser, mockModel)
+    const exporter = new DocumentsExporter(mockUser, mockModel, [], mockLogData)
     exporter['initialised'] = true
     exporter['tarStream'] = new PassThrough() as any
     exporter['gzipStream'] = new PassThrough() as any
@@ -297,7 +295,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('addReleasesToTarball > throws InternalError if release fails', async () => {
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     exporter['initialised'] = true
     exporter['tarStream'] = new PassThrough() as any
     exporter['gzipStream'] = new PassThrough() as any
@@ -316,7 +314,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
     tarballMocks.addEntryToTarGzUpload.mockImplementationOnce(() => {
       throw new Error('fail')
     })
-    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease])
+    const exporter = new DocumentsExporter(mockUser, mockModel, [mockRelease], mockLogData)
     exporter['initialised'] = true
     exporter['tarStream'] = new PassThrough() as any
     exporter['gzipStream'] = new PassThrough() as any
@@ -333,7 +331,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
     tarballMocks.addEntryToTarGzUpload.mockImplementationOnce(() => {
       throw new Error('fail')
     })
-    const exporter = new DocumentsExporter(mockUser, mockModel)
+    const exporter = new DocumentsExporter(mockUser, mockModel, [], mockLogData)
     exporter['initialised'] = true
     exporter['tarStream'] = new PassThrough() as any
     exporter['gzipStream'] = new PassThrough() as any

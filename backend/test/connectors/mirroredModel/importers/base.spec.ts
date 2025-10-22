@@ -17,7 +17,7 @@ const mockMetadata: BaseMirrorMetadata = {
   mirroredModelId: 'mirroredModelId',
   exporter: 'exporter',
 } as BaseMirrorMetadata
-const mockLogData = { extra: 'info' }
+const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('connectors > mirroredModel > importers > BaseImporter', () => {
   test('constructor > success', () => {
@@ -28,7 +28,7 @@ describe('connectors > mirroredModel > importers > BaseImporter', () => {
   })
 
   test('finishListener > success with metadata', async () => {
-    const importer = new TestImporter(mockMetadata)
+    const importer = new TestImporter(mockMetadata, mockLogData)
     const resolve = vi.fn()
     const reject = vi.fn()
 
@@ -74,7 +74,7 @@ describe('connectors > mirroredModel > importers > BaseImporter', () => {
   })
 
   test('processEntry > success implemented by subclass', () => {
-    const importer = new TestImporter(mockMetadata)
+    const importer = new TestImporter(mockMetadata, mockLogData)
     const fakeEntry = {} as Headers
     const fakeStream = new PassThrough()
 

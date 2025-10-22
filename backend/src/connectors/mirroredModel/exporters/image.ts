@@ -1,6 +1,7 @@
 import { ModelDoc } from '../../../models/Model.js'
 import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
+import { MirrorLogData } from '../../../services/mirroredModel/mirroredModel.js'
 import { addCompressedRegistryImageComponents } from '../../../services/mirroredModel/mirroredModel.js'
 import { initialiseTarGzUpload } from '../../../services/mirroredModel/tarball.js'
 import { joinDistributionPackageName } from '../../../services/registry.js'
@@ -20,7 +21,7 @@ export class ImageExporter extends BaseExporter {
     model: ModelDoc,
     release: ReleaseDoc,
     image: ReleaseDoc['images'][number],
-    logData?: Record<string, unknown>,
+    logData: MirrorLogData,
   ) {
     super(user, model, logData)
     this.release = release
