@@ -47,12 +47,11 @@ export async function exportModel(
     releases.push(...(await getReleasesForExport(user, modelId, semvers)))
   }
 
-  const documentsExporter = new DocumentsExporter(user, model, releases, {
+  const documentsExporter = await new DocumentsExporter(user, model, releases, {
     exportId,
     sourceModelId: modelId,
     semvers,
-  })
-  await documentsExporter.init()
+  }).init()
 
   log.debug(
     { user, exportId, sourceModelId: modelId, mirroredModelId, semvers },
@@ -227,8 +226,7 @@ export async function uploadReleaseFiles(
     // Not `await`ed for fire-and-forget approach
     exportQueue
       .add(async () => {
-        const fileExporter = new FileExporter(user, model, file, logData)
-        await fileExporter.init()
+        const fileExporter = await new FileExporter(user, model, file, logData).init()
         await fileExporter.addData()
         await fileExporter.finalise()
       })
@@ -259,8 +257,7 @@ export async function uploadReleaseImages(
   for (const image of images) {
     exportQueue
       .add(async () => {
-        const imageExporter = new ImageExporter(user, model, release, image, logData)
-        await imageExporter.init()
+        const imageExporter = await new ImageExporter(user, model, release, image, logData).init()
         await imageExporter.addData()
         await imageExporter.finalise()
       })

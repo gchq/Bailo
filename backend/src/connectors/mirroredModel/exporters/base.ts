@@ -138,6 +138,7 @@ export abstract class BaseExporter {
     await this._init()
     await this._setupStreams()
     this.initialised = true
+    return this
   }
 
   @requiresInit

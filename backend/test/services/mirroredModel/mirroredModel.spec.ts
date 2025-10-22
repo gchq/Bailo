@@ -74,39 +74,48 @@ const releaseMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../src/services/release.js', () => releaseMocks)
 
-const DocumentsExporterMock = vi.hoisted(() =>
-  vi.fn(() => ({
-    init: vi.fn(() => Promise.resolve()),
-    getModel: vi.fn(() => ({
-      id: 'modelId',
-      settings: { mirror: { destinationModelId: 'dest123' } },
-    })),
-    getReleases: vi.fn(() => [{ id: 'rel1', semver: '1.0.0', images: [] }]),
-    addData: vi.fn(() => Promise.resolve()),
-    finalise: vi.fn(() => Promise.resolve()),
-    getFiles: vi.fn(() => []),
-  })),
-)
+const DocumentsExporterMock = vi.hoisted(() => {
+  return vi.fn(() => {
+    const instance = {
+      init: vi.fn(() => Promise.resolve(instance)),
+      getModel: vi.fn(() => ({
+        id: 'modelId',
+        settings: { mirror: { destinationModelId: 'dest123' } },
+      })),
+      getReleases: vi.fn(() => [{ id: 'rel1', semver: '1.0.0', images: [] }]),
+      addData: vi.fn(() => Promise.resolve()),
+      finalise: vi.fn(() => Promise.resolve()),
+      getFiles: vi.fn(() => []),
+    }
+    return instance
+  })
+})
 vi.mock('../../../src/connectors/mirroredModel/exporters/documents.js', () => ({
   DocumentsExporter: DocumentsExporterMock,
 }))
 
-const FileExporterMock = vi.hoisted(() =>
-  vi.fn(() => ({
-    init: vi.fn(() => Promise.resolve()),
-    addData: vi.fn(() => Promise.resolve()),
-    finalise: vi.fn(() => Promise.resolve()),
-  })),
-)
+const FileExporterMock = vi.hoisted(() => {
+  return vi.fn(() => {
+    const instance = {
+      init: vi.fn(() => Promise.resolve(instance)),
+      addData: vi.fn(() => Promise.resolve()),
+      finalise: vi.fn(() => Promise.resolve()),
+    }
+    return instance
+  })
+})
 vi.mock('../../../src/connectors/mirroredModel/exporters/file.js', () => ({ FileExporter: FileExporterMock }))
 
-const ImageExporterMock = vi.hoisted(() =>
-  vi.fn(() => ({
-    init: vi.fn(() => Promise.resolve()),
-    addData: vi.fn(() => Promise.resolve()),
-    finalise: vi.fn(() => Promise.resolve()),
-  })),
-)
+const ImageExporterMock = vi.hoisted(() => {
+  return vi.fn(() => {
+    const instance = {
+      init: vi.fn(() => Promise.resolve(instance)),
+      addData: vi.fn(() => Promise.resolve()),
+      finalise: vi.fn(() => Promise.resolve()),
+    }
+    return instance
+  })
+})
 vi.mock('../../../src/connectors/mirroredModel/exporters/image.js', () => ({ ImageExporter: ImageExporterMock }))
 
 let pendingJobs: Promise<any>[] = []
