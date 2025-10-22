@@ -13,3 +13,12 @@ export function deepFreeze(object) {
 
   return Object.freeze(object)
 }
+
+export function getPropValue(sourceObject: any, dotNotationPath: string) {
+  let returnData = sourceObject
+
+  dotNotationPath.split('.').forEach((subPath) => {
+    returnData = returnData[subPath] || undefined
+  })
+  return returnData
+}

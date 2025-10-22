@@ -8,12 +8,16 @@ import { SchemaMigrationKind } from '../types/enums.js'
 import { BadReq, Forbidden } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
+import { getPropValue } from '../utils/object.js'
 
 export async function createSchemaMigrationPlan(
   user: UserInterface,
   schemaMigration: Partial<SchemaMigrationInterface>,
 ) {
-  const migrationId = convertStringToId(schemaMigration.name || '')
+  if (!schemaMigration.name) {
+    throw BadReq('Could not create an ID for the schema migration due to missing name property')
+  }
+  const migrationId = convertStringToId(schemaMigration.name)
   const schemaMigrationDoc = new SchemaMigration({ id: migrationId, ...schemaMigration })
 
   const auth = await authorisation.schemaMigration(user, schemaMigrationDoc, SchemaMigrationAction.Create)
@@ -78,15 +82,6 @@ export async function runModelSchemaMigration(user: UserInterface, modelId: stri
   return modelDoc
 }
 
-function getPropValue(sourceObject: any, dotNotationPath: string) {
-  let returnData = sourceObject
-
-  dotNotationPath.split('.').forEach((subPath) => {
-    returnData = returnData[subPath] || ''
-  })
-  return returnData
-}
-
 async function runMigrationPlan(model: ModelDoc, migrationPlan: SchemaMigrationInterface) {
   for (const migrationQuestion of migrationPlan.questionMigrations) {
     switch (migrationQuestion.kind) {
@@ -94,7 +89,7 @@ async function runMigrationPlan(model: ModelDoc, migrationPlan: SchemaMigrationI
         model.set(`card.metadata.${migrationQuestion.sourcePath}`, undefined, { strict: false })
         break
       case SchemaMigrationKind.Move:
-        if (getPropValue(model, `card.metadata.${migrationQuestion.sourcePath}`) !== '') {
+        if (getPropValue(model, `card.metadata.${migrationQuestion.sourcePath}`)) {
           model.set(
             `card.metadata.${migrationQuestion.targetPath}`,
             getPropValue(model, `card.metadata.${migrationQuestion.sourcePath}`),
@@ -103,6 +98,6 @@ async function runMigrationPlan(model: ModelDoc, migrationPlan: SchemaMigrationI
         model.set(`card.metadata.${migrationQuestion.sourcePath}`, undefined, { strict: false })
         break
     }
-    await model.save()
   }
+  await model.save()
 }

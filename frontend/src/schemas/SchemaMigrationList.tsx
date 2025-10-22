@@ -27,8 +27,8 @@ export default function SchemaMigrationList() {
         </Typography>
         <CopyToClipboardButton
           textToCopy={data[index].id}
-          notificationText='Copied access request ID to clipboard'
-          ariaLabel='copy access request ID to clipboard'
+          notificationText='Copied migration ID to clipboard'
+          ariaLabel='copy migration ID to clipboard'
         />
       </Stack>
       <Typography variant='caption'>

@@ -1,3 +1,4 @@
+import { RegistryWidgetsType } from '@rjsf/utils'
 import { Validator } from 'jsonschema'
 import { cloneDeep, dropRight, get, omit, remove } from 'lodash-es'
 import { Dispatch, SetStateAction } from 'react'
@@ -15,8 +16,6 @@ import TagSelector from 'src/MuiForms/TagSelector'
 
 import { SplitSchemaNoRender, StepNoRender, StepType } from '../types/types'
 import { createUiSchema } from './uiSchemaUtils'
-import TestWidget from 'src/MuiForms/TestWidget'
-import { RegistryWidgetsType } from '@rjsf/utils'
 
 export const widgets: RegistryWidgetsType = {
   TextWidget: CustomTextInput,
@@ -30,7 +29,6 @@ export const widgets: RegistryWidgetsType = {
   dataCardSelector: DataCardSelector,
   metricsWidget: Metrics,
   nothing: Nothing,
-  testWidget: TestWidget,
 }
 
 export function createStep({

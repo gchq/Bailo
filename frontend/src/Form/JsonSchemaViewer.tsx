@@ -59,7 +59,6 @@ export default function JsonSchemaViewer({
     dataCardSelector: QuestionViewer,
     metricsWidget: QuestionViewer,
     nothing: Nothing,
-    testWidget: QuestionViewer,
   }
 
   const onFormChange = (form: RJSFSchema) => {

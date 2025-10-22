@@ -23,6 +23,7 @@ import { useCallback, useMemo, useState } from 'react'
 import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
 import { CombinedSchema, QuestionMigration } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
+import { truncateText } from 'utils/stringUtils'
 
 interface SchemaMigratorProps {
   sourceSchema: CombinedSchema
@@ -171,9 +172,9 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       schemaQuestion.schema.items['title']
     ) {
       // The title can be defined either inside the items child-object, or  at the root of the property
-      return schemaQuestion.schema.items['title']
+      return truncateText(schemaQuestion.schema.items['title'], 30)
     } else {
-      return schemaQuestion?.schema.title
+      return truncateText(schemaQuestion?.schema.title, 30)
     }
   }
 
@@ -229,7 +230,6 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Typography fontWeight='bold'>Source question</Typography>
                 <Button
                   size='small'
-                  variant='outlined'
                   sx={{
                     width: '100%',
                   }}
@@ -244,7 +244,6 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                   <Typography fontWeight='bold'>Target question</Typography>
                   <Button
                     size='small'
-                    variant='outlined'
                     sx={{ width: '100%' }}
                     onClick={handleSelectTargetQuestion}
                     aria-label='select target schema question'
@@ -254,7 +253,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 </Stack>
               )}
               <Stack spacing={2}>
-                <Button onClick={handleAddNewAction} aria-label='add action'>
+                <Button variant='outlined' onClick={handleAddNewAction} aria-label='add action'>
                   Add action
                 </Button>
                 <Typography color='error'>{actionErrorText}</Typography>

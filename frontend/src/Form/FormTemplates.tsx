@@ -72,7 +72,6 @@ export function ObjectFieldTemplateForQuestionViewer({
   const handleOnClick = () => {
     formContext.onClickListener({ path: rootName, schema })
   }
-  console.log(schema)
   return (
     <Box sx={{ py: 1 }}>
       <Stack spacing={2}>
