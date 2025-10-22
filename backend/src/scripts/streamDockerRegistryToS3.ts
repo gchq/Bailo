@@ -28,6 +28,7 @@ async function script() {
 
   // main functionality
   const { tarStream, uploadPromise } = await initialiseTarGzUpload(outputFilename, {
+    schemaVersion: 1,
     exporter: 'user',
     sourceModelId,
     mirroredModelId: destinationModelId,
