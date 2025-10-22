@@ -1,13 +1,12 @@
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Button, Chip, ListItem, ListItemText, Menu, MenuItem, Stack } from '@mui/material'
-import { useListModels } from 'actions/model'
 import { useGetSchemas } from 'actions/schema'
 import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
-import ModelListDialog from 'src/schemas/ModelListDialog'
+import EntryListDialog from 'src/schemas/ModelListDialog'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
-import { EntryKind, SchemaInterface } from 'types/types'
+import { SchemaInterface } from 'types/types'
 
 interface SchemaListItemProps {
   schema: SchemaInterface
@@ -34,19 +33,6 @@ export default function SchemaListItem({
   onEditSchemaClick,
 }: SchemaListItemProps) {
   const { mutateSchemas } = useGetSchemas(schema.kind)
-
-  //TODO changes to this as blocked as no accessrequest endpoint
-  const { models, isModelsLoading, isModelsError } = useListModels(
-    schema.kind === 'dataCard' ? EntryKind.DATA_CARD : EntryKind.MODEL,
-    [],
-    '',
-    [],
-    [],
-    [],
-    '',
-    undefined,
-    schema.id,
-  )
 
   const [modelsListOpen, setModelsListOpen] = useState<boolean>(false)
 
@@ -123,7 +109,6 @@ export default function SchemaListItem({
           <MenuItem onClick={() => onEditSchemaClick(schema.id, { hidden: !schema.hidden })}>
             {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
           </MenuItem>
-          {}
           {schema.kind !== 'accessRequest' && (
             <MenuItem onClick={() => setModelsListOpen(true)}>View schema usage</MenuItem>
           )}
@@ -137,13 +122,7 @@ export default function SchemaListItem({
         schema={schema}
       />
       {schema.kind !== 'accessRequest' && (
-        <ModelListDialog
-          models={models}
-          isModelsLoading={isModelsLoading}
-          isModelsError={isModelsError}
-          open={modelsListOpen}
-          onClose={handleModelsListDialogClose}
-        />
+        <EntryListDialog open={modelsListOpen} schema={schema} onClose={handleModelsListDialogClose} />
       )}
     </ListItem>
   )

@@ -10,30 +10,35 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material'
-import { EntrySearchResult } from 'actions/model'
+import { useListModels } from 'actions/model'
 import { useMemo } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { ErrorInfo } from 'utils/fetcher'
+import { EntryKind, SchemaInterface } from 'types/types'
 
 type SchemaDialogProps = {
-  models: Array<EntrySearchResult>
-  isModelsLoading?: boolean
-  isModelsError?: ErrorInfo
   open: boolean
+  schema: SchemaInterface
   onClose: () => void
 }
 
-export default function ModelListDialog({
-  models = [],
-  isModelsLoading = false,
-  isModelsError,
-  open = false,
-  onClose,
-}: SchemaDialogProps) {
+export default function EntryListDialog({ open = false, onClose, schema }: SchemaDialogProps) {
+  //TODO changes to this as blocked as no accessrequest endpoint
+  const { models, isModelsLoading, isModelsError } = useListModels(
+    schema.kind === 'dataCard' ? EntryKind.DATA_CARD : EntryKind.MODEL,
+    [],
+    '',
+    [],
+    [],
+    [],
+    '',
+    undefined,
+    schema.id,
+  )
+
   const modelList = useMemo(
     () => (
       <List>
