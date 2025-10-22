@@ -8,24 +8,20 @@ vi.mock('../../../src/connectors/audit/index.js')
 
 describe('routes > model > postRequestImport', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../src/services/mirroredModel/mirroredModel.js', async (importOriginal) => {
-      const actual = (await importOriginal()) as any
-      return {
-        ImportKind: actual['ImportKind'],
-        importModel: vi.fn(() => ({
-          mirroredModel: { id: 'abc' },
-          importResult: {
-            modelCardVersions: [1, 2, 3],
-            newModelCards: [],
-            releaseSemvers: ['1.2.3'],
-            newReleases: [],
-            fileIds: [],
-            imageIds: [],
-            metadata: { sourceModelId: 'expedita', exporter: 'user' },
-          },
-        })),
-      }
-    })
+    vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => ({
+      importModel: vi.fn(() => ({
+        mirroredModel: { id: 'abc' },
+        importResult: {
+          modelCardVersions: [1, 2, 3],
+          newModelCards: [],
+          releaseSemvers: ['1.2.3'],
+          newReleases: [],
+          fileIds: [],
+          imageIds: [],
+          metadata: { sourceModelId: 'expedita', exporter: 'user' },
+        },
+      })),
+    }))
 
     const fixture = createFixture(postRequestImportFromS3Schema)
     const res = await testPost(`/api/v2/model/import/s3`, fixture)

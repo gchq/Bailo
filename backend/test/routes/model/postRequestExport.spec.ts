@@ -8,13 +8,9 @@ vi.mock('../../../src/connectors/audit/index.js')
 
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
-    vi.mock('../../../src/services/mirroredModel/mirroredModel.js', async (importOriginal) => {
-      const actual = (await importOriginal()) as any
-      return {
-        ImportKind: actual['ImportKind'],
-        exportModel: vi.fn(),
-      }
-    })
+    vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => ({
+      exportModel: vi.fn(),
+    }))
 
     const fixture = createFixture(postRequestExportToS3Schema)
     const res = await testPost(`/api/v2/model/${fixture.params.modelId}/export/s3`, fixture)
