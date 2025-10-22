@@ -6,6 +6,7 @@ import {
   EntryInterface,
   EntryKindKeys,
   EntryUserPermissions,
+  EntryVisibilityKeys,
   FileInterface,
   ModelImage,
   ReleaseInterface,
@@ -23,6 +24,7 @@ export interface EntrySearchResult {
   kind: EntryKindKeys
   organisation?: string
   state?: string
+  visibility: EntryVisibilityKeys
   createdAt: Date
   updatedAt: Date
 }

@@ -1,5 +1,5 @@
 import { CorporateFare } from '@mui/icons-material'
-import { Box, Divider, Stack, Typography } from '@mui/material'
+import { Box, Chip, Divider, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { EntrySearchResult } from 'actions/model'
 import { CSSProperties, useMemo } from 'react'
@@ -43,7 +43,7 @@ export default function EntryListRow({
 
   const mirroredLabel = useMemo(() => {
     if (entry.kind === EntryKind.MIRRORED_MODEL) {
-      return <Typography>(Mirrored)</Typography>
+      return <Typography>Mirrored</Typography>
     }
   }, [entry])
 
@@ -64,7 +64,7 @@ export default function EntryListRow({
           sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
           href={`${entryKindForRedirect}/${entry.id}`}
         >
-          <Stack spacing={1} alignItems='center' direction='row'>
+          <Stack spacing={1} justifyContent='space-between' alignItems='center' direction='row'>
             <Typography
               variant='h5'
               component='h4'
@@ -78,7 +78,12 @@ export default function EntryListRow({
             >
               {entry.name}
             </Typography>
-            {mirroredLabel}
+            <Stack spacing={2} direction='row'>
+              {entry.kind === EntryKind.MIRRORED_MODEL && (
+                <Chip size='small' color='secondary' variant='outlined' label={mirroredLabel} />
+              )}
+              {entry.visibility === 'private' && <Chip size='small' color='secondary' label='Private' />}
+            </Stack>
           </Stack>
         </Link>
         <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>

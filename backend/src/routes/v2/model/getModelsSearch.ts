@@ -98,6 +98,7 @@ export const getModelsSearch = [
       organisation: model.organisation,
       state: model.state,
       collaborators: model.collaborators,
+      visibility: model.visibility,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
     }))
