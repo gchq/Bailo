@@ -281,6 +281,9 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                   <Typography fontWeight='bold'>Migration description (optional)</Typography>
                   <TextField
                     size='small'
+                    multiline
+                    minRows={4}
+                    maxRows={10}
                     value={migrationDescription}
                     onChange={(e) => setMigrationDescription(e.target.value)}
                   />
