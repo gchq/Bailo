@@ -192,7 +192,6 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
   test('finishListener > error when manifest invalid', async () => {
     typeguardMocks.hasKeysOfType.mockReturnValue(false)
     const importer = new ImageImporter(mockUser, mockMetadata)
-    // importer.manifestBody = { bad: 'data' }
     const resolve = vi.fn()
     const reject = vi.fn()
 

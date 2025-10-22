@@ -87,12 +87,10 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
   test('processEntry > success skip already existing file', async () => {
     fileModelMocks.findOne.mockResolvedValue({ id: 'existingId' })
-
     const importer = new FileImporter(mockMetadata)
     const entry: Headers = { name: 'file1', type: 'file' } as Headers
     const stream = new PassThrough()
     stream.end('file-contents')
-    // spy on resume
     const resumeSpy = vi.spyOn(stream, 'resume')
 
     await importer.processEntry(entry, stream)
@@ -104,7 +102,6 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
   test('processEntry > error on multiple files', async () => {
     fileModelMocks.findOne.mockResolvedValue(null)
-
     const importer = new FileImporter(mockMetadata)
     const entry: Headers = { name: 'file1', type: 'file' } as Headers
     const stream = new PassThrough()
@@ -113,6 +110,7 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
     stream2.end('file-contents')
 
     await importer.processEntry(entry, stream)
+
     await expect(importer.processEntry(entry, stream2)).rejects.toThrowError(
       /^Cannot parse compressed file: multiple files found./,
     )
