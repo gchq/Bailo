@@ -51,14 +51,17 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
 
   test('constructor > success with ModelDoc', () => {
     const exporter = new TestExporter(mockUser, mockModel, mockLogData)
+
     expect(exporter.getModel()).toEqual(mockModel)
     expect(exporter).toMatchSnapshot()
   })
 
   test('_init > success with valid model', async () => {
     const exporter = new TestExporter(mockUser, mockModel, mockLogData)
+
     // @ts-expect-error protected method
     await exporter._init()
+
     expect(authMocks.default.model).toHaveBeenCalledWith(mockUser, mockModel, ModelAction.Export)
   })
 
@@ -74,6 +77,7 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
   test('_init > throws BadReq if schemaId missing', async () => {
     const badModel = { ...mockModel, card: {} }
     const exporter = new TestExporter(mockUser, badModel, mockLogData)
+
     // @ts-expect-error protected method
     await expect(exporter._init()).rejects.toEqual(
       BadReq('You must select a schema for your model before you can start the export process.', exporter['logData']),
@@ -83,6 +87,7 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
   test('_init > throws Forbidden if authorisation fails', async () => {
     authMocks.default.model.mockResolvedValueOnce({ success: false, info: 'not allowed' })
     const exporter = new TestExporter(mockUser, mockModel, mockLogData)
+
     // @ts-expect-error protected method
     await expect(exporter._init()).rejects.toEqual(
       Forbidden('not allowed', { userDn: mockUser.dn, modelId: mockModel.id, ...exporter['logData'] }),
@@ -91,7 +96,9 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
 
   test('_setupStreams > success calls initialiseTarGzUpload', async () => {
     const exporter = new TestExporter(mockUser, mockModel, mockLogData)
+
     await exporter._setupStreams()
+
     expect(tarballMocks.initialiseTarGzUpload).toHaveBeenCalled()
     expect(exporter['tarStream']).toBeDefined()
     expect(exporter['gzipStream']).toBeDefined()
@@ -101,13 +108,16 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
 
   test('init > success runs _init and _setupStreams', async () => {
     const exporter = new TestExporter(mockUser, mockModel, mockLogData)
+
     await exporter.init()
+
     expect(exporter['initialised']).toBe(true)
     expect(exporter['tarStream']).toBeDefined()
   })
 
   test('finalise > throws if not initialised (sync throw from decorator)', () => {
     const exporter = new TestExporter(mockUser, mockModel)
+
     expect(() => exporter.finalise()).toThrowError(
       InternalError('Method `finalise` called before `init()`.', { exporterType: 'TestExporter' }),
     )
@@ -117,6 +127,7 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
     const exporter = new TestExporter(mockUser, mockModel)
     exporter['initialised'] = true
     exporter['tarStream'] = undefined
+
     expect(() => exporter.finalise()).toThrowError(
       InternalError('Method finalise streams not initialised before use.', { exporterType: 'TestExporter' }),
     )
@@ -131,6 +142,7 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
     exporter['uploadPromise'] = Promise.resolve()
 
     await exporter.finalise()
+
     expect(tarballMocks.finaliseTarGzUpload).toHaveBeenCalledWith(exporter['tarStream'], exporter['uploadPromise'])
   })
 

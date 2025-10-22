@@ -1,0 +1,54 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`connectors > mirroredModel > exporters > ImageExporter > constructor > sets release, image and logData 1`] = `
+ImageExporter {
+  "_init": [Function],
+  "addData": [Function],
+  "distributionPackageName": undefined,
+  "getDistributionPackageName": [Function],
+  "getImage": [Function],
+  "getInitialiseTarGzUploadParams": [Function],
+  "getRelease": [Function],
+  "gzipStream": undefined,
+  "image": {
+    "_id": {
+      "toString": [Function],
+    },
+    "name": "modelId/image",
+    "tag": "latest",
+  },
+  "initialised": false,
+  "logData": {
+    "exporterType": "ImageExporter",
+  },
+  "model": {
+    "card": {
+      "schemaId": "schemaId",
+    },
+    "id": "modelId",
+    "settings": {
+      "mirror": {
+        "destinationModelId": "destModelId",
+      },
+    },
+  },
+  "release": {
+    "images": [
+      {
+        "_id": {
+          "toString": [Function],
+        },
+        "name": "modelId/image",
+        "tag": "latest",
+      },
+    ],
+    "semver": "1.0.0",
+  },
+  "tarStream": undefined,
+  "uploadPromise": undefined,
+  "uploadStream": undefined,
+  "user": {
+    "dn": "userDN",
+  },
+}
+`;
