@@ -37,10 +37,7 @@
 // }
 
 function printA11yViolations(violations) {
-  cy.task('log', 'this is in printA11yViolations section')
-
   summaryTable(violations)
-
   detailedIssue(violations)
 }
 
@@ -63,8 +60,6 @@ function summaryTable(violations) {
 }
 
 function detailedIssue(violations) {
-  cy.task('log', 'this is the detailedIssues func')
-
   violations.forEach((violation, indexInFailuresArray, array) => {
     const { id, impact, help, helpUrl, nodes } = violation
 

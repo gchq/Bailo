@@ -55,7 +55,7 @@ export default function EntryListRow({
         >
           <Typography
             variant='h5'
-            component='h4'
+            component='h2'
             sx={{
               fontWeight: '500',
               textDecoration: 'none',
