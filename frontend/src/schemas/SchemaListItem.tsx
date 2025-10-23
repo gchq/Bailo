@@ -6,7 +6,7 @@ import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
 import EntryListDialog from 'src/schemas/ModelListDialog'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
-import { SchemaInterface } from 'types/types'
+import { SchemaInterface, SchemaKind } from 'types/types'
 
 interface SchemaListItemProps {
   schema: SchemaInterface
@@ -121,7 +121,7 @@ export default function SchemaListItem({
         onClose={handleReviewRolesDialogClose}
         schema={schema}
       />
-      {schema.kind !== 'accessRequest' && (
+      {schema.kind !== SchemaKind.ACCESS_REQUEST && (
         <EntryListDialog open={modelsListOpen} schema={schema} onClose={handleModelsListDialogClose} />
       )}
     </ListItem>
