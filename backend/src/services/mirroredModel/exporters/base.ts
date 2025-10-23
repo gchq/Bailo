@@ -12,6 +12,17 @@ import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
 import { MirrorLogData } from '../mirroredModel.js'
 import { finaliseTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
 
+/**
+ * Wraps any thrown error with additional execution context information.
+ *
+ * - If `err` is a BailoError, appends method identification to the message and rethrows it.
+ * - If not, wraps it into an `InternalError` with method details and relevant `BaseExporter` log data.
+ *
+ * @param err - The caught error or thrown value.
+ * @param context - Method decorator context containing method metadata.
+ * @param self - The calling `BaseExporter` instance.
+ * @throws InternalError | BailoError
+ */
 function wrapErrorContext(err: unknown, context: ClassMethodDecoratorContext, self: BaseExporter): never {
   if (isBailoError(err)) {
     err.message += `\nMethod \`${String(self.constructor.name)}.${String(context.name)}\` failure.`
@@ -23,6 +34,15 @@ function wrapErrorContext(err: unknown, context: ClassMethodDecoratorContext, se
   })
 }
 
+/**
+ * Method decorator.
+ * Ensures that the decorated method can only run after `init()` has been successfully invoked.
+ *
+ * @typeParam M - Method type extending a function bound to `BaseExporter`.
+ * @param value - The original method implementation.
+ * @param context - Method decorator metadata.
+ * @throws InternalError - If called before the instance is initialised.
+ */
 export function requiresInit<M extends (this: BaseExporter, ...args: any[]) => any>(
   value: M,
   context: ClassMethodDecoratorContext,
@@ -38,6 +58,15 @@ export function requiresInit<M extends (this: BaseExporter, ...args: any[]) => a
   } as M
 }
 
+/**
+ * Method decorator.
+ * Invokes `checkAuths()` before executing the decorated method.
+ * If `checkAuths()` fails, wraps the error with additional method context information.
+ *
+ * @typeParam M - Method type extending a function bound to `BaseExporter`.
+ * @param value - The original method implementation.
+ * @param context - Method decorator metadata.
+ */
 export function checkAuths<M extends (this: BaseExporter, ...args: any[]) => any>(
   value: M,
   context: ClassMethodDecoratorContext,
@@ -52,6 +81,15 @@ export function checkAuths<M extends (this: BaseExporter, ...args: any[]) => any
   } as M
 }
 
+/**
+ * Method decorator.
+ * Ensures tar/gzip/upload streams are set up prior to executing the method.
+ * If not already configured, calls `setupStreams()` and wraps errors with context.
+ *
+ * @typeParam M - Method type extending a function bound to `BaseExporter`.
+ * @param value - The original method implementation.
+ * @param context - Method decorator metadata.
+ */
 export function withStreams<M extends (this: BaseExporter, ...args: any[]) => any>(
   value: M,
   context: ClassMethodDecoratorContext,
@@ -69,6 +107,16 @@ export function withStreams<M extends (this: BaseExporter, ...args: any[]) => an
 }
 
 type AbstractConstructor<T = object> = abstract new (...args: any[]) => T
+/**
+ * Class decorator factory.
+ * Wraps **all instance methods** (excluding the constructor) in error-handling logic that:
+ * - Cleans up tar/gzip/upload streams upon exception.
+ * - Augments thrown errors with method context via `wrapErrorContext`.
+ * Works for both synchronous and asynchronous errors.
+ *
+ * @param Base - Abstract class extending `BaseExporter` to decorate.
+ * @returns A subclass with cleanup/error-wrapping logic applied to all methods.
+ */
 function withStreamCleanupClass<T extends AbstractConstructor<BaseExporter>>(Base: T) {
   abstract class WithCleanup extends Base {
     protected cleanupStreams() {
@@ -113,9 +161,21 @@ function withStreamCleanupClass<T extends AbstractConstructor<BaseExporter>>(Bas
 
 @withStreamCleanupClass
 export abstract class BaseExporter {
+  /**
+   * Method to be implemented by subclasses to perform exporter-specific initialisation.
+   */
   protected abstract _init(): Promise<void> | void
+  /**
+   * Method to be implemented by subclasses to add data to the export streams.
+   */
   protected abstract _addData(): Promise<void> | void
+  /**
+   * Method to be implemented by subclasses for exporter-specific authorisation checks.
+   */
   protected abstract _checkAuths(): Promise<void> | void
+  /**
+   * Provides parameters for `initialiseTarGzUpload()`.
+   */
   protected abstract getInitialiseTarGzUploadParams():
     | Promise<Parameters<typeof initialiseTarGzUpload>>
     | Parameters<typeof initialiseTarGzUpload>
@@ -131,6 +191,13 @@ export abstract class BaseExporter {
   protected initialised = false
   protected authCheck = false
 
+  /**
+   * Constructs a `BaseExporter` with user, model, and logging context.
+   *
+   * @param user - The current user initiating the export.
+   * @param model - The model being exported.
+   * @param logData - Additional log metadata for auditing/tracing.
+   */
   constructor(user: UserInterface, model: ModelDoc, logData: MirrorLogData) {
     this.user = user
     this.model = model
@@ -145,6 +212,15 @@ export abstract class BaseExporter {
     return this.logData
   }
 
+  /**
+   * Initialises the exporter.
+   * - Validates required model settings (destination ID, schema).
+   * - Calls subclass `_init()`.
+   * - Marks exporter as `initialised`.
+   *
+   * @throws BadReq - If required model settings are missing.
+   * @returns This exporter instance.
+   */
   async init() {
     if (!this.model.settings?.mirror?.destinationModelId) {
       throw BadReq("The 'Destination Model ID' has not been set on this model.", this.logData)
@@ -157,6 +233,11 @@ export abstract class BaseExporter {
     return this
   }
 
+  /**
+   * Checks core model-level export permissions via the authorisation connector.
+   *
+   * @throws Forbidden - if the user lacks required rights.
+   */
   protected async _checkModelAuths() {
     const modelAuth = await authorisation.model(this.user, this.model, ModelAction.Export)
     if (!modelAuth.success) {
@@ -164,6 +245,10 @@ export abstract class BaseExporter {
     }
   }
 
+  /**
+   * Runs both model-level and subclass-specific authorisation checks.
+   * Executes only once per exporter lifecycle unless manually reset.
+   */
   async checkAuths() {
     if (!this.authCheck) {
       await this._checkModelAuths()
@@ -172,6 +257,10 @@ export abstract class BaseExporter {
     }
   }
 
+  /**
+   * Called automatically by `@withStreams` if streams are missing.
+   * Initialises tar/gzip/upload streams for the export process.
+   */
   @requiresInit
   protected async setupStreams() {
     const params = await this.getInitialiseTarGzUploadParams()
@@ -182,6 +271,13 @@ export abstract class BaseExporter {
     this.uploadPromise = uploadPromise
   }
 
+  /**
+   * Public entry point to add data to the export package.
+   *
+   * @decorator `@requiresInit` Ensures exporter initialisation.
+   * @decorator `@checkAuths` Ensures authorisation checks pass.
+   * @decorator `@withStreams` Ensures streams are configured.
+   */
   @requiresInit
   @checkAuths
   @withStreams
@@ -190,6 +286,13 @@ export abstract class BaseExporter {
     await this._addData()
   }
 
+  /**
+   * Finalises the export process by completing and uploading the tar.gz file.
+   *
+   * @decorator `@requiresInit`
+   * @decorator `@checkAuths`
+   * @decorator `@withStreams`
+   */
   @requiresInit
   @checkAuths
   @withStreams
