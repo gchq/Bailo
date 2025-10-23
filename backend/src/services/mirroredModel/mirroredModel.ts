@@ -5,7 +5,7 @@ import fetch, { Response } from 'node-fetch'
 import PQueue from 'p-queue'
 import { Pack } from 'tar-stream'
 
-import { EntryKind, ModelDoc, ModelInterface } from '../../models/Model.js'
+import { EntryKind, ModelInterface } from '../../models/Model.js'
 import { ReleaseDoc } from '../../models/Release.js'
 import { UserInterface } from '../../models/User.js'
 import config from '../../utils/config.js'
@@ -16,6 +16,7 @@ import log from '../log.js'
 import { getModelById } from '../model.js'
 import { getImageBlob, getImageManifest, splitDistributionPackageName } from '../registry.js'
 import { getReleasesForExport } from '../release.js'
+import { BaseExporter } from './exporters/base.js'
 import { DocumentsExporter } from './exporters/documents.js'
 import { FileExporter } from './exporters/file.js'
 import { ImageExporter } from './exporters/image.js'
@@ -68,6 +69,8 @@ export async function exportModel(
     sourceModelId: modelId,
     semvers,
   }).init()
+  // Explicitly check auths before adding to queue to return error to caller
+  await documentsExporter.checkAuths()
 
   log.debug(
     { user, exportId, sourceModelId: modelId, mirroredModelId, semvers },
@@ -84,8 +87,41 @@ export async function exportModel(
 
       if (releases && releases.length > 0) {
         for (const release of releases) {
-          uploadReleaseFiles(user, model!, release, documentsExporter.getFiles()!, { exportId })
-          uploadReleaseImages(user, model!, release, release.images, { exportId })
+          addAndFinaliseExporters(
+            await Promise.all(
+              documentsExporter.getFiles()!.map((file) =>
+                new FileExporter(user, model, file, {
+                  fileId: file.id,
+                  fileName: file.name,
+                  exportId,
+                }).init(),
+              ),
+            ),
+            {
+              modelId,
+              mirroredModelId: mirroredModelId,
+              release: release.semver,
+              exportId,
+            },
+          )
+          addAndFinaliseExporters(
+            await Promise.all(
+              release.images.map((image) =>
+                new ImageExporter(user, model, release, image, {
+                  imageId: image._id.toString(),
+                  imageName: image.name,
+                  imageTag: image.tag,
+                  exportId,
+                }).init(),
+              ),
+            ),
+            {
+              modelId,
+              mirroredModelId,
+              release: release.semver,
+              exportId,
+            },
+          )
         }
       }
     })
@@ -247,65 +283,22 @@ export async function addCompressedRegistryImageComponents(
   log.debug({ modelId, imageName, imageTag, ...logData }, 'Finished adding registry image.')
 }
 
-export async function uploadReleaseFiles(
-  user: UserInterface,
-  model: ModelDoc,
-  release: ReleaseDoc,
-  files,
-  logData: MirrorLogData,
-) {
-  for (const file of files) {
+export async function addAndFinaliseExporters(exporters: BaseExporter[], logData: MirrorLogData) {
+  for (const exporter of exporters) {
     // Not `await`ed for fire-and-forget approach
     exportQueue
       .add(async () => {
-        const fileExporter = await new FileExporter(user, model, file, logData).init()
-        await fileExporter.addData()
-        await fileExporter.finalise()
+        await exporter.addData()
+        await exporter.finalise()
       })
       .catch((error) => {
         log.error(
           {
             error,
-            modelId: model.id,
-            mirroredModelId: model.settings.mirror.destinationModelId,
-            release: release.semver,
-            fileId: file.id,
-            fileName: file.name,
+            ...exporter.getLogData(),
             ...logData,
           },
-          'Error when exporting mirrored File.',
-        )
-      })
-  }
-}
-
-export async function uploadReleaseImages(
-  user: UserInterface,
-  model: ModelDoc,
-  release: ReleaseDoc,
-  images: ReleaseDoc['images'],
-  logData: MirrorLogData,
-) {
-  for (const image of images) {
-    exportQueue
-      .add(async () => {
-        const imageExporter = await new ImageExporter(user, model, release, image, logData).init()
-        await imageExporter.addData()
-        await imageExporter.finalise()
-      })
-      .catch((error) => {
-        log.error(
-          {
-            error,
-            modelId: model.id,
-            mirroredModelId: model.settings.mirror.destinationModelId,
-            release: release.semver,
-            imageId: image._id.toString(),
-            imageName: image.name,
-            imageTag: image.tag,
-            ...logData,
-          },
-          'Error when exporting mirrored Image.',
+          `Error when exporting ${exporter.constructor.name}.`,
         )
       })
   }

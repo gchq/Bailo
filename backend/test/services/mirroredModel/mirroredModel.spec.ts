@@ -3,14 +3,13 @@ import { PassThrough, Readable } from 'node:stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import {
+  addAndFinaliseExporters,
   addCompressedRegistryImageComponents,
   exportModel,
   generateDigest,
   getImporter,
   importModel,
   MirrorKind,
-  uploadReleaseFiles,
-  uploadReleaseImages,
 } from '../../../src/services/mirroredModel/mirroredModel.js'
 import { BadReq, InternalError } from '../../../src/utils/error.js'
 
@@ -85,6 +84,7 @@ const DocumentsExporterMock = vi.hoisted(() => {
         id: 'modelId',
         settings: { mirror: { destinationModelId: 'dest123' } },
       })),
+      checkAuths: vi.fn(() => Promise.resolve()),
       getReleases: vi.fn(() => [{ id: 'rel1', semver: '1.0.0', images: [] }]),
       addData: vi.fn(() => Promise.resolve()),
       finalise: vi.fn(() => Promise.resolve()),
@@ -103,6 +103,7 @@ const FileExporterMock = vi.hoisted(() => {
       init: vi.fn(() => Promise.resolve(instance)),
       addData: vi.fn(() => Promise.resolve()),
       finalise: vi.fn(() => Promise.resolve()),
+      getLogData: vi.fn(() => {}),
     }
     return instance
   })
@@ -354,11 +355,11 @@ describe('services > mirroredModel', () => {
     })
   })
 
-  describe('uploadReleaseFiles', () => {
-    test('calls FileExporter', async () => {
-      const model = { id: 'modelId', settings: { mirror: { destinationModelId: 'dest123' } } }
-
-      uploadReleaseFiles({} as any, model as any, { semver: '1.0.0' } as any, [{ id: 'f1' }], {} as any)
+  describe('addAndFinaliseExporters', () => {
+    test('success', async () => {
+      addAndFinaliseExporters([(await new FileExporterMock().init()) as any], {
+        exportId: 'shortId123',
+      })
 
       await Promise.all(pendingJobs)
       expect(FileExporterMock).toHaveBeenCalled()
@@ -370,10 +371,9 @@ describe('services > mirroredModel', () => {
     })
 
     test('log error on exportQueue reject', async () => {
-      const model = { id: 'modelId', settings: { mirror: { destinationModelId: 'dest123' } } }
       exportQueueMock.exportQueueAddMock.mockImplementationOnce(() => Promise.reject(new Error('boom')))
 
-      uploadReleaseFiles({} as any, model as any, { semver: '1.0.0' } as any, [{ id: 'f1', name: 'n' }], {
+      addAndFinaliseExporters([(await new FileExporterMock().init()) as any], {
         exportId: 'shortId123',
       })
 
@@ -381,66 +381,9 @@ describe('services > mirroredModel', () => {
       expect(logMock.error).toHaveBeenCalledWith(
         expect.objectContaining({
           error: expect.any(Error),
-          modelId: 'modelId',
-          mirroredModelId: 'dest123',
-          release: '1.0.0',
-          fileId: 'f1',
-          fileName: 'n',
           exportId: 'shortId123',
         }),
-        'Error when exporting mirrored File.',
-      )
-    })
-  })
-
-  describe('uploadReleaseImages', () => {
-    test('calls ImageExporter', async () => {
-      const model = { id: 'modelId', settings: { mirror: { destinationModelId: 'dest123' } } }
-
-      uploadReleaseImages(
-        {} as any,
-        model as any,
-        { semver: '1.0.0' } as any,
-        [{ _id: 'i1', name: 'n', tag: 't' } as any],
-        {} as any,
-      )
-
-      await Promise.all(pendingJobs)
-      expect(ImageExporterMock).toHaveBeenCalled()
-      const instance = ImageExporterMock.mock.results[0].value
-      expect(instance.addData).toHaveBeenCalled()
-      expect(instance.finalise).toHaveBeenCalled()
-      expect(exportQueueMock.add).toHaveBeenCalled()
-      expect(logMock.error).not.toHaveBeenCalled()
-    })
-
-    test('log error on exportQueue reject', async () => {
-      const model = { id: 'modelId', settings: { mirror: { destinationModelId: 'dest123' } } }
-      exportQueueMock.exportQueueAddMock.mockImplementationOnce(() => Promise.reject(new Error('boom')))
-
-      uploadReleaseImages(
-        {} as any,
-        model as any,
-        { semver: '1.0.0' } as any,
-        [{ _id: 'i1', name: 'n', tag: 't' } as any],
-        {
-          exportId: 'shortId123',
-        },
-      )
-
-      await Promise.all(pendingJobs)
-      expect(logMock.error).toHaveBeenCalledWith(
-        expect.objectContaining({
-          error: expect.any(Error),
-          modelId: 'modelId',
-          mirroredModelId: 'dest123',
-          release: '1.0.0',
-          imageId: 'i1',
-          imageName: 'n',
-          imageTag: 't',
-          exportId: 'shortId123',
-        }),
-        'Error when exporting mirrored Image.',
+        'Error when exporting Object.',
       )
     })
   })

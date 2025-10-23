@@ -8,7 +8,7 @@ import { joinDistributionPackageName } from '../../registry.js'
 import { MirrorKind, MirrorLogData } from '../mirroredModel.js'
 import { addCompressedRegistryImageComponents } from '../mirroredModel.js'
 import { initialiseTarGzUpload } from '../tarball.js'
-import { BaseExporter, requiresInit } from './base.js'
+import { BaseExporter } from './base.js'
 
 export class ImageExporter extends BaseExporter {
   protected readonly release: ReleaseDoc
@@ -40,35 +40,9 @@ export class ImageExporter extends BaseExporter {
   }
 
   protected async _init() {
-    await super._init()
-
-    const releaseAuth = await authorisation.release(this.user, this.model!, ReleaseAction.View, this.release)
-    if (!releaseAuth.success) {
-      throw Forbidden(releaseAuth.info, {
-        userDn: this.user.dn,
-        modelId: this.model.id,
-        semver: this.release.semver,
-        ...this.logData,
-      })
-    }
-
     const imageCheck = this.release.images.find((image) => image._id.toString() === this.image._id.toString())
     if (!imageCheck) {
       throw InternalError('Could not find image associated with release.', {
-        modelId: this.model.id,
-        semver: this.release.semver,
-        imageId: this.image._id.toString(),
-        ...this.logData,
-      })
-    }
-    const imageAuth = await authorisation.image(this.user, this.model!, {
-      type: 'repository',
-      name: this.model.id,
-      actions: ['pull'],
-    })
-    if (!imageAuth.success) {
-      throw Forbidden(imageAuth.info, {
-        userDn: this.user.dn,
         modelId: this.model.id,
         semver: this.release.semver,
         imageId: this.image._id.toString(),
@@ -83,6 +57,33 @@ export class ImageExporter extends BaseExporter {
       path: this.image.name.replace(modelIdRe, this.model!.settings.mirror.destinationModelId!),
       tag: this.image.tag,
     })
+  }
+
+  protected async _checkAuths() {
+    const releaseAuth = await authorisation.release(this.user, this.model!, ReleaseAction.View, this.release)
+    if (!releaseAuth.success) {
+      throw Forbidden(releaseAuth.info, {
+        userDn: this.user.dn,
+        modelId: this.model.id,
+        semver: this.release.semver,
+        ...this.logData,
+      })
+    }
+
+    const imageAuth = await authorisation.image(this.user, this.model!, {
+      type: 'repository',
+      name: this.model.id,
+      actions: ['pull'],
+    })
+    if (!imageAuth.success) {
+      throw Forbidden(imageAuth.info, {
+        userDn: this.user.dn,
+        modelId: this.model.id,
+        semver: this.release.semver,
+        imageId: this.image._id.toString(),
+        ...this.logData,
+      })
+    }
   }
 
   protected getInitialiseTarGzUploadParams(): Parameters<typeof initialiseTarGzUpload> {
@@ -113,8 +114,7 @@ export class ImageExporter extends BaseExporter {
     ]
   }
 
-  @requiresInit
-  async addData() {
+  protected async _addData() {
     // Non-null assertion operator used due to `requiresInit` performing assertion
     await addCompressedRegistryImageComponents(
       this.user,

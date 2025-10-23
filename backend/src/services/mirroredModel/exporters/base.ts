@@ -7,40 +7,68 @@ import { ModelAction } from '../../../connectors/authorisation/actions.js'
 import authorisation from '../../../connectors/authorisation/index.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
+import { isBailoError } from '../../../types/error.js'
 import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
 import { MirrorLogData } from '../mirroredModel.js'
 import { finaliseTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
+
+function wrapErrorContext(err: unknown, context: ClassMethodDecoratorContext, self: BaseExporter): never {
+  if (isBailoError(err)) {
+    err.message += `\nMethod \`${String(self.constructor.name)}.${String(context.name)}\` failure.`
+    throw err
+  }
+  throw InternalError(`Method \`${String(self.constructor.name)}.${String(context.name)}\` failed.`, {
+    error: err,
+    ...self.getLogData(),
+  })
+}
 
 export function requiresInit<M extends (this: BaseExporter, ...args: any[]) => any>(
   value: M,
   context: ClassMethodDecoratorContext,
 ): M {
-  return function (this: BaseExporter, ...args: any[]) {
+  return async function (this: BaseExporter, ...args: any[]) {
     if (!this.initialised) {
       throw InternalError(
         `Method \`${String(this.constructor.name)}.${String(context.name)}\` called before \`init()\`.`,
-        {
-          ...this.logData,
-        },
-      )
-    }
-    if (!this.tarStream || !this.gzipStream || !this.uploadStream || !this.uploadPromise) {
-      throw InternalError(
-        `Method \`${String(this.constructor.name)}.${String(context.name)}\` streams not initialised before use.`,
         { ...this.logData },
       )
     }
-    return value.apply(this, args)
+    return await value.apply(this, args)
   } as M
 }
 
-// Helper for below `withStreamCleanupClass` to work with abstract classes as well as concrete implementations
+export function checkAuths<M extends (this: BaseExporter, ...args: any[]) => any>(
+  value: M,
+  context: ClassMethodDecoratorContext,
+): M {
+  return async function (this: BaseExporter, ...args: any[]) {
+    try {
+      await this.checkAuths()
+    } catch (err) {
+      wrapErrorContext(err, context, this)
+    }
+    return await value.apply(this, args)
+  } as M
+}
+
+export function withStreams<M extends (this: BaseExporter, ...args: any[]) => any>(
+  value: M,
+  context: ClassMethodDecoratorContext,
+): M {
+  return async function (this: BaseExporter, ...args: any[]) {
+    if (!this.tarStream || !this.gzipStream || !this.uploadStream || !this.uploadPromise) {
+      try {
+        await this.setupStreams()
+      } catch (err) {
+        wrapErrorContext(err, context, this)
+      }
+    }
+    return await value.apply(this, args)
+  } as M
+}
+
 type AbstractConstructor<T = object> = abstract new (...args: any[]) => T
-/**
- * Class decorator for `BaseExporter` and its subclasses that automatically wraps all instance
- * methods with error-handling logic to ensure cleanup of export-related streams (`tarStream`,
- * `gzipStream`, `uploadStream`) when any method throws.
- */
 function withStreamCleanupClass<T extends AbstractConstructor<BaseExporter>>(Base: T) {
   abstract class WithCleanup extends Base {
     protected cleanupStreams() {
@@ -66,14 +94,14 @@ function withStreamCleanupClass<T extends AbstractConstructor<BaseExporter>>(Bas
             if (result && typeof result.then === 'function') {
               return result.catch((err: unknown) => {
                 this.cleanupStreams()
-                throw err
+                wrapErrorContext(err, { name } as ClassMethodDecoratorContext, this)
               })
             }
             // otherwise synchronous execution, just return the value
             return result
           } catch (err) {
             this.cleanupStreams()
-            throw err
+            wrapErrorContext(err, { name } as ClassMethodDecoratorContext, this)
           }
         }
       }
@@ -85,22 +113,23 @@ function withStreamCleanupClass<T extends AbstractConstructor<BaseExporter>>(Bas
 
 @withStreamCleanupClass
 export abstract class BaseExporter {
-  abstract addData(): Promise<void> | void
-
+  protected abstract _init(): Promise<void> | void
+  protected abstract _addData(): Promise<void> | void
+  protected abstract _checkAuths(): Promise<void> | void
   protected abstract getInitialiseTarGzUploadParams():
     | Promise<Parameters<typeof initialiseTarGzUpload>>
     | Parameters<typeof initialiseTarGzUpload>
 
   protected readonly logData: MirrorLogData
-
   protected readonly user: UserInterface
   protected readonly model: ModelDoc
 
-  protected tarStream: Pack | undefined
-  protected gzipStream: zlib.Gzip | undefined
-  protected uploadStream: PassThrough | undefined
-  protected uploadPromise: Promise<void> | undefined
-  protected initialised: boolean = false
+  protected tarStream?: Pack
+  protected gzipStream?: zlib.Gzip
+  protected uploadStream?: PassThrough
+  protected uploadPromise?: Promise<void>
+  protected initialised = false
+  protected authCheck = false
 
   constructor(user: UserInterface, model: ModelDoc, logData: MirrorLogData) {
     this.user = user
@@ -112,38 +141,59 @@ export abstract class BaseExporter {
     return this.model
   }
 
-  protected async _init() {
-    if (!this.model.settings.mirror.destinationModelId) {
+  getLogData() {
+    return this.logData
+  }
+
+  async init() {
+    if (!this.model.settings?.mirror?.destinationModelId) {
       throw BadReq("The 'Destination Model ID' has not been set on this model.", this.logData)
     }
-    if (!this.model.card || !this.model.card.schemaId) {
-      throw BadReq('You must select a schema for your model before you can start the export process.', this.logData)
+    if (!this.model.card?.schemaId) {
+      throw BadReq('You must select a schema for your model before export.', this.logData)
     }
+    await this._init()
+    this.initialised = true
+    return this
+  }
+
+  protected async _checkModelAuths() {
     const modelAuth = await authorisation.model(this.user, this.model, ModelAction.Export)
     if (!modelAuth.success) {
       throw Forbidden(modelAuth.info, { userDn: this.user.dn, modelId: this.model.id, ...this.logData })
     }
   }
 
-  async _setupStreams() {
-    ;({
-      tarStream: this.tarStream,
-      gzipStream: this.gzipStream,
-      uploadStream: this.uploadStream,
-      uploadPromise: this.uploadPromise,
-    } = await initialiseTarGzUpload(...(await this.getInitialiseTarGzUploadParams())))
-  }
-
-  async init() {
-    await this._init()
-    await this._setupStreams()
-    this.initialised = true
-    return this
+  async checkAuths() {
+    if (!this.authCheck) {
+      await this._checkModelAuths()
+      await this._checkAuths()
+      this.authCheck = true
+    }
   }
 
   @requiresInit
+  protected async setupStreams() {
+    const params = await this.getInitialiseTarGzUploadParams()
+    const { tarStream, gzipStream, uploadStream, uploadPromise } = await initialiseTarGzUpload(...params)
+    this.tarStream = tarStream
+    this.gzipStream = gzipStream
+    this.uploadStream = uploadStream
+    this.uploadPromise = uploadPromise
+  }
+
+  @requiresInit
+  @checkAuths
+  @withStreams
+  async addData() {
+    // wrap to enforce extra checks
+    await this._addData()
+  }
+
+  @requiresInit
+  @checkAuths
+  @withStreams
   async finalise() {
-    // Non-null assertion operator used due to `requiresInit` performing assertion
     await finaliseTarGzUpload(this.tarStream!, this.uploadPromise!)
   }
 }

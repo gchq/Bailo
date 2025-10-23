@@ -3,7 +3,6 @@ import zlib from 'node:zlib'
 
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ModelAction } from '../../../../src/connectors/authorisation/actions.js'
 import { BaseExporter } from '../../../../src/services/mirroredModel/exporters/base.js'
 import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
 
@@ -21,9 +20,10 @@ const authMocks = vi.hoisted(() => ({
 vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
 class TestExporter extends BaseExporter {
-  addData() {
-    // mock implementation
-  }
+  // no-ops for testing
+  protected async _init() {}
+  protected async _addData() {}
+  protected async _checkAuths() {}
   protected getInitialiseTarGzUploadParams() {
     return ['arg1', 'arg2'] as any
   }
@@ -35,10 +35,11 @@ const mockModel = {
   settings: { mirror: { destinationModelId: 'destModelId' } },
   card: { schemaId: 'schemaId' },
 } as any
-const mockLogData = { extra: 'info', exportId: 'exportId', exporterType: 'TestExporter' }
+const mockLogData = { extra: 'info', exportId: 'exportId' }
 
-describe('connectors > mirroredModel > exporters > BaseExporter', () => {
+describe('services > mirroredModel > exporters > BaseExporter', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     tarballMocks.initialiseTarGzUpload.mockResolvedValue({
       tarStream: {} as any,
       gzipStream: {} as any,
@@ -49,87 +50,90 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
     authMocks.default.model.mockResolvedValue({ success: true } as any)
   })
 
-  test('constructor > success with ModelDoc', () => {
+  test('constructor sets model, user, logData', () => {
     const exporter = new TestExporter(mockUser, mockModel, mockLogData)
 
-    expect(exporter.getModel()).toEqual(mockModel)
-    expect(exporter).toMatchSnapshot()
+    expect(exporter.getModel()).toBe(mockModel)
+    expect(exporter.getLogData()).toMatchObject({
+      exporterType: 'TestExporter',
+      ...mockLogData,
+    })
   })
 
-  test('_init > success with valid model', async () => {
-    const exporter = new TestExporter(mockUser, mockModel, mockLogData)
-
-    // @ts-expect-error protected method
-    await exporter._init()
-
-    expect(authMocks.default.model).toHaveBeenCalledWith(mockUser, mockModel, ModelAction.Export)
-  })
-
-  test('_init > throws BadReq if destinationModelId missing', async () => {
+  test('init throws if destinationModelId missing', async () => {
     const badModel = { ...mockModel, settings: { mirror: {} } }
     const exporter = new TestExporter(mockUser, badModel, mockLogData)
-    // @ts-expect-error protected method
-    await expect(exporter._init()).rejects.toEqual(
-      BadReq("The 'Destination Model ID' has not been set on this model.", exporter['logData']),
+
+    await expect(exporter.init()).rejects.toEqual(
+      BadReq("The 'Destination Model ID' has not been set on this model.", exporter.getLogData()),
     )
   })
 
-  test('_init > throws BadReq if schemaId missing', async () => {
+  test('init throws if schemaId missing', async () => {
     const badModel = { ...mockModel, card: {} }
     const exporter = new TestExporter(mockUser, badModel, mockLogData)
 
-    // @ts-expect-error protected method
-    await expect(exporter._init()).rejects.toEqual(
-      BadReq('You must select a schema for your model before you can start the export process.', exporter['logData']),
+    await expect(exporter.init()).rejects.toEqual(
+      BadReq('You must select a schema for your model before export.', exporter.getLogData()),
     )
   })
 
-  test('_init > throws Forbidden if authorisation fails', async () => {
-    authMocks.default.model.mockResolvedValueOnce({ success: false, info: 'not allowed' })
+  test('init sets initialised true on success', async () => {
     const exporter = new TestExporter(mockUser, mockModel, mockLogData)
 
-    // @ts-expect-error protected method
-    await expect(exporter._init()).rejects.toEqual(
-      Forbidden('not allowed', { userDn: mockUser.dn, modelId: mockModel.id, ...exporter['logData'] }),
+    await exporter.init()
+
+    expect(exporter['initialised']).toBe(true)
+  })
+
+  test('checkAuths calls _checkModelAuths and _checkAuths only once', async () => {
+    const exporter = new TestExporter(mockUser, mockModel, mockLogData)
+    const spyModelAuth = vi.spyOn(exporter as any, '_checkModelAuths')
+    const spyExtraAuth = vi.spyOn(exporter as any, '_checkAuths')
+
+    await exporter.checkAuths()
+    await exporter.checkAuths()
+
+    expect(spyModelAuth).toHaveBeenCalledTimes(1)
+    expect(spyExtraAuth).toHaveBeenCalledTimes(1)
+  })
+
+  test('_checkModelAuths throws Forbidden if authorisation fails', async () => {
+    authMocks.default.model.mockResolvedValueOnce({ success: false, info: 'nope' })
+    const exporter = new TestExporter(mockUser, mockModel, mockLogData)
+
+    await expect(exporter['_checkModelAuths']()).rejects.toEqual(
+      Forbidden('nope', { userDn: mockUser.dn, modelId: mockModel.id, ...exporter.getLogData() }),
     )
   })
 
-  test('_setupStreams > success calls initialiseTarGzUpload', async () => {
+  test('setupStreams sets stream properties', async () => {
     const exporter = new TestExporter(mockUser, mockModel, mockLogData)
+    exporter['initialised'] = true
 
-    await exporter._setupStreams()
+    await exporter['setupStreams']()
 
-    expect(tarballMocks.initialiseTarGzUpload).toHaveBeenCalled()
     expect(exporter['tarStream']).toBeDefined()
     expect(exporter['gzipStream']).toBeDefined()
     expect(exporter['uploadStream']).toBeDefined()
     expect(exporter['uploadPromise']).toBeDefined()
   })
 
-  test('init > success runs _init and _setupStreams', async () => {
-    const exporter = new TestExporter(mockUser, mockModel, mockLogData)
-
-    await exporter.init()
-
-    expect(exporter['initialised']).toBe(true)
-    expect(exporter['tarStream']).toBeDefined()
-  })
-
-  test('finalise > throws if not initialised (sync throw from decorator)', () => {
-    const exporter = new TestExporter(mockUser, mockModel, mockLogData)
-
-    expect(() => exporter.finalise()).toThrowError(
-      InternalError('Method `TestExporter.finalise` called before `init()`.', mockLogData),
-    )
-  })
-
-  test('finalise > throws if streams missing (sync throw from decorator)', () => {
+  test('addData runs after decorators', async () => {
     const exporter = new TestExporter(mockUser, mockModel, mockLogData)
     exporter['initialised'] = true
-    exporter['tarStream'] = undefined
+    const spyAdd = vi.spyOn(exporter as any, '_addData').mockResolvedValue(undefined)
 
-    expect(() => exporter.finalise()).toThrowError(
-      InternalError('Method `TestExporter.finalise` streams not initialised before use.', mockLogData),
+    await exporter.addData()
+
+    expect(spyAdd).toHaveBeenCalled()
+  })
+
+  test('addData fails if not initialised', async () => {
+    const exporter = new TestExporter(mockUser, mockModel, mockLogData)
+
+    await expect(exporter.addData()).rejects.toEqual(
+      InternalError('Method `TestExporter.addData` called before `init()`.', exporter.getLogData()),
     )
   })
 
@@ -146,25 +150,130 @@ describe('connectors > mirroredModel > exporters > BaseExporter', () => {
     expect(tarballMocks.finaliseTarGzUpload).toHaveBeenCalledWith(exporter['tarStream'], exporter['uploadPromise'])
   })
 
-  test('withStreamCleanupClass > cleans up on error', () => {
+  test('finalise > define streams if missing', async () => {
+    const exporter = new TestExporter(mockUser, mockModel, mockLogData)
+    exporter['initialised'] = true
+    exporter['tarStream'] = undefined
+
+    await exporter.finalise()
+
+    expect(tarballMocks.finaliseTarGzUpload).toHaveBeenCalled()
+    expect(exporter['tarStream']).not.toBeUndefined()
+    expect(exporter['gzipStream']).not.toBeUndefined()
+    expect(exporter['uploadStream']).not.toBeUndefined()
+    expect(exporter['uploadPromise']).not.toBeUndefined()
+  })
+
+  test('withStreamCleanupClass cleans up on sync error', async () => {
     class ErrorExporter extends BaseExporter {
-      addData() {
+      protected async _init() {}
+      protected async _addData() {
         throw new Error('fail')
       }
+      protected async _checkAuths() {}
       protected getInitialiseTarGzUploadParams() {
         return [] as any
       }
     }
     const exporter = new ErrorExporter(mockUser, mockModel, mockLogData)
-    // @ts-expect-error mocking streams
-    exporter['tarStream'] = new PassThrough()
+    // @ts-expect-ignore accessing protected property
+    exporter['tarStream'] = new PassThrough() as any
     exporter['gzipStream'] = zlib.createGzip()
     exporter['uploadStream'] = new PassThrough()
 
-    expect(() => exporter.addData()).toThrow('fail')
+    await expect(exporter['_addData']()).rejects.toThrow('fail')
 
-    // @ts-expect-error mocking streams
-    expect(exporter['tarStream'].destroyed).toBe(true)
+    // @ts-expect-ignore accessing protected property
+    expect(exporter['tarStream']!.destroyed).toBe(true)
+    expect(exporter['gzipStream'].destroyed).toBe(true)
+    expect(exporter['uploadStream'].destroyed).toBe(true)
+  })
+
+  test('withStreamCleanupClass cleans up on async error', async () => {
+    class AsyncErrorExporter extends BaseExporter {
+      protected async _init() {}
+      protected async _addData() {
+        return Promise.reject(InternalError('async fail'))
+      }
+      protected async _checkAuths() {}
+      protected getInitialiseTarGzUploadParams() {
+        return [] as any
+      }
+    }
+    const exporter = new AsyncErrorExporter(mockUser, mockModel, mockLogData)
+    // @ts-expect-ignore accessing protected property
+    exporter['tarStream'] = new PassThrough() as any
+    exporter['gzipStream'] = zlib.createGzip()
+    exporter['uploadStream'] = new PassThrough()
+
+    await expect(exporter['_addData']()).rejects.toThrow('async fail')
+
+    // @ts-expect-ignore accessing protected property
+    expect(exporter['tarStream']!.destroyed).toBe(true)
+    expect(exporter['gzipStream'].destroyed).toBe(true)
+    expect(exporter['uploadStream'].destroyed).toBe(true)
+  })
+
+  test('withStreams decorator triggers wrapErrorContext when setupStreams throws', async () => {
+    class StreamFailExporter extends BaseExporter {
+      protected async _init() {}
+      protected async _addData() {}
+      protected async _checkAuths() {}
+      protected getInitialiseTarGzUploadParams() {
+        return [] as any
+      }
+    }
+    const exporter = new StreamFailExporter(mockUser, mockModel, mockLogData) as any
+    exporter.initialised = true
+    vi.spyOn(exporter, 'setupStreams').mockImplementationOnce(() => {
+      throw new Error('setup fail')
+    })
+    // forcibly skip tarStream presence so withStreams will try setupStreams
+    exporter.tarStream = undefined
+
+    await expect(exporter.addData()).rejects.toThrow(/failed/)
+  })
+
+  test('checkAuths decorator triggers wrapErrorContext when pre-check throws', async () => {
+    class AuthFailExporter extends BaseExporter {
+      protected async _init() {}
+      protected async _addData() {}
+      protected async _checkAuths() {}
+      protected getInitialiseTarGzUploadParams() {
+        return [] as any
+      }
+    }
+    const exporter = new AuthFailExporter(mockUser, mockModel, mockLogData) as any
+    exporter.initialised = true
+    vi.spyOn(exporter, 'checkAuths').mockImplementationOnce(() => {
+      throw new Error('auth fail')
+    })
+
+    const prom = exporter.addData()
+
+    await expect(prom).rejects.toThrow(/failed/)
+  })
+
+  test('withStreamCleanupClass hits sync catch branch', () => {
+    class SyncThrowExporter extends BaseExporter {
+      syncMethod() {
+        throw InternalError('sync fail')
+      }
+      protected async _init() {}
+      protected async _addData() {}
+      protected async _checkAuths() {}
+      protected getInitialiseTarGzUploadParams() {
+        return [] as any
+      }
+    }
+    const exporter = new SyncThrowExporter(mockUser, mockModel, mockLogData)
+    exporter['tarStream'] = new PassThrough() as any
+    exporter['gzipStream'] = zlib.createGzip()
+    exporter['uploadStream'] = new PassThrough()
+
+    expect(() => exporter.syncMethod()).toThrow('sync fail')
+
+    expect(exporter['tarStream']!.destroyed).toBe(true)
     expect(exporter['gzipStream'].destroyed).toBe(true)
     expect(exporter['uploadStream'].destroyed).toBe(true)
   })

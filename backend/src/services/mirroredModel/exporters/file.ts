@@ -8,11 +8,11 @@ import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
 import config from '../../../utils/config.js'
-import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
+import { BadReq, Forbidden } from '../../../utils/error.js'
 import { downloadFile } from '../../file.js'
 import { MirrorKind, MirrorLogData } from '../mirroredModel.js'
 import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
-import { BaseExporter, requiresInit } from './base.js'
+import { BaseExporter } from './base.js'
 
 export class FileExporter extends BaseExporter {
   protected readonly file: FileWithScanResultsInterface
@@ -26,19 +26,7 @@ export class FileExporter extends BaseExporter {
     return this.file
   }
 
-  protected async _init() {
-    await super._init()
-
-    const fileAuth = await authorisation.file(this.user, this.model!, this.file, FileAction.Download)
-    if (!fileAuth.success) {
-      throw Forbidden(fileAuth.info, {
-        userDn: this.user.dn,
-        modelId: this.model.id,
-        fileId: this.file.id,
-        ...this.logData,
-      })
-    }
-
+  protected _init() {
     if (this.file.size > config.modelMirror.export.maxSize) {
       throw BadReq('Requested export is too large.', {
         size: this.file.size,
@@ -57,12 +45,19 @@ export class FileExporter extends BaseExporter {
     }
   }
 
-  protected getInitialiseTarGzUploadParams(): Parameters<typeof initialiseTarGzUpload> {
-    if (!this.model) {
-      throw InternalError('Method `getInitialiseTarGzUploadParams` called before `this.model` defined.', {
+  protected async _checkAuths() {
+    const fileAuth = await authorisation.file(this.user, this.model!, this.file, FileAction.Download)
+    if (!fileAuth.success) {
+      throw Forbidden(fileAuth.info, {
+        userDn: this.user.dn,
+        modelId: this.model.id,
+        fileId: this.file.id,
         ...this.logData,
       })
     }
+  }
+
+  protected getInitialiseTarGzUploadParams(): Parameters<typeof initialiseTarGzUpload> {
     return [
       `${this.file.id}.tar.gz`,
       {
@@ -77,16 +72,14 @@ export class FileExporter extends BaseExporter {
     ]
   }
 
-  @requiresInit
-  async addData() {
-    // Non-null assertion operator used due to `requiresInit` performing assertion
+  protected async _addData() {
     await addEntryToTarGzUpload(
       this.tarStream!,
       {
         type: 'stream',
         filename: this.file.id,
         stream: (await downloadFile(this.user, this.file.id)).Body as Readable,
-        size: this.file!.size,
+        size: this.file.size,
       },
       this.logData,
     )

@@ -69,7 +69,7 @@ const mockFile = {
 } as any
 const mockLogData = { extra: 'info', exporterType: 'FileExporter', exportId: 'exportId' }
 
-describe('connectors > mirroredModel > exporters > FileExporter', () => {
+describe('services > mirroredModel > exporters > FileExporter', () => {
   beforeEach(() => {
     tarballMocks.initialiseTarGzUpload.mockResolvedValue({
       tarStream: {} as any,
@@ -84,89 +84,98 @@ describe('connectors > mirroredModel > exporters > FileExporter', () => {
     scannersMocks.default.info.mockReturnValue(false)
   })
 
-  test('constructor > sets file and logData', async () => {
+  test('constructor sets file reference', () => {
     const exporter = new FileExporter(mockUser, mockModel, mockFile, mockLogData)
 
     expect(exporter.getFile()).toEqual(mockFile)
-
-    expect(exporter).toMatchSnapshot()
   })
 
-  test('_init > success with valid inputs', async () => {
+  test('_init succeeds with valid inputs', () => {
     const exporter = new FileExporter(mockUser, mockModel, mockFile, mockLogData)
 
-    // @ts-expect-error protected method
-    await exporter._init()
+    // sync method, so just call and check no throw
+    // @ts-expect-error calling protected method
+    expect(() => exporter._init()).not.toThrow()
+  })
 
-    expect(authMocks.default.model).toHaveBeenCalled()
+  test('_checkAuths succeeds when authorisation passes', async () => {
+    const exporter = new FileExporter(mockUser, mockModel, mockFile, mockLogData)
+
+    // @ts-expect-error calling protected method
+    await expect(exporter._checkAuths()).resolves.toBeUndefined()
+
     expect(authMocks.default.file).toHaveBeenCalledWith(mockUser, mockModel, mockFile, FileAction.Download)
   })
 
-  test('_init > throws Forbidden if file authorisation fails', async () => {
+  test('_checkAuths throws Forbidden if file authorisation fails', async () => {
     authMocks.default.file.mockResolvedValueOnce({ success: false, info: 'no file access' })
     const exporter = new FileExporter(mockUser, mockModel, mockFile, mockLogData)
+    const expectedErr = Forbidden('no file access\nMethod `FileExporter._checkAuths` failure.', {
+      userDn: mockUser.dn,
+      modelId: mockModel.id,
+      fileId: mockFile.id,
+      ...mockLogData,
+    })
 
-    // @ts-expect-error protected method
-    await expect(exporter._init()).rejects.toEqual(
-      Forbidden('no file access', {
-        userDn: mockUser.dn,
-        modelId: mockModel.id,
-        fileId: mockFile.id,
-        ...mockLogData,
-      }),
-    )
+    // @ts-expect-error calling protected method
+    await expect(exporter._checkAuths()).rejects.toEqual(expectedErr)
   })
 
-  test('_init > throws BadReq if file too large', async () => {
+  test('_init throws BadReq if file too large', () => {
     const largeFile = { ...mockFile, size: 2000 }
     const exporter = new FileExporter(mockUser, mockModel, largeFile, mockLogData)
+    const expectedErr = BadReq('Requested export is too large.\nMethod `FileExporter._init` failure.', {
+      size: 2000,
+      maxSize: configMocks.default.modelMirror.export.maxSize,
+    })
 
-    // @ts-expect-error protected method
-    await expect(exporter._init()).rejects.toEqual(
-      BadReq('Requested export is too large.', {
-        size: 2000,
-        maxSize: configMocks.default.modelMirror.export.maxSize,
-      }),
-    )
+    // @ts-expect-error calling protected method
+    expect(() => exporter._init()).toThrowError(expectedErr)
   })
 
-  test('_init > throws BadReq if AV scans missing', async () => {
+  test('_init throws BadReq if AV scans missing', () => {
     scannersMocks.default.info.mockReturnValue(true)
     const badFile = { ...mockFile, avScan: [] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
+    const expectedErr = BadReq('The file is missing AV scan(s).\nMethod `FileExporter._init` failure.', {
+      filename: badFile.name,
+      fileId: badFile.id,
+    })
 
-    // @ts-expect-error protected method
-    await expect(exporter._init()).rejects.toEqual(
-      BadReq('The file is missing AV scan(s).', { filename: badFile.name, fileId: badFile.id }),
-    )
+    // @ts-expect-error calling protected method
+    expect(() => exporter._init()).toThrowError(expectedErr)
   })
 
-  test('_init > throws BadReq if AV scans incomplete', async () => {
+  test('_init throws BadReq if AV scans incomplete', () => {
     scannersMocks.default.info.mockReturnValue(true)
     const badFile = { ...mockFile, avScan: [{ state: ScanState.InProgress, isInfected: false }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
+    const expectedErr = BadReq('The file has incomplete AV scan(s).\nMethod `FileExporter._init` failure.', {
+      filename: badFile.name,
+      fileId: badFile.id,
+    })
 
-    // @ts-expect-error protected method
-    await expect(exporter._init()).rejects.toEqual(
-      BadReq('The file has incomplete AV scan(s).', { filename: badFile.name, fileId: badFile.id }),
-    )
+    // @ts-expect-error calling protected method
+    expect(() => exporter._init()).toThrowError(expectedErr)
   })
 
-  test('_init > throws BadReq if AV scans infected', async () => {
+  test('_init throws BadReq if AV scans infected', () => {
     scannersMocks.default.info.mockReturnValue(true)
     const badFile = { ...mockFile, avScan: [{ state: ScanState.Complete, isInfected: true }] }
     const exporter = new FileExporter(mockUser, mockModel, badFile, mockLogData)
+    const expectedErr = BadReq('The file has failed AV scan(s).\nMethod `FileExporter._init` failure.', {
+      filename: badFile.name,
+      fileId: badFile.id,
+    })
 
-    // @ts-expect-error protected method
-    await expect(exporter._init()).rejects.toEqual(
-      BadReq('The file has failed AV scan(s).', { filename: badFile.name, fileId: badFile.id }),
-    )
+    // @ts-expect-error calling protected method
+    expect(() => exporter._init()).toThrowError(expectedErr)
   })
 
-  test('getInitialiseTarGzUploadParams > returns correct params', async () => {
+  test('getInitialiseTarGzUploadParams returns correct params', () => {
     const exporter = new FileExporter(mockUser, mockModel, mockFile, mockLogData)
 
-    // @ts-expect-error protected method
+    // @ts-expect-error calling protected method
     const params = exporter.getInitialiseTarGzUploadParams()
 
     expect(params[0]).toBe(`${mockFile.id}.tar.gz`)
@@ -180,24 +189,22 @@ describe('connectors > mirroredModel > exporters > FileExporter', () => {
     expect(params[2]).toEqual(mockLogData)
   })
 
-  test('getInitialiseTarGzUploadParams > throws if model missing', () => {
+  test('getInitialiseTarGzUploadParams throws if model missing', () => {
     const exporter = new FileExporter(mockUser, undefined as any, mockFile, mockLogData)
 
-    // @ts-expect-error protected method
+    // @ts-expect-error calling protected method
     expect(() => exporter.getInitialiseTarGzUploadParams()).toThrowError(
-      InternalError('Method `getInitialiseTarGzUploadParams` called before `this.model` defined.', mockLogData),
+      /^Method `FileExporter.getInitialiseTarGzUploadParams` failed./,
     )
   })
 
-  test('addData > throws if not initialised', async () => {
+  test('addData throws if not initialised', async () => {
     const exporter = new FileExporter(mockUser, mockModel, mockFile, mockLogData)
-
-    expect(() => exporter.addData()).toThrowError(
-      InternalError('Method `FileExporter.addData` called before `init()`.', mockLogData),
-    )
+    const expectedErr = InternalError('Method `FileExporter.addData` called before `init()`.', mockLogData)
+    await expect(exporter.addData()).rejects.toEqual(expectedErr)
   })
 
-  test('addData > success calls addEntryToTarGzUpload', async () => {
+  test('addData success calls addEntryToTarGzUpload', async () => {
     const exporter = new FileExporter(mockUser, mockModel, mockFile, mockLogData)
     exporter['initialised'] = true
     exporter['tarStream'] = {} as any

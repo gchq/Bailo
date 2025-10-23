@@ -14,7 +14,7 @@ import { getModelCardRevisions } from '../../model.js'
 import { getAllFileIds } from '../../release.js'
 import { MirrorKind, MirrorLogData } from '../mirroredModel.js'
 import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
-import { BaseExporter, requiresInit } from './base.js'
+import { BaseExporter, checkAuths, requiresInit, withStreams } from './base.js'
 
 export class DocumentsExporter extends BaseExporter {
   protected readonly releases: ReleaseDoc[]
@@ -33,65 +33,61 @@ export class DocumentsExporter extends BaseExporter {
     return this.files
   }
 
-  protected async _init() {
-    await super._init()
-
-    if (this.releases.length > 0) {
-      await this.checkReleaseFiles()
-    }
-  }
-
-  protected getSemvers() {
+  getSemvers() {
     return this.releases.map((release) => release.semver)
   }
 
-  protected async checkReleaseFiles() {
-    const semvers = this.getSemvers()
-    const fileIds = await getAllFileIds(this.model.id, semvers)
-    this.files = await getFilesByIds(this.user, this.model.id, fileIds)
+  protected async _init() {
+    if (this.releases.length > 0) {
+      const semvers = this.getSemvers()
+      const fileIds = await getAllFileIds(this.model.id, semvers)
+      this.files = await getFilesByIds(this.user, this.model.id, fileIds)
 
-    // Check the total size of the export if more than one release is being exported
-    if (this.releases.length > 1) {
-      if (fileIds.length === 0) {
-        return
-      }
-      const totalFileSize = await getTotalFileSize(fileIds)
-      log.debug(
-        { modelId: this.model.id, semvers, size: prettyBytes(totalFileSize) },
-        'Calculated estimated total file size included in export.',
-      )
-      if (totalFileSize > config.modelMirror.export.maxSize) {
-        throw BadReq('Requested export is too large.', {
-          size: totalFileSize,
-          maxSize: config.modelMirror.export.maxSize,
-        })
-      }
-    }
-
-    if (scanners.info()) {
-      const scanErrors: {
-        missingScan: Array<{ name: string; id: string }>
-        incompleteScan: Array<{ name: string; id: string }>
-        failedScan: Array<{ name: string; id: string }>
-      } = { missingScan: [], incompleteScan: [], failedScan: [] }
-      for (const file of this.files) {
-        if (!file.avScan || file.avScan.length === 0) {
-          scanErrors.missingScan.push({ name: file.name, id: file.id })
-        } else if (file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
-          scanErrors.incompleteScan.push({ name: file.name, id: file.id })
-        } else if (file.avScan.some((scanResult) => scanResult.isInfected)) {
-          scanErrors.failedScan.push({ name: file.name, id: file.id })
+      // Check the total size of the export if more than one release is being exported
+      if (this.releases.length > 1) {
+        if (fileIds.length === 0) {
+          return
+        }
+        const totalFileSize = await getTotalFileSize(fileIds)
+        log.debug(
+          { modelId: this.model.id, semvers, size: prettyBytes(totalFileSize) },
+          'Calculated estimated total file size included in export.',
+        )
+        if (totalFileSize > config.modelMirror.export.maxSize) {
+          throw BadReq('Requested export is too large.', {
+            size: totalFileSize,
+            maxSize: config.modelMirror.export.maxSize,
+          })
         }
       }
-      if (
-        scanErrors.missingScan.length > 0 ||
-        scanErrors.incompleteScan.length > 0 ||
-        scanErrors.failedScan.length > 0
-      ) {
-        throw BadReq('The releases contain file(s) that do not have a clean AV scan.', { scanErrors })
+
+      if (scanners.info()) {
+        const scanErrors: {
+          missingScan: Array<{ name: string; id: string }>
+          incompleteScan: Array<{ name: string; id: string }>
+          failedScan: Array<{ name: string; id: string }>
+        } = { missingScan: [], incompleteScan: [], failedScan: [] }
+        for (const file of this.files) {
+          if (!file.avScan || file.avScan.length === 0) {
+            scanErrors.missingScan.push({ name: file.name, id: file.id })
+          } else if (file.avScan.some((scanResult) => scanResult.state !== ScanState.Complete)) {
+            scanErrors.incompleteScan.push({ name: file.name, id: file.id })
+          } else if (file.avScan.some((scanResult) => scanResult.isInfected)) {
+            scanErrors.failedScan.push({ name: file.name, id: file.id })
+          }
+        }
+        if (
+          scanErrors.missingScan.length > 0 ||
+          scanErrors.incompleteScan.length > 0 ||
+          scanErrors.failedScan.length > 0
+        ) {
+          throw BadReq('The releases contain file(s) that do not have a clean AV scan.', { scanErrors })
+        }
       }
     }
   }
+
+  protected _checkAuths() {}
 
   protected getInitialiseTarGzUploadParams(): Parameters<typeof initialiseTarGzUpload> {
     if (!this.model) {
@@ -113,7 +109,8 @@ export class DocumentsExporter extends BaseExporter {
   }
 
   @requiresInit
-  async addData() {
+  @checkAuths
+  protected async _addData() {
     try {
       await this.addModelCardRevisionsToTarball()
     } catch (error) {
@@ -133,6 +130,8 @@ export class DocumentsExporter extends BaseExporter {
   }
 
   @requiresInit
+  @checkAuths
+  @withStreams
   protected async addModelCardRevisionsToTarball() {
     log.debug(
       { user: this.user, modelId: this.model.id, ...this.logData },
@@ -142,7 +141,7 @@ export class DocumentsExporter extends BaseExporter {
     for (const card of cards) {
       const cardJson = JSON.stringify(card.toJSON())
       await addEntryToTarGzUpload(
-        this.tarStream!, // Non-null assertion operator used due to `requiresInit` performing assertion
+        this.tarStream!, // Non-null assertion operator used due to `withStreams` performing assertion
         { type: 'text', filename: `${card.version}.json`, content: cardJson },
         { modelId: this.model.id, ...this.logData },
       )
@@ -154,6 +153,8 @@ export class DocumentsExporter extends BaseExporter {
   }
 
   @requiresInit
+  @checkAuths
+  @withStreams
   protected async addReleasesToTarball() {
     log.debug({ ...this.logData }, 'Adding model releases to Tarball file.')
 
@@ -170,6 +171,8 @@ export class DocumentsExporter extends BaseExporter {
   }
 
   @requiresInit
+  @checkAuths
+  @withStreams
   protected async addReleaseToTarball(release: ReleaseDoc) {
     log.debug({ semver: release.semver, ...this.logData }, 'Adding release to tarball file of releases.')
     const files: FileWithScanResultsInterface[] = await getFilesByIds(this.user, release.modelId, release.fileIds)
@@ -197,6 +200,8 @@ export class DocumentsExporter extends BaseExporter {
   }
 
   @requiresInit
+  @checkAuths
+  @withStreams
   protected async addFilesToTarball(files: FileWithScanResultsInterface[]) {
     for (const file of files) {
       try {
