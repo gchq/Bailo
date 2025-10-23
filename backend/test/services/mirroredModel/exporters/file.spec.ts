@@ -4,8 +4,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { FileAction } from '../../../../src/connectors/authorisation/actions.js'
 import { ScanState } from '../../../../src/connectors/fileScanning/Base.js'
-import { FileExporter } from '../../../../src/connectors/mirroredModel/exporters/file.js'
-import { MirrorKind } from '../../../../src/connectors/mirroredModel/index.js'
+import { FileExporter } from '../../../../src/services/mirroredModel/exporters/file.js'
+import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
 
 const tarballMocks = vi.hoisted(() => ({

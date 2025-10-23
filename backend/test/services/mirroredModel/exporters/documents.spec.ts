@@ -3,8 +3,8 @@ import { PassThrough } from 'node:stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ScanState } from '../../../../src/connectors/fileScanning/Base.js'
-import { DocumentsExporter } from '../../../../src/connectors/mirroredModel/exporters/documents.js'
-import { MirrorKind } from '../../../../src/connectors/mirroredModel/index.js'
+import { DocumentsExporter } from '../../../../src/services/mirroredModel/exporters/documents.js'
+import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 import { BadReq, InternalError } from '../../../../src/utils/error.js'
 
 const tarballMocks = vi.hoisted(() => ({

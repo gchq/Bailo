@@ -65,9 +65,9 @@ const ImporterMock = vi.hoisted(() => {
     errorListenerSpy,
   }
 })
-vi.mock('../../../src/connectors/mirroredModel/importers/documents.js', () => ImporterMock)
-vi.mock('../../../src/connectors/mirroredModel/importers/file.js', () => ImporterMock)
-vi.mock('../../../src/connectors/mirroredModel/importers/image.js', () => ImporterMock)
+vi.mock('../../../src/services/mirroredModel/importers/documents.js', () => ImporterMock)
+vi.mock('../../../src/services/mirroredModel/importers/file.js', () => ImporterMock)
+vi.mock('../../../src/services/mirroredModel/importers/image.js', () => ImporterMock)
 
 function setUpExtractTarGzStreams() {
   const gzipStream = zlib.createGzip({ chunkSize: 16 * 1024 * 1024, level: zlib.constants.Z_BEST_SPEED })

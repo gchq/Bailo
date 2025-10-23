@@ -2,7 +2,6 @@ import { OpenApiGeneratorV3, OpenAPIRegistry, RouteConfig } from '@asteasolution
 import { AnyZodObject, z } from 'zod'
 
 import { ScanState } from '../connectors/fileScanning/Base.js'
-import { MirrorKind } from '../connectors/mirroredModel/index.js'
 import { SystemRoles } from '../models/Model.js'
 import { Decision, ResponseKind } from '../models/Response.js'
 import { ArtefactKind } from '../models/Scan.js'
@@ -10,6 +9,7 @@ import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState } from '../types/types.js'
 import config from '../utils/config.js'
+import { MirrorKind } from './mirroredModel/index.js'
 
 export const registry = new OpenAPIRegistry()
 

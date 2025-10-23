@@ -3,8 +3,8 @@ import { PassThrough } from 'node:stream'
 import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ImageImporter, ImageMirrorMetadata } from '../../../../src/connectors/mirroredModel/importers/image.js'
-import { MirrorKind } from '../../../../src/connectors/mirroredModel/index.js'
+import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
+import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {

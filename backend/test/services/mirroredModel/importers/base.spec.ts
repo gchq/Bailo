@@ -3,7 +3,7 @@ import { PassThrough } from 'node:stream'
 import { Headers } from 'tar-stream'
 import { describe, expect, test, vi } from 'vitest'
 
-import { BaseImporter, BaseMirrorMetadata } from '../../../../src/connectors/mirroredModel/importers/base.js'
+import { BaseImporter, BaseMirrorMetadata } from '../../../../src/services/mirroredModel/importers/base.js'
 import { InternalError } from '../../../../src/utils/error.js'
 
 class TestImporter extends BaseImporter {

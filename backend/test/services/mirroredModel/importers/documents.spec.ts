@@ -6,8 +6,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
   DocumentsImporter,
   DocumentsMirrorMetadata,
-} from '../../../../src/connectors/mirroredModel/importers/documents.js'
-import { MirrorKind } from '../../../../src/connectors/mirroredModel/index.js'
+} from '../../../../src/services/mirroredModel/importers/documents.js'
+import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {

@@ -4,7 +4,7 @@ import zlib from 'node:zlib'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ModelAction } from '../../../../src/connectors/authorisation/actions.js'
-import { BaseExporter } from '../../../../src/connectors/mirroredModel/exporters/base.js'
+import { BaseExporter } from '../../../../src/services/mirroredModel/exporters/base.js'
 import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
 
 const tarballMocks = vi.hoisted(() => ({

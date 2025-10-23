@@ -6,19 +6,19 @@ import { finished } from 'stream/promises'
 import { Headers } from 'tar-stream'
 
 import { UserInterface } from '../../../models/User.js'
-import log from '../../../services/log.js'
-import { MirrorLogData } from '../../../services/mirroredModel/mirroredModel.js'
+import config from '../../../utils/config.js'
+import { InternalError } from '../../../utils/error.js'
+import { hasKeysOfType } from '../../../utils/typeguards.js'
+import log from '../../log.js'
 import {
   doesImageLayerExist,
   initialiseImageUpload,
   putImageBlob,
   putImageManifest,
   splitDistributionPackageName,
-} from '../../../services/registry.js'
-import config from '../../../utils/config.js'
-import { InternalError } from '../../../utils/error.js'
-import { hasKeysOfType } from '../../../utils/typeguards.js'
+} from '../../registry.js'
 import { MirrorKind, MirrorKindKeys } from '../index.js'
+import { MirrorLogData } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type ImageMirrorMetadata = BaseMirrorMetadata & {

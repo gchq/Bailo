@@ -90,7 +90,7 @@ const DocumentsExporterMock = vi.hoisted(() => {
     return instance
   })
 })
-vi.mock('../../../src/connectors/mirroredModel/exporters/documents.js', () => ({
+vi.mock('../../../src/services/mirroredModel/exporters/documents.js', () => ({
   DocumentsExporter: DocumentsExporterMock,
 }))
 
@@ -104,7 +104,7 @@ const FileExporterMock = vi.hoisted(() => {
     return instance
   })
 })
-vi.mock('../../../src/connectors/mirroredModel/exporters/file.js', () => ({ FileExporter: FileExporterMock }))
+vi.mock('../../../src/services/mirroredModel/exporters/file.js', () => ({ FileExporter: FileExporterMock }))
 
 const ImageExporterMock = vi.hoisted(() => {
   return vi.fn(() => {
@@ -116,7 +116,7 @@ const ImageExporterMock = vi.hoisted(() => {
     return instance
   })
 })
-vi.mock('../../../src/connectors/mirroredModel/exporters/image.js', () => ({ ImageExporter: ImageExporterMock }))
+vi.mock('../../../src/services/mirroredModel/exporters/image.js', () => ({ ImageExporter: ImageExporterMock }))
 
 let pendingJobs: Promise<any>[] = []
 const exportQueueMock = vi.hoisted(() => {
@@ -130,7 +130,7 @@ const exportQueueMock = vi.hoisted(() => {
     exportQueueAddMock,
   }
 })
-vi.mock('../../../src/connectors/mirroredModel/exporters/index.js', () => ({ exportQueue: exportQueueMock }))
+vi.mock('../../../src/services/mirroredModel/exporters/index.js', () => ({ exportQueue: exportQueueMock }))
 
 describe('services > mirroredModel', () => {
   beforeEach(() => {

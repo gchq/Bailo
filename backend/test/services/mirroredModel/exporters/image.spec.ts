@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ReleaseAction } from '../../../../src/connectors/authorisation/actions.js'
-import { ImageExporter } from '../../../../src/connectors/mirroredModel/exporters/image.js'
-import { MirrorKind } from '../../../../src/connectors/mirroredModel/index.js'
+import { ImageExporter } from '../../../../src/services/mirroredModel/exporters/image.js'
+import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 import { Forbidden, InternalError } from '../../../../src/utils/error.js'
 
 const tarballMocks = vi.hoisted(() => ({
