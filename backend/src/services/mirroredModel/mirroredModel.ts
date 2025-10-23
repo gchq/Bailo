@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { Readable } from 'node:stream'
 
 import fetch, { Response } from 'node-fetch'
+import PQueue from 'p-queue'
 import { Pack } from 'tar-stream'
 
 import { EntryKind, ModelDoc, ModelInterface } from '../../models/Model.js'
@@ -18,13 +19,28 @@ import { getReleasesForExport } from '../release.js'
 import { DocumentsExporter } from './exporters/documents.js'
 import { FileExporter } from './exporters/file.js'
 import { ImageExporter } from './exporters/image.js'
-import { exportQueue } from './exporters/index.js'
-import { MongoDocumentMirrorInformation } from './importers/documents.js'
-import { FileMirrorInformation } from './importers/file.js'
-import { ImageMirrorInformation } from './importers/image.js'
+import { BaseImporter } from './importers/base.js'
+import { DocumentsImporter, DocumentsMirrorMetadata, MongoDocumentMirrorInformation } from './importers/documents.js'
+import { FileImporter, FileMirrorInformation, FileMirrorMetadata } from './importers/file.js'
+import { ImageImporter, ImageMirrorInformation, ImageMirrorMetadata } from './importers/image.js'
 import { addEntryToTarGzUpload, extractTarGzStream } from './tarball.js'
 
+export const MirrorKind = {
+  Documents: 'documents',
+  File: 'file',
+  Image: 'image',
+} as const
+
+export type MirrorKindKeys<T extends keyof typeof MirrorKind | void = void> = T extends keyof typeof MirrorKind
+  ? (typeof MirrorKind)[T]
+  : (typeof MirrorKind)[keyof typeof MirrorKind]
+
+export type MirrorMetadata = DocumentsMirrorMetadata | FileMirrorMetadata | ImageMirrorMetadata
+export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation
+
 export type MirrorLogData = Record<string, unknown> & ({ exportId: string } | { importId: string })
+
+const exportQueue: PQueue = new PQueue({ concurrency: config.modelMirror.export.concurrency })
 
 export async function exportModel(
   user: UserInterface,
@@ -135,6 +151,22 @@ export async function importModel(
   return {
     mirroredModel,
     importResult,
+  }
+}
+
+export function getImporter(metadata: MirrorMetadata, user: UserInterface, logData: MirrorLogData): BaseImporter {
+  switch (metadata.importKind) {
+    case MirrorKind.Documents:
+      return new DocumentsImporter(user, metadata, logData)
+    case MirrorKind.File:
+      return new FileImporter(metadata, logData)
+    case MirrorKind.Image:
+      return new ImageImporter(user, metadata, logData)
+    default:
+      throw InternalError(`Unknown \`importKind\` specified in '${config.modelMirror.metadataFile}'.`, {
+        metadata,
+        ...logData,
+      })
   }
 }
 

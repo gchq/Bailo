@@ -4,7 +4,6 @@ import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ImageImporter, ImageMirrorMetadata } from '../../../../src/services/mirroredModel/importers/image.js'
-import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -44,9 +43,14 @@ vi.mock('stream/promises', () => ({
   finished: vi.fn(() => Promise.resolve()),
 }))
 
+const mirroredModelMocks = vi.hoisted(() => ({
+  MirrorKind: { Image: 'image' },
+}))
+vi.mock('../../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
+
 const mockUser = { dn: 'user' }
 const mockMetadata: ImageMirrorMetadata = {
-  importKind: MirrorKind.Image,
+  importKind: mirroredModelMocks.MirrorKind.Image,
   mirroredModelId: 'model1',
   distributionPackageName: 'domain/imageName:tag',
 } as ImageMirrorMetadata

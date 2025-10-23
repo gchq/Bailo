@@ -7,7 +7,6 @@ import {
   DocumentsImporter,
   DocumentsMirrorMetadata,
 } from '../../../../src/services/mirroredModel/importers/documents.js'
-import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 
 const authMocks = vi.hoisted(() => ({
   default: {
@@ -53,9 +52,14 @@ const registryMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/registry.js', () => registryMocks)
 
+const mirroredModelMocks = vi.hoisted(() => ({
+  MirrorKind: { Documents: 'documents' },
+}))
+vi.mock('../../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
+
 const mockUser = { dn: 'user' }
 const mockMetadata: DocumentsMirrorMetadata = {
-  importKind: MirrorKind.Documents,
+  importKind: mirroredModelMocks.MirrorKind.Documents,
   mirroredModelId: 'mirroredModelId',
   sourceModelId: 'sourceModelId',
   exporter: 'exporter',

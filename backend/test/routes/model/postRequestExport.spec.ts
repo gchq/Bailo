@@ -9,6 +9,11 @@ vi.mock('../../../src/connectors/audit/index.js')
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
     vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => ({
+      MirrorKind: {
+        Documents: 'documents',
+        File: 'file',
+        Image: 'image',
+      },
       exportModel: vi.fn(),
     }))
 

@@ -4,7 +4,6 @@ import { Headers } from 'tar-stream'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { FileImporter, FileMirrorMetadata } from '../../../../src/services/mirroredModel/importers/file.js'
-import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 import config from '../../../../src/utils/__mocks__/config.js'
 
 const authMocks = vi.hoisted(() => ({
@@ -45,8 +44,13 @@ const registryMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/services/registry.js', () => registryMocks)
 
+const mirroredModelMocks = vi.hoisted(() => ({
+  MirrorKind: { File: 'file' },
+}))
+vi.mock('../../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
+
 const mockMetadata: FileMirrorMetadata = {
-  importKind: MirrorKind.File,
+  importKind: mirroredModelMocks.MirrorKind.File,
   mirroredModelId: 'model123',
   filePath: 'original/file/path',
 } as FileMirrorMetadata

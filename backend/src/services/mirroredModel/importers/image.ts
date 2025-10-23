@@ -17,8 +17,7 @@ import {
   putImageManifest,
   splitDistributionPackageName,
 } from '../../registry.js'
-import { MirrorKind, MirrorKindKeys } from '../index.js'
-import { MirrorLogData } from '../mirroredModel.js'
+import { MirrorKind, MirrorKindKeys, MirrorLogData } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type ImageMirrorMetadata = BaseMirrorMetadata & {

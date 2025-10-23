@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ReleaseAction } from '../../../../src/connectors/authorisation/actions.js'
 import { ImageExporter } from '../../../../src/services/mirroredModel/exporters/image.js'
-import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 import { Forbidden, InternalError } from '../../../../src/utils/error.js'
 
 const tarballMocks = vi.hoisted(() => ({
@@ -12,6 +11,7 @@ vi.mock('../../../../src/services/mirroredModel/tarball.js', () => tarballMocks)
 
 const mirroredModelMocks = vi.hoisted(() => ({
   addCompressedRegistryImageComponents: vi.fn(),
+  MirrorKind: { Image: 'image' },
 }))
 vi.mock('../../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
 
@@ -133,7 +133,7 @@ describe('connectors > mirroredModel > exporters > ImageExporter', () => {
       sourceModelId: mockModel.id,
       mirroredModelId: mockModel.settings.mirror.destinationModelId,
       distributionPackageName: 'joined/name:tag',
-      importKind: MirrorKind.Image,
+      importKind: mirroredModelMocks.MirrorKind.Image,
     })
     expect(params[2]).toEqual(mockLogData)
   })

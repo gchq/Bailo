@@ -14,11 +14,7 @@ import log from '../log.js'
 import { validateMirroredModel } from '../model.js'
 import { mirrorMetadataSchema } from '../specification.js'
 import { BaseImporter } from './importers/base.js'
-import { DocumentsImporter } from './importers/documents.js'
-import { FileImporter } from './importers/file.js'
-import { ImageImporter } from './importers/image.js'
-import { MirrorInformation, MirrorKind, MirrorMetadata } from './index.js'
-import { MirrorLogData } from './mirroredModel.js'
+import { getImporter, MirrorInformation, MirrorLogData, MirrorMetadata } from './mirroredModel.js'
 import { uploadToS3 } from './s3.js'
 
 function createTarGzStreams() {
@@ -106,7 +102,6 @@ export async function extractTarGzStream(
   return new Promise((resolve, reject) => {
     let metadata: MirrorMetadata
     let importer: BaseImporter
-    let firstEntryProcessed = false
     const { ungzipStream, untarStream } = createUnTarGzStreams()
 
     tarGzStream.pipe(ungzipStream).pipe(untarStream)
@@ -149,7 +144,7 @@ export async function extractTarGzStream(
           'Processing un-tarred entry.',
         )
 
-        if (!firstEntryProcessed) {
+        if (!metadata) {
           if (entry.type !== 'file' || entry.name !== config.modelMirror.metadataFile) {
             throw InternalError(`Expected '${config.modelMirror.metadataFile}' as first entry, found '${entry.name}'`, {
               entry,
@@ -165,27 +160,9 @@ export async function extractTarGzStream(
             throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, ...logData })
           }
 
-          switch (metadata.importKind) {
-            case MirrorKind.Documents:
-              importer = new DocumentsImporter(user, metadata, logData)
-              break
-            case MirrorKind.File:
-              importer = new FileImporter(metadata, logData)
-              break
-            case MirrorKind.Image:
-              importer = new ImageImporter(user, metadata, logData)
-              break
-            default:
-              // This should be unreachable due to the above `mirrorMetadataSchema.parse`
-              throw InternalError(`Unknown importKind specified in '${config.modelMirror.metadataFile}'.`, {
-                metadata,
-                entry,
-                ...logData,
-              })
-          }
+          importer = getImporter(metadata, user, { entry, ...logData })
 
           // Drain and continue
-          firstEntryProcessed = true
           next()
           return
         }

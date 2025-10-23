@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ScanState } from '../../../../src/connectors/fileScanning/Base.js'
 import { DocumentsExporter } from '../../../../src/services/mirroredModel/exporters/documents.js'
-import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 import { BadReq, InternalError } from '../../../../src/utils/error.js'
 
 const tarballMocks = vi.hoisted(() => ({
@@ -60,6 +59,11 @@ const authMocks = vi.hoisted(() => ({
   },
 }))
 vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
+
+const mirroredModelMocks = vi.hoisted(() => ({
+  MirrorKind: { Documents: 'documents' },
+}))
+vi.mock('../../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
 
 const mockUser = { dn: 'userDN' } as any
 const mockModel = {
@@ -210,7 +214,7 @@ describe('connectors > mirroredModel > exporters > DocumentsExporter', () => {
       exporter: mockUser.dn,
       sourceModelId: mockModel.id,
       mirroredModelId: mockModel.settings.mirror.destinationModelId,
-      importKind: MirrorKind.Documents,
+      importKind: mirroredModelMocks.MirrorKind.Documents,
     })
   })
 

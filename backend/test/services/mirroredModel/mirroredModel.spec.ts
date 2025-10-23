@@ -6,7 +6,9 @@ import {
   addCompressedRegistryImageComponents,
   exportModel,
   generateDigest,
+  getImporter,
   importModel,
+  MirrorKind,
   uploadReleaseFiles,
   uploadReleaseImages,
 } from '../../../src/services/mirroredModel/mirroredModel.js'
@@ -36,6 +38,7 @@ const configMock = vi.hoisted(() => ({
   app: {
     protocol: '',
   },
+  modelMirror: { export: { concurrency: 1 }, metadataFile: 'meta.json' },
 }))
 vi.mock('../../../src/utils/config.js', () => ({ default: configMock }))
 
@@ -118,6 +121,35 @@ const ImageExporterMock = vi.hoisted(() => {
 })
 vi.mock('../../../src/services/mirroredModel/exporters/image.js', () => ({ ImageExporter: ImageExporterMock }))
 
+const DocumentsImporterMock = vi.hoisted(() => ({
+  DocumentsImporter: vi.fn(() => ({ mocked: 'documents' })),
+  DocumentsMirrorMetadata: vi.fn(),
+  MongoDocumentMirrorInformation: vi.fn(),
+}))
+vi.mock('../../../src/services/mirroredModel/importers/documents.js', () => DocumentsImporterMock)
+
+const FileImporterMock = vi.hoisted(() => ({
+  FileImporter: vi.fn(() => ({ mocked: 'file' })),
+  FileMirrorMetadata: vi.fn(),
+  FileMirrorInformation: vi.fn(),
+}))
+vi.mock('../../../src/services/mirroredModel/importers/file.js', () => FileImporterMock)
+
+const ImageImporterMock = vi.hoisted(() => ({
+  ImageImporter: vi.fn(() => ({ mocked: 'file' })),
+  ImageMirrorMetadata: vi.fn(),
+  ImageMirrorInformation: vi.fn(),
+}))
+vi.mock('../../../src/services/mirroredModel/importers/image.js', () => ImageImporterMock)
+
+vi.mock('./importers/file.js', () => ({
+  FileImporter: vi.fn().mockImplementation(() => ({ mocked: 'file' })),
+}))
+
+vi.mock('./importers/image.js', () => ({
+  ImageImporter: vi.fn().mockImplementation(() => ({ mocked: 'image' })),
+}))
+
 let pendingJobs: Promise<any>[] = []
 const exportQueueMock = vi.hoisted(() => {
   const exportQueueAddMock = vi.fn((job: () => Promise<any>) => {
@@ -130,7 +162,7 @@ const exportQueueMock = vi.hoisted(() => {
     exportQueueAddMock,
   }
 })
-vi.mock('../../../src/services/mirroredModel/exporters/index.js', () => ({ exportQueue: exportQueueMock }))
+vi.mock('p-queue', () => ({ default: vi.fn(() => exportQueueMock) }))
 
 describe('services > mirroredModel', () => {
   beforeEach(() => {
@@ -247,6 +279,32 @@ describe('services > mirroredModel', () => {
       expect(tarballMocks.extractTarGzStream.mock.calls.at(0)?.at(0)).toBeInstanceOf(Readable)
       expect(getModelByIdMock).toHaveBeenCalled()
       expect(res).toHaveProperty('mirroredModel')
+    })
+  })
+
+  describe('getImporter', () => {
+    test('success > Documents', () => {
+      const importer = getImporter({ importKind: MirrorKind.Documents } as any, {} as any, {} as any)
+
+      expect(importer).toMatchObject(DocumentsImporterMock.DocumentsImporter())
+    })
+
+    test('success > File', () => {
+      const importer = getImporter({ importKind: MirrorKind.File } as any, {} as any, {} as any)
+
+      expect(importer).toMatchObject(FileImporterMock.FileImporter())
+    })
+
+    test('success > Image', () => {
+      const importer = getImporter({ importKind: MirrorKind.Image } as any, {} as any, {} as any)
+
+      expect(importer).toMatchObject(ImageImporterMock.ImageImporter())
+    })
+
+    test('fail > invalid importKind', () => {
+      expect(() => getImporter({ importKind: 'invalid' } as any, {} as any, {} as any)).toThrowError(
+        `Unknown \`importKind\` specified in '${configMock.modelMirror.metadataFile}'.`,
+      )
     })
   })
 

@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { FileAction } from '../../../../src/connectors/authorisation/actions.js'
 import { ScanState } from '../../../../src/connectors/fileScanning/Base.js'
 import { FileExporter } from '../../../../src/services/mirroredModel/exporters/file.js'
-import { MirrorKind } from '../../../../src/services/mirroredModel/index.js'
 import { BadReq, Forbidden, InternalError } from '../../../../src/utils/error.js'
 
 const tarballMocks = vi.hoisted(() => ({
@@ -50,6 +49,11 @@ const configMocks = vi.hoisted(() => ({
   },
 }))
 vi.mock('../../../../src/utils/config.js', () => configMocks)
+
+const mirroredModelMocks = vi.hoisted(() => ({
+  MirrorKind: { File: 'file' },
+}))
+vi.mock('../../../../src/services/mirroredModel/mirroredModel.js', () => mirroredModelMocks)
 
 const mockUser = { dn: 'userDN' } as any
 const mockModel = {
@@ -171,7 +175,7 @@ describe('connectors > mirroredModel > exporters > FileExporter', () => {
       sourceModelId: mockModel.id,
       mirroredModelId: mockModel.settings.mirror.destinationModelId,
       filePath: mockFile.id,
-      importKind: MirrorKind.File,
+      importKind: mirroredModelMocks.MirrorKind.File,
     })
     expect(params[2]).toEqual(mockLogData)
   })

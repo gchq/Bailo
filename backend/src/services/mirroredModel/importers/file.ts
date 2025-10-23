@@ -8,8 +8,7 @@ import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { createFilePath, markFileAsCompleteAfterImport } from '../../file.js'
 import log from '../../log.js'
-import { MirrorKind, MirrorKindKeys } from '../index.js'
-import { MirrorLogData } from '../mirroredModel.js'
+import { MirrorKind, MirrorKindKeys, MirrorLogData } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type FileMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'File'>; filePath: string }

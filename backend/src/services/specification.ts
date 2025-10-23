@@ -9,7 +9,7 @@ import { TokenScope } from '../models/Token.js'
 import { SchemaKind } from '../types/enums.js'
 import { FederationState } from '../types/types.js'
 import config from '../utils/config.js'
-import { MirrorKind } from './mirroredModel/index.js'
+import { MirrorKind } from './mirroredModel/mirroredModel.js'
 
 export const registry = new OpenAPIRegistry()
 
