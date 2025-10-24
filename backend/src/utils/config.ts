@@ -96,6 +96,8 @@ export interface Config {
 
     automaticallyCreateBuckets: boolean
 
+    multipartChunkSize: number
+
     buckets: {
       uploads: string
       registry: string
