@@ -43,7 +43,9 @@ class DummyConnector extends BasePeerConnector {
   }
 
   async queryModels(_opts, _user) {
-    return []
+    return {
+      models: [],
+    }
   }
 }
 

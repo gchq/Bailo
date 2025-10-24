@@ -1,9 +1,8 @@
 import fetch, { Response } from 'node-fetch'
 
 import { UserInterface } from '../../models/User.js'
-import { GetModelsResponse, ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { isBailoError } from '../../types/error.js'
-import { SystemStatus } from '../../types/types.js'
+import { ModelSearchResultWithErrors, SystemStatus } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { GenericError, InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
@@ -17,19 +16,21 @@ export class BailoPeerConnector extends BasePeerConnector {
     return Promise.resolve(true)
   }
 
-  async queryModels(opts: { query: string }, _user: UserInterface): Promise<Array<ModelSearchResult>> {
+  async queryModels(opts: { query: string }, _user: UserInterface): Promise<ModelSearchResultWithErrors> {
     let query: URLSearchParams = new URLSearchParams()
     if (opts.query) {
       query = new URLSearchParams({ search: opts.query })
     }
 
-    const results = await this.request<GetModelsResponse>(`/api/v2/models/search?${query.toString()}`)
-    const models = results.models
+    const results = await this.request<ModelSearchResultWithErrors>(`/api/v2/models/search?${query.toString()}`)
 
-    return models.map((model) => ({
-      ...model,
-      peerId: this.getId(),
-    }))
+    return {
+      models: results.models.map((model) => ({
+        ...model,
+        peerId: this.getId(),
+      })),
+      errors: results.errors,
+    }
   }
 
   async getPeerStatus(): Promise<SystemStatus> {

@@ -1,9 +1,14 @@
 import NodeCache from 'node-cache'
 
 import { UserInterface } from '../../models/User.js'
-import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { getHttpsAgent } from '../../services/http.js'
-import { FederationState, FederationStateKeys, RemoteFederationConfig, SystemStatus } from '../../types/types.js'
+import {
+  FederationState,
+  FederationStateKeys,
+  ModelSearchResultWithErrors,
+  RemoteFederationConfig,
+  SystemStatus,
+} from '../../types/types.js'
 
 export abstract class BasePeerConnector {
   id: string
@@ -71,7 +76,7 @@ export abstract class BasePeerConnector {
    */
   abstract getPeerStatus(): Promise<SystemStatus>
 
-  abstract queryModels(opts, user: UserInterface): Promise<Array<ModelSearchResult>>
+  abstract queryModels(opts, user: UserInterface): Promise<ModelSearchResultWithErrors>
 
   /**
    * Provide a formatted key of: `peerId:userDn:key`
