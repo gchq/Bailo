@@ -4,7 +4,7 @@ import { Button, Chip, ListItem, ListItemText, Menu, MenuItem, Stack } from '@mu
 import { useGetSchemas } from 'actions/schema'
 import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
-import EntryListDialog from 'src/schemas/ModelListDialog'
+import EntryListDialog from 'src/schemas/EntryListDialog'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
 import { SchemaInterface, SchemaKind } from 'types/types'
 
@@ -121,9 +121,12 @@ export default function SchemaListItem({
         onClose={handleReviewRolesDialogClose}
         schema={schema}
       />
-      {schema.kind !== SchemaKind.ACCESS_REQUEST && (
-        <EntryListDialog open={modelsListOpen} schema={schema} onClose={handleModelsListDialogClose} />
-      )}
+      {
+        //Temporary: After access request endpoint is created, this should be ternary routing to either EntryListDialog or  (new) AccessRequestListDialog
+        schema.kind !== SchemaKind.ACCESS_REQUEST && (
+          <EntryListDialog open={modelsListOpen} schema={schema} onClose={handleModelsListDialogClose} />
+        )
+      }
     </ListItem>
   )
 }

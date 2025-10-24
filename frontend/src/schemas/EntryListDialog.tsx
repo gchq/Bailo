@@ -17,7 +17,7 @@ import Loading from 'src/common/Loading'
 import { Transition } from 'src/common/Transition'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
-import { EntryKind, SchemaInterface } from 'types/types'
+import { EntryKind, SchemaInterface, SchemaKind } from 'types/types'
 import { camelCaseToTitleCase } from 'utils/stringUtils'
 
 type SchemaDialogProps = {
@@ -27,9 +27,12 @@ type SchemaDialogProps = {
 }
 
 export default function EntryListDialog({ open = false, onClose, schema }: SchemaDialogProps) {
-  //TODO changes to this as blocked as no accessrequest endpoint
-  const { models, isModelsLoading, isModelsError } = useListModels(
-    schema.kind === 'dataCard' ? EntryKind.DATA_CARD : EntryKind.MODEL,
+  const {
+    models: entries,
+    isModelsLoading: isEntriesLoading,
+    isModelsError: isEntriesError,
+  } = useListModels(
+    schema.kind === SchemaKind.DATA_CARD ? EntryKind.DATA_CARD : EntryKind.MODEL,
     [],
     '',
     [],
@@ -40,13 +43,13 @@ export default function EntryListDialog({ open = false, onClose, schema }: Schem
     schema.id,
   )
 
-  const modelList = useMemo(
+  const entryList = useMemo(
     () => (
       <List>
-        {models.map((model) => (
-          <ListItem key={model.id}>
-            <Link href={`/model/${model.id}`} sx={{ textDecoration: 'none', width: '100%' }}>
-              <ListItemButton dense aria-label={`go to the model: ${model.name} `}>
+        {entries.map((entry) => (
+          <ListItem key={entry.id}>
+            <Link href={`/model/${entry.id}`} sx={{ textDecoration: 'none', width: '100%' }}>
+              <ListItemButton dense aria-label={`go to the ${schema.kind}: ${entry.name} `}>
                 <ListItemText
                   primary={
                     <Typography
@@ -60,7 +63,7 @@ export default function EntryListDialog({ open = false, onClose, schema }: Schem
                         overflow: 'hidden',
                       }}
                     >
-                      {model.name}
+                      {entry.name}
                     </Typography>
                   }
                   secondary={
@@ -73,7 +76,7 @@ export default function EntryListDialog({ open = false, onClose, schema }: Schem
                         overflow: 'hidden',
                       }}
                     >
-                      {model.description}
+                      {entry.description}
                     </Typography>
                   }
                 />
@@ -83,21 +86,21 @@ export default function EntryListDialog({ open = false, onClose, schema }: Schem
         ))}
       </List>
     ),
-    [models],
+    [entries, schema.kind],
   )
 
-  if (isModelsError) {
-    return <MessageAlert message={isModelsError.info.message} severity='error' />
+  if (isEntriesError) {
+    return <MessageAlert message={isEntriesError.info.message} severity='error' />
   }
 
   return (
     <Dialog fullWidth open={open} onClose={onClose} maxWidth='sm' slots={{ transition: Transition }}>
-      <DialogTitle>{`${camelCaseToTitleCase(schema.kind)}s associated to schema (${models.length})`}</DialogTitle>
+      <DialogTitle>{`${camelCaseToTitleCase(schema.kind)}s associated to schema (${entries.length})`}</DialogTitle>
       <DialogContent>
-        {isModelsLoading ? (
+        {isEntriesLoading ? (
           <Loading />
-        ) : models.length ? (
-          modelList
+        ) : entries.length ? (
+          entryList
         ) : (
           <EmptyBlob text={`No associated ${camelCaseToTitleCase(schema.kind)}s`} />
         )}
