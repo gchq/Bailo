@@ -1,14 +1,15 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.13.2-bookworm AS sphinx-docs
+FROM python:3.13.9-bookworm AS sphinx-docs
 
 # Prevents Python from writing pyc files, and from buffering stdout and stderr to avoid situations where the application crashes without emitting any logs due to buffering.
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 # Cache packages with run cache, update system packages, install pandoc
-RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
-    rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean && \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
     apt-get update && \
     apt-get install -y --no-install-recommends pandoc
 
@@ -24,7 +25,7 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install -e /app/python -r req
 
 RUN make dirhtml
 
-FROM node:24.9.0-alpine AS base
+FROM node:24.10.0-alpine AS base
 
 RUN apk add --no-cache libc6-compat ca-certificates && \
     apk update

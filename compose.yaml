@@ -1,35 +1,35 @@
+name: bailo
+
 services:
   mongo:
     image: bitnamilegacy/mongodb:8.0.13
+    networks:
+      internal:
     environment:
       - MONGODB_REPLICA_SET_NAME=repl-set
     volumes:
       - mongoVolume:/bitnami/mongodb
-    ports:
-      - 27017:27017
     healthcheck:
-      test:
-        test $$(mongosh --port 27017 --quiet --eval "try
-        {rs.initiate({_id:'repl-set',members:[{_id:0,host:\"mongo:27017\"}]})} catch(e) {rs.status().ok}") -eq 1
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       start_period: 30s
+    ports:
+      - 27017:27017
 
   minio:
     image: bitnamilegacy/minio:2025.7.23
+    networks:
+      internal:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_BROWSER_REDIRECT_URL: http://localhost:8080/minio/ui/
-      MINIO_SERVER_URL: http://minio:9000
-      MINIO_SKIP_CLIENT: yes
-    ports:
-      - 9000:9000
-      - 9001:9001
     volumes:
       - minioVolume:/bitnami/minio
 
   clamd:
     image: clamav/clamav:1.4.3_base
+    networks:
+      internal:
     healthcheck:
       test: ['CMD-SHELL', "echo 'PING' | nc -w 5 localhost 3310"]
       interval: 30s
@@ -37,41 +37,36 @@ services:
       retries: 5
 
   modelscan:
+    networks:
+      internal:
+    image: bailo_modelscan:${INSTANCE_NAME}
     build:
       context: ./lib/modelscan_api
-      target: dev
     volumes:
       - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
-    ports:
-      - 3311:3311
     healthcheck:
-      test: ['CMD-SHELL', 'curl --fail http://localhost:3311/info || exit 1']
+      test: ['CMD-SHELL', 'curl --fail http://127.0.0.1:3311/info || exit 1']
       interval: 30s
       timeout: 10s
       retries: 5
 
-  mailcrab:
-    image: marlonb/mailcrab:v1.6.2
-    ports:
-      - 1080:1080
-      - 1025:1025
-
   nginx:
     image: nginxinc/nginx-unprivileged:1.28.0-alpine3.21-slim
+    networks:
+      default:
+      internal:
     volumes:
       - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
-      - 8080:8080
+      - ${EXTERNAL_PORT}:8080
     depends_on:
       - frontend
       - backend
-      - registry
 
   registry:
-    restart: always
     image: registry:3.0.0
-    ports:
-      - 5000:5000
+    networks:
+      internal:
     environment:
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/cert.pem
       REGISTRY_HTTP_TLS_KEY: /certs/key.pem
@@ -90,33 +85,31 @@ services:
       - ./backend/certs:/certs
 
   frontend:
+    networks:
+      internal:
+    image: bailo_frontend:${INSTANCE_NAME}
     build:
       context: ./frontend/
-      target: dev
-    volumes:
-      - ./frontend:/app
     depends_on:
       - backend
-    ports:
-      - 3000:3000
 
   backend:
+    networks:
+      internal:
+    image: bailo_backend:${INSTANCE_NAME}
     build:
       context: ./backend/
       additional_contexts:
         python: ./lib/python
-      target: dev
     volumes:
-      - ./backend/src:/app/src
-      - ./backend/config:/app/config
       - ./backend/certs:/certs
       - ./backend/certs:/usr/local/share/ca-certificates
-    ports:
-      - 3001:3001
-      - 9229:9229
+      - ./backend/config:/app/config
     depends_on:
       clamd:
         condition: service_healthy
+      registry:
+        condition: service_started
       modelscan:
         condition: service_healthy
       minio:
@@ -127,12 +120,16 @@ services:
       - seccomp:unconfined
       - apparmor:unconfined
     environment:
-      - NODE_CONFIG_ENV=docker_compose
-  webhook-tester:
-    image: tarampampam/webhook-tester
-    command: serve --port 8082 --create-session 00000000-0000-0000-0000-000000000000
-    ports: ['8082:8082/tcp'] # Open <http://127.0.0.1:8080/#/00000000-0000-0000-0000-000000000000>
+      - NODE_CONFIG_ENV=${INSTANCE_NAME}_docker_compose
 
 volumes:
   minioVolume:
+    name: ${INSTANCE_NAME}_minioVolume
   mongoVolume:
+    name: ${INSTANCE_NAME}_mongoVolume
+
+networks:
+  default:
+    name: ${INSTANCE_NAME}_default
+  internal:
+    name: ${INSTANCE_NAME}_internal
