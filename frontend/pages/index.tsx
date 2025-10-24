@@ -30,6 +30,7 @@ import Loading from 'src/common/Loading'
 import SearchInfo from 'src/common/SearchInfo'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
 import { EntryKind, EntryKindKeys } from 'types/types'
@@ -59,7 +60,12 @@ export default function Marketplace() {
   const { peers, isPeersLoading, isPeersError } = useGetPeers()
   const { status, isStatusLoading, isStatusError } = useGetStatus()
 
-  const { models, isModelsError, isModelsLoading } = useListModels(
+  const {
+    models,
+    errors: modelsErrors,
+    isModelsError,
+    isModelsLoading,
+  } = useListModels(
     EntryKind.MODEL,
     selectedRoles,
     selectedTask,
@@ -72,6 +78,7 @@ export default function Marketplace() {
 
   const {
     models: dataCards,
+    errors: dataCardsErrors,
     isModelsError: isDataCardsError,
     isModelsLoading: isDataCardsLoading,
   } = useListModels(
@@ -442,6 +449,7 @@ export default function Marketplace() {
                 </Tabs>
               </Box>
               {isModelsLoading && <Loading />}
+              {modelsErrors && MultipleErrorWrapper('Error with model search', modelsErrors)}
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
@@ -462,6 +470,9 @@ export default function Marketplace() {
                   />
                 </div>
               )}
+              {selectedTab === EntryKind.DATA_CARD &&
+                dataCardsErrors &&
+                MultipleErrorWrapper('Error with data-card search', dataCardsErrors)}
               {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
                 <div data-test='dataCardListBox'>
                   <EntryList

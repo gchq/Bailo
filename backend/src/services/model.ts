@@ -11,9 +11,9 @@ import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
-import { ModelSearchResult } from '../routes/v2/model/getModelsSearch.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
-import { EntityKind, EntryUserPermissions } from '../types/types.js'
+import { isBailoError } from '../types/error.js'
+import { EntityKind, EntryUserPermissions, ModelSearchResultWithErrors } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -132,8 +132,10 @@ export async function searchModels(
   peers?: Array<string>,
   allowTemplating?: boolean,
   schemaId?: string,
-): Promise<Array<ModelSearchResult>> {
-  const models: ModelSearchResult[] = []
+): Promise<ModelSearchResultWithErrors> {
+  const results: ModelSearchResultWithErrors = {
+    models: [],
+  }
 
   const localModelsPromise = searchLocalModels(
     user,
@@ -148,8 +150,19 @@ export async function searchModels(
     schemaId,
   )
 
+  localModelsPromise.catch((e) => {
+    if (!results.errors) {
+      results.errors = {}
+    }
+    if (isBailoError(e)) {
+      results.errors['local'] = e
+    } else {
+      results.errors['local'] = InternalError('Search error', { err: e })
+    }
+  })
+
   const processLocalModels = localModelsPromise.then((localModels) => {
-    models.push(
+    results.models.push(
       ...localModels.map((model) => ({
         id: model.id,
         name: model.name,
@@ -170,15 +183,26 @@ export async function searchModels(
   if (peers && peers.length > 0) {
     const connectors = await getPeerConnectors()
     const remotePromise = connectors.queryModels({ query: search }, user, peers)
-    const processRemoteModels = remotePromise.then((remoteModels) => {
-      models.push(...remoteModels)
+
+    const processRemoteModels = remotePromise.then((remoteResponses) => {
+      for (const response of remoteResponses.flat()) {
+        if (response.models) {
+          results.models.push(...response.models)
+        }
+        if (response.errors) {
+          for (const [peerId, error] of Object.entries(response.errors)) {
+            if (!results.errors) results.errors = {}
+            results.errors[peerId] = error
+          }
+        }
+      }
     })
     promises.push(processRemoteModels)
   }
 
   await Promise.all(promises)
 
-  return models
+  return results
 }
 
 async function searchLocalModels(

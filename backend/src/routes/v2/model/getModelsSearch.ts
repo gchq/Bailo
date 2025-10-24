@@ -3,10 +3,14 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { CollaboratorEntry, EntryKind, EntryKindKeys } from '../../../models/Model.js'
+import { EntryKind, EntryKindKeys } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
+import { ModelSearchResultWithErrors } from '../../../types/types.js'
+import { BadReq } from '../../../utils/error.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
+
+const minLength = 3
 
 export const getModelsSearchSchema = z.object({
   query: z.object({
@@ -17,7 +21,11 @@ export const getModelsSearchSchema = z.object({
     organisations: coerceArray(z.array(z.string()).optional().default([])),
     states: coerceArray(z.array(z.string()).optional().default([])),
     filters: coerceArray(z.array(z.string()).optional().default([])),
-    search: z.string().optional().default(''),
+    search: z
+      .string()
+      .optional()
+      .openapi({ example: `Text to filter by, must be at least ${minLength} characters` })
+      .default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
     peers: coerceArray(z.array(z.string()).optional().default([])),
@@ -48,6 +56,16 @@ registerPath({
                 peerId: z.string().optional(),
               }),
             ),
+            errors: z
+              .record(
+                z.string(),
+                z.object({
+                  peerId: z.string().optional(),
+                  message: z.string().optional(),
+                  code: z.number().optional(),
+                }),
+              )
+              .optional(),
           }),
         },
       },
@@ -55,32 +73,23 @@ registerPath({
   },
 })
 
-export interface ModelSearchResult {
-  id: string
-  name: string
-  description: string
-  tags: Array<string>
-  kind: EntryKindKeys
-  organisation?: string
-  state?: string
-  collaborators: Array<CollaboratorEntry>
-  createdAt: Date
-  updatedAt: Date
-  peerId?: string
-}
-
-export interface GetModelsResponse {
-  models: Array<ModelSearchResult>
-}
-
 export const getModelsSearch = [
-  async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
+  async (req: Request, res: Response<ModelSearchResultWithErrors>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
     const {
       query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states, peers },
     } = parse(req, getModelsSearchSchema)
 
-    const models = await searchModels(
+    let results: ModelSearchResultWithErrors = {
+      models: [],
+    }
+
+    // If a search term is provided, it should have some actual characters to filter by
+    if (search && search.length > 0 && search.length < minLength) {
+      throw BadReq(`Search query too short - must be at least ${minLength} characters`)
+    }
+
+    results = await searchModels(
       req.user,
       kind as EntryKindKeys,
       libraries,
@@ -94,8 +103,8 @@ export const getModelsSearch = [
       schemaId,
     )
 
-    await audit.onSearchModel(req, models)
+    await audit.onSearchModel(req, results.models)
 
-    res.json({ models })
+    res.json(results)
   },
 ]

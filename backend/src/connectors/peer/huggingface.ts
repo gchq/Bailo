@@ -1,10 +1,9 @@
 import { HubApiError, listModels, modelInfo } from '@huggingface/hub'
 
 import { UserInterface } from '../../models/User.js'
-import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import log from '../../services/log.js'
-import { SystemStatus } from '../../types/types.js'
-import { ConfigurationError } from '../../utils/error.js'
+import { ModelSearchResult, ModelSearchResultWithErrors, SystemStatus } from '../../types/types.js'
+import { BadReq, ConfigurationError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
 interface ExtraConfig {
@@ -62,22 +61,31 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
     }
   }
 
-  async queryModels(opts: { query: string }, user: UserInterface): Promise<Array<ModelSearchResult>> {
+  async queryModels(opts: { query: string }, user: UserInterface): Promise<ModelSearchResultWithErrors> {
     const cache = this.getQueryCache()
     const cacheKey = this.buildCacheKey(user, opts.query)
     const cacheResult = cache ? cache.get<Array<ModelSearchResult>>(cacheKey) : undefined
     if (cacheResult) {
       log.debug(`Cache hit - returning cached result for ${cacheKey}`)
-      return cacheResult
+      return {
+        models: cacheResult,
+      }
     }
     log.debug(`Cache miss - executing query for ${cacheKey}`)
 
     // No cache result - execute query, cache response if appropriate
     const models = new Array<ModelSearchResult>()
-    // Don't allow a whole search
-    if (opts.query.length < 5) {
-      return models
+    // Require a minimum length for search
+    const minLength = 5
+    if (opts.query.length < minLength) {
+      return {
+        models: [],
+        errors: {
+          [this.getId()]: BadReq('Query too short', { query: opts.query, minLength }),
+        },
+      }
     }
+
     for await (const model of listModels({
       search: { query: opts.query },
       limit: 100,
@@ -96,11 +104,12 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
         collaborators: [],
       })
     }
+
     // Store in cache if configured to
     if (cache) {
       log.debug(`Cache store - storing query for ${cacheKey}`)
       cache.set(cacheKey, models)
     }
-    return Promise.resolve(models)
+    return Promise.resolve({ models })
   }
 }

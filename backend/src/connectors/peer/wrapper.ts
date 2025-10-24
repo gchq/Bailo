@@ -1,6 +1,5 @@
 import { UserInterface } from '../../models/User.js'
-import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
-import { PeerConfigStatus } from '../../types/types.js'
+import { ModelSearchResultWithErrors, PeerConfigStatus } from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
@@ -42,7 +41,7 @@ export class PeerConnectorWrapper {
     },
     user: UserInterface,
     peersToQuery: Array<string> = this.peerIds,
-  ): Promise<Array<ModelSearchResult>> {
+  ): Promise<Array<ModelSearchResultWithErrors>> {
     if (!peersToQuery.every((q) => this.peers.has(q))) {
       throw InternalError('Invalid peer IDs provided to wrapper')
     }

@@ -2,6 +2,7 @@ import qs from 'querystring'
 import useSWR from 'swr'
 
 import {
+  BailoError,
   EntryForm,
   EntryInterface,
   EntryKindKeys,
@@ -60,6 +61,7 @@ export function useListModels(
   const { data, isLoading, error, mutate } = useSWR<
     {
       models: EntrySearchResult[]
+      errors: Record<string, BailoError>
     },
     ErrorInfo
   >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
@@ -67,6 +69,7 @@ export function useListModels(
   return {
     mutateModels: mutate,
     models: data ? data.models : emptyModelList,
+    errors: data ? data.errors : {},
     isModelsLoading: isLoading,
     isModelsError: error,
   }
