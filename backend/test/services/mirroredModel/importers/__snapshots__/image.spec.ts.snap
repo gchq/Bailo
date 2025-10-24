@@ -1,0 +1,45 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`connectors > mirroredModel > importers > ImageImporter > constructor > success 1`] = `
+ImageImporter {
+  "imageName": "imageName",
+  "imageTag": "tag",
+  "logData": {
+    "extra": "info",
+    "importId": "importId",
+    "importerType": "ImageImporter",
+  },
+  "manifestBody": null,
+  "metadata": {
+    "distributionPackageName": "domain/imageName:tag",
+    "importKind": "image",
+    "mirroredModelId": "model1",
+  },
+  "user": {
+    "dn": "user",
+  },
+}
+`;
+
+exports[`connectors > mirroredModel > importers > ImageImporter > processEntry > success extract manifest.json 1`] = `
+ImageImporter {
+  "imageName": "imageName",
+  "imageTag": "tag",
+  "logData": {
+    "extra": "info",
+    "importId": "importId",
+    "importerType": "ImageImporter",
+  },
+  "manifestBody": {
+    "manifest": true,
+  },
+  "metadata": {
+    "distributionPackageName": "domain/imageName:tag",
+    "importKind": "image",
+    "mirroredModelId": "model1",
+  },
+  "user": {
+    "dn": "user",
+  },
+}
+`;

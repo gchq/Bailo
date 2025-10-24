@@ -7,7 +7,6 @@ import { getModelCardHtmlSchema } from '../../../../src/routes/v2/model/modelcar
 import { getModelCardHtml as getModelCardHtmlService } from '../../../../src/services/modelCardExport.js'
 import { createFixture, testGet } from '../../../testUtils/routes.js'
 
-vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/audit/index.js')
 
 const mockModelCard: ModelCardInterface = {

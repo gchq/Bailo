@@ -5,38 +5,28 @@ import { getObjectStream, putObjectStream } from '../../clients/s3.js'
 import config from '../../utils/config.js'
 import { InternalError } from '../../utils/error.js'
 import log from '../log.js'
-import { ExportMetadata, generateDigest } from './mirroredModel.js'
+import { generateDigest, MirrorLogData } from './mirroredModel.js'
 
-export async function uploadToS3(
-  fileName: string,
-  stream: Readable,
-  metadata: ExportMetadata,
-  logData?: Record<string, unknown>,
-) {
-  const s3LogData = { metadata, ...logData }
+export async function uploadToS3(fileName: string, stream: Readable, logData: MirrorLogData) {
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug(logData, 'Using signatures. Uploading to temporary S3 location first.')
     try {
-      await uploadToTemporaryS3Location(fileName, stream, s3LogData)
-      await copyToExportBucketWithSignatures(fileName, s3LogData, metadata)
+      await uploadToTemporaryS3Location(fileName, stream, logData)
+      await copyToExportBucketWithSignatures(fileName, logData)
     } catch (error) {
-      log.error({ error, ...logData }, 'Failed to upload export to export location with signatures')
+      log.error({ error, ...logData }, 'Failed to upload export to export location with signatures.')
     }
   } else {
     log.debug(logData, 'Signatures not enabled. Uploading to export S3 location.')
     try {
-      await uploadToExportS3Location(fileName, stream, s3LogData, metadata)
+      await uploadToExportS3Location(fileName, stream, logData)
     } catch (error) {
-      log.error({ error, ...logData }, 'Failed to upload export to export location without signatures')
+      log.error({ error, ...logData }, 'Failed to upload export to export location without signatures.')
     }
   }
 }
 
-async function copyToExportBucketWithSignatures(
-  fileName: string,
-  logData: Record<string, unknown>,
-  metadata: ExportMetadata,
-) {
+async function copyToExportBucketWithSignatures(fileName: string, logData: MirrorLogData) {
   let signatures = {}
   log.debug(logData, 'Getting stream from S3 to generate signatures.')
   const streamForDigest = await getObjectFromTemporaryS3Location(fileName, logData)
@@ -48,30 +38,21 @@ async function copyToExportBucketWithSignatures(
     log.error(logData, 'Error generating signature for export.')
     throw e
   }
-  log.debug(logData, 'Successfully generated signatures')
+  log.debug(logData, 'Successfully generated signatures.')
   log.debug(logData, 'Getting stream from S3 to upload to export location.')
   const streamToCopy = await getObjectFromTemporaryS3Location(fileName, logData)
-  await uploadToExportS3Location(fileName, streamToCopy, logData, {
-    ...signatures,
-    ...metadata,
-  })
+  await uploadToExportS3Location(fileName, streamToCopy, logData, signatures)
 }
 
-async function uploadToTemporaryS3Location(
-  fileName: string,
-  stream: Readable,
-  logData: Record<string, unknown>,
-  metadata?: Record<string, string>,
-) {
+async function uploadToTemporaryS3Location(fileName: string, stream: Readable, logData: MirrorLogData) {
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
-    await putObjectStream(object, stream, undefined, metadata)
+    await putObjectStream(object, stream)
     log.debug(
       {
         bucket,
         object,
-        ...(metadata && { metadata }),
         ...logData,
       },
       'Successfully uploaded export to temporary S3 location.',
@@ -80,14 +61,13 @@ async function uploadToTemporaryS3Location(
     throw InternalError('Failed to export to temporary S3 location.', {
       bucket,
       object,
-      ...(metadata && { metadata }),
       error,
       ...logData,
     })
   }
 }
 
-async function getObjectFromTemporaryS3Location(fileName: string, logData: Record<string, unknown>) {
+async function getObjectFromTemporaryS3Location(fileName: string, logData: MirrorLogData) {
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
@@ -111,7 +91,7 @@ async function getObjectFromTemporaryS3Location(fileName: string, logData: Recor
   }
 }
 
-export async function getObjectFromExportS3Location(object: string, logData: Record<string, unknown>) {
+export async function getObjectFromExportS3Location(object: string, logData: MirrorLogData) {
   const bucket = config.modelMirror.export.bucket
   try {
     const stream = (await getObjectStream(object, bucket)).Body as Readable
@@ -121,7 +101,7 @@ export async function getObjectFromExportS3Location(object: string, logData: Rec
         object,
         ...logData,
       },
-      'Successfully retrieved stream from temporary S3 location.',
+      'Successfully retrieved stream from export S3 location.',
     )
     return stream
   } catch (error) {
@@ -132,7 +112,7 @@ export async function getObjectFromExportS3Location(object: string, logData: Rec
         error,
         ...logData,
       },
-      'Failed to retrieve stream from temporary S3 location.',
+      'Failed to retrieve stream from export S3 location.',
     )
     throw error
   }
@@ -141,8 +121,8 @@ export async function getObjectFromExportS3Location(object: string, logData: Rec
 async function uploadToExportS3Location(
   object: string,
   stream: Readable,
-  logData: Record<string, unknown>,
-  metadata?: ExportMetadata,
+  logData: MirrorLogData,
+  metadata?: Record<string, string>,
 ) {
   const bucket = config.modelMirror.export.bucket
   try {
@@ -151,7 +131,6 @@ async function uploadToExportS3Location(
       {
         bucket,
         object,
-        ...(metadata && { metadata }),
         ...logData,
       },
       'Successfully uploaded export to export S3 location.',
@@ -161,7 +140,6 @@ async function uploadToExportS3Location(
       {
         bucket,
         object,
-        ...(metadata && { metadata }),
         error,
         ...logData,
       },
@@ -170,7 +148,6 @@ async function uploadToExportS3Location(
     throw InternalError('Failed to export to export S3 location.', {
       bucket,
       object,
-      ...(metadata && { metadata }),
       error,
       ...logData,
     })

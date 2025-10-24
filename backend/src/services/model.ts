@@ -18,6 +18,7 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
+import { MirrorLogData } from './mirroredModel/mirroredModel.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -542,21 +543,21 @@ export async function setLatestImportedModelCard(modelId: string) {
   return updatedModel
 }
 
-export async function validateMirroredModel(mirroredModelId: string, sourceModelId: string, importId: string) {
+export async function validateMirroredModel(mirroredModelId: string, sourceModelId: string, logData: MirrorLogData) {
   const model = await Model.findOne({
     id: mirroredModelId,
     'settings.mirror.sourceModelId': { $ne: null },
   })
 
   if (!model) {
-    throw NotFound(`The requested mirrored model entry was not found.`, { modelId: mirroredModelId, importId })
+    throw NotFound(`The requested mirrored model entry was not found.`, { modelId: mirroredModelId, ...logData })
   }
 
   if (model.settings.mirror.sourceModelId !== sourceModelId) {
     throw InternalError('The source model ID of the mirrored model does not match the model Id of the imported model', {
       sourceModelId: model.settings.mirror.sourceModelId,
       importedModelId: sourceModelId,
-      importId,
+      ...logData,
     })
   }
 

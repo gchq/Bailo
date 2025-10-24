@@ -56,7 +56,7 @@ async function registryRequest(
   let contentType: string
   let res: Response
   let body: any
-  let stream: ReadableStream | Readable | undefined
+  let stream: Readable | undefined
 
   do {
     const url = `${registry}/v2/${endpoint}${paginateParameter}`
@@ -141,7 +141,7 @@ async function registryRequest(
   return {
     headers: res.headers ? Object.fromEntries(res.headers) : {},
     body: returnRawBody ? undefined : body,
-    stream: returnRawBody ? stream : undefined,
+    stream: returnRawBody ? (stream instanceof ReadableStream ? Readable.fromWeb(stream) : stream) : undefined,
     abort: () => controller.abort(),
     status: res.status,
     statusText: res.statusText,
@@ -210,7 +210,7 @@ export async function getRegistryLayerStream(
   token: string,
   imageRef: RepoRef,
   layerDigest: string,
-): Promise<{ stream: Readable | ReadableStream; abort: () => void }> {
+): Promise<{ stream: Readable; abort: () => void }> {
   const { stream, abort } = await registryRequest(
     token,
     `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
@@ -221,7 +221,7 @@ export async function getRegistryLayerStream(
     },
   )
 
-  if (!stream || !(stream instanceof ReadableStream || stream instanceof Readable)) {
+  if (!stream || !(stream instanceof Readable)) {
     abort()
     throw InternalError('Unrecognised response stream when getting image layer blob.', {
       stream,

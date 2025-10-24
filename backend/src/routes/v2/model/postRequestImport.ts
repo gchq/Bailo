@@ -3,27 +3,14 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { ImportKind, importModel } from '../../../services/mirroredModel/mirroredModel.js'
+import { importModel } from '../../../services/mirroredModel/mirroredModel.js'
 import { registerPath } from '../../../services/specification.js'
 import { parse } from '../../../utils/validate.js'
 
 export const postRequestImportFromS3Schema = z.object({
-  body: z
-    .object({
-      payloadUrl: z.string(),
-      mirroredModelId: z.string(),
-      sourceModelId: z.string(),
-      exporter: z.string(),
-      importKind: z.nativeEnum(ImportKind),
-      filePath: z.string().optional(),
-      distributionPackageName: z.string().optional(),
-    })
-    .refine((data) => data.importKind !== ImportKind.Image || !!data.distributionPackageName, {
-      message: 'distributionPackageName is required for Image import',
-    })
-    .refine((data) => data.importKind !== ImportKind.File || !!data.filePath, {
-      message: 'filePath is required for File import',
-    }),
+  body: z.object({
+    payloadUrl: z.string(),
+  }),
 })
 
 registerPath({
@@ -57,23 +44,22 @@ export const postRequestImportFromS3 = [
   async (req: Request, res: Response<PostRequestImportResponse>): Promise<void> => {
     req.audit = AuditInfo.CreateImport
     const {
-      body: { payloadUrl, sourceModelId, mirroredModelId, exporter, importKind, filePath, distributionPackageName },
+      body: { payloadUrl },
     } = parse(req, postRequestImportFromS3Schema)
 
-    const { mirroredModel, importResult } = await importModel(
-      req.user,
-      mirroredModelId,
-      sourceModelId,
-      payloadUrl,
-      importKind,
-      filePath,
-      distributionPackageName,
+    const { mirroredModel, importResult } = await importModel(req.user, payloadUrl)
+    await audit.onCreateImport(
+      req,
+      mirroredModel,
+      importResult.metadata.sourceModelId,
+      importResult.metadata.exporter,
+      // drop `metadata` from `importResult`
+      (({ metadata: _, ...o }) => o)(importResult),
     )
-    await audit.onCreateImport(req, mirroredModel, sourceModelId, exporter, importResult)
 
     res.json({
       mirroredModelId: mirroredModel.id,
-      sourceModelId,
+      sourceModelId: importResult.metadata.sourceModelId,
     })
   },
 ]

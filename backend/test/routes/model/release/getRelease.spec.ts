@@ -4,9 +4,7 @@ import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { getReleaseSchema } from '../../../../src/routes/v2/release/getRelease.js'
 import { createFixture, testGet } from '../../../testUtils/routes.js'
 
-vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/audit/index.js')
-vi.mock('../../../../src/connectors/authorisation/index.js')
 
 vi.mock('../../../../src/services/release.js', () => ({
   getReleaseBySemver: vi.fn(() => ({ _id: 'test', toObject: vi.fn(() => ({ _id: 'test' })) })),
@@ -14,13 +12,13 @@ vi.mock('../../../../src/services/release.js', () => ({
 
 const getFilesByIds = vi.hoisted(() => vi.fn(() => []))
 
-vi.mock('../../../../src/services/file.ts', () => ({
+vi.mock('../../../../src/services/file.js', () => ({
   getFilesByIds,
 }))
 
 const findResponsesById = vi.hoisted(() => vi.fn(() => []))
 
-vi.mock('../../../../src/services/response.ts', () => ({
+vi.mock('../../../../src/services/response.js', () => ({
   findResponsesById,
 }))
 

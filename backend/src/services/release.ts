@@ -212,7 +212,7 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
   if (model.settings.mirror.sourceModelId) {
     throw BadReq(`Cannot update a release on a mirrored model.`)
   }
-  const release = await getReleaseBySemver(user, modelId, semver)
+  const release = await getReleaseBySemver(user, model, semver)
 
   Object.assign(release, delta)
   await validateRelease(user, model, release)
@@ -371,16 +371,18 @@ export function semverObjectToString(semver: SemverObject): string {
   return `${semver.major}.${semver.minor}.${semver.patch}${metadata}`
 }
 
-export async function getReleaseBySemver(user: UserInterface, modelId: string, semver: string) {
-  const model = await getModelById(user, modelId)
+export async function getReleaseBySemver(user: UserInterface, model: string | ModelDoc, semver: string) {
+  if (typeof model === 'string') {
+    model = await getModelById(user, model)
+  }
   const semverObj = semverStringToObject(semver)
   const release = await Release.findOne({
-    modelId,
+    modelId: model.id,
     semver: semverObj,
   })
 
   if (!release) {
-    throw NotFound(`The requested release was not found.`, { modelId, semver })
+    throw NotFound(`The requested release was not found.`, { modelId: model.id, semver })
   }
 
   const auth = await authorisation.release(user, model, ReleaseAction.View, release)
@@ -526,7 +528,7 @@ export async function deleteRelease(user: UserInterface, modelId: string, semver
   if (model.settings.mirror.sourceModelId) {
     throw BadReq(`Cannot delete a release on a mirrored model.`)
   }
-  const release = await getReleaseBySemver(user, modelId, semver)
+  const release = await getReleaseBySemver(user, model, semver)
 
   const auth = await authorisation.release(user, model, ReleaseAction.Delete, release)
   if (!auth.success) {

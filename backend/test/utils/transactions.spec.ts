@@ -15,7 +15,7 @@ const utilsDb = vi.hoisted(() => {
   return { isTransactionsEnabled: vi.fn() }
 })
 
-vi.mock('../../src/utils/database.ts', () => {
+vi.mock('../../src/utils/database.js', () => {
   return {
     isTransactionsEnabled: utilsDb.isTransactionsEnabled,
   }

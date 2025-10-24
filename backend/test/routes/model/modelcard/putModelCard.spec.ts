@@ -6,8 +6,6 @@ import ModelCardRevisionModel from '../../../../src/models/ModelCardRevision.js'
 import { putModelCardSchema } from '../../../../src/routes/v2/model/modelcard/putModelCard.js'
 import { createFixture, testPut } from '../../../testUtils/routes.js'
 
-vi.mock('../../../../src/connectors/authorisation/index.js')
-vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/audit/index.js')
 
 const modelServiceMock = vi.hoisted(() => {

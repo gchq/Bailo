@@ -132,7 +132,11 @@ export async function downloadFile(user: UserInterface, fileId: string, range?: 
   return getObjectStream(file.path, undefined, range)
 }
 
-export async function getFileById(user: UserInterface, fileId: string): Promise<FileWithScanResultsInterface> {
+export async function getFileById(
+  user: UserInterface,
+  fileId: string,
+  model?: ModelDoc,
+): Promise<FileWithScanResultsInterface> {
   const files: FileWithScanResultsInterface[] = await FileModel.aggregate([
     { $match: { _id: new Types.ObjectId(fileId) } },
     { $limit: 1 },
@@ -152,7 +156,9 @@ export async function getFileById(user: UserInterface, fileId: string): Promise<
   }
   const file: FileWithScanResultsInterface = { ...files[0], id: files[0]._id.toString() }
 
-  const model = await getModelById(user, file.modelId)
+  if (!model) {
+    model = await getModelById(user, file.modelId)
+  }
   const auth = await authorisation.file(user, model, file, FileAction.View)
   if (!auth.success) {
     throw Forbidden(auth.info, { userDn: user.dn, fileId })
