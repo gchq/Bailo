@@ -99,7 +99,7 @@ export default function EntryListDialog({ open = false, onClose, schema }: Schem
         ) : models.length ? (
           modelList
         ) : (
-          <EmptyBlob text={`No Associated ${camelCaseToTitleCase(schema.kind)}s`} />
+          <EmptyBlob text={`No associated ${camelCaseToTitleCase(schema.kind)}s`} />
         )}
       </DialogContent>
       <DialogActions>
