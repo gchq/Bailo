@@ -31,8 +31,6 @@ import MessageAlert from 'src/MessageAlert'
 import TagSelector from 'src/MuiForms/TagSelector'
 import {
   CollaboratorEntry,
-  CreateEntryKind,
-  CreateEntryKindKeys,
   EntityKind,
   EntryForm,
   EntryKind,
@@ -44,7 +42,7 @@ import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
 
 type CreateEntryProps = {
-  createEntryKind: CreateEntryKindKeys
+  createEntryKind: EntryKindKeys
   onBackClick: () => void
 }
 
@@ -68,13 +66,8 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
   const [loading, setLoading] = useState(false)
   const [tags, setTags] = useState<string[]>([])
 
-  const entryKind: EntryKindKeys = useMemo(
-    () => (createEntryKind === CreateEntryKind.MIRRORED_MODEL ? EntryKind.MODEL : createEntryKind),
-    [createEntryKind],
-  )
-
   const isFormValid = useMemo(
-    () => name && description && (sourceModelId || createEntryKind !== CreateEntryKind.MIRRORED_MODEL),
+    () => name && description && (sourceModelId || createEntryKind !== EntryKind.MIRRORED_MODEL),
     [name, description, createEntryKind, sourceModelId],
   )
 
@@ -83,6 +76,12 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
     [],
   )
 
+  const entryKindForRedirect = useMemo(() => {
+    return createEntryKind === EntryKind.MODEL || createEntryKind === EntryKind.MIRRORED_MODEL
+      ? EntryKind.MODEL
+      : createEntryKind
+  }, [createEntryKind])
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setLoading(true)
@@ -90,7 +89,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
 
     const formData: EntryForm = {
       name,
-      kind: entryKind,
+      kind: createEntryKind,
       description,
       organisation,
       visibility,
@@ -111,7 +110,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
       setLoading(false)
     } else {
       const data = await response.json()
-      router.push(`/${entryKind}/${data.model.id}`)
+      router.push(`/${entryKindForRedirect}/${data.model.id}`)
     }
   }
 
@@ -192,7 +191,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
               {`Create ${toTitleCase(createEntryKind)}`}
             </Typography>
             <FileUpload color='primary' fontSize='large' />
-            {createEntryKind === CreateEntryKind.MODEL && (
+            {createEntryKind === EntryKind.MODEL && (
               <Typography>
                 A model repository contains all files, history and information related to a model.
               </Typography>
@@ -206,9 +205,9 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                 Overview
               </Typography>
               <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
-                <EntryNameInput autoFocus value={name} kind={entryKind} onChange={(value) => setName(value)} />
+                <EntryNameInput autoFocus value={name} kind={createEntryKind} onChange={(value) => setName(value)} />
                 <EntryOrganisationInput value={organisation} onChange={(value) => setOrganisation(value)} />
-                {createEntryKind === CreateEntryKind.MIRRORED_MODEL && (
+                {createEntryKind === EntryKind.MIRRORED_MODEL && (
                   <SourceModelInput onChange={(value) => setSourceModelId(value)} value={sourceModelId} />
                 )}
               </Stack>
@@ -266,7 +265,7 @@ export default function CreateEntry({ createEntryKind, onBackClick }: CreateEntr
                         <EntryAccessInput
                           value={collaborators}
                           onChange={handleCollaboratorsChange}
-                          entryKind={entryKind}
+                          entryKind={createEntryKind}
                           entryRoles={modelRoles}
                         />
                       )}

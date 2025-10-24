@@ -30,6 +30,7 @@ exports[`routes > model > getModelsSearch > audit > expected call 1`] = `
       "tag",
     ],
     "updatedAt": undefined,
+    "visibility": undefined,
   },
 ]
 `;

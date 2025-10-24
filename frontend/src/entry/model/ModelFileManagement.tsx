@@ -8,7 +8,7 @@ import Restricted from 'src/common/Restricted'
 import FileDisplay from 'src/entry/model/files/FileDisplay'
 import FileUploadDialog from 'src/entry/model/files/FileUploadDialog'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { EntryInterface, EntryKind } from 'types/types'
 
 type FilesProps = {
   model: EntryInterface
@@ -61,18 +61,20 @@ export default function Files({ model }: FilesProps) {
             justifyContent='flex-end'
             sx={{ py: 0.5, width: '100%', px: 2 }}
           >
-            <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
-              <>
-                <Button
-                  component='span'
-                  variant='outlined'
-                  sx={{ float: 'right' }}
-                  onClick={() => setIsFileUploadDialogOpen(true)}
-                >
-                  Add new files
-                </Button>
-              </>
-            </Restricted>
+            {model.kind !== EntryKind.MIRRORED_MODEL && (
+              <Restricted action='createRelease' fallback={<Button disabled>Add new files</Button>}>
+                <>
+                  <Button
+                    component='span'
+                    variant='outlined'
+                    sx={{ float: 'right' }}
+                    onClick={() => setIsFileUploadDialogOpen(true)}
+                  >
+                    Add new files
+                  </Button>
+                </>
+              </Restricted>
+            )}
             <FileUploadDialog
               model={model}
               open={isFileUploadDialogOpen}

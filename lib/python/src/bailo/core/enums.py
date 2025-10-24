@@ -39,6 +39,7 @@ class EntryKind(ValuedEnum):
 
     MODEL = "model"
     DATACARD = "data-card"
+    MIRRORED_MODEL = "mirrored-model"
 
 
 class MinimalSchema(ValuedEnum):
