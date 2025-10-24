@@ -192,6 +192,7 @@ export default function TopNavigation({ drawerOpen = false, pageTopStyling = {},
                       }}
                       onClick={handleUserMenuClicked}
                       data-test='userMenuButton'
+                      aria-label='User menu dropdown button'
                     >
                       <UserDisplay dn={currentUser.dn} hidePopover />
                     </Button>
