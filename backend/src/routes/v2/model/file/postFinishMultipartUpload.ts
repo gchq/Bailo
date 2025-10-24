@@ -17,12 +17,14 @@ export const postFinishMultipartUploadSchema = z.object({
     fileId: z.string(),
     uploadId: z.string(),
     parts: coerceArray(
-      z.array(
-        z.object({
-          ETag: z.string(),
-          PartNumber: z.number(),
-        }),
-      ),
+      z
+        .array(
+          z.object({
+            ETag: z.string(),
+            PartNumber: z.number(),
+          }),
+        )
+        .min(1),
     ),
     tags: coerceArray(z.array(z.string()).optional()),
   }),

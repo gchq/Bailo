@@ -80,8 +80,10 @@ export async function putObjectStream(
       internal: { error, bucket, key, metadata },
     })
   } finally {
-    // always cleanup the stream
-    body.destroy()
+    // cleanup the stream
+    if (!body.destroyed) {
+      body.destroy()
+    }
   }
 }
 
@@ -113,8 +115,10 @@ export async function putObjectPartStream(
       internal: { error, bucket, key, uploadId, partNumber },
     })
   } finally {
-    // always cleanup the stream
-    body.destroy()
+    // cleanup the stream
+    if (!body.destroyed) {
+      body.destroy()
+    }
   }
 }
 

@@ -180,7 +180,7 @@ export async function uploadMultipartFilePart(
     throw Forbidden(auth.info, { userDn: user.dn, fileId })
   }
 
-  return await putObjectPartStream(fileId, uploadId, partNumber, stream)
+  return await putObjectPartStream(file.path, uploadId, partNumber, stream)
 }
 
 export async function finishUploadMultipartFile(
