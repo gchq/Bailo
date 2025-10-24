@@ -25,7 +25,7 @@ import { plural } from 'utils/stringUtils'
 
 interface UpdateReviewRolesForSchemaDialogProps {
   open: boolean
-  onClose: (value: boolean) => void
+  onClose: () => void
   schema: SchemaInterface
 }
 
@@ -73,7 +73,7 @@ export default function UpdateReviewRolesForSchemaDialog({
 
   const handleOnClose = () => {
     setChecked(schema.reviewRoles)
-    onClose(false)
+    onClose()
   }
 
   const handleOpenDialog = () => {
