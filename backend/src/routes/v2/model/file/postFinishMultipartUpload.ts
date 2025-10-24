@@ -16,11 +16,13 @@ export const postFinishMultipartUploadSchema = z.object({
   body: z.object({
     fileId: z.string(),
     uploadId: z.string(),
-    parts: z.array(
-      z.object({
-        ETag: z.string(),
-        PartNumber: z.number(),
-      }),
+    parts: coerceArray(
+      z.array(
+        z.object({
+          ETag: z.string(),
+          PartNumber: z.number(),
+        }),
+      ),
     ),
     tags: coerceArray(z.array(z.string()).optional()),
   }),
@@ -28,7 +30,7 @@ export const postFinishMultipartUploadSchema = z.object({
 
 registerPath({
   method: 'post',
-  path: '/api/v2/model/{modelId}/files/upload/multipart/start',
+  path: '/api/v2/model/{modelId}/files/upload/multipart/finish',
   tags: ['file'],
   description: 'Finish uploading a multipart file.',
   schema: postFinishMultipartUploadSchema,

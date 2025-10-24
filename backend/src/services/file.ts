@@ -142,14 +142,12 @@ export async function startUploadMultipartFile(
     throw InternalError('Failed to get uploadId from startMultipartUpload.')
   }
 
-  // TODO: move this to config
-  const chunkSize = 5 * 1024 * 1024
-  const numChunks = Math.ceil(size / chunkSize)
+  const numChunks = Math.ceil(size / config.s3.multipartChunkSize)
 
   const chunks: ChunkByteRange[] = []
   for (let partNumber = 1; partNumber <= numChunks; partNumber++) {
-    const startByte = (partNumber - 1) * chunkSize
-    const endByte = Math.min(startByte + chunkSize, size) - 1
+    const startByte = (partNumber - 1) * config.s3.multipartChunkSize
+    const endByte = Math.min(startByte + config.s3.multipartChunkSize, size) - 1
     chunks.push({ startByte, endByte })
   }
 

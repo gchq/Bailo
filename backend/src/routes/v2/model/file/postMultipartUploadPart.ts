@@ -1,3 +1,4 @@
+import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -10,6 +11,8 @@ import { parse } from '../../../../utils/validate.js'
 export const postMultipartUploadPartSchema = z.object({
   params: z.object({
     modelId: z.string(),
+  }),
+  body: z.object({
     fileId: z.string(),
     uploadId: z.string(),
     partNumber: z.number().positive(),
@@ -28,9 +31,7 @@ registerPath({
       content: {
         'application/json': {
           schema: z.object({
-            fileId: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
-            uploadId: z.string().openapi({ example: '67cecbffd2a0951d1693b396' }),
-            chunks: z.array(z.object({ presignedUrl: z.string(), startByte: z.number(), endByte: z.number() })),
+            ETag: z.string().openapi({ example: 'd8c2eafd90c266e19ab9dcacc479f8af' }),
           }),
         },
       },
@@ -38,17 +39,23 @@ registerPath({
   },
 })
 
+interface PostMultipartUploadPart {
+  ETag: string
+}
+
 export const postMultipartUploadPart = [
-  async (req: Request, res: Response): Promise<void> => {
+  bodyParser.json(),
+  async (req: Request, res: Response<PostMultipartUploadPart>): Promise<void> => {
     req.audit = AuditInfo.CreateFile
     // Does user have permission to upload a file?
     const {
-      params: { modelId, fileId, uploadId, partNumber },
+      params: { modelId },
+      body: { fileId, uploadId, partNumber },
     } = parse(req, postMultipartUploadPartSchema)
 
-    const filePart = await uploadMultipartFilePart(req.user, modelId, fileId, uploadId, partNumber, req)
+    const filePartETag = await uploadMultipartFilePart(req.user, modelId, fileId, uploadId, partNumber, req)
     await audit.onUpdateFile(req, modelId, fileId)
 
-    res.json({ ETag: filePart.ETag })
+    res.json({ ETag: filePartETag })
   },
 ]

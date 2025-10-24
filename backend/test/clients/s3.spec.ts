@@ -103,6 +103,7 @@ describe('clients > s3', () => {
     const bucket = 'test-bucket'
     const key = 'test-key'
     const contentType = 'application/octet-stream'
+    s3Mocks.send.mockResolvedValueOnce({ UploadId: 'uploadId' } as any)
 
     const response = await startMultipartUpload(key, contentType, bucket)
 
@@ -112,7 +113,7 @@ describe('clients > s3', () => {
       ContentType: contentType,
     })
     expect(s3Mocks.send).toHaveBeenCalled()
-    expect(response).toEqual({ uploadId: undefined })
+    expect(response).toEqual({ uploadId: 'uploadId' })
   })
 
   test('startMultipartUpload > error', async () => {

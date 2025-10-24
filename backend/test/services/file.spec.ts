@@ -41,6 +41,7 @@ const configMock = vi.hoisted(
         },
       },
       s3: {
+        multipartChunkSize: 5 * 1024 * 1024,
         buckets: {
           uploads: 'uploads',
           registry: 'registry',
@@ -253,8 +254,7 @@ describe('services > file', () => {
     const modelId = 'testModelId'
     const name = 'testFile'
     const mime = 'text/plain'
-    // TODO: update this depending on config
-    const size = 5 * 1024 * 1024 * 2
+    const size = configMock.s3.multipartChunkSize * 2
     const tags = []
 
     const result = await startUploadMultipartFile(user, modelId, name, mime, size, tags)

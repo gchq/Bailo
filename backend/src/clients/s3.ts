@@ -102,9 +102,12 @@ export async function putObjectPartStream(
       Body: body,
     })
     const upload = await client.send(command)
+    if (upload.ETag === undefined) {
+      throw InternalError('Failed to Upload Part.', { key, bucket, uploadId, partNumber, upload })
+    }
     log.debug({ key, bucket, uploadId, partNumber }, 'Upload part completed.')
 
-    return upload
+    return upload.ETag
   } catch (error) {
     throw InternalError('Unable to upload the multipart object to the S3 service.', {
       internal: { error, bucket, key, uploadId, partNumber },
@@ -154,6 +157,9 @@ export async function startMultipartUpload(
     ContentType: contentType,
   })
   const result = await client.send(command)
+  if (result.UploadId === undefined) {
+    throw InternalError('Failed to create Multipart Upload.', { key, contentType, bucket, result })
+  }
   return { uploadId: result.UploadId }
 }
 

@@ -1,0 +1,32 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > file > postStartMultipartUpload > 200 > ok 1`] = `
+{
+  "ETag": "ETag",
+}
+`;
+
+exports[`routes > model > file > postStartMultipartUpload > 400 > no fileId 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_type",
+          "expected": "string",
+          "message": "Required",
+          "path": [
+            "body",
+            "fileId",
+          ],
+          "received": "undefined",
+        },
+      ],
+    },
+    "message": "Path: body.fileId - Message: Required",
+    "name": "Bailo Error",
+  },
+}
+`;
+
+exports[`routes > model > file > postStartMultipartUpload > audit > expected call 1`] = `"expedita"`;
