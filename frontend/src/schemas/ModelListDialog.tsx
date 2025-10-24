@@ -18,6 +18,7 @@ import { Transition } from 'src/common/Transition'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import { EntryKind, SchemaInterface } from 'types/types'
+import { camelCaseToTitleCase } from 'utils/stringUtils'
 
 type SchemaDialogProps = {
   open: boolean
@@ -91,9 +92,15 @@ export default function EntryListDialog({ open = false, onClose, schema }: Schem
 
   return (
     <Dialog fullWidth open={open} onClose={onClose} maxWidth='sm' slots={{ transition: Transition }}>
-      <DialogTitle>{`Models associated to schema (${models.length})`}</DialogTitle>
+      <DialogTitle>{`${camelCaseToTitleCase(schema.kind)}s associated to schema (${models.length})`}</DialogTitle>
       <DialogContent>
-        {isModelsLoading ? <Loading /> : models.length ? modelList : <EmptyBlob text='No Associated Models' />}
+        {isModelsLoading ? (
+          <Loading />
+        ) : models.length ? (
+          modelList
+        ) : (
+          <EmptyBlob text={`No Associated ${camelCaseToTitleCase(schema.kind)}s`} />
+        )}
       </DialogContent>
       <DialogActions>
         <Button variant='contained' onClick={onClose}>
