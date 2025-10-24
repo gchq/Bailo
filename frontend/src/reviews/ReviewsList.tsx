@@ -1,4 +1,3 @@
-import { List } from '@mui/material'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { memoize } from 'lodash-es'
 import Loading from 'src/common/Loading'
@@ -29,23 +28,21 @@ export default function ReviewsList({ kind, status }: ReviewsListProps) {
   return (
     <>
       {isReviewsLoading && <Loading />}
-      <List>
-        <Paginate
-          list={reviews.map((entryFile) => {
-            return { key: entryFile._id, ...entryFile }
-          })}
-          emptyListText={`No reviews found`}
-          sortingProperties={[
-            { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
-            { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
-          ]}
-          defaultSortProperty='createdAt'
-          searchFilterProperty={kind === 'release' ? 'semver' : 'accessRequestId'}
-          searchPlaceholderText={`Search for ${kind === 'release' ? 'semver' : 'access request name'}`}
-        >
-          {ReviewListItem}
-        </Paginate>
-      </List>
+      <Paginate
+        list={reviews.map((entryFile) => {
+          return { key: entryFile._id, ...entryFile }
+        })}
+        emptyListText={`No reviews found`}
+        sortingProperties={[
+          { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
+          { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
+        ]}
+        defaultSortProperty='createdAt'
+        searchFilterProperty={kind === 'release' ? 'semver' : 'accessRequestId'}
+        searchPlaceholderText={`Search for ${kind === 'release' ? 'semver' : 'access request name'}`}
+      >
+        {ReviewListItem}
+      </Paginate>
     </>
   )
 }

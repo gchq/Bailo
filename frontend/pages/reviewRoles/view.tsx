@@ -187,7 +187,7 @@ export default function ReviewRoles() {
                     <Typography color='primary' fontWeight='bold'>
                       Default entities
                     </Typography>
-                    <List>{displayReviewRoleDefaultEntities}</List>
+                    {displayReviewRoleDefaultEntities}
                   </Box>
                   <Box display='flex' ml='auto'>
                     <Stack direction='row' spacing={2}>
