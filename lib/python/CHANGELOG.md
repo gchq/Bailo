@@ -2,7 +2,20 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.1.2 30/09/2025
+## 3.2.0 - 20/10/2025
+
+### Breaking Changes
+
+- Drop Python 3.9 support (due to reaching EOL).
+
+### Changes
+
+- Add Python 3.14 support.
+- Update package dependencies.
+
+## 3.1.2 - 30/09/2025
+
+### Changes
 
 - Fix broken `Client.put_file_scan` method.
 - Update package dependencies.
