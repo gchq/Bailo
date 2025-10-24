@@ -13,41 +13,41 @@ describe('Check A11y violations', () => {
   })
 
   it('Check A11y violations, Front Page', () => {
-    cy.checkA11y(undefined, undefined, printA11yViolations, false)
+    cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
   it('Check A11y violations, Review Page', () => {
     cy.get('a[href="/review"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations, false)
+    cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
   it('Check A11y violations, API Page', () => {
     cy.get('a[href="/api/v2/docs"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations, false)
+    cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
   it('Check A11y violations, Python Docs Page', () => {
     cy.get('a[href="/docs/python/index.html"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations, false)
+    cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
   it('Check A11y violations, Help Page', () => {
     cy.get('a[href="/help"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations, false)
+    cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
   it('Check A11y violations, Schemas Page', () => {
     cy.get('a[href="/schemas/list"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations, false)
+    cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
   it('Check A11y violations, Review Roles Page', () => {
     cy.get('a[href="/reviewRoles/view"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations, false)
+    cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 
   it('Check A11y violations, Settings Page', () => {
     cy.get('a[href="/settings"]').click()
-    cy.checkA11y(undefined, undefined, printA11yViolations, false)
+    cy.checkA11y(undefined, undefined, printA11yViolations)
   })
 })
