@@ -21,9 +21,10 @@ export async function postSchemaMigration(data: PostSchemaMigrationParams) {
   })
 }
 
-export function useGetSchemaMigrations(name?: string) {
+export function useGetSchemaMigrations(id?: string, sourceSchema?: string) {
   const queryParams = {
-    name,
+    id,
+    sourceSchema,
   }
 
   const { data, isLoading, error, mutate } = useSWR<
@@ -39,4 +40,11 @@ export function useGetSchemaMigrations(name?: string) {
     isSchemaMigrationsLoading: isLoading,
     isSchemaMigrationsError: error,
   }
+}
+
+export function postRunSchemaMigration(modelId: string, migrationId: string) {
+  return fetch(`/api/v2/model/${modelId}/migrate-schema/${migrationId}`, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+  })
 }

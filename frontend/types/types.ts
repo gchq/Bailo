@@ -659,6 +659,7 @@ export interface CombinedSchema {
 
 export interface SchemaMigrationInterface {
   name: string
+  id: string
   description?: string
   questionMigrations: QuestionMigration[]
   sourceSchema: string

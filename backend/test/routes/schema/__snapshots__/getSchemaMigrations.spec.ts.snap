@@ -4,6 +4,7 @@ exports[`routes > schema > getSchemaMigrations > audit > expected call 1`] = `
 [
   {
     "description": "This is a test migration plan",
+    "id": "migration-plan-f2434",
     "name": "my migration plan",
     "questionMigrations": [
       {
@@ -14,8 +15,8 @@ exports[`routes > schema > getSchemaMigrations > audit > expected call 1`] = `
         "targetPath": "s2.q1",
       },
     ],
-    "sourceSchema": "v1",
-    "targetSchema": "v2",
+    "sourceSchema": "example-model-schema-1",
+    "targetSchema": "example-model-schema-2",
   },
 ]
 `;
@@ -25,6 +26,7 @@ exports[`routes > schema > getSchemaMigrations > returns the schema with the mat
   "schemaMigrations": [
     {
       "description": "This is a test migration plan",
+      "id": "migration-plan-f2434",
       "name": "my migration plan",
       "questionMigrations": [
         {
@@ -35,8 +37,8 @@ exports[`routes > schema > getSchemaMigrations > returns the schema with the mat
           "targetPath": "s2.q1",
         },
       ],
-      "sourceSchema": "v1",
-      "targetSchema": "v2",
+      "sourceSchema": "example-model-schema-1",
+      "targetSchema": "example-model-schema-2",
     },
   ],
 }

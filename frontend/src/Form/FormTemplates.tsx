@@ -60,6 +60,43 @@ export function ObjectFieldTemplate({ title, properties, description }: ObjectFi
   )
 }
 
+export function ObjectFieldTemplateForQuestionViewer({
+  title,
+  properties,
+  description,
+  formContext,
+  schema,
+  ...props
+}: ObjectFieldTemplateProps) {
+  const rootName = `${formContext.rootSection}.${props.idSchema.$id.replace('root_', '').replace('_', '.')}`
+  const handleOnClick = () => {
+    formContext.onClickListener({ path: rootName, schema })
+  }
+  return (
+    <Box sx={{ py: 1 }}>
+      <Stack spacing={2}>
+        <Stack>
+          <Button size='large' sx={{ textTransform: 'none', textAlign: 'left', width: 'fit-content' }}>
+            <Typography fontWeight='bold' variant='h6' component='h3' onClick={handleOnClick}>
+              {title}
+            </Typography>
+          </Button>
+          <Typography variant='caption' sx={{ pl: 1.5 }}>
+            {description}
+          </Typography>
+        </Stack>
+        <Box sx={{ px: 2 }}>
+          {properties.map((element) => (
+            <div key={element.name} className='property-wrapper'>
+              {element.content}
+            </div>
+          ))}
+        </Box>
+      </Stack>
+    </Box>
+  )
+}
+
 export function TitleFieldTemplate({ title, id }: TitleFieldProps) {
   return id === 'root__title' ? (
     <Typography variant='h5' fontWeight='bold'>
@@ -83,7 +120,7 @@ export function GridTemplate(props) {
 
 export function ArrayFieldTemplateForQuestionViewer({ title, formContext, schema, ...props }: ArrayFieldTemplateProps) {
   const questions: ReactNode[] = []
-  const rootName = `${formContext.rootSection}.${props.idSchema.$id.replace('root_', '')}`
+  const rootName = `${formContext.rootSection}.${props.idSchema.$id.replace('root_', '').replace('_', '.')}`
   if (typeof schema.items === 'object' && !Array.isArray(schema.items) && schema.items !== null) {
     const schemaQuestions = schema.items['properties']
     for (const question in schemaQuestions) {

@@ -18,7 +18,12 @@ export const GetModelCardVersionOptions = {
 export type GetModelCardVersionOptionsKeys =
   (typeof GetModelCardVersionOptions)[keyof typeof GetModelCardVersionOptions]
 
-// HTTP headers
+export const SchemaMigrationKind = {
+  Move: 'move',
+  Delete: 'delete',
+} as const
+export type SchemaMigrationKindKeys = (typeof SchemaMigrationKind)[keyof typeof SchemaMigrationKind]
+
 export const HttpHeader = {
   CONTENT_TYPE: 'Content-Type',
   CONTENT_DISPOSITION: 'Content-Disposition',

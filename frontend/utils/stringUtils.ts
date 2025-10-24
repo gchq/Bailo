@@ -49,3 +49,14 @@ export const toKebabCase = (value: string): string => {
     .replaceAll(' ', '-')
     .toLowerCase()
 }
+
+export const truncateText = (text: string | undefined, limit: number = 100) => {
+  if (!text) {
+    return ''
+  }
+  if (text.length <= limit) {
+    return text
+  }
+
+  return text.slice(0, limit) + '\u2026'
+}

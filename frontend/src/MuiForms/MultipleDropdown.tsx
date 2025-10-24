@@ -87,9 +87,6 @@ export default function MultipleDropdown({
               label='Select an option below'
               size='small'
               id={id}
-              slotProps={{
-                htmlInput: { id: id },
-              }}
               aria-label={`input field for ${label}`}
               placeholder={value.length ? undefined : 'Unanswered'}
               error={rawErrors && rawErrors.length > 0}
