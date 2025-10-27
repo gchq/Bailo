@@ -4,7 +4,6 @@ import audit from '../../../../src/connectors/audit/__mocks__/index.js'
 import { testGet } from '../../../testUtils/routes.js'
 import { testReviewRole } from '../../../testUtils/testModels.js'
 
-vi.mock('../../../../src/utils/user.js')
 vi.mock('../../../../src/connectors/audit/index.js')
 
 describe('routes > model > roles > getModelRoles', () => {
