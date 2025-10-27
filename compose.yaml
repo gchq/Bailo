@@ -59,7 +59,7 @@ services:
   modelscan:
     networks:
       internal:
-    image: ghcr.io/gchq/bailo_modelscan:3.0.0
+    image: ghcr.io/gchq/bailo_modelscan:latest
     volumes:
       - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
     healthcheck:

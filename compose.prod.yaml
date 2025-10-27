@@ -2,8 +2,8 @@ name: bailo-prod
 
 services:
   frontend:
-    image: ghcr.io/gchq/bailo_frontend:v2.10.0
+    image: ghcr.io/gchq/bailo_frontend:latest
     pull_policy: missing
   backend:
-    image: ghcr.io/gchq/bailo_backend:v2.10.0
+    image: ghcr.io/gchq/bailo_backend:latest
     pull_policy: missing
