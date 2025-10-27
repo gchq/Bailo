@@ -23,7 +23,7 @@
     "@aws-sdk/client-kms": "3.899.0",
     "@aws-sdk/client-s3": "3.899.0",
     "@aws-sdk/lib-storage": "3.900.0",
-    "@huggingface/hub": "^2.2.0",
+    "@huggingface/hub": "^2.6.12",
     "@opentelemetry/auto-instrumentations-node": "^0.64.6",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.205.0",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.205.0",
