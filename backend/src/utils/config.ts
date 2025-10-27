@@ -174,6 +174,8 @@ export interface Config {
   }
 
   modelMirror: {
+    metadataFile: string
+    contentDirectory: string
     export: {
       concurrency: number
       maxSize: number

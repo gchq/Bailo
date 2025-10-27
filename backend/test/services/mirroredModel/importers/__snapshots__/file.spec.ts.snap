@@ -1,0 +1,55 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`connectors > mirroredModel > importers > FileImporter > constructor > success 1`] = `
+FileImporter {
+  "bucket": "uploads",
+  "extractedFile": false,
+  "logData": {
+    "extra": "info",
+    "importId": "importId",
+    "importerType": "FileImporter",
+  },
+  "metadata": {
+    "filePath": "original/file/path",
+    "importKind": "file",
+    "mirroredModelId": "model123",
+  },
+  "updatedPath": "updated/file/path",
+}
+`;
+
+exports[`connectors > mirroredModel > importers > FileImporter > processEntry > success skip already existing file 1`] = `
+FileImporter {
+  "bucket": "uploads",
+  "extractedFile": true,
+  "logData": {
+    "extra": "info",
+    "importId": "importId",
+    "importerType": "FileImporter",
+  },
+  "metadata": {
+    "filePath": "original/file/path",
+    "importKind": "file",
+    "mirroredModelId": "model123",
+  },
+  "updatedPath": "updated/file/path",
+}
+`;
+
+exports[`connectors > mirroredModel > importers > FileImporter > processEntry > success upload new file to S3 1`] = `
+FileImporter {
+  "bucket": "uploads",
+  "extractedFile": true,
+  "logData": {
+    "extra": "info",
+    "importId": "importId",
+    "importerType": "FileImporter",
+  },
+  "metadata": {
+    "filePath": "original/file/path",
+    "importKind": "file",
+    "mirroredModelId": "model123",
+  },
+  "updatedPath": "updated/file/path",
+}
+`;

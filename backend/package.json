@@ -90,6 +90,7 @@
     "@types/mjml": "^4.7.4",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.6.1",
+    "@types/node-fetch": "^2.6.13",
     "@types/nodemailer": "^7.0.2",
     "@types/semver": "^7.7.1",
     "@types/shelljs": "^0.8.17",

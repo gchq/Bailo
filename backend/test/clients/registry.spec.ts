@@ -22,7 +22,7 @@ const mockHttpService = vi.hoisted(() => {
 vi.mock('../../src/services/http.js', () => mockHttpService)
 
 const mockReadable = vi.fn() as unknown as Readable
-const mockedFetchBodyStream = new ReadableStream()
+const mockedFetchBodyStream = new Readable()
 const fetchMockResponse = new Response(mockedFetchBodyStream, {
   status: 200,
   statusText: 'ok',
@@ -168,7 +168,7 @@ describe('clients > registry', () => {
 
     expect(fetchMock).toBeCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
-    expect(response.stream).toStrictEqual(mockedFetchBodyStream)
+    expect(response.stream).toBeInstanceOf(Readable)
   })
 
   test('getRegistryLayerStream > cannot reach registry', async () => {

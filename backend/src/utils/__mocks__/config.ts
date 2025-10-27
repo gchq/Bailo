@@ -59,6 +59,7 @@ const config: PartialDeep<Config> = {
   registry: {
     connection: {
       internal: 'https://localhost:5000',
+      insecure: true,
     },
   },
   instrumentation: {
@@ -122,6 +123,13 @@ const config: PartialDeep<Config> = {
       organisations: ['My Organisation'],
       states: ['Development', 'Review', 'Production'],
     },
+  },
+  modelMirror: {
+    export: {
+      concurrency: 1,
+    },
+    contentDirectory: 'content-dir',
+    metadataFile: 'meta.json',
   },
 }
 
