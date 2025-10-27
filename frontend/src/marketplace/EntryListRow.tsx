@@ -67,7 +67,7 @@ export default function EntryListRow({
           <Stack spacing={1} justifyContent='space-between' alignItems='center' direction='row'>
             <Typography
               variant='h5'
-              component='h4'
+              component='h2'
               sx={{
                 fontWeight: '500',
                 textDecoration: 'none',

@@ -36,7 +36,12 @@
 //   }
 // }
 
-function terminalLog(violations) {
+function printA11yViolations(violations) {
+  summaryTable(violations)
+  detailedIssue(violations)
+}
+
+function summaryTable(violations) {
   cy.task(
     'log',
     `${violations.length} accessibility violation${
@@ -54,4 +59,25 @@ function terminalLog(violations) {
   cy.task('table', violationData)
 }
 
-export { terminalLog }
+function detailedIssue(violations) {
+  violations.forEach((violation, indexInFailuresArray, array) => {
+    const { id, impact, help, helpUrl, nodes } = violation
+
+    cy.task(
+      'log',
+      `########## Issue ${indexInFailuresArray + 1} of ${array.length}: '${id}', impact ${impact} ##########`,
+    )
+    cy.task('log', `${help}. See ${helpUrl}`)
+    cy.task('log', `${nodes.length} instance${nodes.length > 1 ? 's' : ''} of this issue:`)
+
+    nodes.forEach((node, indexInNodesArray) => {
+      cy.task(
+        'log',
+        `
+      Issue ${indexInFailuresArray + 1} instance ${indexInNodesArray + 1}: ${node.html}`,
+      )
+    })
+  })
+}
+
+export { printA11yViolations }
