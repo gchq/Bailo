@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
@@ -12,10 +11,16 @@ export const postMultipartUploadPartSchema = z.object({
   params: z.object({
     modelId: z.string(),
   }),
-  body: z.object({
+  query: z.object({
     fileId: z.string(),
     uploadId: z.string(),
-    partNumber: z.number().positive(),
+    partNumber: z.coerce.number().positive(),
+  }),
+  headers: z.object({
+    'content-length': z.coerce.number().positive().openapi({
+      example: 5242880,
+      description: 'Exact size in bytes of this file part. Required for S3 multipart uploads.',
+    }),
   }),
 })
 
@@ -44,16 +49,16 @@ interface PostMultipartUploadPart {
 }
 
 export const postMultipartUploadPart = [
-  bodyParser.json(),
   async (req: Request, res: Response<PostMultipartUploadPart>): Promise<void> => {
     req.audit = AuditInfo.CreateFile
     // Does user have permission to upload a file?
     const {
       params: { modelId },
-      body: { fileId, uploadId, partNumber },
+      query: { fileId, uploadId, partNumber },
+      headers: { 'content-length': bodySize },
     } = parse(req, postMultipartUploadPartSchema)
 
-    const filePartETag = await uploadMultipartFilePart(req.user, modelId, fileId, uploadId, partNumber, req)
+    const filePartETag = await uploadMultipartFilePart(req.user, modelId, fileId, uploadId, partNumber, req, bodySize)
     await audit.onUpdateFile(req, modelId, fileId)
 
     res.json({ ETag: filePartETag })

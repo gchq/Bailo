@@ -1,3 +1,4 @@
+import qs from 'qs'
 import { describe, expect, test, vi } from 'vitest'
 
 import audit from '../../../../src/connectors/audit/__mocks__/index.js'
@@ -15,7 +16,10 @@ vi.mock('../../../../src/services/file.js', () => ({
 describe('routes > model > file > postStartMultipartUpload', () => {
   test('200 > ok', async () => {
     const fixture = createFixture(postMultipartUploadPartSchema)
-    const res = await testPost(`/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part`, fixture)
+    const res = await testPost(
+      `/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part?${qs.stringify(fixture.query)}`,
+      fixture,
+    )
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -23,7 +27,10 @@ describe('routes > model > file > postStartMultipartUpload', () => {
 
   test('audit > expected call', async () => {
     const fixture = createFixture(postMultipartUploadPartSchema)
-    const res = await testPost(`/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part`, fixture)
+    const res = await testPost(
+      `/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part?${qs.stringify(fixture.query)}`,
+      fixture,
+    )
 
     expect(res.statusCode).toBe(200)
     expect(audit.onUpdateFile).toBeCalled()
@@ -33,9 +40,12 @@ describe('routes > model > file > postStartMultipartUpload', () => {
   test('400 > no fileId', async () => {
     const fixture = createFixture(postMultipartUploadPartSchema) as any
     // This fixture does not include a fileId.
-    delete fixture.body.fileId
+    delete fixture.query.fileId
 
-    const res = await testPost(`/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part`, fixture)
+    const res = await testPost(
+      `/api/v2/model/${fixture.params.modelId}/files/upload/multipart/part?${qs.stringify(fixture.query)}`,
+      fixture,
+    )
 
     expect(res.statusCode).toEqual(400)
     expect(res.body).matchSnapshot()

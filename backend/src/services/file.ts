@@ -167,6 +167,7 @@ export async function uploadMultipartFilePart(
   uploadId: string,
   partNumber: number,
   stream: Readable,
+  bodySize: number,
 ) {
   const file = await FileModel.findById(fileId)
   if (!file) {
@@ -180,7 +181,7 @@ export async function uploadMultipartFilePart(
     throw Forbidden(auth.info, { userDn: user.dn, fileId })
   }
 
-  return await putObjectPartStream(file.path, uploadId, partNumber, stream)
+  return await putObjectPartStream(file.path, uploadId, partNumber, stream, bodySize)
 }
 
 export async function finishUploadMultipartFile(

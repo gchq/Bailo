@@ -16,14 +16,14 @@ exports[`routes > model > file > postStartMultipartUpload > 400 > no fileId 1`] 
           "expected": "string",
           "message": "Required",
           "path": [
-            "body",
+            "query",
             "fileId",
           ],
           "received": "undefined",
         },
       ],
     },
-    "message": "Path: body.fileId - Message: Required",
+    "message": "Path: query.fileId - Message: Required",
     "name": "Bailo Error",
   },
 }

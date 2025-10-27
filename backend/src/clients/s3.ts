@@ -81,7 +81,7 @@ export async function putObjectStream(
     })
   } finally {
     // cleanup the stream
-    if (!body.destroyed) {
+    if (!body?.destroyed) {
       body.destroy()
     }
   }
@@ -92,6 +92,7 @@ export async function putObjectPartStream(
   uploadId: string,
   partNumber: number,
   body: PassThrough | Readable,
+  bodySize: number,
   bucket: string = config.s3.buckets.uploads,
 ) {
   try {
@@ -102,9 +103,10 @@ export async function putObjectPartStream(
       UploadId: uploadId,
       PartNumber: Number(partNumber),
       Body: body,
+      ContentLength: bodySize,
     })
     const upload = await client.send(command)
-    if (upload.ETag === undefined) {
+    if (!upload || upload.ETag === undefined) {
       throw InternalError('Failed to Upload Part.', { key, bucket, uploadId, partNumber, upload })
     }
     log.debug({ key, bucket, uploadId, partNumber }, 'Upload part completed.')
@@ -116,7 +118,7 @@ export async function putObjectPartStream(
     })
   } finally {
     // cleanup the stream
-    if (!body.destroyed) {
+    if (!body?.destroyed) {
       body.destroy()
     }
   }

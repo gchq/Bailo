@@ -1,5 +1,3 @@
-import { Readable } from 'node:stream'
-
 import { describe, expect, test, vi } from 'vitest'
 
 import {
@@ -8,6 +6,7 @@ import {
   getObjectStream,
   headObject,
   objectExists,
+  putObjectPartStream,
   putObjectStream,
   startMultipartUpload,
 } from '../../src/clients/s3.js'
@@ -45,7 +44,7 @@ describe('clients > s3', () => {
   test('putObjectStream > success', async () => {
     const bucket = 'test-bucket'
     const key = 'test-key'
-    const body = new Readable()
+    const body = { destroy: vi.fn() } as any
 
     await putObjectStream(key, body, bucket)
 
@@ -64,12 +63,49 @@ describe('clients > s3', () => {
   test('putObjectStream > error', async () => {
     const bucket = 'test-bucket'
     const key = 'test-key'
-    const body = new Readable()
+    const body = { destroy: vi.fn() } as any
     s3UploadMocks.Upload.mockRejectedValueOnce('Error')
 
     const response = putObjectStream(key, body, bucket)
 
     await expect(response).rejects.toThrowError('Unable to upload the object to the S3 service.')
+  })
+
+  test('putObjectPartStream > success', async () => {
+    const key = 'test-key'
+    const uploadId = 'uploadId'
+    const partNumber = 1
+    const body = { destroy: vi.fn() } as any
+    const bodySize = 1024
+    const bucket = 'test-bucket'
+    s3Mocks.send.mockResolvedValueOnce({ ETag: 'ETag' } as any)
+
+    const response = await putObjectPartStream(key, uploadId, partNumber, body, bodySize, bucket)
+
+    expect(s3Mocks.UploadPartCommand).toHaveBeenCalledWith({
+      Bucket: bucket,
+      Key: key,
+      UploadId: uploadId,
+      PartNumber: partNumber,
+      Body: body,
+      ContentLength: bodySize,
+    })
+    expect(s3Mocks.send).toHaveBeenCalled()
+    expect(response).toMatchSnapshot()
+  })
+
+  test('putObjectPartStream > error', async () => {
+    const key = 'test-key'
+    const uploadId = 'uploadId'
+    const partNumber = 1
+    const bodySize = 1024
+    const bucket = 'test-bucket'
+    const body = { destroy: vi.fn() } as any
+    s3Mocks.UploadPartCommand.mockRejectedValueOnce('Error')
+
+    const response = putObjectPartStream(key, uploadId, partNumber, body, bodySize, bucket)
+
+    await expect(response).rejects.toThrowError('Unable to upload the multipart object to the S3 service.')
   })
 
   test('getObjectStream > success', async () => {
