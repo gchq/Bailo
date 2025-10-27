@@ -37,7 +37,7 @@ class Client:
         """Create a model.
 
         :param name: Name of the model
-        :param kind: Either a Model or a Datacard
+        :param kind: Either a Model, Mirrored Model or a Datacard
         :param description: Description of the model
         :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
@@ -125,7 +125,7 @@ class Client:
 
         :param model_id: Unique model ID
         :param name: Name of the model, defaults to None
-        :param kind: Either a Model or a Datacard, defaults to None
+        :param kind: Either a Model, Mirrored Model or a Datacard, defaults to None
         :param description: Description of the model, defaults to None
         :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
