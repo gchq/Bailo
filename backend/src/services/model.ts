@@ -30,6 +30,7 @@ export function checkModelRestriction(model: ModelInterface) {
 }
 
 type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
+
 export type CreateModelParams = Pick<
   ModelInterface,
   'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
@@ -193,6 +194,7 @@ export async function searchModels(
           for (const [peerId, error] of Object.entries(response.errors)) {
             if (!results.errors) results.errors = {}
             results.errors[peerId] = error
+            results.errors[peerId].message = error.message
           }
         }
       }
@@ -244,6 +246,9 @@ async function searchLocalModels(
   }
 
   if (search) {
+    if (search.length > 0 && search.length < 3) {
+      throw BadReq(`Search query too short - must be at least 3 characters`)
+    }
     query.$text = { $search: search }
   }
 

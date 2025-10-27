@@ -7,10 +7,7 @@ import { EntryKind, EntryKindKeys } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
 import { ModelSearchResultWithErrors } from '../../../types/types.js'
-import { BadReq } from '../../../utils/error.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
-
-const minLength = 3
 
 export const getModelsSearchSchema = z.object({
   query: z.object({
@@ -24,7 +21,10 @@ export const getModelsSearchSchema = z.object({
     search: z
       .string()
       .optional()
-      .openapi({ example: `Text to filter by, must be at least ${minLength} characters` })
+      .openapi({
+        example: `Text to filter by - must be longer than 0 characters to be considered, and longer than 3 characters to be used for searching this local instance.
+        External repos may have their own minimum length`,
+      })
       .default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
@@ -82,11 +82,6 @@ export const getModelsSearch = [
 
     let results: ModelSearchResultWithErrors = {
       models: [],
-    }
-
-    // If a search term is provided, it should have some actual characters to filter by
-    if (search && search.length > 0 && search.length < minLength) {
-      throw BadReq(`Search query too short - must be at least ${minLength} characters`)
     }
 
     results = await searchModels(
