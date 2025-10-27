@@ -77,6 +77,9 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
     const models = new Array<ModelSearchResult>()
     // Require a minimum length for search
     const minLength = 5
+    if (opts.query.length === 0) {
+      return Promise.resolve({ models: [] })
+    }
     if (opts.query.length < minLength) {
       return {
         models: [],
