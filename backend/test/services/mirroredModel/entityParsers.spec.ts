@@ -1,11 +1,13 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import { parseFile, parseModelCard, parseRelease } from '../../../../src/services/mirroredModel/parsers/modelParser.js'
+import { parseFile, parseModelCard, parseRelease } from '../../../src/services/mirroredModel/entityParsers.js'
 
 const s3Mocks = vi.hoisted(() => ({
   objectExists: vi.fn(() => Promise.resolve(true)),
 }))
-vi.mock('../../../../src/clients/s3.js', () => s3Mocks)
+vi.mock('../../../src/clients/s3.js', () => s3Mocks)
+
+const mockLogData = { extra: 'info', importId: 'importId' }
 
 describe('services > parsers > modelParser', () => {
   test('parseModelCard > success', () => {
@@ -21,14 +23,14 @@ describe('services > parsers > modelParser', () => {
       },
       'mirroredModelId',
       'sourceModelId',
-      'importId',
+      mockLogData,
     )
 
     expect(result).toMatchSnapshot()
   })
 
   test('parseModelCard > data not a model card', () => {
-    expect(() => parseModelCard({}, '', '', '')).toThrowError('Data cannot be converted into a model card.')
+    expect(() => parseModelCard({}, '', '', mockLogData)).toThrowError('Data cannot be converted into a model card.')
   })
 
   test('parseModelCard > bad sourceModelId', () => {
@@ -45,7 +47,7 @@ describe('services > parsers > modelParser', () => {
         },
         'mirroredModelId',
         'badSourceModelId',
-        'importId',
+        mockLogData,
       ),
     ).toThrowError('Compressed file contains model cards that have a model ID that does not match the source model Id.')
   })
@@ -69,14 +71,14 @@ describe('services > parsers > modelParser', () => {
       },
       'mirroredModelId',
       'sourceModelId',
-      'importId',
+      mockLogData,
     )
 
     expect(result).toMatchSnapshot()
   })
 
   test('parseRelease > data not a release', () => {
-    expect(() => parseRelease({}, '', '', '')).toThrowError('Data cannot be converted into a release.')
+    expect(() => parseRelease({}, '', '', mockLogData)).toThrowError('Data cannot be converted into a release.')
   })
 
   test('parseRelease > bad sourceModelId', () => {
@@ -99,7 +101,7 @@ describe('services > parsers > modelParser', () => {
         },
         'mirroredModelId',
         'badSourceModelId',
-        'importId',
+        mockLogData,
       ),
     ).toThrowError('Compressed file contains releases that have a model ID that does not match the source model Id.')
   })
@@ -120,14 +122,14 @@ describe('services > parsers > modelParser', () => {
       },
       'mirroredModelId',
       'sourceModelId',
-      'importId',
+      mockLogData,
     )
 
     expect(result).toMatchSnapshot()
   })
 
   test('parseFile > data not a file', async () => {
-    await expect(() => parseFile({}, '', '', '')).rejects.toThrowError('Data cannot be converted into a file.')
+    await expect(() => parseFile({}, '', '', mockLogData)).rejects.toThrowError('Data cannot be converted into a file.')
   })
 
   test('parseFile > file does not exist', async () => {
@@ -148,7 +150,7 @@ describe('services > parsers > modelParser', () => {
         },
         'mirroredModelId',
         'sourceModelId',
-        'importId',
+        mockLogData,
       ),
     ).rejects.toThrowError('Error checking existence of file in storage.')
   })
@@ -170,7 +172,7 @@ describe('services > parsers > modelParser', () => {
         },
         'mirroredModelId',
         'badSourceModelId',
-        'importId',
+        mockLogData,
       ),
     ).rejects.toThrowError(
       'Compressed file contains files that have a model ID that does not match the source model Id.',

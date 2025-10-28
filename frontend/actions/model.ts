@@ -34,6 +34,8 @@ export interface ModelExportRequest {
   semvers?: ReleaseInterface['semver'][]
 }
 
+//This function is misleading, it gets a list of entries (models, data cards, etc.), not just models.
+//This is tech debt that is repeating throughout this file and other parts of the codebase.
 export function useListModels(
   kind?: EntryKindKeys,
   filters: string[] = [],
