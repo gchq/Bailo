@@ -24,6 +24,10 @@ by using `--target dev` or `--target prod` respectively (targeting prod is optio
 
 Note that the Docker containers run on port `3311` rather than `8000`, so adjust URLs accordingly.
 
+When using with the wider project's docker compose structure, you can use the
+[compose.modelscan.yaml](../../compose.modelscan.yaml) profile (`compose [...] -f compose.modelscan.yaml`) to switch to
+the local/live development version.
+
 ## Setup
 
 <!-- prettier-ignore-start -->
