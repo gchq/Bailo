@@ -4,13 +4,16 @@ import audit from '../../../src/connectors/audit/__mocks__/index.js'
 import { postRequestExportToS3Schema } from '../../../src/routes/v2/model/postRequestExport.js'
 import { createFixture, testPost } from '../../testUtils/routes.js'
 
-vi.mock('../../../src/utils/user.js')
 vi.mock('../../../src/connectors/audit/index.js')
 
 describe('routes > model > postModel', () => {
   test('200 > ok', async () => {
     vi.mock('../../../src/services/mirroredModel/mirroredModel.js', () => ({
-      ImportKind: { Documents: 'documents', File: 'file' } as const,
+      MirrorKind: {
+        Documents: 'documents',
+        File: 'file',
+        Image: 'image',
+      },
       exportModel: vi.fn(),
     }))
 
