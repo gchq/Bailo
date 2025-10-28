@@ -1,6 +1,7 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Divider, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema, TitleFieldProps } from '@rjsf/utils'
 import { ReactNode } from 'react'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
@@ -68,12 +69,27 @@ export function ObjectFieldTemplateForQuestionViewer({
   schema,
   ...props
 }: ObjectFieldTemplateProps) {
+  const theme = useTheme()
+
   const rootName = `${formContext.rootSection}.${props.idSchema.$id.replace('root_', '').replace('_', '.')}`
   const handleOnClick = () => {
     formContext.onClickListener({ path: rootName, schema })
   }
+
   return (
-    <Box sx={{ py: 1 }}>
+    <Box
+      sx={{
+        p: 1,
+        ...(formContext.activePath === rootName
+          ? {
+              borderStyle: 'solid',
+              borderWidth: '1px',
+              borderColor: theme.palette.primary.main,
+              borderRadius: 1.5,
+            }
+          : {}),
+      }}
+    >
       <Stack spacing={2}>
         <Stack>
           <Button size='large' sx={{ textTransform: 'none', textAlign: 'left', width: 'fit-content' }}>
