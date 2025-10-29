@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import { useGetSchemas } from 'actions/schema'
 import { SyntheticEvent, useCallback, useState } from 'react'
 import Loading from 'src/common/Loading'
+import Title from 'src/common/Title'
 import Link from 'src/Link'
 import MessageAlert from 'src/MessageAlert'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
@@ -72,6 +73,7 @@ export default function SchemaMigrationSelector() {
 
   return (
     <>
+      <Title text='Create a new schema migration plan' />
       {isMigrationPlannerActive && sourceSchema && targetSchema ? (
         <Container maxWidth='xl'>
           <Paper sx={{ my: 4, p: 4 }}>
