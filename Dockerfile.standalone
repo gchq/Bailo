@@ -3,7 +3,7 @@
 FROM python:3.13-bookworm AS sphinx-docs
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
-RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
     rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
     apt-get update && \
     apt-get install -y --no-install-recommends pandoc
@@ -32,15 +32,15 @@ COPY frontend .
 RUN --mount=type=cache,target=/cache/npm npm install sharp@0.33.5 --cache=/cache/npm
 RUN npm run build
 
-FROM ubuntu:jammy
+FROM ubuntu:noble
 ENV DEBIAN_FRONTEND=noninteractive
 # Cache packages with run cache, update system packages, install packages
-RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
     rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
     apt-get update && \
     apt-get install -y --no-install-recommends git curl wget gnupg ca-certificates iproute2 nginx supervisor
 
-RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
     curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
     apt-get update && \
     apt-get install -y --no-install-recommends nodejs
@@ -53,9 +53,9 @@ RUN wget -q https://dl.min.io/server/minio/release/linux-amd64/minio && \
     install -m755 minio /usr/local/bin/ && \
     install -m755 mc /usr/local/bin/
 
-RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
-    wget -qO - https://pgp.mongodb.com/server-7.0.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-7.0.gpg && \
-    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" |  tee /etc/apt/sources.list.d/mongodb-org-7.0.list && \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
+    wget -qO - https://pgp.mongodb.com/server-8.0.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-8.0.gpg && \
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" |  tee /etc/apt/sources.list.d/mongodb-org-8.0.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends mongodb-org && \
     mkdir -m 777 -p /data/db
@@ -78,8 +78,8 @@ ENV REGISTRY_HTTP_TLS_CERTIFICATE=/app/backend/certs/cert.pem \
 
 COPY infrastructure/standalone/registry.conf /registry.conf
 
-RUN wget -q https://github.com/tweedegolf/mailcrab/releases/download/v1.5.0/mailcrab-linux-x86-64-gnu-v1.5.0 && \
-    install -m755 mailcrab-linux-x86-64-gnu-v1.5.0 /usr/local/bin/mailcrab
+RUN wget -q https://github.com/tweedegolf/mailcrab/releases/download/v1.6.2/mailcrab-linux-x86-64-gnu-v1.6.2 && \
+    install -m755 mailcrab-linux-x86-64-gnu-v1.6.2 /usr/local/bin/mailcrab
 
 # Backend
 WORKDIR /app/backend
