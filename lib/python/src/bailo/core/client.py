@@ -29,6 +29,7 @@ class Client:
         name: str,
         kind: EntryKind,
         description: str,
+        sourceModelId: str | None = None,
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
@@ -37,8 +38,9 @@ class Client:
         """Create a model.
 
         :param name: Name of the model
-        :param kind: Either a Model or a Datacard
+        :param kind: Either a Model, Mirrored Model or a Datacard
         :param description: Description of the model
+        :param sourceModelId: Used for syncing a mirrored model to its source model
         :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
@@ -49,17 +51,43 @@ class Client:
         if visibility is not None:
             _visibility = str(visibility)
 
-        filtered_json = filter_none(
-            {
-                "name": name,
-                "kind": kind,
-                "description": description,
-                "visibility": _visibility,
-                "organisation": organisation,
-                "state": state,
-                "collaborators": collaborators,
-            }
-        )
+        if sourceModelId is not None and kind != EntryKind.MIRRORED_MODEL:
+            raise ValueError("Only Mirrored Models may pass a `sourceModelId` argument.")
+
+        if sourceModelId is None and kind == EntryKind.MIRRORED_MODEL:
+            raise ValueError("Mirrored Models must specify a `sourceModelId` argument.")
+
+        filtered_json = {}
+
+        if sourceModelId is not None:
+            filtered_json = filter_none(
+                {
+                    "name": name,
+                    "kind": kind,
+                    "description": description,
+                    "settings": {
+                        "mirror": {
+                            "sourceModelId": sourceModelId,
+                        },
+                    },
+                    "visibility": _visibility,
+                    "organisation": organisation,
+                    "state": state,
+                    "collaborators": collaborators,
+                }
+            )
+        else:
+            filtered_json = filter_none(
+                {
+                    "name": name,
+                    "kind": kind,
+                    "description": description,
+                    "visibility": _visibility,
+                    "organisation": organisation,
+                    "state": state,
+                    "collaborators": collaborators,
+                }
+            )
 
         return self.agent.post(
             f"{self.url}/v2/models",
@@ -125,7 +153,7 @@ class Client:
 
         :param model_id: Unique model ID
         :param name: Name of the model, defaults to None
-        :param kind: Either a Model or a Datacard, defaults to None
+        :param kind: Either a Model, Mirrored Model or a Datacard, defaults to None
         :param description: Description of the model, defaults to None
         :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None

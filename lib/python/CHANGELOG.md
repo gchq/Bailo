@@ -2,6 +2,10 @@
 
 All dates are formatted dd/mm/yyyy.
 
+## 3.2.0 29/10/2025
+
+- Added new kind property for mirrored models
+
 ## 3.1.2 30/09/2025
 
 - Fix broken `Client.put_file_scan` method.
