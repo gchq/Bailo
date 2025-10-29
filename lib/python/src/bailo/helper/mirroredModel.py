@@ -31,7 +31,7 @@ class MirroredModel(Entry):
     :param organisation: Organisation responsible for the mirrored model, defaults to None
     :param state: Development readiness of the mirrored model, defaults to None
     :param collaborators: list of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. mirrored model access) are, defaults to None
-    :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
+    :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
     def __init__(
@@ -75,12 +75,13 @@ class MirroredModel(Entry):
         """Build a mirrored model from Bailo and upload it.
 
         :param client: A client object used to interact with Bailo
-        :param name: Name of model
-        :param description: Description of model
-        :param organisation: Organisation responsible for the model, defaults to None
-        :param state: Development readiness of the model, defaults to None
+        :param name: Name of mirrored model
+        :param description: Description of mirrored model
+        :param sourceModelId: Used for linking a mirrored model to its source model
+        :param organisation: Organisation responsible for the mirrored model, defaults to None
+        :param state: Development readiness of the mirrored model, defaults to None
         :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
-        :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
+        :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
         res = client.post_model(
@@ -117,7 +118,7 @@ class MirroredModel(Entry):
         """Return an existing mirrored model from Bailo.
 
         :param client: A client object used to interact with Bailo
-        :param model_id: A unique model ID
+        :param model_id: A unique mirrored model ID
         :return: A mirrored model object
         """
         res = client.get_model(model_id=model_id)["model"]
@@ -163,8 +164,6 @@ class MirroredModel(Entry):
         res = client.get_models(task=task, libraries=libraries, filters=filters, search=search)
         models = []
 
-        logger.info("Mirrored Models %s successfully retrieved from server.", res)
-
         for model in res["models"]:
             res_model = client.get_model(model_id=model["id"])["model"]
             model_obj = cls(
@@ -194,7 +193,7 @@ class MirroredModel(Entry):
         for release in res["releases"]:
             releases.append(self.get_release(version=release["semver"]))
 
-        logger.info("Successfully retrieved all releases for model %s.", self.model_id)
+        logger.info("Successfully retrieved all releases for mirrored model %s.", self.model_id)
 
         return releases
 
@@ -207,13 +206,13 @@ class MirroredModel(Entry):
         return Release.from_version(self.client, self.model_id, version)
 
     def get_latest_release(self):
-        """Get the latest release for the model from Bailo.
+        """Get the latest release for the mirrored model from Bailo.
 
         :return: Release object
         """
         releases = self.get_releases()
         if not releases:
-            raise BailoException("This model has no releases.")
+            raise BailoException("This mirrored model has no releases.")
 
         latest_release = max(releases)
         logger.info(
@@ -225,7 +224,7 @@ class MirroredModel(Entry):
         return max(releases)
 
     def get_images(self):
-        """Get all model image references for the model.
+        """Get all model image references for the mirrored model.
 
         :return: List of images
         """
@@ -252,7 +251,7 @@ class MirroredModel(Entry):
 
     @property
     def model_card_version(self):
-        """Get the version of the model card.
+        """Get the version of the mirrored model card.
 
         :return: Model card version.
         """
@@ -260,21 +259,21 @@ class MirroredModel(Entry):
 
     @property
     def model_card_schema(self):
-        """Get the schema of the model card.
+        """Get the schema of the mirrored model card.
 
         :return: Model card schema.
         """
         return self._card_schema
 
     def __repr__(self) -> str:
-        """Return a developer-oriented string representation of the model.
+        """Return a developer-oriented string representation of the mirrored model.
 
         :return: String representation with class and ID
         """
         return f"{self.__class__.__name__}({str(self)})"
 
     def __str__(self) -> str:
-        """Return the human-readable string representation of the model.
+        """Return the human-readable string representation of the mirrored model.
 
         :return: String value of the enum.
         """

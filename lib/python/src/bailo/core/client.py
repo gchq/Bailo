@@ -40,6 +40,7 @@ class Client:
         :param name: Name of the model
         :param kind: Either a Model, Mirrored Model or a Datacard
         :param description: Description of the model
+        :param sourceModelId: Used for syncing a mirrored model to its source model
         :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
@@ -49,6 +50,12 @@ class Client:
         _visibility: str = "public"
         if visibility is not None:
             _visibility = str(visibility)
+
+        if sourceModelId is not None and kind != EntryKind.MIRRORED_MODEL:
+            raise ValueError("Only Mirrored Models may pass a `sourceModelId` argument.")
+
+        if sourceModelId is None and kind == EntryKind.MIRRORED_MODEL:
+            raise ValueError("Mirrored Models must specify a `sourceModelId` argument.")
 
         filtered_json = {}
 
