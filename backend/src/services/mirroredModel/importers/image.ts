@@ -5,18 +5,14 @@ import { escapeRegExp } from 'lodash-es'
 import { finished } from 'stream/promises'
 import { Headers } from 'tar-stream'
 
+import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
 import { UserInterface } from '../../../models/User.js'
+import { getAccessToken } from '../../../routes/v1/registryAuth.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { hasKeysOfType } from '../../../utils/typeguards.js'
 import log from '../../log.js'
-import {
-  doesImageLayerExist,
-  initialiseImageUpload,
-  putImageBlob,
-  putImageManifest,
-  splitDistributionPackageName,
-} from '../../registry.js'
+import { splitDistributionPackageName } from '../../registry.js'
 import { MirrorKind, MirrorKindKeys, MirrorLogData } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
@@ -76,8 +72,32 @@ export class ImageImporter extends BaseImporter {
       } else if (ImageImporter.blobRegex.test(entry.name)) {
         // convert filename to digest format
         const layerDigest = `${entry.name.replace(new RegExp(String.raw`^(${config.modelMirror.contentDirectory}/blobs\/sha256\/)`), 'sha256:')}`
+
+        const repositoryPullToken = await getAccessToken({ dn: this.user.dn }, [
+          {
+            type: 'repository',
+            class: '',
+            name: `${this.metadata.mirroredModelId}/${this.imageName}`,
+            actions: ['pull'],
+          },
+        ])
+        const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
+          {
+            type: 'repository',
+            class: '',
+            name: `${this.metadata.mirroredModelId}/${this.imageName}`,
+            actions: ['push', 'pull'],
+          },
+        ])
+
         try {
-          if (await doesImageLayerExist(this.user, this.metadata.mirroredModelId, this.imageName, layerDigest)) {
+          if (
+            await doesLayerExist(
+              repositoryPullToken,
+              { namespace: this.metadata.mirroredModelId, image: this.imageName },
+              layerDigest,
+            )
+          ) {
             log.debug(
               {
                 name: entry.name,
@@ -98,7 +118,10 @@ export class ImageImporter extends BaseImporter {
               },
               'Initiating un-tarred blob upload.',
             )
-            const res = await initialiseImageUpload(this.user, this.metadata.mirroredModelId, this.imageName)
+            const res = await initialiseUpload(repositoryPushPullToken, {
+              namespace: this.metadata.mirroredModelId,
+              image: this.imageName,
+            })
 
             log.debug(
               {
@@ -108,15 +131,7 @@ export class ImageImporter extends BaseImporter {
               },
               'Putting image blob.',
             )
-            await putImageBlob(
-              this.user,
-              this.metadata.mirroredModelId,
-              this.imageName,
-              res.location,
-              layerDigest,
-              stream,
-              String(entry.size),
-            )
+            await uploadLayerMonolithic(repositoryPushPullToken, res.location, layerDigest, stream, String(entry.size))
             await finished(stream)
           }
         } catch (err) {
@@ -143,10 +158,18 @@ export class ImageImporter extends BaseImporter {
   async finishListener(resolve: (reason?: ImageMirrorInformation) => void, reject: (reason?: unknown) => void) {
     log.debug({ ...this.logData }, 'Uploading manifest.')
     if (hasKeysOfType<{ mediaType: 'string' }>(this.manifestBody, { mediaType: 'string' })) {
-      await putImageManifest(
-        this.user,
-        this.metadata.mirroredModelId,
-        this.imageName,
+      const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
+        {
+          type: 'repository',
+          class: '',
+          name: `${this.metadata.mirroredModelId}/${this.imageName}`,
+          actions: ['push', 'pull'],
+        },
+      ])
+
+      await putManifest(
+        repositoryPushPullToken,
+        { namespace: this.metadata.mirroredModelId, image: this.imageName },
         this.imageTag,
         JSON.stringify(this.manifestBody),
         this.manifestBody['mediaType'],
