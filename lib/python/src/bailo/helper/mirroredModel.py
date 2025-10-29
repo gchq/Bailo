@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from semantic_version import Version
 
 # isort: split
