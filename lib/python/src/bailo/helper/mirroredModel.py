@@ -1,20 +1,12 @@
 from __future__ import annotations
 
-import logging
-import os
-import shutil
-import tempfile
-import warnings
-from typing import Any
-
 from semantic_version import Version
 
 # isort: split
 
 from bailo.core.client import Client
-from bailo.core.enums import CollaboratorEntry, EntryKind, MinimalSchema, ModelVisibility
+from bailo.core.enums import CollaboratorEntry, EntryKind, ModelVisibility
 from bailo.core.exceptions import BailoException
-from bailo.core.utils import NestedDict
 from bailo.helper.entry import Entry
 from bailo.helper.release import Release
 
@@ -28,6 +20,7 @@ class MirroredModel(Entry):
     :param model_id: A unique ID for the mirrored model
     :param name: Name of mirrored model
     :param description: Description of mirrored model
+    :param sourceModelId: Used for linking a mirrored model to its source model
     :param organisation: Organisation responsible for the mirrored model, defaults to None
     :param state: Development readiness of the mirrored model, defaults to None
     :param collaborators: list of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. mirrored model access) are, defaults to None
@@ -80,7 +73,7 @@ class MirroredModel(Entry):
         :param sourceModelId: Used for linking a mirrored model to its source model
         :param organisation: Organisation responsible for the mirrored model, defaults to None
         :param state: Development readiness of the mirrored model, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param collaborators: list of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
         """
@@ -114,7 +107,7 @@ class MirroredModel(Entry):
         return model
 
     @classmethod
-    def from_id(cls, client: Client, model_id: str) -> Model:
+    def from_id(cls, client: Client, model_id: str) -> MirroredModel:
         """Return an existing mirrored model from Bailo.
 
         :param client: A client object used to interact with Bailo
