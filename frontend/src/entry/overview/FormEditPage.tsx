@@ -164,6 +164,19 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
                   action='editEntryCard'
                   fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
                 >
+                  <MessageAlert
+                    severity='info'
+                    message='There is a migration available for this model'
+                    buttonText='Migrate'
+                    buttonAction={() => setMigrationListDialogOpen(true)}
+                  />
+                </Restricted>
+              )}
+              {!readOnly && (
+                <Restricted
+                  action='editEntryCard'
+                  fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
+                >
                   <Button
                     variant='outlined'
                     onClick={() => {
