@@ -102,7 +102,7 @@ export const getModelsSearch = [
       visibility: model.visibility,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
-      sourceModelId: model.settings.mirror.sourceModelId,
+      sourceModelId: model.settings?.mirror?.sourceModelId,
     }))
 
     await audit.onSearchModel(req, models)
