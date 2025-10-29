@@ -40,6 +40,7 @@ class MirroredModel(Entry):
         model_id: str,
         name: str,
         description: str,
+        sourceModelId: str,
         organisation: str | None = None,
         state: str | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
@@ -56,7 +57,7 @@ class MirroredModel(Entry):
             state=state,
             collaborators=collaborators,
         )
-
+        self.sourceModelId = sourceModelId
         self.model_id = model_id
 
     @classmethod
@@ -65,11 +66,12 @@ class MirroredModel(Entry):
         client: Client,
         name: str,
         description: str,
+        sourceModelId: str,
         organisation: str | None = None,
         state: str | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
-        visibility: ModelVisibility | None = None,
-    ) -> Model:
+        visibility: ModelVisibility | None = None
+    ) -> MirroredModel:
         """Build a mirrored model from Bailo and upload it.
 
         :param client: A client object used to interact with Bailo
@@ -85,6 +87,7 @@ class MirroredModel(Entry):
             name=name,
             kind=EntryKind.MIRRORED_MODEL,
             description=description,
+            sourceModelId=sourceModelId,
             visibility=visibility,
             organisation=organisation,
             state=state,
@@ -98,6 +101,7 @@ class MirroredModel(Entry):
             model_id=model_id,
             name=name,
             description=description,
+            sourceModelId=sourceModelId,
             visibility=visibility,
             organisation=organisation,
             state=state,
@@ -110,15 +114,15 @@ class MirroredModel(Entry):
 
     @classmethod
     def from_id(cls, client: Client, model_id: str) -> Model:
-        """Return an existing model from Bailo.
+        """Return an existing mirrored model from Bailo.
 
         :param client: A client object used to interact with Bailo
         :param model_id: A unique model ID
-        :return: A model object
+        :return: A mirrored model object
         """
         res = client.get_model(model_id=model_id)["model"]
-        if res["kind"] != "model":
-            raise BailoException(f"ID {model_id} does not belong to a model. Did you mean to use Datacard.from_id()?")
+        if res["kind"] != EntryKind.MIRRORED_MODEL:
+            raise BailoException(f"ID {model_id} does not belong to a mirrored model. Did you mean to use MirroredModel.from_id()?")
 
         logger.info("Model %s successfully retrieved from server.", model_id)
 
@@ -127,6 +131,7 @@ class MirroredModel(Entry):
             model_id=model_id,
             name=res["name"],
             description=res["description"],
+            sourceModelId=res["settings"]["mirror"]["sourceModelId"],
             collaborators=res["collaborators"],
             organisation=res.get("organisation"),
             state=res.get("state"),
@@ -145,7 +150,7 @@ class MirroredModel(Entry):
         libraries: list[str] | None = None,
         filters: list[str] | None = None,
         search: str = "",
-    ) -> list[Model]:
+    ) -> list[MirroredModel]:
         """Return a list of mirrored model objects from Bailo, based on search parameters.
 
         :param client: A client object used to interact with Bailo
@@ -158,6 +163,8 @@ class MirroredModel(Entry):
         res = client.get_models(task=task, libraries=libraries, filters=filters, search=search)
         models = []
 
+        logger.info("Mirrored Models %s successfully retrieved from server.", res)
+
         for model in res["models"]:
             res_model = client.get_model(model_id=model["id"])["model"]
             model_obj = cls(
@@ -165,6 +172,7 @@ class MirroredModel(Entry):
                 model_id=model["id"],
                 name=model["name"],
                 description=model["description"],
+                sourceModelId=model["sourceModelId"],
                 collaborators=model["collaborators"],
                 organisation=model.get("organisation"),
                 state=model.get("state"),

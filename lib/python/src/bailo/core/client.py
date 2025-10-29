@@ -29,6 +29,7 @@ class Client:
         name: str,
         kind: EntryKind,
         description: str,
+        sourceModelId: str | None = None,
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
@@ -49,17 +50,37 @@ class Client:
         if visibility is not None:
             _visibility = str(visibility)
 
-        filtered_json = filter_none(
-            {
-                "name": name,
-                "kind": kind,
-                "description": description,
-                "visibility": _visibility,
-                "organisation": organisation,
-                "state": state,
-                "collaborators": collaborators,
-            }
-        )
+        filtered_json = {}
+
+        if sourceModelId is not None:
+            filtered_json = filter_none(
+                {
+                    "name": name,
+                    "kind": kind,
+                    "description": description,
+                    "settings": {
+                        "mirror": {
+                            "sourceModelId": sourceModelId,
+                        },
+                    },
+                    "visibility": _visibility,
+                    "organisation": organisation,
+                    "state": state,
+                    "collaborators": collaborators,
+                }
+            )
+        else:
+            filtered_json = filter_none(
+                {
+                    "name": name,
+                    "kind": kind,
+                    "description": description,
+                    "visibility": _visibility,
+                    "organisation": organisation,
+                    "state": state,
+                    "collaborators": collaborators,
+                }
+            )
 
         return self.agent.post(
             f"{self.url}/v2/models",

@@ -19,6 +19,7 @@ from bailo.core.enums import EntryKind, ModelVisibility, Role, SchemaKind
 from bailo.helper.access_request import AccessRequest
 from bailo.helper.datacard import Datacard
 from bailo.helper.model import Experiment, Model
+from bailo.helper.mirroredModel import MirroredModel
 from bailo.helper.release import Release
 from bailo.helper.schema import Schema
 
