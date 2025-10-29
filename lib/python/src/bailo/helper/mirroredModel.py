@@ -29,7 +29,7 @@ class MirroredModel(Entry):
     :param name: Name of mirrored model
     :param description: Description of mirrored model
     :param organisation: Organisation responsible for the mirrored model, defaults to None
-    :param state: Development readiness of the model, defaults to None
+    :param state: Development readiness of the mirrored model, defaults to None
     :param collaborators: list of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. mirrored model access) are, defaults to None
     :param visibility: Visibility of model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
