@@ -78,9 +78,9 @@ export default function Marketplace() {
     selectedRoles,
     selectedTask,
     selectedLibraries,
-    selectedPeers,
     selectedOrganisations,
     selectedStates,
+    selectedPeers,
     debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
@@ -94,9 +94,9 @@ export default function Marketplace() {
     selectedRoles,
     selectedTask,
     selectedLibraries,
-    selectedPeers,
     selectedOrganisations,
     selectedStates,
+    selectedPeers,
     debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
@@ -109,9 +109,9 @@ export default function Marketplace() {
     selectedRoles,
     selectedTask,
     selectedLibraries,
-    selectedPeers,
     selectedOrganisations,
     selectedStates,
+    selectedPeers,
     debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
