@@ -1,16 +1,4 @@
-import {
-  Box,
-  Checkbox,
-  Divider,
-  FormControl,
-  FormLabel,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  RadioGroup,
-  Typography,
-} from '@mui/material'
+import { Box, Checkbox, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -37,10 +25,6 @@ export default function MigrationListDialog({
   onConfirmation,
 }: MigrationListDialogProps) {
   const [selectedMigrationPlan, setSelectMigrationPlan] = useState<SchemaMigrationInterface['id'] | undefined>()
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectMigrationPlan((event.target as HTMLInputElement).value)
-  }
 
   const migrationList = useMemo(() => {
     if (migrations.length === 0) {
@@ -72,20 +56,10 @@ export default function MigrationListDialog({
 
   return (
     <Dialog fullWidth open={open} onClose={onCancel} slots={{ transition: Transition }}>
-      <DialogTitle color='primary'>Select a Migration</DialogTitle>
+      <DialogTitle color='primary'>Select a Migration Plan</DialogTitle>
       <Divider flexItem />
       <DialogContent>
-        <FormControl sx={{ width: '100%' }}>
-          <FormLabel id='migration-plan-selector'>Plans</FormLabel>
-          <RadioGroup
-            aria-labelledby='migration-plan-selector'
-            name='migration-plan-selector-group'
-            value={selectedMigrationPlan}
-            onChange={handleChange}
-          >
-            {migrationList}
-          </RadioGroup>
-        </FormControl>
+        {migrationList}
         <Typography variant='caption' color='error'>
           {errorText}
         </Typography>
