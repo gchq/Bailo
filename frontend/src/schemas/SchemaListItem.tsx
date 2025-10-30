@@ -4,14 +4,16 @@ import { Button, Chip, ListItem, ListItemText, Menu, MenuItem, Stack } from '@mu
 import { useGetSchemas } from 'actions/schema'
 import { useState } from 'react'
 import EditableText from 'src/common/EditableText'
+import EntryListDialog from 'src/schemas/EntryListDialog'
 import UpdateReviewRolesForSchemaDialog from 'src/schemas/UpdateReviewRolesForSchemaDialog'
-import { SchemaInterface } from 'types/types'
+import { SchemaInterface, SchemaKind } from 'types/types'
 
 interface SchemaListItemProps {
   schema: SchemaInterface
   schemasLength: number
   index: number
   open: boolean
+  setOpenMenuSchemaId: (schemaId) => void
   anchorEl: null | HTMLElement
   onMenuClose: () => void
   onOpenMenuClick: (event, schemaId: string) => void
@@ -23,18 +25,26 @@ export default function SchemaListItem({
   schemasLength,
   index,
   open,
+  setOpenMenuSchemaId,
   anchorEl,
   onMenuClose,
   onDeleteSchemaClick,
   onOpenMenuClick,
   onEditSchemaClick,
 }: SchemaListItemProps) {
-  const [reviewRoleSelectorIsOpen, setReviewRoleSelectorIsOpen] = useState(false)
-  const { mutateSchemas } = useGetSchemas('model')
+  const { mutateSchemas } = useGetSchemas(schema.kind)
 
-  const handleDialogClose = (isClosed: boolean) => {
+  const [entriesListOpen, setEntriesListOpen] = useState<boolean>(false)
+
+  const [reviewRoleSelectorIsOpen, setReviewRoleSelectorIsOpen] = useState<boolean>(false)
+
+  const handleReviewRolesDialogClose = () => {
     mutateSchemas()
-    setReviewRoleSelectorIsOpen(isClosed)
+    setReviewRoleSelectorIsOpen(false)
+  }
+
+  const handleEntriesListDialogClose = () => {
+    setEntriesListOpen(false)
   }
 
   return (
@@ -91,6 +101,7 @@ export default function SchemaListItem({
             horizontal: 'center',
           }}
           onClose={onMenuClose}
+          onClick={(_event) => setOpenMenuSchemaId(null)}
         >
           <MenuItem onClick={() => onEditSchemaClick(schema.id, { active: !schema.active })}>
             {schema.active ? 'Mark as inactive' : 'Mark as active'}
@@ -98,11 +109,27 @@ export default function SchemaListItem({
           <MenuItem onClick={() => onEditSchemaClick(schema.id, { hidden: !schema.hidden })}>
             {schema.hidden ? 'Mark as visible' : 'Mark as hidden'}
           </MenuItem>
+          {
+            //Temporary: awaiting access request endpoint
+            schema.kind !== 'accessRequest' && (
+              <MenuItem onClick={() => setEntriesListOpen(true)}>View schema usage</MenuItem>
+            )
+          }
           <MenuItem onClick={() => setReviewRoleSelectorIsOpen(true)}>Update review roles</MenuItem>
           <MenuItem onClick={() => onDeleteSchemaClick(schema.id)}>Delete</MenuItem>
         </Menu>
       </Stack>
-      <UpdateReviewRolesForSchemaDialog open={reviewRoleSelectorIsOpen} onClose={handleDialogClose} schema={schema} />
+      <UpdateReviewRolesForSchemaDialog
+        open={reviewRoleSelectorIsOpen}
+        onClose={handleReviewRolesDialogClose}
+        schema={schema}
+      />
+      {
+        //Temporary: After access request endpoint is created, this should be ternary routing to either EntryListDialog or (new) AccessRequestListDialog
+        schema.kind !== SchemaKind.ACCESS_REQUEST && (
+          <EntryListDialog open={entriesListOpen} schema={schema} onClose={handleEntriesListDialogClose} />
+        )
+      }
     </ListItem>
   )
 }

@@ -1,11 +1,18 @@
+import { ExpandMore } from '@mui/icons-material'
 import SearchIcon from '@mui/icons-material/Search'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
+  Checkbox,
   Container,
   Divider,
   FilledInput,
   FormControl,
+  FormControlLabel,
+  FormGroup,
   IconButton,
   InputAdornment,
   InputLabel,
@@ -54,6 +61,7 @@ export default function Marketplace() {
   const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
+  const [mirroredModelsOnly, setMirroredModelsOnly] = useState(false)
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -70,10 +78,10 @@ export default function Marketplace() {
     selectedRoles,
     selectedTask,
     selectedLibraries,
+    selectedPeers,
     selectedOrganisations,
     selectedStates,
-    selectedPeers,
-    debouncedFilter,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
   const {
@@ -89,7 +97,22 @@ export default function Marketplace() {
     selectedPeers,
     selectedOrganisations,
     selectedStates,
-    debouncedFilter,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
+  )
+
+  const {
+    models: mirroredModels,
+    isModelsError: isMirroredModelsError,
+    isModelsLoading: isMirroredModelsLoading,
+  } = useListModels(
+    EntryKind.MIRRORED_MODEL,
+    selectedRoles,
+    selectedTask,
+    selectedLibraries,
+    selectedPeers,
+    selectedOrganisations,
+    selectedStates,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
@@ -252,6 +275,17 @@ export default function Marketplace() {
     router.replace('/', undefined, { shallow: true })
   }
 
+  const combinedModelErrorMessage = useMemo(() => {
+    let errorMessage = ''
+    if (isModelsError) {
+      errorMessage += `${isModelsError.info.message}. `
+    }
+    if (isMirroredModelsError) {
+      errorMessage += `${isMirroredModelsError.info.message}. `
+    }
+    return errorMessage
+  }, [isMirroredModelsError, isModelsError])
+
   useEffect(() => {
     if (reviewRoles) {
       setRoleOptions([
@@ -328,6 +362,11 @@ export default function Marketplace() {
                     </InputAdornment>
                   }
                 />
+                {debouncedFilter.length > 0 && debouncedFilter.length < 3 && (
+                  <Typography variant='caption' color='error'>
+                    Please enter at least three characters
+                  </Typography>
+                )}
               </FormControl>
               <Stack divider={<Divider flexItem />}>
                 {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
@@ -414,6 +453,23 @@ export default function Marketplace() {
                     accordion
                   />
                 </Box>
+                {mirroredModels.length > 0 && (
+                  <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
+                    <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
+                      <Typography component='h2' variant='h6'>
+                        Mirrored Models
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 1 }}>
+                      <FormGroup>
+                        <FormControlLabel
+                          control={<Checkbox onChange={(e) => setMirroredModelsOnly(e.target.checked)} />}
+                          label='Only display mirrored models'
+                        />
+                      </FormGroup>
+                    </AccordionDetails>
+                  </Accordion>
+                )}
                 <Box>
                   <ChipSelector
                     label='My Roles'
@@ -448,13 +504,13 @@ export default function Marketplace() {
                   />
                 </Tabs>
               </Box>
-              {isModelsLoading && <Loading />}
+              {isModelsLoading || (isMirroredModelsLoading && <Loading />)}
               {modelsErrors && MultipleErrorWrapper('Error with model search', modelsErrors)}
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
-                    entries={models}
-                    entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
+                    entries={mirroredModelsOnly ? mirroredModels : [...models, ...mirroredModels]}
+                    entriesErrorMessage={combinedModelErrorMessage || ''}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
                     selectedOrganisations={selectedOrganisations}

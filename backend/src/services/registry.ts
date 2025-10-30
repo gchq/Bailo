@@ -1,15 +1,4 @@
-import { Readable } from 'node:stream'
-
-import {
-  doesLayerExist,
-  getImageTagManifest,
-  getRegistryLayerStream,
-  initialiseUpload,
-  listImageTags,
-  listModelRepos,
-  putManifest,
-  uploadLayerMonolithic,
-} from '../clients/registry.js'
+import { getImageTagManifest, getRegistryLayerStream, listImageTags, listModelRepos } from '../clients/registry.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken } from '../routes/v1/registryAuth.js'
@@ -112,61 +101,4 @@ export async function getImageBlob(user: UserInterface, modelId: string, imageNa
   ])
 
   return await getRegistryLayerStream(repositoryToken, { namespace: modelId, image: imageName }, digest)
-}
-
-export async function doesImageLayerExist(user: UserInterface, modelId: string, imageName: string, digest: string) {
-  await checkUserAuth(user, modelId, ['pull'])
-
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['pull'] },
-  ])
-  return await doesLayerExist(repositoryToken, { namespace: modelId, image: imageName }, digest)
-}
-
-export async function initialiseImageUpload(user: UserInterface, modelId: string, imageName: string) {
-  await checkUserAuth(user, modelId, ['push'])
-
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
-  ])
-  return await initialiseUpload(repositoryToken, { namespace: modelId, image: imageName })
-}
-
-export async function putImageBlob(
-  user: UserInterface,
-  modelId: string,
-  imageName: string,
-  uploadURL: string,
-  digest: string,
-  blob: Readable | ReadableStream,
-  size: string,
-) {
-  await checkUserAuth(user, modelId, ['push'])
-
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
-  ])
-  return await uploadLayerMonolithic(repositoryToken, uploadURL, digest, blob, size)
-}
-
-export async function putImageManifest(
-  user: UserInterface,
-  modelId: string,
-  imageName: string,
-  imageTag: string,
-  manifestText: string,
-  contentType: string,
-) {
-  await checkUserAuth(user, modelId, ['push'])
-
-  const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
-  ])
-  return await putManifest(
-    repositoryToken,
-    { namespace: modelId, image: imageName },
-    imageTag,
-    manifestText,
-    contentType,
-  )
 }

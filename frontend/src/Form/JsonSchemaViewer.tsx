@@ -7,6 +7,7 @@ import { Dispatch, SetStateAction, useState } from 'react'
 import {
   ArrayFieldTemplateForQuestionViewer,
   DescriptionFieldTemplate,
+  ObjectFieldTemplateForQuestionViewer,
   TitleFieldTemplate,
 } from 'src/Form/FormTemplates'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
@@ -124,8 +125,9 @@ export default function JsonSchemaViewer({
           }}
           templates={{
             DescriptionFieldTemplate,
-            TitleFieldTemplate,
+            TitleFieldTemplate: TitleFieldTemplate,
             ArrayFieldTemplate: ArrayFieldTemplateForQuestionViewer,
+            ObjectFieldTemplate: ObjectFieldTemplateForQuestionViewer,
           }}
         >
           <></>

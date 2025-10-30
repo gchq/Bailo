@@ -131,6 +131,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
             index={index}
             schemasLength={schemas.length}
             open={open}
+            setOpenMenuSchemaId={setOpenMenuSchemaId}
             anchorEl={anchorEl}
             onMenuClose={handleCloseMenu}
             onDeleteSchemaClick={handleDeleteSchema}

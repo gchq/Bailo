@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Link from 'src/Link'
 
-type PartialMessageAlertProps =
+type PartialLinkMessageAlertProps =
   | {
       linkText: string
       href: string
@@ -15,6 +15,16 @@ type PartialMessageAlertProps =
   | {
       linkText?: never
       href?: never
+    }
+
+type PartialButtonMessageAlertProps =
+  | {
+      buttonText: string
+      buttonAction: () => void
+    }
+  | {
+      buttonText?: never
+      buttonAction?: never
     }
 
 type MessageAlertProps = {
@@ -25,7 +35,9 @@ type MessageAlertProps = {
   severity?: AlertProps['severity']
   'data-test'?: string
   slimView?: boolean
-} & PartialMessageAlertProps
+  disableScrollToView?: boolean
+} & PartialLinkMessageAlertProps &
+  PartialButtonMessageAlertProps
 
 export default function MessageAlert({
   message = '',
@@ -35,8 +47,11 @@ export default function MessageAlert({
   severity,
   linkText,
   href,
+  buttonText,
+  buttonAction,
   'data-test': dataTest,
   slimView = false,
+  disableScrollToView = false,
 }: MessageAlertProps) {
   const alertRef = useRef<HTMLDivElement>(null)
   const [showContactMessage, setShowContactMessage] = useState(false)
@@ -50,12 +65,12 @@ export default function MessageAlert({
   }
 
   useEffect(() => {
-    if (message && alertRef.current && alertRef.current.scrollIntoView) {
+    if (!disableScrollToView && message && alertRef.current && alertRef.current.scrollIntoView) {
       alertRef.current.scrollIntoView({
         behavior: 'smooth',
       })
     }
-  }, [message])
+  }, [message, disableScrollToView])
 
   const handleContact = () => {
     setShowContactMessage(!showContactMessage)
@@ -86,6 +101,7 @@ export default function MessageAlert({
               ariaLabel='copy error message to clipboard'
             />
           )}
+          {buttonText && <Button onClick={buttonAction}>{buttonText}</Button>}
         </Stack>
         {!!(href && linkText) && (
           <Typography>

@@ -44,6 +44,7 @@ import { postFromSchema } from './routes/v2/model/modelcard/postFromSchema.js'
 import { postFromTemplate } from './routes/v2/model/modelcard/postFromTemplate.js'
 import { putModelCard } from './routes/v2/model/modelcard/putModelCard.js'
 import { patchModel } from './routes/v2/model/patchModel.js'
+import { postMigrateModelSchema } from './routes/v2/model/postMigrateModelSchema.js'
 import { postModel } from './routes/v2/model/postModel.js'
 import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
 import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
@@ -179,6 +180,8 @@ if (!config.ui?.inference || config.ui.inference?.enabled) {
   server.put('/api/v2/model/:modelId/inference/:image/:tag', ...putInference)
   server.delete('/api/v2/model/:modelId/inference/:image/:tag', ...deleteInference)
 }
+
+server.post('/api/v2/model/:modelId/migrate-schema/:migrationId', ...postMigrateModelSchema)
 
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/list', ...getModelFileList)
 // *server.get('/api/v2/model/:modelId/release/:semver/file/:fileCode/raw', ...getModelFileRaw)

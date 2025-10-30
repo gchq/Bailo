@@ -21,9 +21,14 @@ exports[`routes > model > getModelsSearch > audit > expected call 1`] = `
     "description": "description",
     "id": "test",
     "name": "name",
+    "organisation": undefined,
+    "sourceModelId": undefined,
+    "state": undefined,
     "tags": [
       "tag",
     ],
+    "updatedAt": undefined,
+    "visibility": undefined,
   },
 ]
 `;

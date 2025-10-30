@@ -2,6 +2,7 @@ import { Box, Button, Container, Divider, Stack, Typography } from '@mui/materia
 import { useGetSchemaMigrations } from 'actions/schemaMigration'
 import { memoize } from 'lodash-es'
 import Link from 'next/link'
+import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
 import MessageAlert from 'src/MessageAlert'
@@ -13,12 +14,22 @@ export default function SchemaMigrationList() {
   const SchemaMigrationList = memoize(({ data, index }) => (
     <Stack sx={{ p: 2 }} spacing={1}>
       <Stack direction='row' spacing={2} justifyContent='space-between'>
-        <Typography fontWeight='bold' color='primary'>
+        <Typography fontWeight='bold' color='primary' variant='h6'>
           {data[index].name}
         </Typography>
         <Typography>
           Created on <span style={{ fontWeight: 'bold' }}>{formatDateString(data[index].createdAt)}</span>
         </Typography>
+      </Stack>
+      <Stack direction='row' alignItems='center'>
+        <Typography fontWeight='bold' color='primary'>
+          {data[index].id}
+        </Typography>
+        <CopyToClipboardButton
+          textToCopy={data[index].id}
+          notificationText='Copied migration ID to clipboard'
+          ariaLabel='copy migration ID to clipboard'
+        />
       </Stack>
       <Typography variant='caption'>
         Plan for migrating <span style={{ fontWeight: 'bold' }}>{data[index].sourceSchema}</span> to{' '}

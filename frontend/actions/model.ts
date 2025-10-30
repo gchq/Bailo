@@ -7,6 +7,7 @@ import {
   EntryInterface,
   EntryKindKeys,
   EntryUserPermissions,
+  EntryVisibilityKeys,
   FileInterface,
   ModelImage,
   ReleaseInterface,
@@ -25,8 +26,10 @@ export interface EntrySearchResult {
   organisation?: string
   state?: string
   peerId?: string
+  visibility: EntryVisibilityKeys
   createdAt: Date
   updatedAt: Date
+  sourceModelId?: string
 }
 
 export interface ModelExportRequest {
@@ -34,6 +37,8 @@ export interface ModelExportRequest {
   semvers?: ReleaseInterface['semver'][]
 }
 
+//This function is misleading, it gets a list of entries (models, data cards, etc.), not just models.
+//This is tech debt that is repeating throughout this file and other parts of the codebase.
 export function useListModels(
   kind?: EntryKindKeys,
   filters: string[] = [],
@@ -75,7 +80,7 @@ export function useListModels(
   }
 }
 
-export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
+export function useGetModel(id: string | undefined, kind?: EntryKindKeys) {
   const queryParams = {
     kind,
   }

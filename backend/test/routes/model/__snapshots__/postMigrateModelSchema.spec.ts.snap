@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > postModel > 200 > ok 1`] = `
+{
+  "response": "Successfully migrated model schema",
+}
+`;
+
+exports[`routes > model > postModel > audit > expected call 1`] = `
+{
+  "_id": "test",
+  "card": {},
+  "id": "test-model=",
+}
+`;
