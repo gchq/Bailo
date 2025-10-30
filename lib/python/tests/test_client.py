@@ -7,7 +7,7 @@ import pytest
 # isort: split
 
 from bailo import Client, ModelVisibility, SchemaKind
-from bailo.core.enums import EntryKind
+from bailo.core.enums import CollaboratorEntry, EntryKind, Role
 from bailo.core.exceptions import BailoException, ResponseException
 
 mock_result = {"success": True}
@@ -42,6 +42,8 @@ def test_post_model(requests_mock):
         visibility=ModelVisibility.PUBLIC,
         organisation="Example Organisation",
         state="Development",
+        tags=["taga", "tagb"],
+        collaborators=[CollaboratorEntry("user:user", [Role.OWNER])],
     )
 
     assert result == {"success": True}
@@ -81,6 +83,7 @@ def test_patch_model(requests_mock):
         name="test",
         organisation="Example Organisation",
         state="Development",
+        tags=["taga", "tagb", "tagc"],
     )
 
     assert result == {"success": True}

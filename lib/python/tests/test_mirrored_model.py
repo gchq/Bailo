@@ -5,7 +5,7 @@ from bailo.core.enums import CollaboratorEntry, MinimalSchema, Role
 
 # isort: split
 
-from bailo import Client, Datacard, Experiment, MirroredModel, MirroredModel, ModelVisibility
+from bailo import Client, Datacard, Experiment, MirroredModel, ModelVisibility
 from bailo.core.exceptions import BailoException
 from bailo.core.utils import NestedDict
 
@@ -13,18 +13,29 @@ from bailo.core.utils import NestedDict
 def test_mirrored_model(local_mirrored_model):
     assert isinstance(local_mirrored_model, MirroredModel)
 
+
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ("name", "description", "sourceModelId", "organisation", "state", "visibility", "collaborators"),
+    ("name", "description", "sourceModelId", "organisation", "state", "tags", "visibility", "collaborators"),
     [
-        ("test-mirrored-model", "test", "test-1234", None, None, ModelVisibility.PUBLIC, None),
-        ("test-mirrored-model", "test", "test-1234", None, None, None, [CollaboratorEntry("user:user", ["owner", "contributor"])]),
+        ("test-mirrored-model", "test", "test-1234", None, None, None, ModelVisibility.PUBLIC, None),
+        (
+            "test-mirrored-model",
+            "test",
+            "test-1234",
+            None,
+            None,
+            None,
+            None,
+            [CollaboratorEntry("user:user", ["owner", "contributor"])],
+        ),
         (
             "test-mirrored-model",
             "test",
             "test-1234",
             "Example Organisation",
             "Development",
+            ["taga", "tagb"],
             None,
             [CollaboratorEntry("user:user", [Role.OWNER])],
         ),
@@ -37,6 +48,7 @@ def test_create_get_from_id_and_update(
     visibility: ModelVisibility | None,
     organisation: str | None,
     state: str | None,
+    tags: list[str] | None,
     collaborators: list[CollaboratorEntry] | None,
     integration_client: Client,
 ):
@@ -49,6 +61,7 @@ def test_create_get_from_id_and_update(
         visibility=visibility,
         organisation=organisation,
         state=state,
+        tags=tags,
         collaborators=collaborators,
     )
     assert isinstance(mirroredModel, MirroredModel)
@@ -85,4 +98,3 @@ def test_get_releases(integration_client):
 
     with pytest.raises(BailoException):
         model.get_latest_release()
-
