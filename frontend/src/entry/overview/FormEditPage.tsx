@@ -4,10 +4,9 @@ import HistoryIcon from '@mui/icons-material/History'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { Box, Button, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { getChangedFields } from '@rjsf/utils'
-import { useGetModel } from 'actions/model'
 import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
-import { useGetSchemaMigrations } from 'actions/schemaMigration'
+import { postRunSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
 import React from 'react'
 import { useContext, useEffect, useState } from 'react'
@@ -23,30 +22,36 @@ import SaveAndCancelButtons from 'src/entry/overview/SaveAndCancelFormButtons'
 import JsonSchemaForm from 'src/Form/JsonSchemaForm'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
+import { KeyedMutator } from 'swr'
 import { EntryCardKindLabel, EntryInterface, SplitSchemaNoRender } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 import { getStepsData, getStepsFromSchema } from 'utils/formUtils'
 type FormEditPageProps = {
   entry: EntryInterface
   readOnly?: boolean
+  mutateEntry: KeyedMutator<{ model: EntryInterface }>
 }
-export default function FormEditPage({ entry, readOnly = false }: FormEditPageProps) {
+export default function FormEditPage({ entry, readOnly = false, mutateEntry }: FormEditPageProps) {
   const [isEdit, setIsEdit] = useState(false)
   const [oldSchema, setOldSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [splitSchema, setSplitSchema] = useState<SplitSchemaNoRender>({ reference: '', steps: [] })
   const [errorMessage, setErrorMessage] = useState('')
-  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
-  const { isModelError: isEntryError, mutateModel: mutateEntry } = useGetModel(entry.id, entry.kind)
+  const [migrationErrorMessage, setMigrationErrorMessage] = useState('')
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [jsonUploadDialogOpen, setJsonUploadDialogOpen] = useState(false)
   const [migrationListDialogOpen, setMigrationListDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+
   const open = Boolean(anchorEl)
+
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations(
     '',
     entry.card.schemaId,
   )
+  const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)
+  const sendNotification = useNotification()
 
   function handleActionButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
     setAnchorEl(event.currentTarget)
@@ -55,9 +60,8 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   const handleActionButtonClose = () => {
     setAnchorEl(null)
   }
-
-  const sendNotification = useNotification()
   const { setUnsavedChanges } = useContext(UnsavedChangesContext)
+
   async function onSubmit() {
     if (schema) {
       setErrorMessage('')
@@ -89,6 +93,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
       setIsEdit(false)
     }
   }
+
   useEffect(() => {
     if (!entry || !schema) return
     const metadata = entry.card.metadata
@@ -98,9 +103,11 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
     }
     setSplitSchema({ reference: schema.id, steps })
   }, [schema, entry])
+
   useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
+
   function handleJsonFormOnSubmit(formData: string) {
     setJsonUploadDialogOpen(false)
     try {
@@ -114,7 +121,26 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
     } catch (_e) {
       sendNotification({
         variant: 'error',
-        msg: 'Could not update form - please make sure to use valid JSON.',
+        msg: 'Could not update form - please make sure to use valid JSON',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+    }
+  }
+
+  const handleMigrationConfirm = async (selectedMigrationPlan: string) => {
+    setMigrationErrorMessage('')
+    if (!selectedMigrationPlan) {
+      return setMigrationErrorMessage('Invalid schema migration plan selected')
+    }
+    const res = await postRunSchemaMigration(entry.id, selectedMigrationPlan)
+    if (!res.ok) {
+      setMigrationErrorMessage(await getErrorMessage(res))
+    } else {
+      mutateEntry()
+      setMigrationListDialogOpen(false)
+      sendNotification({
+        variant: 'success',
+        msg: 'Schema successfully migrated',
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
     }
@@ -122,10 +148,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
 
   if (isSchemaError) {
     return <MessageAlert message={isSchemaError.info.message} severity='error' />
-  }
-
-  if (isEntryError) {
-    return <MessageAlert message={isEntryError.info.message} severity='error' />
   }
 
   if (isSchemaMigrationsError) {
@@ -157,21 +179,21 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
               />
             </Stack>
           </div>
+          {schemaMigrations.length > 0 && !readOnly && (
+            <Restricted
+              action='editEntryCard'
+              fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
+            >
+              <MessageAlert
+                severity='info'
+                message='There is a migration available for this model'
+                buttonText='Migrate'
+                buttonAction={() => setMigrationListDialogOpen(true)}
+              />
+            </Restricted>
+          )}
           {!isEdit && (
             <Stack direction='row' spacing={1}>
-              {!readOnly && (
-                <Restricted
-                  action='editEntryCard'
-                  fallback={<Button disabled>{`Edit ${EntryCardKindLabel[entry.kind]}`}</Button>}
-                >
-                  <MessageAlert
-                    severity='info'
-                    message='There is a migration available for this model'
-                    buttonText='Migrate'
-                    buttonAction={() => setMigrationListDialogOpen(true)}
-                  />
-                </Restricted>
-              )}
               {!readOnly && (
                 <Restricted
                   action='editEntryCard'
@@ -270,7 +292,8 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
         open={migrationListDialogOpen}
         onCancel={() => setMigrationListDialogOpen(false)}
         migrations={schemaMigrations}
-        entry={entry}
+        errorText={migrationErrorMessage}
+        onConfirmation={handleMigrationConfirm}
       />
     </>
   )
