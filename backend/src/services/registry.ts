@@ -1,8 +1,18 @@
-import { getImageTagManifest, getRegistryLayerStream, listImageTags, listModelRepos } from '../clients/registry.js'
+import {
+  deleteImage,
+  getImageTagManifest,
+  getRegistryLayerStream,
+  listImageTags,
+  listModelRepos,
+  mountBlob,
+  putManifest,
+} from '../clients/registry.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken } from '../routes/v1/registryAuth.js'
+import config from '../utils/config.js'
 import { Forbidden, InternalError } from '../utils/error.js'
+import log from './log.js'
 import { getModelById } from './model.js'
 
 // derived from https://pkg.go.dev/github.com/distribution/reference#pkg-overview
@@ -67,15 +77,13 @@ async function checkUserAuth(user: UserInterface, modelId: string, actions: Acti
 export async function listModelImages(user: UserInterface, modelId: string) {
   await checkUserAuth(user, modelId, ['list'])
 
-  const registryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'registry', class: '', name: 'catalog', actions: ['*'] },
-  ])
+  const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
   return await Promise.all(
     repos.map(async (repo) => {
       const [namespace, image] = repo.split(/\/(.*)/s)
       const repositoryToken = await getAccessToken({ dn: user.dn }, [
-        { type: 'repository', class: '', name: repo, actions: ['pull'] },
+        { type: 'repository', name: repo, actions: ['pull'] },
       ])
       return { repository: namespace, name: image, tags: await listImageTags(repositoryToken, { namespace, image }) }
     }),
@@ -86,7 +94,7 @@ export async function getImageManifest(user: UserInterface, modelId: string, ima
   await checkUserAuth(user, modelId, ['pull'])
 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['pull'] },
+    { type: 'repository', name: `${modelId}/${imageName}`, actions: ['pull'] },
   ])
 
   // get which layers exist for the model
@@ -97,8 +105,51 @@ export async function getImageBlob(user: UserInterface, modelId: string, imageNa
   await checkUserAuth(user, modelId, ['pull'])
 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', class: '', name: `${modelId}/${imageName}`, actions: ['pull'] },
+    { type: 'repository', name: `${modelId}/${imageName}`, actions: ['pull'] },
   ])
 
   return await getRegistryLayerStream(repositoryToken, { namespace: modelId, image: imageName }, digest)
+}
+
+export async function softDeleteImage(user: UserInterface, modelId: string, imageName: string, imageTag: string) {
+  // GET the original manifest
+  const manifest = await getImageManifest(user, modelId, imageName, imageTag)
+  log.debug({ manifest }, 'Got original manifest')
+
+  const allLayers = [manifest.config, ...manifest.layers]
+  const softDeleteNamespace = `${config.registry.softDeletePrefix}${modelId}`
+  log.debug({ softDeleteNamespace }, 'softDeleteNamespace=')
+  const multiRepositoryToken = await getAccessToken({ dn: user.dn }, [
+    { type: 'repository', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
+    { type: 'repository', name: `${softDeleteNamespace}/${imageName}`, actions: ['push', 'pull'] },
+  ])
+
+  // cross-mount layers from original to new image
+  for (const layer of allLayers) {
+    const layerDigest = layer['digest']
+    if (!layerDigest || layerDigest.length === 0) {
+      throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag })
+    }
+
+    await mountBlob(
+      multiRepositoryToken,
+      { namespace: modelId, image: imageName },
+      { namespace: softDeleteNamespace, image: imageName },
+      layerDigest,
+    )
+  }
+
+  // PUT the new manifest
+  const putManifestRes = await putManifest(
+    multiRepositoryToken,
+    { namespace: softDeleteNamespace, image: imageName },
+    imageTag,
+    JSON.stringify(manifest),
+    manifest['mediaType'],
+  )
+  log.debug({ putManifestRes }, 'putManifest result')
+
+  // DELETE the original manifest
+  const deleteRes = await deleteImage(multiRepositoryToken, { namespace: modelId, image: imageName }, imageTag)
+  log.debug({ deleteRes }, 'deleteImage result')
 }

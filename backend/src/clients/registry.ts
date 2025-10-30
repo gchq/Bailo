@@ -8,6 +8,7 @@ import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
+  isDeleteImageResponse,
   isDoesLayerExistResponse,
   isGetImageTagManifestResponse,
   isInitialiseUploadObjectResponse,
@@ -60,7 +61,7 @@ async function registryRequest(
 
   do {
     const url = `${registry}/v2/${endpoint}${paginateParameter}`
-    log.debug({ url }, 'Making request to the registry.')
+    log.trace({ url, extraHeaders }, 'Making request to the registry.')
     try {
       // Note that this `fetch` is from `Node` and not `node-fetch` unlike other places in the codebase.
       // This is because `node-fetch` was incorrectly closing the stream received from `tar` for some (but not all) entries which meant that not all of the streamed data was sent to the registry
@@ -80,7 +81,7 @@ async function registryRequest(
     link = res.headers.get('link') || ''
     contentType = res.headers.get('content-type') || ''
 
-    log.debug(Object.fromEntries(res.headers), 'Headers received from the registry.')
+    log.trace(Object.fromEntries(res.headers), 'Headers received from the registry.')
 
     const linkQueryIndex = link.indexOf('?')
     const linkEndIndex = link.lastIndexOf('>')
@@ -260,10 +261,16 @@ export async function doesLayerExist(token: string, imageRef: RepoRef, digest: s
   }
 }
 
-export async function initialiseUpload(token: string, imageRef: RepoRef) {
-  const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`, true, {
-    method: 'POST',
-  })
+export async function initialiseUpload(token: string, imageRef: RepoRef, extraHeaders: HeadersInit = {}) {
+  const { headers } = await registryRequest(
+    token,
+    `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`,
+    true,
+    {
+      method: 'POST',
+    },
+    extraHeaders,
+  )
 
   if (!isInitialiseUploadObjectResponse(headers)) {
     throw InternalError('Unrecognised response headers when posting initialise image upload.', {
@@ -336,6 +343,48 @@ export async function uploadLayerMonolithic(
       uploadURL,
       digest,
       size,
+    })
+  }
+
+  return headers
+}
+
+export async function mountBlob(
+  token: string,
+  sourceImageRef: RepoRef,
+  destinationImageRef: RepoRef,
+  blobDigest: string,
+) {
+  const { headers, body } = await registryRequest(
+    token,
+    `${destinationImageRef.namespace}/${destinationImageRef.image}/blobs/uploads/?from=${sourceImageRef.namespace}/${sourceImageRef.image}&mount=${blobDigest}`,
+    false,
+    {
+      method: 'POST',
+    },
+    { 'Content-Length': '0' },
+  )
+
+  log.debug({ headers, body }, 'got response from POST')
+}
+
+export async function deleteImage(token: string, imageRef: RepoRef, imageTag: string) {
+  const { headers, body } = await registryRequest(
+    token,
+    `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
+    true,
+    {
+      method: 'DELETE',
+    },
+    { Accept: 'application/vnd.docker.distribution.manifest.v2+json' },
+  )
+
+  log.debug({ headers, body }, 'got response from DELETE')
+  if (!isDeleteImageResponse(headers)) {
+    throw InternalError('Unrecognised response headers when deleting image.', {
+      headers,
+      namespace: imageRef.namespace,
+      image: imageRef.image,
     })
   }
 

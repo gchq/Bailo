@@ -46,6 +46,10 @@ type InitialiseUploadResponse = {
   range: string
 }
 
+type DeleteImageResponse = {
+  'content-length': string
+}
+
 export function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
   return (
     hasKeys(resp, ['errors']) &&
@@ -122,6 +126,17 @@ export function isUploadLayerMonolithicResponse(resp: unknown): resp is UploadLa
 }
 
 export function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUploadResponse {
+  return hasKeysOfType(resp, {
+    'content-length': 'string',
+    date: 'string',
+    'docker-distribution-api-version': 'string',
+    'docker-upload-uuid': 'string',
+    location: 'string',
+    range: 'string',
+  })
+}
+
+export function isDeleteImageResponse(resp: unknown): resp is DeleteImageResponse {
   return hasKeysOfType(resp, {
     'content-length': 'string',
     date: 'string',
