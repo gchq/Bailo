@@ -8,6 +8,43 @@ exports[`services > file > downloadFile > success 1`] = `
 }
 `;
 
+exports[`services > file > finishUploadMultipartFile > success 1`] = `
+{
+  "_id": "mockFileId",
+  "avScan": {
+    "aggregate": [MockFunction spy],
+    "delete": [MockFunction spy],
+    "deleteMany": [MockFunction spy],
+    "find": [MockFunction spy] {
+      "calls": [
+        [
+          {
+            "fileId": "mockFileId",
+          },
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "findOne": [MockFunction spy],
+  },
+  "complete": true,
+  "createdAt": 2024-01-01T00:00:00.000Z,
+  "id": "mockFileId",
+  "mime": "mock/mime",
+  "modelId": "mockModelId",
+  "name": "mockFileName",
+  "path": "/mock/path",
+  "size": 100,
+  "tags": [],
+  "updatedAt": 2024-01-02T00:00:00.000Z,
+}
+`;
+
 exports[`services > file > getFilesByIds > success 1`] = `
 [
   {
@@ -77,6 +114,54 @@ exports[`services > file > removeFile > success 1`] = `
 }
 `;
 
+exports[`services > file > startUploadMultipartFile > success 1`] = `
+{
+  "chunks": [
+    {
+      "endByte": 5242879,
+      "startByte": 0,
+    },
+    {
+      "endByte": 10485759,
+      "startByte": 5242880,
+    },
+  ],
+  "file": {
+    "_id": "mockFileId",
+    "aggregate": [MockFunction spy],
+    "complete": true,
+    "createdAt": 2024-01-01T00:00:00.000Z,
+    "delete": [MockFunction spy],
+    "find": [MockFunction spy],
+    "findById": [MockFunction spy],
+    "findOneAndDelete": [MockFunction spy],
+    "findOneAndUpdate": [MockFunction spy],
+    "group": [MockFunction spy],
+    "match": [MockFunction spy],
+    "mime": "mock/mime",
+    "modelId": "mockModelId",
+    "name": "mockFileName",
+    "path": "/mock/path",
+    "save": [MockFunction spy] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "size": 100,
+    "tags": [],
+    "toObject": [MockFunction spy],
+    "updatedAt": 2024-01-02T00:00:00.000Z,
+  },
+  "uploadId": "uploadId",
+}
+`;
+
 exports[`services > file > updateFile > success 1`] = `
 {
   "_id": {
@@ -129,8 +214,7 @@ exports[`services > file > updateFile > success multiple params 1`] = `
 
 exports[`services > file > uploadFile > success 1`] = `
 {
-  "_id": [MockFunction spy],
-  "aggregate": [MockFunction spy],
+  "_id": "mockFileId",
   "avScan": {
     "aggregate": [MockFunction spy],
     "delete": [MockFunction spy],
@@ -139,30 +223,7 @@ exports[`services > file > uploadFile > success 1`] = `
       "calls": [
         [
           {
-            "fileId": "function(...s) {
-    let n = T(t);
-    n.called = !0, n.callCount++, n.calls.push(s);
-    let d = n.next.shift();
-    if (d) {
-      n.results.push(d);
-      let [a, i] = d;
-      if (a === "ok")
-        return i;
-      throw i;
-    }
-    let o, c = "ok", p = n.results.length;
-    if (n.impl)
-      try {
-        new.target ? o = Reflect.construct(n.impl, s, new.target) : o = n.impl.apply(this, s), c = "ok";
-      } catch (a) {
-        throw o = a, c = "error", n.results.push([c, a]), a;
-      }
-    let g = [c, o];
-    return w(o) && o.then(
-      (a) => n.resolves[p] = ["ok", a],
-      (a) => n.resolves[p] = ["error", a]
-    ), n.results.push(g), o;
-  }",
+            "fileId": "mockFileId",
           },
         ],
       ],
@@ -175,130 +236,22 @@ exports[`services > file > uploadFile > success 1`] = `
     },
     "findOne": [MockFunction spy],
   },
-  "delete": [MockFunction spy],
-  "find": [MockFunction spy],
-  "findOneAndDelete": [MockFunction spy],
-  "findOneAndUpdate": [MockFunction spy],
-  "group": [MockFunction spy],
-  "id": "function(...s) {
-    let n = T(t);
-    n.called = !0, n.callCount++, n.calls.push(s);
-    let d = n.next.shift();
-    if (d) {
-      n.results.push(d);
-      let [a, i] = d;
-      if (a === "ok")
-        return i;
-      throw i;
-    }
-    let o, c = "ok", p = n.results.length;
-    if (n.impl)
-      try {
-        new.target ? o = Reflect.construct(n.impl, s, new.target) : o = n.impl.apply(this, s), c = "ok";
-      } catch (a) {
-        throw o = a, c = "error", n.results.push([c, a]), a;
-      }
-    let g = [c, o];
-    return w(o) && o.then(
-      (a) => n.resolves[p] = ["ok", a],
-      (a) => n.resolves[p] = ["error", a]
-    ), n.results.push(g), o;
-  }",
-  "match": [MockFunction spy],
-  "save": [MockFunction spy] {
-    "calls": [
-      [],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": {
-          "_id": [MockFunction spy],
-          "aggregate": [MockFunction spy],
-          "delete": [MockFunction spy],
-          "find": [MockFunction spy],
-          "findOneAndDelete": [MockFunction spy],
-          "findOneAndUpdate": [MockFunction spy],
-          "group": [MockFunction spy],
-          "match": [MockFunction spy],
-          "save": [MockFunction spy] {
-            "calls": [
-              [],
-            ],
-            "results": [
-              {
-                "type": "return",
-                "value": [Circular],
-              },
-            ],
-          },
-          "size": 100,
-          "toObject": [MockFunction spy] {
-            "calls": [
-              [],
-            ],
-            "results": [
-              {
-                "type": "return",
-                "value": [Circular],
-              },
-            ],
-          },
-        },
-      },
-    ],
-  },
+  "complete": true,
+  "createdAt": 2024-01-01T00:00:00.000Z,
+  "id": "mockFileId",
+  "mime": "mock/mime",
+  "modelId": "mockModelId",
+  "name": "mockFileName",
+  "path": "/mock/path",
   "size": 100,
-  "toObject": [MockFunction spy] {
-    "calls": [
-      [],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": {
-          "_id": [MockFunction spy],
-          "aggregate": [MockFunction spy],
-          "delete": [MockFunction spy],
-          "find": [MockFunction spy],
-          "findOneAndDelete": [MockFunction spy],
-          "findOneAndUpdate": [MockFunction spy],
-          "group": [MockFunction spy],
-          "match": [MockFunction spy],
-          "save": [MockFunction spy] {
-            "calls": [
-              [],
-            ],
-            "results": [
-              {
-                "type": "return",
-                "value": [Circular],
-              },
-            ],
-          },
-          "size": 100,
-          "toObject": [MockFunction spy] {
-            "calls": [
-              [],
-            ],
-            "results": [
-              {
-                "type": "return",
-                "value": [Circular],
-              },
-            ],
-          },
-        },
-      },
-    ],
-  },
+  "tags": [],
+  "updatedAt": 2024-01-02T00:00:00.000Z,
 }
 `;
 
 exports[`services > file > uploadFile > virus scan initialised 1`] = `
 {
-  "_id": [MockFunction spy],
-  "aggregate": [MockFunction spy],
+  "_id": "mockFileId",
   "avScan": {
     "aggregate": [MockFunction spy],
     "delete": [MockFunction spy],
@@ -307,30 +260,7 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
       "calls": [
         [
           {
-            "fileId": "function(...s) {
-    let n = T(t);
-    n.called = !0, n.callCount++, n.calls.push(s);
-    let d = n.next.shift();
-    if (d) {
-      n.results.push(d);
-      let [a, i] = d;
-      if (a === "ok")
-        return i;
-      throw i;
-    }
-    let o, c = "ok", p = n.results.length;
-    if (n.impl)
-      try {
-        new.target ? o = Reflect.construct(n.impl, s, new.target) : o = n.impl.apply(this, s), c = "ok";
-      } catch (a) {
-        throw o = a, c = "error", n.results.push([c, a]), a;
-      }
-    let g = [c, o];
-    return w(o) && o.then(
-      (a) => n.resolves[p] = ["ok", a],
-      (a) => n.resolves[p] = ["error", a]
-    ), n.results.push(g), o;
-  }",
+            "fileId": "mockFileId",
           },
         ],
       ],
@@ -343,123 +273,16 @@ exports[`services > file > uploadFile > virus scan initialised 1`] = `
     },
     "findOne": [MockFunction spy],
   },
-  "delete": [MockFunction spy],
-  "find": [MockFunction spy],
-  "findOneAndDelete": [MockFunction spy],
-  "findOneAndUpdate": [MockFunction spy],
-  "group": [MockFunction spy],
-  "id": "function(...s) {
-    let n = T(t);
-    n.called = !0, n.callCount++, n.calls.push(s);
-    let d = n.next.shift();
-    if (d) {
-      n.results.push(d);
-      let [a, i] = d;
-      if (a === "ok")
-        return i;
-      throw i;
-    }
-    let o, c = "ok", p = n.results.length;
-    if (n.impl)
-      try {
-        new.target ? o = Reflect.construct(n.impl, s, new.target) : o = n.impl.apply(this, s), c = "ok";
-      } catch (a) {
-        throw o = a, c = "error", n.results.push([c, a]), a;
-      }
-    let g = [c, o];
-    return w(o) && o.then(
-      (a) => n.resolves[p] = ["ok", a],
-      (a) => n.resolves[p] = ["error", a]
-    ), n.results.push(g), o;
-  }",
-  "match": [MockFunction spy],
-  "save": [MockFunction spy] {
-    "calls": [
-      [],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": {
-          "_id": [MockFunction spy],
-          "aggregate": [MockFunction spy],
-          "delete": [MockFunction spy],
-          "find": [MockFunction spy],
-          "findOneAndDelete": [MockFunction spy],
-          "findOneAndUpdate": [MockFunction spy],
-          "group": [MockFunction spy],
-          "match": [MockFunction spy],
-          "save": [MockFunction spy] {
-            "calls": [
-              [],
-            ],
-            "results": [
-              {
-                "type": "return",
-                "value": [Circular],
-              },
-            ],
-          },
-          "size": 100,
-          "toObject": [MockFunction spy] {
-            "calls": [
-              [],
-            ],
-            "results": [
-              {
-                "type": "return",
-                "value": [Circular],
-              },
-            ],
-          },
-        },
-      },
-    ],
-  },
+  "complete": true,
+  "createdAt": 2024-01-01T00:00:00.000Z,
+  "id": "mockFileId",
+  "mime": "mock/mime",
+  "modelId": "mockModelId",
+  "name": "mockFileName",
+  "path": "/mock/path",
   "size": 100,
-  "toObject": [MockFunction spy] {
-    "calls": [
-      [],
-    ],
-    "results": [
-      {
-        "type": "return",
-        "value": {
-          "_id": [MockFunction spy],
-          "aggregate": [MockFunction spy],
-          "delete": [MockFunction spy],
-          "find": [MockFunction spy],
-          "findOneAndDelete": [MockFunction spy],
-          "findOneAndUpdate": [MockFunction spy],
-          "group": [MockFunction spy],
-          "match": [MockFunction spy],
-          "save": [MockFunction spy] {
-            "calls": [
-              [],
-            ],
-            "results": [
-              {
-                "type": "return",
-                "value": [Circular],
-              },
-            ],
-          },
-          "size": 100,
-          "toObject": [MockFunction spy] {
-            "calls": [
-              [],
-            ],
-            "results": [
-              {
-                "type": "return",
-                "value": [Circular],
-              },
-            ],
-          },
-        },
-      },
-    ],
-  },
+  "tags": [],
+  "updatedAt": 2024-01-02T00:00:00.000Z,
 }
 `;
 

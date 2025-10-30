@@ -20,6 +20,7 @@ const config: PartialDeep<Config> = {
     forcePathStyle: true,
     rejectUnauthorized: true,
     automaticallyCreateBuckets: true,
+    multipartChunkSize: 5 * 1024 * 1024,
     buckets: {
       uploads: 'uploads',
       registry: 'registry',
