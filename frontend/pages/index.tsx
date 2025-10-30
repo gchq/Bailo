@@ -1,11 +1,18 @@
+import { ExpandMore } from '@mui/icons-material'
 import SearchIcon from '@mui/icons-material/Search'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
+  Checkbox,
   Container,
   Divider,
   FilledInput,
   FormControl,
+  FormControlLabel,
+  FormGroup,
   IconButton,
   InputAdornment,
   InputLabel,
@@ -50,6 +57,7 @@ export default function Marketplace() {
   const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
+  const [mirroredModelsOnly, setMirroredModelsOnly] = useState(false)
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -70,6 +78,20 @@ export default function Marketplace() {
     isModelsLoading: isDataCardsLoading,
   } = useListModels(
     EntryKind.DATA_CARD,
+    selectedRoles,
+    selectedTask,
+    selectedLibraries,
+    selectedOrganisations,
+    selectedStates,
+    debouncedFilter,
+  )
+
+  const {
+    models: mirroredModels,
+    isModelsError: isMirroredModelsError,
+    isModelsLoading: isMirroredModelsLoading,
+  } = useListModels(
+    EntryKind.MIRRORED_MODEL,
     selectedRoles,
     selectedTask,
     selectedLibraries,
@@ -212,6 +234,17 @@ export default function Marketplace() {
     router.replace('/', undefined, { shallow: true })
   }
 
+  const combinedModelErrorMessage = useMemo(() => {
+    let errorMessage = ''
+    if (isModelsError) {
+      errorMessage += `${isModelsError.info.message}. `
+    }
+    if (isMirroredModelsError) {
+      errorMessage += `${isMirroredModelsError.info.message}. `
+    }
+    return errorMessage
+  }, [isMirroredModelsError, isModelsError])
+
   useEffect(() => {
     if (reviewRoles) {
       setRoleOptions([
@@ -223,11 +256,7 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isReviewRolesLoading) {
-    return <Loading />
-  }
-
-  if (isUiConfigLoading) {
+  if (isReviewRolesLoading || isUiConfigLoading) {
     return <Loading />
   }
 
@@ -351,6 +380,23 @@ export default function Marketplace() {
                     accordion
                   />
                 </Box>
+                {mirroredModels.length > 0 && (
+                  <Accordion disableGutters sx={{ backgroundColor: 'transparent' }}>
+                    <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
+                      <Typography component='h2' variant='h6'>
+                        Mirrored Models
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ p: 1 }}>
+                      <FormGroup>
+                        <FormControlLabel
+                          control={<Checkbox onChange={(e) => setMirroredModelsOnly(e.target.checked)} />}
+                          label='Only display mirrored models'
+                        />
+                      </FormGroup>
+                    </AccordionDetails>
+                  </Accordion>
+                )}
                 <Box>
                   <ChipSelector
                     label='My Roles'
@@ -385,12 +431,12 @@ export default function Marketplace() {
                   />
                 </Tabs>
               </Box>
-              {isModelsLoading && <Loading />}
+              {isModelsLoading || (isMirroredModelsLoading && <Loading />)}
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
-                    entries={models}
-                    entriesErrorMessage={isModelsError ? isModelsError.info.message : ''}
+                    entries={mirroredModelsOnly ? mirroredModels : [...models, ...mirroredModels]}
+                    entriesErrorMessage={combinedModelErrorMessage || ''}
                     selectedChips={selectedLibraries}
                     onSelectedChipsChange={handleLibrariesOnChange}
                     selectedOrganisations={selectedOrganisations}

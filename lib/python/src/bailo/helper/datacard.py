@@ -18,9 +18,10 @@ class Datacard(Entry):
     :param datacard_id: A unique ID for the datacard
     :param name: Name of datacard
     :param description: Description of datacard
-    :param organisation: Organisation responsible for the model, defaults to None
-    :param state: Development readiness of the model, defaults to None
-    :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+    :param organisation: Organisation responsible for the datacard, defaults to None
+    :param state: Development readiness of the datacard, defaults to None
+    :param tags: Tags to assign to the datacard, defaults to None
+    :param collaborators: list of CollaboratorEntry to define who the datacard's collaborators (a.k.a. model access) are, defaults to None
     :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
 
@@ -32,6 +33,7 @@ class Datacard(Entry):
         description: str,
         organisation: str | None = None,
         state: str | None = None,
+        tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
         visibility: ModelVisibility | None = None,
     ) -> None:
@@ -43,6 +45,7 @@ class Datacard(Entry):
             kind=EntryKind.DATACARD,
             organisation=organisation,
             state=state,
+            tags=tags,
             collaborators=collaborators,
             visibility=visibility,
         )
@@ -57,6 +60,7 @@ class Datacard(Entry):
         description: str,
         organisation: str | None = None,
         state: str | None = None,
+        tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
         visibility: ModelVisibility | None = None,
     ) -> Datacard:
@@ -65,9 +69,10 @@ class Datacard(Entry):
         :param client: A client object used to interact with Bailo
         :param name: Name of datacard
         :param description: Description of datacard
-        :param organisation: Organisation responsible for the model, defaults to None
-        :param state: Development readiness of the model, defaults to None
-        :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+        :param organisation: Organisation responsible for the datacard, defaults to None
+        :param state: Development readiness of the datacard, defaults to None
+        :param tags: Tags to assign to the datacard, defaults to None
+        :param collaborators: list of CollaboratorEntry to define who the datacard's collaborators (a.k.a. datacard access) are, defaults to None
         :param visibility: Visibility of datacard, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Datacard object
         """
@@ -78,6 +83,7 @@ class Datacard(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
+            tags=tags,
             collaborators=collaborators,
         )
         datacard_id = res["model"]["id"]
@@ -90,6 +96,7 @@ class Datacard(Entry):
             description=description,
             organisation=organisation,
             state=state,
+            tags=tags,
             collaborators=collaborators,
             visibility=visibility,
         )
@@ -122,6 +129,7 @@ class Datacard(Entry):
             collaborators=res["collaborators"],
             organisation=res.get("organisation"),
             state=res.get("state"),
+            tags=res.get("tags"),
         )
         datacard._unpack(res)
 
