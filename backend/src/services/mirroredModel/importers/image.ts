@@ -76,7 +76,6 @@ export class ImageImporter extends BaseImporter {
         const repositoryPullToken = await getAccessToken({ dn: this.user.dn }, [
           {
             type: 'repository',
-            class: '',
             name: `${this.metadata.mirroredModelId}/${this.imageName}`,
             actions: ['pull'],
           },
@@ -84,7 +83,6 @@ export class ImageImporter extends BaseImporter {
         const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
           {
             type: 'repository',
-            class: '',
             name: `${this.metadata.mirroredModelId}/${this.imageName}`,
             actions: ['push', 'pull'],
           },
@@ -161,7 +159,6 @@ export class ImageImporter extends BaseImporter {
       const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
         {
           type: 'repository',
-          class: '',
           name: `${this.metadata.mirroredModelId}/${this.imageName}`,
           actions: ['push', 'pull'],
         },

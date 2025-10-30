@@ -8,7 +8,7 @@ async function script() {
   await connectToMongoose()
 
   const registry = config.registry.connection.internal
-  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', class: '', name: 'catalog', actions: ['*'] }])
+  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const authorisation = `Bearer ${token}`
   const agent = getHttpsUndiciAgent({
     connect: { rejectUnauthorized: !config.registry.connection.insecure },
