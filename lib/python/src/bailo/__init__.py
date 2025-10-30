@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 
 # Package Version
-__version__ = "3.2.0"
+__version__ = "3.2.1"
 
 
 from bailo.core.agent import Agent, PkiAgent, TokenAgent
@@ -18,8 +18,8 @@ from bailo.core.client import Client
 from bailo.core.enums import EntryKind, ModelVisibility, Role, SchemaKind
 from bailo.helper.access_request import AccessRequest
 from bailo.helper.datacard import Datacard
-from bailo.helper.model import Experiment, Model
 from bailo.helper.mirroredModel import MirroredModel
+from bailo.helper.model import Experiment, Model
 from bailo.helper.release import Release
 from bailo.helper.schema import Schema
 

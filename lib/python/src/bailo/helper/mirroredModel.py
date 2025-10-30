@@ -25,6 +25,7 @@ class MirroredModel(Entry):
     :param sourceModelId: Used for linking a mirrored model to its source model
     :param organisation: Organisation responsible for the mirrored model, defaults to None
     :param state: Development readiness of the mirrored model, defaults to None
+    :param tags: Tags to assign to the mirrored model, defaults to None
     :param collaborators: list of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. mirrored model access) are, defaults to None
     :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
     """
@@ -38,6 +39,7 @@ class MirroredModel(Entry):
         sourceModelId: str,
         organisation: str | None = None,
         state: str | None = None,
+        tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
         visibility: ModelVisibility | None = None,
     ) -> None:
@@ -50,6 +52,7 @@ class MirroredModel(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
+            tags=tags,
             collaborators=collaborators,
         )
         self.sourceModelId = sourceModelId
@@ -64,8 +67,9 @@ class MirroredModel(Entry):
         sourceModelId: str,
         organisation: str | None = None,
         state: str | None = None,
+        tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
-        visibility: ModelVisibility | None = None
+        visibility: ModelVisibility | None = None,
     ) -> MirroredModel:
         """Build a mirrored model from Bailo and upload it.
 
@@ -75,6 +79,7 @@ class MirroredModel(Entry):
         :param sourceModelId: Used for linking a mirrored model to its source model
         :param organisation: Organisation responsible for the mirrored model, defaults to None
         :param state: Development readiness of the mirrored model, defaults to None
+        :param tags: Tags to assign to the mirrored model, defaults to None
         :param collaborators: list of CollaboratorEntry to define who the mirrored model's collaborators (a.k.a. model access) are, defaults to None
         :param visibility: Visibility of the mirrored model, using ModelVisibility enum (e.g Public or Private), defaults to None
         :return: Model object
@@ -87,6 +92,7 @@ class MirroredModel(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
+            tags=tags,
             collaborators=collaborators,
         )
         model_id = res["model"]["id"]
@@ -101,6 +107,7 @@ class MirroredModel(Entry):
             visibility=visibility,
             organisation=organisation,
             state=state,
+            tags=tags,
             collaborators=collaborators,
         )
 
@@ -118,7 +125,9 @@ class MirroredModel(Entry):
         """
         res = client.get_model(model_id=model_id)["model"]
         if res["kind"] != EntryKind.MIRRORED_MODEL:
-            raise BailoException(f"ID {model_id} does not belong to a mirrored model. Did you mean to use MirroredModel.from_id()?")
+            raise BailoException(
+                f"ID {model_id} does not belong to a mirrored model. Did you mean to use MirroredModel.from_id()?"
+            )
 
         logger.info("Model %s successfully retrieved from server.", model_id)
 
@@ -131,6 +140,7 @@ class MirroredModel(Entry):
             collaborators=res["collaborators"],
             organisation=res.get("organisation"),
             state=res.get("state"),
+            tags=res.get("tags"),
         )
 
         model._unpack(res)
@@ -170,6 +180,7 @@ class MirroredModel(Entry):
                 collaborators=model["collaborators"],
                 organisation=model.get("organisation"),
                 state=model.get("state"),
+                tags=model.get("tags"),
             )
             model_obj._unpack(res_model)
             model_obj.get_card_latest()

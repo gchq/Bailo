@@ -2,9 +2,13 @@
 
 All dates are formatted dd/mm/yyyy.
 
+## 3.2.1 30/10/2025
+
+- Add `tags` property to `Entry` (and inherited classes `Model`, `MirroredModel` and `Datacard`)
+
 ## 3.2.0 29/10/2025
 
-- Added new kind property for mirrored models
+- Added new `MirroredModel` class.
 
 ## 3.1.2 30/09/2025
 

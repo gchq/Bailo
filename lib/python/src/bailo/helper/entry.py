@@ -18,10 +18,11 @@ class Entry:
     :param name: Name of the entry
     :param description: Description of the entry
     :param kind: Represents whether entry type (i.e. Model, Mirrored Model or Datacard)
-    :param visibility: Visibility of model, using ModelVisibility enum (i.e. Public or Private), defaults to None
-    :param organisation: Organisation responsible for the model, defaults to None
-    :param state: Development readiness of the model, defaults to None
-    :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
+    :param visibility: Visibility of entry, using ModelVisibility enum (i.e. Public or Private), defaults to None
+    :param organisation: Organisation responsible for the entry, defaults to None
+    :param state: Development readiness of the entry, defaults to None
+    :param tags: Tags to assign to the entry, defaults to None
+    :param collaborators: list of CollaboratorEntry to define who the entry's collaborators (a.k.a. entry access) are, defaults to None
     """
 
     def __init__(
@@ -34,6 +35,7 @@ class Entry:
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
     ) -> None:
         self.client = client
@@ -45,6 +47,7 @@ class Entry:
         self.visibility = visibility
         self.organisation = organisation
         self.state = state
+        self.tags = tags
         self.collaborators = collaborators
 
         self._card = None
@@ -61,6 +64,7 @@ class Entry:
             visibility=self.visibility,
             organisation=self.organisation,
             state=self.state,
+            tags=self.tags,
             collaborators=self.collaborators,
         )
         self._unpack(res["model"])
