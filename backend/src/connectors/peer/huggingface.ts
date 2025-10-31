@@ -69,7 +69,7 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
 
   async searchEntries(user: UserInterface, opts: EntrySearchOptionsParams): Promise<EntrySearchResultWithErrors> {
     const cache = this.getQueryCache()
-    const defaultKey = (opts.kind || '') + (opts.search || '')
+    const defaultKey = Object.values(opts).join('+')
     const cacheKey = this.buildCacheKey(user, defaultKey)
     const cacheResult = cache ? cache.get<Array<EntrySearchResult>>(cacheKey) : undefined
     if (cacheResult) {
