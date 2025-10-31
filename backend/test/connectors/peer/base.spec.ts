@@ -42,7 +42,7 @@ class DummyConnector extends BasePeerConnector {
     return { ping: 'pong' }
   }
 
-  async queryModels(_opts, _user) {
+  async searchEntries(_user, _opts) {
     return {
       models: [],
     }

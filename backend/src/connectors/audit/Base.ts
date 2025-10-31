@@ -13,7 +13,7 @@ import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
-import { ModelSearchResult } from '../../types/types.js'
+import { EntrySearchResult } from '../../types/types.js'
 
 const AuditKind = {
   Create: 'Create',
@@ -163,7 +163,7 @@ export abstract class BaseAuditConnector {
   abstract onCreateModel(req: Request, model: ModelDoc)
   abstract onViewModel(req: Request, model: ModelDoc)
   abstract onUpdateModel(req: Request, model: ModelDoc)
-  abstract onSearchModel(req: Request, models: ModelSearchResult[])
+  abstract onSearchModel(req: Request, models: EntrySearchResult[])
 
   abstract onCreateModelCard(req: Request, model: ModelDoc, modelCard: ModelCardInterface)
   abstract onViewModelCard(req: Request, modelId: string, modelCard: ModelCardInterface)
