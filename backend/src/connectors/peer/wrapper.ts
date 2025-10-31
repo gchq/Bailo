@@ -1,5 +1,5 @@
 import { UserInterface } from '../../models/User.js'
-import { ModelSearchResultWithErrors, PeerConfigStatus } from '../../types/types.js'
+import { EntrySearchOptionsParams, EntrySearchResultWithErrors, PeerConfigStatus } from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
@@ -35,20 +35,20 @@ export class PeerConnectorWrapper {
     return new Map<string, PeerConfigStatus>(entries)
   }
 
-  async queryModels(
-    opts: {
-      query: string
-    },
+  async searchEntries(
     user: UserInterface,
-    peersToQuery: Array<string> = this.peerIds,
-  ): Promise<Array<ModelSearchResultWithErrors>> {
-    if (!peersToQuery.every((q) => this.peers.has(q))) {
+    opts: EntrySearchOptionsParams,
+  ): Promise<Array<EntrySearchResultWithErrors>> {
+    if (!opts.peers) {
+      return []
+    }
+    if (!opts.peers.every((q) => this.peers.has(q))) {
       throw InternalError('Invalid peer IDs provided to wrapper')
     }
     const results = await Promise.all(
-      peersToQuery.map((id) => {
+      opts.peers.map((id) => {
         const peer = this.peers.get(id)!
-        return peer.queryModels(opts, user)
+        return peer.searchEntries(user, opts)
       }),
     )
     return results.flat()

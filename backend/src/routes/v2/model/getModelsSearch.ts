@@ -3,34 +3,18 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { EntryKind, EntryKindKeys } from '../../../models/Model.js'
+import { EntryKind } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
-import { ModelSearchResultWithErrors } from '../../../types/types.js'
-import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
+import {
+  EntrySearchOptionsParams,
+  EntrySearchOptionsSchema,
+  EntrySearchResultWithErrors,
+} from '../../../types/types.js'
+import { parse } from '../../../utils/validate.js'
 
 export const getModelsSearchSchema = z.object({
-  query: z.object({
-    // These are all optional with defaults.  If they are not provided, they do not filter settings.
-    kind: z.string(z.nativeEnum(EntryKind)).optional(),
-    task: z.string().optional(),
-    libraries: coerceArray(z.array(z.string()).optional().default([])),
-    organisations: coerceArray(z.array(z.string()).optional().default([])),
-    states: coerceArray(z.array(z.string()).optional().default([])),
-    filters: coerceArray(z.array(z.string()).optional().default([])),
-    search: z
-      .string()
-      .optional()
-      .openapi({
-        example: `Text to filter by - must be longer than 0 characters to be considered, and longer than 3 characters to be used for searching this local instance.
-        External repos may have their own minimum length`,
-      })
-      .default(''),
-    allowTemplating: strictCoerceBoolean(z.boolean().optional()),
-    schemaId: z.string().optional(),
-    adminAccess: strictCoerceBoolean(z.boolean().optional()),
-    peers: coerceArray(z.array(z.string()).optional().default([])),
-  }),
+  query: EntrySearchOptionsSchema,
 })
 
 registerPath({
@@ -76,42 +60,16 @@ registerPath({
 })
 
 export const getModelsSearch = [
-  async (req: Request, res: Response<ModelSearchResultWithErrors>): Promise<void> => {
+  async (req: Request, res: Response<EntrySearchResultWithErrors>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
-    const {
-      query: {
-        kind,
-        libraries,
-        filters,
-        search,
-        task,
-        allowTemplating,
-        schemaId,
-        organisations,
-        states,
-        adminAccess,
-        peers,
-      },
-    } = parse(req, getModelsSearchSchema)
 
-    let results: ModelSearchResultWithErrors = {
+    const opts: { query: EntrySearchOptionsParams } = parse(req, getModelsSearchSchema)
+
+    let results: EntrySearchResultWithErrors = {
       models: [],
     }
 
-    results = await searchModels(
-      req.user,
-      kind as EntryKindKeys,
-      libraries,
-      organisations,
-      states,
-      filters,
-      search,
-      task,
-      peers,
-      allowTemplating,
-      schemaId,
-      adminAccess,
-    )
+    results = await searchModels(req.user, opts.query)
 
     await audit.onSearchModel(req, results.models)
 

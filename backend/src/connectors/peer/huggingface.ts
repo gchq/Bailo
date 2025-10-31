@@ -3,8 +3,13 @@ import { HubApiError, listModels, modelInfo } from '@huggingface/hub'
 import { EntryVisibility } from '../../models/Model.js'
 import { UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
-import { ModelSearchResult, ModelSearchResultWithErrors, SystemStatus } from '../../types/types.js'
-import { BadReq, ConfigurationError } from '../../utils/error.js'
+import {
+  EntrySearchOptionsParams,
+  EntrySearchResult,
+  EntrySearchResultWithErrors,
+  SystemStatus,
+} from '../../types/types.js'
+import { BadReq, ConfigurationError, NotImplemented } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
 interface ExtraConfig {
@@ -62,10 +67,11 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
     }
   }
 
-  async queryModels(opts: { query: string }, user: UserInterface): Promise<ModelSearchResultWithErrors> {
+  async searchEntries(user: UserInterface, opts: EntrySearchOptionsParams): Promise<EntrySearchResultWithErrors> {
     const cache = this.getQueryCache()
-    const cacheKey = this.buildCacheKey(user, opts.query)
-    const cacheResult = cache ? cache.get<Array<ModelSearchResult>>(cacheKey) : undefined
+    const defaultKey = (opts.kind || '') + (opts.search || '')
+    const cacheKey = this.buildCacheKey(user, defaultKey)
+    const cacheResult = cache ? cache.get<Array<EntrySearchResult>>(cacheKey) : undefined
     if (cacheResult) {
       log.debug(`Cache hit - returning cached result for ${cacheKey}`)
       return {
@@ -75,23 +81,57 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
     log.debug(`Cache miss - executing query for ${cacheKey}`)
 
     // No cache result - execute query, cache response if appropriate
-    const models = new Array<ModelSearchResult>()
-    // Require a minimum length for search
-    const minLength = 5
-    if (opts.query.length === 0) {
+    const models = new Array<EntrySearchResult>()
+
+    if (opts.search && opts.search.length === 0) {
       return Promise.resolve({ models: [] })
     }
-    if (opts.query.length < minLength) {
+
+    // Only supports searching for models, not data cards etc.
+    if (opts.kind && opts.kind != 'model') {
       return {
         models: [],
         errors: {
-          [this.getId()]: BadReq('Query too short', { query: opts.query, minLength }),
+          [this.getId()]: NotImplemented(`HuggingFace does not support ${opts.kind}`, {
+            query: opts.search,
+            kind: opts.kind,
+          }),
+        },
+      }
+    }
+
+    if (
+      opts.allowTemplating ||
+      opts.filters ||
+      opts.libraries ||
+      opts.organisations ||
+      opts.schemaId ||
+      opts.states ||
+      opts.task
+    ) {
+      return {
+        models: [],
+        errors: {
+          [this.getId()]: NotImplemented(`HuggingFace does not support all query parameters`, {
+            searchOptions: opts,
+            supportedOptions: ['search'],
+          }),
+        },
+      }
+    }
+    // Require a minimum length for search
+    const minLength = 5
+    if (opts.search && opts.search.length < minLength) {
+      return {
+        models: [],
+        errors: {
+          [this.getId()]: BadReq('Query too short', { query: opts.search, minLength }),
         },
       }
     }
 
     for await (const model of listModels({
-      search: { query: opts.query },
+      search: { query: opts.search },
       limit: 100,
       additionalFields: ['tags', 'cardData', 'createdAt', 'author'],
     })) {

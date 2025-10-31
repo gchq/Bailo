@@ -14,7 +14,12 @@ import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
 import { isBailoError } from '../types/error.js'
-import { EntityKind, EntryUserPermissions, ModelSearchResultWithErrors } from '../types/types.js'
+import {
+  EntityKind,
+  EntrySearchOptionsParams,
+  EntrySearchResultWithErrors,
+  EntryUserPermissions,
+} from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -124,35 +129,13 @@ export async function canUserActionModelById(user: UserInterface, modelId: strin
 
 export async function searchModels(
   user: UserInterface,
-  kind: EntryKindKeys,
-  libraries: Array<string>,
-  organisations: Array<string>,
-  states: Array<string>,
-  filters: Array<string>,
-  search: string,
-  task?: string,
-  peers?: Array<string>,
-  allowTemplating?: boolean,
-  schemaId?: string,
-  adminAccess?: boolean,
-): Promise<ModelSearchResultWithErrors> {
-  const results: ModelSearchResultWithErrors = {
+  opts: EntrySearchOptionsParams,
+): Promise<EntrySearchResultWithErrors> {
+  const results: EntrySearchResultWithErrors = {
     models: [],
   }
 
-  const localModelsPromise = searchLocalModels(
-    user,
-    kind,
-    libraries,
-    organisations,
-    states,
-    filters,
-    search,
-    task,
-    allowTemplating,
-    schemaId,
-    adminAccess,
-  )
+  const localModelsPromise = searchLocalModels(user, opts)
 
   localModelsPromise.catch((e) => {
     if (!results.errors) {
@@ -186,9 +169,9 @@ export async function searchModels(
 
   const promises: Promise<any>[] = [processLocalModels]
 
-  if (peers && peers.length > 0) {
+  if (opts.peers && opts.peers.length > 0) {
     const connectors = await getPeerConnectors()
-    const remotePromise = connectors.queryModels({ query: search }, user, peers)
+    const remotePromise = connectors.searchEntries(user, opts)
 
     const processRemoteModels = remotePromise.then((remoteResponses) => {
       for (const response of remoteResponses.flat()) {
@@ -212,20 +195,10 @@ export async function searchModels(
   return results
 }
 
-async function searchLocalModels(
-  user: UserInterface,
-  kind: EntryKindKeys,
-  libraries: Array<string>,
-  organisations: Array<string>,
-  states: Array<string>,
-  filters: Array<string>,
-  search: string,
-  task?: string,
-  allowTemplating?: boolean,
-  schemaId?: string,
-  adminAccess?: boolean,
-): Promise<Array<ModelInterface>> {
-  if (adminAccess) {
+async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsParams): Promise<Array<ModelInterface>> {
+  const query: any = {}
+
+  if (opts.adminAccess) {
     if (!(await authentication.hasRole(user, Roles.Admin))) {
       throw Forbidden('You do not have the required role.', {
         userDn: user.dn,
@@ -234,49 +207,47 @@ async function searchLocalModels(
     }
   }
 
-  const query: any = {}
-
-  if (kind) {
-    query['kind'] = { $all: kind }
+  if (opts.kind) {
+    query['kind'] = { $all: opts.kind }
   }
 
-  if (organisations.length) {
-    query.organisation = { $in: organisations }
+  if (opts.organisations?.length) {
+    query.organisation = { $in: opts.organisations }
   }
 
-  if (states.length) {
-    query.state = { $in: states }
+  if (opts.states?.length) {
+    query.state = { $in: opts.states }
   }
 
-  if (libraries.length) {
-    query.tags = { $all: libraries }
+  if (opts.libraries?.length) {
+    query.tags = { $all: opts.libraries }
   }
 
-  if (task) {
+  if (opts.task) {
     if (query.tags) {
-      query.tags.$all.push(task)
+      query.tags.$all.push(opts.task)
     } else {
-      query.tags = { $all: [task] }
+      query.tags = { $all: [opts.task] }
     }
   }
 
-  if (search) {
-    if (search.length > 0 && search.length < 3) {
+  if (opts.search) {
+    if (opts.search.length > 0 && opts.search.length < 3) {
       throw BadReq(`Search query too short - must be at least 3 characters`)
     }
-    query.$text = { $search: search }
+    query.$text = { $search: opts.search }
   }
 
-  if (schemaId) {
-    query['card.schemaId'] = { $all: schemaId }
+  if (opts.schemaId) {
+    query['card.schemaId'] = { $all: opts.schemaId }
   }
 
-  if (allowTemplating) {
+  if (opts.allowTemplating) {
     query['settings.allowTemplating'] = true
   }
 
-  if (filters.length > 0) {
-    if (filters.includes('mine')) {
+  if (opts.filters && opts.filters.length > 0) {
+    if (opts.filters?.includes('mine')) {
       query.collaborators = {
         $elemMatch: {
           entity: { $in: await authentication.getEntities(user) },
@@ -285,7 +256,7 @@ async function searchLocalModels(
     } else {
       query.collaborators = {
         $elemMatch: {
-          roles: { $elemMatch: { $in: filters } },
+          roles: { $elemMatch: { $in: opts.filters } },
           entity: { $in: await authentication.getEntities(user) },
         },
       }
@@ -296,7 +267,7 @@ async function searchLocalModels(
     // Find only matching documents
     .find(query)
 
-  if (!search) {
+  if (!opts.search) {
     // Sort by last updated
     cursor = cursor.sort({ updatedAt: -1 })
   } else {
@@ -306,7 +277,7 @@ async function searchLocalModels(
 
   const results = await cursor
   //Auth already checked, so just need to check if they require admin access
-  if (adminAccess) {
+  if (opts.adminAccess) {
     return results
   }
   const auths = await authorisation.models(user, results, ModelAction.View)

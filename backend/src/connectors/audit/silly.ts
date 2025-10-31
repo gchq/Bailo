@@ -13,7 +13,7 @@ import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
 import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
-import { ModelSearchResult } from '../../types/types.js'
+import { EntrySearchResult } from '../../types/types.js'
 import { BaseAuditConnector } from './Base.js'
 
 export class SillyAuditConnector extends BaseAuditConnector {
@@ -24,7 +24,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateModel(_req: Request, _model: ModelDoc) {}
   onViewModel(_req: Request, _model: ModelDoc) {}
   onUpdateModel(_req: Request, _model: ModelDoc) {}
-  onSearchModel(_req: Request, _models: ModelSearchResult[]) {}
+  onSearchModel(_req: Request, _models: EntrySearchResult[]) {}
   onCreateModelCard(_req: Request, _model: ModelDoc, _modelCard: ModelCardInterface) {}
   onViewModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
   onUpdateModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}
