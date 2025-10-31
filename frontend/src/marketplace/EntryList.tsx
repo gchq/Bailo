@@ -101,7 +101,6 @@ export default function EntryList({
         ]}
         searchPlaceholderText='Search by name'
         defaultSortProperty='createdAt'
-        hideSearchInput
       >
         {Row}
       </Paginate>
