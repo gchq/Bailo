@@ -11,9 +11,9 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
-import { ModelSearchResult } from '../../routes/v2/model/getModelsSearch.js'
 import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { EntrySearchResult } from '../../types/types.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
 interface Outcome {
@@ -45,7 +45,7 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
-  onSearchModel(req: Request, models: ModelSearchResult[]) {
+  onSearchModel(req: Request, models: EntrySearchResult[]) {
     this.checkEventType(AuditInfo.SearchModels, req)
     const event = this.generateEvent(req, {
       url: req.originalUrl,

@@ -1,9 +1,10 @@
 import fetch, { Response } from 'node-fetch'
 
+import { UserInterface } from '../../models/User.js'
 import { isBailoError } from '../../types/error.js'
-import { SystemStatus } from '../../types/types.js'
+import { EntrySearchOptionsParams, EntrySearchResultWithErrors, SystemStatus } from '../../types/types.js'
 import config from '../../utils/config.js'
-import { InternalError } from '../../utils/error.js'
+import { GenericError, InternalError } from '../../utils/error.js'
 import { BasePeerConnector } from './base.js'
 
 const emptyPing: SystemStatus = {
@@ -15,22 +16,46 @@ export class BailoPeerConnector extends BasePeerConnector {
     return Promise.resolve(true)
   }
 
+  async searchEntries(_user: UserInterface, opts: EntrySearchOptionsParams): Promise<EntrySearchResultWithErrors> {
+    let query: URLSearchParams = new URLSearchParams()
+    if (opts.search) {
+      query = new URLSearchParams({ search: opts.search })
+    }
+
+    const results = await this.request<EntrySearchResultWithErrors>(`/api/v2/models/search?${query.toString()}`)
+
+    return {
+      models: results.models.map((model) => ({
+        ...model,
+        peerId: this.getId(),
+      })),
+      errors: results.errors,
+    }
+  }
+
   async getPeerStatus(): Promise<SystemStatus> {
     if (this.isDisabled()) {
       return emptyPing
     }
 
-    try {
-      return this.request<SystemStatus>('/api/v2/system/status')
-    } catch (err) {
+    return this.request<SystemStatus>('/api/v2/system/status').catch((err) => {
       if (isBailoError(err)) {
         return {
           error: err,
           ...emptyPing,
         }
+      } else if (err instanceof Error) {
+        return {
+          error: InternalError(err.message, { err }),
+          ...emptyPing,
+        }
+      } else {
+        return {
+          error: GenericError(500, String(err), { cause: err }),
+          ...emptyPing,
+        }
       }
-      throw err
-    }
+    })
   }
 
   async request<T>(path: string) {

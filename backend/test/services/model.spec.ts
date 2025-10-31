@@ -19,7 +19,7 @@ import {
   updateModel,
   updateModelCard,
 } from '../../src/services/model.js'
-import { EntryUserPermissions } from '../../src/types/types.js'
+import { EntrySearchOptionsParams, EntryUserPermissions } from '../../src/types/types.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -202,30 +202,50 @@ describe('services > model', () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, 'model', [], [], [], [], '', undefined)
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+    }
+
+    await searchModels(user, searchParams)
   })
 
   test('searchModels > all filters', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: ['library'],
+      filters: ['mine'],
+      organisations: ['example organisation'],
+      states: ['development'],
+      search: 'search',
+      task: 'task',
+    }
 
-    await searchModels(
-      user,
-      'model',
-      ['library'],
-      ['mine'],
-      ['example organisation'],
-      ['development'],
-      'search',
-      'task',
-    )
+    await searchModels(user, searchParams)
   })
 
   test('searchModels > task no library', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, 'model', [], [], [], [], '', 'task')
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: 'task',
+    }
+
+    await searchModels(user, searchParams)
   })
 
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {
