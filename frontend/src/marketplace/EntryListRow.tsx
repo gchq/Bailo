@@ -86,35 +86,33 @@ export default function EntryListRow({
       key={entry.id}
     >
       <Stack spacing={1}>
-        <Stack direction='row'>
-          <Link
-            sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
-            href={href}
-            target={isExternal ? '_blank' : '_self'}
-          >
-            <Stack spacing={1} justifyContent='space-between' alignItems='center' direction='row'>
-              <Typography
-                variant='h5'
-                component='h2'
-                sx={{
-                  fontWeight: '500',
-                  textDecoration: 'none',
-                  color: theme.palette.primary.main,
-                  textOverflow: 'ellipsis',
-                  overflow: 'hidden',
-                }}
-              >
-                {entry.name}
-              </Typography>
-              <Stack spacing={2} direction='row'>
-                {entry.kind === EntryKind.MIRRORED_MODEL && (
-                  <Chip size='small' color='secondary' variant='outlined' label={mirroredLabel} />
-                )}
-                {entry.visibility === 'private' && <Chip size='small' color='secondary' label='Private' />}
-              </Stack>
-              {isExternal && <LaunchOutlined />}
+        <Link
+          sx={{ textDecoration: 'none', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}
+          href={href}
+          target={isExternal ? '_blank' : '_self'}
+        >
+          <Stack spacing={1} justifyContent='space-between' alignItems='center' direction='row'>
+            <Typography
+              variant='h5'
+              component='h2'
+              sx={{
+                fontWeight: '500',
+                textDecoration: 'none',
+                color: theme.palette.primary.main,
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+              }}
+            >
+              {entry.name}
+            </Typography>
+            <Stack spacing={2} direction='row'>
+              {entry.kind === EntryKind.MIRRORED_MODEL && (
+                <Chip size='small' color='secondary' variant='outlined' label={mirroredLabel} />
+              )}
+              {entry.visibility === 'private' && <Chip size='small' color='secondary' label='Private' />}
             </Stack>
-          </Link>
+            {isExternal && <LaunchOutlined />}
+          </Stack>
           {displayPeers && isExternal && (
             <ChipSelector
               chipTooltipTitle={'Filter by external repository'}
@@ -130,56 +128,56 @@ export default function EntryListRow({
               icon={<CloudQueue />}
             />
           )}
-        </Stack>
-        <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-          {entry.description}
-        </Typography>
-        <Stack direction='row' spacing={1} alignItems='center' sx={{ flexWrap: 'wrap', rowGap: 1 }}>
-          <Stack direction='row' spacing={1}>
-            {displayOrganisation && entry.organisation && (
-              <ChipSelector
-                chipTooltipTitle={'Filter by organisation'}
-                options={[entry.organisation]}
-                expandThreshold={10}
-                variant='outlined'
-                multiple
-                selectedChips={selectedOrganisations}
-                onChange={onSelectedOrganisationsChange}
-                size='small'
-                ariaLabel='add tag to search filter'
-                icon={<CorporateFare />}
-                style={{ padding: 1 }}
-              />
-            )}
-            {displayState && entry.state && (
-              <ChipSelector
-                chipTooltipTitle={'Filter by state'}
-                options={[entry.state]}
-                expandThreshold={10}
-                variant='outlined'
-                multiple
-                selectedChips={selectedStates}
-                onChange={onSelectedStatesChange}
-                size='small'
-                ariaLabel='add tag to search filter'
-                style={{ padding: 1 }}
-              />
-            )}
-          </Stack>
-          {(entry.state || entry.organisation) && (displayOrganisation || displayState) && entry.tags.length > 0 && (
-            <Divider flexItem orientation='vertical' />
+        </Link>
+      </Stack>
+      <Typography variant='body1' sx={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+        {entry.description}
+      </Typography>
+      <Stack direction='row' spacing={1} alignItems='center' sx={{ flexWrap: 'wrap', rowGap: 1 }}>
+        <Stack direction='row' spacing={1}>
+          {displayOrganisation && entry.organisation && (
+            <ChipSelector
+              chipTooltipTitle={'Filter by organisation'}
+              options={[entry.organisation]}
+              expandThreshold={10}
+              variant='outlined'
+              multiple
+              selectedChips={selectedOrganisations}
+              onChange={onSelectedOrganisationsChange}
+              size='small'
+              ariaLabel='add tag to search filter'
+              icon={<CorporateFare />}
+              style={{ padding: 1 }}
+            />
           )}
-          <ChipSelector
-            chipTooltipTitle={'Filter by tag'}
-            options={filteredTags.slice(0, 10)}
-            expandThreshold={10}
-            multiple
-            selectedChips={selectedChips}
-            onChange={onSelectedChipsChange}
-            size='small'
-            ariaLabel='add tag to search filter'
-          />
+          {displayState && entry.state && (
+            <ChipSelector
+              chipTooltipTitle={'Filter by state'}
+              options={[entry.state]}
+              expandThreshold={10}
+              variant='outlined'
+              multiple
+              selectedChips={selectedStates}
+              onChange={onSelectedStatesChange}
+              size='small'
+              ariaLabel='add tag to search filter'
+              style={{ padding: 1 }}
+            />
+          )}
         </Stack>
+        {(entry.state || entry.organisation) && (displayOrganisation || displayState) && entry.tags.length > 0 && (
+          <Divider flexItem orientation='vertical' />
+        )}
+        <ChipSelector
+          chipTooltipTitle={'Filter by tag'}
+          options={filteredTags.slice(0, 10)}
+          expandThreshold={10}
+          multiple
+          selectedChips={selectedChips}
+          onChange={onSelectedChipsChange}
+          size='small'
+          ariaLabel='add tag to search filter'
+        />
       </Stack>
     </Box>
   )

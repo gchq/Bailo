@@ -81,7 +81,7 @@ export default function Marketplace() {
     selectedOrganisations,
     selectedStates,
     selectedPeers,
-    debouncedFilter,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
   const {
@@ -94,10 +94,10 @@ export default function Marketplace() {
     selectedRoles,
     selectedTask,
     selectedLibraries,
-    selectedPeers,
     selectedOrganisations,
     selectedStates,
-    debouncedFilter,
+    selectedPeers,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
   const {
@@ -109,10 +109,10 @@ export default function Marketplace() {
     selectedRoles,
     selectedTask,
     selectedLibraries,
-    selectedPeers,
     selectedOrganisations,
     selectedStates,
-    debouncedFilter,
+    selectedPeers,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
@@ -297,7 +297,7 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isReviewRolesLoading || isUiConfigLoading || isPeersLoading || isStatusLoading) {
+  if (isUiConfigLoading || isReviewRolesLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
   }
 
@@ -362,6 +362,11 @@ export default function Marketplace() {
                     </InputAdornment>
                   }
                 />
+                {debouncedFilter.length > 0 && debouncedFilter.length < 3 && (
+                  <Typography variant='caption' color='error'>
+                    Please enter at least three characters
+                  </Typography>
+                )}
               </FormControl>
               <Stack divider={<Divider flexItem />}>
                 {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (

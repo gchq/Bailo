@@ -178,7 +178,8 @@ export async function searchModels(
         collaborators: model.collaborators,
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
-        sourceModelId: model.settings?.mirror?.sourceModelId,
+        sourceModelId: model.settings.mirror.sourceModelId,
+        visibility: model.visibility,
       })),
     )
   })

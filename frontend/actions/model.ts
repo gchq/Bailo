@@ -25,10 +25,11 @@ export interface EntrySearchResult {
   kind: EntryKindKeys
   organisation?: string
   state?: string
-  visibility: EntryVisibilityKeys
   peerId?: string
+  visibility: EntryVisibilityKeys
   createdAt: Date
   updatedAt: Date
+  sourceModelId?: string
 }
 
 export interface ModelExportRequest {

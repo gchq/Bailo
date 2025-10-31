@@ -1,5 +1,6 @@
 import { HubApiError, listModels, modelInfo } from '@huggingface/hub'
 
+import { EntryVisibility } from '../../models/Model.js'
 import { UserInterface } from '../../models/User.js'
 import log from '../../services/log.js'
 import { ModelSearchResult, ModelSearchResultWithErrors, SystemStatus } from '../../types/types.js'
@@ -105,6 +106,8 @@ export class HuggingFaceHubConnector extends BasePeerConnector {
         updatedAt: model.updatedAt,
         peerId: this.getId(),
         collaborators: [],
+        sourceModelId: undefined,
+        visibility: model.private ? EntryVisibility.Private : EntryVisibility.Public,
       })
     }
 
