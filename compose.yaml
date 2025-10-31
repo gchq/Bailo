@@ -1,14 +1,34 @@
 name: bailo
 
+configs:
+  mongod_conf:
+    file: infrastructure/mongodb/mongod_docker_compose.conf
+  mongod_keyfile:
+    content: abcdef1234567890
+
 services:
   mongo:
-    image: bitnamilegacy/mongodb:8.0.13
+    image: mongodb/mongodb-community-server:8.0.15-ubi9
     networks:
       internal:
     environment:
-      - MONGODB_REPLICA_SET_NAME=repl-set
+      - MONGODB_INITDB_ROOT_USERNAME=bailoadmin
+      - MONGODB_INITDB_ROOT_PASSWORD=bailoadmin
+      - MONGODB_INITDB_REPL_SET_HOST=mongo
+      - MONGODB_INITDB_DATABASE=bailo
     volumes:
-      - mongoVolume:/bitnami/mongodb
+      - mongoVolume:/data/db
+    configs:
+      - source: mongod_conf
+        target: /etc/mongod.conf
+      - source: mongod_keyfile
+        target: /etc/mongod.keyfile
+        mode: 0400
+        uid: "999"
+        gid: "999"
+    command:
+      - "-f"
+      - "/etc/mongod.conf"
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
