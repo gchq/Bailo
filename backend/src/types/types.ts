@@ -1,7 +1,7 @@
 import { ProxyAgentOptions } from 'proxy-agent'
 
 import { PeerKindKeys } from '../connectors/peer/index.js'
-import { CollaboratorEntry, EntryKindKeys, SystemRolesKeys } from '../models/Model.js'
+import { CollaboratorEntry, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
 import { BailoError } from './error.js'
 
 export type PartialDeep<T> = T extends object
@@ -167,6 +167,7 @@ export interface ModelSearchResult {
   organisation?: string
   state?: string
   collaborators: Array<CollaboratorEntry>
+  visibility: EntryVisibilityKeys
   createdAt: Date
   updatedAt: Date
   peerId?: string
