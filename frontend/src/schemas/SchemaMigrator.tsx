@@ -6,7 +6,7 @@ import {
   Box,
   Button,
   Divider,
-  Grid2,
+  Grid,
   IconButton,
   MenuItem,
   Select,
@@ -219,8 +219,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
 
   return (
     <>
-      <Grid2 container spacing={2}>
-        <Grid2
+      <Grid container spacing={2}>
+        <Grid
           size={{ sm: 12, md: 3 }}
           sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
         >
@@ -312,8 +312,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               </Stack>
             </Stack>
           </Stack>
-        </Grid2>
-        <Grid2 size={{ sm: 12, md: 9 }}>
+        </Grid>
+        <Grid size={{ sm: 12, md: 9 }}>
           {sourceSchema && isSourceSchemaActive && (
             <Stack
               spacing={2}
@@ -359,8 +359,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               <em>Select source or target question on the actions menu to view the schema</em>
             </Stack>
           )}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       <Box paddingTop={2}></Box>
     </>
   )

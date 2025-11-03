@@ -1,6 +1,6 @@
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
-import { Box, Button, Card, Divider, Grid2, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema, TitleFieldProps } from '@rjsf/utils'
 import { ReactNode } from 'react'
@@ -13,11 +13,11 @@ export function ArrayFieldTemplate({ title, items, canAdd, formContext, onAddCli
         {title}
       </Typography>
       {items.map((element) => (
-        <Grid2 key={element.key} container spacing={2}>
-          <Grid2 size={{ xs: 11 }}>
+        <Grid key={element.key} container spacing={2}>
+          <Grid size={{ xs: 11 }}>
             <Box>{element.children}</Box>
-          </Grid2>
-          <Grid2 size={{ xs: 1 }}>
+          </Grid>
+          <Grid size={{ xs: 1 }}>
             {formContext.editMode && (
               <Tooltip title='Remove item'>
                 <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
@@ -25,8 +25,8 @@ export function ArrayFieldTemplate({ title, items, canAdd, formContext, onAddCli
                 </IconButton>
               </Tooltip>
             )}
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       ))}
       {canAdd && formContext.editMode && (
         <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />}>
@@ -128,9 +128,9 @@ export function TitleFieldTemplate({ title, id }: TitleFieldProps) {
 export function GridTemplate(props) {
   const { children, column, className, ...rest } = props
   return (
-    <Grid2 item={column} {...rest} className={`${className} my-custom-grid-styling`}>
+    <Grid item={column} {...rest} className={`${className} my-custom-grid-styling`}>
       {children}
-    </Grid2>
+    </Grid>
   )
 }
 

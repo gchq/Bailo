@@ -6,7 +6,7 @@ import {
   Dialog,
   DialogContent,
   Divider,
-  Grid2,
+  Grid,
   Paper,
   Stack,
   Tooltip,
@@ -82,8 +82,8 @@ export default function ReleaseReview() {
   const releaseFiles = useMemo(() => {
     if (release && model) {
       return release.files.map((file) => (
-        <Grid2 container spacing={1} alignItems='center' key={file._id}>
-          <Grid2 size='auto'>
+        <Grid container spacing={1} alignItems='center' key={file._id}>
+          <Grid size='auto'>
             <Tooltip title={file.name}>
               <Link href={`/api/v2/model/${model.id}/file/${file._id}/download`} data-test={`fileLink-${file.name}`}>
                 <Typography noWrap textOverflow='ellipsis' display='inline'>
@@ -91,11 +91,11 @@ export default function ReleaseReview() {
                 </Typography>
               </Link>
             </Tooltip>
-          </Grid2>
-          <Grid2 size={{ xs: 1 }} textAlign='right'>
+          </Grid>
+          <Grid size={{ xs: 1 }} textAlign='right'>
             <Typography variant='caption'>{prettyBytes(file.size)}</Typography>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       ))
     }
   }, [model, release])
