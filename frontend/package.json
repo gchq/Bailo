@@ -72,7 +72,7 @@
     "@types/react-dom": "19.2.2",
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.31.1",
-    "@vitejs/plugin-react": "^5.0.4",
+    "@vitejs/plugin-react": "^5.1.0",
     "axe-core": "^4.10.3",
     "cypress": "^15.3.0",
     "cypress-axe": "^1.7.0",
