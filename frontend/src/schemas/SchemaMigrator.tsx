@@ -106,7 +106,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       !targetSchemaQuestion ||
       targetSchemaQuestion.schema.type !== 'object'
     ) {
-      return false
+      return true
     }
     return (
       JSON.stringify(sourceSchemaQuestion.schema.properties) === JSON.stringify(targetSchemaQuestion.schema.properties)

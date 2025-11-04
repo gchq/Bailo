@@ -2,38 +2,48 @@ import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, Card, Divider, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { ArrayFieldTemplateProps, ObjectFieldTemplateProps, RJSFSchema, TitleFieldProps } from '@rjsf/utils'
+import {
+  ArrayFieldItemTemplateProps,
+  ArrayFieldTemplateProps,
+  ObjectFieldTemplateProps,
+  RJSFSchema,
+  TitleFieldProps,
+} from '@rjsf/utils'
 import { ReactNode } from 'react'
 import QuestionViewer from 'src/MuiForms/QuestionViewer'
 
-export function ArrayFieldTemplate({ title, items, canAdd, formContext, onAddClick }: ArrayFieldTemplateProps) {
+export function ArrayFieldTemplate({ title, items, canAdd, registry, onAddClick }: ArrayFieldTemplateProps) {
   return (
     <Card sx={{ p: 2 }}>
       <Typography fontWeight='bold' variant='h5' component='h2'>
         {title}
       </Typography>
-      {items.map((element) => (
-        <Grid key={element.key} container spacing={2}>
-          <Grid size={{ xs: 11 }}>
-            <Box>{element.children}</Box>
-          </Grid>
-          <Grid size={{ xs: 1 }}>
-            {formContext.editMode && (
-              <Tooltip title='Remove item'>
-                <IconButton size='small' type='button' onClick={element.onDropIndexClick(element.index)}>
-                  <CloseIcon color='error' />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Grid>
-        </Grid>
-      ))}
-      {canAdd && formContext.editMode && (
+      {canAdd && registry.formContext.editMode && (
         <Button size='small' type='button' onClick={onAddClick} startIcon={<AddIcon />}>
           Add Item
         </Button>
       )}
+      {items}
     </Card>
+  )
+}
+
+export function ArrayFieldItemTemplate({ children, registry, buttonsProps }: ArrayFieldItemTemplateProps) {
+  return (
+    <Grid container spacing={2}>
+      <Grid size={{ xs: 11 }}>
+        <Box>{children}</Box>
+      </Grid>
+      <Grid size={{ xs: 1 }}>
+        {registry.formContext.editMode && buttonsProps && (
+          <Tooltip title='Remove item'>
+            <IconButton size='small' type='button' onClick={buttonsProps.onRemoveItem}>
+              <CloseIcon color='error' />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Grid>
+    </Grid>
   )
 }
 
@@ -65,22 +75,22 @@ export function ObjectFieldTemplateForQuestionViewer({
   title,
   properties,
   description,
-  formContext,
+  registry,
   schema,
-  ...props
+  fieldPathId,
 }: ObjectFieldTemplateProps) {
   const theme = useTheme()
 
-  const rootName = `${formContext.rootSection}.${props.idSchema.$id.replace('root_', '').replace('_', '.')}`
+  const rootName = `${registry.formContext.rootSection}.${fieldPathId.$id.replace('root_', '').replace('_', '.')}`
   const handleOnClick = () => {
-    formContext.onClickListener({ path: rootName, schema })
+    registry.formContext.onClickListener({ path: rootName, schema })
   }
 
   return (
     <Box
       sx={{
         p: 1,
-        ...(formContext.activePath === rootName
+        ...(registry.formContext.activePath === rootName
           ? {
               borderStyle: 'solid',
               borderWidth: '1px',
@@ -134,16 +144,16 @@ export function GridTemplate(props) {
   )
 }
 
-export function ArrayFieldTemplateForQuestionViewer({ title, formContext, schema, ...props }: ArrayFieldTemplateProps) {
+export function ArrayFieldTemplateForQuestionViewer({ title, registry, schema, fieldPathId }: ArrayFieldTemplateProps) {
   const questions: ReactNode[] = []
-  const rootName = `${formContext.rootSection}.${props.idSchema.$id.replace('root_', '').replace('_', '.')}`
+  const rootName = `${registry.formContext.rootSection}.${fieldPathId.$id.replace('root_', '').replace('_', '.')}`
   if (typeof schema.items === 'object' && !Array.isArray(schema.items) && schema.items !== null) {
     const schemaQuestions = schema.items['properties']
     for (const question in schemaQuestions) {
       questions.push(
         <QuestionViewer
           schema={schemaQuestions[question] as RJSFSchema}
-          formContext={{ ...formContext, rootSection: rootName }}
+          registry={registry}
           label={schemaQuestions[question]['title']}
           id={question}
         />,
@@ -152,7 +162,7 @@ export function ArrayFieldTemplateForQuestionViewer({ title, formContext, schema
   }
 
   const handleOnClick = () => {
-    formContext.onClickListener({ path: rootName, schema })
+    registry.formContext.onClickListener({ path: rootName, schema })
   }
 
   return (

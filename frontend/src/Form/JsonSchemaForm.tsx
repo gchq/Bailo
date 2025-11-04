@@ -4,7 +4,12 @@ import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useState } from 'react'
-import { ArrayFieldTemplate, DescriptionFieldTemplate, ObjectFieldTemplate } from 'src/Form/FormTemplates'
+import {
+  ArrayFieldItemTemplate,
+  ArrayFieldTemplate,
+  DescriptionFieldTemplate,
+  ObjectFieldTemplate,
+} from 'src/Form/FormTemplates'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
@@ -100,10 +105,12 @@ export default function JsonSchemaForm({
               ? {
                   DescriptionFieldTemplate,
                   ArrayFieldTemplate,
+                  ArrayFieldItemTemplate,
                   ObjectFieldTemplate,
                 }
               : {
                   ArrayFieldTemplate,
+                  ArrayFieldItemTemplate,
                   ObjectFieldTemplate,
                   ErrorListTemplate,
                 }
