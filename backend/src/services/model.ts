@@ -2,6 +2,7 @@ import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
 import { Optional } from 'utility-types'
 
+import { Roles } from '../connectors/authentication/Base.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
@@ -129,6 +130,7 @@ export async function searchModels(
   task?: string,
   allowTemplating?: boolean,
   schemaId?: string,
+  viewAllPrivate?: boolean,
 ): Promise<Array<ModelInterface>> {
   const query: any = {}
 
@@ -198,6 +200,12 @@ export async function searchModels(
   }
 
   const results = await cursor
+  if (viewAllPrivate) {
+    if (!(await authentication.hasRole(user, Roles.Admin))) {
+      throw Forbidden('You do not have authorisation to view these private models', { userDn: user.dn })
+    }
+    return results
+  }
   const auths = await authorisation.models(user, results, ModelAction.View)
   return results.filter((_, i) => auths[i].success)
 }

@@ -20,6 +20,7 @@ export const getModelsSearchSchema = z.object({
     search: z.string().optional().default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
+    viewAllPrivate: strictCoerceBoolean(z.boolean().optional()),
   }),
 })
 
@@ -44,6 +45,7 @@ registerPath({
                 kind: z.string().openapi({ example: EntryKind.Model }),
                 allowTemplating: z.boolean().openapi({ example: true }),
                 schemaId: z.string().optional(),
+                viewAllPrivate: z.boolean().optional(),
               }),
             ),
           }),
@@ -75,7 +77,18 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states },
+      query: {
+        kind,
+        libraries,
+        filters,
+        search,
+        task,
+        allowTemplating,
+        schemaId,
+        organisations,
+        states,
+        viewAllPrivate,
+      },
     } = parse(req, getModelsSearchSchema)
 
     const foundModels = await searchModels(
@@ -89,6 +102,7 @@ export const getModelsSearch = [
       task,
       allowTemplating,
       schemaId,
+      viewAllPrivate,
     )
     const models = foundModels.map((model) => ({
       id: model.id,
