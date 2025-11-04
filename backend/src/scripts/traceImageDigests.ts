@@ -40,7 +40,7 @@ async function getTags(repository: string): Promise<string[]> {
     { type: 'repository', name: repository, actions: ['*'] },
   ])
 
-  const tags = listImageTags(repositoryToken, { namespace: repository, image: '' })
+  const tags = listImageTags(repositoryToken, { repository: repository, name: '' })
   return tags
 }
 

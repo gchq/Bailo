@@ -8,6 +8,7 @@ import {
   putManifest,
 } from '../clients/registry.js'
 import authorisation from '../connectors/authorisation/index.js'
+import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken } from '../routes/v1/registryAuth.js'
 import config from '../utils/config.js'
@@ -81,60 +82,56 @@ export async function listModelImages(user: UserInterface, modelId: string) {
   const repos = await listModelRepos(registryToken, modelId)
   return await Promise.all(
     repos.map(async (repo) => {
-      const [namespace, image] = repo.split(/\/(.*)/s)
+      const [repository, name] = repo.split(/\/(.*)/s)
       const repositoryToken = await getAccessToken({ dn: user.dn }, [
         { type: 'repository', name: repo, actions: ['pull'] },
       ])
-      return { repository: namespace, name: image, tags: await listImageTags(repositoryToken, { namespace, image }) }
+      return { repository, name, tags: await listImageTags(repositoryToken, { repository, name }) }
     }),
   )
 }
 
-export async function getImageManifest(user: UserInterface, modelId: string, imageName: string, imageTag: string) {
-  await checkUserAuth(user, modelId, ['pull'])
+export async function getImageManifest(user: UserInterface, imageRef: ImageRefInterface) {
+  await checkUserAuth(user, imageRef.repository, ['pull'])
 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${modelId}/${imageName}`, actions: ['pull'] },
+    { type: 'repository', name: `${imageRef.repository}/${imageRef.name}`, actions: ['pull'] },
   ])
 
   // get which layers exist for the model
-  return await getImageTagManifest(repositoryToken, { namespace: modelId, image: imageName }, imageTag)
+  return await getImageTagManifest(repositoryToken, imageRef)
 }
 
-export async function getImageBlob(user: UserInterface, modelId: string, imageName: string, digest: string) {
-  await checkUserAuth(user, modelId, ['pull'])
+export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterface, digest: string) {
+  await checkUserAuth(user, repoRef.repository, ['pull'])
 
   const repositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${modelId}/${imageName}`, actions: ['pull'] },
+    { type: 'repository', name: `${repoRef.repository}/${repoRef.name}`, actions: ['pull'] },
   ])
 
-  return await getRegistryLayerStream(repositoryToken, { namespace: modelId, image: imageName }, digest)
+  return await getRegistryLayerStream(repositoryToken, repoRef, digest)
 }
 
-export async function softDeleteImage(user: UserInterface, modelId: string, imageName: string, imageTag: string) {
-  // GET the original manifest
-  const manifest = await getImageManifest(user, modelId, imageName, imageTag)
-  log.debug({ manifest }, 'Got original manifest')
+async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
+  const manifest = await getImageManifest(user, source)
 
   const allLayers = [manifest.config, ...manifest.layers]
-  const softDeleteNamespace = `${config.registry.softDeletePrefix}${modelId}`
-  log.debug({ softDeleteNamespace }, 'softDeleteNamespace=')
   const multiRepositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${modelId}/${imageName}`, actions: ['push', 'pull'] },
-    { type: 'repository', name: `${softDeleteNamespace}/${imageName}`, actions: ['push', 'pull'] },
+    { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['push', 'pull'] },
+    { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull', 'delete'] },
   ])
 
   // cross-mount layers from original to new image
   for (const layer of allLayers) {
     const layerDigest = layer['digest']
     if (!layerDigest || layerDigest.length === 0) {
-      throw InternalError('Could not extract layer digest.', { layer, modelId, imageName, imageTag })
+      throw InternalError('Could not extract layer digest.', { layer, from: source, to: destination })
     }
 
     await mountBlob(
       multiRepositoryToken,
-      { namespace: modelId, image: imageName },
-      { namespace: softDeleteNamespace, image: imageName },
+      { repository: source.repository, name: source.name },
+      { repository: destination.repository, name: destination.name },
       layerDigest,
     )
   }
@@ -142,14 +139,21 @@ export async function softDeleteImage(user: UserInterface, modelId: string, imag
   // PUT the new manifest
   const putManifestRes = await putManifest(
     multiRepositoryToken,
-    { namespace: softDeleteNamespace, image: imageName },
-    imageTag,
+    destination,
     JSON.stringify(manifest),
     manifest['mediaType'],
   )
   log.debug({ putManifestRes }, 'putManifest result')
 
   // DELETE the original manifest
-  const deleteRes = await deleteImage(multiRepositoryToken, { namespace: modelId, image: imageName }, imageTag)
-  log.debug({ deleteRes }, 'deleteImage result')
+  await deleteImage(multiRepositoryToken, source)
+}
+
+export async function softDeleteImage(user: UserInterface, imageRef: ImageRefInterface) {
+  const softDeleteNamespace = `${config.registry.softDeletePrefix}${imageRef.repository}`
+  log.debug({ softDeleteNamespace }, 'softDeleteNamespace=')
+
+  await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
+
+  //TODO: update the Model Release docs
 }

@@ -92,7 +92,7 @@ export class ImageImporter extends BaseImporter {
           if (
             await doesLayerExist(
               repositoryPullToken,
-              { namespace: this.metadata.mirroredModelId, image: this.imageName },
+              { repository: this.metadata.mirroredModelId, name: this.imageName },
               layerDigest,
             )
           ) {
@@ -117,8 +117,8 @@ export class ImageImporter extends BaseImporter {
               'Initiating un-tarred blob upload.',
             )
             const res = await initialiseUpload(repositoryPushPullToken, {
-              namespace: this.metadata.mirroredModelId,
-              image: this.imageName,
+              repository: this.metadata.mirroredModelId,
+              name: this.imageName,
             })
 
             log.debug(
@@ -166,8 +166,7 @@ export class ImageImporter extends BaseImporter {
 
       await putManifest(
         repositoryPushPullToken,
-        { namespace: this.metadata.mirroredModelId, image: this.imageName },
-        this.imageTag,
+        { repository: this.metadata.mirroredModelId, name: this.imageName, tag: this.imageTag },
         JSON.stringify(this.manifestBody),
         this.manifestBody['mediaType'],
       )

@@ -46,7 +46,7 @@ export const deleteImage = [
       params: { modelId, name, tag },
     } = parse(req, deleteImageSchema)
 
-    await softDeleteImage(req.user, modelId, name, tag)
+    await softDeleteImage(req.user, { repository: modelId, name, tag })
     await audit.onDeleteImage(req, modelId, {
       name,
       tag,

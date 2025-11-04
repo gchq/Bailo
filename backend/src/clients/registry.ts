@@ -2,6 +2,7 @@ import { Readable } from 'node:stream'
 
 import { BodyInit, HeadersInit, RequestInit } from 'undici-types'
 
+import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { getHttpsUndiciAgent } from '../services/http.js'
 import log from '../services/log.js'
 import { isRegistryError } from '../types/RegistryError.js'
@@ -18,11 +19,6 @@ import {
   isRegistryErrorResponse,
   isUploadLayerMonolithicResponse,
 } from './registryResponses.js'
-
-interface RepoRef {
-  namespace: string
-  image: string
-}
 
 const registry = config.registry.connection.internal
 
@@ -157,15 +153,15 @@ export async function listModelRepos(token: string, modelId: string) {
     linkFilter: modelId,
   })
   if (!isListModelReposResponse(body)) {
-    throw InternalError('Unrecognised response body when listing model repositories.', { body })
+    throw InternalError('Unrecognised response body when listing model repositories.', { body, modelId })
   }
 
   const filteredRepos = body.repositories.filter((repo) => repo.startsWith(`${modelId}/`))
   return filteredRepos
 }
 
-export async function listImageTags(token: string, imageRef: RepoRef) {
-  const repo = `${imageRef.namespace}/${imageRef.image}`
+export async function listImageTags(token: string, repoRef: RepoRefInterface) {
+  const repo = `${repoRef.repository}/${repoRef.name}`
 
   let body: unknown
   try {
@@ -180,16 +176,16 @@ export async function listImageTags(token: string, imageRef: RepoRef) {
   }
 
   if (!isListImageTagResponse(body)) {
-    throw InternalError('Unrecognised response body when listing image tags.', { body })
+    throw InternalError('Unrecognised response body when listing image tags.', { body, repoRef })
   }
   return body.tags
 }
 
-export async function getImageTagManifest(token: string, imageRef: RepoRef, imageTag: string) {
+export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {
   // TODO: handle `Accept: 'application/vnd.docker.distribution.manifest.list.v2+json'` type for multi-platform images
   const { body } = await registryRequest(
     token,
-    `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
+    `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`,
     undefined,
     undefined,
     {
@@ -199,9 +195,7 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
   if (!isGetImageTagManifestResponse(body)) {
     throw InternalError('Unrecognised response body when getting image tag manifest.', {
       body,
-      namespace: imageRef.namespace,
-      image: imageRef.image,
-      imageTag,
+      imageRef,
     })
   }
   return body
@@ -209,12 +203,12 @@ export async function getImageTagManifest(token: string, imageRef: RepoRef, imag
 
 export async function getRegistryLayerStream(
   token: string,
-  imageRef: RepoRef,
+  repoRef: RepoRefInterface,
   layerDigest: string,
 ): Promise<{ stream: Readable; abort: () => void }> {
   const { stream, abort } = await registryRequest(
     token,
-    `${imageRef.namespace}/${imageRef.image}/blobs/${layerDigest}`,
+    `${repoRef.repository}/${repoRef.name}/blobs/${layerDigest}`,
     true,
     undefined,
     {
@@ -226,8 +220,7 @@ export async function getRegistryLayerStream(
     abort()
     throw InternalError('Unrecognised response stream when getting image layer blob.', {
       stream,
-      namespace: imageRef.namespace,
-      image: imageRef.image,
+      repoRef,
       layerDigest,
     })
   }
@@ -235,17 +228,16 @@ export async function getRegistryLayerStream(
   return { stream, abort }
 }
 
-export async function doesLayerExist(token: string, imageRef: RepoRef, digest: string) {
+export async function doesLayerExist(token: string, repoRef: RepoRefInterface, digest: string) {
   try {
-    const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/${digest}`, true, {
+    const { headers } = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/${digest}`, true, {
       method: 'HEAD',
     })
 
     if (!isDoesLayerExistResponse(headers)) {
       throw InternalError('Unrecognised response headers when heading image layer.', {
         headers,
-        namespace: imageRef.namespace,
-        image: imageRef.image,
+        repoRef,
         digest,
       })
     }
@@ -261,45 +253,37 @@ export async function doesLayerExist(token: string, imageRef: RepoRef, digest: s
   }
 }
 
-export async function initialiseUpload(token: string, imageRef: RepoRef) {
-  const { headers } = await registryRequest(token, `${imageRef.namespace}/${imageRef.image}/blobs/uploads/`, true, {
+export async function initialiseUpload(token: string, repoRef: RepoRefInterface) {
+  const { headers } = await registryRequest(token, `${repoRef.repository}/${repoRef.name}/blobs/uploads/`, true, {
     method: 'POST',
   })
 
   if (!isInitialiseUploadObjectResponse(headers)) {
     throw InternalError('Unrecognised response headers when posting initialise image upload.', {
       headers,
-      namespace: imageRef.namespace,
-      image: imageRef.image,
+      repoRef,
     })
   }
 
   return headers
 }
 
-export async function putManifest(
-  token: string,
-  imageRef: RepoRef,
-  imageTag: string,
-  manifest: BodyInit,
-  contentType: string,
-) {
+export async function putManifest(token: string, imageRef: ImageRefInterface, manifest: BodyInit, contentType: string) {
   const { headers } = await registryRequest(
     token,
-    `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
+    `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`,
     true,
     {
       method: 'PUT',
       body: manifest,
     },
-    { 'Content-Type': contentType, name: `${imageRef.namespace}/${imageRef.image}`, reference: imageTag },
+    { 'Content-Type': contentType, name: `${imageRef.repository}/${imageRef.name}`, reference: imageRef.tag },
   )
 
   if (!isPutManifestResponse(headers)) {
     throw InternalError('Unrecognised response headers when putting image manifest.', {
       headers,
-      namespace: imageRef.namespace,
-      image: imageRef.image,
+      imageRef,
     })
   }
 
@@ -345,13 +329,13 @@ export async function uploadLayerMonolithic(
 
 export async function mountBlob(
   token: string,
-  sourceImageRef: RepoRef,
-  destinationImageRef: RepoRef,
+  sourceRepoRef: RepoRefInterface,
+  destinationRepoRef: RepoRefInterface,
   blobDigest: string,
 ) {
   const { headers, body } = await registryRequest(
     token,
-    `${destinationImageRef.namespace}/${destinationImageRef.image}/blobs/uploads/?from=${sourceImageRef.namespace}/${sourceImageRef.image}&mount=${blobDigest}`,
+    `${destinationRepoRef.repository}/${destinationRepoRef.name}/blobs/uploads/?from=${sourceRepoRef.repository}/${sourceRepoRef.name}&mount=${blobDigest}`,
     false,
     {
       method: 'POST',
@@ -362,10 +346,10 @@ export async function mountBlob(
   log.debug({ headers, body }, 'got response from POST')
 }
 
-export async function deleteImage(token: string, imageRef: RepoRef, imageTag: string) {
-  const { headers, body } = await registryRequest(
+export async function deleteImage(token: string, imageRef: ImageRefInterface) {
+  const { headers } = await registryRequest(
     token,
-    `${imageRef.namespace}/${imageRef.image}/manifests/${imageTag}`,
+    `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`,
     true,
     {
       method: 'DELETE',
@@ -373,12 +357,10 @@ export async function deleteImage(token: string, imageRef: RepoRef, imageTag: st
     { Accept: 'application/vnd.docker.distribution.manifest.v2+json' },
   )
 
-  log.debug({ headers, body }, 'got response from DELETE')
   if (!isDeleteImageResponse(headers)) {
     throw InternalError('Unrecognised response headers when deleting image.', {
       headers,
-      namespace: imageRef.namespace,
-      image: imageRef.image,
+      imageRef,
     })
   }
 

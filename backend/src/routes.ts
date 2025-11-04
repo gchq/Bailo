@@ -163,7 +163,6 @@ server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 
 server.get('/api/v2/model/:modelId/images', ...getImages)
 server.delete('/api/v2/model/:modelId/image/:name/:tag', ...deleteImage)
-// *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
 // This is a temporary workaround to split out the URL to disable authorisation.

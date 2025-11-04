@@ -141,8 +141,5 @@ export function isDeleteImageResponse(resp: unknown): resp is DeleteImageRespons
     'content-length': 'string',
     date: 'string',
     'docker-distribution-api-version': 'string',
-    'docker-upload-uuid': 'string',
-    location: 'string',
-    range: 'string',
   })
 }
