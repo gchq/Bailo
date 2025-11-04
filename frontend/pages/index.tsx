@@ -295,7 +295,7 @@ export default function Marketplace() {
                 variant='filled'
                 onSubmit={onFilterSubmit}
               >
-                <InputLabel htmlFor='entry-filter-input'>Search</InputLabel>
+                <InputLabel htmlFor='entry-filter-input'>Advanced Search</InputLabel>
                 <FilledInput
                   sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2 }}
                   id='entry-filter-input'
