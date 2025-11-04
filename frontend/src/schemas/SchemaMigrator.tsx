@@ -100,12 +100,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   }, [questionMigrations, handleRemoveActionItem])
 
   const checkObjectsMatch = () => {
-    if (
-      !sourceSchemaQuestion ||
-      sourceSchemaQuestion.schema.type !== 'object' ||
-      !targetSchemaQuestion ||
-      targetSchemaQuestion.schema.type !== 'object'
-    ) {
+    if (!sourceSchemaQuestion || !targetSchemaQuestion) {
       return false
     }
     return (
@@ -131,7 +126,12 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     ) {
       return setActionErrorText('You cannot map two questions with different value types')
     }
-    if (!checkObjectsMatch()) {
+    if (
+      sourceSchemaQuestion.schema.type === 'object' &&
+      targetSchemaQuestion &&
+      targetSchemaQuestion.schema.type == 'object' &&
+      !checkObjectsMatch()
+    ) {
       return setActionErrorText('You cannot map two sub-sections that contain different questions')
     }
     const newQuestionMigration: QuestionMigration = {
