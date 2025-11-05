@@ -8,7 +8,7 @@ import {
   Box,
   Button,
   Container,
-  Grid2,
+  Grid,
   Paper,
   Stack,
   Typography,
@@ -164,9 +164,9 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                 </AccordionSummary>
                 <AccordionDetails>
                   <Box sx={{ m: 2 }}>
-                    <Grid2 container spacing={2} justifyContent='center'>
+                    <Grid container spacing={2} justifyContent='center'>
                       {activeSchemaButtons}
-                    </Grid2>
+                    </Grid>
                   </Box>
                 </AccordionDetails>
               </Accordion>
@@ -177,9 +177,9 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <Grid2 container spacing={2} justifyContent='center'>
+                  <Grid container spacing={2} justifyContent='center'>
                     {inactiveSchemaButtons}
-                  </Grid2>
+                  </Grid>
                 </AccordionDetails>
               </Accordion>
             </Stack>

@@ -1,10 +1,15 @@
-import { Grid2, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
+import { Grid, List, ListItem, ListItemButton, Stepper, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import Form from '@rjsf/mui'
 import { RJSFSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import { Dispatch, SetStateAction, useState } from 'react'
-import { ArrayFieldTemplate, DescriptionFieldTemplate, ObjectFieldTemplate } from 'src/Form/FormTemplates'
+import {
+  ArrayFieldItemTemplate,
+  ArrayFieldTemplate,
+  DescriptionFieldTemplate,
+  ObjectFieldTemplate,
+} from 'src/Form/FormTemplates'
 import ValidationErrorIcon from 'src/Form/ValidationErrorIcon'
 import Nothing from 'src/MuiForms/Nothing'
 import { SplitSchemaNoRender } from 'types/types'
@@ -51,8 +56,8 @@ export default function JsonSchemaForm({
   }
 
   return (
-    <Grid2 container spacing={2} sx={{ mt: 1 }}>
-      <Grid2 size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
+    <Grid container spacing={2} sx={{ mt: 1 }}>
+      <Grid size={{ xs: 12, md: 2 }} sx={{ borderRight: 1, borderColor: theme.palette.divider }}>
         <Stepper activeStep={activeStep} nonLinear alternativeLabel orientation='vertical' connector={<Nothing />}>
           <List sx={{ width: { xs: '100%' } }}>
             {splitSchema.steps.map((step, index) => (
@@ -77,8 +82,8 @@ export default function JsonSchemaForm({
             ))}
           </List>
         </Stepper>
-      </Grid2>
-      <Grid2 size={{ xs: 12, md: 10 }}>
+      </Grid>
+      <Grid size={{ xs: 12, md: 10 }}>
         <Form
           schema={currentStep.schema}
           formData={currentStep.state}
@@ -100,10 +105,12 @@ export default function JsonSchemaForm({
               ? {
                   DescriptionFieldTemplate,
                   ArrayFieldTemplate,
+                  ArrayFieldItemTemplate,
                   ObjectFieldTemplate,
                 }
               : {
                   ArrayFieldTemplate,
+                  ArrayFieldItemTemplate,
                   ObjectFieldTemplate,
                   ErrorListTemplate,
                 }
@@ -111,7 +118,7 @@ export default function JsonSchemaForm({
         >
           <></>
         </Form>
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   )
 }

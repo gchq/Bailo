@@ -1,6 +1,6 @@
 import { FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FormContextType } from '@rjsf/utils'
+import { Registry } from '@rjsf/utils'
 import { ChangeEvent, Fragment } from 'react'
 import MessageAlert from 'src/MessageAlert'
 
@@ -9,7 +9,7 @@ interface CustomTextInputProps {
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
-  formContext?: FormContextType
+  registry?: Registry
   value: boolean
   onChange: (newValue: boolean) => void
   InputProps?: any
@@ -17,18 +17,18 @@ interface CustomTextInputProps {
   rawErrors?: string[]
 }
 
-export default function CheckboxInput({ onChange, value, label, formContext, id, required }: CustomTextInputProps) {
+export default function CheckboxInput({ onChange, value, label, registry, id, required }: CustomTextInputProps) {
   const theme = useTheme()
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value === 'true')
   }
 
-  if (!formContext) {
+  if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
-  if (!formContext.editMode && value == undefined) {
+  if (!registry.formContext.editMode && value == undefined) {
     return (
       <Typography
         sx={{
@@ -48,13 +48,13 @@ export default function CheckboxInput({ onChange, value, label, formContext, id,
         {label}
         {required && <span style={{ color: theme.palette.error.main }}>{' *'}</span>}
       </Typography>
-      {formContext.editMode && (
+      {registry.formContext.editMode && (
         <RadioGroup onChange={handleChange} value={value} aria-label={`radio input field for ${label}`} id={id}>
           <FormControlLabel value={true} control={<Radio data-test={`${id}-yes-option`} />} label='Yes' />
           <FormControlLabel value={false} control={<Radio data-test={`${id}-no-option`} />} label='No' />
         </RadioGroup>
       )}
-      {!formContext.editMode && <Typography>{value ? 'Yes' : 'No'}</Typography>}
+      {!registry.formContext.editMode && <Typography>{value ? 'Yes' : 'No'}</Typography>}
     </Fragment>
   )
 }

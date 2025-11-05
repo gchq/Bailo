@@ -62,7 +62,14 @@ type TarEntry =
   | { type: 'stream'; filename: string; stream: Readable; size?: number }
 export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, logData: MirrorLogData) {
   const entryName = `${config.modelMirror.contentDirectory}/${entry.filename}`
-  log.debug({ entryName, entry, ...logData }, 'Adding entry to tarball.')
+  log.debug(
+    {
+      entryName,
+      entry: { type: entry.type, filename: entry.filename },
+      ...logData,
+    },
+    'Adding entry to tarball.',
+  )
 
   if (entry.type === 'text') {
     const contentBuffer = Buffer.from(entry.content, 'utf8')

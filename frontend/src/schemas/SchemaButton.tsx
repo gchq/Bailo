@@ -5,7 +5,7 @@ import {
   CardActions,
   CardContent,
   Divider,
-  Grid2,
+  Grid,
   List,
   ListItem,
   Stack,
@@ -52,7 +52,7 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
     return <MessageAlert message={isReviewRolesError.info.message} severity='error' />
   }
   return (
-    <Grid2 size={{ md: 6, sm: 12 }}>
+    <Grid size={{ md: 6, sm: 12 }}>
       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <CardContent sx={{ pb: 0 }}>
           <Stack spacing={1}>
@@ -79,6 +79,6 @@ export default function SchemaButton({ schema, onClick, loading = false }: Schem
           </Stack>
         </CardActions>
       </Card>
-    </Grid2>
+    </Grid>
   )
 }
