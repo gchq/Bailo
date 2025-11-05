@@ -131,6 +131,11 @@ export async function getAccessRequestById(user: UserInterface, accessRequestId:
   return accessRequest
 }
 
+export async function findAccessRequest() {
+  const accessRequests = await AccessRequest.find({})
+  return accessRequests
+}
+
 export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
 export async function updateAccessRequest(
   user: UserInterface,
