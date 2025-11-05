@@ -141,6 +141,10 @@ describe('connectors > mirroredModel > importers > FileImporter', () => {
 
     importer.finishListener(resolve, reject)
 
-    expect(resolve).toHaveBeenCalledWith({ metadata: mockMetadata })
+    expect(resolve).toHaveBeenCalledWith({
+      metadata: mockMetadata,
+      sourcePath: mockMetadata.filePath,
+      newPath: 'updated/file/path',
+    })
   })
 })
