@@ -3,7 +3,7 @@ import {
   Box,
   Button,
   Divider,
-  Grid2,
+  Grid,
   ListItemIcon,
   ListItemText,
   Menu,
@@ -133,21 +133,21 @@ export default function Paginate<T>({
           sx={{ px: 2.5 }}
           selected={checkMenuOption(sortingProperty.value.toString())}
         >
-          <Grid2 container sx={{ minWidth: '200px' }}>
-            <Grid2 size={2}>
+          <Grid container sx={{ minWidth: '200px' }}>
+            <Grid size={2}>
               {checkMenuOption(sortingProperty.value.toString()) ? (
                 <Check sx={{ width: '100%' }} color='primary' />
               ) : (
                 <Check sx={{ width: '100%' }} color='primary' opacity={0} />
               )}
-            </Grid2>
-            <Grid2 size={2}>
+            </Grid>
+            <Grid size={2}>
               <ListItemIcon>{displaySortingKindIcon(sortingProperty.iconKind)}</ListItemIcon>
-            </Grid2>
-            <Grid2 size={8}>
+            </Grid>
+            <Grid size={8}>
               <ListItemText>{sortingProperty.title}</ListItemText>
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </MenuItem>
       )
     },
@@ -162,15 +162,15 @@ export default function Paginate<T>({
       sx={{ px: 2.5 }}
       selected={checkAscOrDesc(direction)}
     >
-      <Grid2 container sx={{ minWidth: '200px' }}>
-        <Grid2 size={2}>
+      <Grid container sx={{ minWidth: '200px' }}>
+        <Grid size={2}>
           {checkAscOrDesc(direction) ? (
             <Check sx={{ width: '100%' }} color='primary' />
           ) : (
             <Check sx={{ width: '100%' }} color='primary' opacity={0} />
           )}
-        </Grid2>
-        <Grid2 size={2}>
+        </Grid>
+        <Grid size={2}>
           <ListItemIcon>
             {direction === SortingDirection.ASC ? (
               <Sort color='primary' />
@@ -178,11 +178,11 @@ export default function Paginate<T>({
               <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
             )}
           </ListItemIcon>
-        </Grid2>
-        <Grid2 size={8}>
+        </Grid>
+        <Grid size={8}>
           <ListItemText>{direction}</ListItemText>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </MenuItem>
   )
 

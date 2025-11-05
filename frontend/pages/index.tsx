@@ -21,7 +21,7 @@ import {
   Tab,
   Tabs,
   Typography,
-} from '@mui/material/'
+} from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
@@ -295,7 +295,7 @@ export default function Marketplace() {
                 variant='filled'
                 onSubmit={onFilterSubmit}
               >
-                <InputLabel htmlFor='entry-filter-input'>Search</InputLabel>
+                <InputLabel htmlFor='entry-filter-input'>Advanced Search</InputLabel>
                 <FilledInput
                   sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2 }}
                   id='entry-filter-input'
