@@ -7,6 +7,15 @@ metadata:
   region: <region>
   version: <""> # k8s version; example "1.34"
 
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: aws-load-balancer
+        namespace: kube-system
+      wellKnownPolicies:
+        awsLoadBalancerController: true
+
 managedNodeGroups:
   - name: bailo-node
     instanceType: m5.xlarge
