@@ -74,7 +74,7 @@
     "@typescript-eslint/parser": "^8.31.1",
     "@vitejs/plugin-react": "^5.1.0",
     "axe-core": "^4.11.0",
-    "cypress": "^15.3.0",
+    "cypress": "^15.5.0",
     "cypress-axe": "^1.7.0",
     "eslint": "^9.36.0",
     "eslint-config-next": "15.5.4",
@@ -83,10 +83,10 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^6.1.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "jsdom": "^27.0.0",
+    "jsdom": "^27.1.0",
     "next-router-mock": "^1.0.4",
     "prettier": "^3.6.2",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.6"
   }
 }
