@@ -1,5 +1,5 @@
 import {
-  deleteImage,
+  deleteManifest,
   getImageTagManifest,
   getRegistryLayerStream,
   listImageTags,
@@ -80,6 +80,7 @@ export async function listModelImages(user: UserInterface, modelId: string) {
 
   const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
+  log.debug({ repos }, 'listModelRepos()=')
   return await Promise.all(
     repos.map(async (repo) => {
       const [repository, name] = repo.split(/\/(.*)/s)
@@ -115,10 +116,10 @@ export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterfac
 async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
   const manifest = await getImageManifest(user, source)
 
-  const allLayers = [manifest.config, ...manifest.layers]
+  const allLayers = [manifest.body.config, ...manifest.body.layers]
   const multiRepositoryToken = await getAccessToken({ dn: user.dn }, [
-    { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['push', 'pull'] },
-    { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull', 'delete'] },
+    { type: 'repository', name: `${source.repository}/${source.name}`, actions: ['push', 'pull', 'delete'] },
+    { type: 'repository', name: `${destination.repository}/${destination.name}`, actions: ['push', 'pull'] },
   ])
 
   // cross-mount layers from original to new image
@@ -140,13 +141,41 @@ async function renameImage(user: UserInterface, source: ImageRefInterface, desti
   const putManifestRes = await putManifest(
     multiRepositoryToken,
     destination,
-    JSON.stringify(manifest),
-    manifest['mediaType'],
+    JSON.stringify(manifest.body),
+    manifest.body['mediaType'],
   )
   log.debug({ putManifestRes }, 'putManifest result')
 
   // DELETE the original manifest
-  await deleteImage(multiRepositoryToken, source)
+  await deleteManifest(multiRepositoryToken, source)
+
+  let isOrphaned = true
+  try {
+    const remainingImages = await listImageTags(multiRepositoryToken, {
+      repository: source.repository,
+      name: source.name,
+    })
+    for (const tag of remainingImages) {
+      const tagHeaders = (await getImageManifest(user, { repository: source.repository, name: source.name, tag: tag }))
+        .headers
+      if (manifest.headers['Docker-Content-Digest'] === tagHeaders['Docker-Content-Digest']) {
+        isOrphaned = false
+        break
+      }
+    }
+  } catch (err) {
+    if (!err || err['status'] !== '404') {
+      throw err
+    }
+  }
+
+  if (isOrphaned) {
+    await deleteManifest(multiRepositoryToken, {
+      repository: source.repository,
+      name: source.name,
+      tag: manifest.headers['Docker-Content-Digest'],
+    })
+  }
 }
 
 export async function softDeleteImage(user: UserInterface, imageRef: ImageRefInterface) {

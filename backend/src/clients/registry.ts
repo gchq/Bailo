@@ -183,7 +183,7 @@ export async function listImageTags(token: string, repoRef: RepoRefInterface) {
 
 export async function getImageTagManifest(token: string, imageRef: ImageRefInterface) {
   // TODO: handle `Accept: 'application/vnd.docker.distribution.manifest.list.v2+json'` type for multi-platform images
-  const { body } = await registryRequest(
+  const { body, headers } = await registryRequest(
     token,
     `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`,
     undefined,
@@ -198,7 +198,7 @@ export async function getImageTagManifest(token: string, imageRef: ImageRefInter
       imageRef,
     })
   }
-  return body
+  return { body, headers }
 }
 
 export async function getRegistryLayerStream(
@@ -346,7 +346,7 @@ export async function mountBlob(
   log.debug({ headers, body }, 'got response from POST')
 }
 
-export async function deleteImage(token: string, imageRef: ImageRefInterface) {
+export async function deleteManifest(token: string, imageRef: ImageRefInterface) {
   const { headers } = await registryRequest(
     token,
     `${imageRef.repository}/${imageRef.name}/manifests/${imageRef.tag}`,
