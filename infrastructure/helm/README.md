@@ -22,7 +22,7 @@ All commands also assume that the namespace is already created, a namespace can 
 Deployment options can be overridden by including a `--values <file containing overrides>` to a Helm command, or by
 using `--set <option>=<value>`.
 
- Bailo images are hosted using GitHub Container Registry; https://github.com/orgs/gchq/packages?repo_name=Bailo. Alternatively, you can build and publish your image using the provided Dockerfile. At the very minimum, the configuration should include the location of a Bailo image.
+Bailo images are hosted using GitHub Container Registry; https://github.com/orgs/gchq/packages?repo_name=Bailo. Alternatively, you can build and publish your image using the provided Dockerfile. At the very minimum, the configuration should include the location of a Bailo image.
 
 ```yaml
 ---
