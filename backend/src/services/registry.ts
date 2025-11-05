@@ -11,6 +11,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken } from '../routes/v1/registryAuth.js'
+import { isBailoError } from '../types/error.js'
 import config from '../utils/config.js'
 import { Forbidden, InternalError } from '../utils/error.js'
 import log from './log.js'
@@ -128,6 +129,14 @@ async function renameImage(user: UserInterface, source: ImageRefInterface, desti
     if (!layerDigest || layerDigest.length === 0) {
       throw InternalError('Could not extract layer digest.', { layer, from: source, to: destination })
     }
+    log.trace(
+      {
+        layerDigest,
+        source: { repository: source.repository, name: source.name },
+        destination: { repository: destination.repository, name: destination.name },
+      },
+      'CrossMounting registry layer to new repository.',
+    )
 
     await mountBlob(
       multiRepositoryToken,
@@ -137,16 +146,9 @@ async function renameImage(user: UserInterface, source: ImageRefInterface, desti
     )
   }
 
-  // PUT the new manifest
-  const putManifestRes = await putManifest(
-    multiRepositoryToken,
-    destination,
-    JSON.stringify(manifest.body),
-    manifest.body['mediaType'],
-  )
-  log.debug({ putManifestRes }, 'putManifest result')
-
-  // DELETE the original manifest
+  log.trace({ destination }, 'Creating a new manifest for cross mounted repository.')
+  await putManifest(multiRepositoryToken, destination, JSON.stringify(manifest.body), manifest.body['mediaType'])
+  log.trace({ source }, 'Deleting the original manifest.')
   await deleteManifest(multiRepositoryToken, source)
 
   let isOrphaned = true
@@ -158,22 +160,25 @@ async function renameImage(user: UserInterface, source: ImageRefInterface, desti
     for (const tag of remainingImages) {
       const tagHeaders = (await getImageManifest(user, { repository: source.repository, name: source.name, tag: tag }))
         .headers
-      if (manifest.headers['Docker-Content-Digest'] === tagHeaders['Docker-Content-Digest']) {
+      if (manifest.headers['docker-content-digest'] === tagHeaders['docker-content-digest']) {
         isOrphaned = false
+        log.trace({ source }, "Found another tag matching digest. Won't delete digest.")
         break
       }
     }
   } catch (err) {
-    if (!err || err['status'] !== '404') {
+    // error 404 is thrown by listImageTags when no tags remain but the digest still exists
+    if (!err || !isBailoError(err) || err?.context?.status !== 404) {
       throw err
     }
   }
 
   if (isOrphaned) {
+    log.trace({ source }, 'Deleting orphaned digest, to prevent pulling.')
     await deleteManifest(multiRepositoryToken, {
       repository: source.repository,
       name: source.name,
-      tag: manifest.headers['Docker-Content-Digest'],
+      tag: manifest.headers['docker-content-digest'],
     })
   }
 }
