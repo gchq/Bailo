@@ -15,7 +15,7 @@ import { isBailoError } from '../types/error.js'
 import config from '../utils/config.js'
 import { Forbidden, InternalError } from '../utils/error.js'
 import log from './log.js'
-import { getModelById } from './model.js'
+import { findAndDeleteImageFromReleases, getModelById } from './model.js'
 
 // derived from https://pkg.go.dev/github.com/distribution/reference#pkg-overview
 const imageRegex =
@@ -189,5 +189,5 @@ export async function softDeleteImage(user: UserInterface, imageRef: ImageRefInt
 
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
-  //TODO: update the Model Release docs
+  await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef)
 }

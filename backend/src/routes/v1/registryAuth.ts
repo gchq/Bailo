@@ -159,6 +159,16 @@ function generateAccess(scope: any) {
 }
 
 async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
+  if (access.name.startsWith(config.registry.softDeletePrefix)) {
+    const info = `Access name must not begin with soft delete prefix: ${config.registry.softDeletePrefix}`
+    log.warn({ userDn: user.dn, access }, info)
+    return {
+      id: access.name,
+      success: false,
+      info,
+    }
+  }
+
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
