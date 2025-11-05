@@ -1,6 +1,6 @@
 import { Box, Button, Chip, Divider, Stack, TextField, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FormContextType } from '@rjsf/utils'
+import { Registry } from '@rjsf/utils'
 import { useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 
@@ -8,7 +8,7 @@ interface TagSelectorProps {
   onChange: (newValue: string[]) => void
   value: string[]
   label: string
-  formContext?: FormContextType
+  formContext?: Registry['formContext']
   required?: boolean
   id: string
 }
@@ -95,7 +95,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
           </Typography>
         </Stack>
       )}
-      {formContext && !formContext.editMode && (
+      {formContext && formContext.editMode && (
         <>
           <Typography fontWeight='bold' aria-label={`label for ${label}`}>
             {label}
