@@ -113,6 +113,7 @@ vi.mock('../../src/models/ReviewRole.js', () => ({ default: reviewRoleModelMocks
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
   getUserInformation: vi.fn(() => ({ name: 'user', email: 'user@example.com' })),
+  hasRole: vi.fn(() => ({})),
 }))
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: authenticationMocks,
@@ -226,6 +227,23 @@ describe('services > model', () => {
     modelMocks.sort.mockResolvedValueOnce([])
 
     await searchModels(user, 'model', [], [], [], [], '', 'task')
+  })
+
+  test('searchModels > admin access without auth', async () => {
+    const user = { dn: 'not admin' }
+    const adminAccess = true
+    authenticationMocks.hasRole.mockImplementation(() => false)
+    await expect(searchModels(user, 'model', [], [], [], [], '', '', false, '', adminAccess)).rejects.toThrow(
+      'You do not have the required role.',
+    )
+  })
+
+  test('searchModels > admin access with auth', async () => {
+    const user: any = { dn: 'admin' }
+    const adminAccess = true
+    modelMocks.sort.mockResolvedValueOnce([])
+    authenticationMocks.hasRole.mockImplementation(() => true)
+    await searchModels(user, 'model', [], [], [], [], '', '', false, '', adminAccess)
   })
 
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {

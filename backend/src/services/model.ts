@@ -130,8 +130,17 @@ export async function searchModels(
   task?: string,
   allowTemplating?: boolean,
   schemaId?: string,
-  viewAllPrivate?: boolean,
+  adminAccess?: boolean,
 ): Promise<Array<ModelInterface>> {
+  if (adminAccess) {
+    if (!(await authentication.hasRole(user, Roles.Admin))) {
+      throw Forbidden('You do not have the required role.', {
+        userDn: user.dn,
+        requiredRole: Roles.Admin,
+      })
+    }
+  }
+
   const query: any = {}
 
   if (kind) {
@@ -200,10 +209,8 @@ export async function searchModels(
   }
 
   const results = await cursor
-  if (viewAllPrivate) {
-    if (!(await authentication.hasRole(user, Roles.Admin))) {
-      throw Forbidden('You do not have authorisation to view these private models', { userDn: user.dn })
-    }
+  //Auth already checked, so just need to check if they require admin access
+  if (adminAccess) {
     return results
   }
   const auths = await authorisation.models(user, results, ModelAction.View)
