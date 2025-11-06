@@ -195,7 +195,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     }
   }
 
-  const handleSubmitMigrationPlan = async () => {
+  const handleSubmitMigrationPlan = async (draft: boolean) => {
     setSubmitErrorText('')
     if (migrationName === '') {
       return setSubmitErrorText('You must set a name for this migration plan')
@@ -209,6 +209,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
       sourceSchema: sourceSchema.schema.id,
       targetSchema: targetSchema.schema.id,
       questionMigrations: questionMigrations,
+      draft: draft,
     })
     if (!res.ok) {
       setSubmitErrorText(await getErrorMessage(res))
@@ -305,7 +306,14 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                     onChange={(e) => setMigrationDescription(e.target.value)}
                   />
                 </Stack>
-                <Button variant='contained' onClick={handleSubmitMigrationPlan} aria-label='submit migration plan'>
+                <Button variant='outlined' color='info' onClick={() => handleSubmitMigrationPlan(true)}>
+                  Draft migration plan
+                </Button>
+                <Button
+                  variant='contained'
+                  onClick={() => handleSubmitMigrationPlan(false)}
+                  aria-label='submit migration plan'
+                >
                   Submit migration plan
                 </Button>
                 <Typography color='error'>{submitErrorText}</Typography>

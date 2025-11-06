@@ -10,6 +10,8 @@ interface PostSchemaMigrationParams {
   sourceSchema: string
   targetSchema: string
 
+  draft: boolean
+
   questionMigrations: QuestionMigration[]
 }
 
