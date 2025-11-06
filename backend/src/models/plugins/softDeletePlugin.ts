@@ -35,7 +35,7 @@ export function softDeletionPlugin(schema: Schema) {
       this.where('deleted').equals(this['_conditions'].deleted)
       next()
     } else {
-      this.or([{ deleted: null }, { deleted: false }])
+      this.or([{ deleted: { $exists: false } }, { deleted: false }])
       next()
     }
   })
