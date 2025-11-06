@@ -1,13 +1,16 @@
 import { Close, ExpandMore } from '@mui/icons-material'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
   Button,
+  ButtonGroup,
   Divider,
   Grid,
   IconButton,
+  Menu,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -16,9 +19,11 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import ClickAwayListener from '@mui/material/ClickAwayListener'
 import { useTheme } from '@mui/material/styles'
 import { postSchemaMigration } from 'actions/schemaMigration'
 import { useRouter } from 'next/router'
+import React from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
 import { CombinedSchema, QuestionMigration } from 'types/types'
@@ -47,6 +52,9 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
   const [isTargetSchemaActive, setIsTargetSchemaActive] = useState(false)
   const [migrationName, setMigrationName] = useState('')
   const [migrationDescription, setMigrationDescription] = useState('')
+  const [draft, setDraft] = useState(false)
+  const [open, setOpen] = React.useState(false)
+  const anchorRef = React.useRef<HTMLDivElement>(null)
 
   const theme = useTheme()
   const router = useRouter()
@@ -57,6 +65,10 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     },
     [questionMigrations],
   )
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen)
+  }
 
   const actionsList = useMemo(() => {
     if (questionMigrations.length === 0) {
@@ -74,7 +86,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Close color='error' />
               </IconButton>
             </Tooltip>
-            <Typography sx={{ overflow: 'hidde', wordBreak: 'break-word' }}>
+            <Typography sx={{ overflow: 'hidden', wordBreak: 'break-word' }}>
               Source field <span style={{ fontWeight: 'bold' }}>{migrationAction.sourcePath}</span> mapped to target
               field <span style={{ fontWeight: 'bold' }}>{migrationAction.targetPath}</span>
             </Typography>
@@ -195,7 +207,13 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     }
   }
 
-  const handleSubmitMigrationPlan = async (draft: boolean) => {
+  const handleClose = (event: Event) => {
+    if (!(anchorRef.current && anchorRef.current.contains(event.target as HTMLElement))) {
+      setOpen(false)
+    }
+  }
+
+  const handleSubmitMigrationPlan = async () => {
     setSubmitErrorText('')
     if (migrationName === '') {
       return setSubmitErrorText('You must set a name for this migration plan')
@@ -306,16 +324,25 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                     onChange={(e) => setMigrationDescription(e.target.value)}
                   />
                 </Stack>
-                <Button variant='outlined' color='info' onClick={() => handleSubmitMigrationPlan(true)}>
-                  Draft migration plan
-                </Button>
-                <Button
-                  variant='contained'
-                  onClick={() => handleSubmitMigrationPlan(false)}
-                  aria-label='submit migration plan'
+                <ClickAwayListener onClickAway={handleClose}>
+                  <ButtonGroup ref={anchorRef} variant='contained' color='primary'>
+                    <Button onClick={handleSubmitMigrationPlan} aria-label='submit migration plan'>
+                      {draft ? 'Draft migration Plan' : 'Submit migration plan'}
+                    </Button>
+                    <Button size='small' onClick={handleToggle}>
+                      <ArrowDropDownIcon />
+                    </Button>
+                  </ButtonGroup>
+                </ClickAwayListener>
+                <Menu
+                  anchorEl={anchorRef.current}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  open={open}
                 >
-                  Submit migration plan
-                </Button>
+                  <MenuItem onClick={() => setDraft(false)}>Submit migration plan</MenuItem>
+                  <MenuItem onClick={() => setDraft(true)}>Draft migration plan</MenuItem>
+                </Menu>
                 <Typography color='error'>{submitErrorText}</Typography>
               </Stack>
             </Stack>
