@@ -9,7 +9,7 @@ import { isRegistryError } from '../types/RegistryError.js'
 import config from '../utils/config.js'
 import { InternalError, RegistryError } from '../utils/error.js'
 import {
-  isDeleteImageResponse,
+  isDeleteManifestResponse,
   isDoesLayerExistResponse,
   isGetImageTagManifestResponse,
   isInitialiseUploadObjectResponse,
@@ -347,7 +347,7 @@ export async function mountBlob(
   log.debug({ headers }, 'mountBlob headers')
 
   if (!isMountBlobResponse(headers)) {
-    throw InternalError('Unrecognised response headers when deleting image.', {
+    throw InternalError('Unrecognised response headers when mounting a blob.', {
       headers,
       sourceRepoRef,
       destinationRepoRef,
@@ -369,8 +369,8 @@ export async function deleteManifest(token: string, imageRef: ImageRefInterface)
     { Accept: 'application/vnd.docker.distribution.manifest.v2+json' },
   )
 
-  if (!isDeleteImageResponse(headers)) {
-    throw InternalError('Unrecognised response headers when deleting image.', {
+  if (!isDeleteManifestResponse(headers)) {
+    throw InternalError('Unrecognised response headers when deleting manifest.', {
       headers,
       imageRef,
     })

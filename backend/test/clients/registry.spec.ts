@@ -3,12 +3,14 @@ import { Readable } from 'node:stream'
 import { beforeEach, describe, expect, Mock, test, vi } from 'vitest'
 
 import {
+  deleteManifest,
   doesLayerExist,
   getImageTagManifest,
   getRegistryLayerStream,
   initialiseUpload,
   listImageTags,
   listModelRepos,
+  mountBlob,
   putManifest,
   uploadLayerMonolithic,
 } from '../../src/clients/registry.js'
@@ -496,5 +498,79 @@ describe('clients > registry', () => {
     const response = uploadLayerMonolithic('token', 'url', 'digest', mockReadable, 'size')
 
     await expect(response).rejects.toThrowError('Unrecognised response headers when putting image blob.')
+  })
+
+  test('mountBlob > success', async () => {
+    const mockHeaders = new Headers({
+      'content-length': 'string',
+      date: 'string',
+      'docker-content-digest': 'string',
+      'docker-distribution-api-version': 'string',
+      location: 'string',
+    })
+    fetchMock.mockReturnValueOnce({
+      text: vi.fn(),
+      ok: true,
+      headers: mockHeaders,
+    })
+
+    const response = await mountBlob(
+      'token',
+      { repository: 'modelId', name: 'image' },
+      { repository: 'modelId', name: 'image' },
+      'blob',
+    )
+
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('mountBlob > malformed response', async () => {
+    fetchMock.mockReturnValueOnce({
+      text: vi.fn(),
+      ok: true,
+      headers: new Headers({}),
+    })
+
+    const promise = mountBlob(
+      'token',
+      { repository: 'modelId', name: 'image' },
+      { repository: 'modelId', name: 'image' },
+      'blob',
+    )
+
+    await expect(promise).rejects.toThrowError('Unrecognised response headers when mounting a blob.')
+  })
+
+  test('deleteManifest > success', async () => {
+    const mockHeaders = new Headers({
+      'content-length': 'string',
+      date: 'string',
+      'docker-distribution-api-version': 'string',
+    })
+    fetchMock.mockReturnValueOnce({
+      text: vi.fn(),
+      ok: true,
+      headers: mockHeaders,
+    })
+
+    const response = await deleteManifest('token', { repository: 'modelId', name: 'image', tag: 'tag' })
+
+    expect(fetchMock).toBeCalled()
+    expect(fetchMock.mock.calls).toMatchSnapshot()
+    expect(response).toStrictEqual(Object.fromEntries(mockHeaders))
+  })
+
+  test('deleteManifest > malformed response', async () => {
+    fetchMock.mockReturnValueOnce({
+      text: vi.fn(),
+      ok: true,
+      headers: new Headers({}),
+    })
+
+    const promise = deleteManifest('token', { repository: 'modelId', name: 'image', tag: 'tag' })
+
+    await expect(promise).rejects.toThrowError('Unrecognised response headers when deleting manifest.')
   })
 })

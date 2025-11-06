@@ -1,6 +1,40 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 
-import { joinDistributionPackageName, splitDistributionPackageName } from '../../src/services/registry.js'
+import {
+  checkUserAuth,
+  getImageManifest,
+  joinDistributionPackageName,
+  renameImage,
+  splitDistributionPackageName,
+} from '../../src/services/registry.js'
+import { InternalError } from '../../src/utils/error.js'
+
+const authMocks = vi.hoisted(() => ({
+  default: {
+    image: vi.fn(),
+  },
+}))
+vi.mock('../../src/connectors/authorisation/index.js', () => authMocks)
+
+const modelMocks = vi.hoisted(() => ({
+  getModelById: vi.fn(() => ({ _id: 'test' })),
+  findAndDeleteImageFromReleases: vi.fn(),
+}))
+vi.mock('../../src/services/model.js', () => modelMocks)
+
+const registryAuthMocks = vi.hoisted(() => ({
+  getAccessToken: vi.fn(() => 'token'),
+}))
+vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
+
+const registryClientMocks = vi.hoisted(() => ({
+  deleteManifest: vi.fn(),
+  getImageTagManifest: vi.fn(),
+  listImageTags: vi.fn(() => []),
+  mountBlob: vi.fn(),
+  putManifest: vi.fn(),
+}))
+vi.mock('../../src/clients/registry.ts', () => registryClientMocks)
 
 describe('services > registry', () => {
   test('splitDistributionPackageName > success', () => {
@@ -259,5 +293,114 @@ describe('services > registry', () => {
     for (const testString of testStrings) {
       expect(joinDistributionPackageName(splitDistributionPackageName(testString))).toStrictEqual(testString)
     }
+  })
+
+  test('checkUserAuth > success', async () => {
+    authMocks.default.image.mockReturnValueOnce({
+      success: true,
+      id: '',
+    })
+
+    await checkUserAuth({ dn: 'user' }, 'modelId', ['list'])
+
+    expect(modelMocks.getModelById).toBeCalledWith({ dn: 'user' }, 'modelId')
+    expect(authMocks.default.image).toBeCalledWith(
+      { dn: 'user' },
+      { _id: 'test' },
+      { type: 'repository', name: 'modelId', actions: ['list'] },
+    )
+  })
+
+  test('checkUserAuth > forbidden', async () => {
+    authMocks.default.image.mockReturnValueOnce({ success: false, info: 'Error' })
+
+    const promise = checkUserAuth({ dn: 'user' }, 'modelId', ['list'])
+
+    await expect(promise).rejects.toThrowError('Error')
+    expect(modelMocks.getModelById).toBeCalledWith({ dn: 'user' }, 'modelId')
+    expect(authMocks.default.image).toBeCalledWith(
+      { dn: 'user' },
+      { _id: 'test' },
+      { type: 'repository', name: 'modelId', actions: ['list'] },
+    )
+  })
+
+  test('getImageManifest > success', async () => {
+    authMocks.default.image.mockReturnValueOnce({
+      success: true,
+      id: '',
+    })
+
+    await getImageManifest({} as any, {} as any)
+
+    expect(registryAuthMocks.getAccessToken).toHaveBeenCalled()
+    expect(registryClientMocks.getImageTagManifest).toHaveBeenCalled()
+  })
+
+  test('getImageManifest > bad response', async () => {
+    authMocks.default.image.mockReturnValueOnce({
+      success: true,
+      id: '',
+    })
+    registryClientMocks.getImageTagManifest.mockRejectedValue('Error')
+
+    await expect(getImageManifest({} as any, {} as any)).rejects.toThrowError('Error')
+
+    expect(registryAuthMocks.getAccessToken).toHaveBeenCalled()
+  })
+
+  test('renameImage > source manifest not found', async () => {
+    authMocks.default.image.mockReturnValueOnce({
+      success: true,
+      id: '',
+    })
+    registryClientMocks.getImageTagManifest.mockRejectedValueOnce(InternalError('Error', { status: 404 }))
+
+    await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError(
+      'The requested image was not found.',
+    )
+  })
+
+  test('renameImage > source manifest other error', async () => {
+    authMocks.default.image.mockReturnValueOnce({
+      success: true,
+      id: '',
+    })
+    registryClientMocks.getImageTagManifest.mockRejectedValueOnce(InternalError('Error'))
+
+    await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Error')
+  })
+
+  test('renameImage > config missing digest', async () => {
+    authMocks.default.image.mockReturnValueOnce({
+      success: true,
+      id: '',
+    })
+    registryClientMocks.getImageTagManifest.mockResolvedValueOnce({
+      body: { config: {}, layers: [] },
+    })
+
+    await expect(renameImage({} as any, {} as any, {} as any)).rejects.toThrowError('Could not extract layer digest.')
+  })
+
+  test('renameImage > success and delete orphan', async () => {
+    authMocks.default.image.mockReturnValueOnce({
+      success: true,
+      id: '',
+    })
+    const mockBody = { config: { digest: 'digest' }, layers: [{ digest: 'digest' }], mediaType: 'mediaType' }
+    registryClientMocks.getImageTagManifest.mockResolvedValueOnce({
+      body: mockBody,
+      headers: { 'docker-content-digest': 'digest' },
+    })
+    const source = { name: 'sourceName', repository: 'sourceRepository', tag: 'sourceTag' }
+    const destination = { name: 'destinationName', repository: 'destinationRepository', tag: 'destinationTag' }
+
+    await renameImage({} as any, source, destination)
+
+    expect(registryClientMocks.mountBlob).toBeCalledTimes(2)
+    expect(registryClientMocks.putManifest).toBeCalledWith('token', destination, JSON.stringify(mockBody), 'mediaType')
+    expect(registryClientMocks.deleteManifest).toBeCalledWith('token', source)
+    expect(registryClientMocks.deleteManifest).toBeCalledWith('token', { ...source, tag: 'digest' })
   })
 })

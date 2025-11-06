@@ -7,6 +7,7 @@ import {
   mountBlob,
   putManifest,
 } from '../clients/registry.js'
+import { GetImageTagManifestResponse } from '../clients/registryResponses.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
@@ -63,7 +64,7 @@ export function joinDistributionPackageName(distributionPackageName: Distributio
   return `${distributionPackageName.path}@${distributionPackageName['digest']}`
 }
 
-async function checkUserAuth(user: UserInterface, modelId: string, actions: Action[] = []) {
+export async function checkUserAuth(user: UserInterface, modelId: string, actions: Action[] = []) {
   const model = await getModelById(user, modelId)
 
   const auth = await authorisation.image(user, model, {
@@ -113,8 +114,17 @@ export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterfac
   return await getRegistryLayerStream(repositoryToken, repoRef, digest)
 }
 
-async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
-  let manifest
+/**
+ * Renames an image in the registry.
+ *
+ * @remarks
+ * This does _not_ also update any mongo data, and does _not_ do any auth checks on the destination.
+ */
+export async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
+  let manifest: {
+    body: GetImageTagManifestResponse
+    headers: Record<string, string>
+  }
   try {
     manifest = await getImageManifest(user, source)
   } catch (err) {

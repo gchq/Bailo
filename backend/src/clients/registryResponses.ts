@@ -10,7 +10,7 @@ type ListImageTagResponse = { tags: Array<string> }
 
 type ListModelReposResponse = { repositories: Array<string> }
 
-type GetImageTagManifestResponse = {
+export type GetImageTagManifestResponse = {
   schemaVersion: number
   mediaType: string
   config: { mediaType: string; size: number; digest: string }
@@ -47,7 +47,7 @@ type InitialiseUploadResponse = {
   range: string
 }
 
-type DeleteImageResponse = {
+type DeleteManifestResponse = {
   'content-length': string
   date: string
   'docker-distribution-api-version': string
@@ -143,7 +143,7 @@ export function isInitialiseUploadObjectResponse(resp: unknown): resp is Initial
   })
 }
 
-export function isDeleteImageResponse(resp: unknown): resp is DeleteImageResponse {
+export function isDeleteManifestResponse(resp: unknown): resp is DeleteManifestResponse {
   return hasKeysOfType(resp, {
     'content-length': 'string',
     date: 'string',
