@@ -31,6 +31,9 @@ export function softDeletionPlugin(schema: Schema) {
   }
 
   schema.pre('find', function (next: CallbackWithoutResultAndOptionalError) {
+    if (this['_conditions'].deleted === undefined) {
+      next()
+    }
     if (this['_conditions'].deleted) {
       this.where('deleted').equals(this['_conditions'].deleted)
       next()
