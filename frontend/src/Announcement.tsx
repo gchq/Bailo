@@ -1,6 +1,6 @@
 import { Close } from '@mui/icons-material'
 import CampaignIcon from '@mui/icons-material/Campaign'
-import { Box, Button, Grid2, IconButton, Stack, Typography } from '@mui/material'
+import { Box, Button, Grid, IconButton, Stack, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useMemo, useState } from 'react'
 interface AnnoucementProps {
@@ -47,9 +47,9 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
       }}
     >
       <Stack spacing={1} alignItems='center'>
-        <Grid2 container justifyContent='space-between' alignItems='center'>
-          <Grid2 size={{ xs: 1 }} />
-          <Grid2 size={{ xs: 10 }} sx={{ textAlign: 'center' }}>
+        <Grid container justifyContent='space-between' alignItems='center'>
+          <Grid size={{ xs: 1 }} />
+          <Grid size={{ xs: 10 }} sx={{ textAlign: 'center' }}>
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
               spacing={2}
@@ -63,13 +63,13 @@ export default function Announcement({ message, onClose }: AnnoucementProps) {
               </Typography>
               <CampaignIcon color='primary' />
             </Stack>
-          </Grid2>
-          <Grid2 size={{ xs: 1 }} sx={{ textAlign: 'right' }}>
+          </Grid>
+          <Grid size={{ xs: 1 }} sx={{ textAlign: 'right' }}>
             <IconButton aria-label='close announcement pop-up' size='small' onClick={onClose}>
               <Close color='primary' />
             </IconButton>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
         {announcementText}
       </Stack>
     </Box>

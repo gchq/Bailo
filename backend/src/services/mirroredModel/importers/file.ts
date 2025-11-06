@@ -76,6 +76,6 @@ export class FileImporter extends BaseImporter {
 
   // Type resolve
   finishListener(resolve: (reason?: FileMirrorInformation) => void, _reject: (reason?: unknown) => void) {
-    super.finishListener(resolve, _reject)
+    resolve({ metadata: this.metadata, sourcePath: this.metadata.filePath, newPath: this.updatedPath })
   }
 }

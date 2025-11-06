@@ -2,7 +2,7 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { FormContextType } from '@rjsf/utils'
+import { Registry } from '@rjsf/utils'
 import { EntrySearchResult, useListModels } from 'actions/model'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
@@ -18,7 +18,7 @@ interface DataCardSelectorProps {
   required?: boolean
   value: string[]
   onChange: (newValue: string[]) => void
-  formContext?: FormContextType
+  registry?: Registry
   rawErrors?: string[]
   InputProps?: any
 }
@@ -29,7 +29,7 @@ export default function DataCardSelector({
   required,
   label,
   id,
-  formContext,
+  registry,
   rawErrors,
   InputProps,
 }: DataCardSelectorProps) {
@@ -77,14 +77,14 @@ export default function DataCardSelector({
     return <MessageAlert message={isDataCardsError.info.message} severity='error' />
   }
 
-  if (!formContext) {
+  if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
   return (
     <>
       {isDataCardsLoading && <Loading />}
-      {formContext && formContext.editMode && (
+      {registry.formContext && registry.formContext.editMode && (
         <>
           <Typography
             id={`${id}-label`}
@@ -136,7 +136,7 @@ export default function DataCardSelector({
                 slotProps={{
                   input: {
                     ...InputProps,
-                    ...(!formContext.editMode && { disableUnderline: true }),
+                    ...(!registry.formContext.editMode && { disableUnderline: true }),
                     'data-test': id,
                     'aria-label': `input field for ${label}`,
                     id: id,
@@ -147,7 +147,7 @@ export default function DataCardSelector({
           />
         </>
       )}
-      {formContext && !formContext.editMode && (
+      {registry.formContext && !registry.formContext.editMode && (
         <>
           <Typography fontWeight='bold' aria-label={`label for ${label}`}>
             {label}

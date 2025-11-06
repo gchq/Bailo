@@ -1,5 +1,5 @@
 import { Box, Button, darken, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
-import { grey } from '@mui/material/colors/'
+import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'

@@ -33,6 +33,7 @@ class Client:
         visibility: ModelVisibility | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
     ):
         """Create a model.
@@ -44,6 +45,7 @@ class Client:
         :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
+        :param tags: Tags to assign to the model, defaults to None
         :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
@@ -73,6 +75,7 @@ class Client:
                     "visibility": _visibility,
                     "organisation": organisation,
                     "state": state,
+                    "tags": tags,
                     "collaborators": collaborators,
                 }
             )
@@ -85,6 +88,7 @@ class Client:
                     "visibility": _visibility,
                     "organisation": organisation,
                     "state": state,
+                    "tags": tags,
                     "collaborators": collaborators,
                 }
             )
@@ -147,6 +151,7 @@ class Client:
         visibility: str | None = None,
         organisation: str | None = None,
         state: str | None = None,
+        tags: list[str] | None = None,
         collaborators: list[CollaboratorEntry] | None = None,
     ):
         """Update a specific model using its unique ID.
@@ -158,6 +163,7 @@ class Client:
         :param visibility: Enum to define model visibility (e.g public or private), defaults to None
         :param organisation: Organisation responsible for the model, defaults to None
         :param state: Development readiness of the model, defaults to None
+        :param tags: Tags to assign to the model, defaults to None
         :param collaborators: list of CollaboratorEntry to define who the model's collaborators (a.k.a. model access) are, defaults to None
         :return: JSON response object
         """
@@ -170,6 +176,7 @@ class Client:
                 "description": description,
                 "visibility": visibility,
                 "collaborators": collaborators,
+                "tags": tags,
             }
         )
 
