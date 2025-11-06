@@ -31,14 +31,11 @@ export function softDeletionPlugin(schema: Schema) {
   }
 
   schema.pre('find', function (next: CallbackWithoutResultAndOptionalError) {
-    if (this['_conditions'].deleted === undefined) {
-      next()
-    }
     if (this['_conditions'].deleted) {
       this.where('deleted').equals(this['_conditions'].deleted)
       next()
     } else {
-      this.where('deleted').equals(false)
+      this.or([{ deleted: null }, { deleted: false }])
       next()
     }
   })
@@ -48,7 +45,7 @@ export function softDeletionPlugin(schema: Schema) {
       this.where('deleted').equals(this['_conditions'].deleted)
       next()
     } else {
-      this.where('deleted').equals(false)
+      this.or([{ deleted: null }, { deleted: false }])
       next()
     }
   })
