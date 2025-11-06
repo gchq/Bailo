@@ -16,7 +16,7 @@ opensrc-bailols:
     - when: manual
       allow_failure: true
   image:
-    name: openjdk:26-ea-bookworm
+    name: openjdk:26-ea-oraclelinux9
   script:
     - microdnf install -y git wget
     - git clone --mirror "https://$OPENSRC_TOKEN_NAME:$OPENSRC_TOKEN@$OPENSRC_URL"
