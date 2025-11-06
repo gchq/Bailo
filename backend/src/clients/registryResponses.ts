@@ -36,6 +36,7 @@ type PutManifestResponse = {
 }
 
 type UploadLayerMonolithicResponse = PutManifestResponse
+type MountBlobResponse = PutManifestResponse
 
 type InitialiseUploadResponse = {
   'content-length': string
@@ -48,6 +49,8 @@ type InitialiseUploadResponse = {
 
 type DeleteImageResponse = {
   'content-length': string
+  date: string
+  'docker-distribution-api-version': string
 }
 
 export function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
@@ -122,6 +125,10 @@ export function isPutManifestResponse(resp: unknown): resp is PutManifestRespons
 }
 
 export function isUploadLayerMonolithicResponse(resp: unknown): resp is UploadLayerMonolithicResponse {
+  return isPutManifestResponse(resp)
+}
+
+export function isMountBlobResponse(resp: unknown): resp is MountBlobResponse {
   return isPutManifestResponse(resp)
 }
 

@@ -15,6 +15,7 @@ import {
   isInitialiseUploadObjectResponse,
   isListImageTagResponse,
   isListModelReposResponse,
+  isMountBlobResponse,
   isPutManifestResponse,
   isRegistryErrorResponse,
   isUploadLayerMonolithicResponse,
@@ -333,9 +334,7 @@ export async function mountBlob(
   destinationRepoRef: RepoRefInterface,
   blobDigest: string,
 ) {
-  // TODO: remove this disable when type check added
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { headers, body } = await registryRequest(
+  const { headers } = await registryRequest(
     token,
     `${destinationRepoRef.repository}/${destinationRepoRef.name}/blobs/uploads/?from=${sourceRepoRef.repository}/${sourceRepoRef.name}&mount=${blobDigest}`,
     false,
@@ -345,7 +344,18 @@ export async function mountBlob(
     { 'Content-Length': '0' },
   )
 
-  // TODO: type check
+  log.debug({ headers }, 'mountBlob headers')
+
+  if (!isMountBlobResponse(headers)) {
+    throw InternalError('Unrecognised response headers when deleting image.', {
+      headers,
+      sourceRepoRef,
+      destinationRepoRef,
+      blobDigest,
+    })
+  }
+
+  return headers
 }
 
 export async function deleteManifest(token: string, imageRef: ImageRefInterface) {

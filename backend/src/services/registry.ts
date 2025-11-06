@@ -13,7 +13,7 @@ import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
 import config from '../utils/config.js'
-import { Forbidden, InternalError } from '../utils/error.js'
+import { Forbidden, InternalError, NotFound } from '../utils/error.js'
 import log from './log.js'
 import { findAndDeleteImageFromReleases, getModelById } from './model.js'
 
@@ -114,7 +114,16 @@ export async function getImageBlob(user: UserInterface, repoRef: RepoRefInterfac
 }
 
 async function renameImage(user: UserInterface, source: ImageRefInterface, destination: ImageRefInterface) {
-  const manifest = await getImageManifest(user, source)
+  let manifest
+  try {
+    manifest = await getImageManifest(user, source)
+  } catch (err) {
+    // special case for 404 not found
+    if (err && isBailoError(err) && err?.context?.status === 404) {
+      throw NotFound('The requested image was not found.', { ...source })
+    }
+    throw err
+  }
 
   const allLayers = [manifest.body.config, ...manifest.body.layers]
   const multiRepositoryToken = await getAccessToken({ dn: user.dn }, [
