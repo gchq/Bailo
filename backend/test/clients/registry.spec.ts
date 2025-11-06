@@ -66,7 +66,7 @@ describe('clients > registry', () => {
 
     expect(fetchMock).toBeCalled()
     expect(fetchMock.mock.calls).toMatchSnapshot()
-    expect(response).toStrictEqual(mockManifest)
+    expect(response).toStrictEqual({ body: mockManifest, headers: { 'content-type': 'application/json' } })
   })
 
   test('getImageTagManifest > cannot reach registry', async () => {

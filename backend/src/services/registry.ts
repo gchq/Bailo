@@ -81,7 +81,6 @@ export async function listModelImages(user: UserInterface, modelId: string) {
 
   const registryToken = await getAccessToken({ dn: user.dn }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const repos = await listModelRepos(registryToken, modelId)
-  log.debug({ repos }, 'listModelRepos()=')
   return await Promise.all(
     repos.map(async (repo) => {
       const [repository, name] = repo.split(/\/(.*)/s)
@@ -185,7 +184,6 @@ async function renameImage(user: UserInterface, source: ImageRefInterface, desti
 
 export async function softDeleteImage(user: UserInterface, imageRef: ImageRefInterface) {
   const softDeleteNamespace = `${config.registry.softDeletePrefix}${imageRef.repository}`
-  log.debug({ softDeleteNamespace }, 'softDeleteNamespace=')
 
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 

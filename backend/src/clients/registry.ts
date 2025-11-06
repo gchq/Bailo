@@ -333,6 +333,8 @@ export async function mountBlob(
   destinationRepoRef: RepoRefInterface,
   blobDigest: string,
 ) {
+  // TODO: remove this disable when type check added
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { headers, body } = await registryRequest(
     token,
     `${destinationRepoRef.repository}/${destinationRepoRef.name}/blobs/uploads/?from=${sourceRepoRef.repository}/${sourceRepoRef.name}&mount=${blobDigest}`,
@@ -343,7 +345,7 @@ export async function mountBlob(
     { 'Content-Length': '0' },
   )
 
-  log.debug({ headers, body }, 'got response from POST')
+  // TODO: type check
 }
 
 export async function deleteManifest(token: string, imageRef: ImageRefInterface) {
