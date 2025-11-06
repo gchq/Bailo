@@ -1,6 +1,7 @@
 import { Validator } from 'jsonschema'
 import { Types } from 'mongoose'
 
+import { Roles } from '../connectors/authentication/Base.js'
 import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
@@ -20,7 +21,7 @@ import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
-import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
+import { createAccessRequestReviews, findReviews, removeAccessRequestReviews } from './review.js'
 import { getSchemaById } from './schema.js'
 import { sendWebhooks } from './webhook.js'
 
@@ -131,9 +132,26 @@ export async function getAccessRequestById(user: UserInterface, accessRequestId:
   return accessRequest
 }
 
-export async function findAccessRequest() {
-  const accessRequests = await AccessRequest.find({})
-  return accessRequests
+export async function findAccessRequest(user: UserInterface, adminAccess: boolean) {
+  const isAdmin = await authentication.hasRole(user, Roles.Admin)
+
+  // TODO: refactor nested if/else into one
+  if (adminAccess) {
+    if (isAdmin) {
+      // get all (non-deleted) access requests
+      const accessRequests = await AccessRequest.find({ deleted: false })
+      return accessRequests
+    } else {
+      throw Forbidden('error')
+    }
+  } else {
+    // extracting data in this fashion to make the data format consistent of just returning AccessRequest data only
+    const userReviews = await findReviews(user, true, true, undefined, undefined, undefined, 'access')
+    const accessRequestIds = userReviews.map((a) => a.accessRequestId)
+
+    const accessRequests = await AccessRequest.find({ id: accessRequestIds })
+    return accessRequests
+  }
 }
 
 export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
