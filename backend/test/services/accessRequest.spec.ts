@@ -4,6 +4,7 @@ import authorisation from '../../src/connectors/authorisation/index.js'
 import { UserInterface } from '../../src/models/User.js'
 import {
   createAccessRequest,
+  findAccessRequest,
   getAccessRequestsByModel,
   getCurrentUserPermissionsByAccessRequest,
   getModelAccessRequestsForUser,
@@ -22,6 +23,11 @@ const schemaMocks = vi.hoisted(() => ({
   getSchemaById: vi.fn(),
 }))
 vi.mock('../../src/services/schema.js', () => schemaMocks)
+
+const mockAuthentication = vi.hoisted(() => ({
+  hasRole: vi.fn(),
+}))
+vi.mock('../../src/connectors/authentication/index.js', async () => ({ default: mockAuthentication }))
 
 const accessRequestModelMocks = vi.hoisted(() => {
   const obj: any = {}
@@ -134,6 +140,23 @@ describe('services > accessRequest', () => {
     const accessRequests = await getAccessRequestsByModel({} as any, 'modelId')
     expect(accessRequests).toMatchSnapshot()
   })
+
+  test('findAccessRequest > admin success', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(true)
+
+    accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }, { _id: 'b' }])
+    const accessRequests = await findAccessRequest({} as any, true)
+    expect(accessRequests).toMatchSnapshot()
+  })
+
+  test('findAccessRequest > error', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(false)
+    await expect(() => findAccessRequest({} as any, true)).rejects.toThrowError(
+      /^You cannot view all access requests if you are not an admin./,
+    )
+  })
+
+  // TODO: case of regular user?
 
   test('removeAccessRequest > success', async () => {
     reviewModelMocks.find.mockResolvedValue([])
