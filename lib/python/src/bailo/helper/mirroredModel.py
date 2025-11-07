@@ -176,7 +176,6 @@ class MirroredModel(Entry):
                 model_id=model["id"],
                 name=model["name"],
                 description=model["description"],
-                sourceModelId=model["sourceModelId"],
                 collaborators=model["collaborators"],
                 organisation=model.get("organisation"),
                 state=model.get("state"),
