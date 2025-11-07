@@ -1,0 +1,78 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > model > searchModels > all filters 1`] = `
+[
+  [
+    {
+      "$text": {
+        "$search": "search",
+      },
+      "collaborators": {
+        "$elemMatch": {
+          "entity": {
+            "$in": [
+              "user",
+            ],
+          },
+          "roles": {
+            "$elemMatch": {
+              "$in": [
+                "development",
+              ],
+            },
+          },
+        },
+      },
+      "kind": {
+        "$all": "model",
+      },
+      "organisation": {
+        "$in": [
+          "mine",
+        ],
+      },
+      "state": {
+        "$in": [
+          "example organisation",
+        ],
+      },
+      "tags": {
+        "$all": [
+          "library",
+          "task",
+        ],
+      },
+    },
+    {
+      "__v": false,
+      "_id": false,
+      "card": false,
+      "deleted": false,
+      "deletedAt": false,
+      "deletedBy": false,
+      "settings": false,
+    },
+  ],
+]
+`;
+
+exports[`services > model > searchModels > no filters 1`] = `
+[
+  [
+    {
+      "kind": {
+        "$all": "model",
+      },
+    },
+    {
+      "__v": false,
+      "_id": false,
+      "card": false,
+      "deleted": false,
+      "deletedAt": false,
+      "deletedBy": false,
+      "settings": false,
+    },
+  ],
+]
+`;

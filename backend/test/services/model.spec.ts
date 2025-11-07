@@ -204,6 +204,7 @@ describe('services > model', () => {
     modelMocks.sort.mockResolvedValueOnce([])
 
     await searchModels(user, 'model', [], [], [], [], '', undefined)
+    expect(modelMocks.find.mock.calls).matchSnapshot()
   })
 
   test('searchModels > all filters', async () => {
@@ -220,6 +221,8 @@ describe('services > model', () => {
       'search',
       'task',
     )
+
+    expect(modelMocks.find.mock.calls).matchSnapshot()
   })
 
   test('searchModels > task no library', async () => {

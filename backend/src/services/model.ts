@@ -206,7 +206,7 @@ export async function searchModels(
     }
   }
 
-  const cursor = ModelModel
+  let cursor = ModelModel
     // Find only matching documents
     .find(query, {
       settings: false,
@@ -217,7 +217,7 @@ export async function searchModels(
       deletedBy: false,
       deletedAt: false,
     })
-  cursor.sort(sort)
+  cursor = cursor.sort(sort)
 
   const results = await cursor
   //Auth already checked, so just need to check if they require admin access
