@@ -86,6 +86,7 @@ import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
 import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
+import { getCommonTags } from './routes/v2/model/tags/getCommonTags.js'
 
 export const server = express()
 
@@ -225,6 +226,8 @@ server.get('/api/v2/review/roles', ...getReviewRoles)
 server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
 server.post('/api/v2/review/role', ...postReviewRole)
 server.put('/api/v2/review/role/:shortName', ...putReviewRole)
+
+server.get('/api/v2/tags', getCommonTags)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

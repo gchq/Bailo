@@ -24,7 +24,7 @@ import {
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { useListModels } from 'actions/model'
+import { getGetCommonModelTags, useListModels } from 'actions/model'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
@@ -101,6 +101,7 @@ export default function Marketplace() {
   )
 
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
+  const { tags, isTagsLoading, isTagsError } = getGetCommonModelTags()
 
   const theme = useTheme()
   const router = useRouter()
@@ -204,14 +205,6 @@ export default function Marketplace() {
     [updateQueryParams],
   )
 
-  const handleTaskOnChange = useCallback(
-    (task: string) => {
-      setSelectedTask(task)
-      updateQueryParams('task', task)
-    },
-    [updateQueryParams],
-  )
-
   const handleLibrariesOnChange = useCallback(
     (libraries: string[]) => {
       setSelectedLibraries(libraries as string[])
@@ -256,7 +249,7 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isReviewRolesLoading || isUiConfigLoading) {
+  if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading) {
     return <Loading />
   }
 
@@ -266,6 +259,10 @@ export default function Marketplace() {
 
   if (isUiConfigError) {
     return <ErrorWrapper message={isUiConfigError.info.message} />
+  }
+
+  if (isTagsError) {
+    return <ErrorWrapper message={isTagsError.info.message} />
   }
 
   return (
@@ -346,31 +343,9 @@ export default function Marketplace() {
                 )}
                 <Box>
                   <ChipSelector
-                    label='Tasks'
-                    chipTooltipTitle={'Filter by task'}
-                    // TODO fetch all model tags
-                    options={[
-                      'Translation',
-                      'Image Classification',
-                      'Summarization',
-                      'Tokenisation',
-                      'Text to Speech',
-                      'Tabular Regression',
-                    ]}
-                    expandThreshold={10}
-                    selectedChips={selectedTask}
-                    onChange={handleTaskOnChange}
-                    size='small'
-                    ariaLabel='add task to search filter'
-                    accordion
-                  />
-                </Box>
-                <Box>
-                  <ChipSelector
-                    label='Libraries'
-                    chipTooltipTitle={'Filter by library'}
-                    // TODO fetch all model libraries
-                    options={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
+                    label='Popular Tags'
+                    chipTooltipTitle={'Filter by frequently used tags'}
+                    options={tags}
                     expandThreshold={10}
                     multiple
                     selectedChips={selectedLibraries}

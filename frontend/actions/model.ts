@@ -201,3 +201,19 @@ export async function postModelExportToS3(id: string, modelExport: ModelExportRe
     body: JSON.stringify(modelExport),
   })
 }
+
+export function getGetCommonModelTags() {
+  const { data, isLoading, error, mutate } = useSWR<
+    {
+      tags: string[]
+    },
+    ErrorInfo
+  >('/api/v2/tags', fetcher)
+
+  return {
+    mutateTags: mutate,
+    tags: data ? data.tags : [],
+    isTagsLoading: isLoading,
+    isTagsError: error,
+  }
+}
