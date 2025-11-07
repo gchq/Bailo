@@ -328,7 +328,7 @@ describe('services > file', () => {
     vi.mocked(fileModelMocks.findById).mockResolvedValue()
 
     await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrowError(
-      /^Specified file could not be found./,
+      /^The requested file was not found./,
     )
   })
 
