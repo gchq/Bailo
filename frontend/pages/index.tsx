@@ -134,7 +134,7 @@ export default function Marketplace() {
       }
       setSelectedStates([...statesAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery, statesFromQuery])
+  }, [filterFromQuery, taskFromQuery, tagsFromQuery, organisationsFromQuery, statesFromQuery])
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
