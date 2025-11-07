@@ -344,8 +344,6 @@ export async function mountBlob(
     { 'Content-Length': '0' },
   )
 
-  log.debug({ headers }, 'mountBlob headers')
-
   if (!isMountBlobResponse(headers)) {
     throw InternalError('Unrecognised response headers when mounting a blob.', {
       headers,
