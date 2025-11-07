@@ -51,7 +51,6 @@ interface PostMultipartUploadPart {
 export const postMultipartUploadPart = [
   async (req: Request, res: Response<PostMultipartUploadPart>): Promise<void> => {
     req.audit = AuditInfo.CreateFile
-    // Does user have permission to upload a file?
     const {
       params: { modelId },
       query: { fileId, uploadId, partNumber },

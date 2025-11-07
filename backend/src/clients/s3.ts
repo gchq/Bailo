@@ -106,7 +106,7 @@ export async function putObjectPartStream(
       ContentLength: bodySize,
     })
     const upload = await client.send(command)
-    if (!upload || upload.ETag === undefined) {
+    if (!upload || !upload.ETag) {
       throw InternalError('Failed to Upload Part.', { key, bucket, uploadId, partNumber, upload })
     }
     log.debug({ key, bucket, uploadId, partNumber }, 'Upload part completed.')

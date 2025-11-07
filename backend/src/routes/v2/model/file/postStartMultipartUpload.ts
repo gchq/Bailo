@@ -57,7 +57,6 @@ export const postStartMultipartUpload = [
   bodyParser.json(),
   async (req: Request, res: Response<PostStartMultipartUpload>): Promise<void> => {
     req.audit = AuditInfo.CreateFile
-    // Does user have permission to upload a file?
     const {
       params: { modelId },
       body: { name, mime, size, tags },

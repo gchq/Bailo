@@ -169,11 +169,7 @@ export async function uploadMultipartFilePart(
   stream: Readable,
   bodySize: number,
 ) {
-  const file = await FileModel.findById(fileId)
-  if (!file) {
-    throw BadReq('Specified file could not be found.', { fileId })
-  }
-
+  const file = await getFileById(user, fileId)
   const model = await getModelById(user, modelId)
 
   const auth = await authorisation.file(user, model, file, FileAction.Upload)
@@ -194,7 +190,7 @@ export async function finishUploadMultipartFile(
 ) {
   const file = await FileModel.findById(fileId)
   if (!file) {
-    throw BadReq('Specified file could not be found.', { fileId })
+    throw NotFound('The requested file was not found.', { fileId })
   }
 
   const model = await getModelById(user, modelId)
