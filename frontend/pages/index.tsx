@@ -24,7 +24,7 @@ import {
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { getGetCommonModelTags, useListModels } from 'actions/model'
+import { useGetPopularEntryTags, useListModels } from 'actions/model'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
@@ -48,16 +48,14 @@ interface KeyAndLabel {
 const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Any role' }]
 
 export default function Marketplace() {
-  // TODO - fetch model tags from API
   const [filter, setFilter] = useState('')
-  const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
-  const [selectedTask, setSelectedTask] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
   const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [mirroredModelsOnly, setMirroredModelsOnly] = useState(false)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -65,8 +63,8 @@ export default function Marketplace() {
   const { models, isModelsError, isModelsLoading } = useListModels(
     EntryKind.MODEL,
     selectedRoles,
-    selectedTask,
-    selectedLibraries,
+    '',
+    selectedTags,
     selectedOrganisations,
     selectedStates,
     debouncedFilter,
@@ -76,15 +74,7 @@ export default function Marketplace() {
     models: dataCards,
     isModelsError: isDataCardsError,
     isModelsLoading: isDataCardsLoading,
-  } = useListModels(
-    EntryKind.DATA_CARD,
-    selectedRoles,
-    selectedTask,
-    selectedLibraries,
-    selectedOrganisations,
-    selectedStates,
-    debouncedFilter,
-  )
+  } = useListModels(EntryKind.DATA_CARD, selectedRoles, '', [], selectedOrganisations, selectedStates, debouncedFilter)
 
   const {
     models: mirroredModels,
@@ -93,15 +83,15 @@ export default function Marketplace() {
   } = useListModels(
     EntryKind.MIRRORED_MODEL,
     selectedRoles,
-    selectedTask,
-    selectedLibraries,
+    '',
+    selectedTags,
     selectedOrganisations,
     selectedStates,
     debouncedFilter,
   )
 
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
-  const { tags, isTagsLoading, isTagsError } = getGetCommonModelTags()
+  const { tags, isTagsLoading, isTagsError } = useGetPopularEntryTags()
 
   const theme = useTheme()
   const router = useRouter()
@@ -112,19 +102,19 @@ export default function Marketplace() {
     libraries: librariesFromQuery,
     organisations: organisationsFromQuery,
     states: statesFromQuery,
+    tags: tagsFromQuery,
   } = router.query
 
   useEffect(() => {
     if (filterFromQuery) setFilter(filterFromQuery as string)
-    if (taskFromQuery) setSelectedTask(taskFromQuery as string)
-    if (librariesFromQuery) {
-      let librariesAsArray: string[] = []
-      if (typeof librariesFromQuery === 'string') {
-        librariesAsArray.push(librariesFromQuery)
+    if (tagsFromQuery) {
+      let tagsAsArray: string[] = []
+      if (typeof tagsFromQuery === 'string') {
+        tagsAsArray.push(tagsFromQuery)
       } else {
-        librariesAsArray = [...librariesFromQuery]
+        tagsAsArray = [...tagsFromQuery]
       }
-      setSelectedLibraries([...librariesAsArray])
+      setSelectedTags([...tagsAsArray])
     }
     if (organisationsFromQuery) {
       let organisationsAsArray: string[] = []
@@ -205,10 +195,10 @@ export default function Marketplace() {
     [updateQueryParams],
   )
 
-  const handleLibrariesOnChange = useCallback(
-    (libraries: string[]) => {
-      setSelectedLibraries(libraries as string[])
-      updateQueryParams('libraries', libraries)
+  const handlePopularTagsOnChange = useCallback(
+    (selectedTags: string[]) => {
+      setSelectedTags(selectedTags as string[])
+      updateQueryParams('tags', selectedTags)
     },
     [updateQueryParams],
   )
@@ -218,9 +208,8 @@ export default function Marketplace() {
   }
 
   const handleResetFilters = () => {
-    setSelectedTask('')
-    setSelectedLibraries([])
     setSelectedOrganisations([])
+    setSelectedTags([])
     setSelectedStates([])
     setSelectedRoles([])
     setFilter('')
@@ -348,8 +337,8 @@ export default function Marketplace() {
                     options={tags}
                     expandThreshold={10}
                     multiple
-                    selectedChips={selectedLibraries}
-                    onChange={handleLibrariesOnChange}
+                    selectedChips={selectedTags}
+                    onChange={handlePopularTagsOnChange}
                     size='small'
                     ariaLabel='add library to search filter'
                     accordion
@@ -412,8 +401,8 @@ export default function Marketplace() {
                   <EntryList
                     entries={mirroredModelsOnly ? mirroredModels : [...models, ...mirroredModels]}
                     entriesErrorMessage={combinedModelErrorMessage || ''}
-                    selectedChips={selectedLibraries}
-                    onSelectedChipsChange={handleLibrariesOnChange}
+                    selectedChips={selectedTags}
+                    onSelectedChipsChange={handlePopularTagsOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}
@@ -428,8 +417,8 @@ export default function Marketplace() {
                   <EntryList
                     entries={dataCards}
                     entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
-                    selectedChips={selectedLibraries}
-                    onSelectedChipsChange={handleLibrariesOnChange}
+                    selectedChips={selectedTags}
+                    onSelectedChipsChange={handlePopularTagsOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}

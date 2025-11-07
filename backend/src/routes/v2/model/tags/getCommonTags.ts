@@ -1,11 +1,9 @@
 import { Request, Response } from 'express'
 import { z } from 'zod'
 
-import { registerPath } from '../../../../services/specification.js'
-import config from '../../../../utils/config.js'
-import { NotFound } from '../../../../utils/result.js'
-import { parse } from '../../../../utils/validate.js'
 import { commonTagsForEntries } from '../../../../services/model.js'
+import { registerPath } from '../../../../services/specification.js'
+import { parse } from '../../../../utils/validate.js'
 
 export const getCommonTagsSchema = z.object({})
 

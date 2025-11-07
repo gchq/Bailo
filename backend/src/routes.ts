@@ -49,6 +49,7 @@ import { postModel } from './routes/v2/model/postModel.js'
 import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
 import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
+import { getCommonTags } from './routes/v2/model/tags/getCommonTags.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
 import { getWebhooks } from './routes/v2/model/webhook/getWebhooks.js'
 import { postWebhook } from './routes/v2/model/webhook/postWebhook.js'
@@ -86,7 +87,6 @@ import { getUserTokens } from './routes/v2/user/getUserTokens.js'
 import { postUserToken } from './routes/v2/user/postUserToken.js'
 import { generateSwaggerSpec } from './services/specification.js'
 import config from './utils/config.js'
-import { getCommonTags } from './routes/v2/model/tags/getCommonTags.js'
 
 export const server = express()
 

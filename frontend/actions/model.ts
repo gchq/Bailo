@@ -202,7 +202,7 @@ export async function postModelExportToS3(id: string, modelExport: ModelExportRe
   })
 }
 
-export function getGetCommonModelTags() {
+export function useGetPopularEntryTags() {
   const { data, isLoading, error, mutate } = useSWR<
     {
       tags: string[]
