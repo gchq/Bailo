@@ -21,7 +21,7 @@ import {
   Tab,
   Tabs,
   Typography,
-} from '@mui/material/'
+} from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
