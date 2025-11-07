@@ -135,15 +135,11 @@ export async function getAccessRequestById(user: UserInterface, accessRequestId:
 export async function findAccessRequest(user: UserInterface, adminAccess: boolean) {
   const isAdmin = await authentication.hasRole(user, Roles.Admin)
 
-  // TODO: refactor nested if/else into one
-  if (adminAccess) {
-    if (isAdmin) {
-      // get all (non-deleted) access requests
-      const accessRequests = await AccessRequest.find({ deleted: false })
-      return accessRequests
-    } else {
-      throw Forbidden('error')
-    }
+  if (adminAccess && isAdmin) {
+    const accessRequests = await AccessRequest.find({ deleted: false })
+    return accessRequests
+  } else if (adminAccess && !isAdmin) {
+    throw Forbidden('You cannot view all access requests if you are not an admin.')
   } else {
     // extracting data in this fashion to make the data format consistent of just returning AccessRequest data only
     const userReviews = await findReviews(user, true, true, undefined, undefined, undefined, 'access')
