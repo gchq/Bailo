@@ -21,6 +21,7 @@ export const getModelsSearchSchema = z.object({
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
     adminAccess: strictCoerceBoolean(z.boolean().optional()),
+    titleOnly: strictCoerceBoolean(z.boolean().optional()),
   }),
 })
 
@@ -66,7 +67,6 @@ export interface ModelSearchResult {
   collaborators: Array<CollaboratorEntry>
   createdAt: Date
   updatedAt: Date
-  sourceModelId?: string
 }
 
 interface GetModelsResponse {
@@ -77,7 +77,19 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states, adminAccess },
+      query: {
+        kind,
+        libraries,
+        filters,
+        search,
+        task,
+        allowTemplating,
+        schemaId,
+        organisations,
+        states,
+        adminAccess,
+        titleOnly,
+      },
     } = parse(req, getModelsSearchSchema)
 
     const models = await searchModels(
@@ -92,6 +104,7 @@ export const getModelsSearch = [
       allowTemplating,
       schemaId,
       adminAccess,
+      titleOnly,
     )
 
     await audit.onSearchModel(req, models)
