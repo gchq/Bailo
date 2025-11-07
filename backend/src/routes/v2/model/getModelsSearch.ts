@@ -28,7 +28,7 @@ registerPath({
   method: 'get',
   path: '/api/v2/models/search',
   tags: ['model'],
-  description: 'Search through models',
+  description: 'Search models',
   schema: getModelsSearchSchema,
   responses: {
     200: {
@@ -80,7 +80,7 @@ export const getModelsSearch = [
       query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states, adminAccess },
     } = parse(req, getModelsSearchSchema)
 
-    const foundModels = await searchModels(
+    const models = await searchModels(
       req.user,
       kind as EntryKindKeys,
       libraries,
@@ -93,20 +93,6 @@ export const getModelsSearch = [
       schemaId,
       adminAccess,
     )
-    const models = foundModels.map((model) => ({
-      id: model.id,
-      name: model.name,
-      description: model.description,
-      tags: model.tags,
-      kind: model.kind,
-      organisation: model.organisation,
-      state: model.state,
-      collaborators: model.collaborators,
-      visibility: model.visibility,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-      sourceModelId: model.settings?.mirror?.sourceModelId,
-    }))
 
     await audit.onSearchModel(req, models)
 

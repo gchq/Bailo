@@ -131,7 +131,7 @@ export async function searchModels(
   allowTemplating?: boolean,
   schemaId?: string,
   adminAccess?: boolean,
-): Promise<Array<ModelInterface>> {
+): Promise<Array<Omit<ModelInterface, 'settings' | 'card' | 'deleted'>>> {
   if (adminAccess) {
     if (!(await authentication.hasRole(user, Roles.Admin))) {
       throw Forbidden('You do not have the required role.', {
@@ -198,7 +198,15 @@ export async function searchModels(
 
   let cursor = ModelModel
     // Find only matching documents
-    .find(query)
+    .find(query, {
+      settings: false,
+      card: false,
+      deleted: false,
+      _id: false,
+      __v: false,
+      deletedBy: false,
+      deletedAt: false,
+    })
 
   if (!search) {
     // Sort by last updated
