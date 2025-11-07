@@ -203,7 +203,6 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
 
 export async function softDeleteImage(user: UserInterface, imageRef: ImageRefInterface) {
   const softDeleteNamespace = `${config.registry.softDeletePrefix}${imageRef.repository}`
-
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
   await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef)
