@@ -41,6 +41,7 @@ export default function EntryListDialog({ open = false, onClose, schema }: Schem
     '',
     undefined,
     schema.id,
+    true,
   )
 
   const entryList = useMemo(
