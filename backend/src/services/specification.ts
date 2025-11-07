@@ -79,9 +79,7 @@ export const modelCardInterfaceSchema = z.object({
   version: z.number().openapi({ example: 5 }),
   createdBy: z.string().openapi({ example: 'user' }),
   metadata: z.object({
-    overview: z.object({
-      tags: z.array(z.string()).openapi({ example: ['tag', 'tagb'] }),
-    }),
+    overview: z.object({}),
   }),
 })
 
@@ -91,9 +89,7 @@ export const modelCardRevisionInterfaceSchema = z.object({
 
   version: z.number().openapi({ example: 5 }),
   metadata: z.object({
-    overview: z.object({
-      tags: z.array(z.string()).openapi({ example: ['tag', 'tagb'] }),
-    }),
+    overview: z.object({}),
   }),
 
   createdBy: z.string().openapi({ example: 'user' }),
@@ -107,6 +103,9 @@ export const modelInterfaceSchema = z.object({
   name: z.string().openapi({ example: 'Yolo v4' }),
   kind: z.string().openapi({ example: 'model' }),
   description: z.string().openapi({ example: 'You only look once' }),
+  organisation: z.string().openapi({ example: 'Acme Corp' }),
+  state: z.string().openapi({ example: 'development' }),
+  tags: z.array(z.string()).openapi({ example: ['tag', 'tagb'] }),
   card: modelCardInterfaceSchema,
 
   collaborators: z.array(

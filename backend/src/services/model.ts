@@ -2,6 +2,7 @@ import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
 import { Optional } from 'utility-types'
 
+import { Roles } from '../connectors/authentication/Base.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
@@ -129,7 +130,17 @@ export async function searchModels(
   task?: string,
   allowTemplating?: boolean,
   schemaId?: string,
+  adminAccess?: boolean,
 ): Promise<Array<ModelInterface>> {
+  if (adminAccess) {
+    if (!(await authentication.hasRole(user, Roles.Admin))) {
+      throw Forbidden('You do not have the required role.', {
+        userDn: user.dn,
+        requiredRole: Roles.Admin,
+      })
+    }
+  }
+
   const query: any = {}
 
   if (kind) {
@@ -198,6 +209,10 @@ export async function searchModels(
   }
 
   const results = await cursor
+  //Auth already checked, so just need to check if they require admin access
+  if (adminAccess) {
+    return results
+  }
   const auths = await authorisation.models(user, results, ModelAction.View)
   return results.filter((_, i) => auths[i].success)
 }

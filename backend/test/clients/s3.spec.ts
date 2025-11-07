@@ -28,11 +28,6 @@ const s3Mocks = vi.hoisted(() => {
 })
 vi.mock('@aws-sdk/client-s3', () => s3Mocks)
 
-const s3RequestPresignerMocks = vi.hoisted(() => ({
-  getSignedUrl: vi.fn(() => 'https://test.com/presigned/url'),
-}))
-vi.mock('@aws-sdk/s3-request-presigner', () => s3RequestPresignerMocks)
-
 const s3UploadMocks = vi.hoisted(() => {
   return {
     Upload: vi.fn(() => ({ on: vi.fn(), done: vi.fn() })),

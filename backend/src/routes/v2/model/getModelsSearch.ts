@@ -20,6 +20,7 @@ export const getModelsSearchSchema = z.object({
     search: z.string().optional().default(''),
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
+    adminAccess: strictCoerceBoolean(z.boolean().optional()),
   }),
 })
 
@@ -44,6 +45,7 @@ registerPath({
                 kind: z.string().openapi({ example: EntryKind.Model }),
                 allowTemplating: z.boolean().openapi({ example: true }),
                 schemaId: z.string().optional(),
+                adminAccess: z.boolean().optional(),
               }),
             ),
           }),
@@ -64,6 +66,7 @@ export interface ModelSearchResult {
   collaborators: Array<CollaboratorEntry>
   createdAt: Date
   updatedAt: Date
+  sourceModelId?: string
 }
 
 interface GetModelsResponse {
@@ -74,7 +77,7 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states },
+      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states, adminAccess },
     } = parse(req, getModelsSearchSchema)
 
     const foundModels = await searchModels(
@@ -88,6 +91,7 @@ export const getModelsSearch = [
       task,
       allowTemplating,
       schemaId,
+      adminAccess,
     )
     const models = foundModels.map((model) => ({
       id: model.id,
@@ -98,8 +102,10 @@ export const getModelsSearch = [
       organisation: model.organisation,
       state: model.state,
       collaborators: model.collaborators,
+      visibility: model.visibility,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
+      sourceModelId: model.settings?.mirror?.sourceModelId,
     }))
 
     await audit.onSearchModel(req, models)

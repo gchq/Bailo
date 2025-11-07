@@ -1,5 +1,5 @@
 import { LocalOffer } from '@mui/icons-material'
-import { Button, Chip, Grid2, TextField, Tooltip, Typography } from '@mui/material'
+import { Button, Chip, Grid, TextField, Tooltip, Typography } from '@mui/material'
 import prettyBytes from 'pretty-bytes'
 import { ChangeEvent, useCallback, useState } from 'react'
 import Restricted from 'src/common/Restricted'
@@ -48,8 +48,8 @@ export default function FileToBeUploaded({
   )
 
   return (
-    <Grid2 container spacing={1} alignItems='center'>
-      <Grid2 size='auto'>
+    <Grid container spacing={1} alignItems='center'>
+      <Grid size='auto'>
         <Tooltip title={fileWithMetadata.file.name}>
           <Chip
             color='primary'
@@ -57,8 +57,8 @@ export default function FileToBeUploaded({
             onDelete={() => onDelete(fileWithMetadata.file.name)}
           />
         </Tooltip>
-      </Grid2>
-      <Grid2 size={{ xs: 7 }}>
+      </Grid>
+      <Grid size={{ xs: 7 }}>
         <Restricted action='editEntry' fallback={<></>}>
           <Button
             sx={{ width: 'fit-content' }}
@@ -79,10 +79,10 @@ export default function FileToBeUploaded({
         {showMetaDataInput && (
           <TextField size='small' value={fileWithMetadata.metadata?.text} onChange={handleMetadataTextOnChange} />
         )}
-      </Grid2>
-      <Grid2 size={{ xs: 1 }} textAlign='right'>
+      </Grid>
+      <Grid size={{ xs: 1 }} textAlign='right'>
         <Typography variant='caption'>{prettyBytes(fileWithMetadata.file.size)}</Typography>
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   )
 }

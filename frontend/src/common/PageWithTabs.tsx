@@ -1,5 +1,5 @@
 import { Box, Button, darken, Divider, Stack, Tab, Tabs, Tooltip, Typography } from '@mui/material'
-import { grey } from '@mui/material/colors/'
+import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
@@ -28,7 +28,6 @@ interface PageWithTabsProps {
   requiredUrlParams?: ParsedUrlQuery
   titleToCopy?: string
   subheadingToCopy?: string
-  sourceModelId?: string
   additionalHeaderDisplay?: ReactElement
 }
 
@@ -43,7 +42,6 @@ export default function PageWithTabs({
   requiredUrlParams = {},
   titleToCopy = '',
   subheadingToCopy = '',
-  sourceModelId = '',
   additionalHeaderDisplay,
 }: PageWithTabsProps) {
   const router = useRouter()
@@ -166,7 +164,6 @@ export default function PageWithTabs({
             {actionButtonTitle}
           </Button>
         )}
-        {sourceModelId && <Typography fontWeight='bold'>Mirrored from {sourceModelId} (read-only)</Typography>}
         {additionalHeaderDisplay}
       </Stack>
       <Typography sx={{ pl: 2, pb: 1, textOverflow: 'ellipsis', overflow: 'hidden' }}>{additionalInfo}</Typography>
