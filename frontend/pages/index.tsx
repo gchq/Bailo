@@ -99,7 +99,6 @@ export default function Marketplace() {
   const {
     filter: filterFromQuery,
     task: taskFromQuery,
-    libraries: librariesFromQuery,
     organisations: organisationsFromQuery,
     states: statesFromQuery,
     tags: tagsFromQuery,

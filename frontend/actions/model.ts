@@ -38,7 +38,7 @@ export interface ModelExportRequest {
 //This is tech debt that is repeating throughout this file and other parts of the codebase.
 export function useListModels(
   kind?: EntryKindKeys,
-  filters: string[] = [],
+  roles: string[] = [],
   task = '',
   libraries: string[] = [],
   organisations: string[] = [],
@@ -50,7 +50,7 @@ export function useListModels(
 ) {
   const queryParams = {
     ...(kind && { kind }),
-    ...(filters.length > 0 && { filters }),
+    ...(roles.length > 0 && { filters: roles }),
     ...(task && { task }),
     ...(libraries.length > 0 && { libraries }),
     ...(organisations.length > 0 && { organisations }),
