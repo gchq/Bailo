@@ -13,6 +13,7 @@ import {
   getModelById,
   getModelCardRevision,
   isModelCardRevisionDoc,
+  popularTagsForEntries,
   saveImportedModelCard,
   searchModels,
   setLatestImportedModelCard,
@@ -610,5 +611,11 @@ describe('services > model', () => {
 
     expect(modelMocks.findOne).toBeCalled()
     expect(permissions).toEqual(mockPermissions)
+  })
+
+  test('popularTagsForEntries > returns a list of tags', async () => {
+    modelMocks.aggregate.mockResolvedValueOnce([{ _id: 'test-tag1' }])
+    const tags = await popularTagsForEntries()
+    expect(tags).toEqual(['test-tag'])
   })
 })
