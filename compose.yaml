@@ -24,11 +24,11 @@ services:
       - source: mongod_keyfile
         target: /etc/mongod.keyfile
         mode: 0400
-        uid: "999"
-        gid: "999"
+        uid: '999'
+        gid: '999'
     command:
-      - "-f"
-      - "/etc/mongod.conf"
+      - '-f'
+      - '/etc/mongod.conf'
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
