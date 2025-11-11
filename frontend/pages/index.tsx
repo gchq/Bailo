@@ -257,8 +257,8 @@ export default function Marketplace() {
     <>
       <Title text='Marketplace' />
       <Container maxWidth='xl'>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <Stack spacing={2} sx={{ maxWidth: '300px' }}>
+        <Stack direction={{ sm: 'column', md: 'row' }} spacing={2}>
+          <Stack spacing={2} sx={{ maxWidth: { sm: '100%', md: '300px' } }}>
             <Button component={Link} href='/entry/new' variant='contained'>
               Create
             </Button>
@@ -273,7 +273,7 @@ export default function Marketplace() {
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  maxWidth: '400px',
+                  maxWidth: { sm: 'unset', md: '400px' },
                   mb: 3,
                   my: 2,
                 }}
@@ -282,7 +282,7 @@ export default function Marketplace() {
               >
                 <InputLabel htmlFor='entry-filter-input'>Advanced Search</InputLabel>
                 <FilledInput
-                  sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2 }}
+                  sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2, width: '100%' }}
                   id='entry-filter-input'
                   value={filter}
                   disableUnderline
@@ -381,7 +381,13 @@ export default function Marketplace() {
           <Box sx={{ overflow: 'hidden', width: '100%' }}>
             <Paper>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }} data-test='indexPageTabs'>
-                <Tabs value={selectedTab} indicatorColor='secondary'>
+                <Tabs
+                  value={selectedTab}
+                  indicatorColor='secondary'
+                  allowScrollButtonsMobile
+                  scrollButtons='auto'
+                  variant='scrollable'
+                >
                   <Tab
                     label={`Models ${models ? `(${models.length})` : ''}`}
                     value={EntryKind.MODEL}
