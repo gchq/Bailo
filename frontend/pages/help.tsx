@@ -37,7 +37,7 @@ export default function Help() {
           <Grid container spacing={4}>
             <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
-                <CardContent sx={{ height: 320 }}>
+                <CardContent sx={{ minHeight: '320px' }}>
                   <BugReportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
                   <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Bug reports
@@ -60,7 +60,7 @@ export default function Help() {
             </Grid>
             <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
-                <CardContent sx={{ height: 320 }}>
+                <CardContent sx={{ minHeight: '320px' }}>
                   <ArticleIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
                   <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Documentation
@@ -80,7 +80,7 @@ export default function Help() {
             </Grid>
             <Grid size={{ xs: 12, sm: 12, md: 12, lg: 4 }}>
               <Card sx={{ textAlign: 'center', margin: 'auto', maxWidth: 550 }}>
-                <CardContent sx={{ height: 320 }}>
+                <CardContent sx={{ minHeight: '320px' }}>
                   <ContactSupportIcon sx={{ pt: 2, fontSize: 75 }} color='primary' />
                   <Typography sx={{ p: 2 }} variant='h4' component='h2' color='primary'>
                     Get in touch
