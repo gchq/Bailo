@@ -21,18 +21,23 @@ import {
 } from '@mui/material'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import { useTheme } from '@mui/material/styles'
-import { postSchemaMigration } from 'actions/schemaMigration'
-import { useRouter } from 'next/router'
-import React from 'react'
+import React, { Dispatch, SetStateAction } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
 import { CombinedSchema, QuestionMigration } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
 import { truncateText } from 'utils/stringUtils'
 
 interface SchemaMigratorProps {
   sourceSchema: CombinedSchema
   targetSchema: CombinedSchema
+  questionMigrations: QuestionMigration[]
+  setQuestionMigrations: Dispatch<SetStateAction<QuestionMigration[]>>
+  handleSubmitMigrationPlan: (draft: boolean) => void
+  submitErrorText: string
+  migrationName: string
+  setMigrationName: Dispatch<SetStateAction<string>>
+  migrationDescription: string
+  setMigrationDescription: Dispatch<SetStateAction<string>>
 }
 
 export const MigrationKind = {
@@ -41,29 +46,37 @@ export const MigrationKind = {
 } as const
 export type MigrationKindKeys = (typeof MigrationKind)[keyof typeof MigrationKind]
 
-export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMigratorProps) {
+export default function SchemaMigrator({
+  sourceSchema,
+  targetSchema,
+  questionMigrations,
+  setQuestionMigrations,
+  handleSubmitMigrationPlan,
+  submitErrorText = '',
+  migrationName,
+  setMigrationName,
+  migrationDescription,
+  setMigrationDescription,
+}: SchemaMigratorProps) {
   const [sourceSchemaQuestion, setSourceSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
   const [targetSchemaQuestion, setTargetSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
-  const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
   const [questionMigrationKind, setQuestionMigrationKind] = useState<MigrationKindKeys>(MigrationKind.MOVE)
   const [actionErrorText, setActionErrorText] = useState('')
-  const [submitErrorText, setSubmitErrorText] = useState('')
+  const [draft, setDraft] = useState(false)
+
   const [isSourceSchemaActive, setIsSourceSchemaActive] = useState(false)
   const [isTargetSchemaActive, setIsTargetSchemaActive] = useState(false)
-  const [migrationName, setMigrationName] = useState('')
-  const [migrationDescription, setMigrationDescription] = useState('')
-  const [draft, setDraft] = useState(false)
+
   const [open, setOpen] = React.useState(false)
   const anchorRef = React.useRef<HTMLDivElement>(null)
 
   const theme = useTheme()
-  const router = useRouter()
 
   const handleRemoveActionItem = useCallback(
     (action: QuestionMigration) => {
       setQuestionMigrations(questionMigrations.filter((questionMigration) => questionMigration.id !== action.id))
     },
-    [questionMigrations],
+    [questionMigrations, setQuestionMigrations],
   )
 
   const handleToggle = () => {
@@ -213,29 +226,6 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     }
   }
 
-  const handleSubmitMigrationPlan = async () => {
-    setSubmitErrorText('')
-    if (migrationName === '') {
-      return setSubmitErrorText('You must set a name for this migration plan')
-    }
-    if (questionMigrations.length === 0) {
-      return setSubmitErrorText('You must have at least one action before submitting a migration plan.')
-    }
-    const res = await postSchemaMigration({
-      name: migrationName,
-      description: migrationDescription,
-      sourceSchema: sourceSchema.schema.id,
-      targetSchema: targetSchema.schema.id,
-      questionMigrations: questionMigrations,
-      draft: draft,
-    })
-    if (!res.ok) {
-      setSubmitErrorText(await getErrorMessage(res))
-    } else {
-      router.push('/schemas/list?tab=migrations')
-    }
-  }
-
   return (
     <>
       <Grid container spacing={2}>
@@ -326,7 +316,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 </Stack>
                 <ClickAwayListener onClickAway={handleClose}>
                   <ButtonGroup ref={anchorRef} variant='contained' color='primary'>
-                    <Button onClick={handleSubmitMigrationPlan} aria-label='submit migration plan'>
+                    <Button onClick={() => handleSubmitMigrationPlan(draft)} aria-label='submit migration plan'>
                       {draft ? 'Draft migration Plan' : 'Submit migration plan'}
                     </Button>
                     <Button size='small' onClick={handleToggle}>

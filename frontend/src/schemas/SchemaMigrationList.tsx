@@ -15,7 +15,8 @@ export default function SchemaMigrationList() {
     <Stack sx={{ p: 2 }} spacing={1}>
       <Stack direction='row' spacing={2} justifyContent='space-between'>
         <Typography fontWeight='bold' color='primary' variant='h6'>
-          {data[index].name}
+          {`${data[index].name}`}
+          <span style={{ color: 'gray', fontStyle: 'italic' }}>{` ${data[index].draft ? '(draft)' : ''}`}</span>
         </Typography>
         <Typography>
           Created on <span style={{ fontWeight: 'bold' }}>{formatDateString(data[index].createdAt)}</span>
