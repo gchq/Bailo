@@ -339,7 +339,7 @@ export default function Marketplace() {
                     selectedChips={selectedTags}
                     onChange={handlePopularTagsOnChange}
                     size='small'
-                    ariaLabel='add library to search filter'
+                    ariaLabel='add tag to search filter'
                     accordion
                   />
                 </Box>
