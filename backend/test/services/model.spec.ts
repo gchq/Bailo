@@ -614,7 +614,7 @@ describe('services > model', () => {
   })
 
   test('popularTagsForEntries > returns a list of tags', async () => {
-    modelMocks.aggregate.mockResolvedValueOnce([{ _id: 'test-tag1' }])
+    modelMocks.aggregate.mockResolvedValueOnce([{ _id: 'test-tag' }])
     const tags = await popularTagsForEntries()
     expect(tags).toEqual(['test-tag'])
   })
