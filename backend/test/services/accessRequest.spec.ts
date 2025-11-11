@@ -26,6 +26,7 @@ vi.mock('../../src/services/schema.js', () => schemaMocks)
 
 const mockAuthentication = vi.hoisted(() => ({
   hasRole: vi.fn(),
+  getEntities: vi.fn(() => ['user:testUser']),
 }))
 vi.mock('../../src/connectors/authentication/index.js', async () => ({ default: mockAuthentication }))
 
