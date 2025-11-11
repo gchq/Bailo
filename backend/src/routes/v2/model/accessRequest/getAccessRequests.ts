@@ -16,8 +16,7 @@ export const GetAccessRequestsSchema = z.object({
 
 registerPath({
   method: 'get',
-  // TODO: diagnose why simplifying to /api/v2/model/access-requests breaks it?
-  path: '/api/v2/model/access-requests/testing',
+  path: '/api/v2/access-requests',
   tags: ['access-request'],
   description: 'Get all access requests for all models.',
   schema: GetAccessRequestsSchema,

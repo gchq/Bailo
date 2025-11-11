@@ -136,7 +136,7 @@ server.post('/api/v2/model/:modelId/release/:semver/review', ...postReleaseRevie
 
 server.post('/api/v2/model/:modelId/access-requests', ...postAccessRequest)
 server.get('/api/v2/model/:modelId/access-requests', getModelAccessRequests)
-server.get('/api/v2/model/access-requests/testing', getAccessRequests)
+server.get('/api/v2/access-requests', getAccessRequests)
 server.get('/api/v2/model/:modelId/access-request/:accessRequestId', ...getAccessRequest)
 server.delete('/api/v2/model/:modelId/access-request/:accessRequestId', ...deleteAccessRequest)
 server.patch('/api/v2/model/:modelId/access-request/:accessRequestId', ...patchAccessRequest)
