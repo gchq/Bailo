@@ -84,4 +84,24 @@ module.exports = {
       initRetryDelay: 5000,
     },
   },
+
+  federation: {
+    id: 'localBailo',
+    state: 'enabled',
+    peers: {
+      huggingface: {
+        state: 'enabled',
+        baseUrl: 'https://huggingface.co',
+        label: 'Hugging Face',
+        kind: 'huggingfacehub',
+        cache: {
+          query: 60,
+        },
+        extra: {
+          statusModelName: 'openai/whisper-large-v3',
+          statusModelId: '654a84cadff2f49007ce6c37',
+        },
+      },
+    },
+  },
 }

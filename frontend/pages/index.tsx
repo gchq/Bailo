@@ -26,6 +26,7 @@ import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useGetPopularEntryTags, useListModels } from 'actions/model'
 import { useGetReviewRoles } from 'actions/reviewRoles'
+import { useGetPeers, useGetStatus } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -36,9 +37,11 @@ import Loading from 'src/common/Loading'
 import SearchInfo from 'src/common/SearchInfo'
 import Title from 'src/common/Title'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
 import useDebounce from 'src/hooks/useDebounce'
 import EntryList from 'src/marketplace/EntryList'
 import { EntryKind, EntryKindKeys } from 'types/types'
+import { isReachable } from 'utils/peerUtils'
 
 interface KeyAndLabel {
   key: string
@@ -50,6 +53,7 @@ const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Any role' }]
 export default function Marketplace() {
   const [filter, setFilter] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [selectedPeers, setSelectedPeers] = useState<string[]>([])
   const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
   const [selectedStates, setSelectedStates] = useState<string[]>([])
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
@@ -59,22 +63,40 @@ export default function Marketplace() {
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
+  const { peers, isPeersLoading, isPeersError } = useGetPeers()
+  const { status, isStatusLoading, isStatusError } = useGetStatus()
 
-  const { models, isModelsError, isModelsLoading } = useListModels(
+  const {
+    models,
+    errors: modelsErrors,
+    isModelsError,
+    isModelsLoading,
+  } = useListModels(
     EntryKind.MODEL,
     selectedRoles,
     '',
     selectedTags,
     selectedOrganisations,
     selectedStates,
-    debouncedFilter,
+    selectedPeers,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
   const {
     models: dataCards,
+    errors: dataCardsErrors,
     isModelsError: isDataCardsError,
     isModelsLoading: isDataCardsLoading,
-  } = useListModels(EntryKind.DATA_CARD, selectedRoles, '', [], selectedOrganisations, selectedStates, debouncedFilter)
+  } = useListModels(
+    EntryKind.DATA_CARD,
+    selectedRoles,
+    '',
+    [],
+    selectedOrganisations,
+    selectedStates,
+    selectedPeers,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
+  )
 
   const {
     models: mirroredModels,
@@ -87,7 +109,8 @@ export default function Marketplace() {
     selectedTags,
     selectedOrganisations,
     selectedStates,
-    debouncedFilter,
+    selectedPeers,
+    debouncedFilter.length >= 3 ? debouncedFilter : '',
   )
 
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
@@ -99,6 +122,7 @@ export default function Marketplace() {
   const {
     filter: filterFromQuery,
     task: taskFromQuery,
+    peers: peersFromQuery,
     organisations: organisationsFromQuery,
     states: statesFromQuery,
     tags: tagsFromQuery,
@@ -133,7 +157,17 @@ export default function Marketplace() {
       }
       setSelectedStates([...statesAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, tagsFromQuery, organisationsFromQuery, statesFromQuery])
+
+    if (peersFromQuery) {
+      let peersAsArray: string[] = []
+      if (typeof peersFromQuery === 'string') {
+        peersAsArray.push(peersFromQuery)
+      } else {
+        peersAsArray = [...peersFromQuery]
+      }
+      setSelectedPeers([...peersAsArray])
+    }
+  }, [filterFromQuery, taskFromQuery, tagsFromQuery, organisationsFromQuery, statesFromQuery, peersFromQuery])
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -162,6 +196,13 @@ export default function Marketplace() {
     [roleOptions],
   )
 
+  const reachablePeerList = useMemo(() => {
+    if (!peers) return []
+    return Array.from(peers.entries())
+      .filter(([, value]) => isReachable(value))
+      .map(([key]) => key)
+  }, [peers])
+
   const organisationList = useMemo(() => {
     return uiConfig ? uiConfig.modelDetails.organisations.map((organisationItem) => organisationItem) : []
   }, [uiConfig])
@@ -174,6 +215,14 @@ export default function Marketplace() {
     (e: ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value)
       updateQueryParams('filter', e.target.value)
+    },
+    [updateQueryParams],
+  )
+
+  const handlePeersOnChange = useCallback(
+    (peers: string[]) => {
+      setSelectedPeers(peers)
+      updateQueryParams('peers', peers)
     },
     [updateQueryParams],
   )
@@ -211,6 +260,7 @@ export default function Marketplace() {
     setSelectedTags([])
     setSelectedStates([])
     setSelectedRoles([])
+    setSelectedPeers([])
     setFilter('')
     router.replace('/', undefined, { shallow: true })
   }
@@ -237,8 +287,16 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading) {
+  if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
+  }
+
+  if (isPeersError) {
+    return <ErrorWrapper message={isPeersError.info.message} />
+  }
+
+  if (isStatusError) {
+    return <ErrorWrapper message={isStatusError.info.message} />
   }
 
   if (isReviewRolesError) {
@@ -252,6 +310,9 @@ export default function Marketplace() {
   if (isTagsError) {
     return <ErrorWrapper message={isTagsError.info.message} />
   }
+
+  // Only show peer/sources when not actively disabled
+  const federationEnabled = 'disabled' != status?.federation?.state
 
   return (
     <>
@@ -295,6 +356,11 @@ export default function Marketplace() {
                     </InputAdornment>
                   }
                 />
+                {debouncedFilter.length > 0 && debouncedFilter.length < 3 && (
+                  <Typography variant='caption' color='error'>
+                    Please enter at least three characters
+                  </Typography>
+                )}
               </FormControl>
               <Stack divider={<Divider flexItem />}>
                 {uiConfig && uiConfig.modelDetails.organisations.length > 0 && (
@@ -325,6 +391,22 @@ export default function Marketplace() {
                       onChange={handleStatesOnChange}
                       size='small'
                       ariaLabel='add state to search filter'
+                      accordion
+                    />
+                  </Box>
+                )}
+                {federationEnabled && reachablePeerList && reachablePeerList.length > 0 && (
+                  <Box>
+                    <ChipSelector
+                      label='External repos'
+                      chipTooltipTitle={'Include external repostories'}
+                      options={reachablePeerList}
+                      expandThreshold={10}
+                      multiple
+                      selectedChips={selectedPeers}
+                      onChange={handlePeersOnChange}
+                      size='small'
+                      ariaLabel='add external repository to search filter'
                       accordion
                     />
                   </Box>
@@ -400,7 +482,8 @@ export default function Marketplace() {
                   />
                 </Tabs>
               </Box>
-              {isModelsLoading || (isMirroredModelsLoading && <Loading />)}
+              {(isModelsLoading || isMirroredModelsLoading) && <Loading />}
+              {modelsErrors && MultipleErrorWrapper('Error with model search', modelsErrors)}
               {!isModelsLoading && selectedTab === EntryKind.MODEL && (
                 <div data-test='modelListBox'>
                   <EntryList
@@ -412,11 +495,18 @@ export default function Marketplace() {
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}
                     onSelectedStatesChange={handleStatesOnChange}
+                    selectedPeers={selectedPeers}
+                    onSelectedPeersChange={handlePeersOnChange}
                     displayOrganisation={uiConfig && uiConfig.modelDetails.organisations.length > 0}
                     displayState={uiConfig && uiConfig.modelDetails.states.length > 0}
+                    displayPeers={federationEnabled}
+                    peers={peers}
                   />
                 </div>
               )}
+              {selectedTab === EntryKind.DATA_CARD &&
+                dataCardsErrors &&
+                MultipleErrorWrapper('Error with data-card search', dataCardsErrors)}
               {!isDataCardsLoading && selectedTab === EntryKind.DATA_CARD && (
                 <div data-test='dataCardListBox'>
                   <EntryList
@@ -428,6 +518,8 @@ export default function Marketplace() {
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}
                     onSelectedStatesChange={handleStatesOnChange}
+                    selectedPeers={selectedPeers}
+                    onSelectedPeersChange={handlePeersOnChange}
                   />
                 </div>
               )}

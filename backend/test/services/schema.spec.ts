@@ -52,7 +52,13 @@ const modelMocks = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
+vi.mock('../../src/models/Model.js', async () => {
+  const actual = await vi.importActual('../../src/models/Model.js')
+  return {
+    ...actual,
+    default: modelMocks,
+  }
+})
 
 const reviewRoleModelMocks = vi.hoisted(() => {
   const obj: any = {}
