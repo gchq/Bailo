@@ -21,6 +21,7 @@ export const getModelsSearchSchema = z.object({
     allowTemplating: strictCoerceBoolean(z.boolean().optional()),
     schemaId: z.string().optional(),
     adminAccess: strictCoerceBoolean(z.boolean().optional()),
+    titleOnly: strictCoerceBoolean(z.boolean().optional()),
   }),
 })
 
@@ -28,7 +29,7 @@ registerPath({
   method: 'get',
   path: '/api/v2/models/search',
   tags: ['model'],
-  description: 'Search through models',
+  description: 'Search models',
   schema: getModelsSearchSchema,
   responses: {
     200: {
@@ -66,7 +67,6 @@ export interface ModelSearchResult {
   collaborators: Array<CollaboratorEntry>
   createdAt: Date
   updatedAt: Date
-  sourceModelId?: string
 }
 
 interface GetModelsResponse {
@@ -77,10 +77,22 @@ export const getModelsSearch = [
   async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
     const {
-      query: { kind, libraries, filters, search, task, allowTemplating, schemaId, organisations, states, adminAccess },
+      query: {
+        kind,
+        libraries,
+        filters,
+        search,
+        task,
+        allowTemplating,
+        schemaId,
+        organisations,
+        states,
+        adminAccess,
+        titleOnly,
+      },
     } = parse(req, getModelsSearchSchema)
 
-    const foundModels = await searchModels(
+    const models = await searchModels(
       req.user,
       kind as EntryKindKeys,
       libraries,
@@ -92,21 +104,8 @@ export const getModelsSearch = [
       allowTemplating,
       schemaId,
       adminAccess,
+      titleOnly,
     )
-    const models = foundModels.map((model) => ({
-      id: model.id,
-      name: model.name,
-      description: model.description,
-      tags: model.tags,
-      kind: model.kind,
-      organisation: model.organisation,
-      state: model.state,
-      collaborators: model.collaborators,
-      visibility: model.visibility,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-      sourceModelId: model.settings?.mirror?.sourceModelId,
-    }))
 
     await audit.onSearchModel(req, models)
 

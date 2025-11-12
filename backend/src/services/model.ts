@@ -1,5 +1,6 @@
 import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
+import { SortOrder } from 'mongoose'
 import { Optional } from 'utility-types'
 
 import { Roles } from '../connectors/authentication/Base.js'
@@ -131,7 +132,8 @@ export async function searchModels(
   allowTemplating?: boolean,
   schemaId?: string,
   adminAccess?: boolean,
-): Promise<Array<ModelInterface>> {
+  titleOnly?: boolean,
+): Promise<Array<Omit<ModelInterface, 'settings' | 'card' | 'deleted'>>> {
   if (adminAccess) {
     if (!(await authentication.hasRole(user, Roles.Admin))) {
       throw Forbidden('You do not have the required role.', {
@@ -142,6 +144,9 @@ export async function searchModels(
   }
 
   const query: any = {}
+  let sort: string | { [key: string]: SortOrder | { $meta: any } } | [string, SortOrder][] | undefined | null = {
+    updatedAt: -1,
+  }
 
   if (kind) {
     query['kind'] = { $all: kind }
@@ -168,7 +173,12 @@ export async function searchModels(
   }
 
   if (search) {
-    query.$text = { $search: search }
+    if (titleOnly) {
+      query.name = { $regex: search }
+    } else {
+      query.$text = { $search: search }
+      sort = { score: { $meta: 'textScore' } }
+    }
   }
 
   if (schemaId) {
@@ -198,15 +208,16 @@ export async function searchModels(
 
   let cursor = ModelModel
     // Find only matching documents
-    .find(query)
-
-  if (!search) {
-    // Sort by last updated
-    cursor = cursor.sort({ updatedAt: -1 })
-  } else {
-    // Sort by text search
-    cursor = cursor.sort({ score: { $meta: 'textScore' } })
-  }
+    .find(query, {
+      settings: false,
+      card: false,
+      deleted: false,
+      _id: false,
+      __v: false,
+      deletedBy: false,
+      deletedAt: false,
+    })
+  cursor = cursor.sort(sort)
 
   const results = await cursor
   //Auth already checked, so just need to check if they require admin access
