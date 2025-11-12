@@ -6,17 +6,20 @@ import audit from '../../../../connectors/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/AccessRequest.js'
 import { findAccessRequest } from '../../../../services/accessRequest.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/specification.js'
-import { parse, strictCoerceBoolean } from '../../../../utils/validate.js'
+import { coerceArray, parse, strictCoerceBoolean } from '../../../../utils/validate.js'
 
 export const GetAccessRequestsSchema = z.object({
   query: z.object({
+    modelId: coerceArray(z.array(z.string()).optional().default([])),
+    schemaId: z.string().optional().default(''),
+    mine: strictCoerceBoolean(z.boolean().optional().default(false)),
     adminAccess: strictCoerceBoolean(z.boolean().optional().default(false)),
   }),
 })
 
 registerPath({
   method: 'get',
-  path: '/api/v2/access-requests',
+  path: '/api/v2/access-requests/search',
   tags: ['access-request'],
   description: 'Get all access requests for all models.',
   schema: GetAccessRequestsSchema,
@@ -42,10 +45,10 @@ export const getAccessRequests = [
   async (req: Request, res: Response<GetAccessRequestsResponse>): Promise<void> => {
     req.audit = AuditInfo.ViewAccessRequests
     const {
-      query: { adminAccess },
+      query: { modelId, schemaId, mine, adminAccess },
     } = parse(req, GetAccessRequestsSchema)
 
-    const accessRequests = await findAccessRequest(req.user, adminAccess)
+    const accessRequests = await findAccessRequest(req.user, modelId, schemaId, mine, adminAccess)
 
     await audit.onViewAccessRequests(req, accessRequests)
 

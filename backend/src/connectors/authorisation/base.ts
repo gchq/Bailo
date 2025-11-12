@@ -282,7 +282,8 @@ export class BasicAuthorisationConnector {
         if (
           !isNamed &&
           (await missingRequiredRole(user, model, ['owner'])) &&
-          ([AccessRequestAction.Delete, AccessRequestAction.Update] as AccessRequestActionKeys[]).includes(action)
+          ([AccessRequestAction.Delete, AccessRequestAction.Update] as AccessRequestActionKeys[]).includes(action) &&
+          (await this.model(user, model, ModelAction.View))
         ) {
           return { success: false, info: 'You cannot change an access request you do not own.', id: request.id }
         }

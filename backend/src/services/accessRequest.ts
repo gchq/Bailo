@@ -6,7 +6,7 @@ import authentication from '../connectors/authentication/index.js'
 import { Roles } from '../connectors/authentication/Base.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { AccessRequestInterface } from '../models/AccessRequest.js'
+import AccessRequestModel, { AccessRequestInterface } from '../models/AccessRequest.js'
 import AccessRequest from '../models/AccessRequest.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
@@ -22,9 +22,10 @@ import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
-import { createAccessRequestReviews, findReviews, removeAccessRequestReviews } from './review.js'
+import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
 import { getSchemaById } from './schema.js'
 import { sendWebhooks } from './webhook.js'
+import ModelModel from '../models/Model.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
 export async function createAccessRequest(
@@ -133,22 +134,62 @@ export async function getAccessRequestById(user: UserInterface, accessRequestId:
   return accessRequest
 }
 
-export async function findAccessRequest(user: UserInterface, adminAccess: boolean) {
-  const isAdmin = await authentication.hasRole(user, Roles.Admin)
-
-  if (adminAccess && isAdmin) {
-    const accessRequests = await AccessRequest.find({ deleted: false })
-    return accessRequests
-  } else if (adminAccess && !isAdmin) {
-    throw Forbidden('You cannot view all access requests if you are not an admin.')
-  } else {
-    // extracting data in this fashion to make the data format consistent of just returning AccessRequest data only
-    const userReviews = await findReviews(user, true, true, undefined, undefined, undefined, 'access')
-    const accessRequestIds = userReviews.map((a) => a.accessRequestId)
-
-    const accessRequests = await AccessRequest.find({ id: accessRequestIds })
-    return accessRequests
+export async function findAccessRequest(
+  user: UserInterface,
+  modelId: Array<string>,
+  schemaId: string,
+  filters: Array<string>,
+  adminAccess?: boolean,
+): Promise<Array<AccessRequestInterface>> {
+  if (adminAccess) {
+    if (!(await authentication.hasRole(user, Roles.Admin))) {
+      throw Forbidden('You do not have the required role.', {
+        userDn: user.dn,
+        requiredRole: Roles.Admin,
+      })
+    }
   }
+
+  const query: any = {}
+
+  if (modelId.length) {
+    query.modelId = { $all: modelId }
+  }
+
+  if (schemaId) {
+    query.schemaId = { $all: schemaId }
+  }
+
+  if (filters.length > 0) {
+    if (filters.includes('mine')) {
+      query.metadata.overview = {
+        $elemMatch: {
+          entity: { $in: await authentication.getEntities(user) },
+        },
+      }
+    }
+  }
+
+  const cursor = AccessRequestModel.find(query)
+
+  const results = await cursor
+  //Auth already checked, so just need to check if they require admin access
+  if (adminAccess) {
+    return results
+  }
+
+  // authorisation
+  const modelIds = results.map((result) => result.modelId)
+  let auths: any[] = []
+  for (const modelId of modelIds) {
+    const modelDoc = await ModelModel.findOne({ id: modelId })
+    if (!modelDoc) {
+      throw BadReq('Model cannot be found', { modelId })
+    }
+    const model = modelDoc.toObject()
+    auths = auths.concat(await authorisation.accessRequests(user, model, results, AccessRequestAction.View))
+  }
+  return results.filter((_, i) => auths[i].success)
 }
 
 export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
