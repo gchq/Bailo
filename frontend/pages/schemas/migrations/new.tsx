@@ -152,7 +152,12 @@ export default function SchemaMigrationSelector() {
                   </Button>
                 </Link>
               </Box>
-              <Stack direction='row' spacing={6} justifyContent='center' alignItems='center'>
+              <Stack
+                direction={{ sm: 'column', md: 'row' }}
+                spacing={{ sm: 2, md: 6 }}
+                justifyContent='center'
+                alignItems='center'
+              >
                 <Autocomplete
                   disablePortal
                   options={schemas}

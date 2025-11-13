@@ -12,7 +12,7 @@ export default function SchemaMigrationList() {
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations()
   const SchemaMigrationList = memoize(({ data, index }) => (
     <Stack sx={{ p: 2 }} spacing={1}>
-      <Stack direction='row' spacing={2} justifyContent='space-between'>
+      <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} justifyContent='space-between'>
         <Link
           href={`/schemas/migrations/${data[index].id}`}
           noLinkStyle

@@ -125,13 +125,13 @@ export default function SchemaMigrator({
     })
   }, [questionMigrations, handleRemoveActionItem])
 
-  const checkObjectsMatch = () => {
+  const checkObjectsMatch = (...objects) => {
     if (!sourceSchemaQuestion || !targetSchemaQuestion) {
       return false
     }
-    return (
-      JSON.stringify(sourceSchemaQuestion.schema.properties) === JSON.stringify(targetSchemaQuestion.schema.properties)
-    )
+    const keys = objects.reduce((keys, object) => keys.concat(Object.keys(object)), [])
+    const union = new Set(keys)
+    return objects.every((object) => union.size === Object.keys(object).length)
   }
 
   const handleAddNewAction = () => {
@@ -156,7 +156,7 @@ export default function SchemaMigrator({
       sourceSchemaQuestion.schema.type === 'object' &&
       targetSchemaQuestion &&
       targetSchemaQuestion.schema.type == 'object' &&
-      !checkObjectsMatch()
+      !checkObjectsMatch(sourceSchemaQuestion.schema.properties, targetSchemaQuestion.schema.properties)
     ) {
       return setActionErrorText('You cannot map two sub-sections that contain different questions')
     }
