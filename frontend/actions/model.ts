@@ -2,10 +2,12 @@ import qs from 'querystring'
 import useSWR from 'swr'
 
 import {
+  BailoError,
   EntryForm,
   EntryInterface,
   EntryKindKeys,
   EntryUserPermissions,
+  EntryVisibilityKeys,
   FileInterface,
   ModelImage,
   ReleaseInterface,
@@ -23,8 +25,11 @@ export interface EntrySearchResult {
   kind: EntryKindKeys
   organisation?: string
   state?: string
+  peerId?: string
+  visibility: EntryVisibilityKeys
   createdAt: Date
   updatedAt: Date
+  sourceModelId?: string
 }
 
 export interface ModelExportRequest {
@@ -41,9 +46,11 @@ export function useListModels(
   libraries: string[] = [],
   organisations: string[] = [],
   states: string[] = [],
+  peers: string[] = [],
   search = '',
   allowTemplating?: boolean,
   schemaId?: string,
+  viewAllPrivate?: boolean,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -52,13 +59,16 @@ export function useListModels(
     ...(libraries.length > 0 && { libraries }),
     ...(organisations.length > 0 && { organisations }),
     ...(states.length > 0 && { states }),
+    ...(peers.length > 0 && { peers }),
     ...(search && { search }),
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
+    ...(viewAllPrivate && { viewAllPrivate }),
   }
   const { data, isLoading, error, mutate } = useSWR<
     {
       models: EntrySearchResult[]
+      errors: Record<string, BailoError>
     },
     ErrorInfo
   >(Object.entries(queryParams).length > 0 ? `/api/v2/models/search?${qs.stringify(queryParams)}` : null, fetcher)
@@ -66,12 +76,13 @@ export function useListModels(
   return {
     mutateModels: mutate,
     models: data ? data.models : emptyModelList,
+    errors: data ? data.errors : {},
     isModelsLoading: isLoading,
     isModelsError: error,
   }
 }
 
-export function useGetModel(id: string | undefined, kind: EntryKindKeys) {
+export function useGetModel(id: string | undefined, kind?: EntryKindKeys) {
   const queryParams = {
     kind,
   }

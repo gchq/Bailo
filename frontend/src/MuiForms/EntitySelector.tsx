@@ -2,7 +2,7 @@ import { Box, Chip, Stack, Typography } from '@mui/material'
 import Autocomplete from '@mui/material/Autocomplete'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { FormContextType } from '@rjsf/utils'
+import { Registry } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
 import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
@@ -17,7 +17,7 @@ interface EntitySelectorProps {
   required?: boolean
   value: string[]
   onChange: (newValue: string[]) => void
-  formContext?: FormContextType
+  registry?: Registry
   rawErrors?: string[]
   id: string
 }
@@ -27,7 +27,7 @@ export default function EntitySelector({
   value: currentValue,
   required,
   label,
-  formContext,
+  registry,
   rawErrors,
   id,
 }: EntitySelectorProps) {
@@ -43,10 +43,10 @@ export default function EntitySelector({
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
   useEffect(() => {
-    if (formContext && formContext.defaultCurrentUser) {
+    if (registry && registry.formContext && registry.formContext.defaultCurrentUser) {
       setSelectedEntities([{ id: currentUserId, kind: 'user' }])
     }
-  }, [currentUserId, formContext])
+  }, [currentUserId, registry])
 
   useEffect(() => {
     if (currentValue) {
@@ -84,7 +84,7 @@ export default function EntitySelector({
     }
   }
 
-  if (!formContext) {
+  if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
@@ -94,7 +94,7 @@ export default function EntitySelector({
       {isUsersError && isUsersError.status === 413 && (
         <Typography color={theme.palette.error.main}>Too many results. Please refine your search.</Typography>
       )}
-      {currentUser && formContext && formContext.editMode && (
+      {currentUser && registry.formContext && registry.formContext.editMode && (
         <>
           <Typography fontWeight='bold' aria-label={`label for ${label}`} component='label' htmlFor={id}>
             {label}
@@ -149,7 +149,7 @@ export default function EntitySelector({
           />
         </>
       )}
-      {formContext && !formContext.editMode && (
+      {registry.formContext && !registry.formContext.editMode && (
         <>
           <Typography fontWeight='bold' aria-label={`label for ${label}`}>
             {label}

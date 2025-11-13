@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
-import { FormContextType } from '@rjsf/utils'
+import { Registry } from '@rjsf/utils'
 import { Fragment, useMemo } from 'react'
 import MessageAlert from 'src/MessageAlert'
 
@@ -10,7 +10,7 @@ interface CustomTextInputProps {
   required?: boolean
   disabled?: boolean
   readOnly?: boolean
-  formContext?: FormContextType
+  registry?: Registry
   value: string
   onChange: (newValue: string) => void
   InputProps?: any
@@ -22,7 +22,7 @@ export default function CustomTextInput({
   onChange,
   value,
   label,
-  formContext,
+  registry,
   id,
   required,
   rawErrors,
@@ -42,7 +42,7 @@ export default function CustomTextInput({
     }
   }, [theme, value])
 
-  if (!formContext) {
+  if (!registry || !registry.formContext) {
     return <MessageAlert message='Unable to render widget due to missing context' severity='error' />
   }
 
@@ -82,14 +82,14 @@ export default function CustomTextInput({
               },
         ]}
         onChange={handleChange}
-        variant={!formContext.editMode ? 'standard' : 'outlined'}
-        required={formContext.editMode}
-        value={value || (!formContext.editMode ? 'Unanswered' : '')}
-        disabled={!formContext.editMode}
+        variant={!registry.formContext.editMode ? 'standard' : 'outlined'}
+        required={registry.formContext.editMode}
+        value={value || (!registry.formContext.editMode ? 'Unanswered' : '')}
+        disabled={!registry.formContext.editMode}
         slotProps={{
           input: {
             ...InputProps,
-            ...(!formContext.editMode && { disableUnderline: true }),
+            ...(!registry.formContext.editMode && { disableUnderline: true }),
             'data-test': id,
             'aria-label': `text input field for ${label}`,
             id: id,

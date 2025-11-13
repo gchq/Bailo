@@ -1,7 +1,7 @@
 import { green, red, yellow } from '@mui/material/colors'
-import { createTheme, ThemeOptions } from '@mui/material/styles'
+import { createTheme, PaletteColor, PaletteColorOptions, ThemeOptions } from '@mui/material/styles'
 
-declare module '@mui/material/styles/createPalette' {
+declare module '@mui/material/styles' {
   interface Palette {
     container: PaletteColor
     customTextInput: PaletteColor

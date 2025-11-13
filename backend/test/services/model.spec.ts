@@ -19,7 +19,7 @@ import {
   updateModel,
   updateModelCard,
 } from '../../src/services/model.js'
-import { EntryUserPermissions } from '../../src/types/types.js'
+import { EntrySearchOptionsParams, EntryUserPermissions } from '../../src/types/types.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -82,7 +82,13 @@ const modelMocks = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
+vi.mock('../../src/models/Model.js', async () => {
+  const actual = await vi.importActual('../../src/models/Model.js')
+  return {
+    ...actual,
+    default: modelMocks,
+  }
+})
 
 vi.mock('../../src/utils/database.js', async () => ({
   isTransactionsEnabled: vi.fn(() => false),
@@ -113,6 +119,7 @@ vi.mock('../../src/models/ReviewRole.js', () => ({ default: reviewRoleModelMocks
 const authenticationMocks = vi.hoisted(() => ({
   getEntities: vi.fn(() => ['user']),
   getUserInformation: vi.fn(() => ({ name: 'user', email: 'user@example.com' })),
+  hasRole: vi.fn(() => ({})),
 }))
 vi.mock('../../src/connectors/authentication/index.js', async () => ({
   default: authenticationMocks,
@@ -202,30 +209,89 @@ describe('services > model', () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, 'model', [], [], [], [], '', undefined)
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+    }
+
+    await searchModels(user, searchParams)
   })
 
   test('searchModels > all filters', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: ['library'],
+      filters: ['mine'],
+      organisations: ['example organisation'],
+      states: ['development'],
+      search: 'search',
+      task: 'task',
+    }
 
-    await searchModels(
-      user,
-      'model',
-      ['library'],
-      ['mine'],
-      ['example organisation'],
-      ['development'],
-      'search',
-      'task',
-    )
+    await searchModels(user, searchParams)
   })
 
   test('searchModels > task no library', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, 'model', [], [], [], [], '', 'task')
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: 'task',
+    }
+
+    await searchModels(user, searchParams)
+  })
+
+  test('searchModels > admin access without auth', async () => {
+    const user = { dn: 'not admin' }
+    const adminAccess = true
+    authenticationMocks.hasRole.mockImplementation(() => false)
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: 'task',
+      adminAccess,
+    }
+
+    await expect(searchModels(user, searchParams)).rejects.toThrow('You do not have the required role.')
+  })
+
+  test('searchModels > admin access with auth', async () => {
+    const user: any = { dn: 'admin' }
+    const adminAccess = true
+    modelMocks.sort.mockResolvedValueOnce([])
+    authenticationMocks.hasRole.mockImplementation(() => true)
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: 'task',
+      adminAccess,
+    }
+
+    await searchModels(user, searchParams)
   })
 
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {

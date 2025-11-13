@@ -5,7 +5,7 @@ services:
     networks:
       default:
       internal:
-    image: tarampampam/webhook-tester:2.2.3
+    image: tarampampam/webhook-tester:2.2.4
     command: serve --auto-create-sessions
     ports:
       - 8082:8080
@@ -13,6 +13,7 @@ services:
   mailcrab:
     networks:
       default:
+      internal:
     ports:
       - 1080:1080
       - 1025:1025

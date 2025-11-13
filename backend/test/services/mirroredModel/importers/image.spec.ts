@@ -12,14 +12,23 @@ const authMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
-const registryMocks = vi.hoisted(() => ({
+const registryServiceMocks = vi.hoisted(() => ({
   splitDistributionPackageName: vi.fn(() => ({ path: 'imageName', tag: 'tag' })),
-  doesImageLayerExist: vi.fn(),
-  initialiseImageUpload: vi.fn(() => ({ location: 'upload-location' })),
-  putImageBlob: vi.fn(),
-  putImageManifest: vi.fn(),
 }))
-vi.mock('../../../../src/services/registry.js', () => registryMocks)
+vi.mock('../../../../src/services/registry.js', () => registryServiceMocks)
+
+const registryClientMocks = vi.hoisted(() => ({
+  doesLayerExist: vi.fn(),
+  initialiseUpload: vi.fn(() => ({ location: 'upload-location' })),
+  uploadLayerMonolithic: vi.fn(),
+  putManifest: vi.fn(),
+}))
+vi.mock('../../../../src/clients/registry.js', () => registryClientMocks)
+
+const registryAuthMocks = vi.hoisted(() => ({
+  getAccessToken: vi.fn(() => Promise.resolve()),
+}))
+vi.mock('../../../../src/routes/v1/registryAuth.js', () => registryAuthMocks)
 
 const logMocks = vi.hoisted(() => ({
   debug: vi.fn(),
@@ -74,7 +83,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
   })
 
   test('constructor > error when splitDistributionPackageName result has no tag', () => {
-    registryMocks.splitDistributionPackageName.mockReturnValueOnce({ path: 'imageName' } as any)
+    registryServiceMocks.splitDistributionPackageName.mockReturnValueOnce({ path: 'imageName' } as any)
     expect(() => new ImageImporter(mockUser, mockMetadata, mockLogData)).toThrowError(
       /^Distribution Package Name must include a tag\./,
     )
@@ -93,7 +102,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
   })
 
   test('processEntry > success skips blob if it exists in registry', async () => {
-    registryMocks.doesImageLayerExist.mockResolvedValue(true)
+    registryClientMocks.doesLayerExist.mockResolvedValue(true)
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
     const entry: Headers = {
       name: 'content-dir/blobs/sha256/' + 'a'.repeat(64),
@@ -106,11 +115,11 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
     await importer.processEntry(entry, stream)
 
     expect(resumeSpy).toHaveBeenCalled()
-    expect(registryMocks.initialiseImageUpload).not.toHaveBeenCalled()
+    expect(registryClientMocks.initialiseUpload).not.toHaveBeenCalled()
   })
 
   test('processEntry > success uploads blob if not in registry', async () => {
-    registryMocks.doesImageLayerExist.mockResolvedValue(false)
+    registryClientMocks.doesLayerExist.mockResolvedValue(false)
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
     const entry: Headers = {
       name: 'content-dir/blobs/sha256/' + 'b'.repeat(64),
@@ -121,11 +130,9 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
     await importer.processEntry(entry, stream)
 
-    expect(registryMocks.initialiseImageUpload).toHaveBeenCalled()
-    expect(registryMocks.putImageBlob).toHaveBeenCalledWith(
-      mockUser,
-      mockMetadata.mirroredModelId,
-      'imageName',
+    expect(registryClientMocks.initialiseUpload).toHaveBeenCalled()
+    expect(registryClientMocks.uploadLayerMonolithic).toHaveBeenCalledWith(
+      undefined,
       'upload-location',
       expect.stringContaining('sha256:'),
       stream,
@@ -134,8 +141,8 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
   })
 
   test('processEntry > error when blob upload fails', async () => {
-    registryMocks.doesImageLayerExist.mockResolvedValue(false)
-    registryMocks.initialiseImageUpload.mockImplementation(() => {
+    registryClientMocks.doesLayerExist.mockResolvedValue(false)
+    registryClientMocks.initialiseUpload.mockImplementation(() => {
       throw new Error('init fail')
     })
     const importer = new ImageImporter(mockUser, mockMetadata, mockLogData)
@@ -182,10 +189,9 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
     await importer.finishListener(resolve, reject)
 
-    expect(registryMocks.putImageManifest).toHaveBeenCalledWith(
-      mockUser,
-      mockMetadata.mirroredModelId,
-      'imageName',
+    expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
+      undefined,
+      { namespace: mockMetadata.mirroredModelId, image: 'imageName' },
       'tag',
       // @ts-expect-error accessing protected property
       JSON.stringify(importer.manifestBody),

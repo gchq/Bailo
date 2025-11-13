@@ -6,7 +6,7 @@ import {
   Box,
   Button,
   Divider,
-  Grid2,
+  Grid,
   IconButton,
   MenuItem,
   Select,
@@ -99,18 +99,13 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     })
   }, [questionMigrations, handleRemoveActionItem])
 
-  const checkObjectsMatch = () => {
-    if (
-      !sourceSchemaQuestion ||
-      sourceSchemaQuestion.schema.type !== 'object' ||
-      !targetSchemaQuestion ||
-      targetSchemaQuestion.schema.type !== 'object'
-    ) {
+  const checkObjectsMatch = (...objects) => {
+    if (!sourceSchemaQuestion || !targetSchemaQuestion) {
       return false
     }
-    return (
-      JSON.stringify(sourceSchemaQuestion.schema.properties) === JSON.stringify(targetSchemaQuestion.schema.properties)
-    )
+    const keys = objects.reduce((keys, object) => keys.concat(Object.keys(object)), [])
+    const union = new Set(keys)
+    return objects.every((object) => union.size === Object.keys(object).length)
   }
 
   const handleAddNewAction = () => {
@@ -131,7 +126,12 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     ) {
       return setActionErrorText('You cannot map two questions with different value types')
     }
-    if (!checkObjectsMatch()) {
+    if (
+      sourceSchemaQuestion.schema.type === 'object' &&
+      targetSchemaQuestion &&
+      targetSchemaQuestion.schema.type == 'object' &&
+      !checkObjectsMatch(sourceSchemaQuestion.schema.properties, targetSchemaQuestion.schema.properties)
+    ) {
       return setActionErrorText('You cannot map two sub-sections that contain different questions')
     }
     const newQuestionMigration: QuestionMigration = {
@@ -219,8 +219,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
 
   return (
     <>
-      <Grid2 container spacing={2}>
-        <Grid2
+      <Grid container spacing={2}>
+        <Grid
           size={{ sm: 12, md: 3 }}
           sx={{ borderStyle: 'solid', borderWidth: '1px', borderColor: theme.palette.divider, pt: 2 }}
         >
@@ -312,8 +312,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               </Stack>
             </Stack>
           </Stack>
-        </Grid2>
-        <Grid2 size={{ sm: 12, md: 9 }}>
+        </Grid>
+        <Grid size={{ sm: 12, md: 9 }}>
           {sourceSchema && isSourceSchemaActive && (
             <Stack
               spacing={2}
@@ -359,8 +359,8 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
               <em>Select source or target question on the actions menu to view the schema</em>
             </Stack>
           )}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       <Box paddingTop={2}></Box>
     </>
   )

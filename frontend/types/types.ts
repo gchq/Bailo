@@ -431,18 +431,13 @@ export type EntryKindLabelKeys = (typeof EntryKindLabel)[keyof typeof EntryKindL
 export const EntryKind = {
   MODEL: 'model',
   DATA_CARD: 'data-card',
+  MIRRORED_MODEL: 'mirrored-model',
 } as const
 export type EntryKindKeys = (typeof EntryKind)[keyof typeof EntryKind]
 
 export const isEntryKind = (value: unknown): value is EntryKindKeys => {
-  return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD)
+  return !!value && (value === EntryKind.MODEL || value === EntryKind.DATA_CARD || value === EntryKind.MIRRORED_MODEL)
 }
-
-export const CreateEntryKind = {
-  ...EntryKind,
-  MIRRORED_MODEL: 'mirrored-model',
-} as const
-export type CreateEntryKindKeys = (typeof CreateEntryKind)[keyof typeof CreateEntryKind]
 
 export interface EntryInterface {
   id: string
@@ -666,4 +661,44 @@ export interface SchemaMigrationInterface {
   targetSchema: string
   createdAt: string
   updatedAt: string
+}
+
+export const FederationState = {
+  DISABLED: 'disabled',
+  READ_ONLY: 'readOnly',
+  ENABLED: 'enabled',
+} as const
+
+export type FederationStateKeys = (typeof FederationState)[keyof typeof FederationState]
+
+export const PeerKind = {
+  Bailo: 'bailo',
+  HuggingFaceHub: 'huggingfacehub',
+} as const
+export type PeerKindKeys = (typeof PeerKind)[keyof typeof PeerKind]
+
+export interface RemoteFederationConfig {
+  state: FederationStateKeys
+  baseUrl: string
+  label: string
+  kind: PeerKindKeys
+  extra: {
+    [key: string]: any
+  }
+}
+
+export type FederationStatus = {
+  state: FederationStateKeys
+  id?: string
+}
+
+export type SystemStatus = {
+  ping: 'pong' | ''
+  federation?: FederationStatus
+  error?: BailoError
+}
+
+export type PeerConfigStatus = {
+  config: RemoteFederationConfig
+  status: SystemStatus
 }
