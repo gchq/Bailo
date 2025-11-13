@@ -14,6 +14,9 @@ async function setupCognitoClient() {
   let dnName: string
   let userPoolId: string
   try {
+    if (!config?.oauth?.cognito) {
+      throw ConfigurationError('OAuth Cognito configuration is missing')
+    }
     dnName = config.oauth.cognito.userIdAttribute
     userPoolId = config.oauth.cognito.userPoolId
   } catch (_e) {
