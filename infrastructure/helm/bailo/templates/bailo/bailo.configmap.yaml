@@ -101,7 +101,7 @@ data:
       },
 
       log: {
-        level: 'info',
+        level: '{{ .Values.config.log.level }}',
       },
 
       session: {
@@ -224,10 +224,6 @@ data:
           maxInitRetries: {{ .Values.connectors.fileScanners.maxInitRetries }},
           initRetryDelay: {{ .Values.connectors.fileScanners.initRetryDelay }},
         },
-      },
-
-      log: {
-        level: 'trace',
       },
 
       instrumentation: {
