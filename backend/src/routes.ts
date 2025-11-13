@@ -76,6 +76,7 @@ import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'
 import { postSchemaMigration } from './routes/v2/schema/postSchemaMigration.js'
+import { putSchemaMigration } from './routes/v2/schema/putSchemaMigration.js'
 import { getSpecification } from './routes/v2/specification.js'
 import { getPeerStatus } from './routes/v2/system/peers.js'
 import { getSystemStatus } from './routes/v2/system/status.js'
@@ -194,6 +195,7 @@ server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/schema-migrations', ...getSchemaMigrations)
 server.post('/api/v2/schema-migration', ...postSchemaMigration)
+server.put('/api/v2/schema-migrations/:schemaMigrationId', ...putSchemaMigration)
 
 server.get('/api/v2/reviews', ...getReviews)
 server.head('/api/v2/reviews', ...getReviews)

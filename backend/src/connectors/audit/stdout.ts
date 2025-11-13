@@ -396,6 +396,13 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
     req.log.info(event, req.audit.description)
   }
+
+  onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+    this.checkEventType(AuditInfo.UpdateSchemaMigration, req)
+    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
+    req.log.info(event, req.audit.description)
+  }
+
   onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[]) {
     this.checkEventType(AuditInfo.ViewSchemaMigrations, req)
     const event = this.generateEvent(req, {

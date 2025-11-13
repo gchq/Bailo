@@ -36,6 +36,42 @@ export async function createSchemaMigrationPlan(
   }
 }
 
+export type UpdateSchemaMigrationPlan = Pick<
+  SchemaMigrationInterface,
+  'name' | 'description' | 'questionMigrations' | 'draft'
+>
+
+export async function updateSchemaMigrationPlan(
+  user: UserInterface,
+  schemaMigrationId: string,
+  planDiff: UpdateSchemaMigrationPlan,
+) {
+  const schemaMigrationPlan = await getSchemaMigrationById(schemaMigrationId)
+  if (!schemaMigrationPlan) {
+    throw BadReq('Cannot find specified schema migration plan.', { schemaMigrationId })
+  }
+  const auth = await authorisation.schemaMigration(user, schemaMigrationPlan, SchemaMigrationAction.Update)
+  if (!auth.success) {
+    throw Forbidden(auth.info, {
+      userDn: user.dn,
+      schemaMigrationName: schemaMigrationPlan.name,
+    })
+  }
+  Object.assign(schemaMigrationPlan, planDiff)
+  const updatedSchemaMigrationPlan = await SchemaMigration.findOneAndUpdate(
+    { id: schemaMigrationId },
+    {
+      $set: schemaMigrationPlan,
+    },
+  )
+
+  if (!updatedSchemaMigrationPlan) {
+    throw BadReq(`Could not perform request to update schema migraton plan.`, { schemaMigrationId })
+  }
+
+  return updatedSchemaMigrationPlan
+}
+
 export async function getSchemaMigrationById(id: string) {
   return await SchemaMigrationModel.findOne({ id: id })
 }
