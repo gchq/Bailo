@@ -319,9 +319,11 @@ describe('services > mirroredModel', () => {
 
     test('export compressed image layers', async () => {
       registryMocks.getImageManifest.mockResolvedValue({
-        config: { digest: 'sha256:0', size: 1, mediaType: 'text/json' },
-        layers: [{ digest: 'sha256:1', size: 1, mediaType: 'text/json' }],
-        mediaType: 'manifest',
+        body: {
+          config: { digest: 'sha256:0', size: 1, mediaType: 'text/json' },
+          layers: [{ digest: 'sha256:1', size: 1, mediaType: 'text/json' }],
+          mediaType: 'manifest',
+        },
       })
       registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['x']), abort: vi.fn() })
       await addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any)
@@ -330,9 +332,11 @@ describe('services > mirroredModel', () => {
 
     test('missing digest throws', async () => {
       registryMocks.getImageManifest.mockResolvedValue({
-        config: { digest: '', size: 1, mediaType: '' },
-        layers: [],
-        mediaType: 'm',
+        body: {
+          config: { digest: '', size: 1, mediaType: '' },
+          layers: [],
+          mediaType: 'm',
+        },
       })
       await expect(
         addCompressedRegistryImageComponents({} as any, 'modelId', 'img:tag', {} as any, {} as any),
@@ -342,9 +346,11 @@ describe('services > mirroredModel', () => {
     test('addEntry error aborts', async () => {
       const abortMock = vi.fn()
       registryMocks.getImageManifest.mockResolvedValue({
-        config: { digest: 'sha256:0', size: 1, mediaType: '' },
-        layers: [],
-        mediaType: 'm',
+        body: {
+          config: { digest: 'sha256:0', size: 1, mediaType: '' },
+          layers: [],
+          mediaType: 'm',
+        },
       })
       registryMocks.getImageBlob.mockResolvedValue({ stream: Readable.from(['']), abort: abortMock })
       tarballMocks.addEntryToTarGzUpload.mockResolvedValueOnce({}).mockRejectedValueOnce('err')

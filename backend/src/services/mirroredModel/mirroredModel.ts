@@ -222,7 +222,7 @@ export async function addCompressedRegistryImageComponents(
   }
   const { path: imageName, tag: imageTag } = distributionPackageNameObject
   // get which layers exist for the model
-  const tagManifest = await getImageManifest(user, modelId, imageName, imageTag)
+  const tagManifest = (await getImageManifest(user, { repository: modelId, name: imageName, tag: imageTag })).body
   log.debug(
     {
       modelId,
@@ -265,7 +265,11 @@ export async function addCompressedRegistryImageComponents(
       },
       'Fetching image layer',
     )
-    const { stream: responseStream, abort } = await getImageBlob(user, modelId, imageName, layerDigest)
+    const { stream: responseStream, abort } = await getImageBlob(
+      user,
+      { repository: modelId, name: imageName },
+      layerDigest,
+    )
 
     try {
       // pipe the body to tar using streams

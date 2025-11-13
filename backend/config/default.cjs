@@ -61,6 +61,9 @@ module.exports = {
 
     // Allow self-signed certificates
     insecure: true,
+
+    // Similar to the MongoDB soft-delete plugin, specify the prefix for any deleted image names
+    softDeletePrefix: 'soft_deleted/',
   },
 
   federation: {

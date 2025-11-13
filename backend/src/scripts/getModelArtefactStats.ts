@@ -49,7 +49,7 @@ async function script() {
   // setup
   await connectToMongoose()
   const registry = config.registry.connection.internal
-  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', class: '', name: 'catalog', actions: ['*'] }])
+  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
   const authorisation = `Bearer ${token}`
   const agent = getHttpsUndiciAgent({
     connect: { rejectUnauthorized: !config.registry.connection.insecure },
@@ -195,7 +195,7 @@ async function script() {
   await Promise.all(
     catalog.repositories.map(async (repositoryName) => {
       const repositoryToken = await getAccessToken({ dn: 'user' }, [
-        { type: 'repository', class: '', name: repositoryName, actions: ['*'] },
+        { type: 'repository', name: repositoryName, actions: ['*'] },
       ])
       const repositoryAuthorisation = `Bearer ${repositoryToken}`
 
