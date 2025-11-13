@@ -77,9 +77,9 @@ export default function Loading(): ReactElement {
     },
   })
 
-  return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-      <StyledBox />
-    </Box>
-  )
+  const styledBox = () => {
+    return <StyledBox />
+  }
+
+  return <Box sx={{ display: 'flex', justifyContent: 'center' }}>{styledBox()}</Box>
 }

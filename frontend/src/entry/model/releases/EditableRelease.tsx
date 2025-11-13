@@ -103,10 +103,6 @@ export default function EditableRelease({ release, isEdit, onIsEditChange, readO
   }, [release.semver, release.notes, release.minor, release.files, release.images])
 
   useEffect(() => {
-    resetForm()
-  }, [resetForm])
-
-  useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 

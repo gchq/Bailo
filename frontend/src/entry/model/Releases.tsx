@@ -3,7 +3,7 @@ import { useGetReleasesForModelId } from 'actions/release'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { memoize } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import semver from 'semver'
 import Loading from 'src/common/Loading'
 import Paginate from 'src/common/Paginate'
@@ -41,9 +41,13 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
     />
   ))
 
+  const onLatestReleaseChange = useEffectEvent((release: string) => {
+    setLatestRelease(release)
+  })
+
   useEffect(() => {
     if (model && releases.length > 0) {
-      setLatestRelease(semver.sort(releases.map((release) => release.semver))[releases.length - 1])
+      onLatestReleaseChange(semver.sort(releases.map((release) => release.semver))[releases.length - 1])
     }
   }, [latestRelease, model, releases])
 

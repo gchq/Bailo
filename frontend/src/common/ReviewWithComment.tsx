@@ -2,7 +2,7 @@ import { Autocomplete, Button, Divider, Stack, TextField, Typography } from '@mu
 import { useTheme } from '@mui/material/styles'
 import { useGetResponses } from 'actions/response'
 import { useRouter } from 'next/router'
-import { SyntheticEvent, useEffect, useMemo, useState } from 'react'
+import { SyntheticEvent, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { latestReviewsForEachUser } from 'utils/reviewUtils'
 
 import { useGetModelRoles } from '../../actions/model'
@@ -70,15 +70,19 @@ export default function ReviewWithComment({
     return reviewComment.trim() === '' ? true : false
   }
 
+  const updateUndoButton = useEffectEvent((show: boolean) => {
+    setShowUndoButton(show)
+  })
+
   useEffect(() => {
     if (reviewRequest) {
       const latestReviewForRole = latestReviewsForEachUser([reviewRequest], responses).find(
         (latestReview) => latestReview.role === reviewRequest.role,
       )
       if (latestReviewForRole && latestReviewForRole.decision !== Decision.Undo) {
-        setShowUndoButton(true)
+        updateUndoButton(true)
       } else {
-        setShowUndoButton(false)
+        updateUndoButton(false)
       }
     }
   }, [responses, reviewRequest])

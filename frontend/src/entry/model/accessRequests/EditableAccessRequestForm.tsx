@@ -111,10 +111,6 @@ export default function EditableAccessRequestForm({
   }
 
   useEffect(() => {
-    resetForm()
-  }, [resetForm])
-
-  useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 

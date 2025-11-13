@@ -11,7 +11,7 @@ import {
 } from '@mui/material'
 import { useListUsers } from 'actions/user'
 import { debounce } from 'lodash-es'
-import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { SyntheticEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import EntityItem from 'src/entry/settings/EntityItem'
 import ManualEntityInput from 'src/entry/settings/ManualEntityInput'
 import { CollaboratorEntry, EntityKind, EntityObject, EntryKindKeys, SystemRole } from 'types/types'
@@ -58,9 +58,13 @@ export default function EntryAccessInput({ value, onChange, entryKind, entryRole
     [collaborators, entryKind, entryRoles],
   )
 
+  const onCollaboratorsChange = useEffectEvent((value: CollaboratorEntry[]) => {
+    setCollaborators(value)
+  })
+
   useEffect(() => {
     if (value) {
-      setCollaborators(value)
+      onCollaboratorsChange(value)
     }
   }, [value])
 

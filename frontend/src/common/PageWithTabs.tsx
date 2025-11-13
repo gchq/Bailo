@@ -3,7 +3,7 @@ import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
 import { useRouter } from 'next/router'
 import { ParsedUrlQuery } from 'querystring'
-import { ReactElement, SyntheticEvent, useContext, useEffect, useMemo, useState } from 'react'
+import { ReactElement, SyntheticEvent, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import UnsavedChangesContext from 'src/contexts/unsavedChangesContext'
 
@@ -51,9 +51,13 @@ export default function PageWithTabs({
   const { unsavedChanges, setUnsavedChanges, sendWarning } = useContext(UnsavedChangesContext)
   const theme = useTheme()
 
+  const currentTabChanged = useEffectEvent((newTab: string) => {
+    setCurrentTab(newTab)
+  })
+
   useEffect(() => {
     if (!tabs.length) return
-    setCurrentTab(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
+    currentTabChanged(tabs.find((pageTab) => pageTab.path === tab) ? `${tab}` : tabs[0].path)
   }, [tab, tabs])
 
   const tabsList = useMemo(

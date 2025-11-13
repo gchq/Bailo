@@ -3,7 +3,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt'
 import { Box, Card, Grid, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useGetResponses } from 'actions/response'
 import { useGetReviewRequestsForModel } from 'actions/review'
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import UserDisplay from 'src/common/UserDisplay'
@@ -37,10 +37,15 @@ export default function AccessRequestDisplay({ accessRequest, hideReviewBanner =
   } = useGetResponses([...reviews.map((review) => review._id)])
 
   const [reviewsWithLatestResponses, setReviewsWithLatestResponses] = useState<ResponseInterface[]>([])
+
+  const onUpdateReviewLatestResponse = useEffectEvent((response: ResponseInterface[]) => {
+    setReviewsWithLatestResponses(response)
+  })
+
   useEffect(() => {
     if (!isReviewsLoading && reviews) {
       const latestReviews = latestReviewsForEachUser(reviews, reviewResponses)
-      setReviewsWithLatestResponses(latestReviews)
+      onUpdateReviewLatestResponse(latestReviews)
     }
   }, [reviews, isReviewsLoading, reviewResponses])
 

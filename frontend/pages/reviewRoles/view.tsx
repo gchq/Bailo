@@ -6,7 +6,7 @@ import { useGetModelRoles } from 'actions/model'
 import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
-import { FormEvent, Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { FormEvent, Fragment, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
@@ -52,12 +52,6 @@ export default function ReviewRoles() {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
-  useEffect(() => {
-    if (reviewRoles) {
-      setFormData(removeExcessReviewRoleParams(reviewRoles[selectedRole]))
-    }
-  }, [reviewRoles, selectedRole])
-
   function removeExcessReviewRoleParams(reviewRole: ReviewRoleInterface): UpdateReviewRolesParams {
     if (reviewRole) {
       return {
@@ -71,6 +65,16 @@ export default function ReviewRoles() {
       return { shortName: '', name: '', systemRole: '' }
     }
   }
+
+  const onSetFormData = useEffectEvent((newFormData: UpdateReviewRolesParams) => {
+    setFormData(newFormData)
+  })
+
+  useEffect(() => {
+    if (reviewRoles) {
+      onSetFormData(removeExcessReviewRoleParams(reviewRoles[selectedRole]))
+    }
+  }, [reviewRoles, selectedRole])
 
   const listRoles = useMemo(
     () =>

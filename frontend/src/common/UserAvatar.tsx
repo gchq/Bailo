@@ -1,7 +1,7 @@
 import Avatar from '@mui/material/Avatar'
 import Typography from '@mui/material/Typography'
 import { randomColor } from 'randomcolor'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useEffectEvent, useState } from 'react'
 import { Entity } from 'types/types'
 
 export default function UserAvatar({
@@ -23,11 +23,23 @@ export default function UserAvatar({
     format: 'hex',
   })
 
+  const onAvatarSizeChange = useEffectEvent((updatedSize: string) => {
+    setAvatarSize(updatedSize)
+  })
+
+  const onFontSizeChange = useEffectEvent((updatedSize: number) => {
+    setFontSize(updatedSize)
+  })
+
+  const onFontColourChange = useEffectEvent((updatedFontColour: string) => {
+    setFontColour(updatedFontColour)
+  })
+
   useEffect(() => {
     switch (size) {
       case 'chip':
-        setAvatarSize('25px')
-        setFontSize(11)
+        onAvatarSizeChange('25px')
+        onFontSizeChange(11)
         break
       default:
         break
@@ -35,13 +47,13 @@ export default function UserAvatar({
 
     switch (luminosity) {
       case 'light':
-        setFontColour('black')
+        onFontColourChange('black')
         break
       case 'dark':
-        setFontColour('white')
+        onFontColourChange('white')
         break
       default:
-        setFontColour('black')
+        onFontColourChange('black')
         break
     }
   }, [size, luminosity])

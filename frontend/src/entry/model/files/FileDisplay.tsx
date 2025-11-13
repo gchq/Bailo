@@ -21,7 +21,17 @@ import { rerunFileScan, useGetFileScannerInfo } from 'actions/fileScanning'
 import { deleteModelFile, useGetModelFiles } from 'actions/model'
 import { useRouter } from 'next/router'
 import prettyBytes from 'pretty-bytes'
-import { CSSProperties, Fragment, MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  CSSProperties,
+  Fragment,
+  MouseEvent,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useState,
+} from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import Loading from 'src/common/Loading'
 import Restricted from 'src/common/Restricted'
@@ -112,9 +122,13 @@ export default function FileDisplay({
     [file, releases],
   )
 
+  const onLatestReleaseChange = useEffectEvent((semver: string) => {
+    setLatestRelease(semver)
+  })
+
   useEffect(() => {
     if (releases.length > 0 && sortedAssociatedReleases.length > 0) {
-      setLatestRelease(releases[0].semver)
+      onLatestReleaseChange(releases[0].semver)
     }
   }, [releases, setLatestRelease, sortedAssociatedReleases])
 
@@ -141,7 +155,16 @@ export default function FileDisplay({
 
   const [chipDisplay, setChipDisplay] = useState<ChipDetails | undefined>(undefined)
 
-  const updateChipDetails = useCallback(() => {
+  const threatsFound = useCallback((file: FileInterface) => {
+    if (file.avScan === undefined) {
+      return 0
+    }
+    return file.avScan.reduce((acc, scan) => {
+      return scan.viruses ? scan.viruses.length + acc : acc
+    }, 0)
+  }, [])
+
+  const updateChipDetails = useEffectEvent(() => {
     if (!isFileInterface(file) || file.avScan === undefined) {
       setChipDisplay({ label: 'Virus scan results could not be found', colour: 'warning', icon: <Warning /> })
       return
@@ -168,28 +191,19 @@ export default function FileDisplay({
         icon: <Warning />,
       })
     }
-  }, [file])
+  })
 
   useEffect(() => {
     if (chipDisplay === undefined) {
       updateChipDetails()
     }
-  }, [updateChipDetails, chipDisplay, file])
+  }, [chipDisplay, file])
 
   const sendNotification = useNotification()
   const { scanners, isScannersLoading, isScannersError } = useGetFileScannerInfo()
 
   const openMore = Boolean(anchorElMore)
   const openScan = Boolean(anchorElScan)
-
-  const threatsFound = (file: FileInterface) => {
-    if (file.avScan === undefined) {
-      return 0
-    }
-    return file.avScan.reduce((acc, scan) => {
-      return scan.viruses ? scan.viruses.length + acc : acc
-    }, 0)
-  }
 
   const handleRerunFileScanOnClick = useCallback(async () => {
     const res = await rerunFileScan(modelId, (file as FileInterface)._id)
