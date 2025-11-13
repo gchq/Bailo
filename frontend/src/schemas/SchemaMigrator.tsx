@@ -1,4 +1,4 @@
-import { Close, ExpandMore } from '@mui/icons-material'
+import { Check, Close, ExpandMore } from '@mui/icons-material'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import {
   Accordion,
@@ -10,6 +10,7 @@ import {
   Divider,
   Grid,
   IconButton,
+  ListItemText,
   Menu,
   MenuItem,
   Select,
@@ -220,10 +221,8 @@ export default function SchemaMigrator({
     }
   }
 
-  const handleClose = (event: Event) => {
-    if (!(anchorRef.current && anchorRef.current.contains(event.target as HTMLElement))) {
-      setOpen(false)
-    }
+  const handleClose = (_event: Event) => {
+    setOpen(false)
   }
 
   return (
@@ -316,7 +315,11 @@ export default function SchemaMigrator({
                 </Stack>
                 <ClickAwayListener onClickAway={handleClose}>
                   <ButtonGroup ref={anchorRef} variant='contained' color='primary'>
-                    <Button onClick={() => handleSubmitMigrationPlan(draft)} aria-label='submit migration plan'>
+                    <Button
+                      onClick={() => handleSubmitMigrationPlan(draft)}
+                      aria-label='submit migration plan'
+                      fullWidth
+                    >
                       {draft ? 'Draft migration Plan' : 'Submit migration plan'}
                     </Button>
                     <Button size='small' onClick={handleToggle}>
@@ -330,8 +333,12 @@ export default function SchemaMigrator({
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   open={open}
                 >
-                  <MenuItem onClick={() => setDraft(false)}>Submit migration plan</MenuItem>
-                  <MenuItem onClick={() => setDraft(true)}>Draft migration plan</MenuItem>
+                  <MenuItem selected={!draft} onClick={() => setDraft(false)}>
+                    <ListItemText>{'Submit migration plan'}</ListItemText>
+                  </MenuItem>
+                  <MenuItem selected={draft} onClick={() => setDraft(true)}>
+                    <ListItemText>{'Draft migration plan'}</ListItemText>
+                  </MenuItem>
                 </Menu>
                 <Typography color='error'>{submitErrorText}</Typography>
               </Stack>

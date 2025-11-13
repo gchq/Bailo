@@ -1,10 +1,12 @@
-import { Container, Paper } from '@mui/material'
+import { ArrowBack } from '@mui/icons-material'
+import { Button, Container, Paper } from '@mui/material'
 import { useGetSchema } from 'actions/schema'
 import { putSchemaMigration, useGetSchemaMigrations } from 'actions/schemaMigration'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
+import Link from 'src/Link'
 import SchemaMigrator from 'src/schemas/SchemaMigrator'
 import { CombinedSchema, QuestionMigration } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
@@ -115,6 +117,16 @@ export default function SchemaMigrationEditor() {
       {sourceSchemaCombined && targetSchemaCombined && (
         <Container maxWidth='xl'>
           <Paper sx={{ my: 4, p: 4 }}>
+            <Link href={`/schemas/list?tab=migrations`}>
+              <Button
+                size='small'
+                sx={{ width: 'fit-content', pb: 2 }}
+                startIcon={<ArrowBack />}
+                aria-label={'Return to schema select button'}
+              >
+                Back to migration list
+              </Button>
+            </Link>
             <SchemaMigrator
               questionMigrations={questionMigrations}
               setQuestionMigrations={setQuestionMigrations}

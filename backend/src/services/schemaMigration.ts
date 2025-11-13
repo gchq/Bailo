@@ -58,18 +58,9 @@ export async function updateSchemaMigrationPlan(
     })
   }
   Object.assign(schemaMigrationPlan, planDiff)
-  const updatedSchemaMigrationPlan = await SchemaMigration.findOneAndUpdate(
-    { id: schemaMigrationId },
-    {
-      $set: schemaMigrationPlan,
-    },
-  )
+  await schemaMigrationPlan.save()
 
-  if (!updatedSchemaMigrationPlan) {
-    throw BadReq(`Could not perform request to update schema migraton plan.`, { schemaMigrationId })
-  }
-
-  return updatedSchemaMigrationPlan
+  return schemaMigrationPlan
 }
 
 export async function getSchemaMigrationById(id: string) {
