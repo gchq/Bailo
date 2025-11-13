@@ -17,6 +17,7 @@ export default function DataCard() {
     model: dataCard,
     isModelLoading: isDataCardLoading,
     isModelError: isDataCardError,
+    mutateModel,
   } = useGetModel(dataCardId, EntryKind.DATA_CARD)
 
   const { userPermissions } = useContext(UserPermissionsContext)
@@ -30,7 +31,7 @@ export default function DataCard() {
             {
               title: 'Overview',
               path: 'overview',
-              view: <Overview entry={dataCard} />,
+              view: <Overview entry={dataCard} mutateEntry={mutateModel} />,
             },
             {
               title: 'Settings',
@@ -41,7 +42,7 @@ export default function DataCard() {
             },
           ]
         : [],
-    [dataCard, settingsPermission.hasPermission, settingsPermission.info],
+    [dataCard, mutateModel, settingsPermission.hasPermission, settingsPermission.info],
   )
 
   const error = MultipleErrorWrapper(`Unable to load data card page`, {
