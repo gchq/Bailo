@@ -1,47 +1,30 @@
-import { Box, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Typography } from '@mui/material'
+import { Box, Checkbox, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import { useGetModel } from 'actions/model'
-import { postRunSchemaMigration } from 'actions/schemaMigration'
 import { useMemo, useState } from 'react'
 import EmptyBlob from 'src/common/EmptyBlob'
 import { Transition } from 'src/common/Transition'
-import { EntryInterface, SchemaMigrationInterface } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
+import { SchemaMigrationInterface } from 'types/types'
 
 type MigrationListDialogProps = {
   open: boolean
   migrations: SchemaMigrationInterface[]
   onCancel: () => void
-  entry: EntryInterface
+  errorText?: string
+  onConfirmation: (migrationPlanId: string) => Promise<void>
 }
 
-export default function MigrationListDialog({ open, migrations, onCancel, entry }: MigrationListDialogProps) {
+export default function MigrationListDialog({
+  open,
+  migrations,
+  onCancel,
+  errorText,
+  onConfirmation,
+}: MigrationListDialogProps) {
   const [selectedMigrationPlan, setSelectMigrationPlan] = useState<SchemaMigrationInterface['id'] | undefined>()
-  const [errorText, setErrorText] = useState('')
-
-  const { mutateModel } = useGetModel(entry.id, entry.kind)
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectMigrationPlan((event.target as HTMLInputElement).value)
-  }
-
-  const handleMigrationConfirm = async () => {
-    setErrorText('')
-    if (!selectedMigrationPlan) {
-      return setErrorText('Invalid schema migration plan selected')
-    }
-    const res = await postRunSchemaMigration(entry.id, selectedMigrationPlan)
-    if (!res.ok) {
-      setErrorText(await getErrorMessage(res))
-    } else {
-      mutateModel()
-      onCancel()
-    }
-  }
 
   const migrationList = useMemo(() => {
     if (migrations.length === 0) {
@@ -51,26 +34,32 @@ export default function MigrationListDialog({ open, migrations, onCancel, entry 
         </Box>
       )
     }
+
     return migrations.map((migration) => (
-      <FormControlLabel key={migration.id} value={migration.id} control={<Radio />} label={migration.name} />
+      <ListItem key={migration.id} disablePadding>
+        <ListItemButton role={undefined} onClick={() => setSelectMigrationPlan(migration.id)} dense>
+          <ListItemIcon>
+            <Checkbox
+              edge='start'
+              checked={selectedMigrationPlan === migration.id}
+              tabIndex={-1}
+              disableRipple
+              value={selectedMigrationPlan}
+              slotProps={{ input: { 'aria-labelledby': `Schema migration plan ${migration.name}` } }}
+            />
+          </ListItemIcon>
+          <ListItemText primary={migration.name} secondary={migration.description} />
+        </ListItemButton>
+      </ListItem>
     ))
-  }, [migrations])
+  }, [migrations, setSelectMigrationPlan, selectedMigrationPlan])
 
   return (
-    <Dialog fullWidth open={open} onClose={onCancel} TransitionComponent={Transition}>
-      <DialogTitle>Select a migration</DialogTitle>
+    <Dialog fullWidth open={open} onClose={onCancel} slots={{ transition: Transition }}>
+      <DialogTitle color='primary'>Select a Migration Plan</DialogTitle>
+      <Divider flexItem />
       <DialogContent>
-        <FormControl sx={{ width: '100%' }}>
-          <FormLabel id='migration-plan-selector'>Plans</FormLabel>
-          <RadioGroup
-            aria-labelledby='migration-plan-selector'
-            name='migration-plan-selector-group'
-            value={selectedMigrationPlan}
-            onChange={handleChange}
-          >
-            {migrationList}
-          </RadioGroup>
-        </FormControl>
+        {migrationList}
         <Typography variant='caption' color='error'>
           {errorText}
         </Typography>
@@ -79,7 +68,13 @@ export default function MigrationListDialog({ open, migrations, onCancel, entry 
         <Button color='secondary' variant='outlined' onClick={onCancel}>
           Cancel
         </Button>
-        <Button variant='contained' onClick={() => handleMigrationConfirm()} autoFocus data-test='confirmButton'>
+        <Button
+          disabled={!selectedMigrationPlan}
+          variant='contained'
+          onClick={() => onConfirmation(selectedMigrationPlan as string)}
+          autoFocus
+          data-test='confirmButton'
+        >
           Confirm
         </Button>
       </DialogActions>
