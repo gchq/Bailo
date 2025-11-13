@@ -48,14 +48,22 @@ export default function ExpandableButton({
     },
   })
 
+  const renderStyledButton = () => {
+    return (
+      <StyledButton>
+        <Box sx={{ px: 1 }}>
+          <Stack direction='row' alignItems='center' spacing={2}>
+            {icon}
+            <Typography sx={{ whiteSpace: 'nowrap' }}>{label}</Typography>
+          </Stack>
+        </Box>
+      </StyledButton>
+    )
+  }
+
   return (
-    <StyledButton data-test='expandableButton' onClick={() => onClick()} aria-label={ariaLabel}>
-      <Box sx={{ px: 1 }}>
-        <Stack direction='row' alignItems='center' spacing={2}>
-          {icon}
-          <Typography sx={{ whiteSpace: 'nowrap' }}>{label}</Typography>
-        </Stack>
-      </Box>
-    </StyledButton>
+    <Box data-test='expandableButton' onClick={() => onClick()} aria-label={ariaLabel}>
+      {renderStyledButton()}
+    </Box>
   )
 }

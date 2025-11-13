@@ -45,10 +45,6 @@ export default function EditableInference({ inference }: EditableInferenceProps)
   const handleRegistryError = useCallback((value: boolean) => setIsRegistryError(value), [])
 
   useEffect(() => {
-    resetForm()
-  }, [resetForm])
-
-  useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 

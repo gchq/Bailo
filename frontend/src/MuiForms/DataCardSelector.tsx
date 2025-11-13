@@ -6,7 +6,7 @@ import { Registry } from '@rjsf/utils'
 import { EntrySearchResult, useListModels } from 'actions/model'
 import { debounce } from 'lodash-es'
 import { useRouter } from 'next/router'
-import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useState } from 'react'
 import { EntryKind } from 'types/types'
 
 import Loading from '../common/Loading'
@@ -46,6 +46,10 @@ export default function DataCardSelector({
   const theme = useTheme()
   const router = useRouter()
 
+  const onSeelctedDataCardsChanged = useEffectEvent((newDataCards: EntrySearchResult[]) => {
+    setSelectedDataCards(newDataCards)
+  })
+
   useEffect(() => {
     if (currentValue) {
       const updatedDataCards: EntrySearchResult[] = dataCards.filter((dataCard) => {
@@ -53,7 +57,7 @@ export default function DataCardSelector({
           return dataCard
         }
       })
-      setSelectedDataCards(updatedDataCards)
+      onSeelctedDataCardsChanged(updatedDataCards)
     }
   }, [currentValue, dataCards])
 
