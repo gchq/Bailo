@@ -1,8 +1,9 @@
 import MigrationModel, { MigrationMetadata } from '../models/Migration.js'
 
 export async function doesMigrationExist(name: string) {
+  const nameWithNoExtension = name.split('.')[0]
   const migration = await MigrationModel.findOne({
-    name,
+    name: { $regex: nameWithNoExtension },
   })
 
   if (!migration) {
