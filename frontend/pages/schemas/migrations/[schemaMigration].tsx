@@ -122,7 +122,7 @@ export default function SchemaMigrationEditor() {
                 size='small'
                 sx={{ width: 'fit-content', pb: 2 }}
                 startIcon={<ArrowBack />}
-                aria-label={'Return to schema select button'}
+                aria-label={'Return to migration list select button'}
               >
                 Back to migration list
               </Button>

@@ -13,7 +13,11 @@ export default function SchemaMigrationList() {
   const SchemaMigrationList = memoize(({ data, index }) => (
     <Stack sx={{ p: 2 }} spacing={1}>
       <Stack direction='row' spacing={2} justifyContent='space-between'>
-        <Link href={`/schemas/migrations/${data[index].id}`} noLinkStyle>
+        <Link
+          href={`/schemas/migrations/${data[index].id}`}
+          noLinkStyle
+          aria-label={`go to the ${data[index].name} migration plan`}
+        >
           <Typography fontWeight='bold' color='primary' variant='h6'>
             {`${data[index].name}`}
             <span style={{ color: 'gray', fontStyle: 'italic' }}>{` ${data[index].draft ? '(draft)' : ''}`}</span>

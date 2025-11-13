@@ -5,7 +5,9 @@ import {
   createSchemaMigrationPlan,
   runModelSchemaMigration,
   searchSchemaMigrations,
+  updateSchemaMigrationPlan,
 } from '../../src/services/schemaMigration.js'
+import { SchemaMigrationKind } from '../../src/types/enums.js'
 import { testModelSchema, testSchemaMigration } from '../testUtils/testModels.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
@@ -82,6 +84,14 @@ const schemaMocks = vi.hoisted(() => {
   return model
 })
 vi.mock('../../src/models/Schema.js', () => ({ default: schemaMocks }))
+
+// const schemaMigrationMocks = vi.hoisted(() => {
+//   return {
+//     getSchemaMigrationById: vi.fn(),
+//   }
+// })
+
+// vi.mock('../../src/services/schemaMigration.js', () => schemaMigrationMocks)
 
 describe('services > schemaMigration', () => {
   const testUser = { dn: 'user' } as UserInterface
@@ -161,5 +171,44 @@ describe('services > schemaMigration', () => {
     await runModelSchemaMigration({} as UserInterface, 'my-model-123', testSchemaMigration.id)
     expect(testModelForMigration.save).toBeCalledTimes(2)
     expect(testModelForMigration.set).toBeCalledTimes(3)
+  })
+
+  test('update migration > suceess', async () => {
+    await updateSchemaMigrationPlan(testUser, '1241', {
+      name: 'my migration plan',
+      description: 'This is a test migration plan',
+      questionMigrations: [
+        {
+          id: 'test',
+          kind: SchemaMigrationKind.Move,
+          sourcePath: 's1.q1',
+          targetPath: 's2.q1',
+          propertyType: 'string',
+        },
+      ],
+      draft: true,
+    })
+    expect(mockSchemaMigration.save).toBeCalled()
+  })
+
+  test('update migration > not found', async () => {
+    mockSchemaMigration.findOne.mockResolvedValueOnce(null)
+
+    await expect(() =>
+      updateSchemaMigrationPlan(testUser, '1241', {
+        name: 'my migration plan',
+        description: 'This is a test migration plan',
+        questionMigrations: [
+          {
+            id: 'test',
+            kind: SchemaMigrationKind.Move,
+            sourcePath: 's1.q1',
+            targetPath: 's2.q1',
+            propertyType: 'string',
+          },
+        ],
+        draft: true,
+      }),
+    ).rejects.toThrowError('Cannot find specified schema migration plan.')
   })
 })

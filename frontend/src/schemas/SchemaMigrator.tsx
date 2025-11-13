@@ -1,4 +1,4 @@
-import { Check, Close, ExpandMore } from '@mui/icons-material'
+import { Close, ExpandMore } from '@mui/icons-material'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import {
   Accordion,
@@ -317,12 +317,12 @@ export default function SchemaMigrator({
                   <ButtonGroup ref={anchorRef} variant='contained' color='primary'>
                     <Button
                       onClick={() => handleSubmitMigrationPlan(draft)}
-                      aria-label='submit migration plan'
+                      aria-label={`${draft ? 'draft' : 'submit'} migration plan`}
                       fullWidth
                     >
                       {draft ? 'Draft migration Plan' : 'Submit migration plan'}
                     </Button>
-                    <Button size='small' onClick={handleToggle}>
+                    <Button size='small' onClick={handleToggle} aria-label='dropdown for save options'>
                       <ArrowDropDownIcon />
                     </Button>
                   </ButtonGroup>
@@ -333,10 +333,10 @@ export default function SchemaMigrator({
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   open={open}
                 >
-                  <MenuItem selected={!draft} onClick={() => setDraft(false)}>
+                  <MenuItem selected={!draft} onClick={() => setDraft(false)} aria-label='submit migration plan'>
                     <ListItemText>{'Submit migration plan'}</ListItemText>
                   </MenuItem>
-                  <MenuItem selected={draft} onClick={() => setDraft(true)}>
+                  <MenuItem selected={draft} onClick={() => setDraft(true)} aria-label='draft migration plan'>
                     <ListItemText>{'Draft migration plan'}</ListItemText>
                   </MenuItem>
                 </Menu>

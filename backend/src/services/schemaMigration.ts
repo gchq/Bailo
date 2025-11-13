@@ -5,7 +5,7 @@ import SchemaMigration, { SchemaMigrationInterface } from '../models/SchemaMigra
 import SchemaMigrationModel from '../models/SchemaMigration.js'
 import { UserInterface } from '../models/User.js'
 import { SchemaMigrationKind } from '../types/enums.js'
-import { BadReq, Forbidden } from '../utils/error.js'
+import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { handleDuplicateKeys } from '../utils/mongo.js'
 import { getPropValue } from '../utils/object.js'
@@ -46,9 +46,9 @@ export async function updateSchemaMigrationPlan(
   schemaMigrationId: string,
   planDiff: UpdateSchemaMigrationPlan,
 ) {
-  const schemaMigrationPlan = await getSchemaMigrationById(schemaMigrationId)
+  const schemaMigrationPlan = await SchemaMigrationModel.findOne({ id: schemaMigrationId })
   if (!schemaMigrationPlan) {
-    throw BadReq('Cannot find specified schema migration plan.', { schemaMigrationId })
+    throw NotFound('Cannot find specified schema migration plan.', { schemaMigrationId })
   }
   const auth = await authorisation.schemaMigration(user, schemaMigrationPlan, SchemaMigrationAction.Update)
   if (!auth.success) {
@@ -61,10 +61,6 @@ export async function updateSchemaMigrationPlan(
   await schemaMigrationPlan.save()
 
   return schemaMigrationPlan
-}
-
-export async function getSchemaMigrationById(id: string) {
-  return await SchemaMigrationModel.findOne({ id: id })
 }
 
 export async function searchSchemaMigrations(id?: string, sourceSchema?: string) {
@@ -89,7 +85,7 @@ export async function runModelSchemaMigration(user: UserInterface, modelId: stri
     throw BadReq('Model cannot be migrated as it does not have a valid model card.', { modelId })
   }
 
-  const migrationPlan = await getSchemaMigrationById(migrationPlanId)
+  const migrationPlan = await SchemaMigrationModel.findOne({ id: migrationPlanId })
   if (!migrationPlan) {
     throw BadReq('Cannot find specified schema migration plan.', { migrationPlanId })
   }
