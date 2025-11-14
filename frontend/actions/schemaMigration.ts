@@ -10,6 +10,8 @@ interface PostSchemaMigrationParams {
   sourceSchema: string
   targetSchema: string
 
+  draft: boolean
+
   questionMigrations: QuestionMigration[]
 }
 
@@ -18,6 +20,17 @@ export async function postSchemaMigration(data: PostSchemaMigrationParams) {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
+  })
+}
+
+export async function putSchemaMigration(
+  schemaMigrationId: string,
+  planDiff: Pick<SchemaMigrationInterface, 'name' | 'description' | 'questionMigrations' | 'draft'>,
+) {
+  return fetch(`/api/v2/schema-migrations/${schemaMigrationId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(planDiff),
   })
 }
 

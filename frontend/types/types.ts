@@ -657,6 +657,7 @@ export interface SchemaMigrationInterface {
   id: string
   description?: string
   questionMigrations: QuestionMigration[]
+  draft: boolean
   sourceSchema: string
   targetSchema: string
   createdAt: string
