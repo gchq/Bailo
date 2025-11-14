@@ -1,0 +1,44 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > model > file > postStartMultipartUpload > 200 > ok 1`] = `
+{
+  "chunks": [
+    {
+      "endByte": 12345,
+      "presignedUrl": "string",
+      "startByte": 0,
+    },
+  ],
+  "fileId": "test",
+  "uploadId": "test",
+}
+`;
+
+exports[`routes > model > file > postStartMultipartUpload > 400 > no name 1`] = `
+{
+  "error": {
+    "context": {
+      "errors": [
+        {
+          "code": "invalid_type",
+          "expected": "string",
+          "message": "Required",
+          "path": [
+            "body",
+            "name",
+          ],
+          "received": "undefined",
+        },
+      ],
+    },
+    "message": "Path: body.name - Message: Required",
+    "name": "Bailo Error",
+  },
+}
+`;
+
+exports[`routes > model > file > postStartMultipartUpload > audit > expected call 1`] = `
+{
+  "id": "test",
+}
+`;

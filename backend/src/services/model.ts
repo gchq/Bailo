@@ -103,7 +103,7 @@ export async function getModelById(user: UserInterface, modelId: string, kind?: 
   })
 
   if (!model) {
-    throw NotFound(`The requested entry was not found.`, { modelId })
+    throw NotFound('The requested entry was not found.', { modelId })
   }
 
   const auth = await authorisation.model(user, model, ModelAction.View)
