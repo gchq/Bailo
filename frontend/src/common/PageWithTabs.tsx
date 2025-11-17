@@ -120,11 +120,11 @@ export default function PageWithTabs({
   return (
     <>
       <Stack
-        direction='row'
         divider={<Divider flexItem orientation='vertical' />}
         alignItems='center'
         spacing={{ xs: 1, sm: 2 }}
         sx={{ px: 2, pb: 2 }}
+        direction={{ xs: 'column', sm: 'row' }}
       >
         <Stack overflow='auto' sx={{ maxWidth: 'md' }}>
           <Stack textOverflow='ellipsis' overflow='hidden' direction='row'>
@@ -174,6 +174,7 @@ export default function PageWithTabs({
         indicatorColor='secondary'
         scrollButtons='auto'
         variant='scrollable'
+        allowScrollButtonsMobile
       >
         {tabsList}
       </Tabs>
