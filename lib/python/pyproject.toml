@@ -29,18 +29,18 @@ dependencies = [
 
 [project.optional-dependencies]
 mlflow = [
-    "mlflow-skinny[mlserver]==3.1.4"
+    "mlflow-skinny[mlserver]==3.6.0"
 ]
 test = [
-    "black==25.9.0",
+    "black==25.11.0",
     "check-manifest==0.51",
-    "pre-commit==4.3.0",
-    "pylint==3.3.9",
+    "pre-commit==4.4.0",
+    "pylint==4.0.3",
     "pylint_junit==0.3.5",
     "pytest-cov==7.0.0",
     "pytest-mock==3.15.1",
     "pytest-runner==6.0.1",
-    "pytest==8.4.2",
+    "pytest==9.0.1",
     "pytest-github-actions-annotate-failures==0.3.0",
     "requests_mock==1.12.1",
     "shellcheck-py==0.11.0.1",
