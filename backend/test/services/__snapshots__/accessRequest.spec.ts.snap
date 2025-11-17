@@ -4,7 +4,13 @@ exports[`services > accessRequest > findAccessRequest > admin access with auth 1
 
 exports[`services > accessRequest > findAccessRequest > all filters 1`] = `[]`;
 
-exports[`services > accessRequest > findAccessRequest > no filters 1`] = `[]`;
+exports[`services > accessRequest > findAccessRequest > no filters 1`] = `
+[
+  {
+    "_id": "a",
+  },
+]
+`;
 
 exports[`services > accessRequest > getAccessRequestsByModel > good 1`] = `
 [

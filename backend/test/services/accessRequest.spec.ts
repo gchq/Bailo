@@ -19,6 +19,28 @@ const modelMocks = vi.hoisted(() => ({
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
+const modelModelMocks = vi.hoisted(() => {
+  const obj: any = { settings: { mirror: { sourceModelId: '' } } }
+
+  obj.aggregate = vi.fn(() => obj)
+  obj.match = vi.fn(() => obj)
+  obj.sort = vi.fn(() => obj)
+  obj.lookup = vi.fn(() => obj)
+  obj.append = vi.fn(() => obj)
+  obj.find = vi.fn(() => obj)
+  obj.findOne = vi.fn(() => obj)
+  obj.findOneAndUpdate = vi.fn(() => obj)
+  obj.updateOne = vi.fn(() => obj)
+  obj.save = vi.fn(() => obj)
+  obj.findByIdAndUpdate = vi.fn(() => obj)
+
+  const model: any = vi.fn(() => obj)
+  Object.assign(model, obj)
+
+  return model
+})
+vi.mock('../../src/models/Model.js', () => ({ default: modelModelMocks }))
+
 const schemaMocks = vi.hoisted(() => ({
   getSchemaById: vi.fn(),
 }))
@@ -144,7 +166,11 @@ describe('services > accessRequest', () => {
 
   test('findAccessRequest > no filters', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
-    accessRequestModelMocks.find.mockResolvedValue([])
+    accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }])
+    modelModelMocks.findOne.mockResolvedValueOnce({
+      _id: 'a',
+      toObject: vi.fn(() => ({ _id: 'a' })),
+    })
 
     const accessRequests = await findAccessRequest({} as any, [], '', [], false)
     expect(accessRequests).toMatchSnapshot()
