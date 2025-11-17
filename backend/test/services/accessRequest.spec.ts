@@ -142,22 +142,36 @@ describe('services > accessRequest', () => {
     expect(accessRequests).toMatchSnapshot()
   })
 
-  test('findAccessRequest > admin success', async () => {
-    mockAuthentication.hasRole.mockReturnValueOnce(true)
+  test('findAccessRequest > no filters', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(false)
+    accessRequestModelMocks.find.mockResolvedValue([])
 
-    accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }, { _id: 'b' }])
-    const accessRequests = await findAccessRequest({} as any, true)
+    const accessRequests = await findAccessRequest({} as any, [], '', [], false)
     expect(accessRequests).toMatchSnapshot()
   })
 
-  test('findAccessRequest > error', async () => {
+  test('findAccessRequest > all filters', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
-    await expect(() => findAccessRequest({} as any, true)).rejects.toThrowError(
-      /^You cannot view all access requests if you are not an admin./,
+    accessRequestModelMocks.find.mockResolvedValue([])
+
+    const accessRequests = await findAccessRequest({} as any, ['modelId'], 'schemaId', ['filter'], false)
+    expect(accessRequests).toMatchSnapshot()
+  })
+
+  test('findAccessRequest > admin access without auth', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(false)
+    await expect(() => findAccessRequest({} as any, [], '', [], true)).rejects.toThrowError(
+      /^You do not have the required role./,
     )
   })
 
-  // TODO: case of regular user?
+  test('findAccessRequest > admin access with auth', async () => {
+    mockAuthentication.hasRole.mockReturnValueOnce(true)
+    accessRequestModelMocks.find.mockResolvedValue([])
+
+    const accessRequests = await findAccessRequest({} as any, ['modelId'], 'schemaId', ['filter'], true)
+    expect(accessRequests).toMatchSnapshot()
+  })
 
   test('removeAccessRequest > success', async () => {
     reviewModelMocks.find.mockResolvedValue([])

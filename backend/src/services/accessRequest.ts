@@ -6,7 +6,7 @@ import authentication from '../connectors/authentication/index.js'
 import { Roles } from '../connectors/authentication/Base.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import AccessRequestModel, { AccessRequestInterface } from '../models/AccessRequest.js'
+import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
 import AccessRequest from '../models/AccessRequest.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
@@ -140,7 +140,7 @@ export async function findAccessRequest(
   schemaId: string,
   filters: Array<string>,
   adminAccess?: boolean,
-): Promise<Array<AccessRequestInterface>> {
+): Promise<Array<AccessRequestDoc>> {
   if (adminAccess) {
     if (!(await authentication.hasRole(user, Roles.Admin))) {
       throw Forbidden('You do not have the required role.', {
