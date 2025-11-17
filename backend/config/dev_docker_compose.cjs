@@ -5,7 +5,7 @@ module.exports = {
   },
 
   mongo: {
-    uri: 'mongodb://mongo:27017/bailo',
+    uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
   },
 
   app: {

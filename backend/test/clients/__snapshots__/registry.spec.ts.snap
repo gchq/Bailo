@@ -1,5 +1,30 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`clients > registry > deleteManifest > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/manifests/tag",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+        "Authorization": "Bearer token",
+      },
+      "method": "DELETE",
+      "signal": AbortSignal {
+        Symbol(kEvents): Map {},
+        Symbol(events.maxEventTargetListeners): 0,
+        Symbol(events.maxEventTargetListenersWarned): false,
+        Symbol(kHandlers): Map {},
+        Symbol(kAborted): false,
+        Symbol(kReason): undefined,
+        Symbol(kComposite): false,
+      },
+    },
+  ],
+]
+`;
+
 exports[`clients > registry > doesLayerExist > success false 1`] = `
 [
   [
@@ -152,6 +177,31 @@ exports[`clients > registry > listModelRepos > only returns model repos 1`] = `
       "headers": {
         "Authorization": "Bearer token",
       },
+      "signal": AbortSignal {
+        Symbol(kEvents): Map {},
+        Symbol(events.maxEventTargetListeners): 0,
+        Symbol(events.maxEventTargetListenersWarned): false,
+        Symbol(kHandlers): Map {},
+        Symbol(kAborted): false,
+        Symbol(kReason): undefined,
+        Symbol(kComposite): false,
+      },
+    },
+  ],
+]
+`;
+
+exports[`clients > registry > mountBlob > success 1`] = `
+[
+  [
+    "https://localhost:5000/v2/modelId/image/blobs/uploads/?from=modelId/image&mount=blob",
+    {
+      "dispatcher": "mock agent",
+      "headers": {
+        "Authorization": "Bearer token",
+        "Content-Length": "0",
+      },
+      "method": "POST",
       "signal": AbortSignal {
         Symbol(kEvents): Map {},
         Symbol(events.maxEventTargetListeners): 0,
