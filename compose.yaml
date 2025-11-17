@@ -51,7 +51,7 @@ services:
     networks:
       internal:
     healthcheck:
-      test: ["CMD-SHELL", "echo 'PING' | nc -w 5 localhost 3310"]
+      test: ['CMD-SHELL', "echo 'PING' | nc -w 5 localhost 3310"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -63,7 +63,7 @@ services:
     volumes:
       - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://127.0.0.1:3311/info || exit 1"]
+      test: ['CMD-SHELL', 'curl --fail http://127.0.0.1:3311/info || exit 1']
       interval: 30s
       timeout: 10s
       retries: 5
