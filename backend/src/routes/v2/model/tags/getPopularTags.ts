@@ -9,7 +9,7 @@ export const getPopularTagsSchema = z.object({})
 
 registerPath({
   method: 'get',
-  path: '/api/v2/model',
+  path: '/api/v2/models/tags',
   tags: ['tags'],
   description: 'Get a list of the most commonly used tags',
   schema: getPopularTagsSchema,

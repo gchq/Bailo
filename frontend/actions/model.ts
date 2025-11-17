@@ -215,7 +215,7 @@ export function useGetPopularEntryTags() {
       tags: string[]
     },
     ErrorInfo
-  >('/api/v2/tags', fetcher)
+  >('/api/v2/models/tags', fetcher)
 
   return {
     mutateTags: mutate,

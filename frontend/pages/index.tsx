@@ -398,7 +398,7 @@ export default function Marketplace() {
                 {federationEnabled && reachablePeerList && reachablePeerList.length > 0 && (
                   <Box>
                     <ChipSelector
-                      label='External repos'
+                      label='External Repositories'
                       chipTooltipTitle={'Include external repostories'}
                       options={reachablePeerList}
                       expandThreshold={10}

@@ -227,7 +227,7 @@ server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
 server.post('/api/v2/review/role', ...postReviewRole)
 server.put('/api/v2/review/role/:shortName', ...putReviewRole)
 
-server.get('/api/v2/tags', getPopularTags)
+server.get('/api/v2/models/tags', getPopularTags)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
