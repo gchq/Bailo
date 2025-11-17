@@ -50,7 +50,7 @@ export default function ExpandableButton({
 
   const renderStyledButton = () => {
     return (
-      <StyledButton>
+      <StyledButton onClick={() => onClick()}>
         <Box sx={{ px: 1 }}>
           <Stack direction='row' alignItems='center' spacing={2}>
             {icon}
@@ -62,7 +62,7 @@ export default function ExpandableButton({
   }
 
   return (
-    <Box data-test='expandableButton' onClick={() => onClick()} aria-label={ariaLabel}>
+    <Box data-test='expandableButton' aria-label={ariaLabel}>
       {renderStyledButton()}
     </Box>
   )
