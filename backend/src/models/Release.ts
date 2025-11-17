@@ -26,9 +26,11 @@ export interface ReleaseInterface {
   updatedAt: Date
 }
 
-export interface ImageRefInterface {
+export interface RepoRefInterface {
   repository: string
   name: string
+}
+export interface ImageRefInterface extends RepoRefInterface {
   tag: string
 }
 

@@ -20,6 +20,9 @@ import { bailoErrorGuard } from './../middleware/expressErrorHandler.js'
 
 let adminToken: string | undefined
 
+// Similar to the MongoDB soft-delete plugin, specify the prefix for any deleted image names
+export const softDeletePrefix = 'soft_deleted/'
+
 export async function getAdminToken() {
   if (!adminToken) {
     const key = await getPrivateKey()
@@ -159,6 +162,16 @@ function generateAccess(scope: any) {
 }
 
 async function checkAccess(access: Access, user: UserInterface): Promise<AuthResponse> {
+  if (access.name.startsWith(softDeletePrefix)) {
+    const info = `Access name must not begin with soft delete prefix: ${softDeletePrefix}`
+    log.warn({ userDn: user.dn, access }, info)
+    return {
+      id: access.name,
+      success: false,
+      info,
+    }
+  }
+
   const modelId = access.name.split('/')[0]
   let model: ModelDoc
   try {
