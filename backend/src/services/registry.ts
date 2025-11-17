@@ -11,12 +11,12 @@ import { GetImageTagManifestResponse } from '../clients/registryResponses.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
-import { Action, getAccessToken } from '../routes/v1/registryAuth.js'
+import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
-import config from '../utils/config.js'
 import { Forbidden, InternalError, NotFound } from '../utils/error.js'
 import log from './log.js'
-import { findAndDeleteImageFromReleases, getModelById } from './model.js'
+import { getModelById } from './model.js'
+import { findAndDeleteImageFromReleases } from './release.js'
 
 // derived from https://pkg.go.dev/github.com/distribution/reference#pkg-overview
 const imageRegex =
@@ -202,7 +202,9 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
 }
 
 export async function softDeleteImage(user: UserInterface, imageRef: ImageRefInterface) {
-  const softDeleteNamespace = `${config.registry.softDeletePrefix}${imageRef.repository}`
+  await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
+
+  const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
   await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef)

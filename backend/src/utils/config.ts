@@ -121,8 +121,6 @@ export interface Config {
     issuer: string
 
     insecure: boolean
-
-    softDeletePrefix: string
   }
 
   ui: UiConfig

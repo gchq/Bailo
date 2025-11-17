@@ -19,12 +19,17 @@ vi.mock('../../src/connectors/authorisation/index.js', () => authMocks)
 
 const modelMocks = vi.hoisted(() => ({
   getModelById: vi.fn(() => ({ _id: 'test' })),
-  findAndDeleteImageFromReleases: vi.fn(),
 }))
 vi.mock('../../src/services/model.js', () => modelMocks)
 
+const releaseMocks = vi.hoisted(() => ({
+  findAndDeleteImageFromReleases: vi.fn(),
+}))
+vi.mock('../../src/services/release.js', () => releaseMocks)
+
 const registryAuthMocks = vi.hoisted(() => ({
   getAccessToken: vi.fn(() => 'token'),
+  softDeletePrefix: 'soft_deleted/',
 }))
 vi.mock('../../src/routes/v1/registryAuth.ts', () => registryAuthMocks)
 
@@ -484,7 +489,7 @@ describe('services > registry', () => {
       await softDeleteImage({} as any, source)
 
       expect(registryClientMocks.deleteManifest).toHaveBeenCalled()
-      expect(modelMocks.findAndDeleteImageFromReleases).toHaveBeenCalledWith({}, 'sourceRepository', source)
+      expect(releaseMocks.findAndDeleteImageFromReleases).toHaveBeenCalledWith({}, 'sourceRepository', source)
     })
   })
 })

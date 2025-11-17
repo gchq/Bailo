@@ -11,7 +11,6 @@ import { addDefaultReviewRoles } from './services/review.js'
 import { addDefaultSchemas } from './services/schema.js'
 import config from './utils/config.js'
 import { connectToMongoose, runMigrations } from './utils/database.js'
-import { ConfigurationError } from './utils/error.js'
 import { registerSigTerminate } from './utils/signals.js'
 
 // Update certificates based on mount
@@ -26,14 +25,6 @@ extendZodWithOpenApi(z)
 if (config.s3.automaticallyCreateBuckets) {
   ensureBucketExists(config.s3.buckets.uploads)
   ensureBucketExists(config.s3.buckets.registry)
-}
-
-// check that the soft delete prefix for the registry will not conflict
-if (!config.registry.softDeletePrefix.match(/[^a-z 0-9]/)) {
-  throw ConfigurationError(
-    'Soft deletion config string must not allow users to bypass registry authentication. Please use a non alphanumeric character eg an underscore.',
-    { softDeletePrefix: config.registry.softDeletePrefix },
-  )
 }
 
 // connect to Mongo

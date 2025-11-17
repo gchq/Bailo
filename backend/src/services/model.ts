@@ -9,7 +9,6 @@ import authorisation from '../connectors/authorisation/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
-import ReleaseModel, { ImageRefInterface } from '../models/Release.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
@@ -644,22 +643,4 @@ export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) 
     .filter((collaborator) => entities.includes(collaborator.entity))
     .map((collaborator) => collaborator.roles)
     .flat()
-}
-
-export async function findAndDeleteImageFromReleases(
-  user: UserInterface,
-  modelId: string,
-  imageRef: ImageRefInterface,
-) {
-  // Handles auth
-  await getModelById(user, modelId)
-
-  await ReleaseModel.updateMany(
-    { modelId },
-    {
-      $pull: {
-        images: { ...imageRef },
-      },
-    },
-  )
 }

@@ -50,7 +50,7 @@ export const deleteImage = [
     await audit.onDeleteImage(req, modelId, {
       name,
       tag,
-      repository: '',
+      repository: modelId,
     })
 
     res.json({

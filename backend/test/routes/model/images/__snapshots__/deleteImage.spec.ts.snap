@@ -11,7 +11,7 @@ exports[`routes > images > getImages > audit > expected call 1`] = `"expedita"`;
 exports[`routes > images > getImages > audit > expected call 2`] = `
 {
   "name": "Dr. Garry Cummerata",
-  "repository": "",
+  "repository": "expedita",
   "tag": "expedita",
 }
 `;

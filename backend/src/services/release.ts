@@ -6,6 +6,7 @@ import authorisation from '../connectors/authorisation/index.js'
 import { FileWithScanResultsInterface } from '../models/File.js'
 import { ModelDoc, ModelInterface } from '../models/Model.js'
 import Release, { ImageRefInterface, ReleaseDoc, ReleaseInterface, SemverObject } from '../models/Release.js'
+import ReleaseModel from '../models/Release.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import Review, { ReviewDoc } from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
@@ -628,4 +629,22 @@ export async function saveImportedRelease(release: Omit<ReleaseDoc, '_id'>) {
     // This release did not already exist in Mongo, so it is a new release. Return it to be audited.
     return release
   }
+}
+
+export async function findAndDeleteImageFromReleases(
+  user: UserInterface,
+  modelId: string,
+  imageRef: ImageRefInterface,
+) {
+  // Handles auth
+  await getModelById(user, modelId)
+
+  await ReleaseModel.updateMany(
+    { modelId },
+    {
+      $pull: {
+        images: { ...imageRef },
+      },
+    },
+  )
 }
