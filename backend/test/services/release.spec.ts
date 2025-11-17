@@ -8,6 +8,7 @@ import { listModelImages } from '../../src/services/registry.js'
 import {
   createRelease,
   deleteRelease,
+  findAndDeleteImageFromReleases,
   getAllFileIds,
   getFileByReleaseFileName,
   getModelReleases,
@@ -699,5 +700,23 @@ describe('services > release', () => {
     const result = isReleaseDoc(null)
 
     expect(result).toBe(false)
+  })
+
+  test('findAndDeleteImageFromReleases > success', async () => {
+    const mockUser: any = { dn: 'test' }
+    const modelId = 'example'
+    const imageRef = { repository: 'repository', name: 'name', tag: 'tag' }
+
+    await findAndDeleteImageFromReleases(mockUser, modelId, imageRef)
+
+    expect(modelMocks.getModelById).toHaveBeenCalledWith(mockUser, modelId)
+    expect(releaseModelMocks.updateMany).toHaveBeenCalledWith(
+      { modelId },
+      {
+        $pull: {
+          images: { ...imageRef },
+        },
+      },
+    )
   })
 })

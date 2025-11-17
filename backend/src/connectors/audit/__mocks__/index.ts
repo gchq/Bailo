@@ -47,6 +47,7 @@ const audit = {
   onDeleteInference: vi.fn(),
 
   onViewModelImages: vi.fn(),
+  onDeleteImage: vi.fn(),
 
   onCreateS3Export: vi.fn(),
   onCreateImport: vi.fn(),
