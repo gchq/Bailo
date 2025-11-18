@@ -1,6 +1,4 @@
 import Edit from '@mui/icons-material/Edit'
-import GroupsIcon from '@mui/icons-material/Groups'
-import PersonIcon from '@mui/icons-material/Person'
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
 import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
@@ -143,17 +141,11 @@ export default function ReviewRoles() {
     [defaultEntitiesEntry, formData, mutateReviewRoles],
   )
 
-  const displayEntityIcon = (defaultEntity: string) => {
-    const isUser = defaultEntity.startsWith('user:')
-    return isUser ? <PersonIcon color='primary' /> : <GroupsIcon color='secondary' />
-  }
-
   const displayReviewRoleDefaultEntities = useMemo(() => {
     return formData?.defaultEntities && formData?.defaultEntities.length > 0
       ? formData.defaultEntities.map((defaultEntity) => (
           <Stack key={defaultEntity} direction='row' alignItems='center' spacing={1}>
-            {displayEntityIcon(defaultEntity)}
-            <UserDisplay dn={defaultEntity} />
+            <UserDisplay dn={defaultEntity} showIcon />
           </Stack>
         ))
       : 'No entities assigned'

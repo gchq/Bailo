@@ -22,7 +22,6 @@ import { useGetModelRoles } from 'actions/model'
 import { ChangeEvent, Dispatch, FormEvent, ReactElement, SetStateAction, useMemo } from 'react'
 import LabelledInput from 'src/common/LabelledInput'
 import Loading from 'src/common/Loading'
-import EntityIcon from 'src/entry/EntityIcon'
 import EntityNameDisplay from 'src/entry/EntityNameDisplay'
 import EntryAccessInput from 'src/entry/settings/EntryAccessInput'
 import MessageAlert from 'src/MessageAlert'
@@ -99,7 +98,6 @@ export default function ReviewRoleFormContainer<T extends ReviewRoleFormMinimal>
       defaultEntitiesEntry &&
       defaultEntitiesEntry.map((defaultEntity) => (
         <Stack key={defaultEntity.entity} direction='row' alignItems='center' spacing={1}>
-          <EntityIcon entryCollaborator={defaultEntity} />
           <EntityNameDisplay entryCollaborator={defaultEntity} />
           <Tooltip title='Remove user'>
             <IconButton
