@@ -10,14 +10,14 @@ import { UserInterface } from '../../../models/User.js'
 import config from '../../../utils/config.js'
 import { BadReq, Forbidden } from '../../../utils/error.js'
 import { downloadFile } from '../../file.js'
-import { MirrorKind, MirrorLogData } from '../mirroredModel.js'
+import { MirrorExportLogData, MirrorKind } from '../mirroredModel.js'
 import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
 import { BaseExporter } from './base.js'
 
 export class FileExporter extends BaseExporter {
   protected readonly file: FileWithScanResultsInterface
 
-  constructor(user: UserInterface, model: ModelDoc, file: FileWithScanResultsInterface, logData: MirrorLogData) {
+  constructor(user: UserInterface, model: ModelDoc, file: FileWithScanResultsInterface, logData: MirrorExportLogData) {
     super(user, model, logData)
     this.file = file
   }
@@ -67,6 +67,7 @@ export class FileExporter extends BaseExporter {
         mirroredModelId: this.model.settings.mirror.destinationModelId!,
         filePath: this.file.id,
         importKind: MirrorKind.File,
+        exportId: this.logData.exportId,
       },
       this.logData,
     ]

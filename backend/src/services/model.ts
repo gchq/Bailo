@@ -26,7 +26,7 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
-import { MirrorLogData } from './mirroredModel/mirroredModel.js'
+import { MirrorImportLogData } from './mirroredModel/mirroredModel.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -625,7 +625,11 @@ export async function setLatestImportedModelCard(modelId: string) {
   return updatedModel
 }
 
-export async function validateMirroredModel(mirroredModelId: string, sourceModelId: string, logData: MirrorLogData) {
+export async function validateMirroredModel(
+  mirroredModelId: string,
+  sourceModelId: string,
+  logData: MirrorImportLogData,
+) {
   const model = await Model.findOne({
     id: mirroredModelId,
     'settings.mirror.sourceModelId': { $ne: null },
