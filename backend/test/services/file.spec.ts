@@ -8,12 +8,14 @@ import { FileScanResult, ScanState } from '../../src/connectors/fileScanning/Bas
 import { UserInterface } from '../../src/models/User.js'
 import {
   downloadFile,
+  finishUploadMultipartFile,
   getFilesByIds,
   getFilesByModel,
   getTotalFileSize,
   isFileInterfaceDoc,
   removeFile,
   rerunFileScan,
+  startUploadMultipartFile,
   updateFile,
   uploadFile,
 } from '../../src/services/file.js'
@@ -39,6 +41,7 @@ const configMock = vi.hoisted(
         },
       },
       s3: {
+        multipartChunkSize: 5 * 1024 * 1024,
         buckets: {
           uploads: 'uploads',
           registry: 'registry',
@@ -75,6 +78,9 @@ vi.mock('../../src/connectors/fileScanning/index.js', async () => ({ default: fi
 const s3Mocks = vi.hoisted(() => ({
   putObjectStream: vi.fn(() => ({ fileSize: 100 })),
   getObjectStream: vi.fn(() => ({ Body: { pipe: vi.fn() } })),
+  completeMultipartUpload: vi.fn(),
+  headObject: vi.fn(() => ({ ContentLength: 100 })),
+  startMultipartUpload: vi.fn(() => ({ uploadId: 'uploadId' })),
 }))
 vi.mock('../../src/clients/s3.js', () => s3Mocks)
 
@@ -100,12 +106,34 @@ const fileModelMocks = vi.hoisted(() => {
   obj.save = vi.fn(() => obj)
   obj.find = vi.fn(() => obj)
   obj.delete = vi.fn(() => obj)
+  obj.findById = vi.fn(() => obj)
   obj.findOneAndDelete = vi.fn(() => obj)
   obj.findOneAndUpdate = vi.fn(() => obj)
 
-  obj.toObject = vi.fn(() => obj)
+  obj._id = 'mockFileId'
+  obj.modelId = 'mockModelId'
+  obj.name = 'mockFileName'
+  obj.size = 100
+  obj.mime = 'mock/mime'
+  obj.path = '/mock/path'
+  obj.complete = true
+  obj.tags = []
+  obj.createdAt = new Date('2024-01-01T00:00:00Z')
+  obj.updatedAt = new Date('2024-01-02T00:00:00Z')
 
-  obj._id = vi.fn()
+  // Rewrite toObject: return only the relevant plain object
+  obj.toObject = vi.fn(() => ({
+    _id: obj._id,
+    modelId: obj.modelId,
+    name: obj.name,
+    size: obj.size,
+    mime: obj.mime,
+    path: obj.path,
+    complete: obj.complete,
+    tags: obj.tags,
+    createdAt: obj.createdAt,
+    updatedAt: obj.updatedAt,
+  }))
 
   const model: any = vi.fn(() => obj)
   Object.assign(model, obj)
@@ -154,7 +182,8 @@ describe('services > file', () => {
     const name = 'testFile'
     const mime = 'text/plain'
     const stream = new Readable() as any
-    const result = await uploadFile(user, modelId, name, mime, stream)
+    const tags = []
+    const result = await uploadFile(user, modelId, name, mime, stream, tags)
 
     expect(s3Mocks.putObjectStream).toBeCalled()
     expect(fileModelMocks.save).toBeCalled()
@@ -173,8 +202,9 @@ describe('services > file', () => {
     const name = 'testFile'
     const mime = 'text/plain'
     const stream = new Readable() as any
+    const tags = []
 
-    const result = await uploadFile(user, modelId, name, mime, stream)
+    const result = await uploadFile(user, modelId, name, mime, stream, tags)
 
     expect(s3Mocks.putObjectStream).toBeCalled()
     expect(fileModelMocks.save).toBeCalled()
@@ -201,17 +231,115 @@ describe('services > file', () => {
     const mime = 'text/plain'
     const stream = new Readable() as any
 
-    vi.mocked(authorisation.file).mockResolvedValue({
-      info: 'Cannot upload files to a mirrored model.',
-      success: false,
-      id: '',
-    })
+    modelMocks.getModelById.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: '123' } } })
 
     await expect(() => uploadFile(user, modelId, name, mime, stream)).rejects.toThrowError(
       /^Cannot upload files to a mirrored model./,
     )
     expect(fileModelMocks.save).not.toBeCalled()
   })
+
+  test('uploadFile > fileSize 0', async () => {
+    vi.mocked(s3Mocks.putObjectStream).mockResolvedValue({
+      fileSize: 0,
+    })
+
+    await expect(() => uploadFile({} as any, 'modelId', 'name', 'mime', new Readable() as any)).rejects.toThrowError(
+      /^Could not upload mockFileName as it is an empty file./,
+    )
+  })
+
+  test('startUploadMultipartFile > success', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+    const name = 'testFile'
+    const mime = 'text/plain'
+    const size = configMock.s3.multipartChunkSize * 2
+    const tags = []
+
+    const result = await startUploadMultipartFile(user, modelId, name, mime, size, tags)
+
+    expect(s3Mocks.startMultipartUpload).toBeCalled()
+    expect(fileModelMocks.save).toBeCalled()
+    expect(result).toMatchSnapshot()
+  })
+
+  test('startUploadMultipartFile > no permission', async () => {
+    vi.mocked(authorisation.file).mockResolvedValue({
+      info: 'You do not have permission to upload a file to this model.',
+      success: false,
+      id: '',
+    })
+
+    await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrowError(
+      /^You do not have permission to upload a file to this model./,
+    )
+  })
+
+  test('startUploadMultipartFile > failed to get uploadId', async () => {
+    vi.mocked(s3Mocks.startMultipartUpload).mockResolvedValue({} as any)
+
+    await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrowError(
+      /^Failed to get uploadId from startMultipartUpload./,
+    )
+  })
+
+  test('startUploadMultipartFile > should throw an error when attempting to upload a file to a mirrored model', async () => {
+    modelMocks.getModelById.mockResolvedValueOnce({ settings: { mirror: { sourceModelId: '123' } } })
+
+    await expect(() => startUploadMultipartFile({} as any, 'modelId', 'name', 'mime', 1)).rejects.toThrowError(
+      /^Cannot upload files to a mirrored model./,
+    )
+    expect(fileModelMocks.save).not.toBeCalled()
+  })
+
+  test('finishUploadMultipartFile > success', async () => {
+    const user = { dn: 'testUser' } as UserInterface
+    const modelId = 'testModelId'
+    const fileId = 'testFile'
+    const uploadId = 'testUploadId'
+    const parts = [
+      { ETag: '0123456789abcdef', PartNumber: 1 },
+      { ETag: 'fedcba9876543210', PartNumber: 2 },
+    ]
+    const tags = []
+
+    const result = await finishUploadMultipartFile(user, modelId, fileId, uploadId, parts, tags)
+
+    expect(s3Mocks.completeMultipartUpload).toBeCalled()
+    expect(s3Mocks.headObject).toBeCalled()
+    expect(fileModelMocks.save).toBeCalled()
+    expect(result).toMatchSnapshot()
+  })
+
+  test('finishUploadMultipartFile > no permission', async () => {
+    vi.mocked(authorisation.file).mockResolvedValue({
+      info: 'You do not have permission to upload a file to this model.',
+      success: false,
+      id: '',
+    })
+
+    await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrowError(
+      /^You do not have permission to upload a file to this model./,
+    )
+  })
+
+  test('finishUploadMultipartFile > no file', async () => {
+    vi.mocked(fileModelMocks.findById).mockResolvedValue()
+
+    await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrowError(
+      /^The requested file was not found./,
+    )
+  })
+
+  test('finishUploadMultipartFile > no metadata ContentLength', async () => {
+    vi.mocked(s3Mocks.headObject).mockResolvedValue({} as any)
+
+    await expect(() => finishUploadMultipartFile({} as any, 'modelId', 'fileId', 'uploadId', [])).rejects.toThrowError(
+      /^Could not determine uploaded file size./,
+    )
+  })
+
   test('removeFile > success', async () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'

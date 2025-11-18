@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
 import { Registry } from '@rjsf/utils'
 import { debounce } from 'lodash-es'
-import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { KeyboardEvent, SyntheticEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import UserDisplay from 'src/common/UserDisplay'
 import { EntityObject } from 'types/types'
 
@@ -42,9 +42,13 @@ export default function EntitySelector({
 
   const currentUserId = useMemo(() => (currentUser ? currentUser?.dn : ''), [currentUser])
 
+  const onSelectedEntitiesChanged = useEffectEvent((newEntities: EntityObject[]) => {
+    setSelectedEntities(newEntities)
+  })
+
   useEffect(() => {
     if (registry && registry.formContext && registry.formContext.defaultCurrentUser) {
-      setSelectedEntities([{ id: currentUserId, kind: 'user' }])
+      onSelectedEntitiesChanged([{ id: currentUserId, kind: 'user' }])
     }
   }, [currentUserId, registry])
 
@@ -54,7 +58,7 @@ export default function EntitySelector({
         const [kind, id] = value.split(':')
         return { kind, id }
       })
-      setSelectedEntities(updatedEntities)
+      onSelectedEntitiesChanged(updatedEntities)
     }
   }, [currentValue])
 

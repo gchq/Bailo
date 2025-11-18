@@ -1,8 +1,15 @@
-import { Readable } from 'node:stream'
-
 import { describe, expect, test, vi } from 'vitest'
 
-import { ensureBucketExists, getObjectStream, objectExists, putObjectStream } from '../../src/clients/s3.js'
+import {
+  completeMultipartUpload,
+  ensureBucketExists,
+  getObjectStream,
+  headObject,
+  objectExists,
+  putObjectPartStream,
+  putObjectStream,
+  startMultipartUpload,
+} from '../../src/clients/s3.js'
 
 const s3Mocks = vi.hoisted(() => {
   const send = vi.fn(() => 'response')
@@ -13,6 +20,9 @@ const s3Mocks = vi.hoisted(() => {
     HeadObjectCommand: vi.fn(() => ({})),
     HeadBucketCommand: vi.fn(() => ({})),
     CreateBucketCommand: vi.fn(() => ({})),
+    CreateMultipartUploadCommand: vi.fn(() => ({})),
+    CompleteMultipartUploadCommand: vi.fn(() => ({})),
+    UploadPartCommand: vi.fn(() => ({})),
     S3Client: vi.fn(() => ({ send })),
   }
 })
@@ -29,7 +39,7 @@ describe('clients > s3', () => {
   test('putObjectStream > success', async () => {
     const bucket = 'test-bucket'
     const key = 'test-key'
-    const body = new Readable()
+    const body = { destroy: vi.fn() } as any
 
     await putObjectStream(key, body, bucket)
 
@@ -48,12 +58,49 @@ describe('clients > s3', () => {
   test('putObjectStream > error', async () => {
     const bucket = 'test-bucket'
     const key = 'test-key'
-    const body = new Readable()
+    const body = { destroy: vi.fn() } as any
     s3UploadMocks.Upload.mockRejectedValueOnce('Error')
 
     const response = putObjectStream(key, body, bucket)
 
     await expect(response).rejects.toThrowError('Unable to upload the object to the S3 service.')
+  })
+
+  test('putObjectPartStream > success', async () => {
+    const key = 'test-key'
+    const uploadId = 'uploadId'
+    const partNumber = 1
+    const body = { destroy: vi.fn() } as any
+    const bodySize = 1024
+    const bucket = 'test-bucket'
+    s3Mocks.send.mockResolvedValueOnce({ ETag: 'ETag' } as any)
+
+    const response = await putObjectPartStream(key, uploadId, partNumber, body, bodySize, bucket)
+
+    expect(s3Mocks.UploadPartCommand).toHaveBeenCalledWith({
+      Bucket: bucket,
+      Key: key,
+      UploadId: uploadId,
+      PartNumber: partNumber,
+      Body: body,
+      ContentLength: bodySize,
+    })
+    expect(s3Mocks.send).toHaveBeenCalled()
+    expect(response).toMatchSnapshot()
+  })
+
+  test('putObjectPartStream > error', async () => {
+    const key = 'test-key'
+    const uploadId = 'uploadId'
+    const partNumber = 1
+    const bodySize = 1024
+    const bucket = 'test-bucket'
+    const body = { destroy: vi.fn() } as any
+    s3Mocks.UploadPartCommand.mockRejectedValueOnce('Error')
+
+    const response = putObjectPartStream(key, uploadId, partNumber, body, bodySize, bucket)
+
+    await expect(response).rejects.toThrowError('Unable to upload the multipart object to the S3 service.')
   })
 
   test('getObjectStream > success', async () => {
@@ -81,6 +128,75 @@ describe('clients > s3', () => {
     const response = getObjectStream(bucket, key, range)
 
     await expect(response).rejects.toThrowError('Unable to retrieve the object from the S3 service.')
+  })
+
+  test('startMultipartUpload > success', async () => {
+    const bucket = 'test-bucket'
+    const key = 'test-key'
+    const contentType = 'application/octet-stream'
+    s3Mocks.send.mockResolvedValueOnce({ UploadId: 'uploadId' } as any)
+
+    const response = await startMultipartUpload(key, contentType, bucket)
+
+    expect(s3Mocks.CreateMultipartUploadCommand).toHaveBeenCalledWith({
+      Bucket: bucket,
+      Key: key,
+      ContentType: contentType,
+    })
+    expect(s3Mocks.send).toHaveBeenCalled()
+    expect(response).toEqual({ uploadId: 'uploadId' })
+  })
+
+  test('startMultipartUpload > error', async () => {
+    const bucket = 'test-bucket'
+    const key = 'test-key'
+    const contentType = 'application/octet-stream'
+    s3Mocks.send.mockRejectedValueOnce({ name: '', message: '', $fault: {}, $metadata: { httpStatusCode: 404 } })
+
+    const response = startMultipartUpload(key, contentType, bucket)
+
+    await expect(response).rejects.toThrowError()
+  })
+
+  test('completeMultipartUpload > success', async () => {
+    const bucket = 'test-bucket'
+    const key = 'test-key'
+    const uploadId = 'test-upload-id'
+    const parts = [
+      { ETag: '0123456789abcdef', PartNumber: 1 },
+      { ETag: 'fedcba9876543210', PartNumber: 2 },
+    ]
+
+    const response = await completeMultipartUpload(key, uploadId, parts, bucket)
+
+    expect(s3Mocks.CompleteMultipartUploadCommand).toHaveBeenCalledWith({
+      Bucket: bucket,
+      Key: key,
+      UploadId: uploadId,
+      MultipartUpload: { Parts: parts },
+    })
+    expect(s3Mocks.send).toHaveBeenCalled()
+    expect(response).toEqual('response')
+  })
+
+  test('completeMultipartUpload > error', async () => {
+    const bucket = 'test-bucket'
+    const key = 'test-key'
+    const uploadId = 'test-upload-id'
+    const parts = [
+      { ETag: '0123456789abcdef', PartNumber: 1 },
+      { ETag: 'fedcba9876543210', PartNumber: 2 },
+    ]
+    s3Mocks.send.mockRejectedValueOnce({
+      name: '',
+      message: '',
+      $fault: {},
+      $metadata: { httpStatusCode: 404 },
+    })
+
+    const response = completeMultipartUpload(key, uploadId, parts, bucket)
+
+    await expect(response).rejects.toThrowError()
   })
 
   test('objectExists > success', async () => {
@@ -155,5 +271,34 @@ describe('clients > s3', () => {
     const response = ensureBucketExists(bucket)
 
     await expect(response).rejects.toThrowError('Unable to create a new bucket.')
+  })
+
+  test('headObject > success', async () => {
+    const bucket = 'test-bucket'
+    const key = 'test-key'
+
+    const response = await headObject(key, bucket)
+
+    expect(s3Mocks.HeadObjectCommand).toHaveBeenCalledWith({
+      Bucket: bucket,
+      Key: key,
+    })
+    expect(s3Mocks.send).toHaveBeenCalled()
+    expect(response).toEqual('response')
+  })
+
+  test('headObject > no object', async () => {
+    const bucket = 'test-bucket'
+    const key = 'test-key'
+    s3Mocks.send.mockRejectedValueOnce({ name: '', message: '', $fault: {}, $metadata: { httpStatusCode: 404 } })
+
+    const response = headObject(key, bucket)
+
+    await expect(response).rejects.toThrowError()
+    expect(s3Mocks.HeadObjectCommand).toHaveBeenCalledWith({
+      Bucket: bucket,
+      Key: key,
+    })
+    expect(s3Mocks.send).toHaveBeenCalled()
   })
 })

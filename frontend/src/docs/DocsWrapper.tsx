@@ -48,6 +48,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     (doc: DirectoryTree, paddingLeft = paddingIncrement) => {
       let children: Array<any> = []
       if (doc.children) {
+        // eslint-disable-next-line react-hooks/immutability
         children = doc.children.map((child) => createDocElement(child, paddingLeft + paddingIncrement))
       }
 
