@@ -191,8 +191,7 @@ describe('connectors > mirroredModel > importers > ImageImporter', () => {
 
     expect(registryClientMocks.putManifest).toHaveBeenCalledWith(
       undefined,
-      { namespace: mockMetadata.mirroredModelId, image: 'imageName' },
-      'tag',
+      { repository: mockMetadata.mirroredModelId, name: 'imageName', tag: 'tag' },
       // @ts-expect-error accessing protected property
       JSON.stringify(importer.manifestBody),
       'mt',

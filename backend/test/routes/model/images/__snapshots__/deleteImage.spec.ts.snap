@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`routes > images > getImages > 200 > ok 1`] = `
+{
+  "message": "Successfully removed image.",
+}
+`;
+
+exports[`routes > images > getImages > audit > expected call 1`] = `"expedita"`;
+
+exports[`routes > images > getImages > audit > expected call 2`] = `
+{
+  "name": "Dr. Garry Cummerata",
+  "repository": "expedita",
+  "tag": "expedita",
+}
+`;
