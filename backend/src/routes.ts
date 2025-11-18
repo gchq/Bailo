@@ -51,6 +51,7 @@ import { postModel } from './routes/v2/model/postModel.js'
 import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
 import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
+import { getPopularTags } from './routes/v2/model/tags/getPopularTags.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
 import { getWebhooks } from './routes/v2/model/webhook/getWebhooks.js'
 import { postWebhook } from './routes/v2/model/webhook/postWebhook.js'
@@ -229,6 +230,8 @@ server.get('/api/v2/review/roles', ...getReviewRoles)
 server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
 server.post('/api/v2/review/role', ...postReviewRole)
 server.put('/api/v2/review/role/:shortName', ...putReviewRole)
+
+server.get('/api/v2/models/tags', getPopularTags)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)
