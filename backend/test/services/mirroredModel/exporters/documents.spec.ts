@@ -29,7 +29,7 @@ const releaseServiceMocks = vi.hoisted(() => ({
 vi.mock('../../../../src/services/release.js', () => releaseServiceMocks)
 
 const logMocks = vi.hoisted(() => ({
-  default: { debug: vi.fn() },
+  default: { trace: vi.fn(), debug: vi.fn() },
 }))
 vi.mock('../../../../src/services/log.js', () => logMocks)
 
@@ -196,7 +196,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('getInitialiseTarGzUploadParams throws if model missing', () => {
-    const exporter = new DocumentsExporter(mockUser, undefined as any, [], mockLogData)
+    const exporter = new DocumentsExporter(mockUser, { id: 'modelId' } as any, [], mockLogData)
 
     // @ts-expect-error calling protected method
     expect(() => exporter.getInitialiseTarGzUploadParams()).toThrow()
