@@ -29,6 +29,8 @@ module.exports = {
 
     automaticallyCreateBuckets: true,
 
+    multipartChunkSize: 5 * 1024 * 1024,
+
     // Names of buckets that Bailo uses
     buckets: {
       uploads: 'uploads',

@@ -5,7 +5,7 @@ module.exports = {
   },
 
   mongo: {
-    uri: 'mongodb://mongo:27017/bailo',
+    uri: 'mongodb://bailoadmin:bailoadmin@mongo:27017/bailo?replicaSet=rs0&authSource=admin',
   },
 
   app: {
@@ -35,6 +35,8 @@ module.exports = {
     rejectUnauthorized: true,
 
     automaticallyCreateBuckets: true,
+
+    multipartChunkSize: 5 * 1024 * 1024,
 
     // Names of buckets that Bailo uses
     buckets: {
