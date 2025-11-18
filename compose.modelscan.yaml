@@ -1,0 +1,11 @@
+name: bailo-prod
+
+services:
+  modelscan:
+    volumes:
+      - ./lib/modelscan_api/bailo_modelscan_api:/app/bailo_modelscan_api
+    image: bailo_modelscan:${INSTANCE_NAME}
+    pull_policy: build
+    build:
+      context: ./lib/modelscan_api
+      target: dev
