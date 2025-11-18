@@ -76,7 +76,6 @@ export class ImageImporter extends BaseImporter {
         const repositoryPullToken = await getAccessToken({ dn: this.user.dn }, [
           {
             type: 'repository',
-            class: '',
             name: `${this.metadata.mirroredModelId}/${this.imageName}`,
             actions: ['pull'],
           },
@@ -84,7 +83,6 @@ export class ImageImporter extends BaseImporter {
         const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
           {
             type: 'repository',
-            class: '',
             name: `${this.metadata.mirroredModelId}/${this.imageName}`,
             actions: ['push', 'pull'],
           },
@@ -94,7 +92,7 @@ export class ImageImporter extends BaseImporter {
           if (
             await doesLayerExist(
               repositoryPullToken,
-              { namespace: this.metadata.mirroredModelId, image: this.imageName },
+              { repository: this.metadata.mirroredModelId, name: this.imageName },
               layerDigest,
             )
           ) {
@@ -119,8 +117,8 @@ export class ImageImporter extends BaseImporter {
               'Initiating un-tarred blob upload.',
             )
             const res = await initialiseUpload(repositoryPushPullToken, {
-              namespace: this.metadata.mirroredModelId,
-              image: this.imageName,
+              repository: this.metadata.mirroredModelId,
+              name: this.imageName,
             })
 
             log.debug(
@@ -161,7 +159,6 @@ export class ImageImporter extends BaseImporter {
       const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
         {
           type: 'repository',
-          class: '',
           name: `${this.metadata.mirroredModelId}/${this.imageName}`,
           actions: ['push', 'pull'],
         },
@@ -169,8 +166,7 @@ export class ImageImporter extends BaseImporter {
 
       await putManifest(
         repositoryPushPullToken,
-        { namespace: this.metadata.mirroredModelId, image: this.imageName },
-        this.imageTag,
+        { repository: this.metadata.mirroredModelId, name: this.imageName, tag: this.imageTag },
         JSON.stringify(this.manifestBody),
         this.manifestBody['mediaType'],
       )

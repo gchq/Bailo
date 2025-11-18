@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
-import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { MouseEvent, ReactElement, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import semver from 'semver'
 import EmptyBlob from 'src/common/EmptyBlob'
 
@@ -67,8 +67,12 @@ export default function Paginate<T>({
 
   const theme = useTheme()
 
+  const onFilteredListUpdated = useEffectEvent((newList: T[]) => {
+    setFilteredList(newList)
+  })
+
   useEffect(() => {
-    setFilteredList(
+    onFilteredListUpdated(
       list.filter((item: T) => {
         if (searchFilterProperty !== undefined && item[searchFilterProperty as string]) {
           return item[searchFilterProperty as string].toLowerCase().includes(searchFilter.toLowerCase())

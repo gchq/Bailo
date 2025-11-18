@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles'
 import { useListModels } from 'actions/model'
 import { useGetReviewRequestsForUser } from 'actions/review'
 import { deleteSchema, patchSchema, useGetSchemas } from 'actions/schema'
-import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { MouseEvent, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Loading from 'src/common/Loading'
@@ -41,6 +41,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
     [],
     [],
     [],
+    [],
     '',
     false,
     schemaToBeDeleted,
@@ -48,10 +49,14 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
   const [objectsToDelete, setObjectsToDelete] = useState<ObjectToDelete[]>([])
   const [openMenuSchemaId, setOpenMenuSchemaId] = useState<SchemaInterface['id'] | null>(null)
 
+  const onObjectsToDeleteChange = useEffectEvent((updatedReviews: ObjectToDelete[]) => {
+    setObjectsToDelete(updatedReviews)
+  })
+
   useEffect(() => {
     switch (schemaKind) {
       case SchemaKind.ACCESS_REQUEST:
-        return setObjectsToDelete(
+        return onObjectsToDeleteChange(
           reviews.map((review) => {
             return { primary: review.model.name, secondary: review.role, link: `/model/${review.model.id}?tab=access` }
           }),
@@ -59,7 +64,7 @@ export default function SchemaList({ schemaKind }: SchemaDisplayProps) {
 
       case SchemaKind.DATA_CARD:
       case SchemaKind.MODEL:
-        return setObjectsToDelete(
+        return onObjectsToDeleteChange(
           models.map((model) => {
             return { primary: model.name, secondary: model.description, link: `/model/${model.id}` }
           }),

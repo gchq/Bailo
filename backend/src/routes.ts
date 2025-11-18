@@ -27,11 +27,13 @@ import { getDownloadFile } from './routes/v2/model/file/getDownloadFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
 import { patchFile } from './routes/v2/model/file/patchFile.js'
 import { postFinishMultipartUpload } from './routes/v2/model/file/postFinishMultipartUpload.js'
+import { postMultipartUploadPart } from './routes/v2/model/file/postMultipartUploadPart.js'
 import { postSimpleUpload } from './routes/v2/model/file/postSimpleUpload.js'
 import { postStartMultipartUpload } from './routes/v2/model/file/postStartMultipartUpload.js'
 import { getModel } from './routes/v2/model/getModel.js'
 import { getModelCurrentUserPermissions } from './routes/v2/model/getModelCurrentUserPermissions.js'
 import { getModelsSearch } from './routes/v2/model/getModelsSearch.js'
+import { deleteImage } from './routes/v2/model/images/deleteImage.js'
 import { getImages } from './routes/v2/model/images/getImages.js'
 import { deleteInference } from './routes/v2/model/inferencing/deleteInferenceService.js'
 import { getInference } from './routes/v2/model/inferencing/getInferenceService.js'
@@ -50,6 +52,7 @@ import { postModel } from './routes/v2/model/postModel.js'
 import { postRequestExportToS3 } from './routes/v2/model/postRequestExport.js'
 import { postRequestImportFromS3 } from './routes/v2/model/postRequestImport.js'
 import { getModelRoles } from './routes/v2/model/roles/getModelRoles.js'
+import { getPopularTags } from './routes/v2/model/tags/getPopularTags.js'
 import { deleteWebhook } from './routes/v2/model/webhook/deleteWebhook.js'
 import { getWebhooks } from './routes/v2/model/webhook/getWebhooks.js'
 import { postWebhook } from './routes/v2/model/webhook/postWebhook.js'
@@ -153,6 +156,7 @@ server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
 server.get('/api/v2/token/model/:modelId/file/:fileId/download', ...getDownloadFile)
 server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
+server.post('/api/v2/model/:modelId/files/upload/multipart/part', ...postMultipartUploadPart)
 server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 server.patch('/api/v2/model/:modelId/file/:fileId', ...patchFile)
@@ -163,13 +167,14 @@ server.put('/api/v2/model/:modelId/webhook/:webhookId', ...putWebhook)
 server.delete('/api/v2/model/:modelId/webhook/:webhookId', ...deleteWebhook)
 
 server.get('/api/v2/model/:modelId/images', ...getImages)
-// *server.delete('/api/v2/model/:modelId/images/:imageId', ...deleteImage)
+server.delete('/api/v2/model/:modelId/image/:name/:tag', ...deleteImage)
 server.get('/api/v2/model/:modelId/files', ...getFiles)
 server.get('/api/v2/model/:modelId/file/:fileId/download', ...getDownloadFile)
 // This is a temporary workaround to split out the URL to disable authorisation.
 server.get('/api/v2/token/model/:modelId/file/:fileId/download', ...getDownloadFile)
 server.post('/api/v2/model/:modelId/files/upload/simple', ...postSimpleUpload)
 server.post('/api/v2/model/:modelId/files/upload/multipart/start', ...postStartMultipartUpload)
+server.post('/api/v2/model/:modelId/files/upload/multipart/part', ...postMultipartUploadPart)
 server.post('/api/v2/model/:modelId/files/upload/multipart/finish', ...postFinishMultipartUpload)
 server.delete('/api/v2/model/:modelId/file/:fileId', ...deleteFile)
 
@@ -227,6 +232,8 @@ server.get('/api/v2/review/roles', ...getReviewRoles)
 server.delete('/api/v2/review/role/:reviewRoleShortName', ...deleteReviewRole)
 server.post('/api/v2/review/role', ...postReviewRole)
 server.put('/api/v2/review/role/:shortName', ...putReviewRole)
+
+server.get('/api/v2/models/tags', getPopularTags)
 
 // Python docs
 const __filename = fileURLToPath(import.meta.url)

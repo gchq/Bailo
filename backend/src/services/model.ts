@@ -6,13 +6,20 @@ import { Roles } from '../connectors/authentication/Base.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
+import getPeerConnectors from '../connectors/peer/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
-import { EntityKind, EntryUserPermissions } from '../types/types.js'
+import { isBailoError } from '../types/error.js'
+import {
+  EntityKind,
+  EntrySearchOptionsParams,
+  EntrySearchResultWithErrors,
+  EntryUserPermissions,
+} from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -29,6 +36,7 @@ export function checkModelRestriction(model: ModelInterface) {
 }
 
 type OptionalCreateModelParams = Optional<Pick<ModelInterface, 'tags'>, 'tags'>
+
 export type CreateModelParams = Pick<
   ModelInterface,
   'name' | 'description' | 'visibility' | 'settings' | 'kind' | 'collaborators'
@@ -95,7 +103,7 @@ export async function getModelById(user: UserInterface, modelId: string, kind?: 
   })
 
   if (!model) {
-    throw NotFound(`The requested entry was not found.`, { modelId })
+    throw NotFound('The requested entry was not found.', { modelId })
   }
 
   const auth = await authorisation.model(user, model, ModelAction.View)
@@ -121,18 +129,76 @@ export async function canUserActionModelById(user: UserInterface, modelId: strin
 
 export async function searchModels(
   user: UserInterface,
-  kind: EntryKindKeys,
-  libraries: Array<string>,
-  organisations: Array<string>,
-  states: Array<string>,
-  filters: Array<string>,
-  search: string,
-  task?: string,
-  allowTemplating?: boolean,
-  schemaId?: string,
-  adminAccess?: boolean,
-): Promise<Array<ModelInterface>> {
-  if (adminAccess) {
+  opts: EntrySearchOptionsParams,
+): Promise<EntrySearchResultWithErrors> {
+  const results: EntrySearchResultWithErrors = {
+    models: [],
+  }
+
+  const localModelsPromise = searchLocalModels(user, opts)
+
+  localModelsPromise.catch((e) => {
+    if (!results.errors) {
+      results.errors = {}
+    }
+    if (isBailoError(e)) {
+      results.errors['local'] = e
+    } else {
+      results.errors['local'] = InternalError('Search error', { err: e })
+    }
+  })
+
+  const processLocalModels = localModelsPromise.then((localModels) => {
+    results.models.push(
+      ...localModels.map((model) => ({
+        id: model.id,
+        name: model.name,
+        description: model.description,
+        tags: model.tags,
+        kind: model.kind,
+        organisation: model.organisation,
+        state: model.state,
+        collaborators: model.collaborators,
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+        sourceModelId: model.settings.mirror.sourceModelId,
+        visibility: model.visibility,
+      })),
+    )
+  })
+
+  const promises: Promise<any>[] = [processLocalModels]
+
+  if (opts.peers && opts.peers.length > 0) {
+    const connectors = await getPeerConnectors()
+    const remotePromise = connectors.searchEntries(user, opts)
+
+    const processRemoteModels = remotePromise.then((remoteResponses) => {
+      for (const response of remoteResponses.flat()) {
+        if (response.models) {
+          results.models.push(...response.models)
+        }
+        if (response.errors) {
+          for (const [peerId, error] of Object.entries(response.errors)) {
+            if (!results.errors) results.errors = {}
+            results.errors[peerId] = error
+            results.errors[peerId].message = error.message
+          }
+        }
+      }
+    })
+    promises.push(processRemoteModels)
+  }
+
+  await Promise.all(promises)
+
+  return results
+}
+
+async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsParams): Promise<Array<ModelInterface>> {
+  const query: any = {}
+
+  if (opts.adminAccess) {
     if (!(await authentication.hasRole(user, Roles.Admin))) {
       throw Forbidden('You do not have the required role.', {
         userDn: user.dn,
@@ -141,46 +207,47 @@ export async function searchModels(
     }
   }
 
-  const query: any = {}
-
-  if (kind) {
-    query['kind'] = { $all: kind }
+  if (opts.kind) {
+    query['kind'] = { $all: opts.kind }
   }
 
-  if (organisations.length) {
-    query.organisation = { $in: organisations }
+  if (opts.organisations?.length) {
+    query.organisation = { $in: opts.organisations }
   }
 
-  if (states.length) {
-    query.state = { $in: states }
+  if (opts.states?.length) {
+    query.state = { $in: opts.states }
   }
 
-  if (libraries.length) {
-    query.tags = { $all: libraries }
+  if (opts.libraries?.length) {
+    query.tags = { $all: opts.libraries }
   }
 
-  if (task) {
+  if (opts.task) {
     if (query.tags) {
-      query.tags.$all.push(task)
+      query.tags.$all.push(opts.task)
     } else {
-      query.tags = { $all: [task] }
+      query.tags = { $all: [opts.task] }
     }
   }
 
-  if (search) {
-    query.$text = { $search: search }
+  if (opts.search) {
+    if (opts.search.length > 0 && opts.search.length < 3) {
+      throw BadReq(`Search query too short - must be at least 3 characters`)
+    }
+    query.$text = { $search: opts.search }
   }
 
-  if (schemaId) {
-    query['card.schemaId'] = { $all: schemaId }
+  if (opts.schemaId) {
+    query['card.schemaId'] = { $all: opts.schemaId }
   }
 
-  if (allowTemplating) {
+  if (opts.allowTemplating) {
     query['settings.allowTemplating'] = true
   }
 
-  if (filters.length > 0) {
-    if (filters.includes('mine')) {
+  if (opts.filters && opts.filters.length > 0) {
+    if (opts.filters?.includes('mine')) {
       query.collaborators = {
         $elemMatch: {
           entity: { $in: await authentication.getEntities(user) },
@@ -189,7 +256,7 @@ export async function searchModels(
     } else {
       query.collaborators = {
         $elemMatch: {
-          roles: { $elemMatch: { $in: filters } },
+          roles: { $elemMatch: { $in: opts.filters } },
           entity: { $in: await authentication.getEntities(user) },
         },
       }
@@ -200,7 +267,7 @@ export async function searchModels(
     // Find only matching documents
     .find(query)
 
-  if (!search) {
+  if (!opts.search) {
     // Sort by last updated
     cursor = cursor.sort({ updatedAt: -1 })
   } else {
@@ -210,7 +277,7 @@ export async function searchModels(
 
   const results = await cursor
   //Auth already checked, so just need to check if they require admin access
-  if (adminAccess) {
+  if (opts.adminAccess) {
     return results
   }
   const auths = await authorisation.models(user, results, ModelAction.View)
@@ -643,4 +710,9 @@ export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) 
     .filter((collaborator) => entities.includes(collaborator.entity))
     .map((collaborator) => collaborator.roles)
     .flat()
+}
+
+export async function popularTagsForEntries() {
+  const tags = await Model.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
+  return tags.map((tag) => tag._id) as string[]
 }

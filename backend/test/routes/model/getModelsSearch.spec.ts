@@ -8,7 +8,9 @@ import { createFixture, testGet } from '../../testUtils/routes.js'
 vi.mock('../../../src/connectors/audit/index.js')
 
 vi.mock('../../../src/services/model.js', () => ({
-  searchModels: vi.fn(() => [{ id: 'test', name: 'name', description: 'description', tags: ['tag'] }]),
+  searchModels: vi.fn(() => {
+    return { models: [{ id: 'test', name: 'name', description: 'description', tags: ['tag'] }] }
+  }),
 }))
 
 describe('routes > model > getModelsSearch', () => {
