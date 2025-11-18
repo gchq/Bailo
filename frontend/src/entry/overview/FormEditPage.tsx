@@ -9,7 +9,7 @@ import { putModelCard } from 'actions/modelCard'
 import { useGetSchema } from 'actions/schema'
 import { useGetSchemaMigrations } from 'actions/schemaMigration'
 import * as _ from 'lodash-es'
-import React from 'react'
+import React, { useEffectEvent } from 'react'
 import { useContext, useEffect, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
@@ -78,6 +78,7 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
       setLoading(false)
     }
   }
+
   function onCancel() {
     if (schema) {
       mutateEntry()
@@ -89,6 +90,11 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
       setIsEdit(false)
     }
   }
+
+  const onSplitSchemaChange = useEffectEvent((newSplitSchema: SplitSchemaNoRender) => {
+    setSplitSchema(newSplitSchema)
+  })
+
   useEffect(() => {
     if (!entry || !schema) return
     const metadata = entry.card.metadata
@@ -96,11 +102,13 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
     for (const step of steps) {
       step.steps = steps
     }
-    setSplitSchema({ reference: schema.id, steps })
+    onSplitSchemaChange({ reference: schema.id, steps })
   }, [schema, entry])
+
   useEffect(() => {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
+
   function handleJsonFormOnSubmit(formData: string) {
     setJsonUploadDialogOpen(false)
     try {
