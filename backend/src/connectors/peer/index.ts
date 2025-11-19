@@ -46,6 +46,7 @@ export async function getPeerConnectors(cache = true): Promise<PeerConnectorWrap
   // If not globally disabled, setup each peer
   if (FederationState.DISABLED === config.federation.state) {
     log.debug('Federation is disabled, skipping setup of peers')
+    return new PeerConnectorWrapper(peers)
   }
   for (const [id, cfg] of Object.entries(config.federation.peers)) {
     validate(id, cfg)
