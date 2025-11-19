@@ -13,7 +13,7 @@ import { InternalError } from '../../../utils/error.js'
 import { hasKeysOfType } from '../../../utils/typeguards.js'
 import log from '../../log.js'
 import { splitDistributionPackageName } from '../../registry.js'
-import { MirrorKind, MirrorKindKeys, MirrorLogData } from '../mirroredModel.js'
+import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type ImageMirrorMetadata = BaseMirrorMetadata & {
@@ -40,7 +40,7 @@ export class ImageImporter extends BaseImporter {
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/blobs\/sha256\/[0-9a-f]{64}$`,
   )
 
-  constructor(user: UserInterface, metadata: ImageMirrorMetadata, logData: MirrorLogData) {
+  constructor(user: UserInterface, metadata: ImageMirrorMetadata, logData: MirrorImportLogData) {
     super(metadata, logData)
     if (this.metadata.importKind !== MirrorKind.Image) {
       throw InternalError('Cannot parse compressed Image: incorrect metadata specified.', {

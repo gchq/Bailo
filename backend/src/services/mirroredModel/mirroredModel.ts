@@ -39,7 +39,8 @@ export type MirrorKindKeys<T extends keyof typeof MirrorKind | void = void> = T 
 export type MirrorMetadata = DocumentsMirrorMetadata | FileMirrorMetadata | ImageMirrorMetadata
 export type MirrorInformation = MongoDocumentMirrorInformation | FileMirrorInformation | ImageMirrorInformation
 
-export type MirrorLogData = Record<string, unknown> & ({ exportId: string } | { importId: string })
+export type MirrorExportLogData = Record<string, unknown> & { exportId: string }
+export type MirrorImportLogData = Record<string, unknown> & { importId: string }
 
 const exportQueue: PQueue = new PQueue({ concurrency: config.modelMirror.export.concurrency })
 
@@ -190,7 +191,7 @@ export async function importModel(
   }
 }
 
-export function getImporter(metadata: MirrorMetadata, user: UserInterface, logData: MirrorLogData): BaseImporter {
+export function getImporter(metadata: MirrorMetadata, user: UserInterface, logData: MirrorImportLogData): BaseImporter {
   switch (metadata.importKind) {
     case MirrorKind.Documents:
       return new DocumentsImporter(user, metadata, logData)
@@ -211,7 +212,7 @@ export async function addCompressedRegistryImageComponents(
   modelId: string,
   distributionPackageName: string,
   tarStream: Pack,
-  logData: MirrorLogData,
+  logData: MirrorExportLogData,
 ) {
   const distributionPackageNameObject = splitDistributionPackageName(distributionPackageName)
   if (!('tag' in distributionPackageNameObject)) {
@@ -287,7 +288,7 @@ export async function addCompressedRegistryImageComponents(
   log.debug({ modelId, imageName, imageTag, ...logData }, 'Finished adding registry image.')
 }
 
-export async function addAndFinaliseExporters(exporters: BaseExporter[], logData: MirrorLogData) {
+export async function addAndFinaliseExporters(exporters: BaseExporter[], logData: MirrorExportLogData) {
   for (const exporter of exporters) {
     // Not `await`ed for fire-and-forget approach
     exportQueue

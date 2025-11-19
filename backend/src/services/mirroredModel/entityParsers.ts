@@ -5,13 +5,13 @@ import { InternalError } from '../../utils/error.js'
 import { createFilePath, isFileInterfaceDoc } from '../file.js'
 import { isModelCardRevisionDoc } from '../model.js'
 import { isReleaseDoc } from '../release.js'
-import { MirrorLogData } from './mirroredModel.js'
+import { MirrorImportLogData } from './mirroredModel.js'
 
 export function parseModelCard(
   modelCard: unknown,
   mirroredModelId: string,
   sourceModelId: string,
-  logData: MirrorLogData,
+  logData: MirrorImportLogData,
 ): Omit<ModelCardRevisionDoc, '_id'> {
   if (!isModelCardRevisionDoc(modelCard)) {
     throw InternalError('Data cannot be converted into a model card.', {
@@ -41,7 +41,7 @@ export function parseRelease(
   release: unknown,
   mirroredModelId: string,
   sourceModelId: string,
-  logData: MirrorLogData,
+  logData: MirrorImportLogData,
 ): Omit<ReleaseDoc, '_id'> {
   if (!isReleaseDoc(release)) {
     throw InternalError('Data cannot be converted into a release.', {
@@ -71,7 +71,12 @@ export function parseRelease(
   return release
 }
 
-export async function parseFile(file: unknown, mirroredModelId: string, sourceModelId: string, logData: MirrorLogData) {
+export async function parseFile(
+  file: unknown,
+  mirroredModelId: string,
+  sourceModelId: string,
+  logData: MirrorImportLogData,
+) {
   if (!isFileInterfaceDoc(file)) {
     throw InternalError('Data cannot be converted into a file.', { file, mirroredModelId, sourceModelId, ...logData })
   }
