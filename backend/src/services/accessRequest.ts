@@ -187,7 +187,13 @@ export async function findAccessRequest(
       throw BadReq('Model cannot be found', { modelId })
     }
     const model = modelDoc.toObject()
-    auths = auths.concat(await authorisation.accessRequests(user, model, results, AccessRequestAction.View))
+
+    // filter out results for auth
+    const filteredResults = results.filter((object) => {
+      return object.modelId === modelId
+    })
+
+    auths = auths.concat(await authorisation.accessRequests(user, model, filteredResults, AccessRequestAction.View))
   }
   return results.filter((_, i) => auths[i].success)
 }
