@@ -144,7 +144,7 @@ describe('services > mirroredModel > exporters > ImageExporter', () => {
   })
 
   test('getInitialiseTarGzUploadParams throws if model missing', () => {
-    const exporter = new ImageExporter(mockUser, { id: 'modelId' } as any, mockRelease, mockImage, mockLogData)
+    const exporter = new ImageExporter(mockUser, undefined as any, mockRelease, mockImage, mockLogData)
     exporter['distributionPackageName'] = 'joined/name:tag'
     // @ts-expect-error accessing read-only property
     exporter['model'] = undefined

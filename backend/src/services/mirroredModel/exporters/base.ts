@@ -204,7 +204,10 @@ export abstract class BaseExporter {
     this.model = model
     this.logData = { exporterType: this.constructor.name, ...logData }
 
-    log.trace({ user: this.user, modelId: this.model.id, ...this.logData }, `Constructed new ${this.constructor.name}.`)
+    log.trace(
+      { user: this.user, ...(this.model && this.model?.id && { modelId: this.model.id }), ...this.logData },
+      `Constructed new ${this.constructor.name}.`,
+    )
   }
 
   getModel() {

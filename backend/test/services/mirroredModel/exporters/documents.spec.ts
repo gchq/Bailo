@@ -196,7 +196,7 @@ describe('services > mirroredModel > exporters > DocumentsExporter', () => {
   })
 
   test('getInitialiseTarGzUploadParams throws if model missing', () => {
-    const exporter = new DocumentsExporter(mockUser, { id: 'modelId' } as any, [], mockLogData)
+    const exporter = new DocumentsExporter(mockUser, undefined as any, [], mockLogData)
 
     // @ts-expect-error calling protected method
     expect(() => exporter.getInitialiseTarGzUploadParams()).toThrow()
