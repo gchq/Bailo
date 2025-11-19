@@ -76,11 +76,13 @@ export default function MessageAlert({
     setShowContactMessage(!showContactMessage)
   }
 
+  const displayButton = buttonText && buttonAction
+
   if (!message) return null
 
   return (
     <Alert
-      severity={severity}
+      severity={'info'}
       sx={{
         my: 2,
         maxHeight: slimView ? '70px' : 'none',
@@ -88,6 +90,13 @@ export default function MessageAlert({
       }}
       ref={alertRef}
       data-test={dataTest}
+      action={
+        displayButton && (
+          <Button size='small' onClick={buttonAction}>
+            {buttonText}
+          </Button>
+        )
+      }
     >
       <Stack spacing={1}>
         <Stack direction='row' spacing={1} alignItems='center'>
@@ -101,7 +110,6 @@ export default function MessageAlert({
               ariaLabel='copy error message to clipboard'
             />
           )}
-          {buttonText && <Button onClick={buttonAction}>{buttonText}</Button>}
         </Stack>
         {!!(href && linkText) && (
           <Typography>
