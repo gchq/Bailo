@@ -15,13 +15,12 @@ import Releases from 'src/entry/model/Releases'
 import Overview from 'src/entry/overview/Overview'
 import Settings from 'src/entry/settings/Settings'
 import MultipleErrorWrapper from 'src/errors/MultipleErrorWrapper'
-import { EntryKind } from 'types/types'
 import { getCurrentUserRoles } from 'utils/roles'
 
 export default function Model() {
   const router = useRouter()
   const { modelId }: { modelId?: string } = router.query
-  const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelId, EntryKind.MODEL)
+  const { model, isModelLoading, isModelError, mutateModel } = useGetModel(modelId)
   const { currentUser, isCurrentUserLoading, isCurrentUserError } = useGetCurrentUser()
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
 
