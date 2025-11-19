@@ -328,7 +328,7 @@ export default function SchemaMigrator({
                   </ButtonGroup>
                 </ClickAwayListener>
                 <Menu
-                  anchorEl={anchorRef.current}
+                  anchorEl={open && anchorRef.current ? anchorRef.current : null}
                   transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   open={open}

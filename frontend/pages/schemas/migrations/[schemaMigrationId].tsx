@@ -3,7 +3,7 @@ import { Button, Container, Paper } from '@mui/material'
 import { useGetSchema } from 'actions/schema'
 import { putSchemaMigration, useGetSchemaMigration } from 'actions/schemaMigration'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import Link from 'src/Link'
@@ -27,46 +27,40 @@ export default function SchemaMigrationEditor() {
     isSchemaError: isTargetSchemaError,
   } = useGetSchema(schemaMigration ? schemaMigration.targetSchema : '')
 
-  const [sourceSchemaCombined, setSourceSchemaCombined] = useState<CombinedSchema>()
-  const [targetSchemaCombined, setTargetSchemaCombined] = useState<CombinedSchema>()
   const [submitErrorText, setSubmitErrorText] = useState('')
   const [migrationName, setMigrationName] = useState('')
   const [migrationDescription, setMigrationDescription] = useState('')
   const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
 
   useEffect(() => {
-    if (schemaMigration) {
+    if (schemaMigration && migrationName === '' && questionMigrations.length === 0) {
       setQuestionMigrations(schemaMigration.questionMigrations)
       setMigrationName(schemaMigration.name)
-      if (schemaMigration.description) {
-        setMigrationDescription(schemaMigration.description)
-      }
+      setMigrationDescription(schemaMigration.description || '')
     }
-  }, [schemaMigration])
+  }, [migrationName, questionMigrations.length, schemaMigration])
 
-  useEffect(() => {
-    if (sourceSchema) {
-      const sourceSteps = getStepsFromSchema(sourceSchema, {}, [])
-      for (const step of sourceSteps) {
-        step.steps = sourceSteps
-      }
-      setSourceSchemaCombined({
-        schema: sourceSchema,
-        splitSchema: { reference: sourceSchema.name, steps: sourceSteps },
-      })
+  const sourceSchemaCombined: CombinedSchema | undefined = useMemo(() => {
+    if (!sourceSchema) return undefined
+    const sourceSteps = getStepsFromSchema(sourceSchema, {}, [])
+    for (const step of sourceSteps) {
+      step.steps = sourceSteps
+    }
+    return {
+      schema: sourceSchema,
+      splitSchema: { reference: sourceSchema.name, steps: sourceSteps },
     }
   }, [sourceSchema])
 
-  useEffect(() => {
-    if (targetSchema) {
-      const sourceSteps = getStepsFromSchema(targetSchema, {}, [])
-      for (const step of sourceSteps) {
-        step.steps = sourceSteps
-      }
-      setTargetSchemaCombined({
-        schema: targetSchema,
-        splitSchema: { reference: targetSchema.name, steps: sourceSteps },
-      })
+  const targetSchemaCombined: CombinedSchema | undefined = useMemo(() => {
+    if (!targetSchema) return undefined
+    const targetSteps = getStepsFromSchema(targetSchema, {}, [])
+    for (const step of targetSteps) {
+      step.steps = targetSteps
+    }
+    return {
+      schema: targetSchema,
+      splitSchema: { reference: targetSchema.name, steps: targetSteps },
     }
   }, [targetSchema])
 
