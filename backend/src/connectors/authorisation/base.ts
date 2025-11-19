@@ -386,15 +386,17 @@ export class BasicAuthorisationConnector {
           }
         })
 
-        // Don't allow anything beyond pushing and pulling actions.
+        // Don't allow anything beyond pushing, pulling and deleting actions.
         if (
           !actions.every((action) =>
-            ([ImageAction.Push, ImageAction.Pull, ImageAction.List] as ImageActionKeys[]).includes(action),
+            ([ImageAction.Push, ImageAction.Pull, ImageAction.Delete, ImageAction.List] as ImageActionKeys[]).includes(
+              action,
+            ),
           )
         ) {
           return {
             success: false,
-            info: 'You are not allowed to complete any actions beyond `push` or `pull` on an image.',
+            info: 'You are not allowed to complete any actions beyond `push`, `pull` or `delete` on an image.',
             id: access.name,
           }
         }
