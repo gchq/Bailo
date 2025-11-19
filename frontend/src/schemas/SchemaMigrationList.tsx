@@ -21,7 +21,7 @@ export default function SchemaMigrationList() {
         >
           <Typography fontWeight='bold' color='primary' variant='h6'>
             {`${data[index].name}`}
-            <em style={{ color: theme.palette.grey }}>{` ${data[index].draft ? '(draft)' : ''}`}</em>
+            <em style={{ color: theme.palette.secondary.main }}>{` ${data[index].draft ? '(draft)' : ''}`}</em>
           </Typography>
         </Link>
         <Typography>
