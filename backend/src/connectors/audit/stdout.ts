@@ -39,6 +39,12 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     req.log.info(event, req.audit.description)
   }
 
+  onDeleteModel(req: Request, modelId: string) {
+    this.checkEventType(AuditInfo.DeleteModel, req)
+    const event = this.generateEvent(req, { id: modelId })
+    req.log.info(event, req.audit.description)
+  }
+
   onUpdateModel(req: Request, model: ModelDoc) {
     this.checkEventType(AuditInfo.UpdateModel, req)
     const event = this.generateEvent(req, { id: model.id })

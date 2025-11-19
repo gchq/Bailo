@@ -26,7 +26,12 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
+import { getAccessRequestsByModel, removeAccessRequest } from './accessRequest.js'
+import { getFilesByModel, removeFile } from './file.js'
+import { getInferencesByModel, removeInference } from './inference.js'
 import { MirrorImportLogData } from './mirroredModel/mirroredModel.js'
+import { listModelImages, softDeleteImage } from './registry.js'
+import { deleteRelease, getModelReleases } from './release.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -112,6 +117,65 @@ export async function getModelById(user: UserInterface, modelId: string, kind?: 
   }
 
   return model
+}
+
+export async function removeModel(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
+  const model = await Model.findOne({
+    id: modelId,
+    ...(kind && { kind }),
+  })
+
+  if (!model) {
+    throw NotFound('The requested entry was not found.', { modelId })
+  }
+
+  const auth = await authorisation.model(user, model, ModelAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
+
+  // TODO: Reviews, Tokens, Webhooks
+
+  const allReleases = await getModelReleases(user, modelId)
+  const releaseDeletionPromises = allReleases.map((release) => deleteRelease(user, modelId, release.semver))
+
+  const allAccessRequests = await getAccessRequestsByModel(user, modelId)
+  const accessRequestDeletionPromises = allAccessRequests.map((accessRequest) =>
+    removeAccessRequest(user, accessRequest.id),
+  )
+
+  const allModelCardRevisions = await getModelCardRevisions(user, modelId)
+  const modelCardRevisionsDeletionPromises = allModelCardRevisions.map((modelCardRevision) =>
+    modelCardRevision.delete(),
+  )
+
+  const modelFiles = await getFilesByModel(user, modelId)
+  const fileDeletionPromises = modelFiles.map((file) => removeFile(user, modelId, file.id))
+
+  const modelImages = await listModelImages(user, modelId)
+  const imageDeletionPromises = modelImages.flatMap((modelImage) =>
+    modelImage.tags.map((tag) =>
+      softDeleteImage(user, {
+        repository: modelImage.repository,
+        name: modelImage.name,
+        tag,
+      }),
+    ),
+  )
+
+  const modelInferences = await getInferencesByModel(user, modelId)
+  const inferencesDeletionPromises = modelInferences.map((inference) =>
+    removeInference(user, modelId, inference.image, inference.tag),
+  )
+
+  await Promise.all([
+    ...releaseDeletionPromises,
+    ...accessRequestDeletionPromises,
+    ...modelCardRevisionsDeletionPromises,
+    ...fileDeletionPromises,
+    ...imageDeletionPromises,
+    ...inferencesDeletionPromises,
+  ])
 }
 
 export async function canUserActionModelById(user: UserInterface, modelId: string, action: ModelActionKeys) {
