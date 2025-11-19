@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.13-bookworm AS sphinx-docs
+FROM python:3.14-bookworm AS sphinx-docs
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt \
