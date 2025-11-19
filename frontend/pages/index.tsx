@@ -24,7 +24,7 @@ import {
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { useTheme } from '@mui/material/styles'
-import { useListModels } from 'actions/model'
+import { useGetPopularEntryTags, useListModels } from 'actions/model'
 import { useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetPeers, useGetStatus } from 'actions/system'
 import { useGetUiConfig } from 'actions/uiConfig'
@@ -51,10 +51,7 @@ interface KeyAndLabel {
 const defaultRoleOptions: KeyAndLabel[] = [{ key: 'mine', label: 'Any role' }]
 
 export default function Marketplace() {
-  // TODO - fetch model tags from API
   const [filter, setFilter] = useState('')
-  const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
-  const [selectedTask, setSelectedTask] = useState('')
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
   const [selectedPeers, setSelectedPeers] = useState<string[]>([])
   const [selectedOrganisations, setSelectedOrganisations] = useState<string[]>([])
@@ -62,6 +59,7 @@ export default function Marketplace() {
   const [roleOptions, setRoleOptions] = useState<KeyAndLabel[]>(defaultRoleOptions)
   const [selectedTab, setSelectedTab] = useState<EntryKindKeys>(EntryKind.MODEL)
   const [mirroredModelsOnly, setMirroredModelsOnly] = useState(false)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const debouncedFilter = useDebounce(filter, 250)
 
   const { uiConfig, isUiConfigLoading, isUiConfigError } = useGetUiConfig()
@@ -76,8 +74,8 @@ export default function Marketplace() {
   } = useListModels(
     EntryKind.MODEL,
     selectedRoles,
-    selectedTask,
-    selectedLibraries,
+    '',
+    selectedTags,
     selectedOrganisations,
     selectedStates,
     selectedPeers,
@@ -92,8 +90,8 @@ export default function Marketplace() {
   } = useListModels(
     EntryKind.DATA_CARD,
     selectedRoles,
-    selectedTask,
-    selectedLibraries,
+    '',
+    [],
     selectedOrganisations,
     selectedStates,
     selectedPeers,
@@ -107,8 +105,8 @@ export default function Marketplace() {
   } = useListModels(
     EntryKind.MIRRORED_MODEL,
     selectedRoles,
-    selectedTask,
-    selectedLibraries,
+    '',
+    selectedTags,
     selectedOrganisations,
     selectedStates,
     selectedPeers,
@@ -116,6 +114,7 @@ export default function Marketplace() {
   )
 
   const { reviewRoles, isReviewRolesLoading, isReviewRolesError } = useGetReviewRoles()
+  const { tags, isTagsLoading, isTagsError } = useGetPopularEntryTags()
 
   const theme = useTheme()
   const router = useRouter()
@@ -123,23 +122,22 @@ export default function Marketplace() {
   const {
     filter: filterFromQuery,
     task: taskFromQuery,
-    libraries: librariesFromQuery,
     peers: peersFromQuery,
     organisations: organisationsFromQuery,
     states: statesFromQuery,
+    tags: tagsFromQuery,
   } = router.query
 
   useEffect(() => {
     if (filterFromQuery) setFilter(filterFromQuery as string)
-    if (taskFromQuery) setSelectedTask(taskFromQuery as string)
-    if (librariesFromQuery) {
-      let librariesAsArray: string[] = []
-      if (typeof librariesFromQuery === 'string') {
-        librariesAsArray.push(librariesFromQuery)
+    if (tagsFromQuery) {
+      let tagsAsArray: string[] = []
+      if (typeof tagsFromQuery === 'string') {
+        tagsAsArray.push(tagsFromQuery)
       } else {
-        librariesAsArray = [...librariesFromQuery]
+        tagsAsArray = [...tagsFromQuery]
       }
-      setSelectedLibraries([...librariesAsArray])
+      setSelectedTags([...tagsAsArray])
     }
     if (organisationsFromQuery) {
       let organisationsAsArray: string[] = []
@@ -159,6 +157,7 @@ export default function Marketplace() {
       }
       setSelectedStates([...statesAsArray])
     }
+
     if (peersFromQuery) {
       let peersAsArray: string[] = []
       if (typeof peersFromQuery === 'string') {
@@ -168,7 +167,7 @@ export default function Marketplace() {
       }
       setSelectedPeers([...peersAsArray])
     }
-  }, [filterFromQuery, taskFromQuery, librariesFromQuery, organisationsFromQuery, statesFromQuery, peersFromQuery])
+  }, [filterFromQuery, taskFromQuery, tagsFromQuery, organisationsFromQuery, statesFromQuery, peersFromQuery])
 
   const updateQueryParams = useCallback(
     (key: string, value: string | string[]) => {
@@ -244,18 +243,10 @@ export default function Marketplace() {
     [updateQueryParams],
   )
 
-  const handleTaskOnChange = useCallback(
-    (task: string) => {
-      setSelectedTask(task)
-      updateQueryParams('task', task)
-    },
-    [updateQueryParams],
-  )
-
-  const handleLibrariesOnChange = useCallback(
-    (libraries: string[]) => {
-      setSelectedLibraries(libraries as string[])
-      updateQueryParams('libraries', libraries)
+  const handlePopularTagsOnChange = useCallback(
+    (selectedTags: string[]) => {
+      setSelectedTags(selectedTags as string[])
+      updateQueryParams('tags', selectedTags)
     },
     [updateQueryParams],
   )
@@ -265,9 +256,8 @@ export default function Marketplace() {
   }
 
   const handleResetFilters = () => {
-    setSelectedTask('')
-    setSelectedLibraries([])
     setSelectedOrganisations([])
+    setSelectedTags([])
     setSelectedStates([])
     setSelectedRoles([])
     setSelectedPeers([])
@@ -297,7 +287,7 @@ export default function Marketplace() {
     }
   }, [reviewRoles])
 
-  if (isUiConfigLoading || isReviewRolesLoading || isPeersLoading || isStatusLoading) {
+  if (isReviewRolesLoading || isUiConfigLoading || isTagsLoading || isPeersLoading || isStatusLoading) {
     return <Loading />
   }
 
@@ -315,6 +305,10 @@ export default function Marketplace() {
 
   if (isUiConfigError) {
     return <ErrorWrapper message={isUiConfigError.info.message} />
+  }
+
+  if (isTagsError) {
+    return <ErrorWrapper message={isTagsError.info.message} />
   }
 
   // Only show peer/sources when not actively disabled
@@ -404,7 +398,7 @@ export default function Marketplace() {
                 {federationEnabled && reachablePeerList && reachablePeerList.length > 0 && (
                   <Box>
                     <ChipSelector
-                      label='External repos'
+                      label='External Repositories'
                       chipTooltipTitle={'Include external repostories'}
                       options={reachablePeerList}
                       expandThreshold={10}
@@ -419,37 +413,15 @@ export default function Marketplace() {
                 )}
                 <Box>
                   <ChipSelector
-                    label='Tasks'
-                    chipTooltipTitle={'Filter by task'}
-                    // TODO fetch all model tags
-                    options={[
-                      'Translation',
-                      'Image Classification',
-                      'Summarization',
-                      'Tokenisation',
-                      'Text to Speech',
-                      'Tabular Regression',
-                    ]}
-                    expandThreshold={10}
-                    selectedChips={selectedTask}
-                    onChange={handleTaskOnChange}
-                    size='small'
-                    ariaLabel='add task to search filter'
-                    accordion
-                  />
-                </Box>
-                <Box>
-                  <ChipSelector
-                    label='Libraries'
-                    chipTooltipTitle={'Filter by library'}
-                    // TODO fetch all model libraries
-                    options={['PyTorch', 'TensorFlow', 'JAX', 'Transformers', 'ONNX', 'Safetensors', 'spaCy']}
+                    label='Popular Tags'
+                    chipTooltipTitle={'Filter by frequently used tags'}
+                    options={tags}
                     expandThreshold={10}
                     multiple
-                    selectedChips={selectedLibraries}
-                    onChange={handleLibrariesOnChange}
+                    selectedChips={selectedTags}
+                    onChange={handlePopularTagsOnChange}
                     size='small'
-                    ariaLabel='add library to search filter'
+                    ariaLabel='add tag to search filter'
                     accordion
                   />
                 </Box>
@@ -517,8 +489,8 @@ export default function Marketplace() {
                   <EntryList
                     entries={mirroredModelsOnly ? mirroredModels : [...models, ...mirroredModels]}
                     entriesErrorMessage={combinedModelErrorMessage || ''}
-                    selectedChips={selectedLibraries}
-                    onSelectedChipsChange={handleLibrariesOnChange}
+                    selectedChips={selectedTags}
+                    onSelectedChipsChange={handlePopularTagsOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}
@@ -540,8 +512,8 @@ export default function Marketplace() {
                   <EntryList
                     entries={dataCards}
                     entriesErrorMessage={isDataCardsError ? isDataCardsError.info.message : ''}
-                    selectedChips={selectedLibraries}
-                    onSelectedChipsChange={handleLibrariesOnChange}
+                    selectedChips={selectedTags}
+                    onSelectedChipsChange={handlePopularTagsOnChange}
                     selectedOrganisations={selectedOrganisations}
                     onSelectedOrganisationsChange={handleOrganisationsOnChange}
                     selectedStates={selectedStates}

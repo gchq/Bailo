@@ -80,6 +80,11 @@ export default function NewToken() {
     [actionOptions],
   )
 
+  const getActionName = (action: string) => {
+    const [name, _kind] = action.split(':')
+    return name
+  }
+
   const renderActionTags = useCallback(
     (value: string[], getTagProps: AutocompleteRenderGetTagProps) =>
       value.map((option, index) => {
@@ -110,11 +115,6 @@ export default function NewToken() {
       }),
     [selectedActions, TokenWriteAction, TokenReadAction],
   )
-
-  const getActionName = (action: string) => {
-    const [name, _kind] = action.split(':')
-    return name
-  }
 
   const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(event.target.value)

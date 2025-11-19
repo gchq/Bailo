@@ -13,7 +13,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { Registry } from '@rjsf/utils'
 import * as _ from 'lodash-es'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import MessageAlert from 'src/MessageAlert'
 import MetricItem from 'src/MuiForms/MetricItem'
 import { isValidNumber } from 'utils/stringUtils'
@@ -42,12 +42,16 @@ export default function Metrics({ onChange, value, label, registry, required }: 
   const [metricsWithIds, setMetricsWithIds] = useState<MetricValueWithId[]>([])
   const theme = useTheme()
 
+  const onSetMetricsWithIds = useEffectEvent((newMetrics: MetricValueWithId[]) => {
+    setMetricsWithIds(newMetrics)
+  })
+
   useEffect(() => {
     const updatedMetricsWithIds = value.map((metric) => ({
       ...metric,
       id: uuidv4(),
     }))
-    setMetricsWithIds(updatedMetricsWithIds)
+    onSetMetricsWithIds(updatedMetricsWithIds)
   }, [value])
 
   const handleChange = useCallback(

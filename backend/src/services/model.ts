@@ -715,3 +715,8 @@ export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) 
     .map((collaborator) => collaborator.roles)
     .flat()
 }
+
+export async function popularTagsForEntries() {
+  const tags = await Model.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
+  return tags.map((tag) => tag._id) as string[]
+}

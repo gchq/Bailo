@@ -1,12 +1,10 @@
 import Edit from '@mui/icons-material/Edit'
-import GroupsIcon from '@mui/icons-material/Groups'
-import PersonIcon from '@mui/icons-material/Person'
 import { Box, Button, Container, Divider, List, Paper, Stack, Typography } from '@mui/material'
 import { useGetModelRoles } from 'actions/model'
 import { deleteReviewRole, putReviewRole, UpdateReviewRolesParams, useGetReviewRoles } from 'actions/reviewRoles'
 import { useGetSchemas } from 'actions/schema'
 import { useGetCurrentUser } from 'actions/user'
-import { FormEvent, Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { FormEvent, Fragment, useCallback, useContext, useEffect, useEffectEvent, useMemo, useState } from 'react'
 import ConfirmationDialogue from 'src/common/ConfirmationDialogue'
 import EmptyBlob from 'src/common/EmptyBlob'
 import Forbidden from 'src/common/Forbidden'
@@ -52,12 +50,6 @@ export default function ReviewRoles() {
     setUnsavedChanges(isEdit)
   }, [isEdit, setUnsavedChanges])
 
-  useEffect(() => {
-    if (reviewRoles) {
-      setFormData(removeExcessReviewRoleParams(reviewRoles[selectedRole]))
-    }
-  }, [reviewRoles, selectedRole])
-
   function removeExcessReviewRoleParams(reviewRole: ReviewRoleInterface): UpdateReviewRolesParams {
     if (reviewRole) {
       return {
@@ -71,6 +63,16 @@ export default function ReviewRoles() {
       return { shortName: '', name: '', systemRole: '' }
     }
   }
+
+  const onSetFormData = useEffectEvent((newFormData: UpdateReviewRolesParams) => {
+    setFormData(newFormData)
+  })
+
+  useEffect(() => {
+    if (reviewRoles) {
+      onSetFormData(removeExcessReviewRoleParams(reviewRoles[selectedRole]))
+    }
+  }, [reviewRoles, selectedRole])
 
   const listRoles = useMemo(
     () =>
@@ -139,17 +141,11 @@ export default function ReviewRoles() {
     [defaultEntitiesEntry, formData, mutateReviewRoles],
   )
 
-  const displayEntityIcon = (defaultEntity: string) => {
-    const isUser = defaultEntity.startsWith('user:')
-    return isUser ? <PersonIcon color='primary' /> : <GroupsIcon color='secondary' />
-  }
-
   const displayReviewRoleDefaultEntities = useMemo(() => {
     return formData?.defaultEntities && formData?.defaultEntities.length > 0
       ? formData.defaultEntities.map((defaultEntity) => (
           <Stack key={defaultEntity} direction='row' alignItems='center' spacing={1}>
-            {displayEntityIcon(defaultEntity)}
-            <UserDisplay dn={defaultEntity} />
+            <UserDisplay dn={defaultEntity} showIcon />
           </Stack>
         ))
       : 'No entities assigned'
