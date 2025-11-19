@@ -70,17 +70,6 @@ export default function SchemaMigrator({
 
   const theme = useTheme()
 
-  // const [open, setOpen] = React.useState(false)
-  // const anchorRef = React.useRef<HTMLDivElement>(null)
-
-  // const handleToggle = () => {
-  //   setOpen((prevOpen) => !prevOpen)
-  // }
-
-  // const handleClose = (_event: Event) => {
-  //   setOpen(false)
-  // }
-
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(menuAnchorEl)
 

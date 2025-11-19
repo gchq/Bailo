@@ -33,7 +33,12 @@ export default function SchemaMigrationEditor() {
   const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
 
   useEffect(() => {
-    if (schemaMigration && migrationName === '' && questionMigrations.length === 0) {
+    if (
+      schemaMigration &&
+      migrationName === '' &&
+      questionMigrations.length === 0 &&
+      schemaMigration.questionMigrations.length === 0
+    ) {
       setQuestionMigrations(schemaMigration.questionMigrations)
       setMigrationName(schemaMigration.name)
       setMigrationDescription(schemaMigration.description || '')
