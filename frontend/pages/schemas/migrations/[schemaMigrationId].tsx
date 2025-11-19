@@ -3,7 +3,7 @@ import { Button, Container, Paper } from '@mui/material'
 import { useGetSchema } from 'actions/schema'
 import { putSchemaMigration, useGetSchemaMigration } from 'actions/schemaMigration'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import Link from 'src/Link'
@@ -14,6 +14,7 @@ import { getStepsFromSchema } from 'utils/formUtils'
 export default function SchemaMigrationEditor() {
   const router = useRouter()
   const { schemaMigrationId }: { schemaMigrationId?: string } = router.query
+
   const { schemaMigration, isSchemaMigrationLoading, isSchemaMigrationError } = useGetSchemaMigration(schemaMigrationId)
 
   const {
@@ -32,16 +33,14 @@ export default function SchemaMigrationEditor() {
   const [migrationDescription, setMigrationDescription] = useState('')
   const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
 
+  const hasInitialised = useRef(false)
+
   useEffect(() => {
-    if (
-      schemaMigration &&
-      migrationName === '' &&
-      questionMigrations.length === 0 &&
-      schemaMigration.questionMigrations.length === 0
-    ) {
+    if (schemaMigration && !hasInitialised.current) {
       setQuestionMigrations(schemaMigration.questionMigrations)
       setMigrationName(schemaMigration.name)
       setMigrationDescription(schemaMigration.description || '')
+      hasInitialised.current = true
     }
   }, [migrationName, questionMigrations.length, schemaMigration])
 
