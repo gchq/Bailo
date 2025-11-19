@@ -14,9 +14,7 @@ import { getStepsFromSchema } from 'utils/formUtils'
 export default function SchemaMigrationEditor() {
   const router = useRouter()
   const { schemaMigrationId }: { schemaMigrationId?: string } = router.query
-  const { schemaMigration, isSchemaMigrationLoading, isSchemaMigrationError } = useGetSchemaMigration(
-    schemaMigrationId ? schemaMigrationId : '',
-  )
+  const { schemaMigration, isSchemaMigrationLoading, isSchemaMigrationError } = useGetSchemaMigration(schemaMigrationId)
 
   const {
     schema: sourceSchema,
@@ -28,16 +26,13 @@ export default function SchemaMigrationEditor() {
     isSchemaLoading: isTargetSchemaLoading,
     isSchemaError: isTargetSchemaError,
   } = useGetSchema(schemaMigration ? schemaMigration.targetSchema : '')
-  const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>(
-    schemaMigration ? schemaMigration.questionMigrations : [],
-  )
+
   const [sourceSchemaCombined, setSourceSchemaCombined] = useState<CombinedSchema>()
   const [targetSchemaCombined, setTargetSchemaCombined] = useState<CombinedSchema>()
   const [submitErrorText, setSubmitErrorText] = useState('')
-  const [migrationName, setMigrationName] = useState(schemaMigration ? schemaMigration.name : '')
-  const [migrationDescription, setMigrationDescription] = useState(
-    schemaMigration && schemaMigration.description ? schemaMigration.description : '',
-  )
+  const [migrationName, setMigrationName] = useState('')
+  const [migrationDescription, setMigrationDescription] = useState('')
+  const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
 
   useEffect(() => {
     if (schemaMigration) {

@@ -1,4 +1,4 @@
-import { Box, Button, Container, Divider, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Divider, Stack, Typography, useTheme } from '@mui/material'
 import { useGetSchemaMigrations } from 'actions/schemaMigration'
 import { memoize } from 'lodash-es'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
@@ -9,6 +9,7 @@ import MessageAlert from 'src/MessageAlert'
 import { formatDateString } from 'utils/dateUtils'
 
 export default function SchemaMigrationList() {
+  const theme = useTheme()
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations()
   const SchemaMigrationList = memoize(({ data, index }) => (
     <Stack sx={{ p: 2 }} spacing={1}>
@@ -20,7 +21,7 @@ export default function SchemaMigrationList() {
         >
           <Typography fontWeight='bold' color='primary' variant='h6'>
             {`${data[index].name}`}
-            <em style={{ color: 'gray' }}>{` ${data[index].draft ? '(draft)' : ''}`}</em>
+            <em style={{ color: theme.palette.grey }}>{` ${data[index].draft ? '(draft)' : ''}`}</em>
           </Typography>
         </Link>
         <Typography>
