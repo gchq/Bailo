@@ -19,7 +19,7 @@ const registry = `${config.registry.connection.internal}/v2`
 const digestsToSearchFor: string[] = []
 
 async function getRepositories(): Promise<string[]> {
-  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', class: '', name: 'catalog', actions: ['*'] }])
+  const token = await getAccessToken({ dn: 'user' }, [{ type: 'registry', name: 'catalog', actions: ['*'] }])
 
   const authorisation = `Bearer ${token}`
 
@@ -37,10 +37,10 @@ async function getRepositories(): Promise<string[]> {
 
 async function getTags(repository: string): Promise<string[]> {
   const repositoryToken = await getAccessToken({ dn: 'user' }, [
-    { type: 'repository', class: '', name: repository, actions: ['*'] },
+    { type: 'repository', name: repository, actions: ['*'] },
   ])
 
-  const tags = listImageTags(repositoryToken, { namespace: repository, image: '' })
+  const tags = listImageTags(repositoryToken, { repository: repository, name: '' })
   return tags
 }
 
@@ -49,7 +49,7 @@ async function getTagDigests(
   tag: string,
 ): Promise<{ manifest: string; image: string; layers: string[] }> {
   const repositoryToken = await getAccessToken({ dn: 'user' }, [
-    { type: 'repository', class: '', name: repository, actions: ['*'] },
+    { type: 'repository', name: repository, actions: ['*'] },
   ])
   const repositoryAuthorisation = `Bearer ${repositoryToken}`
 

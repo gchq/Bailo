@@ -3,26 +3,18 @@ import { z } from 'zod'
 
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
-import { CollaboratorEntry, EntryKind, EntryKindKeys } from '../../../models/Model.js'
+import { EntryKind } from '../../../models/Model.js'
 import { searchModels } from '../../../services/model.js'
 import { registerPath } from '../../../services/specification.js'
-import { coerceArray, parse, strictCoerceBoolean } from '../../../utils/validate.js'
+import {
+  EntrySearchOptionsParams,
+  EntrySearchOptionsSchema,
+  EntrySearchResultWithErrors,
+} from '../../../types/types.js'
+import { parse } from '../../../utils/validate.js'
 
 export const getModelsSearchSchema = z.object({
-  query: z.object({
-    // These are all optional with defaults.  If they are not provided, they do not filter settings.
-    kind: z.string(z.nativeEnum(EntryKind)).optional(),
-    task: z.string().optional(),
-    libraries: coerceArray(z.array(z.string()).optional().default([])),
-    organisations: coerceArray(z.array(z.string()).optional().default([])),
-    states: coerceArray(z.array(z.string()).optional().default([])),
-    filters: coerceArray(z.array(z.string()).optional().default([])),
-    search: z.string().optional().default(''),
-    allowTemplating: strictCoerceBoolean(z.boolean().optional()),
-    schemaId: z.string().optional(),
-    adminAccess: strictCoerceBoolean(z.boolean().optional()),
-    titleOnly: strictCoerceBoolean(z.boolean().optional()),
-  }),
+  query: EntrySearchOptionsSchema,
 })
 
 registerPath({
@@ -47,8 +39,19 @@ registerPath({
                 allowTemplating: z.boolean().openapi({ example: true }),
                 schemaId: z.string().optional(),
                 adminAccess: z.boolean().optional(),
+                peerId: z.string().optional(),
               }),
             ),
+            errors: z
+              .record(
+                z.string(),
+                z.object({
+                  peerId: z.string().optional(),
+                  message: z.string().optional(),
+                  code: z.number().optional(),
+                }),
+              )
+              .optional(),
           }),
         },
       },
@@ -56,59 +59,20 @@ registerPath({
   },
 })
 
-export interface ModelSearchResult {
-  id: string
-  name: string
-  description: string
-  tags: Array<string>
-  kind: EntryKindKeys
-  organisation?: string
-  state?: string
-  collaborators: Array<CollaboratorEntry>
-  createdAt: Date
-  updatedAt: Date
-}
-
-interface GetModelsResponse {
-  models: Array<ModelSearchResult>
-}
-
 export const getModelsSearch = [
-  async (req: Request, res: Response<GetModelsResponse>): Promise<void> => {
+  async (req: Request, res: Response<EntrySearchResultWithErrors>): Promise<void> => {
     req.audit = AuditInfo.SearchModels
-    const {
-      query: {
-        kind,
-        libraries,
-        filters,
-        search,
-        task,
-        allowTemplating,
-        schemaId,
-        organisations,
-        states,
-        adminAccess,
-        titleOnly,
-      },
-    } = parse(req, getModelsSearchSchema)
 
-    const models = await searchModels(
-      req.user,
-      kind as EntryKindKeys,
-      libraries,
-      organisations,
-      states,
-      filters,
-      search,
-      task,
-      allowTemplating,
-      schemaId,
-      adminAccess,
-      titleOnly,
-    )
+    const opts: { query: EntrySearchOptionsParams } = parse(req, getModelsSearchSchema)
 
-    await audit.onSearchModel(req, models)
+    let results: EntrySearchResultWithErrors = {
+      models: [],
+    }
 
-    res.json({ models })
+    results = await searchModels(req.user, opts.query)
+
+    await audit.onSearchModel(req, results.models)
+
+    res.json(results)
   },
 ]

@@ -48,6 +48,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
     (doc: DirectoryTree, paddingLeft = paddingIncrement) => {
       let children: Array<any> = []
       if (doc.children) {
+        // eslint-disable-next-line react-hooks/immutability
         children = doc.children.map((child) => createDocElement(child, paddingLeft + paddingIncrement))
       }
 
@@ -120,20 +121,19 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
   return (
     <>
       <Title text='Documentation' />
-      {/* Banner height + Toolbar height = 96px */}
-      <Box display='flex' width='100%' height='calc(100vh - 96px)'>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <Box
           sx={(theme) => ({
-            minWidth: 200,
             backgroundColor: theme.palette.background.paper,
             borderRight: `1px solid ${theme.palette.divider}`,
             overflow: 'auto',
             py: 2,
           })}
+          height={{ xs: '250px', sm: 'calc(100vh - 96px)' }}
         >
           <StyledList>{createDocElement(directory)}</StyledList>
         </Box>
-        <Box flex={1} overflow='auto'>
+        <Box flex={1} overflow='auto' height={{ xs: '250px', sm: 'unset' }}>
           <Box display='flex' flexDirection='column' height='100%'>
             <Container
               maxWidth='lg'
@@ -159,7 +159,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
               <Divider flexItem />
               {flatDirectory.length > 0 && (
                 <Box sx={{ pt: 2, mt: 'auto', pl: 4, pr: 4 }}>
-                  <Stack direction='row' justifyContent='space-around'>
+                  <Stack direction={{ sm: 'column', md: 'row' }} justifyContent='space-around'>
                     {currentIndex === 0 && (
                       <Button startIcon={<ArrowBack />} onClick={() => changePageToDocsHome()}>
                         Home
@@ -188,7 +188,7 @@ export default function DocsWrapper({ children }: DocsWrapperProps): ReactElemen
             <Copyright sx={{ pb: 2, pt: 4 }} />
           </Box>
         </Box>
-      </Box>
+      </Stack>
     </>
   )
 }

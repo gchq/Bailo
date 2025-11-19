@@ -1,4 +1,4 @@
-import { Label } from '@mui/icons-material'
+import { Error, Label } from '@mui/icons-material'
 import EmailIcon from '@mui/icons-material/Email'
 import UserIcon from '@mui/icons-material/Person'
 import { Box, Divider, Popover, Stack, Typography } from '@mui/material'
@@ -7,6 +7,7 @@ import { MouseEvent, useMemo, useRef, useState } from 'react'
 import CopyToClipboardButton from 'src/common/CopyToClipboardButton'
 import Loading from 'src/common/Loading'
 import UserAvatar from 'src/common/UserAvatar'
+import EntityIcon from 'src/entry/EntityIcon'
 import { EntityKind } from 'types/types'
 
 export type UserInformation = {
@@ -23,6 +24,7 @@ export type UserDisplayProps = {
   hidePopover?: boolean
   displayAsAvatar?: boolean
   smallAvatars?: boolean
+  showIcon?: boolean
 }
 
 export default function UserDisplay({
@@ -30,12 +32,13 @@ export default function UserDisplay({
   hidePopover = false,
   displayAsAvatar = false,
   smallAvatars = false,
+  showIcon = false,
 }: UserDisplayProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = useMemo(() => !!anchorEl, [anchorEl])
   const ref = useRef<HTMLDivElement>(null)
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
-    dn.includes(':') ? dn.split(':')[1] : dn,
+    dn.includes(':') ? dn.split(':')[5] : dn,
   )
 
   const popoverEnter = () => {
@@ -71,7 +74,26 @@ export default function UserDisplay({
             size={smallAvatars ? 'chip' : undefined}
           />
         ) : (
-          <div>{userInformation ? userInformation.name : 'Unknown User'}</div>
+          <>
+            {userInformation ? (
+              <Stack direction='row' alignItems='center' spacing={1}>
+                {showIcon && (
+                  <EntityIcon
+                    entryCollaborator={{
+                      entity: dn,
+                      roles: [],
+                    }}
+                  />
+                )}
+                <Typography>{userInformation.name}</Typography>
+              </Stack>
+            ) : (
+              <Stack direction='row' alignItems='center' spacing={1}>
+                {showIcon && <Error color='error' />}
+                <Typography color='error'>Unknown User/Group</Typography>
+              </Stack>
+            )}
+          </>
         )}
       </Box>
       {!hidePopover && (

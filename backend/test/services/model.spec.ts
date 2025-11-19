@@ -13,13 +13,14 @@ import {
   getModelById,
   getModelCardRevision,
   isModelCardRevisionDoc,
+  popularTagsForEntries,
   saveImportedModelCard,
   searchModels,
   setLatestImportedModelCard,
   updateModel,
   updateModelCard,
 } from '../../src/services/model.js'
-import { EntryUserPermissions } from '../../src/types/types.js'
+import { EntrySearchOptionsParams, EntryUserPermissions } from '../../src/types/types.js'
 
 vi.mock('../../src/connectors/authorisation/index.js')
 
@@ -82,7 +83,13 @@ const modelMocks = vi.hoisted(() => {
 
   return model
 })
-vi.mock('../../src/models/Model.js', () => ({ default: modelMocks }))
+vi.mock('../../src/models/Model.js', async () => {
+  const actual = await vi.importActual('../../src/models/Model.js')
+  return {
+    ...actual,
+    default: modelMocks,
+  }
+})
 
 vi.mock('../../src/utils/database.js', async () => ({
   isTransactionsEnabled: vi.fn(() => false),
@@ -203,42 +210,69 @@ describe('services > model', () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, 'model', [], [], [], [], '', undefined)
-    expect(modelMocks.find.mock.calls).matchSnapshot()
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: undefined,
+    }
+
+    await searchModels(user, searchParams)
   })
 
   test('searchModels > all filters', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: ['library'],
+      filters: ['mine'],
+      organisations: ['example organisation'],
+      states: ['development'],
+      search: 'search',
+      task: 'task',
+    }
 
-    await searchModels(
-      user,
-      'model',
-      ['library'],
-      ['mine'],
-      ['example organisation'],
-      ['development'],
-      'search',
-      'task',
-    )
-
-    expect(modelMocks.find.mock.calls).matchSnapshot()
+    await searchModels(user, searchParams)
   })
 
   test('searchModels > task no library', async () => {
     const user: any = { dn: 'test' }
     modelMocks.sort.mockResolvedValueOnce([])
 
-    await searchModels(user, 'model', [], [], [], [], '', 'task')
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: 'task',
+    }
+
+    await searchModels(user, searchParams)
   })
 
   test('searchModels > admin access without auth', async () => {
     const user = { dn: 'not admin' }
     const adminAccess = true
     authenticationMocks.hasRole.mockImplementation(() => false)
-    await expect(searchModels(user, 'model', [], [], [], [], '', '', false, '', adminAccess)).rejects.toThrow(
-      'You do not have the required role.',
-    )
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: 'task',
+      adminAccess,
+    }
+
+    await expect(searchModels(user, searchParams)).rejects.toThrow('You do not have the required role.')
   })
 
   test('searchModels > admin access with auth', async () => {
@@ -246,7 +280,19 @@ describe('services > model', () => {
     const adminAccess = true
     modelMocks.sort.mockResolvedValueOnce([])
     authenticationMocks.hasRole.mockImplementation(() => true)
-    await searchModels(user, 'model', [], [], [], [], '', '', false, '', adminAccess)
+
+    const searchParams: EntrySearchOptionsParams = {
+      kind: 'model',
+      libraries: [],
+      filters: [],
+      organisations: [],
+      states: [],
+      search: '',
+      task: 'task',
+      adminAccess,
+    }
+
+    await searchModels(user, searchParams)
   })
 
   test('getModelCardRevision > should throw NotFound if modelCard does not exist', async () => {
@@ -613,5 +659,11 @@ describe('services > model', () => {
 
     expect(modelMocks.findOne).toBeCalled()
     expect(permissions).toEqual(mockPermissions)
+  })
+
+  test('popularTagsForEntries > returns a list of tags', async () => {
+    modelMocks.aggregate.mockResolvedValueOnce([{ _id: 'test-tag' }])
+    const tags = await popularTagsForEntries()
+    expect(tags).toEqual(['test-tag'])
   })
 })

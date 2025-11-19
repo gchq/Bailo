@@ -47,7 +47,12 @@ export default function SchemaCompare() {
   return (
     <Box sx={{ p: 4 }}>
       <Stack spacing={4}>
-        <Stack direction='row' spacing={6} justifyContent='center' alignItems='center'>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={{ xs: 2, sm: 6 }}
+          justifyContent='center'
+          alignItems='center'
+        >
           <Autocomplete
             disablePortal
             options={schemas}

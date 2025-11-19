@@ -10,7 +10,7 @@ type ListImageTagResponse = { tags: Array<string> }
 
 type ListModelReposResponse = { repositories: Array<string> }
 
-type GetImageTagManifestResponse = {
+export type GetImageTagManifestResponse = {
   schemaVersion: number
   mediaType: string
   config: { mediaType: string; size: number; digest: string }
@@ -36,6 +36,7 @@ type PutManifestResponse = {
 }
 
 type UploadLayerMonolithicResponse = PutManifestResponse
+type MountBlobResponse = PutManifestResponse
 
 type InitialiseUploadResponse = {
   'content-length': string
@@ -44,6 +45,12 @@ type InitialiseUploadResponse = {
   'docker-upload-uuid': string
   location: string
   range: string
+}
+
+type DeleteManifestResponse = {
+  'content-length': string
+  date: string
+  'docker-distribution-api-version': string
 }
 
 export function isRegistryErrorResponse(resp: unknown): resp is RegistryErrorResponse {
@@ -121,6 +128,10 @@ export function isUploadLayerMonolithicResponse(resp: unknown): resp is UploadLa
   return isPutManifestResponse(resp)
 }
 
+export function isMountBlobResponse(resp: unknown): resp is MountBlobResponse {
+  return isPutManifestResponse(resp)
+}
+
 export function isInitialiseUploadObjectResponse(resp: unknown): resp is InitialiseUploadResponse {
   return hasKeysOfType(resp, {
     'content-length': 'string',
@@ -129,5 +140,13 @@ export function isInitialiseUploadObjectResponse(resp: unknown): resp is Initial
     'docker-upload-uuid': 'string',
     location: 'string',
     range: 'string',
+  })
+}
+
+export function isDeleteManifestResponse(resp: unknown): resp is DeleteManifestResponse {
+  return hasKeysOfType(resp, {
+    'content-length': 'string',
+    date: 'string',
+    'docker-distribution-api-version': 'string',
   })
 }

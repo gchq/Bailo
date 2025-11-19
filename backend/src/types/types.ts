@@ -1,7 +1,10 @@
 import { ProxyAgentOptions } from 'proxy-agent'
+import { Optional } from 'utility-types'
+import z, { ZodSchema, ZodTypeDef } from 'zod'
 
 import { PeerKindKeys } from '../connectors/peer/index.js'
-import { SystemRolesKeys } from '../models/Model.js'
+import { CollaboratorEntry, EntryKind, EntryKindKeys, EntryVisibilityKeys, SystemRolesKeys } from '../models/Model.js'
+import { coerceArray, strictCoerceBoolean } from '../utils/validate.js'
 import { BailoError } from './error.js'
 
 export type PartialDeep<T> = T extends object
@@ -74,8 +77,14 @@ export interface RemoteFederationConfig {
   baseUrl: string
   label: string
   kind: PeerKindKeys
-  proxy: string
-  httpConfig: ProxyAgentOptions
+  proxy?: string
+  httpConfig?: ProxyAgentOptions
+  cache?: {
+    query?: number
+  }
+  extra?: {
+    [key: string]: any
+  }
 }
 
 export type FederationStatus = {
@@ -151,3 +160,57 @@ export interface UiConfig {
     consumer: string
   }
 }
+
+export interface EntrySearchResult {
+  id: string
+  name: string
+  description: string
+  tags: Array<string>
+  kind: EntryKindKeys
+  organisation?: string
+  state?: string
+  collaborators: Array<CollaboratorEntry>
+  visibility: EntryVisibilityKeys
+  createdAt: Date
+  updatedAt: Date
+  peerId?: string
+  sourceModelId?: string
+}
+
+export interface EntrySearchResultWithErrors {
+  // Todo: Update models to 'entries'
+  models: Array<EntrySearchResult>
+  errors?: Record<string, BailoError>
+}
+
+export interface EntrySearchOptions {
+  kind: EntryKindKeys
+  libraries: Array<string>
+  organisations: Array<string>
+  states: Array<string>
+  filters: Array<string>
+  search: string
+  task: string
+  peers: Array<string>
+  allowTemplating: boolean
+  schemaId: string
+  adminAccess: boolean
+  titleOnly: boolean
+}
+
+export type EntrySearchOptionsParams = Optional<EntrySearchOptions>
+
+export const EntrySearchOptionsSchema: ZodSchema<EntrySearchOptionsParams, ZodTypeDef, unknown> = z.object({
+  kind: z.nativeEnum(EntryKind).optional(),
+  task: z.string().optional(),
+  libraries: coerceArray(z.array(z.string()).optional()),
+  organisations: coerceArray(z.array(z.string()).optional()),
+  states: coerceArray(z.array(z.string()).optional()),
+  filters: coerceArray(z.array(z.string()).optional()),
+  search: z.string().optional(),
+  allowTemplating: strictCoerceBoolean(z.boolean().optional()),
+  schemaId: z.string().optional(),
+  adminAccess: strictCoerceBoolean(z.boolean().optional()),
+  peers: coerceArray(z.array(z.string()).optional()),
+  titleOnly: strictCoerceBoolean(z.boolean().optional()),
+})

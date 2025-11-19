@@ -49,7 +49,7 @@ export default function FileToBeUploaded({
 
   return (
     <Grid container spacing={1} alignItems='center'>
-      <Grid size='auto'>
+      <Grid size={{ xs: 9 }} textOverflow={'ellipsis'}>
         <Tooltip title={fileWithMetadata.file.name}>
           <Chip
             color='primary'
@@ -58,7 +58,7 @@ export default function FileToBeUploaded({
           />
         </Tooltip>
       </Grid>
-      <Grid size={{ xs: 7 }}>
+      <Grid size={{ xs: 2 }}>
         <Restricted action='editEntry' fallback={<></>}>
           <Button
             sx={{ width: 'fit-content' }}
