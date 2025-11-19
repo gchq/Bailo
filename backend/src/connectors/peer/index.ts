@@ -39,7 +39,7 @@ function validate(id: string, cfg: RemoteFederationConfig): void {
   }
 }
 
-export default async function getPeerConnectors(cache = true): Promise<PeerConnectorWrapper> {
+export async function getPeerConnectors(cache = true): Promise<PeerConnectorWrapper> {
   if (peerWrapper && cache) {
     return peerWrapper
   }
@@ -78,3 +78,5 @@ export default async function getPeerConnectors(cache = true): Promise<PeerConne
   await peerWrapper.init()
   return peerWrapper
 }
+
+export default await getPeerConnectors()
