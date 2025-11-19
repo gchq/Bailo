@@ -20,7 +20,7 @@ export default function SchemaMigrationList() {
         >
           <Typography fontWeight='bold' color='primary' variant='h6'>
             {`${data[index].name}`}
-            <span style={{ color: 'gray', fontStyle: 'italic' }}>{` ${data[index].draft ? '(draft)' : ''}`}</span>
+            <em style={{ color: 'gray' }}>{` ${data[index].draft ? '(draft)' : ''}`}</em>
           </Typography>
         </Link>
         <Typography>

@@ -63,8 +63,16 @@ export async function updateSchemaMigrationPlan(
   return schemaMigrationPlan
 }
 
-export async function searchSchemaMigrations(id?: string, sourceSchema?: string) {
-  return await SchemaMigration.find({ ...(id && { id }), ...(sourceSchema && { sourceSchema }) })
+export async function searchSchemaMigrationById(schemaMigrationId: string) {
+  const schemaMigrationPlan = await SchemaMigration.findOne({ id: schemaMigrationId })
+  if (!schemaMigrationPlan) {
+    throw NotFound('Cannot find specified schema migration plan.', { schemaMigrationId })
+  }
+  return schemaMigrationPlan
+}
+
+export async function searchSchemaMigrations(sourceSchema?: string) {
+  return await SchemaMigration.find({ ...(sourceSchema && { sourceSchema }) })
 }
 
 export async function runModelSchemaMigration(user: UserInterface, modelId: string, migrationPlanId: string) {

@@ -410,4 +410,10 @@ export class StdoutAuditConnector extends BaseAuditConnector {
     })
     req.log.info(event, req.audit.description)
   }
+
+  onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface) {
+    this.checkEventType(AuditInfo.ViewSchemaMigrations, req)
+    const event = this.generateEvent(req, { schemaMigrationName: schemaMigration.name })
+    req.log.info(event, req.audit.description)
+  }
 }

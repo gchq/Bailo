@@ -26,13 +26,13 @@ export const putSchemaMigrationSchema = z.object({
         propertyType: z.string().openapi({ example: 'string' }),
       }),
     ),
-    draft: z.boolean(),
+    draft: z.coerce.boolean().optional().default(false),
   }),
 })
 
 registerPath({
   method: 'put',
-  path: '/api/v2/schema-migration',
+  path: '/api/v2/schema-migration/{schemaMigrationId}',
   tags: ['schema-migrations'],
   description: 'Update existing schema migration plan.',
   schema: putSchemaMigrationSchema,

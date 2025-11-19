@@ -79,4 +79,5 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
   onUpdateSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
   onViewSchemaMigrations(_req: Request, _schemaMigrations: SchemaMigrationInterface[]) {}
+  onViewSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
 }

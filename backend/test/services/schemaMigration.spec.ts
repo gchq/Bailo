@@ -85,14 +85,6 @@ const schemaMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/Schema.js', () => ({ default: schemaMocks }))
 
-// const schemaMigrationMocks = vi.hoisted(() => {
-//   return {
-//     getSchemaMigrationById: vi.fn(),
-//   }
-// })
-
-// vi.mock('../../src/services/schemaMigration.js', () => schemaMigrationMocks)
-
 describe('services > schemaMigration', () => {
   const testUser = { dn: 'user' } as UserInterface
 

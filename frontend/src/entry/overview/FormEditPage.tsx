@@ -44,7 +44,6 @@ export default function FormEditPage({ entry, readOnly = false }: FormEditPagePr
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations(
-    '',
     entry.card.schemaId,
   )
 

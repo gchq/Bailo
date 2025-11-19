@@ -18,7 +18,7 @@ export const postSchemaMigrationSchema = z.object({
     description: z.string().optional().openapi({ example: 'This is an example migration plan' }),
     sourceSchema: z.string().openapi({ example: 'v1' }),
     targetSchema: z.string().openapi({ example: 'v2' }),
-    draft: z.boolean(),
+    draft: z.coerce.boolean().optional().default(false),
     questionMigrations: z.array(
       z.object({
         id: z.string(),

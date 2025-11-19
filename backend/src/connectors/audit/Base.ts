@@ -114,6 +114,11 @@ export const AuditInfo = {
     description: 'Schemas Migration Plans viewed',
     auditKind: AuditKind.View,
   },
+  ViewSchemaMigration: {
+    typeId: 'ViewSchemaMigration',
+    description: 'Schema Migration Plan viewed',
+    auditKind: AuditKind.View,
+  },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
 
@@ -214,6 +219,7 @@ export abstract class BaseAuditConnector {
   abstract onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
   abstract onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
   abstract onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[])
+  abstract onViewSchemaMigration(req: Request, schemaMigrations: SchemaMigrationInterface)
 
   abstract onCreateInference(req: Request, inference: InferenceDoc)
   abstract onUpdateInference(req: Request, inference: InferenceDoc)
