@@ -68,10 +68,29 @@ export default function SchemaMigrator({
   const [isSourceSchemaActive, setIsSourceSchemaActive] = useState(false)
   const [isTargetSchemaActive, setIsTargetSchemaActive] = useState(false)
 
-  const [open, setOpen] = React.useState(false)
-  const anchorRef = React.useRef<HTMLDivElement>(null)
-
   const theme = useTheme()
+
+  // const [open, setOpen] = React.useState(false)
+  // const anchorRef = React.useRef<HTMLDivElement>(null)
+
+  // const handleToggle = () => {
+  //   setOpen((prevOpen) => !prevOpen)
+  // }
+
+  // const handleClose = (_event: Event) => {
+  //   setOpen(false)
+  // }
+
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(menuAnchorEl)
+
+  const handleToggle = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setMenuAnchorEl(null)
+  }
 
   const handleRemoveActionItem = useCallback(
     (action: QuestionMigration) => {
@@ -79,10 +98,6 @@ export default function SchemaMigrator({
     },
     [questionMigrations, setQuestionMigrations],
   )
-
-  const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen)
-  }
 
   const actionsList = useMemo(() => {
     if (questionMigrations.length === 0) {
@@ -221,10 +236,6 @@ export default function SchemaMigrator({
     }
   }
 
-  const handleClose = (_event: Event) => {
-    setOpen(false)
-  }
-
   return (
     <>
       <Grid container spacing={2}>
@@ -314,7 +325,7 @@ export default function SchemaMigrator({
                   />
                 </Stack>
                 <ClickAwayListener onClickAway={handleClose}>
-                  <ButtonGroup ref={anchorRef} variant='contained' color='primary'>
+                  <ButtonGroup variant='contained' color='primary'>
                     <Button
                       onClick={() => handleSubmitMigrationPlan(draft)}
                       aria-label={`${draft ? 'draft' : 'submit'} migration plan`}
@@ -328,7 +339,7 @@ export default function SchemaMigrator({
                   </ButtonGroup>
                 </ClickAwayListener>
                 <Menu
-                  anchorEl={open && anchorRef.current ? anchorRef.current : null}
+                  anchorEl={menuAnchorEl}
                   transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   open={open}
