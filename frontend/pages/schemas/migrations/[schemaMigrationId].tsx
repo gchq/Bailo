@@ -34,12 +34,12 @@ export default function SchemaMigrationEditor() {
   const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
 
   useEffect(() => {
-    if (schemaMigration && schemaMigration.questionMigrations.length !== 0) {
+    if (schemaMigration && schemaMigration.questionMigrations.length !== 0 && questionMigrations.length === 0) {
       setQuestionMigrations(schemaMigration.questionMigrations)
       setMigrationName(schemaMigration.name)
       setMigrationDescription(schemaMigration.description || '')
     }
-  }, [schemaMigration])
+  }, [questionMigrations.length, schemaMigration])
 
   const sourceSchemaCombined: CombinedSchema | undefined = useMemo(() => {
     if (sourceSchema) {
