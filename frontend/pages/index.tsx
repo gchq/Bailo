@@ -1,4 +1,5 @@
 import { ExpandMore } from '@mui/icons-material'
+import SubjectIcon from '@mui/icons-material/Subject'
 import {
   Accordion,
   AccordionDetails,
@@ -12,6 +13,7 @@ import {
   FormControl,
   FormControlLabel,
   FormGroup,
+  IconButton,
   InputLabel,
   Paper,
   Stack,
@@ -179,7 +181,7 @@ export default function Marketplace() {
       }
       setSelectedPeers([...peersAsArray])
     }
-    setTitleOnly(Boolean(titleOnlyFromQuery))
+    setTitleOnly(titleOnlyFromQuery === 'true')
   }, [
     filterFromQuery,
     taskFromQuery,
@@ -276,10 +278,10 @@ export default function Marketplace() {
     e.preventDefault()
   }
 
-  const handleChangeTitleOnly = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTitleOnly(event.target.checked)
-    updateQueryParams('titleOnly', event.target.checked.toString())
-  }
+  const handleChangeTitleOnly = useCallback(() => {
+    setTitleOnly(!titleOnly)
+    updateQueryParams('titleOnly', (!titleOnly).toString())
+  }, [updateQueryParams, titleOnly])
 
   const handleResetFilters = () => {
     setSelectedOrganisations([])
@@ -378,8 +380,14 @@ export default function Marketplace() {
                   inputProps={{ spellCheck: 'false' }}
                   onChange={handleFilterChange}
                   endAdornment={
-                    <Tooltip title='Title Only'>
-                      <Checkbox checked={titleOnly} onChange={handleChangeTitleOnly}></Checkbox>
+                    <Tooltip title='Full Text'>
+                      <IconButton
+                        aria-label='titleOnly'
+                        onClick={handleChangeTitleOnly}
+                        color={titleOnly ? 'primary' : 'secondary'}
+                      >
+                        <SubjectIcon />
+                      </IconButton>
                     </Tooltip>
                   }
                 />
