@@ -289,12 +289,14 @@ export class BasicAuthorisationConnector {
 
         /**
          * Reject if:
-         *  - user is not named on the access request OR user is not able to view the model
+         *  - user is not named on the access request
+         *  - user is not able to view the model
          *  - the user is trying to view an existing AR
          */
         if (
-          ([AccessRequestAction.View] as AccessRequestActionKeys[]).includes(action) &&
-          (!isNamed || (await this.model(user, model, ModelAction.View)))
+          !isNamed &&
+          (await this.model(user, model, ModelAction.View)) &&
+          ([AccessRequestAction.View] as AccessRequestActionKeys[]).includes(action)
         ) {
           return {
             success: false,
