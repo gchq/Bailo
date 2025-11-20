@@ -298,30 +298,18 @@ export const inferenceInterfaceSchema = z.object({
   updatedAt: z.string().openapi({ example: new Date().toISOString() }),
 })
 
+const mirrorMetadataBaseSchema = z.object({
+  schemaVersion: z.literal(1),
+  importKind: z.string(),
+  sourceModelId: z.string(),
+  mirroredModelId: z.string(),
+  exporter: z.string(),
+  exportId: z.string(),
+})
 export const mirrorMetadataSchema = z.union([
-  z.object({
-    schemaVersion: z.literal(1),
-    importKind: z.literal(MirrorKind.Documents),
-    sourceModelId: z.string(),
-    mirroredModelId: z.string(),
-    exporter: z.string(),
-  }),
-  z.object({
-    schemaVersion: z.literal(1),
-    importKind: z.literal(MirrorKind.File),
-    sourceModelId: z.string(),
-    mirroredModelId: z.string(),
-    filePath: z.string(),
-    exporter: z.string(),
-  }),
-  z.object({
-    schemaVersion: z.literal(1),
-    importKind: z.literal(MirrorKind.Image),
-    sourceModelId: z.string(),
-    mirroredModelId: z.string(),
-    distributionPackageName: z.string(),
-    exporter: z.string(),
-  }),
+  mirrorMetadataBaseSchema.extend({ importKind: z.literal(MirrorKind.Documents) }),
+  mirrorMetadataBaseSchema.extend({ importKind: z.literal(MirrorKind.File), filePath: z.string() }),
+  mirrorMetadataBaseSchema.extend({ importKind: z.literal(MirrorKind.Image), distributionPackageName: z.string() }),
 ])
 
 export const permissionDetailSchema = z.discriminatedUnion('hasPermission', [
