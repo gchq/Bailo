@@ -2,10 +2,11 @@ import { Readable } from 'node:stream'
 
 import { sign } from '../../clients/kms.js'
 import { getObjectStream, putObjectStream } from '../../clients/s3.js'
+import { MirrorExportLogData, MirrorImportLogData } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { InternalError } from '../../utils/error.js'
 import log from '../log.js'
-import { generateDigest, MirrorExportLogData, MirrorImportLogData } from './mirroredModel.js'
+import { generateDigest } from './mirroredModel.js'
 
 export async function uploadToS3(fileName: string, stream: Readable, logData: MirrorExportLogData) {
   if (config.modelMirror.export.kmsSignature.enabled) {

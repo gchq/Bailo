@@ -8,9 +8,9 @@ import authorisation from '../../../connectors/authorisation/index.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
 import { isBailoError } from '../../../types/error.js'
+import { MirrorExportLogData } from '../../../types/types.js'
 import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
 import log from '../../log.js'
-import { MirrorExportLogData } from '../mirroredModel.js'
 import { finaliseTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
 
 /**

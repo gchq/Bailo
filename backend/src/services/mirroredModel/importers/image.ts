@@ -8,12 +8,12 @@ import { Headers } from 'tar-stream'
 import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
 import { UserInterface } from '../../../models/User.js'
 import { getAccessToken } from '../../../routes/v1/registryAuth.js'
+import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { hasKeysOfType } from '../../../utils/typeguards.js'
 import log from '../../log.js'
 import { splitDistributionPackageName } from '../../registry.js'
-import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type ImageMirrorMetadata = BaseMirrorMetadata & {

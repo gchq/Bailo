@@ -3,9 +3,9 @@ import { PassThrough, Readable } from 'node:stream'
 import { Headers } from 'tar-stream'
 
 import { isBailoError } from '../../../types/error.js'
+import { MirrorImportLogData } from '../../../types/types.js'
 import { InternalError } from '../../../utils/error.js'
 import log from '../../log.js'
-import { MirrorImportLogData } from '../mirroredModel.js'
 
 export type BaseMirrorMetadata = {
   schemaVersion: number
