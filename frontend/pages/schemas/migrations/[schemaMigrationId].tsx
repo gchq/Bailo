@@ -3,7 +3,7 @@ import { Button, Container, Paper } from '@mui/material'
 import { useGetSchema } from 'actions/schema'
 import { putSchemaMigration, useGetSchemaMigration } from 'actions/schemaMigration'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import Loading from 'src/common/Loading'
 import ErrorWrapper from 'src/errors/ErrorWrapper'
 import Link from 'src/Link'
@@ -33,13 +33,17 @@ export default function SchemaMigrationEditor() {
   const [migrationDescription, setMigrationDescription] = useState('')
   const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
 
-  useEffect(() => {
+  const updateMigrationStates = useEffectEvent(() => {
     if (schemaMigration && schemaMigration.questionMigrations.length !== 0 && questionMigrations.length === 0) {
       setQuestionMigrations(schemaMigration.questionMigrations)
       setMigrationName(schemaMigration.name)
       setMigrationDescription(schemaMigration.description || '')
     }
-  }, [questionMigrations.length, schemaMigration])
+  })
+
+  useEffect(() => {
+    updateMigrationStates()
+  }, [schemaMigration])
 
   const sourceSchemaCombined: CombinedSchema | undefined = useMemo(() => {
     if (sourceSchema) {

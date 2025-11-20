@@ -17,7 +17,7 @@ describe('routes > schema > putSchemaMigration', async () => {
   test('successfully updates the schema migration', async () => {
     const fixture = createFixture(putSchemaMigrationSchema)
     mockSchemaMigrationService.updateSchemaMigrationPlan.mockResolvedValue(fixture.body)
-    const res = await testPut(`/api/v2/schema-migrations/${fixture.params.schemaMigrationId}`, fixture)
+    const res = await testPut(`/api/v2/schema-migration/${fixture.params.schemaMigrationId}`, fixture)
 
     expect(res.statusCode).toBe(200)
     expect(res.body).matchSnapshot()
@@ -26,7 +26,7 @@ describe('routes > schema > putSchemaMigration', async () => {
   test('audit > expected call', async () => {
     const fixture = createFixture(putSchemaMigrationSchema)
     mockSchemaMigrationService.updateSchemaMigrationPlan.mockResolvedValue(fixture.body)
-    const res = await testPut(`/api/v2/schema-migrations/${fixture.params.schemaMigrationId}`, fixture)
+    const res = await testPut(`/api/v2/schema-migration/${fixture.params.schemaMigrationId}`, fixture)
 
     expect(res.statusCode).toBe(200)
     expect(audit.onUpdateSchemaMigration).toBeCalled()
