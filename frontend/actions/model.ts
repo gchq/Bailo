@@ -51,6 +51,7 @@ export function useListModels(
   allowTemplating?: boolean,
   schemaId?: string,
   viewAllPrivate?: boolean,
+  titleOnly?: boolean,
 ) {
   const queryParams = {
     ...(kind && { kind }),
@@ -64,6 +65,7 @@ export function useListModels(
     ...(allowTemplating && { allowTemplating }),
     ...(schemaId && { schemaId }),
     ...(viewAllPrivate && { viewAllPrivate }),
+    ...(titleOnly && { titleOnly }),
   }
   const { data, isLoading, error, mutate } = useSWR<
     {

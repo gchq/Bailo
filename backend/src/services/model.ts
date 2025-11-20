@@ -237,7 +237,7 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
 
   if (opts.search) {
     if (opts.titleOnly) {
-      query.name = { $regex: opts.search }
+      query.name = { $regex: opts.search, $options: 'i' }
     } else {
       query.$text = { $search: opts.search }
       sort = { score: { $meta: 'textScore' } }
@@ -268,7 +268,6 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
       }
     }
   }
-
   let cursor = ModelModel
     // Find only matching documents
     .find(query, {

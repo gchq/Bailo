@@ -40,6 +40,7 @@ registerPath({
                 schemaId: z.string().optional(),
                 adminAccess: z.boolean().optional(),
                 peerId: z.string().optional(),
+                titleOnly: z.boolean().optional(),
               }),
             ),
             errors: z
