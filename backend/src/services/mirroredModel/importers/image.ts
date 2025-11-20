@@ -8,12 +8,12 @@ import { Headers } from 'tar-stream'
 import { doesLayerExist, initialiseUpload, putManifest, uploadLayerMonolithic } from '../../../clients/registry.js'
 import { UserInterface } from '../../../models/User.js'
 import { getAccessToken } from '../../../routes/v1/registryAuth.js'
+import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { hasKeysOfType } from '../../../utils/typeguards.js'
 import log from '../../log.js'
 import { splitDistributionPackageName } from '../../registry.js'
-import { MirrorKind, MirrorKindKeys, MirrorLogData } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type ImageMirrorMetadata = BaseMirrorMetadata & {
@@ -40,7 +40,7 @@ export class ImageImporter extends BaseImporter {
     String.raw`^${escapeRegExp(config.modelMirror.contentDirectory)}/blobs\/sha256\/[0-9a-f]{64}$`,
   )
 
-  constructor(user: UserInterface, metadata: ImageMirrorMetadata, logData: MirrorLogData) {
+  constructor(user: UserInterface, metadata: ImageMirrorMetadata, logData: MirrorImportLogData) {
     super(metadata, logData)
     if (this.metadata.importKind !== MirrorKind.Image) {
       throw InternalError('Cannot parse compressed Image: incorrect metadata specified.', {
@@ -76,7 +76,6 @@ export class ImageImporter extends BaseImporter {
         const repositoryPullToken = await getAccessToken({ dn: this.user.dn }, [
           {
             type: 'repository',
-            class: '',
             name: `${this.metadata.mirroredModelId}/${this.imageName}`,
             actions: ['pull'],
           },
@@ -84,7 +83,6 @@ export class ImageImporter extends BaseImporter {
         const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
           {
             type: 'repository',
-            class: '',
             name: `${this.metadata.mirroredModelId}/${this.imageName}`,
             actions: ['push', 'pull'],
           },
@@ -94,7 +92,7 @@ export class ImageImporter extends BaseImporter {
           if (
             await doesLayerExist(
               repositoryPullToken,
-              { namespace: this.metadata.mirroredModelId, image: this.imageName },
+              { repository: this.metadata.mirroredModelId, name: this.imageName },
               layerDigest,
             )
           ) {
@@ -119,8 +117,8 @@ export class ImageImporter extends BaseImporter {
               'Initiating un-tarred blob upload.',
             )
             const res = await initialiseUpload(repositoryPushPullToken, {
-              namespace: this.metadata.mirroredModelId,
-              image: this.imageName,
+              repository: this.metadata.mirroredModelId,
+              name: this.imageName,
             })
 
             log.debug(
@@ -161,7 +159,6 @@ export class ImageImporter extends BaseImporter {
       const repositoryPushPullToken = await getAccessToken({ dn: this.user.dn }, [
         {
           type: 'repository',
-          class: '',
           name: `${this.metadata.mirroredModelId}/${this.imageName}`,
           actions: ['push', 'pull'],
         },
@@ -169,8 +166,7 @@ export class ImageImporter extends BaseImporter {
 
       await putManifest(
         repositoryPushPullToken,
-        { namespace: this.metadata.mirroredModelId, image: this.imageName },
-        this.imageTag,
+        { repository: this.metadata.mirroredModelId, name: this.imageName, tag: this.imageTag },
         JSON.stringify(this.manifestBody),
         this.manifestBody['mediaType'],
       )

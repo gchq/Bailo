@@ -4,15 +4,15 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ReleaseDoc } from '../../models/Release.js'
+import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
-import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { MirrorInformation } from '../../types/types.js'
 import { EntrySearchResult } from '../../types/types.js'
 import { AuditInfo, BaseAuditConnector } from './Base.js'
 
@@ -306,6 +306,11 @@ export class StdoutAuditConnector extends BaseAuditConnector {
       modelId,
       images: images.map((image) => ({ repository: image.repository, name: image.name })),
     })
+    req.log.info(event, req.audit.description)
+  }
+  onDeleteImage(req: Request, modelId: string, image: ImageRefInterface) {
+    this.checkEventType(AuditInfo.DeleteImage, req)
+    const event = this.generateEvent(req, { modelId, image })
     req.log.info(event, req.audit.description)
   }
 

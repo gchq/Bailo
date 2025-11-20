@@ -4,15 +4,15 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ReleaseDoc } from '../../models/Release.js'
+import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
-import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { MirrorInformation } from '../../types/types.js'
 import { EntrySearchResult } from '../../types/types.js'
 
 const AuditKind = {
@@ -121,6 +121,7 @@ export const AuditInfo = {
   },
 
   ViewModelImages: { typeId: 'ViewModelImages', description: 'Model Images Viewed', auditKind: AuditKind.View },
+  DeleteImage: { typeId: 'DeleteImage', description: 'Image Information Deleted', auditKind: AuditKind.Delete },
 
   CreateInference: { typeId: 'CreateInference', description: 'Inference Service Created', auditKind: AuditKind.Create },
   UpdateInference: { typeId: 'UpdateInference', description: 'Inference Service Updated', auditKind: AuditKind.Update },
@@ -232,6 +233,7 @@ export abstract class BaseAuditConnector {
     modelId: string,
     images: { repository: string; name: string; tags: string[] }[],
   )
+  abstract onDeleteImage(req: Request, modelId: string, image: ImageRefInterface)
 
   abstract onCreateS3Export(req: Request, modelId: string, semvers?: string[])
   abstract onCreateImport(

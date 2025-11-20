@@ -44,6 +44,7 @@ export default function SplitButton({ options, onPrimaryButtonClick, onMenuItemC
         transition
         disablePortal
         open={open}
+        // eslint-disable-next-line react-hooks/refs
         anchorEl={anchorRef.current}
         sx={{
           zIndex: 1399,

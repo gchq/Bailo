@@ -10,6 +10,7 @@ import { ModelDoc } from '../../../models/Model.js'
 import { ModelCardRevisionDoc } from '../../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
+import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { Forbidden, InternalError } from '../../../utils/error.js'
 import { saveImportedFile } from '../../file.js'
@@ -18,7 +19,6 @@ import { getModelById, saveImportedModelCard, setLatestImportedModelCard } from 
 import { DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
 import { saveImportedRelease } from '../../release.js'
 import { parseFile, parseModelCard, parseRelease } from '../entityParsers.js'
-import { MirrorKind, MirrorKindKeys, MirrorLogData } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type DocumentsMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'Documents'> }
@@ -49,7 +49,7 @@ export class DocumentsImporter extends BaseImporter {
   protected releaseRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/releases\/(.*)\.json$`)
   protected fileRegex = new RegExp(String.raw`^${config.modelMirror.contentDirectory}/files\/(.*)\.json$`)
 
-  constructor(user: UserInterface, metadata: DocumentsMirrorMetadata, logData: MirrorLogData) {
+  constructor(user: UserInterface, metadata: DocumentsMirrorMetadata, logData: MirrorImportLogData) {
     super(metadata, logData)
     if (this.metadata.importKind !== MirrorKind.Documents) {
       throw InternalError('Cannot parse compressed Documents: incorrect metadata specified.', {

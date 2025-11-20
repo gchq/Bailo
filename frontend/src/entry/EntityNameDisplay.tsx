@@ -13,7 +13,7 @@ export default function EntityNameDisplay({ entryCollaborator }: EntityNameDispl
     [entryCollaborator],
   )
   return entryCollaboratorKind === EntityKind.USER || entryCollaboratorKind === EntityKind.GROUP ? (
-    <UserDisplay dn={entryCollaboratorName} />
+    <UserDisplay dn={entryCollaboratorName} showIcon />
   ) : (
     <Typography fontWeight='bold'>{entryCollaboratorName}</Typography>
   )

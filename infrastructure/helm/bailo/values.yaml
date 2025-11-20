@@ -235,6 +235,8 @@ openshift:
 
 # Instance Settings
 config:
+  log:
+    level: trace
   ui:
     banner:
       enabled: false

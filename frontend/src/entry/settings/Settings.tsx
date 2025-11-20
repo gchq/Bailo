@@ -1,7 +1,7 @@
 import { Container, Divider, List, Stack } from '@mui/material'
 import { useGetUiConfig } from 'actions/uiConfig'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import Loading from 'src/common/Loading'
 import SimpleListItemButton from 'src/common/SimpleListItemButton'
 import ExportSettings from 'src/entry/model/mirroredModels/ExportSettings'
@@ -65,11 +65,15 @@ export default function Settings({ entry }: SettingsProps) {
 
   const [selectedCategory, setSelectedCategory] = useState<SettingsCategoryKeys>(SettingsCategory.DETAILS)
 
+  const onSelectedCategoryChange = useEffectEvent((category: SettingsCategoryKeys) => {
+    setSelectedCategory(category)
+  })
+
   useEffect(() => {
     if (isSettingsCategory(category, entry)) {
-      setSelectedCategory(category)
+      onSelectedCategoryChange(category)
     } else if (category) {
-      setSelectedCategory(SettingsCategory.DETAILS)
+      onSelectedCategoryChange(SettingsCategory.DETAILS)
       router.replace({
         query: { ...router.query, category: SettingsCategory.DETAILS },
       })

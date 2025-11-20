@@ -4,15 +4,15 @@ import { AccessRequestDoc } from '../../models/AccessRequest.js'
 import { FileInterface, FileInterfaceDoc } from '../../models/File.js'
 import { InferenceDoc } from '../../models/Inference.js'
 import { ModelCardInterface, ModelDoc, ModelInterface } from '../../models/Model.js'
-import { ReleaseDoc } from '../../models/Release.js'
+import { ImageRefInterface, ReleaseDoc } from '../../models/Release.js'
 import { ResponseInterface } from '../../models/Response.js'
 import { ReviewInterface } from '../../models/Review.js'
 import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
-import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { MirrorInformation } from '../../types/types.js'
 import { EntrySearchResult } from '../../types/types.js'
 import { BaseAuditConnector } from './Base.js'
 
@@ -55,6 +55,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onUpdateSchema(_req: Request, _schema: SchemaDoc) {}
   onViewSchema(_req: Request, _schema: SchemaInterface) {}
   onViewModelImages(_req: Request, _modelId: string, _images: { repository: string; name: string; tags: string[] }[]) {}
+  onDeleteImage(_req: Request, _modelId: string, _image: ImageRefInterface) {}
   onViewInferences(_req: Request, _inferences: InferenceDoc[]) {}
   onViewInference(_req: Request, _inferences: InferenceDoc) {}
   onUpdateInference(_req: Request, _inferences: InferenceDoc) {}

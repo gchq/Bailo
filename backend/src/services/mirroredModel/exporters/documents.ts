@@ -6,13 +6,13 @@ import { FileWithScanResultsInterface } from '../../../models/File.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
+import { MirrorExportLogData, MirrorKind } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { BadReq, InternalError } from '../../../utils/error.js'
 import { getFilesByIds, getTotalFileSize } from '../../file.js'
 import log from '../../log.js'
 import { getModelCardRevisions } from '../../model.js'
 import { getAllFileIds } from '../../release.js'
-import { MirrorKind, MirrorLogData } from '../mirroredModel.js'
 import { addEntryToTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
 import { BaseExporter, checkAuths, requiresInit, withStreams } from './base.js'
 
@@ -20,7 +20,7 @@ export class DocumentsExporter extends BaseExporter {
   protected readonly releases: ReleaseDoc[]
   protected files: FileWithScanResultsInterface[] | undefined
 
-  constructor(user: UserInterface, model: ModelDoc, releases: ReleaseDoc[], logData: MirrorLogData) {
+  constructor(user: UserInterface, model: ModelDoc, releases: ReleaseDoc[], logData: MirrorExportLogData) {
     super(user, model, logData)
     this.releases = releases
   }
@@ -103,6 +103,7 @@ export class DocumentsExporter extends BaseExporter {
         sourceModelId: this.model.id,
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
         importKind: MirrorKind.Documents,
+        exportId: this.logData.exportId,
       },
       this.logData,
     ]

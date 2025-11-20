@@ -20,13 +20,13 @@ import {
   EntrySearchResultWithErrors,
   EntryUserPermissions,
 } from '../types/types.js'
+import { MirrorImportLogData } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
-import { MirrorLogData } from './mirroredModel/mirroredModel.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -103,7 +103,7 @@ export async function getModelById(user: UserInterface, modelId: string, kind?: 
   })
 
   if (!model) {
-    throw NotFound(`The requested entry was not found.`, { modelId })
+    throw NotFound('The requested entry was not found.', { modelId })
   }
 
   const auth = await authorisation.model(user, model, ModelAction.View)
@@ -625,7 +625,11 @@ export async function setLatestImportedModelCard(modelId: string) {
   return updatedModel
 }
 
-export async function validateMirroredModel(mirroredModelId: string, sourceModelId: string, logData: MirrorLogData) {
+export async function validateMirroredModel(
+  mirroredModelId: string,
+  sourceModelId: string,
+  logData: MirrorImportLogData,
+) {
   const model = await Model.findOne({
     id: mirroredModelId,
     'settings.mirror.sourceModelId': { $ne: null },
@@ -710,4 +714,9 @@ export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) 
     .filter((collaborator) => entities.includes(collaborator.entity))
     .map((collaborator) => collaborator.roles)
     .flat()
+}
+
+export async function popularTagsForEntries() {
+  const tags = await Model.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
+  return tags.map((tag) => tag._id) as string[]
 }

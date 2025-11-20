@@ -29,7 +29,7 @@ const releaseServiceMocks = vi.hoisted(() => ({
 vi.mock('../../../../src/services/release.js', () => releaseServiceMocks)
 
 const logMocks = vi.hoisted(() => ({
-  default: { debug: vi.fn() },
+  default: { trace: vi.fn(), debug: vi.fn() },
 }))
 vi.mock('../../../../src/services/log.js', () => logMocks)
 
