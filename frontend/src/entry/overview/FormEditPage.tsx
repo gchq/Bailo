@@ -47,7 +47,6 @@ export default function FormEditPage({ entry, readOnly = false, mutateEntry }: F
   const open = Boolean(anchorEl)
 
   const { schemaMigrations, isSchemaMigrationsLoading, isSchemaMigrationsError } = useGetSchemaMigrations(
-    '',
     entry.card.schemaId,
   )
   const { schema, isSchemaLoading, isSchemaError } = useGetSchema(entry.card.schemaId)

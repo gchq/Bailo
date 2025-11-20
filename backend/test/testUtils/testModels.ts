@@ -143,4 +143,5 @@ export const testSchemaMigration = {
       propertyType: 'string',
     },
   ],
+  draft: false,
 }

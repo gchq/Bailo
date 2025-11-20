@@ -1,13 +1,17 @@
 import { Close, ExpandMore } from '@mui/icons-material'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
   Button,
+  ButtonGroup,
   Divider,
   Grid,
   IconButton,
+  ListItemText,
+  Menu,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -16,18 +20,25 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import ClickAwayListener from '@mui/material/ClickAwayListener'
 import { useTheme } from '@mui/material/styles'
-import { postSchemaMigration } from 'actions/schemaMigration'
-import { useRouter } from 'next/router'
+import React, { Dispatch, SetStateAction } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import JsonSchemaViewer, { QuestionSelection } from 'src/Form/JsonSchemaViewer'
 import { CombinedSchema, QuestionMigration } from 'types/types'
-import { getErrorMessage } from 'utils/fetcher'
 import { truncateText } from 'utils/stringUtils'
 
 interface SchemaMigratorProps {
   sourceSchema: CombinedSchema
   targetSchema: CombinedSchema
+  questionMigrations: QuestionMigration[]
+  setQuestionMigrations: Dispatch<SetStateAction<QuestionMigration[]>>
+  handleSubmitMigrationPlan: (draft: boolean) => void
+  submitErrorText: string
+  migrationName: string
+  setMigrationName: Dispatch<SetStateAction<string>>
+  migrationDescription: string
+  setMigrationDescription: Dispatch<SetStateAction<string>>
 }
 
 export const MigrationKind = {
@@ -36,26 +47,45 @@ export const MigrationKind = {
 } as const
 export type MigrationKindKeys = (typeof MigrationKind)[keyof typeof MigrationKind]
 
-export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMigratorProps) {
+export default function SchemaMigrator({
+  sourceSchema,
+  targetSchema,
+  questionMigrations,
+  setQuestionMigrations,
+  handleSubmitMigrationPlan,
+  submitErrorText = '',
+  migrationName,
+  setMigrationName,
+  migrationDescription,
+  setMigrationDescription,
+}: SchemaMigratorProps) {
   const [sourceSchemaQuestion, setSourceSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
   const [targetSchemaQuestion, setTargetSchemaQuestion] = useState<QuestionSelection | undefined>(undefined)
-  const [questionMigrations, setQuestionMigrations] = useState<QuestionMigration[]>([])
   const [questionMigrationKind, setQuestionMigrationKind] = useState<MigrationKindKeys>(MigrationKind.MOVE)
   const [actionErrorText, setActionErrorText] = useState('')
-  const [submitErrorText, setSubmitErrorText] = useState('')
+  const [draft, setDraft] = useState(false)
+
   const [isSourceSchemaActive, setIsSourceSchemaActive] = useState(false)
   const [isTargetSchemaActive, setIsTargetSchemaActive] = useState(false)
-  const [migrationName, setMigrationName] = useState('')
-  const [migrationDescription, setMigrationDescription] = useState('')
 
   const theme = useTheme()
-  const router = useRouter()
+
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(menuAnchorEl)
+
+  const handleToggle = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setMenuAnchorEl(null)
+  }
 
   const handleRemoveActionItem = useCallback(
     (action: QuestionMigration) => {
       setQuestionMigrations(questionMigrations.filter((questionMigration) => questionMigration.id !== action.id))
     },
-    [questionMigrations],
+    [questionMigrations, setQuestionMigrations],
   )
 
   const actionsList = useMemo(() => {
@@ -74,7 +104,7 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                 <Close color='error' />
               </IconButton>
             </Tooltip>
-            <Typography sx={{ overflow: 'hidde', wordBreak: 'break-word' }}>
+            <Typography sx={{ overflow: 'hidden', wordBreak: 'break-word' }}>
               Source field <span style={{ fontWeight: 'bold' }}>{migrationAction.sourcePath}</span> mapped to target
               field <span style={{ fontWeight: 'bold' }}>{migrationAction.targetPath}</span>
             </Typography>
@@ -195,28 +225,6 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
     }
   }
 
-  const handleSubmitMigrationPlan = async () => {
-    setSubmitErrorText('')
-    if (migrationName === '') {
-      return setSubmitErrorText('You must set a name for this migration plan')
-    }
-    if (questionMigrations.length === 0) {
-      return setSubmitErrorText('You must have at least one action before submitting a migration plan.')
-    }
-    const res = await postSchemaMigration({
-      name: migrationName,
-      description: migrationDescription,
-      sourceSchema: sourceSchema.schema.id,
-      targetSchema: targetSchema.schema.id,
-      questionMigrations: questionMigrations,
-    })
-    if (!res.ok) {
-      setSubmitErrorText(await getErrorMessage(res))
-    } else {
-      router.push('/schemas/list?tab=migrations')
-    }
-  }
-
   return (
     <>
       <Grid container spacing={2}>
@@ -305,9 +313,33 @@ export default function SchemaMigrator({ sourceSchema, targetSchema }: SchemaMig
                     onChange={(e) => setMigrationDescription(e.target.value)}
                   />
                 </Stack>
-                <Button variant='contained' onClick={handleSubmitMigrationPlan} aria-label='submit migration plan'>
-                  Submit migration plan
-                </Button>
+                <ClickAwayListener onClickAway={handleClose}>
+                  <ButtonGroup variant='contained' color='primary'>
+                    <Button
+                      onClick={() => handleSubmitMigrationPlan(draft)}
+                      aria-label={`${draft ? 'draft' : 'submit'} migration plan`}
+                      fullWidth
+                    >
+                      {draft ? 'Draft migration Plan' : 'Submit migration plan'}
+                    </Button>
+                    <Button size='small' onClick={handleToggle} aria-label='dropdown for save options'>
+                      <ArrowDropDownIcon />
+                    </Button>
+                  </ButtonGroup>
+                </ClickAwayListener>
+                <Menu
+                  anchorEl={menuAnchorEl}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  open={open}
+                >
+                  <MenuItem selected={!draft} onClick={() => setDraft(false)} aria-label='submit migration plan'>
+                    <ListItemText>{'Submit migration plan'}</ListItemText>
+                  </MenuItem>
+                  <MenuItem selected={draft} onClick={() => setDraft(true)} aria-label='draft migration plan'>
+                    <ListItemText>{'Draft migration plan'}</ListItemText>
+                  </MenuItem>
+                </Menu>
                 <Typography color='error'>{submitErrorText}</Typography>
               </Stack>
             </Stack>

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > schema > postSchemaMigration > audit > expected call 1`] = `
+exports[`routes > schema > putSchemaMigration > audit > expected call 1`] = `
 {
   "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
   "draft": false,
@@ -35,12 +35,10 @@ exports[`routes > schema > postSchemaMigration > audit > expected call 1`] = `
       "targetPath": "expedita",
     },
   ],
-  "sourceSchema": "expedita",
-  "targetSchema": "expedita",
 }
 `;
 
-exports[`routes > schema > postSchemaMigration > successfully stores the schema migration 1`] = `
+exports[`routes > schema > putSchemaMigration > successfully updates the schema migration 1`] = `
 {
   "schemaMigration": {
     "description": "Three yellowtail kingfish with okra, beans, dried chinese broccoli, parsnip and goat milk. With a side of baked pear, and your choice of soy flour or jarrahdale pumpkin.",
@@ -76,8 +74,6 @@ exports[`routes > schema > postSchemaMigration > successfully stores the schema 
         "targetPath": "expedita",
       },
     ],
-    "sourceSchema": "expedita",
-    "targetSchema": "expedita",
   },
 }
 `;
