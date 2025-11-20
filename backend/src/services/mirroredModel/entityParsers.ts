@@ -1,11 +1,11 @@
 import { objectExists } from '../../clients/s3.js'
 import { ModelCardRevisionDoc } from '../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../models/Release.js'
+import { MirrorImportLogData } from '../../types/types.js'
 import { InternalError } from '../../utils/error.js'
 import { createFilePath, isFileInterfaceDoc } from '../file.js'
 import { isModelCardRevisionDoc } from '../model.js'
 import { isReleaseDoc } from '../release.js'
-import { MirrorImportLogData } from './mirroredModel.js'
 
 export function parseModelCard(
   modelCard: unknown,

@@ -4,11 +4,11 @@ import { Headers } from 'tar-stream'
 
 import { putObjectStream } from '../../../clients/s3.js'
 import FileModel from '../../../models/File.js'
+import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { createFilePath, markFileAsCompleteAfterImport } from '../../file.js'
 import log from '../../log.js'
-import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type FileMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'File'>; filePath: string }
