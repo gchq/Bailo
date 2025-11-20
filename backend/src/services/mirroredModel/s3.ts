@@ -5,9 +5,9 @@ import { getObjectStream, putObjectStream } from '../../clients/s3.js'
 import config from '../../utils/config.js'
 import { InternalError } from '../../utils/error.js'
 import log from '../log.js'
-import { generateDigest, MirrorLogData } from './mirroredModel.js'
+import { generateDigest, MirrorExportLogData, MirrorImportLogData } from './mirroredModel.js'
 
-export async function uploadToS3(fileName: string, stream: Readable, logData: MirrorLogData) {
+export async function uploadToS3(fileName: string, stream: Readable, logData: MirrorExportLogData) {
   if (config.modelMirror.export.kmsSignature.enabled) {
     log.debug(logData, 'Using signatures. Uploading to temporary S3 location first.')
     try {
@@ -26,7 +26,7 @@ export async function uploadToS3(fileName: string, stream: Readable, logData: Mi
   }
 }
 
-async function copyToExportBucketWithSignatures(fileName: string, logData: MirrorLogData) {
+async function copyToExportBucketWithSignatures(fileName: string, logData: MirrorExportLogData) {
   let signatures = {}
   log.debug(logData, 'Getting stream from S3 to generate signatures.')
   const streamForDigest = await getObjectFromTemporaryS3Location(fileName, logData)
@@ -44,7 +44,7 @@ async function copyToExportBucketWithSignatures(fileName: string, logData: Mirro
   await uploadToExportS3Location(fileName, streamToCopy, logData, signatures)
 }
 
-async function uploadToTemporaryS3Location(fileName: string, stream: Readable, logData: MirrorLogData) {
+async function uploadToTemporaryS3Location(fileName: string, stream: Readable, logData: MirrorExportLogData) {
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
@@ -67,7 +67,7 @@ async function uploadToTemporaryS3Location(fileName: string, stream: Readable, l
   }
 }
 
-async function getObjectFromTemporaryS3Location(fileName: string, logData: MirrorLogData) {
+async function getObjectFromTemporaryS3Location(fileName: string, logData: MirrorExportLogData) {
   const bucket = config.s3.buckets.uploads
   const object = `exportQueue/${fileName}`
   try {
@@ -91,7 +91,10 @@ async function getObjectFromTemporaryS3Location(fileName: string, logData: Mirro
   }
 }
 
-export async function getObjectFromExportS3Location(object: string, logData: MirrorLogData) {
+export async function getObjectFromExportS3Location(
+  object: string,
+  logData: MirrorExportLogData | MirrorImportLogData,
+) {
   const bucket = config.modelMirror.export.bucket
   try {
     const stream = (await getObjectStream(object, bucket)).Body as Readable
@@ -121,7 +124,7 @@ export async function getObjectFromExportS3Location(object: string, logData: Mir
 async function uploadToExportS3Location(
   object: string,
   stream: Readable,
-  logData: MirrorLogData,
+  logData: MirrorExportLogData,
   metadata?: Record<string, string>,
 ) {
   const bucket = config.modelMirror.export.bucket

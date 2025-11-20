@@ -5,7 +5,7 @@ import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
 import { Forbidden, InternalError } from '../../../utils/error.js'
 import { joinDistributionPackageName } from '../../registry.js'
-import { MirrorKind, MirrorLogData } from '../mirroredModel.js'
+import { MirrorExportLogData, MirrorKind } from '../mirroredModel.js'
 import { addCompressedRegistryImageComponents } from '../mirroredModel.js'
 import { initialiseTarGzUpload } from '../tarball.js'
 import { BaseExporter } from './base.js'
@@ -20,7 +20,7 @@ export class ImageExporter extends BaseExporter {
     model: ModelDoc,
     release: ReleaseDoc,
     image: ReleaseDoc['images'][number],
-    logData: MirrorLogData,
+    logData: MirrorExportLogData,
   ) {
     super(user, model, logData)
     this.release = release
@@ -109,6 +109,7 @@ export class ImageExporter extends BaseExporter {
         mirroredModelId: this.model!.settings.mirror.destinationModelId!,
         distributionPackageName: this.distributionPackageName!,
         importKind: MirrorKind.Image,
+        exportId: this.logData.exportId,
       },
       this.logData,
     ]
