@@ -42,7 +42,7 @@ export default function SchemaMigrationEditor() {
       setMigrationDescription(schemaMigration.description || '')
       hasInitialised.current = true
     }
-  }, [migrationName, questionMigrations.length, schemaMigration])
+  }, [schemaMigration])
 
   const sourceSchemaCombined: CombinedSchema | undefined = useMemo(() => {
     if (sourceSchema) {
