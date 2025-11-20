@@ -26,8 +26,8 @@ export default function SearchInfo() {
         <ListItem sx={{ display: 'list-item' }}>
           <Typography>
             {`The advanced search input is used for filtering the marketplace for the current selected tab (${listEntryKinds(' or ', false)}). It uses a full document search, so will also look through the data of the
-            model card to find any items that match your query. If you would like to query specifically on the name, use
-            the "Search by name" input at the top of the list of results.`}
+            model card to find any items that match your query. If you would like to query only on the name, click
+            the "Full Text" icon to toggle searching on the the model name.`}
           </Typography>
         </ListItem>
         <ListItem sx={{ display: 'list-item' }}>

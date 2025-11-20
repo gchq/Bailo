@@ -1,5 +1,6 @@
 import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
+import { SortOrder } from 'mongoose'
 import { Optional } from 'utility-types'
 
 import { Roles } from '../connectors/authentication/Base.js'
@@ -206,6 +207,9 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
       })
     }
   }
+  let sort: string | { [key: string]: SortOrder | { $meta: any } } | [string, SortOrder][] | undefined | null = {
+    updatedAt: -1,
+  }
 
   if (opts.kind) {
     query['kind'] = { $all: opts.kind }
@@ -232,10 +236,12 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
   }
 
   if (opts.search) {
-    if (opts.search.length > 0 && opts.search.length < 3) {
-      throw BadReq(`Search query too short - must be at least 3 characters`)
+    if (opts.titleOnly) {
+      query.name = { $regex: opts.search, $options: 'i' }
+    } else {
+      query.$text = { $search: opts.search }
+      sort = { score: { $meta: 'textScore' } }
     }
-    query.$text = { $search: opts.search }
   }
 
   if (opts.schemaId) {
@@ -262,18 +268,18 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
       }
     }
   }
-
   let cursor = ModelModel
     // Find only matching documents
-    .find(query)
-
-  if (!opts.search) {
-    // Sort by last updated
-    cursor = cursor.sort({ updatedAt: -1 })
-  } else {
-    // Sort by text search
-    cursor = cursor.sort({ score: { $meta: 'textScore' } })
-  }
+    .find(query, {
+      settings: false,
+      card: false,
+      deleted: false,
+      _id: false,
+      __v: false,
+      deletedBy: false,
+      deletedAt: false,
+    })
+  cursor = cursor.sort(sort)
 
   const results = await cursor
   //Auth already checked, so just need to check if they require admin access
