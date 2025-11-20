@@ -14,7 +14,13 @@ import log from '../log.js'
 import { validateMirroredModel } from '../model.js'
 import { mirrorMetadataSchema } from '../specification.js'
 import { BaseImporter } from './importers/base.js'
-import { getImporter, MirrorInformation, MirrorLogData, MirrorMetadata } from './mirroredModel.js'
+import {
+  getImporter,
+  MirrorExportLogData,
+  MirrorImportLogData,
+  MirrorInformation,
+  MirrorMetadata,
+} from './mirroredModel.js'
 import { uploadToS3 } from './s3.js'
 
 function createTarGzStreams() {
@@ -23,7 +29,7 @@ function createTarGzStreams() {
   return { gzipStream, tarStream }
 }
 
-export async function initialiseTarGzUpload(fileName: string, metadata: MirrorMetadata, logData: MirrorLogData) {
+export async function initialiseTarGzUpload(fileName: string, metadata: MirrorMetadata, logData: MirrorExportLogData) {
   const { gzipStream, tarStream } = createTarGzStreams()
   // It is safer to have an extra PassThrough for handling backpressure and explicitly closing on error(s)
   const uploadStream = new PassThrough()
@@ -60,7 +66,7 @@ export async function finaliseTarGzUpload(tarStream: Pack, uploadPromise: Promis
 type TarEntry =
   | { type: 'text'; filename: string; content: string }
   | { type: 'stream'; filename: string; stream: Readable; size?: number }
-export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, logData: MirrorLogData) {
+export async function addEntryToTarGzUpload(tarStream: Pack, entry: TarEntry, logData: MirrorExportLogData) {
   const entryName = `${config.modelMirror.contentDirectory}/${entry.filename}`
   log.debug(
     {
@@ -104,7 +110,7 @@ export function createUnTarGzStreams() {
 export async function extractTarGzStream(
   tarGzStream: Readable,
   user: UserInterface,
-  logData: MirrorLogData,
+  logData: MirrorImportLogData,
 ): Promise<MirrorInformation> {
   return new Promise((resolve, reject) => {
     let metadata: MirrorMetadata
@@ -167,7 +173,7 @@ export async function extractTarGzStream(
             throw Forbidden(auth.info, { userDn: user.dn, modelId: mirroredModel.id, ...logData })
           }
 
-          importer = getImporter(metadata, user, { entry, ...logData })
+          importer = getImporter(metadata, user, logData)
 
           // Drain and continue
           next()

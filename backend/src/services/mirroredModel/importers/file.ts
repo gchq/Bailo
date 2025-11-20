@@ -8,7 +8,7 @@ import config from '../../../utils/config.js'
 import { InternalError } from '../../../utils/error.js'
 import { createFilePath, markFileAsCompleteAfterImport } from '../../file.js'
 import log from '../../log.js'
-import { MirrorKind, MirrorKindKeys, MirrorLogData } from '../mirroredModel.js'
+import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type FileMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'File'>; filePath: string }
@@ -26,7 +26,7 @@ export class FileImporter extends BaseImporter {
 
   protected extractedFile: boolean = false
 
-  constructor(metadata: FileMirrorMetadata, logData: MirrorLogData) {
+  constructor(metadata: FileMirrorMetadata, logData: MirrorImportLogData) {
     super(metadata, logData)
     if (this.metadata.importKind !== MirrorKind.File) {
       throw InternalError('Cannot parse compressed File: incorrect metadata specified.', {
