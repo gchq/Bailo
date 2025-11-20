@@ -36,7 +36,7 @@ export default function SchemaMigrationEditor() {
   const hasInitialised = useRef(false)
 
   useEffect(() => {
-    if (schemaMigration && !hasInitialised.current) {
+    if (schemaMigration && hasInitialised.current === false) {
       setQuestionMigrations(schemaMigration.questionMigrations)
       setMigrationName(schemaMigration.name)
       setMigrationDescription(schemaMigration.description || '')
@@ -45,26 +45,28 @@ export default function SchemaMigrationEditor() {
   }, [migrationName, questionMigrations.length, schemaMigration])
 
   const sourceSchemaCombined: CombinedSchema | undefined = useMemo(() => {
-    if (!sourceSchema) return undefined
-    const sourceSteps = getStepsFromSchema(sourceSchema, {}, [])
-    for (const step of sourceSteps) {
-      step.steps = sourceSteps
-    }
-    return {
-      schema: sourceSchema,
-      splitSchema: { reference: sourceSchema.name, steps: sourceSteps },
+    if (sourceSchema) {
+      const sourceSteps = getStepsFromSchema(sourceSchema, {}, [])
+      for (const step of sourceSteps) {
+        step.steps = sourceSteps
+      }
+      return {
+        schema: sourceSchema,
+        splitSchema: { reference: sourceSchema.name, steps: sourceSteps },
+      }
     }
   }, [sourceSchema])
 
   const targetSchemaCombined: CombinedSchema | undefined = useMemo(() => {
-    if (!targetSchema) return undefined
-    const targetSteps = getStepsFromSchema(targetSchema, {}, [])
-    for (const step of targetSteps) {
-      step.steps = targetSteps
-    }
-    return {
-      schema: targetSchema,
-      splitSchema: { reference: targetSchema.name, steps: targetSteps },
+    if (targetSchema) {
+      const targetSteps = getStepsFromSchema(targetSchema, {}, [])
+      for (const step of targetSteps) {
+        step.steps = targetSteps
+      }
+      return {
+        schema: targetSchema,
+        splitSchema: { reference: targetSchema.name, steps: targetSteps },
+      }
     }
   }, [targetSchema])
 
