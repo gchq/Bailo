@@ -52,7 +52,7 @@ export function useGetSchemaMigrations(sourceSchema?: string) {
 
 export function useGetSchemaMigration(schemaMigrationId?: string) {
   const { data, isLoading, error, mutate } = useSWR<{ schemaMigration: SchemaMigrationInterface }, ErrorInfo>(
-    schemaMigrationId ? `/api/v2/schema-migration/${schemaMigrationId}` : null,
+    `/api/v2/schema-migration/${schemaMigrationId}`,
     fetcher,
   )
 
