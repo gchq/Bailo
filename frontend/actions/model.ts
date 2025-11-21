@@ -201,6 +201,13 @@ export async function patchModel(
   })
 }
 
+export async function deleteModel(id: string) {
+  return fetch(`/api/v2/model/${id}`, {
+    method: 'delete',
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
 export async function postModelExportToS3(id: string, modelExport: ModelExportRequest) {
   return fetch(`/api/v2/model/${id}/export/s3`, {
     method: 'POST',

@@ -1,6 +1,11 @@
 import { Button, Stack, Typography } from '@mui/material'
+import { deleteModel } from 'actions/model'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
+import useNotification from 'src/hooks/useNotification'
+import MessageAlert from 'src/MessageAlert'
 import { EntryInterface } from 'types/types'
+import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
 
 type DangerZoneProps = {
@@ -9,11 +14,27 @@ type DangerZoneProps = {
 
 export default function DangerZone({ entry }: DangerZoneProps) {
   const [loading, setLoading] = useState(false)
+  const sendNotification = useNotification()
+  const [errorMessage, setErrorMessage] = useState('')
+  const router = useRouter()
 
-  const handleDeleteEntry = () => {
+  const handleDeleteEntry = async () => {
     setLoading(true)
 
-    // TODO - Delete entry API request and setLoading(false) on success/fail
+    const response = await deleteModel(entry.id)
+
+    if (!response.ok) {
+      setErrorMessage(await getErrorMessage(response))
+    } else {
+      sendNotification({
+        variant: 'success',
+        msg: 'Model deleted',
+        anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+      })
+      router.push('/')
+    }
+
+    setLoading(false)
   }
 
   return (
@@ -21,10 +42,11 @@ export default function DangerZone({ entry }: DangerZoneProps) {
       <Typography variant='h6' component='h2'>
         Danger Zone!
       </Typography>
-      {/* TODO - Remove disabled prop when reenabling delete functionality */}
-      <Button fullWidth variant='contained' disabled onClick={handleDeleteEntry} loading={loading}>
+      <Button fullWidth variant='contained' onClick={handleDeleteEntry} loading={loading}>
         {`Delete ${toTitleCase(entry.kind)}`}
       </Button>
+      {/* TODO: add a confirmation popup */}
+      <MessageAlert message={errorMessage} severity='error' />
     </Stack>
   )
 }
