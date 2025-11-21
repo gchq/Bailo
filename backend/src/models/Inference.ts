@@ -26,6 +26,8 @@ export interface InferenceInterface {
 
 export type InferenceDoc = InferenceInterface & SoftDeleteDocument
 
+export type InferenceId = { modelId: string; image: string; tag: string }
+
 const InferenceSchema = new Schema<InferenceDoc>(
   {
     modelId: { type: String, required: true },

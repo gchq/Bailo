@@ -489,7 +489,12 @@ describe('services > registry', () => {
       await softDeleteImage({} as any, source)
 
       expect(registryClientMocks.deleteManifest).toHaveBeenCalled()
-      expect(releaseMocks.findAndDeleteImageFromReleases).toHaveBeenCalledWith({}, 'sourceRepository', source)
+      expect(releaseMocks.findAndDeleteImageFromReleases).toHaveBeenCalledWith(
+        {},
+        'sourceRepository',
+        source,
+        undefined,
+      )
     })
   })
 })

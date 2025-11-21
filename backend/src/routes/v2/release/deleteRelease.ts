@@ -5,6 +5,7 @@ import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { deleteRelease as deleteReleaseService } from '../../../services/release.js'
 import { registerPath } from '../../../services/specification.js'
+import { useTransaction } from '../../../utils/transactions.js'
 import { parse } from '../../../utils/validate.js'
 
 export const deleteReleaseSchema = z.object({
@@ -45,7 +46,7 @@ export const deleteRelease = [
       params: { modelId, semver },
     } = parse(req, deleteReleaseSchema)
 
-    await deleteReleaseService(req.user, modelId, semver)
+    await useTransaction([(session) => deleteReleaseService(req.user, modelId, semver, session)])
     await audit.onDeleteRelease(req, modelId, semver)
 
     res.json({

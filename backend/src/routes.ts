@@ -21,6 +21,7 @@ import { getModelAccessRequests } from './routes/v2/model/accessRequest/getModel
 import { patchAccessRequest } from './routes/v2/model/accessRequest/patchAccessRequest.js'
 import { postAccessRequest } from './routes/v2/model/accessRequest/postAccessRequest.js'
 import { postAccessRequestComment } from './routes/v2/model/accessRequest/postAccessRequestComment.js'
+import { deleteModel } from './routes/v2/model/deleteModel.js'
 import { deleteFile } from './routes/v2/model/file/deleteFile.js'
 import { getDownloadFile } from './routes/v2/model/file/getDownloadFile.js'
 import { getFiles } from './routes/v2/model/file/getFiles.js'
@@ -113,6 +114,7 @@ server.get('/api/v2/models/search', ...getModelsSearch)
 
 server.get('/api/v2/model/:modelId', ...getModel)
 server.patch('/api/v2/model/:modelId', ...patchModel)
+server.delete('/api/v2/model/:modelId', ...deleteModel)
 
 server.post('/api/v2/model/:modelId/export/s3', ...postRequestExportToS3)
 server.post('/api/v2/model/import/s3', ...postRequestImportFromS3)

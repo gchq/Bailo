@@ -1,8 +1,11 @@
+import { ClientSession } from 'mongoose'
+
 import { createInferenceService, deleteInferenceService, updateInferenceService } from '../clients/inferencing.js'
 import { ModelAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import InferenceModel, { InferenceDoc, InferenceInterface } from '../models/Inference.js'
+import InferenceModel, { InferenceDoc, InferenceId, InferenceInterface } from '../models/Inference.js'
 import Inference from '../models/Inference.js'
+import { ModelDoc } from '../models/Model.js'
 import { UserInterface } from '../models/User.js'
 import { BadReq, Forbidden, NotFound } from '../utils/error.js'
 import { isMongoServerError } from '../utils/mongo.js'
@@ -137,20 +140,52 @@ export async function updateInference(
   return updatedInference
 }
 
-export async function removeInference(user: UserInterface, modelId: string, image: string, tag: string) {
-  const model = await getModelById(user, modelId)
+export async function removeInferences(
+  user: UserInterface,
+  inferenceIds: InferenceId[],
+  session?: ClientSession | undefined,
+) {
+  const inferences: InferenceDoc[] = []
+  // Model cache
+  const models: Record<string, ModelDoc> = {}
 
-  const auth = await authorisation.model(user, model, ModelAction.Delete)
+  for (const inferenceId of inferenceIds) {
+    let model: ModelDoc
+    if (inferenceId.modelId in models) {
+      model = models[inferenceId.modelId]
+    } else {
+      model = await getModelById(user, inferenceId.modelId)
+      models[inferenceId.modelId] = model
 
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+      // Only check auth for a newly found model
+      for (const authAction of [ModelAction.View, ModelAction.Delete]) {
+        const auth = await authorisation.model(user, model, authAction)
+        if (!auth.success) {
+          throw Forbidden(auth.info, { userDn: user.dn, modelId: inferenceId.modelId })
+        }
+      }
+    }
+
+    const inference = await Inference.findOne({ ...inferenceId })
+    if (!inference) {
+      throw NotFound('The requested inferencing service was not found.', { ...inferenceId })
+    }
+
+    await deleteInferenceService(inferenceId.image)
+    await inference.delete(session)
+
+    inferences.push(inference)
   }
 
-  const inference = await getInferenceByImage(user, modelId, image, tag)
+  return inferences
+}
 
-  await deleteInferenceService(image)
-
-  await inference.delete()
-
-  return inference
+export async function removeInference(
+  user: UserInterface,
+  modelId: string,
+  image: string,
+  tag: string,
+  session?: ClientSession | undefined,
+) {
+  return (await removeInferences(user, [{ modelId, image, tag }], session))[0]
 }

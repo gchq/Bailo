@@ -377,7 +377,7 @@ class Client:
         model_id: str,
         file_id: str,
     ):
-        """Download a specific file by it's id.
+        """Download a specific file by its id.
 
         :param model_id: Unique model ID
         :param file_id: Unique file ID
