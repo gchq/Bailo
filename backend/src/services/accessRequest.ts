@@ -93,8 +93,13 @@ export async function removeAccessRequests(
 
   for (const accessRequestId of accessRequestIds) {
     const accessRequest = await getAccessRequestById(user, accessRequestId)
-    const model =
-      accessRequest.modelId in models ? models[accessRequest.modelId] : await getModelById(user, accessRequest.modelId)
+    let model: ModelDoc
+    if (accessRequest.modelId in models) {
+      model = models[accessRequest.modelId]
+    } else {
+      model = await getModelById(user, accessRequest.modelId)
+      models[accessRequest.modelId] = model
+    }
 
     const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Delete)
     if (!auth.success) {

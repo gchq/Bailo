@@ -1,3 +1,5 @@
+import { ClientSession } from 'mongoose'
+
 import {
   deleteManifest,
   getImageTagManifest,
@@ -201,11 +203,15 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
   }
 }
 
-export async function softDeleteImage(user: UserInterface, imageRef: ImageRefInterface) {
+export async function softDeleteImage(
+  user: UserInterface,
+  imageRef: ImageRefInterface,
+  session?: ClientSession | undefined,
+) {
   await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
 
   const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`
   await renameImage(user, imageRef, { repository: softDeleteNamespace, name: imageRef.name, tag: imageRef.tag })
 
-  await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef)
+  await findAndDeleteImageFromReleases(user, imageRef.repository, imageRef, session)
 }

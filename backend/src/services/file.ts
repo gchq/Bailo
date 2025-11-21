@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream'
 
-import { Schema, Types } from 'mongoose'
+import { ClientSession, Schema, Types } from 'mongoose'
 
 import {
   completeMultipartUpload,
@@ -333,28 +333,44 @@ export async function getFilesByIds(
   return files.filter((_, i) => auths[i].success)
 }
 
-export async function removeFile(user: UserInterface, modelId: string, fileId: string) {
+export async function removeFiles(
+  user: UserInterface,
+  modelId: string,
+  fileIds: string[],
+  session?: ClientSession | undefined,
+) {
   const model = await getModelById(user, modelId)
-  const file = await getFileById(user, fileId)
   if (model.settings.mirror.sourceModelId) {
     throw BadReq(`Cannot remove file from a mirrored model`)
   }
+  const allFiles: FileWithScanResultsInterface[] = []
 
-  const auth = await authorisation.file(user, model, file, FileAction.Delete)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn })
+  for (const fileId of fileIds) {
+    const file = await getFileById(user, fileId)
+    const auth = await authorisation.file(user, model, file, FileAction.Delete)
+    if (!auth.success) {
+      throw Forbidden(auth.info, { userDn: user.dn })
+    }
+
+    await removeFileFromReleases(user, model, fileId)
+
+    await ScanModel.deleteMany({ fileId: { $eq: file.id } }, session)
+
+    // We don't actually remove the file from storage, we only hide all
+    // references to it.  This makes the file not visible to the user.
+    await FileModel.findOneAndDelete({ _id: file._id }, session)
   }
 
-  await removeFileFromReleases(user, model, fileId)
+  return allFiles
+}
 
-  // TODO: use a transaction here once they're part of the codebase
-  await ScanModel.deleteMany({ fileId: { $eq: file.id } })
-
-  // We don't actually remove the file from storage, we only hide all
-  // references to it.  This makes the file not visible to the user.
-  await FileModel.findOneAndDelete({ _id: file._id })
-
-  return file
+export async function removeFile(
+  user: UserInterface,
+  modelId: string,
+  fileId: string,
+  session?: ClientSession | undefined,
+) {
+  return (await removeFiles(user, modelId, [fileId], session))[0]
 }
 
 export async function getTotalFileSize(fileIds: string[]) {

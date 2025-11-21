@@ -25,6 +25,44 @@ export function softDeletionPlugin(schema: Schema) {
     return await this.save(session)
   }
 
+  schema.statics.deleteMany = async function (
+    filter: Record<string, any>,
+    session?: ClientSession | undefined,
+    user?: string,
+  ) {
+    const update: Record<string, any> = {
+      deleted: true,
+      deletedAt: new Date().toISOString(),
+    }
+    if (user) {
+      update.deletedBy = user
+    }
+
+    const options = session ? { session } : {}
+    return this.updateMany(filter, update, options)
+  }
+
+  schema.statics.findOneAndDelete = async function (
+    filter: Record<string, any>,
+    session?: ClientSession | undefined,
+    user?: string,
+  ) {
+    const update: Record<string, any> = {
+      deleted: true,
+      deletedAt: new Date().toISOString(),
+    }
+    if (user) {
+      update.deletedBy = user
+    }
+
+    const options = { new: true } as Record<string, any>
+    if (session) {
+      options.session = session
+    }
+
+    return this.findOneAndUpdate(filter, update, options)
+  }
+
   schema.methods.restore = async function (session: ClientSession | undefined) {
     this.deleted = false
     return await this.save(session)
