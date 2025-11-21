@@ -20,6 +20,7 @@ import {
   EntrySearchResultWithErrors,
   EntryUserPermissions,
 } from '../types/types.js'
+import { MirrorImportLogData } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
@@ -29,7 +30,6 @@ import { useTransaction } from '../utils/transactions.js'
 import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
 import { getFilesByModel, removeFiles } from './file.js'
 import { getInferencesByModel, removeInferences } from './inference.js'
-import { MirrorImportLogData } from './mirroredModel/mirroredModel.js'
 import { listModelImages, softDeleteImage } from './registry.js'
 import { deleteReleases, getModelReleases } from './release.js'
 import { findReviews } from './review.js'
