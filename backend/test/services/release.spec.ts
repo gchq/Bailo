@@ -717,6 +717,9 @@ describe('services > release', () => {
           images: { ...imageRef },
         },
       },
+      {
+        session: undefined,
+      },
     )
   })
 })

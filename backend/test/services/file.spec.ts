@@ -351,7 +351,7 @@ describe('services > file', () => {
     const result = await removeFile(user, modelId, testFileId)
 
     expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
-    expect(scanModelMocks.deleteMany).toBeCalledWith({ fileId: { $eq: testFileId } })
+    expect(scanModelMocks.deleteMany).toBeCalledWith({ fileId: { $eq: testFileId } }, undefined)
     expect(fileModelMocks.findOneAndDelete).toBeCalled()
     expect(result).toMatchSnapshot()
   })
