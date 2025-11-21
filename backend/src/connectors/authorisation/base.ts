@@ -287,6 +287,24 @@ export class BasicAuthorisationConnector {
           return { success: false, info: 'You cannot change an access request you do not own.', id: request.id }
         }
 
+        /**
+         * Reject if:
+         *  - user is not named on the access request
+         *  - user is not able to view the model
+         *  - the user is trying to view an existing AR
+         */
+        if (
+          !isNamed &&
+          (await this.model(user, model, ModelAction.View)) &&
+          ([AccessRequestAction.View] as AccessRequestActionKeys[]).includes(action)
+        ) {
+          return {
+            success: false,
+            info: 'You cannot view an access request for a model you cannot view.',
+            id: request.id,
+          }
+        }
+
         // Otherwise they either own the model, access request or this is a read-only action.
         return { success: true, id: request.id }
       }),

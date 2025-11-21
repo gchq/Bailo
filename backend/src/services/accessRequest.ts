@@ -1,10 +1,12 @@
+// eslint-disable-next-line simple-import-sort/imports
 import { Validator } from 'jsonschema'
 import { Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
+import { Roles } from '../connectors/authentication/Base.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { AccessRequestInterface } from '../models/AccessRequest.js'
+import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
 import AccessRequest from '../models/AccessRequest.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
@@ -23,6 +25,7 @@ import { removeResponsesByParentIds } from './response.js'
 import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
 import { getSchemaById } from './schema.js'
 import { sendWebhooks } from './webhook.js'
+import ModelModel from '../models/Model.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
 export async function createAccessRequest(
@@ -129,6 +132,84 @@ export async function getAccessRequestById(user: UserInterface, accessRequestId:
   }
 
   return accessRequest
+}
+
+export async function findAccessRequest(
+  user: UserInterface,
+  modelId: Array<string>,
+  schemaId: string,
+  filters: Array<string>,
+  adminAccess?: boolean,
+): Promise<Array<AccessRequestDoc>> {
+  if (adminAccess) {
+    if (!(await authentication.hasRole(user, Roles.Admin))) {
+      throw Forbidden('You do not have the required role.', {
+        userDn: user.dn,
+        requiredRole: Roles.Admin,
+      })
+    }
+  }
+
+  const query: any = {}
+
+  if (modelId.length) {
+    query.modelId = { $all: modelId }
+  }
+
+  if (schemaId) {
+    query.schemaId = { $all: schemaId }
+  }
+
+  if (filters.length > 0) {
+    if (filters.includes('mine')) {
+      query.metadata.overview = {
+        $elemMatch: {
+          entity: { $in: await authentication.getEntities(user) },
+        },
+      }
+    }
+  }
+
+  const cursor = AccessRequestModel.find(query)
+
+  const results = await cursor
+  //Auth already checked, so just need to check if they require admin access
+  if (adminAccess) {
+    return results
+  }
+
+  // alternate aggregation if not admin
+  const modelAggregation = await ModelModel.aggregate([
+    {
+      $lookup: {
+        from: 'v2_access_requests',
+        localField: 'id',
+        foreignField: 'modelId',
+        as: 'accessRequests',
+      },
+    },
+    {
+      $project: {
+        model: '$$ROOT', // wrap current document into "model:{}" object
+      },
+    },
+  ])
+
+  const accessRequests: any[] = []
+  for (const document of modelAggregation) {
+    const auth = await authorisation.accessRequests(
+      user,
+      document.model,
+      document.model.accessRequests,
+      AccessRequestAction.View,
+    )
+    const filteredIds = auth.filter((result) => result.success).map((result) => result.id)
+    const filteredRequests = document.model.accessRequests.filter((accessRequest) =>
+      filteredIds.includes(accessRequest.id),
+    )
+    accessRequests.push(...filteredRequests)
+  }
+  return accessRequests
 }
 
 export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
