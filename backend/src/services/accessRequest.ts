@@ -1,11 +1,12 @@
 import { Validator } from 'jsonschema'
-import { Types } from 'mongoose'
+import { ClientSession, Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import { AccessRequestInterface } from '../models/AccessRequest.js'
 import AccessRequest from '../models/AccessRequest.js'
+import { ModelDoc } from '../models/Model.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
 import { UserInterface } from '../models/User.js'
@@ -16,7 +17,6 @@ import { toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
-import { useTransaction } from '../utils/transactions.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { removeResponsesByParentIds } from './response.js'
@@ -83,26 +83,43 @@ export async function createAccessRequest(
   return accessRequest
 }
 
-export async function removeAccessRequest(user: UserInterface, accessRequestId: string) {
-  const accessRequest = await getAccessRequestById(user, accessRequestId)
-  const model = await getModelById(user, accessRequest.modelId)
+export async function removeAccessRequests(
+  user: UserInterface,
+  accessRequestIds: string[],
+  session?: ClientSession | undefined,
+) {
+  // Model cache
+  const models: Record<string, ModelDoc> = {}
 
-  const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Delete)
-  if (!auth.success) {
-    throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
+  for (const accessRequestId of accessRequestIds) {
+    const accessRequest = await getAccessRequestById(user, accessRequestId)
+    const model =
+      accessRequest.modelId in models ? models[accessRequest.modelId] : await getModelById(user, accessRequest.modelId)
+
+    const auth = await authorisation.accessRequest(user, model, accessRequest, AccessRequestAction.Delete)
+    if (!auth.success) {
+      throw Forbidden(auth.info, { userDn: user.dn, accessRequestId })
+    }
+
+    const reviewsForAccessRequest = await ReviewModel.find({ accessRequestId })
+
+    await accessRequest.delete(session)
+    await removeAccessRequestReviews(accessRequestId, session)
+    await removeResponsesByParentIds(
+      [...reviewsForAccessRequest.map((review) => review['_id']), accessRequest['_id']] as string[],
+      session,
+    )
   }
 
-  const reviewsForAccessRequest = await ReviewModel.find({ accessRequestId })
+  return { accessRequestIds }
+}
 
-  await useTransaction([
-    (session) => accessRequest.delete(session),
-    (session) => removeAccessRequestReviews(accessRequestId, session),
-    (session) =>
-      removeResponsesByParentIds(
-        [...reviewsForAccessRequest.map((review) => review['_id']), accessRequest['_id']] as string[],
-        session,
-      ),
-  ])
+export async function removeAccessRequest(
+  user: UserInterface,
+  accessRequestId: string,
+  session?: ClientSession | undefined,
+) {
+  await removeAccessRequests(user, [accessRequestId], session)
 
   return { accessRequestId }
 }

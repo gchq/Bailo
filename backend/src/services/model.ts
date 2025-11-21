@@ -7,8 +7,7 @@ import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import getPeerConnectors from '../connectors/peer/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
-import Model, { ModelInterface } from '../models/Model.js'
+import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
@@ -26,13 +25,15 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
-import { getAccessRequestsByModel, removeAccessRequest } from './accessRequest.js'
+import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
 import { getFilesByModel, removeFile } from './file.js'
 import { getInferencesByModel, removeInference } from './inference.js'
 import { MirrorImportLogData } from './mirroredModel/mirroredModel.js'
 import { listModelImages, softDeleteImage } from './registry.js'
 import { deleteRelease, getModelReleases } from './release.js'
+import { findReviews } from './review.js'
 import { getSchemaById } from './schema.js'
+import { getWebhooksByModel, removeWebhook } from './webhook.js'
 
 export function checkModelRestriction(model: ModelInterface) {
   if (model.settings.mirror.sourceModelId) {
@@ -80,7 +81,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     ]
   }
 
-  const model = new Model({
+  const model = new ModelModel({
     ...modelParams,
     id: modelId,
     collaborators,
@@ -102,7 +103,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
 }
 
 export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
-  const model = await Model.findOne({
+  const model = await ModelModel.findOne({
     id: modelId,
     ...(kind && { kind }),
   })
@@ -120,7 +121,7 @@ export async function getModelById(user: UserInterface, modelId: string, kind?: 
 }
 
 export async function removeModel(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
-  const model = await Model.findOne({
+  const model = await ModelModel.findOne({
     id: modelId,
     ...(kind && { kind }),
   })
@@ -134,15 +135,18 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
-  // TODO: Reviews, Tokens, Webhooks
+  // TODO: Reviews, Tokens
+
+  // const allTokens = await getTokens
+
+  // const allReviews = await findReviews(user, false, undefined, modelId)
+  // const reviewDeletionPromises = allReviews.map((review) => review.delete())
+
+  const allWebhooks = await getWebhooksByModel(user, modelId)
+  const webhookDeletionPromises = allWebhooks.map((webhook) => removeWebhook(user, modelId, webhook.id))
 
   const allReleases = await getModelReleases(user, modelId)
   const releaseDeletionPromises = allReleases.map((release) => deleteRelease(user, modelId, release.semver))
-
-  const allAccessRequests = await getAccessRequestsByModel(user, modelId)
-  const accessRequestDeletionPromises = allAccessRequests.map((accessRequest) =>
-    removeAccessRequest(user, accessRequest.id),
-  )
 
   const allModelCardRevisions = await getModelCardRevisions(user, modelId)
   const modelCardRevisionsDeletionPromises = allModelCardRevisions.map((modelCardRevision) =>
@@ -168,13 +172,16 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     removeInference(user, modelId, inference.image, inference.tag),
   )
 
-  await Promise.all([
-    ...releaseDeletionPromises,
-    ...accessRequestDeletionPromises,
-    ...modelCardRevisionsDeletionPromises,
-    ...fileDeletionPromises,
-    ...imageDeletionPromises,
-    ...inferencesDeletionPromises,
+  const allAccessRequests = await getAccessRequestsByModel(user, modelId)
+
+  await useTransaction([
+    (session) =>
+      removeAccessRequests(
+        user,
+        allAccessRequests.flatMap((accessRequest) => accessRequest.id),
+        session,
+      ),
+    (session) => model.delete(session),
   ])
 }
 
@@ -694,7 +701,7 @@ export async function validateMirroredModel(
   sourceModelId: string,
   logData: MirrorImportLogData,
 ) {
-  const model = await Model.findOne({
+  const model = await ModelModel.findOne({
     id: mirroredModelId,
     'settings.mirror.sourceModelId': { $ne: null },
   })
@@ -781,6 +788,6 @@ export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) 
 }
 
 export async function popularTagsForEntries() {
-  const tags = await Model.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
+  const tags = await ModelModel.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
   return tags.map((tag) => tag._id) as string[]
 }
