@@ -21,7 +21,7 @@ registerPath({
   method: 'get',
   path: '/api/v2/model/{modelId}',
   tags: ['model'],
-  description: "Get a model by it's ID",
+  description: 'Get a model by its ID',
   schema: getModelSchema,
   responses: {
     200: {

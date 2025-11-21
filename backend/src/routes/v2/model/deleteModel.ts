@@ -16,7 +16,7 @@ export const deleteModelSchema = z.object({
 registerPath({
   method: 'delete',
   path: '/api/v2/model/{modelId}',
-  tags: ['file'],
+  tags: ['model'],
   description: 'Delete a model.',
   schema: deleteModelSchema,
   responses: {
