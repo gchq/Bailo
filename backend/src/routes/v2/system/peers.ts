@@ -32,10 +32,9 @@ interface GetPeerStatusResponse {
 export const getPeerStatus = [
   async (req: Request, res: Response<GetPeerStatusResponse>): Promise<void> => {
     const _ = parse(req, getPeerStatusSchema)
-    const peersWrapper = await peers()
 
     res.json({
-      peers: Object.fromEntries(await peersWrapper.status()),
+      peers: Object.fromEntries(await peers.status()),
     })
   },
 ]
