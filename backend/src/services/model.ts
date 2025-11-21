@@ -34,6 +34,7 @@ import { listModelImages, softDeleteImage } from './registry.js'
 import { deleteReleases, getModelReleases } from './release.js'
 import { findReviews } from './review.js'
 import { getSchemaById } from './schema.js'
+import { dropModelIdFromTokens, getTokensForModel } from './token.js'
 import { getWebhooksByModel } from './webhook.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -136,13 +137,10 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
     throw Forbidden(auth.info, { userDn: user.dn, modelId })
   }
 
-  // TODO: Tokens
-
-  // const allTokens = await getTokens
-
   const allModelReviews = await findReviews(user, false, undefined, modelId)
   const allModelImages = await listModelImages(user, modelId)
   const allModelReleases = await getModelReleases(user, modelId)
+  const allModelTokens = await getTokensForModel(user, modelId)
   const allModelWebhooks = await getWebhooksByModel(user, modelId)
   const allModelCardRevisions = await getModelCardRevisions(user, modelId)
   const allModelFiles = await getFilesByModel(user, modelId)
@@ -166,6 +164,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
       ),
     (session) =>
       Promise.all(allModelReviews.map((review) => ReviewModel.findOneAndDelete({ _id: review._id }, session))),
+    (session) => dropModelIdFromTokens(user, modelId, allModelTokens, session),
     (session) => Promise.all(allModelWebhooks.map((webhook) => webhook.delete(session))),
     (session) =>
       removeFiles(

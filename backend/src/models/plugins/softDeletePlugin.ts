@@ -25,6 +25,23 @@ export function softDeletionPlugin(schema: Schema) {
     return await this.save(session)
   }
 
+  schema.statics.deleteOne = async function (
+    filter: Record<string, any>,
+    session?: ClientSession | undefined,
+    user?: string,
+  ) {
+    const update: Record<string, any> = {
+      deleted: true,
+      deletedAt: new Date().toISOString(),
+    }
+    if (user) {
+      update.deletedBy = user
+    }
+
+    const options = session ? { session } : {}
+    return this.updateOne(filter, update, options)
+  }
+
   schema.statics.deleteMany = async function (
     filter: Record<string, any>,
     session?: ClientSession | undefined,

@@ -1,3 +1,4 @@
+import { ClientSession } from 'mongoose'
 import { customAlphabet } from 'nanoid'
 
 import { Response } from '../connectors/authorisation/base.js'
@@ -54,6 +55,32 @@ export async function findUserTokens(user: UserInterface) {
   return Token.find({
     user: user.dn,
   })
+}
+
+export async function getTokensForModel(user: UserInterface, modelId: string) {
+  return Token.find({
+    user: user.dn,
+    modelIds: modelId,
+  })
+}
+
+export async function dropModelIdFromTokens(
+  user: UserInterface,
+  modelId: string,
+  tokens: TokenDoc[],
+  session?: ClientSession | undefined,
+) {
+  for (const token of tokens) {
+    // Remove the modelId from modelIds
+    token.modelIds = token.modelIds.filter((id) => id !== modelId)
+
+    if (token.modelIds.length === 0) {
+      // If modelIds is now empty, delete document
+      token.delete(session)
+    } else {
+      await token.save({ session })
+    }
+  }
 }
 
 export async function removeToken(user: UserInterface, accessKey: string) {
