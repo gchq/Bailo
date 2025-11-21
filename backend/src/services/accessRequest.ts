@@ -178,24 +178,38 @@ export async function findAccessRequest(
     return results
   }
 
-  // authorisation
-  const modelIds = results.map((result) => result.modelId)
-  let auths: any[] = []
-  for (const modelId of modelIds) {
-    const modelDoc = await ModelModel.findOne({ id: modelId })
-    if (!modelDoc) {
-      throw BadReq('Model cannot be found', { modelId })
-    }
-    const model = modelDoc.toObject()
+  // alternate aggregation if not admin
+  const modelAggregation = await ModelModel.aggregate([
+    {
+      $lookup: {
+        from: 'v2_access_requests',
+        localField: 'id',
+        foreignField: 'modelId',
+        as: 'accessRequests',
+      },
+    },
+    {
+      $project: {
+        model: '$$ROOT', // wrap current document into "model:{}" object
+      },
+    },
+  ])
 
-    // filter out results for auth
-    const filteredResults = results.filter((object) => {
-      return object.modelId === modelId
-    })
-
-    auths = auths.concat(await authorisation.accessRequests(user, model, filteredResults, AccessRequestAction.View))
+  const accessRequests: any[] = []
+  for (const document of modelAggregation) {
+    const auth = await authorisation.accessRequests(
+      user,
+      document.model,
+      document.model.accessRequests,
+      AccessRequestAction.View,
+    )
+    const filteredIds = auth.filter((result) => result.success).map((result) => result.id)
+    const filteredRequests = document.model.accessRequests.filter((accessRequest) =>
+      filteredIds.includes(accessRequest.id),
+    )
+    accessRequests.push(...filteredRequests)
   }
-  return results.filter((_, i) => auths[i].success)
+  return accessRequests
 }
 
 export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
