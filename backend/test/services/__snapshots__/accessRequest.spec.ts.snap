@@ -2,7 +2,20 @@
 
 exports[`services > accessRequest > findAccessRequest > admin access with auth 1`] = `[]`;
 
-exports[`services > accessRequest > findAccessRequest > all filters 1`] = `[]`;
+exports[`services > accessRequest > findAccessRequest > all filters 1`] = `
+[
+  {
+    "_id": "a",
+    "metadata": {
+      "overview": {
+        "entities": [
+          "user:user",
+        ],
+      },
+    },
+  },
+]
+`;
 
 exports[`services > accessRequest > findAccessRequest > no filters 1`] = `
 [

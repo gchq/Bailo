@@ -176,22 +176,38 @@ describe('services > accessRequest', () => {
       },
     ])
 
-    const accessRequests = await findAccessRequest({} as any, [], '', [], false)
+    const accessRequests = await findAccessRequest({} as any, [], '', true, false)
     expect(accessRequests).toMatchSnapshot()
   })
 
   test('findAccessRequest > all filters', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
-    accessRequestModelMocks.find.mockResolvedValue([])
-    modelModelMocks.aggregate.mockResolvedValueOnce([])
+    accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }])
+    modelModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        model: {
+          _id: 'a',
+          accessRequests: [
+            {
+              _id: 'a',
+              metadata: {
+                overview: {
+                  entities: ['user:user'],
+                },
+              },
+            },
+          ],
+        },
+      },
+    ])
 
-    const accessRequests = await findAccessRequest({} as any, ['modelId'], 'schemaId', ['filter'], false)
+    const accessRequests = await findAccessRequest({} as any, ['modelId'], 'schemaId', false, false)
     expect(accessRequests).toMatchSnapshot()
   })
 
   test('findAccessRequest > admin access without auth', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
-    await expect(() => findAccessRequest({} as any, [], '', [], true)).rejects.toThrowError(
+    await expect(() => findAccessRequest({} as any, [], '', true, true)).rejects.toThrowError(
       /^You do not have the required role./,
     )
   })
@@ -200,7 +216,7 @@ describe('services > accessRequest', () => {
     mockAuthentication.hasRole.mockReturnValueOnce(true)
     accessRequestModelMocks.find.mockResolvedValue([])
 
-    const accessRequests = await findAccessRequest({} as any, ['modelId'], 'schemaId', ['filter'], true)
+    const accessRequests = await findAccessRequest({} as any, ['modelId'], 'schemaId', true, true)
     expect(accessRequests).toMatchSnapshot()
   })
 

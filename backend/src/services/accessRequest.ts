@@ -138,7 +138,7 @@ export async function findAccessRequest(
   user: UserInterface,
   modelId: Array<string>,
   schemaId: string,
-  filters: Array<string>,
+  mine: boolean,
   adminAccess?: boolean,
 ): Promise<Array<AccessRequestDoc>> {
   if (adminAccess) {
@@ -160,13 +160,13 @@ export async function findAccessRequest(
     query.schemaId = { $all: schemaId }
   }
 
-  if (filters.length > 0) {
-    if (filters.includes('mine')) {
-      query.metadata.overview = {
+  if (mine) {
+    query.metadata = {
+      overview: {
         $elemMatch: {
           entity: { $in: await authentication.getEntities(user) },
         },
-      }
+      },
     }
   }
 
