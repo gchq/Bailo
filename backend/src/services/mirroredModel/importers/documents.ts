@@ -10,6 +10,7 @@ import { ModelDoc } from '../../../models/Model.js'
 import { ModelCardRevisionDoc } from '../../../models/ModelCardRevision.js'
 import { ReleaseDoc } from '../../../models/Release.js'
 import { UserInterface } from '../../../models/User.js'
+import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../../../types/types.js'
 import config from '../../../utils/config.js'
 import { Forbidden, InternalError } from '../../../utils/error.js'
 import { saveImportedFile } from '../../file.js'
@@ -18,7 +19,6 @@ import { getModelById, saveImportedModelCard, setLatestImportedModelCard } from 
 import { DistributionPackageName, joinDistributionPackageName } from '../../registry.js'
 import { saveImportedRelease } from '../../release.js'
 import { parseFile, parseModelCard, parseRelease } from '../entityParsers.js'
-import { MirrorImportLogData, MirrorKind, MirrorKindKeys } from '../mirroredModel.js'
 import { BaseImporter, BaseMirrorMetadata } from './base.js'
 
 export type DocumentsMirrorMetadata = BaseMirrorMetadata & { importKind: MirrorKindKeys<'Documents'> }

@@ -8,19 +8,14 @@ import { ModelAction } from '../../connectors/authorisation/actions.js'
 import authorisation from '../../connectors/authorisation/index.js'
 import { UserInterface } from '../../models/User.js'
 import { isBailoError } from '../../types/error.js'
+import { MirrorExportLogData, MirrorImportLogData, MirrorInformation, MirrorMetadata } from '../../types/types.js'
 import config from '../../utils/config.js'
 import { Forbidden, InternalError } from '../../utils/error.js'
 import log from '../log.js'
 import { validateMirroredModel } from '../model.js'
 import { mirrorMetadataSchema } from '../specification.js'
 import { BaseImporter } from './importers/base.js'
-import {
-  getImporter,
-  MirrorExportLogData,
-  MirrorImportLogData,
-  MirrorInformation,
-  MirrorMetadata,
-} from './mirroredModel.js'
+import { getImporter } from './mirroredModel.js'
 import { uploadToS3 } from './s3.js'
 
 function createTarGzStreams() {

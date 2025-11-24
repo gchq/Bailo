@@ -20,13 +20,13 @@ import {
   EntrySearchResultWithErrors,
   EntryUserPermissions,
 } from '../types/types.js'
+import { MirrorImportLogData } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
-import { MirrorImportLogData } from './mirroredModel/mirroredModel.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
