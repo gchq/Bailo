@@ -4,6 +4,7 @@ import { UserInterface } from '../../src/models/User.js'
 import {
   createSchemaMigrationPlan,
   runModelSchemaMigration,
+  searchSchemaMigrationById,
   searchSchemaMigrations,
   updateSchemaMigrationPlan,
 } from '../../src/services/schemaMigration.js'
@@ -92,6 +93,21 @@ describe('services > schemaMigration', () => {
     mockSchemaMigration.find.mockResolvedValueOnce([testSchemaMigration])
     const result = await searchSchemaMigrations()
     expect(result).toEqual([testSchemaMigration])
+  })
+
+  test('searchSchemaMigrationById > success', async () => {
+    const schemaMigrationId = 'test-id'
+    mockSchemaMigration.findOne.mockResolvedValueOnce(testSchemaMigration)
+    const res = await searchSchemaMigrationById(schemaMigrationId)
+    expect(res).toBe(testSchemaMigration)
+  })
+
+  test('searchSchemaMigrationById > not found', async () => {
+    const schemaMigrationId = 'test-id'
+    mockSchemaMigration.findOne.mockResolvedValueOnce(null)
+    await expect(() => searchSchemaMigrationById(schemaMigrationId)).rejects.toThrowError(
+      'Cannot find specified schema migration plan.',
+    )
   })
 
   test('a schema migration plan can be created', async () => {

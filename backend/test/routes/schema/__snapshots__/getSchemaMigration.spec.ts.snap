@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`routes > schema > putSchemaMigration > audit > expected call 1`] = `
+exports[`routes > schema > getSchemaMigration > audit > expected call 1`] = `
 {
   "description": "This is a test migration plan",
   "draft": false,
@@ -20,7 +20,7 @@ exports[`routes > schema > putSchemaMigration > audit > expected call 1`] = `
 }
 `;
 
-exports[`routes > schema > putSchemaMigration > successfully updates the schema migration 1`] = `
+exports[`routes > schema > getSchemaMigration > successfully updates the schema migration 1`] = `
 {
   "schemaMigration": {
     "description": "This is a test migration plan",

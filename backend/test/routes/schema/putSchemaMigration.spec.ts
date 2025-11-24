@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import audit from '../../../src/connectors/audit/__mocks__/index.js'
 import { putSchemaMigrationSchema } from '../../../src/routes/v2/schema/putSchemaMigration.js'
 import { createFixture, testPut } from '../../testUtils/routes.js'
+import { testSchemaMigration } from '../../testUtils/testModels.js'
 
 vi.mock('../../../src/connectors/audit/index.js')
 
@@ -16,7 +17,7 @@ vi.mock('../../../src/services/schemaMigration.js', () => mockSchemaMigrationSer
 describe('routes > schema > putSchemaMigration', async () => {
   test('successfully updates the schema migration', async () => {
     const fixture = createFixture(putSchemaMigrationSchema)
-    mockSchemaMigrationService.updateSchemaMigrationPlan.mockResolvedValue(fixture.body)
+    mockSchemaMigrationService.updateSchemaMigrationPlan.mockResolvedValue(testSchemaMigration)
     const res = await testPut(`/api/v2/schema-migration/${fixture.params.schemaMigrationId}`, fixture)
 
     expect(res.statusCode).toBe(200)
@@ -25,7 +26,7 @@ describe('routes > schema > putSchemaMigration', async () => {
 
   test('audit > expected call', async () => {
     const fixture = createFixture(putSchemaMigrationSchema)
-    mockSchemaMigrationService.updateSchemaMigrationPlan.mockResolvedValue(fixture.body)
+    mockSchemaMigrationService.updateSchemaMigrationPlan.mockResolvedValue(testSchemaMigration)
     const res = await testPut(`/api/v2/schema-migration/${fixture.params.schemaMigrationId}`, fixture)
 
     expect(res.statusCode).toBe(200)
