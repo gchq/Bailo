@@ -167,10 +167,14 @@ describe('services > accessRequest', () => {
   test('findAccessRequest > no filters', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
     accessRequestModelMocks.find.mockResolvedValue([{ _id: 'a' }])
-    modelModelMocks.findOne.mockResolvedValueOnce({
-      _id: 'a',
-      toObject: vi.fn(() => ({ _id: 'a' })),
-    })
+    modelModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        model: {
+          _id: 'a',
+          accessRequests: [{ _id: 'a' }],
+        },
+      },
+    ])
 
     const accessRequests = await findAccessRequest({} as any, [], '', [], false)
     expect(accessRequests).toMatchSnapshot()
@@ -179,6 +183,7 @@ describe('services > accessRequest', () => {
   test('findAccessRequest > all filters', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
     accessRequestModelMocks.find.mockResolvedValue([])
+    modelModelMocks.aggregate.mockResolvedValueOnce([])
 
     const accessRequests = await findAccessRequest({} as any, ['modelId'], 'schemaId', ['filter'], false)
     expect(accessRequests).toMatchSnapshot()
