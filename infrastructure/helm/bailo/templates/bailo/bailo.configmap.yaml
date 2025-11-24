@@ -62,6 +62,30 @@ data:
         insecure: {{ .Values.registry.insecure }},
       },
 
+      federation: {
+        state: '{{ .Values.federation.state }}',
+        {{ if eq .Values.federation.state "enabled" }}
+        id: '{{ .Values.federation.id }}',
+        peers: {
+        {{- range $v := .Values.federation.peers }}
+          {{ $v.name }}: {
+            state: '{{ $v.state }}',
+            baseUrl: '{{ $v.baseUrl }}',
+            label: '{{ $v.label }}',
+            kind: '{{ $v.kind }}',
+            cache: {
+              query: {{ $v.cacheQuery }},
+            },
+            extra: {
+              statusModelName: '{{ $v.statusModelName }}',
+              statusModelId: '{{ $v.statusModelId }}',
+            },
+          },
+        {{- end }}
+        },
+        {{ end }}
+      },
+
       avScanning: {
         clamdscan: {
           concurrency: {{ .Values.clamav.concurrency }},
