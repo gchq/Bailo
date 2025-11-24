@@ -7,6 +7,7 @@ import ChipSelector from 'src/common/ChipSelector'
 import Link from 'src/Link'
 import { EntryKind, PeerConfigStatus } from 'types/types'
 import { getEntryUrl } from 'utils/peerUtils'
+import { truncateText } from 'utils/stringUtils'
 
 interface EntryListRowProps {
   selectedChips: string[]
@@ -71,7 +72,7 @@ export default function EntryListRow({
     }
   }
 
-  const filteredTags = entry.tags.filter((t) => t.length < 15)
+  const filteredTags = entry.tags.map((tag) => truncateText(tag, 25))
 
   return (
     <Box
