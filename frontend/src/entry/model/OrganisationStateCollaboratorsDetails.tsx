@@ -59,7 +59,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   return (
     <Box>
       <Stack spacing={2} sx={{ mr: 0, backgroundColor: theme.palette.container.main, p: 2, borderRadius: 2 }}>
-        <Typography color='primary' variant='h6'>
+        <Typography color='primary' variant='h6' component='h2'>
           {toSentenceCase(entry.kind)} Details
         </Typography>
         <Stack spacing={1}>
