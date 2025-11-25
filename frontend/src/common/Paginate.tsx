@@ -15,6 +15,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { isArray } from 'lodash-es'
 import { MouseEvent, ReactElement, useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react'
+import semver from 'semver'
 import EmptyBlob from 'src/common/EmptyBlob'
 
 interface PaginateProps<T> {
@@ -125,6 +126,20 @@ export default function Paginate<T>({
     }
   }, [])
 
+  const compareSemanticVersions = useCallback(
+    (a: T, b: T) => {
+      if (typeof a[orderByValue] !== 'string' || typeof b[orderByValue] !== 'string') {
+        return 1
+      }
+      if (ascOrDesc === SortingDirection.ASC) {
+        return semver.gt(a[orderByValue], b[orderByValue]) ? 1 : -1
+      } else {
+        return semver.gt(b[orderByValue], a[orderByValue]) ? 1 : -1
+      }
+    },
+    [ascOrDesc, orderByValue],
+  )
+
   const orderByMenuListItems = useCallback(
     (sortingProperty: SortingProperty<T>) => {
       return (
@@ -201,8 +216,13 @@ export default function Paginate<T>({
 
   const listDisplay = useMemo(() => {
     let sortedList
-    sortedList = filteredList.sort(sortByValue)
-    sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+    if (orderByValue === 'semver') {
+      sortedList = filteredList.sort(compareSemanticVersions)
+      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+    } else {
+      sortedList = filteredList.sort(sortByValue)
+      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
+    }
     if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
         <div key={item['key']} style={{ width: '100%' }}>
@@ -210,7 +230,7 @@ export default function Paginate<T>({
         </div>
       ))
     }
-  }, [page, pageSize, filteredList, sortByValue, children])
+  }, [orderByValue, filteredList, compareSemanticVersions, sortByValue, page, pageSize, children])
 
   if (list.length === 0) {
     return <EmptyBlob text={emptyListText} />
