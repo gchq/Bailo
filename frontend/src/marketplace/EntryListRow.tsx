@@ -7,7 +7,6 @@ import ChipSelector from 'src/common/ChipSelector'
 import Link from 'src/Link'
 import { EntryKind, PeerConfigStatus } from 'types/types'
 import { getEntryUrl } from 'utils/peerUtils'
-import { truncateText } from 'utils/stringUtils'
 
 interface EntryListRowProps {
   selectedChips: string[]
@@ -71,8 +70,6 @@ export default function EntryListRow({
       href = getEntryUrl(peer.config, entry)
     }
   }
-
-  const filteredTags = entry.tags.map((tag) => truncateText(tag, 25))
 
   return (
     <Box
@@ -171,7 +168,7 @@ export default function EntryListRow({
         )}
         <ChipSelector
           chipTooltipTitle={'Filter by tag'}
-          options={filteredTags.slice(0, 10)}
+          options={entry.tags.slice(0, 10)}
           expandThreshold={10}
           multiple
           selectedChips={selectedChips}
