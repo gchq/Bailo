@@ -412,19 +412,32 @@ describe('services > file', () => {
     expect(fileModelMocks.delete).not.toBeCalled()
   })
 
-  test('removeFiles > should throw an error when attempting to remove a file from a mirrored model', async () => {
+  test('removeFiles > success bypass mirrored model check', async () => {
     const user = { dn: 'testUser' } as UserInterface
     const modelId = 'testModelId'
 
-    fileModelMocks.aggregate.mockResolvedValueOnce([
-      { modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } },
-    ])
-    vi.mocked(authorisation.file).mockResolvedValue({
-      info: 'Cannot remove file from a mirrored model.',
-      success: false,
-      id: '',
-    })
-    await expect(() => removeFiles(user, modelId, [testFileId])).rejects.toThrowError(
+    modelMocks.getModelById.mockResolvedValueOnce({
+      settings: { mirror: { sourceModelId: 'sourceModelId' } },
+    } as any)
+    fileModelMocks.aggregate
+      .mockResolvedValueOnce([{ modelId: 'testModel', _id: { toString: vi.fn(() => testFileId) } }])
+      .mockResolvedValueOnce([{ modelId: 'testModel2', _id: { toString: vi.fn(() => testFileIdReversed) } }])
+
+    const result = await removeFiles(user, modelId, [testFileId, testFileIdReversed], true)
+
+    expect(releaseServiceMocks.removeFileFromReleases).toBeCalled()
+    expect(scanModelMocks.deleteMany).toBeCalledTimes(2)
+    expect(scanModelMocks.deleteMany.mock.calls).toMatchSnapshot()
+    expect(fileModelMocks.findOneAndDelete).toBeCalledTimes(2)
+    expect(result).toMatchSnapshot()
+  })
+
+  test('removeFiles > throw on mirrored model', async () => {
+    modelMocks.getModelById.mockResolvedValueOnce({
+      settings: { mirror: { sourceModelId: 'sourceModelId' } },
+    } as any)
+
+    await expect(() => removeFiles({} as any, 'modelId', [testFileId])).rejects.toThrowError(
       /^Cannot remove file from a mirrored model./,
     )
     expect(fileModelMocks.delete).not.toBeCalled()

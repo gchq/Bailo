@@ -342,7 +342,7 @@ export async function removeFiles(
 ) {
   const model = await getModelById(user, modelId)
   if (model.settings.mirror.sourceModelId && !deleteMirroredModel) {
-    throw BadReq(`Cannot remove file from a mirrored model`)
+    throw BadReq('Cannot remove file from a mirrored model.')
   }
   const allFiles: FileWithScanResultsInterface[] = []
 

@@ -536,7 +536,22 @@ describe('services > release', () => {
       expect(releaseModelMocks.save).not.toBeCalled()
     })
 
-    test('should throw a bad req when attempting to delete a release on a mirrored model', async () => {
+    test('success bypass mirrored model check', async () => {
+      modelMocks.getModelById.mockResolvedValueOnce({
+        id: 'test_model_id',
+        card: { version: 1 },
+        settings: { mirror: { sourceModelId: '123' } },
+      })
+      reviewModelMocks.find.mockResolvedValue([])
+
+      expect(await deleteReleases({} as any, 'test', ['test1', 'test2'], true)).toStrictEqual({
+        modelId: 'test',
+        semvers: ['test1', 'test2'],
+      })
+      expect(releaseModelMocks.delete).toBeCalledTimes(2)
+    })
+
+    test('throw on mirrored model', async () => {
       modelMocks.getModelById.mockResolvedValueOnce({
         id: 'test_model_id',
         card: { version: 1 },
