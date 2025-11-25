@@ -78,5 +78,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onUpdateReviewRole(_req: Request, _reviewRole: ReviewRoleInterface) {}
   onDeleteReviewRole(_req: Request, _reviewRoleId: string) {}
   onCreateSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
+  onUpdateSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
   onViewSchemaMigrations(_req: Request, _schemaMigrations: SchemaMigrationInterface[]) {}
+  onViewSchemaMigration(_req: Request, _schemaMigration: SchemaMigrationInterface) {}
 }
