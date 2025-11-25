@@ -237,6 +237,7 @@ export default function Paginate<T>({
             size='small'
             placeholder={searchPlaceholderText}
             value={searchFilter}
+            label='search input filed for paginated list'
             onChange={(e) => setSearchFilter(e.target.value)}
             sx={{ maxWidth: '200px' }}
           />

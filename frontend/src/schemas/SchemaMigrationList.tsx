@@ -14,7 +14,7 @@ export default function SchemaMigrationList() {
   const SchemaMigrationList = memoize(({ data, index }) => (
     <Stack sx={{ p: 2 }} spacing={1}>
       <Stack direction={{ sm: 'column', md: 'row' }} spacing={2} justifyContent='space-between'>
-        <Typography fontWeight='bold' color='primary' variant='h6'>
+        <Typography fontWeight='bold' color='primary' variant='h6' component='h2'>
           {data[index].name}
         </Typography>
         <Typography>
