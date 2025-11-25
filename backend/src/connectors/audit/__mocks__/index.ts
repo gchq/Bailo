@@ -4,6 +4,7 @@ const audit = {
   onCreateModel: vi.fn(),
   onViewModel: vi.fn(),
   onUpdateModel: vi.fn(),
+  onDeleteModel: vi.fn(),
   onSearchModel: vi.fn(),
 
   onCreateModelCard: vi.fn(),

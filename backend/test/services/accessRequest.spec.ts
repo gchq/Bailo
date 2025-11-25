@@ -8,6 +8,7 @@ import {
   getCurrentUserPermissionsByAccessRequest,
   getModelAccessRequestsForUser,
   removeAccessRequest,
+  removeAccessRequests,
 } from '../../src/services/accessRequest.js'
 import { AccessRequestUserPermissions } from '../../src/types/types.js'
 
@@ -72,19 +73,20 @@ const reviewModelMocks = vi.hoisted(() => {
 })
 vi.mock('../../src/models/Review.js', () => ({ default: reviewModelMocks }))
 
-const mockReviewService = vi.hoisted(() => {
-  return {
-    createAccessRequestReviews: vi.fn(),
-    removeAccessRequestReviews: vi.fn(),
-  }
-})
+const mockReviewService = vi.hoisted(() => ({
+  createAccessRequestReviews: vi.fn(),
+  removeAccessRequestReviews: vi.fn(),
+}))
 vi.mock('../../src/services/review.js', () => mockReviewService)
 
-const mockWebhookService = vi.hoisted(() => {
-  return {
-    sendWebhooks: vi.fn(),
-  }
-})
+const mockResponseService = vi.hoisted(() => ({
+  removeResponsesByParentIds: vi.fn(),
+}))
+vi.mock('../../src/services/response.js', () => mockResponseService)
+
+const mockWebhookService = vi.hoisted(() => ({
+  sendWebhooks: vi.fn(),
+}))
 vi.mock('../../src/services/webhook.js', () => mockWebhookService)
 
 const accessRequest = {
@@ -155,6 +157,36 @@ describe('services > accessRequest', () => {
     })
 
     await expect(() => removeAccessRequest({} as any, 'test')).rejects.toThrowError(
+      /^You do not have permission to delete this access request./,
+    )
+  })
+
+  test('removeAccessRequests > success', async () => {
+    reviewModelMocks.find.mockResolvedValue([])
+    responseModelMocks.find.mockResolvedValue([])
+
+    expect(await removeAccessRequests({} as any, ['test', 'test2'])).toStrictEqual({
+      accessRequestIds: ['test', 'test2'],
+    })
+    expect(reviewModelMocks.find).toHaveBeenCalledTimes(2)
+    // Once in removeAccessRequests and twice in getAccessRequestById
+    expect(modelMocks.getModelById).toHaveBeenCalledTimes(3)
+  })
+
+  test('removeAccessRequests > no permission', async () => {
+    const mockAccessRequest = { _id: 'release' }
+
+    modelMocks.getModelById.mockResolvedValue(undefined)
+    accessRequestModelMocks.findOne.mockResolvedValue(mockAccessRequest)
+
+    vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({ success: true, id: '' })
+    vi.mocked(authorisation.accessRequest).mockResolvedValueOnce({
+      success: false,
+      info: 'You do not have permission to delete this access request.',
+      id: '',
+    })
+
+    await expect(() => removeAccessRequests({} as any, ['test', 'test2'])).rejects.toThrowError(
       /^You do not have permission to delete this access request./,
     )
   })

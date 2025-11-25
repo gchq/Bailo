@@ -347,6 +347,7 @@ export async function removeFiles(
 
   for (const fileId of fileIds) {
     const file = await getFileById(user, fileId)
+    allFiles.push(file)
     const auth = await authorisation.file(user, model, file, FileAction.Delete)
     if (!auth.success) {
       throw Forbidden(auth.info, { userDn: user.dn })

@@ -94,7 +94,85 @@ exports[`services > file > getFilesByModel > success 1`] = `
 ]
 `;
 
-exports[`services > file > removeFile > success 1`] = `undefined`;
+exports[`services > file > removeFile > success 1`] = `
+{
+  "_id": {
+    "toString": [MockFunction spy] {
+      "calls": [
+        [],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": "73859F8D26679D2E52597326",
+        },
+      ],
+    },
+  },
+  "id": "73859F8D26679D2E52597326",
+  "modelId": "testModel",
+}
+`;
+
+exports[`services > file > removeFiles > success 1`] = `
+[
+  [
+    {
+      "fileId": {
+        "$eq": "73859F8D26679D2E52597326",
+      },
+    },
+    undefined,
+  ],
+  [
+    {
+      "fileId": {
+        "$eq": "62379525E2D97662D8F95837",
+      },
+    },
+    undefined,
+  ],
+]
+`;
+
+exports[`services > file > removeFiles > success 2`] = `
+[
+  {
+    "_id": {
+      "toString": [MockFunction spy] {
+        "calls": [
+          [],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": "73859F8D26679D2E52597326",
+          },
+        ],
+      },
+    },
+    "id": "73859F8D26679D2E52597326",
+    "modelId": "testModel",
+  },
+  {
+    "_id": {
+      "toString": [MockFunction spy] {
+        "calls": [
+          [],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": "62379525E2D97662D8F95837",
+          },
+        ],
+      },
+    },
+    "id": "62379525E2D97662D8F95837",
+    "modelId": "testModel2",
+  },
+]
+`;
 
 exports[`services > file > startUploadMultipartFile > success 1`] = `
 {
