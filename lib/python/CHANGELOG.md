@@ -2,7 +2,12 @@
 
 All dates are formatted dd/mm/yyyy.
 
-## 3.2.1 30/10/2025
+## 3.3.0 - DD/MM/2025
+
+- Add `Client.delete_model` to core and `Entry.delete` helper (and inherited classes `Model`, `MirroredModel` and
+  `Datacard`)
+
+## 3.2.1 - 30/10/2025
 
 - Add `tags` property to `Entry` (and inherited classes `Model`, `MirroredModel` and `Datacard`)
 
@@ -10,7 +15,7 @@ All dates are formatted dd/mm/yyyy.
 
 - Added new `MirroredModel` class.
 
-## 3.1.2 30/09/2025
+## 3.1.2 - 30/09/2025
 
 - Fix broken `Client.put_file_scan` method.
 - Update package dependencies.

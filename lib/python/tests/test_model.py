@@ -37,7 +37,7 @@ def test_create_experiment_from_model(local_model):
         ),
     ],
 )
-def test_create_get_from_id_and_update(
+def test_create_get_from_id_update_and_delete_model(
     name: str,
     description: str,
     visibility: ModelVisibility | None,
@@ -70,6 +70,9 @@ def test_create_get_from_id_and_update(
     assert get_model.description == "testing-1234"
 
     assert model.model_id == get_model.model_id
+
+    # Check that the model is deleted
+    assert model.delete()
 
 
 @pytest.mark.integration
