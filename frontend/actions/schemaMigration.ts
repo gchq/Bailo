@@ -10,6 +10,8 @@ interface PostSchemaMigrationParams {
   sourceSchema: string
   targetSchema: string
 
+  draft: boolean
+
   questionMigrations: QuestionMigration[]
 }
 
@@ -21,24 +23,44 @@ export async function postSchemaMigration(data: PostSchemaMigrationParams) {
   })
 }
 
-export function useGetSchemaMigrations(id?: string, sourceSchema?: string) {
-  const queryParams = {
-    id,
-    sourceSchema,
-  }
+export async function putSchemaMigration(
+  schemaMigrationId: string,
+  planDiff: Pick<SchemaMigrationInterface, 'name' | 'description' | 'questionMigrations' | 'draft'>,
+) {
+  return fetch(`/api/v2/schema-migration/${schemaMigrationId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(planDiff),
+  })
+}
 
+export function useGetSchemaMigrations(sourceSchema?: string) {
   const { data, isLoading, error, mutate } = useSWR<
     {
       schemaMigrations: SchemaMigrationInterface[]
     },
     ErrorInfo
-  >(`/api/v2/schema-migrations?${qs.stringify(queryParams)}`, fetcher)
+  >(`/api/v2/schema-migrations?${qs.stringify({ sourceSchema })}`, fetcher)
 
   return {
     mutateSchemas: mutate,
     schemaMigrations: data ? data.schemaMigrations : [],
     isSchemaMigrationsLoading: isLoading,
     isSchemaMigrationsError: error,
+  }
+}
+
+export function useGetSchemaMigration(schemaMigrationId?: string) {
+  const { data, isLoading, error, mutate } = useSWR<{ schemaMigration: SchemaMigrationInterface }, ErrorInfo>(
+    schemaMigrationId ? `/api/v2/schema-migration/${schemaMigrationId}` : null,
+    fetcher,
+  )
+
+  return {
+    mutateSchemas: mutate,
+    schemaMigration: data?.schemaMigration,
+    isSchemaMigrationLoading: isLoading,
+    isSchemaMigrationError: error,
   }
 }
 
