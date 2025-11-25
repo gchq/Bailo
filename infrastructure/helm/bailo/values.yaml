@@ -213,6 +213,19 @@ registry:
   keyFile: key.pem
   serviceAccount: ''
 
+federation:
+  id: 'localBailo'
+  state: 'disabled'
+  peers:
+    - name: 'huggingface'
+      state: 'enabled'
+      baseUrl: 'https://huggingface.co'
+      label: 'Hugging Face'
+      kind: 'huggingfacehub'
+      cacheQuery: 60
+      statusModelName: 'openai/whisper-large-v3'
+      statusModelId: '654a84cadff2f49007ce6c37'
+
 # Nginx Dependencies
 nginxAuth:
   repository: nginxinc/nginx-unprivileged # runs Nginx as non-root unprivileged user.
@@ -236,7 +249,7 @@ openshift:
 # Instance Settings
 config:
   log:
-    level: info
+    level: trace
   ui:
     banner:
       enabled: false

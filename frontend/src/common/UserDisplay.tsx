@@ -38,7 +38,7 @@ export default function UserDisplay({
   const open = useMemo(() => !!anchorEl, [anchorEl])
   const ref = useRef<HTMLDivElement>(null)
   const { userInformation, isUserInformationLoading, isUserInformationError } = useGetUserInformation(
-    dn.includes(':') ? dn.split(':')[5] : dn,
+    dn.includes(':') ? dn.split(':')[1] : dn,
   )
 
   const popoverEnter = () => {

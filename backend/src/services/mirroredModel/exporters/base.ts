@@ -8,8 +8,9 @@ import authorisation from '../../../connectors/authorisation/index.js'
 import { ModelDoc } from '../../../models/Model.js'
 import { UserInterface } from '../../../models/User.js'
 import { isBailoError } from '../../../types/error.js'
+import { MirrorExportLogData } from '../../../types/types.js'
 import { BadReq, Forbidden, InternalError } from '../../../utils/error.js'
-import { MirrorLogData } from '../mirroredModel.js'
+import log from '../../log.js'
 import { finaliseTarGzUpload, initialiseTarGzUpload } from '../tarball.js'
 
 /**
@@ -180,7 +181,7 @@ export abstract class BaseExporter {
     | Promise<Parameters<typeof initialiseTarGzUpload>>
     | Parameters<typeof initialiseTarGzUpload>
 
-  protected readonly logData: MirrorLogData
+  protected readonly logData: MirrorExportLogData
   protected readonly user: UserInterface
   protected readonly model: ModelDoc
 
@@ -198,10 +199,15 @@ export abstract class BaseExporter {
    * @param model - The model being exported.
    * @param logData - Additional log metadata for auditing/tracing.
    */
-  constructor(user: UserInterface, model: ModelDoc, logData: MirrorLogData) {
+  constructor(user: UserInterface, model: ModelDoc, logData: MirrorExportLogData) {
     this.user = user
     this.model = model
     this.logData = { exporterType: this.constructor.name, ...logData }
+
+    log.trace(
+      { user: this.user, ...(this.model && this.model?.id && { modelId: this.model.id }), ...this.logData },
+      `Constructed new ${this.constructor.name}.`,
+    )
   }
 
   getModel() {
@@ -222,6 +228,8 @@ export abstract class BaseExporter {
    * @returns This exporter instance.
    */
   async init() {
+    log.trace(this.logData, `Initialising ${this.constructor.name}.`)
+
     if (!this.model.settings?.mirror?.destinationModelId) {
       throw BadReq("The 'Destination Model ID' has not been set on this model.", this.logData)
     }
@@ -230,6 +238,8 @@ export abstract class BaseExporter {
     }
     await this._init()
     this.initialised = true
+
+    log.trace(this.logData, `Finished initialising ${this.constructor.name}.`)
     return this
   }
 
@@ -263,12 +273,16 @@ export abstract class BaseExporter {
    */
   @requiresInit
   protected async setupStreams() {
+    log.trace(this.logData, `Setting up streams for ${this.constructor.name}.`)
+
     const params = await this.getInitialiseTarGzUploadParams()
     const { tarStream, gzipStream, uploadStream, uploadPromise } = await initialiseTarGzUpload(...params)
     this.tarStream = tarStream
     this.gzipStream = gzipStream
     this.uploadStream = uploadStream
     this.uploadPromise = uploadPromise
+
+    log.trace(this.logData, `Finished setting up streams for ${this.constructor.name}.`)
   }
 
   /**
@@ -283,7 +297,11 @@ export abstract class BaseExporter {
   @withStreams
   async addData() {
     // wrap to enforce extra checks
+    log.trace(this.logData, `Adding data to ${this.constructor.name}.`)
+
     await this._addData()
+
+    log.trace(this.logData, `Finished adding data to ${this.constructor.name}.`)
   }
 
   /**
@@ -297,6 +315,10 @@ export abstract class BaseExporter {
   @checkAuths
   @withStreams
   async finalise() {
+    log.trace(this.logData, `Finalising ${this.constructor.name}.`)
+
     await finaliseTarGzUpload(this.tarStream!, this.uploadPromise!)
+
+    log.trace(this.logData, `Finished finalising ${this.constructor.name}.`)
   }
 }

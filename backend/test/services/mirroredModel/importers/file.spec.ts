@@ -14,6 +14,7 @@ const authMocks = vi.hoisted(() => ({
 vi.mock('../../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const logMocks = vi.hoisted(() => ({
+  trace: vi.fn(),
   debug: vi.fn(),
 }))
 vi.mock('../../../../src/services/log.js', () => ({

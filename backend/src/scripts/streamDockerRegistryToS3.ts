@@ -1,7 +1,8 @@
 import { ensureBucketExists } from '../clients/s3.js'
 import log from '../services/log.js'
-import { addCompressedRegistryImageComponents, MirrorKind } from '../services/mirroredModel/mirroredModel.js'
+import { addCompressedRegistryImageComponents } from '../services/mirroredModel/mirroredModel.js'
 import { finaliseTarGzUpload, initialiseTarGzUpload } from '../services/mirroredModel/tarball.js'
+import { MirrorKind } from '../types/types.js'
 import config from '../utils/config.js'
 import { connectToMongoose, disconnectFromMongoose } from '../utils/database.js'
 import { shortId } from '../utils/id.js'
@@ -25,7 +26,8 @@ async function script() {
   await connectToMongoose()
   ensureBucketExists(config.modelMirror.export.bucket)
   const user = { dn: 'user' }
-  const logData = { exportId: `manual-${shortId()}` }
+  const exportId = `manual-${shortId()}`
+  const logData = { exportId }
 
   // main functionality
   const { tarStream, uploadPromise } = await initialiseTarGzUpload(
@@ -37,6 +39,7 @@ async function script() {
       mirroredModelId: destinationModelId,
       importKind: MirrorKind.Image,
       distributionPackageName: imageDistributionPackageName.replace(sourceModelId, destinationModelId),
+      exportId,
     },
     logData,
   )

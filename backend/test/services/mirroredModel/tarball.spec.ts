@@ -202,6 +202,7 @@ describe('service > mirroredModel > tarball', () => {
         sourceModelId: 'sid',
         importKind: mirroredModelMocks.MirrorKind.Documents,
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -225,6 +226,7 @@ describe('service > mirroredModel > tarball', () => {
         importKind: mirroredModelMocks.MirrorKind.File,
         filePath: 'test/file',
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -248,6 +250,7 @@ describe('service > mirroredModel > tarball', () => {
         importKind: mirroredModelMocks.MirrorKind.Image,
         distributionPackageName: 'model/image:tag',
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -280,6 +283,7 @@ describe('service > mirroredModel > tarball', () => {
         sourceModelId: 'sid',
         importKind: mirroredModelMocks.MirrorKind.Documents,
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -298,6 +302,7 @@ describe('service > mirroredModel > tarball', () => {
         sourceModelId: 'sid',
         importKind: mirroredModelMocks.MirrorKind.Documents,
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -330,6 +335,7 @@ describe('service > mirroredModel > tarball', () => {
         sourceModelId: 'sid',
         importKind: mirroredModelMocks.MirrorKind.Documents,
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))
@@ -354,6 +360,7 @@ describe('service > mirroredModel > tarball', () => {
         sourceModelId: 'sid',
         importKind: mirroredModelMocks.MirrorKind.Documents,
         exporter: 'user',
+        exportId: 'exportId',
       }
       servicesModelMocks.validateMirroredModel.mockResolvedValue({ id: 'model', name: 'test' })
       tarStream.entry({ name: config.modelMirror!.metadataFile!, type: 'file' }, Buffer.from(JSON.stringify(meta)))

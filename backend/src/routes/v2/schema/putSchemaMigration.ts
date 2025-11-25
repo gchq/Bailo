@@ -4,21 +4,19 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../connectors/audit/Base.js'
 import audit from '../../../connectors/audit/index.js'
 import { SchemaMigrationInterface } from '../../../models/SchemaMigration.js'
-import { createSchemaMigrationPlan } from '../../../services/schemaMigration.js'
+import { updateSchemaMigrationPlan } from '../../../services/schemaMigration.js'
 import { registerPath } from '../../../services/specification.js'
 import { SchemaMigrationKind } from '../../../types/enums.js'
 import { getEnumValues } from '../../../utils/enum.js'
 import { parse } from '../../../utils/validate.js'
 
-export const postSchemaMigrationSchema = z.object({
+export const putSchemaMigrationSchema = z.object({
+  params: z.object({
+    schemaMigrationId: z.string().openapi({ example: 'yolo-v4-abcdef' }),
+  }),
   body: z.object({
-    name: z.string({
-      required_error: 'Must specify schema migration plan name',
-    }),
-    description: z.string().optional().openapi({ example: 'This is an example migration plan' }),
-    sourceSchema: z.string().openapi({ example: 'v1' }),
-    targetSchema: z.string().openapi({ example: 'v2' }),
-    draft: z.coerce.boolean().optional().default(false),
+    name: z.string(),
+    description: z.string().openapi({ example: 'This is an example migration plan' }),
     questionMigrations: z.array(
       z.object({
         id: z.string(),
@@ -28,22 +26,23 @@ export const postSchemaMigrationSchema = z.object({
         propertyType: z.string().openapi({ example: 'string' }),
       }),
     ),
+    draft: z.coerce.boolean().optional().default(false),
   }),
 })
 
 registerPath({
-  method: 'post',
-  path: '/api/v2/schema-migration',
+  method: 'put',
+  path: '/api/v2/schema-migration/{schemaMigrationId}',
   tags: ['schema-migrations'],
-  description: 'Create a new schema migration plan.',
-  schema: postSchemaMigrationSchema,
+  description: 'Update existing schema migration plan.',
+  schema: putSchemaMigrationSchema,
   responses: {
     200: {
-      description: 'The created schema migration plan instance.',
+      description: 'Updated schema migration plan instance.',
       content: {
         'application/json': {
           schema: z.object({
-            schemaMigration: postSchemaMigrationSchema,
+            schemaMigration: putSchemaMigrationSchema,
           }),
         },
       },
@@ -51,17 +50,17 @@ registerPath({
   },
 })
 
-interface PostSchemaMigrationPlanResponse {
+interface PutSchemaMigrationPlanResponse {
   schemaMigration: SchemaMigrationInterface
 }
 
-export const postSchemaMigration = [
-  async (req: Request, res: Response<PostSchemaMigrationPlanResponse>): Promise<void> => {
-    req.audit = AuditInfo.CreateSchemaMigration
-    const { body } = parse(req, postSchemaMigrationSchema)
+export const putSchemaMigration = [
+  async (req: Request, res: Response<PutSchemaMigrationPlanResponse>): Promise<void> => {
+    req.audit = AuditInfo.UpdateSchemaMigration
+    const { params, body } = parse(req, putSchemaMigrationSchema)
 
-    const schemaMigration = await createSchemaMigrationPlan(req.user, body)
-    await audit.onCreateSchemaMigration(req, schemaMigration)
+    const schemaMigration = await updateSchemaMigrationPlan(req.user, params.schemaMigrationId, body)
+    await audit.onUpdateSchemaMigration(req, schemaMigration)
 
     res.json({
       schemaMigration,
