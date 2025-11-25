@@ -256,36 +256,30 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
     }
   }
 
-  let results: ModelDoc[] = []
+  const projection = {
+    settings: false,
+    card: false,
+    deleted: false,
+    _id: false,
+    __v: false,
+    deletedBy: false,
+    deletedAt: false,
+  }
+
   // Always do a partial match on the model name
-  results = results.concat(
-    await ModelModel.find(opts.search ? { ...query, name: { $regex: opts.search, $options: 'i' } } : query, {
-      settings: false,
-      card: false,
-      deleted: false,
-      _id: false,
-      __v: false,
-      deletedBy: false,
-      deletedAt: false,
-    }).sort({
-      updatedAt: -1,
-    }),
-  )
+  let results = await ModelModel.find(
+    opts.search ? { ...query, name: { $regex: opts.search, $options: 'i' } } : query,
+    projection,
+  ).sort({
+    updatedAt: -1,
+  })
+
   //Include all full text matches
   if (opts.search && !opts.titleOnly) {
     results = results.concat(
-      await ModelModel.find(
-        { ...query, $text: { $search: opts.search } },
-        {
-          settings: false,
-          card: false,
-          deleted: false,
-          _id: false,
-          __v: false,
-          deletedBy: false,
-          deletedAt: false,
-        },
-      ).sort({ score: { $meta: 'textScore' } }),
+      await ModelModel.find({ ...query, $text: { $search: opts.search } }, projection).sort({
+        score: { $meta: 'textScore' },
+      }),
     )
   }
 
