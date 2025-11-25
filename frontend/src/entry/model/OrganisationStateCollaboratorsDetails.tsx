@@ -40,6 +40,7 @@ export default function OrganisationStateCollaboratorsDetails({ entry }: Organis
   }, [entry])
 
   const handleEntryTagOnChange = async (newTags: string[]) => {
+    setEntryTagUpdateErrorMessage('')
     const response = await patchModel(entry.id, { tags: newTags })
     if (!response.ok) {
       setEntryTagUpdateErrorMessage(await getErrorMessage(response))

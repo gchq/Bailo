@@ -21,7 +21,8 @@ export default function TagSelector({ onChange, value, label, formContext, requi
 
   const handleNewTagSubmit = () => {
     setErrorText('')
-    if (value.includes(newTag)) {
+    const isDuplicate = value.some((tag) => tag.toLowerCase() === newTag.toLowerCase())
+    if (isDuplicate) {
       setErrorText('You cannot add duplicate tags')
       return
     }
@@ -29,6 +30,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
       setErrorText('You cannot add an empty tag')
       return
     }
+
     const updatedArray = value
     updatedArray.push(newTag)
     onChange(updatedArray)
@@ -77,16 +79,27 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             </Stack>
             <Box sx={{ overflowX: 'auto', p: 1 }}>
               <Stack spacing={1} direction='row'>
-                <Box sx={{ whitespace: 'pre-wrap' }}>
-                  {value.map((tag) => (
-                    <Chip
-                      label={tag}
-                      key={tag}
-                      sx={{ width: 'fit-content', m: 0.5 }}
-                      onDelete={() => handleChipOnDelete(tag)}
-                    />
-                  ))}
-                </Box>
+                {value.length === 0 ? (
+                  <Typography
+                    sx={{
+                      fontStyle: 'italic',
+                      color: theme.palette.customTextInput.main,
+                    }}
+                  >
+                    No tags
+                  </Typography>
+                ) : (
+                  <Box sx={{ whitespace: 'pre-wrap' }}>
+                    {value.map((tag) => (
+                      <Chip
+                        label={tag}
+                        key={tag}
+                        sx={{ width: 'fit-content', m: 0.5 }}
+                        onDelete={() => handleChipOnDelete(tag)}
+                      />
+                    ))}
+                  </Box>
+                )}
               </Stack>
             </Box>
           </Stack>
@@ -94,30 +107,6 @@ export default function TagSelector({ onChange, value, label, formContext, requi
             {errorText}
           </Typography>
         </Stack>
-      )}
-      {formContext && formContext.editMode && (
-        <>
-          <Typography fontWeight='bold' aria-label={`label for ${label}`}>
-            {label}
-          </Typography>
-          {value.length === 0 && (
-            <Typography
-              sx={{
-                fontStyle: 'italic',
-                color: theme.palette.customTextInput.main,
-              }}
-            >
-              Unanswered
-            </Typography>
-          )}
-          <Box sx={{ overflowX: 'auto', p: 1 }}>
-            <Stack spacing={1} direction='row'>
-              {value.map((tag) => (
-                <Chip label={tag} key={tag} sx={{ width: 'fit-content' }} />
-              ))}
-            </Stack>
-          </Box>
-        </>
       )}
     </>
   )
