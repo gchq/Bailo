@@ -1,6 +1,5 @@
 import { Validator } from 'jsonschema'
 import * as _ from 'lodash-es'
-import { SortOrder } from 'mongoose'
 import { Optional } from 'utility-types'
 
 import { Roles } from '../connectors/authentication/Base.js'
@@ -207,9 +206,6 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
       })
     }
   }
-  let sort: string | { [key: string]: SortOrder | { $meta: any } } | [string, SortOrder][] | undefined | null = {
-    updatedAt: -1,
-  }
 
   if (opts.kind) {
     query['kind'] = { $all: opts.kind }
@@ -232,15 +228,6 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
       query.tags.$all.push(opts.task)
     } else {
       query.tags = { $all: [opts.task] }
-    }
-  }
-
-  if (opts.search) {
-    if (opts.titleOnly) {
-      query.name = { $regex: opts.search, $options: 'i' }
-    } else {
-      query.$text = { $search: opts.search }
-      sort = { score: { $meta: 'textScore' } }
     }
   }
 
@@ -268,9 +255,11 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
       }
     }
   }
-  let cursor = ModelModel
-    // Find only matching documents
-    .find(query, {
+
+  let results: ModelDoc[] = []
+  // Always do a partial match on the model name
+  results = results.concat(
+    await ModelModel.find(opts.search ? { ...query, name: { $regex: opts.search, $options: 'i' } } : query, {
       settings: false,
       card: false,
       deleted: false,
@@ -278,10 +267,40 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
       __v: false,
       deletedBy: false,
       deletedAt: false,
-    })
-  cursor = cursor.sort(sort)
+    }).sort({
+      updatedAt: -1,
+    }),
+  )
+  //Include all full text matches
+  if (opts.search && !opts.titleOnly) {
+    results = results.concat(
+      await ModelModel.find(
+        { ...query, $text: { $search: opts.search } },
+        {
+          settings: false,
+          card: false,
+          deleted: false,
+          _id: false,
+          __v: false,
+          deletedBy: false,
+          deletedAt: false,
+        },
+      ).sort({ score: { $meta: 'textScore' } }),
+    )
+  }
 
-  const results = await cursor
+  // Remove duplicate items
+  const seen = new Set()
+
+  results = results.filter((item) => {
+    const isDuplicate = seen.has(item.id)
+    if (isDuplicate) {
+      return false
+    }
+    seen.add(item.id)
+    return true
+  })
+
   //Auth already checked, so just need to check if they require admin access
   if (opts.adminAccess) {
     return results
