@@ -10,10 +10,10 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 const withMDX = nextMDX({
-  extension: /\.mdx?$/,
-  options: {
-    remarkPlugins: [remarkFrontmatter, remarkGfm],
-    rehypePlugins: [rehypeHighlight],
+  mdxOptions: {
+    extension: /\.mdx?$/,
+    remarkPlugins: [import('remark-frontmatter'), import('remark-gfm')],
+    rehypePlugins: [import('rehype-highlight')],
   },
 })
 
@@ -29,6 +29,7 @@ const nextConfig = {
   modularizeImports: {
     '@mui/material': {
       transform: '@mui/material/{{member}}',
+      // skipDefaultConversion: ['styled'],
     },
     '@mui/icons-material': {
       transform: '@mui/icons-material/{{member}}',
