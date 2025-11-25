@@ -6,7 +6,7 @@ import { Roles } from '../connectors/authentication/Base.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import getPeerConnectors from '../connectors/peer/index.js'
+import peers from '../connectors/peer/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
 import ReviewModel from '../models/Review.js'
@@ -258,8 +258,7 @@ export async function searchModels(
   const promises: Promise<any>[] = [processLocalModels]
 
   if (opts.peers && opts.peers.length > 0) {
-    const connectors = await getPeerConnectors()
-    const remotePromise = connectors.searchEntries(user, opts)
+    const remotePromise = peers.searchEntries(user, opts)
 
     const processRemoteModels = remotePromise.then((remoteResponses) => {
       for (const response of remoteResponses.flat()) {

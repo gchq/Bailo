@@ -4,6 +4,7 @@ exports[`routes > schema > getSchemaMigrations > audit > expected call 1`] = `
 [
   {
     "description": "This is a test migration plan",
+    "draft": false,
     "id": "migration-plan-f2434",
     "name": "my migration plan",
     "questionMigrations": [
@@ -26,6 +27,7 @@ exports[`routes > schema > getSchemaMigrations > returns the schema with the mat
   "schemaMigrations": [
     {
       "description": "This is a test migration plan",
+      "draft": false,
       "id": "migration-plan-f2434",
       "name": "my migration plan",
       "questionMigrations": [
