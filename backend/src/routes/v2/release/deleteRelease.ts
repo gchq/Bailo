@@ -46,7 +46,7 @@ export const deleteRelease = [
       params: { modelId, semver },
     } = parse(req, deleteReleaseSchema)
 
-    await useTransaction([(session) => deleteReleaseService(req.user, modelId, semver, session)])
+    await useTransaction([(session) => deleteReleaseService(req.user, modelId, semver, undefined, session)])
     await audit.onDeleteRelease(req, modelId, semver)
 
     res.json({

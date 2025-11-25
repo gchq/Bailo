@@ -153,6 +153,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
         user,
         modelId,
         allModelReleases.flatMap((release) => release.semver),
+        true,
         session,
       ),
     (session) => Promise.all(allModelCardRevisions.map((modelCardRevision) => modelCardRevision.delete(session))),
@@ -170,6 +171,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
         user,
         modelId,
         allModelFiles.flatMap((file) => file.id),
+        true,
         session,
       ),
     (session) =>
@@ -183,6 +185,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
                 name: modelImage.name,
                 tag,
               },
+              true,
               session,
             ),
           ),

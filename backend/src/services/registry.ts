@@ -15,7 +15,7 @@ import { ImageRefInterface, RepoRefInterface } from '../models/Release.js'
 import { UserInterface } from '../models/User.js'
 import { Action, getAccessToken, softDeletePrefix } from '../routes/v1/registryAuth.js'
 import { isBailoError } from '../types/error.js'
-import { Forbidden, InternalError, NotFound } from '../utils/error.js'
+import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import log from './log.js'
 import { getModelById } from './model.js'
 import { findAndDeleteImageFromReleases } from './release.js'
@@ -206,8 +206,14 @@ export async function renameImage(user: UserInterface, source: ImageRefInterface
 export async function softDeleteImage(
   user: UserInterface,
   imageRef: ImageRefInterface,
+  deleteMirroredModel: boolean = false,
   session?: ClientSession | undefined,
 ) {
+  const model = await getModelById(user, imageRef.repository)
+  if (model?.settings?.mirror?.sourceModelId && !deleteMirroredModel) {
+    throw BadReq('Cannot remove image from a mirrored model.')
+  }
+
   await checkUserAuth(user, imageRef.repository, ['push', 'pull', 'delete'])
 
   const softDeleteNamespace = `${softDeletePrefix}${imageRef.repository}`

@@ -337,10 +337,11 @@ export async function removeFiles(
   user: UserInterface,
   modelId: string,
   fileIds: string[],
+  deleteMirroredModel: boolean = false,
   session?: ClientSession | undefined,
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
+  if (model.settings.mirror.sourceModelId && !deleteMirroredModel) {
     throw BadReq(`Cannot remove file from a mirrored model`)
   }
   const allFiles: FileWithScanResultsInterface[] = []
@@ -369,9 +370,10 @@ export async function removeFile(
   user: UserInterface,
   modelId: string,
   fileId: string,
+  deleteMirroredModel: boolean = false,
   session?: ClientSession | undefined,
 ) {
-  return (await removeFiles(user, modelId, [fileId], session))[0]
+  return (await removeFiles(user, modelId, [fileId], deleteMirroredModel, session))[0]
 }
 
 export async function getTotalFileSize(fileIds: string[]) {

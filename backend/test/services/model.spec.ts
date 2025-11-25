@@ -329,7 +329,7 @@ describe('services > model', () => {
       expect(inferenceMock.getInferencesByModel).toBeCalled()
       expect(accessRequestMock.getAccessRequestsByModel).toBeCalled()
 
-      expect(releaseMock.deleteReleases).toBeCalledWith(user, modelId, Array(itemsFound).fill(semver), undefined)
+      expect(releaseMock.deleteReleases).toBeCalledWith(user, modelId, Array(itemsFound).fill(semver), true, undefined)
       expect(modelCardRevisionMockDelete).toBeCalledTimes(itemsFound)
       expect(accessRequestMock.removeAccessRequests).toBeCalledWith(
         user,
@@ -340,11 +340,12 @@ describe('services > model', () => {
       expect(reviewModelMocks.findByIdAndDelete.mock.calls.at(0)).toEqual([_id, undefined])
       expect(tokenMock.dropModelIdFromTokens).toBeCalledWith(user, modelId, Array(itemsFound).fill({}), undefined)
       expect(webhookMockDelete).toBeCalledTimes(itemsFound)
-      expect(fileMock.removeFiles).toBeCalledWith(user, modelId, Array(itemsFound).fill(fileId), undefined)
+      expect(fileMock.removeFiles).toBeCalledWith(user, modelId, Array(itemsFound).fill(fileId), true, undefined)
       expect(registryMock.softDeleteImage).toBeCalledTimes(itemsFound * 2)
       expect(registryMock.softDeleteImage.mock.calls.at(0)).toEqual([
         user,
         { repository: 'repository', name: 'name', tag: 'tag1' },
+        true,
         undefined,
       ])
       expect(inferenceMock.removeInferences).toBeCalledWith(

@@ -528,11 +528,12 @@ export async function deleteReleases(
   user: UserInterface,
   modelId: string,
   semvers: string[],
+  deleteMirroredModel: boolean = false,
   session?: ClientSession | undefined,
 ) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot delete a release on a mirrored model.`)
+  if (model.settings.mirror.sourceModelId && !deleteMirroredModel) {
+    throw BadReq('Cannot delete a release on a mirrored model.')
   }
   for (const semver of semvers) {
     const release = await getReleaseBySemver(user, model, semver)
@@ -562,9 +563,10 @@ export async function deleteRelease(
   user: UserInterface,
   modelId: string,
   semver: string,
+  deleteMirroredModel: boolean = false,
   session?: ClientSession | undefined,
 ) {
-  await deleteReleases(user, modelId, [semver], session)
+  await deleteReleases(user, modelId, [semver], deleteMirroredModel, session)
   return { modelId, semver }
 }
 
