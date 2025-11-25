@@ -29,7 +29,6 @@ const nextConfig = {
   modularizeImports: {
     '@mui/material': {
       transform: '@mui/material/{{member}}',
-      // skipDefaultConversion: ['styled'],
     },
     '@mui/icons-material': {
       transform: '@mui/icons-material/{{member}}',
