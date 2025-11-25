@@ -8,6 +8,7 @@ import { listModelImages } from '../../src/services/registry.js'
 import {
   createRelease,
   deleteRelease,
+  deleteReleases,
   findAndDeleteImageFromReleases,
   getAllFileIds,
   getFileByReleaseFileName,
@@ -505,35 +506,47 @@ describe('services > release', () => {
     expect(await deleteRelease({} as any, 'test', 'test')).toStrictEqual({ modelId: 'test', semver: 'test' })
   })
 
-  test('deleteRelease > no permission', async () => {
-    const mockRelease = { _id: 'release' }
+  describe('deleteReleases', () => {
+    test('success', async () => {
+      reviewModelMocks.find.mockResolvedValue([])
 
-    releaseModelMocks.findOne.mockResolvedValue(mockRelease)
-
-    vi.mocked(authorisation.release).mockImplementation(async (_user, _model, action, _release) => {
-      if (action === ReleaseAction.View) return { success: true, id: '' }
-      if (action === ReleaseAction.Delete)
-        return { success: false, info: 'You do not have permission to delete this release.', id: '' }
-
-      return { success: false, info: 'Unknown action.', id: '' }
+      expect(await deleteReleases({} as any, 'test', ['test1', 'test2'])).toStrictEqual({
+        modelId: 'test',
+        semvers: ['test1', 'test2'],
+      })
+      expect(releaseModelMocks.delete).toBeCalledTimes(2)
     })
 
-    await expect(() => deleteRelease({} as any, 'test', 'test')).rejects.toThrowError(
-      /^You do not have permission to delete this release./,
-    )
-    expect(releaseModelMocks.save).not.toBeCalled()
-  })
+    test('no permission', async () => {
+      const mockRelease = { _id: 'release' }
 
-  test('deleteRelease > should throw a bad req when attempting to delete a release on a mirrored model', async () => {
-    modelMocks.getModelById.mockResolvedValueOnce({
-      id: 'test_model_id',
-      card: { version: 1 },
-      settings: { mirror: { sourceModelId: '123' } },
+      releaseModelMocks.findOne.mockResolvedValue(mockRelease)
+
+      vi.mocked(authorisation.release).mockImplementation(async (_user, _model, action, _release) => {
+        if (action === ReleaseAction.View) return { success: true, id: '' }
+        if (action === ReleaseAction.Delete)
+          return { success: false, info: 'You do not have permission to delete this release.', id: '' }
+
+        return { success: false, info: 'Unknown action.', id: '' }
+      })
+
+      await expect(() => deleteReleases({} as any, 'test', ['test'])).rejects.toThrowError(
+        /^You do not have permission to delete this release./,
+      )
+      expect(releaseModelMocks.save).not.toBeCalled()
     })
 
-    await expect(() => deleteRelease({} as any, 'test', 'test')).rejects.toThrowError(
-      /^Cannot delete a release on a mirrored model./,
-    )
+    test('should throw a bad req when attempting to delete a release on a mirrored model', async () => {
+      modelMocks.getModelById.mockResolvedValueOnce({
+        id: 'test_model_id',
+        card: { version: 1 },
+        settings: { mirror: { sourceModelId: '123' } },
+      })
+
+      await expect(() => deleteReleases({} as any, 'test', ['test'])).rejects.toThrowError(
+        /^Cannot delete a release on a mirrored model./,
+      )
+    })
   })
 
   test('removeFileFromReleases > no permission', async () => {

@@ -71,12 +71,16 @@ export async function dropModelIdFromTokens(
   session?: ClientSession | undefined,
 ) {
   for (const token of tokens) {
+    if (token.user !== user.dn) {
+      throw Forbidden('Only the token owner can modify the token.', { user, modelId, token })
+    }
+
     // Remove the modelId from modelIds
     token.modelIds = token.modelIds.filter((id) => id !== modelId)
 
     if (token.modelIds.length === 0) {
       // If modelIds is now empty, delete document
-      token.delete(session)
+      await token.delete(session)
     } else {
       await token.save({ session })
     }
@@ -87,7 +91,7 @@ export async function removeToken(user: UserInterface, accessKey: string) {
   const token = await findTokenByAccessKey(accessKey)
 
   if (token.user !== user.dn) {
-    throw Forbidden('Only the token owner can remove the token', { accessKey })
+    throw Forbidden('Only the token owner can remove the token.', { accessKey })
   }
 
   await token.delete()

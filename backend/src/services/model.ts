@@ -147,7 +147,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
   const allModelInferences = await getInferencesByModel(user, modelId)
   const allModelAccessRequests = await getAccessRequestsByModel(user, modelId)
 
-  await useTransaction([
+  return await useTransaction([
     (session) =>
       deleteReleases(
         user,
@@ -162,8 +162,7 @@ export async function removeModel(user: UserInterface, modelId: string, kind?: E
         allModelAccessRequests.flatMap((accessRequest) => accessRequest.id),
         session,
       ),
-    (session) =>
-      Promise.all(allModelReviews.map((review) => ReviewModel.findOneAndDelete({ _id: review._id }, session))),
+    (session) => Promise.all(allModelReviews.map((review) => ReviewModel.findByIdAndDelete(review._id, session))),
     (session) => dropModelIdFromTokens(user, modelId, allModelTokens, session),
     (session) => Promise.all(allModelWebhooks.map((webhook) => webhook.delete(session))),
     (session) =>
