@@ -14,6 +14,7 @@ import { testReviewResponse } from '../../testUtils/testModels.js'
 
 const logMock = vi.hoisted(() => ({
   info: vi.fn(),
+  debug: vi.fn(),
   warn: vi.fn(),
 }))
 vi.mock('../../../src/services/log.js', async () => ({
