@@ -6,7 +6,7 @@ import { Roles } from '../connectors/authentication/Base.js'
 import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import getPeerConnectors from '../connectors/peer/index.js'
+import peers from '../connectors/peer/index.js'
 import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
 import Model, { ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
@@ -20,13 +20,13 @@ import {
   EntrySearchResultWithErrors,
   EntryUserPermissions,
 } from '../types/types.js'
+import { MirrorImportLogData } from '../types/types.js'
 import { isValidatorResultError } from '../types/ValidatorResultError.js'
 import { fromEntity, toEntity } from '../utils/entity.js'
 import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
-import { MirrorImportLogData } from './mirroredModel/mirroredModel.js'
 import { getSchemaById } from './schema.js'
 
 export function checkModelRestriction(model: ModelInterface) {
@@ -170,8 +170,7 @@ export async function searchModels(
   const promises: Promise<any>[] = [processLocalModels]
 
   if (opts.peers && opts.peers.length > 0) {
-    const connectors = await getPeerConnectors()
-    const remotePromise = connectors.searchEntries(user, opts)
+    const remotePromise = peers.searchEntries(user, opts)
 
     const processRemoteModels = remotePromise.then((remoteResponses) => {
       for (const response of remoteResponses.flat()) {

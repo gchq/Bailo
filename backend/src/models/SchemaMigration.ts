@@ -18,6 +18,8 @@ export interface SchemaMigrationInterface {
   sourceSchema: string
   targetSchema: string
 
+  draft: boolean
+
   questionMigrations: QuestionMigration[]
 
   createdAt: Date
@@ -34,6 +36,8 @@ const SchemaMigrationSchema = new Schema<SchemaMigrationInterface>(
 
     sourceSchema: { type: String, required: true },
     targetSchema: { type: String, required: true },
+
+    draft: { type: Boolean, required: true },
 
     questionMigrations: [
       {

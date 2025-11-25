@@ -9,8 +9,8 @@ import {
   generateDigest,
   getImporter,
   importModel,
-  MirrorKind,
 } from '../../../src/services/mirroredModel/mirroredModel.js'
+import { MirrorKind } from '../../../src/types/types.js'
 import { BadReq, InternalError } from '../../../src/utils/error.js'
 
 const configMock = vi.hoisted(() => ({

@@ -11,8 +11,8 @@ import { ReviewRoleInterface } from '../../models/ReviewRole.js'
 import { SchemaDoc, SchemaInterface } from '../../models/Schema.js'
 import { SchemaMigrationInterface } from '../../models/SchemaMigration.js'
 import { TokenDoc } from '../../models/Token.js'
-import { MirrorInformation } from '../../services/mirroredModel/mirroredModel.js'
 import { BailoError } from '../../types/error.js'
+import { MirrorInformation } from '../../types/types.js'
 import { EntrySearchResult } from '../../types/types.js'
 
 const AuditKind = {
@@ -104,9 +104,19 @@ export const AuditInfo = {
     description: 'Schema Migration Plan Created',
     auditKind: AuditKind.Create,
   },
+  UpdateSchemaMigration: {
+    typeId: 'UpdateSchemaMigration',
+    description: 'Schema Migration Plan Updated',
+    auditKind: AuditKind.Update,
+  },
   ViewSchemaMigrations: {
     typeId: 'ViewSchemaMigrations',
     description: 'Schemas Migration Plans viewed',
+    auditKind: AuditKind.View,
+  },
+  ViewSchemaMigration: {
+    typeId: 'ViewSchemaMigration',
+    description: 'Schema Migration Plan viewed',
     auditKind: AuditKind.View,
   },
 
@@ -208,7 +218,9 @@ export abstract class BaseAuditConnector {
   abstract onUpdateSchema(req: Request, schema: SchemaDoc)
 
   abstract onCreateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
+  abstract onUpdateSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
   abstract onViewSchemaMigrations(req: Request, schemaMigrations: SchemaMigrationInterface[])
+  abstract onViewSchemaMigration(req: Request, schemaMigration: SchemaMigrationInterface)
 
   abstract onCreateInference(req: Request, inference: InferenceDoc)
   abstract onUpdateInference(req: Request, inference: InferenceDoc)
