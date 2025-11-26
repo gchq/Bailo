@@ -165,8 +165,15 @@ export async function findAccessRequests(
     }
   }
 
-  const stages: PipelineStage[] = [
-    { $match: query },
+  const stages: PipelineStage[] = [{ $match: query }]
+
+  //Auth already checked, so just need to check if they require admin access
+  if (adminAccess) {
+    const results = await AccessRequestModel.aggregate(stages)
+    return results
+  }
+
+  stages.push(
     { $group: { _id: '$modelId', accessRequests: { $push: '$$ROOT' } } },
     {
       $lookup: {
@@ -179,13 +186,9 @@ export async function findAccessRequests(
     {
       $unwind: '$model',
     },
-  ]
+  )
 
   const results = await AccessRequestModel.aggregate(stages)
-  //Auth already checked, so just need to check if they require admin access
-  if (adminAccess) {
-    return results
-  }
 
   const accessRequests: AccessRequestDoc[] = []
   for (const result of results) {
