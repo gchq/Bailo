@@ -72,12 +72,13 @@ export default function TagSelector({ onChange, value, label, formContext, requi
                 id={id}
                 aria-label={`input field for ${label}`}
                 onChange={(e) => setNewTag(e.target.value)}
+                sx={{ minWidth: '100px' }}
               />
               <Button size='small' onClick={handleNewTagSubmit}>
                 Add tag
               </Button>
             </Stack>
-            <Box sx={{ overflowX: 'auto', p: 1 }}>
+            <Box sx={{ overflow: 'auto', p: 1 }}>
               <Stack spacing={1} direction='row'>
                 {value.length === 0 ? (
                   <Typography
@@ -86,7 +87,7 @@ export default function TagSelector({ onChange, value, label, formContext, requi
                       color: theme.palette.customTextInput.main,
                     }}
                   >
-                    No tags
+                    {formContext && formContext.emptyPlaceholderText ? formContext.emptyPlaceholderText : 'No tags'}
                   </Typography>
                 ) : (
                   <Box sx={{ whitespace: 'pre-wrap' }}>
