@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import useNotification from 'src/hooks/useNotification'
 import MessageAlert from 'src/MessageAlert'
-import { EntryInterface } from 'types/types'
+import { EntryInterface, EntryKindLabel } from 'types/types'
 import { getErrorMessage } from 'utils/fetcher'
 import { toTitleCase } from 'utils/stringUtils'
 
@@ -31,7 +31,7 @@ export default function DangerZone({ entry }: DangerZoneProps) {
     } else {
       sendNotification({
         variant: 'success',
-        msg: 'Model deleted',
+        msg: `${toTitleCase(EntryKindLabel[entry.kind])} deleted`,
         anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
       })
       router.push('/')
@@ -47,10 +47,10 @@ export default function DangerZone({ entry }: DangerZoneProps) {
         Danger Zone!
       </Typography>
       <Button fullWidth variant='contained' color='error' onClick={() => setOpenConfirm(true)}>
-        {`Delete ${toTitleCase(entry.kind)}`}
+        {`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}
       </Button>
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
-        <DialogTitle>{`Delete ${toTitleCase(entry.kind)}`}</DialogTitle>
+        <DialogTitle>{`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}</DialogTitle>
         <DialogContent>
           <Typography gutterBottom>
             To confirm deletion, type <strong>{entry.name}</strong> below. This action cannot be undone.
@@ -73,6 +73,7 @@ export default function DangerZone({ entry }: DangerZoneProps) {
           <Button
             color='error'
             variant='contained'
+            type='submit'
             onClick={handleDeleteEntry}
             loading={loading}
             disabled={confirmInput.trim() !== entry.name}
