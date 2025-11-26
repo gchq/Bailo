@@ -97,7 +97,7 @@ export default function Releases({ model, currentUserRoles, readOnly = false }: 
             { value: 'createdAt', title: 'Date uploaded', iconKind: 'date' },
             { value: 'updatedAt', title: 'Date updated', iconKind: 'date' },
           ]}
-          searchPlaceholderText='Search by semver'
+          searchPlaceholderText='Search by version'
           defaultSortProperty='semver'
         >
           {ReleaseListItem}

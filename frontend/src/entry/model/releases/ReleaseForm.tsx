@@ -46,6 +46,7 @@ import {
   isFileInterface,
 } from 'types/types'
 import { sortByCreatedAtDescending } from 'utils/arrayUtils'
+import { formatDateString } from 'utils/dateUtils'
 import { isValidSemver } from 'utils/stringUtils'
 
 type ReleaseFormData = {
@@ -139,7 +140,10 @@ export default function ReleaseForm({
   const modelCardVersionList = useMemo(() => {
     return modelCardRevisions.sort(sortByCreatedAtDescending).map((revision) => (
       <MenuItem key={revision.version} value={revision.version}>
-        {revision.version}
+        <Stack direction='row' spacing={1} alignItems='center'>
+          <Typography>{revision.version} -</Typography>
+          <Typography variant='caption'>{formatDateString(revision.createdAt)}</Typography>
+        </Stack>
       </MenuItem>
     ))
   }, [modelCardRevisions])
@@ -213,6 +217,7 @@ export default function ReleaseForm({
           <Typography fontWeight='bold' component='label' htmlFor='semantic-version-input'>
             Semantic version {!editable && <span style={{ color: theme.palette.error.main }}>*</span>}
           </Typography>
+          <Typography variant='caption'>For example: 1.0.0</Typography>
           {isReadOnly || isEdit ? (
             <ReadOnlyAnswer value={formData.semver} />
           ) : (
