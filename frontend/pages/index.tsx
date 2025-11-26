@@ -377,6 +377,7 @@ export default function Marketplace() {
                   sx={{ flex: 1, backgroundColor: theme.palette.background.paper, borderRadius: 2, width: '100%' }}
                   id='entry-filter-input'
                   value={filter}
+                  disableUnderline
                   inputProps={{ spellCheck: 'false' }}
                   onChange={handleFilterChange}
                   endAdornment={
