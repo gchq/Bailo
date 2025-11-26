@@ -1,6 +1,6 @@
 // eslint-disable-next-line simple-import-sort/imports
 import { Validator } from 'jsonschema'
-import { Types } from 'mongoose'
+import { PipelineStage, Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
 import { Roles } from '../connectors/authentication/Base.js'
@@ -25,7 +25,6 @@ import { removeResponsesByParentIds } from './response.js'
 import { createAccessRequestReviews, removeAccessRequestReviews } from './review.js'
 import { getSchemaById } from './schema.js'
 import { sendWebhooks } from './webhook.js'
-import ModelModel from '../models/Model.js'
 
 export type CreateAccessRequestParams = Pick<AccessRequestInterface, 'metadata' | 'schemaId'>
 export async function createAccessRequest(
@@ -153,61 +152,48 @@ export async function findAccessRequest(
   const query: any = {}
 
   if (modelId.length) {
-    query.modelId = { $all: modelId }
+    query.modelId = { $in: modelId }
   }
 
   if (schemaId) {
-    query.schemaId = { $all: schemaId }
+    query.schemaId = { $in: schemaId }
   }
 
   if (mine) {
-    query.metadata = {
-      overview: {
-        $elemMatch: {
-          entity: { $in: await authentication.getEntities(user) },
-        },
-      },
+    query['metadata.overview.entities'] = {
+      $in: await authentication.getEntities(user),
     }
   }
 
-  const cursor = AccessRequestModel.find(query)
+  const stages: PipelineStage[] = [
+    { $match: query },
+    { $group: { _id: '$modelId', accessRequests: { $push: '$$ROOT' } } },
+    {
+      $lookup: {
+        from: 'v2_models',
+        localField: '_id',
+        foreignField: 'id',
+        as: 'model',
+      },
+    },
+    {
+      $unwind: '$model',
+    },
+  ]
 
-  const results = await cursor
+  const results = await AccessRequestModel.aggregate(stages)
   //Auth already checked, so just need to check if they require admin access
   if (adminAccess) {
     return results
   }
 
-  // alternate aggregation if not admin
-  const modelAggregation = await ModelModel.aggregate([
-    {
-      $lookup: {
-        from: 'v2_access_requests',
-        localField: 'id',
-        foreignField: 'modelId',
-        as: 'accessRequests',
-      },
-    },
-    {
-      $project: {
-        model: '$$ROOT', // wrap current document into "model:{}" object
-      },
-    },
-  ])
+  const accessRequests: AccessRequestDoc[] = []
+  for (const result of results) {
+    const auth = await authorisation.accessRequests(user, result.model, result.accessRequests, AccessRequestAction.View)
 
-  const accessRequests: any[] = []
-  for (const document of modelAggregation) {
-    const auth = await authorisation.accessRequests(
-      user,
-      document.model,
-      document.model.accessRequests,
-      AccessRequestAction.View,
-    )
-    const filteredIds = auth.filter((result) => result.success).map((result) => result.id)
-    const filteredRequests = document.model.accessRequests.filter((accessRequest) =>
-      filteredIds.includes(accessRequest.id),
-    )
-    accessRequests.push(...filteredRequests)
+    const authorisedIds = new Set(auth.filter((result) => result.success).map((result) => result.id))
+    const filteredAccessRequests = result.accessRequests.filter((accessRequest) => authorisedIds.has(accessRequest.id))
+    accessRequests.push(...filteredAccessRequests)
   }
   return accessRequests
 }
