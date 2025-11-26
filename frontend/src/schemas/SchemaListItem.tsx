@@ -90,7 +90,7 @@ export default function SchemaListItem({
           open={open}
           anchorEl={anchorEl}
           MenuListProps={{
-            'aria-labelledby': `schema-actions-button-${schema.id}`,
+            'aria-label': `schema-actions-button-${schema.id}`,
           }}
           anchorOrigin={{
             vertical: 'bottom',

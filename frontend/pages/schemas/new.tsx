@@ -174,7 +174,7 @@ export default function NewSchema() {
                     required
                     size='small'
                     value={schemaId}
-                    aria-label='Schema ID'
+                    label='Schema ID'
                     onChange={(e) => setSchemaId(e.target.value)}
                     slotProps={{
                       htmlInput: { autoFocus: true },
@@ -191,7 +191,7 @@ export default function NewSchema() {
                     required
                     size='small'
                     value={schemaName}
-                    aria-label='Schema name'
+                    label='Schema name'
                     onChange={(e) => setSchemaName(e.target.value)}
                   />
                   <Typography variant='caption'>Please specify a name for your schema</Typography>
@@ -228,13 +228,14 @@ export default function NewSchema() {
                 />
               </Stack>
               <Stack>
-                <Typography fontWeight='bold'>
+                <Typography fontWeight='bold' id='schema-type-label'>
                   Schema Type <span style={{ color: theme.palette.error.main }}>*</span>
                 </Typography>
                 <Select
                   size='small'
                   required
                   value={schemaKind}
+                  inputProps={{ 'aria-labelledby': 'schema-type-label' }}
                   onChange={(e) => setSchemaKind(e.target.value as SchemaKindKeys)}
                 >
                   {schemaTypeOptions}

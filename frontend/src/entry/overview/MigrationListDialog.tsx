@@ -45,7 +45,7 @@ export default function MigrationListDialog({
               tabIndex={-1}
               disableRipple
               value={selectedMigrationPlan}
-              slotProps={{ input: { 'aria-labelledby': `Schema migration plan ${migration.name}` } }}
+              slotProps={{ input: { 'aria-label': `Schema migration plan ${migration.name}` } }}
             />
           </ListItemIcon>
           <ListItemText primary={migration.name} secondary={migration.description} />
