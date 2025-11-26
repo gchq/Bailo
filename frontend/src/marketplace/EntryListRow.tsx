@@ -71,8 +71,6 @@ export default function EntryListRow({
     }
   }
 
-  const filteredTags = entry.tags.filter((t) => t.length < 15)
-
   return (
     <Box
       justifyContent='flex-start'
@@ -170,7 +168,7 @@ export default function EntryListRow({
         )}
         <ChipSelector
           chipTooltipTitle={'Filter by tag'}
-          options={filteredTags.slice(0, 10)}
+          options={entry.tags.slice(0, 10)}
           expandThreshold={10}
           multiple
           selectedChips={selectedChips}

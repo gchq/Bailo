@@ -106,7 +106,7 @@ export default function UpdateReviewRolesForSchemaDialog({
                 checked={checked.includes(role.shortName)}
                 tabIndex={-1}
                 disableRipple
-                slotProps={{ input: { 'aria-labelledby': role.shortName } }}
+                slotProps={{ input: { 'aria-label': role.shortName } }}
               />
             </ListItemIcon>
             <ListItemText primary={role.name} secondary={role.description} />
