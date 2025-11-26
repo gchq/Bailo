@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { AuditInfo } from '../../../../connectors/audit/Base.js'
 import audit from '../../../../connectors/audit/index.js'
 import { AccessRequestInterface } from '../../../../models/AccessRequest.js'
-import { findAccessRequest } from '../../../../services/accessRequest.js'
+import { findAccessRequests } from '../../../../services/accessRequest.js'
 import { accessRequestInterfaceSchema, registerPath } from '../../../../services/specification.js'
 import { coerceArray, parse, strictCoerceBoolean } from '../../../../utils/validate.js'
 
@@ -48,7 +48,7 @@ export const getAccessRequests = [
       query: { modelId, schemaId, mine, adminAccess },
     } = parse(req, GetAccessRequestsSchema)
 
-    const accessRequests = await findAccessRequest(req.user, modelId, schemaId, mine, adminAccess)
+    const accessRequests = await findAccessRequests(req.user, modelId, schemaId, mine, adminAccess)
 
     await audit.onViewAccessRequests(req, accessRequests)
 

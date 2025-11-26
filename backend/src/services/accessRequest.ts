@@ -133,7 +133,7 @@ export async function getAccessRequestById(user: UserInterface, accessRequestId:
   return accessRequest
 }
 
-export async function findAccessRequest(
+export async function findAccessRequests(
   user: UserInterface,
   modelId: Array<string>,
   schemaId: string,

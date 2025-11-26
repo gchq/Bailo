@@ -1,29 +1,10 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`services > accessRequest > findAccessRequest > admin access with auth 1`] = `[]`;
+exports[`services > accessRequest > findAccessRequests > admin access with auth 1`] = `[]`;
 
-exports[`services > accessRequest > findAccessRequest > all filters 1`] = `
-[
-  {
-    "_id": "a",
-    "metadata": {
-      "overview": {
-        "entities": [
-          "user:user",
-        ],
-      },
-    },
-  },
-]
-`;
+exports[`services > accessRequest > findAccessRequests > all filters 1`] = `[]`;
 
-exports[`services > accessRequest > findAccessRequest > no filters 1`] = `
-[
-  {
-    "_id": "a",
-  },
-]
-`;
+exports[`services > accessRequest > findAccessRequests > no filters 1`] = `[]`;
 
 exports[`services > accessRequest > getAccessRequestsByModel > good 1`] = `
 [

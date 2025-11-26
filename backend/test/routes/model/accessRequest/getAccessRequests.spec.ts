@@ -11,7 +11,7 @@ vi.mock('../../../../src/connectors/audit/index.js')
 
 const accessRequestsMock = vi.hoisted(() => {
   return {
-    findAccessRequest: vi.fn(() => undefined as any),
+    findAccessRequests: vi.fn(() => undefined as any),
   }
 })
 vi.mock('../../../../src/services/accessRequest.js', () => accessRequestsMock)
@@ -26,7 +26,7 @@ vi.mock('../../../../src/services/response.js', () => responseMock)
 describe('routes > accessRequest > getAccessRequests', () => {
   test('200 > ok', async () => {
     const accessRequestDoc = new AccessRequestModel({ ...testAccessRequest })
-    accessRequestsMock.findAccessRequest.mockResolvedValueOnce(accessRequestDoc)
+    accessRequestsMock.findAccessRequests.mockResolvedValueOnce(accessRequestDoc)
     responseMock.findResponses.mockResolvedValue([testAccessRequest])
 
     const fixture = createFixture(GetAccessRequestsSchema)
@@ -38,7 +38,7 @@ describe('routes > accessRequest > getAccessRequests', () => {
 
   test('audit > expected call', async () => {
     const accessRequestDoc = new AccessRequestModel({ ...testAccessRequest })
-    accessRequestsMock.findAccessRequest.mockResolvedValueOnce(accessRequestDoc)
+    accessRequestsMock.findAccessRequests.mockResolvedValueOnce(accessRequestDoc)
     responseMock.findResponses.mockResolvedValue([testAccessRequest])
 
     const fixture = createFixture(GetAccessRequestsSchema)
