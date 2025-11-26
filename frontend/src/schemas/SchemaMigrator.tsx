@@ -239,11 +239,14 @@ export default function SchemaMigrator({
             <Divider />
             <Stack sx={{ p: 2 }} spacing={2}>
               <Stack spacing={1}>
-                <Typography fontWeight='bold'>Action type</Typography>
+                <Typography id='schema-action-type' fontWeight='bold'>
+                  Action type
+                </Typography>
                 <Select
                   defaultValue={MigrationKind.MOVE}
                   size='small'
                   sx={{ width: '100%' }}
+                  inputProps={{ 'aria-labelledby': 'schema-action-type' }}
                   value={questionMigrationKind}
                   onChange={handleMigrationKindOnChange}
                 >
@@ -300,13 +303,19 @@ export default function SchemaMigrator({
               <Stack spacing={2}>
                 <Stack spacing={1}>
                   <Typography fontWeight='bold'>Migration name</Typography>
-                  <TextField size='small' value={migrationName} onChange={(e) => setMigrationName(e.target.value)} />
+                  <TextField
+                    size='small'
+                    value={migrationName}
+                    onChange={(e) => setMigrationName(e.target.value)}
+                    label='migration plan name input'
+                  />
                 </Stack>
                 <Stack spacing={1}>
                   <Typography fontWeight='bold'>Migration description (optional)</Typography>
                   <TextField
                     size='small'
                     multiline
+                    label='migration plan description input'
                     minRows={4}
                     maxRows={10}
                     value={migrationDescription}

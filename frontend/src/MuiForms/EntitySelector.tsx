@@ -140,7 +140,9 @@ export default function EntitySelector({
               <TextField
                 {...params}
                 placeholder='Username or group name'
-                aria-label={`input field for ${label}`}
+                slotProps={{
+                  htmlInput: { 'aria-label': `input field for ${label}` },
+                }}
                 error={rawErrors && rawErrors.length > 0}
                 id={id}
                 onKeyDown={(event: KeyboardEvent) => {

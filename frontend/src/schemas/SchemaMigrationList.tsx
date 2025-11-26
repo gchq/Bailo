@@ -19,7 +19,7 @@ export default function SchemaMigrationList() {
           noLinkStyle
           aria-label={`go to the ${data[index].name} migration plan`}
         >
-          <Typography fontWeight='bold' color='primary' variant='h6'>
+          <Typography fontWeight='bold' color='primary' variant='h6' component='h2'>
             {`${data[index].name}`}
             <em style={{ color: theme.palette.secondary.main }}>{` ${data[index].draft ? '(draft)' : ''}`}</em>
           </Typography>
