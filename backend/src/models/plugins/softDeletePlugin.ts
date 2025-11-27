@@ -38,8 +38,7 @@ export function softDeletionPlugin(schema: Schema) {
       update.deletedBy = user
     }
 
-    const options = session ? { session } : {}
-    return this.updateOne(filter, update, options)
+    return this.updateOne(filter, update, { session })
   }
 
   schema.statics.deleteMany = async function (
@@ -55,8 +54,7 @@ export function softDeletionPlugin(schema: Schema) {
       update.deletedBy = user
     }
 
-    const options = session ? { session } : {}
-    return this.updateMany(filter, update, options)
+    return this.updateMany(filter, update, { session })
   }
 
   schema.statics.findByIdAndDelete = async function (
@@ -72,7 +70,7 @@ export function softDeletionPlugin(schema: Schema) {
       update.deletedBy = user
     }
 
-    const options = { new: true } as Record<string, any>
+    const options: Record<string, any> = { new: true }
     if (session) {
       options.session = session
     }
@@ -93,7 +91,7 @@ export function softDeletionPlugin(schema: Schema) {
       update.deletedBy = user
     }
 
-    const options = { new: true } as Record<string, any>
+    const options: Record<string, any> = { new: true }
     if (session) {
       options.session = session
     }
