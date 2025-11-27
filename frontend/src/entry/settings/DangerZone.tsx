@@ -38,7 +38,7 @@ export default function DangerZone({ entry }: DangerZoneProps) {
     }
 
     setLoading(false)
-    setOpenConfirm(false)
+    setOpenConfirm(!response.ok)
   }
 
   return (
@@ -82,7 +82,6 @@ export default function DangerZone({ entry }: DangerZoneProps) {
           </Button>
         </DialogActions>
       </Dialog>
-      <MessageAlert message={errorMessage} severity='error' />
     </Stack>
   )
 }

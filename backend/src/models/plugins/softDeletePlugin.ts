@@ -22,7 +22,7 @@ export function softDeletionPlugin(schema: Schema) {
     if (user) {
       this.deletedBy = user
     }
-    return await this.save(session)
+    return await this.save({ session })
   }
 
   schema.statics.deleteOne = async function (
@@ -101,7 +101,7 @@ export function softDeletionPlugin(schema: Schema) {
 
   schema.methods.restore = async function (session: ClientSession | undefined) {
     this.deleted = false
-    return await this.save(session)
+    return await this.save({ session })
   }
 
   schema.pre('find', function (next: CallbackWithoutResultAndOptionalError) {
