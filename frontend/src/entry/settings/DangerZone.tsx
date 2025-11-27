@@ -73,7 +73,6 @@ export default function DangerZone({ entry }: DangerZoneProps) {
           <Button
             color='error'
             variant='contained'
-            type='submit'
             onClick={handleDeleteEntry}
             loading={loading}
             disabled={confirmInput.trim() !== entry.name}
