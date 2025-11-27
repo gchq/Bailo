@@ -276,24 +276,15 @@ async function searchLocalModels(user: UserInterface, opts: EntrySearchOptionsPa
 
   //Include all full text matches
   if (opts.search && !opts.titleOnly) {
-    results = results.concat(
-      await ModelModel.find({ ...query, $text: { $search: opts.search } }, projection).sort({
-        score: { $meta: 'textScore' },
-      }),
-    )
+    let fullTextOnlyResults = await ModelModel.find({ ...query, $text: { $search: opts.search } }, projection).sort({
+      score: { $meta: 'textScore' },
+    })
+    // Remove duplicate items
+    const mask = new Set(results.map((model) => model.id))
+
+    fullTextOnlyResults = fullTextOnlyResults.filter((model) => !mask.has(model.id))
+    results = results.concat(fullTextOnlyResults)
   }
-
-  // Remove duplicate items
-  const seen = new Set()
-
-  results = results.filter((item) => {
-    const isDuplicate = seen.has(item.id)
-    if (isDuplicate) {
-      return false
-    }
-    seen.add(item.id)
-    return true
-  })
 
   //Auth already checked, so just need to check if they require admin access
   if (opts.adminAccess) {
