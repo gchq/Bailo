@@ -144,9 +144,7 @@ export async function extractTarGzStream(
       try {
         log.debug(
           {
-            name: entry.name,
-            type: entry.type,
-            size: entry.size,
+            entry,
             ...logData,
           },
           'Processing un-tarred entry.',
@@ -160,6 +158,7 @@ export async function extractTarGzStream(
             })
           }
           metadata = mirrorMetadataSchema.parse(await json(stream))
+          log.trace({ metadata, ...logData }, `Extracted metadata file '${config.modelMirror.metadataFile}'.`)
 
           // Only check auth once we know what the model is
           const mirroredModel = await validateMirroredModel(metadata.mirroredModelId, metadata.sourceModelId, logData)
