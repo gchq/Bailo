@@ -167,7 +167,19 @@ describe('services > accessRequest', () => {
 
   test('findAccessRequests > no filters', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
-    accessRequestModelMocks.aggregate.mockResolvedValueOnce([])
+    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        accessRequests: [
+          {
+            id: 'a',
+          },
+        ],
+        model: {
+          id: 'modelId',
+        },
+      },
+    ])
+    vi.mocked(authorisation.accessRequests).mockResolvedValue([{ success: true, id: 'a' }])
 
     const accessRequests = await findAccessRequests({} as any, [], '', true, false)
     expect(accessRequests).toMatchSnapshot()
@@ -175,7 +187,19 @@ describe('services > accessRequest', () => {
 
   test('findAccessRequests > all filters', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(false)
-    accessRequestModelMocks.aggregate.mockResolvedValueOnce([])
+    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        accessRequests: [
+          {
+            id: 'a',
+          },
+        ],
+        model: {
+          id: 'modelId',
+        },
+      },
+    ])
+    vi.mocked(authorisation.accessRequests).mockResolvedValue([{ success: true, id: 'a' }])
 
     const accessRequests = await findAccessRequests({} as any, ['modelId'], 'schemaId', false, false)
     expect(accessRequests).toMatchSnapshot()
@@ -190,9 +214,17 @@ describe('services > accessRequest', () => {
 
   test('findAccessRequests > admin access with auth', async () => {
     mockAuthentication.hasRole.mockReturnValueOnce(true)
-    accessRequestModelMocks.aggregate.mockResolvedValueOnce([])
+    accessRequestModelMocks.aggregate.mockResolvedValueOnce([
+      {
+        accessRequests: [
+          {
+            id: 'a',
+          },
+        ],
+      },
+    ])
 
-    const accessRequests = await findAccessRequests({} as any, ['modelId'], 'schemaId', true, true)
+    const accessRequests = await findAccessRequests({} as any, [], '', true, true)
     expect(accessRequests).toMatchSnapshot()
   })
 
