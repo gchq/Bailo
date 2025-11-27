@@ -146,7 +146,7 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
               </Button>
             </Link>
             <Stack spacing={2} justifyContent='center' alignItems='center'>
-              <Typography variant='h6' color='primary'>
+              <Typography variant='h6' component='h1' color='primary'>
                 Select a schema
               </Typography>
               <Schema fontSize='large' color='primary' />
@@ -156,9 +156,9 @@ export default function SchemaSelect({ schemaKind, entry }: SchemaSelectProps) {
               </Typography>
             </Stack>
             <Stack sx={{ mt: 2 }} spacing={2} alignItems='center'>
-              <Accordion defaultExpanded sx={accordionStyling}>
+              <Accordion defaultExpanded sx={accordionStyling} slotProps={{ heading: { component: 'h2' } }}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h2'>
+                  <Typography sx={{ width: '100%' }} align='center' color='primary' variant='h6' component='h3'>
                     Active Schemas
                   </Typography>
                 </AccordionSummary>

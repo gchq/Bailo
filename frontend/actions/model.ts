@@ -84,7 +84,7 @@ export function useListModels(
 
 export function useGetModel(id: string | undefined, kind?: EntryKindKeys) {
   const queryParams = {
-    kind,
+    ...(kind && { kind }),
   }
 
   const { data, isLoading, error, mutate } = useSWR<

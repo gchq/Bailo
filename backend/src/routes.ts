@@ -75,11 +75,13 @@ import { postReviewRole } from './routes/v2/review/postReviewRole.js'
 import { putReviewRole } from './routes/v2/review/putReviewRole.js'
 import { deleteSchema } from './routes/v2/schema/deleteSchema.js'
 import { getSchema } from './routes/v2/schema/getSchema.js'
+import { getSchemaMigration } from './routes/v2/schema/getSchemaMigration.js'
 import { getSchemaMigrations } from './routes/v2/schema/getSchemaMigrations.js'
 import { getSchemas } from './routes/v2/schema/getSchemas.js'
 import { patchSchema } from './routes/v2/schema/patchSchema.js'
 import { postSchema } from './routes/v2/schema/postSchema.js'
 import { postSchemaMigration } from './routes/v2/schema/postSchemaMigration.js'
+import { putSchemaMigration } from './routes/v2/schema/putSchemaMigration.js'
 import { getSpecification } from './routes/v2/specification.js'
 import { getPeerStatus } from './routes/v2/system/peers.js'
 import { getSystemStatus } from './routes/v2/system/status.js'
@@ -200,7 +202,9 @@ server.patch('/api/v2/schema/:schemaId', ...patchSchema)
 server.delete('/api/v2/schema/:schemaId', ...deleteSchema)
 
 server.get('/api/v2/schema-migrations', ...getSchemaMigrations)
+server.get('/api/v2/schema-migration/:schemaMigrationId', ...getSchemaMigration)
 server.post('/api/v2/schema-migration', ...postSchemaMigration)
+server.put('/api/v2/schema-migration/:schemaMigrationId', ...putSchemaMigration)
 
 server.get('/api/v2/reviews', ...getReviews)
 server.head('/api/v2/reviews', ...getReviews)

@@ -38,6 +38,7 @@ export type SchemaActionKeys = (typeof SchemaAction)[keyof typeof SchemaAction]
 
 export const SchemaMigrationAction = {
   Create: 'schema:create',
+  Update: 'schema:update',
   View: 'schema:view',
 } as const
 export type SchemaMigrationActionKeys = (typeof SchemaMigrationAction)[keyof typeof SchemaMigrationAction]

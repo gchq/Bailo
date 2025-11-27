@@ -36,7 +36,7 @@ export default function ReviewRoleDisplay({ review }: ReviewRoleDisplayProps) {
     <>
       <Stack direction='row' alignItems='center' justifyContent='center' spacing={1}>
         <NotificationsNoneOutlinedIcon sx={{ fontSize: 'medium' }} color='warning' />
-        <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }}>
+        <Typography variant='subtitle2' sx={{ fontStyle: 'italic' }} component='p'>
           {`This ${review.kind} needs to be reviewed by the ${getRoleDisplayName(review.role, modelRoles)}.`}
         </Typography>
       </Stack>
