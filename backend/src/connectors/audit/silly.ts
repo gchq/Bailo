@@ -24,6 +24,7 @@ export class SillyAuditConnector extends BaseAuditConnector {
   onCreateModel(_req: Request, _model: ModelDoc) {}
   onViewModel(_req: Request, _model: ModelDoc) {}
   onUpdateModel(_req: Request, _model: ModelDoc) {}
+  onDeleteModel(_req: Request, _modelId: string) {}
   onSearchModel(_req: Request, _models: EntrySearchResult[]) {}
   onCreateModelCard(_req: Request, _model: ModelDoc, _modelCard: ModelCardInterface) {}
   onViewModelCard(_req: Request, _modelId: string, _modelCard: ModelCardInterface) {}

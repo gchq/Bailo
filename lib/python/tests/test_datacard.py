@@ -30,7 +30,7 @@ def test_datacard(local_datacard):
         ),
     ],
 )
-def test_create_get_from_id_and_update(
+def test_create_get_from_id_update_and_delete_datacard(
     name: str,
     description: str,
     visibility: ModelVisibility | None,
@@ -63,6 +63,9 @@ def test_create_get_from_id_and_update(
     assert get_datacard.description == "testing-1234"
 
     assert datacard.datacard_id == get_datacard.datacard_id
+
+    # Check that the datacard is deleted
+    assert datacard.delete()
 
 
 @pytest.mark.integration

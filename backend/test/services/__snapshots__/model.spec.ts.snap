@@ -1,0 +1,259 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services > model > removeModel > success empty 1`] = `
+[
+  {
+    "modelId": "modelId",
+    "semvers": [],
+  },
+  [],
+  undefined,
+  [],
+  undefined,
+  [],
+  undefined,
+  [],
+  undefined,
+  {
+    "aggregate": [MockFunction spy],
+    "append": [MockFunction spy],
+    "delete": [MockFunction spy] {
+      "calls": [
+        [
+          undefined,
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "find": [MockFunction spy],
+    "findByIdAndUpdate": [MockFunction spy],
+    "findOne": [MockFunction spy] {
+      "calls": [
+        [
+          {
+            "id": "modelId",
+          },
+        ],
+        [
+          {
+            "id": "modelId",
+          },
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "findOneAndUpdate": [MockFunction spy],
+    "lookup": [MockFunction spy],
+    "match": [MockFunction spy],
+    "save": [MockFunction spy],
+    "settings": {
+      "mirror": {
+        "sourceModelId": "",
+      },
+    },
+    "sort": [MockFunction spy],
+    "updateOne": [MockFunction spy],
+  },
+]
+`;
+
+exports[`services > model > removeModel > success entries 1`] = `
+[
+  {
+    "modelId": "modelId",
+    "semvers": [
+      "1.2.3",
+      "1.2.3",
+      "1.2.3",
+    ],
+  },
+  [
+    undefined,
+    undefined,
+    undefined,
+  ],
+  undefined,
+  [
+    {
+      "findByIdAndDelete": [MockFunction spy] {
+        "calls": [
+          [
+            "6776901b879d08e34b599d7e",
+            undefined,
+          ],
+          [
+            "6776901b879d08e34b599d7e",
+            undefined,
+          ],
+          [
+            "6776901b879d08e34b599d7e",
+            undefined,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+    },
+    {
+      "findByIdAndDelete": [MockFunction spy] {
+        "calls": [
+          [
+            "6776901b879d08e34b599d7e",
+            undefined,
+          ],
+          [
+            "6776901b879d08e34b599d7e",
+            undefined,
+          ],
+          [
+            "6776901b879d08e34b599d7e",
+            undefined,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+    },
+    {
+      "findByIdAndDelete": [MockFunction spy] {
+        "calls": [
+          [
+            "6776901b879d08e34b599d7e",
+            undefined,
+          ],
+          [
+            "6776901b879d08e34b599d7e",
+            undefined,
+          ],
+          [
+            "6776901b879d08e34b599d7e",
+            undefined,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+    },
+  ],
+  undefined,
+  [
+    undefined,
+    undefined,
+    undefined,
+  ],
+  undefined,
+  [
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  ],
+  undefined,
+  {
+    "aggregate": [MockFunction spy],
+    "append": [MockFunction spy],
+    "delete": [MockFunction spy] {
+      "calls": [
+        [
+          undefined,
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "find": [MockFunction spy],
+    "findByIdAndUpdate": [MockFunction spy],
+    "findOne": [MockFunction spy] {
+      "calls": [
+        [
+          {
+            "id": "modelId",
+          },
+        ],
+        [
+          {
+            "id": "modelId",
+          },
+        ],
+      ],
+      "results": [
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+        {
+          "type": "return",
+          "value": [Circular],
+        },
+      ],
+    },
+    "findOneAndUpdate": [MockFunction spy],
+    "lookup": [MockFunction spy],
+    "match": [MockFunction spy],
+    "save": [MockFunction spy],
+    "settings": {
+      "mirror": {
+        "sourceModelId": "",
+      },
+    },
+    "sort": [MockFunction spy],
+    "updateOne": [MockFunction spy],
+  },
+]
+`;

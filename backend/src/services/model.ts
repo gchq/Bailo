@@ -7,9 +7,9 @@ import authentication from '../connectors/authentication/index.js'
 import { ModelAction, ModelActionKeys, ReleaseAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
 import peers from '../connectors/peer/index.js'
-import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc } from '../models/Model.js'
-import Model, { ModelInterface } from '../models/Model.js'
+import ModelModel, { CollaboratorEntry, EntryKindKeys, ModelDoc, ModelInterface } from '../models/Model.js'
 import ModelCardRevisionModel, { ModelCardRevisionDoc } from '../models/ModelCardRevision.js'
+import ReviewModel from '../models/Review.js'
 import ReviewRoleModel from '../models/ReviewRole.js'
 import { UserInterface } from '../models/User.js'
 import { GetModelCardVersionOptions, GetModelCardVersionOptionsKeys } from '../types/enums.js'
@@ -27,7 +27,15 @@ import { BadReq, Forbidden, InternalError, NotFound } from '../utils/error.js'
 import { convertStringToId } from '../utils/id.js'
 import { authResponseToUserPermission } from '../utils/permissions.js'
 import { useTransaction } from '../utils/transactions.js'
+import { getAccessRequestsByModel, removeAccessRequests } from './accessRequest.js'
+import { getFilesByModel, removeFiles } from './file.js'
+import { getInferencesByModel, removeInferences } from './inference.js'
+import { listModelImages, softDeleteImage } from './registry.js'
+import { deleteReleases, getModelReleases } from './release.js'
+import { findReviews } from './review.js'
 import { getSchemaById } from './schema.js'
+import { dropModelIdFromTokens, getTokensForModel } from './token.js'
+import { getWebhooksByModel } from './webhook.js'
 
 export function checkModelRestriction(model: ModelInterface) {
   if (model.settings.mirror.sourceModelId) {
@@ -75,7 +83,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
     ]
   }
 
-  const model = new Model({
+  const model = new ModelModel({
     ...modelParams,
     id: modelId,
     collaborators,
@@ -97,7 +105,7 @@ export async function createModel(user: UserInterface, modelParams: CreateModelP
 }
 
 export async function getModelById(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
-  const model = await Model.findOne({
+  const model = await ModelModel.findOne({
     id: modelId,
     ...(kind && { kind }),
   })
@@ -112,6 +120,89 @@ export async function getModelById(user: UserInterface, modelId: string, kind?: 
   }
 
   return model
+}
+
+export async function removeModel(user: UserInterface, modelId: string, kind?: EntryKindKeys) {
+  const model = await ModelModel.findOne({
+    id: modelId,
+    ...(kind && { kind }),
+  })
+
+  if (!model) {
+    throw NotFound('The requested entry was not found.', { modelId })
+  }
+
+  const auth = await authorisation.model(user, model, ModelAction.Delete)
+  if (!auth.success) {
+    throw Forbidden(auth.info, { userDn: user.dn, modelId })
+  }
+
+  const allModelReviews = await findReviews(user, false, undefined, modelId)
+  const allModelImages = await listModelImages(user, modelId)
+  const allModelReleases = await getModelReleases(user, modelId)
+  const allModelTokens = await getTokensForModel(user, modelId)
+  const allModelWebhooks = await getWebhooksByModel(user, modelId)
+  const allModelCardRevisions = await getModelCardRevisions(user, modelId)
+  const allModelFiles = await getFilesByModel(user, modelId)
+  const allModelInferences = await getInferencesByModel(user, modelId)
+  const allModelAccessRequests = await getAccessRequestsByModel(user, modelId)
+
+  return await useTransaction([
+    (session) =>
+      deleteReleases(
+        user,
+        modelId,
+        allModelReleases.flatMap((release) => release.semver),
+        true,
+        session,
+      ),
+    (session) => Promise.all(allModelCardRevisions.map((modelCardRevision) => modelCardRevision.delete(session))),
+    (session) =>
+      removeAccessRequests(
+        user,
+        allModelAccessRequests.flatMap((accessRequest) => accessRequest.id),
+        session,
+      ),
+    (session) => Promise.all(allModelReviews.map((review) => ReviewModel.findByIdAndDelete(review._id, session))),
+    (session) => dropModelIdFromTokens(user, modelId, allModelTokens, session),
+    (session) => Promise.all(allModelWebhooks.map((webhook) => webhook.delete(session))),
+    (session) =>
+      removeFiles(
+        user,
+        modelId,
+        allModelFiles.flatMap((file) => file.id),
+        true,
+        session,
+      ),
+    (session) =>
+      Promise.all(
+        allModelImages.flatMap((modelImage) =>
+          modelImage.tags.map((tag) =>
+            softDeleteImage(
+              user,
+              {
+                repository: modelImage.repository,
+                name: modelImage.name,
+                tag,
+              },
+              true,
+              session,
+            ),
+          ),
+        ),
+      ),
+    (session) =>
+      removeInferences(
+        user,
+        allModelInferences.flatMap((inference) => ({
+          modelId: inference.modelId,
+          image: inference.image,
+          tag: inference.tag,
+        })),
+        session,
+      ),
+    (session) => model.delete(session),
+  ])
 }
 
 export async function canUserActionModelById(user: UserInterface, modelId: string, action: ModelActionKeys) {
@@ -629,7 +720,7 @@ export async function validateMirroredModel(
   sourceModelId: string,
   logData: MirrorImportLogData,
 ) {
-  const model = await Model.findOne({
+  const model = await ModelModel.findOne({
     id: mirroredModelId,
     'settings.mirror.sourceModelId': { $ne: null },
   })
@@ -716,6 +807,6 @@ export async function getModelSystemRoles(user: UserInterface, model: ModelDoc) 
 }
 
 export async function popularTagsForEntries() {
-  const tags = await Model.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
+  const tags = await ModelModel.aggregate([{ $unwind: '$tags' }, { $sortByCount: '$tags' }, { $limit: 10 }])
   return tags.map((tag) => tag._id) as string[]
 }
