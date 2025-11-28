@@ -1,4 +1,4 @@
-import { PassThrough } from 'node:stream'
+import { PassThrough, Readable } from 'node:stream'
 import zlib from 'node:zlib'
 
 import { extract, pack } from 'tar-stream'
@@ -22,8 +22,9 @@ vi.mock('../../../src/connectors/authorisation/index.js', () => authMocks)
 
 const logMocks = vi.hoisted(() => ({
   trace: vi.fn(),
-  info: vi.fn(),
   debug: vi.fn(),
+  info: vi.fn(),
+  error: vi.fn(),
 }))
 vi.mock('../../../src/services/log.js', async () => ({
   default: logMocks,
@@ -393,6 +394,12 @@ describe('service > mirroredModel > tarball', () => {
       badStream.end(gzippedJunk)
 
       const promise = extractTarGzStream(badStream, { dn: 'user' }, {} as any)
+
+      await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
+    })
+
+    test('error gzip stream is invalid', async () => {
+      const promise = extractTarGzStream(Readable.from(['']), { dn: 'user' }, {} as any)
 
       await expect(promise).rejects.toThrowError(/^Error processing tarball during import./)
     })
