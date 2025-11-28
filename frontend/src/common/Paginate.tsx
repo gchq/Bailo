@@ -192,7 +192,7 @@ export default function Paginate<T>({
         </Grid>
         <Grid size={2}>
           <ListItemIcon>
-            {direction === SortingDirection.ASC ? (
+            {direction === SortingDirection.DESC ? (
               <Sort color='primary' />
             ) : (
               <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
