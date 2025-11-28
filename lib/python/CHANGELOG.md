@@ -2,6 +2,18 @@
 
 All dates are formatted dd/mm/yyyy.
 
+## 3.3.0 - 20/10/2025
+
+### Breaking Changes
+
+- Drop Python 3.9 support (due to reaching EOL).
+- Add python 3.14 support.
+
+### Changes
+
+- Add Python 3.14 support.
+- Update package dependencies.
+
 ## 3.2.1 30/10/2025
 
 - Add `tags` property to `Entry` (and inherited classes `Model`, `MirroredModel` and `Datacard`)
