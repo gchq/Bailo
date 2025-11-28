@@ -133,9 +133,6 @@ export type CreateReleaseParams = Optional<
 >
 export async function createRelease(user: UserInterface, releaseParams: CreateReleaseParams) {
   const model = await getModelById(user, releaseParams.modelId)
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot create a release from a mirrored model.`)
-  }
 
   if (releaseParams.modelCardVersion) {
     // Ensure that the requested model card version exists.
@@ -209,9 +206,6 @@ export async function createRelease(user: UserInterface, releaseParams: CreateRe
 export type UpdateReleaseParams = Pick<ReleaseInterface, 'notes' | 'draft' | 'modelCardVersion' | 'fileIds' | 'images'>
 export async function updateRelease(user: UserInterface, modelId: string, semver: string, delta: UpdateReleaseParams) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot update a release on a mirrored model.`)
-  }
   const release = await getReleaseBySemver(user, modelId, semver)
 
   Object.assign(release, delta)
@@ -242,11 +236,6 @@ export async function updateRelease(user: UserInterface, modelId: string, semver
 }
 
 export async function newReleaseComment(user: UserInterface, modelId: string, semver: string, comment: string) {
-  const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot create a new comment on a mirrored model.`)
-  }
-
   const semverObj = semverStringToObject(semver)
   const release = await Release.findOne({ modelId, semver: semverObj })
   if (!release) {
@@ -523,9 +512,6 @@ function convertSemverQueryToMongoQuery(querySemver: string, modelID: string) {
 
 export async function deleteRelease(user: UserInterface, modelId: string, semver: string) {
   const model = await getModelById(user, modelId)
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot delete a release on a mirrored model.`)
-  }
   const release = await getReleaseBySemver(user, modelId, semver)
 
   const auth = await authorisation.release(user, model, ReleaseAction.Delete, release)
@@ -556,10 +542,6 @@ export function getReleaseName(release: ReleaseDoc): string {
 }
 
 export async function removeFileFromReleases(user: UserInterface, model: ModelDoc, fileId: string) {
-  if (model.settings.mirror.sourceModelId) {
-    throw BadReq(`Cannot remove a file from a mirrored model.`)
-  }
-
   const query = {
     modelId: model.id,
     // Match documents where the element exists in the array

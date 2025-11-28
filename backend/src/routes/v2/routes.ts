@@ -93,7 +93,15 @@ const entryAllowList: {
       { url: match('/permissions/mine'), method: ['GET'] },
     ],
   },
-  mirroredModel: { allowAll: true },
+  mirroredModel: {
+    allow: [
+      { url: match('/'), method: ['GET', 'patch'] },
+      {
+        url: (input) => /\/*/.test(input),
+        method: ['GET'],
+      },
+    ],
+  },
 }
 
 router.use('/model/:modelId', entryKindCheck(entryAllowList))

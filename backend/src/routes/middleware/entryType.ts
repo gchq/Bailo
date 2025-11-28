@@ -6,7 +6,10 @@ import { BadReq } from '../../utils/error.js'
 
 export type AllowList =
   | {
-      allow: { url: MatchFunction<Partial<Record<string, string | string[]>>>; method: string[] }[]
+      allow: {
+        url: MatchFunction<Partial<Record<string, string | string[]>>> | ((input: string) => boolean)
+        method: string[]
+      }[]
       allowAll?: never
     }
   | {
@@ -16,6 +19,7 @@ export type AllowList =
 
 export function entryKindCheck(allowList: { model: AllowList; 'data-card': AllowList; mirroredModel: AllowList }) {
   return async function (req: Request, res: Response, next: NextFunction) {
+    //new RegExp('').exec(req.path)
     const entry = await getModelById(req.user, req.params.modelId)
     const entryAllowList = allowList[entry.kind]
     if (entryAllowList.allowAll) {
