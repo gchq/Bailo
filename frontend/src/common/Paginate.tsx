@@ -1,4 +1,4 @@
-import { CalendarMonth, Check, ExpandLess, ExpandMore, Sort, SortByAlpha } from '@mui/icons-material'
+import { CalendarMonth, Check, ExpandLess, ExpandMore, LineWeight, Sort, SortByAlpha } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -41,7 +41,7 @@ export type SortingDirectionKeys = (typeof SortingDirection)[keyof typeof Sortin
 export interface SortingProperty<T> {
   value: keyof T
   title: string
-  iconKind: 'text' | 'date'
+  iconKind: 'text' | 'date' | 'size'
 }
 
 export default function Paginate<T>({
@@ -121,10 +121,26 @@ export default function Paginate<T>({
         return <SortByAlpha color='primary' />
       case 'date':
         return <CalendarMonth color='primary' />
+      case 'size':
+        return <LineWeight color='primary' />
       default:
         return <SortByAlpha color='primary' />
     }
   }, [])
+
+  const compareSemanticVersions = useCallback(
+    (a: T, b: T) => {
+      if (typeof a[orderByValue] !== 'string' || typeof b[orderByValue] !== 'string') {
+        return 1
+      }
+      if (ascOrDesc === SortingDirection.ASC) {
+        return semver.gt(a[orderByValue], b[orderByValue]) ? 1 : -1
+      } else {
+        return semver.gt(b[orderByValue], a[orderByValue]) ? 1 : -1
+      }
+    },
+    [ascOrDesc, orderByValue],
+  )
 
   const orderByMenuListItems = useCallback(
     (sortingProperty: SortingProperty<T>) => {
@@ -176,7 +192,7 @@ export default function Paginate<T>({
         </Grid>
         <Grid size={2}>
           <ListItemIcon>
-            {direction === SortingDirection.ASC ? (
+            {direction === SortingDirection.DESC ? (
               <Sort color='primary' />
             ) : (
               <Sort sx={{ transform: 'scaleY(-1)' }} color='primary' />
@@ -203,13 +219,12 @@ export default function Paginate<T>({
   const listDisplay = useMemo(() => {
     let sortedList
     if (orderByValue === 'semver') {
-      const listSemvers = filteredList.map((item: T) => item['semver'])
-      const semverList = semver.sort(listSemvers)
-      sortedList = filteredList.sort((a, b) => semverList.indexOf(a) - semverList.indexOf(b))
+      sortedList = filteredList.sort(compareSemanticVersions)
+      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
     } else {
       sortedList = filteredList.sort(sortByValue)
+      sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
     }
-    sortedList = sortedList.slice((page - 1) * pageSize, page * pageSize)
     if (isArray(sortedList)) {
       return sortedList.map((item, index) => (
         <div key={item['key']} style={{ width: '100%' }}>
@@ -217,7 +232,7 @@ export default function Paginate<T>({
         </div>
       ))
     }
-  }, [orderByValue, page, pageSize, filteredList, sortByValue, children])
+  }, [orderByValue, filteredList, compareSemanticVersions, sortByValue, page, pageSize, children])
 
   if (list.length === 0) {
     return <EmptyBlob text={emptyListText} />
@@ -235,9 +250,8 @@ export default function Paginate<T>({
         {!hideSearchInput && (
           <TextField
             size='small'
-            placeholder={searchPlaceholderText}
             value={searchFilter}
-            label='search input filed for paginated list'
+            label={searchPlaceholderText}
             onChange={(e) => setSearchFilter(e.target.value)}
             sx={{ maxWidth: '200px' }}
           />

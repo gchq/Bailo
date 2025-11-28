@@ -1,10 +1,12 @@
+// eslint-disable-next-line simple-import-sort/imports
 import { Validator } from 'jsonschema'
-import { Types } from 'mongoose'
+import { PipelineStage, Types } from 'mongoose'
 
 import authentication from '../connectors/authentication/index.js'
+import { Roles } from '../connectors/authentication/Base.js'
 import { AccessRequestAction } from '../connectors/authorisation/actions.js'
 import authorisation from '../connectors/authorisation/index.js'
-import { AccessRequestInterface } from '../models/AccessRequest.js'
+import AccessRequestModel, { AccessRequestDoc, AccessRequestInterface } from '../models/AccessRequest.js'
 import AccessRequest from '../models/AccessRequest.js'
 import ResponseModel, { ResponseKind } from '../models/Response.js'
 import ReviewModel from '../models/Review.js'
@@ -129,6 +131,74 @@ export async function getAccessRequestById(user: UserInterface, accessRequestId:
   }
 
   return accessRequest
+}
+
+export async function findAccessRequests(
+  user: UserInterface,
+  modelId: Array<string>,
+  schemaId: string,
+  mine: boolean,
+  adminAccess?: boolean,
+): Promise<Array<AccessRequestDoc>> {
+  if (adminAccess) {
+    if (!(await authentication.hasRole(user, Roles.Admin))) {
+      throw Forbidden('You do not have the required role.', {
+        userDn: user.dn,
+        requiredRole: Roles.Admin,
+      })
+    }
+  }
+
+  const query: any = {}
+
+  if (modelId.length) {
+    query.modelId = { $in: modelId }
+  }
+
+  if (schemaId) {
+    query.schemaId = { $in: schemaId }
+  }
+
+  if (mine) {
+    query['metadata.overview.entities'] = {
+      $in: await authentication.getEntities(user),
+    }
+  }
+
+  const stages: PipelineStage[] = [{ $match: query }]
+
+  //Auth already checked, so just need to check if they require admin access
+  if (adminAccess) {
+    const results = await AccessRequestModel.aggregate(stages)
+    return results
+  }
+
+  stages.push(
+    { $group: { _id: '$modelId', accessRequests: { $push: '$$ROOT' } } },
+    {
+      $lookup: {
+        from: 'v2_models',
+        localField: '_id',
+        foreignField: 'id',
+        as: 'model',
+      },
+    },
+    {
+      $unwind: '$model',
+    },
+  )
+
+  const results = await AccessRequestModel.aggregate(stages)
+
+  const accessRequests: AccessRequestDoc[] = []
+  for (const result of results) {
+    const auth = await authorisation.accessRequests(user, result.model, result.accessRequests, AccessRequestAction.View)
+
+    const authorisedIds = new Set(auth.filter((result) => result.success).map((result) => result.id))
+    const filteredAccessRequests = result.accessRequests.filter((accessRequest) => authorisedIds.has(accessRequest.id))
+    accessRequests.push(...filteredAccessRequests)
+  }
+  return accessRequests
 }
 
 export type UpdateAccessRequestParams = Pick<AccessRequestInterface, 'metadata'>
