@@ -225,7 +225,7 @@ describe('services > model', () => {
 
   test('searchModels > all filters', async () => {
     const user: any = { dn: 'test' }
-    modelMocks.sort.mockResolvedValueOnce([])
+    modelMocks.sort.mockResolvedValue([])
     const searchParams: EntrySearchOptionsParams = {
       kind: 'model',
       libraries: ['library'],
