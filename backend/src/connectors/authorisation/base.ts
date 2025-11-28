@@ -288,6 +288,7 @@ export class BasicAuthorisationConnector {
         }
 
         if (
+          !isNamed &&
           !(await this.model(user, model, ModelAction.View)).success &&
           ([AccessRequestAction.View] as AccessRequestActionKeys[]).includes(action)
         ) {
