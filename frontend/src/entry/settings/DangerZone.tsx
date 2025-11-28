@@ -49,7 +49,15 @@ export default function DangerZone({ entry }: DangerZoneProps) {
       <Button fullWidth variant='contained' color='error' onClick={() => setOpenConfirm(true)}>
         {`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}
       </Button>
-      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+      <Dialog
+        onKeyUp={(e) => {
+          if (e.code === 'Enter' && confirmInput.trim() === entry.name) {
+            handleDeleteEntry()
+          }
+        }}
+        open={openConfirm}
+        onClose={() => setOpenConfirm(false)}
+      >
         <DialogTitle>{`Delete ${toTitleCase(EntryKindLabel[entry.kind])}`}</DialogTitle>
         <DialogContent>
           <Typography gutterBottom>
@@ -70,13 +78,7 @@ export default function DangerZone({ entry }: DangerZoneProps) {
           <Button onClick={() => setOpenConfirm(false)} disabled={loading}>
             Cancel
           </Button>
-          <Button
-            color='error'
-            variant='contained'
-            onClick={handleDeleteEntry}
-            loading={loading}
-            disabled={confirmInput.trim() !== entry.name}
-          >
+          <Button color='error' variant='contained' loading={loading} disabled={confirmInput.trim() !== entry.name}>
             Delete
           </Button>
         </DialogActions>
