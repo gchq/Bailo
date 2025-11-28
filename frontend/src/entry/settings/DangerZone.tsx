@@ -78,7 +78,13 @@ export default function DangerZone({ entry }: DangerZoneProps) {
           <Button onClick={() => setOpenConfirm(false)} disabled={loading}>
             Cancel
           </Button>
-          <Button color='error' variant='contained' loading={loading} disabled={confirmInput.trim() !== entry.name}>
+          <Button
+            color='error'
+            variant='contained'
+            onClick={handleDeleteEntry}
+            loading={loading}
+            disabled={confirmInput.trim() !== entry.name}
+          >
             Delete
           </Button>
         </DialogActions>
