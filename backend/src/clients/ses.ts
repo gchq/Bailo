@@ -30,9 +30,5 @@ async function createSesClient(): Promise<SESv2Client> {
   log.info('Creating AWS SES Client')
   return new SESv2Client({
     region: config.ses.region,
-    credentials: {
-      accessKeyId: config.ses.credentials.accessKeyId,
-      secretAccessKey: config.ses.credentials.secretAccessKey,
-    },
   })
 }
