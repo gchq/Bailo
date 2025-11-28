@@ -89,13 +89,18 @@ const entryAllowList: {
   model: { allowAll: true },
   'data-card': {
     allow: [
-      { url: match('/'), method: ['GET', 'patch'] },
+      { url: match('/'), method: ['GET', 'PATCH'] },
+      { url: match('/setup/from-template'), method: ['POST'] },
+      { url: match('/setup/from-schema'), method: ['POST'] },
+      { url: match('/model-card-revisions'), method: ['GET'] },
+      { url: match('/model-card/:version'), method: ['GET'] },
+      { url: match('/model-cards'), method: ['PUT'] },
       { url: match('/permissions/mine'), method: ['GET'] },
     ],
   },
   mirroredModel: {
     allow: [
-      { url: match('/'), method: ['GET', 'patch'] },
+      { url: match('/'), method: ['GET', 'PATCH'] },
       {
         url: (input) => /\/*/.test(input),
         method: ['GET'],
